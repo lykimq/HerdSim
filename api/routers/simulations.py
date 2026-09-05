@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 
 from algorithms.registry import algorithm_registry
 from api.session_manager import session_manager
+from core.experiment_config import resolve_experiment_config
 from core.simulation_runner import SimulationRunner
 from metrics.registry import metric_registry
 from scenarios.registry import scenario_registry
@@ -17,10 +18,12 @@ router = APIRouter()
 class CreateSessionRequest(BaseModel):
     algorithm_id: str = "strombom"
     scenario_id: str = "drive_to_goal"
-    num_sheep: int = Field(default=20, ge=1, le=200)
-    num_shepherds: int = Field(default=1, ge=1, le=10)
+    preset: str = Field(default="paper", pattern="^(paper|scenario|custom)$")
+    num_sheep: Optional[int] = Field(default=None, ge=1, le=200)
+    num_shepherds: Optional[int] = Field(default=None, ge=1, le=10)
     seed: Optional[int] = 42
     algorithm_params: Optional[dict[str, Any]] = None
+    world_overrides: Optional[dict[str, Any]] = None
 
 
 def _world_payload(runner: SimulationRunner) -> dict[str, Any]:
@@ -58,11 +61,18 @@ def create_session(req: CreateSessionRequest):
     except KeyError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-    config = dict(algorithm.default_config)
-    config["n_sheep"] = req.num_sheep
-    config["n_shepherds"] = req.num_shepherds
-    if req.algorithm_params:
-        config.update(req.algorithm_params)
+    try:
+        config = resolve_experiment_config(
+            algorithm,
+            scenario,
+            preset=req.preset,
+            num_sheep=req.num_sheep,
+            num_shepherds=req.num_shepherds,
+            algorithm_params=req.algorithm_params,
+            world_overrides=req.world_overrides,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     runner = SimulationRunner(
         algorithm=algorithm,
@@ -77,11 +87,13 @@ def create_session(req: CreateSessionRequest):
     return {
         "session_id": session_id,
         "status": "initialized",
-        "num_sheep": req.num_sheep,
-        "num_shepherds": req.num_shepherds,
+        "preset": req.preset,
+        "num_sheep": config["n_sheep"],
+        "num_shepherds": config["n_shepherds"],
         "seed": runner.seed,
         "algorithm_id": req.algorithm_id,
         "scenario_id": req.scenario_id,
+        "config": config,
         "world": _world_payload(runner),
         "sheep_positions": state.sheep_positions.tolist() if state else [],
         "shepherd_positions": state.shepherd_positions.tolist() if state else [],

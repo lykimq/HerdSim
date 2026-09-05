@@ -26,7 +26,14 @@ class ShepherdPathMetric(BaseMetric):
 
     @property
     def description(self) -> str:
-        return "Cumulative Euclidean distance traveled by all shepherds."
+        return (
+            "Cumulative Euclidean distance traveled by all shepherds, "
+            "in world units."
+        )
+
+    @property
+    def unit(self) -> str:
+        return "world units"
 
     def compute(self, state: SimulationState) -> float:
         if self._prev_positions is not None:

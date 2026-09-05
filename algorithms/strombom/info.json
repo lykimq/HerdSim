@@ -8,5 +8,7 @@
   "doi": "https://doi.org/10.1098/rsif.2014.0719",
   "mechanism": "Single shepherd adaptively switches between Collect (gather stragglers) and Drive (push flock to goal) based on flock cohesion threshold f(N) = r_a × N^(2/3).",
   "agent_types": ["sheep", "shepherd"],
+  "herder_kind": "human",
+  "herder_label": "Shepherd",
   "default_agents": {"sheep": 50, "shepherds": 1}
 }

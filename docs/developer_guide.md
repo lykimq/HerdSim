@@ -18,6 +18,22 @@
 3. Register in `scenarios/registry.py`.
 4. Add tests in `tests/backend/test_scenarios.py`.
 
+## Experiment presets
+- `paper`: algorithm paper defaults (agent counts + parameters)
+- `scenario`: overlay scenario `default_config` (world + recommended agents)
+- `custom`: user overrides for agents/world
+
+Session create accepts `preset`, optional `num_sheep`/`num_shepherds`, `algorithm_params`, and `world_overrides`.
+
+## Benchmarks
+```bash
+curl -X POST http://localhost:8000/api/benchmarks/run \
+  -H 'Content-Type: application/json' \
+  -d '{"algorithm_ids":["strombom","kubo"],"scenario_id":"split_flock","seeds":[1,2,3],"preset":"paper"}'
+```
+
+Or use the Analytics tab in the UI.
+
 ## Local development
 ```bash
 pip install -e ".[dev]"
@@ -38,6 +54,6 @@ Vanilla JS + Vite + PixiJS 8:
 
 ## Batch experiments
 ```bash
-python scripts/run_batch.py --algorithm strombom --seeds 1,2,3 --out results/strombom.csv
+python scripts/run_batch.py --algorithm strombom --preset paper --seeds 1,2,3 --out results/strombom.csv
 python scripts/export_report.py --input results/strombom.csv --out results/report.md
 ```

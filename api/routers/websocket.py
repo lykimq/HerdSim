@@ -115,12 +115,23 @@ async def simulation_websocket(websocket: WebSocket, session_id: str):
                     loop_task.cancel()
                     loop_task = None
             elif action == "step":
+                # Manual step is not continuous play: stop the run loop and
+                # report paused so the UI can keep stepping without Pause.
+                running = False
+                if loop_task:
+                    loop_task.cancel()
+                    loop_task = None
                 state, metrics_data, status = runner.step()
-                payload = _frame_payload(runner, status, frame_type="tick")
+                if status == "running":
+                    session.status = "paused"
+                    frame_status = "paused"
+                else:
+                    session.status = status
+                    frame_status = status
+                payload = _frame_payload(runner, frame_status, frame_type="tick")
                 payload["metrics"] = metrics_data
                 await websocket.send_json(payload)
                 if status != "running":
-                    session.status = status
                     await websocket.send_json(
                         {
                             "type": "terminated",

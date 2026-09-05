@@ -31,6 +31,7 @@ class MetricRegistry:
                 "id": m.id,
                 "name": m.name,
                 "description": m.description,
+                "unit": m.unit,
             }
             for m in self.get_all()
         ]
@@ -44,6 +45,7 @@ def _auto_register():
     from metrics.min_separation import MinSeparationMetric
     from metrics.outlier_count import OutlierCountMetric
     from metrics.polarization import PolarizationMetric
+    from metrics.sheep_in_goal import SheepInGoalMetric
     from metrics.shepherd_path import ShepherdPathMetric
     from metrics.success_rate import SuccessRateMetric
     from metrics.time_to_goal import TimeToGoalMetric
@@ -53,6 +55,7 @@ def _auto_register():
         TimeToGoalMetric,
         ShepherdPathMetric,
         SuccessRateMetric,
+        SheepInGoalMetric,
         PolarizationMetric,
         OutlierCountMetric,
         MinSeparationMetric,

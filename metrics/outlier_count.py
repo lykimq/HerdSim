@@ -23,7 +23,13 @@ class OutlierCountMetric(BaseMetric):
 
     @property
     def description(self) -> str:
-        return "Number of sheep beyond f(N) = r_a × N^(2/3) from the flock centroid."
+        return (
+            "Number of sheep beyond f(N) = r_a * N^(2/3) from the flock centroid "
+            "(stragglers). This is not the count of sheep outside the goal."
+        )
+    @property
+    def unit(self) -> str:
+        return "sheep"
 
     def compute(self, state: SimulationState) -> float:
         if state.n_sheep == 0:

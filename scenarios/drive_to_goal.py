@@ -24,7 +24,22 @@ class DriveToGoalScenario(BaseScenario):
 
     @property
     def description(self) -> str:
-        return "Herd all sheep into a circular goal zone at a corner of the field."
+        return "Herd all sheep into a circular goal zone near the field origin (corner). Grid lines are display-only world-unit markers."
+
+    @property
+    def default_config(self) -> dict[str, Any]:
+        return {
+            "n_sheep": 50,
+            "n_shepherds": 1,
+            "world_width": 150.0,
+            "world_height": 150.0,
+            "goal_center": [15.0, 15.0],
+            "goal_radius": 15.0,
+            "initial_spread": 30.0,
+            "shepherd_start_offset": 50.0,
+            "max_ticks": 3000,
+            "success_fraction": 1.0,
+        }
 
     def create_world(self, config: dict[str, Any]) -> World:
         width = config.get("world_width", 150.0)
@@ -64,7 +79,7 @@ class DriveToGoalScenario(BaseScenario):
             return False
         success_fraction = config.get("success_fraction", 1.0)
         inside = goal.contains(state.sheep_positions)
-        return np.mean(inside) >= success_fraction
+        return bool(np.mean(inside) >= success_fraction)
 
     def max_ticks(self, config: dict[str, Any]) -> int:
         return config.get("max_ticks", 3000)

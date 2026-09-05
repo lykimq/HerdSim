@@ -3,10 +3,11 @@
 Generic research platform for agent-based sheep herding simulations with pluggable algorithms, scenarios, and algorithm-agnostic metrics.
 
 ## Features
-- Strombom 2014 Collect/Drive shepherding
-- Kubo 2022 multi-dog force-based herding (MATLAB-faithful port)
-- Scenarios: drive to goal, containment, obstacle course
+- Algorithms: Strombom, Kubo, Flocking Dog, Strombom Multi-Dog, Strombom Noise
+- Scenarios: drive to goal, containment, obstacle course, split flock, narrow gate, wide field
+- Paper / scenario / custom experiment presets
 - Live Vanilla JS + PixiJS frontend (Single / Arena / Analytics)
+- Multi-seed benchmark API + Analytics comparison tables
 - FastAPI + WebSocket streaming
 - Batch CLI experiments and CSV/Markdown export
 

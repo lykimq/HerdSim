@@ -41,3 +41,6 @@ select = ["E", "F", "I", "W", "UP"]
 [tool.pytest.ini_options]
 testpaths = ["tests/backend"]
 asyncio_mode = "auto"
+markers = [
+    "stress: heavy / long runs; use make test-stress",
+]

@@ -1,0 +1,13 @@
+{
+  "id": "strombom_multi",
+  "name": "Strombom Multi-Dog",
+  "paper_title": "Solving the shepherding problem (multi-dog extension)",
+  "authors": "D. Strombom et al. (base); HerdSim multi-dog extension",
+  "year": 2014,
+  "doi": "https://doi.org/10.1098/rsif.2014.0719",
+  "mechanism": "Strombom Collect/Drive with explicit sector assignment so multiple shepherds target distinct outliers instead of stacking on one point.",
+  "agent_types": ["sheep", "dog"],
+  "herder_kind": "dog",
+  "herder_label": "Dog",
+  "default_agents": {"sheep": 50, "shepherds": 3}
+}

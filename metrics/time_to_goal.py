@@ -22,7 +22,14 @@ class TimeToGoalMetric(BaseMetric):
 
     @property
     def description(self) -> str:
-        return "Current tick if all sheep in goal zone, else -1."
+        return (
+            "Simulation tick when all sheep are first inside the goal zone, "
+            "else -1. This is discrete ticks, not wall-clock seconds."
+        )
+
+    @property
+    def unit(self) -> str:
+        return "ticks"
 
     def compute(self, state: SimulationState) -> float:
         goal = state.world.goal

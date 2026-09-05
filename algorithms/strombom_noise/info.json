@@ -1,0 +1,13 @@
+{
+  "id": "strombom_noise",
+  "name": "Strombom Noise",
+  "paper_title": "Solving the shepherding problem (noise variant)",
+  "authors": "D. Strombom et al. (base); HerdSim noise preset variant",
+  "year": 2014,
+  "doi": "https://doi.org/10.1098/rsif.2014.0719",
+  "mechanism": "Identical Collect/Drive logic with elevated sheep noise (and lower inertia) to test robustness under perturbation.",
+  "agent_types": ["sheep", "shepherd"],
+  "herder_kind": "human",
+  "herder_label": "Shepherd",
+  "default_agents": {"sheep": 50, "shepherds": 1}
+}

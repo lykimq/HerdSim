@@ -1,0 +1,15 @@
+{
+  "id": "flocking_dog",
+  "name": "Flocking Dog 2024",
+  "paper_title": "Collective responses of flocking sheep (Ovis aries) to a herding dog (border collie)",
+  "authors": "Fujioka et al.",
+  "journal": "Communications Biology",
+  "year": 2024,
+  "doi": "https://doi.org/10.1038/s42003-024-07245-8",
+  "mechanism": "Simplified reciprocal dog-sheep coupling with alignment, front-biased information flow, and Collect/Drive shepherd positioning.",
+  "agent_types": ["sheep", "dog"],
+  "herder_kind": "dog",
+  "herder_label": "Dog",
+  "default_agents": {"sheep": 40, "shepherds": 1},
+  "notes": "Runnable abstraction inspired by the empirical paper; not a full UWB trajectory replay."
+}

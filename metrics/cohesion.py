@@ -15,7 +15,14 @@ class CohesionMetric(BaseMetric):
 
     @property
     def description(self) -> str:
-        return "Mean Euclidean distance of all sheep to the flock centroid (GCM)."
+        return (
+            "Mean Euclidean distance of all sheep to the flock centroid (GCM), "
+            "in world units."
+        )
+
+    @property
+    def unit(self) -> str:
+        return "world units"
 
     def compute(self, state: SimulationState) -> float:
         if state.n_sheep == 0:

@@ -1,4 +1,4 @@
-.PHONY: install dev dev-backend dev-frontend test test-backend test-frontend lint format build clean
+.PHONY: install dev dev-backend dev-frontend test test-backend test-stress test-frontend lint format build clean
 
 # ─── Install ──────────────────────────────────────────────────
 install:
@@ -6,10 +6,9 @@ install:
 	cd frontend && npm install
 
 # ─── Development Servers ──────────────────────────────────────
+# One Ctrl+C stops both processes (see scripts/dev.sh).
 dev:
-	@echo "Starting backend (port 8000) and frontend (port 5173)..."
-	$(MAKE) dev-backend &
-	$(MAKE) dev-frontend
+	@exec bash scripts/dev.sh
 
 dev-backend:
 	uvicorn api.main:app --reload --port 8000
@@ -18,10 +17,14 @@ dev-frontend:
 	cd frontend && npm run dev
 
 # ─── Testing ──────────────────────────────────────────────────
+# Default: fast suite (stress excluded) + frontend build.
 test: test-backend test-frontend
 
 test-backend:
-	pytest tests/backend/ -v
+	pytest tests/backend/ -v -m "not stress"
+
+test-stress:
+	pytest tests/backend/ -v -m stress
 
 test-frontend:
 	cd frontend && npm run build

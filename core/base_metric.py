@@ -29,6 +29,11 @@ class BaseMetric(ABC):
     def description(self) -> str:
         """One-line description shown in UI tooltips and exports."""
 
+    @property
+    def unit(self) -> str:
+        """Short unit label for UI, e.g. 'ticks', 'world units', 'fraction'."""
+        return ""
+
     @abstractmethod
     def compute(self, state: SimulationState) -> float:
         """Compute the metric value for the current simulation state.

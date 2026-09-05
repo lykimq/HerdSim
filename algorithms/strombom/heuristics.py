@@ -29,7 +29,7 @@ def should_collect(state: SimulationState, config: dict) -> bool:
     """
     threshold = compute_threshold(state.n_sheep, config["r_a"])
     max_dist = np.max(state.distances_to_centroid())
-    return max_dist > threshold
+    return bool(max_dist > threshold)
 
 
 def _offset_distance(config: dict) -> float:

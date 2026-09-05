@@ -18,7 +18,14 @@ class MinSeparationMetric(BaseMetric):
 
     @property
     def description(self) -> str:
-        return "Minimum pairwise distance between any two sheep (collision risk)."
+        return (
+            "Minimum pairwise distance between any two sheep (collision risk), "
+            "in world units."
+        )
+
+    @property
+    def unit(self) -> str:
+        return "world units"
 
     def compute(self, state: SimulationState) -> float:
         if state.n_sheep < 2:

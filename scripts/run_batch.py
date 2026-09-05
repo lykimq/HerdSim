@@ -9,6 +9,7 @@ from pathlib import Path
 import pandas as pd
 
 from algorithms.registry import algorithm_registry
+from core.experiment_config import resolve_experiment_config
 from core.simulation_runner import SimulationRunner
 from metrics.registry import metric_registry
 from scenarios.registry import scenario_registry
@@ -22,9 +23,10 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="HerdSim batch runner")
     parser.add_argument("--algorithm", default="strombom")
     parser.add_argument("--scenario", default="drive_to_goal")
+    parser.add_argument("--preset", default="paper", choices=["paper", "scenario", "custom"])
     parser.add_argument("--seeds", default="1,2,3,4,5")
-    parser.add_argument("--n-sheep", type=int, default=20)
-    parser.add_argument("--n-shepherds", type=int, default=1)
+    parser.add_argument("--n-sheep", type=int, default=None)
+    parser.add_argument("--n-shepherds", type=int, default=None)
     parser.add_argument("--out", default="results/batch.csv")
     args = parser.parse_args()
 
@@ -33,9 +35,13 @@ def main() -> None:
     rows = []
 
     for seed in parse_seeds(args.seeds):
-        config = dict(algorithm.default_config)
-        config["n_sheep"] = args.n_sheep
-        config["n_shepherds"] = args.n_shepherds
+        config = resolve_experiment_config(
+            algorithm,
+            scenario,
+            preset=args.preset,
+            num_sheep=args.n_sheep,
+            num_shepherds=args.n_shepherds,
+        )
         runner = SimulationRunner(
             algorithm=algorithm,
             scenario=scenario,
@@ -47,7 +53,10 @@ def main() -> None:
         summary = {
             "algorithm": args.algorithm,
             "scenario": args.scenario,
+            "preset": args.preset,
             "seed": seed,
+            "n_sheep": config["n_sheep"],
+            "n_shepherds": config["n_shepherds"],
             "success": result.success,
             "total_ticks": result.total_ticks,
         }

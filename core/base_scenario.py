@@ -38,6 +38,11 @@ class BaseScenario(ABC):
     def description(self) -> str:
         """One-line description of the scenario objective."""
 
+    @property
+    def default_config(self) -> dict[str, Any]:
+        """Scenario-owned defaults for agents/world (used by 'scenario' preset)."""
+        return {}
+
     @abstractmethod
     def create_world(self, config: dict[str, Any]) -> World:
         """Build the world environment for this scenario."""

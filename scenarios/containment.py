@@ -26,6 +26,21 @@ class ContainmentScenario(BaseScenario):
     def description(self) -> str:
         return "Keep all sheep inside a central pen; escape counts as failure."
 
+    @property
+    def default_config(self) -> dict[str, Any]:
+        return {
+            "n_sheep": 40,
+            "n_shepherds": 3,
+            "world_width": 150.0,
+            "world_height": 150.0,
+            "pen_center": [75.0, 75.0],
+            "pen_radius": 35.0,
+            "initial_spread": 20.0,
+            "max_ticks": 2000,
+            "containment_fraction": 0.95,
+            "containment_min_ticks": 200,
+        }
+
     def create_world(self, config: dict[str, Any]) -> World:
         width = float(config.get("world_width", 150.0))
         height = float(config.get("world_height", 150.0))

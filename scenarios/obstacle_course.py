@@ -26,25 +26,41 @@ class ObstacleCourseScenario(BaseScenario):
     def description(self) -> str:
         return "Guide the flock through obstacles into a goal zone."
 
+    @property
+    def default_config(self) -> dict[str, Any]:
+        return {
+            "n_sheep": 30,
+            "n_shepherds": 2,
+            "world_width": 150.0,
+            "world_height": 150.0,
+            "goal_center": [130.0, 75.0],
+            "goal_radius": 15.0,
+            "initial_spread": 15.0,
+            "max_ticks": 4000,
+            "success_fraction": 1.0,
+            "obstacles": [
+                {"min_corner": [55.0, 0.0], "max_corner": [65.0, 55.0]},
+                {"min_corner": [55.0, 95.0], "max_corner": [65.0, 150.0]},
+                {"min_corner": [95.0, 40.0], "max_corner": [105.0, 110.0]},
+            ],
+        }
+
     def create_world(self, config: dict[str, Any]) -> World:
         width = float(config.get("world_width", 150.0))
         height = float(config.get("world_height", 150.0))
         goal_center = np.array(config.get("goal_center", [130.0, 75.0]), dtype=float)
         goal_radius = float(config.get("goal_radius", 15.0))
 
+        raw_obstacles = config.get("obstacles")
+        if raw_obstacles is None:
+            raw_obstacles = self.default_config["obstacles"]
+
         obstacles = [
             Obstacle(
-                min_corner=np.array([55.0, 0.0]),
-                max_corner=np.array([65.0, 55.0]),
-            ),
-            Obstacle(
-                min_corner=np.array([55.0, 95.0]),
-                max_corner=np.array([65.0, 150.0]),
-            ),
-            Obstacle(
-                min_corner=np.array([95.0, 40.0]),
-                max_corner=np.array([105.0, 110.0]),
-            ),
+                min_corner=np.array(item["min_corner"], dtype=float),
+                max_corner=np.array(item["max_corner"], dtype=float),
+            )
+            for item in raw_obstacles
         ]
         return World(
             width=width,

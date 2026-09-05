@@ -22,7 +22,12 @@ class ScenarioRegistry:
 
     def list_all(self) -> list[dict]:
         return [
-            {"id": s.id, "name": s.name, "description": s.description}
+            {
+                "id": s.id,
+                "name": s.name,
+                "description": s.description,
+                "default_config": s.default_config,
+            }
             for s in self._scenarios.values()
         ]
 
@@ -38,11 +43,20 @@ def _auto_register():
     """Import built-in scenarios to trigger registration."""
     from scenarios.containment import ContainmentScenario
     from scenarios.drive_to_goal import DriveToGoalScenario
+    from scenarios.narrow_gate import NarrowGateScenario
     from scenarios.obstacle_course import ObstacleCourseScenario
+    from scenarios.split_flock import SplitFlockScenario
+    from scenarios.wide_field import WideFieldScenario
 
-    scenario_registry.register(DriveToGoalScenario())
-    scenario_registry.register(ContainmentScenario())
-    scenario_registry.register(ObstacleCourseScenario())
+    for cls in [
+        DriveToGoalScenario,
+        ContainmentScenario,
+        ObstacleCourseScenario,
+        SplitFlockScenario,
+        NarrowGateScenario,
+        WideFieldScenario,
+    ]:
+        scenario_registry.register(cls())
 
 
 _auto_register()
