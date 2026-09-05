@@ -7,10 +7,12 @@ from core.simulation_state import SimulationState
 
 
 class OutlierCountMetric(BaseMetric):
-    """Counts sheep exceeding distance f(N) = r_a * N^(2/3) from the GCM.
+    """Counts sheep exceeding the effective collect threshold from the GCM.
 
-    This directly corresponds to the Strömbom switching condition,
-    but is useful as a generic straggler measure for any algorithm.
+    Base threshold is f(N) = r_a * N^(2/3) (Strombom 2014).  An optional
+    'collect_threshold_scale' stored in state metadata (not in the paper;
+    default 1.0) widens the tolerance for scenarios where oscillation is a
+    concern.  The count always matches the algorithm's switching condition.
     """
 
     @property
@@ -24,9 +26,13 @@ class OutlierCountMetric(BaseMetric):
     @property
     def description(self) -> str:
         return (
-            "Number of sheep beyond f(N) = r_a * N^(2/3) from the flock centroid "
-            "(stragglers). This is not the count of sheep outside the goal."
+            "Number of sheep beyond the effective collect threshold from the flock "
+            "centroid (stragglers).  Base formula: f(N) = r_a * N^(2/3) (Strombom "
+            "2014).  A scenario may supply collect_threshold_scale != 1.0 (not in "
+            "the paper) to widen tolerance; the displayed count always matches the "
+            "algorithm's switching condition.  This is not sheep outside the goal."
         )
+
     @property
     def unit(self) -> str:
         return "sheep"
@@ -35,6 +41,7 @@ class OutlierCountMetric(BaseMetric):
         if state.n_sheep == 0:
             return 0.0
         r_a = state.metadata.get("r_a", 2.0)
-        threshold = r_a * (state.n_sheep ** (2.0 / 3.0))
+        scale = float(state.metadata.get("collect_threshold_scale", 1.0))
+        threshold = r_a * (state.n_sheep ** (2.0 / 3.0)) * scale
         distances = state.distances_to_centroid()
         return float(np.sum(distances > threshold))

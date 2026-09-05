@@ -59,6 +59,9 @@ class StrombomAlgorithm(BaseAlgorithm):
 
         metadata = dict(state.metadata)
         metadata["r_a"] = float(config.get("r_a", metadata.get("r_a", 2.0)))
+        metadata["collect_threshold_scale"] = float(
+            config.get("collect_threshold_scale", metadata.get("collect_threshold_scale", 1.0))
+        )
 
         return SimulationState(
             tick=state.tick,

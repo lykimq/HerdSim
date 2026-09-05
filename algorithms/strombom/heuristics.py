@@ -25,9 +25,14 @@ def compute_threshold(n_sheep: int, r_a: float) -> float:
 def should_collect(state: SimulationState, config: dict) -> bool:
     """Determine if the shepherd should be in Collect mode.
 
-    Returns True if any sheep is further than f(N) from the flock centroid.
+    Returns True if any sheep exceeds the effective threshold from the flock
+    centroid.  The base threshold is the paper formula f(N) = r_a * N^(2/3).
+    An optional 'collect_threshold_scale' (not in Strombom 2014; default 1.0)
+    may be supplied by the scenario to widen tolerance and reduce oscillation
+    when initial clusters start far from the goal.
     """
-    threshold = compute_threshold(state.n_sheep, config["r_a"])
+    scale = float(config.get("collect_threshold_scale", 1.0))
+    threshold = compute_threshold(state.n_sheep, config["r_a"]) * scale
     max_dist = np.max(state.distances_to_centroid())
     return bool(max_dist > threshold)
 

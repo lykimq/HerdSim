@@ -21,7 +21,13 @@ STROMBOM_DEFAULTS = {
     # Paper uses r_a as collect/drive stand-off; kept as explicit override.
     "collect_drive_offset": 2.0,
     # Switching threshold: f(N) = r_a * N^(2/3)
-    # Computed dynamically from r_a and n_sheep, not a static param
+    # Computed dynamically from r_a and n_sheep, not a static param.
+    #
+    # Extension (not in Strombom 2014): a scenario may supply
+    # collect_threshold_scale > 1.0 to widen the threshold, reducing
+    # collect interruptions when initial clusters are far from the goal.
+    # Default 1.0 reproduces the original paper behaviour.
+    "collect_threshold_scale": 1.0,
     # World
     "world_width": 150.0,
     "world_height": 150.0,

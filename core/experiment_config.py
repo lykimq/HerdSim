@@ -22,6 +22,10 @@ WORLD_KEYS = (
     "n_clusters",
     "gate_width",
     "gate_y",
+    # Extension (not in Strombom 2014): allows a scenario to widen the
+    # collect/drive switching threshold without changing r_a.  Default 1.0
+    # reproduces paper behaviour.  Flows from scenario config into all presets.
+    "collect_threshold_scale",
 )
 
 
