@@ -1,0 +1,44 @@
+"""Auto-discovers and registers algorithm plugins from the algorithms/ package."""
+
+from __future__ import annotations
+
+from core.base_algorithm import BaseAlgorithm
+
+
+class AlgorithmRegistry:
+    """Central registry for herding algorithm plugins."""
+
+    def __init__(self):
+        self._algorithms: dict[str, BaseAlgorithm] = {}
+
+    def register(self, algorithm: BaseAlgorithm) -> None:
+        self._algorithms[algorithm.id] = algorithm
+
+    def get(self, algorithm_id: str) -> BaseAlgorithm:
+        if algorithm_id not in self._algorithms:
+            available = list(self._algorithms.keys())
+            raise KeyError(f"Unknown algorithm '{algorithm_id}'. Available: {available}")
+        return self._algorithms[algorithm_id]
+
+    def list_all(self) -> list[dict]:
+        return [
+            {"id": a.id, "name": a.name, "default_config": a.default_config}
+            for a in self._algorithms.values()
+        ]
+
+    def names(self) -> list[str]:
+        return list(self._algorithms.keys())
+
+
+algorithm_registry = AlgorithmRegistry()
+
+
+def _auto_register():
+    from algorithms.kubo.algorithm import KuboAlgorithm
+    from algorithms.strombom.algorithm import StrombomAlgorithm
+
+    algorithm_registry.register(StrombomAlgorithm())
+    algorithm_registry.register(KuboAlgorithm())
+
+
+_auto_register()
