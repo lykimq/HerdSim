@@ -198,13 +198,3 @@ export function downloadText(filename, text, mime) {
   a.click();
   URL.revokeObjectURL(url);
 }
-
-export function historyToCsv(history) {
-  if (!history.length) return "";
-  const keys = Object.keys(history[0]);
-  const rows = [keys.join(",")];
-  history.forEach((row) => {
-    rows.push(keys.map((k) => row[k]).join(","));
-  });
-  return rows.join("\n");
-}

@@ -2,46 +2,23 @@ import { fetchAlgorithm, fetchBenchmarkDefinitions, runBenchmark, exportBenchmar
 import {
   algorithmBlurb,
   downloadText,
-  presetSelectHtml,
   presetSourceBlurb,
   scenarioBlurb,
 } from '../utils/params.js';
+import {
+  barChart,
+  metricDefsHtml,
+  methodCardHtml,
+  summaryHeadHtml,
+  summaryRowHtml,
+  trialUnits,
+} from '../utils/analyticsFormat.js';
+import {
+  analyticsMetricsCardHtml,
+  analyticsResultsHtml,
+  analyticsRunnerHtml,
+} from './analyticsMarkup.js';
 import { mountTips } from '../utils/tooltips.js';
-
-function barChart(container, summary, key, label) {
-  container.innerHTML = '';
-  const title = document.createElement('div');
-  title.className = 'section-title';
-  title.textContent = label;
-  container.appendChild(title);
-
-  const max = Math.max(
-    ...summary.map((s) => Number(s[key]) || 0),
-    0.0001,
-  );
-  summary.forEach((row) => {
-    const wrap = document.createElement('div');
-    wrap.style.marginBottom = '0.55rem';
-    const name = document.createElement('div');
-    name.style.fontSize = '0.8rem';
-    name.style.color = 'var(--text-muted)';
-    const val = row[key] == null ? 0 : Number(row[key]);
-    name.textContent = `${row.algorithm}: ${Number.isFinite(val) ? val.toFixed(3) : 'n/a'}`;
-    const barBg = document.createElement('div');
-    barBg.style.height = '10px';
-    barBg.style.background = 'rgba(255,255,255,0.08)';
-    barBg.style.borderRadius = '999px';
-    const bar = document.createElement('div');
-    bar.style.height = '100%';
-    bar.style.width = `${Math.max(2, (val / max) * 100)}%`;
-    bar.style.background = 'var(--accent-primary)';
-    bar.style.borderRadius = '999px';
-    barBg.appendChild(bar);
-    wrap.appendChild(name);
-    wrap.appendChild(barBg);
-    container.appendChild(wrap);
-  });
-}
 
 export function createAnalyticsDashboard({ algorithms, scenarios }) {
   const root = document.createElement('div');
@@ -55,58 +32,11 @@ export function createAnalyticsDashboard({ algorithms, scenarios }) {
 
   const runner = document.createElement('div');
   runner.className = 'card-glass';
-  runner.innerHTML = `
-    <div class="section-title">Benchmark Runner</div>
-    <div class="control-group">
-      <label>Algorithms</label>
-      <div class="check-list" data-role="algs"></div>
-      <p class="param-hint" data-role="algorithm-blurb"></p>
-    </div>
-    <div class="control-group">
-      <label>Scenario</label>
-      <select data-role="scenario"></select>
-      <p class="param-hint" data-role="scenario-blurb"></p>
-    </div>
-    <div class="control-group">
-      <label>Settings source</label>
-      <select data-role="preset">${presetSelectHtml(false)}</select>
-      <p class="param-hint" data-role="preset-blurb"></p>
-    </div>
-    <div class="control-group">
-      <label>Seeds (comma-separated)</label>
-      <input data-role="seeds" type="text" value="1" />
-    </div>
-    <div class="btn-row">
-      <button class="btn" data-role="run">Run Benchmark</button>
-    </div>
-    <div class="run-progress hidden" data-role="progress-wrap">
-      <div class="run-progress-track">
-        <div class="run-progress-bar" data-role="progress-bar"></div>
-      </div>
-      <div class="run-progress-meta">
-        <span class="run-progress-pct" data-role="progress-pct">0%</span>
-        <span data-role="status">Ready.</span>
-      </div>
-    </div>
-    <p data-role="idle-status" style="color:var(--text-muted);font-size:0.8rem;">Ready.</p>
-  `;
+  runner.innerHTML = analyticsRunnerHtml();
 
   const results = document.createElement('div');
   results.className = 'card-glass';
-  results.innerHTML = `
-    <div class="section-title">Summary Table</div>
-    <table class="benchmark-table">
-      <thead>
-        <tr data-role="summary-head"></tr>
-      </thead>
-      <tbody data-role="tbody"></tbody>
-    </table>
-    <div class="export-row" data-role="exports">
-      <button class="btn btn-secondary" data-role="csv">Export CSV</button>
-      <button class="btn btn-secondary" data-role="json">Export JSON</button>
-      <button class="btn btn-secondary" data-role="md">Export Markdown</button>
-    </div>
-  `;
+  results.innerHTML = analyticsResultsHtml();
 
   const charts = document.createElement('div');
   charts.className = 'card-glass';
@@ -114,13 +44,7 @@ export function createAnalyticsDashboard({ algorithms, scenarios }) {
 
   const metricsCard = document.createElement('div');
   metricsCard.className = 'card-glass';
-  metricsCard.innerHTML = `
-    <div class="section-title">Summary Metric Definitions</div>
-    <p style="color:var(--text-muted);font-size:0.78rem;margin:0 0 0.5rem;">
-      These match the Summary Table columns above. CSV exports include a separate comment block for every trial column.
-    </p>
-    <div data-role="metric-defs"></div>
-  `;
+  metricsCard.innerHTML = analyticsMetricsCardHtml();
 
   const methods = document.createElement('div');
   methods.className = 'card-glass';
@@ -220,12 +144,6 @@ export function createAnalyticsDashboard({ algorithms, scenarios }) {
     statusEl.textContent = message;
   }
 
-  function trialUnits(event) {
-    const fraction = Number(event.fraction);
-    const safeFraction = Number.isFinite(fraction) ? Math.min(1, Math.max(0, fraction)) : 0;
-    return Math.max(0, event.index - 1) + safeFraction;
-  }
-
   function setIdleStatus(message) {
     progressWrap.classList.add('hidden');
     idleStatus.classList.remove('hidden');
@@ -238,13 +156,8 @@ export function createAnalyticsDashboard({ algorithms, scenarios }) {
   let summaryDefs = [];
 
   function renderSummaryHead() {
-    const head = results.querySelector('[data-role="summary-head"]');
-    head.innerHTML = summaryDefs
-      .map(
-        (d) =>
-          `<th title="${d.description}">${d.label}</th>`,
-      )
-      .join('');
+    results.querySelector('[data-role="summary-head"]').innerHTML =
+      summaryHeadHtml(summaryDefs);
   }
 
   function renderSummary(payload) {
@@ -253,15 +166,7 @@ export function createAnalyticsDashboard({ algorithms, scenarios }) {
     tbody.innerHTML = '';
     (payload.summary || []).forEach((row) => {
       const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${row.algorithm}</td>
-        <td>${row.trials}</td>
-        <td>${(row.success_rate * 100).toFixed(1)}%</td>
-        <td>${row.mean_ticks_success ?? 'n/a'}</td>
-        <td>${row.median_ticks_success ?? 'n/a'}</td>
-        <td>${row.mean_cohesion != null ? Number(row.mean_cohesion).toFixed(2) : 'n/a'}</td>
-        <td>${row.mean_shepherd_path != null ? Number(row.mean_shepherd_path).toFixed(1) : 'n/a'}</td>
-      `;
+      tr.innerHTML = summaryRowHtml(row);
       tbody.appendChild(tr);
     });
     barChart(
@@ -366,16 +271,8 @@ export function createAnalyticsDashboard({ algorithms, scenarios }) {
     const defsPayload = await fetchBenchmarkDefinitions();
     summaryDefs = defsPayload.summary || [];
     renderSummaryHead();
-    const defs = metricsCard.querySelector('[data-role="metric-defs"]');
-    defs.innerHTML = summaryDefs
-      .map(
-        (m) =>
-          `<div class="metric-card" style="flex-direction:column;align-items:flex-start;gap:0.25rem;">
-            <strong>${m.label}</strong>
-            <span style="color:var(--text-muted);font-size:0.8rem;">${m.id}: ${m.description || ''}</span>
-          </div>`,
-      )
-      .join('');
+    metricsCard.querySelector('[data-role="metric-defs"]').innerHTML =
+      metricDefsHtml(summaryDefs);
 
     const methodsHost = methods.querySelector('[data-role="methods"]');
     methodsHost.innerHTML = '';
@@ -386,29 +283,15 @@ export function createAnalyticsDashboard({ algorithms, scenarios }) {
       } catch {
         // ignore
       }
-      const info = details.info || {};
       const card = document.createElement('div');
       card.className = 'algo-card';
       card.style.marginBottom = '0.75rem';
-      card.innerHTML = `
-        <h3>${details.name || alg.name}</h3>
-        <p><strong>Paper:</strong> ${info.paper_title || 'n/a'}</p>
-        <p>${info.mechanism || ''}</p>
-      `;
+      card.innerHTML = methodCardHtml(details, alg);
       methodsHost.appendChild(card);
     }
   }
 
   function destroy() {}
 
-  function getExportState() {
-    if (!lastPayload) return { history: [], sessionId: null };
-    return {
-      history: lastPayload.rows,
-      sessionId: null,
-      benchmark: lastPayload,
-    };
-  }
-
-  return { root, mount, destroy, getExportState };
+  return { root, mount, destroy };
 }

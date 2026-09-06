@@ -1,32 +1,29 @@
-"""Default parameters for the Strömbom 2014 herding algorithm.
+"""Default parameters for the Strombom 2014 herding algorithm.
 
-Reference: Strömbom et al., J. Royal Soc. Interface, 2014.
-Parameter names follow the paper's notation.
+Reference: Strombom et al., J. Royal Soc. Interface, 2014, Table 1.
+Parameter names follow the paper's notation where practical.
 """
 
 STROMBOM_DEFAULTS = {
     # Agent counts
     "n_sheep": 50,
     "n_shepherds": 1,
-    # Sheep behaviour
-    "r_a": 2.0,  # sheep-sheep repulsion distance
-    "r_s": 65.0,  # shepherd detection range for sheep
-    "r_n": 50.0,  # neighbour radius for local centroid
-    "c": 1.05,  # attraction strength toward local centroid
-    "noise_strength": 0.3,  # random movement noise (paper e)
-    "sheep_speed": 1.5,  # max sheep step size per tick
-    "inertia": 0.5,  # weight of previous velocity
+    # Sheep behaviour (paper Table 1)
+    "r_a": 2.0,  # sheep-sheep repulsion distance; also weight ra
+    "r_s": 65.0,  # shepherd detection distance
+    "rs_weight": 1.0,  # relative strength of shepherd repulsion (paper rs)
+    "n_neighbors": -1,  # topological LCM; -1 => N-1 (global case)
+    "c": 1.05,  # attraction strength toward LCM of n nearest neighbours
+    "noise_strength": 0.3,  # angular noise e
+    "sheep_speed": 1.0,  # agent displacement d per time step
+    "inertia": 0.5,  # previous-heading weight h
+    "graze_move_prob": 0.05,  # p: move while grazing when dog beyond r_s
     # Shepherd behaviour
-    "shepherd_speed": 2.0,  # shepherd step size per tick
-    # Paper uses r_a as collect/drive stand-off; kept as explicit override.
-    "collect_drive_offset": 2.0,
+    "shepherd_speed": 1.5,  # shepherd displacement ds per time step
+    "shepherd_stop_multiple": 3.0,  # stop when within this * r_a of any sheep
     # Switching threshold: f(N) = r_a * N^(2/3)
-    # Computed dynamically from r_a and n_sheep, not a static param.
-    #
-    # Extension (not in Strombom 2014): a scenario may supply
-    # collect_threshold_scale > 1.0 to widen the threshold, reducing
-    # collect interruptions when initial clusters are far from the goal.
-    # Default 1.0 reproduces the original paper behaviour.
+    # Extension (not in Strombom 2014): scenarios may supply
+    # collect_threshold_scale > 1.0 to widen the threshold.
     "collect_threshold_scale": 1.0,
     # World
     "world_width": 150.0,

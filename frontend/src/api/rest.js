@@ -55,12 +55,6 @@ export async function createSession(payload) {
   return res.json();
 }
 
-export async function exportSession(sessionId, format = 'json') {
-  const res = await apiFetch(`/api/metrics/export/${sessionId}?format=${format}`);
-  if (format === 'json') return res.json();
-  return res.text();
-}
-
 export async function runBenchmark(payload, { onEvent } = {}) {
   const res = await apiFetch('/api/benchmarks/run?stream=1', {
     method: 'POST',

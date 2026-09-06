@@ -1,0 +1,36 @@
+:root {
+  --bg-primary: #0f1117;
+  --bg-secondary: #161b26;
+  --bg-card: rgba(255, 255, 255, 0.08);
+  --border-color: rgba(255, 255, 255, 0.12);
+  --accent-primary: #06b6d4;
+  --accent-sheep: #FFFFFF;
+  --accent-dog: #1a1a1a;
+  --accent-goal: #d13438;
+  --accent-pen: #8e644b;
+  --accent-waypoint: #54b948;
+  --accent-obstacle: #70a1d7;
+  --accent-success: #22c55e;
+  --accent-warning: #f59e0b;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+}
+
+#app {
+  display: grid;
+  grid-template-rows: 56px 1fr;
+  height: 100vh;
+}
+
+.hidden { display: none !important; }

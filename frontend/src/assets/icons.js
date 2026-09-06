@@ -118,10 +118,6 @@ export function herderIconName(herderKind) {
   return herderKind === 'human' ? 'shepherd' : 'dog';
 }
 
-export function herderColor(herderKind) {
-  return herderKind === 'human' ? ICON_COLORS.shepherd : ICON_COLORS.dog;
-}
-
 /**
  * Inline icon HTML for buttons/labels.
  * Animals/objects use Game Icons; playback/UI use Lucide.

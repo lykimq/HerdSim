@@ -1,12 +1,8 @@
-"""Strömbom 2014 herding algorithm implementation.
+"""Strombom 2014 herding algorithm.
 
-Reference: Strömbom et al., "Solving the shepherding problem:
-heuristics for herding autonomous, interacting agents",
-J. Royal Soc. Interface, vol. 11, no. 100, 2014.
-
-A single shepherd switches between Collect and Drive modes based on
-flock cohesion. Sheep respond to attraction (local centroid), repulsion
-(neighbours + shepherd), inertia, and noise.
+Collect/Drive shepherding (Strombom et al., J. R. Soc. Interface 2014).
+Sheep: topological LCM attraction, neighbour/shepherd repulsion, inertia, noise;
+graze when beyond r_s.
 """
 
 from __future__ import annotations
@@ -18,18 +14,20 @@ import numpy as np
 from algorithms.strombom.config import STROMBOM_DEFAULTS
 from algorithms.strombom.heuristics import compute_shepherd_velocity
 from core.agents.sheep import (
+    compose_strombom_heading,
     compute_attraction,
-    compute_local_centroid,
+    compute_local_centroid_knn,
     compute_noise,
     compute_repulsion_from_neighbours,
     compute_repulsion_from_shepherds,
+    unit_vector,
 )
 from core.base_algorithm import BaseAlgorithm
 from core.simulation_state import SimulationState
 
 
 class StrombomAlgorithm(BaseAlgorithm):
-    """Strömbom 2014 Collect/Drive shepherding algorithm."""
+    """Strombom 2014 Collect/Drive shepherding algorithm."""
 
     @property
     def id(self) -> str:
@@ -37,7 +35,7 @@ class StrombomAlgorithm(BaseAlgorithm):
 
     @property
     def name(self) -> str:
-        return "Strömbom 2014"
+        return "Strombom 2014"
 
     @property
     def default_config(self) -> dict[str, Any]:
@@ -60,7 +58,10 @@ class StrombomAlgorithm(BaseAlgorithm):
         metadata = dict(state.metadata)
         metadata["r_a"] = float(config.get("r_a", metadata.get("r_a", 2.0)))
         metadata["collect_threshold_scale"] = float(
-            config.get("collect_threshold_scale", metadata.get("collect_threshold_scale", 1.0))
+            config.get(
+                "collect_threshold_scale",
+                metadata.get("collect_threshold_scale", 1.0),
+            )
         )
 
         return SimulationState(
@@ -75,19 +76,40 @@ class StrombomAlgorithm(BaseAlgorithm):
         )
 
     def _update_sheep(self, state: SimulationState, config: dict) -> np.ndarray:
-        """Compute new velocities for all sheep."""
+        """Paper sheep update: graze beyond r_s; else eq. (4.2)-(4.3)."""
         n = state.n_sheep
         velocities = np.zeros((n, 2))
-        r_a = config["r_a"]
-        r_s = config["r_s"]
-        r_n = config["r_n"]
-        c = config["c"]
-        noise_str = config["noise_strength"]
-        speed = config["sheep_speed"]
-        inertia = config["inertia"]
+        r_a = float(config["r_a"])
+        r_s = float(config["r_s"])
+        n_neighbors = int(config.get("n_neighbors", -1))
+        c = float(config["c"])
+        ra_weight = float(config.get("ra_weight", r_a))
+        rs_weight = float(config.get("rs_weight", 1.0))
+        noise_str = float(config["noise_strength"])
+        speed = float(config["sheep_speed"])
+        inertia = float(config["inertia"])
+        graze_p = float(config.get("graze_move_prob", 0.05))
 
         for i in range(n):
-            lcm = compute_local_centroid(state.sheep_positions, i, r_n)
+            min_shep_dist = (
+                float(
+                    np.min(
+                        np.linalg.norm(
+                            state.shepherd_positions - state.sheep_positions[i],
+                            axis=1,
+                        )
+                    )
+                )
+                if state.n_shepherds
+                else float("inf")
+            )
+
+            if min_shep_dist > r_s:
+                if state.rng.random() < graze_p:
+                    velocities[i] = unit_vector(compute_noise(state.rng, 1.0)) * speed
+                continue
+
+            lcm = compute_local_centroid_knn(state.sheep_positions, i, n_neighbors)
             attraction = compute_attraction(state.sheep_positions[i], lcm)
             repulsion_sheep = compute_repulsion_from_neighbours(
                 state.sheep_positions, i, r_a
@@ -96,13 +118,18 @@ class StrombomAlgorithm(BaseAlgorithm):
                 state.sheep_positions[i], state.shepherd_positions, r_s
             )
             noise = compute_noise(state.rng, noise_str)
-
-            desired = c * attraction + repulsion_sheep + repulsion_shep + noise
-            blended = inertia * state.sheep_velocities[i] + (1 - inertia) * desired
-
-            norm = np.linalg.norm(blended)
-            if norm > 1e-10:
-                velocities[i] = (blended / norm) * speed
+            heading = compose_strombom_heading(
+                state.sheep_velocities[i],
+                attraction,
+                repulsion_sheep,
+                repulsion_shep,
+                noise,
+                inertia=inertia,
+                c=c,
+                ra_weight=ra_weight,
+                rs_weight=rs_weight,
+            )
+            velocities[i] = heading * speed
         return velocities
 
     def _update_shepherds(self, state: SimulationState, config: dict) -> np.ndarray:

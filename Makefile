@@ -30,6 +30,7 @@ test-frontend:
 	cd frontend && npm run build
 
 # ─── Code Quality ────────────────────────────────────────────
+# Frontend eslint/prettier use npx (not pinned in package.json).
 lint:
 	ruff check .
 	cd frontend && npx eslint src/

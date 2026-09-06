@@ -21,6 +21,7 @@ from algorithms.kubo.forces import (
     dog_force_components,
     sheep_force_components,
 )
+from core.agents.goal import resolve_goal_center
 from core.base_algorithm import BaseAlgorithm
 from core.simulation_state import SimulationState
 
@@ -43,17 +44,27 @@ class KuboAlgorithm(BaseAlgorithm):
     def step(self, state: SimulationState, config: dict[str, Any]) -> SimulationState:
         radius = float(config["radius"])
         dt = float(config["dt"])
-        goal = self._goal_position(state, config)
+        goal = resolve_goal_center(state, config)
 
+        # MATLAB updates sheep first, then dogs see the new sheep positions.
         sheep_vel = self._update_sheep(state, config, radius)
-        dog_vel = self._update_dogs(state, config, radius, goal)
-
         sheep_pos = state.sheep_positions + dt * sheep_vel
-        dog_pos = state.shepherd_positions + dt * dog_vel
-
         sheep_pos = state.world.reflect_positions(sheep_pos)
-        dog_pos = state.world.reflect_positions(dog_pos)
         sheep_vel = state.world.reflect_velocities(sheep_pos, sheep_vel)
+
+        mid_state = SimulationState(
+            tick=state.tick,
+            sheep_positions=sheep_pos,
+            sheep_velocities=sheep_vel,
+            shepherd_positions=state.shepherd_positions,
+            shepherd_velocities=state.shepherd_velocities,
+            world=state.world,
+            rng=state.rng,
+            metadata=state.metadata,
+        )
+        dog_vel = self._update_dogs(mid_state, config, radius, goal)
+        dog_pos = state.shepherd_positions + dt * dog_vel
+        dog_pos = state.world.reflect_positions(dog_pos)
         dog_vel = state.world.reflect_velocities(dog_pos, dog_vel)
 
         metadata = dict(state.metadata)
@@ -69,11 +80,6 @@ class KuboAlgorithm(BaseAlgorithm):
             rng=state.rng,
             metadata=metadata,
         )
-
-    def _goal_position(self, state: SimulationState, config: dict) -> np.ndarray:
-        if state.world.goal is not None:
-            return state.world.goal.center.astype(float)
-        return np.array(config.get("goal_center", [15.0, 15.0]), dtype=float)
 
     def _update_sheep(
         self, state: SimulationState, config: dict, radius: float

@@ -1,8 +1,4 @@
-"""Shepherd agent utility functions.
-
-Provides pure functions for shepherd positioning and movement.
-No mutable state — operates on numpy arrays.
-"""
+"""Shepherd positioning helpers (Collect/Drive stand-off geometry)."""
 
 from __future__ import annotations
 
@@ -12,10 +8,7 @@ import numpy as np
 def move_toward(
     current_pos: np.ndarray, target_pos: np.ndarray, speed: float
 ) -> np.ndarray:
-    """Compute velocity vector moving from current toward target at given speed.
-
-    Returns velocity vector (2,). If already at target, returns zeros.
-    """
+    """Velocity from current toward target at most `speed` (zeros if at target)."""
     diff = target_pos - current_pos
     dist = np.linalg.norm(diff)
     if dist < 1e-10:
@@ -26,13 +19,10 @@ def move_toward(
 def position_behind_target(
     target_pos: np.ndarray, reference_pos: np.ndarray, offset_distance: float
 ) -> np.ndarray:
-    """Compute a position that is behind `target_pos` relative to `reference_pos`.
+    """Point beyond `target_pos` on the ray from `reference_pos` through target.
 
-    Used for both collecting (behind furthest sheep relative to centroid)
-    and driving (behind centroid relative to goal).
-
-    Returns position (2,) that is offset_distance beyond target_pos,
-    on the line from reference_pos through target_pos.
+    Collect: behind furthest sheep relative to centroid.
+    Drive: behind centroid relative to goal.
     """
     direction = target_pos - reference_pos
     norm = np.linalg.norm(direction)

@@ -39,12 +39,14 @@ def test_strombom_multi_dogs_take_distinct_positions():
 
 def test_flocking_dog_step_moves_agents():
     alg = FlockingDogAlgorithm()
+    # Dog within Rd so sheep are active (not grazing).
     state = make_state(
-        [[40.0, 40.0], [45.0, 42.0], [38.0, 48.0]],
-        [[70.0, 70.0]],
+        [[40.0, 40.0], [42.0, 40.0], [40.0, 42.0]],
+        [[48.0, 41.0]],
         world=make_world(),
         seed=0,
     )
+    state.sheep_velocities[:] = [[0.0, 1.0], [0.0, 1.0], [0.0, 1.0]]
     new_state = alg.step(state, alg.default_config)
     assert not np.allclose(new_state.sheep_positions, state.sheep_positions)
     assert not np.allclose(new_state.shepherd_positions, state.shepherd_positions)

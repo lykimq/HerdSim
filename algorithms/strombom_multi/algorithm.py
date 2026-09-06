@@ -1,4 +1,4 @@
-"""Strombom multi-dog extension with sector-based shepherd assignment."""
+"""Strombom multi-dog extension with outlier assignment and spaced drive."""
 
 from __future__ import annotations
 
@@ -8,13 +8,18 @@ import numpy as np
 
 from algorithms.strombom.algorithm import StrombomAlgorithm
 from algorithms.strombom.config import STROMBOM_DEFAULTS
-from algorithms.strombom.heuristics import compute_threshold
+from algorithms.strombom.heuristics import (
+    collect_offset,
+    compute_threshold,
+    drive_offset,
+)
+from core.agents.goal import resolve_goal_center
 from core.agents.shepherd import move_toward, position_behind_target
 from core.simulation_state import SimulationState
 
 
 class StrombomMultiAlgorithm(StrombomAlgorithm):
-    """Multi-shepherd Strombom with explicit outlier sector assignment."""
+    """Multi-shepherd Strombom: dogs cycle outliers; drive with angular spacing."""
 
     @property
     def id(self) -> str:
@@ -28,7 +33,6 @@ class StrombomMultiAlgorithm(StrombomAlgorithm):
     def default_config(self) -> dict[str, Any]:
         cfg = STROMBOM_DEFAULTS.copy()
         cfg["n_shepherds"] = 3
-        cfg["sector_assignment"] = True
         return cfg
 
     def _update_shepherds(self, state: SimulationState, config: dict) -> np.ndarray:
@@ -41,18 +45,14 @@ class StrombomMultiAlgorithm(StrombomAlgorithm):
         threshold = compute_threshold(state.n_sheep, config["r_a"])
         distances = state.distances_to_centroid()
         outliers = np.where(distances > threshold)[0]
-
-        if state.world.goal is not None:
-            goal = state.world.goal.center
-        else:
-            goal = np.array(config.get("goal_center", [15.0, 15.0]), dtype=float)
-
-        offset = float(config.get("collect_drive_offset", config.get("r_a", 2.0)))
-        speed = float(config.get("shepherd_speed", 2.0))
+        goal = resolve_goal_center(state, config)
+        c_offset = collect_offset(config)
+        d_offset = drive_offset(state, config)
+        speed = float(config.get("shepherd_speed", 1.5))
 
         if len(outliers) == 0:
             # All dogs drive with angular spacing behind the flock.
-            base = position_behind_target(centroid, goal, offset)
+            base = position_behind_target(centroid, goal, d_offset)
             for i in range(m):
                 angle = (2 * np.pi * i) / m
                 spaced = base + 8.0 * np.array([np.cos(angle), np.sin(angle)])
@@ -64,9 +64,9 @@ class StrombomMultiAlgorithm(StrombomAlgorithm):
         for i in range(m):
             sheep_idx = int(order[i % len(order)])
             target = position_behind_target(
-                state.sheep_positions[sheep_idx], centroid, offset
+                state.sheep_positions[sheep_idx], centroid, c_offset
             )
-            # Slight lateral offset so dogs do not stack.
+            # Lateral offset so dogs do not stack on the same point.
             tangential = np.array(
                 [
                     -(state.sheep_positions[sheep_idx][1] - centroid[1]),
