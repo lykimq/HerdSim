@@ -1,21 +1,20 @@
-;; Strombom 2014 -- NetLogo twin of HerdSim algorithms/strombom
+;; Flocking Dog 2024 -- NetLogo twin of HerdSim algorithms/flocking_dog
 ;;
-;; Visual comparison: match HerdSim Single via Interface sliders, then setup / go.
-;; HerdSim Single runs the Python reference of the same paper rules.
-;;
-;; Sheep: graze beyond r_s; else LCM attraction, neighbour/shepherd repulsion,
-;;        inertia, and angular noise (Strombom eqs.).
-;; Shepherd: Collect vs Drive using f(N) = r_a * N^(2/3); stop within 3*r_a.
+;; Jadhav et al.: topological attraction/alignment, short-range sheep repulsion,
+;; dog repulsion within Rd; dog Collect/Drive with slowdown within r_a.
+;; Match HerdSim Single via Interface sliders, then setup / go.
 
 breed [sheep a-sheep]
-breed [herders herder]
-
-herders-own [
-  path-x
-  path-y
-]
+breed [dogs a-dog]
 
 sheep-own [
+  prev-dx
+  prev-dy
+]
+
+dogs-own [
+  path-x
+  path-y
   prev-dx
   prev-dy
 ]
@@ -34,8 +33,8 @@ globals [
 
 to setup
   clear-all
-  ;; Slider/input values are kept after clear-all and reapplied to globals.
-  ;; Defaults match HerdSim Strombom paper + drive_to_goal.
+  ;; Slider values persist after clear-all.
+  ;; Defaults match HerdSim Flocking Dog 2024 + drive_to_goal.
   random-seed sim-seed
   ;; Spawn matches HerdSim drive_to_goal (center +/- 30; herders near 125 +/- 5).
   set arena-width 150
@@ -64,11 +63,13 @@ to setup
     set prev-dy 0
   ]
 
-  create-herders initial-herders [
+  create-dogs initial-dogs [
     set shape "default"
     set color yellow
     set size 4
     setxy (125 - 5 + random-float 10) (125 - 5 + random-float 10)
+    set prev-dx 0
+    set prev-dy 0
   ]
 
 
@@ -76,7 +77,7 @@ to setup
   set time-to-goal -1
   
   clear-output
-  ask herders [
+  ask dogs [
     set path-x xcor
     set path-y ycor
   ]
@@ -137,71 +138,93 @@ to-report should-collect?
   report [distancexy gcx gcy] of farthest > collect-threshold
 end
 
+to-report pick-n-of [n agentset]
+  if not any? agentset [ report nobody ]
+  ifelse count agentset <= n
+    [ report agentset ]
+    [ report n-of n agentset ]
+end
+
 to update-sheep
   if count sheep = 0 [ stop ]
-  let herder-list sort herders
+  if count dogs = 0 [ stop ]
+
+  ;; HerdSim sheep sense the first dog only (paper / MATLAB single-dog case).
+  let primary-dog first sort dogs
 
   ask sheep [
     let sx xcor
     let sy ycor
-    let min-shep-dist 1e9
-    foreach herder-list [ h ->
-      let d distance h
-      if d < min-shep-dist [ set min-shep-dist d ]
-    ]
+    let dist-dog distance primary-dog
 
-    ifelse min-shep-dist > r-s [
-      ifelse random-float 1 < graze-move-prob [
-        let nxy random-noise-xy
-        let ux unit-x (item 0 nxy) (item 1 nxy)
-        let uy unit-y (item 0 nxy) (item 1 nxy)
-        setxy (reflect-x (sx + ux * sheep-speed)) (reflect-y (sy + uy * sheep-speed))
-        set prev-dx ux * sheep-speed
-        set prev-dy uy * sheep-speed
-      ] [
-        set prev-dx 0
-        set prev-dy 0
-      ]
+    ifelse dist-dog > r-s [
+      set prev-dx 0
+      set prev-dy 0
     ] [
       let others sheep with [ self != myself ]
-      let lcmx sx
-      let lcmy sy
-      if any? others [
-        ifelse (n-neighbors < 0) or (n-neighbors >= count others) [
-          set lcmx mean [xcor] of others
-          set lcmy mean [ycor] of others
-        ] [
-          let nearest min-n-of n-neighbors others [ distance myself ]
-          set lcmx mean [xcor] of nearest
-          set lcmy mean [ycor] of nearest
+      let k min (list k-neighbors count others)
+      let nearest nobody
+      if k > 0 [
+        set nearest min-n-of k others [ distance myself ]
+      ]
+
+      let atrx 0
+      let atry 0
+      let atr-set nobody
+      if nearest != nobody [
+        set atr-set pick-n-of n-attraction nearest
+        if atr-set != nobody and any? atr-set [
+          ask atr-set [
+            let ox xcor - sx
+            let oy ycor - sy
+            let d sqrt (ox * ox + oy * oy)
+            if d > 1e-9 [
+              set atrx atrx + (ox / d)
+              set atry atry + (oy / d)
+            ]
+          ]
+          let alen sqrt (atrx * atrx + atry * atry)
+          if alen > 1e-9 [
+            set atrx atrx / alen
+            set atry atry / alen
+          ]
         ]
       ]
-      let ax lcmx - sx
-      let ay lcmy - sy
+
+      let alix 0
+      let aliy 0
+      if atr-set != nobody and any? atr-set [
+        let ali-set pick-n-of n-alignment atr-set
+        if ali-set != nobody and any? ali-set [
+          set alix mean [prev-dx] of ali-set
+          set aliy mean [prev-dy] of ali-set
+          let llen sqrt (alix * alix + aliy * aliy)
+          if llen > 1e-9 [
+            set alix alix / llen
+            set aliy aliy / llen
+          ]
+        ]
+      ]
 
       let rx 0
       let ry 0
-      foreach sort others [ o ->
-        let d distance o
+      ask others [
+        let d distance myself
         if d < r-a and d > 1e-9 [
-          let ox sx - [xcor] of o
-          let oy sy - [ycor] of o
+          let ox sx - xcor
+          let oy sy - ycor
           set rx rx + (ox / d)
           set ry ry + (oy / d)
         ]
       ]
-
-      let hx 0
-      let hy 0
-      foreach herder-list [ h ->
-        let d distance h
-        if d < r-s and d > 1e-9 [
-          let ox sx - [xcor] of h
-          let oy sy - [ycor] of h
-          set hx hx + (ox / d)
-          set hy hy + (oy / d)
-        ]
+      let rlen sqrt (rx * rx + ry * ry)
+      if rlen > 1e-9 [
+        set rx rx / rlen
+        set ry ry / rlen
       ]
+
+      let dog-rx unit-x (sx - [xcor] of primary-dog) (sy - [ycor] of primary-dog)
+      let dog-ry unit-y (sx - [xcor] of primary-dog) (sy - [ycor] of primary-dog)
 
       let pdx prev-dx
       let pdy prev-dy
@@ -212,8 +235,8 @@ to update-sheep
       ]
 
       let nxy random-noise-xy
-      let hxdg inertia * pdx + c-attr * ax + r-a * rx + rs-weight * hx + item 0 nxy
-      let hydg inertia * pdy + c-attr * ay + r-a * ry + rs-weight * hy + item 1 nxy
+      let hxdg inertia * pdx + sheep-repulsion-weight * rx + dog-repulsion-weight * dog-rx + attraction-weight * atrx + alignment-weight * alix + item 0 nxy
+      let hydg inertia * pdy + sheep-repulsion-weight * ry + dog-repulsion-weight * dog-ry + attraction-weight * atry + alignment-weight * aliy + item 1 nxy
       let ux unit-x hxdg hydg
       let uy unit-y hxdg hydg
       setxy (reflect-x (sx + ux * sheep-speed)) (reflect-y (sy + uy * sheep-speed))
@@ -223,8 +246,8 @@ to update-sheep
   ]
 end
 
-to update-herders
-  if count herders = 0 [ stop ]
+to update-dogs
+  if count dogs = 0 [ stop ]
   if count sheep = 0 [ stop ]
 
   let gcx sheep-gcm-x
@@ -265,21 +288,37 @@ to update-herders
     ]
   ]
 
-  ask herders [
+  ask dogs [
     let min-sheep-dist min [distance myself] of sheep
-    if min-sheep-dist <= shepherd-stop-multiple * r-a [ stop ]
-
-    let delta-x target-x - xcor
-    let delta-y target-y - ycor
-    let dist sqrt (delta-x * delta-x + delta-y * delta-y)
-    if dist > 1e-9 [
-      let step-len shepherd-speed
-      let nxy random-noise-xy
-      let mx (delta-x / dist) + item 0 nxy
-      let my (delta-y / dist) + item 1 nxy
-      let ux unit-x mx my
-      let uy unit-y mx my
-      setxy (reflect-x (xcor + ux * step-len)) (reflect-y (ycor + uy * step-len))
+    ifelse min-sheep-dist <= r-a [
+      let pdx prev-dx
+      let pdy prev-dy
+      let plen sqrt (pdx * pdx + pdy * pdy)
+      ifelse plen > 1e-9 [
+        set pdx pdx / plen
+        set pdy pdy / plen
+      ] [
+        set pdx unit-x (gcx - xcor) (gcy - ycor)
+        set pdy unit-y (gcx - xcor) (gcy - ycor)
+      ]
+      setxy (reflect-x (xcor + pdx * shepherd-close-speed)) (reflect-y (ycor + pdy * shepherd-close-speed))
+      set prev-dx pdx * shepherd-close-speed
+      set prev-dy pdy * shepherd-close-speed
+    ] [
+      let delta-x target-x - xcor
+      let delta-y target-y - ycor
+      let dist sqrt (delta-x * delta-x + delta-y * delta-y)
+      if dist > 1e-9 [
+        let step-len min (list shepherd-speed dist)
+        let nxy random-noise-xy
+        let mx (delta-x / dist) * shepherd-speed + item 0 nxy
+        let my (delta-y / dist) * shepherd-speed + item 1 nxy
+        let ux unit-x mx my
+        let uy unit-y mx my
+        setxy (reflect-x (xcor + ux * step-len)) (reflect-y (ycor + uy * step-len))
+        set prev-dx ux * step-len
+        set prev-dy uy * step-len
+      ]
     ]
   ]
 end
@@ -334,17 +373,17 @@ end
 
 to apply-trails
   ifelse show-trails [
-    ask herders [
+    ask dogs [
       set pen-size 2
       pen-down
     ]
   ] [
-    ask herders [ pen-up ]
+    ask dogs [ pen-up ]
   ]
 end
 
 to update-herder-path
-  ask herders [
+  ask dogs [
     set herder-path-length herder-path-length + distancexy path-x path-y
     set path-x xcor
     set path-y ycor
@@ -420,7 +459,7 @@ end
 
 to toggle-follow-herder
   ifelse subject = nobody [
-    if any? herders [ follow one-of herders ]
+    if any? dogs [ follow one-of dogs ]
   ] [
     reset-perspective
   ]
@@ -436,7 +475,7 @@ to go
     stop
   ]
   update-sheep
-  update-herders
+  update-dogs
   tick
   update-comparison-metrics
   if success? [
@@ -563,7 +602,7 @@ initial-sheep
 initial-sheep
 5
 150
-50.0
+14.0
 1
 1
 NIL
@@ -574,8 +613,8 @@ SLIDER
 245
 195
 278
-initial-herders
-initial-herders
+initial-dogs
+initial-dogs
 1
 8
 1.0
@@ -651,9 +690,9 @@ SLIDER
 478
 r-s
 r-s
-10
+5
 100
-65.0
+12.0
 1
 1
 NIL
@@ -664,6 +703,51 @@ SLIDER
 485
 195
 518
+k-neighbors
+k-neighbors
+1
+20
+10.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+25
+525
+195
+558
+n-attraction
+n-attraction
+1
+10
+5.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+25
+565
+195
+598
+n-alignment
+n-alignment
+1
+5
+1.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+25
+605
+195
+638
 sheep-speed
 sheep-speed
 0.1
@@ -676,9 +760,9 @@ HORIZONTAL
 
 SLIDER
 25
-525
+645
 195
-558
+678
 shepherd-speed
 shepherd-speed
 0.1
@@ -691,58 +775,13 @@ HORIZONTAL
 
 SLIDER
 25
-565
-195
-598
-noise-strength
-noise-strength
-0
-1
-0.3
-0.05
-1
-NIL
-HORIZONTAL
-
-SLIDER
-25
-605
-195
-638
-inertia
-inertia
-0
-1
-0.5
-0.05
-1
-NIL
-HORIZONTAL
-
-SLIDER
-25
-645
-195
-678
-c-attr
-c-attr
-0.5
-2
-1.05
-0.05
-1
-NIL
-HORIZONTAL
-
-SLIDER
-25
 685
 195
 718
-graze-move-prob
-graze-move-prob
-0
-0.5
+shepherd-close-speed
+shepherd-close-speed
+0.01
+1
 0.05
 0.01
 1
@@ -754,12 +793,12 @@ SLIDER
 725
 195
 758
-shepherd-stop-multiple
-shepherd-stop-multiple
+noise-strength
+noise-strength
+0
 1
-6
-3.0
 0.5
+0.05
 1
 NIL
 HORIZONTAL
@@ -769,6 +808,81 @@ SLIDER
 765
 195
 798
+inertia
+inertia
+0
+1
+0.5
+0.05
+1
+NIL
+HORIZONTAL
+
+SLIDER
+25
+805
+195
+838
+sheep-repulsion-weight
+sheep-repulsion-weight
+0
+5
+2.0
+0.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+25
+845
+195
+878
+dog-repulsion-weight
+dog-repulsion-weight
+0
+5
+1.0
+0.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+25
+885
+195
+918
+attraction-weight
+attraction-weight
+0
+5
+1.5
+0.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+25
+925
+195
+958
+alignment-weight
+alignment-weight
+0
+5
+1.3
+0.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+25
+965
+195
+998
 collect-threshold-scale
 collect-threshold-scale
 0.5
@@ -779,42 +893,12 @@ collect-threshold-scale
 NIL
 HORIZONTAL
 
-SLIDER
-25
-810
-195
-843
-n-neighbors
-n-neighbors
--1
-50
--1.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-25
-855
-195
-888
-rs-weight
-rs-weight
-0
-3
-1.0
-0.1
-1
-NIL
-HORIZONTAL
-
 TEXTBOX
 25
-908
-880
-308
-Match HerdSim Single:\nsheep, shepherds, seed,\nmax_ticks, goal_radius,\nand Strombom paper params.\nAdjust sliders, then setup.
+1010
+210
+1080
+Match HerdSim Flocking Dog:\nsheep/dogs, seed, Rd/Ra,\ntopological k/nAtt/nAli,\nweights, close-speed.
 11
 0.0
 1
@@ -931,7 +1015,7 @@ MONITOR
 980
 310
 sheep / dogs
-(word count sheep " / " count herders)
+(word count sheep " / " count dogs)
 3
 1
 11
@@ -1102,6 +1186,7 @@ Research panel: histograms, min separation,\nfollow camera, clear trails. Observ
 @#$#@#$#@
 @#$#@#$#@
 NetLogo 6.4.0
+@#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@

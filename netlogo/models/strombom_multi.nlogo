@@ -1,14 +1,12 @@
-;; Strombom 2014 -- NetLogo twin of HerdSim algorithms/strombom
+;; Strombom Multi-Dog -- NetLogo twin of HerdSim algorithms/strombom_multi
 ;;
-;; Visual comparison: match HerdSim Single via Interface sliders, then setup / go.
-;; HerdSim Single runs the Python reference of the same paper rules.
-;;
-;; Sheep: graze beyond r_s; else LCM attraction, neighbour/shepherd repulsion,
-;;        inertia, and angular noise (Strombom eqs.).
-;; Shepherd: Collect vs Drive using f(N) = r_a * N^(2/3); stop within 3*r_a.
+;; Strombom Collect/Drive sheep with multi-shepherd outlier assignment and
+;; angular spacing on Drive (HerdSim default: 3 shepherds).
+;; Match HerdSim Single via Interface sliders, then setup / go.
 
 breed [sheep a-sheep]
 breed [herders herder]
+directed-link-breed [assignments assignment]
 
 herders-own [
   path-x
@@ -35,7 +33,7 @@ globals [
 to setup
   clear-all
   ;; Slider/input values are kept after clear-all and reapplied to globals.
-  ;; Defaults match HerdSim Strombom paper + drive_to_goal.
+  ;; Defaults match HerdSim Strombom Multi-Dog + drive_to_goal.
   random-seed sim-seed
   ;; Spawn matches HerdSim drive_to_goal (center +/- 30; herders near 125 +/- 5).
   set arena-width 150
@@ -226,60 +224,101 @@ end
 to update-herders
   if count herders = 0 [ stop ]
   if count sheep = 0 [ stop ]
+  ask assignments [ die ]
 
   let gcx sheep-gcm-x
   let gcy sheep-gcm-y
-  let collecting? should-collect?
-  ifelse collecting?
-    [ set mode-label "collect" ]
-    [ set mode-label "drive" ]
+  let thresh collect-threshold
+  let outliers sheep with [ distancexy gcx gcy > thresh ]
+  let m count herders
+  let herder-list sort herders
 
-  let farthest max-one-of sheep [ distancexy gcx gcy ]
-  let far-x [xcor] of farthest
-  let far-y [ycor] of farthest
-
-  let target-x gcx
-  let target-y gcy
-  ifelse collecting? [
-    let behind-x far-x - gcx
-    let behind-y far-y - gcy
-    let blen sqrt (behind-x * behind-x + behind-y * behind-y)
-    ifelse blen > 1e-9 [
-      set target-x far-x + (behind-x / blen) * r-a
-      set target-y far-y + (behind-y / blen) * r-a
-    ] [
-      set target-x far-x
-      set target-y far-y
+  ifelse any? outliers [
+    set mode-label "collect"
+    let ordered sort-by [ [a b] ->
+      [distancexy gcx gcy] of a > [distancexy gcx gcy] of b
+    ] outliers
+    let n-out length ordered
+    let i 0
+    foreach herder-list [ h ->
+      let sheep-agent item (i mod n-out) ordered
+      ask h [
+        create-assignment-to sheep-agent [
+          set color yellow
+          set thickness 0.35
+        ]
+      ]
+      let sx [xcor] of sheep-agent
+      let sy [ycor] of sheep-agent
+      let behind-x sx - gcx
+      let behind-y sy - gcy
+      let blen sqrt (behind-x * behind-x + behind-y * behind-y)
+      let tx sx
+      let ty sy
+      if blen > 1e-9 [
+        set tx sx + (behind-x / blen) * r-a
+        set ty sy + (behind-y / blen) * r-a
+      ]
+      let tang-x (0 - (sy - gcy))
+      let tang-y (sx - gcx)
+      let tn sqrt (tang-x * tang-x + tang-y * tang-y)
+      if tn > 1e-10 [
+        let offset 4.0 * (i - (m - 1) / 2.0)
+        set tx tx + (tang-x / tn) * offset
+        set ty ty + (tang-y / tn) * offset
+      ]
+      ask h [
+        let min-sheep-dist min [distance myself] of sheep
+        if min-sheep-dist > shepherd-stop-multiple * r-a [
+          let delta-x tx - xcor
+          let delta-y ty - ycor
+          let dist sqrt (delta-x * delta-x + delta-y * delta-y)
+          if dist > 1e-9 [
+            let nxy random-noise-xy
+            let mx (delta-x / dist) + item 0 nxy
+            let my (delta-y / dist) + item 1 nxy
+            let ux unit-x mx my
+            let uy unit-y mx my
+            setxy (reflect-x (xcor + ux * shepherd-speed)) (reflect-y (ycor + uy * shepherd-speed))
+          ]
+        ]
+      ]
+      set i i + 1
     ]
   ] [
+    set mode-label "drive"
     let drive-standoff r-a * sqrt (count sheep)
     let away-x gcx - goal-x
     let away-y gcy - goal-y
     let alen sqrt (away-x * away-x + away-y * away-y)
-    ifelse alen > 1e-9 [
-      set target-x gcx + (away-x / alen) * drive-standoff
-      set target-y gcy + (away-y / alen) * drive-standoff
-    ] [
-      set target-x gcx
-      set target-y gcy
+    let base-x gcx
+    let base-y gcy
+    if alen > 1e-9 [
+      set base-x gcx + (away-x / alen) * drive-standoff
+      set base-y gcy + (away-y / alen) * drive-standoff
     ]
-  ]
-
-  ask herders [
-    let min-sheep-dist min [distance myself] of sheep
-    if min-sheep-dist <= shepherd-stop-multiple * r-a [ stop ]
-
-    let delta-x target-x - xcor
-    let delta-y target-y - ycor
-    let dist sqrt (delta-x * delta-x + delta-y * delta-y)
-    if dist > 1e-9 [
-      let step-len shepherd-speed
-      let nxy random-noise-xy
-      let mx (delta-x / dist) + item 0 nxy
-      let my (delta-y / dist) + item 1 nxy
-      let ux unit-x mx my
-      let uy unit-y mx my
-      setxy (reflect-x (xcor + ux * step-len)) (reflect-y (ycor + uy * step-len))
+    let i 0
+    foreach herder-list [ h ->
+      let angle (360 * i) / m
+      let spaced-x base-x + 8.0 * cos angle
+      let spaced-y base-y + 8.0 * sin angle
+      ask h [
+        let min-sheep-dist min [distance myself] of sheep
+        if min-sheep-dist > shepherd-stop-multiple * r-a [
+          let delta-x spaced-x - xcor
+          let delta-y spaced-y - ycor
+          let dist sqrt (delta-x * delta-x + delta-y * delta-y)
+          if dist > 1e-9 [
+            let nxy random-noise-xy
+            let mx (delta-x / dist) + item 0 nxy
+            let my (delta-y / dist) + item 1 nxy
+            let ux unit-x mx my
+            let uy unit-y mx my
+            setxy (reflect-x (xcor + ux * shepherd-speed)) (reflect-y (ycor + uy * shepherd-speed))
+          ]
+        ]
+      ]
+      set i i + 1
     ]
   ]
 end
@@ -578,7 +617,7 @@ initial-herders
 initial-herders
 1
 8
-1.0
+3.0
 1
 1
 NIL
@@ -814,7 +853,7 @@ TEXTBOX
 908
 880
 308
-Match HerdSim Single:\nsheep, shepherds, seed,\nmax_ticks, goal_radius,\nand Strombom paper params.\nAdjust sliders, then setup.
+Match HerdSim Multi-Dog:\nsheep, shepherds (default 3),\nCollect assigns outliers;\nDrive uses angular spacing.
 11
 0.0
 1

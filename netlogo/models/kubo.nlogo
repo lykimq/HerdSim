@@ -13,9 +13,14 @@ breed [sheep a-sheep]
 breed [dogs a-dog]
 
 sheep-own [ vx vy ]
-dogs-own [ vx vy ]
+dogs-own [
+  path-x
+  path-y vx vy ]
 
 globals [
+  mode-label
+  time-to-goal
+  herder-path-length
   arena-width
   arena-height
   goal-x
@@ -29,6 +34,7 @@ to setup
   clear-all
   ;; Slider values persist after clear-all (HerdSim-comparable settings).
   random-seed sim-seed
+  ;; Spawn matches HerdSim drive_to_goal (center +/- 30; herders near 125 +/- 5).
   set arena-width 150
   set arena-height 150
   set goal-x 15
@@ -50,7 +56,7 @@ to setup
     set shape "circle"
     set color white
     set size 2.5
-    setxy (50 + random-float 40) (50 + random-float 40)
+    setxy (75 - 30 + random-float 60) (75 - 30 + random-float 60)
     set vx 0
     set vy 0
   ]
@@ -59,20 +65,38 @@ to setup
     set shape "default"
     set color orange
     set size 3.5
-    setxy (110 + random-float 25) (110 + random-float 25)
+    setxy (125 - 5 + random-float 10) (125 - 5 + random-float 10)
     set vx 0
     set vy 0
   ]
 
+
+  set herder-path-length 0
+  set time-to-goal -1
+  set mode-label "force"
+  clear-output
+  ask dogs [
+    set path-x xcor
+    set path-y ycor
+  ]
+  apply-trails
+
   reset-ticks
 end
 
-to-report clamp-x [x]
-  report max (list 0 (min (list arena-width x)))
+;; Match HerdSim World.reflect_positions (elastic bounce, one pass).
+to-report reflect-x [x]
+  let px x
+  if px < 0 [ set px 0 - px ]
+  if px > arena-width [ set px (2 * arena-width) - px ]
+  report max (list 0 (min (list arena-width px)))
 end
 
-to-report clamp-y [y]
-  report max (list 0 (min (list arena-height y)))
+to-report reflect-y [y]
+  let py y
+  if py < 0 [ set py 0 - py ]
+  if py > arena-height [ set py (2 * arena-height) - py ]
+  report max (list 0 (min (list arena-height py)))
 end
 
 to-report clamped-vel [sx sy max-speed]
@@ -81,6 +105,33 @@ to-report clamped-vel [sx sy max-speed]
     report (list sx sy)
   ]
   report (list (sx / spd * max-speed) (sy / spd * max-speed))
+end
+
+;; Match HerdSim reflect_positions + reflect_velocities for force agents.
+to step-with-reflect
+  let nx xcor + step-dt * vx
+  let ny ycor + step-dt * vy
+  let hit-x false
+  let hit-y false
+  if nx < 0 [
+    set nx 0 - nx
+    set hit-x true
+  ]
+  if nx > arena-width [
+    set nx (2 * arena-width) - nx
+    set hit-x true
+  ]
+  if ny < 0 [
+    set ny 0 - ny
+    set hit-y true
+  ]
+  if ny > arena-height [
+    set ny (2 * arena-height) - ny
+    set hit-y true
+  ]
+  setxy (max (list 0 (min (list arena-width nx)))) (max (list 0 (min (list arena-height ny))))
+  if hit-x [ set vx 0 - vx ]
+  if hit-y [ set vy 0 - vy ]
 end
 
 to update-sheep
@@ -167,7 +218,7 @@ to update-sheep
   ]
 
   ask sheep [
-    setxy (clamp-x (xcor + step-dt * vx)) (clamp-y (ycor + step-dt * vy))
+    step-with-reflect
   ]
 end
 
@@ -262,7 +313,7 @@ to update-dogs
   ]
 
   ask dogs [
-    setxy (clamp-x (xcor + step-dt * vx)) (clamp-y (ycor + step-dt * vy))
+    step-with-reflect
   ]
 end
 
@@ -275,24 +326,162 @@ to-report success?
   report (sheep-in-goal-count / count sheep) >= success-fraction
 end
 
+
+; === comparison metrics (HerdSim-aligned) ===
+
+to-report collect-threshold
+  report r-a * (count sheep ^ (2 / 3))
+end
+
+to-report sheep-in-goal-frac
+  if count sheep = 0 [ report 0 ]
+  report sheep-in-goal-count / count sheep
+end
+
+to-report flock-cohesion
+  if count sheep = 0 [ report 0 ]
+  let gcx mean [xcor] of sheep
+  let gcy mean [ycor] of sheep
+  report mean [ distancexy gcx gcy ] of sheep
+end
+
+to-report outlier-count
+  if count sheep = 0 [ report 0 ]
+  let gcx mean [xcor] of sheep
+  let gcy mean [ycor] of sheep
+  let thresh collect-threshold
+  report count sheep with [ distancexy gcx gcy > thresh ]
+end
+
+to-report gcm-to-goal
+  if count sheep = 0 [ report 0 ]
+  let gcx mean [xcor] of sheep
+  let gcy mean [ycor] of sheep
+  report sqrt ((gcx - goal-x) * (gcx - goal-x) + (gcy - goal-y) * (gcy - goal-y))
+end
+
+to-report flock-polarization
+  if count sheep = 0 [ report 0 ]
+  let movers sheep with [ (vx * vx + vy * vy) > 1e-20 ]
+  if not any? movers [ report 0 ]
+  let mx mean [ vx / sqrt (vx * vx + vy * vy) ] of movers
+  let my mean [ vy / sqrt (vx * vx + vy * vy) ] of movers
+  report sqrt (mx * mx + my * my)
+end
+
+to apply-trails
+  ifelse show-trails [
+    ask dogs [
+      set pen-size 2
+      pen-down
+    ]
+  ] [
+    ask dogs [ pen-up ]
+  ]
+end
+
+to update-herder-path
+  ask dogs [
+    set herder-path-length herder-path-length + distancexy path-x path-y
+    set path-x xcor
+    set path-y ycor
+  ]
+end
+
+to update-comparison-metrics
+  update-herder-path
+  if (time-to-goal < 0) and success? [
+    set time-to-goal ticks
+  ]
+  apply-trails
+end
+
+to write-run-summary
+  clear-output
+  output-print "metric,value"
+  output-print (word "status," run-status)
+  output-print (word "ticks," ticks)
+  output-print (word "time_to_goal," time-to-goal)
+  output-print (word "sheep_in_goal," sheep-in-goal-count)
+  output-print (word "sheep_in_goal_frac," precision sheep-in-goal-frac 4)
+  output-print (word "cohesion," precision flock-cohesion 3)
+  output-print (word "min_separation," precision min-separation 3)
+  output-print (word "outlier_count," outlier-count)
+  output-print (word "gcm_goal_dist," precision gcm-to-goal 3)
+  output-print (word "polarization," precision flock-polarization 4)
+  output-print (word "shepherd_path," precision herder-path-length 3)
+  output-print (word "mode," mode-label)
+  output-print (word "seed," sim-seed)
+end
+
+to finish-run [ status-name ]
+  set run-status status-name
+  if (status-name = "success") and (time-to-goal < 0) [
+    set time-to-goal ticks
+  ]
+  write-run-summary
+end
+
+
+; === research panel helpers ===
+to-report min-separation
+  if count sheep < 2 [ report 0 ]
+  let best 1e9
+  let alist sort sheep
+  let n length alist
+  let i 0
+  while [i < (n - 1)] [
+    let a item i alist
+    let j i + 1
+    while [j < n] [
+      let d [distance (item j alist)] of a
+      if d < best [ set best d ]
+      set j j + 1
+    ]
+    set i i + 1
+  ]
+  report best
+end
+
+to-report sheep-heading-deg
+  ;; Degrees from velocity components (NetLogo atan is atan2(dx, dy) style: atan dx dy).
+  let spd sqrt (vx * vx + vy * vy)
+  if spd <= 1e-9 [ report heading ]
+  report atan vx vy
+end
+
+to clear-trails
+  clear-drawing
+  apply-trails
+end
+
+to toggle-follow-herder
+  ifelse subject = nobody [
+    if any? dogs [ follow one-of dogs ]
+  ] [
+    reset-perspective
+  ]
+end
+
 to go
   if ticks >= max-ticks [
-    set run-status "timeout"
+    finish-run "timeout"
     stop
   ]
   if success? [
-    set run-status "success"
+    finish-run "success"
     stop
   ]
   update-sheep
   update-dogs
   tick
+  update-comparison-metrics
   if success? [
-    set run-status "success"
+    finish-run "success"
     stop
   ]
   if ticks >= max-ticks [
-    set run-status "timeout"
+    finish-run "timeout"
     stop
   ]
 end
@@ -468,9 +657,24 @@ HORIZONTAL
 
 SLIDER
 25
-405
+410
 195
-438
+443
+r-a
+r-a
+0.5
+10
+2.0
+0.5
+1
+NIL
+HORIZONTAL
+
+SLIDER
+25
+450
+195
+483
 sense-radius
 sense-radius
 10
@@ -483,9 +687,9 @@ HORIZONTAL
 
 SLIDER
 25
-445
+490
 195
-478
+523
 step-dt
 step-dt
 0.01
@@ -498,9 +702,9 @@ HORIZONTAL
 
 SLIDER
 25
-485
+530
 195
-518
+563
 sheep-speed-max
 sheep-speed-max
 1
@@ -513,9 +717,9 @@ HORIZONTAL
 
 SLIDER
 25
-525
+570
 195
-558
+603
 dog-speed-max
 dog-speed-max
 1
@@ -528,9 +732,9 @@ HORIZONTAL
 
 SLIDER
 25
-565
+610
 195
-598
+643
 k-s1
 k-s1
 0
@@ -543,9 +747,9 @@ HORIZONTAL
 
 SLIDER
 25
-605
+650
 195
-638
+683
 k-s2
 k-s2
 0
@@ -558,9 +762,9 @@ HORIZONTAL
 
 SLIDER
 25
-645
+690
 195
-678
+723
 k-s3
 k-s3
 0
@@ -573,9 +777,9 @@ HORIZONTAL
 
 SLIDER
 25
-685
+730
 195
-718
+763
 k-s4
 k-s4
 0
@@ -588,9 +792,9 @@ HORIZONTAL
 
 SLIDER
 25
-725
+770
 195
-758
+803
 k-f1
 k-f1
 0
@@ -603,9 +807,9 @@ HORIZONTAL
 
 SLIDER
 25
-765
+810
 195
-798
+843
 k-f2
 k-f2
 0
@@ -618,9 +822,9 @@ HORIZONTAL
 
 SLIDER
 25
-805
+850
 195
-838
+883
 k-f3
 k-f3
 0
@@ -633,9 +837,9 @@ HORIZONTAL
 
 SLIDER
 25
-845
+890
 195
-878
+923
 k-f4
 k-f4
 0
@@ -648,10 +852,289 @@ HORIZONTAL
 
 TEXTBOX
 25
-890
+935
 210
-960
+1005
 Match HerdSim Single:\nsheep, dogs, seed,\nmax_ticks, goal_radius,\nradius/dt/speeds, and\nK_s*/K_f* gains.\nAdjust sliders, then setup.
+11
+0.0
+1
+
+BUTTON
+700
+10
+980
+43
+go once
+go
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+
+SWITCH
+700
+55
+860
+88
+show-trails
+show-trails
+0
+1
+-1000
+
+MONITOR
+700
+100
+840
+145
+in goal %
+precision sheep-in-goal-frac 3
+3
+1
+11
+
+MONITOR
+850
+100
+980
+145
+cohesion
+precision flock-cohesion 2
+3
+1
+11
+
+MONITOR
+700
+155
+840
+200
+outliers
+outlier-count
+0
+1
+11
+
+MONITOR
+850
+155
+980
+200
+GCM-goal
+precision gcm-to-goal 2
+3
+1
+11
+
+MONITOR
+700
+210
+840
+255
+polarisation
+precision flock-polarization 3
+3
+1
+11
+
+MONITOR
+850
+210
+980
+255
+herder path
+precision herder-path-length 1
+3
+1
+11
+
+MONITOR
+700
+265
+840
+310
+time to goal
+time-to-goal
+0
+1
+11
+
+MONITOR
+850
+265
+980
+310
+sheep / dogs
+(word count sheep " / " count dogs)
+3
+1
+11
+
+PLOT
+700
+320
+980
+470
+Sheep in goal
+tick
+sheep
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"in-goal" 1.0 0 -16777216 true "" "plot sheep-in-goal-count"
+
+PLOT
+700
+480
+980
+630
+Flock cohesion
+tick
+mean dist
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"cohesion" 1.0 0 -2674135 true "" "plot flock-cohesion"
+
+PLOT
+700
+640
+980
+790
+GCM to goal
+tick
+distance
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"gcm-goal" 1.0 0 -13345367 true "" "plot gcm-to-goal"
+
+OUTPUT
+700
+800
+980
+920
+11
+
+TEXTBOX
+700
+930
+980
+990
+Comparison panel: metrics, trails, plots;\nresearch panel (right) adds histograms\nand camera / trail tools.
+11
+0.0
+1
+
+BUTTON
+1000
+10
+1140
+43
+follow herder
+toggle-follow-herder
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+1150
+10
+1290
+43
+clear trails
+clear-trails
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+MONITOR
+1000
+55
+1140
+100
+min sep
+precision min-separation 2
+3
+1
+11
+
+PLOT
+1000
+110
+1290
+280
+Heading histogram
+heading
+count
+0.0
+360.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"headings" 1.0 1 -16777216 true "" "histogram [sheep-heading-deg] of sheep"
+
+PLOT
+1000
+290
+1290
+460
+GCM distance histogram
+dist to GCM
+count
+0.0
+50.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"gcm-dist" 1.0 1 -13345367 true "" "if any? sheep [ let gcx mean [xcor] of sheep let gcy mean [ycor] of sheep histogram [ distancexy gcx gcy ] of sheep ]"
+
+TEXTBOX
+1000
+470
+1290
+530
+Research panel: histograms, min separation,\nfollow camera, clear trails. Observations\nfeed future HerdSim feature ideas.
 11
 0.0
 1

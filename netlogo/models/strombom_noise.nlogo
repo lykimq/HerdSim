@@ -1,11 +1,8 @@
-;; Strombom 2014 -- NetLogo twin of HerdSim algorithms/strombom
+;; Strombom Noise -- NetLogo twin of HerdSim algorithms/strombom_noise
 ;;
-;; Visual comparison: match HerdSim Single via Interface sliders, then setup / go.
-;; HerdSim Single runs the Python reference of the same paper rules.
-;;
-;; Sheep: graze beyond r_s; else LCM attraction, neighbour/shepherd repulsion,
-;;        inertia, and angular noise (Strombom eqs.).
-;; Shepherd: Collect vs Drive using f(N) = r_a * N^(2/3); stop within 3*r_a.
+;; Same Collect/Drive as Strombom 2014 with elevated sheep noise and lower inertia
+;; (HerdSim defaults: noise_strength=0.9, inertia=0.35).
+;; Match HerdSim Single via Interface sliders, then setup / go.
 
 breed [sheep a-sheep]
 breed [herders herder]
@@ -35,7 +32,7 @@ globals [
 to setup
   clear-all
   ;; Slider/input values are kept after clear-all and reapplied to globals.
-  ;; Defaults match HerdSim Strombom paper + drive_to_goal.
+  ;; Defaults match HerdSim Strombom Noise + drive_to_goal.
   random-seed sim-seed
   ;; Spawn matches HerdSim drive_to_goal (center +/- 30; herders near 125 +/- 5).
   set arena-width 150
@@ -698,7 +695,7 @@ noise-strength
 noise-strength
 0
 1
-0.3
+0.9
 0.05
 1
 NIL
@@ -713,7 +710,7 @@ inertia
 inertia
 0
 1
-0.5
+0.35
 0.05
 1
 NIL
@@ -814,7 +811,7 @@ TEXTBOX
 908
 880
 308
-Match HerdSim Single:\nsheep, shepherds, seed,\nmax_ticks, goal_radius,\nand Strombom paper params.\nAdjust sliders, then setup.
+Match HerdSim Strombom Noise:\nsame Collect/Drive params;\ndefault noise 0.9, inertia 0.35.\nAdjust sliders, then setup.
 11
 0.0
 1

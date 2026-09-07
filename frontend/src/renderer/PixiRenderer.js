@@ -171,6 +171,32 @@ export class PixiRenderer {
         this.agentLayer.addChild(g);
       }
     });
+
+    this._drawAssignmentOverlay(frame);
+  }
+
+  _drawAssignmentOverlay(frame) {
+    this.overlayLayer.removeChildren();
+    const lines = frame?.metadata?.assignment_lines;
+    if (!Array.isArray(lines) || lines.length === 0) return;
+
+    const g = new Graphics();
+    lines.forEach((line) => {
+      const from = line?.from;
+      const to = line?.to;
+      if (!Array.isArray(from) || !Array.isArray(to)) return;
+      const [x1, y1] = this._toScreen(from[0], from[1]);
+      const [x2, y2] = this._toScreen(to[0], to[1]);
+      const collect = line.mode === 'collect';
+      g.moveTo(x1, y1);
+      g.lineTo(x2, y2);
+      g.stroke({
+        width: collect ? 1.6 : 1.1,
+        color: collect ? 0xfbbf24 : 0x67e8f9,
+        alpha: collect ? 0.85 : 0.45,
+      });
+    });
+    this.overlayLayer.addChild(g);
   }
 
   destroy() {

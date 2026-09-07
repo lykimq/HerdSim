@@ -54,28 +54,49 @@ function panelHtml() {
 function helpHtml() {
   return `
     <div class="card-glass netlogo-help">
-      <div class="section-title">How it works</div>
+      <div class="section-title">NetLogo vs HerdSim</div>
       <p class="param-hint">
-        This tab launches <strong>NetLogo</strong> on your machine. HerdSim does not
-        simulate arbitrary <code>.nlogo</code> files in the browser canvas.
+        Use this tab to open <code>.nlogo</code> models in the NetLogo desktop app.
+        Browser views (Single, Arena, Analytics) always run HerdSim's Python
+        algorithms.
       </p>
       <p class="param-hint">
-        <strong>Algorithm twins</strong> are NetLogo ports of HerdSim algorithms.
-        In NetLogo, use the sliders (sheep/dogs, seed, max-ticks, goal radius,
-        algorithm gains) to match HerdSim Single settings, then
-        <strong>setup</strong> / <strong>go</strong>. Use
-        <strong>Run in HerdSim</strong> with the same numbers for a side-by-side
-        visual comparison (not tick-exact parity).
+        Each <strong>algorithm twin</strong> is a NetLogo version of a HerdSim
+        algorithm for the <strong>Drive to Goal</strong> scenario only (same
+        goal zone, spawn layout, and success rule as HerdSim
+        <code>drive_to_goal</code>). Other HerdSim scenarios are not mirrored
+        in these twins. Align the NetLogo sliders with Single (agent counts,
+        seed, max-ticks, goal radius, and gains), run <strong>setup</strong> /
+        <strong>go</strong> (or <strong>go once</strong>) in NetLogo, then
+        <strong>Run in HerdSim</strong> with Drive to Goal and the same values
+        to compare both side by side.
       </p>
       <p class="param-hint">
-        Need NetLogo installed first?
+        Twins include a comparison panel with HerdSim-style live metrics
+        (sheep in goal, cohesion, outliers, GCM-to-goal distance, polarisation,
+        herder path length, time to goal, min separation), time-series plots,
+        optional herder trails, heading and GCM-distance histograms, follow /
+        clear-trails controls, and a CSV-style run summary in the output box when
+        a run ends (success or timeout).
+      </p>
+      <p class="param-hint">
+        Twins use the same Drive to Goal starting layout and wall bounce as
+        HerdSim, so runs should look similar. Finish times can still differ:
+        NetLogo and HerdSim use different random-number generators (a shared
+        seed does not produce the same sequence), agents may update in a
+        different order within a tick, and force-based models such as Kubo are
+        especially sensitive to those discrete differences. Treat this as a
+        behavioural comparison, not a tick-for-tick replay.
+      </p>
+      <p class="param-hint">
+        Install NetLogo first from the
         <a
           href="https://www.netlogo.org/downloads/"
           target="_blank"
           rel="noopener noreferrer"
-        >Download and install NetLogo</a>
-        (desktop 6.x + Java). After install, restart HerdSim if Open stays disabled,
-        or set <code>netlogo_home</code> to your install folder.
+        >official downloads page</a>
+        (desktop 6.x + Java). If Open stays disabled after install, restart
+        HerdSim or set <code>netlogo_home</code> to your install folder.
       </p>
     </div>
   `;

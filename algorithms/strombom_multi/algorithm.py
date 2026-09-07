@@ -21,6 +21,11 @@ from core.simulation_state import SimulationState
 class StrombomMultiAlgorithm(StrombomAlgorithm):
     """Multi-shepherd Strombom: dogs cycle outliers; drive with angular spacing."""
 
+    def __init__(self) -> None:
+        super().__init__()
+        self._last_assignment_lines: list[dict[str, Any]] = []
+        self._last_mode: str = "drive"
+
     @property
     def id(self) -> str:
         return "strombom_multi"
@@ -35,8 +40,26 @@ class StrombomMultiAlgorithm(StrombomAlgorithm):
         cfg["n_shepherds"] = 3
         return cfg
 
+    def step(self, state: SimulationState, config: dict[str, Any]) -> SimulationState:
+        new_state = super().step(state, config)
+        metadata = dict(new_state.metadata)
+        metadata["assignment_lines"] = list(self._last_assignment_lines)
+        metadata["herding_mode"] = self._last_mode
+        return SimulationState(
+            tick=new_state.tick,
+            sheep_positions=new_state.sheep_positions,
+            sheep_velocities=new_state.sheep_velocities,
+            shepherd_positions=new_state.shepherd_positions,
+            shepherd_velocities=new_state.shepherd_velocities,
+            world=new_state.world,
+            rng=new_state.rng,
+            metadata=metadata,
+        )
+
     def _update_shepherds(self, state: SimulationState, config: dict) -> np.ndarray:
         velocities = np.zeros_like(state.shepherd_positions)
+        self._last_assignment_lines = []
+        self._last_mode = "drive"
         m = state.n_shepherds
         if m == 0:
             return velocities
@@ -57,8 +80,16 @@ class StrombomMultiAlgorithm(StrombomAlgorithm):
                 angle = (2 * np.pi * i) / m
                 spaced = base + 8.0 * np.array([np.cos(angle), np.sin(angle)])
                 velocities[i] = move_toward(state.shepherd_positions[i], spaced, speed)
+                self._last_assignment_lines.append(
+                    {
+                        "from": state.shepherd_positions[i].tolist(),
+                        "to": spaced.tolist(),
+                        "mode": "drive",
+                    }
+                )
             return velocities
 
+        self._last_mode = "collect"
         # Assign each dog to a distinct outlier (cycle if fewer outliers).
         order = outliers[np.argsort(-distances[outliers])]
         for i in range(m):
@@ -77,4 +108,12 @@ class StrombomMultiAlgorithm(StrombomAlgorithm):
             if tn > 1e-10:
                 target = target + (tangential / tn) * (4.0 * (i - (m - 1) / 2.0))
             velocities[i] = move_toward(state.shepherd_positions[i], target, speed)
+            self._last_assignment_lines.append(
+                {
+                    "from": state.shepherd_positions[i].tolist(),
+                    "to": state.sheep_positions[sheep_idx].tolist(),
+                    "mode": "collect",
+                    "sheep_index": sheep_idx,
+                }
+            )
         return velocities

@@ -183,7 +183,11 @@ export function buildParamControls(container, defaults, values, onChange, option
         });
       } else {
         input.type = "number";
-        input.step = Math.abs(defaultValue) >= 10 ? "1" : "0.1";
+        const intLike =
+          Number.isInteger(defaultValue) ||
+          key === "n_neighbors" ||
+          key.startsWith("n_");
+        input.step = intLike || Math.abs(defaultValue) >= 10 ? "1" : "0.1";
         input.value = String(current);
         input.addEventListener("input", () => {
           const num = Number(input.value);

@@ -3,12 +3,30 @@
     "algorithm_id": "strombom",
     "name": "Strombom 2014",
     "model_file": "netlogo/models/strombom.nlogo",
-    "description": "Collect/Drive shepherding (Strombom et al., 2014). Open in NetLogo for the desktop view, or run the Python twin in HerdSim Single."
+    "description": "Collect/Drive shepherding (Strombom et al., 2014)."
+  },
+  {
+    "algorithm_id": "strombom_noise",
+    "name": "Strombom Noise",
+    "model_file": "netlogo/models/strombom_noise.nlogo",
+    "description": "Strombom Collect/Drive with elevated sheep noise."
+  },
+  {
+    "algorithm_id": "strombom_multi",
+    "name": "Strombom Multi-Dog",
+    "model_file": "netlogo/models/strombom_multi.nlogo",
+    "description": "Multi-shepherd Strombom with outlier assignment and spaced Drive."
   },
   {
     "algorithm_id": "kubo",
     "name": "Kubo 2022",
     "model_file": "netlogo/models/kubo.nlogo",
-    "description": "Multi-dog repulsive-force herding (Kubo et al., 2022). Open in NetLogo for the desktop view, or run the Python twin in HerdSim Single."
+    "description": "Multi-dog repulsive-force herding (Kubo et al., 2022)."
+  },
+  {
+    "algorithm_id": "flocking_dog",
+    "name": "Flocking Dog 2024",
+    "model_file": "netlogo/models/flocking_dog.nlogo",
+    "description": "Topological flocking sheep with Collect/Drive dog (Jadhav et al., 2024)."
   }
 ]

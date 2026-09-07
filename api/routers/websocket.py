@@ -37,6 +37,7 @@ def _frame_payload(runner, status: str, frame_type: str = "tick") -> dict:
         "sheep_headings": _heading_from_velocity(state.sheep_velocities),
         "shepherd_headings": _heading_from_velocity(state.shepherd_velocities),
         "metrics": runner.recorder.latest() if frame_type == "tick" else {},
+        "metadata": dict(state.metadata or {}),
         "status": status,
         "seed": runner.seed,
         "world": {

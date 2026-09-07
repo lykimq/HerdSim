@@ -7,23 +7,62 @@ in the browser canvas (Single / Arena / Analytics stay Python algorithms only).
 ## Algorithm twins (compare NetLogo vs HerdSim)
 
 Some HerdSim algorithms have a NetLogo twin under `netlogo/models/`, listed in
-`netlogo/twins.json`.
+`netlogo/twins.json`. Twins cover the **Drive to Goal** scenario only.
 
 Current twins:
 
 - **Strombom 2014** -> `netlogo/models/strombom.nlogo`
+- **Strombom Noise** -> `netlogo/models/strombom_noise.nlogo`
+- **Strombom Multi-Dog** -> `netlogo/models/strombom_multi.nlogo`
 - **Kubo 2022** -> `netlogo/models/kubo.nlogo`
+- **Flocking Dog 2024** -> `netlogo/models/flocking_dog.nlogo`
 
 Workflow:
 
 1. NetLogo tab -> select the twin -> **Open in NetLogo**.
 2. Match HerdSim settings with the NetLogo sliders (sheep/dogs, seed, max-ticks,
-   goal radius, and algorithm gains), click **setup**, then **go**.
-3. Click **Run in HerdSim** to open Single with the same algorithm and use the
-   same numbers there for comparison.
+   goal radius, and algorithm gains), click **setup**, then **go** or **go once**.
+   Use the comparison panel (metrics, plots, trails) and the research panel
+   (histograms, min separation, follow herder, clear trails) while the model
+   runs; the output box fills in a run summary when the run ends.
+3. Click **Run in HerdSim** to open Single with Drive to Goal and the same
+   algorithm / numbers for comparison.
 
-This is a visual/workflow comparison. Exact tick-by-tick numeric parity is not
-guaranteed (different RNG and discrete updates).
+Twins use the same Drive to Goal starting layout and wall bounce as HerdSim,
+so runs should look similar. Finish times can still differ: NetLogo and HerdSim
+use different random-number generators (a shared seed does not produce the same
+sequence), agents may update in a different order within a tick, and force-based
+models such as Kubo are especially sensitive to those discrete differences.
+Treat this as a behavioural comparison, not a tick-for-tick replay.
+
+### Twin Interface panels
+
+- **Comparison panel:** in-goal %, cohesion, outliers, GCM-goal, polarisation,
+  herder path, time to goal, live line plots, optional herder trails.
+- **Research panel:** heading histogram, GCM-distance histogram, min separation,
+  follow herder / clear trails.
+- **Strombom family:** `n-neighbors` and `rs-weight` sliders (parameter parity).
+- **Kubo:** `r-a` slider for outlier threshold parity.
+- **Strombom Multi:** yellow assignment links from herders to Collect targets.
+
+### Feature map
+
+| Capability | NetLogo twins | HerdSim |
+|---|---|---|
+| Live scalar metrics | monitors | MetricsPanel (includes min_separation) |
+| Live distribution plots | heading + GCM-distance histograms | Single Distributions panel |
+| Herder trails | pen trails | optional later |
+| Multi-dog assignment viz | Collect links | Single/Arena Pixi overlay lines |
+| `n_neighbors` / `rs_weight` | Strombom sliders | Single algorithm parameter controls |
+| Metric history charts | line plots | Single Metric history + scrub |
+| Batch multi-seed | manual / BehaviorSpace | Analytics |
+| A/B compare | two NetLogo windows | Arena |
+
+### HerdSim-only strengths
+
+Keep these as HerdSim advantages (do not need NetLogo clones): Analytics
+multi-seed batch export, Arena A/B live deltas, Pixi GPU rendering at higher
+agent counts.
 
 To add another twin later: port the algorithm to a `.nlogo` file, then add an
 entry in `netlogo/twins.json`.

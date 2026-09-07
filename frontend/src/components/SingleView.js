@@ -1,5 +1,7 @@
 import { createControlPanel } from './ControlPanel.js';
 import { createMetricsPanel } from './MetricsPanel.js';
+import { createDistributionPanel } from './DistributionPanel.js';
+import { createMetricHistoryPanel } from './MetricHistoryPanel.js';
 import { PixiRenderer } from '../renderer/PixiRenderer.js';
 import { fetchMetrics } from '../api/rest.js';
 import { openSimulationSession } from '../utils/simulationSession.js';
@@ -17,10 +19,28 @@ export function createSingleView({ algorithms, scenarios, onStatus, preferredAlg
   let busy = false;
 
   const metrics = createMetricsPanel();
+  const distributions = createDistributionPanel();
   const canvasHost = document.createElement('div');
   canvasHost.className = 'canvas-host';
   const renderer = new PixiRenderer(canvasHost);
   let herderKind = 'dog';
+
+  const side = document.createElement('div');
+  side.className = 'single-side';
+
+  const historyPanel = createMetricHistoryPanel({
+    onScrub: (row) => {
+      if (!row?.frame) return;
+      renderer.render(row.frame);
+      metrics.update(row.metrics || {}, history.length);
+      distributions.update(row.frame);
+      onStatus?.({
+        status: 'paused',
+        tick: row.tick,
+        sessionId,
+      });
+    },
+  });
 
   let controls;
 
@@ -40,17 +60,29 @@ export function createSingleView({ algorithms, scenarios, onStatus, preferredAlg
       try {
         if (socket) socket.close();
         history = [];
+        historyPanel.clear();
+        distributions.clear();
         const { session, socket: nextSocket } = await openSimulationSession({
           cfg,
           renderer,
           herderKind,
           onFrame: (msg) => {
             if (msg.type === 'tick') {
-              history.push({ tick: msg.tick, ...msg.metrics });
+              const entry = {
+                tick: msg.tick,
+                metrics: msg.metrics || {},
+                frame: msg,
+              };
+              history.push(entry);
+              historyPanel.push(entry);
               metrics.update(msg.metrics, history.length);
+              distributions.update(msg);
             } else {
               history = [];
+              historyPanel.clear();
               metrics.update({}, 0);
+              distributions.clear();
+              if (msg.type === 'reset') distributions.update(msg);
             }
             status = msg.status || status;
             onStatus?.({
@@ -107,7 +139,10 @@ export function createSingleView({ algorithms, scenarios, onStatus, preferredAlg
   syncPlayback();
   root.appendChild(controls.root);
   root.appendChild(canvasHost);
-  root.appendChild(metrics.root);
+  side.appendChild(metrics.root);
+  side.appendChild(distributions.root);
+  side.appendChild(historyPanel.root);
+  root.appendChild(side);
 
   async function mount() {
     log.info('single', 'Mounting Single view');

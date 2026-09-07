@@ -236,3 +236,38 @@ select, input[type="number"], input[type="range"], input[type="text"] {
   font-family: var(--font-mono);
   color: var(--accent-primary);
 }
+
+.single-side {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+  max-height: calc(100vh - 56px - 22px - 2rem);
+  overflow: auto;
+}
+
+.distribution-panel .dist-block,
+.metric-history-panel .dist-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.distribution-panel .dist-label,
+.metric-history-panel .dist-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.distribution-panel canvas,
+.metric-history-panel canvas {
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: #0b1220;
+}
+
+.metric-history-panel input[type="range"] {
+  width: 100%;
+}

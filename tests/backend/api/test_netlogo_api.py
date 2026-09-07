@@ -11,15 +11,21 @@ from api.main import app
 client = TestClient(app)
 
 
-def test_list_twins_includes_strombom_and_kubo():
+def test_list_twins_includes_all_algorithms():
     res = client.get("/api/netlogo/twins")
     assert res.status_code == 200
     twins = res.json()["twins"]
     by_id = {t["algorithm_id"]: t for t in twins}
-    assert "strombom" in by_id
-    assert by_id["strombom"]["model_file"].endswith("strombom.nlogo")
-    assert "kubo" in by_id
-    assert by_id["kubo"]["model_file"].endswith("kubo.nlogo")
+    expected = {
+        "strombom": "strombom.nlogo",
+        "strombom_noise": "strombom_noise.nlogo",
+        "strombom_multi": "strombom_multi.nlogo",
+        "kubo": "kubo.nlogo",
+        "flocking_dog": "flocking_dog.nlogo",
+    }
+    for alg_id, filename in expected.items():
+        assert alg_id in by_id
+        assert by_id[alg_id]["model_file"].endswith(filename)
 
 
 def test_list_netlogo_models_includes_example():
