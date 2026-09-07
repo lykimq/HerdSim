@@ -216,3 +216,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# User-uploaded NetLogo models
+netlogo/models/uploads/*
+!netlogo/models/uploads/.gitkeep

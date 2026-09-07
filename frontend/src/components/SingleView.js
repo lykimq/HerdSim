@@ -6,7 +6,7 @@ import { openSimulationSession } from '../utils/simulationSession.js';
 import { log, withTimeout } from '../utils/logger.js';
 import { applyControlPanelPlayback, derivePhase, statusAfterManualStep } from '../utils/playback.js';
 
-export function createSingleView({ algorithms, scenarios, onStatus }) {
+export function createSingleView({ algorithms, scenarios, onStatus, preferredAlg = null }) {
   const root = document.createElement('div');
   root.className = 'single-layout';
 
@@ -103,7 +103,7 @@ export function createSingleView({ algorithms, scenarios, onStatus }) {
     },
   });
 
-  controls.setOptions(algorithms, scenarios);
+  controls.setOptions(algorithms, scenarios, preferredAlg);
   syncPlayback();
   root.appendChild(controls.root);
   root.appendChild(canvasHost);

@@ -32,7 +32,20 @@ def main() -> None:
         for alg, rate in grouped.items():
             lines.append(f"- {alg}: success_rate={rate:.2f}")
 
-    lines.extend(["", "## Raw Table", "", "```", df.to_string(index=False), "```", ""])
+    lines.extend([
+        "", 
+        "## Scientific Analysis",
+        "![Success Rate](plots/success_rate.png)",
+        "",
+        "![Convergence Time](plots/convergence.png)",
+        "",
+        "## Raw Table", 
+        "", 
+        "```", 
+        df.to_string(index=False), 
+        "```", 
+        ""
+    ])
 
     out_path = Path(args.out)
     out_path.parent.mkdir(parents=True, exist_ok=True)

@@ -25,6 +25,7 @@ def test_lists_core_catalog(client):
     by_id = {item["id"]: item for item in algs}
     assert by_id["strombom"]["herder_kind"] == "human"
     assert by_id["kubo"]["herder_kind"] == "dog"
+    assert "netlogo" not in by_id
 
     scenarios = client.get("/api/scenarios").json()
     assert any(item["id"] == "drive_to_goal" for item in scenarios)

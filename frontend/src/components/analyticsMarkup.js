@@ -24,6 +24,7 @@ export function analyticsRunnerHtml() {
     </div>
     <div class="btn-row">
       <button class="btn" data-role="run">Run Benchmark</button>
+      <button class="btn btn-secondary" data-role="clear">Clear Results</button>
     </div>
     <div class="run-progress hidden" data-role="progress-wrap">
       <div class="run-progress-track">

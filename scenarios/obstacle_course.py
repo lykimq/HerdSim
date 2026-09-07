@@ -63,6 +63,8 @@ class ObstacleCourseScenario(BaseScenario):
             for item in raw_obstacles
         ]
         return World(
+            dt=float(config.get("dt", 0.1)),
+            scale=float(config.get("scale", 1.0)),
             width=width,
             height=height,
             goal=GoalZone(center=goal_center, radius=goal_radius),

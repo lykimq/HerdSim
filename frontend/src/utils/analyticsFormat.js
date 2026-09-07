@@ -1,38 +1,67 @@
 /** Pure formatting helpers for the Analytics dashboard. */
 
-export function barChart(container, summary, key, label) {
+export function renderPlotlyBarChart(container, summary, key, label) {
+  if (!window.Plotly) {
+    container.innerHTML = '<div style="color:var(--text-muted)">Plotly is loading or unavailable.</div>';
+    return;
+  }
   container.innerHTML = '';
-  const title = document.createElement('div');
-  title.className = 'section-title';
-  title.textContent = label;
-  container.appendChild(title);
 
-  const max = Math.max(
-    ...summary.map((s) => Number(s[key]) || 0),
-    0.0001,
-  );
-  summary.forEach((row) => {
-    const wrap = document.createElement('div');
-    wrap.style.marginBottom = '0.55rem';
-    const name = document.createElement('div');
-    name.style.fontSize = '0.8rem';
-    name.style.color = 'var(--text-muted)';
-    const val = row[key] == null ? 0 : Number(row[key]);
-    name.textContent = `${row.algorithm}: ${Number.isFinite(val) ? val.toFixed(3) : 'n/a'}`;
-    const barBg = document.createElement('div');
-    barBg.style.height = '10px';
-    barBg.style.background = 'rgba(255,255,255,0.08)';
-    barBg.style.borderRadius = '999px';
-    const bar = document.createElement('div');
-    bar.style.height = '100%';
-    bar.style.width = `${Math.max(2, (val / max) * 100)}%`;
-    bar.style.background = 'var(--accent-primary)';
-    bar.style.borderRadius = '999px';
-    barBg.appendChild(bar);
-    wrap.appendChild(name);
-    wrap.appendChild(barBg);
-    container.appendChild(wrap);
+  const algorithms = summary.map(s => s.algorithm);
+  const values = summary.map(s => s[key] == null ? 0 : Number(s[key]));
+
+  const trace = {
+    x: algorithms,
+    y: values,
+    type: 'bar',
+    marker: {
+      color: '#3498db',
+    }
+  };
+
+  const layout = {
+    title: label,
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)',
+    font: { color: '#e2e8f0' },
+    margin: { l: 40, r: 20, t: 40, b: 40 },
+    xaxis: { title: 'Algorithm', tickfont: { color: '#cbd5e1' } },
+    yaxis: { title: label, tickfont: { color: '#cbd5e1' } }
+  };
+
+  window.Plotly.newPlot(container, [trace], layout, { responsive: true, displayModeBar: false });
+}
+
+export function renderPlotlyBoxPlot(container, rawRows, key, label) {
+  if (!window.Plotly) {
+    container.innerHTML = '<div style="color:var(--text-muted)">Plotly is loading or unavailable.</div>';
+    return;
+  }
+  container.innerHTML = '';
+
+  const algorithms = [...new Set(rawRows.map(r => r.algorithm))];
+  const traces = algorithms.map(alg => {
+    const algRows = rawRows.filter(r => r.algorithm === alg && r.success);
+    return {
+      y: algRows.map(r => Number(r[key])),
+      type: 'box',
+      name: alg,
+      marker: { color: '#10b981' }
+    };
   });
+
+  const layout = {
+    title: label,
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)',
+    font: { color: '#e2e8f0' },
+    margin: { l: 50, r: 20, t: 40, b: 40 },
+    xaxis: { title: 'Algorithm', tickfont: { color: '#cbd5e1' } },
+    yaxis: { title: label, tickfont: { color: '#cbd5e1' } },
+    showlegend: false
+  };
+
+  window.Plotly.newPlot(container, traces, layout, { responsive: true, displayModeBar: false });
 }
 
 export function summaryHeadHtml(summaryDefs) {

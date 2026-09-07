@@ -47,6 +47,8 @@ class DriveToGoalScenario(BaseScenario):
         goal_radius = config.get("goal_radius", 15.0)
         goal_center = np.array(config.get("goal_center", [15.0, 15.0]), dtype=float)
         return World(
+            dt=float(config.get("dt", 0.1)),
+            scale=float(config.get("scale", 1.0)),
             width=width,
             height=height,
             goal=GoalZone(center=goal_center, radius=goal_radius),

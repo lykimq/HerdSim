@@ -2,6 +2,7 @@ import { checkApiHealth, fetchAlgorithms, fetchScenarios } from './api/rest.js';
 import { createSingleView } from './components/SingleView.js';
 import { createArenaView } from './components/ArenaView.js';
 import { createAnalyticsDashboard } from './components/AnalyticsDashboard.js';
+import { createNetLogoView } from './components/NetLogoView.js';
 import { GAME_ICONS_ATTRIBUTION } from './assets/icons.js';
 import { log, withTimeout, sleep } from './utils/logger.js';
 import { mountTips } from './utils/tooltips.js';
@@ -19,6 +20,7 @@ header.innerHTML = `
     <button class="nav-tab active" data-view="single">Single</button>
     <button class="nav-tab" data-view="arena">Arena</button>
     <button class="nav-tab" data-view="analytics">Analytics</button>
+    <button class="nav-tab" data-view="netlogo">NetLogo</button>
   </div>
   <div class="header-meta">
     <span>Seed: <strong data-role="seed">-</strong></span>
@@ -94,6 +96,12 @@ async function waitForApi({ attempts = 8, delayMs = 500 } = {}) {
   throw lastErr || new Error('API health check failed');
 }
 
+const globalState = {
+  analyticsPayload: null,
+};
+
+let preferredSingleAlg = null;
+
 async function switchView(name, algorithms, scenarios) {
   if (switching) {
     log.warn('ui', `Ignoring view switch to ${name}; mount in progress`);
@@ -118,20 +126,36 @@ async function switchView(name, algorithms, scenarios) {
 
     // Clear Single-run header when leaving that view so Arena/Analytics
     // do not keep a stale SUCCESS / tick from the previous session.
-    if (name !== 'single') {
+    if (name !== 'single' && name !== 'netlogo') {
       setStatus({ status: 'idle', tick: 0, seed: '-' });
     }
 
     if (name === 'arena') {
       currentView = createArenaView({ algorithms, scenarios, onStatus: setStatus });
     } else if (name === 'analytics') {
-      currentView = createAnalyticsDashboard({ algorithms, scenarios });
+      currentView = createAnalyticsDashboard({
+        algorithms,
+        scenarios,
+        globalState,
+      });
+    } else if (name === 'netlogo') {
+      setStatus({ status: 'idle', tick: 0, seed: '-' });
+      currentView = createNetLogoView({
+        onStatus: setStatus,
+        onRunInHerdSim: (algorithmId) => {
+          preferredSingleAlg = algorithmId;
+          switchView('single', algorithms, scenarios);
+        },
+      });
     } else {
       setStatus({ status: 'idle', tick: 0, seed: '-' });
+      const preferredAlg = preferredSingleAlg;
+      preferredSingleAlg = null;
       currentView = createSingleView({
         algorithms,
         scenarios,
         onStatus: setStatus,
+        preferredAlg,
       });
     }
 

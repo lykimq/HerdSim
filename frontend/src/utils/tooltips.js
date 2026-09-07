@@ -4,6 +4,7 @@ export const BUTTON_TIPS = {
   single: 'One algorithm, live controls.',
   arena: 'Compare two algorithms side by side.',
   analytics: 'Batch benchmarks and method notes.',
+  netlogo: 'Browse and open .nlogo models in your local NetLogo app.',
 
   export: 'Export current results.',
   'retry-boot': 'Retry API connection.',

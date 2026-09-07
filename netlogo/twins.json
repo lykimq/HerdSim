@@ -1,0 +1,14 @@
+[
+  {
+    "algorithm_id": "strombom",
+    "name": "Strombom 2014",
+    "model_file": "netlogo/models/strombom.nlogo",
+    "description": "Collect/Drive shepherding (Strombom et al., 2014). Open in NetLogo for the desktop view, or run the Python twin in HerdSim Single."
+  },
+  {
+    "algorithm_id": "kubo",
+    "name": "Kubo 2022",
+    "model_file": "netlogo/models/kubo.nlogo",
+    "description": "Multi-dog repulsive-force herding (Kubo et al., 2022). Open in NetLogo for the desktop view, or run the Python twin in HerdSim Single."
+  }
+]

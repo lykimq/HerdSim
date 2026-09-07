@@ -52,6 +52,8 @@ class ContainmentScenario(BaseScenario):
         )
         pen_radius = float(config.get("pen_radius", 35.0))
         return World(
+            dt=float(config.get("dt", 0.1)),
+            scale=float(config.get("scale", 1.0)),
             width=width,
             height=height,
             goal=GoalZone(center=pen_center, radius=pen_radius),

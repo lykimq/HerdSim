@@ -115,7 +115,7 @@ export function isEditableParam(
   if (key === "n_sheep" || key === "n_shepherds") return includeAgents;
   if (!includeWorld && WORLD_KEYS.has(key)) return false;
   if (isPointParam(key, value)) return includeWorld;
-  return typeof value === "number";
+  return typeof value === "number" || typeof value === "string";
 }
 
 function shouldShowParam(key, value, options = {}) {
@@ -173,15 +173,25 @@ export function buildParamControls(container, defaults, values, onChange, option
       appendPointInputs(group, label, key, values, defaultValue, onChange);
     } else if (!readOnly && !infoOnly) {
       const input = document.createElement("input");
-      input.type = "number";
-      input.step = Math.abs(defaultValue) >= 10 ? "1" : "0.1";
-      input.value = String(current);
-      input.addEventListener("input", () => {
-        const num = Number(input.value);
-        values[key] = num;
-        label.querySelector(".param-val").textContent = formatParamValue(key, num);
-        if (onChange) onChange(key, num);
-      });
+      if (typeof defaultValue === "string") {
+        input.type = "text";
+        input.value = current;
+        input.addEventListener("input", () => {
+          values[key] = input.value;
+          label.querySelector(".param-val").textContent = input.value;
+          if (onChange) onChange(key, input.value);
+        });
+      } else {
+        input.type = "number";
+        input.step = Math.abs(defaultValue) >= 10 ? "1" : "0.1";
+        input.value = String(current);
+        input.addEventListener("input", () => {
+          const num = Number(input.value);
+          values[key] = num;
+          label.querySelector(".param-val").textContent = formatParamValue(key, num);
+          if (onChange) onChange(key, num);
+        });
+      }
       group.appendChild(input);
     }
 

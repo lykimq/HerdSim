@@ -47,6 +47,8 @@ class WideFieldScenario(BaseScenario):
         goal_center = np.array(config.get("goal_center", [20.0, 20.0]), dtype=float)
         goal_radius = float(config.get("goal_radius", 20.0))
         return World(
+            dt=float(config.get("dt", 0.1)),
+            scale=float(config.get("scale", 1.0)),
             width=width,
             height=height,
             goal=GoalZone(center=goal_center, radius=goal_radius),

@@ -6,7 +6,8 @@ import {
   scenarioBlurb,
 } from '../utils/params.js';
 import {
-  barChart,
+  renderPlotlyBarChart,
+  renderPlotlyBoxPlot,
   metricDefsHtml,
   methodCardHtml,
   summaryHeadHtml,
@@ -20,7 +21,7 @@ import {
 } from './analyticsMarkup.js';
 import { mountTips } from '../utils/tooltips.js';
 
-export function createAnalyticsDashboard({ algorithms, scenarios }) {
+export function createAnalyticsDashboard({ algorithms, scenarios, globalState }) {
   const root = document.createElement('div');
   root.className = 'analytics-layout';
 
@@ -152,7 +153,7 @@ export function createAnalyticsDashboard({ algorithms, scenarios }) {
     progressPct.textContent = '0%';
   }
 
-  let lastPayload = null;
+  let lastPayload = globalState?.analyticsPayload || null;
   let summaryDefs = [];
 
   function renderSummaryHead() {
@@ -169,25 +170,23 @@ export function createAnalyticsDashboard({ algorithms, scenarios }) {
       tr.innerHTML = summaryRowHtml(row);
       tbody.appendChild(tr);
     });
-    barChart(
+    renderPlotlyBarChart(
       charts.querySelector('[data-role="chart-success"]'),
       payload.summary || [],
       'success_rate',
       'Success Rate',
     );
-    barChart(
+    renderPlotlyBoxPlot(
       charts.querySelector('[data-role="chart-ticks"]'),
-      (payload.summary || []).map((s) => ({
-        ...s,
-        mean_ticks_success: s.mean_ticks_success ?? 0,
-      })),
-      'mean_ticks_success',
-      'Mean Ticks to Success',
+      payload.rows || [],
+      'total_ticks',
+      'Convergence Time (Ticks)',
     );
   }
 
   runner.querySelector('[data-role="run"]').addEventListener('click', async () => {
     const runBtn = runner.querySelector('[data-role="run"]');
+    const clearBtn = runner.querySelector('[data-role="clear"]');
     const selected = selectedAlgorithmIds();
     if (!selected.length) {
       setIdleStatus('Select at least one algorithm.');
@@ -206,6 +205,7 @@ export function createAnalyticsDashboard({ algorithms, scenarios }) {
     const total = selected.length * seeds.length;
     const started = performance.now();
     runBtn.disabled = true;
+    clearBtn.disabled = true;
     setProgress(0, total, `Starting ${total} trials...`);
 
     try {
@@ -240,6 +240,7 @@ export function createAnalyticsDashboard({ algorithms, scenarios }) {
           },
         },
       );
+      if (globalState) globalState.analyticsPayload = payload;
       renderSummary(payload);
       const elapsed = ((performance.now() - started) / 1000).toFixed(1);
       setProgress(total, total, `Done: ${payload.rows.length} trials in ${elapsed}s.`);
@@ -247,7 +248,18 @@ export function createAnalyticsDashboard({ algorithms, scenarios }) {
       setIdleStatus(`Failed: ${err.message}`);
     } finally {
       runBtn.disabled = false;
+      clearBtn.disabled = false;
     }
+  });
+
+  runner.querySelector('[data-role="clear"]').addEventListener('click', () => {
+    if (globalState) globalState.analyticsPayload = null;
+    lastPayload = null;
+    const tbody = results.querySelector('[data-role="tbody"]');
+    tbody.innerHTML = '';
+    charts.querySelector('[data-role="chart-success"]').innerHTML = '';
+    charts.querySelector('[data-role="chart-ticks"]').innerHTML = '';
+    setIdleStatus('Results cleared.');
   });
 
   results.querySelector('[data-role="csv"]').addEventListener('click', async () => {
@@ -273,6 +285,11 @@ export function createAnalyticsDashboard({ algorithms, scenarios }) {
     renderSummaryHead();
     metricsCard.querySelector('[data-role="metric-defs"]').innerHTML =
       metricDefsHtml(summaryDefs);
+
+    if (lastPayload) {
+      renderSummary(lastPayload);
+      setIdleStatus(`Showing previous results. ${lastPayload.rows.length} trials.`);
+    }
 
     const methodsHost = methods.querySelector('[data-role="methods"]');
     methodsHost.innerHTML = '';

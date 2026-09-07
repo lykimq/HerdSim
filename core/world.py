@@ -34,6 +34,8 @@ class World:
 
     width: float = 150.0
     height: float = 150.0
+    dt: float = 0.1  # seconds per tick
+    scale: float = 1.0  # meters per spatial unit
     goal: GoalZone | None = None
     obstacles: list[Obstacle] = field(default_factory=list)
 

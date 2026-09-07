@@ -129,3 +129,40 @@ export async function exportBenchmark(format = 'json') {
   if (format === 'json') return res.json();
   return res.text();
 }
+
+export async function fetchNetLogoModels() {
+  const res = await apiFetch('/api/netlogo/models');
+  return res.json();
+}
+
+export async function fetchNetLogoTwins() {
+  const res = await apiFetch('/api/netlogo/twins');
+  return res.json();
+}
+
+export async function fetchNetLogoStatus() {
+  const res = await apiFetch('/api/netlogo/status');
+  return res.json();
+}
+
+export async function uploadNetLogoModel(file) {
+  const body = new FormData();
+  body.append('file', file);
+  const res = await apiFetch('/api/netlogo/upload', {
+    method: 'POST',
+    body,
+  });
+  return res.json();
+}
+
+export async function openNetLogoDesktop({ model_file, netlogo_home = '' }) {
+  const res = await apiFetch('/api/netlogo/open', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model_file,
+      netlogo_home: netlogo_home || null,
+    }),
+  });
+  return res.json();
+}
