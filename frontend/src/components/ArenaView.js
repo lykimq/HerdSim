@@ -145,7 +145,19 @@ export function createArenaView({ algorithms, scenarios, onStatus }) {
     });
   }
 
-  const deltaTimer = setInterval(refreshDeltas, 400);
+  let deltaTimer = setInterval(refreshDeltas, 400);
+
+  function stopDeltas() {
+    if (deltaTimer == null) return;
+    clearInterval(deltaTimer);
+    deltaTimer = null;
+  }
+
+  function startDeltas() {
+    if (deltaTimer != null) return;
+    refreshDeltas();
+    deltaTimer = setInterval(refreshDeltas, 400);
+  }
 
   async function initBoth() {
     if (busy) return false;
@@ -257,10 +269,32 @@ export function createArenaView({ algorithms, scenarios, onStatus }) {
   }
 
   function destroy() {
-    clearInterval(deltaTimer);
+    stopDeltas();
     left.destroy();
     right.destroy();
   }
 
-  return { root, mount, destroy };
+  function onHide() {
+    const running =
+      left.getRunStatus() === 'running' || right.getRunStatus() === 'running';
+    if (running) {
+      left.pause();
+      right.pause();
+      setArenaStatus('Paused (switched tabs). Click Play Both to continue.');
+      syncControls();
+      onStatus?.({ status: 'paused' });
+    }
+    stopDeltas();
+  }
+
+  function onShow() {
+    startDeltas();
+    syncControls();
+    requestAnimationFrame(() => {
+      left.renderer.resize();
+      right.renderer.resize();
+    });
+  }
+
+  return { root, mount, destroy, onHide, onShow };
 }

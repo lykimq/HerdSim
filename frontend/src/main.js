@@ -46,7 +46,9 @@ const statusEl = header.querySelector('[data-role="status"]');
 const tickEl = header.querySelector('[data-role="tick"]');
 const seedEl = header.querySelector('[data-role="seed"]');
 
-let currentView = null;
+const viewCache = Object.create(null);
+const statusByView = Object.create(null);
+let activeViewName = null;
 let switching = false;
 
 function setStatus({ status, tick, seed }) {
@@ -59,7 +61,64 @@ function setStatus({ status, tick, seed }) {
   if (seed != null) seedEl.textContent = String(seed);
 }
 
+function rememberStatus(viewName, payload = {}) {
+  const prev = statusByView[viewName] || { status: 'idle', tick: 0, seed: '-' };
+  statusByView[viewName] = {
+    status: payload.status != null ? payload.status : prev.status,
+    tick: payload.tick != null ? payload.tick : prev.tick,
+    seed: payload.seed != null ? payload.seed : prev.seed,
+  };
+}
+
+function makeStatusHandler(viewName) {
+  return (payload) => {
+    rememberStatus(viewName, payload);
+    if (activeViewName === viewName) setStatus(statusByView[viewName]);
+  };
+}
+
+function applyHeaderForView(viewName) {
+  const snap = statusByView[viewName] || { status: 'idle', tick: 0, seed: '-' };
+  setStatus(snap);
+}
+
+function hideViewPanel(view) {
+  if (!view?.root) return;
+  view.root.classList.add('view-panel--hidden');
+  view.root.setAttribute('aria-hidden', 'true');
+  view.root.inert = true;
+}
+
+function showViewPanel(view) {
+  if (!view?.root) return;
+  view.root.classList.remove('view-panel--hidden');
+  view.root.removeAttribute('aria-hidden');
+  view.root.inert = false;
+  view.root.classList.remove('view-panel--enter');
+  // Force reflow so the enter animation can replay.
+  void view.root.offsetWidth;
+  view.root.classList.add('view-panel--enter');
+}
+
+function destroyCachedViews() {
+  Object.keys(viewCache).forEach((name) => {
+    const view = viewCache[name];
+    try {
+      view?.destroy?.();
+    } catch (err) {
+      log.error('ui', `Error destroying cached view ${name}: ${err.message}`, err);
+    }
+    delete viewCache[name];
+  });
+  Object.keys(statusByView).forEach((name) => {
+    delete statusByView[name];
+  });
+  viewHost.innerHTML = '';
+  activeViewName = null;
+}
+
 function showBootError(message, detail = '') {
+  destroyCachedViews();
   viewHost.innerHTML = `
     <div class="card-glass boot-error">
       <div class="section-title">Cannot reach API</div>
@@ -102,75 +161,120 @@ const globalState = {
 
 let preferredSingleAlg = null;
 
+function createView(name, algorithms, scenarios) {
+  const onStatus = makeStatusHandler(name);
+  if (name === 'arena') {
+    return createArenaView({ algorithms, scenarios, onStatus });
+  }
+  if (name === 'analytics') {
+    return createAnalyticsDashboard({
+      algorithms,
+      scenarios,
+      globalState,
+    });
+  }
+  if (name === 'netlogo') {
+    return createNetLogoView({
+      onStatus,
+      onRunInHerdSim: (algorithmId) => {
+        preferredSingleAlg = algorithmId;
+        switchView('single', algorithms, scenarios);
+      },
+    });
+  }
+  const preferredAlg = preferredSingleAlg;
+  preferredSingleAlg = null;
+  return createSingleView({
+    algorithms,
+    scenarios,
+    onStatus,
+    preferredAlg,
+  });
+}
+
 async function switchView(name, algorithms, scenarios) {
   if (switching) {
     log.warn('ui', `Ignoring view switch to ${name}; mount in progress`);
     return;
   }
+
+  const cached = viewCache[name];
+  if (activeViewName === name && cached) {
+    if (name === 'single' && preferredSingleAlg) {
+      cached.preferAlgorithm?.(preferredSingleAlg);
+      preferredSingleAlg = null;
+    }
+    return;
+  }
+
   switching = true;
   log.info('ui', `Switching to ${name}`);
   try {
-    if (currentView) {
+    const previousName = activeViewName;
+    const previous = previousName ? viewCache[previousName] : null;
+    if (previous) {
       try {
-        currentView.destroy();
+        previous.onHide?.();
       } catch (err) {
-        log.error('ui', `Error destroying previous view: ${err.message}`, err);
+        log.error('ui', `Error hiding ${previousName}: ${err.message}`, err);
       }
-      currentView = null;
-    }
-    viewHost.innerHTML = '';
-
-    header.querySelectorAll('.nav-tab').forEach((btn) => {
-      btn.classList.toggle('active', btn.dataset.view === name);
-    });
-
-    // Clear Single-run header when leaving that view so Arena/Analytics
-    // do not keep a stale SUCCESS / tick from the previous session.
-    if (name !== 'single' && name !== 'netlogo') {
-      setStatus({ status: 'idle', tick: 0, seed: '-' });
+      hideViewPanel(previous);
     }
 
-    if (name === 'arena') {
-      currentView = createArenaView({ algorithms, scenarios, onStatus: setStatus });
-    } else if (name === 'analytics') {
-      currentView = createAnalyticsDashboard({
-        algorithms,
-        scenarios,
-        globalState,
+    let view = cached;
+    if (!view) {
+      view = createView(name, algorithms, scenarios);
+      view.root.classList.add('view-panel');
+      viewCache[name] = view;
+      viewHost.appendChild(view.root);
+      activeViewName = name;
+      rememberStatus(name, { status: 'idle', tick: 0, seed: '-' });
+      applyHeaderForView(name);
+      header.querySelectorAll('.nav-tab').forEach((btn) => {
+        btn.classList.toggle('active', btn.dataset.view === name);
       });
-    } else if (name === 'netlogo') {
-      setStatus({ status: 'idle', tick: 0, seed: '-' });
-      currentView = createNetLogoView({
-        onStatus: setStatus,
-        onRunInHerdSim: (algorithmId) => {
-          preferredSingleAlg = algorithmId;
-          switchView('single', algorithms, scenarios);
-        },
-      });
+      // Mount while visible so Pixi/canvas get a real host size.
+      showViewPanel(view);
+      await withTimeout(view.mount(), 45000, `${name} view mount`);
+      log.info('ui', `${name} view ready (created)`);
     } else {
-      setStatus({ status: 'idle', tick: 0, seed: '-' });
-      const preferredAlg = preferredSingleAlg;
-      preferredSingleAlg = null;
-      currentView = createSingleView({
-        algorithms,
-        scenarios,
-        onStatus: setStatus,
-        preferredAlg,
+      activeViewName = name;
+      if (name === 'single' && preferredSingleAlg) {
+        view.preferAlgorithm?.(preferredSingleAlg);
+        preferredSingleAlg = null;
+      }
+      header.querySelectorAll('.nav-tab').forEach((btn) => {
+        btn.classList.toggle('active', btn.dataset.view === name);
       });
+      showViewPanel(view);
+      applyHeaderForView(name);
+      try {
+        view.onShow?.();
+      } catch (err) {
+        log.error('ui', `Error showing ${name}: ${err.message}`, err);
+      }
+      log.info('ui', `${name} view ready (cached)`);
     }
-
-    viewHost.appendChild(currentView.root);
-    await withTimeout(currentView.mount(), 45000, `${name} view mount`);
-    log.info('ui', `${name} view ready`);
   } catch (err) {
     log.error('ui', `Failed to open ${name}: ${err.message}`, err);
-    viewHost.innerHTML = `
-      <div class="card-glass boot-error">
-        <div class="section-title">View failed: ${name}</div>
-        <p>${err.message || err}</p>
-        <p class="boot-error-hint">Open the browser console for details.</p>
-      </div>
+    if (viewCache[name]) {
+      try {
+        viewCache[name].destroy?.();
+      } catch {
+        // ignore cleanup errors after a failed mount
+      }
+      delete viewCache[name];
+    }
+    if (activeViewName === name) activeViewName = null;
+    viewHost.querySelectorAll('.boot-error').forEach((el) => el.remove());
+    const errorCard = document.createElement('div');
+    errorCard.className = 'card-glass boot-error';
+    errorCard.innerHTML = `
+      <div class="section-title">View failed: ${name}</div>
+      <p>${err.message || err}</p>
+      <p class="boot-error-hint">Open the browser console for details.</p>
     `;
+    viewHost.appendChild(errorCard);
   } finally {
     switching = false;
   }
@@ -178,8 +282,10 @@ async function switchView(name, algorithms, scenarios) {
 
 async function boot() {
   log.info('boot', 'Starting HerdSim UI');
+  destroyCachedViews();
   viewHost.innerHTML = `<div class="card-glass boot-loading">Connecting to API on :8000...</div>`;
   await waitForApi();
+  viewHost.innerHTML = '';
 
   const [algorithms, scenarios] = await Promise.all([
     fetchAlgorithms(),
@@ -198,6 +304,10 @@ async function boot() {
 
   await switchView('single', algorithms, scenarios);
 }
+
+window.addEventListener('pagehide', () => {
+  destroyCachedViews();
+});
 
 boot().catch((err) => {
   log.error('boot', err.message || String(err), err);

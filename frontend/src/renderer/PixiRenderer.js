@@ -211,4 +211,14 @@ export class PixiRenderer {
     this._ready = false;
     log.debug('pixi', 'Renderer destroyed');
   }
+
+  /** Force a layout pass after the host was display:none (tab keep-alive). */
+  resize() {
+    if (!this.app?.renderer || !this.hostEl) return;
+    const w = this.hostEl.clientWidth;
+    const h = this.hostEl.clientHeight;
+    if (w <= 0 || h <= 0) return;
+    this.app.renderer.resize(w, h);
+    if (this._ready) this._drawField();
+  }
 }

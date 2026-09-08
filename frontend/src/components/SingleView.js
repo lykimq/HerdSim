@@ -167,5 +167,27 @@ export function createSingleView({ algorithms, scenarios, onStatus, preferredAlg
     renderer.destroy();
   }
 
-  return { root, mount, destroy };
+  function onHide() {
+    if (status !== 'running' || !socket) return;
+    if (!socket.send('pause')) return;
+    status = 'paused';
+    syncPlayback();
+    const tick = history.at(-1)?.tick || 0;
+    onStatus?.({ status: 'paused', tick, sessionId });
+  }
+
+  function onShow() {
+    requestAnimationFrame(() => {
+      renderer.resize();
+    });
+  }
+
+  function preferAlgorithm(algorithmId) {
+    if (!algorithmId) return;
+    controls.setAlgorithm(algorithmId);
+    herderKind = controls.getHerderKind();
+    renderer.setHerderKind(herderKind);
+  }
+
+  return { root, mount, destroy, onHide, onShow, preferAlgorithm };
 }
