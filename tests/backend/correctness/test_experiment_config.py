@@ -88,4 +88,18 @@ def test_kubo_paper_keeps_force_params_under_narrow_gate_world():
     assert config["dog_speed_max"] == alg.default_config["dog_speed_max"]
     assert config["n_shepherds"] == 4
     assert config["gate_width"] == scen.default_config["gate_width"]
+    assert config["gate_x"] == scen.default_config["gate_x"]
+    assert config["wall_thickness"] == scen.default_config["wall_thickness"]
     assert config["goal_center"] == scen.default_config["goal_center"]
+
+
+def test_paper_preset_includes_containment_scenario_keys():
+    from scenarios.containment import ContainmentScenario
+
+    config = resolve_experiment_config(
+        StrombomAlgorithm(), ContainmentScenario(), preset="paper"
+    )
+    assert config["containment_fraction"] == 0.95
+    assert config["containment_min_ticks"] == 200
+    assert config["pen_center"] == ContainmentScenario().default_config["pen_center"]
+    assert config["pen_radius"] == ContainmentScenario().default_config["pen_radius"]

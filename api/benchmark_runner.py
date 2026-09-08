@@ -53,13 +53,12 @@ def _trial_row(
     if not result.history.empty:
         final = result.history.iloc[-1].to_dict()
         row.update({k: v for k, v in final.items() if k != "tick"})
-        if "time_to_goal" in result.history.columns:
-            positives = result.history.loc[
-                result.history["time_to_goal"] >= 0, "time_to_goal"
-            ]
-            row["first_success_tick"] = (
-                float(positives.iloc[0]) if len(positives) else -1.0
-            )
+    # Scenario success stops the trial, so total_ticks is the first success tick.
+    # Distinct from time_to_goal, which requires all sheep inside the goal.
+    if result.success:
+        row["first_success_tick"] = float(result.total_ticks)
+    else:
+        row["first_success_tick"] = -1.0
     return row
 
 

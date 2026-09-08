@@ -5,7 +5,7 @@
 2. Subclass `BaseAlgorithm` (`id`, `name`, `default_config`, `step`).
 3. Use `state.rng` for randomness; prefer `state.world.goal` for goal position.
 4. Register the instance in `algorithms/registry.py` `_auto_register()`.
-5. Add `docs/algorithms/<id>.md` using the template in `docs/implementation_plan.md` section 6, plus tests under `tests/backend/`.
+5. Add `docs/algorithms/<id>.md` using existing algorithm docs as templates, plus tests under `tests/backend/`.
 
 ## Add a metric (3 steps)
 1. Create `metrics/<id>.py` subclassing `BaseMetric`.
@@ -16,13 +16,12 @@
 1. Create `scenarios/<id>.py` subclassing `BaseScenario`.
 2. Implement `create_world`, `initial_positions`, `is_success`, `max_ticks`.
 3. Register in `scenarios/registry.py`.
-4. Add tests in `tests/backend/test_scenarios.py`.
+4. Add tests in `tests/backend/scenarios/` and document layout keys in `core/shared_defaults.py`.
 
 ## Experiment presets
-- `paper`: algorithm paper defaults (agent counts + parameters)
+- `paper`: algorithm paper defaults (agent counts + behavior); world/layout from the selected scenario
 - `scenario`: overlay scenario `default_config` (world + recommended agents)
 - `custom`: user overrides for agents/world
-
 Session create accepts `preset`, optional `num_sheep`/`num_shepherds`, `algorithm_params`, and `world_overrides`.
 
 ## Benchmarks
@@ -55,5 +54,6 @@ Vanilla JS + Vite + PixiJS 8:
 ## Batch experiments
 ```bash
 python scripts/run_batch.py --algorithm strombom --preset paper --seeds 1,2,3 --out results/strombom.csv
-python scripts/export_report.py --input results/strombom.csv --out results/report.md
 ```
+
+For research exports with experiment design, metric definitions, and caveats, use the Analytics tab (CSV / JSON; Markdown is a short summary note).

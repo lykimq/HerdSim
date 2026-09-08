@@ -11,12 +11,11 @@ from fastapi.responses import PlainTextResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field
 
 from api.benchmark_defs import benchmark_definitions_payload
+from api.benchmark_report import build_report_package, report_to_csv, report_to_markdown
 from api.benchmark_runner import (
     iter_one_trial,
     run_benchmark,
     summarize_rows,
-    summary_to_csv,
-    summary_to_markdown,
 )
 from api.benchmark_sweep import expand_param_grid, parse_sweep_specs
 
@@ -24,6 +23,20 @@ router = APIRouter()
 
 # In-memory last benchmark for export convenience.
 _LAST_BENCHMARK: dict | None = None
+_LAST_REQUEST: dict | None = None
+
+
+def _request_meta(req: BenchmarkRequest, sweep_payload: list[dict[str, Any]] | None) -> dict:
+    return {
+        "algorithm_ids": list(req.algorithm_ids),
+        "scenario_id": req.scenario_id,
+        "preset": req.preset,
+        "seeds": list(req.seeds),
+        "num_sheep": req.num_sheep,
+        "num_shepherds": req.num_shepherds,
+        "algorithm_params": req.algorithm_params,
+        "sweep": sweep_payload,
+    }
 
 
 class SweepParam(BaseModel):
@@ -86,11 +99,14 @@ def benchmark_run(
             )
         except (KeyError, ValueError) as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
+        meta = _request_meta(req, sweep_payload)
+        payload["experiment"] = meta
         _LAST_BENCHMARK = payload
+        _LAST_REQUEST = meta
         return payload
 
     def event_stream():
-        global _LAST_BENCHMARK
+        global _LAST_BENCHMARK, _LAST_REQUEST
         try:
             rows = []
             param_sets = expand_param_grid(specs)
@@ -115,11 +131,14 @@ def benchmark_run(
                             if event["type"] == "trial":
                                 rows.append(event["row"])
                             yield json.dumps(event) + "\n"
+            meta = _request_meta(req, sweep_payload)
             payload = {
                 "rows": rows,
                 "summary": summarize_rows(pd.DataFrame(rows)),
+                "experiment": meta,
             }
             _LAST_BENCHMARK = payload
+            _LAST_REQUEST = meta
             yield json.dumps({"type": "done", **payload}) + "\n"
         except (KeyError, ValueError) as exc:
             yield json.dumps({"type": "error", "message": str(exc)}) + "\n"
@@ -147,15 +166,16 @@ def benchmark_export(format: str = Query(default="json", pattern="^(json|csv|md)
     if _LAST_BENCHMARK is None:
         raise HTTPException(status_code=404, detail="No benchmark has been run yet")
     if format == "json":
-        return _LAST_BENCHMARK
+        return build_report_package(_LAST_BENCHMARK, request=_LAST_REQUEST)
     if format == "csv":
         return Response(
-            content=summary_to_csv(_LAST_BENCHMARK),
+            content=report_to_csv(_LAST_BENCHMARK, request=_LAST_REQUEST),
             media_type="text/csv",
             headers={
                 "Content-Disposition": 'attachment; filename="herdsim_benchmark.csv"'
             },
         )
     return PlainTextResponse(
-        summary_to_markdown(_LAST_BENCHMARK), media_type="text/markdown"
+        report_to_markdown(_LAST_BENCHMARK, request=_LAST_REQUEST),
+        media_type="text/markdown",
     )

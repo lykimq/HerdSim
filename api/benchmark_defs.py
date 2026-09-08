@@ -17,7 +17,7 @@ SUMMARY_METRIC_DEFS: list[dict[str, str]] = [
     {
         "id": "success_rate",
         "label": "Success",
-        "description": "Share of trials that reached the goal before max ticks.",
+        "description": "Share of trials that met the scenario success criterion before max ticks.",
     },
     {
         "id": "mean_ticks_success",
@@ -57,20 +57,30 @@ CSV_COLUMN_DEFS: list[dict[str, str]] = [
     {"id": "n_shepherds", "description": "Number of shepherds/dogs in the trial."},
     {
         "id": "success",
-        "description": "True if the trial reached the goal before max ticks.",
+        "description": "True if the scenario success criterion was met before max ticks.",
     },
     {"id": "total_ticks", "description": "Simulation ticks executed before success or timeout (not wall-clock time)."},
     {
         "id": "first_success_tick",
-        "description": "First tick when success was true, or -1 if never.",
+        "description": (
+            "First tick when the scenario success criterion was met, or -1 if never. "
+            "Uses the scenario rule (which may allow a partial flock). "
+            "Distinct from time_to_goal."
+        ),
     },
     {
         "id": "time_to_goal",
-        "description": "Final-tick time_to_goal: simulation tick if in goal, else -1 (not wall-clock time).",
+        "description": (
+            "Final-tick time_to_goal: simulation tick if ALL sheep are inside the goal, "
+            "else -1 (strict full-goal metric; not wall-clock time)."
+        ),
     },
     {
         "id": "success_rate",
-        "description": "Final-tick fraction of sheep inside the goal zone (0-1).",
+        "description": (
+            "Final-tick fraction of sheep inside the goal zone (0-1). "
+            "This is occupancy, not the boolean trial success column."
+        ),
     },
     {
         "id": "cohesion",

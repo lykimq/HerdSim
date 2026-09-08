@@ -23,7 +23,7 @@ describe('buildRunReport', () => {
     const report = buildRunReport({
       status: 'success',
       algorithmName: 'Strombom',
-      scenarioId: 'open_field',
+      scenarioId: 'drive_to_goal',
       history: makeHistory([
         {
           tick: 0,
@@ -75,26 +75,68 @@ describe('buildRunReport', () => {
 
     assert.ok(report);
     assert.equal(report.badge, 'Success');
-    assert.match(report.headline, /succeeded at tick 120/);
+    assert.match(report.headline, /met the success criterion at tick 120/);
     assert.match(report.headline, /Strombom/);
-    assert.match(report.takeaway, /compact flock/);
+    assert.match(report.takeaway, /Success criterion met/);
 
     const text = formatRunReportText(report);
     assert.match(text, /4\.67/);
     assert.match(text, /12 -> 4\.67/);
     assert.match(text, /50 of 50 sheep/);
-    assert.match(text, /First sheep entered the goal around tick 60/);
-    assert.match(text, /Whole flock was in the goal from tick 120/);
-    assert.match(text, /Total shepherd path length: 210\.50/);
+    assert.match(text, /First sheep entered the goal at tick 60/);
+    assert.match(text, /All sheep in the goal from tick 120/);
+    assert.match(text, /Cumulative shepherd path: 210\.50/);
     assert.match(text, /Final GCM-to-goal distance: 8/);
     assert.match(text, /40 -> 8/);
     assert.match(text, /mostly aligned/);
-    assert.match(text, /Peak outlier count during the run: 4/);
+    assert.match(text, /Peak outlier count: 4/);
+    assert.match(text, /time_to_goal/);
+  });
+
+  it('uses pen wording for containment scenarios', () => {
+    const report = buildRunReport({
+      status: 'success',
+      scenarioId: 'containment',
+      history: makeHistory([
+        {
+          tick: 0,
+          n: 20,
+          metrics: {
+            cohesion: 8,
+            gcm_goal: 5,
+            sheep_in_goal: 18,
+            outlier_count: 0,
+            shepherd_path: 0,
+            success_rate: 0.9,
+          },
+        },
+        {
+          tick: 200,
+          n: 20,
+          metrics: {
+            cohesion: 7,
+            gcm_goal: 4,
+            sheep_in_goal: 19,
+            outlier_count: 0,
+            shepherd_path: 40,
+            success_rate: 0.95,
+          },
+        },
+      ]),
+    });
+
+    assert.ok(report);
+    assert.match(report.takeaway, /Containment criterion/);
+    const text = formatRunReportText(report);
+    assert.match(text, /Pen occupancy/);
+    assert.match(text, /pen/);
+    assert.doesNotMatch(text, /Goal progress/);
   });
 
   it('explains timeout with remaining outliers', () => {
     const report = buildRunReport({
       status: 'timeout',
+      scenarioId: 'drive_to_goal',
       history: makeHistory([
         {
           tick: 0,
@@ -113,7 +155,13 @@ describe('buildRunReport', () => {
         {
           tick: 500,
           n: 4,
-          metrics: { cohesion: 15, sheep_in_goal: 1, outlier_count: 3, shepherd_path: 400 },
+          metrics: {
+            cohesion: 15,
+            sheep_in_goal: 1,
+            outlier_count: 3,
+            shepherd_path: 400,
+            success_rate: 0.25,
+          },
           frame: {
             sheep_headings: [0, Math.PI, Math.PI / 2, (3 * Math.PI) / 2],
             sheep_positions: [
@@ -129,9 +177,9 @@ describe('buildRunReport', () => {
 
     assert.ok(report);
     assert.equal(report.badge, 'Timeout');
-    assert.match(report.takeaway, /stragglers|spread|partial|stalled/i);
+    assert.match(report.takeaway, /Did not meet the success criterion/);
     const text = formatRunReportText(report);
-    assert.match(text, /timed out at tick 500/);
-    assert.match(text, /3 sheep beyond the collect threshold/);
+    assert.match(text, /reached max ticks without success at tick 500/);
+    assert.match(text, /Outliers beyond collect threshold at end: 3/);
   });
 });

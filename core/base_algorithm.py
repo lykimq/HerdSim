@@ -44,8 +44,10 @@ class BaseAlgorithm(ABC):
         Receives the current state and configuration parameters.
         Returns an updated SimulationState with new positions and velocities.
         
-        IMPORTANT: All computed velocities MUST be multiplied by `state.world.dt`
-        before updating positions, to ensure time normalization across different algorithms.
-        
+        IMPORTANT: Velocity / displacement conventions differ by algorithm family.
+        Strombom and Flocking Dog treat speed as displacement per tick
+        (`pos += vel`). Kubo integrates with its own config `dt`
+        (`pos += dt * vel`). See docs/simulation_environment.md.
+
         The algorithm should use state.rng for any randomness.
         """

@@ -71,6 +71,38 @@ def test_strombom_multi_applies_shepherd_noise():
     assert not np.allclose(v0, v1)
 
 
+def test_strombom_multi_respects_collect_threshold_scale():
+    """Widened collect_threshold_scale must match base Strombom switching."""
+    alg = StrombomMultiAlgorithm()
+    # Compact flock plus one moderate outlier: beyond f(N) but inside 1.5*f(N).
+    sheep = [
+        [50.0, 50.0],
+        [51.0, 50.0],
+        [50.0, 51.0],
+        [49.5, 49.5],
+        [50.5, 49.5],
+        [49.5, 50.5],
+        [51.0, 51.0],
+        [62.0, 50.0],
+    ]
+    dogs = [[90.0, 50.0], [92.0, 48.0], [88.0, 52.0]]
+    state = make_state(sheep, dogs, world=make_world(goal_center=(10.0, 10.0)), seed=1)
+    r_a = 2.0
+    n = len(sheep)
+    base_threshold = r_a * (n ** (2.0 / 3.0))
+    dist = float(np.max(state.distances_to_centroid()))
+    assert dist > base_threshold
+    assert dist <= base_threshold * 1.5
+
+    cfg_paper = {**alg.default_config, "r_a": r_a, "collect_threshold_scale": 1.0}
+    cfg_scaled = {**alg.default_config, "r_a": r_a, "collect_threshold_scale": 1.5}
+    # With scale 1.0 the moderate outlier triggers Collect; with 1.5 it should Drive.
+    alg._update_shepherds(state, cfg_paper)
+    assert alg._last_mode == "collect"
+    alg._update_shepherds(state, cfg_scaled)
+    assert alg._last_mode == "drive"
+
+
 def test_flocking_dog_step_moves_agents():
     alg = FlockingDogAlgorithm()
     # Dog within Rd so sheep are active (not grazing).

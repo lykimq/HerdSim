@@ -30,7 +30,10 @@ WORLD_KEYS = (
     "success_fraction",
     "n_clusters",
     "gate_width",
-    "gate_y",
+    "gate_x",
+    "wall_thickness",
+    "containment_fraction",
+    "containment_min_ticks",
     # Scenario may widen Strombom-style f(N); algorithms declare the default.
     "collect_threshold_scale",
 )

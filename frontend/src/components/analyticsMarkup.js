@@ -70,7 +70,7 @@ export function analyticsRunnerHtml() {
 export function analyticsResultsHtml() {
   return `
     <p class="analytics-intro">
-      Each row summarizes one algorithm across the chosen seeds. Success is the share of trials that reached the goal in time; mean and median ticks are how long successful runs took; mean cohesion is final flock tightness (sheep distance to the flock center); mean path is average dog travel distance. Hover a column header for a short definition. CSV exports include notes for every trial column.
+      Each row summarizes one algorithm across the chosen seeds. Success is the share of trials that met the scenario success criterion in time; mean and median ticks are how long successful runs took; mean cohesion is final flock tightness (sheep distance to GCM); mean path is average shepherd travel. Hover a column header for a short definition. CSV and JSON exports include experiment design, column notes, and comparison caveats; Markdown is a short methods note.
     </p>
     <table class="benchmark-table">
       <thead>

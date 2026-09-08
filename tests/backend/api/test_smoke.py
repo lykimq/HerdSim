@@ -114,16 +114,25 @@ def test_benchmark_run_and_export(client):
     payload = res.json()
     assert len(payload["rows"]) == 1
     assert len(payload["summary"]) == 1
+    assert payload["experiment"]["scenario_id"] == "drive_to_goal"
     csv_res = client.get("/api/benchmarks/export?format=csv")
     assert csv_res.status_code == 200
-    assert csv_res.text.startswith("# HerdSim benchmark CSV column definitions")
+    assert csv_res.text.startswith("# HerdSim benchmark CSV (version")
+    assert "# caveat:" in csv_res.text
     assert "algorithm" in csv_res.text
+    json_res = client.get("/api/benchmarks/export?format=json")
+    assert json_res.status_code == 200
+    package = json_res.json()
+    assert package["herdsim_version"]
+    assert "git" not in package
+    assert package["caveats"]
+    assert package["metric_definitions"]
     defs = client.get("/api/benchmarks/definitions")
     assert defs.status_code == 200
     body = defs.json()
     assert any(d["id"] == "success_rate" for d in body["summary"])
     assert any(d["id"] == "cohesion" for d in body["csv"])
-
+    assert any(d["id"] == "first_success_tick" for d in body["csv"])
 
 @pytest.mark.asyncio
 async def test_async_create_session():

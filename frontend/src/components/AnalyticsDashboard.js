@@ -70,9 +70,9 @@ export function createAnalyticsDashboard({ algorithms, scenarios, globalState })
 
   mountTips(runner);
   mountTips(results, {
-    csv: 'Download trial rows as CSV (includes column definitions).',
-    json: 'Download full benchmark payload as JSON.',
-    md: 'Download the summary table as Markdown.',
+    csv: 'Download trial rows as CSV (column notes, experiment design, caveats).',
+    json: 'Download full report package: experiment, metrics, rows, summary, caveats.',
+    md: 'Download a short methods/results note (same facts as JSON/CSV).',
   });
 
   const algList = runner.querySelector('[data-role="algs"]');

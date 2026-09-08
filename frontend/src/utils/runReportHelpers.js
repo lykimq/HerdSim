@@ -1,4 +1,4 @@
-/** Shared helpers for end-of-run report text. */
+/** Shared helpers for end-of-run report text (ABM / methods-note style). */
 
 export function num(val) {
   const n = Number(val);
@@ -41,18 +41,22 @@ export function maxPoint(points) {
 
 export function outcomeInfo(status) {
   if (status === 'success') {
-    return { label: 'Success', tone: 'success', verb: 'succeeded' };
+    return { label: 'Success', tone: 'success', verb: 'met the success criterion' };
   }
   if (status === 'timeout') {
-    return { label: 'Timeout', tone: 'warn', verb: 'timed out' };
+    return { label: 'Timeout', tone: 'warn', verb: 'reached max ticks without success' };
   }
   if (status === 'failed') {
     return { label: 'Failed', tone: 'danger', verb: 'failed' };
   }
   if (status === 'completed') {
-    return { label: 'Completed', tone: 'neutral', verb: 'finished' };
+    return { label: 'Completed', tone: 'neutral', verb: 'ended' };
   }
   return { label: 'Ended', tone: 'neutral', verb: 'ended' };
+}
+
+export function isContainmentScenario(scenarioId) {
+  return scenarioId === 'containment';
 }
 
 export function flockSpreadPhrase(cohesion) {
@@ -76,12 +80,12 @@ export function headingPhrase(peak, count) {
 export function alignmentPhrase(polarization) {
   const p = num(polarization);
   if (p == null) return null;
-  if (p >= 0.7) return 'strongly aligned';
-  if (p >= 0.4) return 'partly aligned';
-  return 'poorly aligned';
+  if (p >= 0.7) return 'high';
+  if (p >= 0.4) return 'moderate';
+  return 'low';
 }
 
-export function changePhrase(delta, upWord, downWord, flatWord = 'stayed similar') {
+export function changePhrase(delta, upWord, downWord, flatWord = 'unchanged') {
   if (delta == null || !Number.isFinite(delta)) return null;
   if (Math.abs(delta) < 1e-6) return flatWord;
   if (delta > 0) return upWord;
@@ -99,36 +103,70 @@ export function flockSizeFrom(row) {
   return null;
 }
 
-export function buildTakeaway({ status, inGoal, flockSize, cohesion, outliers, pathPerTick }) {
+/**
+ * One-line factual summary for methods/results notes.
+ * Uses scenario-aware wording (containment vs drive-to-goal tasks).
+ */
+export function buildTakeaway({
+  status,
+  scenarioId,
+  inGoal,
+  flockSize,
+  cohesion,
+  outliers,
+  successRate,
+  pathPerTick,
+}) {
+  const containment = isContainmentScenario(scenarioId);
+  const zone = containment ? 'pen' : 'goal';
   const spread = flockSpreadPhrase(cohesion);
-  const goalRatio =
-    inGoal != null && flockSize != null && flockSize > 0 ? inGoal / flockSize : null;
+  const occupancy =
+    successRate != null
+      ? successRate
+      : inGoal != null && flockSize != null && flockSize > 0
+        ? inGoal / flockSize
+        : null;
 
   if (status === 'success') {
+    if (containment) {
+      if (occupancy != null) {
+        return `Containment criterion met; final pen occupancy ${fmt(occupancy * 100, 0)}%.`;
+      }
+      return 'Containment criterion met before max ticks.';
+    }
     if (spread === 'tight' && (outliers == null || outliers === 0)) {
-      return 'The run finished with a compact flock and no stragglers.';
+      return `Success criterion met; final flock cohesion ${fmt(cohesion)} with no outliers beyond the collect threshold.`;
     }
-    if (spread === 'tight') {
-      return 'The run finished successfully with a compact flock.';
+    if (outliers != null && outliers > 0) {
+      return `Success criterion met; ${fmt(outliers, 0)} sheep still beyond the collect threshold at the end.`;
     }
-    return 'The run reached the goal, though the flock was not fully compact at the end.';
+    return 'Success criterion met before max ticks.';
   }
 
   if (status === 'timeout' || status === 'failed') {
-    if (goalRatio != null && goalRatio >= 0.5) {
-      return 'Progress was partial: many sheep reached the goal, but the run did not finish in time.';
+    if (occupancy != null) {
+      return (
+        `Did not meet the success criterion by max ticks; final ${zone} occupancy ` +
+        `${fmt(occupancy * 100, 0)}%.`
+      );
     }
     if (outliers != null && outliers > 0) {
-      return 'The run stalled with sheep still outside the main flock; collecting stragglers likely limited progress.';
+      return (
+        `Did not meet the success criterion; ${fmt(outliers, 0)} sheep beyond the ` +
+        'collect threshold at the end.'
+      );
     }
-    if (spread === 'spread out') {
-      return 'The flock stayed spread out, which usually makes driving toward the goal harder.';
+    if (spread === 'spread out' && cohesion != null) {
+      return `Did not meet the success criterion; final cohesion ${fmt(cohesion)} (spread flock).`;
     }
     if (pathPerTick != null && pathPerTick > 2.5) {
-      return 'The shepherd traveled a lot per tick without finishing; effort was high relative to progress.';
+      return (
+        `Did not meet the success criterion; mean shepherd travel ${fmt(pathPerTick)} ` +
+        'world units per tick.'
+      );
     }
-    return 'The run ended without completing the herding task.';
+    return 'Did not meet the scenario success criterion before max ticks.';
   }
 
-  return 'Review the sections below for flock shape, goal progress, and shepherd effort.';
+  return 'Run ended; see sections for flock metrics and shepherd path.';
 }

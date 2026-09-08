@@ -34,9 +34,6 @@ def collect_offset(config: dict) -> float:
     """Collect stand-off Pc: r_a behind the furthest agent (paper Table 1)."""
     if "collect_offset" in config:
         return float(config["collect_offset"])
-    # Compatibility alias used by some older configs / UI overrides.
-    if "collect_drive_offset" in config:
-        return float(config["collect_drive_offset"])
     return float(config.get("r_a", 2.0))
 
 

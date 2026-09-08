@@ -21,7 +21,10 @@ export const SCENARIO_WORLD_KEYS = new Set([
   "success_fraction",
   "n_clusters",
   "gate_width",
-  "gate_y",
+  "gate_x",
+  "wall_thickness",
+  "containment_fraction",
+  "containment_min_ticks",
   "collect_threshold_scale",
 ]);
 

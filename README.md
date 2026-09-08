@@ -9,7 +9,7 @@ Generic research platform for agent-based sheep herding simulations with pluggab
 - Live Vanilla JS + PixiJS frontend (Single / Arena / Analytics)
 - Multi-seed benchmark API + Analytics comparison tables
 - FastAPI + WebSocket streaming
-- Batch CLI experiments and CSV/Markdown export
+- Batch CLI trials (`scripts/run_batch.py`) and Analytics UI CSV/JSON/Markdown export
 
 ## Quick start
 
@@ -37,9 +37,9 @@ cd frontend && npm run build
 
 ```bash
 python scripts/run_batch.py --algorithm kubo --n-shepherds 4 --seeds 1,2,3 --out results/kubo.csv
-python scripts/export_report.py --input results/kubo.csv --out results/kubo_report.md
 ```
 
+For comparison tables with provenance and caveats, use the Analytics tab Export CSV / JSON (Markdown is a short methods note).
 ## Documentation
 - `docs/developer_guide.md`
 - `docs/simulation_environment.md`

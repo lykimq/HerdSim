@@ -467,8 +467,7 @@ What defines task completion for this algorithm's typical scenario.
 │       └── favicon.svg
 │
 ├── scripts/
-│   ├── run_batch.py                        # CLI: N trials × M algorithms → CSV
-│   └── export_report.py                    # CLI: Markdown comparison report
+│   └── run_batch.py                        # CLI: N trials → CSV (use Analytics UI for research reports)
 │
 └── tests/
     ├── backend/
@@ -586,7 +585,7 @@ jobs:
 - [ ] Frontend tests
 
 ### Phase 4 — Batch CLI + CI/CD + README
-- [ ] `scripts/run_batch.py` + `scripts/export_report.py`
+- [x] `scripts/run_batch.py` (Analytics UI CSV/JSON is the preferred research export; CLI `export_report.py` removed)
 - [ ] `.github/workflows/ci.yml`
 - [ ] `README.md` with setup, architecture diagram, screenshots
 - [ ] Final integration testing

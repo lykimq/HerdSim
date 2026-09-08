@@ -1,4 +1,4 @@
-/** End-of-run analysis model for the Single-view Run report. */
+/** End-of-run methods/results note for the Single-view Run report. */
 
 import { DONE_STATUSES } from './playback.js';
 import { headingBins } from './distributionStats.js';
@@ -11,6 +11,7 @@ import {
   flockSpreadPhrase,
   fmt,
   headingPhrase,
+  isContainmentScenario,
   maxPoint,
   metricAt,
   minPoint,
@@ -36,6 +37,8 @@ export function buildRunReport({
 } = {}) {
   if (!DONE_STATUSES.has(status) || !history.length) return null;
 
+  const containment = isContainmentScenario(scenarioId);
+  const zone = containment ? 'pen' : 'goal';
   const first = history[0];
   const last = history[history.length - 1];
   const outcome = outcomeInfo(status);
@@ -83,7 +86,7 @@ export function buildRunReport({
 
   const contextBits = [];
   if (algorithmName) contextBits.push(algorithmName);
-  if (scenarioId) contextBits.push(`scenario ${scenarioId}`);
+  if (scenarioId) contextBits.push(scenarioId);
   const headline = [
     `Run ${outcome.verb} at tick ${tick ?? '-'}`,
     contextBits.length ? `(${contextBits.join(', ')})` : null,
@@ -94,89 +97,105 @@ export function buildRunReport({
   const sections = [];
 
   const outcomeLines = [];
-  outcomeLines.push(`Duration: ${durationTicks} ticks recorded (${ticks} samples).`);
+  outcomeLines.push(`Recorded ${durationTicks} ticks (${ticks} samples).`);
+  if (status === 'success') {
+    outcomeLines.push('Scenario success criterion: met.');
+  } else if (status === 'timeout') {
+    outcomeLines.push('Scenario success criterion: not met (timeout).');
+  }
   if (timeToGoal != null && timeToGoal >= 0) {
-    outcomeLines.push(`Time to goal metric: tick ${fmt(timeToGoal, 0)}.`);
+    outcomeLines.push(
+      `time_to_goal (all sheep in ${zone}): tick ${fmt(timeToGoal, 0)}.`,
+    );
+  } else if (timeToGoal != null && timeToGoal < 0 && !containment) {
+    outcomeLines.push('time_to_goal (all sheep in goal): not reached (-1).');
   }
   if (successRate != null) {
     const pct = successRate <= 1 ? successRate * 100 : successRate;
-    outcomeLines.push(`Success rate metric: ${fmt(pct, 0)}%.`);
+    outcomeLines.push(
+      `Final ${zone} occupancy (success_rate): ${fmt(pct, 0)}%.`,
+    );
   }
   sections.push({ id: 'outcome', title: 'Outcome', lines: outcomeLines });
 
-  const goalLines = [];
+  const zoneLines = [];
   if (inGoal != null && flockSize != null) {
-    goalLines.push(`Final: ${fmt(inGoal, 0)} of ${flockSize} sheep in the goal.`);
+    zoneLines.push(`Final count in ${zone}: ${fmt(inGoal, 0)} of ${flockSize} sheep.`);
   } else if (inGoal != null) {
-    goalLines.push(`Final: ${fmt(inGoal, 0)} sheep in the goal.`);
+    zoneLines.push(`Final count in ${zone}: ${fmt(inGoal, 0)} sheep.`);
   }
   if (firstGoalTick != null && startInGoal <= 0) {
-    goalLines.push(`First sheep entered the goal around tick ${firstGoalTick}.`);
+    zoneLines.push(`First sheep entered the ${zone} at tick ${firstGoalTick}.`);
   } else if (startInGoal > 0) {
-    goalLines.push(`Sheep were already in the goal at the start of recording.`);
+    zoneLines.push(`Sheep were already in the ${zone} at tick 0.`);
   }
   if (allInTick != null) {
-    goalLines.push(`Whole flock was in the goal from tick ${allInTick}.`);
-  } else if (flockSize != null && inGoal != null && inGoal < flockSize) {
-    goalLines.push(`The flock never fully entered the goal during this run.`);
+    zoneLines.push(`All sheep in the ${zone} from tick ${allInTick}.`);
+  } else if (flockSize != null && inGoal != null && inGoal < flockSize && !containment) {
+    zoneLines.push('Not all sheep entered the goal during this run.');
   }
-  if (gcmGoal != null) {
-    goalLines.push(`Final GCM-to-goal distance: ${fmt(gcmGoal)}.`);
+  if (gcmGoal != null && !containment) {
+    zoneLines.push(`Final GCM-to-goal distance: ${fmt(gcmGoal)}.`);
+  } else if (gcmGoal != null && containment) {
+    zoneLines.push(`Final GCM-to-pen-centre distance: ${fmt(gcmGoal)}.`);
   }
   if (startGcmGoal != null && gcmGoal != null && gcmGoalDelta != null) {
+    const target = containment ? 'pen centre' : 'goal';
     const trend = changePhrase(
       gcmGoalDelta,
-      'moved farther from the goal',
-      'moved closer to the goal',
-      'stayed about the same distance from the goal',
+      `increased (GCM farther from ${target})`,
+      `decreased (GCM closer to ${target})`,
+      'unchanged',
     );
-    goalLines.push(
-      `GCM-goal ${trend}: ${fmt(startGcmGoal)} -> ${fmt(gcmGoal)} (delta ${fmt(gcmGoalDelta)}).`,
-    );
-  }
-  if (closestGcm && gcmGoal != null && closestGcm.value < gcmGoal - 1e-6) {
-    goalLines.push(
-      `Closest GCM approach during the run: ${fmt(closestGcm.value)} (tick ${closestGcm.tick}).`,
+    zoneLines.push(
+      `GCM distance ${trend}: ${fmt(startGcmGoal)} -> ${fmt(gcmGoal)} (delta ${fmt(gcmGoalDelta)}).`,
     );
   }
-  if (goalLines.length) {
-    sections.push({ id: 'goal', title: 'Goal progress', lines: goalLines });
+  if (closestGcm && gcmGoal != null && closestGcm.value < gcmGoal - 1e-6 && !containment) {
+    zoneLines.push(
+      `Minimum GCM-to-goal during run: ${fmt(closestGcm.value)} (tick ${closestGcm.tick}).`,
+    );
+  }
+  if (zoneLines.length) {
+    sections.push({
+      id: 'goal',
+      title: containment ? 'Pen occupancy' : 'Goal progress',
+      lines: zoneLines,
+    });
   }
 
   const flockLines = [];
   const spread = flockSpreadPhrase(cohesion);
   if (spread && cohesion != null) {
-    flockLines.push(`Final flock shape: ${spread} (cohesion ${fmt(cohesion)}).`);
+    flockLines.push(`Final cohesion: ${fmt(cohesion)} (${spread}).`);
   }
   if (startCohesion != null && cohesion != null && cohesionDelta != null) {
     const trend = changePhrase(
       cohesionDelta,
-      'became more spread out',
-      'became tighter',
-      'stayed about as compact',
+      'increased (more spread)',
+      'decreased (tighter)',
+      'unchanged',
     );
     flockLines.push(
       `Cohesion ${trend}: ${fmt(startCohesion)} -> ${fmt(cohesion)} (delta ${fmt(cohesionDelta)}).`,
     );
   }
   if (outliers != null) {
-    if (outliers > 0) {
-      flockLines.push(`Stragglers at end: ${fmt(outliers, 0)} sheep beyond the collect threshold.`);
-    } else {
-      flockLines.push(`No stragglers beyond the collect threshold at the end.`);
-    }
+    flockLines.push(
+      `Outliers beyond collect threshold at end: ${fmt(outliers, 0)}.`,
+    );
   }
   if (worstOutliers && worstOutliers.value > 0) {
     flockLines.push(
-      `Peak outlier count during the run: ${fmt(worstOutliers.value, 0)} (tick ${worstOutliers.tick}).`,
+      `Peak outlier count: ${fmt(worstOutliers.value, 0)} (tick ${worstOutliers.tick}).`,
     );
   }
   if (minSep != null) {
-    flockLines.push(`Final closest sheep pair: ${fmt(minSep)}.`);
+    flockLines.push(`Final min separation: ${fmt(minSep)}.`);
   }
   if (closestSep && (minSep == null || closestSep.value < minSep - 1e-6)) {
     flockLines.push(
-      `Tightest separation during the run: ${fmt(closestSep.value)} (tick ${closestSep.tick}).`,
+      `Minimum separation during run: ${fmt(closestSep.value)} (tick ${closestSep.tick}).`,
     );
   }
   if (flockLines.length) {
@@ -189,22 +208,24 @@ export function buildRunReport({
     const heading = headingPhrase(headingState.peak, headingState.count);
     if (heading) {
       motionLines.push(
-        `Headings were ${heading} (peak bin ${headingState.peak} of ${headingState.count}).`,
+        `Heading distribution: ${heading} (peak bin count ${headingState.peak} of ${headingState.count}).`,
       );
     }
   }
   if (polarization != null) {
     const align = alignmentPhrase(polarization);
-    if (align) motionLines.push(`Polarisation: ${align} (${fmt(polarization)} on a 0-1 scale).`);
+    if (align) {
+      motionLines.push(`Polarisation: ${fmt(polarization)} (${align} on 0-1 scale).`);
+    }
   }
   const startPolar = polarSeries[0]?.value;
   if (startPolar != null && polarization != null) {
     const polarDelta = polarization - startPolar;
     const polarTrend = changePhrase(
       polarDelta,
-      'increased (more ordered)',
-      'decreased (more disordered)',
-      'stayed similar',
+      'increased',
+      'decreased',
+      'unchanged',
     );
     motionLines.push(
       `Polarisation ${polarTrend}: ${fmt(startPolar)} -> ${fmt(polarization)}.`,
@@ -216,17 +237,17 @@ export function buildRunReport({
 
   const shepherdLines = [];
   if (path != null) {
-    shepherdLines.push(`Total shepherd path length: ${fmt(path)}.`);
+    shepherdLines.push(`Cumulative shepherd path: ${fmt(path)}.`);
   }
   if (pathPerTick != null && Number.isFinite(pathPerTick)) {
-    shepherdLines.push(`Average travel per tick: ${fmt(pathPerTick)}.`);
+    shepherdLines.push(`Mean path per tick: ${fmt(pathPerTick)}.`);
   }
   const startPath = pathSeries[0]?.value;
   if (startPath != null && path != null && path > startPath) {
-    shepherdLines.push(`Path grew from ${fmt(startPath)} to ${fmt(path)} over the run.`);
+    shepherdLines.push(`Path ${fmt(startPath)} -> ${fmt(path)}.`);
   }
   if (shepherdLines.length) {
-    sections.push({ id: 'shepherd', title: 'Shepherd effort', lines: shepherdLines });
+    sections.push({ id: 'shepherd', title: 'Shepherd path', lines: shepherdLines });
   }
 
   return {
@@ -235,10 +256,12 @@ export function buildRunReport({
     headline,
     takeaway: buildTakeaway({
       status,
+      scenarioId,
       inGoal,
       flockSize,
       cohesion,
       outliers,
+      successRate,
       pathPerTick,
     }),
     sections: sections.filter((s) => s.lines.length > 0),

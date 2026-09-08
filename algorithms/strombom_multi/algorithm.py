@@ -66,7 +66,8 @@ class StrombomMultiAlgorithm(StrombomAlgorithm):
             return velocities
 
         centroid = state.sheep_centroid
-        threshold = compute_threshold(state.n_sheep, config["r_a"])
+        scale = float(config.get("collect_threshold_scale", 1.0))
+        threshold = compute_threshold(state.n_sheep, config["r_a"]) * scale
         distances = state.distances_to_centroid()
         outliers = np.where(distances > threshold)[0]
         goal = resolve_goal_center(state, config)

@@ -62,8 +62,9 @@ Currently, HerdSim outputs batch CSVs and markdown text summaries, but lacks vis
   - `results/plots/convergence_line.png`
 - This script will be modular so users can easily add custom plots.
 
-#### [MODIFY] [scripts/export_report.py](file:///home/quyen/HerdSim/scripts/export_report.py)
-- **Update**: Embed the generated `.png` graphs into the `report.md` file using standard markdown image tags, creating a beautiful automated research report.
+#### [REMOVED] `scripts/export_report.py`
+
+Prefer Analytics UI CSV/JSON exports (`api/benchmark_report.py`). Do not restore a second CLI report path unless it shares that model.
 
 #### [MODIFY] `frontend/package.json` & `frontend/src/main.js` (Optional)
 - Add `plotly.js` or `chart.js` to render live time-series graphs (like Flock Cohesion vs Time) in the existing Analytics tab.
