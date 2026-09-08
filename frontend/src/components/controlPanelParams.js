@@ -88,11 +88,23 @@ export function createParamRefresh({ els, state, currentPreset, onAlgorithmChang
           a.localeCompare(b),
         ),
       );
-      buildParamControls(els.params, resolved, resolved, null, {
+      const buildOpts = {
         includeWorld: true,
         includeAgents: true,
         readOnly: true,
-      });
+      };
+      if (state.fairSheepOverride != null) {
+        const paperSheep = state.defaults.n_sheep;
+        resolved.n_sheep = state.fairSheepOverride;
+        buildOpts.displayKeys = { n_sheep: 'n_sheep (shared)' };
+        buildOpts.paramAnnotations = {
+          n_sheep:
+            paperSheep != null && Number(paperSheep) !== Number(state.fairSheepOverride)
+              ? `from Fair Compare; paper default ${paperSheep}`
+              : 'from Fair Compare',
+        };
+      }
+      buildParamControls(els.params, resolved, resolved, null, buildOpts);
     }
 
     els.worldSection.classList.toggle('hidden', !paramsEditable);

@@ -5,7 +5,17 @@ import { openSimulationSession } from '../utils/simulationSession.js';
 import { log, withTimeout } from '../utils/logger.js';
 import { statusAfterManualStep } from '../utils/playback.js';
 
-export function createArenaSide(label, algorithms, scenarios, preferredAlg, onStatus, onPhaseHint) {
+/**
+ * One Arena column: canvas + control panel + metrics.
+ * Supports fair init (shared cfg) and independent init (local cfg, like Single).
+ */
+export function createArenaSide(
+  label,
+  algorithms,
+  scenarios,
+  preferredAlg,
+  { onStatus, onPhaseHint, onIndependentInit, onSideError } = {},
+) {
   const panel = document.createElement('div');
   panel.className = 'arena-panel';
   const title = document.createElement('h4');
@@ -21,6 +31,7 @@ export function createArenaSide(label, algorithms, scenarios, preferredAlg, onSt
   let history = [];
   let latestMetrics = {};
   let lastStatus = 'idle';
+  let busy = false;
   const metrics = createMetricsPanel(null, `Live Metrics ${label}`);
 
   function updateTitle() {
@@ -35,9 +46,13 @@ export function createArenaSide(label, algorithms, scenarios, preferredAlg, onSt
     return lastStatus;
   }
 
+  function isBusy() {
+    return busy;
+  }
+
   function sendAction(action, extra = {}) {
     if (!hasSession()) {
-      log.warn('arena', `${label}: '${action}' ignored — run Init Both first`);
+      log.warn('arena', `${label}: '${action}' ignored — Initialize this side (or Init Both) first`);
       return false;
     }
     const ok = socket.send(action, extra);
@@ -51,15 +66,93 @@ export function createArenaSide(label, algorithms, scenarios, preferredAlg, onSt
     return ok;
   }
 
+  function closeSession() {
+    if (socket) socket.close();
+    socket = null;
+    sessionId = null;
+    lastStatus = 'idle';
+  }
+
+  async function openSideSession(cfg) {
+    closeSession();
+    history = [];
+    latestMetrics = {};
+    metrics.update({}, 0);
+
+    const seed = cfg.seed;
+    const { session, socket: nextSocket } = await openSimulationSession({
+      cfg,
+      renderer,
+      herderKind: controls.getHerderKind(),
+      onFrame: (msg) => {
+        if (msg.type === 'tick') {
+          history.push({ tick: msg.tick, ...msg.metrics });
+          latestMetrics = msg.metrics || {};
+          metrics.update(msg.metrics, history.length);
+          if (msg.status) lastStatus = msg.status;
+          onStatus?.({
+            status: lastStatus,
+            tick: msg.tick,
+            seed,
+          });
+          onPhaseHint?.();
+        } else {
+          history = [];
+          latestMetrics = {};
+          metrics.update({}, 0);
+          lastStatus = 'initialized';
+          onStatus?.({ status: 'initialized', tick: 0, seed });
+          onPhaseHint?.();
+        }
+      },
+      onTerminated: (msg) => {
+        lastStatus = msg.status || 'completed';
+        onStatus?.({
+          status: lastStatus,
+          tick: history.at(-1)?.tick || 0,
+          seed,
+        });
+        onPhaseHint?.();
+      },
+      onError: () => {
+        log.error('arena', `${label}: websocket error for ${sessionId}`);
+      },
+    });
+
+    sessionId = session.session_id;
+    lastStatus = 'initialized';
+    socket = nextSocket;
+    onStatus?.({ status: 'initialized', tick: session.tick ?? 0, seed });
+    updateTitle();
+    log.info('arena', `${label}: session ready ${sessionId}`);
+    return session;
+  }
+
   let controls;
   controls = createControlPanel({
     sideLabel: label,
-    hideScenario: true,
-    hideSeed: true,
-    hideSheepDogs: true,
     paramsOpen: false,
-    onInit: async () => {
-      // Shared bar supplies scenario/seed/sheep; merge below via initFromShared.
+    onInit: async (cfg) => {
+      if (busy) return;
+      busy = true;
+      onPhaseHint?.();
+      try {
+        log.info('arena', `${label}: independent init`, {
+          algorithm: cfg.algorithm_id,
+          scenario: cfg.scenario_id,
+          seed: cfg.seed,
+          sheep: cfg.num_sheep,
+        });
+        await openSideSession(cfg);
+        onIndependentInit?.(label);
+      } catch (err) {
+        log.error('arena', `${label}: init failed: ${err.message || err}`, err);
+        closeSession();
+        onSideError?.(label, err);
+      } finally {
+        busy = false;
+        onPhaseHint?.();
+      }
     },
     onPlay: () => sendAction('play'),
     onPause: () => sendAction('pause'),
@@ -75,79 +168,37 @@ export function createArenaSide(label, algorithms, scenarios, preferredAlg, onSt
   renderer.setHerderKind(controls.getHerderKind());
   updateTitle();
   controls.root.querySelector('[data-role="algorithm"]').addEventListener('change', updateTitle);
-  // Hide per-side init; shared bar owns init/play.
-  controls.root.querySelector('[data-role="init"]').classList.add('hidden');
 
   async function initFromShared(sharedCfg) {
-    log.info('arena', `${label}: creating session`, {
-      algorithm: controls.getConfig().algorithm_id,
-      scenario: sharedCfg.scenario_id,
-      seed: sharedCfg.seed,
-      sheep: sharedCfg.num_sheep,
-    });
-    if (socket) socket.close();
-    socket = null;
-    sessionId = null;
-    lastStatus = 'idle';
+    if (busy) return null;
+    busy = true;
+    onPhaseHint?.();
+    try {
+      log.info('arena', `${label}: fair init`, {
+        algorithm: controls.getConfig().algorithm_id,
+        scenario: sharedCfg.scenario_id,
+        seed: sharedCfg.seed,
+        sheep: sharedCfg.num_sheep,
+      });
+      controls.setScenario(sharedCfg.scenario_id);
+      controls.setSeed(sharedCfg.seed);
+      controls.setSheepCount(sharedCfg.num_sheep);
+      controls.setFairSheepOverride(sharedCfg.num_sheep);
 
-    const local = controls.getConfig();
-    const cfg = {
-      ...local,
-      scenario_id: sharedCfg.scenario_id,
-      seed: sharedCfg.seed,
-      num_sheep: sharedCfg.num_sheep,
-      num_shepherds: sharedCfg.num_shepherds ?? local.num_shepherds,
-      preset: local.preset === 'custom' ? 'custom' : sharedCfg.preset || local.preset,
-    };
-    if (sharedCfg.lock_fair) {
-      cfg.num_sheep = sharedCfg.num_sheep;
+      const local = controls.getConfig();
+      const cfg = {
+        ...local,
+        scenario_id: sharedCfg.scenario_id,
+        seed: sharedCfg.seed,
+        num_sheep: sharedCfg.num_sheep,
+        num_shepherds: sharedCfg.num_shepherds ?? local.num_shepherds,
+        preset: local.preset === 'custom' ? 'custom' : sharedCfg.preset || local.preset,
+      };
+      return await openSideSession(cfg);
+    } finally {
+      busy = false;
+      onPhaseHint?.();
     }
-
-    history = [];
-    latestMetrics = {};
-    metrics.update({}, 0);
-
-    const { session, socket: nextSocket } = await openSimulationSession({
-      cfg,
-      renderer,
-      herderKind: controls.getHerderKind(),
-      onFrame: (msg) => {
-        if (msg.type === 'tick') {
-          history.push({ tick: msg.tick, ...msg.metrics });
-          latestMetrics = msg.metrics || {};
-          metrics.update(msg.metrics, history.length);
-          if (msg.status) lastStatus = msg.status;
-          onStatus?.({
-            status: lastStatus,
-            tick: msg.tick,
-            seed: sharedCfg.seed,
-          });
-          onPhaseHint?.();
-        } else {
-          history = [];
-          latestMetrics = {};
-          metrics.update({}, 0);
-          lastStatus = 'initialized';
-          onStatus?.({ status: 'initialized', tick: 0, seed: sharedCfg.seed });
-          onPhaseHint?.();
-        }
-      },
-      onTerminated: (msg) => {
-        lastStatus = msg.status || 'completed';
-        onStatus?.({ status: lastStatus, tick: history.at(-1)?.tick || 0, seed: sharedCfg.seed });
-        onPhaseHint?.();
-      },
-      onError: () => {
-        log.error('arena', `${label}: websocket error for ${sessionId}`);
-      },
-    });
-    sessionId = session.session_id;
-    lastStatus = 'initialized';
-    onStatus?.({ status: 'initialized', tick: session.tick ?? 0, seed: sharedCfg.seed });
-    updateTitle();
-    socket = nextSocket;
-    log.info('arena', `${label}: session ready ${sessionId}`);
-    return session;
   }
 
   return {
@@ -158,12 +209,13 @@ export function createArenaSide(label, algorithms, scenarios, preferredAlg, onSt
     title,
     hasSession,
     getRunStatus,
+    isBusy,
     async mount() {
       log.info('arena', `Mounting side ${label}`);
       await withTimeout(renderer.init(), 20000, `Arena ${label} renderer`);
     },
     destroy() {
-      socket?.close();
+      closeSession();
       renderer.destroy();
     },
     getHistory: () => history,

@@ -165,8 +165,14 @@ export function buildParamControls(container, defaults, values, onChange, option
 
     const label = document.createElement("label");
     const current = values[key] ?? defaultValue;
-    const displayKey = key === "obstacles" ? "obstacles (count)" : key;
-    label.innerHTML = `<span class="param-key" title="${key}">${displayKey}</span><span class="param-val">${formatParamValue(key, current)}</span>`;
+    const displayKey =
+      options.displayKeys?.[key] ||
+      (key === "obstacles" ? "obstacles (count)" : key);
+    const annotation = options.paramAnnotations?.[key];
+    const valueText = annotation
+      ? `${formatParamValue(key, current)} (${annotation})`
+      : formatParamValue(key, current);
+    label.innerHTML = `<span class="param-key" title="${key}">${displayKey}</span><span class="param-val">${valueText}</span>`;
     group.appendChild(label);
 
     if (!readOnly && pointParam) {

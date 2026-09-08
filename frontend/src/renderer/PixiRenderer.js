@@ -15,7 +15,8 @@ export class PixiRenderer {
     this.app = null;
     this.fieldLayer = null;
     this.agentLayer = null;
-    this.overlayLayer = null;
+    this.assignmentLayer = null;
+    this.hudLayer = null;
     this.textures = { sheep: null, dog: null, shepherd: null, goal: null, pen: null };
     this.herderKind = 'dog';
     this.world = {
@@ -44,10 +45,12 @@ export class PixiRenderer {
 
       this.fieldLayer = new Container();
       this.agentLayer = new Container();
-      this.overlayLayer = new Container();
+      this.assignmentLayer = new Container();
+      this.hudLayer = new Container();
       this.app.stage.addChild(this.fieldLayer);
       this.app.stage.addChild(this.agentLayer);
-      this.app.stage.addChild(this.overlayLayer);
+      this.app.stage.addChild(this.assignmentLayer);
+      this.app.stage.addChild(this.hudLayer);
 
       this.textures = await loadIconTextures();
       this._ready = true;
@@ -176,7 +179,7 @@ export class PixiRenderer {
   }
 
   _drawAssignmentOverlay(frame) {
-    this.overlayLayer.removeChildren();
+    this.assignmentLayer.removeChildren();
     const lines = frame?.metadata?.assignment_lines;
     if (!Array.isArray(lines) || lines.length === 0) return;
 
@@ -196,7 +199,7 @@ export class PixiRenderer {
         alpha: collect ? 0.85 : 0.45,
       });
     });
-    this.overlayLayer.addChild(g);
+    this.assignmentLayer.addChild(g);
   }
 
   destroy() {

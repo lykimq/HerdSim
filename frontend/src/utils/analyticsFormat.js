@@ -1,64 +1,157 @@
 /** Pure formatting helpers for the Analytics dashboard. */
 
-export function renderPlotlyBarChart(container, summary, key, label) {
-  if (!window.Plotly) {
-    container.innerHTML = '<div style="color:var(--text-muted)">Plotly is loading or unavailable.</div>';
-    return;
-  }
-  container.innerHTML = '';
+const PLOT_COLORS = ['#34d399', '#38bdf8', '#a78bfa', '#fbbf24', '#f472b6', '#fb7185'];
 
-  const algorithms = summary.map(s => s.algorithm);
-  const values = summary.map(s => s[key] == null ? 0 : Number(s[key]));
+function plotlyUnavailableHtml() {
+  return '<div style="color:var(--text-muted)">Plotly is loading or unavailable.</div>';
+}
 
-  const trace = {
-    x: algorithms,
-    y: values,
-    type: 'bar',
-    marker: {
-      color: '#3498db',
-    }
-  };
+function algorithmOrder(rows) {
+  return [...new Set(rows.map((r) => r.algorithm))];
+}
 
-  const layout = {
-    title: label,
+function colorForAlgorithm(algorithms, algorithmId) {
+  const index = algorithms.indexOf(algorithmId);
+  return PLOT_COLORS[Math.max(0, index) % PLOT_COLORS.length];
+}
+
+function baseLayout(title, yTitle, xTitle = 'Algorithm') {
+  return {
+    title,
     paper_bgcolor: 'rgba(0,0,0,0)',
     plot_bgcolor: 'rgba(0,0,0,0)',
     font: { color: '#e2e8f0' },
-    margin: { l: 40, r: 20, t: 40, b: 40 },
-    xaxis: { title: 'Algorithm', tickfont: { color: '#cbd5e1' } },
-    yaxis: { title: label, tickfont: { color: '#cbd5e1' } }
+    margin: { l: 50, r: 20, t: 40, b: 50 },
+    xaxis: { title: xTitle, tickfont: { color: '#cbd5e1' } },
+    yaxis: { title: yTitle, tickfont: { color: '#cbd5e1' } },
   };
-
-  window.Plotly.newPlot(container, [trace], layout, { responsive: true, displayModeBar: false });
 }
 
-export function renderPlotlyBoxPlot(container, rawRows, key, label) {
+/**
+ * Box plot of a per-trial metric by algorithm.
+ * Failed trials can be excluded from the box and/or marked with X overlays.
+ */
+export function renderPlotlyBoxPlot(container, rawRows, key, label, options = {}) {
   if (!window.Plotly) {
-    container.innerHTML = '<div style="color:var(--text-muted)">Plotly is loading or unavailable.</div>';
+    container.innerHTML = plotlyUnavailableHtml();
     return;
   }
   container.innerHTML = '';
 
-  const algorithms = [...new Set(rawRows.map(r => r.algorithm))];
-  const traces = algorithms.map(alg => {
-    const algRows = rawRows.filter(r => r.algorithm === alg && r.success);
+  const {
+    boxSuccessOnly = false,
+    annotateFailures = true,
+  } = options;
+
+  const rows = rawRows || [];
+  const algorithms = algorithmOrder(rows);
+  if (!algorithms.length) {
+    container.innerHTML = '<div style="color:var(--text-muted)">No trial data yet.</div>';
+    return;
+  }
+
+  const traces = algorithms.map((alg) => {
+    const algRows = rows.filter((r) => {
+      if (r.algorithm !== alg || r[key] == null) return false;
+      return boxSuccessOnly ? r.success : true;
+    });
     return {
-      y: algRows.map(r => Number(r[key])),
+      y: algRows.map((r) => Number(r[key])),
       type: 'box',
       name: alg,
-      marker: { color: '#10b981' }
+      marker: { color: colorForAlgorithm(algorithms, alg) },
+      boxpoints: false,
     };
   });
 
+  if (annotateFailures) {
+    const fails = rows.filter((r) => !r.success && r[key] != null);
+    if (fails.length) {
+      traces.push({
+        type: 'scatter',
+        mode: 'markers',
+        name: 'Failed',
+        x: fails.map((r) => r.algorithm),
+        y: fails.map((r) => Number(r[key])),
+        text: fails.map((r) => `seed ${r.seed}`),
+        marker: {
+          symbol: 'x',
+          size: 11,
+          color: '#f87171',
+          line: { width: 2, color: '#f87171' },
+        },
+        hovertemplate: '%{x}<br>Failed %{text}<br>%{y}<extra></extra>',
+      });
+    }
+  }
+
   const layout = {
-    title: label,
-    paper_bgcolor: 'rgba(0,0,0,0)',
-    plot_bgcolor: 'rgba(0,0,0,0)',
-    font: { color: '#e2e8f0' },
-    margin: { l: 50, r: 20, t: 40, b: 40 },
-    xaxis: { title: 'Algorithm', tickfont: { color: '#cbd5e1' } },
-    yaxis: { title: label, tickfont: { color: '#cbd5e1' } },
-    showlegend: false
+    ...baseLayout(label, label),
+    showlegend: annotateFailures && rows.some((r) => !r.success),
+    legend: { orientation: 'h', y: -0.2, font: { color: '#cbd5e1' } },
+  };
+
+  window.Plotly.newPlot(container, traces, layout, { responsive: true, displayModeBar: false });
+}
+
+/** Scatter of shepherd path vs convergence ticks; X marks failed trials. */
+export function renderPlotlyPathTicksScatter(container, rawRows) {
+  if (!window.Plotly) {
+    container.innerHTML = plotlyUnavailableHtml();
+    return;
+  }
+  container.innerHTML = '';
+
+  const rows = (rawRows || []).filter(
+    (r) => r.total_ticks != null && r.shepherd_path != null,
+  );
+  const algorithms = algorithmOrder(rows);
+  if (!algorithms.length) {
+    container.innerHTML = '<div style="color:var(--text-muted)">No trial data yet.</div>';
+    return;
+  }
+
+  const traces = [];
+  algorithms.forEach((alg) => {
+    const color = colorForAlgorithm(algorithms, alg);
+    const ok = rows.filter((r) => r.algorithm === alg && r.success);
+    const bad = rows.filter((r) => r.algorithm === alg && !r.success);
+
+    if (ok.length) {
+      traces.push({
+        type: 'scatter',
+        mode: 'markers',
+        name: alg,
+        x: ok.map((r) => Number(r.total_ticks)),
+        y: ok.map((r) => Number(r.shepherd_path)),
+        text: ok.map((r) => `seed ${r.seed}`),
+        marker: { size: 9, color, symbol: 'circle' },
+        hovertemplate: `${alg}<br>%{text}<br>ticks=%{x}<br>path=%{y}<extra></extra>`,
+      });
+    }
+    if (bad.length) {
+      traces.push({
+        type: 'scatter',
+        mode: 'markers',
+        name: `${alg} failed`,
+        x: bad.map((r) => Number(r.total_ticks)),
+        y: bad.map((r) => Number(r.shepherd_path)),
+        text: bad.map((r) => `seed ${r.seed}`),
+        marker: {
+          size: 11,
+          color,
+          symbol: 'x',
+          line: { width: 2, color },
+        },
+        hovertemplate: `${alg} failed<br>%{text}<br>ticks=%{x}<br>path=%{y}<extra></extra>`,
+      });
+    }
+  });
+
+  const layout = {
+    ...baseLayout('Path vs Convergence', 'Shepherd path', 'Convergence time (ticks)'),
+    showlegend: true,
+    legend: { orientation: 'h', y: -0.25, font: { color: '#cbd5e1' } },
   };
 
   window.Plotly.newPlot(container, traces, layout, { responsive: true, displayModeBar: false });
@@ -80,18 +173,6 @@ export function summaryRowHtml(row) {
     <td>${row.mean_cohesion != null ? Number(row.mean_cohesion).toFixed(2) : 'n/a'}</td>
     <td>${row.mean_shepherd_path != null ? Number(row.mean_shepherd_path).toFixed(1) : 'n/a'}</td>
   `;
-}
-
-export function metricDefsHtml(summaryDefs) {
-  return summaryDefs
-    .map(
-      (m) =>
-        `<div class="metric-card" style="flex-direction:column;align-items:flex-start;gap:0.25rem;">
-          <strong>${m.label}</strong>
-          <span style="color:var(--text-muted);font-size:0.8rem;">${m.id}: ${m.description || ''}</span>
-        </div>`,
-    )
-    .join('');
 }
 
 export function methodCardHtml(details, alg) {

@@ -15,7 +15,7 @@ const LABEL_STEP = 50;
 export function drawField(ctx) {
   if (!ctx._ready || !ctx.app?.renderer) return;
   ctx.fieldLayer.removeChildren();
-  ctx.overlayLayer.removeChildren();
+  ctx.hudLayer.removeChildren();
   const { s, offsetX, offsetY, pad, w, h } = ctx._scale();
   if (w < 40 || h < 40) {
     log.debug('pixi', 'Skip field draw; canvas not laid out yet', { w, h });
@@ -72,23 +72,23 @@ export function drawField(ctx) {
   // Axis tick labels (world units) -- sparse for readability/perf
   for (let x = 0; x <= ctx.world.width + 0.01; x += LABEL_STEP) {
     const [sx] = ctx._toScreen(x, 0);
-    ctx.overlayLayer.addChild(
+    ctx.hudLayer.addChild(
       ctx._makeLabel(String(x), sx, offsetY + fieldH + 10, { size: 9, ay: 0 }),
     );
   }
   for (let y = 0; y <= ctx.world.height + 0.01; y += LABEL_STEP) {
     const [, sy] = ctx._toScreen(0, y);
-    ctx.overlayLayer.addChild(
+    ctx.hudLayer.addChild(
       ctx._makeLabel(String(y), offsetX - 8, sy, { size: 9, ax: 1 }),
     );
   }
-  ctx.overlayLayer.addChild(
+  ctx.hudLayer.addChild(
     ctx._makeLabel('x', offsetX + fieldW / 2, offsetY + fieldH + 20, {
       size: 10,
       fill: 0x64748b,
     }),
   );
-  ctx.overlayLayer.addChild(
+  ctx.hudLayer.addChild(
     ctx._makeLabel('y', Math.max(10, offsetX - pad + 4), offsetY + fieldH / 2, {
       size: 10,
       fill: 0x64748b,
@@ -110,8 +110,8 @@ export function drawField(ctx) {
   bar.moveTo(barX + barPx, barY - 4);
   bar.lineTo(barX + barPx, barY + 4);
   bar.stroke();
-  ctx.overlayLayer.addChild(bar);
-  ctx.overlayLayer.addChild(
+  ctx.hudLayer.addChild(bar);
+  ctx.hudLayer.addChild(
     ctx._makeLabel(`${barWorld} units`, barX + barPx / 2, barY + 10, {
       size: 9,
       fill: 0xe2e8f0,
@@ -164,7 +164,7 @@ export function drawField(ctx) {
       );
       ctx.fieldLayer.addChild(marker);
     }
-    ctx.overlayLayer.addChild(
+    ctx.hudLayer.addChild(
       ctx._makeLabel('GOAL', sx, sy - gr - 8, {
         size: 11,
         fill: 0xfca5a5,

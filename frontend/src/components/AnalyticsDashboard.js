@@ -6,20 +6,22 @@ import {
   scenarioBlurb,
 } from '../utils/params.js';
 import {
-  renderPlotlyBarChart,
   renderPlotlyBoxPlot,
-  metricDefsHtml,
+  renderPlotlyPathTicksScatter,
   methodCardHtml,
   summaryHeadHtml,
   summaryRowHtml,
   trialUnits,
 } from '../utils/analyticsFormat.js';
 import {
-  analyticsMetricsCardHtml,
-  analyticsResultsHtml,
+  analyticsChartsHtml,
   analyticsRunnerHtml,
+  analyticsSideTabsHtml,
 } from './analyticsMarkup.js';
 import { mountTips } from '../utils/tooltips.js';
+
+const DEFAULT_BENCHMARK_ALG_IDS = ['strombom', 'kubo', 'flocking_dog'];
+const DEFAULT_BENCHMARK_SCENARIO_ID = 'split_flock';
 
 export function createAnalyticsDashboard({ algorithms, scenarios, globalState }) {
   const root = document.createElement('div');
@@ -35,29 +37,36 @@ export function createAnalyticsDashboard({ algorithms, scenarios, globalState })
   runner.className = 'card-glass';
   runner.innerHTML = analyticsRunnerHtml();
 
-  const results = document.createElement('div');
-  results.className = 'card-glass';
-  results.innerHTML = analyticsResultsHtml();
-
   const charts = document.createElement('div');
   charts.className = 'card-glass';
-  charts.innerHTML = `<div data-role="chart-success"></div><div data-role="chart-ticks" style="margin-top:1rem;"></div>`;
+  charts.innerHTML = analyticsChartsHtml();
 
-  const metricsCard = document.createElement('div');
-  metricsCard.className = 'card-glass';
-  metricsCard.innerHTML = analyticsMetricsCardHtml();
+  const sidePanel = document.createElement('div');
+  sidePanel.className = 'card-glass';
+  sidePanel.innerHTML = analyticsSideTabsHtml();
 
-  const methods = document.createElement('div');
-  methods.className = 'card-glass';
-  methods.innerHTML = `<div class="section-title">Methods (Algorithm Cards)</div><div data-role="methods"></div>`;
+  const results = sidePanel.querySelector('[data-panel="summary"]');
+  const methods = sidePanel.querySelector('[data-panel="methods"]');
 
   left.appendChild(runner);
-  left.appendChild(results);
   left.appendChild(charts);
-  right.appendChild(metricsCard);
-  right.appendChild(methods);
+  right.appendChild(sidePanel);
   root.appendChild(left);
   root.appendChild(right);
+
+  sidePanel.querySelector('.analytics-tab-bar').addEventListener('click', (event) => {
+    const btn = event.target.closest('[data-tab]');
+    if (!btn || !sidePanel.contains(btn)) return;
+    const tabId = btn.dataset.tab;
+    sidePanel.querySelectorAll('.analytics-tab').forEach((tab) => {
+      const on = tab.dataset.tab === tabId;
+      tab.classList.toggle('active', on);
+      tab.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    sidePanel.querySelectorAll('.analytics-tab-panel').forEach((panel) => {
+      panel.classList.toggle('hidden', panel.dataset.panel !== tabId);
+    });
+  });
 
   mountTips(runner);
   mountTips(results, {
@@ -68,14 +77,20 @@ export function createAnalyticsDashboard({ algorithms, scenarios, globalState })
 
   const algList = runner.querySelector('[data-role="algs"]');
   const algBlurbEl = runner.querySelector('[data-role="algorithm-blurb"]');
-  const defaultAlgId = algorithms[0]?.id;
+  const defaultAlgIds = new Set(
+    DEFAULT_BENCHMARK_ALG_IDS.filter((id) => algorithms.some((a) => a.id === id)),
+  );
+  if (!defaultAlgIds.size && algorithms[0]?.id) {
+    defaultAlgIds.add(algorithms[0].id);
+  }
   algList.innerHTML = algorithms
     .map((a) => {
       const tip = algorithmBlurb(a);
       const titleAttr = tip ? ` title="${tip.replace(/"/g, '&quot;')}"` : '';
+      const checked = defaultAlgIds.has(a.id) ? 'checked' : '';
       return `
       <label class="check-item"${titleAttr}>
-        <input type="checkbox" value="${a.id}" ${a.id === defaultAlgId ? 'checked' : ''} />
+        <input type="checkbox" value="${a.id}" ${checked} />
         <span>${a.name}</span>
       </label>`;
     })
@@ -89,8 +104,14 @@ export function createAnalyticsDashboard({ algorithms, scenarios, globalState })
 
   const scenSelect = runner.querySelector('[data-role="scenario"]');
   const scenBlurbEl = runner.querySelector('[data-role="scenario-blurb"]');
+  const defaultScenarioId = scenarios.some((s) => s.id === DEFAULT_BENCHMARK_SCENARIO_ID)
+    ? DEFAULT_BENCHMARK_SCENARIO_ID
+    : scenarios[0]?.id;
   scenSelect.innerHTML = scenarios
-    .map((s) => `<option value="${s.id}">${s.name}</option>`)
+    .map(
+      (s) =>
+        `<option value="${s.id}" ${s.id === defaultScenarioId ? 'selected' : ''}>${s.name}</option>`,
+    )
     .join('');
 
   const presetSelect = runner.querySelector('[data-role="preset"]');
@@ -161,6 +182,55 @@ export function createAnalyticsDashboard({ algorithms, scenarios, globalState })
       summaryHeadHtml(summaryDefs);
   }
 
+  function clearCharts() {
+    charts.querySelectorAll('[data-role^="chart-"]').forEach((el) => {
+      el.innerHTML = '';
+    });
+  }
+
+  function renderCharts(rows) {
+    const data = rows || [];
+    renderPlotlyBoxPlot(
+      charts.querySelector('[data-role="chart-ticks"]'),
+      data,
+      'total_ticks',
+      'Convergence Time (Ticks)',
+      { boxSuccessOnly: true, annotateFailures: true },
+    );
+    renderPlotlyBoxPlot(
+      charts.querySelector('[data-role="chart-path"]'),
+      data,
+      'shepherd_path',
+      'Shepherd Path',
+      { boxSuccessOnly: false, annotateFailures: true },
+    );
+    renderPlotlyBoxPlot(
+      charts.querySelector('[data-role="chart-cohesion"]'),
+      data,
+      'cohesion',
+      'Final Cohesion',
+      { boxSuccessOnly: false, annotateFailures: true },
+    );
+    renderPlotlyBoxPlot(
+      charts.querySelector('[data-role="chart-polarization"]'),
+      data,
+      'polarization',
+      'Polarization',
+      { boxSuccessOnly: false, annotateFailures: true },
+    );
+    renderPlotlyBoxPlot(
+      charts.querySelector('[data-role="chart-min-sep"]'),
+      data,
+      'min_separation',
+      'Min Separation',
+      { boxSuccessOnly: false, annotateFailures: true },
+    );
+    renderPlotlyPathTicksScatter(
+      charts.querySelector('[data-role="chart-scatter"]'),
+      data,
+    );
+  }
+
   function renderSummary(payload) {
     lastPayload = payload;
     const tbody = results.querySelector('[data-role="tbody"]');
@@ -170,18 +240,7 @@ export function createAnalyticsDashboard({ algorithms, scenarios, globalState })
       tr.innerHTML = summaryRowHtml(row);
       tbody.appendChild(tr);
     });
-    renderPlotlyBarChart(
-      charts.querySelector('[data-role="chart-success"]'),
-      payload.summary || [],
-      'success_rate',
-      'Success Rate',
-    );
-    renderPlotlyBoxPlot(
-      charts.querySelector('[data-role="chart-ticks"]'),
-      payload.rows || [],
-      'total_ticks',
-      'Convergence Time (Ticks)',
-    );
+    renderCharts(payload.rows || []);
   }
 
   runner.querySelector('[data-role="run"]').addEventListener('click', async () => {
@@ -257,8 +316,7 @@ export function createAnalyticsDashboard({ algorithms, scenarios, globalState })
     lastPayload = null;
     const tbody = results.querySelector('[data-role="tbody"]');
     tbody.innerHTML = '';
-    charts.querySelector('[data-role="chart-success"]').innerHTML = '';
-    charts.querySelector('[data-role="chart-ticks"]').innerHTML = '';
+    clearCharts();
     setIdleStatus('Results cleared.');
   });
 
@@ -283,8 +341,6 @@ export function createAnalyticsDashboard({ algorithms, scenarios, globalState })
     const defsPayload = await fetchBenchmarkDefinitions();
     summaryDefs = defsPayload.summary || [];
     renderSummaryHead();
-    metricsCard.querySelector('[data-role="metric-defs"]').innerHTML =
-      metricDefsHtml(summaryDefs);
 
     if (lastPayload) {
       renderSummary(lastPayload);

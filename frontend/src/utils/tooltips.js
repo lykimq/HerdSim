@@ -2,7 +2,7 @@
 
 export const BUTTON_TIPS = {
   single: 'One algorithm, live controls.',
-  arena: 'Compare two algorithms side by side.',
+  arena: 'Fair compare (Init Both) or independent side-by-side runs.',
   analytics: 'Batch benchmarks and method notes.',
   netlogo: 'Browse and open .nlogo models in your local NetLogo app.',
 
@@ -15,10 +15,10 @@ export const BUTTON_TIPS = {
   step: 'Advance one tick; keep clicking to step again.',
   reset: 'Return to start positions.',
 
-  'init-both': 'Create A and B sessions (does not run).',
-  'play-both': 'Start or resume both sides.',
-  'pause-both': 'Pause both sides.',
-  'reset-both': 'Reset both sides to start.',
+  'init-both': 'Fair compare: create A and B with shared scenario/seed/sheep (does not run).',
+  'play-both': 'Fair compare: start or resume both sides together.',
+  'pause-both': 'Fair compare: pause both sides.',
+  'reset-both': 'Fair compare: reset both sides to start.',
 
   run: 'Run selected algorithms x seeds.',
   csv: 'Download trial rows as CSV (includes column definitions).',

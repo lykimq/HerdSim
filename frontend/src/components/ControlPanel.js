@@ -60,6 +60,7 @@ export function createControlPanel({
     defaults: {},
     scenarioDefaults: {},
     lockCustom: false,
+    fairSheepOverride: null,
   };
 
   function currentPreset() {
@@ -194,6 +195,14 @@ export function createControlPanel({
     els.sheepCount.textContent = String(n);
   }
 
+  function setFairSheepOverride(n) {
+    state.fairSheepOverride = n == null || Number.isNaN(Number(n)) ? null : Number(n);
+    if (state.fairSheepOverride != null) {
+      setSheepCount(state.fairSheepOverride);
+    }
+    refreshParamControls();
+  }
+
   function setAlgorithm(algorithmId) {
     if (![...els.algorithm.options].some((o) => o.value === algorithmId)) return;
     els.algorithm.value = algorithmId;
@@ -218,6 +227,7 @@ export function createControlPanel({
     setSeed,
     setScenario,
     setSheepCount,
+    setFairSheepOverride,
     setAlgorithm,
     getAlgorithmName,
     getHerderKind,
