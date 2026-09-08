@@ -66,7 +66,7 @@ export function createMetricHistoryPanel({ onScrub } = {}) {
     block.className = 'dist-block';
     block.innerHTML = `
       <div class="dist-label">${series.label}</div>
-      <canvas data-id="${series.id}" width="300" height="56"></canvas>
+      <canvas data-id="${series.id}" width="480" height="44"></canvas>
     `;
     chartsEl.appendChild(block);
     canvases[series.id] = block.querySelector('canvas');

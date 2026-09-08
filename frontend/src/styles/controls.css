@@ -246,6 +246,38 @@ select, input[type="number"], input[type="range"], input[type="text"] {
   overflow: auto;
 }
 
+.single-side > .card-glass {
+  flex: 0 0 auto;
+  min-height: auto;
+  overflow: visible;
+}
+
+.single-center .metric-history-panel {
+  flex: 0 0 auto;
+  gap: 0.35rem;
+  padding: 0.55rem 0.75rem;
+  min-height: 0;
+}
+
+.single-center .metric-history-panel .param-hint {
+  margin-top: 0;
+  font-size: 0.68rem;
+}
+
+.single-center .metric-history-panel [data-role="charts"] {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.3rem 0.55rem;
+}
+
+.single-center .metric-history-panel .control-group {
+  gap: 0.15rem;
+}
+
+.single-center .metric-history-panel .control-group label {
+  font-size: 0.72rem;
+}
+
 .distribution-panel .dist-block,
 .metric-history-panel .dist-block {
   display: flex;
@@ -266,6 +298,10 @@ select, input[type="number"], input[type="range"], input[type="text"] {
   border-radius: 6px;
   border: 1px solid var(--border-color);
   background: #0b1220;
+}
+
+.single-center .metric-history-panel canvas {
+  height: 44px;
 }
 
 .metric-history-panel input[type="range"] {

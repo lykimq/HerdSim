@@ -137,11 +137,17 @@ export function createSingleView({ algorithms, scenarios, onStatus, preferredAlg
 
   controls.setOptions(algorithms, scenarios, preferredAlg);
   syncPlayback();
-  root.appendChild(controls.root);
-  root.appendChild(canvasHost);
+
+  const center = document.createElement('div');
+  center.className = 'single-center';
+  center.appendChild(canvasHost);
+  center.appendChild(historyPanel.root);
+
   side.appendChild(metrics.root);
   side.appendChild(distributions.root);
-  side.appendChild(historyPanel.root);
+
+  root.appendChild(controls.root);
+  root.appendChild(center);
   root.appendChild(side);
 
   async function mount() {
