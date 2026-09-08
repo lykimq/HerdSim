@@ -9,7 +9,13 @@ import {
 import { herderIconName, iconImg } from '../assets/icons.js';
 
 /** Build the param-panel refresh helpers used by createControlPanel. */
-export function createParamRefresh({ els, state, currentPreset, onAlgorithmChange }) {
+export function createParamRefresh({
+  els,
+  state,
+  currentPreset,
+  onAlgorithmChange,
+  afterRefresh,
+}) {
   function applyAgentCountsFromDefaults() {
     const source =
       currentPreset() === 'scenario' && Object.keys(state.scenarioDefaults).length
@@ -132,6 +138,8 @@ export function createParamRefresh({ els, state, currentPreset, onAlgorithmChang
         readOnly: false,
       });
     }
+
+    afterRefresh?.();
   }
 
   return { refreshParamControls };

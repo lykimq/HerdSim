@@ -11,5 +11,8 @@
   "herder_kind": "dog",
   "herder_label": "Dog",
   "default_agents": {"sheep": 40, "shepherds": 4},
-  "source_code": "matlab/Force-Based-Sheep-Herding-Algorithm"
+  "source_code": "matlab/Force-Based-Sheep-Herding-Algorithm",
+  "overlays": {
+    "assignment_modes": []
+  }
 }

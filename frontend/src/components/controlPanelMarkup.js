@@ -48,6 +48,23 @@ export function controlPanelHtml({ sideLabel = '', paramsOpen = true } = {}) {
       <label data-role="speed-label">Simulation Speed (1.0x)</label>
       <input data-role="speed" type="range" min="0.1" max="10" step="0.1" value="1" />
     </div>
+    <div class="section-title">Display</div>
+    <div class="control-group display-overlays">
+      <label class="check-item overlay-option">
+        <input data-role="trail-visible" type="checkbox" checked />
+        <span class="overlay-swatch overlay-swatch--trail" aria-hidden="true"></span>
+        <span data-role="trail-label">Trails: where herders walked this run (not shepherd_path length).</span>
+      </label>
+      <label class="check-item overlay-option">
+        <input data-role="gcm-goal-visible" type="checkbox" checked />
+        <span class="overlay-swatch overlay-swatch--gcm-goal" aria-hidden="true"></span>
+        <span data-role="gcm-goal-label">GCM to goal: line from flock centre of mass to the goal.</span>
+      </label>
+      <div data-role="assignment-overlays"></div>
+      <div class="trail-actions">
+        <button type="button" class="btn btn-secondary" data-role="clear-trails">Clear trails</button>
+      </div>
+    </div>
     <details class="param-section" ${paramsOpen ? 'open' : ''} data-role="params-section">
       <summary class="section-title" data-role="params-title">Settings</summary>
       <div class="param-list" data-role="params"></div>

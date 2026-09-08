@@ -14,6 +14,7 @@ export async function openSimulationSession({
   onError,
 }) {
   renderer.setHerderKind(herderKind);
+  renderer.clearTrails();
   const session = await createSession(cfg);
 
   if (session.world) renderer.setWorld(session.world);
@@ -26,6 +27,7 @@ export async function openSimulationSession({
   const socket = createSimulationSocket(session.session_id, {
     onMessage: (msg) => {
       if (msg.type === 'tick' || msg.type === 'reset') {
+        if (msg.type === 'reset') renderer.clearTrails();
         if (msg.world) renderer.setWorld(msg.world);
         renderer.render(msg);
         onFrame?.(msg);

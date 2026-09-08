@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 
 from metrics.cohesion import CohesionMetric
+from metrics.gcm_goal import GcmGoalMetric
 from metrics.min_separation import MinSeparationMetric
 from metrics.outlier_count import OutlierCountMetric
 from metrics.polarization import PolarizationMetric
@@ -21,6 +22,14 @@ def test_cohesion_is_mean_distance_to_centroid():
     state = make_state(sheep, [[10.0, 10.0]])
     # Centroid is (1,1); each sheep is sqrt(2) away.
     assert CohesionMetric().compute(state) == pytest.approx(np.sqrt(2.0))
+
+
+def test_gcm_goal_is_centroid_to_goal_distance():
+    world = make_world(goal_center=(0.0, 0.0), goal_radius=5.0)
+    sheep = [[0.0, 0.0], [2.0, 0.0], [0.0, 2.0], [2.0, 2.0]]
+    state = make_state(sheep, [[10.0, 10.0]], world=world)
+    # Centroid is (1,1); distance to goal (0,0) is sqrt(2).
+    assert GcmGoalMetric().compute(state) == pytest.approx(np.sqrt(2.0))
 
 
 def test_success_rate_fraction_inside_goal():

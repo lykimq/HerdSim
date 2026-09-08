@@ -78,6 +78,7 @@ export function createArenaSide(
     history = [];
     latestMetrics = {};
     metrics.update({}, 0);
+    renderer.clearTrails();
 
     const seed = cfg.seed;
     const { session, socket: nextSocket } = await openSimulationSession({
@@ -163,9 +164,23 @@ export function createArenaSide(
       renderer.setHerderKind(kind);
       updateTitle();
     },
+    onTrailVisibleChange: (visible) => renderer.setTrailVisible(visible),
+    onGcmGoalVisibleChange: (visible) => renderer.setGcmGoalVisible(visible),
+    onAssignmentModesChange: (modes) => {
+      renderer.setAssignmentModes(modes);
+      const visibility = controls.getAssignmentModeVisibility();
+      Object.entries(visibility).forEach(([modeId, on]) => {
+        renderer.setAssignmentModeVisible(modeId, on);
+      });
+    },
+    onAssignmentModeVisibleChange: (modeId, visible) =>
+      renderer.setAssignmentModeVisible(modeId, visible),
+    onClearTrails: () => renderer.clearTrails(),
   });
   controls.setOptions(algorithms, scenarios, preferredAlg);
   renderer.setHerderKind(controls.getHerderKind());
+  renderer.setTrailVisible(controls.isTrailVisible());
+  renderer.setGcmGoalVisible(controls.isGcmGoalVisible());
   updateTitle();
   controls.root.querySelector('[data-role="algorithm"]').addEventListener('change', updateTitle);
 
@@ -213,6 +228,8 @@ export function createArenaSide(
     async mount() {
       log.info('arena', `Mounting side ${label}`);
       await withTimeout(renderer.init(), 20000, `Arena ${label} renderer`);
+      renderer.setTrailVisible(controls.isTrailVisible());
+      renderer.setGcmGoalVisible(controls.isGcmGoalVisible());
     },
     destroy() {
       closeSession();

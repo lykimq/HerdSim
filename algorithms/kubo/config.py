@@ -2,6 +2,9 @@
 
 Mapped from the MATLAB reference implementation
 (PatrickHup/Force-Based-Sheep-Herding-Algorithm) and Kubo et al. 2022.
+
+World / layout keys are shared (see core.shared_defaults); this module declares
+paper agent counts and Kubo-specific behavior only.
 """
 
 KUBO_DEFAULTS = {
@@ -24,11 +27,5 @@ KUBO_DEFAULTS = {
     "sheep_speed_max": 5.0,
     "dog_speed_max": 10.0,
     "use_advanced_vision": False,
-    # World / scenario defaults for drive_to_goal
-    "world_width": 150.0,
-    "world_height": 150.0,
-    "goal_center": [15.0, 15.0],
-    "goal_radius": 15.0,
-    "max_ticks": 3000,
     "r_a": 2.0,  # used by generic outlier metric
 }

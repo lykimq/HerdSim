@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from typing import Optional
+from typing import Any, Optional
 
 import pandas as pd
 from fastapi import APIRouter, HTTPException, Query
@@ -18,11 +18,17 @@ from api.benchmark_runner import (
     summary_to_csv,
     summary_to_markdown,
 )
+from api.benchmark_sweep import expand_param_grid, parse_sweep_specs
 
 router = APIRouter()
 
 # In-memory last benchmark for export convenience.
 _LAST_BENCHMARK: dict | None = None
+
+
+class SweepParam(BaseModel):
+    key: str
+    values: list[float | int] = Field(min_length=1)
 
 
 class BenchmarkRequest(BaseModel):
@@ -32,13 +38,26 @@ class BenchmarkRequest(BaseModel):
     preset: str = Field(default="paper", pattern="^(paper|scenario|custom)$")
     num_sheep: Optional[int] = Field(default=None, ge=1, le=200)
     num_shepherds: Optional[int] = Field(default=None, ge=1, le=10)
+    algorithm_params: Optional[dict[str, Any]] = None
+    sweep: Optional[list[SweepParam]] = None
 
 
-def _validate_request(req: BenchmarkRequest) -> None:
+def _validate_request(req: BenchmarkRequest) -> list[dict[str, Any]]:
     if not req.algorithm_ids:
         raise HTTPException(status_code=400, detail="algorithm_ids required")
     if not req.seeds:
         raise HTTPException(status_code=400, detail="seeds required")
+    try:
+        specs = parse_sweep_specs(
+            [item.model_dump() for item in req.sweep] if req.sweep else None
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    if specs and len(req.algorithm_ids) != 1:
+        raise HTTPException(
+            status_code=400, detail="Param sweep requires exactly one algorithm"
+        )
+    return specs
 
 
 @router.post("/run")
@@ -50,7 +69,8 @@ def benchmark_run(
     ),
 ):
     global _LAST_BENCHMARK
-    _validate_request(req)
+    specs = _validate_request(req)
+    sweep_payload = [s for s in specs] if specs else None
 
     if not stream:
         try:
@@ -61,8 +81,10 @@ def benchmark_run(
                 preset=req.preset,
                 num_sheep=req.num_sheep,
                 num_shepherds=req.num_shepherds,
+                algorithm_params=req.algorithm_params,
+                sweep=sweep_payload,
             )
-        except KeyError as exc:
+        except (KeyError, ValueError) as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
         _LAST_BENCHMARK = payload
         return payload
@@ -71,31 +93,35 @@ def benchmark_run(
         global _LAST_BENCHMARK
         try:
             rows = []
-            total = len(req.algorithm_ids) * len(req.seeds)
+            param_sets = expand_param_grid(specs)
+            total = len(req.algorithm_ids) * len(req.seeds) * len(param_sets)
             index = 0
             for algorithm_id in req.algorithm_ids:
-                for seed in req.seeds:
-                    index += 1
-                    for event in iter_one_trial(
-                        algorithm_id=algorithm_id,
-                        scenario_id=req.scenario_id,
-                        seed=seed,
-                        preset=req.preset,
-                        num_sheep=req.num_sheep,
-                        num_shepherds=req.num_shepherds,
-                        index=index,
-                        total=total,
-                    ):
-                        if event["type"] == "trial":
-                            rows.append(event["row"])
-                        yield json.dumps(event) + "\n"
+                for params in param_sets:
+                    for seed in req.seeds:
+                        index += 1
+                        for event in iter_one_trial(
+                            algorithm_id=algorithm_id,
+                            scenario_id=req.scenario_id,
+                            seed=seed,
+                            preset=req.preset,
+                            num_sheep=req.num_sheep,
+                            num_shepherds=req.num_shepherds,
+                            algorithm_params=req.algorithm_params,
+                            sweep_params=params or None,
+                            index=index,
+                            total=total,
+                        ):
+                            if event["type"] == "trial":
+                                rows.append(event["row"])
+                            yield json.dumps(event) + "\n"
             payload = {
                 "rows": rows,
                 "summary": summarize_rows(pd.DataFrame(rows)),
             }
             _LAST_BENCHMARK = payload
             yield json.dumps({"type": "done", **payload}) + "\n"
-        except KeyError as exc:
+        except (KeyError, ValueError) as exc:
             yield json.dumps({"type": "error", "message": str(exc)}) + "\n"
         except Exception as exc:  # noqa: BLE001 - surface failures to the UI stream
             yield json.dumps({"type": "error", "message": str(exc)}) + "\n"

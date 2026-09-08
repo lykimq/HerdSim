@@ -2,7 +2,11 @@
 
 const ALWAYS_SKIP = new Set(["use_advanced_vision"]);
 
-/** World / layout keys taken from the selected scenario (mirrors backend WORLD_KEYS). */
+/**
+ * World / layout keys owned by the scenario (mirrors core/shared_defaults.WORLD_KEYS).
+ * Algorithm default_config should not declare these; paper/custom merge them from
+ * the selected scenario on top of shared world fallbacks.
+ */
 export const SCENARIO_WORLD_KEYS = new Set([
   "world_width",
   "world_height",
@@ -18,6 +22,7 @@ export const SCENARIO_WORLD_KEYS = new Set([
   "n_clusters",
   "gate_width",
   "gate_y",
+  "collect_threshold_scale",
 ]);
 
 const WORLD_KEYS = SCENARIO_WORLD_KEYS;

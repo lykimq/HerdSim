@@ -7,12 +7,24 @@ from typing import Any, Callable, Iterator
 import pandas as pd
 
 from algorithms.registry import algorithm_registry
+from api.benchmark_summary import summarize_rows, summary_to_csv, summary_to_markdown
+from api.benchmark_sweep import expand_param_grid, parse_sweep_specs, sweep_label
 from core.experiment_config import resolve_experiment_config
 from core.simulation_runner import RunResult, SimulationRunner
 from metrics.registry import metric_registry
 from scenarios.registry import scenario_registry
 
 ProgressFn = Callable[[dict[str, Any]], None]
+
+# Re-export summary helpers for existing imports.
+__all__ = [
+    "iter_one_trial",
+    "run_benchmark",
+    "run_one_trial",
+    "summarize_rows",
+    "summary_to_csv",
+    "summary_to_markdown",
+]
 
 
 def _trial_row(
@@ -23,6 +35,7 @@ def _trial_row(
     seed: int,
     config: dict[str, Any],
     result,
+    sweep_params: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     row: dict[str, Any] = {
         "algorithm": algorithm_id,
@@ -34,6 +47,9 @@ def _trial_row(
         "success": bool(result.success),
         "total_ticks": int(result.total_ticks),
     }
+    if sweep_params:
+        row.update(sweep_params)
+        row["sweep_label"] = sweep_label(sweep_params)
     if not result.history.empty:
         final = result.history.iloc[-1].to_dict()
         row.update({k: v for k, v in final.items() if k != "tick"})
@@ -60,18 +76,24 @@ def iter_one_trial(
     preset: str = "paper",
     num_sheep: int | None = None,
     num_shepherds: int | None = None,
+    algorithm_params: dict[str, Any] | None = None,
+    sweep_params: dict[str, Any] | None = None,
     index: int = 1,
     total: int = 1,
 ) -> Iterator[dict[str, Any]]:
     """Yield start/tick/trial events for one algorithm x seed run."""
     algorithm = algorithm_registry.get(algorithm_id)
     scenario = scenario_registry.get(scenario_id)
+    merged_params = dict(algorithm_params or {})
+    if sweep_params:
+        merged_params.update(sweep_params)
     config = resolve_experiment_config(
         algorithm,
         scenario,
         preset=preset,
         num_sheep=num_sheep,
         num_shepherds=num_shepherds,
+        algorithm_params=merged_params or None,
     )
     runner = SimulationRunner(
         algorithm=algorithm,
@@ -92,6 +114,7 @@ def iter_one_trial(
         "tick": 0,
         "max_ticks": max_ticks,
         "fraction": 0.0,
+        "sweep_label": sweep_label(sweep_params) if sweep_params else "",
     }
 
     runner.initialize()
@@ -130,6 +153,7 @@ def iter_one_trial(
         seed=seed,
         config=config,
         result=result,
+        sweep_params=sweep_params,
     )
     yield {"type": "trial", "row": row, "index": index, "total": total}
 
@@ -142,6 +166,7 @@ def run_one_trial(
     preset: str = "paper",
     num_sheep: int | None = None,
     num_shepherds: int | None = None,
+    algorithm_params: dict[str, Any] | None = None,
     on_progress: ProgressFn | None = None,
 ) -> dict[str, Any]:
     """Run a single algorithm x seed trial and return one result row."""
@@ -153,6 +178,7 @@ def run_one_trial(
         preset=preset,
         num_sheep=num_sheep,
         num_shepherds=num_shepherds,
+        algorithm_params=algorithm_params,
     ):
         if event["type"] == "trial":
             row = event["row"]
@@ -171,129 +197,45 @@ def run_benchmark(
     preset: str = "paper",
     num_sheep: int | None = None,
     num_shepherds: int | None = None,
+    algorithm_params: dict[str, Any] | None = None,
+    sweep: list[dict[str, Any]] | None = None,
     on_progress: ProgressFn | None = None,
 ) -> dict[str, Any]:
-    """Run algorithm x seed trials and return rows + aggregate summary."""
+    """Run algorithm x seed (x optional param grid) trials; return rows + summary."""
     scenario_registry.get(scenario_id)
     for algorithm_id in algorithm_ids:
         algorithm_registry.get(algorithm_id)
 
+    specs = parse_sweep_specs(sweep)
+    if specs and len(algorithm_ids) != 1:
+        raise ValueError("Param sweep requires exactly one algorithm")
+    param_sets = expand_param_grid(specs)
+
     rows: list[dict[str, Any]] = []
-    total = len(algorithm_ids) * len(seeds)
+    total = len(algorithm_ids) * len(seeds) * len(param_sets)
     index = 0
 
     for algorithm_id in algorithm_ids:
-        for seed in seeds:
-            index += 1
-            for event in iter_one_trial(
-                algorithm_id=algorithm_id,
-                scenario_id=scenario_id,
-                seed=seed,
-                preset=preset,
-                num_sheep=num_sheep,
-                num_shepherds=num_shepherds,
-                index=index,
-                total=total,
-            ):
-                if event["type"] == "trial":
-                    rows.append(event["row"])
-                if on_progress:
-                    on_progress(event)
+        for params in param_sets:
+            for seed in seeds:
+                index += 1
+                for event in iter_one_trial(
+                    algorithm_id=algorithm_id,
+                    scenario_id=scenario_id,
+                    seed=seed,
+                    preset=preset,
+                    num_sheep=num_sheep,
+                    num_shepherds=num_shepherds,
+                    algorithm_params=algorithm_params,
+                    sweep_params=params or None,
+                    index=index,
+                    total=total,
+                ):
+                    if event["type"] == "trial":
+                        rows.append(event["row"])
+                    if on_progress:
+                        on_progress(event)
 
     df = pd.DataFrame(rows)
     summary = summarize_rows(df)
     return {"rows": rows, "summary": summary}
-
-
-def summarize_rows(df: pd.DataFrame) -> list[dict[str, Any]]:
-    if df.empty:
-        return []
-    out = []
-    for algorithm, group in df.groupby("algorithm"):
-        success_rate = float(group["success"].mean())
-        success_ticks = group.loc[group["success"], "total_ticks"]
-        out.append(
-            {
-                "algorithm": algorithm,
-                "trials": int(len(group)),
-                "success_rate": success_rate,
-                "mean_ticks_success": (
-                    float(success_ticks.mean()) if len(success_ticks) else None
-                ),
-                "median_ticks_success": (
-                    float(success_ticks.median()) if len(success_ticks) else None
-                ),
-                "mean_cohesion": (
-                    float(group["cohesion"].mean())
-                    if "cohesion" in group.columns
-                    else None
-                ),
-                "mean_shepherd_path": (
-                    float(group["shepherd_path"].mean())
-                    if "shepherd_path" in group.columns
-                    else None
-                ),
-                "cohesion_std": (
-                    float(group["cohesion"].std(ddof=0))
-                    if "cohesion" in group.columns
-                    else None
-                ),
-            }
-        )
-    return out
-
-
-# Back-compat alias used by older imports.
-_summarize = summarize_rows
-
-
-def summary_to_csv(payload: dict[str, Any]) -> str:
-    rows = payload.get("rows") or []
-    if not rows:
-        return ""
-    from api.benchmark_defs import csv_definitions_preamble
-
-    frame = pd.DataFrame(rows)
-    body = frame.to_csv(index=False)
-    return csv_definitions_preamble(list(frame.columns)) + body
-
-
-def summary_to_markdown(payload: dict[str, Any]) -> str:
-    from api.benchmark_defs import SUMMARY_METRIC_DEFS
-
-    summary = payload.get("summary") or []
-    lines = [
-        "## Benchmark summary",
-        "",
-        "| Algorithm | Trials | Success | Mean ticks | Median ticks | Mean cohesion | Mean path |",
-        "|---|---:|---:|---:|---:|---:|---:|",
-    ]
-    for row in summary:
-        lines.append(
-            "| {algorithm} | {trials} | {success:.1%} | {mean_ticks} | {median_ticks} | {cohesion} | {path} |".format(
-                algorithm=row.get("algorithm"),
-                trials=row.get("trials"),
-                success=float(row.get("success_rate") or 0),
-                mean_ticks=row.get("mean_ticks_success")
-                if row.get("mean_ticks_success") is not None
-                else "n/a",
-                median_ticks=row.get("median_ticks_success")
-                if row.get("median_ticks_success") is not None
-                else "n/a",
-                cohesion=(
-                    f"{row['mean_cohesion']:.2f}"
-                    if row.get("mean_cohesion") is not None
-                    else "n/a"
-                ),
-                path=(
-                    f"{row['mean_shepherd_path']:.1f}"
-                    if row.get("mean_shepherd_path") is not None
-                    else "n/a"
-                ),
-            )
-        )
-    lines.extend(["", "## Summary metric definitions", ""])
-    for item in SUMMARY_METRIC_DEFS:
-        lines.append(f"- **{item['label']}** (`{item['id']}`): {item['description']}")
-    lines.append("")
-    return "\n".join(lines)

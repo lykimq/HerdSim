@@ -9,5 +9,19 @@
   "agent_types": ["sheep", "dog"],
   "herder_kind": "dog",
   "herder_label": "Dog",
-  "default_agents": {"sheep": 50, "shepherds": 3}
+  "default_agents": {"sheep": 50, "shepherds": 3},
+  "overlays": {
+    "assignment_modes": [
+      {
+        "id": "collect",
+        "label": "Collect: herder to assigned outlier sheep.",
+        "color": "#fbbf24"
+      },
+      {
+        "id": "drive",
+        "label": "Drive: herder to spaced stand-off behind the flock.",
+        "color": "#67e8f9"
+      }
+    ]
+  }
 }

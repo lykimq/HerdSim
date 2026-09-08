@@ -11,6 +11,7 @@ export function createMetricsPanel(metricDefs = null, title = 'Live Metrics') {
   const ticksEl = root.querySelector('[data-role="ticks"]');
   const defaultIds = [
     'cohesion',
+    'gcm_goal',
     'shepherd_path',
     'polarization',
     'outlier_count',

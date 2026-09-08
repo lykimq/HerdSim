@@ -27,6 +27,7 @@ from algorithms.strombom.heuristics import (
     collect_target,
     drive_target,
     should_collect,
+    strombom_assignment_lines,
 )
 from core.agents.sheep import compute_noise, nearest_neighbor_indices, unit_vector
 from core.agents.shepherd import move_toward
@@ -60,6 +61,11 @@ class FlockingDogAlgorithm(BaseAlgorithm):
 
         metadata = dict(state.metadata)
         metadata["r_a"] = float(config.get("r_a", 2.0))
+        if state.n_shepherds and state.n_sheep:
+            metadata["assignment_lines"] = strombom_assignment_lines(state, config)
+            metadata["herding_mode"] = (
+                "collect" if should_collect(state, config) else "drive"
+            )
 
         return SimulationState(
             tick=state.tick,

@@ -1,4 +1,10 @@
 import { mountTips } from '../utils/tooltips.js';
+import {
+  assignmentModeOptionHtml,
+  assignmentModesFromAlgorithm,
+  GCM_GOAL_LABEL,
+  TRAIL_LABEL,
+} from '../utils/displayOverlays.js';
 import { controlPanelHtml } from './controlPanelMarkup.js';
 import { createParamRefresh } from './controlPanelParams.js';
 
@@ -10,6 +16,11 @@ export function createControlPanel({
   onReset,
   onSpeedChange,
   onAlgorithmChange,
+  onTrailVisibleChange,
+  onGcmGoalVisibleChange,
+  onAssignmentModesChange,
+  onAssignmentModeVisibleChange,
+  onClearTrails,
   sideLabel = '',
   paramsOpen = true,
 }) {
@@ -40,6 +51,9 @@ export function createControlPanel({
     worldParams: root.querySelector('[data-role="world-params"]'),
     speed: root.querySelector('[data-role="speed"]'),
     speedLabel: root.querySelector('[data-role="speed-label"]'),
+    trailLabel: root.querySelector('[data-role="trail-label"]'),
+    gcmGoalLabel: root.querySelector('[data-role="gcm-goal-label"]'),
+    assignmentOverlays: root.querySelector('[data-role="assignment-overlays"]'),
   };
 
   const state = {
@@ -53,10 +67,27 @@ export function createControlPanel({
     scenarioDefaults: {},
     lockCustom: false,
     fairSheepOverride: null,
+    assignmentModes: [],
   };
 
   function currentPreset() {
     return els.preset.value;
+  }
+
+  function refreshDisplayOverlays() {
+    const alg = state.algorithms.find((a) => a.id === state.selectedAlg);
+    if (els.trailLabel) els.trailLabel.textContent = TRAIL_LABEL;
+    if (els.gcmGoalLabel) els.gcmGoalLabel.textContent = GCM_GOAL_LABEL;
+    state.assignmentModes = assignmentModesFromAlgorithm(alg);
+    els.assignmentOverlays.innerHTML = state.assignmentModes
+      .map((mode) => assignmentModeOptionHtml(mode))
+      .join('');
+    els.assignmentOverlays.querySelectorAll('[data-role="assignment-mode"]').forEach((input) => {
+      input.addEventListener('change', () => {
+        onAssignmentModeVisibleChange?.(input.dataset.mode, input.checked);
+      });
+    });
+    onAssignmentModesChange?.(state.assignmentModes);
   }
 
   const { refreshParamControls } = createParamRefresh({
@@ -64,6 +95,7 @@ export function createControlPanel({
     state,
     currentPreset,
     onAlgorithmChange,
+    afterRefresh: refreshDisplayOverlays,
   });
 
   els.algorithm.addEventListener('change', () => {
@@ -100,6 +132,17 @@ export function createControlPanel({
     onSpeedChange?.(speed);
   });
 
+  const trailVisible = root.querySelector('[data-role="trail-visible"]');
+  const gcmGoalVisible = root.querySelector('[data-role="gcm-goal-visible"]');
+  const clearTrailsBtn = root.querySelector('[data-role="clear-trails"]');
+  trailVisible.addEventListener('change', () => {
+    onTrailVisibleChange?.(trailVisible.checked);
+  });
+  gcmGoalVisible.addEventListener('change', () => {
+    onGcmGoalVisibleChange?.(gcmGoalVisible.checked);
+  });
+  clearTrailsBtn.addEventListener('click', () => onClearTrails?.());
+
   root.querySelector('[data-role="init"]').addEventListener('click', () => onInit?.(getConfig()));
   root.querySelector('[data-role="play"]').addEventListener('click', () => onPlay?.());
   root.querySelector('[data-role="pause"]').addEventListener('click', () => onPause?.());
@@ -128,7 +171,6 @@ export function createControlPanel({
     playbackEls.speed.disabled = !speed;
   }
 
-  // Playback starts locked until a session is initialized.
   setPlaybackEnabled({
     play: false,
     pause: false,
@@ -212,6 +254,22 @@ export function createControlPanel({
     return alg?.name || els.algorithm.value;
   }
 
+  function isTrailVisible() {
+    return Boolean(trailVisible.checked);
+  }
+
+  function isGcmGoalVisible() {
+    return Boolean(gcmGoalVisible.checked);
+  }
+
+  function getAssignmentModeVisibility() {
+    const out = {};
+    els.assignmentOverlays.querySelectorAll('[data-role="assignment-mode"]').forEach((input) => {
+      out[input.dataset.mode] = input.checked;
+    });
+    return out;
+  }
+
   return {
     root,
     setOptions,
@@ -223,6 +281,9 @@ export function createControlPanel({
     setAlgorithm,
     getAlgorithmName,
     getHerderKind,
+    isTrailVisible,
+    isGcmGoalVisible,
+    getAssignmentModeVisibility,
     refreshParamControls,
     setPlaybackEnabled,
   };

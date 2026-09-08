@@ -30,6 +30,7 @@ describe('buildRunReport', () => {
           n: 50,
           metrics: {
             cohesion: 12,
+            gcm_goal: 40,
             sheep_in_goal: 0,
             outlier_count: 4,
             shepherd_path: 0,
@@ -42,6 +43,7 @@ describe('buildRunReport', () => {
           n: 50,
           metrics: {
             cohesion: 7,
+            gcm_goal: 25,
             sheep_in_goal: 10,
             outlier_count: 1,
             shepherd_path: 80,
@@ -54,6 +56,7 @@ describe('buildRunReport', () => {
           n: 50,
           metrics: {
             cohesion: 4.67,
+            gcm_goal: 8,
             sheep_in_goal: 50,
             outlier_count: 0,
             shepherd_path: 210.5,
@@ -83,6 +86,8 @@ describe('buildRunReport', () => {
     assert.match(text, /First sheep entered the goal around tick 60/);
     assert.match(text, /Whole flock was in the goal from tick 120/);
     assert.match(text, /Total shepherd path length: 210\.50/);
+    assert.match(text, /Final GCM-to-goal distance: 8/);
+    assert.match(text, /40 -> 8/);
     assert.match(text, /mostly aligned/);
     assert.match(text, /Peak outlier count during the run: 4/);
   });

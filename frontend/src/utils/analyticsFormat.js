@@ -6,8 +6,8 @@ function plotlyUnavailableHtml() {
   return '<div style="color:var(--text-muted)">Plotly is loading or unavailable.</div>';
 }
 
-function algorithmOrder(rows) {
-  return [...new Set(rows.map((r) => r.algorithm))];
+function algorithmOrder(rows, groupKey = 'algorithm') {
+  return [...new Set(rows.map((r) => r[groupKey]).filter((v) => v != null && v !== ''))];
 }
 
 function colorForAlgorithm(algorithms, algorithmId) {
@@ -28,7 +28,7 @@ function baseLayout(title, yTitle, xTitle = 'Algorithm') {
 }
 
 /**
- * Box plot of a per-trial metric by algorithm.
+ * Box plot of a per-trial metric by algorithm (or sweep_label).
  * Failed trials can be excluded from the box and/or marked with X overlays.
  */
 export function renderPlotlyBoxPlot(container, rawRows, key, label, options = {}) {
@@ -41,10 +41,12 @@ export function renderPlotlyBoxPlot(container, rawRows, key, label, options = {}
   const {
     boxSuccessOnly = false,
     annotateFailures = true,
+    groupKey = 'algorithm',
+    xTitle = groupKey === 'sweep_label' ? 'Parameter set' : 'Algorithm',
   } = options;
 
   const rows = rawRows || [];
-  const algorithms = algorithmOrder(rows);
+  const algorithms = algorithmOrder(rows, groupKey);
   if (!algorithms.length) {
     container.innerHTML = '<div style="color:var(--text-muted)">No trial data yet.</div>';
     return;
@@ -52,13 +54,13 @@ export function renderPlotlyBoxPlot(container, rawRows, key, label, options = {}
 
   const traces = algorithms.map((alg) => {
     const algRows = rows.filter((r) => {
-      if (r.algorithm !== alg || r[key] == null) return false;
+      if (r[groupKey] !== alg || r[key] == null) return false;
       return boxSuccessOnly ? r.success : true;
     });
     return {
       y: algRows.map((r) => Number(r[key])),
       type: 'box',
-      name: alg,
+      name: String(alg),
       marker: { color: colorForAlgorithm(algorithms, alg) },
       boxpoints: false,
     };
@@ -71,7 +73,7 @@ export function renderPlotlyBoxPlot(container, rawRows, key, label, options = {}
         type: 'scatter',
         mode: 'markers',
         name: 'Failed',
-        x: fails.map((r) => r.algorithm),
+        x: fails.map((r) => r[groupKey]),
         y: fails.map((r) => Number(r[key])),
         text: fails.map((r) => `seed ${r.seed}`),
         marker: {
@@ -86,7 +88,7 @@ export function renderPlotlyBoxPlot(container, rawRows, key, label, options = {}
   }
 
   const layout = {
-    ...baseLayout(label, label),
+    ...baseLayout(label, label, xTitle),
     showlegend: annotateFailures && rows.some((r) => !r.success),
     legend: { orientation: 'h', y: -0.2, font: { color: '#cbd5e1' } },
   };
@@ -172,6 +174,7 @@ export function summaryRowHtml(row) {
     <td>${row.median_ticks_success ?? 'n/a'}</td>
     <td>${row.mean_cohesion != null ? Number(row.mean_cohesion).toFixed(2) : 'n/a'}</td>
     <td>${row.mean_shepherd_path != null ? Number(row.mean_shepherd_path).toFixed(1) : 'n/a'}</td>
+    <td>${row.mean_gcm_goal != null ? Number(row.mean_gcm_goal).toFixed(2) : 'n/a'}</td>
   `;
 }
 

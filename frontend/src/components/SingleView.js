@@ -32,9 +32,14 @@ export function createSingleView({ algorithms, scenarios, onStatus, preferredAlg
   side.className = 'single-side';
 
   const historyPanel = createMetricHistoryPanel({
-    onScrub: (row) => {
+    onScrub: (row, scrubIndex) => {
       if (!row?.frame) return;
-      renderer.render(row.frame);
+      renderer.render(row.frame, { recordTrail: false });
+      const frames = history
+        .slice(0, Math.max(0, scrubIndex) + 1)
+        .map((entry) => entry.frame)
+        .filter(Boolean);
+      renderer.setTrailsFromFrames(frames);
       metrics.update(row.metrics || {}, history.length);
       distributions.update(row.frame);
       onStatus?.({
@@ -82,6 +87,7 @@ export function createSingleView({ algorithms, scenarios, onStatus, preferredAlg
         historyPanel.clear();
         distributions.clear();
         runReport.clear();
+        renderer.clearTrails();
         const { session, socket: nextSocket } = await openSimulationSession({
           cfg,
           renderer,
@@ -155,6 +161,18 @@ export function createSingleView({ algorithms, scenarios, onStatus, preferredAlg
       herderKind = kind;
       renderer.setHerderKind(kind);
     },
+    onTrailVisibleChange: (visible) => renderer.setTrailVisible(visible),
+    onGcmGoalVisibleChange: (visible) => renderer.setGcmGoalVisible(visible),
+    onAssignmentModesChange: (modes) => {
+      renderer.setAssignmentModes(modes);
+      const visibility = controls.getAssignmentModeVisibility();
+      Object.entries(visibility).forEach(([modeId, on]) => {
+        renderer.setAssignmentModeVisible(modeId, on);
+      });
+    },
+    onAssignmentModeVisibleChange: (modeId, visible) =>
+      renderer.setAssignmentModeVisible(modeId, visible),
+    onClearTrails: () => renderer.clearTrails(),
   });
 
   controls.setOptions(algorithms, scenarios, preferredAlg);
@@ -165,9 +183,20 @@ export function createSingleView({ algorithms, scenarios, onStatus, preferredAlg
   center.appendChild(canvasHost);
   center.appendChild(historyPanel.root);
 
-  side.appendChild(runReport.root);
-  side.appendChild(metrics.root);
-  side.appendChild(distributions.root);
+  const liveGroup = document.createElement('div');
+  liveGroup.className = 'single-side-group';
+  liveGroup.innerHTML = '<div class="section-title single-side-group-title">Live</div>';
+  liveGroup.appendChild(metrics.root);
+  liveGroup.appendChild(distributions.root);
+
+  const afterGroup = document.createElement('div');
+  afterGroup.className = 'single-side-group';
+  afterGroup.innerHTML =
+    '<div class="section-title single-side-group-title">After run</div>';
+  afterGroup.appendChild(runReport.root);
+
+  side.appendChild(liveGroup);
+  side.appendChild(afterGroup);
 
   root.appendChild(controls.root);
   root.appendChild(center);
@@ -183,6 +212,8 @@ export function createSingleView({ algorithms, scenarios, onStatus, preferredAlg
       log.warn('single', `Could not load metric definitions: ${err.message}`);
     }
     await withTimeout(renderer.init(), 20000, 'Single renderer');
+    renderer.setTrailVisible(controls.isTrailVisible());
+    renderer.setGcmGoalVisible(controls.isGcmGoalVisible());
     log.info('single', 'Single view ready');
     syncPlayback();
   }

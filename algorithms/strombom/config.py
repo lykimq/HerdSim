@@ -2,6 +2,9 @@
 
 Reference: Strombom et al., J. Royal Soc. Interface, 2014, Table 1.
 Parameter names follow the paper's notation where practical.
+
+World / layout keys are shared (see core.shared_defaults); this module declares
+paper agent counts and Strombom-specific behavior only.
 """
 
 STROMBOM_DEFAULTS = {
@@ -25,10 +28,4 @@ STROMBOM_DEFAULTS = {
     # Extension (not in Strombom 2014): scenarios may supply
     # collect_threshold_scale > 1.0 to widen the threshold.
     "collect_threshold_scale": 1.0,
-    # World
-    "world_width": 150.0,
-    "world_height": 150.0,
-    "goal_center": [15.0, 15.0],
-    "goal_radius": 15.0,
-    "max_ticks": 3000,
 }

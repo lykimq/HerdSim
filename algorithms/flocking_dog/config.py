@@ -2,6 +2,9 @@
 
 Mapped from Jadhav et al., Communications Biology 2024 (Methods / Fig. 7)
 and the authors' reference MATLAB `model/herding_model.m` + `simulation_hm.m`.
+
+World / layout keys are shared (see core.shared_defaults); this module declares
+paper agent counts and Flocking Dog-specific behavior only.
 """
 
 FLOCKING_DOG_DEFAULTS = {
@@ -28,10 +31,4 @@ FLOCKING_DOG_DEFAULTS = {
     # Collect/Drive (paper uses Strombom-style f(N), pd, pc)
     # f(N) = r_a * N^(2/3); pd = r_a * sqrt(N); pc = r_a
     "collect_threshold_scale": 1.0,
-    # World
-    "world_width": 150.0,
-    "world_height": 150.0,
-    "goal_center": [15.0, 15.0],
-    "goal_radius": 15.0,
-    "max_ticks": 3000,
 }

@@ -6,29 +6,14 @@ from typing import Any
 
 from core.base_algorithm import BaseAlgorithm
 from core.base_scenario import BaseScenario
-
-WORLD_KEYS = (
-    "world_width",
-    "world_height",
-    "goal_center",
-    "goal_radius",
-    "max_ticks",
-    "pen_center",
-    "pen_radius",
-    "obstacles",
-    "initial_spread",
-    "shepherd_start_offset",
-    "success_fraction",
-    "n_clusters",
-    "gate_width",
-    "gate_y",
-    "collect_threshold_scale",
+from core.shared_defaults import (
+    SHARED_WORLD_DEFAULTS,
+    WORLD_KEYS,
+    scenario_world_config,
 )
 
-
-def _scenario_world_config(scenario_defaults: dict[str, Any]) -> dict[str, Any]:
-    """World / layout keys from the selected scenario (goal, obstacles, etc.)."""
-    return {k: v for k, v in scenario_defaults.items() if k in WORLD_KEYS}
+# Re-export for callers that import WORLD_KEYS from this module.
+__all__ = ["WORLD_KEYS", "resolve_experiment_config"]
 
 
 def resolve_experiment_config(
@@ -43,6 +28,9 @@ def resolve_experiment_config(
 ) -> dict[str, Any]:
     """Build the run config used by SimulationRunner.
 
+    Composition:
+      shared world defaults -> algorithm defaults -> scenario overlay -> overrides
+
     Presets:
     - paper: algorithm paper parameters and agent counts; world layout from scenario
     - scenario: algorithm defaults, then full scenario.default_config overlay
@@ -52,14 +40,15 @@ def resolve_experiment_config(
     if preset not in {"paper", "scenario", "custom"}:
         raise ValueError(f"Unknown preset '{preset}'. Use paper|scenario|custom.")
 
-    config = dict(algorithm.default_config)
+    config = dict(SHARED_WORLD_DEFAULTS)
+    config.update(dict(algorithm.default_config))
     scenario_defaults = dict(getattr(scenario, "default_config", {}) or {})
 
     if preset == "scenario":
         config.update(scenario_defaults)
     else:
         # paper and custom: keep algorithm behavior params, use scenario layout.
-        config.update(_scenario_world_config(scenario_defaults))
+        config.update(scenario_world_config(scenario_defaults))
 
     if algorithm_params:
         config.update(algorithm_params)

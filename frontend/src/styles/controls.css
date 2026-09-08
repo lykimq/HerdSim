@@ -88,6 +88,69 @@
   line-height: 1.35;
 }
 
+.control-group .trail-actions {
+  padding-left: 0;
+  margin-top: 0.15rem;
+}
+
+.control-group .btn[data-role="clear-trails"] {
+  align-self: flex-start;
+}
+
+.display-overlays [data-role="assignment-overlays"] {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.display-overlays [data-role="assignment-overlays"]:empty {
+  display: none;
+}
+
+.display-overlays .check-item.overlay-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.35;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.display-overlays .overlay-option > span:last-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.display-overlays .overlay-option input[type="checkbox"] {
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+}
+
+.overlay-swatch {
+  flex: 0 0 auto;
+  width: 1.1rem;
+  height: 0.28rem;
+  margin-top: 0.4rem;
+  border-radius: 999px;
+}
+
+.overlay-swatch--trail {
+  background: #cbd5e1;
+}
+
+.overlay-swatch--gcm-goal {
+  background: #c084fc;
+}
+
+
 .param-item input[type="number"] {
   width: 100%;
   min-width: 0;
@@ -245,7 +308,24 @@ select, input[type="number"], input[type="range"], input[type="text"] {
   overflow: visible;
 }
 
-.single-side > .card-glass {
+.single-side-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.single-side-group-title {
+  margin: 0;
+  padding: 0 0.1rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.single-side > .card-glass,
+.single-side-group > .card-glass {
   flex: 0 0 auto;
   min-height: auto;
   overflow: visible;
@@ -266,7 +346,7 @@ select, input[type="number"], input[type="range"], input[type="text"] {
 
 .single-center .metric-history-panel [data-role="charts"] {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 0.3rem 0.55rem;
 }
 

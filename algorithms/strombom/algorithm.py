@@ -12,7 +12,11 @@ from typing import Any
 import numpy as np
 
 from algorithms.strombom.config import STROMBOM_DEFAULTS
-from algorithms.strombom.heuristics import compute_shepherd_velocity
+from algorithms.strombom.heuristics import (
+    compute_shepherd_velocity,
+    should_collect,
+    strombom_assignment_lines,
+)
 from core.agents.sheep import (
     compose_strombom_heading,
     compute_attraction,
@@ -63,6 +67,11 @@ class StrombomAlgorithm(BaseAlgorithm):
                 metadata.get("collect_threshold_scale", 1.0),
             )
         )
+        if state.n_shepherds and state.n_sheep:
+            metadata["assignment_lines"] = strombom_assignment_lines(state, config)
+            metadata["herding_mode"] = (
+                "collect" if should_collect(state, config) else "drive"
+            )
 
         return SimulationState(
             tick=state.tick,

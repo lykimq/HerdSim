@@ -4,12 +4,37 @@ export function analyticsRunnerHtml() {
   return `
     <div class="section-title">Benchmark Runner</div>
     <p class="analytics-intro">
-      Analytics runs batch benchmarks: choose algorithms, a scenario, and seeds, then compare success rate and timing across trials. Use Single or Arena to watch one run; use this tab for multi-seed comparison and CSV/JSON/Markdown export.
+      Compare algorithms across seeds, or sweep one to two numeric parameters for a single algorithm. Use Single or Arena to watch one run; use this tab for batch comparison and CSV/JSON/Markdown export.
     </p>
     <div class="control-group">
+      <label>Mode</label>
+      <select data-role="mode">
+        <option value="compare">Compare algorithms</option>
+        <option value="sweep">Param sweep</option>
+      </select>
+      <p class="param-hint">Compare runs several algorithms on the same seeds. Sweep grids 1-2 params for one algorithm.</p>
+    </div>
+    <div class="control-group" data-role="compare-algs">
       <label>Algorithms</label>
       <div class="check-list" data-role="algs"></div>
       <p class="param-hint" data-role="algorithm-blurb"></p>
+    </div>
+    <div class="control-group hidden" data-role="sweep-alg-wrap">
+      <label>Algorithm</label>
+      <select data-role="sweep-alg"></select>
+      <p class="param-hint" data-role="sweep-alg-blurb"></p>
+    </div>
+    <div class="control-group hidden" data-role="sweep-fields">
+      <label>Param 1 key</label>
+      <select data-role="sweep-key-1"></select>
+      <label>Param 1 values (comma-separated)</label>
+      <input data-role="sweep-values-1" type="text" value="1, 5, 10" />
+      <label>Param 2 key (optional)</label>
+      <select data-role="sweep-key-2">
+        <option value="">(none)</option>
+      </select>
+      <label>Param 2 values</label>
+      <input data-role="sweep-values-2" type="text" value="" placeholder="e.g. 0.5, 1.0" />
     </div>
     <div class="control-group">
       <label>Scenario</label>
@@ -116,6 +141,11 @@ export function analyticsChartsHtml() {
       'Min Separation',
       'Closest pair of sheep at the end of each trial (world units). Very low values can mean crowding or collisions. Red X = failed trials.',
       'chart-min-sep',
+    )}
+    ${chartBlock(
+      'GCM to Goal',
+      'Distance from flock centroid to goal centre at the end of each trial (world units). Lower means the flock ended closer to the goal. Red X = failed trials.',
+      'chart-gcm-goal',
     )}
     ${chartBlock(
       'Path vs Convergence',

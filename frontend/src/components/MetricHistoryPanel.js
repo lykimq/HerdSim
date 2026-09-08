@@ -5,6 +5,7 @@ const SERIES = [
   { id: 'sheep_in_goal', label: 'In goal', color: '#4ade80' },
   { id: 'shepherd_path', label: 'Path', color: '#fbbf24' },
   { id: 'min_separation', label: 'Min sep', color: '#67e8f9' },
+  { id: 'polarization', label: 'Polarisation', color: '#38bdf8' },
 ];
 
 function formatValue(id, val) {

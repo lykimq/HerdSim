@@ -31,7 +31,11 @@ class BaseAlgorithm(ABC):
     @property
     @abstractmethod
     def default_config(self) -> dict[str, Any]:
-        """Default parameter values shown in UI and used if not overridden."""
+        """Algorithm-specific defaults (agent counts + behavior params).
+
+        Do not include world/layout keys; those come from shared defaults and
+        the selected scenario via resolve_experiment_config.
+        """
 
     @abstractmethod
     def step(self, state: SimulationState, config: dict[str, Any]) -> SimulationState:

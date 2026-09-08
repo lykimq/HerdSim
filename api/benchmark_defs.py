@@ -39,10 +39,16 @@ SUMMARY_METRIC_DEFS: list[dict[str, str]] = [
         "label": "Mean path",
         "description": "Average final-tick cumulative shepherd travel distance in world units.",
     },
+    {
+        "id": "mean_gcm_goal",
+        "label": "Mean GCM-goal",
+        "description": "Average final-tick distance from flock GCM to goal centre, in world units.",
+    },
 ]
 
 # Per-trial columns written by Export CSV (final-tick snapshot + run metadata).
 CSV_COLUMN_DEFS: list[dict[str, str]] = [
+    {"id": "sweep_label", "description": "Param-grid label when Analytics ran a sweep (empty otherwise)."},
     {"id": "algorithm", "description": "Algorithm id for this trial."},
     {"id": "scenario", "description": "Scenario id used for this trial."},
     {"id": "preset", "description": "Config preset: paper, scenario, or custom."},
@@ -69,6 +75,10 @@ CSV_COLUMN_DEFS: list[dict[str, str]] = [
     {
         "id": "cohesion",
         "description": "Final-tick mean sheep distance to flock centroid, in world units.",
+    },
+    {
+        "id": "gcm_goal",
+        "description": "Final-tick distance from flock GCM to goal centre, in world units.",
     },
     {
         "id": "shepherd_path",

@@ -6,18 +6,18 @@ import {
   scenarioBlurb,
 } from '../utils/params.js';
 import {
-  renderPlotlyBoxPlot,
-  renderPlotlyPathTicksScatter,
   methodCardHtml,
   summaryHeadHtml,
   summaryRowHtml,
   trialUnits,
 } from '../utils/analyticsFormat.js';
+import { renderAnalyticsCharts } from '../utils/analyticsCharts.js';
 import {
   analyticsChartsHtml,
   analyticsRunnerHtml,
   analyticsSideTabsHtml,
 } from './analyticsMarkup.js';
+import { bindAnalyticsMode } from './analyticsMode.js';
 import { mountTips } from '../utils/tooltips.js';
 
 const DEFAULT_BENCHMARK_ALG_IDS = ['strombom', 'kubo', 'flocking_dog'];
@@ -118,12 +118,16 @@ export function createAnalyticsDashboard({ algorithms, scenarios, globalState })
   const presetBlurb = runner.querySelector('[data-role="preset-blurb"]');
 
   function syncContextBlurbs() {
-    const ids = selectedAlgorithmIds();
+    const mode = runner.querySelector('[data-role="mode"]').value;
+    const ids =
+      mode === 'sweep'
+        ? [runner.querySelector('[data-role="sweep-alg"]').value]
+        : selectedAlgorithmIds();
     const alg = algorithms.find((a) => a.id === ids[0]);
     const scen = scenarios.find((s) => s.id === scenSelect.value);
     const preset = presetSelect.value;
 
-    if (ids.length > 1) {
+    if (mode !== 'sweep' && ids.length > 1) {
       algBlurbEl.textContent =
         'Multiple algorithms selected; each uses its own paper/reference defaults when Settings source is Algorithm (paper).';
     } else {
@@ -134,7 +138,7 @@ export function createAnalyticsDashboard({ algorithms, scenarios, globalState })
     scenBlurbEl.textContent = scenarioBlurb(scen);
     scenBlurbEl.classList.toggle('hidden', !scenBlurbEl.textContent);
 
-    if (preset === 'paper' && ids.length > 1) {
+    if (preset === 'paper' && mode !== 'sweep' && ids.length > 1) {
       presetBlurb.textContent =
         'Each selected algorithm runs with its own paper/reference defaults.';
     } else {
@@ -149,7 +153,13 @@ export function createAnalyticsDashboard({ algorithms, scenarios, globalState })
   algList.addEventListener('change', syncContextBlurbs);
   scenSelect.addEventListener('change', syncContextBlurbs);
   presetSelect.addEventListener('change', syncContextBlurbs);
-  syncContextBlurbs();
+
+  const modeApi = bindAnalyticsMode({
+    runner,
+    algorithms,
+    selectedAlgorithmIds,
+    syncContextBlurbs,
+  });
 
   const progressWrap = runner.querySelector('[data-role="progress-wrap"]');
   const progressBar = runner.querySelector('[data-role="progress-bar"]');
@@ -189,46 +199,7 @@ export function createAnalyticsDashboard({ algorithms, scenarios, globalState })
   }
 
   function renderCharts(rows) {
-    const data = rows || [];
-    renderPlotlyBoxPlot(
-      charts.querySelector('[data-role="chart-ticks"]'),
-      data,
-      'total_ticks',
-      'Convergence Time (Ticks)',
-      { boxSuccessOnly: true, annotateFailures: true },
-    );
-    renderPlotlyBoxPlot(
-      charts.querySelector('[data-role="chart-path"]'),
-      data,
-      'shepherd_path',
-      'Shepherd Path',
-      { boxSuccessOnly: false, annotateFailures: true },
-    );
-    renderPlotlyBoxPlot(
-      charts.querySelector('[data-role="chart-cohesion"]'),
-      data,
-      'cohesion',
-      'Final Cohesion',
-      { boxSuccessOnly: false, annotateFailures: true },
-    );
-    renderPlotlyBoxPlot(
-      charts.querySelector('[data-role="chart-polarization"]'),
-      data,
-      'polarization',
-      'Polarization',
-      { boxSuccessOnly: false, annotateFailures: true },
-    );
-    renderPlotlyBoxPlot(
-      charts.querySelector('[data-role="chart-min-sep"]'),
-      data,
-      'min_separation',
-      'Min Separation',
-      { boxSuccessOnly: false, annotateFailures: true },
-    );
-    renderPlotlyPathTicksScatter(
-      charts.querySelector('[data-role="chart-scatter"]'),
-      data,
-    );
+    renderAnalyticsCharts(charts, rows);
   }
 
   function renderSummary(payload) {
@@ -246,11 +217,6 @@ export function createAnalyticsDashboard({ algorithms, scenarios, globalState })
   runner.querySelector('[data-role="run"]').addEventListener('click', async () => {
     const runBtn = runner.querySelector('[data-role="run"]');
     const clearBtn = runner.querySelector('[data-role="clear"]');
-    const selected = selectedAlgorithmIds();
-    if (!selected.length) {
-      setIdleStatus('Select at least one algorithm.');
-      return;
-    }
     const seeds = runner
       .querySelector('[data-role="seeds"]')
       .value.split(',')
@@ -260,49 +226,50 @@ export function createAnalyticsDashboard({ algorithms, scenarios, globalState })
       setIdleStatus('Enter at least one seed.');
       return;
     }
+    const built = modeApi.buildRequest(seeds);
+    if (built.error) {
+      setIdleStatus(built.error);
+      return;
+    }
 
-    const total = selected.length * seeds.length;
     const started = performance.now();
     runBtn.disabled = true;
     clearBtn.disabled = true;
-    setProgress(0, total, `Starting ${total} trials...`);
+    setProgress(0, 1, 'Starting trials...');
 
     try {
-      const payload = await runBenchmark(
-        {
-          algorithm_ids: selected,
-          scenario_id: scenSelect.value,
-          seeds,
-          preset: runner.querySelector('[data-role="preset"]').value,
+      const payload = await runBenchmark(built.payload, {
+        onEvent: (event) => {
+          const elapsed = ((performance.now() - started) / 1000).toFixed(0);
+          if (event.type === 'progress' || event.type === 'tick') {
+            const tickPart =
+              event.tick != null && event.max_ticks != null
+                ? ` tick ${event.tick}/${event.max_ticks}`
+                : '';
+            const sweepPart = event.sweep_label ? ` [${event.sweep_label}]` : '';
+            setProgress(
+              trialUnits(event),
+              event.total,
+              `Running ${event.index}/${event.total}: ${event.algorithm}${sweepPart} seed ${event.seed}${tickPart} (${elapsed}s)`,
+            );
+          } else if (event.type === 'trial') {
+            const ok = event.row?.success ? 'ok' : 'fail';
+            setProgress(
+              event.index,
+              event.total,
+              `Finished ${event.index}/${event.total} (${ok}, ${elapsed}s)`,
+            );
+          }
         },
-        {
-          onEvent: (event) => {
-            const elapsed = ((performance.now() - started) / 1000).toFixed(0);
-            if (event.type === 'progress' || event.type === 'tick') {
-              const tickPart =
-                event.tick != null && event.max_ticks != null
-                  ? ` tick ${event.tick}/${event.max_ticks}`
-                  : '';
-              setProgress(
-                trialUnits(event),
-                event.total,
-                `Running ${event.index}/${event.total}: ${event.algorithm} seed ${event.seed}${tickPart} (${elapsed}s)`,
-              );
-            } else if (event.type === 'trial') {
-              const ok = event.row?.success ? 'ok' : 'fail';
-              setProgress(
-                event.index,
-                event.total,
-                `Finished ${event.index}/${event.total} (${ok}, ${elapsed}s)`,
-              );
-            }
-          },
-        },
-      );
+      });
       if (globalState) globalState.analyticsPayload = payload;
       renderSummary(payload);
       const elapsed = ((performance.now() - started) / 1000).toFixed(1);
-      setProgress(total, total, `Done: ${payload.rows.length} trials in ${elapsed}s.`);
+      setProgress(
+        payload.rows.length,
+        payload.rows.length,
+        `Done: ${payload.rows.length} trials in ${elapsed}s.`,
+      );
     } catch (err) {
       setIdleStatus(`Failed: ${err.message}`);
     } finally {

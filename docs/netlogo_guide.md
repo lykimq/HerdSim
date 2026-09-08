@@ -49,20 +49,23 @@ Treat this as a behavioural comparison, not a tick-for-tick replay.
 
 | Capability | NetLogo twins | HerdSim |
 |---|---|---|
-| Live scalar metrics | monitors | MetricsPanel (includes min_separation) |
+| Live scalar metrics | monitors (incl. GCM-goal) | MetricsPanel (incl. min_separation, gcm_goal) |
 | Live distribution plots | heading + GCM-distance histograms | Single Distributions panel |
-| Herder trails | pen trails | optional later |
-| Multi-dog assignment viz | Collect links | Single/Arena Pixi overlay lines |
+| Herder trails | pen trails | Always available (slate / per-herder colors) |
+| Assignment viz | Collect links (multi twin) | Declared per algorithm in `info.json` overlays; toggles adapt |
 | `n_neighbors` / `rs_weight` | Strombom sliders | Single algorithm parameter controls |
-| Metric history charts | line plots | Single Metric history + scrub |
+| Metric history charts | line plots | Single Metric history + scrub (incl. polarization, gcm_goal) |
 | Batch multi-seed | manual / BehaviorSpace | Analytics |
+| Parameter sweep | BehaviorSpace | Analytics param-grid mode |
 | A/B compare | two NetLogo windows | Arena |
+| End-of-run narrative | output box | Single Run report |
+| Single-run export | - | deferred |
 
 ### HerdSim-only strengths
 
 Keep these as HerdSim advantages (do not need NetLogo clones): Analytics
-multi-seed batch export, Arena A/B live deltas, Pixi GPU rendering at higher
-agent counts.
+multi-seed batch and param-grid sweeps with export, Arena A/B live deltas,
+Pixi GPU rendering at higher agent counts, Single scrub + Run report.
 
 To add another twin later: port the algorithm to a `.nlogo` file, then add an
 entry in `netlogo/twins.json`.

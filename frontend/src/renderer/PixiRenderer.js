@@ -1,6 +1,14 @@
 import { Application, Container, Graphics, Sprite, Text } from 'pixi.js';
 import { loadIconTextures } from './iconTextures.js';
 import { drawField } from './drawField.js';
+import {
+  appendTrailPositions,
+  ASSIGNMENT_COLLECT_COLOR,
+  ASSIGNMENT_DRIVE_COLOR,
+  trailColor,
+  trailsFromFrames,
+} from './herderTrails.js';
+import { parseOverlayColor, GCM_GOAL_COLOR, sheepCentroid } from '../utils/displayOverlays.js';
 import { log } from '../utils/logger.js';
 
 /**
@@ -14,11 +22,19 @@ export class PixiRenderer {
     this.hostEl = hostEl;
     this.app = null;
     this.fieldLayer = null;
+    this.trailLayer = null;
     this.agentLayer = null;
     this.assignmentLayer = null;
+    this.gcmGoalLayer = null;
     this.hudLayer = null;
     this.textures = { sheep: null, dog: null, shepherd: null, goal: null, pen: null };
     this.herderKind = 'dog';
+    this.trailVisible = true;
+    this.gcmGoalVisible = true;
+    this.assignmentModeVisible = {};
+    this.assignmentModeColors = {};
+    this.trailPoints = [];
+    this._lastFrame = null;
     this.world = {
       width: 150,
       height: 150,
@@ -37,19 +53,22 @@ export class PixiRenderer {
         background: '#090d16',
         antialias: true,
         resizeTo: this.hostEl,
-        // Prefer canvas2d fallback path avoidance; one WebGL context per view.
         preference: 'webgl',
       });
       this.hostEl.innerHTML = '';
       this.hostEl.appendChild(this.app.canvas);
 
       this.fieldLayer = new Container();
+      this.trailLayer = new Container();
       this.agentLayer = new Container();
       this.assignmentLayer = new Container();
+      this.gcmGoalLayer = new Container();
       this.hudLayer = new Container();
       this.app.stage.addChild(this.fieldLayer);
+      this.app.stage.addChild(this.trailLayer);
       this.app.stage.addChild(this.agentLayer);
       this.app.stage.addChild(this.assignmentLayer);
+      this.app.stage.addChild(this.gcmGoalLayer);
       this.app.stage.addChild(this.hudLayer);
 
       this.textures = await loadIconTextures();
@@ -86,6 +105,61 @@ export class PixiRenderer {
     this.herderKind = kind === 'human' ? 'human' : 'dog';
   }
 
+  setTrailVisible(visible) {
+    this.trailVisible = Boolean(visible);
+    this._drawTrails();
+  }
+
+  setGcmGoalVisible(visible) {
+    this.gcmGoalVisible = Boolean(visible);
+    this._redrawGcmGoal();
+  }
+
+  setAssignmentModes(modes) {
+    const nextVisible = {};
+    const nextColors = {};
+    (modes || []).forEach((mode) => {
+      const id = mode?.id;
+      if (!id) return;
+      nextVisible[id] =
+        this.assignmentModeVisible[id] !== undefined
+          ? this.assignmentModeVisible[id]
+          : true;
+      nextColors[id] = parseOverlayColor(
+        mode.color,
+        id === 'collect' ? ASSIGNMENT_COLLECT_COLOR : ASSIGNMENT_DRIVE_COLOR,
+      );
+    });
+    this.assignmentModeVisible = nextVisible;
+    this.assignmentModeColors = nextColors;
+    this._redrawAssignment();
+  }
+
+  setAssignmentModeVisible(modeId, visible) {
+    if (!modeId) return;
+    this.assignmentModeVisible[modeId] = Boolean(visible);
+    this._redrawAssignment();
+  }
+
+  _redrawAssignment() {
+    if (this._lastFrame) this._drawAssignmentOverlay(this._lastFrame);
+  }
+
+  _redrawGcmGoal() {
+    if (this._lastFrame) this._drawGcmGoalOverlay(this._lastFrame);
+    else if (this.gcmGoalLayer) this.gcmGoalLayer.removeChildren();
+  }
+
+  clearTrails() {
+    this.trailPoints = [];
+    this._drawTrails();
+  }
+
+  setTrailsFromFrames(frames) {
+    this.trailPoints = trailsFromFrames(frames);
+    this._drawTrails();
+  }
+
   _herderTexture() {
     return this.herderKind === 'human' ? this.textures.shepherd : this.textures.dog;
   }
@@ -93,7 +167,6 @@ export class PixiRenderer {
   _scale() {
     const w = this.app.renderer.width;
     const h = this.app.renderer.height;
-    // Leave a small margin for axis labels.
     const pad = 28;
     const s = Math.min(
       (w - pad * 1.5) / this.world.width,
@@ -137,10 +210,18 @@ export class PixiRenderer {
 
   _drawField() {
     drawField(this);
+    this._drawTrails();
+    this._redrawGcmGoal();
   }
 
-  render(frame) {
+  /**
+   * @param {object} frame
+   * @param {{ recordTrail?: boolean }} [options]
+   */
+  render(frame, options = {}) {
     if (!this._ready || !frame) return;
+    const recordTrail = options.recordTrail !== false;
+    this._lastFrame = frame;
     if (frame.world) this.setWorld(frame.world);
 
     this.agentLayer.removeChildren();
@@ -175,7 +256,35 @@ export class PixiRenderer {
       }
     });
 
+    if (recordTrail) {
+      this.trailPoints = appendTrailPositions(this.trailPoints, dogs);
+    }
+    this._drawTrails();
     this._drawAssignmentOverlay(frame);
+    this._drawGcmGoalOverlay(frame);
+  }
+
+  _drawTrails() {
+    if (!this.trailLayer) return;
+    this.trailLayer.removeChildren();
+    if (!this.trailVisible || !this.trailPoints.length) return;
+
+    const g = new Graphics();
+    this.trailPoints.forEach((poly, idx) => {
+      if (!poly || poly.length < 2) return;
+      const [x0, y0] = this._toScreen(poly[0][0], poly[0][1]);
+      g.moveTo(x0, y0);
+      for (let i = 1; i < poly.length; i += 1) {
+        const [x, y] = this._toScreen(poly[i][0], poly[i][1]);
+        g.lineTo(x, y);
+      }
+      g.stroke({
+        width: 1.4,
+        color: trailColor(idx),
+        alpha: 0.55,
+      });
+    });
+    this.trailLayer.addChild(g);
   }
 
   _drawAssignmentOverlay(frame) {
@@ -188,23 +297,59 @@ export class PixiRenderer {
       const from = line?.from;
       const to = line?.to;
       if (!Array.isArray(from) || !Array.isArray(to)) return;
+      const mode = String(line.mode || 'target');
+      if (this.assignmentModeVisible[mode] === false) return;
+      // If modes are declared and this mode is unknown, hide it.
+      if (
+        Object.keys(this.assignmentModeVisible).length > 0 &&
+        this.assignmentModeVisible[mode] === undefined
+      ) {
+        return;
+      }
       const [x1, y1] = this._toScreen(from[0], from[1]);
       const [x2, y2] = this._toScreen(to[0], to[1]);
-      const collect = line.mode === 'collect';
+      const color =
+        this.assignmentModeColors[mode] ??
+        (mode === 'collect' ? ASSIGNMENT_COLLECT_COLOR : ASSIGNMENT_DRIVE_COLOR);
       g.moveTo(x1, y1);
       g.lineTo(x2, y2);
       g.stroke({
-        width: collect ? 1.6 : 1.1,
-        color: collect ? 0xfbbf24 : 0x67e8f9,
-        alpha: collect ? 0.85 : 0.45,
+        width: mode === 'collect' ? 1.6 : 1.1,
+        color,
+        alpha: mode === 'collect' ? 0.85 : 0.55,
       });
     });
     this.assignmentLayer.addChild(g);
   }
 
+  _drawGcmGoalOverlay(frame) {
+    if (!this.gcmGoalLayer) return;
+    this.gcmGoalLayer.removeChildren();
+    if (!this.gcmGoalVisible || !frame) return;
+
+    const gcm = sheepCentroid(frame.sheep_positions);
+    const goal = frame.world?.goal_center ?? this.world.goal_center;
+    if (!gcm || !Array.isArray(goal) || goal.length < 2) return;
+
+    const [x1, y1] = this._toScreen(gcm[0], gcm[1]);
+    const [x2, y2] = this._toScreen(Number(goal[0]), Number(goal[1]));
+    const color = parseOverlayColor(GCM_GOAL_COLOR, 0xc084fc);
+    const { s } = this._scale();
+    const markerR = Math.max(3.5, 2.2 * s);
+
+    const g = new Graphics();
+    g.moveTo(x1, y1);
+    g.lineTo(x2, y2);
+    g.stroke({ width: 1.5, color, alpha: 0.75 });
+    g.circle(x1, y1, markerR);
+    g.stroke({ width: 1.4, color, alpha: 0.95 });
+    g.circle(x1, y1, Math.max(1.2, markerR * 0.35));
+    g.fill({ color, alpha: 0.9 });
+    this.gcmGoalLayer.addChild(g);
+  }
+
   destroy() {
     if (this.app) {
-      // Keep shared icon textures alive for the next view mount.
       this.app.destroy(
         { removeView: true },
         { children: true, texture: false, textureSource: false },

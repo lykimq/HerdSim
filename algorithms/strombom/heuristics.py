@@ -93,3 +93,34 @@ def compute_shepherd_velocity(
     else:
         target = drive_target(state, config)
     return shepherd_step_toward(state, config, shepherd_idx, target)
+
+
+def strombom_assignment_line(
+    state: SimulationState, config: dict, shepherd_idx: int = 0
+) -> dict:
+    """Overlay line from herder to Collect sheep or Drive stand-off point."""
+    shepherd_pos = state.shepherd_positions[shepherd_idx]
+    if should_collect(state, config):
+        sheep_idx = int(state.furthest_sheep_index())
+        return {
+            "from": shepherd_pos.tolist(),
+            "to": state.sheep_positions[sheep_idx].tolist(),
+            "mode": "collect",
+            "sheep_index": sheep_idx,
+        }
+    target = drive_target(state, config)
+    return {
+        "from": shepherd_pos.tolist(),
+        "to": target.tolist(),
+        "mode": "drive",
+    }
+
+
+def strombom_assignment_lines(
+    state: SimulationState, config: dict
+) -> list[dict]:
+    """One assignment line per shepherd using Strombom Collect/Drive targets."""
+    return [
+        strombom_assignment_line(state, config, i)
+        for i in range(state.n_shepherds)
+    ]

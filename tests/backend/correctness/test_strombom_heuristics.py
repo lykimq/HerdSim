@@ -13,6 +13,7 @@ from algorithms.strombom.heuristics import (
     drive_offset,
     drive_target,
     should_collect,
+    strombom_assignment_line,
 )
 from core.agents.sheep import (
     compose_strombom_heading,
@@ -37,6 +38,25 @@ def test_should_drive_when_flock_is_compact():
     sheep = [[50.0, 50.0], [51.0, 50.5], [49.5, 51.0], [50.5, 49.5]]
     state = make_state(sheep, [[70.0, 70.0]])
     assert not should_collect(state, {"r_a": 2.0})
+
+
+def test_assignment_line_collect_points_at_furthest_sheep():
+    sheep = [[50.0, 50.0], [51.0, 50.0], [50.0, 51.0], [80.0, 50.0]]
+    state = make_state(sheep, [[90.0, 50.0]])
+    line = strombom_assignment_line(state, {"r_a": 2.0}, shepherd_idx=0)
+    assert line["mode"] == "collect"
+    assert line["sheep_index"] == 3
+    assert line["to"] == [80.0, 50.0]
+    assert line["from"] == [90.0, 50.0]
+
+
+def test_assignment_line_drive_points_at_drive_target():
+    sheep = [[50.0, 50.0], [51.0, 50.5], [49.5, 51.0], [50.5, 49.5]]
+    state = make_state(sheep, [[70.0, 70.0]], world=make_world(goal_center=(10.0, 10.0)))
+    line = strombom_assignment_line(state, {"r_a": 2.0}, shepherd_idx=0)
+    assert line["mode"] == "drive"
+    target = drive_target(state, {"r_a": 2.0})
+    assert line["to"] == pytest.approx(target.tolist())
 
 
 def test_collect_target_is_behind_furthest_sheep():
