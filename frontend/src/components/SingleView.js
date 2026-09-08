@@ -2,11 +2,13 @@ import { createControlPanel } from './ControlPanel.js';
 import { createMetricsPanel } from './MetricsPanel.js';
 import { createDistributionPanel } from './DistributionPanel.js';
 import { createMetricHistoryPanel } from './MetricHistoryPanel.js';
+import { createRunReportPanel } from './RunReportPanel.js';
 import { PixiRenderer } from '../renderer/PixiRenderer.js';
 import { fetchMetrics } from '../api/rest.js';
 import { openSimulationSession } from '../utils/simulationSession.js';
 import { log, withTimeout } from '../utils/logger.js';
-import { applyControlPanelPlayback, derivePhase, statusAfterManualStep } from '../utils/playback.js';
+import { applyControlPanelPlayback, derivePhase, statusAfterManualStep, DONE_STATUSES } from '../utils/playback.js';
+import { buildRunReport } from '../utils/runReport.js';
 
 export function createSingleView({ algorithms, scenarios, onStatus, preferredAlg = null }) {
   const root = document.createElement('div');
@@ -20,6 +22,7 @@ export function createSingleView({ algorithms, scenarios, onStatus, preferredAlg
 
   const metrics = createMetricsPanel();
   const distributions = createDistributionPanel();
+  const runReport = createRunReportPanel();
   const canvasHost = document.createElement('div');
   canvasHost.className = 'canvas-host';
   const renderer = new PixiRenderer(canvasHost);
@@ -44,6 +47,22 @@ export function createSingleView({ algorithms, scenarios, onStatus, preferredAlg
 
   let controls;
 
+  function refreshRunReport(nextStatus = status) {
+    if (!DONE_STATUSES.has(nextStatus)) {
+      runReport.clear();
+      return;
+    }
+    const cfg = controls?.getConfig?.() || {};
+    runReport.setReport(
+      buildRunReport({
+        status: nextStatus,
+        history,
+        algorithmName: controls?.getAlgorithmName?.() || null,
+        scenarioId: cfg.scenario_id || null,
+      }),
+    );
+  }
+
   function syncPlayback() {
     const phase = derivePhase({
       busy,
@@ -62,6 +81,7 @@ export function createSingleView({ algorithms, scenarios, onStatus, preferredAlg
         history = [];
         historyPanel.clear();
         distributions.clear();
+        runReport.clear();
         const { session, socket: nextSocket } = await openSimulationSession({
           cfg,
           renderer,
@@ -85,6 +105,7 @@ export function createSingleView({ algorithms, scenarios, onStatus, preferredAlg
               if (msg.type === 'reset') distributions.update(msg);
             }
             status = msg.status || status;
+            refreshRunReport(status);
             onStatus?.({
               status,
               tick: msg.tick,
@@ -95,6 +116,7 @@ export function createSingleView({ algorithms, scenarios, onStatus, preferredAlg
           },
           onTerminated: (msg) => {
             status = msg.status;
+            refreshRunReport(status);
             onStatus?.({ status, tick: history.at(-1)?.tick || 0, sessionId });
             syncPlayback();
           },
@@ -143,6 +165,7 @@ export function createSingleView({ algorithms, scenarios, onStatus, preferredAlg
   center.appendChild(canvasHost);
   center.appendChild(historyPanel.root);
 
+  side.appendChild(runReport.root);
   side.appendChild(metrics.root);
   side.appendChild(distributions.root);
 
@@ -153,7 +176,9 @@ export function createSingleView({ algorithms, scenarios, onStatus, preferredAlg
   async function mount() {
     log.info('single', 'Mounting Single view');
     try {
-      metrics.setDefinitions(await fetchMetrics());
+      const defs = await fetchMetrics();
+      metrics.setDefinitions(defs);
+      historyPanel.setDefinitions(defs);
     } catch (err) {
       log.warn('single', `Could not load metric definitions: ${err.message}`);
     }
