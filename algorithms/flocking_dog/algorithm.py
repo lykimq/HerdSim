@@ -133,7 +133,8 @@ class FlockingDogAlgorithm(BaseAlgorithm):
             dog = state.shepherd_positions[i]
             min_dist = float(np.min(np.linalg.norm(state.sheep_positions - dog, axis=1)))
 
-            # Paper / MATLAB: slow to 0.05 when within r_a of any sheep.
+            # Author MATLAB: continue previous unit heading at absolute 0.05
+            # when within r_a of any sheep (not 0.05*vDog; not toward Pdrive).
             if min_dist <= r_a:
                 prev = unit_vector(state.shepherd_velocities[i])
                 if np.linalg.norm(prev) < 1e-10:

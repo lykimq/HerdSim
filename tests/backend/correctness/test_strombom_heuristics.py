@@ -125,10 +125,15 @@ def test_lcm_uses_n_nearest_neighbours():
     assert np.allclose(lcm, [5.5, 0.0])
 
 
-def test_neighbour_repulsion_matches_eq_4_1_direction():
+def test_neighbour_repulsion_matches_eq_4_1():
+    """Paper eq. 4.1: R_a = sum of unit vectors away from neighbours."""
+    # Single neighbour at distance 1: unit vector (-1, 0).
     positions = np.array([[0.0, 0.0], [1.0, 0.0]])
     ra = compute_repulsion_from_neighbours(positions, 0, repulsion_radius=2.0)
-    # Away from neighbour at +1 => negative x, magnitude 1/1^2 = 1
-    assert ra[0] < 0
-    assert abs(ra[1]) < 1e-10
-    assert abs(ra[0] + 1.0) < 1e-6
+    assert np.allclose(ra, [-1.0, 0.0])
+
+    # Two neighbours: sum of unit vectors away from each.
+    positions = np.array([[0.0, 0.0], [1.0, 0.0], [0.0, 2.0]])
+    ra = compute_repulsion_from_neighbours(positions, 0, repulsion_radius=3.0)
+    # Away from (1,0) => (-1,0); away from (0,2) => (0,-1); sum = (-1,-1).
+    assert np.allclose(ra, [-1.0, -1.0])

@@ -12,9 +12,10 @@ from algorithms.strombom.heuristics import (
     collect_offset,
     compute_threshold,
     drive_offset,
+    shepherd_step_toward,
 )
 from core.agents.goal import resolve_goal_center
-from core.agents.shepherd import move_toward, position_behind_target
+from core.agents.shepherd import position_behind_target
 from core.simulation_state import SimulationState
 
 
@@ -71,7 +72,6 @@ class StrombomMultiAlgorithm(StrombomAlgorithm):
         goal = resolve_goal_center(state, config)
         c_offset = collect_offset(config)
         d_offset = drive_offset(state, config)
-        speed = float(config.get("shepherd_speed", 1.5))
 
         if len(outliers) == 0:
             # All dogs drive with angular spacing behind the flock.
@@ -79,7 +79,7 @@ class StrombomMultiAlgorithm(StrombomAlgorithm):
             for i in range(m):
                 angle = (2 * np.pi * i) / m
                 spaced = base + 8.0 * np.array([np.cos(angle), np.sin(angle)])
-                velocities[i] = move_toward(state.shepherd_positions[i], spaced, speed)
+                velocities[i] = shepherd_step_toward(state, config, i, spaced)
                 self._last_assignment_lines.append(
                     {
                         "from": state.shepherd_positions[i].tolist(),
@@ -107,7 +107,7 @@ class StrombomMultiAlgorithm(StrombomAlgorithm):
             tn = np.linalg.norm(tangential)
             if tn > 1e-10:
                 target = target + (tangential / tn) * (4.0 * (i - (m - 1) / 2.0))
-            velocities[i] = move_toward(state.shepherd_positions[i], target, speed)
+            velocities[i] = shepherd_step_toward(state, config, i, target)
             self._last_assignment_lines.append(
                 {
                     "from": state.shepherd_positions[i].tolist(),

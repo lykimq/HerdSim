@@ -47,7 +47,9 @@ Collect threshold `f(N) = r_a * N^(2/3)`, collect offset `pc = r_a`, drive offse
    - Heading: `h H_hat + rho_a Rep + rho_d Dog + c Att + alg Ali + e e_hat`, normalise, step `vS`.
 
 ## Shepherd Dynamics
-1. If within `r_a` of any sheep: continue previous heading at speed `0.05`.
+1. If within `r_a` of any sheep: continue previous heading at absolute speed
+   `0.05` (author MATLAB `herding_model.m`; Methods text `vD = 0.05 ms^-1`).
+   Fig. 7 caption writes `0.05vD`; the MATLAB reference uses the absolute value.
 2. Else if furthest sheep > `f(N)` from GCM: Collect behind that sheep (offset `pc`).
 3. Else Drive behind GCM relative to goal (offset `pd`).
 4. Add angular noise `e`, move at `vDog`.

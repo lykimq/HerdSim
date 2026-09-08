@@ -49,6 +49,9 @@ def test_dog_slows_within_ra():
     state.shepherd_velocities[:] = [[1.0, 0.0]]
     new_state = alg.step(state, cfg)
     assert np.isclose(np.linalg.norm(new_state.shepherd_velocities[0]), 0.05)
+    assert np.allclose(
+        new_state.shepherd_velocities[0] / 0.05, [1.0, 0.0], atol=1e-9
+    )
 
 
 def test_collect_threshold_is_ra_n_two_thirds():

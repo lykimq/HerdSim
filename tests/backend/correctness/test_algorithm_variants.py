@@ -37,6 +37,40 @@ def test_strombom_multi_dogs_take_distinct_positions():
     assert len(uniq) == 3
 
 
+def test_strombom_multi_stops_within_three_ra():
+    """Multi-dog shepherds use the same 3*r_a stop as Strombom 2014."""
+    alg = StrombomMultiAlgorithm()
+    cfg = alg.default_config
+    sheep = np.array([[50.0, 50.0], [52.0, 50.0], [50.0, 52.0]])
+    # All three dogs closer than 3*r_a = 6 to some sheep.
+    dogs = np.array([[51.0, 50.5], [50.5, 51.0], [51.5, 51.5]])
+    state = make_state(sheep, dogs, world=make_world(), seed=1)
+    new_state = alg.step(state, cfg)
+    assert np.allclose(new_state.shepherd_velocities, 0.0)
+
+
+def test_strombom_multi_applies_shepherd_noise():
+    """With noise on and stop disabled, multi-dog headings are not pure aim."""
+    alg = StrombomMultiAlgorithm()
+    cfg = {
+        **alg.default_config,
+        "noise_strength": 1.0,
+        "shepherd_stop_multiple": 0.0,
+        "n_shepherds": 1,
+    }
+    sheep = np.array([[40.0, 40.0], [42.0, 40.0], [40.0, 42.0], [41.0, 41.0]])
+    dog = np.array([[80.0, 40.0]])
+    state = make_state(sheep, dog, world=make_world(goal_center=(0.0, 0.0)), seed=7)
+    # Two steps with same seed path: with noise, velocity should be non-zero
+    # and not exactly along the geometric aim vector alone across RNG draws.
+    v0 = alg._update_shepherds(state, cfg)[0]
+    state2 = make_state(sheep, dog, world=make_world(goal_center=(0.0, 0.0)), seed=99)
+    v1 = alg._update_shepherds(state2, cfg)[0]
+    assert np.linalg.norm(v0) > 0
+    assert np.linalg.norm(v1) > 0
+    assert not np.allclose(v0, v1)
+
+
 def test_flocking_dog_step_moves_agents():
     alg = FlockingDogAlgorithm()
     # Dog within Rd so sheep are active (not grazing).

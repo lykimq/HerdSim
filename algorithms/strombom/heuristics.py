@@ -62,15 +62,10 @@ def drive_target(state: SimulationState, config: dict) -> np.ndarray:
     return position_behind_target(centroid, goal_center, drive_offset(state, config))
 
 
-def compute_shepherd_velocity(
-    state: SimulationState, config: dict, shepherd_idx: int = 0
+def shepherd_step_toward(
+    state: SimulationState, config: dict, shepherd_idx: int, target: np.ndarray
 ) -> np.ndarray:
-    """Collect/Drive velocity with 3*r_a stop and paper angular noise."""
-    if should_collect(state, config):
-        target = collect_target(state, config)
-    else:
-        target = drive_target(state, config)
-
+    """Velocity toward target with paper 3*r_a stop and angular noise."""
     speed = float(config.get("shepherd_speed", 1.5))
     shepherd_pos = state.shepherd_positions[shepherd_idx]
     min_sheep_dist = float(
@@ -87,3 +82,14 @@ def compute_shepherd_velocity(
     direction = unit_vector(base + noise)
     step = min(speed, float(np.linalg.norm(target - shepherd_pos)))
     return direction * step
+
+
+def compute_shepherd_velocity(
+    state: SimulationState, config: dict, shepherd_idx: int = 0
+) -> np.ndarray:
+    """Collect/Drive velocity with 3*r_a stop and paper angular noise."""
+    if should_collect(state, config):
+        target = collect_target(state, config)
+    else:
+        target = drive_target(state, config)
+    return shepherd_step_toward(state, config, shepherd_idx, target)

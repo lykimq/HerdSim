@@ -5,7 +5,7 @@
   "authors": "D. Strombom et al. (base); HerdSim multi-dog extension",
   "year": 2014,
   "doi": "https://doi.org/10.1098/rsif.2014.0719",
-  "mechanism": "Strombom Collect/Drive with explicit sector assignment so multiple shepherds target distinct outliers instead of stacking on one point.",
+  "mechanism": "Strombom Collect/Drive with explicit outlier assignment and spaced Drive positions so multiple shepherds do not stack. Each dog still uses the paper 3*r_a stop and angular noise when stepping toward its assigned target.",
   "agent_types": ["sheep", "dog"],
   "herder_kind": "dog",
   "herder_label": "Dog",

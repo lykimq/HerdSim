@@ -53,19 +53,19 @@ def compute_attraction(position: np.ndarray, centroid: np.ndarray) -> np.ndarray
 def compute_repulsion_from_neighbours(
     positions: np.ndarray, index: int, repulsion_radius: float
 ) -> np.ndarray:
-    """Inverse-distance neighbour repulsion (Strombom eq. 4.1).
+    """Neighbour repulsion (Strombom 2014 eq. 4.1).
 
-    R_a = sum_j (A_i - A_j) / |A_i - A_j|^2 for neighbours within r_a.
-    Callers normalise and scale by weight ra when composing headings.
+    R_a = sum_j (A_i - A_j) / |A_i - A_j| for neighbours within r_a
+    (sum of unit vectors away from neighbours). Callers normalise and
+    scale by weight ra when composing headings.
     """
     diffs = positions[index] - positions
     distances = np.linalg.norm(diffs, axis=1)
     mask = (distances < repulsion_radius) & (distances > 0)
     if not np.any(mask):
         return np.zeros(2)
-    weights = 1.0 / np.maximum(distances[mask], 1e-10)
     normed = diffs[mask] / np.maximum(distances[mask, np.newaxis], 1e-10)
-    return np.sum(normed * weights[:, np.newaxis], axis=0)
+    return np.sum(normed, axis=0)
 
 
 def compute_repulsion_from_shepherds(

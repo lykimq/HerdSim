@@ -20,7 +20,7 @@ class BaseScenario(ABC):
     - Success and timeout conditions
 
     An algorithm defines HOW agents behave.
-    Scenarios and algorithms are independent — any algorithm can run in any scenario.
+    Scenarios and algorithms are independent - any algorithm can run in any scenario.
     """
 
     @property

@@ -38,7 +38,8 @@ For each sheep i each tick:
 2. Else (threatened):
    - LCM of `n` nearest neighbours (`n_neighbors`; default all other sheep).
    - Attraction `C_hat`: unit vector toward LCM.
-   - Neighbour repulsion `R_a` within `r_a` (eq. 4.1), then unit `R_a_hat`.
+   - Neighbour repulsion `R_a` within `r_a` (eq. 4.1: sum of unit vectors
+     `(A_i - A_j) / |A_i - A_j|`), then unit `R_a_hat`.
    - Shepherd repulsion unit `R_s_hat` within `r_s`.
    - Noise `e * e_hat`.
    - Heading (eq. 4.2): `H' = h H_hat + c C_hat + ra R_a_hat + rs R_s_hat + e e_hat`.
@@ -71,6 +72,6 @@ Typical scenario `drive_to_goal`: fraction of sheep inside goal circle >= `succe
 - Code lives in `algorithms/strombom/` (`algorithm.py`, `heuristics.py`, `config.py`).
 - Shared helpers: `core/agents/sheep.py` (`compose_strombom_heading`, `compute_local_centroid_knn`).
 - Drive uses `state.world.goal.center` when available.
-- Multi-shepherd UI values share Collect/Drive logic per dog; the paper defines one shepherd. Use Kubo or `strombom_multi` for coordinated multi-dog herding.
+- Multi-shepherd UI values share Collect/Drive logic per dog; the paper defines one shepherd. Use Kubo or `strombom_multi` for coordinated multi-dog herding. `strombom_multi` keeps the paper 3*r_a stop and shepherd noise while assigning distinct Collect/Drive targets.
 - Optional overrides: `collect_offset`, `drive_offset`, `ra_weight` (defaults to `r_a`).
 - Extension (not in paper): `collect_threshold_scale` may widen f(N) for some scenarios.
