@@ -1,13 +1,7 @@
 import { presetSelectHtml } from '../utils/params.js';
 import { iconImg } from '../assets/icons.js';
 
-export function controlPanelHtml({
-  sideLabel,
-  hideScenario,
-  hideSeed,
-  hideSheepDogs,
-  paramsOpen,
-}) {
+export function controlPanelHtml({ sideLabel = '', paramsOpen = true } = {}) {
   return `
     <div class="section-title">Configuration ${sideLabel ? `- ${sideLabel}` : ''}</div>
     <div class="control-group">
@@ -15,7 +9,7 @@ export function controlPanelHtml({
       <select data-role="algorithm"></select>
       <p class="param-hint" data-role="algorithm-blurb"></p>
     </div>
-    <div class="control-group ${hideScenario ? 'hidden' : ''}">
+    <div class="control-group">
       <label>Scenario</label>
       <select data-role="scenario"></select>
       <p class="param-hint" data-role="scenario-blurb"></p>
@@ -25,18 +19,18 @@ export function controlPanelHtml({
       <select data-role="preset">${presetSelectHtml(true)}</select>
       <p class="param-hint" data-role="preset-blurb"></p>
     </div>
-    <div class="control-group ${hideSheepDogs ? 'hidden' : ''}">
+    <div class="control-group">
       <label>${iconImg('sheep', 'icon icon-inline')} Number of Sheep (<span data-role="sheep-count">50</span>)</label>
       <input data-role="sheep" type="range" min="5" max="150" value="50" />
     </div>
-    <div class="control-group ${hideSheepDogs ? 'hidden' : ''}">
+    <div class="control-group">
       <label data-role="herder-label">
         <span data-role="herder-icon">${iconImg('dog', 'icon icon-inline')}</span>
         Number of <span data-role="herder-word">Dogs</span> (<span data-role="dog-count">1</span>)
       </label>
       <input data-role="dogs" type="range" min="1" max="8" value="1" />
     </div>
-    <div class="control-group ${hideSeed ? 'hidden' : ''}">
+    <div class="control-group">
       <label>Random Seed</label>
       <input data-role="seed" type="number" value="42" />
     </div>

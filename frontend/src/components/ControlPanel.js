@@ -2,8 +2,6 @@ import { mountTips } from '../utils/tooltips.js';
 import { controlPanelHtml } from './controlPanelMarkup.js';
 import { createParamRefresh } from './controlPanelParams.js';
 
-export { createMetricsPanel } from './MetricsPanel.js';
-
 export function createControlPanel({
   onInit,
   onPlay,
@@ -13,18 +11,12 @@ export function createControlPanel({
   onSpeedChange,
   onAlgorithmChange,
   sideLabel = '',
-  hideScenario = false,
-  hideSeed = false,
-  hideSheepDogs = false,
   paramsOpen = true,
 }) {
   const root = document.createElement('div');
   root.className = 'card-glass';
   root.innerHTML = controlPanelHtml({
     sideLabel,
-    hideScenario,
-    hideSeed,
-    hideSheepDogs,
     paramsOpen,
   });
 

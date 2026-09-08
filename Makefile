@@ -27,6 +27,7 @@ test-stress:
 	pytest tests/backend/ -v -m stress
 
 test-frontend:
+	node --test tests/frontend/*.test.js
 	cd frontend && npm run build
 
 # ─── Code Quality ────────────────────────────────────────────

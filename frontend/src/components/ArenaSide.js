@@ -218,8 +218,6 @@ export function createArenaSide(
       closeSession();
       renderer.destroy();
     },
-    getHistory: () => history,
-    getSessionId: () => sessionId,
     getLatestMetrics: () => latestMetrics,
     initFromShared,
     play: () => sendAction('play'),

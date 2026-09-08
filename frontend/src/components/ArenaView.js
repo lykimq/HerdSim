@@ -1,5 +1,6 @@
 import { createArenaSide } from './ArenaSide.js';
-import { arenaFairBarHtml, formatMetricDelta } from './arenaMarkup.js';
+import { arenaFairBarHtml } from './arenaMarkup.js';
+import { formatMetricDelta } from '../utils/arenaDeltas.js';
 import { fetchMetrics } from '../api/rest.js';
 import { log, sleep } from '../utils/logger.js';
 import { mountTips } from '../utils/tooltips.js';

@@ -88,3 +88,16 @@ def test_time_to_goal_returns_tick_when_all_inside():
         tick=42,
     )
     assert TimeToGoalMetric().compute(outside) == pytest.approx(-1.0)
+
+
+def test_time_to_goal_stays_negative_until_every_sheep_is_inside():
+    """time_to_goal uses all-inside; success_rate can be partial."""
+    world = make_world(goal_center=(0.0, 0.0), goal_radius=5.0)
+    mostly_inside = make_state(
+        [[0.0, 0.0], [1.0, 0.0], [20.0, 20.0]],
+        [[10.0, 10.0]],
+        world=world,
+        tick=10,
+    )
+    assert SuccessRateMetric().compute(mostly_inside) == pytest.approx(2.0 / 3.0)
+    assert TimeToGoalMetric().compute(mostly_inside) == pytest.approx(-1.0)
