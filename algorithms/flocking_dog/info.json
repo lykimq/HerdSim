@@ -7,10 +7,16 @@
   "year": 2024,
   "doi": "https://doi.org/10.1038/s42003-024-07245-8",
   "mechanism": "Topological random attraction/alignment, short-range repulsion, dog repulsion within Rd, grazing beyond Rd; dog Collect/Drive with f(N) and slowdown within r_a.",
-  "agent_types": ["sheep", "dog"],
+  "agent_types": [
+    "sheep",
+    "dog"
+  ],
   "herder_kind": "dog",
   "herder_label": "Dog",
-  "default_agents": {"sheep": 14, "shepherds": 1},
+  "default_agents": {
+    "sheep": 14,
+    "shepherds": 1
+  },
   "notes": "Faithful to paper Methods / Fig. 7 and authors' MATLAB herding_model.m; Drive uses scenario goal instead of MATLAB origin.",
   "overlays": {
     "assignment_modes": [
@@ -25,5 +31,41 @@
         "color": "#67e8f9"
       }
     ]
-  }
+  },
+  "param_groups": [
+    {
+      "id": "sheep",
+      "label": "Sheep",
+      "keys": [
+        "r_a",
+        "r_s",
+        "k_neighbors",
+        "n_attraction",
+        "n_alignment",
+        "inertia",
+        "sheep_repulsion_weight",
+        "dog_repulsion_weight",
+        "attraction_weight",
+        "alignment_weight",
+        "noise_strength",
+        "sheep_speed"
+      ]
+    },
+    {
+      "id": "dog",
+      "label": "Dog",
+      "keys": [
+        "shepherd_speed",
+        "shepherd_close_speed"
+      ]
+    },
+    {
+      "id": "agents",
+      "label": "Agents",
+      "keys": [
+        "n_sheep",
+        "n_shepherds"
+      ]
+    }
+  ]
 }

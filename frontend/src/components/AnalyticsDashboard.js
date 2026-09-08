@@ -20,7 +20,14 @@ import {
 import { bindAnalyticsMode } from './analyticsMode.js';
 import { mountTips } from '../utils/tooltips.js';
 
-const DEFAULT_BENCHMARK_ALG_IDS = ['strombom', 'kubo', 'flocking_dog'];
+const DEFAULT_BENCHMARK_ALG_IDS = [
+  'strombom',
+  'kubo',
+  'flocking_dog',
+  'v_formation',
+  'heterogeneous',
+  'obstacle_aware',
+];
 const DEFAULT_BENCHMARK_SCENARIO_ID = 'split_flock';
 
 export function createAnalyticsDashboard({ algorithms, scenarios, globalState }) {

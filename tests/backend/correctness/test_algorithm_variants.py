@@ -13,7 +13,14 @@ from tests.backend.helpers import make_state, make_world
 
 def test_variants_registered():
     names = set(algorithm_registry.names())
-    assert {"strombom_multi", "strombom_noise", "flocking_dog"} <= names
+    assert {
+        "strombom_multi",
+        "strombom_noise",
+        "flocking_dog",
+        "v_formation",
+        "heterogeneous",
+        "obstacle_aware",
+    } <= names
 
 
 def test_strombom_noise_default_strength():

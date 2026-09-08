@@ -3,10 +3,10 @@
 Generic research platform for agent-based sheep herding simulations with pluggable algorithms, scenarios, and algorithm-agnostic metrics.
 
 ## Features
-- Algorithms: Strombom, Kubo, Flocking Dog, Strombom Multi-Dog, Strombom Noise
+- Algorithms: Strombom, Kubo, Flocking Dog, Strombom Multi-Dog, Strombom Noise (plus roadmap additions as registered)
 - Scenarios: drive to goal, containment, obstacle course, split flock, narrow gate, wide field
 - Paper / scenario / custom experiment presets
-- Live Vanilla JS + PixiJS frontend (Single / Arena / Analytics)
+- Live Vanilla JS + PixiJS frontend (Single / Arena / Analytics / NetLogo / Guide)
 - Multi-seed benchmark API + Analytics comparison tables
 - FastAPI + WebSocket streaming
 - Batch CLI trials (`scripts/run_batch.py`) and Analytics UI CSV/JSON/Markdown export
@@ -40,12 +40,15 @@ python scripts/run_batch.py --algorithm kubo --n-shepherds 4 --seeds 1,2,3 --out
 ```
 
 For comparison tables with provenance and caveats, use the Analytics tab Export CSV / JSON (Markdown is a short methods note).
+
 ## Documentation
-- `docs/developer_guide.md`
-- `docs/simulation_environment.md`
-- `docs/metrics_guide.md`
-- `docs/algorithms/strombom_2014.md`
-- `docs/algorithms/kubo_2022.md`
+
+Start at [`docs/README.md`](docs/README.md) (topic map).
+
+- Using the app: `docs/user/guide.md` (also the in-app **Guide** tab)
+- Models: `docs/research/` (algorithms, scenarios, metrics, environment, NetLogo)
+- Codebase: `docs/developer/`
+- Paper PDFs: `docs/papers/`
 
 ## Project layout
 - `core/` simulation engine

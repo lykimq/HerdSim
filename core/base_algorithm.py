@@ -47,7 +47,7 @@ class BaseAlgorithm(ABC):
         IMPORTANT: Velocity / displacement conventions differ by algorithm family.
         Strombom and Flocking Dog treat speed as displacement per tick
         (`pos += vel`). Kubo integrates with its own config `dt`
-        (`pos += dt * vel`). See docs/simulation_environment.md.
+        (`pos += dt * vel`). See docs/research/environment.md.
 
         The algorithm should use state.rng for any randomness.
         """

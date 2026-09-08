@@ -1,0 +1,45 @@
+{
+  "id": "v_formation",
+  "name": "V-Formation",
+  "paper_title": "Effective Herding in Shepherding Problem in V-formation Control",
+  "authors": "K. Fujioka, S. Hayashi",
+  "journal": "Transactions of the Institute of Systems, Control and Information Engineers",
+  "year": 2018,
+  "doi": "https://doi.org/10.5687/iscie.31.21",
+  "mechanism": "Strombom sheep dynamics with multi-dog Collect on outliers; when cohesive, dogs drive from angularly spaced V-arc points behind the flock GCM relative to the goal (Fujioka/Hayashi V-formation).",
+  "agent_types": ["sheep", "dog"],
+  "herder_kind": "dog",
+  "herder_label": "Dog",
+  "default_agents": {"sheep": 50, "shepherds": 2},
+  "param_groups": [
+    {
+      "id": "sheep",
+      "label": "Sheep",
+      "keys": ["r_a", "r_s", "rs_weight", "n_neighbors", "c", "noise_strength", "sheep_speed", "inertia", "graze_move_prob"]
+    },
+    {
+      "id": "shepherd",
+      "label": "Shepherd",
+      "keys": ["shepherd_speed", "shepherd_stop_multiple", "v_angle_deg", "v_arc_offset", "collect_threshold_scale"]
+    },
+    {
+      "id": "agents",
+      "label": "Agents",
+      "keys": ["n_sheep", "n_shepherds"]
+    }
+  ],
+  "overlays": {
+    "assignment_modes": [
+      {
+        "id": "collect",
+        "label": "Collect: dog to assigned outlier sheep.",
+        "color": "#fbbf24"
+      },
+      {
+        "id": "drive",
+        "label": "Drive: dog to V-arc stand-off behind the flock.",
+        "color": "#67e8f9"
+      }
+    ]
+  }
+}

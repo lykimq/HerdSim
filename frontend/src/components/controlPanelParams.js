@@ -86,6 +86,7 @@ export function createParamRefresh({
         includeWorld: false,
         includeAgents: false,
         readOnly: false,
+        paramGroups: alg?.info?.param_groups,
       });
     } else {
       // Full resolved settings for the selected source, sorted for scanning.
@@ -98,6 +99,7 @@ export function createParamRefresh({
         includeWorld: true,
         includeAgents: true,
         readOnly: true,
+        paramGroups: alg?.info?.param_groups,
       };
       if (state.fairSheepOverride != null) {
         const paperSheep = state.defaults.n_sheep;

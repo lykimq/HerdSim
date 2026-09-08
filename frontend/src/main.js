@@ -3,6 +3,7 @@ import { createSingleView } from './components/SingleView.js';
 import { createArenaView } from './components/ArenaView.js';
 import { createAnalyticsDashboard } from './components/AnalyticsDashboard.js';
 import { createNetLogoView } from './components/NetLogoView.js';
+import { createGuideView } from './components/GuideView.js';
 import { GAME_ICONS_ATTRIBUTION } from './assets/icons.js';
 import { log, withTimeout, sleep } from './utils/logger.js';
 import { mountTips } from './utils/tooltips.js';
@@ -21,6 +22,7 @@ header.innerHTML = `
     <button class="nav-tab" data-view="arena">Arena</button>
     <button class="nav-tab" data-view="analytics">Analytics</button>
     <button class="nav-tab" data-view="netlogo">NetLogo</button>
+    <button class="nav-tab" data-view="guide">Guide</button>
   </div>
   <div class="header-meta">
     <span>Seed: <strong data-role="seed">-</strong></span>
@@ -177,6 +179,15 @@ function createView(name, algorithms, scenarios) {
     return createNetLogoView({
       onStatus,
       onRunInHerdSim: (algorithmId) => {
+        preferredSingleAlg = algorithmId;
+        switchView('single', algorithms, scenarios);
+      },
+    });
+  }
+  if (name === 'guide') {
+    return createGuideView({
+      algorithms,
+      onOpenAlgorithm: (algorithmId) => {
         preferredSingleAlg = algorithmId;
         switchView('single', algorithms, scenarios);
       },

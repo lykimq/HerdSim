@@ -166,3 +166,13 @@ export async function openNetLogoDesktop({ model_file, netlogo_home = '' }) {
   });
   return res.json();
 }
+
+export async function fetchDocIndex() {
+  const res = await apiFetch('/api/docs');
+  return res.json();
+}
+
+export async function fetchDoc(slug) {
+  const res = await apiFetch(`/api/docs/${slug}`);
+  return res.text();
+}

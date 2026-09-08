@@ -1,16 +1,22 @@
 {
   "id": "strombom",
-  "name": "Strömbom 2014",
+  "name": "Str\u00f6mbom 2014",
   "paper_title": "Solving the shepherding problem: heuristics for herding autonomous, interacting agents",
-  "authors": "D. Strömbom, R. P. Mann, A. M. Wilson, S. Hailes, A. J. Morton, D. J. T. Sumpter, A. J. King",
+  "authors": "D. Str\u00f6mbom, R. P. Mann, A. M. Wilson, S. Hailes, A. J. Morton, D. J. T. Sumpter, A. J. King",
   "journal": "Journal of The Royal Society Interface",
   "year": 2014,
   "doi": "https://doi.org/10.1098/rsif.2014.0719",
-  "mechanism": "Single shepherd adaptively switches between Collect (gather stragglers) and Drive (push flock to goal) based on flock cohesion threshold f(N) = r_a × N^(2/3).",
-  "agent_types": ["sheep", "shepherd"],
+  "mechanism": "Single shepherd adaptively switches between Collect (gather stragglers) and Drive (push flock to goal) based on flock cohesion threshold f(N) = r_a \u00d7 N^(2/3).",
+  "agent_types": [
+    "sheep",
+    "shepherd"
+  ],
   "herder_kind": "human",
   "herder_label": "Shepherd",
-  "default_agents": {"sheep": 50, "shepherds": 1},
+  "default_agents": {
+    "sheep": 50,
+    "shepherds": 1
+  },
   "overlays": {
     "assignment_modes": [
       {
@@ -24,5 +30,39 @@
         "color": "#67e8f9"
       }
     ]
-  }
+  },
+  "param_groups": [
+    {
+      "id": "sheep",
+      "label": "Sheep",
+      "keys": [
+        "r_a",
+        "r_s",
+        "rs_weight",
+        "n_neighbors",
+        "c",
+        "noise_strength",
+        "sheep_speed",
+        "inertia",
+        "graze_move_prob"
+      ]
+    },
+    {
+      "id": "shepherd",
+      "label": "Shepherd",
+      "keys": [
+        "shepherd_speed",
+        "shepherd_stop_multiple",
+        "collect_threshold_scale"
+      ]
+    },
+    {
+      "id": "agents",
+      "label": "Agents",
+      "keys": [
+        "n_sheep",
+        "n_shepherds"
+      ]
+    }
+  ]
 }

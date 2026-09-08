@@ -6,10 +6,16 @@
   "year": 2014,
   "doi": "https://doi.org/10.1098/rsif.2014.0719",
   "mechanism": "Strombom Collect/Drive with explicit outlier assignment and spaced Drive positions so multiple shepherds do not stack. Each dog still uses the paper 3*r_a stop and angular noise when stepping toward its assigned target.",
-  "agent_types": ["sheep", "dog"],
+  "agent_types": [
+    "sheep",
+    "dog"
+  ],
   "herder_kind": "dog",
   "herder_label": "Dog",
-  "default_agents": {"sheep": 50, "shepherds": 3},
+  "default_agents": {
+    "sheep": 50,
+    "shepherds": 3
+  },
   "overlays": {
     "assignment_modes": [
       {
@@ -23,5 +29,39 @@
         "color": "#67e8f9"
       }
     ]
-  }
+  },
+  "param_groups": [
+    {
+      "id": "sheep",
+      "label": "Sheep",
+      "keys": [
+        "r_a",
+        "r_s",
+        "rs_weight",
+        "n_neighbors",
+        "c",
+        "noise_strength",
+        "sheep_speed",
+        "inertia",
+        "graze_move_prob"
+      ]
+    },
+    {
+      "id": "shepherd",
+      "label": "Shepherd",
+      "keys": [
+        "shepherd_speed",
+        "shepherd_stop_multiple",
+        "collect_threshold_scale"
+      ]
+    },
+    {
+      "id": "agents",
+      "label": "Agents",
+      "keys": [
+        "n_sheep",
+        "n_shepherds"
+      ]
+    }
+  ]
 }

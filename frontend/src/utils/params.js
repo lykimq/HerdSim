@@ -161,8 +161,9 @@ function appendPointInputs(group, label, key, values, defaultValue, onChange) {
 export function buildParamControls(container, defaults, values, onChange, options = {}) {
   container.innerHTML = "";
   const readOnly = Boolean(options.readOnly);
+  const groups = options.paramGroups;
 
-  Object.entries(defaults || {}).forEach(([key, defaultValue]) => {
+  function appendOne(key, defaultValue, mount) {
     if (!shouldShowParam(key, defaultValue, options)) return;
 
     const infoOnly = isInfoWorldParam(key, defaultValue);
@@ -213,7 +214,32 @@ export function buildParamControls(container, defaults, values, onChange, option
       group.appendChild(input);
     }
 
-    container.appendChild(group);
+    mount.appendChild(group);
+  }
+
+  const used = new Set();
+  if (Array.isArray(groups) && groups.length) {
+    for (const g of groups) {
+      const keys = (g.keys || []).filter((k) => k in (defaults || {}));
+      if (!keys.length) continue;
+      const heading = document.createElement("div");
+      heading.className = "param-group-title";
+      heading.textContent = g.label || g.id || "Parameters";
+      container.appendChild(heading);
+      for (const key of keys) {
+        appendOne(key, defaults[key], container);
+        used.add(key);
+      }
+    }
+    Object.entries(defaults || {}).forEach(([key, defaultValue]) => {
+      if (used.has(key)) return;
+      appendOne(key, defaultValue, container);
+    });
+    return;
+  }
+
+  Object.entries(defaults || {}).forEach(([key, defaultValue]) => {
+    appendOne(key, defaultValue, container);
   });
 }
 

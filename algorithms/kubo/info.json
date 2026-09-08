@@ -7,12 +7,52 @@
   "year": 2022,
   "doi": "https://doi.org/10.1007/s10015-021-00726-7",
   "mechanism": "Multiple sheepdogs apply repulsive social forces. Dog-dog repulsion (K_f4) encourages a semi-circular formation behind the flock while dogs target the sheep farthest from the goal.",
-  "agent_types": ["sheep", "dog"],
+  "agent_types": [
+    "sheep",
+    "dog"
+  ],
   "herder_kind": "dog",
   "herder_label": "Dog",
-  "default_agents": {"sheep": 40, "shepherds": 4},
+  "default_agents": {
+    "sheep": 40,
+    "shepherds": 4
+  },
   "source_code": "matlab/Force-Based-Sheep-Herding-Algorithm",
   "overlays": {
     "assignment_modes": []
-  }
+  },
+  "param_groups": [
+    {
+      "id": "sheep",
+      "label": "Sheep forces",
+      "keys": [
+        "radius",
+        "K_s1",
+        "K_s2",
+        "K_s3",
+        "K_s4",
+        "sheep_speed_max"
+      ]
+    },
+    {
+      "id": "dogs",
+      "label": "Dog forces",
+      "keys": [
+        "K_f1",
+        "K_f2",
+        "K_f3",
+        "K_f4",
+        "dog_speed_max",
+        "dt"
+      ]
+    },
+    {
+      "id": "agents",
+      "label": "Agents",
+      "keys": [
+        "n_sheep",
+        "n_shepherds"
+      ]
+    }
+  ]
 }

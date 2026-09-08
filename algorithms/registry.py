@@ -35,10 +35,13 @@ algorithm_registry = AlgorithmRegistry()
 
 def _auto_register():
     from algorithms.flocking_dog.algorithm import FlockingDogAlgorithm
+    from algorithms.heterogeneous.algorithm import HeterogeneousAlgorithm
     from algorithms.kubo.algorithm import KuboAlgorithm
+    from algorithms.obstacle_aware.algorithm import ObstacleAwareAlgorithm
     from algorithms.strombom.algorithm import StrombomAlgorithm
     from algorithms.strombom_multi.algorithm import StrombomMultiAlgorithm
     from algorithms.strombom_noise.algorithm import StrombomNoiseAlgorithm
+    from algorithms.v_formation.algorithm import VFormationAlgorithm
 
     for cls in [
         StrombomAlgorithm,
@@ -46,6 +49,9 @@ def _auto_register():
         FlockingDogAlgorithm,
         StrombomMultiAlgorithm,
         StrombomNoiseAlgorithm,
+        VFormationAlgorithm,
+        HeterogeneousAlgorithm,
+        ObstacleAwareAlgorithm,
     ]:
         algorithm_registry.register(cls())
 
