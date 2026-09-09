@@ -44,7 +44,7 @@ For comparison tables with provenance and caveats, use the Analytics tab Export 
 ## Documentation
 
 - Guide tab (in-app): [`docs/research/`](docs/research/) -- algorithms, scenarios, metrics, environment, NetLogo
-- Codebase: [`docs/developer/`](docs/developer/) -- [architecture](docs/developer/architecture.md), [contributing](docs/developer/contributing.md), [config and presets](docs/developer/config_and_presets.md), [testing](docs/developer/testing.md)
+- Codebase: [`docs/developer/README.md`](docs/developer/README.md) -- architecture, configuration, and extending the simulator
 - Paper PDFs: [`docs/papers/`](docs/papers/)
 
 ## Project layout

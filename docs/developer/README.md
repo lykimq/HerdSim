@@ -86,14 +86,7 @@ flowchart TD
 
 Algorithms are responsible for calculating intent (velocity vectors for sheep and shepherds). The engine applies obstacle resolution and environment constraints *after* the algorithm has run, ensuring agents don't move out of bounds or overlap illegally.
 
-## Codebase Structure
 
-- **`api/`**: FastAPI routers, REST endpoints, and WebSocket session handlers.
-- **`core/`**: The simulation engine, base classes (e.g., `BaseAlgorithm`), state definitions, and config resolution.
-- **`algorithms/`**, **`scenarios/`**, **`metrics/`**: Plugin directories. Each implements specific interfaces defined in `core/`.
-- **`frontend/`**: Vanilla JavaScript SPA using Vite. The main view router is in `src/main.js`. Rendering is handled by PixiJS.
-- **`docs/`**: Project documentation, split between research papers/theories and developer guides.
-- **`tests/`**: Pytest suite for the backend and Node tests for the frontend.
 
 ## Configuration & Overrides
 
@@ -128,32 +121,5 @@ Metrics evaluate the state of the simulation at each tick (e.g., center of mass,
 - Implement the evaluation logic using the current state.
 - Register it in `metrics/registry.py`.
 
-## Development Workflow
-
-### Starting the Stack
-```bash
-# 1. Install backend dependencies (Python 3.10+)
-pip install -e ".[dev]"
-
-# 2. Install frontend dependencies (Node.js)
-cd frontend
-npm install
-cd ..
-
-# 3. Start the FastAPI backend
-uvicorn api.main:app --reload --port 8000
-
-# 4. Start the Vite dev server (in a separate terminal)
-cd frontend
-npm run dev
-```
-
-### Running Tests
-Ensure changes don't break determinism or core logic.
-```bash
-# Run backend tests (excludes heavy stress tests)
-pytest tests/backend/ -q -m "not stress"
-
-# Run frontend unit tests
-node --test tests/frontend/*.test.js
-```
+> [!NOTE]
+> For information on project layout, local setup instructions, and testing commands, please refer to the root [README.md](../../README.md).
