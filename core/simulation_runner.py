@@ -95,6 +95,20 @@ class SimulationRunner:
             self._state.shepherd_positions
         )
 
+        # Enforce arena boundaries (elastic reflection).
+        self._state.sheep_positions = self._state.world.reflect_positions(
+            self._state.sheep_positions
+        )
+        self._state.shepherd_positions = self._state.world.reflect_positions(
+            self._state.shepherd_positions
+        )
+        self._state.sheep_velocities = self._state.world.reflect_velocities(
+            self._state.sheep_positions, self._state.sheep_velocities
+        )
+        self._state.shepherd_velocities = self._state.world.reflect_velocities(
+            self._state.shepherd_positions, self._state.shepherd_velocities
+        )
+
         metrics_snapshot = self.recorder.record(self._state)
 
         if self.scenario.is_success(self._state, self.config):

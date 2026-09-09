@@ -52,13 +52,6 @@ class StrombomAlgorithm(BaseAlgorithm):
         new_sheep_pos = state.sheep_positions + new_sheep_vel
         new_shepherd_pos = state.shepherd_positions + new_shepherd_vel
 
-        new_sheep_pos = state.world.reflect_positions(new_sheep_pos)
-        new_shepherd_pos = state.world.reflect_positions(new_shepherd_pos)
-        new_sheep_vel = state.world.reflect_velocities(new_sheep_pos, new_sheep_vel)
-        new_shepherd_vel = state.world.reflect_velocities(
-            new_shepherd_pos, new_shepherd_vel
-        )
-
         metadata = dict(state.metadata)
         metadata["r_a"] = float(config.get("r_a", metadata.get("r_a", 2.0)))
         metadata["collect_threshold_scale"] = float(

@@ -49,8 +49,6 @@ class KuboAlgorithm(BaseAlgorithm):
         # MATLAB updates sheep first, then dogs see the new sheep positions.
         sheep_vel = self._update_sheep(state, config, radius)
         sheep_pos = state.sheep_positions + dt * sheep_vel
-        sheep_pos = state.world.reflect_positions(sheep_pos)
-        sheep_vel = state.world.reflect_velocities(sheep_pos, sheep_vel)
 
         mid_state = SimulationState(
             tick=state.tick,
@@ -64,8 +62,6 @@ class KuboAlgorithm(BaseAlgorithm):
         )
         dog_vel = self._update_dogs(mid_state, config, radius, goal)
         dog_pos = state.shepherd_positions + dt * dog_vel
-        dog_pos = state.world.reflect_positions(dog_pos)
-        dog_vel = state.world.reflect_velocities(dog_pos, dog_vel)
 
         metadata = dict(state.metadata)
         metadata["r_a"] = float(config.get("r_a", metadata.get("r_a", 2.0)))

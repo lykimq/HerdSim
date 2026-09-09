@@ -87,13 +87,6 @@ class HeterogeneousAlgorithm(StrombomAlgorithm):
         new_sheep_pos = seeded.sheep_positions + new_sheep_vel
         new_shepherd_pos = seeded.shepherd_positions + new_shepherd_vel
 
-        new_sheep_pos = seeded.world.reflect_positions(new_sheep_pos)
-        new_shepherd_pos = seeded.world.reflect_positions(new_shepherd_pos)
-        new_sheep_vel = seeded.world.reflect_velocities(new_sheep_pos, new_sheep_vel)
-        new_shepherd_vel = seeded.world.reflect_velocities(
-            new_shepherd_pos, new_shepherd_vel
-        )
-
         metadata = dict(seeded.metadata)
         metadata["r_a"] = float(config.get("r_a", metadata.get("r_a", 2.0)))
         metadata["collect_threshold_scale"] = float(

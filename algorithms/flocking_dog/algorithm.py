@@ -54,10 +54,8 @@ class FlockingDogAlgorithm(BaseAlgorithm):
         sheep_vel = self._update_sheep(state, config)
         dog_vel = self._update_dogs(state, config)
 
-        sheep_pos = state.world.reflect_positions(state.sheep_positions + sheep_vel)
-        dog_pos = state.world.reflect_positions(state.shepherd_positions + dog_vel)
-        sheep_vel = state.world.reflect_velocities(sheep_pos, sheep_vel)
-        dog_vel = state.world.reflect_velocities(dog_pos, dog_vel)
+        sheep_pos = state.sheep_positions + sheep_vel
+        dog_pos = state.shepherd_positions + dog_vel
 
         metadata = dict(state.metadata)
         metadata["r_a"] = float(config.get("r_a", 2.0))

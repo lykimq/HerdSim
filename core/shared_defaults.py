@@ -12,9 +12,6 @@ from __future__ import annotations
 
 from typing import Any
 
-# Paper agent counts: declared per algorithm, overridable by scenario preset.
-AGENT_KEYS = ("n_sheep", "n_shepherds")
-
 # Keys owned by the selected scenario (paper/custom take these from scenario).
 WORLD_KEYS = (
     "world_width",

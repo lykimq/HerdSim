@@ -37,6 +37,7 @@ class DriveToGoalScenario(BaseScenario):
             "goal_radius": 15.0,
             "initial_spread": 30.0,
             "shepherd_start_offset": 50.0,
+            "shepherd_jitter": 5.0,
             "max_ticks": 3000,
             "success_fraction": 1.0,
         }
@@ -70,7 +71,8 @@ class DriveToGoalScenario(BaseScenario):
         # Shepherd starts at a distance behind the flock (opposite side from goal)
         shepherd_offset = config.get("shepherd_start_offset", 50.0)
         shepherd_base = center + np.array([shepherd_offset, shepherd_offset])
-        shepherd_pos = shepherd_base + rng.uniform(-5, 5, size=(n_shepherds, 2))
+        jitter = config.get("shepherd_jitter", 5.0)
+        shepherd_pos = shepherd_base + rng.uniform(-jitter, jitter, size=(n_shepherds, 2))
 
         return sheep_pos, shepherd_pos
 
