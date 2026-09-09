@@ -75,11 +75,15 @@ class StrombomMultiAlgorithm(StrombomAlgorithm):
         d_offset = drive_offset(state, config)
 
         if len(outliers) == 0:
-            # All dogs drive with angular spacing behind the flock.
+            # Spread dogs on a circle around the Drive point so they do not
+            # stack. Radius 4*r_a ties lateral spread to sheep personal space
+            # (and the 3*r_a stop scale): large enough that dogs stay clear of
+            # each other near the flock, small enough to keep pressure focused.
             base = position_behind_target(centroid, goal, d_offset)
+            spacing = 4.0 * float(config.get("r_a", 2.0))
             for i in range(m):
                 angle = (2 * np.pi * i) / m
-                spaced = base + 8.0 * np.array([np.cos(angle), np.sin(angle)])
+                spaced = base + spacing * np.array([np.cos(angle), np.sin(angle)])
                 velocities[i] = shepherd_step_toward(state, config, i, spaced)
                 self._last_assignment_lines.append(
                     {
@@ -93,6 +97,7 @@ class StrombomMultiAlgorithm(StrombomAlgorithm):
         self._last_mode = "collect"
         # Assign each dog to a distinct outlier (cycle if fewer outliers).
         order = outliers[np.argsort(-distances[outliers])]
+        lateral_step = 2.0 * float(config.get("r_a", 2.0))
         for i in range(m):
             sheep_idx = int(order[i % len(order)])
             target = position_behind_target(
@@ -107,7 +112,9 @@ class StrombomMultiAlgorithm(StrombomAlgorithm):
             )
             tn = np.linalg.norm(tangential)
             if tn > 1e-10:
-                target = target + (tangential / tn) * (4.0 * (i - (m - 1) / 2.0))
+                target = target + (tangential / tn) * (
+                    lateral_step * (i - (m - 1) / 2.0)
+                )
             velocities[i] = shepherd_step_toward(state, config, i, target)
             self._last_assignment_lines.append(
                 {

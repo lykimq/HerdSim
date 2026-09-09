@@ -130,8 +130,8 @@ class FlockingDogAlgorithm(BaseAlgorithm):
             return out
 
         r_a = float(config["r_a"])
-        speed = float(config["shepherd_speed"])
-        close_speed = float(config["shepherd_close_speed"])
+        speed = float(config["dog_speed"])
+        close_speed = float(config["dog_close_speed"])
         e = float(config["noise_strength"])
         centroid = state.sheep_centroid
 

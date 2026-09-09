@@ -220,3 +220,6 @@ __marimo__/
 # User-uploaded NetLogo models
 netlogo/models/uploads/*
 !netlogo/models/uploads/.gitkeep
+
+# Node / frontend
+node_modules/

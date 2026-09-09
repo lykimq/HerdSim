@@ -263,7 +263,7 @@ to update-herders
       let tang-y (sx - gcx)
       let tn sqrt (tang-x * tang-x + tang-y * tang-y)
       if tn > 1e-10 [
-        let offset 4.0 * (i - (m - 1) / 2.0)
+        let offset (2.0 * r-a) * (i - (m - 1) / 2.0)
         set tx tx + (tang-x / tn) * offset
         set ty ty + (tang-y / tn) * offset
       ]
@@ -300,8 +300,9 @@ to update-herders
     let i 0
     foreach herder-list [ h ->
       let angle (360 * i) / m
-      let spaced-x base-x + 8.0 * cos angle
-      let spaced-y base-y + 8.0 * sin angle
+      let spacing 4.0 * r-a
+      let spaced-x base-x + spacing * cos angle
+      let spaced-y base-y + spacing * sin angle
       ask h [
         let min-sheep-dist min [distance myself] of sheep
         if min-sheep-dist > shepherd-stop-multiple * r-a [

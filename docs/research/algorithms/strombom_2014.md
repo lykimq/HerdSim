@@ -1,134 +1,170 @@
 # Strombom et al. (2014)
 
-## Paper reference
+## What it is
 
-- D. Strombom, R. P. Mann, A. M. Wilson, S. Hailes, A. J. Morton, D. J. T. Sumpter, A. J. King
-- "Solving the shepherding problem: heuristics for herding autonomous, interacting agents"
-- Journal of The Royal Society Interface, 11(100):20140719, 2014
-- DOI: https://doi.org/10.1098/rsif.2014.0719
-- PDF: [../../papers/Strombom_et_al.pdf](../../papers/Strombom_et_al.pdf)
+Single-shepherd **Collect / Drive** herding. Sheep graze or flee under shepherd pressure while staying near neighbours; the shepherd switches between recovering outliers (Collect) and pushing a tight flock to the goal (Drive). This is the base of the Strombom family in HerdSim. All other Strombom variants reuse these sheep rules and the same cohesion switch unless they say otherwise.
 
-## Problem the paper solves
+## Reference
 
-One shepherd must aggregate interacting agents (sheep) and drive them to a predetermined destination. Success in the paper is transporting the flock to the target under local attraction-repulsion sheep dynamics. The published heuristic switches between Collect (recover stragglers) and Drive (push a cohesive flock toward the goal).
+D. Strombom, R. P. Mann, A. M. Wilson, S. Hailes, A. J. Morton, D. J. T. Sumpter, A. J. King.
+"Solving the shepherding problem: heuristics for herding autonomous, interacting agents."
+Journal of The Royal Society Interface, 11(100):20140719, 2014.
+DOI: 10.1098/rsif.2014.0719
 
-## Algorithm (written out)
+## Why
 
-### Sheep (each tick)
+One shepherd must bring a flock of interacting sheep to a fixed goal. Sheep do not cooperate: they graze when the shepherd is far, and when threatened they flee the shepherd while staying near neighbours. A single Drive push fails when the flock is spread, because outliers are left behind.
 
-1. If distance to nearest shepherd > `r_s`: **graze** -- remain still, or with probability `p` take a random step of length `d`.
-2. Else (threatened):
-   - Compute LCM of `n` nearest neighbours (`n_neighbors`; default all other sheep).
-   - Attraction unit `C_hat` toward LCM.
-   - Neighbour repulsion: sum unit vectors `(A_i - A_j)/|A_i-A_j|` for neighbours within `r_a`, then unit `R_a_hat` (paper eq. 4.1).
-   - Shepherd repulsion unit `R_s_hat` within `r_s`.
-   - Angular noise `e * e_hat`.
-   - Heading (eq. 4.2): `H' = h H_hat + c C_hat + ra R_a_hat + rs R_s_hat + e e_hat`.
-   - Normalise `H'`, displace by `d` (eq. 4.3).
-3. Reflect at world boundaries.
+## Goal
 
-### Shepherd (each tick)
+On Drive to Goal with the paper preset, a successful run gathers stragglers, then drives a cohesive flock into the goal. Live metrics show cohesion falling, outlier count rising only during Collect, and success rate rising as sheep enter the goal. The run report records whether the scenario criterion was met and how long the shepherd path was.
 
-1. Compute flock GCM.
-2. If `max_i ||p_i - GCM|| > f(N) = r_a * N^(2/3)` (optionally times `collect_threshold_scale`) -> **Collect**, else **Drive**.
-3. Collect target `Pc`: point behind the furthest sheep relative to GCM, offset `r_a` (or `collect_offset`).
-4. Drive target `Pd`: point behind GCM relative to goal, offset `r_a * sqrt(N)` (or `drive_offset`).
-5. If within `3 * r_a` of any sheep: speed = 0.
-6. Otherwise move toward the target at `ds`, with angular noise `e`.
+## How (idea)
 
-### Switching
+Switch between two modes. **Collect** recovers the furthest outlier until the flock is tight enough. **Drive** then pushes the whole flock toward the goal from behind. The switch uses cohesion threshold f(N). The shepherd stops if it gets too close, so it does not scatter the sheep.
+
+```mermaid
+flowchart TD
+  startNode(["Start tick"])
+  sheepQ{"Shepherd near sheep?"}
+  graze["Sheep graze"]
+  respond["Sheep flee and flock"]
+  modeQ{"Flock cohesive enough<br/>to drive?"}
+  collect["Collect furthest outlier"]
+  drive["Drive flock toward goal"]
+  stopQ{"Shepherd too close<br/>to sheep?"}
+  halt["Shepherd stops"]
+  move["Shepherd moves to target"]
+  done(["End tick"])
+
+  startNode --> sheepQ
+  sheepQ -->|no| graze
+  sheepQ -->|yes| respond
+  graze --> modeQ
+  respond --> modeQ
+  modeQ -->|no: Collect| collect
+  modeQ -->|yes: Drive| drive
+  collect --> stopQ
+  drive --> stopQ
+  stopQ -->|yes| halt
+  stopQ -->|no| move
+  halt --> done
+  move --> done
+
+  classDef question fill:#fff9c4,stroke:#f9a825,color:#000000
+  classDef domain fill:#c8e6c9,stroke:#2e7d32,color:#000000
+  classDef start fill:#eceff1,stroke:#546e7a,color:#000000
+
+  class startNode,done start
+  class sheepQ,modeQ,stopQ question
+  class graze,respond,collect,drive,halt,move domain
+```
+
+Legend: grey = start/end, yellow = decision, green = action.
+
+## How (rules)
+
+### Sheep dynamics
+
+Each sheep `i` maintains a heading `H_i` and position `p_i`. On every tick, if the shepherd is farther than `r_s` away, the sheep grazes -- it either stays still or with probability `graze_move_prob` takes a random step of length `sheep_speed`. When the shepherd is within `r_s` the sheep responds:
+
+**Local centre of mass (LCM).** The sheep computes the mean position of its `n_neighbors` nearest neighbours. The unit vector from `p_i` toward this centre is denoted `C`.
+
+**Neighbour repulsion.** For every neighbour `j` within distance `r_a`:
 
 ```
-if max_distance_to_GCM > r_a * N^(2/3) * collect_threshold_scale:
-    mode = Collect
-else:
-    mode = Drive
+R_a = sum_j  (p_i - p_j) / ||p_i - p_j||
 ```
 
-## Agents
+`R_a` is then normalised to a unit vector.
 
-| Type | Paper default | State |
-|------|---------------|-------|
-| Sheep | N = 50 | position, velocity |
-| Shepherd | M = 1 | position, velocity |
+**Shepherd repulsion.** The unit vector away from the shepherd is `R_s`.
 
-UI may set M > 1; base `strombom` still uses per-dog Collect/Drive toward shared-style targets without multi-dog assignment. Use `strombom_multi`, `kubo`, or `v_formation` for coordinated multi-dog behaviour.
+**Heading update (paper Eq. 4.2):**
 
-## Paper parameters (full accounts)
+```
+H' = inertia * H  +  c * C  +  r_a * R_a  +  rs_weight * R_s  +  noise_strength * epsilon
+```
 
-### `r_a` (paper `r_a`, default 2.0)
+where `epsilon` is a unit vector in a uniformly random direction. `H'` is normalised and the sheep advances `sheep_speed` in that direction (paper Eq. 4.3):
 
-Sheep-sheep repulsion distance and force weight `ra`. Enters Collect/Drive threshold `f(N) = r_a * N^(2/3)` and default collect/drive offsets. Paper Table 1. Code: sheep repulsion helpers; `compute_threshold` in `algorithms/strombom/heuristics.py`. Increase -> stronger/longer-range sheep repulsion and a larger cohesion threshold (Collect more often). Decrease -> tighter flocks and earlier Drive.
+```
+p_i  <-  p_i  +  sheep_speed * (H' / ||H'||)
+```
 
-### `r_s` (paper `r_s`, default 65.0)
+### Shepherd algorithm
 
-Shepherd detection distance for sheep. Beyond `r_s`, sheep graze. Paper Table 1. Code: sheep threat test in `algorithms/strombom/algorithm.py`. Increase -> sheep react from farther away; decrease -> larger graze region, less continuous pressure.
+#### Cohesion threshold
 
-### `rs_weight` (paper `rs`, default 1.0)
+The shepherd computes the flock global centre of mass (GCM) and checks whether the flock is cohesive enough to drive. The threshold radius is:
 
-Relative strength of shepherd repulsion in the sheep heading sum. Paper Table 1. Code: `compose_strombom_heading` / sheep step. Increase -> stronger flight from the dog; decrease -> weaker evasion (harder herding).
+```
+f(N) = r_a * N^(2/3)
+```
 
-### `n_neighbors` (paper `n`, default -1)
+If the maximum distance from any sheep to the GCM exceeds `f(N)`, the flock is too spread to push and the shepherd enters Collect mode. Otherwise it enters Drive mode.
 
-Topological LCM size. `-1` means N-1 (global). Paper discusses locality of attraction. Code: `compute_local_centroid_knn`. Smaller `n` -> more local flocking, higher split risk.
+#### Collect mode
 
-### `c` (paper `c`, default 1.05)
+The shepherd identifies the outlier sheep -- the one farthest from the GCM -- and moves to a point directly behind it relative to the GCM at stand-off distance `r_a`. Once in position it pushes the outlier back toward the flock.
 
-Attraction weight toward LCM. Paper Table 1. Increase -> stronger clustering toward local centre; decrease -> weaker cohesion under threat.
+**Collect target:**
 
-### `inertia` (paper `h`, default 0.5)
+```
+P_c = p_farthest  +  r_a * (p_farthest - GCM) / ||p_farthest - GCM||
+```
 
-Previous-heading weight. Paper Table 1. Higher -> smoother trajectories; lower -> snappier heading changes.
+#### Drive mode
 
-### `noise_strength` (paper `e`, default 0.3)
+The shepherd positions behind the GCM along the direction toward the goal and pushes the whole flock forward.
 
-Angular noise magnitude for sheep and shepherd. Paper Table 1. Higher -> more jitter, more failed collects; lower -> more deterministic paths.
+**Drive target:**
 
-### `sheep_speed` (paper `d`, default 1.0)
+```
+P_d = GCM  +  r_a * sqrt(N) * (GCM - goal) / ||GCM - goal||
+```
 
-Sheep displacement per tick (not meters/second). Paper Table 1. Scales how far sheep move each step.
+The stand-off `r_a * sqrt(N)` keeps the shepherd far enough back to maintain pressure on the whole flock rather than just the nearest sheep.
 
-### `graze_move_prob` (paper `p`, default 0.05)
+#### Shepherd step
 
-Probability of a random step while grazing. Paper Table 1. Higher -> more drift when the dog is far.
+On each tick the shepherd moves toward its target at speed `shepherd_speed`, unless it is within `shepherd_stop_multiple * r_a` of any sheep, in which case it stops to avoid scattering the flock.
 
-### `shepherd_speed` (paper `ds`, default 1.5)
+## Knobs
 
-Shepherd displacement per tick. Paper Table 1. Higher -> dog closes targets faster relative to sheep step `d`.
+### Agents
 
-### `shepherd_stop_multiple` (default 3.0)
+| Agent | Paper default |
+|-------|---------------|
+| Sheep (N) | 50 |
+| Shepherd (M) | 1 |
 
-Stop when within this multiple of `r_a` of any sheep (paper uses 3). Code: shepherd step. Lower -> dog approaches closer before stopping.
+The **paper** preset loads these values. Running with M > 1 uses the base Strombom rules with each shepherd applying the same Collect / Drive logic independently. For coordinated multi-dog behaviour see Strombom Multi-Dog, Kubo 2022, or V-Formation.
 
-### HerdSim extensions
+### Parameters
 
-| Key | Default | Role |
-|-----|---------|------|
-| `collect_threshold_scale` | 1.0 | Multiplies `f(N)`; scenarios may widen Collect |
-| `collect_offset` / `drive_offset` | derived | Optional overrides of Pc/Pd stand-off |
-| `ra_weight` | = `r_a` | Optional separate weight from distance `r_a` |
+| Parameter | Default | Meaning |
+|-----------|---------|---------|
+| `r_a` | 2.0 | Sheep-sheep repulsion distance. Also sets the cohesion threshold f(N) and the Collect/Drive stand-off distances. Larger values widen personal space and raise the threshold, so the shepherd collects more aggressively. |
+| `r_s` | 65.0 | Shepherd detection distance. Sheep beyond `r_s` graze; sheep within `r_s` respond. A smaller value limits how early the shepherd exerts pressure. |
+| `rs_weight` | 1.0 | Scalar weight on shepherd repulsion in the heading sum. Higher values make sheep flee faster; lower values make them harder to push. |
+| `c` | 1.05 | LCM attraction weight. Higher values strengthen clustering within the neighbourhood. |
+| `inertia` | 0.5 | Weight on the previous heading. Higher values smooth trajectories; lower values allow sharper turns. |
+| `noise_strength` | 0.3 | Angular noise magnitude applied to both sheep and shepherd. Higher noise increases scatter and can cause Collect to fail under a fixed seed budget. |
+| `n_neighbors` | -1 (all) | Neighbourhood size for the LCM. `-1` uses all other sheep (global). Smaller values give more local cohesion but raise split risk. |
+| `sheep_speed` | 1.0 | Sheep displacement per tick. |
+| `shepherd_speed` | 1.5 | Shepherd displacement per tick. |
+| `graze_move_prob` | 0.05 | Probability of a random step while grazing. Higher values cause more drift when the shepherd is far away. |
+| `shepherd_stop_multiple` | 3.0 | Stop distance as a multiple of `r_a`. The shepherd halts when within this radius of any sheep. |
 
-## Paper preset in HerdSim
+## In HerdSim
 
-Preset **paper** loads `STROMBOM_DEFAULTS` (N=50, M=1, Table 1 behaviour). World/layout come from the selected scenario. Under `drive_to_goal` with paper defaults, expect Collect episodes while the flock is spread, then Drive toward the goal with the dog stopping near the flock; success when the scenario fraction is in the goal (default all-in-goal).
+| Parameter | Default | Purpose |
+|-----------|---------|---------|
+| `collect_threshold_scale` | 1.0 | Multiplier on f(N). Scenarios that start with a spread flock may raise this so the shepherd collects rather than attempting to drive prematurely. |
+| `collect_offset` | derived | Override the Collect stand-off distance. Default is `r_a`. |
+| `drive_offset` | derived | Override the Drive stand-off distance. Default is `r_a * sqrt(N)`. |
 
-## Fidelity notes
+## Limits
 
-- Matches paper Collect/Drive switch, sheep heading composition, and stop distance 3*`r_a`.
-- Drive uses `state.world.goal.center` (scenario goal), not a fixed paper origin.
-- Elastic wall reflection is applied (paper open-field emphasis differs).
-- `collect_threshold_scale` is an intentional HerdSim extension.
-
-## Code
-
-- `algorithms/strombom/algorithm.py`, `heuristics.py`, `config.py`
-- Shared: `core/agents/sheep.py` (`compose_strombom_heading`, `compute_local_centroid_knn`)
-
-## Tests
-
-- `tests/backend/correctness/test_strombom_heuristics.py`
-- `tests/backend/correctness/test_algorithm_variants.py` (family behaviour)
-
-## Related scenarios / metrics
-
-Scenarios: `drive_to_goal`, `split_flock`, `wide_field`. Metrics: `cohesion`, `outlier_count`, `gcm_goal`, `time_to_goal`, `shepherd_path`, `success_rate`.
+The HerdSim implementation matches the paper Collect / Drive switch condition, the sheep heading composition, and the shepherd stop distance `shepherd_stop_multiple * r_a` (default 3 * `r_a`). The goal is the scenario goal zone rather than a fixed origin. Wall reflection is applied at arena boundaries (the paper uses an open field). The `collect_threshold_scale` parameter is a HerdSim addition with no paper equivalent.

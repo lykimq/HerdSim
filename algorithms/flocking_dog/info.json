@@ -55,8 +55,8 @@
       "id": "dog",
       "label": "Dog",
       "keys": [
-        "shepherd_speed",
-        "shepherd_close_speed"
+        "dog_speed",
+        "dog_close_speed"
       ]
     },
     {

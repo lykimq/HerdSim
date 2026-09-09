@@ -301,18 +301,18 @@ to update-dogs
         set pdx unit-x (gcx - xcor) (gcy - ycor)
         set pdy unit-y (gcx - xcor) (gcy - ycor)
       ]
-      setxy (reflect-x (xcor + pdx * shepherd-close-speed)) (reflect-y (ycor + pdy * shepherd-close-speed))
-      set prev-dx pdx * shepherd-close-speed
-      set prev-dy pdy * shepherd-close-speed
+      setxy (reflect-x (xcor + pdx * dog-close-speed)) (reflect-y (ycor + pdy * dog-close-speed))
+      set prev-dx pdx * dog-close-speed
+      set prev-dy pdy * dog-close-speed
     ] [
       let delta-x target-x - xcor
       let delta-y target-y - ycor
       let dist sqrt (delta-x * delta-x + delta-y * delta-y)
       if dist > 1e-9 [
-        let step-len min (list shepherd-speed dist)
+        let step-len min (list dog-speed dist)
         let nxy random-noise-xy
-        let mx (delta-x / dist) * shepherd-speed + item 0 nxy
-        let my (delta-y / dist) * shepherd-speed + item 1 nxy
+        let mx (delta-x / dist) * dog-speed + item 0 nxy
+        let my (delta-y / dist) * dog-speed + item 1 nxy
         let ux unit-x mx my
         let uy unit-y mx my
         setxy (reflect-x (xcor + ux * step-len)) (reflect-y (ycor + uy * step-len))
@@ -763,8 +763,8 @@ SLIDER
 645
 195
 678
-shepherd-speed
-shepherd-speed
+dog-speed
+dog-speed
 0.1
 4
 1.5
@@ -778,8 +778,8 @@ SLIDER
 685
 195
 718
-shepherd-close-speed
-shepherd-close-speed
+dog-close-speed
+dog-close-speed
 0.01
 1
 0.05

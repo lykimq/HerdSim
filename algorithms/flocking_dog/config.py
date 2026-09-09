@@ -26,8 +26,8 @@ FLOCKING_DOG_DEFAULTS = {
     "noise_strength": 0.5,  # e
     # Speeds
     "sheep_speed": 1.0,  # vS
-    "shepherd_speed": 1.5,  # vDog
-    "shepherd_close_speed": 0.05,  # slow when within r_a of any sheep
+    "dog_speed": 1.5,  # vDog / vD in paper
+    "dog_close_speed": 0.05,  # absolute speed when within r_a of any sheep (paper)
     # Collect/Drive (paper uses Strombom-style f(N), pd, pc)
     # f(N) = r_a * N^(2/3); pd = r_a * sqrt(N); pc = r_a
     "collect_threshold_scale": 1.0,

@@ -20,8 +20,8 @@ def test_flocking_dog_defaults_match_paper():
     assert cfg["n_attraction"] == 5
     assert cfg["n_alignment"] == 1
     assert cfg["sheep_speed"] == 1.0
-    assert cfg["shepherd_speed"] == 1.5
-    assert cfg["shepherd_close_speed"] == 0.05
+    assert cfg["dog_speed"] == 1.5
+    assert cfg["dog_close_speed"] == 0.05
 
 
 def test_sheep_graze_when_dog_beyond_rd():

@@ -1,6 +1,6 @@
 # Architecture
 
-HerdSim is a plugin-oriented herding simulator: algorithms, scenarios, and metrics register independently; a shared runner advances ticks; FastAPI + WebSocket serve Single/Arena/Analytics; PixiJS renders the arena.
+HerdSim is a plugin-oriented herding simulator. Algorithms, scenarios, and metrics register independently. A shared runner advances ticks. FastAPI and WebSocket serve the UI; PixiJS renders the arena.
 
 ## System context
 
@@ -38,7 +38,6 @@ flowchart LR
   classDef domain fill:#c8e6c9,stroke:#2e7d32,color:#1b5e20
   classDef shared fill:#e1bee7,stroke:#7b1fa2,color:#4a148c
   classDef transport fill:#ffe0b2,stroke:#ef6c00,color:#e65100
-  classDef question fill:#fff9c4,stroke:#f9a825,color:#5d4037
   classDef start fill:#eceff1,stroke:#546e7a,color:#263238
 
   class uiSingle,uiAnalytics ui
@@ -49,18 +48,16 @@ flowchart LR
   class startNode,endNode start
 ```
 
-Legend: blue = UI, teal = wiring/config, green = domain models, purple = shared core, orange = transport, yellow = decision, grey = start/end.
+Legend: blue = UI, teal = wiring, green = domain, purple = shared core, orange = transport, grey = start/end.
 
 ## One simulation tick
 
 ```mermaid
 flowchart TD
   startTick([Tick_begin])
-  hist[History_optional]
   met[Compute_metrics]
   stepAlg[Algorithm_step]
   obst[resolve_obstacles]
-  reflect[World_already_in_algo]
   done([Tick_end_state])
 
   startTick --> met
@@ -68,23 +65,16 @@ flowchart TD
   stepAlg --> obst
   obst --> done
 
-  classDef ui fill:#cfe2f3,stroke:#1565c0,color:#0d47a1
-  classDef wiring fill:#b2dfdb,stroke:#00796b,color:#004d40
   classDef domain fill:#c8e6c9,stroke:#2e7d32,color:#1b5e20
   classDef shared fill:#e1bee7,stroke:#7b1fa2,color:#4a148c
-  classDef transport fill:#ffe0b2,stroke:#ef6c00,color:#e65100
-  classDef question fill:#fff9c4,stroke:#f9a825,color:#5d4037
   classDef start fill:#eceff1,stroke:#546e7a,color:#263238
 
   class startTick,done start
   class met,stepAlg domain
-  class obst,reflect shared
-  class hist wiring
+  class obst shared
 ```
 
-Legend: blue = UI, teal = wiring/config, green = domain models, purple = shared core, orange = transport, yellow = decision, grey = start/end.
-
-Exact metric/algorithm ordering lives in `core/simulation_runner.py`. Algorithms own sheep and shepherd updates inside `step()`. Runner applies obstacle resolution afterward. Velocity conventions differ by family (see [../research/environment.md](../research/environment.md)).
+Exact ordering lives in `core/simulation_runner.py`. Algorithms own sheep and shepherd updates inside `step()`. The runner applies obstacle resolution afterward. Velocity conventions differ by family; see [../research/environment.md](../research/environment.md).
 
 ## Plugin surfaces
 
@@ -96,11 +86,11 @@ Exact metric/algorithm ordering lives in `core/simulation_runner.py`. Algorithms
 
 ## Frontend
 
-Vanilla JS + Vite + PixiJS 8. View router: `frontend/src/main.js` (Single, Arena, Analytics, NetLogo, Guide). REST: `frontend/src/api/rest.js`. Guide loads markdown from `GET /api/docs/{slug}`.
+Vanilla JS + Vite + PixiJS 8. View router: `frontend/src/main.js` (Single, Arena, Analytics, NetLogo, Guide). REST: `frontend/src/api/rest.js`. Guide loads markdown from `GET /api/docs/{slug}` (`docs/research/` pages listed in GuideView).
 
 ## Non-goals
 
 - General ABM language or NetLogo replacement for arbitrary models
-- GIS / 3D / heterogeneous robot kinds beyond sheep+shepherds without a new design
-- CBF / QP / RL training loops inside the interactive `step()` path (separate plan if needed)
-- Deleting `docs/papers/` or keeping obsolete doc archives
+- GIS / 3D / agent kinds beyond sheep + shepherds without a new design
+- CBF / QP / RL training loops inside the interactive `step()` path
+- Deleting `docs/papers/`

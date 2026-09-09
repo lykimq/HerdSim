@@ -1,4 +1,4 @@
-/** Minimal markdown -> HTML for Guide tab (no extra dependency). */
+/** Minimal markdown -> HTML for Guide tab (no extra dependency except Mermaid). */
 
 function escapeHtml(text) {
   return String(text)
@@ -21,6 +21,7 @@ export function renderMarkdown(md) {
   const out = [];
   let i = 0;
   let inCode = false;
+  let codeLang = '';
   let codeBuf = [];
   let inTable = false;
   let tableBuf = [];
@@ -39,16 +40,29 @@ export function renderMarkdown(md) {
     inTable = false;
   }
 
+  function flushCode() {
+    const body = codeBuf.join('\n');
+    if (codeLang === 'mermaid') {
+      out.push(
+        `<div class="guide-mermaid"><pre class="mermaid">${escapeHtml(body)}</pre></div>`
+      );
+    } else {
+      out.push(`<pre><code>${escapeHtml(body)}</code></pre>`);
+    }
+    codeBuf = [];
+    codeLang = '';
+    inCode = false;
+  }
+
   while (i < lines.length) {
     const line = lines[i];
     if (line.startsWith('```')) {
       if (inCode) {
-        out.push(`<pre><code>${escapeHtml(codeBuf.join('\n'))}</code></pre>`);
-        codeBuf = [];
-        inCode = false;
+        flushCode();
       } else {
         if (inTable) flushTable();
         inCode = true;
+        codeLang = line.slice(3).trim().toLowerCase();
       }
       i += 1;
       continue;
@@ -66,7 +80,8 @@ export function renderMarkdown(md) {
     }
     if (inTable) flushTable();
 
-    if (/^### /.test(line)) out.push(`<h3>${inlineFormat(line.slice(4))}</h3>`);
+    if (/^#### /.test(line)) out.push(`<h4>${inlineFormat(line.slice(5))}</h4>`);
+    else if (/^### /.test(line)) out.push(`<h3>${inlineFormat(line.slice(4))}</h3>`);
     else if (/^## /.test(line)) out.push(`<h2>${inlineFormat(line.slice(3))}</h2>`);
     else if (/^# /.test(line)) out.push(`<h1>${inlineFormat(line.slice(2))}</h1>`);
     else if (/^[-*] /.test(line)) {
@@ -89,7 +104,7 @@ export function renderMarkdown(md) {
     else out.push(`<p>${inlineFormat(line)}</p>`);
     i += 1;
   }
-  if (inCode) out.push(`<pre><code>${escapeHtml(codeBuf.join('\n'))}</code></pre>`);
+  if (inCode) flushCode();
   if (inTable) flushTable();
   return out.join('\n');
 }

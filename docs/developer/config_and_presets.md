@@ -1,6 +1,8 @@
 # Config and presets
 
-`resolve_experiment_config` merges layers into one resolved config for a session or benchmark trial.
+`resolve_experiment_config` merges layers into one resolved config for a session or benchmark trial. Code: `core/experiment_config.py`, `core/shared_defaults.py`.
+
+## Merge order
 
 ```mermaid
 flowchart TD
@@ -18,13 +20,9 @@ flowchart TD
   scenQ -->|scenario| scen --> out
   scenQ -->|custom| custom --> out
   paper -.->|world_from_scenario| scen
-  custom --> algo
 
-  classDef ui fill:#cfe2f3,stroke:#1565c0,color:#0d47a1
   classDef wiring fill:#b2dfdb,stroke:#00796b,color:#004d40
   classDef domain fill:#c8e6c9,stroke:#2e7d32,color:#1b5e20
-  classDef shared fill:#e1bee7,stroke:#7b1fa2,color:#4a148c
-  classDef transport fill:#ffe0b2,stroke:#ef6c00,color:#e65100
   classDef question fill:#fff9c4,stroke:#f9a825,color:#5d4037
   classDef start fill:#eceff1,stroke:#546e7a,color:#263238
 
@@ -34,12 +32,12 @@ flowchart TD
   class scenQ question
 ```
 
-Legend: blue = UI, teal = wiring/config, green = domain models, purple = shared core, orange = transport, yellow = decision, grey = start/end.
+## Presets
 
 | Preset | Behaviour |
 |--------|-----------|
-| `paper` | Algorithm agent counts + behaviour defaults; world/layout from selected scenario |
+| `paper` | Algorithm agent counts + behaviour defaults; world/layout from the selected scenario |
 | `scenario` | Scenario `default_config` for agents + world |
 | `custom` | Explicit `algorithm_params` / `world_overrides` / agent counts |
 
-Code: `core/experiment_config.py`, `core/shared_defaults.py`. Session create accepts `preset`, optional `num_sheep` / `num_shepherds`, `algorithm_params`, `world_overrides`.
+Session create accepts `preset`, optional `num_sheep` / `num_shepherds`, `algorithm_params`, and `world_overrides`.

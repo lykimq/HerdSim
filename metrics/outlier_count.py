@@ -7,12 +7,12 @@ from core.simulation_state import SimulationState
 
 
 class OutlierCountMetric(BaseMetric):
-    """Counts sheep exceeding the effective collect threshold from the GCM.
+    """Counts sheep exceeding the shared collect-style threshold from the GCM.
 
-    Base threshold is f(N) = r_a * N^(2/3) (Strombom 2014).  An optional
-    'collect_threshold_scale' stored in state metadata (not in the paper;
-    default 1.0) widens the tolerance for scenarios where oscillation is a
-    concern.  The count always matches the algorithm's switching condition.
+    Threshold is f(N) = r_a * N^(2/3) times optional collect_threshold_scale.
+    Same formula for every algorithm so spread stays comparable. For Collect /
+    Drive controllers this matches the mode switch; for others (e.g. Kubo) it
+    is only a report score. Not sheep outside the goal.
     """
 
     @property
@@ -26,11 +26,11 @@ class OutlierCountMetric(BaseMetric):
     @property
     def description(self) -> str:
         return (
-            "Number of sheep beyond the effective collect threshold from the flock "
-            "centroid (stragglers).  Base formula: f(N) = r_a * N^(2/3) (Strombom "
-            "2014).  A scenario may supply collect_threshold_scale != 1.0 (not in "
-            "the paper) to widen tolerance; the displayed count always matches the "
-            "algorithm's switching condition.  This is not sheep outside the goal."
+            "Number of sheep beyond the shared threshold f(N) = r_a * N^(2/3) "
+            "(times collect_threshold_scale if set) from the flock centroid. "
+            "Same definition for all algorithms. Matches Collect / Drive switching "
+            "when that controller is used; otherwise a flock-spread score only. "
+            "Not sheep outside the goal -- use Sheep in Goal or Success Rate."
         )
 
     @property

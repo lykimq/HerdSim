@@ -11,24 +11,21 @@ router = APIRouter()
 
 _DOCS_ROOT = Path(__file__).resolve().parents[2] / "docs"
 
-# Whitelist: Guide tab only. Keys are URL slugs.
+# Whitelist must match GuideView NAV (frontend/src/components/GuideView.js).
 DOC_SLUGS: dict[str, Path] = {
-    "user/guide": _DOCS_ROOT / "user" / "guide.md",
-    "research/readme": _DOCS_ROOT / "research" / "README.md",
+    "research/algorithms": _DOCS_ROOT / "research" / "algorithms" / "README.md",
+    "research/algorithms/strombom_2014": _DOCS_ROOT / "research" / "algorithms" / "strombom_2014.md",
+    "research/algorithms/strombom_multi": _DOCS_ROOT / "research" / "algorithms" / "strombom_multi.md",
+    "research/algorithms/strombom_noise": _DOCS_ROOT / "research" / "algorithms" / "strombom_noise.md",
+    "research/algorithms/v_formation": _DOCS_ROOT / "research" / "algorithms" / "v_formation.md",
+    "research/algorithms/heterogeneous": _DOCS_ROOT / "research" / "algorithms" / "heterogeneous.md",
+    "research/algorithms/obstacle_aware": _DOCS_ROOT / "research" / "algorithms" / "obstacle_aware.md",
+    "research/algorithms/kubo_2022": _DOCS_ROOT / "research" / "algorithms" / "kubo_2022.md",
+    "research/algorithms/flocking_dog_2024": _DOCS_ROOT / "research" / "algorithms" / "flocking_dog_2024.md",
     "research/scenarios": _DOCS_ROOT / "research" / "scenarios.md",
     "research/metrics": _DOCS_ROOT / "research" / "metrics.md",
     "research/environment": _DOCS_ROOT / "research" / "environment.md",
     "research/netlogo": _DOCS_ROOT / "research" / "netlogo.md",
-    "research/algorithms": _DOCS_ROOT / "research" / "algorithms" / "README.md",
-    "research/algorithms/strombom_2014": _DOCS_ROOT / "research" / "algorithms" / "strombom_2014.md",
-    "research/algorithms/strombom_noise": _DOCS_ROOT / "research" / "algorithms" / "strombom_noise.md",
-    "research/algorithms/strombom_multi": _DOCS_ROOT / "research" / "algorithms" / "strombom_multi.md",
-    "research/algorithms/kubo_2022": _DOCS_ROOT / "research" / "algorithms" / "kubo_2022.md",
-    "research/algorithms/flocking_dog_2024": _DOCS_ROOT / "research" / "algorithms" / "flocking_dog_2024.md",
-    "research/algorithms/force_based_matlab": _DOCS_ROOT / "research" / "algorithms" / "force_based_matlab.md",
-    "research/algorithms/v_formation": _DOCS_ROOT / "research" / "algorithms" / "v_formation.md",
-    "research/algorithms/heterogeneous": _DOCS_ROOT / "research" / "algorithms" / "heterogeneous.md",
-    "research/algorithms/obstacle_aware": _DOCS_ROOT / "research" / "algorithms" / "obstacle_aware.md",
 }
 
 

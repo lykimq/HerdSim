@@ -1,47 +1,39 @@
-# Simulation environment
+# Simulation Environment
 
-## Integration (tick vs `dt`)
+## Arena
 
-Each tick, algorithms compute new velocities, then update positions. Semantics differ by family:
+All simulations run inside a rectangular arena with configurable width and height. The arena is defined by the selected scenario. Walls are hard boundaries: agents that would overshoot a wall are reflected back into the arena. Both position and velocity components are reflected, so agents bounce off walls rather than clipping through them.
 
-| Family | Position update | Speed meaning |
-|--------|-----------------|---------------|
-| Strombom / Flocking Dog / Strombom variants | `p <- p + v` | `sheep_speed` / `shepherd_speed` are **displacement per tick** (world `dt` not applied) |
-| Kubo | `p <- p + dt * v` | `dt` from **algorithm config** (default 0.05). Scenario `World.dt` does not integrate Kubo |
+## Goal zone
 
-Cross-algorithm path length and speed comparisons are therefore not physically time-normalized. Analytics CSV/JSON exports list this caveat.
+The goal zone is a circular region within the arena. Its centre and radius are set by the scenario. Sheep are counted as inside the goal if their position falls within this circle. In the Containment scenario the same circular zone serves as the pen.
 
-## Shared world model
+## Obstacles
 
-`core/world.py`:
+Scenarios that include obstacles place one or more rectangular regions inside the arena. Agents that collide with an obstacle boundary are pushed to the nearest edge. The Obstacle-Aware algorithm uses the positions and extents of these rectangles to deflect its Drive target around them. Other algorithms do not reason about obstacles explicitly; they still respect the obstacle boundaries through the environment's collision resolution, but their Drive targets may point through obstacles.
 
-- Rectangular arena (`width`, `height`)
-- Optional circular `GoalZone` (also used as the containment pen)
-- Optional rectangular `Obstacle` list
+## Time step conventions
 
-## Boundary handling
+HerdSim supports two time-step conventions, and algorithms choose one at implementation.
 
-1. `reflect_positions` -- mirror overshoot back into the arena
-2. `reflect_velocities` -- flip velocity components at edges
-3. `resolve_obstacles` -- push agents from obstacle interiors to the nearest edge (applied in `SimulationRunner` for all algorithms after the algorithm step)
+**Displacement-per-tick (Strombom family).** On each tick, an agent advances by a fixed displacement d in the direction of its heading:
 
-## Shared sheep helpers
+```
+p  <-  p  +  d * heading_unit
+```
 
-`core/agents/sheep.py` provides building blocks used by Strombom-family algorithms (local centroid, attraction, neighbour repulsion, shepherd repulsion, noise). Kubo uses MATLAB-faithful forces in `algorithms/kubo/forces.py`.
+The parameters `sheep_speed` and `shepherd_speed` are this displacement in world units per tick. World time `dt` has no effect on these algorithms.
 
-## Scenarios
+**Continuous integration (Kubo).** On each tick, an agent integrates a velocity field using a configurable time step `dt`:
 
-See [scenarios.md](scenarios.md) for success criteria. Summary:
+```
+p  <-  p  +  dt * v
+```
 
-| ID | Objective |
-|----|-----------|
-| `drive_to_goal` | Herd sheep into a corner goal circle |
-| `containment` | Keep sheep inside a central pen for a minimum duration |
-| `obstacle_course` | Reach a goal while avoiding rectangular obstacles |
-| `split_flock` | Collect / recovery from 2-3 initial clusters |
-| `narrow_gate` | Pass a choke point then reach the goal |
-| `wide_field` | Long drive on a larger arena |
+The parameter `dt` is part of the algorithm configuration. Speed parameters are velocities (world units per unit time), and the effective displacement per tick is `dt * v`.
+
+These two conventions are not interchangeable. The number of ticks to complete a scenario, and the cumulative shepherd path length, are not physically equivalent between families even at the same tick count. Analytics exports document which convention each algorithm uses, and this caveat appears in exported CSV and JSON files.
 
 ## Reproducibility
 
-`SimulationRunner` creates `numpy.random.default_rng(seed)` on `SimulationState.rng`. All stochastic terms must use `state.rng`.
+Every stochastic element in a run -- initial sheep positions, heading noise, random grazing steps, stubborn sheep assignment -- is drawn from a single seeded random number generator. Given the same seed, algorithm, scenario, and parameter values, a run is fully deterministic and reproducible. Different seeds produce statistically independent runs, which is what the Analytics multi-seed mode exploits.

@@ -10,10 +10,10 @@
 
 ## Expectations for a new algorithm
 
-- Determinism: same seed => same trajectories (or documented RNG use).
+- Determinism: same seed yields the same trajectories (or document intentional RNG use).
 - Registry lists the new id.
-- Docs page exists under `docs/research/algorithms/` and sync test (if present) passes.
-- Behavioural checks for any novel threshold, assignment, or heterogeneity rule.
+- Docs page exists under `docs/research/algorithms/` and any docs-sync test passes.
+- Behavioural checks for novel thresholds, assignment, or heterogeneity rules.
 
 ## Commands
 

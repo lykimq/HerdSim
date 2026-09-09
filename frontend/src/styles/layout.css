@@ -199,8 +199,12 @@
   gap: 0.1rem;
 }
 
-.guide-nav-item.is-nested {
+.guide-nav-item.is-depth-1 {
   padding-left: 0.85rem;
+}
+
+.guide-nav-item.is-depth-2 {
+  padding-left: 1.7rem;
 }
 
 .guide-nav-link {
@@ -221,6 +225,10 @@
 .guide-nav-item.is-nested .guide-nav-link {
   font-size: 0.82rem;
   padding: 0.3rem 0.65rem;
+}
+
+.guide-nav-item.is-depth-2 .guide-nav-link {
+  font-size: 0.8rem;
 }
 
 .guide-nav-link:hover {
@@ -259,6 +267,7 @@
 .guide-md h1 { font-size: 1.45rem; margin: 0 0 1.1rem; line-height: 1.3; }
 .guide-md h2 { font-size: 1.15rem; margin: 2rem 0 0.75rem; line-height: 1.35; }
 .guide-md h3 { font-size: 1rem; margin: 1.5rem 0 0.55rem; line-height: 1.4; }
+.guide-md h4 { font-size: 0.95rem; margin: 1.15rem 0 0.45rem; line-height: 1.4; font-weight: 600; }
 .guide-md p { margin: 0 0 1rem; }
 .guide-md ul, .guide-md ol { margin: 0 0 1rem; padding-left: 1.5rem; }
 .guide-md li + li { margin-top: 0.35rem; }
@@ -286,6 +295,45 @@
 }
 .guide-md code { font-family: var(--font-mono); font-size: 0.85em; }
 .guide-md a { color: #67e8f9; }
+
+.guide-md .guide-mermaid {
+  background: #020617;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 1.15rem 1rem;
+  margin: 1.25rem 0;
+  overflow-x: auto;
+  text-align: center;
+}
+
+.guide-md .guide-mermaid svg {
+  max-width: 100%;
+  height: auto;
+  background: transparent !important;
+}
+
+.guide-md .guide-mermaid text,
+.guide-md .guide-mermaid tspan {
+  fill: #000000 !important;
+}
+
+.guide-md .guide-mermaid foreignObject,
+.guide-md .guide-mermaid foreignObject div,
+.guide-md .guide-mermaid foreignObject span,
+.guide-md .guide-mermaid .nodeLabel,
+.guide-md .guide-mermaid .edgeLabel {
+  color: #000000 !important;
+}
+
+.guide-md .guide-mermaid .edgeLabel rect {
+  fill: #e2e8f0 !important;
+}
+
+.guide-md p.guide-diagram-legend {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  margin: -0.5rem 0 1.25rem;
+}
 
 @media (max-width: 900px) {
   .guide-layout {

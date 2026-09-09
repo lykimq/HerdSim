@@ -43,12 +43,9 @@ For comparison tables with provenance and caveats, use the Analytics tab Export 
 
 ## Documentation
 
-Start at [`docs/README.md`](docs/README.md) (topic map).
-
-- Using the app: `docs/user/guide.md` (also the in-app **Guide** tab)
-- Models: `docs/research/` (algorithms, scenarios, metrics, environment, NetLogo)
-- Codebase: `docs/developer/`
-- Paper PDFs: `docs/papers/`
+- Guide tab (in-app): [`docs/research/`](docs/research/) -- algorithms, scenarios, metrics, environment, NetLogo
+- Codebase: [`docs/developer/`](docs/developer/) -- [architecture](docs/developer/architecture.md), [contributing](docs/developer/contributing.md), [config and presets](docs/developer/config_and_presets.md), [testing](docs/developer/testing.md)
+- Paper PDFs: [`docs/papers/`](docs/papers/)
 
 ## Project layout
 - `core/` simulation engine

@@ -1,23 +1,83 @@
 # Algorithms
 
-| ID | Family | Paper / basis | Page |
-|----|--------|---------------|------|
-| `strombom` | Collect/Drive | Strombom et al. 2014 | [strombom_2014.md](strombom_2014.md) |
-| `strombom_noise` | Collect/Drive | Strombom + elevated noise | [strombom_noise.md](strombom_noise.md) |
-| `strombom_multi` | Collect/Drive multi-dog | Strombom multi-dog extension | [strombom_multi.md](strombom_multi.md) |
-| `kubo` | Force-based multi-dog | Kubo et al. 2022 | [kubo_2022.md](kubo_2022.md) |
-| `flocking_dog` | Topological flocking + dog | Jadhav et al. 2024 | [flocking_dog_2024.md](flocking_dog_2024.md) |
-| `v_formation` | V-formation drive | Fujioka / Hayashi line | [v_formation.md](v_formation.md) |
-| `heterogeneous` | Collect/Drive + sheep types | Heterogeneous response variant | [heterogeneous.md](heterogeneous.md) |
-| `obstacle_aware` | Collect/Drive + obstacle drive | Clutter-aware heuristic | [obstacle_aware.md](obstacle_aware.md) |
+HerdSim implements algorithms from the published literature and a small set of HerdSim variants. Every algorithm runs under the same scenarios and the same metrics, so comparisons stay direct.
 
-MATLAB companion for Kubo: [force_based_matlab.md](force_based_matlab.md).
+## Family map
 
-PDF sources: [../../papers/](../../papers/).
+```mermaid
+flowchart TD
+  startNode(["Algorithms"])
+  strom["Strombom 2014<br/>Collect / Drive base"]
+  multi["Multi<br/>share outliers"]
+  noise["Noise<br/>less stable"]
+  vform["V-Formation<br/>arc Drive"]
+  hetero["Heterogeneous<br/>stubborn sheep"]
+  obst["Obstacle-Aware<br/>route around"]
+  kubo["Kubo 2022<br/>force fields"]
+  flock["Flocking Dog<br/>neighbour flocking"]
 
-## Fidelity notes (current suite)
+  startNode --> strom
+  startNode --> kubo
+  startNode --> flock
+  strom --> multi
+  strom --> noise
+  strom --> vform
+  strom --> hetero
+  strom --> obst
 
-- Collect/Drive Strombom family shares `f(N)` and `collect_threshold_scale` (including `strombom_multi`).
-- Strict `time_to_goal` vs scenario success / `first_success_tick` documented in [../metrics.md](../metrics.md).
-- Tick vs Kubo `dt` caveats in [../environment.md](../environment.md) and Analytics exports.
-- NetLogo twins: Drive-to-Goal behavioural comparison only ([../netlogo.md](../netlogo.md)).
+  classDef domain fill:#c8e6c9,stroke:#2e7d32,color:#000000
+  classDef wiring fill:#e1bee7,stroke:#7b1fa2,color:#000000
+  classDef transport fill:#ffe0b2,stroke:#ef6c00,color:#000000
+  classDef start fill:#eceff1,stroke:#546e7a,color:#000000
+
+  class startNode start
+  class strom domain
+  class multi,noise,vform,hetero,obst wiring
+  class kubo,flock transport
+```
+
+Legend: grey = index, green = Strombom base, purple = Strombom variants, orange = other algorithms.
+
+## Chooser
+
+| Algorithm | What it is | Why it is in HerdSim | Goal |
+|-----------|------------|----------------------|------|
+| **Strombom 2014** | Single-shepherd Collect / Drive base | Paper-faithful herding heuristic | Gather outliers, then drive a cohesive flock into the goal |
+| **Strombom Multi-Dog** | Coordinated multi-dog Collect / Drive | Avoid dogs stacking on one point | Spaced Collect / Drive coverage as a multi-dog baseline |
+| **Strombom Noise** | Same rules, noisier defaults | Stress-test robustness | Show sensitivity of Collect / Drive under jitter |
+| **V-Formation** | Multi-dog V-arc Drive | Compare Drive geometry | Even pressure across the flock back during Drive |
+| **Heterogeneous** | Stubborn sub-population of sheep | Model mixed flock response | Quantify harder herding when some sheep resist |
+| **Obstacle-Aware** | Drive deflection around obstacles / gates | Constrained scenarios | Reach the goal without locking onto a blocked line |
+| **Kubo 2022** | Continuous force-based multi-dog | Different dynamics family | Fan dogs behind the flock and advance without Collect / Drive modes |
+| **Flocking Dog** | Topological sheep flocking + Collect / Drive dog | Empirical neighbour-based sheep model | Small-flock herding with local attraction / alignment |
+
+## Algorithm groups
+
+### Strombom family (Collect / Drive)
+
+These algorithms share Strombom 2014 sheep dynamics and the Collect / Drive shepherd switch based on the cohesion threshold
+
+```
+f(N) = r_a * N^(2/3)
+```
+
+### Other algorithms
+
+| Algorithm | Family | Basis |
+|-----------|--------|-------|
+| **Kubo 2022** | Continuous force-based, multi-shepherd | Kubo et al., Artif. Life Robotics, 2022 |
+| **Flocking Dog 2024** | Topological flocking + Collect / Drive shepherding | Jadhav et al., Commun. Biol., 2024 |
+
+Flocking Dog uses a Collect / Drive-style shepherd, but its sheep model is not Strombom: sheep use topological attraction and alignment subsets rather than the Strombom heading sum. Kubo is a separate force-based family with no discrete Collect / Drive modes.
+
+## Two dynamics styles
+
+**Collect / Drive.** The shepherd recovers outliers (Collect) or pushes a cohesive flock toward the goal (Drive). Mode switching depends on whether any sheep lies outside the cohesion threshold around the flock centre of mass.
+
+**Continuous force-based.** Sheep and shepherds respond to weighted force fields at every integration step. Dogs spread through dog-dog repulsion and target the sheep farthest from the goal within sensing range. There is no explicit Collect / Drive switch.
+
+## Comparing algorithms
+
+Use **Arena** for side-by-side runs under a shared seed and scenario. Use **Analytics** for multi-seed trials or parameter sweeps, then export CSV or JSON.
+
+Path length and speed are not directly comparable between Strombom-family algorithms (fixed displacement per tick) and Kubo (continuous integration with `dt`). Analytics exports document this caveat.
