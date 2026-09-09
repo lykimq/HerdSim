@@ -4,7 +4,7 @@
 
 Herding behavior-where a small group of "shepherds" (like dogs or robots) controls and guides a much larger group of "sheep" to a target-is a complex problem with applications in robotics, crowd control, and collective animal behavior. HerdSim provides a standardized environment to easily compare different herding algorithms against various scenarios.
 
-## Movitation
+## Motivation
 Researchers and developers building flocking or herding algorithms often struggle with:
 - **Visualization:** Seeing how algorithms perform in real-time.
 - **Standardization:** Apples-to-apples comparisons of different algorithms under the same conditions.
@@ -16,24 +16,13 @@ HerdSim solves this by providing a plug-and-play architecture. You can select an
 
 You can run HerdSim locally on your machine. You'll need Python and Node.js installed.
 
-1. **Install the backend dependencies:**
+1. **Install dependencies:**
    ```bash
-   pip install -e ".[dev]"
+   make install
    ```
-2. **Install the frontend dependencies:**
+2. **Start the simulation server and visual interface:**
    ```bash
-   cd frontend
-   npm install
-   cd ..
-   ```
-3. **Start the simulation server:**
-   ```bash
-   uvicorn api.main:app --reload --port 8000
-   ```
-4. **Start the visual interface:** (Open a new terminal window)
-   ```bash
-   cd frontend
-   npm run dev
+   make dev
    ```
 
 Once everything is running, open your browser and go to **http://localhost:5173** to start simulating!
