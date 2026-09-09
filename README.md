@@ -4,13 +4,15 @@
 
 Herding behavior—where a small group of "shepherds" (like dogs or robots) controls and guides a much larger group of "sheep" to a target—is a complex problem with applications in robotics, crowd control, and collective animal behavior. HerdSim provides a standardized environment to easily compare different herding algorithms against various scenarios.
 
-## What it solves
-Researchers and developers building flocking or herding algorithms often struggle with:
-- **Visualization:** Seeing how algorithms perform in real-time.
-- **Standardization:** Apples-to-apples comparisons of different algorithms under the same conditions.
-- **Extensibility:** Easily dropping in new environments (like obstacles or narrow gates) without rewriting the core engine.
+## Platform Highlights
 
-HerdSim solves this by providing a plug-and-play architecture. You can select an algorithm, choose a scenario (e.g., "drive to goal", "split flock", "obstacle course"), and immediately watch the simulation unfold in a live, interactive web interface.
+HerdSim is built to address the core challenges of evaluating swarm robotics and collective animal behavior models:
+
+- **Live Visualization:** An interactive web interface for real-time observation of complex flocking dynamics.
+- **Standardized Benchmarking:** Run apples-to-apples comparisons of different herding models under identical, reproducible conditions.
+- **Extensible Architecture:** A plug-and-play system designed for easily integrating custom environments, constraints, and driving algorithms without modifying the underlying simulation engine.
+
+Whether you are evaluating a "drive to goal" scenario or navigating a "split flock" through an obstacle course, HerdSim provides the necessary tooling to visualize and analyze your models immediately.
 
 ## Getting Started
 
