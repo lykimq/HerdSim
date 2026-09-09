@@ -74,7 +74,7 @@ flowchart TD
   class obst shared
 ```
 
-Exact ordering lives in `core/simulation_runner.py`. Algorithms own sheep and shepherd updates inside `step()`. The runner applies obstacle resolution afterward. Velocity conventions differ by family; see [../research/environment.md](../research/environment.md).
+Exact ordering lives in `core/simulation_runner.py`. Algorithms own sheep and shepherd updates inside `step()`. The runner applies obstacle resolution afterward. Displacement-per-tick vs continuous `dt` conventions are documented under `docs/research/environment.md`.
 
 ## Plugin surfaces
 
@@ -86,11 +86,4 @@ Exact ordering lives in `core/simulation_runner.py`. Algorithms own sheep and sh
 
 ## Frontend
 
-Vanilla JS + Vite + PixiJS 8. View router: `frontend/src/main.js` (Single, Arena, Analytics, NetLogo, Guide). REST: `frontend/src/api/rest.js`. Guide loads markdown from `GET /api/docs/{slug}` (`docs/research/` pages listed in GuideView).
-
-## Non-goals
-
-- General ABM language or NetLogo replacement for arbitrary models
-- GIS / 3D / agent kinds beyond sheep + shepherds without a new design
-- CBF / QP / RL training loops inside the interactive `step()` path
-- Deleting `docs/papers/`
+Vanilla JS + Vite + PixiJS 8. View router: `frontend/src/main.js` (Single, Arena, Analytics, NetLogo, Guide). REST client: `frontend/src/api/rest.js`. The Guide tab loads markdown from `GET /api/docs/{slug}` for the pages listed in `GuideView.js`.

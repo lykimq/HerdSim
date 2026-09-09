@@ -2,7 +2,7 @@
 
 ## What it is
 
-HerdSim variant of **Strombom 2014**. Sheep and Collect stay the same; Drive deflects around obstacles or through a gate when the straight flock-to-goal line is blocked. Meant for Obstacle Course and Narrow Gate. Not a certified path planner or safety controller.
+HerdSim variant of **Strombom 2014**. Sheep and Collect stay the same; Drive deflects around obstacles or through a gate when the straight flock-to-goal line is blocked. Intended for Obstacle Course and Narrow Gate.
 
 ## Reference
 

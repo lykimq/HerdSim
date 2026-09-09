@@ -12,7 +12,7 @@
 
 - Determinism: same seed yields the same trajectories (or document intentional RNG use).
 - Registry lists the new id.
-- Docs page exists under `docs/research/algorithms/` and any docs-sync test passes.
+- Docs page exists under `docs/research/algorithms/`.
 - Behavioural checks for novel thresholds, assignment, or heterogeneity rules.
 
 ## Commands
