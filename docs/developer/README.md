@@ -13,17 +13,17 @@ The following diagram illustrates how the frontend interacts with the backend co
 ```mermaid
 flowchart LR
   startNode([Client])
-  uiSingle[Single Arena View]
-  uiAnalytics[Analytics Dashboard]
-  apiHTTP[FastAPI REST]
-  apiWS[FastAPI WebSocket]
-  sessions[Session Manager]
-  runner[Simulation Engine]
-  algo[Algorithm Plugins]
-  scenario[Scenario Plugins]
-  metrics[Metric Plugins]
-  world[World State (Obstacles/Goals)]
-  endNode([Frame Data & Metrics])
+  uiSingle["Single Arena View"]
+  uiAnalytics["Analytics Dashboard"]
+  apiHTTP["FastAPI REST"]
+  apiWS["FastAPI WebSocket"]
+  sessions["Session Manager"]
+  runner["Simulation Engine"]
+  algo["Algorithm Plugins"]
+  scenario["Scenario Plugins"]
+  metrics["Metric Plugins"]
+  world["World State (Obstacles/Goals)"]
+  endNode(["Frame Data & Metrics"])
 
   startNode --> uiSingle
   startNode --> uiAnalytics
@@ -65,10 +65,10 @@ During each tick, the engine guarantees a strict execution order to ensure repro
 ```mermaid
 flowchart TD
   startTick([Tick Begin])
-  met[Evaluate Metrics]
-  stepAlg[Algorithm Step (Agent Movement)]
-  obst[Resolve Collisions & Obstacles]
-  done([Tick End])
+  met["Evaluate Metrics"]
+  stepAlg["Algorithm Step (Agent Movement)"]
+  obst["Resolve Collisions & Obstacles"]
+  done(["Tick End"])
 
   startTick --> met
   met --> stepAlg
