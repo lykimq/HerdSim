@@ -1,14 +1,10 @@
 # HerdSim Architecture & Design
 
-Welcome to the HerdSim architecture documentation. This document serves as the single source of truth for the system architecture, core simulation loop, codebase organization, and instructions for extending the platform with new plugins.
-
-## 1. Introduction & Background
-
-HerdSim is a highly modular platform for simulating and analyzing agent-based herding and flocking behaviors. By decoupling the simulation engine from the specific algorithmic logic and the frontend presentation layer, HerdSim provides a flexible environment to test different theories of collective motion.
+HerdSim is a modular platform for simulating and analyzing agent-based herding behaviors. By decoupling the simulation engine from the specific algorithmic logic and the frontend presentation layer, HerdSim provides a flexible environment to test different theories of collective motion.
 
 The platform is designed to allow researchers and developers to compare the behaviors of different herding models (e.g., Strombom, Kubo, and standard flocking models) under identical conditions, providing analytical metrics on herd cohesion, target acquisition, and obstacle avoidance.
 
-## 2. Design Requirements
+## Design Requirements
 
 The system is built around several core requirements:
 - **Modularity:** Algorithms, scenarios, and metrics must be plug-and-play without requiring modifications to the core engine.
@@ -16,7 +12,7 @@ The system is built around several core requirements:
 - **Scalability:** The engine must efficiently handle large numbers of agents (sheep and shepherds).
 - **Separation of Concerns:** The backend is solely responsible for state and simulation logic, while the frontend handles rendering and user interaction.
 
-## 3. HerdSim Architecture
+## HerdSim Architecture
 
 HerdSim is built as a decoupled system: a Python-based simulation engine backend and a JavaScript/PixiJS frontend. The backend handles the heavy lifting of the tick-based simulation, while the frontend handles rendering and user interaction via REST and WebSockets.
 
@@ -68,7 +64,7 @@ flowchart LR
   class startNode,endNode start
 ```
 
-## 4. The Simulation Engine
+## The Simulation Engine
 
 The core of HerdSim is the simulation runner (`core/simulation_runner.py`). It manages the state of the world and advances the simulation in discrete time steps (ticks).
 
@@ -110,7 +106,7 @@ Simulation configurations are layered. When a new simulation session starts, the
 4. **Algorithm Defaults**: Fallback parameters defined by the algorithm implementation.
 5. **Global Shared Defaults**: Base world settings defined in `core/shared_defaults.py`.
 
-## 5. The Algorithm Interface
+## The Algorithm Interface
 
 HerdSim is designed around a plugin architecture. Algorithms control the behavior of the agents (sheep and shepherds).
 
@@ -126,7 +122,7 @@ HerdSim currently integrates several herding models, which act as discrete algor
 - Register your algorithm in `algorithms/registry.py`.
 - Define any custom configuration parameters in your algorithm's `default_config`.
 
-## 6. Scenarios and Environments
+## Scenarios and Environments
 
 Scenarios define the initial state of the world, such as arena boundaries, obstacles, targets, and starting positions of agents. 
 
@@ -135,7 +131,7 @@ Scenarios define the initial state of the world, such as arena boundaries, obsta
 - Implement `create_world()` and `initial_positions()`.
 - Register the scenario in `scenarios/registry.py`.
 
-## 7. Metrics & Analytics
+## Metrics & Analytics
 
 Metrics evaluate the state of the simulation at each tick (e.g., center of mass, success conditions, agent stress).
 
@@ -144,7 +140,7 @@ Metrics evaluate the state of the simulation at each tick (e.g., center of mass,
 - Implement the evaluation logic using the current state.
 - Register it in `metrics/registry.py`.
 
-## 8. Implementation Details
+## Implementation Details
 
 - **`api/`**: FastAPI routers, REST endpoints, and WebSocket session handlers.
 - **`core/`**: The simulation engine, base classes (e.g., `BaseAlgorithm`), state definitions, and config resolution.
@@ -153,7 +149,7 @@ Metrics evaluate the state of the simulation at each tick (e.g., center of mass,
 - **`docs/`**: Project documentation (this architecture guide).
 - **`tests/`**: Pytest suite for the backend and Node tests for the frontend.
 
-## 9. End-to-End Workflows
+## End-to-End Workflows
 
 ### Development Workflow: Starting the Stack
 ```bash
