@@ -1,57 +1,46 @@
-# HerdSim
+# HerdSim 🐑
 
-Generic research platform for agent-based sheep herding simulations with pluggable algorithms, scenarios, and algorithm-agnostic metrics.
+**HerdSim** is an interactive, agent-based research platform designed to simulate, visualize, and evaluate sheep herding algorithms. 
 
-## Features
-- Algorithms: Strombom, Kubo, Flocking Dog, Strombom Multi-Dog, Strombom Noise (plus roadmap additions as registered)
-- Scenarios: drive to goal, containment, obstacle course, split flock, narrow gate, wide field
-- Paper / scenario / custom experiment presets
-- Live Vanilla JS + PixiJS frontend (Single / Arena / Analytics / NetLogo / Guide)
-- Multi-seed benchmark API + Analytics comparison tables
-- FastAPI + WebSocket streaming
-- Batch CLI trials (`scripts/run_batch.py`) and Analytics UI CSV/JSON/Markdown export
+Herding behavior—where a small group of "shepherds" (like dogs or robots) controls and guides a much larger group of "sheep" to a target—is a complex problem with applications in robotics, crowd control, and collective animal behavior. HerdSim provides a standardized environment to easily compare different herding algorithms against various scenarios.
 
-## Quick start
+## What it solves
+Researchers and developers building flocking or herding algorithms often struggle with:
+- **Visualization:** Seeing how algorithms perform in real-time.
+- **Standardization:** Apples-to-apples comparisons of different algorithms under the same conditions.
+- **Extensibility:** Easily dropping in new environments (like obstacles or narrow gates) without rewriting the core engine.
 
-```bash
-pip install -e ".[dev]"
-cd frontend && npm install && cd ..
+HerdSim solves this by providing a plug-and-play architecture. You can select an algorithm, choose a scenario (e.g., "drive to goal", "split flock", "obstacle course"), and immediately watch the simulation unfold in a live, interactive web interface.
 
-# API
-uvicorn api.main:app --reload --port 8000
+## Getting Started
 
-# UI (separate terminal)
-cd frontend && npm run dev
-```
+You can run HerdSim locally on your machine. You'll need Python and Node.js installed.
 
-Open http://localhost:5173
+1. **Install the backend dependencies:**
+   ```bash
+   pip install -e ".[dev]"
+   ```
+2. **Install the frontend dependencies:**
+   ```bash
+   cd frontend
+   npm install
+   cd ..
+   ```
+3. **Start the simulation server:**
+   ```bash
+   uvicorn api.main:app --reload --port 8000
+   ```
+4. **Start the visual interface:** (Open a new terminal window)
+   ```bash
+   cd frontend
+   npm run dev
+   ```
 
-## Tests
-
-```bash
-pytest tests/backend/ -v
-cd frontend && npm run build
-```
-
-## Batch runs
-
-```bash
-python scripts/run_batch.py --algorithm kubo --n-shepherds 4 --seeds 1,2,3 --out results/kubo.csv
-```
-
-For comparison tables with provenance and caveats, use the Analytics tab Export CSV / JSON (Markdown is a short methods note).
+Once everything is running, open your browser and go to **http://localhost:5173** to start simulating!
 
 ## Documentation
 
-- Guide tab (in-app): [`docs/research/`](docs/research/) -- algorithms, scenarios, metrics, environment, NetLogo
-- Codebase: [`docs/developer/README.md`](docs/developer/README.md) -- architecture, configuration, and extending the simulator
-- Paper PDFs: [`docs/papers/`](docs/papers/)
-
-## Project layout
-- `core/` simulation engine
-- `algorithms/` pluggable herding models
-- `scenarios/` task definitions
-- `metrics/` generic evaluation measures
-- `api/` FastAPI + WebSocket
-- `frontend/` Vanilla JS + PixiJS UI
-- `matlab/` upstream force-based MATLAB reference
+Want to dive deeper into the science or the code? 
+- **Research & Theory:** Check out the in-app "Guide" tab or browse the [`docs/research/`](docs/research/) folder to learn about the specific algorithms, scenarios, and metrics included.
+- **Developer Guide:** Interested in how the engine works or want to write your own algorithm plugin? Read our [Developer Documentation](docs/developer/README.md).
+- **Papers:** Original research papers are available in [`docs/papers/`](docs/papers/).
