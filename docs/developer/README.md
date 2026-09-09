@@ -133,28 +133,16 @@ Metrics evaluate the state of the simulation at each tick (e.g., center of mass,
 
 ### Starting the Stack
 ```bash
-# 1. Install backend dependencies (Python 3.10+)
-pip install -e ".[dev]"
+# 1. Install all dependencies (Python 3.10+ and Node.js required)
+make install
 
-# 2. Install frontend dependencies (Node.js)
-cd frontend
-npm install
-cd ..
-
-# 3. Start the FastAPI backend
-uvicorn api.main:app --reload --port 8000
-
-# 4. Start the Vite dev server (in a separate terminal)
-cd frontend
-npm run dev
+# 2. Start both the FastAPI backend and Vite dev server
+make dev
 ```
 
 ### Running Tests
 Ensure changes don't break determinism or core logic.
 ```bash
-# Run backend tests (excludes heavy stress tests)
-pytest tests/backend/ -q -m "not stress"
-
-# Run frontend unit tests
-node --test tests/frontend/*.test.js
+# Run backend and frontend tests (excludes heavy stress tests)
+make test
 ```
