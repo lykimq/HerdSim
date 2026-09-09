@@ -6,13 +6,9 @@ Herding behavior—where a small group of "shepherds" (like dogs or robots) cont
 
 ## Platform Highlights
 
-HerdSim is built to address the core challenges of evaluating swarm robotics and collective animal behavior models:
-
 - **Live Visualization:** An interactive web interface for real-time observation of complex flocking dynamics.
 - **Standardized Benchmarking:** Run apples-to-apples comparisons of different herding models under identical, reproducible conditions.
 - **Extensible Architecture:** A plug-and-play system designed for easily integrating custom environments, constraints, and driving algorithms without modifying the underlying simulation engine.
-
-Whether you are evaluating a "drive to goal" scenario or navigating a "split flock" through an obstacle course, HerdSim provides the necessary tooling to visualize and analyze your models immediately.
 
 ## Getting Started
 
