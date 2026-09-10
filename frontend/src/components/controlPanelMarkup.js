@@ -2,7 +2,7 @@ import { presetSelectHtml } from '../utils/params.js';
 import { iconImg } from '../assets/icons.js';
 import { factorFieldLabel } from '../utils/factors.js';
 
-export function controlPanelHtml({ sideLabel = '', paramsOpen = true } = {}) {
+function setupHtml(sideLabel) {
   return `
     <div class="section-title">Setup ${sideLabel ? `- ${sideLabel}` : ''}</div>
     <p class="panel-lead">
@@ -39,7 +39,12 @@ export function controlPanelHtml({ sideLabel = '', paramsOpen = true } = {}) {
       <input data-role="seed" type="number" value="42" />
     </div>
     <div class="config-summary" data-role="config-summary" aria-live="polite"></div>
-    <details class="param-section" open data-role="factors-section">
+  `;
+}
+
+function factorsHtml(factorsOpen) {
+  return `
+    <details class="param-section" ${factorsOpen ? 'open' : ''} data-role="factors-section">
       <summary class="section-title">Experimental factors</summary>
       <p class="param-hint" data-role="factors-summary"></p>
       <div class="param-list factors-grid" data-role="factors">
@@ -109,37 +114,53 @@ export function controlPanelHtml({ sideLabel = '', paramsOpen = true } = {}) {
         Factors override instrument defaults when Settings source is Custom. Paper/Scenario keep instrument defaults unless you switch to Custom.
       </p>
     </details>
-    <button class="btn btn-secondary" data-role="init">${iconImg('release')} Initialize New Run</button>
-    <div class="section-title">Playback</div>
-    <div class="btn-row">
-      <button class="btn" data-role="play">${iconImg('play')} Play</button>
-      <button class="btn btn-secondary" data-role="pause">${iconImg('pause')} Pause</button>
-    </div>
-    <div class="btn-row">
-      <button class="btn btn-secondary" data-role="step">${iconImg('step')} Step</button>
-      <button class="btn btn-secondary" data-role="reset">${iconImg('reset')} Reset</button>
-    </div>
-    <div class="control-group">
-      <label data-role="speed-label">Simulation Speed (1.0x)</label>
-      <input data-role="speed" type="range" min="0.1" max="10" step="0.1" value="1" />
-    </div>
-    <div class="section-title">Display</div>
-    <div class="control-group display-overlays">
-      <label class="check-item overlay-option">
-        <input data-role="trail-visible" type="checkbox" checked />
-        <span class="overlay-swatch overlay-swatch--trail" aria-hidden="true"></span>
-        <span data-role="trail-label">Trails: where herders walked this run (not shepherd_path length).</span>
-      </label>
-      <label class="check-item overlay-option">
-        <input data-role="gcm-goal-visible" type="checkbox" checked />
-        <span class="overlay-swatch overlay-swatch--gcm-goal" aria-hidden="true"></span>
-        <span data-role="gcm-goal-label">GCM to goal: line from flock centre of mass to the goal.</span>
-      </label>
-      <div data-role="assignment-overlays"></div>
-      <div class="trail-actions">
-        <button type="button" class="btn btn-secondary" data-role="clear-trails">Clear trails</button>
+  `;
+}
+
+function runControlsHtml() {
+  return `
+    <div class="control-run-strip" data-role="run-strip">
+      <button class="btn btn-secondary" data-role="init">${iconImg('release')} Initialize New Run</button>
+      <div class="btn-row control-run-playback">
+        <button class="btn" data-role="play">${iconImg('play')} Play</button>
+        <button class="btn btn-secondary" data-role="pause">${iconImg('pause')} Pause</button>
+        <button class="btn btn-secondary" data-role="step">${iconImg('step')} Step</button>
+        <button class="btn btn-secondary" data-role="reset">${iconImg('reset')} Reset</button>
+      </div>
+      <div class="control-group control-run-speed">
+        <label data-role="speed-label">Simulation Speed (1.0x)</label>
+        <input data-role="speed" type="range" min="0.1" max="10" step="0.1" value="1" />
       </div>
     </div>
+  `;
+}
+
+function displayHtml() {
+  return `
+    <div class="control-display-section" data-role="display-section">
+      <div class="section-title">Display</div>
+      <div class="control-group display-overlays">
+        <label class="check-item overlay-option">
+          <input data-role="trail-visible" type="checkbox" checked />
+          <span class="overlay-swatch overlay-swatch--trail" aria-hidden="true"></span>
+          <span data-role="trail-label">Trails: where herders walked this run (not shepherd_path length).</span>
+        </label>
+        <label class="check-item overlay-option">
+          <input data-role="gcm-goal-visible" type="checkbox" checked />
+          <span class="overlay-swatch overlay-swatch--gcm-goal" aria-hidden="true"></span>
+          <span data-role="gcm-goal-label">GCM to goal: line from flock centre of mass to the goal.</span>
+        </label>
+        <div data-role="assignment-overlays"></div>
+        <div class="trail-actions">
+          <button type="button" class="btn btn-secondary" data-role="clear-trails">Clear trails</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function advancedHtml(paramsOpen) {
+  return `
     <details class="param-section" ${paramsOpen ? 'open' : ''} data-role="params-section">
       <summary class="section-title" data-role="params-title">Advanced settings</summary>
       <div class="param-list" data-role="params"></div>
@@ -149,4 +170,23 @@ export function controlPanelHtml({ sideLabel = '', paramsOpen = true } = {}) {
       <div class="param-list" data-role="world-params"></div>
     </details>
   `;
+}
+
+export function controlPanelHtml({
+  sideLabel = '',
+  paramsOpen = true,
+  factorsOpen = true,
+  runFirst = false,
+  includeDisplay = true,
+} = {}) {
+  const setup = setupHtml(sideLabel);
+  const factors = factorsHtml(factorsOpen);
+  const run = runControlsHtml();
+  const display = includeDisplay ? displayHtml() : '';
+  const advanced = advancedHtml(paramsOpen);
+
+  if (runFirst) {
+    return `${run}${setup}${factors}${advanced}${display}`;
+  }
+  return `${setup}${factors}${run}${display}${advanced}`;
 }

@@ -25,14 +25,21 @@ export function createControlPanel({
   onClearTrails,
   sideLabel = '',
   paramsOpen = true,
+  factorsOpen = true,
+  runFirst = false,
+  includeDisplay = true,
   compact = false,
 }) {
   const root = document.createElement('div');
   root.className = 'card-glass control-panel';
   if (compact) root.classList.add('control-panel--compact');
+  if (runFirst) root.classList.add('control-panel--run-first');
   root.innerHTML = controlPanelHtml({
     sideLabel,
     paramsOpen,
+    factorsOpen,
+    runFirst,
+    includeDisplay,
   });
 
   const els = {
@@ -97,6 +104,10 @@ export function createControlPanel({
     if (els.trailLabel) els.trailLabel.textContent = TRAIL_LABEL;
     if (els.gcmGoalLabel) els.gcmGoalLabel.textContent = GCM_GOAL_LABEL;
     state.assignmentModes = assignmentModesFromAlgorithm(alg);
+    if (!els.assignmentOverlays) {
+      onAssignmentModesChange?.(state.assignmentModes);
+      return;
+    }
     els.assignmentOverlays.innerHTML = state.assignmentModes
       .map((mode) => assignmentModeOptionHtml(mode))
       .join('');
@@ -179,13 +190,13 @@ export function createControlPanel({
   const trailVisible = root.querySelector('[data-role="trail-visible"]');
   const gcmGoalVisible = root.querySelector('[data-role="gcm-goal-visible"]');
   const clearTrailsBtn = root.querySelector('[data-role="clear-trails"]');
-  trailVisible.addEventListener('change', () => {
+  trailVisible?.addEventListener('change', () => {
     onTrailVisibleChange?.(trailVisible.checked);
   });
-  gcmGoalVisible.addEventListener('change', () => {
+  gcmGoalVisible?.addEventListener('change', () => {
     onGcmGoalVisibleChange?.(gcmGoalVisible.checked);
   });
-  clearTrailsBtn.addEventListener('click', () => onClearTrails?.());
+  clearTrailsBtn?.addEventListener('click', () => onClearTrails?.());
 
   factorApi.bindFactorInputs();
 
@@ -196,6 +207,8 @@ export function createControlPanel({
         els.factorsError.textContent = checked.errors[0];
         els.factorsError.classList.remove('hidden');
       }
+      const factorsSection = root.querySelector('[data-role="factors-section"]');
+      if (factorsSection) factorsSection.open = true;
       return;
     }
     onInit?.(getConfig());
@@ -322,19 +335,27 @@ export function createControlPanel({
   }
 
   function isTrailVisible() {
-    return Boolean(trailVisible.checked);
+    return Boolean(trailVisible?.checked);
   }
 
   function isGcmGoalVisible() {
-    return Boolean(gcmGoalVisible.checked);
+    return Boolean(gcmGoalVisible?.checked);
   }
 
   function getAssignmentModeVisibility() {
     const out = {};
-    els.assignmentOverlays.querySelectorAll('[data-role="assignment-mode"]').forEach((input) => {
+    els.assignmentOverlays?.querySelectorAll('[data-role="assignment-mode"]').forEach((input) => {
       out[input.dataset.mode] = input.checked;
     });
     return out;
+  }
+
+  function getDisplaySection() {
+    return root.querySelector('[data-role="display-section"]');
+  }
+
+  function getRunStrip() {
+    return root.querySelector('[data-role="run-strip"]');
   }
 
   return {
@@ -353,6 +374,8 @@ export function createControlPanel({
     isTrailVisible,
     isGcmGoalVisible,
     getAssignmentModeVisibility,
+    getDisplaySection,
+    getRunStrip,
     refreshParamControls,
     setPlaybackEnabled,
   };
