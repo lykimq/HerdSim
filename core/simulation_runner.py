@@ -57,7 +57,10 @@ class SimulationRunner:
 
         metadata = {
             "r_a": float(self.config.get("r_a", 2.0)),
-            "collect_threshold_scale": float(self.config.get("collect_threshold_scale", 1.0)),
+            "collect_threshold_scale": float(
+                self.config.get("collect_threshold_scale", 1.0)
+            ),
+            "measurement_radius": float(self.config.get("measurement_radius", 5.0)),
             "algorithm_id": self.algorithm.id,
             "scenario_id": self.scenario.id,
             "seed": self.seed,
@@ -84,6 +87,8 @@ class SimulationRunner:
         if self._state is None:
             self.initialize()
 
+        # Canonical tick order: algorithm proposes movement, then environment
+        # resolves obstacles/walls, then metrics record state(t+1).
         self._state = self.algorithm.step(self._state, self.config)
         self._state.tick += 1
 

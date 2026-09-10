@@ -166,15 +166,21 @@ export function summaryHeadHtml(summaryDefs) {
 }
 
 export function summaryRowHtml(row) {
+  const pct = (v) => (v != null ? `${(Number(v) * 100).toFixed(1)}%` : 'n/a');
+  const num = (v, digits = 2) => (v != null ? Number(v).toFixed(digits) : 'n/a');
   return `
     <td>${row.algorithm}</td>
     <td>${row.trials}</td>
-    <td>${(row.success_rate * 100).toFixed(1)}%</td>
+    <td>${pct(row.success_rate)}</td>
+    <td>${pct(row.failure_rate)}</td>
     <td>${row.mean_ticks_success ?? 'n/a'}</td>
     <td>${row.median_ticks_success ?? 'n/a'}</td>
-    <td>${row.mean_cohesion != null ? Number(row.mean_cohesion).toFixed(2) : 'n/a'}</td>
-    <td>${row.mean_shepherd_path != null ? Number(row.mean_shepherd_path).toFixed(1) : 'n/a'}</td>
-    <td>${row.mean_gcm_goal != null ? Number(row.mean_gcm_goal).toFixed(2) : 'n/a'}</td>
+    <td>${num(row.iqr_ticks_success, 1)}</td>
+    <td>${num(row.mean_auc_cohesion)}</td>
+    <td>${num(row.mean_auc_fragmentation)}</td>
+    <td>${num(row.mean_shepherd_path, 1)}</td>
+    <td>${num(row.mean_control_efficiency, 4)}</td>
+    <td>${num(row.mean_final_gcm_goal)}</td>
   `;
 }
 

@@ -14,6 +14,7 @@ export function createMetricsPanel(metricDefs = null, title = 'Live Metrics') {
     'gcm_goal',
     'shepherd_path',
     'polarization',
+    'fragmentation',
     'outlier_count',
     'min_separation',
     'sheep_in_goal',

@@ -17,6 +17,10 @@ A scenario defines the task, the world layout, and the success criterion for a s
 
 Each scenario has a recommended configuration accessible via the **scenario** preset. This sets flock size, shepherd count, and world layout to values suited to the task. The **paper** preset overrides agent counts with the algorithm's published defaults while keeping the scenario's world layout.
 
+For fair cross-model comparison, use **custom** (or Arena overrides) to lock the same `n_sheep` and `n_shepherds` for every algorithm on the same scenario. See `docs/research/comparison_framework.md`.
+
+There is no algorithm-specific replication scenario. Models such as Kubo keep MATLAB-faithful force parameters in the algorithm plugin; the shared scenario supplies the HerdSim world.
+
 ## What scenarios control
 
 Scenarios own the world geometry: arena dimensions, goal or pen position and radius, obstacle placement, gate parameters (position, width, wall thickness), and containment thresholds. Algorithms run inside the world the scenario defines.

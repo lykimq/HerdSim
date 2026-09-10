@@ -124,15 +124,17 @@ def test_benchmark_run_and_export(client):
     assert json_res.status_code == 200
     package = json_res.json()
     assert package["herdsim_version"]
-    assert "git" not in package
+    assert "git_commit" in package
     assert package["caveats"]
     assert package["metric_definitions"]
     defs = client.get("/api/benchmarks/definitions")
     assert defs.status_code == 200
     body = defs.json()
     assert any(d["id"] == "success_rate" for d in body["summary"])
-    assert any(d["id"] == "cohesion" for d in body["csv"])
+    assert any(d["id"] == "auc_cohesion" for d in body["csv"])
+    assert any(d["id"] == "control_efficiency" for d in body["csv"])
     assert any(d["id"] == "first_success_tick" for d in body["csv"])
+    assert not any(d["id"] == "cohesion" for d in body["csv"])
 
 @pytest.mark.asyncio
 async def test_async_create_session():

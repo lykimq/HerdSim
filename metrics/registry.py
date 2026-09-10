@@ -42,6 +42,7 @@ metric_registry = MetricRegistry()
 
 def _auto_register():
     from metrics.cohesion import CohesionMetric
+    from metrics.fragmentation import FragmentationMetric
     from metrics.gcm_goal import GcmGoalMetric
     from metrics.min_separation import MinSeparationMetric
     from metrics.outlier_count import OutlierCountMetric
@@ -61,6 +62,7 @@ def _auto_register():
         PolarizationMetric,
         OutlierCountMetric,
         MinSeparationMetric,
+        FragmentationMetric,
     ]:
         metric_registry.register(cls)
 

@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 
 from metrics.cohesion import CohesionMetric
+from metrics.fragmentation import FragmentationMetric, largest_component_fraction
 from metrics.gcm_goal import GcmGoalMetric
 from metrics.min_separation import MinSeparationMetric
 from metrics.outlier_count import OutlierCountMetric
@@ -110,3 +111,19 @@ def test_time_to_goal_stays_negative_until_every_sheep_is_inside():
     )
     assert SuccessRateMetric().compute(mostly_inside) == pytest.approx(2.0 / 3.0)
     assert TimeToGoalMetric().compute(mostly_inside) == pytest.approx(-1.0)
+
+
+def test_fragmentation_is_largest_component_over_n():
+    # Two pairs far apart: largest component has 2 of 4 sheep -> 0.5.
+    sheep = [[0.0, 0.0], [1.0, 0.0], [50.0, 0.0], [51.0, 0.0]]
+    state = make_state(sheep, [[10.0, 10.0]], metadata={"measurement_radius": 2.0})
+    assert FragmentationMetric().compute(state) == pytest.approx(0.5)
+    assert largest_component_fraction(np.asarray(sheep, dtype=float), 2.0) == pytest.approx(
+        0.5
+    )
+
+
+def test_fragmentation_is_one_when_fully_connected():
+    sheep = [[0.0, 0.0], [1.0, 0.0], [2.0, 0.0]]
+    state = make_state(sheep, [[10.0, 10.0]], metadata={"measurement_radius": 2.0})
+    assert FragmentationMetric().compute(state) == pytest.approx(1.0)

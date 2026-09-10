@@ -70,20 +70,25 @@ The core of HerdSim is the simulation runner (`core/simulation_runner.py`). It m
 
 ### Tick Lifecycle
 
-During each tick, the engine guarantees a strict execution order to ensure reproducible and deterministic behavior:
+During each tick, the engine uses this canonical order so metrics describe the
+state after environment constraints (not the algorithm's raw proposal):
+
+```text
+state(t) -> algorithm.step -> resolve obstacles/walls -> state(t+1) -> metrics(state(t+1))
+```
 
 ```mermaid
 flowchart TD
   startTick([Tick Begin])
-  met["Evaluate Metrics"]
   stepAlg["Algorithm Step (Agent Movement)"]
-  obst["Resolve Collisions & Obstacles"]
+  obst["Resolve Obstacles and Walls"]
+  met["Evaluate Metrics"]
   done(["Tick End"])
 
-  startTick --> met
-  met --> stepAlg
+  startTick --> stepAlg
   stepAlg --> obst
-  obst --> done
+  obst --> met
+  met --> done
 
   classDef domain fill:#c8e6c9,stroke:#2e7d32,color:#1b5e20
   classDef shared fill:#e1bee7,stroke:#7b1fa2,color:#4a148c
@@ -94,7 +99,21 @@ flowchart TD
   class obst shared
 ```
 
-Algorithms are responsible for calculating intent (velocity vectors for sheep and shepherds). The engine applies obstacle resolution and environment constraints *after* the algorithm has run, ensuring agents don't move out of bounds or overlap illegally.
+At initialize (tick 0), metrics are recorded once before any algorithm step as a
+baseline snapshot. Algorithms propose movement; the engine then applies obstacle
+resolution and elastic wall reflection; metrics then record the constrained state.
+
+### Terminology
+
+HerdSim plugins are registered as **algorithms** (`BaseAlgorithm`). In research
+writing it helps to distinguish:
+
+- **Model**: agent dynamics / force or heuristic family (e.g. Kubo 2022, Strombom 2014).
+- **Controller / herding policy**: how dogs choose targets or modes (e.g. Collect/Drive).
+- **Scenario**: task and environment (world, goal, success criterion).
+- **Metric**: observable-state measurement recorded each tick.
+
+The code API keeps the name `BaseAlgorithm` for all model/controller plugins.
 
 ### Configuration & Overrides
 
@@ -111,14 +130,18 @@ Simulation configurations are layered. When a new simulation session starts, the
 HerdSim is designed around a plugin architecture. Algorithms control the behavior of the agents (sheep and shepherds).
 
 ### Deep dive into implemented families
-HerdSim currently integrates several herding models, which act as discrete algorithm plugins:
-- **Flocking (Dog/Sheep):** Classic boids-based models utilizing separation, alignment, and cohesion.
-- **Kubo:** Focuses on specific mathematical abstractions of sheep-dog interaction.
-- **Strombom:** A robust, biologically-inspired model modeling how a shepherd drives a cohesive group toward a target.
+HerdSim registers eight algorithm plugins. For scientific comparison, three
+are treated as distinct model families:
+
+- **Strombom 2014** (`strombom`) and variants (`strombom_multi`, `strombom_noise`, plus related Collect/Drive extensions).
+- **Kubo 2022** (`kubo`): continuous force-based multi-dog model (MATLAB-faithful gains/`dt`).
+- **Jadhav 2024** (`flocking_dog`): empirically informed sheep/dog flocking dynamics.
+
+Additional teaching / variation plugins: `v_formation`, `heterogeneous`, `obstacle_aware`.
 
 ### Adding an Algorithm
 - Subclass `core.base_algorithm.BaseAlgorithm`.
-- Implement the `step(self, state)` method.
+- Implement the `step(self, state, config)` method.
 - Register your algorithm in `algorithms/registry.py`.
 - Define any custom configuration parameters in your algorithm's `default_config`.
 

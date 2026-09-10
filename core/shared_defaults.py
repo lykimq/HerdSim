@@ -33,6 +33,8 @@ WORLD_KEYS = (
     "containment_min_ticks",
     # Scenario may widen Strombom-style f(N); algorithms declare the default.
     "collect_threshold_scale",
+    # Experimental flock-connectivity radius for fragmentation metric.
+    "measurement_radius",
 )
 
 # Fallback layout when scenario / overrides omit a world key.
@@ -42,6 +44,8 @@ SHARED_WORLD_DEFAULTS: dict[str, Any] = {
     "goal_center": [15.0, 15.0],
     "goal_radius": 15.0,
     "max_ticks": 3000,
+    # Experimental (not algorithm-specific) radius for fragmentation.
+    "measurement_radius": 5.0,
 }
 
 

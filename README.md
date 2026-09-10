@@ -1,20 +1,35 @@
-# HerdSim 🐑
+# HerdSim
 
-**HerdSim** is an interactive, agent-based research platform designed to simulate, visualize, and evaluate sheep herding algorithms. 
+**HerdSim** is an interactive agent-based research platform for simulating,
+visualizing, and comparing sheep herding models under shared scenarios and
+metrics.
 
-Herding behavior-where a small group of "shepherds" (like dogs or robots) controls and guides a much larger group of "sheep" to a target-is a complex problem with applications in robotics, crowd control, and collective animal behavior. HerdSim provides a standardized environment to easily compare different herding algorithms against various scenarios.
+Herding -- where a small group of shepherds guides a larger flock to a target --
+is a complex problem in robotics and collective behaviour. HerdSim provides a
+standardized experimental stack so different models can be evaluated under
+equivalent conditions.
 
 ## Motivation
-Researchers and developers building flocking or herding algorithms often struggle with:
-- **Visualization:** Seeing how algorithms perform in real-time.
-- **Standardization:** Apples-to-apples comparisons of different algorithms under the same conditions.
-- **Extensibility:** Easily dropping in new environments (like obstacles or narrow gates) without rewriting the core engine.
 
-HerdSim solves this by providing a plug-and-play architecture. You can select an algorithm, choose a scenario (e.g., "drive to goal", "split flock", "obstacle course"), and immediately watch the simulation unfold in a live, interactive web interface.
+- **Visualization:** watch algorithms in real time.
+- **Standardization:** same scenarios, metrics, and seeds across models.
+- **Extensibility:** plug in algorithms, scenarios, and metrics without rewriting the engine.
+
+Core comparison families: Strombom 2014, Kubo 2022, and Jadhav 2024 (`flocking_dog`).
+
+## Research docs
+
+- [Comparison framework](docs/research/comparison_framework.md) -- fair protocol and reporting
+- [Metrics](docs/research/metrics.md) -- taxonomy, trajectory aggregates, provenance
+- [Related work](docs/research/related_work.md) -- situating the three model families
+- [Architecture](docs/architecture.md) -- tick lifecycle and plugins
+- [Algorithms](docs/research/algorithms/README.md) -- suite map
+
+Fair comparison CLI: `python scripts/run_fair_compare.py` (shared N/M, default 30 seeds).
 
 ## Getting Started
 
-You can run HerdSim locally on your machine. You'll need Python and Node.js installed.
+You need Python and Node.js.
 
 1. **Install dependencies:**
    ```bash
@@ -25,4 +40,4 @@ You can run HerdSim locally on your machine. You'll need Python and Node.js inst
    make dev
    ```
 
-Once everything is running, open your browser and go to **http://localhost:5173** to start simulating!
+Open **http://localhost:5173** to start simulating.

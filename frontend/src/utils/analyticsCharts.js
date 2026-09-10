@@ -31,29 +31,43 @@ export function renderAnalyticsCharts(chartsRoot, rows) {
   renderPlotlyBoxPlot(
     chartsRoot.querySelector('[data-role="chart-cohesion"]'),
     data,
-    'cohesion',
-    'Final Cohesion',
+    'auc_cohesion',
+    'AUC Cohesion',
     boxOpts,
   );
   renderPlotlyBoxPlot(
     chartsRoot.querySelector('[data-role="chart-polarization"]'),
     data,
-    'polarization',
-    'Polarization',
+    'auc_polarization',
+    'AUC Polarization',
+    boxOpts,
+  );
+  renderPlotlyBoxPlot(
+    chartsRoot.querySelector('[data-role="chart-fragmentation"]'),
+    data,
+    'auc_fragmentation',
+    'AUC Fragmentation',
     boxOpts,
   );
   renderPlotlyBoxPlot(
     chartsRoot.querySelector('[data-role="chart-min-sep"]'),
     data,
-    'min_separation',
-    'Min Separation',
+    'final_min_separation',
+    'Final Min Separation',
     boxOpts,
   );
   renderPlotlyBoxPlot(
     chartsRoot.querySelector('[data-role="chart-gcm-goal"]'),
     data,
-    'gcm_goal',
-    'GCM to Goal',
+    'final_gcm_goal',
+    'Final GCM to Goal',
+    boxOpts,
+  );
+  renderPlotlyBoxPlot(
+    chartsRoot.querySelector('[data-role="chart-ctrl-eff"]'),
+    data,
+    'control_efficiency',
+    'Control Efficiency',
     boxOpts,
   );
   renderPlotlyPathTicksScatter(

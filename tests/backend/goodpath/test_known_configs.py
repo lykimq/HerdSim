@@ -83,3 +83,39 @@ def test_flocking_dog_short_run_terminates_cleanly():
     assert result.total_ticks == 40
     assert result.final_state.n_sheep == 10
     assert result.final_state.n_shepherds == 1
+
+
+def test_kubo_dogs_spread_and_flock_progresses():
+    """Kubo multi-dog smoke: dogs do not stack; GCM moves toward the goal."""
+    runner = build_runner(
+        "kubo",
+        "drive_to_goal",
+        seed=2,
+        num_sheep=20,
+        num_shepherds=4,
+        config_overrides={"max_ticks": 200},
+    )
+    result = runner.run()
+    start = result.history.iloc[0]["gcm_goal"]
+    end = result.history.iloc[-1]["gcm_goal"]
+    assert end < start
+    dogs = result.final_state.shepherd_positions
+    pairwise = []
+    for i in range(len(dogs)):
+        for j in range(i + 1, len(dogs)):
+            pairwise.append(float(np.linalg.norm(dogs[i] - dogs[j])))
+    assert min(pairwise) > 1.0
+
+
+def test_strombom_collect_drive_metadata_on_early_ticks():
+    runner = build_runner("strombom", seed=1, num_sheep=15, num_shepherds=1)
+    runner.initialize()
+    modes = set()
+    for _ in range(30):
+        state, _, status = runner.step()
+        mode = state.metadata.get("herding_mode")
+        if mode:
+            modes.add(mode)
+        if status != "running":
+            break
+    assert modes & {"collect", "drive"}

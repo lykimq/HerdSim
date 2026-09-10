@@ -151,6 +151,12 @@ The paper studies small empirical flocks. Running with larger N is valid but cha
 | `dog_speed` | 1.5 | Dog displacement per tick (paper `vDog` / `vD`). |
 | `dog_close_speed` | 0.05 | Absolute dog speed when within `r_a` of any sheep (paper close-range slowdown). |
 
+## Fidelity status
+
+**Matches paper / author MATLAB:** topological sheep neighbour rules, dog close-speed inside `r_a`, paper-oriented small flock defaults (N=14), Collect/Drive-style dog.
+
+**Differs by design:** scenario goal instead of MATLAB origin; arena wall reflection. Role in HerdSim: empirically informed third model family alongside Strombom and Kubo for fair shared-scenario comparison.
+
 ## Fidelity notes
 
 The HerdSim implementation follows the author MATLAB model for sheep heading and dog close-speed. The Drive target uses the scenario goal rather than the MATLAB reference origin. Wall reflection is applied at arena boundaries. The random topological sub-sampling (`n_attraction`, `n_alignment`) means runs at the same seed can exhibit more variability than the Strombom family, particularly at small N.

@@ -7,6 +7,7 @@ from typing import Any, Callable, Iterator
 import pandas as pd
 
 from algorithms.registry import algorithm_registry
+from api.benchmark_aggregates import build_trial_metric_fields
 from api.benchmark_summary import summarize_rows, summary_to_csv, summary_to_markdown
 from api.benchmark_sweep import expand_param_grid, parse_sweep_specs, sweep_label
 from core.experiment_config import resolve_experiment_config
@@ -46,13 +47,12 @@ def _trial_row(
         "n_shepherds": config["n_shepherds"],
         "success": bool(result.success),
         "total_ticks": int(result.total_ticks),
+        "resolved_config": dict(config),
     }
     if sweep_params:
         row.update(sweep_params)
         row["sweep_label"] = sweep_label(sweep_params)
-    if not result.history.empty:
-        final = result.history.iloc[-1].to_dict()
-        row.update({k: v for k, v in final.items() if k != "tick"})
+    row.update(build_trial_metric_fields(result.history))
     # Scenario success stops the trial, so total_ticks is the first success tick.
     # Distinct from time_to_goal, which requires all sheep inside the goal.
     if result.success:

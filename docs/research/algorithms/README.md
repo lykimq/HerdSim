@@ -80,4 +80,8 @@ Flocking Dog uses a Collect / Drive-style shepherd, but its sheep model is not S
 
 Use **Arena** for side-by-side runs under a shared seed and scenario. Use **Analytics** for multi-seed trials or parameter sweeps, then export CSV or JSON.
 
+For scientific comparison of Strombom, Kubo, and Flocking Dog, lock shared sheep/dog counts (custom preset) and prefer trajectory/outcome exports described in `docs/research/comparison_framework.md` and `docs/research/metrics.md`. CLI: `scripts/run_fair_compare.py`.
+
 Path length and speed are not directly comparable between Strombom-family algorithms (fixed displacement per tick) and Kubo (continuous integration with `dt`). Analytics exports document this caveat.
+
+Background literature context: `docs/research/related_work.md`.

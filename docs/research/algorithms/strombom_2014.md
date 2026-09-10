@@ -168,3 +168,9 @@ The **paper** preset loads these values. Running with M > 1 uses the base Stromb
 ## Limits
 
 The HerdSim implementation matches the paper Collect / Drive switch condition, the sheep heading composition, and the shepherd stop distance `shepherd_stop_multiple * r_a` (default 3 * `r_a`). The goal is the scenario goal zone rather than a fixed origin. Wall reflection is applied at arena boundaries (the paper uses an open field). The `collect_threshold_scale` parameter is a HerdSim addition with no paper equivalent.
+
+## Fidelity status
+
+**Matches paper:** Collect/Drive switch via f(N), sheep heading composition, shepherd stop distance, paper-preset agent dynamics defaults.
+
+**Differs by design:** scenario-owned goal/world layout and wall reflection; optional `collect_threshold_scale`. Analytics now reports trajectory aggregates (auc cohesion, fragmentation) in addition to task success -- interpret Collect spikes via outlier_count and fragmentation over time, not final-tick cohesion alone.

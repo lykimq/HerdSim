@@ -70,7 +70,10 @@ export function analyticsRunnerHtml() {
 export function analyticsResultsHtml() {
   return `
     <p class="analytics-intro">
-      Each row summarizes one algorithm across the chosen seeds. Success is the share of trials that met the scenario success criterion in time; mean and median ticks are how long successful runs took; mean cohesion is final flock tightness (sheep distance to GCM); mean path is average shepherd travel. Hover a column header for a short definition. CSV and JSON exports include experiment design, column notes, and comparison caveats; Markdown is a short methods note.
+      Each row summarizes one algorithm across the chosen seeds. Success/failure are scenario outcomes;
+      ticks describe successful runs; AUC cohesion/fragmentation and control efficiency summarize the full
+      trajectory. Hover a column header for definitions. CSV and JSON exports include experiment design,
+      column notes, and comparison caveats.
     </p>
     <table class="benchmark-table">
       <thead>
@@ -124,28 +127,38 @@ export function analyticsChartsHtml() {
     )}
     ${chartBlock(
       'Shepherd Path',
-      'Cumulative dog travel distance (world units). Lower usually means less effort for the same outcome. Red X = failed trials.',
+      'Cumulative dog travel distance at end of run (world units). Lower usually means less effort for the same outcome. Red X = failed trials.',
       'chart-path',
     )}
     ${chartBlock(
-      'Final Cohesion',
-      'Mean sheep distance to the flock centroid at the end of each trial. Lower is a tighter flock. Red X = failed trials.',
+      'AUC Cohesion',
+      'Mean sheep distance to the flock centroid averaged over the full trial trajectory. Lower is a tighter flock over time. Red X = failed trials.',
       'chart-cohesion',
     )}
     ${chartBlock(
-      'Polarization',
-      'Final heading alignment of the flock (0-1). Higher means sheep move more in the same direction. Red X = failed trials.',
+      'AUC Polarization',
+      'Mean heading alignment of the flock over the trial (0-1). Higher means sheep moved more coherently in direction. Red X = failed trials.',
       'chart-polarization',
     )}
     ${chartBlock(
-      'Min Separation',
-      'Closest pair of sheep at the end of each trial (world units). Very low values can mean crowding or collisions. Red X = failed trials.',
+      'AUC Fragmentation',
+      'Mean largest connected-component fraction over ticks (measurement_radius). Closer to 1.0 means the flock stayed connected. Red X = failed trials.',
+      'chart-fragmentation',
+    )}
+    ${chartBlock(
+      'Final Min Separation',
+      'Closest pair of sheep at the end of each trial (world units). Very low values can mean crowding. Red X = failed trials.',
       'chart-min-sep',
     )}
     ${chartBlock(
-      'GCM to Goal',
+      'Final GCM to Goal',
       'Distance from flock centroid to goal centre at the end of each trial (world units). Lower means the flock ended closer to the goal. Red X = failed trials.',
       'chart-gcm-goal',
+    )}
+    ${chartBlock(
+      'Control Efficiency',
+      'Goal progress per unit shepherd travel: (gcm_start - gcm_end) / path. Higher means more progress for less dog movement. Red X = failed trials.',
+      'chart-ctrl-eff',
     )}
     ${chartBlock(
       'Path vs Convergence',

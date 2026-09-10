@@ -37,3 +37,11 @@ These two conventions are not interchangeable. The number of ticks to complete a
 ## Reproducibility
 
 Every stochastic element in a run -- initial sheep positions, heading noise, random grazing steps, stubborn sheep assignment -- is drawn from a single seeded random number generator. Given the same seed, algorithm, scenario, and parameter values, a run is fully deterministic and reproducible. Different seeds produce statistically independent runs, which is what the Analytics multi-seed mode exploits.
+
+## Experimental measurement radius
+
+`measurement_radius` (shared default, overridable) is used only by the fragmentation metric: sheep within that distance are treated as connected. It is an experimental measurement parameter, not Kubo sensing `radius` and not Strombom `r_a`.
+
+## Tick order and environment constraints
+
+Each tick applies algorithm movement, then obstacle and wall resolution, then metrics on the constrained state. Metrics therefore describe positions after environment constraints.
