@@ -11,7 +11,7 @@ router = APIRouter()
 
 _DOCS_ROOT = Path(__file__).resolve().parents[2] / "docs"
 
-# Whitelist must match GuideView NAV (frontend/src/components/GuideView.js).
+# Whitelist served by Guide; titles come from list_docs().
 DOC_SLUGS: dict[str, Path] = {
     "user_guide": _DOCS_ROOT / "user_guide.md",
     "research/algorithms": _DOCS_ROOT / "research" / "algorithms" / "README.md",
@@ -38,9 +38,36 @@ DOC_SLUGS: dict[str, Path] = {
 @router.get("")
 async def list_docs():
     """List Guide-visible documentation slugs."""
+    title_map = {
+        "user_guide": "User Guide",
+        "research/algorithms": "Instruments",
+        "research/algorithms/strombom_2014": "Strombom 2014",
+        "research/algorithms/strombom_multi": "Strombom Multi-Dog",
+        "research/algorithms/strombom_noise": "Strombom Noise",
+        "research/algorithms/v_formation": "V-Formation",
+        "research/algorithms/heterogeneous": "Heterogeneous",
+        "research/algorithms/obstacle_aware": "Obstacle-Aware",
+        "research/algorithms/kubo_2022": "Kubo 2022",
+        "research/algorithms/flocking_dog_2024": "Flocking Dog",
+        "research/algorithms/fat": "FAT",
+        "research/algorithms/communication_free": "Communication-Free",
+        "research/algorithms/adaptive": "Adaptive",
+        "research/scenarios": "Scenarios",
+        "research/metrics": "Metrics",
+        "research/environment": "Environment",
+        "research/netlogo": "NetLogo",
+        "research/comparison_framework": "Comparison Framework",
+        "architecture": "Architecture",
+    }
     items = []
     for slug, path in DOC_SLUGS.items():
-        items.append({"slug": slug, "exists": path.is_file(), "title": slug.split("/")[-1]})
+        items.append(
+            {
+                "slug": slug,
+                "exists": path.is_file(),
+                "title": title_map.get(slug, slug.split("/")[-1]),
+            }
+        )
     return {"docs": items}
 
 

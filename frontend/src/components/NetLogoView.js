@@ -1,4 +1,4 @@
-/** NetLogo tab: open .nlogo in desktop NetLogo; compare HerdSim algorithm twins. */
+/** NetLogo tab: open .nlogo in desktop NetLogo; compare HerdSim instrument twins. */
 
 import {
   fetchNetLogoModels,
@@ -9,19 +9,19 @@ import {
 } from '../api/rest.js';
 import { log } from '../utils/logger.js';
 import { mountTips } from '../utils/tooltips.js';
+import { setStatusMessage } from '../utils/dom.js';
 
 function panelHtml() {
   return `
     <div class="section-title">NetLogo</div>
-    <p class="param-hint">
-      Open <code>.nlogo</code> models in your local NetLogo desktop app.
-      For HerdSim algorithms with a NetLogo twin, compare by opening NetLogo then
-      running the same algorithm in Single.
+    <p class="panel-lead">
+      Open <code>.nlogo</code> instrument twins in your local NetLogo desktop app,
+      then jump back to Simulate with the matching HerdSim instrument.
     </p>
 
-    <div class="section-title">HerdSim algorithm twins</div>
+    <div class="section-title">HerdSim instrument twins</div>
     <div class="control-group">
-      <label>Algorithm</label>
+      <label>Instrument twin</label>
       <select data-role="twin"></select>
       <p class="param-hint" data-role="twin-meta"></p>
     </div>
@@ -47,7 +47,7 @@ function panelHtml() {
       <input data-role="netlogo-home" type="text" placeholder="Auto-detect if empty" />
       <p class="param-hint" data-role="home-status"></p>
     </div>
-    <p class="param-hint" data-role="action-status"></p>
+    <p class="param-hint" data-role="action-status" aria-live="polite"></p>
   `;
 }
 
@@ -57,15 +57,15 @@ function helpHtml() {
       <div class="section-title">NetLogo vs HerdSim</div>
       <p class="param-hint">
         Use this tab to open <code>.nlogo</code> models in the NetLogo desktop app.
-        Browser views (Single, Arena, Analytics) always run HerdSim's Python
-        algorithms.
+        Browser views (Simulate, Compare, Experiments) always run HerdSim's Python
+        instruments.
       </p>
       <p class="param-hint">
-        Each <strong>algorithm twin</strong> is a NetLogo version of a HerdSim
-        algorithm for the <strong>Drive to Goal</strong> scenario only (same
+        Each <strong>instrument twin</strong> is a NetLogo version of a HerdSim
+        instrument for the <strong>Drive to Goal</strong> scenario only (same
         goal zone, spawn layout, and success rule as HerdSim
         <code>drive_to_goal</code>). Other HerdSim scenarios are not mirrored
-        in these twins. Align the NetLogo sliders with Single (agent counts,
+        in these twins. Align the NetLogo sliders with Simulate (agent counts,
         seed, max-ticks, goal radius, and gains), run <strong>setup</strong> /
         <strong>go</strong> (or <strong>go once</strong>) in NetLogo, then
         <strong>Run in HerdSim</strong> with Drive to Goal and the same values
@@ -137,8 +137,8 @@ export function createNetLogoView({ onStatus, onRunInHerdSim } = {}) {
     actionStatus: left.querySelector('[data-role="action-status"]'),
   };
 
-  function setActionStatus(text) {
-    els.actionStatus.textContent = text || '';
+  function setActionStatus(text, { error = false } = {}) {
+    setStatusMessage(els.actionStatus, text || '', { error });
   }
 
   function selectedTwin() {
@@ -159,7 +159,7 @@ export function createNetLogoView({ onStatus, onRunInHerdSim } = {}) {
   function refreshTwinMeta() {
     const twin = selectedTwin();
     if (!twin) {
-      els.twinMeta.textContent = 'No algorithm twins available yet.';
+      els.twinMeta.textContent = 'No instrument twins available yet.';
       syncButtons();
       return;
     }
@@ -217,7 +217,7 @@ export function createNetLogoView({ onStatus, onRunInHerdSim } = {}) {
       setActionStatus(`Opened ${label} in NetLogo desktop.`);
       onStatus?.({ status: 'idle', tick: 0, seed: '-' });
     } catch (err) {
-      setActionStatus(err.message || String(err));
+      setActionStatus(err.message || String(err), { error: true });
       log.error('netlogo', err.message || String(err), err);
       onStatus?.({ status: 'idle', tick: 0, seed: '-' });
     } finally {
@@ -238,7 +238,7 @@ export function createNetLogoView({ onStatus, onRunInHerdSim } = {}) {
   els.runHerdSim.addEventListener('click', () => {
     const twin = selectedTwin();
     if (!twin || typeof onRunInHerdSim !== 'function') return;
-    setActionStatus(`Opening HerdSim Single with ${twin.name}...`);
+    setActionStatus(`Opening HerdSim Simulate with ${twin.name}...`);
     onRunInHerdSim(twin.algorithm_id);
   });
 
@@ -260,7 +260,7 @@ export function createNetLogoView({ onStatus, onRunInHerdSim } = {}) {
       fillModels(payload.models, result.model.path);
       setActionStatus(`Saved ${result.model.path}`);
     } catch (err) {
-      setActionStatus(err.message || String(err));
+      setActionStatus(err.message || String(err), { error: true });
       log.error('netlogo', err.message || String(err), err);
     } finally {
       els.upload.value = '';
@@ -270,8 +270,8 @@ export function createNetLogoView({ onStatus, onRunInHerdSim } = {}) {
   });
 
   mountTips(left, {
-    'open-twin': 'Open this algorithm twin in your local NetLogo desktop app.',
-    'run-herdsim': 'Switch to Single and select the matching HerdSim algorithm.',
+    'open-twin': 'Open this instrument twin in your local NetLogo desktop app.',
+    'run-herdsim': 'Switch to Simulate and select the matching HerdSim instrument.',
     'open-desktop': 'Open the selected library/upload model in NetLogo.',
   });
 
@@ -298,7 +298,7 @@ export function createNetLogoView({ onStatus, onRunInHerdSim } = {}) {
       }
       syncButtons();
     } catch (err) {
-      setActionStatus(err.message || String(err));
+      setActionStatus(err.message || String(err), { error: true });
       log.error('netlogo', `Could not load NetLogo catalog: ${err.message || err}`, err);
     }
     log.info('netlogo', 'NetLogo view ready');

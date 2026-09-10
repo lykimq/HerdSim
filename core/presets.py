@@ -157,6 +157,25 @@ def list_presets() -> list[dict[str, Any]]:
     ]
 
 
+def find_preset_for_models(sheep_model: str, dog_controller: str) -> str | None:
+    """Return a named instrument id matching the model pair, if any.
+
+    When several presets share the same pair, prefer id == sheep_model
+    (canonical package), otherwise the first id in sorted order.
+    """
+    matches = [
+        p
+        for p in PRESETS.values()
+        if p["sheep_model"] == sheep_model and p["dog_controller"] == dog_controller
+    ]
+    if not matches:
+        return None
+    for preset in matches:
+        if preset["id"] == sheep_model:
+            return preset["id"]
+    return sorted(matches, key=lambda p: p["id"])[0]["id"]
+
+
 def get_preset(preset_id: str) -> dict[str, Any]:
     if preset_id not in PRESETS:
         raise KeyError(

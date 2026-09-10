@@ -4,6 +4,52 @@
   gap: 0.55rem;
 }
 
+.arena-mode-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem 0.85rem;
+}
+
+.arena-mode-toggle {
+  display: inline-flex;
+  gap: 0.35rem;
+}
+
+.arena-mode-btn {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  padding: 0.35rem 0.7rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.arena-mode-btn.active {
+  color: var(--text-main);
+  background: var(--accent-primary-soft);
+  border-color: rgba(6, 182, 212, 0.45);
+}
+
+.arena-fair-controls.is-disabled,
+.arena-fair-row.is-disabled {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.arena-fair-title {
+  margin: 0;
+}
+
+.arena-fair-field {
+  min-width: 140px;
+}
+
+.arena-fair-field--seed {
+  min-width: 90px;
+}
+
 .arena-fair-row,
 .arena-delta-row {
   display: flex;

@@ -1,9 +1,21 @@
 /** Pure formatting helpers for the Analytics dashboard. */
 
+import { emptyStateHtml } from './dom.js';
+import { parseTrialFactors } from './analyticsSweep.js';
+
 const PLOT_COLORS = ['#34d399', '#38bdf8', '#a78bfa', '#fbbf24', '#f472b6', '#fb7185'];
 
+let plotlyPromise = null;
+
+async function loadPlotly() {
+  if (!plotlyPromise) {
+    plotlyPromise = import('plotly.js-dist-min').then((mod) => mod.default || mod);
+  }
+  return plotlyPromise;
+}
+
 function plotlyUnavailableHtml() {
-  return '<div style="color:var(--text-muted)">Plotly is loading or unavailable.</div>';
+  return emptyStateHtml('Plotly is loading or unavailable.');
 }
 
 function algorithmOrder(rows, groupKey = 'algorithm') {
@@ -15,7 +27,7 @@ function colorForAlgorithm(algorithms, algorithmId) {
   return PLOT_COLORS[Math.max(0, index) % PLOT_COLORS.length];
 }
 
-function baseLayout(title, yTitle, xTitle = 'Algorithm') {
+function baseLayout(title, yTitle, xTitle = 'Instrument') {
   return {
     title,
     paper_bgcolor: 'rgba(0,0,0,0)',
@@ -28,11 +40,18 @@ function baseLayout(title, yTitle, xTitle = 'Algorithm') {
 }
 
 /**
- * Box plot of a per-trial metric by algorithm (or sweep_label).
+ * Box plot of a per-trial metric by instrument (or sweep_label).
  * Failed trials can be excluded from the box and/or marked with X overlays.
  */
-export function renderPlotlyBoxPlot(container, rawRows, key, label, options = {}) {
-  if (!window.Plotly) {
+export async function renderPlotlyBoxPlot(container, rawRows, key, label, options = {}) {
+  let Plotly;
+  try {
+    Plotly = await loadPlotly();
+  } catch {
+    container.innerHTML = plotlyUnavailableHtml();
+    return;
+  }
+  if (!Plotly?.newPlot) {
     container.innerHTML = plotlyUnavailableHtml();
     return;
   }
@@ -42,13 +61,15 @@ export function renderPlotlyBoxPlot(container, rawRows, key, label, options = {}
     boxSuccessOnly = false,
     annotateFailures = true,
     groupKey = 'algorithm',
-    xTitle = groupKey === 'sweep_label' ? 'Parameter set' : 'Algorithm',
+    xTitle = groupKey === 'sweep_label' || groupKey === 'factor_label'
+      ? 'Parameter set'
+      : 'Instrument',
   } = options;
 
   const rows = rawRows || [];
   const algorithms = algorithmOrder(rows, groupKey);
   if (!algorithms.length) {
-    container.innerHTML = '<div style="color:var(--text-muted)">No trial data yet.</div>';
+    container.innerHTML = emptyStateHtml('No trial data yet.');
     return;
   }
 
@@ -93,12 +114,19 @@ export function renderPlotlyBoxPlot(container, rawRows, key, label, options = {}
     legend: { orientation: 'h', y: -0.2, font: { color: '#cbd5e1' } },
   };
 
-  window.Plotly.newPlot(container, traces, layout, { responsive: true, displayModeBar: false });
+  Plotly.newPlot(container, traces, layout, { responsive: true, displayModeBar: false });
 }
 
 /** Scatter of shepherd path vs convergence ticks; X marks failed trials. */
-export function renderPlotlyPathTicksScatter(container, rawRows) {
-  if (!window.Plotly) {
+export async function renderPlotlyPathTicksScatter(container, rawRows) {
+  let Plotly;
+  try {
+    Plotly = await loadPlotly();
+  } catch {
+    container.innerHTML = plotlyUnavailableHtml();
+    return;
+  }
+  if (!Plotly?.newPlot) {
     container.innerHTML = plotlyUnavailableHtml();
     return;
   }
@@ -109,7 +137,7 @@ export function renderPlotlyPathTicksScatter(container, rawRows) {
   );
   const algorithms = algorithmOrder(rows);
   if (!algorithms.length) {
-    container.innerHTML = '<div style="color:var(--text-muted)">No trial data yet.</div>';
+    container.innerHTML = emptyStateHtml('No trial data yet.');
     return;
   }
 
@@ -156,7 +184,90 @@ export function renderPlotlyPathTicksScatter(container, rawRows) {
     legend: { orientation: 'h', y: -0.25, font: { color: '#cbd5e1' } },
   };
 
-  window.Plotly.newPlot(container, traces, layout, { responsive: true, displayModeBar: false });
+  Plotly.newPlot(container, traces, layout, { responsive: true, displayModeBar: false });
+}
+
+/**
+ * Success-rate heatmap over the first two factor keys found in trial rows.
+ * Expects factor_* value fields and/or parseable sweep_label "k=v, k=v".
+ */
+export async function renderPlotlyHerdabilityHeatmap(container, rawRows) {
+  let Plotly;
+  try {
+    Plotly = await loadPlotly();
+  } catch {
+    container.innerHTML = plotlyUnavailableHtml();
+    return;
+  }
+  if (!Plotly?.newPlot) {
+    container.innerHTML = plotlyUnavailableHtml();
+    return;
+  }
+  container.innerHTML = '';
+
+  const rows = rawRows || [];
+  if (!rows.length) {
+    container.innerHTML = emptyStateHtml('No trial data yet.');
+    return;
+  }
+
+  const parsed = rows.map((row) => ({ ...row, factors: parseTrialFactors(row) }));
+
+  const keyCounts = {};
+  parsed.forEach((row) => {
+    Object.keys(row.factors).forEach((k) => {
+      keyCounts[k] = (keyCounts[k] || 0) + 1;
+    });
+  });
+  const keys = Object.keys(keyCounts).sort((a, b) => keyCounts[b] - keyCounts[a]);
+  if (keys.length < 2) {
+    container.innerHTML = emptyStateHtml(
+      'Heatmap needs a factor grid with at least two swept keys.',
+    );
+    return;
+  }
+
+  const xKey = keys[0];
+  const yKey = keys[1];
+  const xVals = [...new Set(parsed.map((r) => String(r.factors[xKey])))].sort(compareFactor);
+  const yVals = [...new Set(parsed.map((r) => String(r.factors[yKey])))].sort(compareFactor);
+  const z = yVals.map((y) =>
+    xVals.map((x) => {
+      const cell = parsed.filter(
+        (r) => String(r.factors[xKey]) === x && String(r.factors[yKey]) === y,
+      );
+      if (!cell.length) return null;
+      const ok = cell.filter((r) => r.success).length;
+      return ok / cell.length;
+    }),
+  );
+
+  const traces = [
+    {
+      type: 'heatmap',
+      x: xVals,
+      y: yVals,
+      z,
+      colorscale: 'Viridis',
+      zmin: 0,
+      zmax: 1,
+      colorbar: { title: 'Success rate' },
+      hovertemplate: `${xKey}=%{x}<br>${yKey}=%{y}<br>success=%{z:.2f}<extra></extra>`,
+    },
+  ];
+
+  const layout = {
+    ...baseLayout('Herdability heatmap', yKey, xKey),
+    margin: { l: 70, r: 20, t: 40, b: 60 },
+  };
+  Plotly.newPlot(container, traces, layout, { responsive: true, displayModeBar: false });
+}
+
+function compareFactor(a, b) {
+  const na = Number(a);
+  const nb = Number(b);
+  if (Number.isFinite(na) && Number.isFinite(nb)) return na - nb;
+  return String(a).localeCompare(String(b));
 }
 
 export function summaryHeadHtml(summaryDefs) {
@@ -189,7 +300,8 @@ export function methodCardHtml(details, alg) {
   return `
     <h3>${details.name || alg.name}</h3>
     <p><strong>Paper:</strong> ${info.paper_title || 'n/a'}</p>
-    <p>${info.mechanism || ''}</p>
+    <p class="method-meta">${details.sheep_model || ''} x ${details.dog_controller || ''}</p>
+    <p>${info.mechanism || details.description || ''}</p>
   `;
 }
 
@@ -197,4 +309,13 @@ export function trialUnits(event) {
   const fraction = Number(event.fraction);
   const safeFraction = Number.isFinite(fraction) ? Math.min(1, Math.max(0, fraction)) : 0;
   return Math.max(0, event.index - 1) + safeFraction;
+}
+
+export function headlineFromSummary(summary = []) {
+  if (!summary.length) return 'No results yet.';
+  const best = [...summary].sort(
+    (a, b) => Number(b.success_rate || 0) - Number(a.success_rate || 0),
+  )[0];
+  const pct = best.success_rate != null ? `${(Number(best.success_rate) * 100).toFixed(0)}%` : 'n/a';
+  return `Best success: ${best.algorithm} (${pct} over ${best.trials} trials).`;
 }

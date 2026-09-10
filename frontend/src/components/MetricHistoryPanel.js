@@ -1,5 +1,8 @@
 /** Per-tick metric history charts with scrub, hover readout, and scale labels. */
 
+import { formatMetricValue } from '../utils/metricFormat.js';
+import { drawSeries, indexFromPointer, placeHoverTip } from '../utils/chartCanvas.js';
+
 const SERIES = [
   { id: 'cohesion', label: 'Cohesion', color: '#f87171' },
   { id: 'fragmentation', label: 'Fragment', color: '#c084fc' },
@@ -8,92 +11,6 @@ const SERIES = [
   { id: 'min_separation', label: 'Min sep', color: '#67e8f9' },
   { id: 'polarization', label: 'Polarisation', color: '#38bdf8' },
 ];
-
-function formatValue(id, val) {
-  if (val == null || Number.isNaN(Number(val))) return '-';
-  if (id === 'time_to_goal' && Number(val) < 0) return 'not yet';
-  if (Number.isInteger(val)) return String(val);
-  return Number(val).toFixed(2);
-}
-
-function formatScale(val) {
-  if (!Number.isFinite(val)) return '-';
-  if (Number.isInteger(val)) return String(val);
-  return Number(val).toFixed(2);
-}
-
-function indexFromPointer(canvas, clientX, length) {
-  if (length <= 0) return -1;
-  if (length === 1) return 0;
-  const rect = canvas.getBoundingClientRect();
-  const x = Math.min(Math.max(clientX - rect.left, 0), rect.width);
-  return Math.round((x / rect.width) * (length - 1));
-}
-
-function drawSeries(canvas, values, color, scrubIndex, hoverIndex) {
-  const ctx = canvas.getContext('2d');
-  const w = canvas.width;
-  const h = canvas.height;
-  ctx.clearRect(0, 0, w, h);
-  ctx.fillStyle = '#0b1220';
-  ctx.fillRect(0, 0, w, h);
-  if (!values.length) return;
-
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const span = max - min || 1;
-  const step = values.length > 1 ? w / (values.length - 1) : w;
-
-  function yAt(v) {
-    return h - 4 - ((v - min) / span) * (h - 8);
-  }
-
-  ctx.beginPath();
-  values.forEach((v, i) => {
-    const x = i * step;
-    const y = yAt(v);
-    if (i === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-  });
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
-
-  if (scrubIndex >= 0 && scrubIndex < values.length) {
-    const x = scrubIndex * step;
-    const y = yAt(values[scrubIndex]);
-    ctx.strokeStyle = '#94a3b8';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, h);
-    ctx.stroke();
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.arc(x, y, 3, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  if (hoverIndex >= 0 && hoverIndex < values.length && hoverIndex !== scrubIndex) {
-    const x = hoverIndex * step;
-    ctx.strokeStyle = '#cbd5e1';
-    ctx.lineWidth = 1;
-    ctx.setLineDash([3, 3]);
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, h);
-    ctx.stroke();
-    ctx.setLineDash([]);
-  }
-
-  ctx.fillStyle = '#64748b';
-  ctx.font = '10px JetBrains Mono, monospace';
-  ctx.textAlign = 'left';
-  ctx.fillText(formatScale(min), 4, h - 2);
-  ctx.textAlign = 'right';
-  ctx.fillText(formatScale(max), w - 4, h - 2);
-  ctx.textAlign = 'left';
-}
 
 export function createMetricHistoryPanel({ onScrub } = {}) {
   const root = document.createElement('div');
@@ -132,14 +49,16 @@ export function createMetricHistoryPanel({ onScrub } = {}) {
     block.innerHTML = `
       <div class="metric-history-label">
         <span class="dist-label" data-role="name">${series.label}</span>
-        <span class="metric-history-value" data-role="value" style="color:${series.color}">-</span>
+        <span class="metric-history-value" data-role="value" data-color="${series.color}">-</span>
         <span class="metric-history-unit" data-role="unit"></span>
       </div>
       <canvas data-id="${series.id}" width="480" height="52"></canvas>
     `;
     chartsEl.appendChild(block);
+    const valueEl = block.querySelector('[data-role="value"]');
+    valueEl.style.color = series.color;
     canvases[series.id] = block.querySelector('canvas');
-    valueEls[series.id] = block.querySelector('[data-role="value"]');
+    valueEls[series.id] = valueEl;
     labelEls[series.id] = block.querySelector('[data-role="name"]');
     unitEls[series.id] = block.querySelector('[data-role="unit"]');
   });
@@ -174,19 +93,10 @@ export function createMetricHistoryPanel({ onScrub } = {}) {
     }
     const raw = row.metrics?.[series.id];
     const unit = unitSuffix(series.id);
-    const valueText = formatValue(series.id, raw == null ? null : Number(raw));
+    const valueText = formatMetricValue(series.id, raw == null ? null : Number(raw));
     hoverTip.textContent = `Tick ${row.tick ?? idx}: ${valueText}${unit ? ` ${unit}` : ''}`;
     hoverTip.classList.remove('hidden');
-
-    const rootRect = root.getBoundingClientRect();
-    const tipW = hoverTip.offsetWidth;
-    const tipH = hoverTip.offsetHeight;
-    let left = clientX - rootRect.left + 12;
-    let top = clientY - rootRect.top - tipH - 8;
-    left = Math.max(4, Math.min(left, rootRect.width - tipW - 4));
-    top = Math.max(4, Math.min(top, rootRect.height - tipH - 4));
-    hoverTip.style.left = `${Math.round(left)}px`;
-    hoverTip.style.top = `${Math.round(top)}px`;
+    placeHoverTip(hoverTip, root, clientX, clientY);
   }
 
   function paint() {
@@ -200,7 +110,7 @@ export function createMetricHistoryPanel({ onScrub } = {}) {
         valueEls[series.id].textContent = '-';
       } else {
         const raw = history[idx].metrics?.[series.id];
-        valueEls[series.id].textContent = formatValue(
+        valueEls[series.id].textContent = formatMetricValue(
           series.id,
           raw == null ? null : Number(raw),
         );

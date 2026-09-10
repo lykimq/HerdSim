@@ -1,4 +1,4 @@
-import { checkApiHealth, fetchAlgorithms, fetchScenarios } from './api/rest.js';
+import { checkApiHealth, fetchAlgorithms, fetchModels, fetchScenarios } from './api/rest.js';
 import { createSingleView } from './components/SingleView.js';
 import { createArenaView } from './components/ArenaView.js';
 import { createAnalyticsDashboard } from './components/AnalyticsDashboard.js';
@@ -7,26 +7,59 @@ import { createGuideView } from './components/GuideView.js';
 import { GAME_ICONS_ATTRIBUTION } from './assets/icons.js';
 import { log, withTimeout, sleep } from './utils/logger.js';
 import { mountTips } from './utils/tooltips.js';
+import { applyFactorMetadata } from './utils/factors.js';
+import { escapeHtml } from './utils/dom.js';
+
+const VIEW_META = {
+  single: {
+    label: 'Simulate',
+    description: 'Run one instrument with experimental factors and live metrics.',
+  },
+  arena: {
+    label: 'Compare',
+    description: 'Fair or independent side-by-side instrument comparison.',
+  },
+  analytics: {
+    label: 'Experiments',
+    description: 'Batch instrument comparison and multi-axis factor grids.',
+  },
+  netlogo: {
+    label: 'NetLogo',
+    description: 'Open instrument twins and library models in desktop NetLogo.',
+  },
+  guide: {
+    label: 'Guide',
+    description: 'User guide, instruments, scenarios, metrics, and architecture.',
+  },
+};
 
 const app = document.getElementById('app');
 
 const header = document.createElement('header');
 header.className = 'app-header';
 header.innerHTML = `
-  <div style="display:flex;align-items:center;gap:0.75rem;">
+  <div class="brand-block">
     <span class="logo-title">HerdSim</span>
-    <span style="color:var(--text-muted);font-size:0.75rem;">v0.1.0</span>
+    <span class="brand-tagline">Herdability lab</span>
   </div>
-  <div class="nav-tabs">
-    <button class="nav-tab active" data-view="single">Single</button>
-    <button class="nav-tab" data-view="arena">Arena</button>
-    <button class="nav-tab" data-view="analytics">Analytics</button>
-    <button class="nav-tab" data-view="netlogo">NetLogo</button>
-    <button class="nav-tab" data-view="guide">Guide</button>
-  </div>
-  <div class="header-meta">
-    <span>Seed: <strong data-role="seed">-</strong></span>
-    <span>Tick: <strong data-role="tick">0</strong></span>
+  <nav class="nav-tabs" role="tablist" aria-label="HerdSim views">
+    ${Object.entries(VIEW_META)
+      .map(
+        ([id, meta], index) => `
+      <button
+        class="nav-tab${index === 0 ? ' active' : ''}"
+        data-view="${id}"
+        role="tab"
+        aria-selected="${index === 0 ? 'true' : 'false'}"
+        title="${escapeHtml(meta.description)}"
+      >${escapeHtml(meta.label)}</button>`,
+      )
+      .join('')}
+  </nav>
+  <div class="header-meta" data-role="header-meta">
+    <span class="header-context" data-role="view-context"></span>
+    <span data-role="seed-wrap">Seed: <strong data-role="seed">-</strong></span>
+    <span data-role="tick-wrap">Tick: <strong data-role="tick">0</strong></span>
     <span class="badge" data-role="status">IDLE</span>
   </div>
 `;
@@ -42,11 +75,20 @@ app.appendChild(header);
 app.appendChild(viewHost);
 app.appendChild(credit);
 
-mountTips(header);
+mountTips(header, {
+  single: VIEW_META.single.description,
+  arena: VIEW_META.arena.description,
+  analytics: VIEW_META.analytics.description,
+  netlogo: VIEW_META.netlogo.description,
+  guide: VIEW_META.guide.description,
+});
 
 const statusEl = header.querySelector('[data-role="status"]');
 const tickEl = header.querySelector('[data-role="tick"]');
 const seedEl = header.querySelector('[data-role="seed"]');
+const tickWrap = header.querySelector('[data-role="tick-wrap"]');
+const seedWrap = header.querySelector('[data-role="seed-wrap"]');
+const viewContextEl = header.querySelector('[data-role="view-context"]');
 
 const viewCache = Object.create(null);
 const statusByView = Object.create(null);
@@ -82,6 +124,14 @@ function makeStatusHandler(viewName) {
 function applyHeaderForView(viewName) {
   const snap = statusByView[viewName] || { status: 'idle', tick: 0, seed: '-' };
   setStatus(snap);
+  const meta = VIEW_META[viewName];
+  viewContextEl.textContent = meta?.description || '';
+  const showSimMeta = viewName === 'single' || viewName === 'arena';
+  tickWrap.classList.toggle('hidden', !showSimMeta);
+  seedWrap.classList.toggle('hidden', !showSimMeta && viewName !== 'analytics');
+  if (viewName === 'analytics') {
+    seedWrap.classList.remove('hidden');
+  }
 }
 
 function hideViewPanel(view) {
@@ -97,7 +147,6 @@ function showViewPanel(view) {
   view.root.removeAttribute('aria-hidden');
   view.root.inert = false;
   view.root.classList.remove('view-panel--enter');
-  // Force reflow so the enter animation can replay.
   void view.root.offsetWidth;
   view.root.classList.add('view-panel--enter');
 }
@@ -122,12 +171,12 @@ function destroyCachedViews() {
 function showBootError(message, detail = '') {
   destroyCachedViews();
   viewHost.innerHTML = `
-    <div class="card-glass boot-error">
+    <div class="card-glass boot-error notice notice--error">
       <div class="section-title">Cannot reach API</div>
-      <p>${message}</p>
-      ${detail ? `<pre class="boot-error-detail">${detail}</pre>` : ''}
-      <p class="boot-error-hint">Start the backend, then click Retry:</p>
-      <pre class="boot-error-detail">cd /home/quyen/HerdSim && uvicorn api.main:app --reload --port 8000</pre>
+      <p>${escapeHtml(message)}</p>
+      ${detail ? `<pre class="boot-error-detail">${escapeHtml(detail)}</pre>` : ''}
+      <p class="boot-error-hint">Start the backend API on port 8000, then click Retry:</p>
+      <pre class="boot-error-detail">uvicorn api.main:app --reload --port 8000</pre>
       <button class="btn" data-role="retry-boot">Retry</button>
     </div>
   `;
@@ -163,15 +212,16 @@ const globalState = {
 
 let preferredSingleAlg = null;
 
-function createView(name, algorithms, scenarios) {
+function createView(name, algorithms, scenarios, models) {
   const onStatus = makeStatusHandler(name);
   if (name === 'arena') {
-    return createArenaView({ algorithms, scenarios, onStatus });
+    return createArenaView({ algorithms, scenarios, models, onStatus });
   }
   if (name === 'analytics') {
     return createAnalyticsDashboard({
       algorithms,
       scenarios,
+      models,
       globalState,
     });
   }
@@ -180,24 +230,30 @@ function createView(name, algorithms, scenarios) {
       onStatus,
       onRunInHerdSim: (algorithmId) => {
         preferredSingleAlg = algorithmId;
-        switchView('single', algorithms, scenarios);
+        switchView('single', algorithms, scenarios, models);
       },
     });
   }
   if (name === 'guide') {
-    return createGuideView();
+    return createGuideView({
+      onRunInstrument: (algorithmId) => {
+        preferredSingleAlg = algorithmId;
+        switchView('single', algorithms, scenarios, models);
+      },
+    });
   }
   const preferredAlg = preferredSingleAlg;
   preferredSingleAlg = null;
   return createSingleView({
     algorithms,
     scenarios,
+    models,
     onStatus,
     preferredAlg,
   });
 }
 
-async function switchView(name, algorithms, scenarios) {
+async function switchView(name, algorithms, scenarios, models) {
   if (switching) {
     log.warn('ui', `Ignoring view switch to ${name}; mount in progress`);
     return;
@@ -228,7 +284,7 @@ async function switchView(name, algorithms, scenarios) {
 
     let view = cached;
     if (!view) {
-      view = createView(name, algorithms, scenarios);
+      view = createView(name, algorithms, scenarios, models);
       view.root.classList.add('view-panel');
       viewCache[name] = view;
       viewHost.appendChild(view.root);
@@ -236,9 +292,10 @@ async function switchView(name, algorithms, scenarios) {
       rememberStatus(name, { status: 'idle', tick: 0, seed: '-' });
       applyHeaderForView(name);
       header.querySelectorAll('.nav-tab').forEach((btn) => {
-        btn.classList.toggle('active', btn.dataset.view === name);
+        const on = btn.dataset.view === name;
+        btn.classList.toggle('active', on);
+        btn.setAttribute('aria-selected', on ? 'true' : 'false');
       });
-      // Mount while visible so Pixi/canvas get a real host size.
       showViewPanel(view);
       await withTimeout(view.mount(), 45000, `${name} view mount`);
       log.info('ui', `${name} view ready (created)`);
@@ -249,7 +306,9 @@ async function switchView(name, algorithms, scenarios) {
         preferredSingleAlg = null;
       }
       header.querySelectorAll('.nav-tab').forEach((btn) => {
-        btn.classList.toggle('active', btn.dataset.view === name);
+        const on = btn.dataset.view === name;
+        btn.classList.toggle('active', on);
+        btn.setAttribute('aria-selected', on ? 'true' : 'false');
       });
       showViewPanel(view);
       applyHeaderForView(name);
@@ -273,10 +332,10 @@ async function switchView(name, algorithms, scenarios) {
     if (activeViewName === name) activeViewName = null;
     viewHost.querySelectorAll('.boot-error').forEach((el) => el.remove());
     const errorCard = document.createElement('div');
-    errorCard.className = 'card-glass boot-error';
+    errorCard.className = 'card-glass boot-error notice notice--error';
     errorCard.innerHTML = `
-      <div class="section-title">View failed: ${name}</div>
-      <p>${err.message || err}</p>
+      <div class="section-title">View failed: ${escapeHtml(name)}</div>
+      <p>${escapeHtml(err.message || err)}</p>
       <p class="boot-error-hint">Open the browser console for details.</p>
     `;
     viewHost.appendChild(errorCard);
@@ -292,22 +351,27 @@ async function boot() {
   await waitForApi();
   viewHost.innerHTML = '';
 
-  const [algorithms, scenarios] = await Promise.all([
+  const [algorithms, scenarios, models] = await Promise.all([
     fetchAlgorithms(),
     fetchScenarios(),
+    fetchModels(),
   ]);
-  log.info('boot', `Loaded ${algorithms.length} algorithms, ${scenarios.length} scenarios`);
+  applyFactorMetadata(models?.factors || null);
+  log.info(
+    'boot',
+    `Loaded ${algorithms.length} instruments, ${scenarios.length} scenarios, ${models?.sheep_models?.length || 0} sheep models`,
+  );
 
   header.querySelectorAll('.nav-tab').forEach((btn) => {
     btn.replaceWith(btn.cloneNode(true));
   });
   header.querySelectorAll('.nav-tab').forEach((btn) => {
     btn.addEventListener('click', () => {
-      switchView(btn.dataset.view, algorithms, scenarios);
+      switchView(btn.dataset.view, algorithms, scenarios, models);
     });
   });
 
-  await switchView('single', algorithms, scenarios);
+  await switchView('single', algorithms, scenarios, models);
 }
 
 window.addEventListener('pagehide', () => {
@@ -318,6 +382,6 @@ boot().catch((err) => {
   log.error('boot', err.message || String(err), err);
   showBootError(
     err.message || String(err),
-    'Vite proxy errors like ECONNREFUSED mean the API is not listening on port 8000.',
+    'Connection refused usually means the API is not listening on port 8000.',
   );
 });

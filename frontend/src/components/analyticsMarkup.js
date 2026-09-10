@@ -1,40 +1,45 @@
 import { presetSelectHtml } from '../utils/params.js';
+import { STUDY_TEMPLATES } from '../utils/factors.js';
 
 export function analyticsRunnerHtml() {
+  const studyOptions = STUDY_TEMPLATES.map(
+    (t) => `<option value="${t.id}">${t.label}</option>`,
+  ).join('');
   return `
-    <div class="section-title">Benchmark Runner</div>
+    <div class="section-title">Experiment design</div>
     <p class="analytics-intro">
-      Compare algorithms across seeds, or sweep one to two numeric parameters for a single algorithm. Use Single or Arena to watch one run; use this tab for batch comparison and CSV/JSON/Markdown export.
+      Compare named instruments across seeds, or run a factor grid over sheep model, dog controller, flock size, and other factors.
+      Matching model pairs reuse instrument param bundles automatically.
     </p>
+    <div class="control-group">
+      <label>Study template</label>
+      <select data-role="study-template">
+        <option value="">(none)</option>
+        ${studyOptions}
+      </select>
+      <p class="param-hint">Templates fill factor-grid rows for common herdability / sensing / heterogeneity studies.</p>
+    </div>
     <div class="control-group">
       <label>Mode</label>
       <select data-role="mode">
-        <option value="compare">Compare algorithms</option>
-        <option value="sweep">Param sweep</option>
+        <option value="compare">Compare instruments</option>
+        <option value="grid">Factor grid</option>
       </select>
-      <p class="param-hint">Compare runs several algorithms on the same seeds. Sweep grids 1-2 params for one algorithm.</p>
+      <p class="param-hint">Compare runs several instruments on the same seeds. Factor grid sweeps required model/size factors (plus optional axes); no instrument picker.</p>
     </div>
     <div class="control-group" data-role="compare-algs">
-      <label>Algorithms</label>
+      <label>Instruments</label>
       <div class="check-list" data-role="algs"></div>
       <p class="param-hint" data-role="algorithm-blurb"></p>
     </div>
-    <div class="control-group hidden" data-role="sweep-alg-wrap">
-      <label>Algorithm</label>
-      <select data-role="sweep-alg"></select>
-      <p class="param-hint" data-role="sweep-alg-blurb"></p>
-    </div>
-    <div class="control-group hidden" data-role="sweep-fields">
-      <label>Param 1 key</label>
-      <select data-role="sweep-key-1"></select>
-      <label>Param 1 values (comma-separated)</label>
-      <input data-role="sweep-values-1" type="text" value="1, 5, 10" />
-      <label>Param 2 key (optional)</label>
-      <select data-role="sweep-key-2">
-        <option value="">(none)</option>
-      </select>
-      <label>Param 2 values</label>
-      <input data-role="sweep-values-2" type="text" value="" placeholder="e.g. 0.5, 1.0" />
+    <div class="control-group hidden" data-role="grid-fields">
+      <div class="factor-grid-toolbar">
+        <button type="button" class="btn btn-secondary" data-role="grid-add-row">Add factor</button>
+        <span class="param-hint" data-role="grid-cell-estimate">0 cells</span>
+      </div>
+      <p class="param-hint" data-role="grid-limit-hint"></p>
+      <div class="factor-grid-rows" data-role="grid-rows"></div>
+      <p class="param-hint" data-role="grid-warn"></p>
     </div>
     <div class="control-group">
       <label>Scenario</label>
@@ -51,7 +56,7 @@ export function analyticsRunnerHtml() {
       <input data-role="seeds" type="text" value="1, 2, 3" />
     </div>
     <div class="btn-row">
-      <button class="btn" data-role="run">Run Benchmark</button>
+      <button class="btn" data-role="run">Run Experiment</button>
       <button class="btn btn-secondary" data-role="clear">Clear Results</button>
     </div>
     <div class="run-progress hidden" data-role="progress-wrap">
@@ -63,14 +68,15 @@ export function analyticsRunnerHtml() {
         <span data-role="status">Ready.</span>
       </div>
     </div>
-    <p data-role="idle-status" style="color:var(--text-muted);font-size:0.8rem;">Ready.</p>
+    <p class="idle-status" data-role="idle-status">Ready.</p>
   `;
 }
 
 export function analyticsResultsHtml() {
   return `
+    <div class="analytics-headline" data-role="headline" aria-live="polite"></div>
     <p class="analytics-intro">
-      Each row summarizes one algorithm across the chosen seeds. Success/failure are scenario outcomes;
+      Each row summarizes one instrument (or factor cell) across the chosen seeds. Success/failure are scenario outcomes;
       ticks describe successful runs; AUC cohesion/fragmentation and control efficiency summarize the full
       trajectory. Hover a column header for definitions. CSV and JSON exports include experiment design,
       column notes, and comparison caveats.
@@ -120,6 +126,11 @@ function chartBlock(title, blurb, role) {
 
 export function analyticsChartsHtml() {
   return `
+    ${chartBlock(
+      'Herdability heatmap',
+      'When a factor grid has two (or more) swept keys, success rate is shown as a matrix over the first two factors. Empty cells mean no trials for that combination.',
+      'chart-heatmap',
+    )}
     ${chartBlock(
       'Convergence Time',
       'Successful trials only in the box: simulation ticks to finish. Red X marks failed (timeout) trials at their final tick count. Lower and tighter is usually better.',

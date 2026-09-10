@@ -1,5 +1,8 @@
 /** Dedicated end-of-run analysis panel for Single view. */
 
+import { downloadText } from '../utils/params.js';
+import { formatRunReportText } from '../utils/runReport.js';
+
 export function createRunReportPanel() {
   const root = document.createElement('div');
   root.className = 'card-glass run-report-panel hidden';
@@ -12,20 +15,27 @@ export function createRunReportPanel() {
     <p class="run-report-headline" data-role="headline"></p>
     <p class="run-report-takeaway" data-role="takeaway"></p>
     <div class="run-report-sections" data-role="sections"></div>
+    <div class="export-row run-report-actions">
+      <button type="button" class="btn btn-secondary" data-role="download-report">Download report</button>
+    </div>
   `;
 
   const badgeEl = root.querySelector('[data-role="badge"]');
   const headlineEl = root.querySelector('[data-role="headline"]');
   const takeawayEl = root.querySelector('[data-role="takeaway"]');
   const sectionsEl = root.querySelector('[data-role="sections"]');
+  const downloadBtn = root.querySelector('[data-role="download-report"]');
+  let lastReport = null;
 
   function clear() {
+    lastReport = null;
     root.classList.add('hidden');
     badgeEl.textContent = '';
     badgeEl.className = 'run-report-badge';
     headlineEl.textContent = '';
     takeawayEl.textContent = '';
     sectionsEl.replaceChildren();
+    downloadBtn.disabled = true;
   }
 
   function setReport(report) {
@@ -33,6 +43,7 @@ export function createRunReportPanel() {
       clear();
       return;
     }
+    lastReport = report;
     root.classList.remove('hidden');
     badgeEl.textContent = report.badge || '';
     badgeEl.className = `run-report-badge run-report-badge--${report.tone || 'neutral'}`;
@@ -56,7 +67,17 @@ export function createRunReportPanel() {
       block.appendChild(list);
       sectionsEl.appendChild(block);
     });
+    downloadBtn.disabled = false;
   }
+
+  downloadBtn.addEventListener('click', () => {
+    if (!lastReport) return;
+    downloadText(
+      `herdsim_run_report_${Date.now()}.txt`,
+      formatRunReportText(lastReport),
+      'text/plain',
+    );
+  });
 
   clear();
   return { root, setReport, clear };

@@ -1,67 +1,8 @@
 /** Live heading and GCM-distance distribution plots for Single view. */
 
 import { gcmDistanceBins, headingBins } from '../utils/distributionStats.js';
-
-function formatScale(val) {
-  if (!Number.isFinite(val)) return '-';
-  if (Number.isInteger(val)) return String(val);
-  return Number(val).toFixed(2);
-}
-
-function binFromPointer(canvas, clientX, length) {
-  if (length <= 0) return -1;
-  const rect = canvas.getBoundingClientRect();
-  if (rect.width <= 0) return -1;
-  const x = Math.min(Math.max(clientX - rect.left, 0), rect.width - 1e-6);
-  return Math.min(length - 1, Math.floor((x / rect.width) * length));
-}
-
-function drawHistogram(canvas, bins, { minLabel, maxLabel, color, hoverIndex = -1, peakIndex = -1 }) {
-  const values = Array.isArray(bins) ? bins : [];
-  const ctx = canvas.getContext('2d');
-  const w = canvas.width;
-  const h = canvas.height;
-  ctx.clearRect(0, 0, w, h);
-  ctx.fillStyle = '#0b1220';
-  ctx.fillRect(0, 0, w, h);
-  if (!values.length) return;
-
-  const peak = Math.max(1, ...values);
-  const barW = w / values.length;
-
-  values.forEach((count, i) => {
-    const bh = (count / peak) * (h - 8);
-    const x = i * barW + 1;
-    const y = h - bh - 2;
-    const bw = Math.max(1, barW - 2);
-    const isPeak = i === peakIndex && count > 0;
-    const isHover = i === hoverIndex;
-    ctx.fillStyle = isHover ? '#e2e8f0' : isPeak ? '#ffffff' : color;
-    ctx.globalAlpha = isHover || isPeak ? 1 : 0.85;
-    ctx.fillRect(x, y, bw, bh);
-    ctx.globalAlpha = 1;
-  });
-
-  if (hoverIndex >= 0 && hoverIndex < values.length) {
-    const x = hoverIndex * barW + barW / 2;
-    ctx.strokeStyle = '#cbd5e1';
-    ctx.lineWidth = 1;
-    ctx.setLineDash([3, 3]);
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, h);
-    ctx.stroke();
-    ctx.setLineDash([]);
-  }
-
-  ctx.fillStyle = '#64748b';
-  ctx.font = '10px JetBrains Mono, monospace';
-  ctx.textAlign = 'left';
-  ctx.fillText(minLabel, 4, h - 2);
-  ctx.textAlign = 'right';
-  ctx.fillText(maxLabel, w - 4, h - 2);
-  ctx.textAlign = 'left';
-}
+import { formatScale } from '../utils/metricFormat.js';
+import { binFromPointer, drawHistogram, placeHoverTip } from '../utils/chartCanvas.js';
 
 function binRangeLabel(lo, hi, unit) {
   const a = formatScale(lo);
@@ -78,7 +19,7 @@ export function createDistributionPanel() {
     <div class="dist-block" data-role="heading-block">
       <div class="chart-meta">
         <span class="dist-label" title="Compass heading of each sheep (0-360 deg).">Sheep headings</span>
-        <span class="chart-meta-value" data-role="heading-value" style="color:#67e8f9">-</span>
+        <span class="chart-meta-value chart-meta-value--cyan" data-role="heading-value">-</span>
         <span class="chart-meta-unit" data-role="heading-unit"></span>
       </div>
       <canvas data-role="heading" width="300" height="72"></canvas>
@@ -86,7 +27,7 @@ export function createDistributionPanel() {
     <div class="dist-block" data-role="gcm-block">
       <div class="chart-meta">
         <span class="dist-label" title="Distance of each sheep from the group center of mass.">Distance to GCM</span>
-        <span class="chart-meta-value" data-role="gcm-value" style="color:#fbbf24">-</span>
+        <span class="chart-meta-value chart-meta-value--amber" data-role="gcm-value">-</span>
         <span class="chart-meta-unit" data-role="gcm-unit"></span>
       </div>
       <canvas data-role="gcm" width="300" height="72"></canvas>
@@ -119,15 +60,7 @@ export function createDistributionPanel() {
     }
     hoverTip.textContent = text;
     hoverTip.classList.remove('hidden');
-    const rootRect = root.getBoundingClientRect();
-    const tipW = hoverTip.offsetWidth;
-    const tipH = hoverTip.offsetHeight;
-    let left = clientX - rootRect.left + 12;
-    let top = clientY - rootRect.top - tipH - 8;
-    left = Math.max(4, Math.min(left, rootRect.width - tipW - 4));
-    top = Math.max(4, Math.min(top, rootRect.height - tipH - 4));
-    hoverTip.style.left = `${Math.round(left)}px`;
-    hoverTip.style.top = `${Math.round(top)}px`;
+    placeHoverTip(hoverTip, root, clientX, clientY);
   }
 
   function paint() {

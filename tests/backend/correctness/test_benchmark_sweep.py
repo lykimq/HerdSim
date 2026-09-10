@@ -51,3 +51,44 @@ def test_run_benchmark_param_sweep_labels_rows():
     summary = summarize_rows(pd.DataFrame(payload["rows"]))
     assert len(summary) == 2
     assert all("[" in row["algorithm"] for row in summary)
+
+
+def test_find_preset_for_models_prefers_canonical():
+    from core.presets import find_preset_for_models
+
+    assert find_preset_for_models("strombom", "collect_drive") == "strombom"
+    assert find_preset_for_models("kubo", "kubo_forces") == "kubo"
+    assert find_preset_for_models("jadhav", "fat") is None
+
+
+def test_run_benchmark_factor_grid_without_instrument_uses_param_bundle():
+    payload = run_benchmark(
+        algorithm_ids=[],
+        scenario_id="drive_to_goal",
+        seeds=[1],
+        preset="custom",
+        sweep=[
+            {"key": "sheep_model", "values": ["strombom"]},
+            {"key": "dog_controller", "values": ["collect_drive"]},
+            {"key": "n_sheep", "values": [8]},
+            {"key": "n_shepherds", "values": [1]},
+        ],
+    )
+    assert len(payload["rows"]) == 1
+    row = payload["rows"][0]
+    assert row["sheep_model"] == "strombom"
+    assert row["dog_controller"] == "collect_drive"
+    assert row["instrument"] == "strombom"
+    assert row["sweep_label"]
+    assert "n_sheep=8" in row["sweep_label"]
+
+
+def test_run_benchmark_factor_grid_without_models_rejected():
+    with pytest.raises(ValueError, match="sheep_model"):
+        run_benchmark(
+            algorithm_ids=[],
+            scenario_id="drive_to_goal",
+            seeds=[1],
+            preset="custom",
+            sweep=[{"key": "n_sheep", "values": [8, 16]}],
+        )

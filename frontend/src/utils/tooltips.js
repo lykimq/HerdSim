@@ -1,10 +1,11 @@
 /** Shared hover tips for buttons (floating tip; works when disabled). */
 
 export const BUTTON_TIPS = {
-  single: 'One algorithm, live controls.',
+  single: 'Run one instrument with live controls and experimental factors.',
   arena: 'Fair compare (Init Both) or independent side-by-side runs.',
-  analytics: 'Batch benchmarks and method notes.',
+  analytics: 'Batch instrument comparison and factor-grid experiments.',
   netlogo: 'Browse and open .nlogo models in your local NetLogo app.',
+  guide: 'Read the user guide and instrument documentation.',
 
   export: 'Export current results.',
   'retry-boot': 'Retry API connection.',
@@ -19,11 +20,16 @@ export const BUTTON_TIPS = {
   'play-both': 'Fair compare: start or resume both sides together.',
   'pause-both': 'Fair compare: pause both sides.',
   'reset-both': 'Fair compare: reset both sides to start.',
+  'mode-fair': 'Use shared scenario, seed, and sheep across both sides.',
+  'mode-independent': 'Initialize each side with its own settings.',
 
-  run: 'Run selected algorithms x seeds.',
+  run: 'Run selected instruments x seeds (or the factor grid).',
+  clear: 'Clear benchmark results and charts.',
+  'grid-add-row': 'Add another factor axis to the grid.',
   csv: 'Download trial rows as CSV (includes column definitions).',
   json: 'Download full benchmark payload as JSON.',
   md: 'Download the summary table as Markdown.',
+  'download-report': 'Download the end-of-run report as plain text.',
   close: 'Close dialog.',
 };
 

@@ -4,7 +4,7 @@ const ALWAYS_SKIP = new Set(["use_advanced_vision"]);
 
 /**
  * World / layout keys owned by the scenario (mirrors core/shared_defaults.WORLD_KEYS).
- * Algorithm default_config should not declare these; paper/custom merge them from
+ * Instrument default_config should not declare these; paper/custom merge them from
  * the selected scenario on top of shared world fallbacks.
  */
 export const SCENARIO_WORLD_KEYS = new Set([
@@ -28,14 +28,12 @@ export const SCENARIO_WORLD_KEYS = new Set([
   "collect_threshold_scale",
 ]);
 
-const WORLD_KEYS = SCENARIO_WORLD_KEYS;
-
 /** Shared preset ids, dropdown labels, and section titles. */
 export const PRESET_OPTIONS = [
   {
     id: "paper",
-    label: "Algorithm (paper)",
-    paramsTitle: "Algorithm (paper) settings",
+    label: "Instrument (paper)",
+    paramsTitle: "Instrument (paper) settings",
   },
   {
     id: "scenario",
@@ -45,7 +43,7 @@ export const PRESET_OPTIONS = [
   {
     id: "custom",
     label: "Custom",
-    paramsTitle: "Custom algorithm parameters",
+    paramsTitle: "Custom instrument parameters",
   },
 ];
 
@@ -81,7 +79,7 @@ export function scenarioBlurb(scenario) {
 export function presetSourceBlurb(presetId, { algorithm, scenario } = {}) {
   if (presetId === "scenario") return scenarioBlurb(scenario);
   if (presetId === "custom") {
-    return "Edit algorithm and world parameters yourself, then Initialize.";
+    return "Edit instrument, experimental factors, and world parameters yourself, then Initialize.";
   }
   return algorithmBlurb(algorithm);
 }
@@ -121,7 +119,7 @@ export function isEditableParam(
   if (ALWAYS_SKIP.has(key)) return false;
   if (isInfoWorldParam(key, value)) return false;
   if (key === "n_sheep" || key === "n_shepherds") return includeAgents;
-  if (!includeWorld && WORLD_KEYS.has(key)) return false;
+  if (!includeWorld && SCENARIO_WORLD_KEYS.has(key)) return false;
   if (isPointParam(key, value)) return includeWorld;
   return typeof value === "number" || typeof value === "string";
 }

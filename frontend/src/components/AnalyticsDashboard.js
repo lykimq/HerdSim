@@ -6,6 +6,7 @@ import {
   scenarioBlurb,
 } from '../utils/params.js';
 import {
+  headlineFromSummary,
   methodCardHtml,
   summaryHeadHtml,
   summaryRowHtml,
@@ -20,17 +21,18 @@ import {
 import { bindAnalyticsMode } from './analyticsMode.js';
 import { mountTips } from '../utils/tooltips.js';
 
-const DEFAULT_BENCHMARK_ALG_IDS = [
+const DEFAULT_BENCHMARK_INSTRUMENT_IDS = [
   'strombom',
   'kubo',
   'flocking_dog',
   'v_formation',
-  'heterogeneous',
   'obstacle_aware',
+  'fat',
+  'adaptive',
 ];
 const DEFAULT_BENCHMARK_SCENARIO_ID = 'split_flock';
 
-export function createAnalyticsDashboard({ algorithms, scenarios, globalState }) {
+export function createAnalyticsDashboard({ algorithms, scenarios, models = null, globalState }) {
   const root = document.createElement('div');
   root.className = 'analytics-layout';
 
@@ -54,6 +56,7 @@ export function createAnalyticsDashboard({ algorithms, scenarios, globalState })
 
   const results = sidePanel.querySelector('[data-panel="summary"]');
   const methods = sidePanel.querySelector('[data-panel="methods"]');
+  const headlineEl = results.querySelector('[data-role="headline"]');
 
   left.appendChild(runner);
   left.appendChild(charts);
@@ -85,7 +88,7 @@ export function createAnalyticsDashboard({ algorithms, scenarios, globalState })
   const algList = runner.querySelector('[data-role="algs"]');
   const algBlurbEl = runner.querySelector('[data-role="algorithm-blurb"]');
   const defaultAlgIds = new Set(
-    DEFAULT_BENCHMARK_ALG_IDS.filter((id) => algorithms.some((a) => a.id === id)),
+    DEFAULT_BENCHMARK_INSTRUMENT_IDS.filter((id) => algorithms.some((a) => a.id === id)),
   );
   if (!defaultAlgIds.size && algorithms[0]?.id) {
     defaultAlgIds.add(algorithms[0].id);
@@ -126,17 +129,17 @@ export function createAnalyticsDashboard({ algorithms, scenarios, globalState })
 
   function syncContextBlurbs() {
     const mode = runner.querySelector('[data-role="mode"]').value;
-    const ids =
-      mode === 'sweep'
-        ? [runner.querySelector('[data-role="sweep-alg"]').value]
-        : selectedAlgorithmIds();
+    const ids = mode === 'grid' ? [] : selectedAlgorithmIds();
     const alg = algorithms.find((a) => a.id === ids[0]);
     const scen = scenarios.find((s) => s.id === scenSelect.value);
     const preset = presetSelect.value;
 
-    if (mode !== 'sweep' && ids.length > 1) {
+    if (mode === 'grid') {
       algBlurbEl.textContent =
-        'Multiple algorithms selected; each uses its own paper/reference defaults when Settings source is Algorithm (paper).';
+        'Factor grid uses sheep model + dog controller (and matching param bundles). Compare mode selects named instruments.';
+    } else if (ids.length > 1) {
+      algBlurbEl.textContent =
+        'Multiple instruments selected; each uses its own paper/reference defaults when Settings source is Instrument (paper).';
     } else {
       algBlurbEl.textContent = algorithmBlurb(alg);
     }
@@ -145,9 +148,9 @@ export function createAnalyticsDashboard({ algorithms, scenarios, globalState })
     scenBlurbEl.textContent = scenarioBlurb(scen);
     scenBlurbEl.classList.toggle('hidden', !scenBlurbEl.textContent);
 
-    if (preset === 'paper' && mode !== 'sweep' && ids.length > 1) {
+    if (preset === 'paper' && mode !== 'grid' && ids.length > 1) {
       presetBlurb.textContent =
-        'Each selected algorithm runs with its own paper/reference defaults.';
+        'Each selected instrument runs with its own paper/reference defaults.';
     } else {
       presetBlurb.textContent = presetSourceBlurb(preset, {
         algorithm: alg,
@@ -206,10 +209,10 @@ export function createAnalyticsDashboard({ algorithms, scenarios, globalState })
   }
 
   function renderCharts(rows) {
-    renderAnalyticsCharts(charts, rows);
+    return renderAnalyticsCharts(charts, rows);
   }
 
-  function renderSummary(payload) {
+  async function renderSummary(payload) {
     lastPayload = payload;
     const tbody = results.querySelector('[data-role="tbody"]');
     tbody.innerHTML = '';
@@ -218,7 +221,8 @@ export function createAnalyticsDashboard({ algorithms, scenarios, globalState })
       tr.innerHTML = summaryRowHtml(row);
       tbody.appendChild(tr);
     });
-    renderCharts(payload.rows || []);
+    if (headlineEl) headlineEl.textContent = headlineFromSummary(payload.summary || []);
+    await renderCharts(payload.rows || []);
   }
 
   runner.querySelector('[data-role="run"]').addEventListener('click', async () => {
@@ -270,7 +274,7 @@ export function createAnalyticsDashboard({ algorithms, scenarios, globalState })
         },
       });
       if (globalState) globalState.analyticsPayload = payload;
-      renderSummary(payload);
+      await renderSummary(payload);
       const elapsed = ((performance.now() - started) / 1000).toFixed(1);
       setProgress(
         payload.rows.length,
@@ -290,6 +294,7 @@ export function createAnalyticsDashboard({ algorithms, scenarios, globalState })
     lastPayload = null;
     const tbody = results.querySelector('[data-role="tbody"]');
     tbody.innerHTML = '';
+    if (headlineEl) headlineEl.textContent = '';
     clearCharts();
     setIdleStatus('Results cleared.');
   });
@@ -317,7 +322,7 @@ export function createAnalyticsDashboard({ algorithms, scenarios, globalState })
     renderSummaryHead();
 
     if (lastPayload) {
-      renderSummary(lastPayload);
+      await renderSummary(lastPayload);
       setIdleStatus(`Showing previous results. ${lastPayload.rows.length} trials.`);
     }
 
@@ -332,7 +337,6 @@ export function createAnalyticsDashboard({ algorithms, scenarios, globalState })
       }
       const card = document.createElement('div');
       card.className = 'algo-card';
-      card.style.marginBottom = '0.75rem';
       card.innerHTML = methodCardHtml(details, alg);
       methodsHost.appendChild(card);
     }

@@ -5,8 +5,10 @@ import {
   GCM_GOAL_LABEL,
   TRAIL_LABEL,
 } from '../utils/displayOverlays.js';
+import { buildSessionPayload, DEFAULT_FACTORS, summarizeFactors } from '../utils/factors.js';
 import { controlPanelHtml } from './controlPanelMarkup.js';
 import { createParamRefresh } from './controlPanelParams.js';
+import { createFactorControls } from './controlPanelFactors.js';
 
 export function createControlPanel({
   onInit,
@@ -23,9 +25,11 @@ export function createControlPanel({
   onClearTrails,
   sideLabel = '',
   paramsOpen = true,
+  compact = false,
 }) {
   const root = document.createElement('div');
-  root.className = 'card-glass';
+  root.className = 'card-glass control-panel';
+  if (compact) root.classList.add('control-panel--compact');
   root.innerHTML = controlPanelHtml({
     sideLabel,
     paramsOpen,
@@ -54,11 +58,18 @@ export function createControlPanel({
     trailLabel: root.querySelector('[data-role="trail-label"]'),
     gcmGoalLabel: root.querySelector('[data-role="gcm-goal-label"]'),
     assignmentOverlays: root.querySelector('[data-role="assignment-overlays"]'),
+    factorsRoot: root.querySelector('[data-role="factors"]'),
+    factorsHint: root.querySelector('[data-role="factors-hint"]'),
+    factorsSummary: root.querySelector('[data-role="factors-summary"]'),
+    factorsError: root.querySelector('[data-role="factors-error"]'),
+    configSummary: root.querySelector('[data-role="config-summary"]'),
+    goalVelocityWrap: root.querySelector('[data-role="goal-velocity-wrap"]'),
   };
 
   const state = {
     algorithms: [],
     scenarios: [],
+    models: { sheep_models: [], dog_controllers: [] },
     selectedAlg: '',
     selectedScen: '',
     algorithmParams: {},
@@ -68,10 +79,17 @@ export function createControlPanel({
     lockCustom: false,
     fairSheepOverride: null,
     assignmentModes: [],
+    factors: { ...DEFAULT_FACTORS },
   };
 
   function currentPreset() {
     return els.preset.value;
+  }
+
+  function markCustom() {
+    if (currentPreset() === 'custom') return;
+    els.preset.value = 'custom';
+    state.lockCustom = true;
   }
 
   function refreshDisplayOverlays() {
@@ -90,13 +108,42 @@ export function createControlPanel({
     onAssignmentModesChange?.(state.assignmentModes);
   }
 
-  const { refreshParamControls } = createParamRefresh({
+  const factorApi = createFactorControls({
+    els,
+    state,
+    currentPreset,
+    markCustom,
+  });
+
+  const { refreshParamControls: refreshParamsOnly } = createParamRefresh({
     els,
     state,
     currentPreset,
     onAlgorithmChange,
     afterRefresh: refreshDisplayOverlays,
   });
+
+  function refreshConfigSummary() {
+    if (!els.configSummary) return;
+    const alg = state.algorithms.find((a) => a.id === state.selectedAlg);
+    const scen = state.scenarios.find((s) => s.id === state.selectedScen);
+    const factorBits = summarizeFactors(state.factors);
+    els.configSummary.textContent = [
+      alg?.name || state.selectedAlg || 'Instrument',
+      scen?.name || state.selectedScen || 'Scenario',
+      `${els.sheep.value} sheep / ${els.dogs.value} dogs`,
+      `seed ${els.seed.value}`,
+      factorBits || null,
+    ]
+      .filter(Boolean)
+      .join(' · ');
+  }
+
+  function refreshParamControls() {
+    refreshParamsOnly();
+    factorApi.refreshFactorControls();
+    refreshConfigSummary();
+  }
 
   els.algorithm.addEventListener('change', () => {
     state.selectedAlg = els.algorithm.value;
@@ -114,18 +161,15 @@ export function createControlPanel({
   });
   els.sheep.addEventListener('input', () => {
     els.sheepCount.textContent = els.sheep.value;
-    if (currentPreset() !== 'custom') {
-      els.preset.value = 'custom';
-      state.lockCustom = true;
-    }
+    markCustom();
+    refreshConfigSummary();
   });
   els.dogs.addEventListener('input', () => {
     els.dogCount.textContent = els.dogs.value;
-    if (currentPreset() !== 'custom') {
-      els.preset.value = 'custom';
-      state.lockCustom = true;
-    }
+    markCustom();
+    refreshConfigSummary();
   });
+  els.seed.addEventListener('input', refreshConfigSummary);
   els.speed.addEventListener('input', () => {
     const speed = Number(els.speed.value);
     els.speedLabel.textContent = `Simulation Speed (${speed.toFixed(1)}x)`;
@@ -143,7 +187,19 @@ export function createControlPanel({
   });
   clearTrailsBtn.addEventListener('click', () => onClearTrails?.());
 
-  root.querySelector('[data-role="init"]').addEventListener('click', () => onInit?.(getConfig()));
+  factorApi.bindFactorInputs();
+
+  root.querySelector('[data-role="init"]').addEventListener('click', () => {
+    const checked = factorApi.validateCurrent();
+    if (!checked.ok) {
+      if (els.factorsError) {
+        els.factorsError.textContent = checked.errors[0];
+        els.factorsError.classList.remove('hidden');
+      }
+      return;
+    }
+    onInit?.(getConfig());
+  });
   root.querySelector('[data-role="play"]').addEventListener('click', () => onPlay?.());
   root.querySelector('[data-role="pause"]').addEventListener('click', () => onPause?.());
   root.querySelector('[data-role="step"]').addEventListener('click', () => onStep?.());
@@ -181,9 +237,10 @@ export function createControlPanel({
 
   mountTips(root);
 
-  function setOptions(algorithms, scenarios, preferredAlg = null) {
+  function setOptions(algorithms, scenarios, preferredAlg = null, models = null) {
     state.algorithms = algorithms;
     state.scenarios = scenarios;
+    if (models) state.models = models;
     els.algorithm.innerHTML = algorithms
       .map((a) => `<option value="${a.id}">${a.name}</option>`)
       .join('');
@@ -197,24 +254,29 @@ export function createControlPanel({
     refreshParamControls();
   }
 
+  function setModels(models) {
+    state.models = models || { sheep_models: [], dog_controllers: [] };
+    factorApi.refreshFactorControls();
+  }
+
   function getConfig() {
-    const payload = {
-      algorithm_id: els.algorithm.value,
-      scenario_id: els.scenario.value,
+    state.factors = factorApi.readFactorFields();
+    return buildSessionPayload({
+      instrumentId: els.algorithm.value,
+      scenarioId: els.scenario.value,
       preset: currentPreset(),
-      num_sheep: Number(els.sheep.value),
-      num_shepherds: Number(els.dogs.value),
-      seed: Number(els.seed.value),
-      algorithm_params: { ...state.algorithmParams },
-    };
-    if (currentPreset() === 'custom') {
-      payload.world_overrides = { ...state.worldOverrides };
-    }
-    return payload;
+      numSheep: els.sheep.value,
+      numShepherds: els.dogs.value,
+      seed: els.seed.value,
+      algorithmParams: state.algorithmParams,
+      worldOverrides: state.worldOverrides,
+      factors: state.factors,
+    });
   }
 
   function setSeed(seed) {
     els.seed.value = String(seed);
+    refreshConfigSummary();
   }
 
   function setScenario(scenarioId) {
@@ -227,6 +289,7 @@ export function createControlPanel({
   function setSheepCount(n) {
     els.sheep.value = String(n);
     els.sheepCount.textContent = String(n);
+    refreshConfigSummary();
   }
 
   function setFairSheepOverride(n) {
@@ -254,6 +317,10 @@ export function createControlPanel({
     return alg?.name || els.algorithm.value;
   }
 
+  function getInstrumentId() {
+    return els.algorithm.value;
+  }
+
   function isTrailVisible() {
     return Boolean(trailVisible.checked);
   }
@@ -273,6 +340,7 @@ export function createControlPanel({
   return {
     root,
     setOptions,
+    setModels,
     getConfig,
     setSeed,
     setScenario,
@@ -280,6 +348,7 @@ export function createControlPanel({
     setFairSheepOverride,
     setAlgorithm,
     getAlgorithmName,
+    getInstrumentId,
     getHerderKind,
     isTrailVisible,
     isGcmGoalVisible,

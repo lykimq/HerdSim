@@ -56,8 +56,6 @@ class BenchmarkRequest(BaseModel):
 
 
 def _validate_request(req: BenchmarkRequest) -> list[dict[str, Any]]:
-    if not req.algorithm_ids:
-        raise HTTPException(status_code=400, detail="algorithm_ids required")
     if not req.seeds:
         raise HTTPException(status_code=400, detail="seeds required")
     try:
@@ -66,10 +64,24 @@ def _validate_request(req: BenchmarkRequest) -> list[dict[str, Any]]:
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
-    if specs and len(req.algorithm_ids) != 1:
-        raise HTTPException(
-            status_code=400, detail="Param sweep requires exactly one algorithm"
-        )
+    if specs:
+        keys = {str(item["key"]) for item in specs}
+        if req.algorithm_ids:
+            if len(req.algorithm_ids) != 1:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Param sweep with an instrument requires exactly one algorithm",
+                )
+        elif "sheep_model" not in keys or "dog_controller" not in keys:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Factor grids without an instrument require sheep_model "
+                    "and dog_controller factors"
+                ),
+            )
+    elif not req.algorithm_ids:
+        raise HTTPException(status_code=400, detail="algorithm_ids required")
     return specs
 
 
@@ -110,9 +122,10 @@ def benchmark_run(
         try:
             rows = []
             param_sets = expand_param_grid(specs)
-            total = len(req.algorithm_ids) * len(req.seeds) * len(param_sets)
+            instrument_loop = list(req.algorithm_ids) if req.algorithm_ids else [None]
+            total = len(instrument_loop) * len(req.seeds) * len(param_sets)
             index = 0
-            for algorithm_id in req.algorithm_ids:
+            for algorithm_id in instrument_loop:
                 for params in param_sets:
                     for seed in req.seeds:
                         index += 1

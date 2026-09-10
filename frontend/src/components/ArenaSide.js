@@ -1,9 +1,8 @@
 import { createControlPanel } from './ControlPanel.js';
 import { createMetricsPanel } from './MetricsPanel.js';
 import { PixiRenderer } from '../renderer/PixiRenderer.js';
-import { openSimulationSession } from '../utils/simulationSession.js';
+import { createSimulationController } from '../utils/simulationController.js';
 import { log, withTimeout } from '../utils/logger.js';
-import { statusAfterManualStep } from '../utils/playback.js';
 
 /**
  * One Arena column: canvas + control panel + metrics.
@@ -14,7 +13,7 @@ export function createArenaSide(
   algorithms,
   scenarios,
   preferredAlg,
-  { onStatus, onPhaseHint, onIndependentInit, onSideError } = {},
+  { onStatus, onPhaseHint, onIndependentInit, onSideError, models = null } = {},
 ) {
   const panel = document.createElement('div');
   panel.className = 'arena-panel';
@@ -26,140 +25,69 @@ export function createArenaSide(
   panel.appendChild(canvasHost);
 
   const renderer = new PixiRenderer(canvasHost);
-  let socket = null;
-  let sessionId = null;
-  let history = [];
-  let latestMetrics = {};
-  let lastStatus = 'idle';
-  let busy = false;
   const metrics = createMetricsPanel(null, `Live Metrics ${label}`);
 
   function updateTitle() {
     title.textContent = `${label}: ${controls.getAlgorithmName()}`;
   }
 
-  function hasSession() {
-    return Boolean(sessionId && socket);
-  }
-
-  function getRunStatus() {
-    return lastStatus;
-  }
-
-  function isBusy() {
-    return busy;
-  }
-
-  function sendAction(action, extra = {}) {
-    if (!hasSession()) {
-      log.warn('arena', `${label}: '${action}' ignored — Initialize this side (or Init Both) first`);
-      return false;
-    }
-    const ok = socket.send(action, extra);
-    if (ok) {
-      if (action === 'play') lastStatus = 'running';
-      else if (action === 'pause') lastStatus = 'paused';
-      else if (action === 'step') lastStatus = statusAfterManualStep(lastStatus);
-      else if (action === 'reset') lastStatus = 'initialized';
-      onPhaseHint?.();
-    }
-    return ok;
-  }
-
-  function closeSession() {
-    if (socket) socket.close();
-    socket = null;
-    sessionId = null;
-    lastStatus = 'idle';
-  }
-
-  async function openSideSession(cfg) {
-    closeSession();
-    history = [];
-    latestMetrics = {};
-    metrics.update({}, 0);
-    renderer.clearTrails();
-
-    const seed = cfg.seed;
-    const { session, socket: nextSocket } = await openSimulationSession({
-      cfg,
-      renderer,
-      herderKind: controls.getHerderKind(),
-      onFrame: (msg) => {
-        if (msg.type === 'tick') {
-          history.push({ tick: msg.tick, ...msg.metrics });
-          latestMetrics = msg.metrics || {};
-          metrics.update(msg.metrics, history.length);
-          if (msg.status) lastStatus = msg.status;
-          onStatus?.({
-            status: lastStatus,
-            tick: msg.tick,
-            seed,
-          });
-          onPhaseHint?.();
-        } else {
-          history = [];
-          latestMetrics = {};
-          metrics.update({}, 0);
-          lastStatus = 'initialized';
-          onStatus?.({ status: 'initialized', tick: 0, seed });
-          onPhaseHint?.();
-        }
-      },
-      onTerminated: (msg) => {
-        lastStatus = msg.status || 'completed';
-        onStatus?.({
-          status: lastStatus,
-          tick: history.at(-1)?.tick || 0,
-          seed,
-        });
-        onPhaseHint?.();
-      },
-      onError: () => {
-        log.error('arena', `${label}: websocket error for ${sessionId}`);
-      },
-    });
-
-    sessionId = session.session_id;
-    lastStatus = 'initialized';
-    socket = nextSocket;
-    onStatus?.({ status: 'initialized', tick: session.tick ?? 0, seed });
-    updateTitle();
-    log.info('arena', `${label}: session ready ${sessionId}`);
-    return session;
-  }
-
   let controls;
+  const sim = createSimulationController({
+    label: `arena-${label}`,
+    renderer,
+    getHerderKind: () => controls.getHerderKind(),
+    onPhaseHint,
+    onFrame: (msg, ctx) => {
+      if (msg.type === 'tick') {
+        metrics.update(msg.metrics, ctx.history.length);
+        onStatus?.({
+          status: ctx.status,
+          tick: msg.tick,
+          seed: ctx.seed,
+        });
+      } else {
+        metrics.update({}, 0);
+        onStatus?.({ status: 'initialized', tick: 0, seed: ctx.seed });
+      }
+    },
+    onTerminated: (_msg, ctx) => {
+      onStatus?.({
+        status: ctx.status,
+        tick: ctx.history.at(-1)?.tick || 0,
+        seed: ctx.seed,
+      });
+    },
+    onError: () => {
+      log.error('arena', `${label}: websocket error`);
+    },
+  });
+
   controls = createControlPanel({
     sideLabel: label,
     paramsOpen: false,
+    compact: true,
     onInit: async (cfg) => {
-      if (busy) return;
-      busy = true;
-      onPhaseHint?.();
       try {
         log.info('arena', `${label}: independent init`, {
-          algorithm: cfg.algorithm_id,
+          instrument: cfg.instrument || cfg.algorithm_id,
           scenario: cfg.scenario_id,
           seed: cfg.seed,
           sheep: cfg.num_sheep,
         });
-        await openSideSession(cfg);
+        await sim.openBusy(cfg);
+        updateTitle();
         onIndependentInit?.(label);
       } catch (err) {
         log.error('arena', `${label}: init failed: ${err.message || err}`, err);
-        closeSession();
+        sim.close();
         onSideError?.(label, err);
-      } finally {
-        busy = false;
-        onPhaseHint?.();
       }
     },
-    onPlay: () => sendAction('play'),
-    onPause: () => sendAction('pause'),
-    onStep: () => sendAction('step'),
-    onReset: () => sendAction('reset'),
-    onSpeedChange: (speed) => sendAction('set_speed', { speed }),
+    onPlay: () => sim.play(),
+    onPause: () => sim.pause(),
+    onStep: () => sim.step(),
+    onReset: () => sim.reset(),
+    onSpeedChange: (speed) => sim.setSpeed(speed),
     onAlgorithmChange: (kind) => {
       renderer.setHerderKind(kind);
       updateTitle();
@@ -177,20 +105,16 @@ export function createArenaSide(
       renderer.setAssignmentModeVisible(modeId, visible),
     onClearTrails: () => renderer.clearTrails(),
   });
-  controls.setOptions(algorithms, scenarios, preferredAlg);
+  controls.setOptions(algorithms, scenarios, preferredAlg, models);
   renderer.setHerderKind(controls.getHerderKind());
-  renderer.setTrailVisible(controls.isTrailVisible());
-  renderer.setGcmGoalVisible(controls.isGcmGoalVisible());
+  sim.wireRendererOverlays(controls);
   updateTitle();
   controls.root.querySelector('[data-role="algorithm"]').addEventListener('change', updateTitle);
 
   async function initFromShared(sharedCfg) {
-    if (busy) return null;
-    busy = true;
-    onPhaseHint?.();
     try {
       log.info('arena', `${label}: fair init`, {
-        algorithm: controls.getConfig().algorithm_id,
+        instrument: controls.getConfig().algorithm_id,
         scenario: sharedCfg.scenario_id,
         seed: sharedCfg.seed,
         sheep: sharedCfg.num_sheep,
@@ -209,10 +133,11 @@ export function createArenaSide(
         num_shepherds: sharedCfg.num_shepherds ?? local.num_shepherds,
         preset: local.preset === 'custom' ? 'custom' : sharedCfg.preset || local.preset,
       };
-      return await openSideSession(cfg);
-    } finally {
-      busy = false;
-      onPhaseHint?.();
+      const session = await sim.openBusy(cfg);
+      updateTitle();
+      return session;
+    } catch (err) {
+      throw err;
     }
   }
 
@@ -222,25 +147,23 @@ export function createArenaSide(
     metrics,
     renderer,
     title,
-    hasSession,
-    getRunStatus,
-    isBusy,
+    hasSession: () => sim.hasSession(),
+    getRunStatus: () => sim.getStatus(),
+    isBusy: () => sim.isBusy(),
     async mount() {
       log.info('arena', `Mounting side ${label}`);
       await withTimeout(renderer.init(), 20000, `Arena ${label} renderer`);
-      renderer.setTrailVisible(controls.isTrailVisible());
-      renderer.setGcmGoalVisible(controls.isGcmGoalVisible());
+      sim.wireRendererOverlays(controls);
     },
     destroy() {
-      closeSession();
-      renderer.destroy();
+      sim.destroy();
     },
-    getLatestMetrics: () => latestMetrics,
+    getLatestMetrics: () => sim.getLatestMetrics(),
     initFromShared,
-    play: () => sendAction('play'),
-    pause: () => sendAction('pause'),
-    step: () => sendAction('step'),
-    reset: () => sendAction('reset'),
-    setSpeed: (speed) => sendAction('set_speed', { speed }),
+    play: () => sim.play(),
+    pause: () => sim.pause(),
+    step: () => sim.step(),
+    reset: () => sim.reset(),
+    setSpeed: (speed) => sim.setSpeed(speed),
   };
 }

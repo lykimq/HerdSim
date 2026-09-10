@@ -8,7 +8,7 @@ from api.benchmark_aggregates import build_trial_metric_fields
 from api.benchmark_summary import summarize_rows, summary_to_csv, summary_to_markdown
 from api.benchmark_sweep import expand_factor_grid, parse_factor_specs, sweep_label
 from core.experiment_config import resolve_experiment_config
-from core.presets import get_preset
+from core.presets import find_preset_for_models, get_preset
 from core.simulation_runner import RunResult, SimulationRunner
 from metrics.registry import metric_registry
 from scenarios.registry import scenario_registry
@@ -84,11 +84,6 @@ def iter_one_trial(
 ) -> Iterator[dict[str, Any]]:
     """Yield start/tick/trial events for one instrument x seed run."""
     instrument_id = instrument or algorithm_id
-    if not instrument_id and not (sheep_model and dog_controller):
-        raise ValueError("Provide instrument or sheep_model+dog_controller")
-    if instrument_id:
-        get_preset(instrument_id)
-
     scenario = scenario_registry.get(scenario_id)
     merged_params = dict(algorithm_params or {})
     factor_overrides = dict(sweep_params or {})
@@ -105,6 +100,14 @@ def iter_one_trial(
         merged_params["obs_mode"] = factor_overrides["obs_mode"]
     for key, value in list(factor_overrides.items()):
         merged_params[key] = value
+
+    # Factor-grid cells can omit instrument: recover the matching param bundle.
+    if not instrument_id and sheep_model and dog_controller:
+        instrument_id = find_preset_for_models(sheep_model, dog_controller)
+    if instrument_id:
+        get_preset(instrument_id)
+    elif not (sheep_model and dog_controller):
+        raise ValueError("Provide instrument or sheep_model+dog_controller")
 
     config = resolve_experiment_config(
         scenario=scenario,
@@ -225,19 +228,30 @@ def run_benchmark(
     on_progress: ProgressFn | None = None,
 ) -> dict[str, Any]:
     ids = list(instruments or algorithm_ids or [])
-    if not ids:
+    specs = parse_factor_specs(sweep)
+    param_sets = expand_factor_grid(specs)
+
+    if specs:
+        if ids and len(ids) != 1:
+            raise ValueError("Factor grids with an instrument require exactly one")
+        if not ids:
+            for params in param_sets:
+                if "sheep_model" not in params or "dog_controller" not in params:
+                    raise ValueError(
+                        "Factor grids without an instrument require sheep_model "
+                        "and dog_controller in every cell"
+                    )
+    elif not ids:
         raise ValueError("Provide instruments or algorithm_ids")
+
     for instrument_id in ids:
         get_preset(instrument_id)
 
-    specs = parse_factor_specs(sweep)
-    if specs and len(ids) != 1:
-        raise ValueError("Factor grids require exactly one instrument")
-    param_sets = expand_factor_grid(specs)
-    total = len(ids) * len(seeds) * len(param_sets)
+    instrument_loop = ids if ids else [None]
+    total = len(instrument_loop) * len(seeds) * len(param_sets)
     rows: list[dict[str, Any]] = []
     index = 0
-    for instrument_id in ids:
+    for instrument_id in instrument_loop:
         for params in param_sets:
             for seed in seeds:
                 index += 1

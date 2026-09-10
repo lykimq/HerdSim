@@ -1,11 +1,15 @@
 import { presetSelectHtml } from '../utils/params.js';
 import { iconImg } from '../assets/icons.js';
+import { factorFieldLabel } from '../utils/factors.js';
 
 export function controlPanelHtml({ sideLabel = '', paramsOpen = true } = {}) {
   return `
-    <div class="section-title">Configuration ${sideLabel ? `- ${sideLabel}` : ''}</div>
+    <div class="section-title">Setup ${sideLabel ? `- ${sideLabel}` : ''}</div>
+    <p class="panel-lead">
+      Choose an instrument and scenario, optionally customize experimental factors, then initialize a run.
+    </p>
     <div class="control-group">
-      <label>Algorithm</label>
+      <label>Instrument</label>
       <select data-role="algorithm"></select>
       <p class="param-hint" data-role="algorithm-blurb"></p>
     </div>
@@ -34,6 +38,77 @@ export function controlPanelHtml({ sideLabel = '', paramsOpen = true } = {}) {
       <label>Random Seed</label>
       <input data-role="seed" type="number" value="42" />
     </div>
+    <div class="config-summary" data-role="config-summary" aria-live="polite"></div>
+    <details class="param-section" open data-role="factors-section">
+      <summary class="section-title">Experimental factors</summary>
+      <p class="param-hint" data-role="factors-summary"></p>
+      <div class="param-list factors-grid" data-role="factors">
+        <div class="param-group-title">Model</div>
+        <div class="param-item">
+          <label><span class="param-key">${factorFieldLabel('sheep_model')}</span></label>
+          <select data-factor="sheep_model"></select>
+        </div>
+        <div class="param-item">
+          <label><span class="param-key">${factorFieldLabel('dog_controller')}</span></label>
+          <select data-factor="dog_controller"></select>
+        </div>
+        <div class="param-group-title">Observation</div>
+        <div class="param-item">
+          <label><span class="param-key">${factorFieldLabel('obs_mode')}</span></label>
+          <select data-factor="obs_mode"></select>
+        </div>
+        <div class="param-item">
+          <label><span class="param-key">${factorFieldLabel('sensing_range')}</span></label>
+          <input data-factor="sensing_range" type="number" step="any" placeholder="default" />
+        </div>
+        <div class="param-item">
+          <label><span class="param-key">${factorFieldLabel('noise_sigma')}</span></label>
+          <input data-factor="noise_sigma" type="number" step="any" min="0" value="0" />
+        </div>
+        <div class="param-item">
+          <label><span class="param-key">${factorFieldLabel('communication')}</span></label>
+          <select data-factor="communication"></select>
+        </div>
+        <div class="param-group-title">Flock</div>
+        <div class="param-item">
+          <label><span class="param-key">${factorFieldLabel('stubborn_fraction')}</span></label>
+          <input data-factor="stubborn_fraction" type="number" step="0.05" min="0" max="1" value="0" />
+        </div>
+        <div class="param-item">
+          <label><span class="param-key">${factorFieldLabel('cohesion_scale')}</span></label>
+          <input data-factor="cohesion_scale" type="number" step="0.1" min="0" value="1" />
+        </div>
+        <div class="param-group-title">Shepherds</div>
+        <div class="param-item">
+          <label><span class="param-key">${factorFieldLabel('failure_mode')}</span></label>
+          <select data-factor="failure_mode"></select>
+        </div>
+        <div class="param-item">
+          <label><span class="param-key">${factorFieldLabel('failure_tick')}</span></label>
+          <input data-factor="failure_tick" type="number" step="1" value="-1" />
+        </div>
+        <div class="param-item">
+          <label><span class="param-key">${factorFieldLabel('speed_scale')}</span></label>
+          <input data-factor="speed_scale" type="number" step="0.1" min="0" value="1" />
+        </div>
+        <div class="param-group-title">Environment</div>
+        <div class="param-item">
+          <label><span class="param-key">${factorFieldLabel('goal_mode')}</span></label>
+          <select data-factor="goal_mode"></select>
+        </div>
+        <div class="param-item" data-role="goal-velocity-wrap">
+          <label><span class="param-key">${factorFieldLabel('goal_velocity')}</span></label>
+          <div class="factor-pair">
+            <input data-factor="goal_velocity_x" type="number" step="any" value="0" aria-label="goal_velocity_x" />
+            <input data-factor="goal_velocity_y" type="number" step="any" value="0" aria-label="goal_velocity_y" />
+          </div>
+        </div>
+      </div>
+      <p class="param-hint is-error hidden" data-role="factors-error"></p>
+      <p class="param-hint" data-role="factors-hint">
+        Factors override instrument defaults when Settings source is Custom. Paper/Scenario keep instrument defaults unless you switch to Custom.
+      </p>
+    </details>
     <button class="btn btn-secondary" data-role="init">${iconImg('release')} Initialize New Run</button>
     <div class="section-title">Playback</div>
     <div class="btn-row">
@@ -66,7 +141,7 @@ export function controlPanelHtml({ sideLabel = '', paramsOpen = true } = {}) {
       </div>
     </div>
     <details class="param-section" ${paramsOpen ? 'open' : ''} data-role="params-section">
-      <summary class="section-title" data-role="params-title">Settings</summary>
+      <summary class="section-title" data-role="params-title">Advanced settings</summary>
       <div class="param-list" data-role="params"></div>
     </details>
     <details class="param-section hidden" data-role="world-section">

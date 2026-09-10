@@ -31,6 +31,11 @@ export async function fetchAlgorithms() {
   return res.json();
 }
 
+export async function fetchModels() {
+  const res = await apiFetch('/api/algorithms/meta/models');
+  return res.json();
+}
+
 export async function fetchAlgorithm(algorithmId) {
   const res = await apiFetch(`/api/algorithms/${algorithmId}`);
   return res.json();

@@ -1,3 +1,10 @@
+import {
+  DEFAULT_LIVE_METRIC_IDS,
+  formatMetricValue,
+  metricLabelText,
+  metricTipText,
+} from '../utils/metricFormat.js';
+
 export function createMetricsPanel(metricDefs = null, title = 'Live Metrics') {
   const root = document.createElement('div');
   root.className = 'card-glass';
@@ -9,51 +16,18 @@ export function createMetricsPanel(metricDefs = null, title = 'Live Metrics') {
   `;
   const cards = root.querySelector('[data-role="cards"]');
   const ticksEl = root.querySelector('[data-role="ticks"]');
-  const defaultIds = [
-    'cohesion',
-    'gcm_goal',
-    'shepherd_path',
-    'polarization',
-    'fragmentation',
-    'outlier_count',
-    'min_separation',
-    'sheep_in_goal',
-    'success_rate',
-    'time_to_goal',
-  ];
 
   let defsById = Object.fromEntries((metricDefs || []).map((m) => [m.id, m]));
-  const metricIds = metricDefs?.map((m) => m.id) || defaultIds;
+  const metricIds = metricDefs?.map((m) => m.id) || DEFAULT_LIVE_METRIC_IDS;
   const valueEls = {};
   const labelEls = {};
-
-  function labelText(id) {
-    const def = defsById[id];
-    const name = def?.name || id;
-    const unit = def?.unit;
-    return unit ? `${name} (${unit})` : name;
-  }
-
-  function tipText(id) {
-    const def = defsById[id];
-    if (!def) return id;
-    const unitPart = def.unit ? ` Unit: ${def.unit}.` : '';
-    return `${def.description || id}${unitPart}`;
-  }
-
-  function formatValue(id, val) {
-    if (val == null) return '-';
-    if (id === 'time_to_goal' && Number(val) < 0) return 'not yet';
-    if (Number.isInteger(val)) return String(val);
-    return Number(val).toFixed(2);
-  }
 
   metricIds.forEach((id) => {
     const card = document.createElement('div');
     card.className = 'metric-card';
-    card.innerHTML = `<span data-role="label">${labelText(id)}</span><span class="metric-value" data-id="${id}">-</span>`;
+    card.innerHTML = `<span data-role="label">${metricLabelText(defsById[id], id)}</span><span class="metric-value" data-id="${id}">-</span>`;
     const labelEl = card.querySelector('[data-role="label"]');
-    labelEl.title = tipText(id);
+    labelEl.title = metricTipText(defsById[id], id);
     cards.appendChild(card);
     valueEls[id] = card.querySelector('.metric-value');
     labelEls[id] = labelEl;
@@ -63,14 +37,14 @@ export function createMetricsPanel(metricDefs = null, title = 'Live Metrics') {
     defsById = Object.fromEntries((defs || []).map((m) => [m.id, m]));
     metricIds.forEach((id) => {
       if (!labelEls[id]) return;
-      labelEls[id].textContent = labelText(id);
-      labelEls[id].title = tipText(id);
+      labelEls[id].textContent = metricLabelText(defsById[id], id);
+      labelEls[id].title = metricTipText(defsById[id], id);
     });
   }
 
   function update(metrics = {}, historyLength = 0) {
     metricIds.forEach((id) => {
-      valueEls[id].textContent = formatValue(id, metrics[id]);
+      valueEls[id].textContent = formatMetricValue(id, metrics[id]);
     });
     ticksEl.textContent = String(historyLength);
   }

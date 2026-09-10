@@ -1,13 +1,15 @@
 import { createArenaSide } from './ArenaSide.js';
 import { arenaFairBarHtml } from './arenaMarkup.js';
 import { formatMetricDelta } from '../utils/arenaDeltas.js';
+import { ARENA_DELTA_METRIC_IDS } from '../utils/metricFormat.js';
 import { fetchMetrics } from '../api/rest.js';
 import { log, sleep } from '../utils/logger.js';
 import { mountTips } from '../utils/tooltips.js';
 import { scenarioBlurb } from '../utils/params.js';
 import { applyArenaPlayback } from '../utils/playback.js';
+import { setStatusMessage } from '../utils/dom.js';
 
-export function createArenaView({ algorithms, scenarios, onStatus }) {
+export function createArenaView({ algorithms, scenarios, models = null, onStatus }) {
   const root = document.createElement('div');
   root.className = 'arena-layout';
 
@@ -20,6 +22,10 @@ export function createArenaView({ algorithms, scenarios, onStatus }) {
   let btnPause;
   let btnReset;
   let statusEl;
+  let modeFairBtn;
+  let modeIndepBtn;
+  let modeHint;
+  let fairControls;
 
   function anyBusy() {
     return Boolean(left?.isBusy() || right?.isBusy());
@@ -39,6 +45,17 @@ export function createArenaView({ algorithms, scenarios, onStatus }) {
         reset: btnReset,
       },
     });
+    const fair = compareMode !== 'independent';
+    modeFairBtn?.classList.toggle('active', fair);
+    modeIndepBtn?.classList.toggle('active', !fair);
+    modeFairBtn?.setAttribute('aria-pressed', fair ? 'true' : 'false');
+    modeIndepBtn?.setAttribute('aria-pressed', fair ? 'false' : 'true');
+    fairControls?.classList.toggle('is-disabled', !fair);
+    if (modeHint) {
+      modeHint.textContent = fair
+        ? 'Fair compare locks shared scenario, seed, and sheep count across both sides.'
+        : 'Independent mode: initialize and play each side with its own setup.';
+    }
   }
 
   function setCompareMode(next) {
@@ -51,13 +68,13 @@ export function createArenaView({ algorithms, scenarios, onStatus }) {
   }
 
   function setArenaStatus(message, { error = false } = {}) {
-    statusEl.textContent = message;
-    statusEl.classList.toggle('arena-status-error', error);
+    setStatusMessage(statusEl, message, { error });
     if (error) log.error('arena', message);
     else log.info('arena', message);
   }
 
   const sideOpts = {
+    models,
     onStatus,
     onPhaseHint: syncControls,
     onIndependentInit: (sideLabel) => {
@@ -89,6 +106,10 @@ export function createArenaView({ algorithms, scenarios, onStatus }) {
   btnPlay = shared.querySelector('[data-role="play-both"]');
   btnPause = shared.querySelector('[data-role="pause-both"]');
   btnReset = shared.querySelector('[data-role="reset-both"]');
+  modeFairBtn = shared.querySelector('[data-role="mode-fair"]');
+  modeIndepBtn = shared.querySelector('[data-role="mode-independent"]');
+  modeHint = shared.querySelector('[data-role="mode-hint"]');
+  fairControls = shared.querySelector('[data-role="fair-controls"]');
 
   const scenSelect = shared.querySelector('[data-role="shared-scenario"]');
   const scenBlurbEl = shared.querySelector('[data-role="shared-scenario-blurb"]');
@@ -130,8 +151,9 @@ export function createArenaView({ algorithms, scenarios, onStatus }) {
   function refreshDeltas() {
     const a = left.getLatestMetrics();
     const b = right.getLatestMetrics();
-    ['cohesion', 'shepherd_path', 'success_rate', 'time_to_goal'].forEach((key) => {
-      shared.querySelector(`[data-delta="${key}"]`).textContent = formatMetricDelta(a, b, key);
+    ARENA_DELTA_METRIC_IDS.forEach((key) => {
+      const el = shared.querySelector(`[data-delta="${key}"]`);
+      if (el) el.textContent = formatMetricDelta(a, b, key);
     });
   }
 
@@ -192,6 +214,15 @@ export function createArenaView({ algorithms, scenarios, onStatus }) {
     setArenaStatus('Fair compare: reset to start. Click Play Both to run again.');
     syncControls();
   }
+
+  modeFairBtn.addEventListener('click', () => {
+    setCompareMode('idle');
+    setArenaStatus('Fair compare selected. Set shared settings, then Init Both.');
+  });
+  modeIndepBtn.addEventListener('click', () => {
+    setCompareMode('independent');
+    setArenaStatus('Independent mode: initialize each side separately.');
+  });
 
   btnInit.addEventListener('click', () => {
     initBoth();
