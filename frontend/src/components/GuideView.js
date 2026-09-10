@@ -4,6 +4,7 @@ import { renderMarkdown } from '../utils/markdown.js';
 import { log } from '../utils/logger.js';
 
 const NAV = [
+  { slug: 'user_guide', label: 'User Guide' },
   { slug: 'research/algorithms', label: 'Algorithms' },
   { slug: 'research/algorithms/strombom_2014', label: 'Strombom 2014', depth: 1 },
   { slug: 'research/algorithms/strombom_multi', label: 'Strombom Multi-Dog', depth: 2 },

@@ -13,6 +13,7 @@ _DOCS_ROOT = Path(__file__).resolve().parents[2] / "docs"
 
 # Whitelist must match GuideView NAV (frontend/src/components/GuideView.js).
 DOC_SLUGS: dict[str, Path] = {
+    "user_guide": _DOCS_ROOT / "user_guide.md",
     "research/algorithms": _DOCS_ROOT / "research" / "algorithms" / "README.md",
     "research/algorithms/strombom_2014": _DOCS_ROOT / "research" / "algorithms" / "strombom_2014.md",
     "research/algorithms/strombom_multi": _DOCS_ROOT / "research" / "algorithms" / "strombom_multi.md",
