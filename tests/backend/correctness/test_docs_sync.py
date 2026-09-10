@@ -18,6 +18,9 @@ DOC_BY_ID = {
     "v_formation": "v_formation",
     "heterogeneous": "heterogeneous",
     "obstacle_aware": "obstacle_aware",
+    "fat": "fat",
+    "communication_free": "communication_free",
+    "adaptive": "adaptive",
 }
 
 

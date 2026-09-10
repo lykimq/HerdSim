@@ -1,0 +1,6 @@
+{
+  "id": "fat",
+  "herder_kind": "dog",
+  "herder_label": "Dog",
+  "summary": "Farthest-agent targeting under local observations."
+}

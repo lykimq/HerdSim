@@ -1,11 +1,13 @@
-"""Correctness: V-formation algorithm behaviour."""
+"""Correctness: V-formation controller behaviour."""
 
 from __future__ import annotations
 
 import numpy as np
 
 from algorithms.registry import algorithm_registry
-from algorithms.v_formation.algorithm import VFormationAlgorithm
+from controllers.v_formation import VFormationController
+from core.observation_models import GlobalObservation
+from core.presets import get_preset
 from tests.backend.helpers import build_runner, make_state, make_world, snapshot_positions
 
 
@@ -14,7 +16,7 @@ def test_v_formation_registered():
 
 
 def test_v_formation_step_runs():
-    alg = VFormationAlgorithm()
+    ctrl = VFormationController()
     sheep = [
         [50.0, 50.0],
         [51.0, 50.0],
@@ -25,7 +27,8 @@ def test_v_formation_step_runs():
     ]
     dogs = [[80.0, 50.0], [82.0, 48.0]]
     state = make_state(sheep, dogs, world=make_world(goal_center=(10.0, 10.0)), seed=3)
-    new_state = alg.step(state, alg.default_config)
+    obs = GlobalObservation().observe_all(state, ctrl.default_config)
+    new_state = ctrl.step(state, obs, ctrl.default_config)
     assert new_state.n_sheep == len(sheep)
     assert new_state.n_shepherds == 2
     assert new_state.metadata.get("herding_mode") in {"collect", "drive"}
@@ -47,7 +50,7 @@ def test_v_formation_determinism_same_seed():
 
 
 def test_v_formation_collect_threshold_scale_affects_mode():
-    alg = VFormationAlgorithm()
+    ctrl = VFormationController()
     sheep = [
         [50.0, 50.0],
         [51.0, 50.0],
@@ -67,9 +70,8 @@ def test_v_formation_collect_threshold_scale_affects_mode():
     assert dist > base_threshold
     assert dist <= base_threshold * 1.5
 
-    cfg_paper = {**alg.default_config, "r_a": r_a, "collect_threshold_scale": 1.0}
-    cfg_scaled = {**alg.default_config, "r_a": r_a, "collect_threshold_scale": 1.5}
-    alg._update_shepherds(state, cfg_paper)
-    assert alg._last_mode == "collect"
-    alg._update_shepherds(state, cfg_scaled)
-    assert alg._last_mode == "drive"
+    cfg_paper = {**ctrl.default_config, "r_a": r_a, "collect_threshold_scale": 1.0}
+    cfg_scaled = {**ctrl.default_config, "r_a": r_a, "collect_threshold_scale": 1.5}
+    obs = GlobalObservation().observe_all(state, cfg_paper)
+    assert ctrl.step(state, obs, cfg_paper).metadata["herding_mode"] == "collect"
+    assert ctrl.step(state, obs, cfg_scaled).metadata["herding_mode"] == "drive"

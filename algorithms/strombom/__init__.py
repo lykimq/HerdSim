@@ -1,5 +1,3 @@
-"""Strombom 2014 algorithm package."""
+"""Strombom package: config and heuristics shared by dynamics/controllers."""
 
-from algorithms.strombom.algorithm import StrombomAlgorithm
-
-__all__ = ["StrombomAlgorithm"]
+__all__ = []

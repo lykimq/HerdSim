@@ -1,0 +1,6 @@
+{
+  "id": "communication_free",
+  "herder_kind": "dog",
+  "herder_label": "Dog",
+  "summary": "Independent Collect/Drive decisions without inter-dog messages."
+}

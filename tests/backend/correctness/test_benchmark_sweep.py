@@ -1,4 +1,4 @@
-"""Tests for Analytics param-grid sweep helpers and runner."""
+"""Tests for factor-grid helpers and runner."""
 
 from __future__ import annotations
 
@@ -8,6 +8,7 @@ import pytest
 from api.benchmark_runner import run_benchmark
 from api.benchmark_summary import summarize_rows
 from api.benchmark_sweep import expand_param_grid, parse_sweep_specs, sweep_label
+from core.experimental_factors import MAX_FACTOR_GRID_CELLS
 
 
 def test_parse_and_expand_param_grid():
@@ -25,13 +26,11 @@ def test_parse_and_expand_param_grid():
     assert sweep_label(grid[0]) == "n_neighbors=1, rs_weight=1"
 
 
-def test_parse_sweep_rejects_more_than_two_params():
-    with pytest.raises(ValueError, match="at most 2"):
-        parse_sweep_specs(
+def test_parse_sweep_rejects_oversized_grid():
+    with pytest.raises(ValueError, match="max is"):
+        expand_param_grid(
             [
-                {"key": "a", "values": [1]},
-                {"key": "b", "values": [2]},
-                {"key": "c", "values": [3]},
+                {"key": "n_sheep", "values": list(range(MAX_FACTOR_GRID_CELLS + 1))},
             ]
         )
 

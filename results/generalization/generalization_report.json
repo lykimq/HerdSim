@@ -1,0 +1,46 @@
+[
+  {
+    "instrument": "strombom",
+    "p_train": 1.0,
+    "tests": {
+      "obstacles": {
+        "p_test": 1.0,
+        "generalization_gap": 0.0
+      },
+      "local_sensing": {
+        "p_test": 0.0,
+        "generalization_gap": 1.0
+      },
+      "heterogeneous": {
+        "p_test": 1.0,
+        "generalization_gap": 0.0
+      },
+      "noisy_bearing": {
+        "p_test": 0.0,
+        "generalization_gap": 1.0
+      }
+    }
+  },
+  {
+    "instrument": "adaptive",
+    "p_train": 0.0,
+    "tests": {
+      "obstacles": {
+        "p_test": 0.0,
+        "generalization_gap": 0.0
+      },
+      "local_sensing": {
+        "p_test": 0.0,
+        "generalization_gap": 0.0
+      },
+      "heterogeneous": {
+        "p_test": 0.0,
+        "generalization_gap": 0.0
+      },
+      "noisy_bearing": {
+        "p_test": 0.0,
+        "generalization_gap": 0.0
+      }
+    }
+  }
+]

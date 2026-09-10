@@ -6,7 +6,6 @@ from typing import Any
 
 import numpy as np
 
-from algorithms.registry import algorithm_registry
 from core.experiment_config import resolve_experiment_config
 from core.simulation_runner import RunResult, SimulationRunner
 from core.simulation_state import SimulationState
@@ -62,23 +61,21 @@ def build_runner(
     num_shepherds: int | None = None,
     config_overrides: dict[str, Any] | None = None,
 ) -> SimulationRunner:
-    algorithm = algorithm_registry.get(algorithm_id)
     scenario = scenario_registry.get(scenario_id)
     config = resolve_experiment_config(
-        algorithm,
-        scenario,
+        scenario=scenario,
+        instrument=algorithm_id,
         preset=preset,
         num_sheep=num_sheep,
         num_shepherds=num_shepherds,
+        algorithm_params=config_overrides,
     )
-    if config_overrides:
-        config.update(config_overrides)
     return SimulationRunner(
-        algorithm=algorithm,
         scenario=scenario,
         metrics=metric_registry.get_all(),
         config=config,
         seed=seed,
+        instrument=algorithm_id,
     )
 
 

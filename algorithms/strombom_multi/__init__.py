@@ -1,5 +1,3 @@
-"""Strombom multi-dog package."""
+"""Strombom multi-dog instrument metadata."""
 
-from algorithms.strombom_multi.algorithm import StrombomMultiAlgorithm
-
-__all__ = ["StrombomMultiAlgorithm"]
+__all__ = []

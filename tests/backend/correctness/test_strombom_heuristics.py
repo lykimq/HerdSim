@@ -5,7 +5,6 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from algorithms.strombom.algorithm import StrombomAlgorithm
 from algorithms.strombom.heuristics import (
     collect_offset,
     collect_target,
@@ -86,22 +85,28 @@ def test_drive_target_is_behind_gcm_from_goal():
 
 
 def test_shepherd_stops_within_three_ra():
-    alg = StrombomAlgorithm()
-    cfg = alg.default_config
+    from controllers.collect_drive import CollectDriveController
+    from core.observation_models import GlobalObservation
+
+    ctrl = CollectDriveController()
+    cfg = ctrl.default_config
     sheep = np.array([[50.0, 50.0], [52.0, 50.0], [50.0, 52.0]])
-    dog = np.array([[51.0, 50.5]])  # closer than 3*r_a = 6
+    dog = np.array([[51.0, 50.5]])
     state = make_state(sheep, dog, world=make_world(), seed=1)
-    new_state = alg.step(state, cfg)
+    obs = GlobalObservation().observe_all(state, cfg)
+    new_state = ctrl.step(state, obs, cfg)
     assert np.allclose(new_state.shepherd_velocities[0], 0.0)
 
 
 def test_sheep_graze_when_shepherd_beyond_rs():
-    alg = StrombomAlgorithm()
-    cfg = {**alg.default_config, "graze_move_prob": 0.0}
+    from dynamics.strombom import StrombomSheepDynamics
+
+    sheep_dyn = StrombomSheepDynamics()
+    cfg = {**sheep_dyn.default_config, "graze_move_prob": 0.0}
     sheep = np.array([[40.0, 40.0], [42.0, 40.0], [40.0, 42.0]])
-    dog = np.array([[140.0, 140.0]])  # >> r_s
+    dog = np.array([[140.0, 140.0]])
     state = make_state(sheep, dog, world=make_world(), seed=2)
-    new_state = alg.step(state, cfg)
+    new_state = sheep_dyn.step(state, cfg)
     assert np.allclose(new_state.sheep_velocities, 0.0)
 
 

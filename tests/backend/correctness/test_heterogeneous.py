@@ -1,11 +1,13 @@
-"""Correctness: heterogeneous sheep response variant."""
+"""Correctness: heterogeneous sheep response as a flock factor."""
 
 from __future__ import annotations
 
 import numpy as np
 
-from algorithms.heterogeneous.algorithm import HeterogeneousAlgorithm
 from algorithms.registry import algorithm_registry
+from core.agent_attributes import init_agent_attributes
+from core.presets import get_preset
+from dynamics.strombom import StrombomSheepDynamics
 from tests.backend.helpers import build_runner, make_state, make_world, snapshot_positions
 
 
@@ -28,9 +30,7 @@ def test_heterogeneous_determinism_same_seed():
 
 
 def test_heterogeneous_stubborn_weaker_dog_response():
-    """stubborn_fraction=0 yields stronger dog response than high stubbornness."""
-    alg = HeterogeneousAlgorithm()
-    # Dog close enough that sheep are active (within r_s).
+    sheep_dyn = StrombomSheepDynamics()
     sheep = np.array(
         [
             [40.0, 40.0],
@@ -47,9 +47,8 @@ def test_heterogeneous_stubborn_weaker_dog_response():
     )
     dog = np.array([[48.0, 41.0]])
     world = make_world(goal_center=(10.0, 10.0))
-
     base = {
-        **alg.default_config,
+        **get_preset("heterogeneous")["default_config"],
         "noise_strength": 0.0,
         "graze_move_prob": 0.0,
         "r_s": 65.0,
@@ -58,20 +57,17 @@ def test_heterogeneous_stubborn_weaker_dog_response():
     cfg_responsive = {**base, "stubborn_fraction": 0.0, "stubborn_rs_scale": 0.25}
     cfg_stubborn = {**base, "stubborn_fraction": 1.0, "stubborn_rs_scale": 0.25}
 
-    state_r = make_state(sheep, dog, world=world, seed=5)
-    state_s = make_state(sheep, dog, world=world, seed=5)
-    # Pre-seed identical previous headings so compose differs mainly by rs.
+    state_r = init_agent_attributes(make_state(sheep, dog, world=world, seed=5), cfg_responsive)
+    state_s = init_agent_attributes(make_state(sheep, dog, world=world, seed=5), cfg_stubborn)
     state_r.sheep_velocities[:] = [[0.0, 1.0]] * len(sheep)
     state_s.sheep_velocities[:] = [[0.0, 1.0]] * len(sheep)
 
-    out_r = alg.step(state_r, cfg_responsive)
-    out_s = alg.step(state_s, cfg_stubborn)
+    out_r = sheep_dyn.step(state_r, cfg_responsive)
+    out_s = sheep_dyn.step(state_s, cfg_stubborn)
 
-    assert "sheep_response" in out_r.metadata
-    assert all(abs(v - 1.0) < 1e-9 for v in out_r.metadata["sheep_response"])
-    assert all(abs(v - 0.25) < 1e-9 for v in out_s.metadata["sheep_response"])
+    assert all(abs(v - 1.0) < 1e-9 for v in out_r.sheep_response)
+    assert all(abs(v - 0.25) < 1e-9 for v in out_s.sheep_response)
 
-    # Mean displacement away from dog should be larger for fully responsive flock.
     dog_pos = dog[0]
     away_r = np.mean(
         [

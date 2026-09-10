@@ -41,7 +41,7 @@ def _request_meta(req: BenchmarkRequest, sweep_payload: list[dict[str, Any]] | N
 
 class SweepParam(BaseModel):
     key: str
-    values: list[float | int] = Field(min_length=1)
+    values: list[float | int | str] = Field(min_length=1)
 
 
 class BenchmarkRequest(BaseModel):

@@ -1,16 +1,18 @@
-"""Correctness: obstacle-aware Collect/Drive variant."""
+"""Correctness: obstacle-aware Collect/Drive controller."""
 
 from __future__ import annotations
 
 import numpy as np
 
-from algorithms.obstacle_aware.algorithm import ObstacleAwareAlgorithm
 from algorithms.obstacle_aware.geometry import (
     deflect_drive_point,
     find_gate_gap_center,
     segment_intersects_aabb,
 )
 from algorithms.registry import algorithm_registry
+from controllers.obstacle_aware_drive import ObstacleAwareDriveController
+from core.observation_models import GlobalObservation
+from core.presets import get_preset
 from core.world import Obstacle
 from tests.backend.helpers import build_runner, make_state, make_world, run_trial, snapshot_positions
 
@@ -61,11 +63,12 @@ def test_obstacle_aware_runs_obstacle_course_without_crash():
 
 
 def test_obstacle_aware_step_emits_mode_metadata():
-    alg = ObstacleAwareAlgorithm()
+    ctrl = ObstacleAwareDriveController()
     sheep = [[40.0, 40.0], [42.0, 40.0], [40.0, 42.0], [41.0, 41.0]]
     dogs = [[70.0, 40.0]]
     state = make_state(sheep, dogs, world=make_world(goal_center=(120.0, 40.0)), seed=2)
-    new_state = alg.step(state, alg.default_config)
+    obs = GlobalObservation().observe_all(state, ctrl.default_config)
+    new_state = ctrl.step(state, obs, ctrl.default_config)
     assert new_state.metadata.get("herding_mode") in {"collect", "drive"}
     assert isinstance(new_state.metadata.get("assignment_lines"), list)
 

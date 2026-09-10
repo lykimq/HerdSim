@@ -1,5 +1,3 @@
-"""Kubo 2022 force-based herding algorithm package."""
+"""Kubo package: config and force helpers."""
 
-from algorithms.kubo.algorithm import KuboAlgorithm
-
-__all__ = ["KuboAlgorithm"]
+__all__ = []

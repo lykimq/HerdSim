@@ -76,6 +76,16 @@ Cohesion, GCM to Goal, Success Rate, Sheep in Goal, Fragmentation, Outlier Count
 
 For fair comparison, lock the same `n_sheep`, `n_shepherds`, scenario, and seeds (custom preset). Do not use paper preset when comparing models that declare different paper agent counts. See `docs/research/comparison_framework.md`.
 
-## Provenance in Analytics exports
+## Factor-derived analysis outputs
+
+Trial tables from factor grids also support:
+
+- `required_shepherds` estimates via `analysis.herdability.required_shepherds`
+- sensing/noise degradation slopes via `analysis.herdability.degradation_slope`
+- dimensionless predictors (`pi_speed`, `pi_dogs`, `pi_sensing`, `pi_density`)
+- behavioural event transitions via `analysis.behavioural`
+- velocity-correlation delay proxies via `analysis.propagation`
+
+These are analysis-layer outputs, not per-tick metric plugins.
 
 JSON packages include `herdsim_version`, best-effort `git_commit`, `python_version`, experiment design, `resolved_config` (from a trial), metric definitions, summary, trial rows, and caveats. CSV includes the same preamble facts; nested `resolved_config` is omitted from CSV cells and kept in JSON.

@@ -23,10 +23,15 @@ DOC_SLUGS: dict[str, Path] = {
     "research/algorithms/obstacle_aware": _DOCS_ROOT / "research" / "algorithms" / "obstacle_aware.md",
     "research/algorithms/kubo_2022": _DOCS_ROOT / "research" / "algorithms" / "kubo_2022.md",
     "research/algorithms/flocking_dog_2024": _DOCS_ROOT / "research" / "algorithms" / "flocking_dog_2024.md",
+    "research/algorithms/fat": _DOCS_ROOT / "research" / "algorithms" / "fat.md",
+    "research/algorithms/communication_free": _DOCS_ROOT / "research" / "algorithms" / "communication_free.md",
+    "research/algorithms/adaptive": _DOCS_ROOT / "research" / "algorithms" / "adaptive.md",
     "research/scenarios": _DOCS_ROOT / "research" / "scenarios.md",
     "research/metrics": _DOCS_ROOT / "research" / "metrics.md",
     "research/environment": _DOCS_ROOT / "research" / "environment.md",
     "research/netlogo": _DOCS_ROOT / "research" / "netlogo.md",
+    "research/comparison_framework": _DOCS_ROOT / "research" / "comparison_framework.md",
+    "architecture": _DOCS_ROOT / "architecture.md",
 }
 
 

@@ -1,0 +1,41 @@
+{
+  "instrument": "strombom",
+  "scenario": "drive_to_goal",
+  "preset": "custom",
+  "seeds": [
+    1,
+    2,
+    3
+  ],
+  "grid": [
+    {
+      "key": "n_sheep",
+      "values": [
+        20,
+        40
+      ]
+    },
+    {
+      "key": "n_shepherds",
+      "values": [
+        1,
+        2
+      ]
+    },
+    {
+      "key": "obs_mode",
+      "values": [
+        "global",
+        "local_positions"
+      ]
+    },
+    {
+      "key": "stubborn_fraction",
+      "values": [
+        0,
+        0.5
+      ]
+    }
+  ],
+  "n_trials": 48
+}

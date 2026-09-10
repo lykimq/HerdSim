@@ -83,20 +83,23 @@ def test_clamp_speed_caps_fast_agents_only():
 
 
 def test_kubo_step_dogs_see_updated_sheep_positions():
-    """MATLAB integrates sheep before dog forces use sheep positions."""
-    from algorithms.kubo.algorithm import KuboAlgorithm
+    """Runner updates sheep before dog forces use sheep positions."""
+    from controllers.kubo_forces import KuboDogController
+    from core.observation_models import GlobalObservation
+    from dynamics.kubo import KuboSheepDynamics
     from tests.backend.helpers import make_world
 
-    alg = KuboAlgorithm()
-    cfg = {**alg.default_config, "dt": 0.05, "radius": 60.0}
-    # Sheep near dog so dog repulsion on sheep is strong; after sheep move,
-    # dog targeting should still run without crash and advance positions.
+    sheep_dyn = KuboSheepDynamics()
+    dogs = KuboDogController()
+    cfg = {**sheep_dyn.default_config, **dogs.default_config, "dt": 0.05, "radius": 60.0}
     state = make_state(
         [[40.0, 40.0], [42.0, 40.0], [40.0, 42.0]],
         [[55.0, 40.0], [58.0, 45.0]],
         world=make_world(),
         seed=0,
     )
-    new_state = alg.step(state, cfg)
-    assert not np.allclose(new_state.sheep_positions, state.sheep_positions)
+    mid = sheep_dyn.step(state, cfg)
+    obs = GlobalObservation().observe_all(mid, cfg)
+    new_state = dogs.step(mid, obs, cfg)
+    assert not np.allclose(mid.sheep_positions, state.sheep_positions)
     assert new_state.shepherd_positions.shape == state.shepherd_positions.shape

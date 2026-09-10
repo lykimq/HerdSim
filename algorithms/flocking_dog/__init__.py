@@ -1,5 +1,3 @@
-"""Flocking Dog 2024 algorithm package."""
+"""Flocking Dog / Jadhav package: config and sheep helpers."""
 
-from algorithms.flocking_dog.algorithm import FlockingDogAlgorithm
-
-__all__ = ["FlockingDogAlgorithm"]
+__all__ = []

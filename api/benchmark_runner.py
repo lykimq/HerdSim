@@ -1,23 +1,20 @@
-"""Multi-seed benchmark runner for scientific comparisons."""
+"""Multi-seed / factor-grid benchmark runner."""
 
 from __future__ import annotations
 
 from typing import Any, Callable, Iterator
 
-import pandas as pd
-
-from algorithms.registry import algorithm_registry
 from api.benchmark_aggregates import build_trial_metric_fields
 from api.benchmark_summary import summarize_rows, summary_to_csv, summary_to_markdown
-from api.benchmark_sweep import expand_param_grid, parse_sweep_specs, sweep_label
+from api.benchmark_sweep import expand_factor_grid, parse_factor_specs, sweep_label
 from core.experiment_config import resolve_experiment_config
+from core.presets import get_preset
 from core.simulation_runner import RunResult, SimulationRunner
 from metrics.registry import metric_registry
 from scenarios.registry import scenario_registry
 
 ProgressFn = Callable[[dict[str, Any]], None]
 
-# Re-export summary helpers for existing imports.
 __all__ = [
     "iter_one_trial",
     "run_benchmark",
@@ -30,7 +27,7 @@ __all__ = [
 
 def _trial_row(
     *,
-    algorithm_id: str,
+    instrument: str,
     scenario_id: str,
     preset: str,
     seed: int,
@@ -39,10 +36,14 @@ def _trial_row(
     sweep_params: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     row: dict[str, Any] = {
-        "algorithm": algorithm_id,
+        "instrument": instrument,
+        "algorithm": instrument,  # report alias
         "scenario": scenario_id,
         "preset": preset,
         "seed": seed,
+        "sheep_model": config.get("sheep_model"),
+        "dog_controller": config.get("dog_controller"),
+        "obs_mode": config.get("obs_mode"),
         "n_sheep": config["n_sheep"],
         "n_shepherds": config["n_shepherds"],
         "success": bool(result.success),
@@ -52,9 +53,8 @@ def _trial_row(
     if sweep_params:
         row.update(sweep_params)
         row["sweep_label"] = sweep_label(sweep_params)
+        row["factor_label"] = sweep_label(sweep_params)
     row.update(build_trial_metric_fields(result.history))
-    # Scenario success stops the trial, so total_ticks is the first success tick.
-    # Distinct from time_to_goal, which requires all sheep inside the goal.
     if result.success:
         row["first_success_tick"] = float(result.total_ticks)
     else:
@@ -63,13 +63,13 @@ def _trial_row(
 
 
 def _progress_stride(max_ticks: int) -> int:
-    # About 40 updates per trial; keep short trials responsive.
     return max(1, max_ticks // 40)
 
 
 def iter_one_trial(
     *,
-    algorithm_id: str,
+    instrument: str | None = None,
+    algorithm_id: str | None = None,
     scenario_id: str,
     seed: int,
     preset: str = "paper",
@@ -77,36 +77,60 @@ def iter_one_trial(
     num_shepherds: int | None = None,
     algorithm_params: dict[str, Any] | None = None,
     sweep_params: dict[str, Any] | None = None,
+    sheep_model: str | None = None,
+    dog_controller: str | None = None,
     index: int = 1,
     total: int = 1,
 ) -> Iterator[dict[str, Any]]:
-    """Yield start/tick/trial events for one algorithm x seed run."""
-    algorithm = algorithm_registry.get(algorithm_id)
+    """Yield start/tick/trial events for one instrument x seed run."""
+    instrument_id = instrument or algorithm_id
+    if not instrument_id and not (sheep_model and dog_controller):
+        raise ValueError("Provide instrument or sheep_model+dog_controller")
+    if instrument_id:
+        get_preset(instrument_id)
+
     scenario = scenario_registry.get(scenario_id)
     merged_params = dict(algorithm_params or {})
-    if sweep_params:
-        merged_params.update(sweep_params)
+    factor_overrides = dict(sweep_params or {})
+    # Map factor overrides into resolve inputs.
+    if "n_sheep" in factor_overrides and num_sheep is None:
+        num_sheep = int(factor_overrides.pop("n_sheep"))
+    if "n_shepherds" in factor_overrides and num_shepherds is None:
+        num_shepherds = int(factor_overrides.pop("n_shepherds"))
+    if "sheep_model" in factor_overrides and sheep_model is None:
+        sheep_model = str(factor_overrides.pop("sheep_model"))
+    if "dog_controller" in factor_overrides and dog_controller is None:
+        dog_controller = str(factor_overrides.pop("dog_controller"))
+    if "obs_mode" in factor_overrides:
+        merged_params["obs_mode"] = factor_overrides["obs_mode"]
+    for key, value in list(factor_overrides.items()):
+        merged_params[key] = value
+
     config = resolve_experiment_config(
-        algorithm,
-        scenario,
+        scenario=scenario,
+        instrument=instrument_id,
         preset=preset,
         num_sheep=num_sheep,
         num_shepherds=num_shepherds,
         algorithm_params=merged_params or None,
+        sheep_model=sheep_model,
+        dog_controller=dog_controller,
     )
     runner = SimulationRunner(
-        algorithm=algorithm,
         scenario=scenario,
         metrics=metric_registry.get_all(),
         config=config,
         seed=seed,
+        instrument=instrument_id,
     )
     max_ticks = max(1, int(scenario.max_ticks(config)))
     stride = _progress_stride(max_ticks)
+    label_id = instrument_id or f"{config['sheep_model']}+{config['dog_controller']}"
 
     yield {
         "type": "progress",
-        "algorithm": algorithm_id,
+        "algorithm": label_id,
+        "instrument": label_id,
         "seed": seed,
         "index": index,
         "total": total,
@@ -121,14 +145,12 @@ def iter_one_trial(
     while status == "running":
         state, _, status = runner.step()
         tick = int(state.tick)
-        if status == "success":
-            fraction = 1.0
-        else:
-            fraction = min(1.0, tick / max_ticks)
+        fraction = 1.0 if status == "success" else min(1.0, tick / max_ticks)
         if tick == 1 or tick % stride == 0 or status != "running":
             yield {
                 "type": "tick",
-                "algorithm": algorithm_id,
+                "algorithm": label_id,
+                "instrument": label_id,
                 "seed": seed,
                 "index": index,
                 "total": total,
@@ -146,7 +168,7 @@ def iter_one_trial(
         final_state=runner.state,
     )
     row = _trial_row(
-        algorithm_id=algorithm_id,
+        instrument=label_id,
         scenario_id=scenario_id,
         preset=preset,
         seed=seed,
@@ -159,7 +181,8 @@ def iter_one_trial(
 
 def run_one_trial(
     *,
-    algorithm_id: str,
+    instrument: str | None = None,
+    algorithm_id: str | None = None,
     scenario_id: str,
     seed: int,
     preset: str = "paper",
@@ -168,9 +191,9 @@ def run_one_trial(
     algorithm_params: dict[str, Any] | None = None,
     on_progress: ProgressFn | None = None,
 ) -> dict[str, Any]:
-    """Run a single algorithm x seed trial and return one result row."""
     row: dict[str, Any] | None = None
     for event in iter_one_trial(
+        instrument=instrument,
         algorithm_id=algorithm_id,
         scenario_id=scenario_id,
         seed=seed,
@@ -179,10 +202,10 @@ def run_one_trial(
         num_shepherds=num_shepherds,
         algorithm_params=algorithm_params,
     ):
-        if event["type"] == "trial":
-            row = event["row"]
-        elif on_progress:
+        if on_progress and event.get("type") in {"progress", "tick"}:
             on_progress(event)
+        if event.get("type") == "trial":
+            row = event["row"]
     if row is None:
         raise RuntimeError("Trial produced no result row")
     return row
@@ -190,7 +213,8 @@ def run_one_trial(
 
 def run_benchmark(
     *,
-    algorithm_ids: list[str],
+    algorithm_ids: list[str] | None = None,
+    instruments: list[str] | None = None,
     scenario_id: str,
     seeds: list[int],
     preset: str = "paper",
@@ -200,26 +224,25 @@ def run_benchmark(
     sweep: list[dict[str, Any]] | None = None,
     on_progress: ProgressFn | None = None,
 ) -> dict[str, Any]:
-    """Run algorithm x seed (x optional param grid) trials; return rows + summary."""
-    scenario_registry.get(scenario_id)
-    for algorithm_id in algorithm_ids:
-        algorithm_registry.get(algorithm_id)
+    ids = list(instruments or algorithm_ids or [])
+    if not ids:
+        raise ValueError("Provide instruments or algorithm_ids")
+    for instrument_id in ids:
+        get_preset(instrument_id)
 
-    specs = parse_sweep_specs(sweep)
-    if specs and len(algorithm_ids) != 1:
-        raise ValueError("Param sweep requires exactly one algorithm")
-    param_sets = expand_param_grid(specs)
-
+    specs = parse_factor_specs(sweep)
+    if specs and len(ids) != 1:
+        raise ValueError("Factor grids require exactly one instrument")
+    param_sets = expand_factor_grid(specs)
+    total = len(ids) * len(seeds) * len(param_sets)
     rows: list[dict[str, Any]] = []
-    total = len(algorithm_ids) * len(seeds) * len(param_sets)
     index = 0
-
-    for algorithm_id in algorithm_ids:
+    for instrument_id in ids:
         for params in param_sets:
             for seed in seeds:
                 index += 1
                 for event in iter_one_trial(
-                    algorithm_id=algorithm_id,
+                    instrument=instrument_id,
                     scenario_id=scenario_id,
                     seed=seed,
                     preset=preset,
@@ -230,11 +253,13 @@ def run_benchmark(
                     index=index,
                     total=total,
                 ):
-                    if event["type"] == "trial":
-                        rows.append(event["row"])
-                    if on_progress:
+                    if on_progress and event.get("type") in {"progress", "tick"}:
                         on_progress(event)
+                    if event.get("type") == "trial":
+                        rows.append(event["row"])
+    import pandas as pd
 
-    df = pd.DataFrame(rows)
-    summary = summarize_rows(df)
-    return {"rows": rows, "summary": summary}
+    return {
+        "rows": rows,
+        "summary": summarize_rows(pd.DataFrame(rows)),
+    }

@@ -1,19 +1,22 @@
-"""Correctness: Flocking Dog 2024 paper dynamics."""
+"""Correctness: Jadhav / Flocking Dog 2024 sheep and dog dynamics."""
 
 from __future__ import annotations
 
 import numpy as np
 import pytest
 
-from algorithms.flocking_dog.algorithm import FlockingDogAlgorithm
 from algorithms.flocking_dog.dynamics import sheep_repulsion
-from core.agents.sheep import nearest_neighbor_indices
 from algorithms.strombom.heuristics import compute_threshold
+from controllers.collect_drive import CollectDriveController
+from core.agents.sheep import nearest_neighbor_indices
+from core.observation_models import GlobalObservation
+from core.presets import get_preset
+from dynamics.jadhav import JadhavSheepDynamics
 from tests.backend.helpers import make_state, make_world
 
 
 def test_flocking_dog_defaults_match_paper():
-    cfg = FlockingDogAlgorithm().default_config
+    cfg = get_preset("flocking_dog")["default_config"]
     assert cfg["r_a"] == 2.0
     assert cfg["r_s"] == 12.0
     assert cfg["k_neighbors"] == 10
@@ -25,29 +28,30 @@ def test_flocking_dog_defaults_match_paper():
 
 
 def test_sheep_graze_when_dog_beyond_rd():
-    alg = FlockingDogAlgorithm()
-    cfg = alg.default_config
+    sheep = JadhavSheepDynamics()
+    cfg = sheep.default_config
     state = make_state(
         [[40.0, 40.0], [42.0, 40.0], [40.0, 42.0]],
-        [[100.0, 100.0]],  # >> r_s=12
+        [[100.0, 100.0]],
         world=make_world(),
         seed=0,
     )
-    new_state = alg.step(state, cfg)
+    new_state = sheep.step(state, cfg)
     assert np.allclose(new_state.sheep_velocities, 0.0)
 
 
 def test_dog_slows_within_ra():
-    alg = FlockingDogAlgorithm()
-    cfg = alg.default_config
+    ctrl = CollectDriveController()
+    cfg = {**get_preset("flocking_dog")["default_config"]}
     state = make_state(
         [[50.0, 50.0], [52.0, 50.0], [50.0, 52.0]],
-        [[51.0, 50.5]],  # within r_a=2
+        [[51.0, 50.5]],
         world=make_world(),
         seed=1,
     )
     state.shepherd_velocities[:] = [[1.0, 0.0]]
-    new_state = alg.step(state, cfg)
+    obs = GlobalObservation().observe_all(state, cfg)
+    new_state = ctrl.step(state, obs, cfg)
     assert np.isclose(np.linalg.norm(new_state.shepherd_velocities[0]), 0.05)
     assert np.allclose(
         new_state.shepherd_velocities[0] / 0.05, [1.0, 0.0], atol=1e-9
@@ -74,14 +78,12 @@ def test_sheep_repulsion_points_away():
 
 
 def test_threatened_sheep_move_away_from_dog():
-    alg = FlockingDogAlgorithm()
-    cfg = {**alg.default_config, "noise_strength": 0.0}
-    # Dog to the right of a tight flock within Rd.
-    sheep = np.array([[50.0, 50.0], [51.0, 50.0], [50.0, 51.0], [51.0, 51.0]])
+    sheep = JadhavSheepDynamics()
+    cfg = {**sheep.default_config, "noise_strength": 0.0}
+    sheep_pos = np.array([[50.0, 50.0], [51.0, 50.0], [50.0, 51.0], [51.0, 51.0]])
     dog = np.array([[55.0, 50.5]])
-    state = make_state(sheep, dog, world=make_world(), seed=3)
+    state = make_state(sheep_pos, dog, world=make_world(), seed=3)
     state.sheep_velocities[:] = [[0.0, 1.0]] * 4
-    new_state = alg.step(state, cfg)
-    # Mean sheep displacement should have a leftward (away-from-dog) component.
-    delta = new_state.sheep_positions.mean(axis=0) - sheep.mean(axis=0)
+    new_state = sheep.step(state, cfg)
+    delta = new_state.sheep_positions.mean(axis=0) - sheep_pos.mean(axis=0)
     assert delta[0] < 0

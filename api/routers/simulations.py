@@ -5,9 +5,9 @@ from typing import Any, Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-from algorithms.registry import algorithm_registry
 from api.session_manager import session_manager
 from core.experiment_config import resolve_experiment_config
+from core.presets import get_preset
 from core.simulation_runner import SimulationRunner
 from metrics.registry import metric_registry
 from scenarios.registry import scenario_registry
@@ -16,14 +16,18 @@ router = APIRouter()
 
 
 class CreateSessionRequest(BaseModel):
-    algorithm_id: str = "strombom"
+    algorithm_id: Optional[str] = None
+    instrument: Optional[str] = None
     scenario_id: str = "drive_to_goal"
     preset: str = Field(default="paper", pattern="^(paper|scenario|custom)$")
     num_sheep: Optional[int] = Field(default=None, ge=1, le=200)
-    num_shepherds: Optional[int] = Field(default=None, ge=1, le=10)
+    num_shepherds: Optional[int] = Field(default=None, ge=0, le=10)
     seed: Optional[int] = 42
     algorithm_params: Optional[dict[str, Any]] = None
     world_overrides: Optional[dict[str, Any]] = None
+    sheep_model: Optional[str] = None
+    dog_controller: Optional[str] = None
+    obs_mode: Optional[str] = None
 
 
 def _world_payload(runner: SimulationRunner) -> dict[str, Any]:
@@ -51,8 +55,9 @@ def _world_payload(runner: SimulationRunner) -> dict[str, Any]:
 @router.post("/")
 def create_session(req: CreateSessionRequest):
     """Create and initialize a new simulation session."""
+    instrument = req.instrument or req.algorithm_id or "strombom"
     try:
-        algorithm = algorithm_registry.get(req.algorithm_id)
+        get_preset(instrument)
     except KeyError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
@@ -61,25 +66,31 @@ def create_session(req: CreateSessionRequest):
     except KeyError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
+    params = dict(req.algorithm_params or {})
+    if req.obs_mode:
+        params["obs_mode"] = req.obs_mode
+
     try:
         config = resolve_experiment_config(
-            algorithm,
-            scenario,
+            scenario=scenario,
+            instrument=instrument,
             preset=req.preset,
             num_sheep=req.num_sheep,
             num_shepherds=req.num_shepherds,
-            algorithm_params=req.algorithm_params,
+            algorithm_params=params or None,
             world_overrides=req.world_overrides,
+            sheep_model=req.sheep_model,
+            dog_controller=req.dog_controller,
         )
-    except ValueError as exc:
+    except (ValueError, KeyError) as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     runner = SimulationRunner(
-        algorithm=algorithm,
         scenario=scenario,
         metrics=metric_registry.get_all(),
         config=config,
         seed=req.seed if req.seed is not None else 42,
+        instrument=instrument,
     )
 
     session_id = session_manager.create_session(runner)
@@ -91,7 +102,11 @@ def create_session(req: CreateSessionRequest):
         "num_sheep": config["n_sheep"],
         "num_shepherds": config["n_shepherds"],
         "seed": runner.seed,
-        "algorithm_id": req.algorithm_id,
+        "algorithm_id": instrument,
+        "instrument": instrument,
+        "sheep_model": config.get("sheep_model"),
+        "dog_controller": config.get("dog_controller"),
+        "obs_mode": config.get("obs_mode"),
         "scenario_id": req.scenario_id,
         "config": config,
         "world": _world_payload(runner),
@@ -104,13 +119,11 @@ def create_session(req: CreateSessionRequest):
 @router.get("")
 @router.get("/")
 def list_sessions():
-    """List all active simulation sessions."""
     return session_manager.list_sessions()
 
 
 @router.get("/{session_id}")
 def get_session_status(session_id: str):
-    """Get status and current state of a session."""
     try:
         session = session_manager.get_session(session_id)
     except KeyError as exc:
@@ -128,6 +141,5 @@ def get_session_status(session_id: str):
 
 @router.delete("/{session_id}")
 def delete_session(session_id: str):
-    """Terminate and remove a session."""
     session_manager.remove_session(session_id)
     return {"status": "deleted", "session_id": session_id}

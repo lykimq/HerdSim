@@ -1,5 +1,3 @@
-"""Fujioka/Hayashi V-formation herding package."""
+"""V-formation instrument metadata and defaults."""
 
-from algorithms.v_formation.algorithm import VFormationAlgorithm
-
-__all__ = ["VFormationAlgorithm"]
+__all__ = []

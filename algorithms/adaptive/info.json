@@ -1,0 +1,6 @@
+{
+  "id": "adaptive",
+  "herder_kind": "dog",
+  "herder_label": "Dog",
+  "summary": "Context-aware collect/drive/recover/lead controller."
+}

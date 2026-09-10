@@ -1,5 +1,3 @@
-"""Obstacle-aware Collect/Drive herding package."""
+"""Obstacle-aware instrument metadata, geometry helpers, and defaults."""
 
-from algorithms.obstacle_aware.algorithm import ObstacleAwareAlgorithm
-
-__all__ = ["ObstacleAwareAlgorithm"]
+__all__ = []

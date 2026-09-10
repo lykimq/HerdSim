@@ -1,43 +1,46 @@
 # HerdSim
 
-**HerdSim** is an interactive agent-based research platform for simulating,
-visualizing, and comparing sheep herding models under shared scenarios and
-metrics.
+**HerdSim** is a reproducible experimental platform for investigating the
+limits, robustness, generalization, and information requirements of multi-agent
+shepherding.
 
 Herding -- where a small group of shepherds guides a larger flock to a target --
-is a complex problem in robotics and collective behaviour. HerdSim provides a
-standardized experimental stack so different models can be evaluated under
-equivalent conditions.
+is studied here through orthogonal experimental factors rather than algorithm
+catalogues alone. Controllers are instruments for measuring herdability.
 
 ## Motivation
 
-- **Visualization:** watch algorithms in real time.
-- **Standardization:** same scenarios, metrics, and seeds across models.
-- **Extensibility:** plug in algorithms, scenarios, and metrics without rewriting the engine.
+- **Herdability:** when is a flock controllable under given N_sheep, N_dogs, and density?
+- **Information:** how does performance change under global, local, bearing, or noisy sensing?
+- **Heterogeneity:** how robust are strategies when sheep or dogs are not identical?
+- **Generalization:** do rankings reverse under distribution shift?
 
-Core comparison families: Strombom 2014, Kubo 2022, and Jadhav 2024 (`flocking_dog`).
+## Architecture
+
+Each tick runs:
+
+```text
+environment updates -> sheep dynamics -> observation -> dog controller
+-> constraints -> obstacles/walls -> metrics
+```
+
+Named instruments (e.g. `strombom`, `kubo`, `flocking_dog`) are factor bundles
+over `sheep_model` x `dog_controller`.
 
 ## Research docs
 
-- [Comparison framework](docs/research/comparison_framework.md) -- fair protocol and reporting
-- [Metrics](docs/research/metrics.md) -- taxonomy, trajectory aggregates, provenance
-- [Related work](docs/research/related_work.md) -- situating the three model families
-- [Architecture](docs/architecture.md) -- tick lifecycle and plugins
-- [Algorithms](docs/research/algorithms/README.md) -- suite map
+- [Comparison framework](docs/research/comparison_framework.md)
+- [Metrics](docs/research/metrics.md)
+- [Related work](docs/research/related_work.md)
+- [Architecture](docs/architecture.md)
+- [Instruments](docs/research/algorithms/README.md)
 
-Fair comparison CLI: `python scripts/run_fair_compare.py` (shared N/M, default 30 seeds).
+Fair comparison: `python scripts/run_fair_compare.py`
+
+Factor grids: `python scripts/run_factor_grid.py --grid 'n_sheep=20,50;n_shepherds=1,2' --seeds 1,2,3`
 
 ## Getting Started
 
-You need Python and Node.js.
-
-1. **Install dependencies:**
-   ```bash
-   make install
-   ```
-2. **Start the simulation server and visual interface:**
-   ```bash
-   make dev
-   ```
-
-Open **http://localhost:5173** to start simulating.
+1. `make install`
+2. `make dev`
+3. Open http://localhost:5173

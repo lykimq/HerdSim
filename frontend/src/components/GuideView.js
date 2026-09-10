@@ -5,7 +5,7 @@ import { log } from '../utils/logger.js';
 
 const NAV = [
   { slug: 'user_guide', label: 'User Guide' },
-  { slug: 'research/algorithms', label: 'Algorithms' },
+  { slug: 'research/algorithms', label: 'Instruments' },
   { slug: 'research/algorithms/strombom_2014', label: 'Strombom 2014', depth: 1 },
   { slug: 'research/algorithms/strombom_multi', label: 'Strombom Multi-Dog', depth: 2 },
   { slug: 'research/algorithms/strombom_noise', label: 'Strombom Noise', depth: 2 },
@@ -14,6 +14,11 @@ const NAV = [
   { slug: 'research/algorithms/obstacle_aware', label: 'Obstacle-Aware', depth: 2 },
   { slug: 'research/algorithms/kubo_2022', label: 'Kubo 2022', depth: 1 },
   { slug: 'research/algorithms/flocking_dog_2024', label: 'Flocking Dog', depth: 1 },
+  { slug: 'research/algorithms/fat', label: 'FAT', depth: 1 },
+  { slug: 'research/algorithms/communication_free', label: 'Communication-Free', depth: 1 },
+  { slug: 'research/algorithms/adaptive', label: 'Adaptive', depth: 1 },
+  { slug: 'research/comparison_framework', label: 'Comparison Framework' },
+  { slug: 'architecture', label: 'Architecture' },
   { slug: 'research/scenarios', label: 'Scenarios' },
   { slug: 'research/metrics', label: 'Metrics' },
   { slug: 'research/environment', label: 'Environment' },

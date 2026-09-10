@@ -1,5 +1,3 @@
-"""Heterogeneous sheep (responsive vs stubborn) herding package."""
+"""Heterogeneous sheep instrument metadata (stubborn_fraction factor)."""
 
-from algorithms.heterogeneous.algorithm import HeterogeneousAlgorithm
-
-__all__ = ["HeterogeneousAlgorithm"]
+__all__ = []

@@ -26,6 +26,5 @@ KUBO_DEFAULTS = {
     "dt": 0.05,
     "sheep_speed_max": 5.0,
     "dog_speed_max": 10.0,
-    "use_advanced_vision": False,
     "r_a": 2.0,  # used by generic outlier metric
 }

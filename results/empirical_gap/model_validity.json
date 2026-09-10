@@ -1,0 +1,6 @@
+{
+  "ideal_strombom_success": 1.0,
+  "jadhav_sheep_success": 1.0,
+  "ranking_changed": false,
+  "note": "Full UWB trajectory fitting can replace flocking_dog defaults; this report compares instrument-level empirical vs idealized sheep."
+}

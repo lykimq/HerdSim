@@ -18,7 +18,7 @@ def test_docs_list_and_fetch_algorithms_overview():
     assert "guide" not in slugs
     res = client.get("/api/docs/research/algorithms")
     assert res.status_code == 200
-    assert "Algorithms" in res.text
+    assert "Instruments" in res.text or "sheep model" in res.text.lower()
     assert "text/markdown" in res.headers.get("content-type", "")
 
 

@@ -1,5 +1,3 @@
-"""Strombom noise variant package."""
+"""Strombom noise instrument metadata (noise as a factor)."""
 
-from algorithms.strombom_noise.algorithm import StrombomNoiseAlgorithm
-
-__all__ = ["StrombomNoiseAlgorithm"]
+__all__ = []
