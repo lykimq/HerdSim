@@ -6,7 +6,7 @@ function setupHtml(sideLabel) {
   return `
     <div class="section-title">Setup ${sideLabel ? `- ${sideLabel}` : ''}</div>
     <p class="panel-lead">
-      Choose an instrument and scenario, optionally customize experimental factors, then initialize a run.
+      Choose an instrument, then a mode. Each mode shows only the controls you need.
     </p>
     <div class="control-group">
       <label>Instrument</label>
@@ -14,25 +14,34 @@ function setupHtml(sideLabel) {
       <p class="param-hint" data-role="algorithm-blurb"></p>
     </div>
     <div class="control-group">
+      <label>Mode</label>
+      <select data-role="preset">${presetSelectHtml(true)}</select>
+      <p class="param-hint" data-role="preset-blurb"></p>
+    </div>
+    <div class="control-group hidden" data-role="scenario-group">
       <label>Scenario</label>
       <select data-role="scenario"></select>
       <p class="param-hint" data-role="scenario-blurb"></p>
     </div>
-    <div class="control-group">
-      <label>Settings source</label>
-      <select data-role="preset">${presetSelectHtml(true)}</select>
-      <p class="param-hint" data-role="preset-blurb"></p>
+    <div class="control-group hidden" data-role="paper-task-group">
+      <label>Task</label>
+      <p class="mode-fixed-value" data-role="paper-task-label">Drive to Goal</p>
+      <p class="param-hint">Fixed for Paper original (usual paper-style task).</p>
     </div>
-    <div class="control-group">
+    <div class="control-group hidden" data-role="agent-counts-group">
       <label>${iconImg('sheep', 'icon icon-inline')} Number of Sheep (<span data-role="sheep-count">50</span>)</label>
       <input data-role="sheep" type="range" min="5" max="150" value="50" />
     </div>
-    <div class="control-group">
+    <div class="control-group hidden" data-role="agent-counts-group">
       <label data-role="herder-label">
         <span data-role="herder-icon">${iconImg('dog', 'icon icon-inline')}</span>
         Number of <span data-role="herder-word">Dogs</span> (<span data-role="dog-count">1</span>)
       </label>
       <input data-role="dogs" type="range" min="1" max="8" value="1" />
+    </div>
+    <div class="control-group" data-role="counts-info-group">
+      <label>Agent counts</label>
+      <p class="mode-fixed-value" data-role="counts-info"></p>
     </div>
     <div class="control-group">
       <label>Random Seed</label>
@@ -44,7 +53,7 @@ function setupHtml(sideLabel) {
 
 function factorsHtml(factorsOpen) {
   return `
-    <details class="param-section" ${factorsOpen ? 'open' : ''} data-role="factors-section">
+    <details class="param-section hidden" ${factorsOpen ? 'open' : ''} data-role="factors-section">
       <summary class="section-title">Experimental factors</summary>
       <p class="param-hint" data-role="factors-summary"></p>
       <div class="param-list factors-grid" data-role="factors">
@@ -111,7 +120,7 @@ function factorsHtml(factorsOpen) {
       </div>
       <p class="param-hint is-error hidden" data-role="factors-error"></p>
       <p class="param-hint" data-role="factors-hint">
-        Factors override instrument defaults when Settings source is Custom. Paper/Scenario keep instrument defaults unless you switch to Custom.
+        Edit factors for this custom run (observation, heterogeneity, failure, goal).
       </p>
     </details>
   `;
@@ -161,7 +170,7 @@ function displayHtml() {
 
 function advancedHtml(paramsOpen) {
   return `
-    <details class="param-section" ${paramsOpen ? 'open' : ''} data-role="params-section">
+    <details class="param-section hidden" ${paramsOpen ? 'open' : ''} data-role="params-section">
       <summary class="section-title" data-role="params-title">Advanced settings</summary>
       <div class="param-list" data-role="params"></div>
     </details>

@@ -150,8 +150,8 @@ export function createFactorControls({ els, state, currentPreset, markCustom }) 
     });
     if (els.factorsHint) {
       els.factorsHint.textContent = editable
-        ? 'Custom factors are sent with the session (observation, heterogeneity, failure, goal).'
-        : 'Switch Settings source to Custom to edit experimental factors. Showing instrument defaults.';
+        ? 'Edit factors for this custom run (observation, heterogeneity, failure, goal).'
+        : 'Switch Mode to Custom to edit experimental factors.';
     }
   }
 

@@ -47,7 +47,7 @@ export function analyticsRunnerHtml() {
       <p class="param-hint" data-role="scenario-blurb"></p>
     </div>
     <div class="control-group">
-      <label>Settings source</label>
+      <label>Mode</label>
       <select data-role="preset">${presetSelectHtml(false)}</select>
       <p class="param-hint" data-role="preset-blurb"></p>
     </div>

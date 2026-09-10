@@ -139,7 +139,7 @@ export function createAnalyticsDashboard({ algorithms, scenarios, models = null,
         'Factor grid uses sheep model + dog controller (and matching param bundles). Compare mode selects named instruments.';
     } else if (ids.length > 1) {
       algBlurbEl.textContent =
-        'Multiple instruments selected; each uses its own paper/reference defaults when Settings source is Instrument (paper).';
+        'Multiple instruments selected; each uses its own paper defaults when Mode is Paper original.';
     } else {
       algBlurbEl.textContent = algorithmBlurb(alg);
     }
@@ -155,6 +155,7 @@ export function createAnalyticsDashboard({ algorithms, scenarios, models = null,
       presetBlurb.textContent = presetSourceBlurb(preset, {
         algorithm: alg,
         scenario: scen,
+        paperTaskLocked: false,
       });
     }
     presetBlurb.classList.toggle('hidden', !presetBlurb.textContent);

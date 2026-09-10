@@ -230,6 +230,17 @@
   line-height: 1.45;
 }
 
+.mode-fixed-value {
+  margin: 0;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: rgba(15, 23, 42, 0.35);
+  color: var(--text-main);
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+
 .config-summary {
   padding: 0.55rem 0.65rem;
   border: 1px solid var(--border-color);

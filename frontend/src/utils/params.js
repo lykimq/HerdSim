@@ -28,22 +28,25 @@ export const SCENARIO_WORLD_KEYS = new Set([
   "collect_threshold_scale",
 ]);
 
+/** Usual paper-style task for Paper original mode. */
+export const PAPER_TASK_SCENARIO_ID = "drive_to_goal";
+
 /** Shared preset ids, dropdown labels, and section titles. */
 export const PRESET_OPTIONS = [
   {
     id: "paper",
-    label: "Instrument (paper)",
-    paramsTitle: "Instrument (paper) settings",
+    label: "Paper original",
+    paramsTitle: "Paper original settings",
   },
   {
     id: "scenario",
-    label: "Scenario (task)",
-    paramsTitle: "Scenario (task) settings",
+    label: "Scenarios",
+    paramsTitle: "Scenario recommended settings",
   },
   {
     id: "custom",
     label: "Custom",
-    paramsTitle: "Custom instrument parameters",
+    paramsTitle: "Custom parameters",
   },
 ];
 
@@ -72,16 +75,55 @@ export function scenarioBlurb(scenario) {
   return scenario?.description || "";
 }
 
+/** Recommended agent counts from a scenario default_config. */
+export function scenarioCountHint(scenario) {
+  const cfg = scenario?.default_config || {};
+  const nSheep = cfg.n_sheep;
+  const nDogs = cfg.n_shepherds;
+  if (nSheep == null || nDogs == null) return "";
+  return `${nSheep} sheep, ${nDogs} dogs`;
+}
+
+/** Scenario dropdown label with recommended counts when available. */
+export function scenarioOptionLabel(scenario) {
+  const counts = scenarioCountHint(scenario);
+  const name = scenario?.name || scenario?.id || "";
+  return counts ? `${name} (${counts})` : name;
+}
+
 /**
- * Text under Settings source: show the entity description for paper/scenario,
- * or a short edit hint for Custom.
+ * Text under Mode: what this mode locks vs what the user picks next.
  */
-export function presetSourceBlurb(presetId, { algorithm, scenario } = {}) {
-  if (presetId === "scenario") return scenarioBlurb(scenario);
-  if (presetId === "custom") {
-    return "Edit instrument, experimental factors, and world parameters yourself, then Initialize.";
+export function presetSourceBlurb(
+  presetId,
+  { algorithm, scenario, paperTaskLocked = true } = {},
+) {
+  if (presetId === "scenario") {
+    const counts = scenarioCountHint(scenario);
+    const task = scenario?.name || "this scenario";
+    const base = scenarioBlurb(scenario);
+    const setup = counts
+      ? `Uses ${task} recommended setup (${counts}).`
+      : `Uses ${task} recommended setup.`;
+    return base ? `${setup} ${base}` : setup;
   }
-  return algorithmBlurb(algorithm);
+  if (presetId === "custom") {
+    return "Choose any scenario and edit sheep, dogs, factors, and advanced parameters.";
+  }
+  const algName = algorithm?.name || "this instrument";
+  const cfg = algorithm?.default_config || {};
+  const nSheep = cfg.n_sheep;
+  const nDogs = cfg.n_shepherds;
+  const counts =
+    nSheep != null && nDogs != null ? `${nSheep} sheep, ${nDogs} dogs` : null;
+  const mech = algorithmBlurb(algorithm);
+  const taskName = paperTaskLocked
+    ? "Drive to Goal"
+    : scenario?.name || "the selected scenario";
+  const setup = counts
+    ? `Paper params and counts for ${algName} (${counts}); world from ${taskName}.`
+    : `Paper params and counts for ${algName}; world from ${taskName}.`;
+  return mech ? `${setup} ${mech}` : setup;
 }
 
 /** Copy scenario world/layout keys onto a config object (paper/custom base). */

@@ -6,6 +6,7 @@ import {
   TRAIL_LABEL,
 } from '../utils/displayOverlays.js';
 import { buildSessionPayload, DEFAULT_FACTORS, summarizeFactors } from '../utils/factors.js';
+import { getPresetOption, PAPER_TASK_SCENARIO_ID, scenarioOptionLabel } from '../utils/params.js';
 import { controlPanelHtml } from './controlPanelMarkup.js';
 import { createParamRefresh } from './controlPanelParams.js';
 import { createFactorControls } from './controlPanelFactors.js';
@@ -29,6 +30,8 @@ export function createControlPanel({
   runFirst = false,
   includeDisplay = true,
   compact = false,
+  /** When true, Paper original locks the task to Drive to Goal. */
+  lockPaperScenario = true,
 }) {
   const root = document.createElement('div');
   root.className = 'card-glass control-panel';
@@ -46,17 +49,23 @@ export function createControlPanel({
     algorithm: root.querySelector('[data-role="algorithm"]'),
     algorithmBlurb: root.querySelector('[data-role="algorithm-blurb"]'),
     scenario: root.querySelector('[data-role="scenario"]'),
+    scenarioGroup: root.querySelector('[data-role="scenario-group"]'),
     scenarioBlurb: root.querySelector('[data-role="scenario-blurb"]'),
+    paperTaskGroup: root.querySelector('[data-role="paper-task-group"]'),
+    paperTaskLabel: root.querySelector('[data-role="paper-task-label"]'),
     preset: root.querySelector('[data-role="preset"]'),
     presetBlurb: root.querySelector('[data-role="preset-blurb"]'),
     sheep: root.querySelector('[data-role="sheep"]'),
     dogs: root.querySelector('[data-role="dogs"]'),
     sheepCount: root.querySelector('[data-role="sheep-count"]'),
     dogCount: root.querySelector('[data-role="dog-count"]'),
+    countsInfoGroup: root.querySelector('[data-role="counts-info-group"]'),
+    countsInfo: root.querySelector('[data-role="counts-info"]'),
     herderIcon: root.querySelector('[data-role="herder-icon"]'),
     herderWord: root.querySelector('[data-role="herder-word"]'),
     seed: root.querySelector('[data-role="seed"]'),
     params: root.querySelector('[data-role="params"]'),
+    paramsSection: root.querySelector('[data-role="params-section"]'),
     paramsTitle: root.querySelector('[data-role="params-title"]'),
     worldSection: root.querySelector('[data-role="world-section"]'),
     worldParams: root.querySelector('[data-role="world-params"]'),
@@ -65,6 +74,7 @@ export function createControlPanel({
     trailLabel: root.querySelector('[data-role="trail-label"]'),
     gcmGoalLabel: root.querySelector('[data-role="gcm-goal-label"]'),
     assignmentOverlays: root.querySelector('[data-role="assignment-overlays"]'),
+    factorsSection: root.querySelector('[data-role="factors-section"]'),
     factorsRoot: root.querySelector('[data-role="factors"]'),
     factorsHint: root.querySelector('[data-role="factors-hint"]'),
     factorsSummary: root.querySelector('[data-role="factors-summary"]'),
@@ -130,6 +140,7 @@ export function createControlPanel({
     els,
     state,
     currentPreset,
+    lockPaperScenario,
     onAlgorithmChange,
     afterRefresh: refreshDisplayOverlays,
   });
@@ -138,8 +149,11 @@ export function createControlPanel({
     if (!els.configSummary) return;
     const alg = state.algorithms.find((a) => a.id === state.selectedAlg);
     const scen = state.scenarios.find((s) => s.id === state.selectedScen);
-    const factorBits = summarizeFactors(state.factors);
+    const modeLabel = getPresetOption(currentPreset()).label;
+    const factorBits =
+      currentPreset() === 'custom' ? summarizeFactors(state.factors) : null;
     els.configSummary.textContent = [
+      modeLabel,
       alg?.name || state.selectedAlg || 'Instrument',
       scen?.name || state.selectedScen || 'Scenario',
       `${els.sheep.value} sheep / ${els.dogs.value} dogs`,
@@ -172,12 +186,12 @@ export function createControlPanel({
   });
   els.sheep.addEventListener('input', () => {
     els.sheepCount.textContent = els.sheep.value;
-    markCustom();
+    if (currentPreset() !== 'custom') markCustom();
     refreshConfigSummary();
   });
   els.dogs.addEventListener('input', () => {
     els.dogCount.textContent = els.dogs.value;
-    markCustom();
+    if (currentPreset() !== 'custom') markCustom();
     refreshConfigSummary();
   });
   els.seed.addEventListener('input', refreshConfigSummary);
@@ -201,15 +215,16 @@ export function createControlPanel({
   factorApi.bindFactorInputs();
 
   root.querySelector('[data-role="init"]').addEventListener('click', () => {
-    const checked = factorApi.validateCurrent();
-    if (!checked.ok) {
-      if (els.factorsError) {
-        els.factorsError.textContent = checked.errors[0];
-        els.factorsError.classList.remove('hidden');
+    if (currentPreset() === 'custom') {
+      const checked = factorApi.validateCurrent();
+      if (!checked.ok) {
+        if (els.factorsError) {
+          els.factorsError.textContent = checked.errors[0];
+          els.factorsError.classList.remove('hidden');
+        }
+        if (els.factorsSection) els.factorsSection.open = true;
+        return;
       }
-      const factorsSection = root.querySelector('[data-role="factors-section"]');
-      if (factorsSection) factorsSection.open = true;
-      return;
     }
     onInit?.(getConfig());
   });
@@ -258,10 +273,17 @@ export function createControlPanel({
       .map((a) => `<option value="${a.id}">${a.name}</option>`)
       .join('');
     els.scenario.innerHTML = scenarios
-      .map((s) => `<option value="${s.id}">${s.name}</option>`)
+      .map((s) => `<option value="${s.id}">${scenarioOptionLabel(s)}</option>`)
       .join('');
     state.selectedAlg = preferredAlg || algorithms[0]?.id || '';
-    state.selectedScen = scenarios[0]?.id || '';
+    const preferredScen =
+      (lockPaperScenario &&
+      scenarios.some((s) => s.id === PAPER_TASK_SCENARIO_ID)
+        ? PAPER_TASK_SCENARIO_ID
+        : null) ||
+      scenarios[0]?.id ||
+      '';
+    state.selectedScen = preferredScen;
     if (state.selectedAlg) els.algorithm.value = state.selectedAlg;
     if (state.selectedScen) els.scenario.value = state.selectedScen;
     refreshParamControls();

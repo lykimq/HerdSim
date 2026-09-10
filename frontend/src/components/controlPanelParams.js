@@ -1,10 +1,12 @@
 import {
+  PAPER_TASK_SCENARIO_ID,
   algorithmBlurb,
   applyScenarioWorld,
   buildParamControls,
   getPresetOption,
   presetSourceBlurb,
   scenarioBlurb,
+  scenarioCountHint,
 } from '../utils/params.js';
 import { herderIconName, iconImg } from '../assets/icons.js';
 
@@ -13,6 +15,7 @@ export function createParamRefresh({
   els,
   state,
   currentPreset,
+  lockPaperScenario,
   onAlgorithmChange,
   afterRefresh,
 }) {
@@ -42,7 +45,62 @@ export function createParamRefresh({
     onAlgorithmChange?.(kind, alg);
   }
 
+  function ensurePaperScenario() {
+    if (!lockPaperScenario || currentPreset() !== 'paper') return;
+    const hasPaperTask = state.scenarios.some((s) => s.id === PAPER_TASK_SCENARIO_ID);
+    if (!hasPaperTask) return;
+    if (state.selectedScen === PAPER_TASK_SCENARIO_ID) return;
+    state.selectedScen = PAPER_TASK_SCENARIO_ID;
+    if (els.scenario) els.scenario.value = PAPER_TASK_SCENARIO_ID;
+  }
+
+  function syncModeVisibility() {
+    const preset = currentPreset();
+    const isCustom = preset === 'custom';
+    const isScenario = preset === 'scenario';
+    const lockPaperTask = preset === 'paper' && lockPaperScenario;
+
+    els.scenarioGroup?.classList.toggle('hidden', lockPaperTask);
+    els.paperTaskGroup?.classList.toggle('hidden', !lockPaperTask);
+    rootQueryAll(els, 'agent-counts-group').forEach((el) => {
+      el.classList.toggle('hidden', !isCustom);
+    });
+    els.countsInfoGroup?.classList.toggle('hidden', isCustom);
+    els.factorsSection?.classList.toggle('hidden', !isCustom);
+    els.paramsSection?.classList.toggle('hidden', !isCustom);
+    if (!isCustom && els.worldSection) {
+      els.worldSection.classList.add('hidden');
+    }
+
+    if (els.countsInfo) {
+      const herder = els.herderWord?.textContent || 'dogs';
+      els.countsInfo.textContent = `${els.sheep.value} sheep / ${els.dogs.value} ${herder.toLowerCase()}`;
+    }
+    if (els.paperTaskLabel) {
+      const paperScen = state.scenarios.find((s) => s.id === PAPER_TASK_SCENARIO_ID);
+      els.paperTaskLabel.textContent = paperScen?.name || 'Drive to Goal';
+    }
+
+    if (els.scenarioBlurb && isScenario) {
+      const scen = state.scenarios.find((s) => s.id === state.selectedScen);
+      const counts = scenarioCountHint(scen);
+      const desc = scenarioBlurb(scen);
+      els.scenarioBlurb.textContent = [counts && `Recommended: ${counts}`, desc]
+        .filter(Boolean)
+        .join('. ');
+      els.scenarioBlurb.classList.toggle('hidden', !els.scenarioBlurb.textContent);
+    }
+  }
+
+  function rootQueryAll(elsMap, role) {
+    const root = elsMap.algorithm?.closest('.control-panel');
+    if (!root) return [];
+    return [...root.querySelectorAll(`[data-role="${role}"]`)];
+  }
+
   function refreshParamControls() {
+    ensurePaperScenario();
+
     const alg = state.algorithms.find((a) => a.id === state.selectedAlg);
     const scen = state.scenarios.find((s) => s.id === state.selectedScen);
     state.defaults = alg?.default_config || {};
@@ -68,7 +126,7 @@ export function createParamRefresh({
       els.algorithmBlurb.textContent = algorithmBlurb(alg);
       els.algorithmBlurb.classList.toggle('hidden', !els.algorithmBlurb.textContent);
     }
-    if (els.scenarioBlurb) {
+    if (els.scenarioBlurb && preset !== 'scenario') {
       els.scenarioBlurb.textContent = scenarioBlurb(scen);
       els.scenarioBlurb.classList.toggle('hidden', !els.scenarioBlurb.textContent);
     }
@@ -76,73 +134,51 @@ export function createParamRefresh({
       els.presetBlurb.textContent = presetSourceBlurb(preset, {
         algorithm: alg,
         scenario: scen,
+        paperTaskLocked: lockPaperScenario,
       });
       els.presetBlurb.classList.toggle('hidden', !els.presetBlurb.textContent);
     }
     if (els.paramsTitle) els.paramsTitle.textContent = presetInfo.paramsTitle;
 
-    if (paramsEditable) {
-      buildParamControls(els.params, state.defaults, state.algorithmParams, null, {
-        includeWorld: false,
-        includeAgents: false,
-        readOnly: false,
-        paramGroups: alg?.info?.param_groups,
-      });
-    } else {
-      // Full resolved settings for the selected source, sorted for scanning.
-      const resolved = Object.fromEntries(
-        Object.entries(state.algorithmParams).sort(([a], [b]) =>
-          a.localeCompare(b),
-        ),
-      );
-      const buildOpts = {
-        includeWorld: true,
-        includeAgents: true,
-        readOnly: true,
-        paramGroups: alg?.info?.param_groups,
-      };
-      if (state.fairSheepOverride != null) {
-        const paperSheep = state.defaults.n_sheep;
-        resolved.n_sheep = state.fairSheepOverride;
-        buildOpts.displayKeys = { n_sheep: 'n_sheep (shared)' };
-        buildOpts.paramAnnotations = {
-          n_sheep:
-            paperSheep != null && Number(paperSheep) !== Number(state.fairSheepOverride)
-              ? `from Fair Compare; paper default ${paperSheep}`
-              : 'from Fair Compare',
-        };
-      }
-      buildParamControls(els.params, resolved, resolved, null, buildOpts);
+    syncModeVisibility();
+
+    if (!paramsEditable) {
+      afterRefresh?.();
+      return;
     }
 
-    els.worldSection.classList.toggle('hidden', !paramsEditable);
-    if (paramsEditable) {
-      els.worldSection.open = true;
-      const layoutFromScenario = applyScenarioWorld({}, state.scenarioDefaults);
-      const worldDefaults = {
-        world_width: layoutFromScenario.world_width ?? state.algorithmParams.world_width ?? 150,
-        world_height: layoutFromScenario.world_height ?? state.algorithmParams.world_height ?? 150,
-        goal_radius: layoutFromScenario.goal_radius ?? state.algorithmParams.goal_radius ?? 15,
-        max_ticks: layoutFromScenario.max_ticks ?? state.algorithmParams.max_ticks ?? 3000,
-        ...layoutFromScenario,
-        ...state.worldOverrides,
-      };
-      // Keep info fields present even if overrides omitted them.
-      if (layoutFromScenario.obstacles && worldDefaults.obstacles == null) {
-        worldDefaults.obstacles = layoutFromScenario.obstacles;
-      }
-      if (layoutFromScenario.goal_center && worldDefaults.goal_center == null) {
-        worldDefaults.goal_center = layoutFromScenario.goal_center;
-      }
-      state.worldOverrides = { ...worldDefaults };
-      buildParamControls(els.worldParams, worldDefaults, state.worldOverrides, null, {
-        includeWorld: true,
-        readOnly: false,
-      });
+    buildParamControls(els.params, state.defaults, state.algorithmParams, null, {
+      includeWorld: false,
+      includeAgents: false,
+      readOnly: false,
+      paramGroups: alg?.info?.param_groups,
+    });
+
+    els.worldSection.classList.toggle('hidden', false);
+    els.worldSection.open = true;
+    const layoutFromScenario = applyScenarioWorld({}, state.scenarioDefaults);
+    const worldDefaults = {
+      world_width: layoutFromScenario.world_width ?? state.algorithmParams.world_width ?? 150,
+      world_height: layoutFromScenario.world_height ?? state.algorithmParams.world_height ?? 150,
+      goal_radius: layoutFromScenario.goal_radius ?? state.algorithmParams.goal_radius ?? 15,
+      max_ticks: layoutFromScenario.max_ticks ?? state.algorithmParams.max_ticks ?? 3000,
+      ...layoutFromScenario,
+      ...state.worldOverrides,
+    };
+    if (layoutFromScenario.obstacles && worldDefaults.obstacles == null) {
+      worldDefaults.obstacles = layoutFromScenario.obstacles;
     }
+    if (layoutFromScenario.goal_center && worldDefaults.goal_center == null) {
+      worldDefaults.goal_center = layoutFromScenario.goal_center;
+    }
+    state.worldOverrides = { ...worldDefaults };
+    buildParamControls(els.worldParams, worldDefaults, state.worldOverrides, null, {
+      includeWorld: true,
+      readOnly: false,
+    });
 
     afterRefresh?.();
   }
 
-  return { refreshParamControls };
+  return { refreshParamControls, syncModeVisibility };
 }

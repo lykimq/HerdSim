@@ -66,6 +66,7 @@ export function createArenaSide(
     sideLabel: label,
     paramsOpen: false,
     compact: true,
+    lockPaperScenario: false,
     onInit: async (cfg) => {
       try {
         log.info('arena', `${label}: independent init`, {
