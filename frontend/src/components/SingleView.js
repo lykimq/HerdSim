@@ -174,11 +174,6 @@ export function createSingleView({
 
   const center = document.createElement('div');
   center.className = 'single-center';
-  const displaySection = controls.getDisplaySection();
-  if (displaySection) {
-    displaySection.classList.add('canvas-display-bar', 'card-glass');
-    center.appendChild(displaySection);
-  }
   center.appendChild(canvasHost);
   center.appendChild(historyPanel.root);
 
@@ -197,13 +192,6 @@ export function createSingleView({
   side.appendChild(liveGroup);
   side.appendChild(afterGroup);
 
-  const runStrip = controls.getRunStrip();
-  if (runStrip) {
-    const runBar = document.createElement('div');
-    runBar.className = 'single-run-bar card-glass';
-    runBar.appendChild(runStrip);
-    root.appendChild(runBar);
-  }
   root.appendChild(controls.root);
   root.appendChild(center);
   root.appendChild(side);
@@ -221,6 +209,9 @@ export function createSingleView({
     sim.wireRendererOverlays(controls);
     log.info('single', 'Single view ready');
     syncPlayback();
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => renderer.resize());
+    });
   }
 
   function destroy() {
@@ -237,7 +228,7 @@ export function createSingleView({
 
   function onShow() {
     requestAnimationFrame(() => {
-      renderer.resize();
+      requestAnimationFrame(() => renderer.resize());
     });
   }
 

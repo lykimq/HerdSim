@@ -198,7 +198,7 @@ export function controlPanelHtml({
   const advanced = advancedHtml(paramsOpen);
 
   if (runFirst) {
-    return `${run}${setup}${factors}${advanced}${display}`;
+    return `${run}${display}${setup}${factors}${advanced}`;
   }
   return `${setup}${factors}${run}${display}${advanced}`;
 }

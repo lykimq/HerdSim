@@ -16,69 +16,26 @@
   gap: 0.5rem;
 }
 
-.single-run-bar {
-  grid-column: 1 / -1;
-  padding: 0.75rem 1rem;
-}
-
-.single-run-bar .control-run-strip {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: end;
-  gap: 0.65rem 0.85rem;
-}
-
-.single-run-bar .control-run-playback {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(5.5rem, 1fr));
-  flex: 1 1 22rem;
-  gap: 0.5rem;
-}
-
-.single-run-bar .control-run-speed {
-  flex: 1 1 14rem;
-  min-width: 12rem;
-  max-width: 22rem;
-}
-
-.single-run-bar [data-role="init"] {
-  flex: 0 0 auto;
-}
-
 .control-display-section {
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
 }
 
-.canvas-display-bar {
-  padding: 0.65rem 0.85rem;
-  gap: 0.45rem;
-}
-
-.canvas-display-bar .display-overlays {
+.control-panel .display-overlays {
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 0.45rem 0.85rem;
+  flex-direction: column;
+  gap: 0.4rem;
 }
 
-.canvas-display-bar .display-overlays [data-role="assignment-overlays"] {
-  display: contents;
+.control-panel .display-overlays [data-role="assignment-overlays"] {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
 }
 
-.canvas-display-bar .display-overlays .overlay-option {
-  flex: 1 1 11rem;
-  max-width: 100%;
-}
-
-.canvas-display-bar .trail-actions {
-  flex: 0 0 auto;
-  margin-top: 0;
-  align-self: center;
-  padding-left: 0;
+.control-panel .trail-actions {
+  margin-top: 0.15rem;
 }
 
 .param-section {
@@ -460,8 +417,8 @@ select, input[type="number"], input[type="range"], input[type="text"], input[typ
 .single-center .metric-history-panel {
   position: relative;
   flex: 0 0 auto;
-  gap: 0.35rem;
-  padding: 0.55rem 0.75rem;
+  gap: 0.3rem;
+  padding: 0.45rem 0.65rem;
   min-height: 0;
 }
 
@@ -656,7 +613,7 @@ select, input[type="number"], input[type="range"], input[type="text"], input[typ
 }
 
 .single-center .metric-history-panel canvas {
-  height: 52px;
+  height: 44px;
 }
 
 .metric-history-panel input[type="range"] {

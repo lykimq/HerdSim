@@ -167,12 +167,12 @@ export class PixiRenderer {
   _scale() {
     const w = this.app.renderer.width;
     const h = this.app.renderer.height;
-    const pad = 28;
+    const pad = 18;
     const s = Math.min(
-      (w - pad * 1.5) / this.world.width,
-      (h - pad * 1.5) / this.world.height,
+      (w - pad * 1.35) / this.world.width,
+      (h - pad * 1.35) / this.world.height,
     );
-    const offsetX = pad + (w - pad * 1.5 - this.world.width * s) / 2;
+    const offsetX = pad + (w - pad * 1.35 - this.world.width * s) / 2;
     const offsetY = (h - pad - this.world.height * s) / 2;
     return { s, offsetX, offsetY, w, h, pad };
   }
