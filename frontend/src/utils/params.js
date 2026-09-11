@@ -1,5 +1,10 @@
 /** Numeric parameter helpers and shared preset labels for experiment controls. */
 
+import {
+  paramFieldDescription,
+  setParamItemDescription,
+} from "./paramDescriptions.js";
+
 const ALWAYS_SKIP = new Set(["use_advanced_vision"]);
 
 /**
@@ -223,6 +228,7 @@ export function buildParamControls(container, defaults, values, onChange, option
       : formatParamValue(key, current);
     label.innerHTML = `<span class="param-key" title="${key}">${displayKey}</span><span class="param-val">${valueText}</span>`;
     group.appendChild(label);
+    setParamItemDescription(group, paramFieldDescription(key));
 
     if (!readOnly && pointParam) {
       appendPointInputs(group, label, key, values, defaultValue, onChange);

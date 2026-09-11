@@ -8,6 +8,7 @@ import {
   scenarioBlurb,
   scenarioCountHint,
 } from '../utils/params.js';
+import { validateWorldOverrides } from '../utils/paramDescriptions.js';
 import { herderIconName, iconImg } from '../assets/icons.js';
 
 /** Build the param-panel refresh helpers used by createControlPanel. */
@@ -172,10 +173,26 @@ export function createParamRefresh({
       worldDefaults.goal_center = layoutFromScenario.goal_center;
     }
     state.worldOverrides = { ...worldDefaults };
-    buildParamControls(els.worldParams, worldDefaults, state.worldOverrides, null, {
-      includeWorld: true,
-      readOnly: false,
-    });
+
+    function syncWorldError() {
+      if (!els.worldError) return;
+      const checked = validateWorldOverrides(state.worldOverrides);
+      els.worldError.textContent = checked.ok ? '' : checked.errors[0];
+      els.worldError.classList.toggle('hidden', checked.ok);
+      if (!checked.ok) els.worldSection.open = true;
+    }
+
+    buildParamControls(
+      els.worldParams,
+      worldDefaults,
+      state.worldOverrides,
+      () => syncWorldError(),
+      {
+        includeWorld: true,
+        readOnly: false,
+      },
+    );
+    syncWorldError();
 
     afterRefresh?.();
   }

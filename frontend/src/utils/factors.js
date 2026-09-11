@@ -203,76 +203,77 @@ export const FACTOR_FIELD_META = {
   n_sheep: {
     label: 'Sheep count',
     description:
-      'Flock size. Larger N usually makes herding harder and runs slower. No hard max beyond the grid cell limit.',
+      'Flock size. Larger N usually makes herding harder and runs slower.',
   },
   n_shepherds: {
     label: 'Shepherd count',
     description:
-      'Number of herders. More shepherds can help, but coordination cost may rise. No hard max beyond the grid cell limit.',
+      'Number of herders. More can help coverage; coordination cost may rise.',
   },
   sheep_model: {
     label: 'Sheep model',
     description:
-      'Sheep motion model. Together with dog controller, selects a matching instrument param bundle when one exists.',
+      'Sheep motion model. Chosen by Instrument in Setup (not edited here).',
   },
   dog_controller: {
     label: 'Dog controller',
     description:
-      'Shepherd controller. Together with sheep model, selects a matching instrument param bundle when one exists.',
+      'Shepherd controller. Chosen by Instrument in Setup (not edited here).',
   },
   obs_mode: {
     label: 'Observation mode',
     description:
-      'What each shepherd perceives each tick. global = full state; local/bearing = limited sensing; noisy_bearing adds noise; intermittent updates less often.',
+      'What each shepherd perceives each tick. global = full state; local_positions / bearing_only = limited sensing; noisy_bearing adds noise; intermittent updates less often. Harder modes usually slow or fail herding.',
   },
   sensing_range: {
     label: 'Sensing range',
     description:
-      'Local sensing radius in world units (typical world size 150; default sensing near 65). Only used for local/bearing modes. Lower = harder sensing.',
+      'Local sensing radius in world units (typical world ~150; default near 65). Only for local/bearing modes. Lower = fewer sheep seen and harder control; higher = closer to global.',
   },
   noise_sigma: {
     label: 'Observation noise',
     description:
-      'Noise on bearing observations (mainly for noisy_bearing). 0 = clean; higher = less reliable bearings. Must be >= 0.',
+      'Noise on bearings for noisy_bearing mode. Must be >= 0. 0 = clean; higher = less reliable sensing and weaker herding.',
   },
   communication: {
     label: 'Communication',
     description:
-      'Whether shepherds share information. none = independent; neighbour_broadcast / global_shared share more.',
+      'Whether shepherds share information. none = independent; neighbour_broadcast / global_shared share more and can improve multi-herder coordination.',
   },
   stubborn_fraction: {
     label: 'Stubborn fraction',
     description:
-      'Share of sheep with reduced shepherd response. Must be in [0, 1]. 0 = normal flock; higher = harder to push.',
+      'Share of sheep with reduced shepherd response. Must be in [0, 1]. 0 = normal flock; higher = harder to push and more splits.',
   },
   cohesion_scale: {
     label: 'Cohesion scale',
     description:
-      'Scales flocking cohesion. Must be >= 0 (1 is nominal). Lower = looser flock; higher = sheep stick together more tightly.',
+      'Scales flocking cohesion. Must be >= 0 (1 is nominal). Lower = looser/split-prone flock; higher = sheep stick together more.',
   },
   failure_mode: {
     label: 'Failure mode',
     description:
-      'How shepherds degrade after failure_tick. none = healthy; inactive / reduced_speed / blind = progressive failure.',
+      'How shepherds degrade after failure_tick. none = healthy; inactive_after_tick / reduced_speed_after_tick / blind_after_tick = progressive failure that usually hurts success.',
   },
   failure_tick: {
     label: 'Failure tick',
     description:
-      'Tick when failure_mode starts (typical runs use max_ticks around 3000). Earlier ticks mean failure hits sooner.',
+      'Tick when failure_mode starts (-1 often means unused). Earlier ticks = failure hits sooner; compare against max_ticks (~3000).',
   },
   speed_scale: {
     label: 'Shepherd speed scale',
     description:
-      'Shared multiplier on shepherd speed (1 is nominal). Lower = slower herders; higher = faster herders.',
+      'Multiplier on shepherd speed. Must be >= 0 (1 is nominal). Lower = slower herders; higher = faster but can overshoot/scatter.',
   },
   goal_mode: {
     label: 'Goal mode',
     description:
-      'Goal behavior. static = fixed target; moving = goal drifts (harder tracking).',
+      'Goal behavior. static = fixed target; moving = goal drifts and is harder to track.',
   },
   goal_velocity: {
     label: 'Goal velocity',
-    description: 'Velocity of a moving goal (x, y). Used only when goal_mode is moving.',
+    description:
+      'Per-tick velocity (vx, vy) in world units. Same scale as sheep_speed (~1.0) and shepherd_speed (~1.5). Try 0.2-0.5 for a trackable moving goal; (1,1) outruns the flock quickly. The centre is clamped so the full goal disk stays inside the arena.',
   },
 };
 

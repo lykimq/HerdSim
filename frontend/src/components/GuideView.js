@@ -132,25 +132,6 @@ async function renderGuideMermaid(rootEl) {
   }
 }
 
-function buildOutline(bodyEl) {
-  const headings = [...bodyEl.querySelectorAll('h2, h3')];
-  if (!headings.length) return '';
-  return `
-    <div class="guide-outline">
-      <div class="section-title">On this page</div>
-      <ul class="guide-outline-list">
-        ${headings
-          .map((h, i) => {
-            const id = h.id || `section-${i}`;
-            h.id = id;
-            return `<li class="guide-outline-item is-${h.tagName.toLowerCase()}"><a href="#${id}">${escapeHtml(h.textContent)}</a></li>`;
-          })
-          .join('')}
-      </ul>
-    </div>
-  `;
-}
-
 function instrumentSlugFromDoc(slug) {
   if (!slug.startsWith('research/algorithms/')) return null;
   const leaf = slug.slice('research/algorithms/'.length);
@@ -219,10 +200,6 @@ export function createGuideView({ onRunInstrument } = {}) {
     try {
       const md = await fetchDoc(slug);
       bodyEl.innerHTML = `<div class="guide-md">${renderMarkdown(md)}</div>`;
-      const outline = buildOutline(bodyEl.querySelector('.guide-md'));
-      if (outline) {
-        bodyEl.insertAdjacentHTML('afterbegin', outline);
-      }
       const instrumentId = instrumentSlugFromDoc(slug);
       if (instrumentId && typeof onRunInstrument === 'function') {
         const jump = document.createElement('div');

@@ -20,6 +20,39 @@ class GoalZone:
         return distances <= self.radius
 
 
+def clamp_goal_center(
+    center: np.ndarray | list[float],
+    radius: float,
+    width: float,
+    height: float,
+) -> np.ndarray:
+    """Clamp a goal centre so the full disk stays inside the arena.
+
+    Clamping only the centre to [0, width] lets a goal with positive radius
+    sit half outside the walls. Valid centres lie in
+    [radius, width - radius] x [radius, height - radius] when the arena is
+    large enough; otherwise the centre is pinned to the arena mid-point.
+    """
+    r = max(0.0, float(radius))
+    w = float(width)
+    h = float(height)
+    c = np.asarray(center, dtype=float).reshape(2)
+
+    if w <= 0 or h <= 0:
+        return c.copy()
+
+    if 2.0 * r >= w:
+        cx = 0.5 * w
+    else:
+        cx = float(np.clip(c[0], r, w - r))
+
+    if 2.0 * r >= h:
+        cy = 0.5 * h
+    else:
+        cy = float(np.clip(c[1], r, h - r))
+
+    return np.array([cx, cy], dtype=float)
+
 @dataclass
 class Obstacle:
     """Rectangular obstacle that agents cannot pass through."""

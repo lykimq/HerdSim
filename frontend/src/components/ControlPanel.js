@@ -7,6 +7,7 @@ import {
 } from '../utils/displayOverlays.js';
 import { buildSessionPayload, DEFAULT_FACTORS, summarizeFactors } from '../utils/factors.js';
 import { getPresetOption, PAPER_TASK_SCENARIO_ID, scenarioOptionLabel } from '../utils/params.js';
+import { validateWorldOverrides } from '../utils/paramDescriptions.js';
 import { controlPanelHtml } from './controlPanelMarkup.js';
 import { createParamRefresh } from './controlPanelParams.js';
 import { createFactorControls } from './controlPanelFactors.js';
@@ -69,6 +70,7 @@ export function createControlPanel({
     paramsTitle: root.querySelector('[data-role="params-title"]'),
     worldSection: root.querySelector('[data-role="world-section"]'),
     worldParams: root.querySelector('[data-role="world-params"]'),
+    worldError: root.querySelector('[data-role="world-error"]'),
     speed: root.querySelector('[data-role="speed"]'),
     speedLabel: root.querySelector('[data-role="speed-label"]'),
     trailLabel: root.querySelector('[data-role="trail-label"]'),
@@ -223,6 +225,15 @@ export function createControlPanel({
           els.factorsError.classList.remove('hidden');
         }
         if (els.factorsSection) els.factorsSection.open = true;
+        return;
+      }
+      const worldChecked = validateWorldOverrides(state.worldOverrides);
+      if (!worldChecked.ok) {
+        if (els.worldError) {
+          els.worldError.textContent = worldChecked.errors[0];
+          els.worldError.classList.remove('hidden');
+        }
+        if (els.worldSection) els.worldSection.open = true;
         return;
       }
     }

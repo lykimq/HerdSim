@@ -103,10 +103,24 @@ function factorsHtml(factorsOpen) {
         </div>
         <div class="param-item" data-role="goal-velocity-wrap">
           <label><span class="param-key">${factorFieldLabel('goal_velocity')}</span></label>
-          <div class="factor-pair">
-            <input data-factor="goal_velocity_x" type="number" step="any" value="0" aria-label="goal_velocity_x" />
-            <input data-factor="goal_velocity_y" type="number" step="any" value="0" aria-label="goal_velocity_y" />
+          <div class="factor-pair factor-pair--labeled">
+            <label class="factor-axis">
+              <span class="factor-axis-key">vx</span>
+              <input data-factor="goal_velocity_x" type="number" step="0.05" value="0" aria-label="goal velocity vx" />
+            </label>
+            <label class="factor-axis">
+              <span class="factor-axis-key">vy</span>
+              <input data-factor="goal_velocity_y" type="number" step="0.05" value="0" aria-label="goal velocity vy" />
+            </label>
           </div>
+          <div class="goal-velocity-presets" role="group" aria-label="Goal velocity starters">
+            <button type="button" class="goal-velocity-chip" data-goal-vx="0.2" data-goal-vy="0">Slow horizontal</button>
+            <button type="button" class="goal-velocity-chip" data-goal-vx="0.25" data-goal-vy="0.25">Slow diagonal</button>
+            <button type="button" class="goal-velocity-chip" data-goal-vx="0.5" data-goal-vy="0.5">Hard diagonal</button>
+          </div>
+          <p class="param-desc" data-role="goal-velocity-hint">
+            World units per tick (same scale as sheep~1.0, shepherd~1.5). Try 0.2-0.5; (1,1) is very fast.
+          </p>
         </div>
       </div>
       <p class="param-hint is-error hidden" data-role="factors-error"></p>
@@ -174,8 +188,10 @@ function advancedHtml(paramsOpen) {
       <summary class="section-title">World overrides</summary>
       <p class="param-hint">
         Optional. Change arena layout beyond the selected scenario defaults.
+        goal_center must keep the full goal disk inside the arena.
       </p>
       <div class="param-list" data-role="world-params"></div>
+      <p class="param-hint is-error hidden" data-role="world-error"></p>
     </details>
   `;
 }

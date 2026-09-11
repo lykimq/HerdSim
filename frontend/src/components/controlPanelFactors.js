@@ -14,6 +14,7 @@ import {
   summarizeFactors,
   validateFactors,
 } from '../utils/factors.js';
+import { setParamItemDescription } from '../utils/paramDescriptions.js';
 
 export function createFactorControls({ els, state, currentPreset, markCustom }) {
   function setSelectOptions(select, items, selected) {
@@ -52,10 +53,16 @@ export function createFactorControls({ els, state, currentPreset, markCustom }) 
     els.factorsRoot?.querySelectorAll('[data-factor]').forEach((el) => {
       const key = el.dataset.factor;
       const labelKey = key?.startsWith('goal_velocity') ? 'goal_velocity' : key;
-      const labelEl = el.closest('.param-item')?.querySelector('.param-key');
+      const paramItem = el.closest('.param-item');
+      const labelEl = paramItem?.querySelector('.param-key');
+      const description = factorFieldDescription(labelKey);
       if (labelEl && labelKey) {
         labelEl.textContent = factorFieldLabel(labelKey);
-        labelEl.title = factorFieldDescription(labelKey) || labelKey;
+        labelEl.title = description || labelKey;
+      }
+      // Goal velocity has a live hint with starters; skip the generic desc there.
+      if (paramItem && labelKey !== 'goal_velocity') {
+        setParamItemDescription(paramItem, description);
       }
     });
   }
@@ -122,6 +129,7 @@ export function createFactorControls({ els, state, currentPreset, markCustom }) 
     if (els.goalVelocityWrap) {
       els.goalVelocityWrap.classList.toggle('hidden', !visible.goal_velocity);
     }
+    syncGoalVelocityHint(f);
     if (els.factorsSummary) {
       els.factorsSummary.textContent = summarizeFactors(f) || 'Instrument defaults';
     }
@@ -132,9 +140,35 @@ export function createFactorControls({ els, state, currentPreset, markCustom }) 
     }
   }
 
+  function syncGoalVelocityHint(factors = {}) {
+    const hint = els.goalVelocityWrap?.querySelector('[data-role="goal-velocity-hint"]');
+    if (!hint) return;
+    const vx = Number(factors.goal_velocity_x);
+    const vy = Number(factors.goal_velocity_y);
+    const base =
+      'World units per tick (same scale as sheep~1.0, shepherd~1.5). Try 0.2-0.5; (1,1) is very fast.';
+    if (!Number.isFinite(vx) || !Number.isFinite(vy)) {
+      hint.textContent = base;
+      return;
+    }
+    const speed = Math.hypot(vx, vy);
+    if (speed < 1e-12) {
+      hint.textContent = `${base} Current: stopped (0, 0).`;
+      return;
+    }
+    let pace = 'gentle';
+    if (speed >= 1) pace = 'very fast (outruns sheep)';
+    else if (speed >= 0.5) pace = 'hard chase';
+    else if (speed >= 0.25) pace = 'mild';
+    hint.textContent = `${base} Current: (${vx}, ${vy}), speed ${speed.toFixed(2)}/tick (${pace}).`;
+  }
+
   function setFactorsEditable(editable) {
     els.factorsRoot?.querySelectorAll('[data-factor]').forEach((el) => {
       el.disabled = !editable;
+    });
+    els.goalVelocityWrap?.querySelectorAll('.goal-velocity-chip').forEach((btn) => {
+      btn.disabled = !editable;
     });
     if (els.factorsHint) {
       els.factorsHint.textContent = editable
@@ -170,6 +204,20 @@ export function createFactorControls({ els, state, currentPreset, markCustom }) 
       });
       el.addEventListener('input', () => {
         if (currentPreset() !== 'custom') markCustom();
+        state.factors = readFactorFields();
+        syncConditionalVisibility();
+      });
+    });
+    els.goalVelocityWrap?.querySelectorAll('.goal-velocity-chip').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (btn.disabled) return;
+        if (currentPreset() !== 'custom') markCustom();
+        const vx = btn.dataset.goalVx;
+        const vy = btn.dataset.goalVy;
+        const xEl = els.factorsRoot?.querySelector('[data-factor="goal_velocity_x"]');
+        const yEl = els.factorsRoot?.querySelector('[data-factor="goal_velocity_y"]');
+        if (xEl) xEl.value = vx;
+        if (yEl) yEl.value = vy;
         state.factors = readFactorFields();
         syncConditionalVisibility();
       });

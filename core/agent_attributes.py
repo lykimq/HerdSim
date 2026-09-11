@@ -7,7 +7,7 @@ from typing import Any
 import numpy as np
 
 from core.simulation_state import SimulationState
-from core.world import GoalZone
+from core.world import GoalZone, clamp_goal_center
 
 
 def assign_sheep_response(
@@ -104,9 +104,13 @@ def apply_environment_updates(
     if vel.shape != (2,) or float(np.linalg.norm(vel)) < 1e-12:
         return state
     new_center = state.world.goal.center + vel
-    # Keep goal inside arena with soft clamp.
-    new_center[0] = float(np.clip(new_center[0], 0.0, state.world.width))
-    new_center[1] = float(np.clip(new_center[1], 0.0, state.world.height))
+    # Keep the full goal disk inside the arena (not only the centre point).
+    new_center = clamp_goal_center(
+        new_center,
+        state.world.goal.radius,
+        state.world.width,
+        state.world.height,
+    )
     world = state.world
     world.goal = GoalZone(center=new_center, radius=world.goal.radius)
     return state

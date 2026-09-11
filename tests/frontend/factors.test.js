@@ -25,6 +25,10 @@ import {
 } from '../../frontend/src/utils/analyticsSweep.js';
 import { formatMetricValue } from '../../frontend/src/utils/metricFormat.js';
 import { escapeHtml } from '../../frontend/src/utils/dom.js';
+import {
+  circularZoneCenterBounds,
+  validateWorldOverrides,
+} from '../../frontend/src/utils/paramDescriptions.js';
 
 describe('factors helpers', () => {
   it('parses mixed numeric and string value lists', () => {
@@ -246,5 +250,41 @@ describe('shared formatters', () => {
     assert.equal(formatMetricValue('time_to_goal', -1), 'not yet');
     assert.equal(formatMetricValue('cohesion', 1.2345), '1.23');
     assert.equal(escapeHtml('<b>"x"</b>'), '&lt;b&gt;&quot;x&quot;&lt;/b&gt;');
+  });
+});
+
+describe('world override bounds', () => {
+  it('suggests valid goal_center ranges from arena and radius', () => {
+    const bounds = circularZoneCenterBounds(150, 150, 15);
+    assert.deepEqual(bounds, {
+      minX: 15,
+      maxX: 135,
+      minY: 15,
+      maxY: 135,
+      radius: 15,
+      width: 150,
+      height: 150,
+      cramped: false,
+    });
+  });
+
+  it('rejects goal_center that would place the disk outside the arena', () => {
+    const bad = validateWorldOverrides({
+      world_width: 150,
+      world_height: 150,
+      goal_radius: 15,
+      goal_center: [1, 1],
+    });
+    assert.equal(bad.ok, false);
+    assert.match(bad.errors[0], /goal_center is out of bounds/);
+    assert.match(bad.errors[0], /\[15, 135\]/);
+
+    const good = validateWorldOverrides({
+      world_width: 150,
+      world_height: 150,
+      goal_radius: 15,
+      goal_center: [15, 15],
+    });
+    assert.equal(good.ok, true);
   });
 });

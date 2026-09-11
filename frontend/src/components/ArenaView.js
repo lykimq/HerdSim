@@ -53,8 +53,8 @@ export function createArenaView({ algorithms, scenarios, models = null, onStatus
     fairControls?.classList.toggle('is-disabled', !fair);
     if (modeHint) {
       modeHint.textContent = fair
-        ? 'Fair compare locks shared scenario, seed, and sheep count across both sides.'
-        : 'Independent mode: initialize and play each side with its own setup.';
+        ? 'Shared scenario, seed, and sheep on both sides.'
+        : 'Each side uses its own setup. Initialize and play A and B separately.';
     }
   }
 
