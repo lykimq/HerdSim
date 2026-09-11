@@ -1,9 +1,11 @@
-import { mountTips } from '../utils/tooltips.js';
+import { mountTips, setInfoTip } from '../utils/tooltips.js';
 import {
   assignmentModeOptionHtml,
   assignmentModesFromAlgorithm,
   GCM_GOAL_LABEL,
+  GCM_GOAL_TIP,
   TRAIL_LABEL,
+  TRAIL_TIP,
 } from '../utils/displayOverlays.js';
 import { buildSessionPayload, DEFAULT_FACTORS, summarizeFactors } from '../utils/factors.js';
 import { getPresetOption, PAPER_TASK_SCENARIO_ID, scenarioOptionLabel } from '../utils/params.js';
@@ -48,14 +50,15 @@ export function createControlPanel({
 
   const els = {
     algorithm: root.querySelector('[data-role="algorithm"]'),
-    algorithmBlurb: root.querySelector('[data-role="algorithm-blurb"]'),
+    algorithmLabel: root.querySelector('[data-role="algorithm-label"]'),
     scenario: root.querySelector('[data-role="scenario"]'),
     scenarioGroup: root.querySelector('[data-role="scenario-group"]'),
-    scenarioBlurb: root.querySelector('[data-role="scenario-blurb"]'),
+    scenarioLabel: root.querySelector('[data-role="scenario-label"]'),
     paperTaskGroup: root.querySelector('[data-role="paper-task-group"]'),
     paperTaskLabel: root.querySelector('[data-role="paper-task-label"]'),
+    paperTaskInfoLabel: root.querySelector('[data-role="paper-task-info-label"]'),
     preset: root.querySelector('[data-role="preset"]'),
-    presetBlurb: root.querySelector('[data-role="preset-blurb"]'),
+    presetLabel: root.querySelector('[data-role="preset-label"]'),
     sheep: root.querySelector('[data-role="sheep"]'),
     dogs: root.querySelector('[data-role="dogs"]'),
     sheepCount: root.querySelector('[data-role="sheep-count"]'),
@@ -67,8 +70,10 @@ export function createControlPanel({
     seed: root.querySelector('[data-role="seed"]'),
     params: root.querySelector('[data-role="params"]'),
     paramsSection: root.querySelector('[data-role="params-section"]'),
+    paramsSummaryEl: root.querySelector('[data-role="params-summary-el"]'),
     paramsTitle: root.querySelector('[data-role="params-title"]'),
     worldSection: root.querySelector('[data-role="world-section"]'),
+    worldSummaryEl: root.querySelector('[data-role="world-summary-el"]'),
     worldParams: root.querySelector('[data-role="world-params"]'),
     worldError: root.querySelector('[data-role="world-error"]'),
     speed: root.querySelector('[data-role="speed"]'),
@@ -78,7 +83,7 @@ export function createControlPanel({
     assignmentOverlays: root.querySelector('[data-role="assignment-overlays"]'),
     factorsSection: root.querySelector('[data-role="factors-section"]'),
     factorsRoot: root.querySelector('[data-role="factors"]'),
-    factorsHint: root.querySelector('[data-role="factors-hint"]'),
+    factorsSummaryEl: root.querySelector('[data-role="factors-summary-el"]'),
     factorsSummary: root.querySelector('[data-role="factors-summary"]'),
     factorsError: root.querySelector('[data-role="factors-error"]'),
     configSummary: root.querySelector('[data-role="config-summary"]'),
@@ -113,8 +118,14 @@ export function createControlPanel({
 
   function refreshDisplayOverlays() {
     const alg = state.algorithms.find((a) => a.id === state.selectedAlg);
-    if (els.trailLabel) els.trailLabel.textContent = TRAIL_LABEL;
-    if (els.gcmGoalLabel) els.gcmGoalLabel.textContent = GCM_GOAL_LABEL;
+    if (els.trailLabel) {
+      els.trailLabel.textContent = TRAIL_LABEL;
+      setInfoTip(els.trailLabel, TRAIL_TIP);
+    }
+    if (els.gcmGoalLabel) {
+      els.gcmGoalLabel.textContent = GCM_GOAL_LABEL;
+      setInfoTip(els.gcmGoalLabel, GCM_GOAL_TIP);
+    }
     state.assignmentModes = assignmentModesFromAlgorithm(alg);
     if (!els.assignmentOverlays) {
       onAssignmentModesChange?.(state.assignmentModes);

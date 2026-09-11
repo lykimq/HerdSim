@@ -138,15 +138,14 @@
 
 .param-item label {
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 0.35rem;
   font-size: 0.75rem;
   color: var(--text-muted);
 }
 
 .param-item .param-key {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-width: 0;
   overflow: visible;
   white-space: nowrap;
@@ -157,6 +156,7 @@
   font-family: var(--font-mono);
   color: var(--accent-primary);
   flex: 0 0 auto;
+  margin-left: auto;
   white-space: nowrap;
 }
 
@@ -212,7 +212,7 @@
   color: var(--text-muted);
 }
 
-.display-overlays .overlay-option > span:last-child {
+.display-overlays .overlay-option > span:last-of-type {
   flex: 1 1 auto;
   min-width: 0;
 }
@@ -362,7 +362,7 @@ select, input[type="number"], input[type="range"], input[type="text"], input[typ
 .tip-float {
   position: fixed;
   z-index: 1000;
-  max-width: min(240px, calc(100vw - 16px));
+  max-width: min(320px, calc(100vw - 16px));
   padding: 0.4rem 0.55rem;
   border-radius: 8px;
   background: #0b1220;
@@ -373,6 +373,37 @@ select, input[type="number"], input[type="range"], input[type="text"], input[typ
   line-height: 1.35;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
   pointer-events: none;
+}
+
+.hint-badge {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.45rem;
+  padding: 0.08rem 0.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--text-muted);
+  vertical-align: middle;
+}
+
+.param-section > summary.section-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.15rem 0;
+}
+
+.control-group > label,
+.overlay-option > span:last-of-type {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .tip-float.hidden {

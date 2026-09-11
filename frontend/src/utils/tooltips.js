@@ -139,6 +139,40 @@ function tipKey(btn) {
   return btn.dataset.role || btn.dataset.view || '';
 }
 
+/**
+ * Attach a hover tip directly to anchorEl (label/title text).
+ * No glyph -- hover or focus the text to see the tip.
+ * Empty/nullish text clears the tip. Also removes any leftover .info-dot nodes.
+ */
+export function setInfoTip(anchorEl, text) {
+  if (!anchorEl) return null;
+  installGlobalTipHiders();
+
+  // Clean up the previous icon-based tips if still present.
+  anchorEl.querySelectorAll?.('.info-dot').forEach((el) => el.remove());
+  if (anchorEl.nextElementSibling?.classList?.contains('info-dot')) {
+    anchorEl.nextElementSibling.remove();
+  }
+
+  if (text == null || text === '') {
+    hideFloat(anchorEl);
+    anchorEl.removeAttribute('data-tip');
+    return null;
+  }
+
+  if (!anchorEl.dataset.tipBound) {
+    anchorEl.dataset.tipBound = '1';
+    anchorEl.addEventListener('mouseenter', onEnter);
+    anchorEl.addEventListener('mouseleave', onLeave);
+    anchorEl.addEventListener('focusin', onFocusIn);
+    anchorEl.addEventListener('focusout', onFocusOut);
+  }
+
+  anchorEl.setAttribute('data-tip', text);
+  anchorEl.removeAttribute('title');
+  return anchorEl;
+}
+
 /** Apply BUTTON_TIPS (plus optional overrides) to all buttons under root. */
 export function mountTips(root, overrides = {}) {
   if (!root) return;

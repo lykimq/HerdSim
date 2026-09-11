@@ -5,28 +5,22 @@ import { factorFieldLabel } from '../utils/factors.js';
 function setupHtml(sideLabel) {
   return `
     <div class="section-title">Setup ${sideLabel ? `- ${sideLabel}` : ''}</div>
-    <p class="panel-lead">
-      Choose an instrument, then a mode. Each mode shows only the controls you need.
-    </p>
+    <p class="panel-lead">Pick an instrument and mode.</p>
     <div class="control-group">
-      <label>Instrument</label>
+      <label data-role="algorithm-label">Instrument</label>
       <select data-role="algorithm"></select>
-      <p class="param-hint" data-role="algorithm-blurb"></p>
     </div>
     <div class="control-group">
-      <label>Mode</label>
+      <label data-role="preset-label">Mode</label>
       <select data-role="preset">${presetSelectHtml(true)}</select>
-      <p class="param-hint" data-role="preset-blurb"></p>
     </div>
     <div class="control-group hidden" data-role="scenario-group">
-      <label>Scenario</label>
+      <label data-role="scenario-label">Scenario</label>
       <select data-role="scenario"></select>
-      <p class="param-hint" data-role="scenario-blurb"></p>
     </div>
     <div class="control-group hidden" data-role="paper-task-group">
-      <label>Task</label>
+      <label data-role="paper-task-info-label">Task</label>
       <p class="mode-fixed-value" data-role="paper-task-label">Drive to Goal</p>
-      <p class="param-hint">Fixed for Paper original (usual paper-style task).</p>
     </div>
     <div class="control-group hidden" data-role="agent-counts-group">
       <label>${iconImg('sheep', 'icon icon-inline')} Number of Sheep (<span data-role="sheep-count">50</span>)</label>
@@ -54,7 +48,10 @@ function setupHtml(sideLabel) {
 function factorsHtml(factorsOpen) {
   return `
     <details class="param-section hidden" ${factorsOpen ? 'open' : ''} data-role="factors-section">
-      <summary class="section-title">Experimental factors</summary>
+      <summary class="section-title" data-role="factors-summary-el">
+        Experimental factors
+        <span class="hint-badge">Optional</span>
+      </summary>
       <p class="param-hint" data-role="factors-summary"></p>
       <div class="param-list factors-grid" data-role="factors">
         <div class="param-group-title">Observation</div>
@@ -118,16 +115,9 @@ function factorsHtml(factorsOpen) {
             <button type="button" class="goal-velocity-chip" data-goal-vx="0.25" data-goal-vy="0.25">Slow diagonal</button>
             <button type="button" class="goal-velocity-chip" data-goal-vx="0.5" data-goal-vy="0.5">Hard diagonal</button>
           </div>
-          <p class="param-desc" data-role="goal-velocity-hint">
-            World units per tick (same scale as sheep~1.0, shepherd~1.5). Try 0.2-0.5; (1,1) is very fast.
-          </p>
         </div>
       </div>
       <p class="param-hint is-error hidden" data-role="factors-error"></p>
-      <p class="param-hint" data-role="factors-hint">
-        Extra experiment knobs not set by Instrument or sheep/dog counts above
-        (observation, flock, failure, goal).
-      </p>
     </details>
   `;
 }
@@ -158,12 +148,12 @@ function displayHtml() {
         <label class="check-item overlay-option">
           <input data-role="trail-visible" type="checkbox" checked />
           <span class="overlay-swatch overlay-swatch--trail" aria-hidden="true"></span>
-          <span data-role="trail-label">Trails: where herders walked this run (not shepherd_path length).</span>
+          <span data-role="trail-label">Trails</span>
         </label>
         <label class="check-item overlay-option">
           <input data-role="gcm-goal-visible" type="checkbox" checked />
           <span class="overlay-swatch overlay-swatch--gcm-goal" aria-hidden="true"></span>
-          <span data-role="gcm-goal-label">GCM to goal: line from flock centre of mass to the goal.</span>
+          <span data-role="gcm-goal-label">GCM to goal</span>
         </label>
         <div data-role="assignment-overlays"></div>
         <div class="trail-actions">
@@ -177,19 +167,17 @@ function displayHtml() {
 function advancedHtml(paramsOpen) {
   return `
     <details class="param-section hidden" ${paramsOpen ? 'open' : ''} data-role="params-section">
-      <summary class="section-title" data-role="params-title">Instrument parameters</summary>
-      <p class="param-hint">
-        Numeric knobs for the selected instrument only (changes with Instrument above).
-        Agent counts stay on the sheep/dog sliders.
-      </p>
+      <summary class="section-title" data-role="params-summary-el">
+        <span data-role="params-title">Instrument parameters</span>
+        <span class="hint-badge">Optional</span>
+      </summary>
       <div class="param-list" data-role="params"></div>
     </details>
     <details class="param-section hidden" data-role="world-section">
-      <summary class="section-title">World overrides</summary>
-      <p class="param-hint">
-        Optional. Change arena layout beyond the selected scenario defaults.
-        goal_center must keep the full goal disk inside the arena.
-      </p>
+      <summary class="section-title" data-role="world-summary-el">
+        World overrides
+        <span class="hint-badge">Optional</span>
+      </summary>
       <div class="param-list" data-role="world-params"></div>
       <p class="param-hint is-error hidden" data-role="world-error"></p>
     </details>

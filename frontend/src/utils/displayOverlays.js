@@ -5,11 +5,14 @@ export const DEFAULT_MODE_COLORS = {
   drive: '#67e8f9',
 };
 
-export const TRAIL_LABEL =
-  'Trails: where herders walked this run (not shepherd_path length).';
+export const TRAIL_LABEL = 'Trails';
 
-export const GCM_GOAL_LABEL =
-  'GCM to goal: line from flock centre of mass to the goal.';
+export const TRAIL_TIP =
+  'Where herders walked this run (not shepherd_path length).';
+
+export const GCM_GOAL_LABEL = 'GCM to goal';
+
+export const GCM_GOAL_TIP = 'Line from flock centre of mass to the goal.';
 
 export const GCM_GOAL_COLOR = '#c084fc';
 

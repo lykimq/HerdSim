@@ -138,15 +138,6 @@
   padding: 0.5rem 0.55rem;
 }
 
-.arena-header-shared > .arena-scenario-blurb {
-  grid-column: 1 / -1;
-}
-
-.arena-scenario-blurb {
-  margin: 0;
-  max-width: 100%;
-}
-
 .arena-header-deltas {
   display: flex;
   flex-direction: column;

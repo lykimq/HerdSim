@@ -4,7 +4,7 @@ import { formatMetricDelta } from '../utils/arenaDeltas.js';
 import { ARENA_DELTA_METRIC_IDS } from '../utils/metricFormat.js';
 import { fetchMetrics } from '../api/rest.js';
 import { log, sleep } from '../utils/logger.js';
-import { mountTips } from '../utils/tooltips.js';
+import { mountTips, setInfoTip } from '../utils/tooltips.js';
 import { scenarioBlurb } from '../utils/params.js';
 import { applyArenaPlayback } from '../utils/playback.js';
 import { setStatusMessage } from '../utils/dom.js';
@@ -112,14 +112,13 @@ export function createArenaView({ algorithms, scenarios, models = null, onStatus
   fairControls = shared.querySelector('[data-role="fair-controls"]');
 
   const scenSelect = shared.querySelector('[data-role="shared-scenario"]');
-  const scenBlurbEl = shared.querySelector('[data-role="shared-scenario-blurb"]');
+  const scenLabel = shared.querySelector('[data-role="shared-scenario-label"]');
   scenSelect.innerHTML = scenarios
     .map((s) => `<option value="${s.id}">${s.name}</option>`)
     .join('');
   function syncSharedScenarioBlurb() {
     const scen = scenarios.find((s) => s.id === scenSelect.value);
-    scenBlurbEl.textContent = scenarioBlurb(scen);
-    scenBlurbEl.classList.toggle('hidden', !scenBlurbEl.textContent);
+    setInfoTip(scenLabel, scenarioBlurb(scen));
   }
   scenSelect.addEventListener('change', syncSharedScenarioBlurb);
   syncSharedScenarioBlurb();

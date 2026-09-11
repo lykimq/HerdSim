@@ -2,6 +2,7 @@
 
 import { formatMetricValue } from '../utils/metricFormat.js';
 import { drawSeries, indexFromPointer, placeHoverTip } from '../utils/chartCanvas.js';
+import { setInfoTip } from '../utils/tooltips.js';
 
 const SERIES = [
   { id: 'cohesion', label: 'Cohesion', color: '#f87171' },
@@ -17,7 +18,6 @@ export function createMetricHistoryPanel({ onScrub } = {}) {
   root.className = 'card-glass metric-history-panel';
   root.innerHTML = `
     <div class="section-title">Metric history</div>
-    <p class="param-hint">Live tick series. Scrub to replay a frame; hover a chart for the value at that tick.</p>
     <div data-role="charts"></div>
     <div class="control-group">
       <label>Scrub tick</label>
@@ -27,6 +27,10 @@ export function createMetricHistoryPanel({ onScrub } = {}) {
     <div class="metric-history-hover-tip hidden" data-role="hover-tip" role="tooltip"></div>
   `;
 
+  setInfoTip(
+    root.querySelector('.section-title'),
+    'Live tick series. Scrub to replay a frame; hover a chart for the value at that tick.',
+  );
   const chartsEl = root.querySelector('[data-role="charts"]');
   const scrub = root.querySelector('[data-role="scrub"]');
   const scrubLabel = root.querySelector('[data-role="scrub-label"]');

@@ -28,7 +28,7 @@ export function arenaFairBarHtml() {
       <div class="arena-header-shared" data-role="fair-controls">
         <div class="arena-header-shared-fields">
           <div class="control-group arena-fair-field arena-fair-field--scenario">
-            <label>Shared scenario</label>
+            <label data-role="shared-scenario-label">Shared scenario</label>
             <select data-role="shared-scenario"></select>
           </div>
           <div class="control-group arena-fair-field arena-fair-field--seed">
@@ -46,7 +46,6 @@ export function arenaFairBarHtml() {
           <button class="btn btn-secondary" data-role="pause-both">${iconImg('pause')} Pause Both</button>
           <button class="btn btn-secondary" data-role="reset-both">${iconImg('reset')} Reset Both</button>
         </div>
-        <p class="arena-header-hint arena-scenario-blurb" data-role="shared-scenario-blurb"></p>
       </div>
 
       <div class="arena-header-deltas">

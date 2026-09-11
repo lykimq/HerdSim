@@ -10,6 +10,13 @@ import {
 } from '../utils/params.js';
 import { validateWorldOverrides } from '../utils/paramDescriptions.js';
 import { herderIconName, iconImg } from '../assets/icons.js';
+import { setInfoTip } from '../utils/tooltips.js';
+
+const PAPER_TASK_TIP = 'Fixed for Paper original (usual paper-style task).';
+const PARAMS_SECTION_TIP =
+  'Numeric knobs for the selected instrument only (changes with Instrument above). Agent counts stay on the sheep/dog sliders.';
+const WORLD_SECTION_TIP =
+  'Optional. Change arena layout beyond the selected scenario defaults. goal_center must keep the full goal disk inside the arena.';
 
 /** Build the param-panel refresh helpers used by createControlPanel. */
 export function createParamRefresh({
@@ -81,15 +88,16 @@ export function createParamRefresh({
       const paperScen = state.scenarios.find((s) => s.id === PAPER_TASK_SCENARIO_ID);
       els.paperTaskLabel.textContent = paperScen?.name || 'Drive to Goal';
     }
+    if (els.paperTaskInfoLabel) {
+      setInfoTip(els.paperTaskInfoLabel, lockPaperTask ? PAPER_TASK_TIP : '');
+    }
 
-    if (els.scenarioBlurb && isScenario) {
+    if (isScenario) {
       const scen = state.scenarios.find((s) => s.id === state.selectedScen);
       const counts = scenarioCountHint(scen);
       const desc = scenarioBlurb(scen);
-      els.scenarioBlurb.textContent = [counts && `Recommended: ${counts}`, desc]
-        .filter(Boolean)
-        .join('. ');
-      els.scenarioBlurb.classList.toggle('hidden', !els.scenarioBlurb.textContent);
+      const tip = [counts && `Recommended: ${counts}`, desc].filter(Boolean).join('. ');
+      setInfoTip(els.scenarioLabel, tip);
     }
   }
 
@@ -123,22 +131,20 @@ export function createParamRefresh({
     const preset = currentPreset();
     const presetInfo = getPresetOption(preset);
     const paramsEditable = preset === 'custom';
-    if (els.algorithmBlurb) {
-      els.algorithmBlurb.textContent = algorithmBlurb(alg);
-      els.algorithmBlurb.classList.toggle('hidden', !els.algorithmBlurb.textContent);
+    setInfoTip(els.algorithmLabel, algorithmBlurb(alg));
+    if (preset !== 'scenario') {
+      setInfoTip(els.scenarioLabel, scenarioBlurb(scen));
     }
-    if (els.scenarioBlurb && preset !== 'scenario') {
-      els.scenarioBlurb.textContent = scenarioBlurb(scen);
-      els.scenarioBlurb.classList.toggle('hidden', !els.scenarioBlurb.textContent);
-    }
-    if (els.presetBlurb) {
-      els.presetBlurb.textContent = presetSourceBlurb(preset, {
+    setInfoTip(
+      els.presetLabel,
+      presetSourceBlurb(preset, {
         algorithm: alg,
         scenario: scen,
         paperTaskLocked: lockPaperScenario,
-      });
-      els.presetBlurb.classList.toggle('hidden', !els.presetBlurb.textContent);
-    }
+      }),
+    );
+    setInfoTip(els.paramsSummaryEl, PARAMS_SECTION_TIP);
+    setInfoTip(els.worldSummaryEl, WORLD_SECTION_TIP);
     if (els.paramsTitle) els.paramsTitle.textContent = presetInfo.paramsTitle;
 
     syncModeVisibility();

@@ -3,6 +3,7 @@
 import { gcmDistanceBins, headingBins } from '../utils/distributionStats.js';
 import { formatScale } from '../utils/metricFormat.js';
 import { binFromPointer, drawHistogram, placeHoverTip } from '../utils/chartCanvas.js';
+import { setInfoTip } from '../utils/tooltips.js';
 
 function binRangeLabel(lo, hi, unit) {
   const a = formatScale(lo);
@@ -15,10 +16,9 @@ export function createDistributionPanel() {
   root.className = 'card-glass distribution-panel';
   root.innerHTML = `
     <div class="section-title">Distributions</div>
-    <p class="param-hint">Heading and distance-to-GCM shapes. Hover a bin for its count.</p>
     <div class="dist-block" data-role="heading-block">
       <div class="chart-meta">
-        <span class="dist-label" title="Compass heading of each sheep (0-360 deg).">Sheep headings</span>
+        <span class="dist-label" data-role="heading-label">Sheep headings</span>
         <span class="chart-meta-value chart-meta-value--cyan" data-role="heading-value">-</span>
         <span class="chart-meta-unit" data-role="heading-unit"></span>
       </div>
@@ -26,7 +26,7 @@ export function createDistributionPanel() {
     </div>
     <div class="dist-block" data-role="gcm-block">
       <div class="chart-meta">
-        <span class="dist-label" title="Distance of each sheep from the group center of mass.">Distance to GCM</span>
+        <span class="dist-label" data-role="gcm-label">Distance to GCM</span>
         <span class="chart-meta-value chart-meta-value--amber" data-role="gcm-value">-</span>
         <span class="chart-meta-unit" data-role="gcm-unit"></span>
       </div>
@@ -35,6 +35,18 @@ export function createDistributionPanel() {
     <div class="chart-hover-tip hidden" data-role="hover-tip" role="tooltip"></div>
   `;
 
+  setInfoTip(
+    root.querySelector('.section-title'),
+    'Heading and distance-to-GCM shapes. Hover a bin for its count.',
+  );
+  setInfoTip(
+    root.querySelector('[data-role="heading-label"]'),
+    'Compass heading of each sheep (0-360 deg).',
+  );
+  setInfoTip(
+    root.querySelector('[data-role="gcm-label"]'),
+    'Distance of each sheep from the group center of mass.',
+  );
   const headingCanvas = root.querySelector('[data-role="heading"]');
   const gcmCanvas = root.querySelector('[data-role="gcm"]');
   const headingValue = root.querySelector('[data-role="heading-value"]');

@@ -4,6 +4,9 @@
  * Keep each entry to meaning, valid range when useful, and high/low effect.
  */
 
+import { setInfoTip } from './tooltips.js';
+
+
 /** Instrument / shared numeric keys shown under Instrument parameters. */
 export const INSTRUMENT_PARAM_DESCRIPTIONS = {
   r_a:
@@ -139,27 +142,17 @@ export function paramFieldDescription(key) {
   );
 }
 
-/** Ensure a visible .param-desc under a param-item (after the label when present). */
+/**
+ * Attach field help as a hover tip on the field name (no always-on paragraph).
+ * Removes any leftover .param-desc paragraphs from the older layout.
+ */
 export function setParamItemDescription(paramItem, text) {
   if (!paramItem) return;
-  let desc = paramItem.querySelector(':scope > .param-desc');
-  if (!text) {
-    desc?.remove();
-    return;
-  }
-  if (!desc) {
-    desc = document.createElement('p');
-    desc.className = 'param-desc';
-    const label = paramItem.querySelector(':scope > label');
-    if (label?.nextSibling) {
-      paramItem.insertBefore(desc, label.nextSibling);
-    } else if (label) {
-      label.after(desc);
-    } else {
-      paramItem.prepend(desc);
-    }
-  }
-  desc.textContent = text;
+  paramItem.querySelectorAll(':scope > .param-desc').forEach((el) => el.remove());
+  const label = paramItem.querySelector(':scope > label');
+  if (!label) return;
+  const keyEl = label.querySelector(':scope > .param-key');
+  setInfoTip(keyEl || label, text || '');
 }
 
 /**

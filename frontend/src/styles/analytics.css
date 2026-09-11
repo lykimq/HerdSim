@@ -74,6 +74,10 @@
   font-weight: 600;
 }
 
+.analytics-headline:empty {
+  display: none;
+}
+
 .idle-status {
   color: var(--text-muted);
   font-size: 0.8rem;

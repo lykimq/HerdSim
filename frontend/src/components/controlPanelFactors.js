@@ -15,6 +15,7 @@ import {
   validateFactors,
 } from '../utils/factors.js';
 import { setParamItemDescription } from '../utils/paramDescriptions.js';
+import { setInfoTip } from '../utils/tooltips.js';
 
 export function createFactorControls({ els, state, currentPreset, markCustom }) {
   function setSelectOptions(select, items, selected) {
@@ -58,9 +59,9 @@ export function createFactorControls({ els, state, currentPreset, markCustom }) 
       const description = factorFieldDescription(labelKey);
       if (labelEl && labelKey) {
         labelEl.textContent = factorFieldLabel(labelKey);
-        labelEl.title = description || labelKey;
+        labelEl.removeAttribute('title');
       }
-      // Goal velocity has a live hint with starters; skip the generic desc there.
+      // Goal velocity tip is refreshed with live speed in syncGoalVelocityHint.
       if (paramItem && labelKey !== 'goal_velocity') {
         setParamItemDescription(paramItem, description);
       }
@@ -141,26 +142,27 @@ export function createFactorControls({ els, state, currentPreset, markCustom }) 
   }
 
   function syncGoalVelocityHint(factors = {}) {
-    const hint = els.goalVelocityWrap?.querySelector('[data-role="goal-velocity-hint"]');
-    if (!hint) return;
+    const wrap = els.goalVelocityWrap;
+    if (!wrap) return;
+    const base =
+      factorFieldDescription('goal_velocity') ||
+      'World units per tick (same scale as sheep~1.0, shepherd~1.5). Try 0.2-0.5; (1,1) is very fast.';
     const vx = Number(factors.goal_velocity_x);
     const vy = Number(factors.goal_velocity_y);
-    const base =
-      'World units per tick (same scale as sheep~1.0, shepherd~1.5). Try 0.2-0.5; (1,1) is very fast.';
-    if (!Number.isFinite(vx) || !Number.isFinite(vy)) {
-      hint.textContent = base;
-      return;
+    let tip = base;
+    if (Number.isFinite(vx) && Number.isFinite(vy)) {
+      const speed = Math.hypot(vx, vy);
+      if (speed < 1e-12) {
+        tip = `${base} Current: stopped (0, 0).`;
+      } else {
+        let pace = 'gentle';
+        if (speed >= 1) pace = 'very fast (outruns sheep)';
+        else if (speed >= 0.5) pace = 'hard chase';
+        else if (speed >= 0.25) pace = 'mild';
+        tip = `${base} Current: (${vx}, ${vy}), speed ${speed.toFixed(2)}/tick (${pace}).`;
+      }
     }
-    const speed = Math.hypot(vx, vy);
-    if (speed < 1e-12) {
-      hint.textContent = `${base} Current: stopped (0, 0).`;
-      return;
-    }
-    let pace = 'gentle';
-    if (speed >= 1) pace = 'very fast (outruns sheep)';
-    else if (speed >= 0.5) pace = 'hard chase';
-    else if (speed >= 0.25) pace = 'mild';
-    hint.textContent = `${base} Current: (${vx}, ${vy}), speed ${speed.toFixed(2)}/tick (${pace}).`;
+    setParamItemDescription(wrap, tip);
   }
 
   function setFactorsEditable(editable) {
@@ -170,10 +172,13 @@ export function createFactorControls({ els, state, currentPreset, markCustom }) 
     els.goalVelocityWrap?.querySelectorAll('.goal-velocity-chip').forEach((btn) => {
       btn.disabled = !editable;
     });
-    if (els.factorsHint) {
-      els.factorsHint.textContent = editable
-        ? 'Extra experiment knobs not set by Instrument or sheep/dog counts above (observation, flock, failure, goal).'
-        : 'Switch Mode to Custom to edit experimental factors.';
+    if (els.factorsSummaryEl) {
+      setInfoTip(
+        els.factorsSummaryEl,
+        editable
+          ? 'Extra experiment knobs not set by Instrument or sheep/dog counts above (observation, flock, failure, goal).'
+          : 'Switch Mode to Custom to edit experimental factors.',
+      );
     }
   }
 
