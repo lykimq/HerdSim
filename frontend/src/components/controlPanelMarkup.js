@@ -57,15 +57,6 @@ function factorsHtml(factorsOpen) {
       <summary class="section-title">Experimental factors</summary>
       <p class="param-hint" data-role="factors-summary"></p>
       <div class="param-list factors-grid" data-role="factors">
-        <div class="param-group-title">Model</div>
-        <div class="param-item">
-          <label><span class="param-key">${factorFieldLabel('sheep_model')}</span></label>
-          <select data-factor="sheep_model"></select>
-        </div>
-        <div class="param-item">
-          <label><span class="param-key">${factorFieldLabel('dog_controller')}</span></label>
-          <select data-factor="dog_controller"></select>
-        </div>
         <div class="param-group-title">Observation</div>
         <div class="param-item">
           <label><span class="param-key">${factorFieldLabel('obs_mode')}</span></label>
@@ -120,7 +111,8 @@ function factorsHtml(factorsOpen) {
       </div>
       <p class="param-hint is-error hidden" data-role="factors-error"></p>
       <p class="param-hint" data-role="factors-hint">
-        Edit factors for this custom run (observation, heterogeneity, failure, goal).
+        Extra experiment knobs not set by Instrument or sheep/dog counts above
+        (observation, flock, failure, goal).
       </p>
     </details>
   `;
@@ -171,11 +163,18 @@ function displayHtml() {
 function advancedHtml(paramsOpen) {
   return `
     <details class="param-section hidden" ${paramsOpen ? 'open' : ''} data-role="params-section">
-      <summary class="section-title" data-role="params-title">Advanced settings</summary>
+      <summary class="section-title" data-role="params-title">Instrument parameters</summary>
+      <p class="param-hint">
+        Numeric knobs for the selected instrument only (changes with Instrument above).
+        Agent counts stay on the sheep/dog sliders.
+      </p>
       <div class="param-list" data-role="params"></div>
     </details>
     <details class="param-section hidden" data-role="world-section">
-      <summary class="section-title">World Overrides</summary>
+      <summary class="section-title">World overrides</summary>
+      <p class="param-hint">
+        Optional. Change arena layout beyond the selected scenario defaults.
+      </p>
       <div class="param-list" data-role="world-params"></div>
     </details>
   `;

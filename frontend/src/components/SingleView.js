@@ -115,7 +115,7 @@ export function createSingleView({
 
   controls = createControlPanel({
     paramsOpen: false,
-    factorsOpen: false,
+    factorsOpen: true,
     runFirst: true,
     onInit: async (cfg) => {
       try {

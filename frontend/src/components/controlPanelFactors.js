@@ -45,18 +45,7 @@ export function createFactorControls({ els, state, currentPreset, markCustom }) 
   }
 
   function fillModelSelects() {
-    const sheepIds = (state.models?.sheep_models || []).map((item) =>
-      typeof item === 'string' ? item : item.id,
-    );
-    const dogIds = (state.models?.dog_controllers || []).map((item) =>
-      typeof item === 'string' ? item : item.id,
-    );
-    const sheep = sheepIds.filter(Boolean).map((id) => ({ id, label: id }));
-    const dogs = dogIds.filter(Boolean).map((id) => ({ id, label: id }));
-    const sheepSel = els.factorsRoot.querySelector('[data-factor="sheep_model"]');
-    const dogSel = els.factorsRoot.querySelector('[data-factor="dog_controller"]');
-    setSelectOptions(sheepSel, [{ id: '', label: '(instrument default)' }, ...sheep], state.factors.sheep_model);
-    setSelectOptions(dogSel, [{ id: '', label: '(instrument default)' }, ...dogs], state.factors.dog_controller);
+    // Sheep/dog models come from the Instrument selector; no duplicate controls here.
   }
 
   function applyFieldLabels() {
@@ -80,8 +69,6 @@ export function createFactorControls({ els, state, currentPreset, markCustom }) 
       if (!el) return;
       el.value = value == null ? '' : String(value);
     };
-    setVal('sheep_model', f.sheep_model);
-    setVal('dog_controller', f.dog_controller);
     setVal('obs_mode', f.obs_mode);
     setVal('sensing_range', f.sensing_range);
     setVal('noise_sigma', f.noise_sigma);
@@ -102,8 +89,9 @@ export function createFactorControls({ els, state, currentPreset, markCustom }) 
     if (!root) return { ...DEFAULT_FACTORS };
     const get = (key) => root.querySelector(`[data-factor="${key}"]`)?.value;
     return {
-      sheep_model: get('sheep_model') || '',
-      dog_controller: get('dog_controller') || '',
+      // Keep instrument models from state; Setup Instrument owns that choice.
+      sheep_model: state.factors?.sheep_model || '',
+      dog_controller: state.factors?.dog_controller || '',
       obs_mode: get('obs_mode') || 'global',
       sensing_range: get('sensing_range') === '' ? '' : get('sensing_range'),
       noise_sigma: get('noise_sigma'),
@@ -150,7 +138,7 @@ export function createFactorControls({ els, state, currentPreset, markCustom }) 
     });
     if (els.factorsHint) {
       els.factorsHint.textContent = editable
-        ? 'Edit factors for this custom run (observation, heterogeneity, failure, goal).'
+        ? 'Extra experiment knobs not set by Instrument or sheep/dog counts above (observation, flock, failure, goal).'
         : 'Switch Mode to Custom to edit experimental factors.';
     }
   }

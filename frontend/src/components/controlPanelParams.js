@@ -155,7 +155,7 @@ export function createParamRefresh({
     });
 
     els.worldSection.classList.toggle('hidden', false);
-    els.worldSection.open = true;
+    // Keep world collapsed; scenario already supplies layout until the user opens this.
     const layoutFromScenario = applyScenarioWorld({}, state.scenarioDefaults);
     const worldDefaults = {
       world_width: layoutFromScenario.world_width ?? state.algorithmParams.world_width ?? 150,

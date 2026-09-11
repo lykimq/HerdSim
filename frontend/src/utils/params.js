@@ -46,7 +46,7 @@ export const PRESET_OPTIONS = [
   {
     id: "custom",
     label: "Custom",
-    paramsTitle: "Custom parameters",
+    paramsTitle: "Instrument parameters",
   },
 ];
 
@@ -108,7 +108,7 @@ export function presetSourceBlurb(
     return base ? `${setup} ${base}` : setup;
   }
   if (presetId === "custom") {
-    return "Choose any scenario and edit sheep, dogs, factors, and advanced parameters.";
+    return "Customize scenario, sheep/dogs, experimental factors, and optional instrument or world parameters.";
   }
   const algName = algorithm?.name || "this instrument";
   const cfg = algorithm?.default_config || {};
@@ -260,7 +260,10 @@ export function buildParamControls(container, defaults, values, onChange, option
   const used = new Set();
   if (Array.isArray(groups) && groups.length) {
     for (const g of groups) {
-      const keys = (g.keys || []).filter((k) => k in (defaults || {}));
+      const keys = (g.keys || []).filter((k) => {
+        if (!(k in (defaults || {}))) return false;
+        return shouldShowParam(k, defaults[k], options);
+      });
       if (!keys.length) continue;
       const heading = document.createElement("div");
       heading.className = "param-group-title";
