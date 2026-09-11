@@ -135,7 +135,7 @@ export function buildTakeaway({
       return 'Containment criterion met before max ticks.';
     }
     if (spread === 'tight' && (outliers == null || outliers === 0)) {
-      return `Success criterion met; final flock cohesion ${fmt(cohesion)} with no outliers beyond the collect threshold.`;
+      return `Success criterion met; final flock was tight with no sheep beyond the collect threshold.`;
     }
     if (outliers != null && outliers > 0) {
       return `Success criterion met; ${fmt(outliers, 0)} sheep still beyond the collect threshold at the end.`;

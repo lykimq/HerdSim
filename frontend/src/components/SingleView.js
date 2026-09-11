@@ -64,7 +64,9 @@ export function createSingleView({
         status: nextStatus,
         history: sim.getHistory(),
         algorithmName: controls?.getAlgorithmName?.() || null,
+        algorithmId: cfg.algorithm_id || cfg.instrument || null,
         scenarioId: cfg.scenario_id || null,
+        config: cfg,
       }),
     );
   }
@@ -176,6 +178,7 @@ export function createSingleView({
   center.className = 'single-center';
   center.appendChild(canvasHost);
   center.appendChild(historyPanel.root);
+  center.appendChild(runReport.root);
 
   const liveGroup = document.createElement('div');
   liveGroup.className = 'single-side-group';
@@ -183,14 +186,7 @@ export function createSingleView({
   liveGroup.appendChild(metrics.root);
   liveGroup.appendChild(distributions.root);
 
-  const afterGroup = document.createElement('div');
-  afterGroup.className = 'single-side-group';
-  afterGroup.innerHTML =
-    '<div class="section-title single-side-group-title">After run</div>';
-  afterGroup.appendChild(runReport.root);
-
   side.appendChild(liveGroup);
-  side.appendChild(afterGroup);
 
   root.appendChild(controls.root);
   root.appendChild(center);

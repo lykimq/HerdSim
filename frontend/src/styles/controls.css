@@ -213,6 +213,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+  min-width: 0;
 }
 
 .control-group label {
@@ -225,12 +226,26 @@
 
 select, input[type="number"], input[type="range"], input[type="text"], input[type="search"] {
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
   background: var(--bg-input);
   border: 1px solid var(--border-color);
   color: var(--text-main);
   border-radius: var(--radius-sm);
   padding: 0.45rem 0.55rem;
   font-size: 0.9rem;
+}
+
+/* Match select / text field chrome; spinner buttons make seed look narrower. */
+.control-group input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.control-group input[type="number"]::-webkit-outer-spin-button,
+.control-group input[type="number"]::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
 }
 
 .chart-meta-value--cyan { color: #67e8f9; }
@@ -494,6 +509,11 @@ select, input[type="number"], input[type="range"], input[type="text"], input[typ
   position: relative;
 }
 
+.single-center .run-report-panel {
+  flex: 0 0 auto;
+  margin-top: 0.35rem;
+}
+
 .run-report-panel {
   gap: 0.45rem;
 }
@@ -556,6 +576,35 @@ select, input[type="number"], input[type="range"], input[type="text"], input[typ
   gap: 0.55rem;
 }
 
+.run-report-fold {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+}
+
+.run-report-fold-summary {
+  cursor: pointer;
+  list-style: none;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  font-weight: 600;
+  padding: 0;
+  margin-bottom: 0.2rem;
+}
+
+.run-report-fold-summary::-webkit-details-marker {
+  display: none;
+}
+
+.run-report-fold-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
 .run-report-section-title {
   font-size: 0.68rem;
   text-transform: uppercase;
@@ -563,6 +612,10 @@ select, input[type="number"], input[type="range"], input[type="text"], input[typ
   color: var(--text-muted);
   font-weight: 600;
   margin-bottom: 0.2rem;
+}
+
+.run-report-section-title:empty {
+  display: none;
 }
 
 .run-report-lines {
@@ -575,6 +628,14 @@ select, input[type="number"], input[type="range"], input[type="text"], input[typ
 
 .run-report-lines li + li {
   margin-top: 0.15rem;
+}
+
+.run-report-lines .run-report-line-heading {
+  list-style: none;
+  margin-left: -1rem;
+  margin-top: 0.35rem;
+  color: var(--text-main);
+  font-weight: 600;
 }
 
 .metric-history-panel .metric-history-hover-tip,

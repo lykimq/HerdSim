@@ -29,7 +29,7 @@ export const BUTTON_TIPS = {
   csv: 'Download trial rows as CSV (includes column definitions).',
   json: 'Download full benchmark payload as JSON.',
   md: 'Download the summary table as Markdown.',
-  'download-report': 'Download the end-of-run report as plain text.',
+  'download-report': 'Download the end-of-run report as Markdown (.md).',
   close: 'Close dialog.',
 };
 

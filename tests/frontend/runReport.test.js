@@ -1,6 +1,10 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { buildRunReport, formatRunReportText } from '../../frontend/src/utils/runReport.js';
+import {
+  buildRunReport,
+  formatRunReportMarkdown,
+  formatRunReportText,
+} from '../../frontend/src/utils/runReport.js';
 
 function makeHistory(rows) {
   return rows.map((row) => ({
@@ -23,7 +27,17 @@ describe('buildRunReport', () => {
     const report = buildRunReport({
       status: 'success',
       algorithmName: 'Strombom',
+      algorithmId: 'strombom',
       scenarioId: 'drive_to_goal',
+      config: {
+        algorithm_id: 'strombom',
+        scenario_id: 'drive_to_goal',
+        preset: 'paper',
+        seed: 42,
+        num_sheep: 50,
+        num_shepherds: 1,
+        algorithm_params: { ra: 65, max_ticks: 3000 },
+      },
       history: makeHistory([
         {
           tick: 0,
@@ -79,18 +93,41 @@ describe('buildRunReport', () => {
     assert.match(report.headline, /Strombom/);
     assert.match(report.takeaway, /Success criterion met/);
 
+    const setup = report.sections.find((s) => s.id === 'setup');
+    assert.ok(setup);
+    assert.ok(setup.lines.some((l) => /Instrument: Strombom/.test(l)));
+    assert.ok(setup.lines.some((l) => /Seed: 42/.test(l)));
+    assert.ok(setup.lines.some((l) => /Number of sheep: 50/.test(l)));
+    assert.ok(setup.lines.some((l) => /ra: 65/.test(l) || /Ra: 65/.test(l)));
+
+    const insights = report.sections.find((s) => s.id === 'insights');
+    assert.ok(insights);
+    assert.ok(
+      insights.lines.some((l) => /Collect\/Drive|outliers rose|Flock spread decreased/.test(l)),
+    );
+
     const text = formatRunReportText(report);
     assert.match(text, /4\.67/);
     assert.match(text, /12 -> 4\.67/);
     assert.match(text, /50 of 50 sheep/);
     assert.match(text, /First sheep entered the goal at tick 60/);
-    assert.match(text, /All sheep in the goal from tick 120/);
-    assert.match(text, /Cumulative shepherd path: 210\.50/);
-    assert.match(text, /Final GCM-to-goal distance: 8/);
+    assert.match(text, /All sheep were in the goal by tick 118/);
+    assert.doesNotMatch(text, /All sheep in the goal from tick 120/);
+    assert.match(text, /Total herder travel distance: 210\.50/);
+    assert.match(text, /Final distance from flock centre to goal: 8/);
     assert.match(text, /40 -> 8/);
     assert.match(text, /mostly aligned/);
-    assert.match(text, /Peak outlier count: 4/);
-    assert.match(text, /time_to_goal/);
+    assert.match(text, /Highest outlier count during the run: 4/);
+    assert.doesNotMatch(text, /time_to_goal/);
+    assert.doesNotMatch(text, /success_rate/);
+    assert.match(text, /Drive to Goal/);
+
+    const md = formatRunReportMarkdown(report);
+    assert.match(md, /^# HerdSim run report/m);
+    assert.match(md, /## Setup/);
+    assert.match(md, /## Insights/);
+    assert.match(md, /- Seed: 42/);
+    assert.match(md, /\*\*Instrument parameters\*\*/);
   });
 
   it('uses pen wording for containment scenarios', () => {
@@ -133,10 +170,19 @@ describe('buildRunReport', () => {
     assert.doesNotMatch(text, /Goal progress/);
   });
 
-  it('explains timeout with remaining outliers', () => {
+  it('explains timeout with remaining outliers and grounded Collect insight', () => {
     const report = buildRunReport({
       status: 'timeout',
+      algorithmId: 'strombom',
       scenarioId: 'drive_to_goal',
+      config: {
+        algorithm_id: 'strombom',
+        scenario_id: 'drive_to_goal',
+        seed: 7,
+        num_sheep: 4,
+        num_shepherds: 1,
+        algorithm_params: { ra: 65 },
+      },
       history: makeHistory([
         {
           tick: 0,
@@ -180,6 +226,32 @@ describe('buildRunReport', () => {
     assert.match(report.takeaway, /Did not meet the success criterion/);
     const text = formatRunReportText(report);
     assert.match(text, /reached max ticks without success at tick 500/);
-    assert.match(text, /Outliers beyond collect threshold at end: 3/);
+    assert.match(text, /Sheep beyond the collect threshold at the end: 3/);
+    assert.match(text, /Collect had not finished clearing outliers/);
+  });
+
+  it('omits invented insights when evidence is weak', () => {
+    const report = buildRunReport({
+      status: 'completed',
+      algorithmId: 'potential_field',
+      scenarioId: 'drive_to_goal',
+      history: makeHistory([
+        {
+          tick: 0,
+          n: 4,
+          metrics: { cohesion: 8, sheep_in_goal: 0, shepherd_path: 0 },
+        },
+        {
+          tick: 10,
+          n: 4,
+          metrics: { cohesion: 8.1, sheep_in_goal: 0, shepherd_path: 5 },
+        },
+      ]),
+    });
+    assert.ok(report);
+    assert.equal(
+      report.sections.find((s) => s.id === 'insights'),
+      undefined,
+    );
   });
 });

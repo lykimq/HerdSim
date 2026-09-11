@@ -1,7 +1,60 @@
 /** Dedicated end-of-run analysis panel for Single view. */
 
 import { downloadText } from '../utils/params.js';
-import { formatRunReportText } from '../utils/runReport.js';
+import { formatRunReportMarkdown } from '../utils/runReport.js';
+
+function isLineHeading(line) {
+  return /:$/.test(line) && !/: .+/.test(line);
+}
+
+function appendLines(list, lines) {
+  (lines || []).forEach((line) => {
+    if (isLineHeading(line)) {
+      const heading = document.createElement('li');
+      heading.className = 'run-report-line-heading';
+      heading.textContent = line.slice(0, -1);
+      list.appendChild(heading);
+      return;
+    }
+    const item = document.createElement('li');
+    item.textContent = line;
+    list.appendChild(item);
+  });
+}
+
+function createSectionBlock(section) {
+  const block = document.createElement('div');
+  block.className = 'run-report-section';
+  if (section.id) block.dataset.sectionId = section.id;
+  const title = document.createElement('div');
+  title.className = 'run-report-section-title';
+  title.textContent = section.title;
+  const list = document.createElement('ul');
+  list.className = 'run-report-lines';
+  appendLines(list, section.lines);
+  block.appendChild(title);
+  block.appendChild(list);
+  return block;
+}
+
+function createCollapsibleSection(section, open = true) {
+  const details = document.createElement('details');
+  details.className = 'run-report-fold';
+  details.open = open;
+  if (section.id) details.dataset.sectionId = section.id;
+  const summary = document.createElement('summary');
+  summary.className = 'run-report-fold-summary';
+  summary.textContent = section.title;
+  const body = document.createElement('div');
+  body.className = 'run-report-fold-body';
+  const list = document.createElement('ul');
+  list.className = 'run-report-lines';
+  appendLines(list, section.lines);
+  body.appendChild(list);
+  details.appendChild(summary);
+  details.appendChild(body);
+  return details;
+}
 
 export function createRunReportPanel() {
   const root = document.createElement('div');
@@ -16,7 +69,7 @@ export function createRunReportPanel() {
     <p class="run-report-takeaway" data-role="takeaway"></p>
     <div class="run-report-sections" data-role="sections"></div>
     <div class="export-row run-report-actions">
-      <button type="button" class="btn btn-secondary" data-role="download-report">Download report</button>
+      <button type="button" class="btn btn-secondary" data-role="download-report">Download Markdown</button>
     </div>
   `;
 
@@ -50,32 +103,29 @@ export function createRunReportPanel() {
     headlineEl.textContent = report.headline || '';
     takeawayEl.textContent = report.takeaway || '';
     sectionsEl.replaceChildren();
+
+    // Render in report order (Setup is last). Only Setup is collapsible.
     (report.sections || []).forEach((section) => {
-      const block = document.createElement('div');
-      block.className = 'run-report-section';
-      const title = document.createElement('div');
-      title.className = 'run-report-section-title';
-      title.textContent = section.title;
-      const list = document.createElement('ul');
-      list.className = 'run-report-lines';
-      (section.lines || []).forEach((line) => {
-        const item = document.createElement('li');
-        item.textContent = line;
-        list.appendChild(item);
-      });
-      block.appendChild(title);
-      block.appendChild(list);
-      sectionsEl.appendChild(block);
+      if (section.id === 'setup') {
+        sectionsEl.appendChild(createCollapsibleSection(section, true));
+        return;
+      }
+      sectionsEl.appendChild(createSectionBlock(section));
     });
+
     downloadBtn.disabled = false;
+    // Keep the restored report in view under Metric history after a finished run.
+    requestAnimationFrame(() => {
+      root.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    });
   }
 
   downloadBtn.addEventListener('click', () => {
     if (!lastReport) return;
     downloadText(
-      `herdsim_run_report_${Date.now()}.txt`,
-      formatRunReportText(lastReport),
-      'text/plain',
+      `herdsim_run_report_${Date.now()}.md`,
+      formatRunReportMarkdown(lastReport),
+      'text/markdown',
     );
   });
 

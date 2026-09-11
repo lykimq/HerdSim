@@ -139,9 +139,9 @@
 
 .single-layout {
   grid-template-columns: minmax(280px, 320px) minmax(0, 1fr) minmax(250px, 300px);
-  height: 100%;
-  min-height: 0;
-  align-items: stretch;
+  min-height: 100%;
+  height: auto;
+  align-items: start;
   overflow: visible;
 }
 
@@ -152,14 +152,21 @@
   overflow: visible;
 }
 
+.single-layout > .control-panel {
+  align-self: start;
+  height: auto;
+}
+
 .single-center {
   display: flex;
   flex-direction: column;
   gap: 0.55rem;
   min-width: 0;
   min-height: 0;
-  height: 100%;
-  overflow: hidden;
+  /* Grow with metric history + run report; do not clip the end-of-run panel. */
+  height: auto;
+  align-self: start;
+  overflow: visible;
 }
 
 .arena-layout {
@@ -180,8 +187,8 @@
 }
 
 .single-layout .canvas-host {
-  flex: 1 1 0;
-  height: auto;
+  flex: 0 0 auto;
+  height: min(70vh, 640px);
   min-height: 420px;
 }
 
@@ -274,6 +281,10 @@
   color: var(--text-main);
   font-size: 0.75rem;
   line-height: 1.4;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
 }
 
 .guide-layout {
@@ -472,6 +483,14 @@
 @media (max-width: 1200px) {
   .single-layout {
     grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
+    /* Let Setup keep its natural height when Live wraps below; otherwise the
+       fixed viewport row crushes the panel and overflow:visible spills seed/summary. */
+    height: auto;
+    align-items: start;
+  }
+  .single-layout > .control-panel {
+    align-self: start;
+    height: auto;
   }
   .single-side {
     grid-column: 1 / -1;
