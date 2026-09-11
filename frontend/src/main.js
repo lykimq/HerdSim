@@ -235,12 +235,7 @@ function createView(name, algorithms, scenarios, models) {
     });
   }
   if (name === 'guide') {
-    return createGuideView({
-      onRunInstrument: (algorithmId) => {
-        preferredSingleAlg = algorithmId;
-        switchView('single', algorithms, scenarios, models);
-      },
-    });
+    return createGuideView();
   }
   const preferredAlg = preferredSingleAlg;
   preferredSingleAlg = null;

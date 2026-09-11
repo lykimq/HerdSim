@@ -305,12 +305,40 @@
   gap: 0.1rem;
 }
 
-.guide-nav-item.is-depth-1 {
+.guide-nav-folder {
+  border: none;
+  background: transparent;
+  padding: 0;
+}
+
+.guide-nav-folder-summary {
+  list-style: none;
+  cursor: pointer;
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.guide-nav-folder-summary::-webkit-details-marker {
+  display: none;
+}
+
+.guide-nav-children {
+  margin-top: 0.1rem;
+}
+
+.guide-nav-item.is-depth-1,
+.guide-nav-group.is-depth-1 {
   padding-left: 0.85rem;
 }
 
-.guide-nav-item.is-depth-2 {
-  padding-left: 1.7rem;
+.guide-nav-item.is-depth-2,
+.guide-nav-group.is-depth-2 {
+  padding-left: 0.85rem;
+}
+
+.guide-nav-group > .guide-nav-folder > .guide-nav-children {
+  padding-left: 0.35rem;
 }
 
 .guide-nav-link {
@@ -347,10 +375,6 @@
   border-left-color: #67e8f9;
   background: rgba(103, 232, 249, 0.08);
   font-weight: 600;
-}
-
-.guide-jump {
-  margin-bottom: 1rem;
 }
 
 .guide-layout > .guide-content.card-glass {
