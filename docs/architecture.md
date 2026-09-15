@@ -1,9 +1,6 @@
 # HerdSim Architecture & Design
 
-HerdSim is a factor-based platform for simulating and analyzing multi-agent
-shepherding. The engine separates sheep dynamics, shepherd observation, and dog
-control so experiments can vary information, heterogeneity, environment, and
-controller architecture independently.
+HerdSim is a factor-based platform for simulating and analyzing multi-agent shepherding. The engine separates sheep dynamics, shepherd observation, and dog control so experiments can vary information, heterogeneity, environment, and controller architecture independently.
 
 ## Design Requirements
 
@@ -65,8 +62,7 @@ Defined in `core/experimental_factors.py`:
 - Environment: world keys, `goal_mode`
 - Model: `sheep_model`, `dog_controller`, scenario, preset
 
-Named instruments in `core/presets.py` are factor bundles (e.g. `strombom` =
-Strombom sheep + Collect/Drive).
+Named instruments in `core/presets.py` are factor bundles (e.g. `strombom` = Strombom sheep + Collect/Drive).
 
 ## Plugin Interfaces
 
@@ -75,15 +71,9 @@ Strombom sheep + Collect/Drive).
 - `BaseDogController` in `core/dog_controller.py`
 - Registries in `core/plugin_registry.py`
 - Named instruments (presets) in `core/presets.py`
-- `algorithms/registry.py` exposes `instrument_registry` (and a legacy
-  `algorithm_registry` alias) for scripts and docs sync; prefer `core.presets`
-  or `instrument` in new code
+- `algorithms/registry.py` exposes `instrument_registry` for scripts and docs sync; prefer `core.presets` or `instrument` in new code
 
-New sheep models, dog controllers, and observation modes register in
-`core/plugin_registry.py`. Scenarios and metrics register in their package
-registries. Named instruments are factor bundles in `core/presets.py` with
-package metadata under `algorithms/<id>/` (on-disk package name; UI and docs
-say instrument).
+New sheep models, dog controllers, and observation modes register in `core/plugin_registry.py`. Scenarios and metrics register in their package registries. Named instruments are factor bundles in `core/presets.py` with package metadata under `algorithms/<id>/` (on-disk package name; UI and docs say instrument).
 
 ## Config Composition
 
@@ -108,6 +98,4 @@ say instrument).
 - `docs/`: architecture and research docs
 - `tests/`: pytest + frontend node tests
 
-API fields may still accept `algorithm_id` / `algorithm_ids` for compatibility;
-prefer `instrument` / instruments in new endpoints and UI strings. On disk,
-instrument packages remain under `algorithms/<id>/`.
+API fields use `instrument` / `instruments` for endpoint payloads and UI strings. On disk, instrument packages remain under `algorithms/<id>/`.

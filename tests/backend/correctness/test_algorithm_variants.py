@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from algorithms.registry import algorithm_registry
+from algorithms.registry import instrument_registry
 from controllers.collect_drive_multi import CollectDriveMultiController
 from core.observation_models import GlobalObservation
 from core.presets import get_preset
@@ -14,7 +14,7 @@ from tests.backend.helpers import make_state, make_world
 
 
 def test_variants_registered():
-    names = set(algorithm_registry.names())
+    names = set(instrument_registry.names())
     assert {
         "strombom_multi",
         "strombom_noise",

@@ -67,7 +67,7 @@ export function createSingleView({
         status: nextStatus,
         history: sim.getHistory(),
         algorithmName: controls?.getAlgorithmName?.() || null,
-        algorithmId: cfg.algorithm_id || cfg.instrument || null,
+        instrumentId: cfg.instrument || null,
         scenarioId: cfg.scenario_id || null,
         config: cfg,
       }),

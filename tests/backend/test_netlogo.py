@@ -11,11 +11,11 @@ from algorithms.netlogo.bridge import (
     find_netlogo_home,
     resolve_model_path,
 )
-from algorithms.registry import algorithm_registry
+from algorithms.registry import instrument_registry
 
 
 def test_netlogo_not_registered_as_herdsim_algorithm():
-    assert "netlogo" not in algorithm_registry.names()
+    assert "netlogo" not in instrument_registry.names()
 
 
 def test_example_model_exists():

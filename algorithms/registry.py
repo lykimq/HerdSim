@@ -1,8 +1,7 @@
 """Instrument registry facade used by scripts and docs sync.
 
-Named instruments live in ``core.presets``. This module keeps a small
-discovery API for callers that previously used ``algorithm_registry``.
-Prefer ``core.presets`` / ``instrument`` in new code.
+Named instruments live in ``core.presets``. This module provides a small
+discovery API for callers; prefer ``core.presets`` / ``instrument`` in new code.
 """
 
 from __future__ import annotations
@@ -33,6 +32,3 @@ class _PresetView:
 
 
 instrument_registry = InstrumentRegistry()
-# Legacy alias for older imports / tests.
-AlgorithmRegistry = InstrumentRegistry
-algorithm_registry = instrument_registry

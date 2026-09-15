@@ -78,7 +78,6 @@ def _progress_stride(max_ticks: int) -> int:
 def iter_one_trial(
     *,
     instrument: str | None = None,
-    algorithm_id: str | None = None,
     scenario_id: str,
     seed: int,
     preset: str = "paper",
@@ -92,7 +91,7 @@ def iter_one_trial(
     total: int = 1,
 ) -> Iterator[dict[str, Any]]:
     """Yield start/tick/trial events for one instrument x seed run."""
-    instrument_id = instrument or algorithm_id
+    instrument_id = instrument
     scenario = scenario_registry.get(scenario_id)
     merged_params = dict(algorithm_params or {})
     factor_overrides = dict(sweep_params or {})
@@ -194,7 +193,6 @@ def iter_one_trial(
 def run_one_trial(
     *,
     instrument: str | None = None,
-    algorithm_id: str | None = None,
     scenario_id: str,
     seed: int,
     preset: str = "paper",
@@ -206,7 +204,6 @@ def run_one_trial(
     row: dict[str, Any] | None = None
     for event in iter_one_trial(
         instrument=instrument,
-        algorithm_id=algorithm_id,
         scenario_id=scenario_id,
         seed=seed,
         preset=preset,
@@ -225,7 +222,6 @@ def run_one_trial(
 
 def run_benchmark(
     *,
-    algorithm_ids: list[str] | None = None,
     instruments: list[str] | None = None,
     scenario_id: str,
     seeds: list[int],
@@ -236,7 +232,7 @@ def run_benchmark(
     sweep: list[dict[str, Any]] | None = None,
     on_progress: ProgressFn | None = None,
 ) -> dict[str, Any]:
-    ids = list(instruments or algorithm_ids or [])
+    ids = list(instruments or [])
     specs = parse_factor_specs(sweep)
     param_sets = expand_factor_grid(specs)
 
@@ -251,7 +247,7 @@ def run_benchmark(
                         "and dog_controller in every cell"
                     )
     elif not ids:
-        raise ValueError("Provide instruments or algorithm_ids")
+        raise ValueError("Provide instruments")
 
     for instrument_id in ids:
         get_preset(instrument_id)

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from algorithms.registry import algorithm_registry
+from algorithms.registry import instrument_registry
 from controllers.v_formation import VFormationController
 from core.observation_models import GlobalObservation
 from core.presets import get_preset
@@ -12,7 +12,7 @@ from tests.backend.helpers import build_runner, make_state, make_world, snapshot
 
 
 def test_v_formation_registered():
-    assert "v_formation" in algorithm_registry.names()
+    assert "v_formation" in instrument_registry.names()
 
 
 def test_v_formation_step_runs():

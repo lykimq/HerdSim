@@ -16,7 +16,6 @@ router = APIRouter()
 
 
 class CreateSessionRequest(BaseModel):
-    algorithm_id: Optional[str] = None
     instrument: Optional[str] = None
     scenario_id: str = "drive_to_goal"
     preset: str = Field(default="paper", pattern="^(paper|scenario|custom)$")
@@ -55,7 +54,7 @@ def _world_payload(runner: SimulationRunner) -> dict[str, Any]:
 @router.post("/")
 def create_session(req: CreateSessionRequest):
     """Create and initialize a new simulation session."""
-    instrument = req.instrument or req.algorithm_id or "strombom"
+    instrument = req.instrument or "strombom"
     try:
         get_preset(instrument)
     except KeyError as exc:
@@ -102,7 +101,6 @@ def create_session(req: CreateSessionRequest):
         "num_sheep": config["n_sheep"],
         "num_shepherds": config["n_shepherds"],
         "seed": runner.seed,
-        "algorithm_id": instrument,
         "instrument": instrument,
         "sheep_model": config.get("sheep_model"),
         "dog_controller": config.get("dog_controller"),

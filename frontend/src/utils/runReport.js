@@ -53,8 +53,7 @@ export function buildRunReport({
   const tick = last.tick;
   const frame = last.frame || {};
   const flockSize = flockSizeFrom(last);
-  const resolvedAlgorithmId =
-    algorithmId || config?.algorithm_id || config?.instrument || null;
+  const resolvedInstrumentId = algorithmId || config?.instrument || null;
 
   const cohesionSeries = series(history, 'cohesion');
   const gcmGoalSeries = series(history, 'gcm_goal');
@@ -143,7 +142,7 @@ export function buildRunReport({
   const insightLines = buildInsightLines({
     status,
     scenarioId,
-    algorithmId: resolvedAlgorithmId,
+    instrumentId: resolvedInstrumentId,
     config,
     cohesion,
     cohesionDelta,

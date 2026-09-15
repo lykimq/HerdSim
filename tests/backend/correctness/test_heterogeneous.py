@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from algorithms.registry import algorithm_registry
+from algorithms.registry import instrument_registry
 from core.agent_attributes import init_agent_attributes
 from core.presets import get_preset
 from dynamics.strombom import StrombomSheepDynamics
@@ -12,7 +12,7 @@ from tests.backend.helpers import build_runner, make_state, make_world, snapshot
 
 
 def test_heterogeneous_registered():
-    assert "heterogeneous" in algorithm_registry.names()
+    assert "heterogeneous" in instrument_registry.names()
 
 
 def test_heterogeneous_determinism_same_seed():

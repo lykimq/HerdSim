@@ -66,7 +66,7 @@ Each sheep `i` operates in two states depending on whether the dog is within det
 
 **Grazing.** If the dog distance exceeds `r_s`, the sheep is stationary.
 
-**Responding.** The sheep perceives its `k_neighbors` nearest neighbours. From that neighbourhood, `n_attraction` sheep are drawn at random for the attraction force, and `n_alignment` sheep are drawn at random for the alignment force. This random topological sub-sampling reflects the paper's empirical model of attention under stress.
+**Responding.** The sheep perceives its `k_neighbors` nearest neighbours. It draws `n_attraction` sheep at random for the attraction force, then draws `n_alignment` sheep at random from that attraction sample for alignment. This random topological sub-sampling reflects the paper's empirical model of attention under stress.
 
 **Neighbour repulsion** `Rep` -- for all neighbours `j` within `r_a`:
 
@@ -76,7 +76,7 @@ Rep = sum_j  (p_i - p_j) / ||p_i - p_j||
 
 **Attraction** `Att` -- unit vector from `p_i` toward the mean position of the `n_attraction` sampled neighbours.
 
-**Alignment** `Ali` -- mean unit velocity of the `n_alignment` sampled neighbours.
+**Alignment** `Ali` -- mean unit velocity of `n_alignment` neighbours sampled from the attraction sample.
 
 **Dog repulsion** `Dog` -- unit vector from the dog toward `p_i`.
 
@@ -123,14 +123,16 @@ P_d = GCM  +  r_a * sqrt(N) * (GCM - goal) / ||GCM - goal||
 
 When the dog is within `r_a` of any sheep, it continues on its current heading at a reduced absolute speed `dog_close_speed`. This prevents scattering when the dog is already inside the flock boundary, and matches the author's MATLAB implementation.
 
-## Agents
+## HerdSim preset agents
 
 | Agent | Default |
 |-------|---------|
 | Sheep (N) | 14 |
 | Dog (M) | 1 |
 
-The paper studies small empirical flocks. Running with larger N is valid but changes the f(N) threshold substantially.
+The paper reports a 14-sheep empirical flock. HerdSim uses the same count in
+its `flocking_dog` preset. Running with larger N changes the f(N) threshold
+substantially.
 
 ## Parameters
 
@@ -153,10 +155,10 @@ The paper studies small empirical flocks. Running with larger N is valid but cha
 
 ## Fidelity status
 
-**Matches paper / author MATLAB:** topological sheep neighbour rules, dog close-speed inside `r_a`, paper-oriented small flock defaults (N=14), Collect/Drive-style dog.
+**Paper-informed elements:** topological sheep neighbour rules, dog close-speed inside `r_a`, and the small-flock setting (N=14). HerdSim combines these sheep rules with a Collect/Drive-style dog controller.
 
 **Differs by design:** scenario goal instead of MATLAB origin; arena wall reflection. Role in HerdSim: empirically informed third model family alongside Strombom and Kubo for fair shared-scenario comparison.
 
 ## Fidelity notes
 
-The HerdSim implementation follows the author MATLAB model for sheep heading and dog close-speed. The Drive target uses the scenario goal rather than the MATLAB reference origin. Wall reflection is applied at arena boundaries. The random topological sub-sampling (`n_attraction`, `n_alignment`) means runs at the same seed can exhibit more variability than the Strombom family, particularly at small N.
+The Drive target uses the scenario goal rather than the paper's experimental target setup, and wall reflection is applied at arena boundaries. The random topological sub-sampling (`n_attraction`, `n_alignment`) means runs at the same seed can exhibit more variability than the Strombom family, particularly at small N.

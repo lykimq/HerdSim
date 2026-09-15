@@ -84,7 +84,7 @@ export function buildSetupLines({
 } = {}) {
   const cfg = config || {};
   const lines = [];
-  const instrumentId = cfg.algorithm_id || cfg.instrument || null;
+  const instrumentId = cfg.instrument || null;
   pushKv(lines, 'Instrument', algorithmName || instrumentId);
   if (algorithmName && instrumentId && algorithmName !== instrumentId) {
     pushKv(lines, 'Instrument id', instrumentId);
@@ -132,7 +132,7 @@ export function buildSetupLines({
 export function buildInsightLines({
   status,
   scenarioId,
-  algorithmId = null,
+  instrumentId = null,
   config = null,
   cohesion = null,
   cohesionDelta = null,
@@ -148,7 +148,7 @@ export function buildInsightLines({
 } = {}) {
   const lines = [];
   const cfg = config || {};
-  const id = algorithmId || cfg.algorithm_id || cfg.instrument || null;
+  const id = instrumentId || cfg.instrument || null;
   const collectDrive = id ? COLLECT_DRIVE_IDS.has(id) : false;
   const containment = isContainmentScenario(scenarioId);
   const zone = containment ? 'pen' : 'goal';

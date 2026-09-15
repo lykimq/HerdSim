@@ -148,7 +148,6 @@ export function createNetLogoView({ onStatus, onRunInHerdSim } = {}) {
   }
 
   function selectedTwin() {
-    return twins.find((t) => t.algorithm_id === els.twin.value) || null;
   }
 
   function selectedModel() {
@@ -189,7 +188,6 @@ export function createNetLogoView({ onStatus, onRunInHerdSim } = {}) {
     twins = list || [];
     twinPaths = new Set(twins.map((t) => t.model_file));
     els.twin.innerHTML = twins
-      .map((t) => `<option value="${t.algorithm_id}">${t.name}</option>`)
       .join('');
     refreshTwinMeta();
   }
@@ -245,7 +243,10 @@ export function createNetLogoView({ onStatus, onRunInHerdSim } = {}) {
     const twin = selectedTwin();
     if (!twin || typeof onRunInHerdSim !== 'function') return;
     setActionStatus(`Opening HerdSim Simulate with ${twin.name}...`);
-    onRunInHerdSim(twin.algorithm_id);
+    return twins.find((t) => t.instrument === els.twin.value) || null;
+
+      .map((t) => `<option value="${t.instrument}">${t.name}</option>`)
+    onRunInHerdSim(twin.instrument);
   });
 
   els.openDesktop.addEventListener('click', async () => {

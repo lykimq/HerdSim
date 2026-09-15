@@ -1,12 +1,8 @@
 # Metrics
 
-Metrics are computed at every tick from observable simulation state and are
-instrument-agnostic unless noted. They appear in the live metrics panel during
-Simulate and Compare runs, in the scrub history, and in Experiments exports.
+Metrics are computed at every tick from observable simulation state and are instrument-agnostic unless noted. They appear in the live metrics panel during Simulate and Compare runs, in the scrub history, and in Experiments exports.
 
-Per-tick plugins write into history. Analytics **trial** and **summary** exports
-use an outcome + trajectory schema (mean/min/max/auc over the run), not bare
-final-tick metric ids.
+Per-tick plugins write into history. Analytics **trial** and **summary** exports use an outcome + trajectory schema (mean/min/max/auc over the run), not bare final-tick metric ids.
 
 ## Metric taxonomy
 
@@ -14,7 +10,7 @@ final-tick metric ids.
 
 | Metric | Definition |
 |--------|------------|
-| **Success Rate** (per-tick) | Fraction of sheep currently inside the goal zone (0-1). Instantaneous occupancy, not the trial success flag. |
+| **Success Rate** (per-tick) | Fraction of sheep currently inside the goal zone (0-1). Instantaneous occupancy,  not the trial success flag. |
 | **Sheep in Goal** | Integer count of sheep currently inside the goal zone. |
 | **Time to Goal** | Current tick if all sheep are simultaneously inside the goal; -1 otherwise. |
 | **GCM to Goal** | Euclidean distance from the flock GCM to the goal centre. |
@@ -90,8 +86,7 @@ These are analysis-layer outputs, not per-tick metric plugins.
 
 ## Failure taxonomy (trial exports)
 
-Unsuccessful trials also receive a heuristic `failure_mode` from
-`analysis.failure_taxonomy.classify_failure`:
+Unsuccessful trials also receive a heuristic `failure_mode` from `analysis.failure_taxonomy.classify_failure`: 
 
 | Id | Meaning |
 |----|---------|
@@ -103,7 +98,6 @@ Unsuccessful trials also receive a heuristic `failure_mode` from
 | `stacking` | Shepherds stayed unusually close (when recorded) |
 | `scatter` | Cohesion stayed high (spread) through the run |
 
-`failure_label` is the human-readable string; `failure_hints` lists every heuristic
-that matched. Single-view run reports show the same classes under Failure hints.
+`failure_label` is the human-readable string; `failure_hints` lists every heuristic that matched. Single-view run reports show the same classes under Failure hints.
 
 JSON packages include `herdsim_version`, best-effort `git_commit`, `python_version`, experiment design, `resolved_config` (from a trial), metric definitions, summary, trial rows, and caveats. CSV includes the same preamble facts; nested `resolved_config` is omitted from CSV cells and kept in JSON.

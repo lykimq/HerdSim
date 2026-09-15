@@ -52,7 +52,7 @@ def make_state(
 
 
 def build_runner(
-    algorithm_id: str,
+    instrument: str,
     scenario_id: str = "drive_to_goal",
     *,
     preset: str = "paper",
@@ -64,7 +64,7 @@ def build_runner(
     scenario = scenario_registry.get(scenario_id)
     config = resolve_experiment_config(
         scenario=scenario,
-        instrument=algorithm_id,
+        instrument=instrument,
         preset=preset,
         num_sheep=num_sheep,
         num_shepherds=num_shepherds,
@@ -75,12 +75,12 @@ def build_runner(
         metrics=metric_registry.get_all(),
         config=config,
         seed=seed,
-        instrument=algorithm_id,
+        instrument=instrument,
     )
 
 
 def run_trial(
-    algorithm_id: str,
+    instrument: str,
     scenario_id: str = "drive_to_goal",
     *,
     preset: str = "paper",
@@ -90,7 +90,7 @@ def run_trial(
     config_overrides: dict[str, Any] | None = None,
 ) -> RunResult:
     runner = build_runner(
-        algorithm_id,
+        instrument,
         scenario_id,
         preset=preset,
         seed=seed,

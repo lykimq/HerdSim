@@ -1,7 +1,6 @@
 # Instruments (sheep model x dog controller)
 
-HerdSim no longer treats each paper as a monolithic algorithm. Named instruments
-are presets over orthogonal plugins.
+# HerdSim no longer treats each paper as a monolithic algorithm. Named instruments are presets over orthogonal plugins.
 
 ## Sheep models
 

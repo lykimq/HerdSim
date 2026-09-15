@@ -15,7 +15,7 @@ def test_list_twins_includes_all_algorithms():
     res = client.get("/api/netlogo/twins")
     assert res.status_code == 200
     twins = res.json()["twins"]
-    by_id = {t["algorithm_id"]: t for t in twins}
+    by_id = {t.get("instrument") or t.get("algorithm_id"): t for t in twins}
     expected = {
         "strombom": "strombom.nlogo",
         "strombom_noise": "strombom_noise.nlogo",

@@ -17,7 +17,7 @@ from api.benchmark_runner import run_benchmark
 
 def test_report_package_includes_provenance():
     payload = run_benchmark(
-        algorithm_ids=["strombom"],
+        instruments=["strombom"],
         scenario_id="drive_to_goal",
         seeds=[1],
         preset="paper",
@@ -25,7 +25,7 @@ def test_report_package_includes_provenance():
         num_shepherds=1,
     )
     request = {
-        "algorithm_ids": ["strombom"],
+        "instruments": ["strombom"],
         "scenario_id": "drive_to_goal",
         "preset": "paper",
         "seeds": [1],
@@ -115,7 +115,7 @@ def test_markdown_export_shares_caveats():
 def test_first_success_tick_matches_scenario_success_not_time_to_goal():
     """Successful trials set first_success_tick from scenario stop, not all-in-goal."""
     payload = run_benchmark(
-        algorithm_ids=["strombom"],
+        instruments=["strombom"],
         scenario_id="drive_to_goal",
         seeds=[1],
         preset="paper",

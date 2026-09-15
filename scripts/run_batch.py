@@ -22,7 +22,7 @@ def parse_seeds(raw: str) -> list[int]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="HerdSim batch runner")
-    parser.add_argument("--algorithm", default="strombom")
+    parser.add_argument("--instrument", default="strombom")
     parser.add_argument("--scenario", default="drive_to_goal")
     parser.add_argument("--preset", default="paper", choices=["paper", "scenario", "custom"])
     parser.add_argument("--seeds", default="1,2,3,4,5")
@@ -33,7 +33,7 @@ def main() -> None:
 
     seeds = parse_seeds(args.seeds)
     request = {
-        "algorithm_ids": [args.algorithm],
+        "instruments": [args.instrument],
         "scenario_id": args.scenario,
         "preset": args.preset,
         "seeds": seeds,
@@ -41,7 +41,7 @@ def main() -> None:
         "num_shepherds": args.n_shepherds,
     }
     payload = run_benchmark(
-        algorithm_ids=[args.algorithm],
+        instruments=[args.instrument],
         scenario_id=args.scenario,
         seeds=seeds,
         preset=args.preset,

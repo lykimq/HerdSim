@@ -182,10 +182,10 @@ def list_models():
     }
 
 
-@router.get("/{algorithm_id}")
-def get_algorithm(algorithm_id: str):
+@router.get("/{instrument}")
+def get_instrument(instrument: str):
     try:
-        preset = get_preset(algorithm_id)
+        preset = get_preset(instrument)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     payload = {

@@ -87,7 +87,7 @@ def build_experiment_block(
     req = request or payload.get("experiment") or {}
     rows = payload.get("rows") or []
     first = rows[0] if rows else {}
-    algorithms = req.get("algorithm_ids")
+    algorithms = req.get("instruments")
     if not algorithms:
         algorithms = sorted({r.get("algorithm") for r in rows if r.get("algorithm")})
     seeds = req.get("seeds")
@@ -95,7 +95,7 @@ def build_experiment_block(
         seeds = sorted({int(r["seed"]) for r in rows if "seed" in r})
     resolved = first.get("resolved_config")
     return {
-        "algorithm_ids": list(algorithms),
+        "instruments": list(algorithms),
         "scenario_id": req.get("scenario_id") or first.get("scenario"),
         "preset": req.get("preset") or first.get("preset"),
         "seeds": list(seeds),
@@ -153,7 +153,7 @@ def report_to_csv(payload: dict[str, Any], *, request: dict[str, Any] | None = N
         f"# python_version: {package.get('python_version')}",
         f"# scenario: {package['experiment'].get('scenario_id')}",
         f"# preset: {package['experiment'].get('preset')}",
-        f"# instruments: {', '.join(str(a) for a in package['experiment'].get('algorithm_ids') or [])}",
+        f"# instruments: {', '.join(str(a) for a in package['experiment'].get('instruments') or [])}",
         f"# seeds: {', '.join(str(s) for s in package['experiment'].get('seeds') or [])}",
         f"# trials: {package['experiment'].get('trials')}",
         "#",
@@ -189,7 +189,7 @@ def report_to_markdown(
         f"- Python: {package.get('python_version')}",
         f"- Scenario: {exp.get('scenario_id')}",
         f"- Preset: {exp.get('preset')}",
-        f"- Instruments: {', '.join(str(a) for a in exp.get('algorithm_ids') or [])}",
+        f"- Instruments: {', '.join(str(a) for a in exp.get('instruments') or [])}",
         f"- Seeds: {', '.join(str(s) for s in exp.get('seeds') or [])}",
         f"- Trials: {exp.get('trials')}",
         "",

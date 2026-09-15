@@ -301,7 +301,7 @@ export function bindAnalyticsMode({
       if (!selected.length) return { error: 'Select at least one instrument.' };
       return {
         payload: {
-          algorithm_ids: selected,
+          instruments: selected,
           scenario_id,
           seeds,
           preset,
@@ -312,7 +312,7 @@ export function bindAnalyticsMode({
     if (checked.error) return { error: checked.error };
     return {
       payload: {
-        algorithm_ids: [],
+        instruments: [],
         scenario_id,
         seeds,
         preset,

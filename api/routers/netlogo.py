@@ -92,17 +92,17 @@ def _load_twins() -> list[dict]:
     for item in raw:
         if not isinstance(item, dict):
             continue
-        algorithm_id = str(item.get("algorithm_id", "")).strip()
+        instrument = str(item.get("instrument", item.get("algorithm_id", ""))).strip()
         model_file = str(item.get("model_file", "")).strip()
-        if not algorithm_id or not model_file:
+        if not instrument or not model_file:
             continue
         path = resolve_model_path(model_file)
         if not path.is_file():
             continue
         twins.append(
             {
-                "algorithm_id": algorithm_id,
-                "name": str(item.get("name") or algorithm_id),
+                "instrument": instrument,
+                "name": str(item.get("name") or instrument),
                 "model_file": _rel_model_path(path),
                 "description": str(item.get("description") or ""),
                 "size_bytes": path.stat().st_size,

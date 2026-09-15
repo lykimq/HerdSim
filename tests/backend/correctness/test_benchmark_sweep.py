@@ -37,7 +37,7 @@ def test_parse_sweep_rejects_oversized_grid():
 
 def test_run_benchmark_param_sweep_labels_rows():
     payload = run_benchmark(
-        algorithm_ids=["strombom"],
+        instruments=["strombom"],
         scenario_id="drive_to_goal",
         seeds=[1],
         preset="paper",
@@ -63,7 +63,7 @@ def test_find_preset_for_models_prefers_canonical():
 
 def test_run_benchmark_factor_grid_without_instrument_uses_param_bundle():
     payload = run_benchmark(
-        algorithm_ids=[],
+        instruments=[],
         scenario_id="drive_to_goal",
         seeds=[1],
         preset="custom",
@@ -86,7 +86,7 @@ def test_run_benchmark_factor_grid_without_instrument_uses_param_bundle():
 def test_run_benchmark_factor_grid_without_models_rejected():
     with pytest.raises(ValueError, match="sheep_model"):
         run_benchmark(
-            algorithm_ids=[],
+            instruments=[],
             scenario_id="drive_to_goal",
             seeds=[1],
             preset="custom",

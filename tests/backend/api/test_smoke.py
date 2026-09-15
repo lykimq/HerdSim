@@ -40,7 +40,7 @@ def test_create_session_paper_strombom(client):
     res = client.post(
         "/api/simulations",
         json={
-            "algorithm_id": "strombom",
+            "instrument": "strombom",
             "scenario_id": "drive_to_goal",
             "preset": "paper",
             "seed": 7,
@@ -57,7 +57,7 @@ def test_create_session_scenario_preset_kubo(client):
     res = client.post(
         "/api/simulations",
         json={
-            "algorithm_id": "kubo",
+            "instrument": "kubo",
             "scenario_id": "obstacle_course",
             "preset": "scenario",
             "seed": 1,
@@ -73,7 +73,7 @@ def test_websocket_step_and_reset(client):
     create = client.post(
         "/api/simulations",
         json={
-            "algorithm_id": "strombom",
+            "instrument": "strombom",
             "scenario_id": "drive_to_goal",
             "num_sheep": 8,
             "num_shepherds": 1,
@@ -102,7 +102,7 @@ def test_benchmark_run_and_export(client):
     res = client.post(
         "/api/benchmarks/run",
         json={
-            "algorithm_ids": ["strombom"],
+            "instruments": ["strombom"],
             "scenario_id": "drive_to_goal",
             "seeds": [1],
             "preset": "paper",
@@ -143,12 +143,12 @@ async def test_async_create_session():
         res = await ac.post(
             "/api/simulations",
             json={
-                "algorithm_id": "strombom",
+                "instrument": "strombom",
                 "scenario_id": "drive_to_goal",
                 "num_sheep": 5,
                 "num_shepherds": 1,
                 "seed": 1,
-            },
+                },
         )
     assert res.status_code == 200
     assert res.json()["session_id"]

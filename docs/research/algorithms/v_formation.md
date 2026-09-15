@@ -79,15 +79,7 @@ Sheep dynamics are identical to Strombom 2014. Collect and the cohesion threshol
 
 ### Drive mode (V-arc)
 
-A base Drive point `P_base` is computed behind the GCM along the GCM-to-goal axis:
-
-```
-P_base = GCM  +  v_arc_offset * (GCM - goal) / ||GCM - goal||
-```
-
-where `v_arc_offset` defaults to `r_a * sqrt(N)` if not set explicitly.
-
-Dog `i` is placed on an angular arc centred on `P_base`. The angular offset for dog `i` is:
+The controller uses the unit direction from the goal to the GCM as the direction behind the flock. The arc radius is `v_arc_offset` when supplied, or `r_a * sqrt(N)` otherwise. The angular offset for dog `i` is:
 
 ```
 theta(i) = (i - (M - 1) / 2) * v_angle_deg  (converted to radians)
@@ -95,10 +87,10 @@ theta(i) = (i - (M - 1) / 2) * v_angle_deg  (converted to radians)
 
 This centres the arc symmetrically. Dog `0` sits to one side; the middle dog (if `M` is odd) sits directly behind the GCM.
 
-Each dog's target is:
+Each dog's target is a point on the arc centred on the GCM:
 
 ```
-P_d(i) = P_base  +  R(behind_direction, theta(i)) * arc_radius
+P_d(i) = GCM  +  R(behind_direction, theta(i)) * arc_radius
 ```
 
 where `R(...)` denotes a 2D rotation of the behind-GCM unit vector by angle `theta(i)`.
@@ -121,7 +113,7 @@ All Strombom 2014 parameters apply. V-Formation-specific additions:
 | Parameter | Default | Meaning |
 |-----------|---------|---------|
 | `v_angle_deg` | 35 | Angular spacing between adjacent dogs in the arc, in degrees. Larger values widen the V. |
-| `v_arc_offset` | `r_a * sqrt(N)` | Distance from `P_base` to each dog's arc position. Larger values stand dogs farther back. |
+| `v_arc_offset` | `r_a * sqrt(N)` | Radius of the target arc around the GCM. Larger values place dogs farther from the flock. |
 
 ## How to read a run
 

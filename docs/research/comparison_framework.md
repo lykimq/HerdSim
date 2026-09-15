@@ -1,14 +1,10 @@
 # Comparison framework
 
-HerdSim is an experimental platform for studying multi-shepherd herding under
-shared scenarios, seeds, and instrument-independent metrics. Instruments are
-factor bundles over sheep models and dog controllers.
+HerdSim is an experimental platform for studying multi-shepherd herding under shared scenarios, seeds, and instrument-independent metrics. Instruments are factor bundles over sheep models and dog controllers.
 
 ## Contribution framing
 
-The research goal is not only to implement individual herding controllers. It is
-to run equivalent experiments across mechanisms and conditions, then report
-outcomes with reproducible provenance.
+The research goal is not only to implement individual herding controllers. It is to run equivalent experiments across mechanisms and conditions, then report outcomes with reproducible provenance.
 
 Core instruments:
 
@@ -18,8 +14,7 @@ Core instruments:
 | `kubo` | kubo | kubo_forces |
 | `flocking_dog` | jadhav | collect_drive |
 
-Variants (`strombom_noise`, `heterogeneous`, `fat`, `adaptive`, ...) are
-presets over the same factor space.
+Variants (`strombom_noise`, `heterogeneous`, `fat`, `adaptive`, ...) are presets over the same factor space.
 
 ## Fair-comparison protocol
 

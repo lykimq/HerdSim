@@ -523,7 +523,6 @@ export function buildSessionPayload({
 }) {
   const f = { ...DEFAULT_FACTORS, ...(factors || {}) };
   const payload = {
-    algorithm_id: instrumentId,
     instrument: instrumentId,
     scenario_id: scenarioId,
     preset,

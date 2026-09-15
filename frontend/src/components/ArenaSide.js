@@ -70,7 +70,7 @@ export function createArenaSide(
     onInit: async (cfg) => {
       try {
         log.info('arena', `${label}: independent init`, {
-          instrument: cfg.instrument || cfg.algorithm_id,
+          instrument: cfg.instrument,
           scenario: cfg.scenario_id,
           seed: cfg.seed,
           sheep: cfg.num_sheep,
@@ -115,7 +115,7 @@ export function createArenaSide(
   async function initFromShared(sharedCfg) {
     try {
       log.info('arena', `${label}: fair init`, {
-        instrument: controls.getConfig().algorithm_id,
+        instrument: controls.getConfig().instrument,
         scenario: sharedCfg.scenario_id,
         seed: sharedCfg.seed,
         sheep: sharedCfg.num_sheep,

@@ -28,7 +28,7 @@ _LAST_REQUEST: dict | None = None
 
 def _request_meta(req: BenchmarkRequest, sweep_payload: list[dict[str, Any]] | None) -> dict:
     return {
-        "algorithm_ids": list(req.algorithm_ids),
+        "instruments": list(req.instruments),
         "scenario_id": req.scenario_id,
         "preset": req.preset,
         "seeds": list(req.seeds),
@@ -45,7 +45,7 @@ class SweepParam(BaseModel):
 
 
 class BenchmarkRequest(BaseModel):
-    algorithm_ids: list[str] = Field(default_factory=lambda: ["strombom", "kubo"])
+    instruments: list[str] = Field(default_factory=lambda: ["strombom", "kubo"])
     scenario_id: str = "drive_to_goal"
     seeds: list[int] = Field(default_factory=lambda: [1, 2, 3, 4, 5])
     preset: str = Field(default="paper", pattern="^(paper|scenario|custom)$")
@@ -66,11 +66,11 @@ def _validate_request(req: BenchmarkRequest) -> list[dict[str, Any]]:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     if specs:
         keys = {str(item["key"]) for item in specs}
-        if req.algorithm_ids:
-            if len(req.algorithm_ids) != 1:
+        if req.instruments:
+            if len(req.instruments) != 1:
                 raise HTTPException(
                     status_code=400,
-                    detail="Param sweep with an instrument requires exactly one algorithm",
+                    detail="Param sweep with an instrument requires exactly one instrument",
                 )
         elif "sheep_model" not in keys or "dog_controller" not in keys:
             raise HTTPException(
@@ -80,8 +80,8 @@ def _validate_request(req: BenchmarkRequest) -> list[dict[str, Any]]:
                     "and dog_controller factors"
                 ),
             )
-    elif not req.algorithm_ids:
-        raise HTTPException(status_code=400, detail="algorithm_ids required")
+    elif not req.instruments:
+        raise HTTPException(status_code=400, detail="instruments required")
     return specs
 
 
@@ -99,8 +99,8 @@ def benchmark_run(
 
     if not stream:
         try:
-            payload = run_benchmark(
-                algorithm_ids=req.algorithm_ids,
+                payload = run_benchmark(
+                instruments=req.instruments,
                 scenario_id=req.scenario_id,
                 seeds=req.seeds,
                 preset=req.preset,
@@ -122,15 +122,15 @@ def benchmark_run(
         try:
             rows = []
             param_sets = expand_param_grid(specs)
-            instrument_loop = list(req.algorithm_ids) if req.algorithm_ids else [None]
+            instrument_loop = list(req.instruments) if req.instruments else [None]
             total = len(instrument_loop) * len(req.seeds) * len(param_sets)
             index = 0
-            for algorithm_id in instrument_loop:
+            for instrument in instrument_loop:
                 for params in param_sets:
                     for seed in req.seeds:
                         index += 1
                         for event in iter_one_trial(
-                            algorithm_id=algorithm_id,
+                            instrument=instrument,
                             scenario_id=req.scenario_id,
                             seed=seed,
                             preset=req.preset,

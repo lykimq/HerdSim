@@ -132,14 +132,14 @@ On each tick the shepherd moves toward its target at speed `shepherd_speed`, unl
 
 ## Knobs
 
-### Agents
+### HerdSim preset agents
 
-| Agent | Paper default |
+| Agent | Default |
 |-------|---------------|
 | Sheep (N) | 50 |
 | Shepherd (M) | 1 |
 
-The **paper** preset loads these values. Running with M > 1 uses the base Strombom rules with each shepherd applying the same Collect / Drive logic independently. For coordinated multi-dog behaviour see Strombom Multi-Dog, Kubo 2022, or V-Formation.
+The HerdSim `strombom` preset loads these values. Running with M > 1 uses the base Strombom rules with each shepherd applying the same Collect / Drive logic independently. For coordinated multi-dog behaviour see Strombom Multi-Dog, Kubo 2022, or V-Formation.
 
 ### Parameters
 
@@ -171,6 +171,6 @@ The HerdSim implementation matches the paper Collect / Drive switch condition, t
 
 ## Fidelity status
 
-**Matches paper:** Collect/Drive switch via f(N), sheep heading composition, shepherd stop distance, paper-preset agent dynamics defaults.
+**Paper-aligned mechanism:** Collect/Drive switch via f(N), sheep heading composition, and shepherd stop distance.
 
 **Differs by design:** scenario-owned goal/world layout and wall reflection; optional `collect_threshold_scale`. Analytics now reports trajectory aggregates (auc cohesion, fragmentation) in addition to task success -- interpret Collect spikes via outlier_count and fragmentation over time, not final-tick cohesion alone.

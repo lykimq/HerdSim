@@ -289,7 +289,9 @@
 
 .guide-layout {
   display: grid;
-  grid-template-columns: minmax(220px, 280px) 1fr;
+  /* give the left nav a stable but flexible width, and allow the content
+     column to take more horizontal space for comfortable reading */
+  grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
   gap: 1.25rem;
   padding: 1.25rem 1.5rem;
   min-height: 100%;
@@ -389,16 +391,26 @@
 }
 
 .guide-layout > .guide-content.card-glass {
-  padding: 2.5rem 3rem 3rem;
+  /* Slightly reduce horizontal padding so the reading column can expand
+     while keeping a pleasant inner gutter on wide screens. */
+  padding: 2rem 2rem 3rem;
   overflow: auto;
   gap: 0;
 }
 
 .guide-md {
-  max-width: 48rem;
-  margin: 0 auto;
+  /* Adaptive readable measure: prefer ~80 characters per line where
+     possible, but never exceed the layout's available width. On narrow
+     frames the content will use the full column width without forcing
+     artificial mid-word breaks. */
+  max-width: min(68rem, 80ch);
   width: 100%;
+  margin: 0 auto;
   box-sizing: border-box;
+  padding: 0 0.25rem;
+  /* Ensure normal wrapping behavior for prose */
+  word-break: normal;
+  overflow-wrap: normal;
 }
 
 .guide-md > *:first-child {
@@ -416,7 +428,7 @@
 .guide-md p { margin: 0 0 1rem; }
 .guide-md ul, .guide-md ol { margin: 0 0 1rem; padding-left: 1.5rem; }
 .guide-md li + li { margin-top: 0.35rem; }
-.guide-md p, .guide-md li { color: var(--text-main); line-height: 1.7; font-size: 0.94rem; }
+.guide-md p, .guide-md li { color: var(--text-main); line-height: 1.8; font-size: 1rem; word-break: normal; overflow-wrap: normal; }
 .guide-md table {
   width: 100%;
   border-collapse: collapse;

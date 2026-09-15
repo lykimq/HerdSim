@@ -34,9 +34,9 @@ def main() -> None:
         description="HerdSim fair comparison batch (shared N/M, outcome+trajectory schema)"
     )
     parser.add_argument(
-        "--algorithms",
+        "--instruments",
         default="strombom,kubo,flocking_dog",
-        help="Comma-separated algorithm ids",
+        help="Comma-separated instrument ids",
     )
     parser.add_argument("--scenario", default="drive_to_goal")
     parser.add_argument(
@@ -55,10 +55,10 @@ def main() -> None:
     parser.add_argument("--out-dir", default="results/fair_compare")
     args = parser.parse_args()
 
-    algorithm_ids = parse_algorithms(args.algorithms)
+    algorithm_ids = parse_algorithms(args.instruments)
     seeds = parse_seeds(args.seeds)
     request = {
-        "algorithm_ids": algorithm_ids,
+        "instruments": algorithm_ids,
         "scenario_id": args.scenario,
         "preset": args.preset,
         "seeds": seeds,
@@ -66,7 +66,7 @@ def main() -> None:
         "num_shepherds": args.n_shepherds,
     }
     payload = run_benchmark(
-        algorithm_ids=algorithm_ids,
+        instruments=algorithm_ids,
         scenario_id=args.scenario,
         seeds=seeds,
         preset=args.preset,

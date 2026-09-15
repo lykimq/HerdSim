@@ -14,7 +14,7 @@ herdability; metrics stay algorithm-agnostic.
 
 - **Herdability:** when is a flock controllable under given N_sheep, N_dogs, and density?
 - **Information:** how does performance change under global, local, bearing, or noisy sensing?
-- **Heterogeneity:** how robust are strategies when sheep or dogs are not identical?
+- **Heterogeneity:** how do outcomes change when sheep or dogs differ in response or capability?
 - **Generalization:** do rankings reverse under distribution shift?
 
 ## Architecture
