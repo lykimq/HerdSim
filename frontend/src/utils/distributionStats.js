@@ -1,4 +1,4 @@
-/** Shared heading / GCM-distance histogram binning for Single view. */
+/** Shared heading / GCM-distance histogram binning for Simulate view. */
 
 function emptyBins(n) {
   return Array.from({ length: n }, () => 0);

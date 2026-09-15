@@ -2,6 +2,9 @@
 
 Compares idealized Strombom sheep vs Jadhav sheep under the same Collect/Drive
 controller and reports success / cohesion differences as a model-validity map.
+
+Deferred: full UWB / trajectory fitting is out of scope until platform polish
+is complete. This script only compares instrument-level success rates.
 """
 
 from __future__ import annotations

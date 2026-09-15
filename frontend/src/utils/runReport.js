@@ -1,4 +1,4 @@
-/** End-of-run methods/results note for the Single-view Run report. */
+/** End-of-run methods/results note for the Simulate-view Run report. */
 
 import { DONE_STATUSES } from './playback.js';
 import { headingBins } from './distributionStats.js';
@@ -23,6 +23,7 @@ import {
   buildSetupLines,
   humanScenarioLabel,
 } from './runReportExtras.js';
+import { classifyRunFailure } from './failureTaxonomy.js';
 
 /**
  * Build a structured end-of-run report from full tick history and session setup.
@@ -124,6 +125,20 @@ export function buildRunReport({
     outcomeLines.push('Scenario success criterion: not met.');
   }
   sections.push({ id: 'outcome', title: 'Outcome', lines: outcomeLines });
+
+  const nShepherds =
+    config?.num_shepherds ??
+    config?.n_shepherds ??
+    config?.algorithm_params?.n_shepherds ??
+    null;
+  const failure = classifyRunFailure({
+    status,
+    history,
+    nShepherds: Number(nShepherds) || 0,
+  });
+  if (failure.lines.length) {
+    sections.push({ id: 'failure', title: 'Failure hints', lines: failure.lines });
+  }
 
   const insightLines = buildInsightLines({
     status,
@@ -314,6 +329,8 @@ export function buildRunReport({
       successRate,
       pathPerTick,
     }),
+    failure_mode: failure.failure_mode,
+    failure_label: failure.failure_label,
     sections: sections.filter((s) => s.lines.length > 0),
   };
 }

@@ -1,6 +1,6 @@
 # Scenarios
 
-A scenario defines the task, the world layout, and the success criterion for a simulation run. Any algorithm can run in any scenario; scenarios and algorithms are fully independent.
+A scenario defines the task, the world layout, and the success criterion for a simulation run. Any instrument can run in any scenario; scenarios and instruments are fully independent.
 
 ## Scenario index
 
@@ -17,13 +17,13 @@ A scenario defines the task, the world layout, and the success criterion for a s
 
 Each scenario has a recommended configuration accessible via the **scenario** preset. This sets flock size, shepherd count, and world layout to values suited to the task. The **paper** preset overrides agent counts with the algorithm's published defaults while keeping the scenario's world layout.
 
-For fair cross-model comparison, use **custom** (or Arena overrides) to lock the same `n_sheep` and `n_shepherds` for every algorithm on the same scenario. See `docs/research/comparison_framework.md`.
+For fair cross-model comparison, use **custom** (or Compare shared settings) to lock the same `n_sheep` and `n_shepherds` for every instrument on the same scenario. See `docs/research/comparison_framework.md`.
 
-There is no algorithm-specific replication scenario. Models such as Kubo keep MATLAB-faithful force parameters in the algorithm plugin; the shared scenario supplies the HerdSim world.
+There is no instrument-specific replication scenario. Models such as Kubo keep MATLAB-faithful force parameters in the instrument package; the shared scenario supplies the HerdSim world.
 
 ## What scenarios control
 
-Scenarios own the world geometry: arena dimensions, goal or pen position and radius, obstacle placement, gate parameters (position, width, wall thickness), and containment thresholds. Algorithms run inside the world the scenario defines.
+Scenarios own the world geometry: arena dimensions, goal or pen position and radius, obstacle placement, gate parameters (position, width, wall thickness), and containment thresholds. Instruments run inside the world the scenario defines.
 
 ## Success, occupancy, and time
 
@@ -37,7 +37,7 @@ Three related quantities appear in the metrics panel and run report:
 
 **Time to goal** is a strict metric: it reports the current tick only when every single sheep is simultaneously inside the goal. If any sheep is outside, it returns -1. This can differ from the first success tick under scenarios where `success_fraction` is less than 1.
 
-**First success tick** (in run reports and Analytics exports) is the tick at which the scenario success criterion first held. This is the primary outcome measure for comparing algorithms on a given scenario.
+**First success tick** (in run reports and Experiments exports) is the tick at which the scenario success criterion first held. This is the primary outcome measure for comparing instruments on a given scenario.
 
 ## Collect threshold and scenario tuning
 

@@ -7,8 +7,8 @@ function setupHtml(sideLabel) {
     <div class="section-title">Setup ${sideLabel ? `- ${sideLabel}` : ''}</div>
     <p class="panel-lead">Pick an instrument and mode.</p>
     <div class="control-group">
-      <label data-role="algorithm-label">Instrument</label>
-      <select data-role="algorithm"></select>
+      <label data-role="instrument-label">Instrument</label>
+      <select data-role="instrument"></select>
     </div>
     <div class="control-group">
       <label data-role="preset-label">Mode</label>

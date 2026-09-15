@@ -1,4 +1,4 @@
-/** Dedicated end-of-run analysis panel for Single view. */
+/** Dedicated end-of-run analysis panel for Simulate view. */
 
 import { downloadText } from '../utils/params.js';
 import { formatRunReportMarkdown } from '../utils/runReport.js';
@@ -70,6 +70,7 @@ export function createRunReportPanel() {
     <div class="run-report-sections" data-role="sections"></div>
     <div class="export-row run-report-actions">
       <button type="button" class="btn btn-secondary" data-role="download-report">Download Markdown</button>
+      <button type="button" class="btn btn-secondary" data-role="download-json">Download JSON</button>
     </div>
   `;
 
@@ -78,6 +79,7 @@ export function createRunReportPanel() {
   const takeawayEl = root.querySelector('[data-role="takeaway"]');
   const sectionsEl = root.querySelector('[data-role="sections"]');
   const downloadBtn = root.querySelector('[data-role="download-report"]');
+  const downloadJsonBtn = root.querySelector('[data-role="download-json"]');
   let lastReport = null;
 
   function clear() {
@@ -89,6 +91,7 @@ export function createRunReportPanel() {
     takeawayEl.textContent = '';
     sectionsEl.replaceChildren();
     downloadBtn.disabled = true;
+    downloadJsonBtn.disabled = true;
   }
 
   function setReport(report) {
@@ -114,6 +117,7 @@ export function createRunReportPanel() {
     });
 
     downloadBtn.disabled = false;
+    downloadJsonBtn.disabled = false;
     // Keep the restored report in view under Metric history after a finished run.
     requestAnimationFrame(() => {
       root.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
@@ -126,6 +130,15 @@ export function createRunReportPanel() {
       `herdsim_run_report_${Date.now()}.md`,
       formatRunReportMarkdown(lastReport),
       'text/markdown',
+    );
+  });
+
+  downloadJsonBtn.addEventListener('click', () => {
+    if (!lastReport) return;
+    downloadText(
+      `herdsim_run_report_${Date.now()}.json`,
+      `${JSON.stringify(lastReport, null, 2)}\n`,
+      'application/json',
     );
   });
 

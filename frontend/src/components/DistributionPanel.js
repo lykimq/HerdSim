@@ -1,4 +1,4 @@
-/** Live heading and GCM-distance distribution plots for Single view. */
+/** Live heading and GCM-distance distribution plots for Simulate view. */
 
 import { gcmDistanceBins, headingBins } from '../utils/distributionStats.js';
 import { formatScale } from '../utils/metricFormat.js';

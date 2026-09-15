@@ -47,8 +47,14 @@ def test_report_package_includes_provenance():
     row = package["rows"][0]
     assert "auc_cohesion" in row
     assert "control_efficiency" in row
+    assert "failure_mode" in row
+    assert "failure_label" in row
     assert "cohesion" not in row
     assert "failure_rate" in package["summary"][0]
+    if row["success"]:
+        assert row["failure_mode"] == "none"
+    else:
+        assert row["failure_mode"] != "none"
 
 
 def test_csv_export_includes_caveats_and_columns():

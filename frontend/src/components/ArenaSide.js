@@ -110,7 +110,7 @@ export function createArenaSide(
   renderer.setHerderKind(controls.getHerderKind());
   sim.wireRendererOverlays(controls);
   updateTitle();
-  controls.root.querySelector('[data-role="algorithm"]').addEventListener('change', updateTitle);
+  controls.root.querySelector('[data-role="instrument"]').addEventListener('change', updateTitle);
 
   async function initFromShared(sharedCfg) {
     try {

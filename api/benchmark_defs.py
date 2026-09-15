@@ -6,8 +6,8 @@ from __future__ import annotations
 SUMMARY_METRIC_DEFS: list[dict[str, str]] = [
     {
         "id": "algorithm",
-        "label": "Algorithm",
-        "description": "Algorithm id compared in this benchmark.",
+        "label": "Instrument",
+        "description": "Instrument id compared in this benchmark.",
     },
     {
         "id": "trials",
@@ -69,7 +69,7 @@ SUMMARY_METRIC_DEFS: list[dict[str, str]] = [
 # Per-trial columns written by Export CSV.
 CSV_COLUMN_DEFS: list[dict[str, str]] = [
     {"id": "sweep_label", "description": "Param-grid label when Analytics ran a sweep (empty otherwise)."},
-    {"id": "algorithm", "description": "Algorithm id for this trial."},
+    {"id": "algorithm", "description": "Instrument id for this trial."},
     {"id": "scenario", "description": "Scenario id used for this trial."},
     {"id": "preset", "description": "Config preset: paper, scenario, or custom."},
     {"id": "seed", "description": "Random seed for this trial."},
@@ -78,6 +78,21 @@ CSV_COLUMN_DEFS: list[dict[str, str]] = [
     {
         "id": "success",
         "description": "True if the scenario success criterion was met before max ticks.",
+    },
+    {
+        "id": "failure_mode",
+        "description": (
+            "Heuristic failure class for unsuccessful trials: none, timeout, split, "
+            "stuck, oscillation, stacking, or scatter. Success trials use none."
+        ),
+    },
+    {
+        "id": "failure_label",
+        "description": "Human-readable description of failure_mode.",
+    },
+    {
+        "id": "failure_hints",
+        "description": "All failure heuristics that matched (JSON list); primary is failure_mode.",
     },
     {
         "id": "total_ticks",

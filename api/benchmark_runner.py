@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Callable, Iterator
 
+from analysis.failure_taxonomy import classify_failure
 from api.benchmark_aggregates import build_trial_metric_fields
 from api.benchmark_summary import summarize_rows, summary_to_csv, summary_to_markdown
 from api.benchmark_sweep import expand_factor_grid, parse_factor_specs, sweep_label
@@ -59,6 +60,14 @@ def _trial_row(
         row["first_success_tick"] = float(result.total_ticks)
     else:
         row["first_success_tick"] = -1.0
+    failure = classify_failure(
+        result.history,
+        success=bool(result.success),
+        n_shepherds=int(config.get("n_shepherds") or 0),
+    )
+    row["failure_mode"] = failure["failure_mode"]
+    row["failure_label"] = failure["failure_label"]
+    row["failure_hints"] = list(failure.get("failure_hints") or [])
     return row
 
 

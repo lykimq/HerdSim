@@ -1,4 +1,4 @@
-/** Setup formatting and grounded run insights for the Single-view report. */
+/** Setup formatting and grounded run insights for the Simulate-view report. */
 
 import { factorFieldLabel } from './factors.js';
 import { getPresetOption } from './params.js';

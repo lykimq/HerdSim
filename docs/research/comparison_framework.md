@@ -1,7 +1,7 @@
 # Comparison framework
 
 HerdSim is an experimental platform for studying multi-shepherd herding under
-shared scenarios, seeds, and algorithm-independent metrics. Instruments are
+shared scenarios, seeds, and instrument-independent metrics. Instruments are
 factor bundles over sheep models and dog controllers.
 
 ## Contribution framing
@@ -66,4 +66,5 @@ python scripts/run_factor_grid.py \
 - Median and IQR of completion ticks on successful trials.
 - Trajectory AUC cohesion and fragmentation.
 - Mean shepherd path and control efficiency.
+- Failure-mode counts on unsuccessful trials (`failure_mode` in trial rows).
 - Document tick/`dt` caveats when comparing Strombom-family and Kubo path lengths.

@@ -8,8 +8,12 @@ export function analyticsRunnerHtml() {
   return `
     <div class="section-title">Experiment design</div>
     <p class="analytics-intro">
-      Compare named instruments across seeds, or run a factor grid over sheep model, dog controller, flock size, and other factors.
-      Matching model pairs reuse instrument param bundles automatically.
+      Compare named instruments across seeds, or run a factor grid over sheep model,
+      dog controller, flock size, and other factors. Matching model pairs reuse
+      instrument param bundles automatically. For fair instrument ranking, use
+      Custom mode and lock the same sheep and dog counts (see Comparison Framework
+      in Guide). Kubo path lengths use continuous dt and are not directly comparable
+      to Strombom-family displacement-per-tick paths.
     </p>
     <div class="control-group">
       <label>Study template</label>
@@ -78,8 +82,8 @@ export function analyticsResultsHtml() {
     <p class="analytics-intro">
       Each row summarizes one instrument (or factor cell) across the chosen seeds. Success/failure are scenario outcomes;
       ticks describe successful runs; AUC cohesion/fragmentation and control efficiency summarize the full
-      trajectory. Hover a column header for definitions. CSV and JSON exports include experiment design,
-      column notes, and comparison caveats.
+      trajectory. Unsuccessful trial rows also carry failure_mode / failure_label heuristics. Hover a column header
+      for definitions. CSV and JSON exports include experiment design, column notes, and comparison caveats.
     </p>
     <table class="benchmark-table">
       <thead>

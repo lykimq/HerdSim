@@ -31,7 +31,7 @@ dev = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["core*", "algorithms*", "scenarios*", "metrics*", "api*"]
+include = ["core*", "algorithms*", "scenarios*", "metrics*", "api*", "analysis*", "dynamics*", "controllers*"]
 
 [tool.ruff]
 line-length = 100

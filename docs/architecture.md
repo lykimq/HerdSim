@@ -74,6 +74,16 @@ Strombom sheep + Collect/Drive).
 - `BaseObservationModel` / `ShepherdObservation` in `core/observation.py`
 - `BaseDogController` in `core/dog_controller.py`
 - Registries in `core/plugin_registry.py`
+- Named instruments (presets) in `core/presets.py`
+- `algorithms/registry.py` exposes `instrument_registry` (and a legacy
+  `algorithm_registry` alias) for scripts and docs sync; prefer `core.presets`
+  or `instrument` in new code
+
+New sheep models, dog controllers, and observation modes register in
+`core/plugin_registry.py`. Scenarios and metrics register in their package
+registries. Named instruments are factor bundles in `core/presets.py` with
+package metadata under `algorithms/<id>/` (on-disk package name; UI and docs
+say instrument).
 
 ## Config Composition
 
@@ -88,11 +98,16 @@ Strombom sheep + Collect/Drive).
 ## Implementation Layout
 
 - `api/`: FastAPI routers and factor-grid benchmarks
-- `core/`: runner, factors, observation, agent attributes
+- `core/`: runner, factors, observation, agent attributes, presets
 - `dynamics/`, `controllers/`: sheep and dog plugins
+- `algorithms/<id>/`: instrument packages (`info.json`, paper defaults, helpers)
 - `scenarios/`, `metrics/`: task and measurement plugins
-- `analysis/`: herdability, behavioural, propagation helpers
+- `analysis/`: herdability, behavioural, failure taxonomy, propagation helpers
 - `scripts/`: fair compare, factor grids, generalization, policy train
-- `frontend/`: Vite SPA
+- `frontend/`: Vite SPA (Simulate, Compare, Experiments, NetLogo, Guide)
 - `docs/`: architecture and research docs
 - `tests/`: pytest + frontend node tests
+
+API fields may still accept `algorithm_id` / `algorithm_ids` for compatibility;
+prefer `instrument` / instruments in new endpoints and UI strings. On disk,
+instrument packages remain under `algorithms/<id>/`.

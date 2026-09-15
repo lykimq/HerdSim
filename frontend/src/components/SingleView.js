@@ -3,6 +3,7 @@ import { createMetricsPanel } from './MetricsPanel.js';
 import { createDistributionPanel } from './DistributionPanel.js';
 import { createMetricHistoryPanel } from './MetricHistoryPanel.js';
 import { createRunReportPanel } from './RunReportPanel.js';
+import { createAgentInspectPanel } from './AgentInspectPanel.js';
 import { PixiRenderer } from '../renderer/PixiRenderer.js';
 import { fetchMetrics } from '../api/rest.js';
 import { createSimulationController } from '../utils/simulationController.js';
@@ -25,6 +26,7 @@ export function createSingleView({
 
   const metrics = createMetricsPanel();
   const distributions = createDistributionPanel();
+  const inspect = createAgentInspectPanel();
   const runReport = createRunReportPanel();
   const canvasHost = document.createElement('div');
   canvasHost.className = 'canvas-host';
@@ -45,6 +47,7 @@ export function createSingleView({
       renderer.setTrailsFromFrames(frames);
       metrics.update(row.metrics || {}, sim.getHistory().length);
       distributions.update(row.frame);
+      inspect.update(row.frame || {});
       onStatus?.({
         status: 'paused',
         tick: row.tick,
@@ -91,11 +94,17 @@ export function createSingleView({
         historyPanel.push(entry);
         metrics.update(msg.metrics, ctx.history.length);
         distributions.update(msg);
+        inspect.update(msg);
       } else {
         historyPanel.clear();
         metrics.update({}, 0);
         distributions.clear();
-        if (msg.type === 'reset') distributions.update(msg);
+        if (msg.type === 'reset') {
+          distributions.update(msg);
+          inspect.update(msg);
+        } else {
+          inspect.clear();
+        }
       }
       refreshRunReport(ctx.status);
       onStatus?.({
@@ -123,6 +132,7 @@ export function createSingleView({
       try {
         historyPanel.clear();
         distributions.clear();
+        inspect.clear();
         runReport.clear();
         const session = await sim.openBusy(cfg);
         if (!session) return;
@@ -184,6 +194,7 @@ export function createSingleView({
   liveGroup.className = 'single-side-group';
   liveGroup.innerHTML = '<div class="section-title single-side-group-title">Live</div>';
   liveGroup.appendChild(metrics.root);
+  liveGroup.appendChild(inspect.root);
   liveGroup.appendChild(distributions.root);
 
   side.appendChild(liveGroup);
@@ -193,7 +204,7 @@ export function createSingleView({
   root.appendChild(side);
 
   async function mount() {
-    log.info('single', 'Mounting Single view');
+    log.info('single', 'Mounting Simulate view');
     try {
       const defs = await fetchMetrics();
       metrics.setDefinitions(defs);
@@ -203,7 +214,7 @@ export function createSingleView({
     }
     await withTimeout(renderer.init(), 20000, 'Single renderer');
     sim.wireRendererOverlays(controls);
-    log.info('single', 'Single view ready');
+    log.info('single', 'Simulate view ready');
     syncPlayback();
     requestAnimationFrame(() => {
       requestAnimationFrame(() => renderer.resize());

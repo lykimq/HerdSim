@@ -224,6 +224,11 @@ describe('buildRunReport', () => {
     assert.ok(report);
     assert.equal(report.badge, 'Timeout');
     assert.match(report.takeaway, /Did not meet the success criterion/);
+    assert.ok(report.failure_mode);
+    assert.notEqual(report.failure_mode, 'none');
+    const failure = report.sections.find((s) => s.id === 'failure');
+    assert.ok(failure);
+    assert.ok(failure.lines.some((l) => /Failure class:/.test(l)));
     const text = formatRunReportText(report);
     assert.match(text, /reached max ticks without success at tick 500/);
     assert.match(text, /Sheep beyond the collect threshold at the end: 3/);

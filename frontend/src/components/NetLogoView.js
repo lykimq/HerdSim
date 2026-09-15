@@ -72,6 +72,12 @@ function helpHtml() {
         to compare both side by side.
       </p>
       <p class="param-hint">
+        Twins support behavioural comparison only. Shared seeds do not reproduce
+        the same RNG sequences as HerdSim, and agent update order can differ.
+        Treat finish times and exact paths as approximate, not tick-for-tick
+        replays. Force-based twins (Kubo) are especially sensitive.
+      </p>
+      <p class="param-hint">
         Twins include a comparison panel with HerdSim-style live metrics
         (sheep in goal, cohesion, outliers, GCM-to-goal distance, polarisation,
         herder path length, time to goal, min separation), time-series plots,

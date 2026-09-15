@@ -20,6 +20,11 @@ COMPARISON_CAVEATS = [
         "Cross-algorithm path and speed comparisons are not time-normalized."
     ),
     (
+        "Unsuccessful trials include failure_mode / failure_label heuristics "
+        "(timeout, split, stuck, oscillation, stacking, scatter). These are "
+        "diagnostic labels, not scenario success criteria."
+    ),
+    (
         "Column success is the scenario success criterion. Column final_success_rate "
         "is end-of-run goal occupancy (fraction of sheep in the goal). Column "
         "time_to_goal is strict: all sheep inside the goal, else -1."
@@ -148,7 +153,7 @@ def report_to_csv(payload: dict[str, Any], *, request: dict[str, Any] | None = N
         f"# python_version: {package.get('python_version')}",
         f"# scenario: {package['experiment'].get('scenario_id')}",
         f"# preset: {package['experiment'].get('preset')}",
-        f"# algorithms: {', '.join(str(a) for a in package['experiment'].get('algorithm_ids') or [])}",
+        f"# instruments: {', '.join(str(a) for a in package['experiment'].get('algorithm_ids') or [])}",
         f"# seeds: {', '.join(str(s) for s in package['experiment'].get('seeds') or [])}",
         f"# trials: {package['experiment'].get('trials')}",
         "#",
@@ -184,13 +189,13 @@ def report_to_markdown(
         f"- Python: {package.get('python_version')}",
         f"- Scenario: {exp.get('scenario_id')}",
         f"- Preset: {exp.get('preset')}",
-        f"- Algorithms: {', '.join(str(a) for a in exp.get('algorithm_ids') or [])}",
+        f"- Instruments: {', '.join(str(a) for a in exp.get('algorithm_ids') or [])}",
         f"- Seeds: {', '.join(str(s) for s in exp.get('seeds') or [])}",
         f"- Trials: {exp.get('trials')}",
         "",
         "## Summary",
         "",
-        "| Algorithm | Trials | Success | Failure | Mean ticks | Median ticks | IQR ticks | AUC cohesion | AUC fragment | Mean path | Ctrl eff. | Final GCM-goal |",
+        "| Instrument | Trials | Success | Failure | Mean ticks | Median ticks | IQR ticks | AUC cohesion | AUC fragment | Mean path | Ctrl eff. | Final GCM-goal |",
         "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for row in package["summary"]:

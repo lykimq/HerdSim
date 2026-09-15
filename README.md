@@ -6,7 +6,9 @@ shepherding.
 
 Herding -- where a small group of shepherds guides a larger flock to a target --
 is studied here through orthogonal experimental factors rather than algorithm
-catalogues alone. Controllers are instruments for measuring herdability.
+catalogues alone. Named **instruments** are factor bundles over
+`sheep_model` x `dog_controller`. Controllers are instruments for measuring
+herdability; metrics stay algorithm-agnostic.
 
 ## Motivation
 
@@ -24,8 +26,7 @@ environment updates -> sheep dynamics -> observation -> dog controller
 -> constraints -> obstacles/walls -> metrics
 ```
 
-Named instruments (e.g. `strombom`, `kubo`, `flocking_dog`) are factor bundles
-over `sheep_model` x `dog_controller`.
+See [docs/architecture.md](docs/architecture.md) for the factor-based plugin layout.
 
 ## Research docs
 
@@ -44,3 +45,7 @@ Factor grids: `python scripts/run_factor_grid.py --grid 'n_sheep=20,50;n_shepher
 1. `make install`
 2. `make dev`
 3. Open http://localhost:5173
+
+UI tabs: **Simulate** (single run + inspect + run report), **Compare** (Arena A/B),
+**Experiments** (Analytics compare / factor grid), **NetLogo** (desktop twins),
+**Guide** (same docs as this tree).

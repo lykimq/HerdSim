@@ -53,7 +53,7 @@ export function createArenaView({ algorithms, scenarios, models = null, onStatus
     fairControls?.classList.toggle('is-disabled', !fair);
     if (modeHint) {
       modeHint.textContent = fair
-        ? 'Shared scenario, seed, and sheep on both sides.'
+        ? 'Shared scenario, seed, and sheep. Deltas compare outcomes; Kubo path/ticks use dt.'
         : 'Each side uses its own setup. Initialize and play A and B separately.';
     }
   }

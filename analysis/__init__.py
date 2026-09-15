@@ -1,6 +1,7 @@
 """Analysis package for herdability and validation studies."""
 
 from analysis.behavioural import detect_events, matrix_distance, transition_matrix
+from analysis.failure_taxonomy import FAILURE_LABELS, classify_failure
 from analysis.herdability import (
     attach_dimensionless,
     degradation_slope,
@@ -18,4 +19,6 @@ __all__ = [
     "transition_matrix",
     "matrix_distance",
     "velocity_correlation_delay",
+    "classify_failure",
+    "FAILURE_LABELS",
 ]

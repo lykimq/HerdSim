@@ -21,7 +21,8 @@ export function arenaFairBarHtml() {
           </div>
         </div>
         <p class="arena-header-hint" data-role="mode-hint">
-          Shared scenario, seed, and sheep on both sides.
+          Shared scenario, seed, and sheep on both sides. Metric deltas are
+          outcome comparisons, not tick-for-tick path parity (Kubo uses dt).
         </p>
       </div>
 
@@ -53,6 +54,8 @@ export function arenaFairBarHtml() {
           <span class="arena-header-label">Live deltas (A - B)</span>
           <p class="arena-header-hint arena-delta-hint">
             Positive favors A. Time to goal is n/a until both have finished.
+            Do not treat shepherd path as comparable across Kubo (dt) and
+            Strombom-family (displacement per tick) without the export caveats.
           </p>
         </div>
         <div class="arena-delta-grid">

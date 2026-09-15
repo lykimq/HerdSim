@@ -1,11 +1,11 @@
 .PHONY: install dev dev-backend dev-frontend test test-backend test-stress test-frontend lint format build clean
 
-# ─── Install ──────────────────────────────────────────────────
+# Install
 install:
 	pip install -e ".[dev]"
 	cd frontend && npm install
 
-# ─── Development Servers ──────────────────────────────────────
+# Development Servers
 # One Ctrl+C stops both processes (see scripts/dev.sh).
 dev:
 	@exec bash scripts/dev.sh
@@ -16,7 +16,7 @@ dev-backend:
 dev-frontend:
 	cd frontend && npm run dev
 
-# ─── Testing ──────────────────────────────────────────────────
+# Testing
 # Default: fast suite (stress excluded) + frontend build.
 test: test-backend test-frontend
 
@@ -30,7 +30,7 @@ test-frontend:
 	node --test tests/frontend/*.test.js
 	cd frontend && npm run build
 
-# ─── Code Quality ────────────────────────────────────────────
+# Code Quality
 # Frontend eslint/prettier use npx (not pinned in package.json).
 lint:
 	ruff check .
@@ -40,11 +40,11 @@ format:
 	ruff format .
 	cd frontend && npx prettier --write src/
 
-# ─── Build ────────────────────────────────────────────────────
+# Build	
 build:
 	cd frontend && npm run build
 
-# ─── Clean ────────────────────────────────────────────────────
+# Clean
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 	rm -rf .pytest_cache .ruff_cache

@@ -49,8 +49,8 @@ export function createControlPanel({
   });
 
   const els = {
-    algorithm: root.querySelector('[data-role="algorithm"]'),
-    algorithmLabel: root.querySelector('[data-role="algorithm-label"]'),
+    algorithm: root.querySelector('[data-role="instrument"]'),
+    algorithmLabel: root.querySelector('[data-role="instrument-label"]'),
     scenario: root.querySelector('[data-role="scenario"]'),
     scenarioGroup: root.querySelector('[data-role="scenario-group"]'),
     scenarioLabel: root.querySelector('[data-role="scenario-label"]'),

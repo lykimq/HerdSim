@@ -1,8 +1,8 @@
 # Metrics
 
 Metrics are computed at every tick from observable simulation state and are
-algorithm-agnostic unless noted. They appear in the live metrics panel during
-Single and Arena runs, in the scrub history, and in Analytics exports.
+instrument-agnostic unless noted. They appear in the live metrics panel during
+Simulate and Compare runs, in the scrub history, and in Experiments exports.
 
 Per-tick plugins write into history. Analytics **trial** and **summary** exports
 use an outcome + trajectory schema (mean/min/max/auc over the run), not bare
@@ -48,7 +48,7 @@ final-tick metric ids.
 
 | Metric | Definition |
 |--------|------------|
-| **Outlier Count** | Number of sheep beyond f(N) = `r_a` * N^(2/3) (optionally scaled by `collect_threshold_scale`) from the GCM. Same formula for every algorithm so Arena/Analytics share one spread scale. For Collect/Drive controllers this matches the mode switch; for Kubo it is a report score only. Not "sheep outside the goal." |
+| **Outlier Count** | Number of sheep beyond f(N) = `r_a` * N^(2/3) (optionally scaled by `collect_threshold_scale`) from the GCM. Same formula for every instrument so Compare/Experiments share one spread scale. For Collect/Drive controllers this matches the mode switch; for Kubo it is a report score only. Not "sheep outside the goal." |
 
 ## Outcome vs trajectory (Analytics)
 
@@ -68,11 +68,11 @@ final-tick metric ids.
 
 **Polarisation** can peak during Drive and drop during Collect when the flock is fragmented.
 
-## Comparing across algorithms
+## Comparing across instruments
 
-Cohesion, GCM to Goal, Success Rate, Sheep in Goal, Fragmentation, Outlier Count, Min Separation, and Polarisation use the same definitions for every algorithm on a shared seed and scenario.
+Cohesion, GCM to Goal, Success Rate, Sheep in Goal, Fragmentation, Outlier Count, Min Separation, and Polarisation use the same definitions for every instrument on a shared seed and scenario.
 
-**Shepherd Path** and tick counts are comparable across algorithms only when they share the same time-step convention. Strombom-family algorithms advance by a fixed displacement per tick; Kubo integrates over continuous `dt`. Path lengths are not directly comparable without normalising by the integration step.
+**Shepherd Path** and tick counts are comparable across instruments only when they share the same time-step convention. Strombom-family instruments advance by a fixed displacement per tick; Kubo integrates over continuous `dt`. Path lengths are not directly comparable without normalising by the integration step.
 
 For fair comparison, lock the same `n_sheep`, `n_shepherds`, scenario, and seeds (custom preset). Do not use paper preset when comparing models that declare different paper agent counts. See `docs/research/comparison_framework.md`.
 
@@ -87,5 +87,23 @@ Trial tables from factor grids also support:
 - velocity-correlation delay proxies via `analysis.propagation`
 
 These are analysis-layer outputs, not per-tick metric plugins.
+
+## Failure taxonomy (trial exports)
+
+Unsuccessful trials also receive a heuristic `failure_mode` from
+`analysis.failure_taxonomy.classify_failure`:
+
+| Id | Meaning |
+|----|---------|
+| `none` | Scenario success |
+| `timeout` | Hit max ticks without a more specific pattern |
+| `split` | Low end-of-run fragmentation (largest component / N) |
+| `stuck` | Little GCM-to-goal progress in the second half |
+| `oscillation` | GCM-to-goal distance flipped often without settling |
+| `stacking` | Shepherds stayed unusually close (when recorded) |
+| `scatter` | Cohesion stayed high (spread) through the run |
+
+`failure_label` is the human-readable string; `failure_hints` lists every heuristic
+that matched. Single-view run reports show the same classes under Failure hints.
 
 JSON packages include `herdsim_version`, best-effort `git_commit`, `python_version`, experiment design, `resolved_config` (from a trial), metric definitions, summary, trial rows, and caveats. CSV includes the same preamble facts; nested `resolved_config` is omitted from CSV cells and kept in JSON.

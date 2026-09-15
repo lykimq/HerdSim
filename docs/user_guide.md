@@ -51,10 +51,15 @@ The Simulate view is the primary place to visualize instrument behavior.
 HerdSim records history as it runs.
 - **Scrub History:** When paused, use the timeline to move through recorded ticks.
 - **Live Metrics:** Cohesion, GCM to Goal, fragmentation, and related metrics update each tick.
+- **Inspect:** Live herding mode, sheep/dog models, observation mode, and assignment count
+  from the current frame metadata.
+- **Run report:** After success or timeout, a methods-style summary appears under the
+  scrub bar, including failure hints when the run did not succeed. Download Markdown
+  from the report panel.
 
-## 4. Analytics Dashboard
+## 4. Experiments dashboard
 
-Analytics / Experiments runs simulations headless for batch evaluation.
+Experiments runs simulations headless for batch evaluation.
 
 - **Compare instruments:** Same scenario and seeds across selected instruments.
 - **Factor grid:** Sweep one or more scientific factors (for example `n_sheep` x
@@ -66,11 +71,12 @@ Analytics / Experiments runs simulations headless for batch evaluation.
   counts (Custom / shared settings). Instrument (paper) keeps each preset's own
   published agent counts.
 - **Exports:** CSV and JSON include outcome columns, trajectory aggregates, control
-  efficiency, experiment design, resolved config, git commit when available, and
-  comparison caveats.
+  efficiency, failure_mode / failure_label, experiment design, resolved config,
+  git commit when available, and comparison caveats.
 
 Larger offline grids and generalization studies can also be run from the CLI
-scripts (`scripts/run_factor_grid.py`, `scripts/run_generalization.py`,
-`scripts/run_empirical_gap.py`).
+scripts (`scripts/run_factor_grid.py`, `scripts/run_generalization.py`).
+Empirical trajectory fitting (`scripts/run_empirical_gap.py`) remains a stub until
+after platform polish.
 
 For the formal protocol, see `docs/research/comparison_framework.md`.
