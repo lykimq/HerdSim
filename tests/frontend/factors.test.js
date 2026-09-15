@@ -66,7 +66,6 @@ describe('factors helpers', () => {
         goal_velocity_y: 0,
       },
     });
-    assert.equal(payload.algorithm_id, 'strombom');
     assert.equal(payload.instrument, 'strombom');
     assert.equal(payload.obs_mode, 'local_positions');
     assert.equal(payload.sheep_model, 'strombom');

@@ -1,4 +1,4 @@
-/** Normalize Display overlays: trails, GCM-to-goal, and algorithm assignment modes. */
+/** Normalize Display overlays: trails, GCM-to-goal, and instrument assignment modes. */
 
 export const DEFAULT_MODE_COLORS = {
   collect: '#fbbf24',
@@ -47,11 +47,11 @@ export function parseOverlayColor(value, fallback = 0xcbd5e1) {
 }
 
 /**
- * Assignment modes declared by the algorithm (empty if none).
+ * Assignment modes declared by the instrument (empty if none).
  * @returns {Array<{ id: string, label: string, color: string }>}
  */
-export function assignmentModesFromAlgorithm(algorithm) {
-  const raw = algorithm?.info?.overlays?.assignment_modes;
+export function assignmentModesFromInstrument(instrument) {
+  const raw = instrument?.info?.overlays?.assignment_modes;
   if (!Array.isArray(raw)) return [];
   return raw
     .map((mode) => {

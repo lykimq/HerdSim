@@ -1,26 +1,26 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import {
-  assignmentModesFromAlgorithm,
+  assignmentModesFromInstrument,
   parseOverlayColor,
   sheepCentroid,
   GCM_GOAL_COLOR,
 } from '../../frontend/src/utils/displayOverlays.js';
 
 describe('displayOverlays', () => {
-  it('returns empty assignment modes when algorithm has none', () => {
+  it('returns empty assignment modes when instrument has none', () => {
     assert.deepEqual(
-      assignmentModesFromAlgorithm({
+      assignmentModesFromInstrument({
         id: 'kubo',
         info: { overlays: { assignment_modes: [] } },
       }),
       [],
     );
-    assert.deepEqual(assignmentModesFromAlgorithm({ id: 'kubo', info: {} }), []);
+    assert.deepEqual(assignmentModesFromInstrument({ id: 'kubo', info: {} }), []);
   });
 
   it('normalizes declared Collect/Drive modes', () => {
-    const modes = assignmentModesFromAlgorithm({
+    const modes = assignmentModesFromInstrument({
       id: 'strombom',
       info: {
         overlays: {

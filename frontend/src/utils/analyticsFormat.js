@@ -18,12 +18,21 @@ function plotlyUnavailableHtml() {
   return emptyStateHtml('Plotly is loading or unavailable.');
 }
 
-function algorithmOrder(rows, groupKey = 'algorithm') {
-  return [...new Set(rows.map((r) => r[groupKey]).filter((v) => v != null && v !== ''))];
+function instrumentOrder(rows, groupKey = 'algorithm') {
+  return [
+    ...new Set(
+      rows
+        .map((r) => {
+          if (groupKey === 'algorithm') return r.algorithm ?? r.instrument;
+          return r[groupKey];
+        })
+        .filter((v) => v != null && v !== ''),
+    ),
+  ];
 }
 
-function colorForAlgorithm(algorithms, algorithmId) {
-  const index = algorithms.indexOf(algorithmId);
+function colorForInstrument(instruments, instrumentId) {
+  const index = instruments.indexOf(instrumentId);
   return PLOT_COLORS[Math.max(0, index) % PLOT_COLORS.length];
 }
 
@@ -67,13 +76,13 @@ export async function renderPlotlyBoxPlot(container, rawRows, key, label, option
   } = options;
 
   const rows = rawRows || [];
-  const algorithms = algorithmOrder(rows, groupKey);
-  if (!algorithms.length) {
+  const instruments = instrumentOrder(rows, groupKey);
+  if (!instruments.length) {
     container.innerHTML = emptyStateHtml('No trial data yet.');
     return;
   }
 
-  const traces = algorithms.map((alg) => {
+  const traces = instruments.map((alg) => {
     const algRows = rows.filter((r) => {
       if (r[groupKey] !== alg || r[key] == null) return false;
       return boxSuccessOnly ? r.success : true;
@@ -82,7 +91,7 @@ export async function renderPlotlyBoxPlot(container, rawRows, key, label, option
       y: algRows.map((r) => Number(r[key])),
       type: 'box',
       name: String(alg),
-      marker: { color: colorForAlgorithm(algorithms, alg) },
+      marker: { color: colorForInstrument(instruments, alg) },
       boxpoints: false,
     };
   });
@@ -135,17 +144,17 @@ export async function renderPlotlyPathTicksScatter(container, rawRows) {
   const rows = (rawRows || []).filter(
     (r) => r.total_ticks != null && r.shepherd_path != null,
   );
-  const algorithms = algorithmOrder(rows);
-  if (!algorithms.length) {
+  const instruments = instrumentOrder(rows);
+  if (!instruments.length) {
     container.innerHTML = emptyStateHtml('No trial data yet.');
     return;
   }
 
   const traces = [];
-  algorithms.forEach((alg) => {
-    const color = colorForAlgorithm(algorithms, alg);
-    const ok = rows.filter((r) => r.algorithm === alg && r.success);
-    const bad = rows.filter((r) => r.algorithm === alg && !r.success);
+  instruments.forEach((alg) => {
+    const color = colorForInstrument(instruments, alg);
+    const ok = rows.filter((r) => (r.algorithm ?? r.instrument) === alg && r.success);
+    const bad = rows.filter((r) => (r.algorithm ?? r.instrument) === alg && !r.success);
 
     if (ok.length) {
       traces.push({

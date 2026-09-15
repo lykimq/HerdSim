@@ -30,8 +30,8 @@ function joinValues(list) {
 
 export function bindAnalyticsMode({
   runner,
-  algorithms,
-  selectedAlgorithmIds,
+  instruments,
+  selectedInstrumentIds,
   syncContextBlurbs,
 }) {
   const modeSelect = runner.querySelector('[data-role="mode"]');
@@ -45,7 +45,7 @@ export function bindAnalyticsMode({
   const seedsInput = runner.querySelector('[data-role="seeds"]');
   const presetSelect = runner.querySelector('[data-role="preset"]');
   const defaultsById = Object.fromEntries(
-    algorithms.map((a) => [a.id, a.default_config || {}]),
+    instruments.map((a) => [a.id, a.default_config || {}]),
   );
 
   let gridRows = defaultRequiredFactorGridRows();
@@ -297,7 +297,7 @@ export function bindAnalyticsMode({
     const preset = presetSelect.value;
     const scenario_id = runner.querySelector('[data-role="scenario"]').value;
     if (modeSelect.value !== 'grid') {
-      const selected = selectedAlgorithmIds();
+      const selected = selectedInstrumentIds();
       if (!selected.length) return { error: 'Select at least one instrument.' };
       return {
         payload: {

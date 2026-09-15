@@ -79,14 +79,14 @@ function pushKv(lines, label, value) {
  */
 export function buildSetupLines({
   config = null,
-  algorithmName = null,
+  instrumentName = null,
   scenarioId = null,
 } = {}) {
   const cfg = config || {};
   const lines = [];
-  const instrumentId = cfg.instrument || null;
-  pushKv(lines, 'Instrument', algorithmName || instrumentId);
-  if (algorithmName && instrumentId && algorithmName !== instrumentId) {
+  const instrumentId = cfg.instrument || cfg.algorithm_id || null;
+  pushKv(lines, 'Instrument', instrumentName || instrumentId);
+  if (instrumentName && instrumentId && instrumentName !== instrumentId) {
     pushKv(lines, 'Instrument id', instrumentId);
   }
   pushKv(lines, 'Scenario', humanScenarioLabel(scenarioId || cfg.scenario_id));

@@ -26,8 +26,8 @@ describe('buildRunReport', () => {
   it('summarizes a successful finished run with trends', () => {
     const report = buildRunReport({
       status: 'success',
-      algorithmName: 'Strombom',
-      algorithmId: 'strombom',
+      instrumentName: 'Strombom',
+      instrumentId: 'strombom',
       scenarioId: 'drive_to_goal',
       config: {
         algorithm_id: 'strombom',
@@ -173,7 +173,7 @@ describe('buildRunReport', () => {
   it('explains timeout with remaining outliers and grounded Collect insight', () => {
     const report = buildRunReport({
       status: 'timeout',
-      algorithmId: 'strombom',
+      instrumentId: 'strombom',
       scenarioId: 'drive_to_goal',
       config: {
         algorithm_id: 'strombom',
@@ -238,7 +238,7 @@ describe('buildRunReport', () => {
   it('omits invented insights when evidence is weak', () => {
     const report = buildRunReport({
       status: 'completed',
-      algorithmId: 'potential_field',
+      instrumentId: 'potential_field',
       scenarioId: 'drive_to_goal',
       history: makeHistory([
         {

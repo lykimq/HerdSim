@@ -38,8 +38,8 @@ import { classifyRunFailure } from './failureTaxonomy.js';
 export function buildRunReport({
   status,
   history = [],
-  algorithmName = null,
-  algorithmId = null,
+  instrumentName = null,
+  instrumentId = null,
   scenarioId = null,
   config = null,
 } = {}) {
@@ -53,7 +53,8 @@ export function buildRunReport({
   const tick = last.tick;
   const frame = last.frame || {};
   const flockSize = flockSizeFrom(last);
-  const resolvedInstrumentId = algorithmId || config?.instrument || null;
+  const resolvedInstrumentId =
+    instrumentId || config?.instrument || config?.algorithm_id || null;
 
   const cohesionSeries = series(history, 'cohesion');
   const gcmGoalSeries = series(history, 'gcm_goal');
@@ -94,7 +95,7 @@ export function buildRunReport({
   const pathPerTick = path != null && durationTicks > 0 ? path / durationTicks : null;
 
   const contextBits = [];
-  if (algorithmName) contextBits.push(algorithmName);
+  if (instrumentName) contextBits.push(instrumentName);
   const scenarioLabel = humanScenarioLabel(scenarioId);
   if (scenarioLabel) contextBits.push(scenarioLabel);
   const headline = [
@@ -307,7 +308,7 @@ export function buildRunReport({
 
   const setupLines = buildSetupLines({
     config,
-    algorithmName,
+    instrumentName,
     scenarioId,
   });
   if (setupLines.length) {

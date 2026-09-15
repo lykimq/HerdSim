@@ -183,7 +183,7 @@ export function createFactorControls({ els, state, currentPreset, markCustom }) 
   }
 
   function seedFactorsFromInstrument() {
-    const alg = state.algorithms.find((a) => a.id === state.selectedAlg);
+    const alg = state.instruments.find((a) => a.id === state.selectedInstrument);
     state.factors = factorsFromInstrument(alg);
     writeFactorFields();
   }

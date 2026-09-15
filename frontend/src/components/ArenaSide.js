@@ -10,9 +10,9 @@ import { log, withTimeout } from '../utils/logger.js';
  */
 export function createArenaSide(
   label,
-  algorithms,
+  instruments,
   scenarios,
-  preferredAlg,
+  preferredInstrument,
   { onStatus, onPhaseHint, onIndependentInit, onSideError, models = null } = {},
 ) {
   const panel = document.createElement('div');
@@ -28,7 +28,7 @@ export function createArenaSide(
   const metrics = createMetricsPanel(null, `Live Metrics ${label}`);
 
   function updateTitle() {
-    title.textContent = `${label}: ${controls.getAlgorithmName()}`;
+    title.textContent = `${label}: ${controls.getInstrumentName()}`;
   }
 
   let controls;
@@ -89,7 +89,7 @@ export function createArenaSide(
     onStep: () => sim.step(),
     onReset: () => sim.reset(),
     onSpeedChange: (speed) => sim.setSpeed(speed),
-    onAlgorithmChange: (kind) => {
+    onInstrumentChange: (kind) => {
       renderer.setHerderKind(kind);
       updateTitle();
     },
@@ -106,7 +106,7 @@ export function createArenaSide(
       renderer.setAssignmentModeVisible(modeId, visible),
     onClearTrails: () => renderer.clearTrails(),
   });
-  controls.setOptions(algorithms, scenarios, preferredAlg, models);
+  controls.setOptions(instruments, scenarios, preferredInstrument, models);
   renderer.setHerderKind(controls.getHerderKind());
   sim.wireRendererOverlays(controls);
   updateTitle();

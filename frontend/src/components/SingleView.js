@@ -12,11 +12,11 @@ import { applyControlPanelPlayback, derivePhase, DONE_STATUSES } from '../utils/
 import { buildRunReport } from '../utils/runReport.js';
 
 export function createSingleView({
-  algorithms,
+  instruments,
   scenarios,
   models = null,
   onStatus,
-  preferredAlg = null,
+  preferredInstrument = null,
 }) {
   const root = document.createElement('div');
   root.className = 'single-layout';
@@ -66,7 +66,7 @@ export function createSingleView({
       buildRunReport({
         status: nextStatus,
         history: sim.getHistory(),
-        algorithmName: controls?.getAlgorithmName?.() || null,
+        instrumentName: controls?.getInstrumentName?.() || null,
         instrumentId: cfg.instrument || null,
         scenarioId: cfg.scenario_id || null,
         config: cfg,
@@ -163,7 +163,7 @@ export function createSingleView({
       syncPlayback();
     },
     onSpeedChange: (speed) => sim.setSpeed(speed),
-    onAlgorithmChange: (kind) => {
+    onInstrumentChange: (kind) => {
       herderKind = kind;
       renderer.setHerderKind(kind);
     },
@@ -181,7 +181,7 @@ export function createSingleView({
     onClearTrails: () => renderer.clearTrails(),
   });
 
-  controls.setOptions(algorithms, scenarios, preferredAlg, models);
+  controls.setOptions(instruments, scenarios, preferredInstrument, models);
   syncPlayback();
 
   const center = document.createElement('div');
@@ -239,12 +239,12 @@ export function createSingleView({
     });
   }
 
-  function preferAlgorithm(algorithmId) {
-    if (!algorithmId) return;
-    controls.setAlgorithm(algorithmId);
+  function preferInstrument(instrumentId) {
+    if (!instrumentId) return;
+    controls.setInstrument(instrumentId);
     herderKind = controls.getHerderKind();
     renderer.setHerderKind(herderKind);
   }
 
-  return { root, mount, destroy, onHide, onShow, preferAlgorithm };
+  return { root, mount, destroy, onHide, onShow, preferInstrument };
 }

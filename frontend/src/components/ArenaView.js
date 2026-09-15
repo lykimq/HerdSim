@@ -9,7 +9,7 @@ import { scenarioBlurb } from '../utils/params.js';
 import { applyArenaPlayback } from '../utils/playback.js';
 import { setStatusMessage } from '../utils/dom.js';
 
-export function createArenaView({ algorithms, scenarios, models = null, onStatus }) {
+export function createArenaView({ instruments, scenarios, models = null, onStatus }) {
   const root = document.createElement('div');
   root.className = 'arena-layout';
 
@@ -88,12 +88,12 @@ export function createArenaView({ algorithms, scenarios, models = null, onStatus
     },
   };
 
-  left = createArenaSide('A', algorithms, scenarios, algorithms[0]?.id, sideOpts);
+  left = createArenaSide('A', instruments, scenarios, instruments[0]?.id, sideOpts);
   right = createArenaSide(
     'B',
-    algorithms,
+    instruments,
     scenarios,
-    algorithms[1]?.id || algorithms[0]?.id,
+    instruments[1]?.id || instruments[0]?.id,
     sideOpts,
   );
 

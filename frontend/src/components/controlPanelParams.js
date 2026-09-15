@@ -24,7 +24,7 @@ export function createParamRefresh({
   state,
   currentPreset,
   lockPaperScenario,
-  onAlgorithmChange,
+  onInstrumentChange,
   afterRefresh,
 }) {
   function applyAgentCountsFromDefaults() {
@@ -41,7 +41,7 @@ export function createParamRefresh({
   }
 
   function applyHerderUi() {
-    const alg = state.algorithms.find((a) => a.id === state.selectedAlg);
+    const alg = state.instruments.find((a) => a.id === state.selectedInstrument);
     const kind = alg?.herder_kind === 'human' ? 'human' : 'dog';
     const label = alg?.herder_label || (kind === 'human' ? 'Shepherd' : 'Dog');
     if (els.herderIcon) {
@@ -50,7 +50,7 @@ export function createParamRefresh({
     if (els.herderWord) {
       els.herderWord.textContent = `${label}s`;
     }
-    onAlgorithmChange?.(kind, alg);
+    onInstrumentChange?.(kind, alg);
   }
 
   function ensurePaperScenario() {
@@ -102,7 +102,7 @@ export function createParamRefresh({
   }
 
   function rootQueryAll(elsMap, role) {
-    const root = elsMap.algorithm?.closest('.control-panel');
+    const root = elsMap.instrument?.closest('.control-panel');
     if (!root) return [];
     return [...root.querySelectorAll(`[data-role="${role}"]`)];
   }
@@ -110,7 +110,7 @@ export function createParamRefresh({
   function refreshParamControls() {
     ensurePaperScenario();
 
-    const alg = state.algorithms.find((a) => a.id === state.selectedAlg);
+    const alg = state.instruments.find((a) => a.id === state.selectedInstrument);
     const scen = state.scenarios.find((s) => s.id === state.selectedScen);
     state.defaults = alg?.default_config || {};
     state.scenarioDefaults = scen?.default_config || {};
@@ -131,7 +131,7 @@ export function createParamRefresh({
     const preset = currentPreset();
     const presetInfo = getPresetOption(preset);
     const paramsEditable = preset === 'custom';
-    setInfoTip(els.algorithmLabel, algorithmBlurb(alg));
+    setInfoTip(els.instrumentLabel, algorithmBlurb(alg));
     if (preset !== 'scenario') {
       setInfoTip(els.scenarioLabel, scenarioBlurb(scen));
     }

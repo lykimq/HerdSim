@@ -1,4 +1,4 @@
-import { checkApiHealth, fetchAlgorithms, fetchModels, fetchScenarios } from './api/rest.js';
+import { checkApiHealth, fetchInstruments, fetchModels, fetchScenarios } from './api/rest.js';
 import { createSingleView } from './components/SingleView.js';
 import { createArenaView } from './components/ArenaView.js';
 import { createAnalyticsDashboard } from './components/AnalyticsDashboard.js';
@@ -210,16 +210,16 @@ const globalState = {
   analyticsPayload: null,
 };
 
-let preferredSingleAlg = null;
+let preferredSingleInstrument = null;
 
-function createView(name, algorithms, scenarios, models) {
+function createView(name, instruments, scenarios, models) {
   const onStatus = makeStatusHandler(name);
   if (name === 'arena') {
-    return createArenaView({ algorithms, scenarios, models, onStatus });
+    return createArenaView({ instruments, scenarios, models, onStatus });
   }
   if (name === 'analytics') {
     return createAnalyticsDashboard({
-      algorithms,
+      instruments,
       scenarios,
       models,
       globalState,
@@ -228,27 +228,27 @@ function createView(name, algorithms, scenarios, models) {
   if (name === 'netlogo') {
     return createNetLogoView({
       onStatus,
-      onRunInHerdSim: (algorithmId) => {
-        preferredSingleAlg = algorithmId;
-        switchView('single', algorithms, scenarios, models);
+      onRunInHerdSim: (instrumentId) => {
+        preferredSingleInstrument = instrumentId;
+        switchView('single', instruments, scenarios, models);
       },
     });
   }
   if (name === 'guide') {
     return createGuideView();
   }
-  const preferredAlg = preferredSingleAlg;
-  preferredSingleAlg = null;
+  const preferredInstrument = preferredSingleInstrument;
+  preferredSingleInstrument = null;
   return createSingleView({
-    algorithms,
+    instruments,
     scenarios,
     models,
     onStatus,
-    preferredAlg,
+    preferredInstrument,
   });
 }
 
-async function switchView(name, algorithms, scenarios, models) {
+async function switchView(name, instruments, scenarios, models) {
   if (switching) {
     log.warn('ui', `Ignoring view switch to ${name}; mount in progress`);
     return;
@@ -256,9 +256,9 @@ async function switchView(name, algorithms, scenarios, models) {
 
   const cached = viewCache[name];
   if (activeViewName === name && cached) {
-    if (name === 'single' && preferredSingleAlg) {
-      cached.preferAlgorithm?.(preferredSingleAlg);
-      preferredSingleAlg = null;
+    if (name === 'single' && preferredSingleInstrument) {
+      cached.preferInstrument?.(preferredSingleInstrument);
+      preferredSingleInstrument = null;
     }
     return;
   }
@@ -279,7 +279,7 @@ async function switchView(name, algorithms, scenarios, models) {
 
     let view = cached;
     if (!view) {
-      view = createView(name, algorithms, scenarios, models);
+      view = createView(name, instruments, scenarios, models);
       view.root.classList.add('view-panel');
       viewCache[name] = view;
       viewHost.appendChild(view.root);
@@ -296,9 +296,9 @@ async function switchView(name, algorithms, scenarios, models) {
       log.info('ui', `${name} view ready (created)`);
     } else {
       activeViewName = name;
-      if (name === 'single' && preferredSingleAlg) {
-        view.preferAlgorithm?.(preferredSingleAlg);
-        preferredSingleAlg = null;
+      if (name === 'single' && preferredSingleInstrument) {
+        view.preferInstrument?.(preferredSingleInstrument);
+        preferredSingleInstrument = null;
       }
       header.querySelectorAll('.nav-tab').forEach((btn) => {
         const on = btn.dataset.view === name;
@@ -346,15 +346,15 @@ async function boot() {
   await waitForApi();
   viewHost.innerHTML = '';
 
-  const [algorithms, scenarios, models] = await Promise.all([
-    fetchAlgorithms(),
+  const [instruments, scenarios, models] = await Promise.all([
+    fetchInstruments(),
     fetchScenarios(),
     fetchModels(),
   ]);
   applyFactorMetadata(models?.factors || null);
   log.info(
     'boot',
-    `Loaded ${algorithms.length} instruments, ${scenarios.length} scenarios, ${models?.sheep_models?.length || 0} sheep models`,
+    `Loaded ${instruments.length} instruments, ${scenarios.length} scenarios, ${models?.sheep_models?.length || 0} sheep models`,
   );
 
   header.querySelectorAll('.nav-tab').forEach((btn) => {
@@ -362,11 +362,11 @@ async function boot() {
   });
   header.querySelectorAll('.nav-tab').forEach((btn) => {
     btn.addEventListener('click', () => {
-      switchView(btn.dataset.view, algorithms, scenarios, models);
+      switchView(btn.dataset.view, instruments, scenarios, models);
     });
   });
 
-  await switchView('single', algorithms, scenarios, models);
+  await switchView('single', instruments, scenarios, models);
 }
 
 window.addEventListener('pagehide', () => {

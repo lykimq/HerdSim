@@ -1,7 +1,7 @@
 import { mountTips, setInfoTip } from '../utils/tooltips.js';
 import {
   assignmentModeOptionHtml,
-  assignmentModesFromAlgorithm,
+  assignmentModesFromInstrument,
   GCM_GOAL_LABEL,
   GCM_GOAL_TIP,
   TRAIL_LABEL,
@@ -21,7 +21,7 @@ export function createControlPanel({
   onStep,
   onReset,
   onSpeedChange,
-  onAlgorithmChange,
+  onInstrumentChange,
   onTrailVisibleChange,
   onGcmGoalVisibleChange,
   onAssignmentModesChange,
@@ -49,8 +49,8 @@ export function createControlPanel({
   });
 
   const els = {
-    algorithm: root.querySelector('[data-role="instrument"]'),
-    algorithmLabel: root.querySelector('[data-role="instrument-label"]'),
+    instrument: root.querySelector('[data-role="instrument"]'),
+    instrumentLabel: root.querySelector('[data-role="instrument-label"]'),
     scenario: root.querySelector('[data-role="scenario"]'),
     scenarioGroup: root.querySelector('[data-role="scenario-group"]'),
     scenarioLabel: root.querySelector('[data-role="scenario-label"]'),
@@ -91,10 +91,10 @@ export function createControlPanel({
   };
 
   const state = {
-    algorithms: [],
+    instruments: [],
     scenarios: [],
     models: { sheep_models: [], dog_controllers: [] },
-    selectedAlg: '',
+    selectedInstrument: '',
     selectedScen: '',
     algorithmParams: {},
     worldOverrides: {},
@@ -117,7 +117,7 @@ export function createControlPanel({
   }
 
   function refreshDisplayOverlays() {
-    const alg = state.algorithms.find((a) => a.id === state.selectedAlg);
+    const alg = state.instruments.find((a) => a.id === state.selectedInstrument);
     if (els.trailLabel) {
       els.trailLabel.textContent = TRAIL_LABEL;
       setInfoTip(els.trailLabel, TRAIL_TIP);
@@ -126,7 +126,7 @@ export function createControlPanel({
       els.gcmGoalLabel.textContent = GCM_GOAL_LABEL;
       setInfoTip(els.gcmGoalLabel, GCM_GOAL_TIP);
     }
-    state.assignmentModes = assignmentModesFromAlgorithm(alg);
+    state.assignmentModes = assignmentModesFromInstrument(alg);
     if (!els.assignmentOverlays) {
       onAssignmentModesChange?.(state.assignmentModes);
       return;
@@ -154,20 +154,20 @@ export function createControlPanel({
     state,
     currentPreset,
     lockPaperScenario,
-    onAlgorithmChange,
+    onInstrumentChange,
     afterRefresh: refreshDisplayOverlays,
   });
 
   function refreshConfigSummary() {
     if (!els.configSummary) return;
-    const alg = state.algorithms.find((a) => a.id === state.selectedAlg);
+    const alg = state.instruments.find((a) => a.id === state.selectedInstrument);
     const scen = state.scenarios.find((s) => s.id === state.selectedScen);
     const modeLabel = getPresetOption(currentPreset()).label;
     const factorBits =
       currentPreset() === 'custom' ? summarizeFactors(state.factors) : null;
     els.configSummary.textContent = [
       modeLabel,
-      alg?.name || state.selectedAlg || 'Instrument',
+      alg?.name || state.selectedInstrument || 'Instrument',
       scen?.name || state.selectedScen || 'Scenario',
       `${els.sheep.value} sheep / ${els.dogs.value} dogs`,
       `seed ${els.seed.value}`,
@@ -183,8 +183,8 @@ export function createControlPanel({
     refreshConfigSummary();
   }
 
-  els.algorithm.addEventListener('change', () => {
-    state.selectedAlg = els.algorithm.value;
+  els.instrument.addEventListener('change', () => {
+    state.selectedInstrument = els.instrument.value;
     if (currentPreset() !== 'custom') state.lockCustom = false;
     refreshParamControls();
   });
@@ -287,17 +287,17 @@ export function createControlPanel({
 
   mountTips(root);
 
-  function setOptions(algorithms, scenarios, preferredAlg = null, models = null) {
-    state.algorithms = algorithms;
+  function setOptions(instruments, scenarios, preferredInstrument = null, models = null) {
+    state.instruments = instruments;
     state.scenarios = scenarios;
     if (models) state.models = models;
-    els.algorithm.innerHTML = algorithms
+    els.instrument.innerHTML = instruments
       .map((a) => `<option value="${a.id}">${a.name}</option>`)
       .join('');
     els.scenario.innerHTML = scenarios
       .map((s) => `<option value="${s.id}">${scenarioOptionLabel(s)}</option>`)
       .join('');
-    state.selectedAlg = preferredAlg || algorithms[0]?.id || '';
+    state.selectedInstrument = preferredInstrument || instruments[0]?.id || '';
     const preferredScen =
       (lockPaperScenario &&
       scenarios.some((s) => s.id === PAPER_TASK_SCENARIO_ID)
@@ -306,7 +306,7 @@ export function createControlPanel({
       scenarios[0]?.id ||
       '';
     state.selectedScen = preferredScen;
-    if (state.selectedAlg) els.algorithm.value = state.selectedAlg;
+    if (state.selectedInstrument) els.instrument.value = state.selectedInstrument;
     if (state.selectedScen) els.scenario.value = state.selectedScen;
     refreshParamControls();
   }
@@ -319,7 +319,7 @@ export function createControlPanel({
   function getConfig() {
     state.factors = factorApi.readFactorFields();
     return buildSessionPayload({
-      instrumentId: els.algorithm.value,
+      instrumentId: els.instrument.value,
       scenarioId: els.scenario.value,
       preset: currentPreset(),
       numSheep: els.sheep.value,
@@ -357,25 +357,25 @@ export function createControlPanel({
     refreshParamControls();
   }
 
-  function setAlgorithm(algorithmId) {
-    if (![...els.algorithm.options].some((o) => o.value === algorithmId)) return;
-    els.algorithm.value = algorithmId;
-    state.selectedAlg = algorithmId;
+  function setInstrument(instrumentId) {
+    if (![...els.instrument.options].some((o) => o.value === instrumentId)) return;
+    els.instrument.value = instrumentId;
+    state.selectedInstrument = instrumentId;
     refreshParamControls();
   }
 
   function getHerderKind() {
-    const alg = state.algorithms.find((a) => a.id === els.algorithm.value);
+    const alg = state.instruments.find((a) => a.id === els.instrument.value);
     return alg?.herder_kind === 'human' ? 'human' : 'dog';
   }
 
-  function getAlgorithmName() {
-    const alg = state.algorithms.find((a) => a.id === els.algorithm.value);
-    return alg?.name || els.algorithm.value;
+  function getInstrumentName() {
+    const alg = state.instruments.find((a) => a.id === els.instrument.value);
+    return alg?.name || els.instrument.value;
   }
 
   function getInstrumentId() {
-    return els.algorithm.value;
+    return els.instrument.value;
   }
 
   function isTrailVisible() {
@@ -411,8 +411,8 @@ export function createControlPanel({
     setScenario,
     setSheepCount,
     setFairSheepOverride,
-    setAlgorithm,
-    getAlgorithmName,
+    setInstrument,
+    getInstrumentName,
     getInstrumentId,
     getHerderKind,
     isTrailVisible,

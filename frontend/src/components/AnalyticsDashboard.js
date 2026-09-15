@@ -1,4 +1,4 @@
-import { fetchAlgorithm, fetchBenchmarkDefinitions, runBenchmark, exportBenchmark } from '../api/rest.js';
+import { fetchInstrument, fetchBenchmarkDefinitions, runBenchmark, exportBenchmark } from '../api/rest.js';
 import {
   algorithmBlurb,
   downloadText,
@@ -32,7 +32,7 @@ const DEFAULT_BENCHMARK_INSTRUMENT_IDS = [
 ];
 const DEFAULT_BENCHMARK_SCENARIO_ID = 'split_flock';
 
-export function createAnalyticsDashboard({ algorithms, scenarios, models = null, globalState }) {
+export function createAnalyticsDashboard({ instruments, scenarios, models = null, globalState }) {
   const root = document.createElement('div');
   root.className = 'analytics-layout';
 
@@ -87,17 +87,17 @@ export function createAnalyticsDashboard({ algorithms, scenarios, models = null,
 
   const algList = runner.querySelector('[data-role="algs"]');
   const algBlurbEl = runner.querySelector('[data-role="algorithm-blurb"]');
-  const defaultAlgIds = new Set(
-    DEFAULT_BENCHMARK_INSTRUMENT_IDS.filter((id) => algorithms.some((a) => a.id === id)),
+  const defaultInstrumentIds = new Set(
+    DEFAULT_BENCHMARK_INSTRUMENT_IDS.filter((id) => instruments.some((a) => a.id === id)),
   );
-  if (!defaultAlgIds.size && algorithms[0]?.id) {
-    defaultAlgIds.add(algorithms[0].id);
+  if (!defaultInstrumentIds.size && instruments[0]?.id) {
+    defaultInstrumentIds.add(instruments[0].id);
   }
-  algList.innerHTML = algorithms
+  algList.innerHTML = instruments
     .map((a) => {
       const tip = algorithmBlurb(a);
       const titleAttr = tip ? ` title="${tip.replace(/"/g, '&quot;')}"` : '';
-      const checked = defaultAlgIds.has(a.id) ? 'checked' : '';
+      const checked = defaultInstrumentIds.has(a.id) ? 'checked' : '';
       return `
       <label class="check-item"${titleAttr}>
         <input type="checkbox" value="${a.id}" ${checked} />
@@ -106,7 +106,7 @@ export function createAnalyticsDashboard({ algorithms, scenarios, models = null,
     })
     .join('');
 
-  function selectedAlgorithmIds() {
+  function selectedInstrumentIds() {
     return [...algList.querySelectorAll('input[type="checkbox"]:checked')].map(
       (el) => el.value,
     );
@@ -129,8 +129,8 @@ export function createAnalyticsDashboard({ algorithms, scenarios, models = null,
 
   function syncContextBlurbs() {
     const mode = runner.querySelector('[data-role="mode"]').value;
-    const ids = mode === 'grid' ? [] : selectedAlgorithmIds();
-    const alg = algorithms.find((a) => a.id === ids[0]);
+    const ids = mode === 'grid' ? [] : selectedInstrumentIds();
+    const alg = instruments.find((a) => a.id === ids[0]);
     const scen = scenarios.find((s) => s.id === scenSelect.value);
     const preset = presetSelect.value;
 
@@ -167,8 +167,8 @@ export function createAnalyticsDashboard({ algorithms, scenarios, models = null,
 
   const modeApi = bindAnalyticsMode({
     runner,
-    algorithms,
-    selectedAlgorithmIds,
+    instruments,
+    selectedInstrumentIds,
     syncContextBlurbs,
   });
 
@@ -329,10 +329,10 @@ export function createAnalyticsDashboard({ algorithms, scenarios, models = null,
 
     const methodsHost = methods.querySelector('[data-role="methods"]');
     methodsHost.innerHTML = '';
-    for (const alg of algorithms) {
+    for (const alg of instruments) {
       let details = alg;
       try {
-        details = await fetchAlgorithm(alg.id);
+        details = await fetchInstrument(alg.id);
       } catch {
         // ignore
       }

@@ -26,7 +26,7 @@ export async function checkApiHealth() {
   return res.json();
 }
 
-export async function fetchAlgorithms() {
+export async function fetchInstruments() {
   const res = await apiFetch('/api/algorithms');
   return res.json();
 }
@@ -36,8 +36,8 @@ export async function fetchModels() {
   return res.json();
 }
 
-export async function fetchAlgorithm(algorithmId) {
-  const res = await apiFetch(`/api/algorithms/${algorithmId}`);
+export async function fetchInstrument(instrumentId) {
+  const res = await apiFetch(`/api/algorithms/${instrumentId}`);
   return res.json();
 }
 
