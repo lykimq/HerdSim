@@ -4,14 +4,6 @@
 
 HerdSim stress preset on **Strombom 2014**: same Collect / Drive rules, noisier defaults. Not a separate publication.
 
-## Reference
-
-Base paper:
-D. Strombom, R. P. Mann, A. M. Wilson, S. Hailes, A. J. Morton, D. J. T. Sumpter, A. J. King.
-"Solving the shepherding problem: heuristics for herding autonomous, interacting agents."
-Journal of The Royal Society Interface, 11(100):20140719, 2014.
-DOI: 10.1098/rsif.2014.0719
-
 ## Why
 
 The Strombom 2014 paper preset is relatively smooth. That can hide how brittle Collect / Drive is when headings jitter and the flock will not stay tidy.
@@ -74,3 +66,11 @@ Default N = 50 sheep and M = 1 shepherd, as in Strombom 2014. All other Strombom
 ## Limits
 
 Same fidelity as Strombom 2014. This page only changes defaults; it does not add a new control law.
+
+## Reference
+
+Base paper:
+D. Strombom, R. P. Mann, A. M. Wilson, S. Hailes, A. J. Morton, D. J. T. Sumpter, A. J. King.
+"Solving the shepherding problem: heuristics for herding autonomous, interacting agents."
+Journal of The Royal Society Interface, 11(100):20140719, 2014.
+DOI: 10.1098/rsif.2014.0719

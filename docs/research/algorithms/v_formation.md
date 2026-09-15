@@ -6,20 +6,6 @@ HerdSim multi-dog variant of **Strombom 2014**. Sheep and Collect match Strombom
 
 In the app the herders are labeled **Dog**, as with Strombom Multi-Dog.
 
-## Reference
-
-V-formation Drive idea:
-K. Fujioka, S. Hayashi.
-"Effective Herding in Shepherding Problem in V-formation Control."
-Transactions of the Institute of Systems, Control and Information Engineers, 2018.
-DOI: 10.5687/iscie.31.21
-
-Sheep / Collect base:
-D. Strombom et al.
-"Solving the shepherding problem: heuristics for herding autonomous, interacting agents."
-Journal of The Royal Society Interface, 11(100):20140719, 2014.
-DOI: 10.1098/rsif.2014.0719
-
 ## Why
 
 In multi-dog Drive, stacking dogs on one point or spreading them on a full circle can leave uneven pressure across the back of the flock.
@@ -124,3 +110,17 @@ All Strombom 2014 parameters apply. V-Formation-specific additions:
 ## Limits
 
 The sheep model is faithful to Strombom 2014. The V-arc Drive geometry is a HerdSim design implementing the formation idea; it is not a line-by-line reproduction of any specific Fujioka experiment configuration. Scenario goal and wall reflection apply as with all HerdSim algorithms.
+
+## Reference
+
+V-formation Drive idea:
+K. Fujioka, S. Hayashi.
+"Effective Herding in Shepherding Problem in V-formation Control."
+Transactions of the Institute of Systems, Control and Information Engineers, 2018.
+DOI: 10.5687/iscie.31.21
+
+Sheep / Collect base:
+D. Strombom et al.
+"Solving the shepherding problem: heuristics for herding autonomous, interacting agents."
+Journal of The Royal Society Interface, 11(100):20140719, 2014.
+DOI: 10.1098/rsif.2014.0719

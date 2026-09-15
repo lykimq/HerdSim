@@ -4,14 +4,6 @@
 
 HerdSim variant of **Strombom 2014**. Sheep and Collect stay the same; Drive deflects around obstacles or through a gate when the straight flock-to-goal line is blocked. Intended for Obstacle Course and Narrow Gate.
 
-## Reference
-
-Base paper:
-D. Strombom, R. P. Mann, A. M. Wilson, S. Hailes, A. J. Morton, D. J. T. Sumpter, A. J. King.
-"Solving the shepherding problem: heuristics for herding autonomous, interacting agents."
-Journal of The Royal Society Interface, 11(100):20140719, 2014.
-DOI: 10.1098/rsif.2014.0719
-
 ## Why
 
 Open-field Collect / Drive aims straight from flock to goal. With obstacles or a narrow gate, that line is blocked, so the shepherd can push sheep into walls or stall in front of a choke point.
@@ -111,3 +103,11 @@ Default N = 50 sheep, M = 1 shepherd. Multi-dog configurations work with the spa
 ## Limits
 
 Obstacle deflection is a geometric heuristic. It does not guarantee optimal routing or collision-free paths under all configurations. The shepherd may oscillate near complex obstacle layouts or narrow gates if the deflected Drive point is unstable. No control barrier function safety certificates are applied. This algorithm is appropriate for exploratory comparison on constrained scenarios, not for guaranteed safety analysis.
+
+## Reference
+
+Base paper:
+D. Strombom, R. P. Mann, A. M. Wilson, S. Hailes, A. J. Morton, D. J. T. Sumpter, A. J. King.
+"Solving the shepherding problem: heuristics for herding autonomous, interacting agents."
+Journal of The Royal Society Interface, 11(100):20140719, 2014.
+DOI: 10.1098/rsif.2014.0719

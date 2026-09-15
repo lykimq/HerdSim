@@ -6,16 +6,6 @@ HerdSim multi-dog variant of **Strombom 2014**. Sheep and the Collect / Drive sw
 
 In the app the herders are labeled **Dog** (unlike Strombom 2014, which uses Shepherd).
 
-## Reference
-
-Base paper:
-D. Strombom, R. P. Mann, A. M. Wilson, S. Hailes, A. J. Morton, D. J. T. Sumpter, A. J. King.
-"Solving the shepherding problem: heuristics for herding autonomous, interacting agents."
-Journal of The Royal Society Interface, 11(100):20140719, 2014.
-DOI: 10.1098/rsif.2014.0719
-
-Multi-dog assignment and Drive spacing are a HerdSim extension for comparison with V-Formation and Kubo.
-
 ## Why
 
 Strombom 2014 is built for one shepherd. With several dogs and no coordination, they stack on the same Collect or Drive point and waste coverage on one side of the flock.
@@ -138,3 +128,13 @@ All Strombom 2014 parameters apply with the same meanings. Multi-dog spacing is 
 ## Limits
 
 The sheep model and the Collect / Drive threshold are faithful to Strombom 2014. The assignment and Drive arc geometry are HerdSim designs intended to provide a coherent multi-dog baseline; they are not claimed to reproduce any specific published multi-dog algorithm.
+
+## Reference
+
+Base paper:
+D. Strombom, R. P. Mann, A. M. Wilson, S. Hailes, A. J. Morton, D. J. T. Sumpter, A. J. King.
+"Solving the shepherding problem: heuristics for herding autonomous, interacting agents."
+Journal of The Royal Society Interface, 11(100):20140719, 2014.
+DOI: 10.1098/rsif.2014.0719
+
+Multi-dog assignment and Drive spacing are a HerdSim extension for comparison with V-Formation and Kubo.

@@ -4,13 +4,6 @@
 
 Single-shepherd **Collect / Drive** herding. Sheep graze or flee under shepherd pressure while staying near neighbours; the shepherd switches between recovering outliers (Collect) and pushing a tight flock to the goal (Drive). This is the base of the Strombom family in HerdSim. All other Strombom variants reuse these sheep rules and the same cohesion switch unless they say otherwise.
 
-## Reference
-
-D. Strombom, R. P. Mann, A. M. Wilson, S. Hailes, A. J. Morton, D. J. T. Sumpter, A. J. King.
-"Solving the shepherding problem: heuristics for herding autonomous, interacting agents."
-Journal of The Royal Society Interface, 11(100):20140719, 2014.
-DOI: 10.1098/rsif.2014.0719
-
 ## Why
 
 One shepherd must bring a flock of interacting sheep to a fixed goal. Sheep do not cooperate: they graze when the shepherd is far, and when threatened they flee the shepherd while staying near neighbours. A single Drive push fails when the flock is spread, because outliers are left behind.
@@ -174,3 +167,10 @@ The HerdSim implementation matches the paper Collect / Drive switch condition, t
 **Paper-aligned mechanism:** Collect/Drive switch via f(N), sheep heading composition, and shepherd stop distance.
 
 **Differs by design:** scenario-owned goal/world layout and wall reflection; optional `collect_threshold_scale`. Analytics now reports trajectory aggregates (auc cohesion, fragmentation) in addition to task success -- interpret Collect spikes via outlier_count and fragmentation over time, not final-tick cohesion alone.
+
+## Reference
+
+D. Strombom, R. P. Mann, A. M. Wilson, S. Hailes, A. J. Morton, D. J. T. Sumpter, A. J. King.
+"Solving the shepherding problem: heuristics for herding autonomous, interacting agents."
+Journal of The Royal Society Interface, 11(100):20140719, 2014.
+DOI: 10.1098/rsif.2014.0719

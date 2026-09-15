@@ -216,7 +216,7 @@ export function createGuideView() {
       <nav data-role="guide-nav"></nav>
     </aside>
     <article class="guide-content card-glass" data-role="guide-body">
-      <p class="text-muted">Loading documentation...</p>
+      <p class="text-muted">Loading the guide...</p>
     </article>
   `;
 
@@ -269,18 +269,32 @@ export function createGuideView() {
     navEl.innerHTML = `<ul class="guide-nav-list">${renderNavNodes(tree)}</ul>`;
   }
 
+  function markNavActive(slug) {
+    navEl.querySelectorAll('.guide-nav-link.active, .guide-nav-folder-summary.active').forEach((el) => {
+      el.classList.remove('active');
+    });
+    const leaf = navEl.querySelector(`button[data-slug="${slug}"]`);
+    if (leaf) {
+      leaf.classList.add('active');
+      return;
+    }
+    const folder = navEl.querySelector(`[data-folder="${slug}"]`);
+    folder?.querySelector(':scope > .guide-nav-folder-summary')?.classList.add('active');
+  }
+
   async function showSlug(slug, { syncNav = true } = {}) {
     activeSlug = slug;
     ancestorsOf(slug, navItems).forEach((parent) => expandedFolders.add(parent));
     if (syncNav) renderNav();
-    bodyEl.innerHTML = '<p class="text-muted">Loading...</p>';
+    else markNavActive(slug);
+    bodyEl.innerHTML = '<p class="text-muted">Loading this page...</p>';
     try {
       const md = await fetchDoc(slug);
       bodyEl.innerHTML = `<div class="guide-md">${renderMarkdown(md)}</div>`;
       await renderGuideMermaid(bodyEl);
     } catch (err) {
       log.error('guide', err.message, err);
-      bodyEl.innerHTML = `<p class="text-muted">Could not load ${escapeHtml(slug)}: ${escapeHtml(err.message)}</p>`;
+      bodyEl.innerHTML = `<p class="text-muted">Could not open ${escapeHtml(slug)}. ${escapeHtml(err.message)}</p>`;
     }
   }
 
@@ -290,25 +304,26 @@ export function createGuideView() {
       showSlug(leaf.dataset.slug);
       return;
     }
-    // Folder labels toggle open/close via native <details>; load that page when opening.
+    const summary = ev.target.closest('[data-folder-summary]');
+    if (!summary) return;
+    const folder = summary.closest('[data-folder]');
+    if (!folder) return;
+    const slug = folder.dataset.folder;
+    // Parent rows are both folders and pages. If already open on a child,
+    // keep the folder open and show the parent page instead of collapsing.
+    if (folder.open && activeSlug !== slug) {
+      ev.preventDefault();
+    }
+    expandedFolders.add(slug);
+    void showSlug(slug, { syncNav: false });
   });
 
   navEl.addEventListener('toggle', (ev) => {
     const folder = ev.target;
     if (!folder?.matches?.('[data-folder]')) return;
     const slug = folder.dataset.folder;
-    if (folder.open) {
-      expandedFolders.add(slug);
-      if (activeSlug !== slug) {
-        void showSlug(slug, { syncNav: false });
-        navEl.querySelectorAll('.guide-nav-link.active, .guide-nav-folder-summary.active').forEach((el) => {
-          el.classList.remove('active');
-        });
-        folder.querySelector(':scope > .guide-nav-folder-summary')?.classList.add('active');
-      }
-    } else {
-      expandedFolders.delete(slug);
-    }
+    if (folder.open) expandedFolders.add(slug);
+    else expandedFolders.delete(slug);
   });
 
   filterEl.addEventListener('input', renderNav);

@@ -1,12 +1,5 @@
 # Flocking Dog (Jadhav et al. 2024)
 
-## Reference
-
-V. Jadhav, et al.
-"Collective responses of flocking sheep (Ovis aries) to a herding dog (border collie)."
-Communications Biology, 2024.
-DOI: 10.1038/s42003-024-07245-8
-
 ## Problem
 
 Real sheep under dog pressure do not use a simple global flock model. They attend to a limited set of neighbours, and a dog that presses too hard inside the flock can scatter them instead of driving them.
@@ -162,3 +155,10 @@ substantially.
 ## Fidelity notes
 
 The Drive target uses the scenario goal rather than the paper's experimental target setup, and wall reflection is applied at arena boundaries. The random topological sub-sampling (`n_attraction`, `n_alignment`) means runs at the same seed can exhibit more variability than the Strombom family, particularly at small N.
+
+## Reference
+
+V. Jadhav, et al.
+"Collective responses of flocking sheep (Ovis aries) to a herding dog (border collie)."
+Communications Biology, 2024.
+DOI: 10.1038/s42003-024-07245-8

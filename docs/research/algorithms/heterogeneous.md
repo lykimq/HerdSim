@@ -4,14 +4,6 @@
 
 HerdSim variant of **Strombom 2014**. Collect / Drive is unchanged; a fraction of sheep have weaker shepherd repulsion for the whole run. Inspired by heterogeneous shepherding literature (e.g. Hiraoka / Sueoka / Osuka). Not a single-paper twin.
 
-## Reference
-
-Base paper:
-D. Strombom, R. P. Mann, A. M. Wilson, S. Hailes, A. J. Morton, D. J. T. Sumpter, A. J. King.
-"Solving the shepherding problem: heuristics for herding autonomous, interacting agents."
-Journal of The Royal Society Interface, 11(100):20140719, 2014.
-DOI: 10.1098/rsif.2014.0719
-
 ## Why
 
 Strombom 2014 assumes every sheep responds the same way to the shepherd. Real flocks are mixed: some animals are easy to push, others resist, so residual outliers can remain even when Collect looks correct.
@@ -98,3 +90,11 @@ Default N = 50 sheep, M = 1 shepherd, as in Strombom 2014. All Strombom 2014 par
 ## Limits
 
 Shepherd geometry matches Strombom 2014. Heterogeneous response is a HerdSim model of population variation, not a claim to reproduce one specific published flock.
+
+## Reference
+
+Base paper:
+D. Strombom, R. P. Mann, A. M. Wilson, S. Hailes, A. J. Morton, D. J. T. Sumpter, A. J. King.
+"Solving the shepherding problem: heuristics for herding autonomous, interacting agents."
+Journal of The Royal Society Interface, 11(100):20140719, 2014.
+DOI: 10.1098/rsif.2014.0719
