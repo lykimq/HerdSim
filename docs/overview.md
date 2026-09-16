@@ -34,7 +34,7 @@ Typical research themes:
 
 Under the hood, every tick follows the same pipeline: environment updates, sheep dynamics, observation, dog control, constraints and walls, then metrics. Metrics are shared across instruments so numbers mean the same thing on every side of a comparison.
 
-## Core ideas in plain language
+## Core ideas
 
 **Instrument.** A ready-made method package: how sheep move plus how dogs decide where to go (for example Strombom 2014, Kubo 2022, FAT). Pick it from a list; you do not assemble plugins by hand for normal use.
 
@@ -71,7 +71,7 @@ Reference pages (Instruments, Scenarios, Metrics, Environment) explain the scien
 
 When you are ready to compare two methods visually, switch to **Compare**. When you need many seeds and a table, switch to **Experiments**.
 
-## Questions researchers often ask
+## Frequently Asked Questions
 
 **Is HerdSim a single algorithm demo?**
 No. It is a platform: shared scenarios, seeds, factors, and metrics around many instruments.

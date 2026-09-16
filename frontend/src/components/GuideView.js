@@ -5,7 +5,7 @@ import { log } from '../utils/logger.js';
 import { escapeHtml } from '../utils/dom.js';
 
 const FALLBACK_NAV = [
-  { slug: 'user_guide', label: 'Overview', group: 'Start here' },
+  { slug: 'overview', label: 'Overview', group: 'Start here' },
   { slug: 'research/comparison_framework', label: 'Compare', group: 'How to use' },
   { slug: 'experiments', label: 'Experiments', group: 'How to use' },
   { slug: 'research/netlogo', label: 'NetLogo', group: 'How to use' },
@@ -17,7 +17,7 @@ const FALLBACK_NAV = [
 ];
 
 const LABEL_OVERRIDES = {
-  user_guide: 'Overview',
+  overview: 'Overview',
   experiments: 'Experiments',
   'research/algorithms': 'Instruments',
   'research/algorithms/strombom_2014': 'Strombom 2014',
@@ -245,7 +245,7 @@ export function createGuideView() {
     ...item,
     depth: 0,
   }));
-  let activeSlug = navItems[0]?.slug || 'user_guide';
+  let activeSlug = navItems[0]?.slug || 'overview';
   /** Parent slugs the user has expanded; auto-open when the active page is inside. */
   const expandedFolders = new Set();
 

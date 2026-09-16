@@ -14,7 +14,7 @@ _DOCS_ROOT = Path(__file__).resolve().parents[2] / "docs"
 # Whitelist served by Guide. Order and groups drive the left nav.
 _DOC_ENTRIES: list[tuple[str, Path, str, str]] = [
     # slug, path, title, nav group
-    ("user_guide", _DOCS_ROOT / "user_guide.md", "Overview", "Start here"),
+    ("overview", _DOCS_ROOT / "overview.md", "Overview", "Start here"),
     (
         "research/comparison_framework",
         _DOCS_ROOT / "research" / "comparison_framework.md",
