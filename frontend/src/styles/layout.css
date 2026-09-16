@@ -334,6 +334,26 @@
   gap: 0.1rem;
 }
 
+.guide-nav-section {
+  list-style: none;
+  margin: 0.85rem 0 0.2rem;
+  padding: 0 0.65rem;
+}
+
+.guide-nav-section:first-child {
+  margin-top: 0.15rem;
+}
+
+.guide-nav-section-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  opacity: 0.9;
+}
+
 .guide-nav-folder {
   border: none;
   background: transparent;

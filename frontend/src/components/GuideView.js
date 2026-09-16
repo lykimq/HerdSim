@@ -5,18 +5,20 @@ import { log } from '../utils/logger.js';
 import { escapeHtml } from '../utils/dom.js';
 
 const FALLBACK_NAV = [
-  { slug: 'user_guide', label: 'User Guide' },
-  { slug: 'research/algorithms', label: 'Instruments' },
-  { slug: 'research/comparison_framework', label: 'Comparison Framework' },
-  { slug: 'architecture', label: 'Architecture' },
-  { slug: 'research/scenarios', label: 'Scenarios' },
-  { slug: 'research/metrics', label: 'Metrics' },
-  { slug: 'research/environment', label: 'Environment' },
-  { slug: 'research/netlogo', label: 'NetLogo' },
+  { slug: 'user_guide', label: 'Overview', group: 'Start here' },
+  { slug: 'research/comparison_framework', label: 'Compare', group: 'How to use' },
+  { slug: 'experiments', label: 'Experiments', group: 'How to use' },
+  { slug: 'research/netlogo', label: 'NetLogo', group: 'How to use' },
+  { slug: 'research/algorithms', label: 'Instruments', group: 'Reference' },
+  { slug: 'research/scenarios', label: 'Scenarios', group: 'Reference' },
+  { slug: 'research/metrics', label: 'Metrics', group: 'Reference' },
+  { slug: 'research/environment', label: 'Environment', group: 'Reference' },
+  { slug: 'architecture', label: 'Architecture', group: 'For developers' },
 ];
 
 const LABEL_OVERRIDES = {
-  user_guide: 'User Guide',
+  user_guide: 'Overview',
+  experiments: 'Experiments',
   'research/algorithms': 'Instruments',
   'research/algorithms/strombom_2014': 'Strombom 2014',
   'research/algorithms/strombom_multi': 'Strombom Multi-Dog',
@@ -29,7 +31,7 @@ const LABEL_OVERRIDES = {
   'research/algorithms/fat': 'FAT',
   'research/algorithms/communication_free': 'Communication-Free',
   'research/algorithms/adaptive': 'Adaptive',
-  'research/comparison_framework': 'Comparison Framework',
+  'research/comparison_framework': 'Compare',
   architecture: 'Architecture',
   'research/scenarios': 'Scenarios',
   'research/metrics': 'Metrics',
@@ -158,6 +160,21 @@ function filterNavTree(nodes, q) {
     .filter(Boolean);
 }
 
+/** Preserve API / fallback order of root pages, grouped for the left menu. */
+function groupRootNodes(nodes) {
+  const order = [];
+  const byGroup = new Map();
+  nodes.forEach((node) => {
+    const label = node.item.group || '';
+    if (!byGroup.has(label)) {
+      byGroup.set(label, []);
+      order.push(label);
+    }
+    byGroup.get(label).push(node);
+  });
+  return order.map((label) => ({ label, nodes: byGroup.get(label) }));
+}
+
 function ancestorsOf(slug, items) {
   const bySlug = new Map(items.map((item) => [item.slug, item]));
   const out = [];
@@ -267,7 +284,18 @@ export function createGuideView() {
   function renderNav() {
     const q = String(filterEl.value || '').trim().toLowerCase();
     const tree = filterNavTree(buildNavTree(navItems), q);
-    navEl.innerHTML = `<ul class="guide-nav-list">${renderNavNodes(tree)}</ul>`;
+    const sections = groupRootNodes(tree);
+    const html = sections
+      .map((section) => {
+        const heading = section.label
+          ? `<li class="guide-nav-section" aria-hidden="true">
+              <span class="guide-nav-section-label">${escapeHtml(section.label)}</span>
+            </li>`
+          : '';
+        return `${heading}${renderNavNodes(section.nodes)}`;
+      })
+      .join('');
+    navEl.innerHTML = `<ul class="guide-nav-list">${html}</ul>`;
   }
 
   function markNavActive(slug) {
@@ -339,6 +367,7 @@ export function createGuideView() {
           navItems = docs.map((d) => ({
             slug: d.slug,
             label: titleFromSlug(d.slug, d.title),
+            group: d.group || '',
           }));
         }
       } catch {

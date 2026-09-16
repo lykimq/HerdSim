@@ -11,7 +11,7 @@ export function analyticsRunnerHtml() {
       Compare named instruments across seeds, or run a factor grid over sheep model,
       dog controller, flock size, and other factors. Matching model pairs reuse
       instrument param bundles automatically. For fair instrument ranking, use
-      Custom mode and lock the same sheep and dog counts (see Comparison Framework
+      Custom mode and lock the same sheep and dog counts (see Compare and Experiments
       in Guide). Kubo path lengths use continuous dt and are not directly comparable
       to Strombom-family displacement-per-tick paths.
     </p>

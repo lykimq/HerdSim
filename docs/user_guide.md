@@ -1,55 +1,105 @@
-# HerdSim User Guide
+# Overview
 
-Welcome to the HerdSim interactive web application. This guide walks through setting up simulations, interacting with the environments, and interpreting analytics data.
+HerdSim is an interactive research workbench for **multi-agent sheep herding**: a small number of shepherds (dogs) guides a larger flock toward a goal under controlled conditions.
 
-## 1. Introduction to the UI
+The point is not only to demo one clever controller. It is to ask measurable questions about when herding works, when it fails, and how methods compare when the world, flock size, sensing, and randomness are held fair.
 
-When you open HerdSim in your browser (default `http://localhost:5173`), you see a unified interface for running, analyzing, and comparing sheep herding instruments under controlled experimental factors.
+## Purpose and goals
 
-Main views in the top navigation:
-- **Simulate:** Real-time interactive 2D visualization of one simulation.
-- **Compare:** Side-by-side comparison runs.
-- **Experiments:** Batch trials, instrument comparison, factor grids, and export.
-- **NetLogo:** Research panel for NetLogo-related work.
-- **Guide:** Documentation (this tab).
+HerdSim helps you:
 
-Instruments are named presets over `sheep_model` x `dog_controller` (for example Strombom, Kubo, FAT, Adaptive, Communication-Free). Experimental factors such as observation mode, stubborn fraction, and shepherd failure can be varied without changing the instrument bundle.
+- **Run** named herding methods (instruments) in shared scenarios
+- **Vary** experimental factors (sensing, heterogeneity, failure, counts) without rewriting the engine
+- **Compare** methods live (side by side) or in batch (many seeds, exports)
+- **Report** outcomes with shared metrics and reproducible seeds
 
-## 2. Setting up a Simulation (Simulate)
+Typical research themes:
 
-The Simulate view is the primary place to visualize instrument behavior.
+| Theme | Example question |
+|-------|------------------|
+| Herdability | How many dogs does a flock of size N need? |
+| Information | Does performance collapse under local or noisy sensing? |
+| Heterogeneity | What happens when some sheep barely respond to the dog? |
+| Robustness | Can the team finish if a shepherd fails mid-run? |
+| Generalization | Does the ranking of methods flip on a harder scenario or seed set? |
+| Method contrast | Collect/Drive vs force-based vs local farthest-sheep targeting |
 
-### Configuration Panel (Left Sidebar)
-1. **Instrument:** Choose a named preset (e.g. Strombom 2014, Kubo 2022, Flocking Dog).
-2. **Scenario:** Select the environment (e.g. Drive to Goal, Obstacle Course, Split Flock).
-3. **Settings source:** Instrument (paper), Scenario (task), or Custom.
-4. **Experimental factors:** Observation (`obs_mode`, sensing, noise), flock heterogeneity (`stubborn_fraction`, `cohesion_scale`), shepherd failure, and goal motion. Switch to Custom to edit these; they are sent with the session. Conditional fields appear only when relevant (for example sensing range under local observation, failure tick under an active failure mode).
-5. **Resolved setup summary:** A short line under the seed control shows the current instrument, scenario, counts, and active factors before you initialize.
-6. **Agent counts and seed:** Sheep count, dog/shepherd count, and random seed.
-7. **Advanced settings:** Instrument-specific numeric parameters (paper defaults or custom).
+## What you get (features)
 
-### Action Controls
-- **Initialize New Run:** Create a session with the current instrument and factors.
-- **Play / Pause:** Play or pause the simulation.
-- **Step:** Advance by exactly one tick.
-- **Reset:** Restart with the same seed and initial conditions.
+- **Simulate:** one live run with scrub history, metrics, inspect panel, and a run report
+- **Compare:** Fair or Independent A/B arenas with live metric deltas
+- **Experiments:** multi-seed instrument ranking, factor grids, charts, CSV/JSON/Markdown export
+- **NetLogo:** open desktop twins for instruments that have a NetLogo counterpart
+- **Guide:** this documentation set (overview, how-to pages, and reference)
 
-## 3. Controlling and Scrubbing the Simulation
+Under the hood, every tick follows the same pipeline: environment updates, sheep dynamics, observation, dog control, constraints and walls, then metrics. Metrics are shared across instruments so numbers mean the same thing on every side of a comparison.
 
-HerdSim records history as it runs.
-- **Scrub History:** When paused, use the timeline to move through recorded ticks.
-- **Live Metrics:** Cohesion, GCM to Goal, fragmentation, and related metrics update each tick.
-- **Inspect:** Live herding mode, sheep/dog models, observation mode, and assignment count from the current frame metadata.
-- **Run report:** After success or timeout, a methods-style summary appears under the scrub bar, including failure hints when the run did not succeed. Download Markdown from the report panel.
+## Core ideas in plain language
 
-## 4. Experiments dashboard
+**Instrument.** A ready-made method package: how sheep move plus how dogs decide where to go (for example Strombom 2014, Kubo 2022, FAT). Pick it from a list; you do not assemble plugins by hand for normal use.
 
-Experiments runs simulations headless for batch evaluation.
+**Scenario.** The task and layout (for example Drive to Goal, Obstacle Course). Success rules and world shape live here.
 
-- **Compare instruments:** Same scenario and seeds across selected instruments.
-- **Factor grid:** Sweep one or more scientific factors (for example `n_sheep` x `n_shepherds` x `obs_mode`) for a single instrument. Study templates fill common grids (herdability N x M, sensing degradation, stubborn fraction).
-- **Herdability heatmap:** After a two-or-more-axis grid, success rate is plotted over the first two factors.
-- **Fair comparison tip:** When comparing instruments, lock the same sheep and dog counts (Custom / shared settings). Instrument (paper) keeps each preset's own published agent counts.
-- **Exports:** CSV and JSON include outcome columns, trajectory aggregates, control efficiency, failure_mode / failure_label, experiment design, resolved config, git commit when available, and comparison caveats.
+**Seed.** The random draw for initial positions and stochastic bits. Same instrument + scenario + seed => same replay. Different seeds => independent trials.
 
-For the formal protocol, see `docs/research/comparison_framework.md`.
+**Experimental factors.** Knobs around the instrument: observation mode, sensing range, noise, stubborn fraction, shepherd failure, goal motion, sheep/dog counts, and more. Change conditions without switching the named method.
+
+**Settings source.** Instrument (paper-style defaults), Scenario (task defaults), or Custom (you lock counts and factors). Use Custom when you want a fair head-to-head ranking.
+
+## Map of the app
+
+Open the app at `http://localhost:5173` after `make install` and `make dev` (see the project README).
+
+| Tab | Use it to... | Full how-to |
+|-----|--------------|-------------|
+| Simulate | Watch one run, scrub, inspect, download a run report | Short start below |
+| Compare | Watch two instruments matched or independently | **Compare** in this Guide |
+| Experiments | Rank methods over seeds, sweep factors, export | **Experiments** in this Guide |
+| NetLogo | Open a desktop twin beside HerdSim | **NetLogo** in this Guide |
+| Guide | Read overview and reference | You are here |
+
+Reference pages (Instruments, Scenarios, Metrics, Environment) explain the scientific objects. Architecture is for developers extending the stack.
+
+## First minutes in Simulate
+
+1. Open **Simulate**.
+2. Pick an **instrument** (Strombom 2014 is a good first choice) and a **scenario** (Drive to Goal).
+3. Note the seed and agent counts; switch to **Custom** if you plan to change factors.
+4. Click **Initialize New Run**, then **Play**.
+5. Pause to **scrub** the timeline, read live metrics, and open **Inspect** for mode and model metadata.
+6. When the run ends, read the **run report** (and download Markdown if you want notes).
+
+When you are ready to compare two methods visually, switch to **Compare**. When you need many seeds and a table, switch to **Experiments**.
+
+## Questions researchers often ask
+
+**Is HerdSim a single algorithm demo?**
+No. It is a platform: shared scenarios, seeds, factors, and metrics around many instruments.
+
+**What is an instrument vs a factor?**
+An instrument is the method bundle you select by name. A factor is a condition you vary around it (sensing, stubborn sheep, failure, counts). You can keep one instrument and still run a factor study.
+
+**How do I compare methods fairly?**
+Lock the same scenario, sheep count, dog count, seed list, and success rule. In Compare, use Fair compare. In Experiments, use Compare instruments with Custom counts. Paper presets keep each method's published counts; that is replication, not a matched ranking.
+
+**Why do path lengths look odd across Kubo and Strombom-style methods?**
+They do not advance motion the same way. Kubo uses a continuous time step (`dt`); many Strombom-family controllers move by displacement per tick. Treat path length carefully; Experiments exports call out this caveat.
+
+**Can I reproduce a paper's agent counts?**
+Yes: use Instrument (paper) settings. Say clearly that those runs are paper-default replication, not locked-count fair compare.
+
+**Where do batch results and provenance go?**
+Experiments exports (CSV, JSON, Markdown) carry trial outcomes, trajectory summaries, failure labels, design, and resolved config. Live Compare is for watching; Experiments is for evidence you can cite.
+
+**Is NetLogo inside the browser sim?**
+No. HerdSim runs the Python engine in Simulate, Compare, and Experiments. The NetLogo tab opens desktop models that mirror selected instruments for visual cross-check.
+
+**Where should I read next?**
+
+- Method details: **Instruments**
+- Task layouts: **Scenarios**
+- Score definitions: **Metrics**
+- World and timing conventions: **Environment**
+- Live A/B UI: **Compare**
+- Batch studies: **Experiments**
+- Desktop twins: **NetLogo**

@@ -46,4 +46,4 @@ Those knobs live under experimental factors and Custom settings. Changing them d
 - Start with **Strombom 2014** if you are new to the app.
 - Use **Kubo 2022** or **Flocking Dog** when you want a different herding style to compare.
 - Open **Scenarios** and **Metrics** in this Guide when you are ready to judge success and read the live numbers.
-- See **Comparison Framework** for fair side-by-side experiments across instruments.
+- See **Compare** and **Experiments** in this Guide for fair side-by-side and batch studies.

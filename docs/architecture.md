@@ -90,7 +90,7 @@ New sheep models, dog controllers, and observation modes register in `core/plugi
 - `api/`: FastAPI routers and factor-grid benchmarks
 - `core/`: runner, factors, observation, agent attributes, presets
 - `dynamics/`, `controllers/`: sheep and dog plugins
-- `algorithms/<id>/`: instrument packages (`info.json`, paper defaults, helpers)
+- `algorithms/<id>/`: on-disk instrument packages (`info.json`, paper defaults, helpers). Folder name is historical; product language is instrument. This is not an HTTP path.
 - `scenarios/`, `metrics/`: task and measurement plugins
 - `analysis/`: herdability, behavioural, failure taxonomy, propagation helpers
 - `scripts/`: `dev.sh` (local API + Vite; also `make dev`)
@@ -98,4 +98,11 @@ New sheep models, dog controllers, and observation modes register in `core/plugi
 - `docs/`: architecture and research docs
 - `tests/`: pytest + frontend node tests
 
-API fields use `instrument` / `instruments` for endpoint payloads and UI strings. On disk, instrument packages remain under `algorithms/<id>/`. Discovery: `GET /api/instruments`.
+## HTTP API (instruments)
+
+Discovery and UI payloads use **instrument** wording:
+
+- `GET /api/instruments` lists named instruments (from `core/presets.py`, with package metadata from `algorithms/<id>/info.json` where present)
+- Related routes under `/api/instruments/...` (for example models meta used by Experiments)
+
+There is no `/api/algorithms` route. Prefer `instrument` / `instruments` in new API fields and clients. On disk, packages remain under `algorithms/<id>/` until a deliberate folder rename.
