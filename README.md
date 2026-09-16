@@ -4,7 +4,7 @@
 limits, robustness, generalization, and information requirements of multi-agent
 shepherding.
 
-Herding -- where a small group of shepherds guides a larger flock to a target --
+Herding, where a small group of shepherds guides a larger flock to a target --
 is studied here through orthogonal experimental factors rather than algorithm
 catalogues alone. Named **instruments** are factor bundles over
 `sheep_model` x `dog_controller`. Controllers are instruments for measuring
