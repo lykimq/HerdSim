@@ -1,4 +1,12 @@
-"""Strombom 2014 sheep dynamics."""
+"""Strombom 2014 sheep motion (sheep_model=strombom).
+
+Beyond shepherd range r_s, sheep graze: usually stay still, sometimes take a
+random step. Within r_s they update heading from inertia, attraction to the
+local neighbour centre, sheep-sheep repulsion inside r_a, repulsion from active
+shepherds, and angular noise, then advance by sheep_speed (displacement per
+tick). Used by the Strombom-family instruments; the dog side is a separate
+controller (typically Collect/Drive).
+"""
 
 from __future__ import annotations
 

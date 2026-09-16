@@ -34,7 +34,7 @@ export function analyticsRunnerHtml() {
     <div class="control-group" data-role="compare-algs">
       <label>Instruments</label>
       <div class="check-list" data-role="algs"></div>
-      <p class="param-hint" data-role="algorithm-blurb"></p>
+      <p class="param-hint" data-role="instrument-blurb"></p>
     </div>
     <div class="control-group hidden" data-role="grid-fields">
       <div class="factor-grid-toolbar">

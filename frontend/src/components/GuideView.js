@@ -84,7 +84,8 @@ function ensureMermaid() {
   if (mermaidReady) return;
   mermaid.initialize({
     startOnLoad: false,
-    securityLevel: 'strict',
+    securityLevel: 'antiscript',
+    htmlLabels: true,
     theme: 'base',
     themeVariables: {
       primaryColor: '#cfe2f3',
@@ -103,7 +104,7 @@ function ensureMermaid() {
       edgeLabelBackground: '#e2e8f0',
       background: '#020617',
     },
-    flowchart: { curve: 'basis', htmlLabels: false },
+    flowchart: { curve: 'basis' },
   });
   mermaidReady = true;
 }

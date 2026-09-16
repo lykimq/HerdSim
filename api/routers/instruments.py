@@ -1,4 +1,4 @@
-"""API router for instrument / preset discovery (legacy path /api/algorithms)."""
+"""API router for instrument / preset discovery."""
 
 from __future__ import annotations
 
@@ -167,7 +167,7 @@ def _with_herder_meta(entry: dict) -> dict:
 
 @router.get("")
 @router.get("/")
-def list_algorithms():
+def list_instruments():
     """List named instrument presets (sheep_model x dog_controller bundles)."""
     return [_with_herder_meta(item) for item in list_presets()]
 

@@ -13,7 +13,7 @@ Main views in the top navigation:
 - **NetLogo:** Research panel for NetLogo-related work.
 - **Guide:** Documentation (this tab).
 
-Instruments are named presets over `sheep_model` x `dog_controller` (for example Strombom, Kubo, FAT, Adaptive, Communication-free). Experimental factors such as observation mode, stubborn fraction, and shepherd failure can be varied without changing the instrument bundle.
+Instruments are named presets over `sheep_model` x `dog_controller` (for example Strombom, Kubo, FAT, Adaptive, Communication-Free). Experimental factors such as observation mode, stubborn fraction, and shepherd failure can be varied without changing the instrument bundle.
 
 ## 2. Setting up a Simulation (Simulate)
 
@@ -51,7 +51,5 @@ Experiments runs simulations headless for batch evaluation.
 - **Herdability heatmap:** After a two-or-more-axis grid, success rate is plotted over the first two factors.
 - **Fair comparison tip:** When comparing instruments, lock the same sheep and dog counts (Custom / shared settings). Instrument (paper) keeps each preset's own published agent counts.
 - **Exports:** CSV and JSON include outcome columns, trajectory aggregates, control efficiency, failure_mode / failure_label, experiment design, resolved config, git commit when available, and comparison caveats.
-
-Larger offline grids and generalization studies can also be run from the CLI scripts (`scripts/run_factor_grid.py`, `scripts/run_generalization.py`). Empirical trajectory fitting (`scripts/run_empirical_gap.py`) remains a stub until after platform polish.
 
 For the formal protocol, see `docs/research/comparison_framework.md`.

@@ -67,9 +67,9 @@ export function presetSelectHtml(includeCustom = true) {
     .join("");
 }
 
-/** Short text for the selected algorithm (mechanism / paper title). */
-export function algorithmBlurb(algorithm) {
-  const info = algorithm?.info;
+/** Short text for the selected instrument (mechanism / paper title). */
+export function instrumentBlurb(instrument) {
+  const info = instrument?.info;
   if (info?.mechanism) return info.mechanism;
   if (info?.paper_title) return info.paper_title;
   return "";
@@ -101,7 +101,7 @@ export function scenarioOptionLabel(scenario) {
  */
 export function presetSourceBlurb(
   presetId,
-  { algorithm, scenario, paperTaskLocked = true } = {},
+  { instrument, scenario, paperTaskLocked = true } = {},
 ) {
   if (presetId === "scenario") {
     const counts = scenarioCountHint(scenario);
@@ -115,19 +115,19 @@ export function presetSourceBlurb(
   if (presetId === "custom") {
     return "Customize scenario, sheep/dogs, experimental factors, and optional instrument or world parameters.";
   }
-  const algName = algorithm?.name || "this instrument";
-  const cfg = algorithm?.default_config || {};
+  const name = instrument?.name || "this instrument";
+  const cfg = instrument?.default_config || {};
   const nSheep = cfg.n_sheep;
   const nDogs = cfg.n_shepherds;
   const counts =
     nSheep != null && nDogs != null ? `${nSheep} sheep, ${nDogs} dogs` : null;
-  const mech = algorithmBlurb(algorithm);
+  const mech = instrumentBlurb(instrument);
   const taskName = paperTaskLocked
     ? "Drive to Goal"
     : scenario?.name || "the selected scenario";
   const setup = counts
-    ? `Paper params and counts for ${algName} (${counts}); world from ${taskName}.`
-    : `Paper params and counts for ${algName}; world from ${taskName}.`;
+    ? `Paper params and counts for ${name} (${counts}); world from ${taskName}.`
+    : `Paper params and counts for ${name}; world from ${taskName}.`;
   return mech ? `${setup} ${mech}` : setup;
 }
 

@@ -33,7 +33,7 @@ Three related quantities appear in the metrics panel and run report:
 
 **Sheep in goal** (live metric) is the integer count of sheep inside the goal zone.
 
-**Scenario success** is declared when the scenario's specific criterion first holds -- for example, all sheep inside the goal, or the pen occupancy threshold sustained for enough ticks. Success is a boolean event, not a continuous metric.
+**Scenario success** is declared when the scenario's specific criterion first holds: for example, all sheep inside the goal, or the pen occupancy threshold sustained for enough ticks. Success is a boolean event, not a continuous metric.
 
 **Time to goal** is a strict metric: it reports the current tick only when every single sheep is simultaneously inside the goal. If any sheep is outside, it returns -1. This can differ from the first success tick under scenarios where `success_fraction` is less than 1.
 

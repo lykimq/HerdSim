@@ -46,7 +46,7 @@ Finish times and exact paths will differ between HerdSim and NetLogo even with t
 2. Agents may update in a different order within a tick between the two implementations.
 3. Force-based models such as Kubo are especially sensitive to these discrete differences.
 
-Treat the comparison as behavioural -- do the instruments produce similar collective motion and herding strategies -- not as a tick-for-tick replay.
+Focus on behaviour (similar collective motion and herding strategies), not tick-for-tick replay.
 
 ## Capability comparison
 

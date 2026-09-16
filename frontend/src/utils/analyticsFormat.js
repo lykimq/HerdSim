@@ -18,14 +18,11 @@ function plotlyUnavailableHtml() {
   return emptyStateHtml('Plotly is loading or unavailable.');
 }
 
-function instrumentOrder(rows, groupKey = 'algorithm') {
+function instrumentOrder(rows, groupKey = 'instrument') {
   return [
     ...new Set(
       rows
-        .map((r) => {
-          if (groupKey === 'algorithm') return r.algorithm ?? r.instrument;
-          return r[groupKey];
-        })
+        .map((r) => r[groupKey])
         .filter((v) => v != null && v !== ''),
     ),
   ];
@@ -69,7 +66,7 @@ export async function renderPlotlyBoxPlot(container, rawRows, key, label, option
   const {
     boxSuccessOnly = false,
     annotateFailures = true,
-    groupKey = 'algorithm',
+    groupKey = 'instrument',
     xTitle = groupKey === 'sweep_label' || groupKey === 'factor_label'
       ? 'Parameter set'
       : 'Instrument',
@@ -153,8 +150,8 @@ export async function renderPlotlyPathTicksScatter(container, rawRows) {
   const traces = [];
   instruments.forEach((alg) => {
     const color = colorForInstrument(instruments, alg);
-    const ok = rows.filter((r) => (r.algorithm ?? r.instrument) === alg && r.success);
-    const bad = rows.filter((r) => (r.algorithm ?? r.instrument) === alg && !r.success);
+    const ok = rows.filter((r) => r.instrument === alg && r.success);
+    const bad = rows.filter((r) => r.instrument === alg && !r.success);
 
     if (ok.length) {
       traces.push({
@@ -289,7 +286,7 @@ export function summaryRowHtml(row) {
   const pct = (v) => (v != null ? `${(Number(v) * 100).toFixed(1)}%` : 'n/a');
   const num = (v, digits = 2) => (v != null ? Number(v).toFixed(digits) : 'n/a');
   return `
-    <td>${row.algorithm}</td>
+    <td>${row.instrument}</td>
     <td>${row.trials}</td>
     <td>${pct(row.success_rate)}</td>
     <td>${pct(row.failure_rate)}</td>
@@ -326,5 +323,5 @@ export function headlineFromSummary(summary = []) {
     (a, b) => Number(b.success_rate || 0) - Number(a.success_rate || 0),
   )[0];
   const pct = best.success_rate != null ? `${(Number(best.success_rate) * 100).toFixed(0)}%` : 'n/a';
-  return `Best success: ${best.algorithm} (${pct} over ${best.trials} trials).`;
+  return `Best success: ${best.instrument} (${pct} over ${best.trials} trials).`;
 }

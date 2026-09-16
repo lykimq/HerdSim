@@ -50,7 +50,7 @@ def test_run_benchmark_param_sweep_labels_rows():
     assert labels == {"n_neighbors=-1", "n_neighbors=2"}
     summary = summarize_rows(pd.DataFrame(payload["rows"]))
     assert len(summary) == 2
-    assert all("[" in row["algorithm"] for row in summary)
+    assert all("[" in row["instrument"] for row in summary)
 
 
 def test_find_preset_for_models_prefers_canonical():

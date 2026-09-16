@@ -1,6 +1,6 @@
 import {
   PAPER_TASK_SCENARIO_ID,
-  algorithmBlurb,
+  instrumentBlurb,
   applyScenarioWorld,
   buildParamControls,
   getPresetOption,
@@ -131,14 +131,14 @@ export function createParamRefresh({
     const preset = currentPreset();
     const presetInfo = getPresetOption(preset);
     const paramsEditable = preset === 'custom';
-    setInfoTip(els.instrumentLabel, algorithmBlurb(alg));
+    setInfoTip(els.instrumentLabel, instrumentBlurb(alg));
     if (preset !== 'scenario') {
       setInfoTip(els.scenarioLabel, scenarioBlurb(scen));
     }
     setInfoTip(
       els.presetLabel,
       presetSourceBlurb(preset, {
-        algorithm: alg,
+        instrument: alg,
         scenario: scen,
         paperTaskLocked: lockPaperScenario,
       }),

@@ -146,7 +146,7 @@ describe('factor grid helpers', () => {
 
   it('groups charts by sweep_label when present', () => {
     assert.equal(chartGroupKey([{ sweep_label: 'n_sheep=20' }]), 'sweep_label');
-    assert.equal(chartGroupKey([{ algorithm: 'strombom' }]), 'algorithm');
+    assert.equal(chartGroupKey([{ instrument: 'strombom' }]), 'instrument');
   });
 
   it('parses two-axis sweep labels and ignores factor_label meta', () => {

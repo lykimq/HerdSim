@@ -2,13 +2,17 @@
 
 ## What it is
 
-HerdSim multi-dog variant of **Strombom 2014**. Sheep and Collect match Strombom Multi-Dog; Drive places dogs on a V-shaped arc behind the flock (Fujioka-style formation idea). Not a full port of every Fujioka experiment setting.
+Multi-dog variant of **Strombom 2014**. Sheep and Collect match Strombom Multi-Dog; Drive places dogs on a V-shaped arc behind the flock, following the Fujioka-style formation idea. Not a full copy of Fujioka's experiment settings.
 
 In the app the herders are labeled **Dog**, as with Strombom Multi-Dog.
+
+**Fidelity:** Collect comes from Strombom Multi-Dog. The V-arc placement (`v_angle_deg`, `v_arc_offset`) is a HerdSim take on the Fujioka formation idea, not a line-by-line replica of that paper.
 
 ## Why
 
 In multi-dog Drive, stacking dogs on one point or spreading them on a full circle can leave uneven pressure across the back of the flock.
+
+V-Formation lets you compare Drive geometry alone against Strombom Multi-Dog (circle spacing vs V-arc) while holding sheep and Collect assignment fixed.
 
 ## Goal
 
@@ -63,7 +67,58 @@ Legend: grey = start/end, yellow = decision, green = shared step, purple = V-for
 
 Sheep dynamics are identical to Strombom 2014. Collect and the cohesion threshold match Strombom Multi-Dog. Read those pages for the shared parts.
 
+```mermaid
+flowchart TD
+  startNode(["Each tick"])
+  sheep["Sheep update as Strombom 2014"]
+  spreadQ{"Any sheep > f(N)<br/>from GCM?"}
+  collect["Collect as Strombom Multi-Dog"]
+  vdrive["Drive: place dogs on V-arc"]
+  step["Each dog moves with<br/>Strombom stop rule"]
+  done(["End tick"])
+
+  startNode --> sheep --> spreadQ
+  spreadQ -->|yes| collect --> step
+  spreadQ -->|no| vdrive --> step
+  step --> done
+
+  classDef question fill:#fff9c4,stroke:#f9a825,color:#000000
+  classDef domain fill:#c8e6c9,stroke:#2e7d32,color:#000000
+  classDef wiring fill:#e1bee7,stroke:#7b1fa2,color:#000000
+  classDef start fill:#eceff1,stroke:#546e7a,color:#000000
+
+  class startNode,done start
+  class spreadQ question
+  class sheep,collect,step domain
+  class vdrive wiring
+```
+
+Legend: grey = start/end, yellow = decision, green = shared step, purple = V-arc Drive.
+
 ### Drive mode (V-arc)
+
+```mermaid
+flowchart TD
+  startNode(["Drive mode per dog i"])
+  behind["Unit vector from goal to GCM"]
+  radius["arc_radius = v_arc_offset<br/>or r_a * sqrt(N)"]
+  angle["theta(i) = (i - (M-1)/2) * v_angle_deg"]
+  target["P_d(i) = GCM<br/>+ R(behind, theta(i)) * arc_radius"]
+  step["Move with Strombom stop rule"]
+  done(["Next dog"])
+
+  startNode --> behind --> radius --> angle --> target --> step --> done
+
+  classDef domain fill:#c8e6c9,stroke:#2e7d32,color:#000000
+  classDef wiring fill:#e1bee7,stroke:#7b1fa2,color:#000000
+  classDef start fill:#eceff1,stroke:#546e7a,color:#000000
+
+  class startNode,done start
+  class behind,radius domain
+  class angle,target,step wiring
+```
+
+Legend: green = shared geometry inputs, purple = V-arc placement per dog.
 
 The controller uses the unit direction from the goal to the GCM as the direction behind the flock. The arc radius is `v_arc_offset` when supplied, or `r_a * sqrt(N)` otherwise. The angular offset for dog `i` is:
 
@@ -111,15 +166,27 @@ All Strombom 2014 parameters apply. V-Formation-specific additions:
 
 The sheep model is faithful to Strombom 2014. The V-arc Drive geometry is a HerdSim design implementing the formation idea; it is not a line-by-line reproduction of any specific Fujioka experiment configuration. Scenario goal and wall reflection apply as with all HerdSim algorithms.
 
+## Fidelity status
+
+**From Fujioka / Hayashi (2018):** V-formation (fan) Drive idea behind the flock.
+
+**From Strombom Multi-Dog / Strombom 2014:** sheep dynamics; Collect outlier assignment; stop rule.
+
+**HerdSim-only:** `v_angle_deg` / `v_arc_offset` placement; default M = 2.
+
+**Not implemented:** Fujioka experiment settings, environment, or full parameter sweep as published.
+
 ## Reference
 
-V-formation Drive idea:
+**V-formation Drive idea:**
+
 K. Fujioka, S. Hayashi.
 "Effective Herding in Shepherding Problem in V-formation Control."
 Transactions of the Institute of Systems, Control and Information Engineers, 2018.
 DOI: 10.5687/iscie.31.21
 
-Sheep / Collect base:
+**Sheep / Collect base:**
+
 D. Strombom et al.
 "Solving the shepherding problem: heuristics for herding autonomous, interacting agents."
 Journal of The Royal Society Interface, 11(100):20140719, 2014.

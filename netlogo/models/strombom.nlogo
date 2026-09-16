@@ -1,4 +1,4 @@
-;; Strombom 2014 -- NetLogo twin of HerdSim algorithms/strombom
+;; Strombom 2014: NetLogo twin of HerdSim algorithms/strombom
 ;;
 ;; Visual comparison: match HerdSim Single via Interface sliders, then setup / go.
 ;; HerdSim Single runs the Python reference of the same paper rules.

@@ -27,17 +27,17 @@ export async function checkApiHealth() {
 }
 
 export async function fetchInstruments() {
-  const res = await apiFetch('/api/algorithms');
+  const res = await apiFetch('/api/instruments');
   return res.json();
 }
 
 export async function fetchModels() {
-  const res = await apiFetch('/api/algorithms/meta/models');
+  const res = await apiFetch('/api/instruments/meta/models');
   return res.json();
 }
 
 export async function fetchInstrument(instrumentId) {
-  const res = await apiFetch(`/api/algorithms/${instrumentId}`);
+  const res = await apiFetch(`/api/instruments/${instrumentId}`);
   return res.json();
 }
 

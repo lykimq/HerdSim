@@ -102,9 +102,9 @@ def resolve_experiment_config(
 ) -> dict[str, Any]:
     """Resolve config from factors and/or a named instrument preset.
 
-    ``instrument`` replaces the old algorithm_id selector. When provided, its
-    sheep_model, dog_controller, and default params are applied first.
-    Explicit ``algorithm_params`` and ``world_overrides`` win last.
+    When ``instrument`` is provided, its sheep_model, dog_controller, and default
+    params are applied first. Explicit ``algorithm_params`` and ``world_overrides``
+    win last.
     """
     raw: dict[str, Any] = {}
     explicit_params = dict(algorithm_params or {})

@@ -1,4 +1,4 @@
-;; Kubo 2022 -- NetLogo twin of HerdSim algorithms/kubo
+;; Kubo 2022: NetLogo twin of HerdSim algorithms/kubo
 ;;
 ;; Multi-dog repulsive-force herding (Kubo et al., 2022 / MATLAB port).
 ;; Match HerdSim Single via Interface sliders, then setup / go.

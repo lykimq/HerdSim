@@ -5,14 +5,14 @@ from __future__ import annotations
 # Columns shown in the Analytics summary table / charts.
 SUMMARY_METRIC_DEFS: list[dict[str, str]] = [
     {
-        "id": "algorithm",
+        "id": "instrument",
         "label": "Instrument",
         "description": "Instrument id compared in this benchmark.",
     },
     {
         "id": "trials",
         "label": "Trials",
-        "description": "Number of seeds run for this algorithm.",
+        "description": "Number of seeds run for this instrument.",
     },
     {
         "id": "success_rate",
@@ -69,7 +69,7 @@ SUMMARY_METRIC_DEFS: list[dict[str, str]] = [
 # Per-trial columns written by Export CSV.
 CSV_COLUMN_DEFS: list[dict[str, str]] = [
     {"id": "sweep_label", "description": "Param-grid label when Analytics ran a sweep (empty otherwise)."},
-    {"id": "algorithm", "description": "Instrument id for this trial."},
+    {"id": "instrument", "description": "Instrument id for this trial."},
     {"id": "scenario", "description": "Scenario id used for this trial."},
     {"id": "preset", "description": "Config preset: paper, scenario, or custom."},
     {"id": "seed", "description": "Random seed for this trial."},

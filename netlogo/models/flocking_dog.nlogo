@@ -1,4 +1,4 @@
-;; Flocking Dog 2024 -- NetLogo twin of HerdSim algorithms/flocking_dog
+;; Flocking Dog 2024: NetLogo twin of HerdSim algorithms/flocking_dog
 ;;
 ;; Jadhav et al.: topological attraction/alignment, short-range sheep repulsion,
 ;; dog repulsion within Rd; dog Collect/Drive with slowdown within r_a.

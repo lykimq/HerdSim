@@ -10,7 +10,7 @@ Per-tick plugins write into history. Analytics **trial** and **summary** exports
 
 | Metric | Definition |
 |--------|------------|
-| **Success Rate** (per-tick) | Fraction of sheep currently inside the goal zone (0-1). Instantaneous occupancy,  not the trial success flag. |
+| **Success Rate** (per-tick) | Fraction of sheep currently inside the goal zone (0-1). Instantaneous occupancy, not the trial success flag. |
 | **Sheep in Goal** | Integer count of sheep currently inside the goal zone. |
 | **Time to Goal** | Current tick if all sheep are simultaneously inside the goal; -1 otherwise. |
 | **GCM to Goal** | Euclidean distance from the flock GCM to the goal centre. |

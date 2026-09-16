@@ -36,10 +36,6 @@ See [docs/architecture.md](docs/architecture.md) for the factor-based plugin lay
 - [Architecture](docs/architecture.md)
 - [Instruments](docs/research/algorithms/README.md)
 
-Fair comparison: `python scripts/run_fair_compare.py`
-
-Factor grids: `python scripts/run_factor_grid.py --grid 'n_sheep=20,50;n_shepherds=1,2' --seeds 1,2,3`
-
 ## Getting Started
 
 1. `make install`
@@ -47,5 +43,8 @@ Factor grids: `python scripts/run_factor_grid.py --grid 'n_sheep=20,50;n_shepher
 3. Open http://localhost:5173
 
 UI tabs: **Simulate** (single run + inspect + run report), **Compare** (Arena A/B),
-**Experiments** (Analytics compare / factor grid), **NetLogo** (desktop twins),
+**Experiments** (fair compare / factor grid + CSV/JSON export), **NetLogo** (desktop twins),
 **Guide** (same docs as this tree).
+
+Batch studies and fair comparisons run in the **Experiments** tab; see
+[Comparison framework](docs/research/comparison_framework.md).

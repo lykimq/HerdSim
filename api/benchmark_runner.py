@@ -38,7 +38,6 @@ def _trial_row(
 ) -> dict[str, Any]:
     row: dict[str, Any] = {
         "instrument": instrument,
-        "algorithm": instrument,  # report alias
         "scenario": scenario_id,
         "preset": preset,
         "seed": seed,
@@ -140,7 +139,6 @@ def iter_one_trial(
 
     yield {
         "type": "progress",
-        "algorithm": label_id,
         "instrument": label_id,
         "seed": seed,
         "index": index,
@@ -160,7 +158,6 @@ def iter_one_trial(
         if tick == 1 or tick % stride == 0 or status != "running":
             yield {
                 "type": "tick",
-                "algorithm": label_id,
                 "instrument": label_id,
                 "seed": seed,
                 "index": index,

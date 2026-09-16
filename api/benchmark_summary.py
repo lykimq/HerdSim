@@ -32,22 +32,22 @@ def summarize_rows(df: pd.DataFrame) -> list[dict[str, Any]]:
         return []
     out = []
     group_cols = (
-        ["algorithm", "sweep_label"]
+        ["instrument", "sweep_label"]
         if "sweep_label" in df.columns
         and df["sweep_label"].astype(str).str.len().gt(0).any()
-        else ["algorithm"]
+        else ["instrument"]
     )
     for keys, group in df.groupby(group_cols, sort=False):
         if not isinstance(keys, tuple):
             keys = (keys,)
-        algorithm = keys[0]
+        instrument = keys[0]
         label = keys[1] if len(keys) > 1 else ""
         success_rate = float(group["success"].mean())
         success_ticks = group.loc[group["success"], "total_ticks"]
-        display = f"{algorithm} [{label}]" if label else algorithm
+        display = f"{instrument} [{label}]" if label else instrument
         out.append(
             {
-                "algorithm": display,
+                "instrument": display,
                 "sweep_label": label or None,
                 "trials": int(len(group)),
                 "success_rate": success_rate,

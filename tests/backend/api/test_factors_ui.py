@@ -22,7 +22,7 @@ def client():
 
 
 def test_meta_models_lists_plugins(client):
-    res = client.get("/api/algorithms/meta/models")
+    res = client.get("/api/instruments/meta/models")
     assert res.status_code == 200
     payload = res.json()
     sheep_ids = {

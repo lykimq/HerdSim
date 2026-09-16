@@ -1,4 +1,4 @@
-;; Strombom Multi-Dog -- NetLogo twin of HerdSim algorithms/strombom_multi
+;; Strombom Multi-Dog: NetLogo twin of HerdSim algorithms/strombom_multi
 ;;
 ;; Strombom Collect/Drive sheep with multi-shepherd outlier assignment and
 ;; angular spacing on Drive (HerdSim default: 3 shepherds).

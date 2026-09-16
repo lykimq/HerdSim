@@ -1,6 +1,6 @@
 import { fetchInstrument, fetchBenchmarkDefinitions, runBenchmark, exportBenchmark } from '../api/rest.js';
 import {
-  algorithmBlurb,
+  instrumentBlurb,
   downloadText,
   presetSourceBlurb,
   scenarioBlurb,
@@ -86,7 +86,7 @@ export function createAnalyticsDashboard({ instruments, scenarios, models = null
   });
 
   const algList = runner.querySelector('[data-role="algs"]');
-  const algBlurbEl = runner.querySelector('[data-role="algorithm-blurb"]');
+  const algBlurbEl = runner.querySelector('[data-role="instrument-blurb"]');
   const defaultInstrumentIds = new Set(
     DEFAULT_BENCHMARK_INSTRUMENT_IDS.filter((id) => instruments.some((a) => a.id === id)),
   );
@@ -95,7 +95,7 @@ export function createAnalyticsDashboard({ instruments, scenarios, models = null
   }
   algList.innerHTML = instruments
     .map((a) => {
-      const tip = algorithmBlurb(a);
+      const tip = instrumentBlurb(a);
       const titleAttr = tip ? ` title="${tip.replace(/"/g, '&quot;')}"` : '';
       const checked = defaultInstrumentIds.has(a.id) ? 'checked' : '';
       return `
@@ -141,7 +141,7 @@ export function createAnalyticsDashboard({ instruments, scenarios, models = null
       algBlurbEl.textContent =
         'Multiple instruments selected; each uses its own paper defaults when Mode is Paper original.';
     } else {
-      algBlurbEl.textContent = algorithmBlurb(alg);
+      algBlurbEl.textContent = instrumentBlurb(alg);
     }
     algBlurbEl.classList.toggle('hidden', !algBlurbEl.textContent);
 
@@ -153,7 +153,7 @@ export function createAnalyticsDashboard({ instruments, scenarios, models = null
         'Each selected instrument runs with its own paper/reference defaults.';
     } else {
       presetBlurb.textContent = presetSourceBlurb(preset, {
-        algorithm: alg,
+        instrument: alg,
         scenario: scen,
         paperTaskLocked: false,
       });
@@ -262,7 +262,7 @@ export function createAnalyticsDashboard({ instruments, scenarios, models = null
             setProgress(
               trialUnits(event),
               event.total,
-              `Running ${event.index}/${event.total}: ${event.algorithm}${sweepPart} seed ${event.seed}${tickPart} (${elapsed}s)`,
+              `Running ${event.index}/${event.total}: ${event.instrument}${sweepPart} seed ${event.seed}${tickPart} (${elapsed}s)`,
             );
           } else if (event.type === 'trial') {
             const ok = event.row?.success ? 'ok' : 'fail';

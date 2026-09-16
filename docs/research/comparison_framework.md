@@ -25,35 +25,18 @@ Variants (`strombom_noise`, `heterogeneous`, `fat`, `adaptive`, ...) are presets
 5. Seeds: at least 30 for distribution reporting.
 6. Report distributions, not only means.
 
-```bash
-python scripts/run_fair_compare.py \
-  --algorithms strombom,kubo,flocking_dog \
-  --scenario drive_to_goal \
-  --preset custom \
-  --n-sheep 40 \
-  --n-shepherds 4 \
-  --out-dir results/fair_compare
-```
+Run this in the **Experiments** tab (Compare instruments mode) with shared
+custom counts, then export CSV/JSON. Prefer `custom` over paper presets when
+models declare different agent counts.
 
 ## Factor experiments
 
-```bash
-python scripts/run_factor_grid.py \
-  --instrument strombom \
-  --grid 'n_sheep=20,50,100;n_shepherds=1,2,4' \
-  --seeds 1,2,3,4,5 \
-  --out-dir results/herdability
-```
+Use **Experiments** → factor grid for one instrument. Example axes:
 
-Observation and heterogeneity axes:
+- Herdability: `n_sheep` x `n_shepherds`
+- Information: `obs_mode` x `stubborn_fraction` (and sensing/noise when relevant)
 
-```bash
-python scripts/run_factor_grid.py \
-  --instrument strombom \
-  --grid 'obs_mode=global,local_positions,bearing_only;stubborn_fraction=0.0,0.5' \
-  --seeds 1,2,3 \
-  --out-dir results/information
-```
+Export includes trial rows, summary, experiment design, and caveats.
 
 ## Statistical reporting norms
 

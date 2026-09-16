@@ -2,11 +2,15 @@
 
 ## What it is
 
-Single-shepherd **Collect / Drive** herding. Sheep graze or flee under shepherd pressure while staying near neighbours; the shepherd switches between recovering outliers (Collect) and pushing a tight flock to the goal (Drive). This is the base of the Strombom family in HerdSim. All other Strombom variants reuse these sheep rules and the same cohesion switch unless they say otherwise.
+Single-shepherd **Collect / Drive** herding. Sheep graze or flee under shepherd pressure while staying near neighbours; the shepherd switches between recovering outliers (Collect) and pushing a tight flock to the goal (Drive). This is the base of the Strombom family in HerdSim. Other Strombom variants reuse these sheep rules and the same cohesion switch unless they say otherwise.
+
+**Fidelity:** Matches the paper on Collect/Drive via f(N), the sheep heading update, and the shepherd stop distance. HerdSim differences: scenario-owned goal and world layout, arena wall reflection (the paper uses an open field), and the optional `collect_threshold_scale` parameter.
 
 ## Why
 
-One shepherd must bring a flock of interacting sheep to a fixed goal. Sheep do not cooperate: they graze when the shepherd is far, and when threatened they flee the shepherd while staying near neighbours. A single Drive push fails when the flock is spread, because outliers are left behind.
+One shepherd must bring a flock of interacting sheep to a fixed goal. Sheep do not cooperate: they graze when the shepherd is far, and when threatened they flee while staying near neighbours. A single Drive push fails when the flock is spread, because outliers are left behind.
+
+In HerdSim this is the default starting instrument for open-field Drive to Goal, and the shared sheep base for most related variants.
 
 ## Goal
 
@@ -59,7 +63,41 @@ Legend: grey = start/end, yellow = decision, green = action.
 
 ### Sheep dynamics
 
-Each sheep `i` maintains a heading `H_i` and position `p_i`. On every tick, if the shepherd is farther than `r_s` away, the sheep grazes -- it either stays still or with probability `graze_move_prob` takes a random step of length `sheep_speed`. When the shepherd is within `r_s` the sheep responds:
+```mermaid
+flowchart TD
+  startNode(["For each sheep i"])
+  distQ{"Shepherd distance > r_s?"}
+  grazeStill["Stay still"]
+  grazeRand{"Random step?<br/>prob = graze_move_prob"}
+  grazeMove["Random step length sheep_speed"]
+  lcm["Compute LCM from n_neighbors"]
+  repel["Sum neighbour repulsion R_a"]
+  flee["Unit vector away from shepherd R_s"]
+  heading["Heading update H':<br/>inertia*H + c*C<br/>+ r_a*R_a + rs_weight*R_s<br/>+ noise"]
+  move["p_i += sheep_speed<br/>* unit(H')"]
+  done(["Next sheep"])
+
+  startNode --> distQ
+  distQ -->|yes: graze| grazeStill
+  distQ -->|no: respond| lcm
+  grazeStill --> grazeRand
+  grazeRand -->|yes| grazeMove
+  grazeRand -->|no| done
+  grazeMove --> done
+  lcm --> repel --> flee --> heading --> move --> done
+
+  classDef question fill:#fff9c4,stroke:#f9a825,color:#000000
+  classDef domain fill:#c8e6c9,stroke:#2e7d32,color:#000000
+  classDef start fill:#eceff1,stroke:#546e7a,color:#000000
+
+  class startNode,done start
+  class distQ,grazeRand question
+  class grazeStill,grazeMove,lcm,repel,flee,heading,move domain
+```
+
+Legend: grey = start/end, yellow = decision, green = sheep update step.
+
+Each sheep `i` maintains a heading `H_i` and position `p_i`. On every tick, if the shepherd is farther than `r_s` away, the sheep grazes: it either stays still or with probability `graze_move_prob` takes a random step of length `sheep_speed`. When the shepherd is within `r_s` the sheep responds:
 
 **Local centre of mass (LCM).** The sheep computes the mean position of its `n_neighbors` nearest neighbours. The unit vector from `p_i` toward this centre is denoted `C`.
 
@@ -87,6 +125,37 @@ p_i  <-  p_i  +  sheep_speed * (H' / ||H'||)
 
 ### Shepherd algorithm
 
+```mermaid
+flowchart TD
+  startNode(["Shepherd tick"])
+  gcm["Compute GCM"]
+  spreadQ{"Any sheep > f(N)<br/>from GCM?"}
+  collect["Collect: target behind<br/>furthest outlier"]
+  drive["Drive: target behind GCM<br/>toward goal"]
+  stopQ{"Within shepherd_stop_multiple * r_a<br/>of any sheep?"}
+  halt["Stop"]
+  go["Move toward target at shepherd_speed"]
+  done(["End tick"])
+
+  startNode --> gcm --> spreadQ
+  spreadQ -->|yes: spread| collect
+  spreadQ -->|no: cohesive| drive
+  collect --> stopQ
+  drive --> stopQ
+  stopQ -->|yes| halt --> done
+  stopQ -->|no| go --> done
+
+  classDef question fill:#fff9c4,stroke:#f9a825,color:#000000
+  classDef domain fill:#c8e6c9,stroke:#2e7d32,color:#000000
+  classDef start fill:#eceff1,stroke:#546e7a,color:#000000
+
+  class startNode,done start
+  class spreadQ,stopQ question
+  class gcm,collect,drive,halt,go domain
+```
+
+Legend: grey = start/end, yellow = decision, green = shepherd step.
+
 #### Cohesion threshold
 
 The shepherd computes the flock global centre of mass (GCM) and checks whether the flock is cohesive enough to drive. The threshold radius is:
@@ -99,7 +168,7 @@ If the maximum distance from any sheep to the GCM exceeds `f(N)`, the flock is t
 
 #### Collect mode
 
-The shepherd identifies the outlier sheep -- the one farthest from the GCM -- and moves to a point directly behind it relative to the GCM at stand-off distance `r_a`. Once in position it pushes the outlier back toward the flock.
+The shepherd identifies the outlier sheep (the one farthest from the GCM) and moves to a point directly behind it relative to the GCM at stand-off distance `r_a`. Once in position it pushes the outlier back toward the flock.
 
 **Collect target:**
 
@@ -166,7 +235,7 @@ The HerdSim implementation matches the paper Collect / Drive switch condition, t
 
 **Paper-aligned mechanism:** Collect/Drive switch via f(N), sheep heading composition, and shepherd stop distance.
 
-**Differs by design:** scenario-owned goal/world layout and wall reflection; optional `collect_threshold_scale`. Analytics now reports trajectory aggregates (auc cohesion, fragmentation) in addition to task success -- interpret Collect spikes via outlier_count and fragmentation over time, not final-tick cohesion alone.
+**HerdSim differences:** scenario-owned goal/world layout and wall reflection; optional `collect_threshold_scale`. Analytics also reports trajectory aggregates (auc cohesion, fragmentation) in addition to task success. Interpret Collect spikes via outlier_count and fragmentation over time, not final-tick cohesion alone.
 
 ## Reference
 

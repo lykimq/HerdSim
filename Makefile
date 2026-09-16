@@ -1,4 +1,22 @@
-.PHONY: install dev dev-backend dev-frontend test test-backend test-stress test-frontend lint format build clean
+.PHONY: help install dev dev-backend dev-frontend test test-backend test-stress test-frontend lint format build clean
+
+# Default target
+help:
+	@echo "HerdSim make targets"
+	@echo ""
+	@echo "  make install         Install Python (editable + dev) and frontend deps"
+	@echo "  make dev             Start API + Vite together (Ctrl+C stops both)"
+	@echo "  make dev-backend     Start FastAPI only (port 8000, reload)"
+	@echo "  make dev-frontend    Start Vite only"
+	@echo "  make test            Backend tests (no stress) + frontend tests/build"
+	@echo "  make test-backend    Pytest under tests/backend/ (excludes stress)"
+	@echo "  make test-stress     Pytest stress-marked backend tests"
+	@echo "  make test-frontend   Node frontend tests + production build"
+	@echo "  make lint            Ruff check + frontend eslint"
+	@echo "  make format          Ruff format + frontend prettier"
+	@echo "  make build           Frontend production build"
+	@echo "  make clean           Remove caches, dist, and Vite cache"
+	@echo "  make help            Show this help"
 
 # Install
 install:
@@ -40,7 +58,7 @@ format:
 	ruff format .
 	cd frontend && npx prettier --write src/
 
-# Build	
+# Build
 build:
 	cd frontend && npm run build
 

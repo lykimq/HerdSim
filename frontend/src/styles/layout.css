@@ -654,6 +654,16 @@
   color: #000000 !important;
 }
 
+.guide-md .guide-mermaid foreignObject div,
+.guide-md .guide-mermaid foreignObject span,
+.guide-md .guide-mermaid .nodeLabel {
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.35;
+  text-align: center;
+}
+
 .guide-md .guide-mermaid .edgeLabel rect {
   fill: #e2e8f0 !important;
 }

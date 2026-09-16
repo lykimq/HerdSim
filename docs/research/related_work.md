@@ -1,6 +1,6 @@
 # Related work
 
-HerdSim sits among agent-based shepherding models that guide interacting followers with steering agents. The platform emphasizes controlled variation of assumptions: sensing, heterogeneity, environment, and controller architecture.
+Agent-based shepherding models differ mainly in how sheep move and how dogs choose targets. HerdSim keeps scenarios and metrics shared so you can vary sensing, heterogeneity, environment, and controller architecture in controlled experiments.
 
 ## Instruments in HerdSim
 
@@ -15,6 +15,18 @@ Force-based multi-sheepdog guidance. Instrument: `kubo`.
 ### Jadhav et al. 2024
 
 Empirically informed flocking sheep responses. Instrument: `flocking_dog` (`sheep_model=jadhav`).
+
+### Tsunoda et al. 2018 (FAT)
+
+Farthest-agent targeting under local observations. Instrument: `fat` (Strombom sheep, FAT dog controller).
+
+### Li et al. 2023 (Communication-Free)
+
+Decentralised Collect / Drive without shared dog targets. Instrument: `communication_free`.
+
+### Adaptive (HerdSim)
+
+Mode switcher (collect, drive, recover, lead) inspired by context-aware and lead-herd literature. Instrument: `adaptive`. Not tied to one paper implementation.
 
 ## Research themes HerdSim targets
 

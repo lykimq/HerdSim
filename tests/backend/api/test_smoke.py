@@ -21,7 +21,7 @@ def test_health(client):
 
 
 def test_lists_core_catalog(client):
-    algs = client.get("/api/algorithms").json()
+    algs = client.get("/api/instruments").json()
     by_id = {item["id"]: item for item in algs}
     assert by_id["strombom"]["herder_kind"] == "human"
     assert by_id["kubo"]["herder_kind"] == "dog"
@@ -119,7 +119,7 @@ def test_benchmark_run_and_export(client):
     assert csv_res.status_code == 200
     assert csv_res.text.startswith("# HerdSim benchmark CSV (version")
     assert "# caveat:" in csv_res.text
-    assert "algorithm" in csv_res.text
+    assert "instrument" in csv_res.text
     json_res = client.get("/api/benchmarks/export?format=json")
     assert json_res.status_code == 200
     package = json_res.json()

@@ -3,7 +3,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.routers import algorithms, benchmarks, docs, metrics, netlogo, scenarios, simulations, websocket
+from api.routers import benchmarks, docs, instruments, metrics, netlogo, scenarios, simulations, websocket
 
 app = FastAPI(
     title="HerdSim API",
@@ -19,7 +19,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(algorithms.router, prefix="/api/algorithms", tags=["algorithms"])
+app.include_router(instruments.router, prefix="/api/instruments", tags=["instruments"])
 app.include_router(scenarios.router, prefix="/api/scenarios", tags=["scenarios"])
 app.include_router(simulations.router, prefix="/api/simulations", tags=["simulations"])
 app.include_router(metrics.router, prefix="/api/metrics", tags=["metrics"])

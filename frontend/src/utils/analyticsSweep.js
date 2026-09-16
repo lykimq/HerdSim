@@ -18,7 +18,7 @@ export function chartGroupKey(rows) {
   const list = rows || [];
   if (list.some((r) => r.sweep_label)) return 'sweep_label';
   if (list.some((r) => r.factor_label)) return 'factor_label';
-  return 'algorithm';
+  return 'instrument';
 }
 
 /** Reserved row fields that start with factor_ but are labels, not axes. */

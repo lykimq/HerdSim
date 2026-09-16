@@ -61,7 +61,7 @@ def test_csv_export_includes_caveats_and_columns():
     payload = {
         "rows": [
             {
-                "algorithm": "strombom",
+                "instrument": "strombom",
                 "scenario": "drive_to_goal",
                 "preset": "paper",
                 "seed": 1,
@@ -81,17 +81,17 @@ def test_csv_export_includes_caveats_and_columns():
     assert text.startswith(f"# HerdSim benchmark CSV (version {HERDSIM_VERSION})")
     assert "# git_commit:" in text
     assert "# caveat:" in text
-    assert "algorithm" in text
+    assert "instrument" in text
     assert "first_success_tick" in text
     assert "resolved_config" not in text.split("\n")[-1]
 
 
 def test_markdown_export_shares_caveats():
     payload = {
-        "rows": [{"algorithm": "strombom", "scenario": "drive_to_goal", "seed": 1}],
+        "rows": [{"instrument": "strombom", "scenario": "drive_to_goal", "seed": 1}],
         "summary": [
             {
-                "algorithm": "strombom",
+                "instrument": "strombom",
                 "trials": 1,
                 "success_rate": 1.0,
                 "failure_rate": 0.0,

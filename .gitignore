@@ -221,5 +221,9 @@ __marimo__/
 netlogo/models/uploads/*
 !netlogo/models/uploads/.gitkeep
 
+# Offline experiment outputs (CLI scripts write here by default)
+results/*
+!results/.gitkeep
+
 # Node / frontend
 node_modules/

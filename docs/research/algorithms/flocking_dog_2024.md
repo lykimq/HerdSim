@@ -1,18 +1,22 @@
 # Flocking Dog (Jadhav et al. 2024)
 
-## Problem
+## What it is
 
-Real sheep under dog pressure do not use a simple global flock model. They attend to a limited set of neighbours, and a dog that presses too hard inside the flock can scatter them instead of driving them.
+Sheep flocking based on field observations of dogs and sheep, paired with a Collect / Drive-style dog that slows when already inside the flock. Default flocks are small (N = 14), matching the paper setting. Instrument: `flocking_dog` (`sheep_model=jadhav`, `dog_controller=collect_drive`).
 
-## Solution
+**Fidelity:** Sheep rules follow Jadhav on topological neighbourhoods, random attraction/alignment subsets, small N, and dog close-speed inside `r_a`. The dog Collect / Drive geometry is Strombom-style for shared-scenario comparison; that is not a claim that Jadhav's field trials used that exact controller. HerdSim also uses a scenario goal and arena wall reflection instead of the MATLAB origin setup.
 
-Model sheep with topological flocking: each sheep looks at its nearest neighbours and samples subsets for attraction and alignment. The dog still Collects and Drives like Strombom, but slows when it is already inside the flock. Default flocks are small (N = 14), matching the empirical setting.
+## Why
+
+Strombom sheep use a large neighbourhood heading model that is convenient but not field-calibrated. Real sheep under a herding dog attend to a limited neighbour set, and a dog that presses too hard inside the group can scatter them.
+
+Flocking Dog brings that sheep behaviour into HerdSim while keeping a readable Collect / Drive dog, so you can compare sheep realism against Strombom and Kubo on the same scenarios and metrics.
 
 ## Goal
 
 A successful run on a small flock shows neighbour-based flocking under dog pressure, Collect when the group splits, and Drive when it is tight, without the dog charging through the flock at full speed. Compared with Strombom 2014, trails look more local and variable because attraction and alignment use random neighbour subsets.
 
-## Architecture
+## How (idea)
 
 ```mermaid
 flowchart TD
@@ -53,7 +57,41 @@ flowchart TD
 
 Legend: grey = start/end, yellow = decision, green = Collect/Drive shepherding, purple = flocking / close-dog behaviour.
 
-## Sheep dynamics
+## How (rules)
+
+### Sheep dynamics
+
+```mermaid
+flowchart TD
+  startNode(["For each sheep i"])
+  distQ{"Dog distance > r_s?"}
+  graze["Stay still"]
+  neigh["Perceive k_neighbors nearest"]
+  sample["Sample n_attraction for Att;<br/>n_alignment from that sample"]
+  repel["Neighbour repulsion Rep"]
+  att["Attraction Att"]
+  ali["Alignment Ali"]
+  dog["Dog repulsion Dog"]
+  heading["Heading update H':<br/>inertia*H + Rep + Dog<br/>+ Att + Ali + noise"]
+  move["Advance sheep_speed along unit(H')"]
+  done(["Next sheep"])
+
+  startNode --> distQ
+  distQ -->|yes| graze --> done
+  distQ -->|no| neigh --> sample --> repel --> att --> ali --> dog --> heading --> move --> done
+
+  classDef question fill:#fff9c4,stroke:#f9a825,color:#000000
+  classDef domain fill:#c8e6c9,stroke:#2e7d32,color:#000000
+  classDef wiring fill:#e1bee7,stroke:#7b1fa2,color:#000000
+  classDef start fill:#eceff1,stroke:#546e7a,color:#000000
+
+  class startNode,done start
+  class distQ question
+  class graze,repel,att,ali,dog,heading,move domain
+  class neigh,sample wiring
+```
+
+Legend: grey = start/end, yellow = decision, green = motion terms, purple = topological neighbour sampling.
 
 Each sheep `i` operates in two states depending on whether the dog is within detection distance `r_s`.
 
@@ -61,17 +99,17 @@ Each sheep `i` operates in two states depending on whether the dog is within det
 
 **Responding.** The sheep perceives its `k_neighbors` nearest neighbours. It draws `n_attraction` sheep at random for the attraction force, then draws `n_alignment` sheep at random from that attraction sample for alignment. This random topological sub-sampling reflects the paper's empirical model of attention under stress.
 
-**Neighbour repulsion** `Rep` -- for all neighbours `j` within `r_a`:
+**Neighbour repulsion** `Rep`: for all neighbours `j` within `r_a`:
 
 ```
 Rep = sum_j  (p_i - p_j) / ||p_i - p_j||
 ```
 
-**Attraction** `Att` -- unit vector from `p_i` toward the mean position of the `n_attraction` sampled neighbours.
+**Attraction** `Att`: unit vector from `p_i` toward the mean position of the `n_attraction` sampled neighbours.
 
-**Alignment** `Ali` -- mean unit velocity of `n_alignment` neighbours sampled from the attraction sample.
+**Alignment** `Ali`: mean unit velocity of `n_alignment` neighbours sampled from the attraction sample.
 
-**Dog repulsion** `Dog` -- unit vector from the dog toward `p_i`.
+**Dog repulsion** `Dog`: unit vector from the dog toward `p_i`.
 
 **Heading update:**
 
@@ -86,7 +124,36 @@ H' = inertia * H
 
 where `epsilon` is a unit vector in a uniformly random direction. `H'` is normalised and the sheep steps by `sheep_speed` in that direction.
 
-## Dog algorithm
+### Dog algorithm
+
+```mermaid
+flowchart TD
+  startNode(["Dog tick"])
+  closeQ{"Dog within r_a<br/>of any sheep?"}
+  slow["Keep heading at dog_close_speed"]
+  spreadQ{"Furthest sheep > f(N)<br/>from GCM?"}
+  collect["Collect behind furthest outlier"]
+  drive["Drive behind GCM toward goal"]
+  done(["End tick"])
+
+  startNode --> closeQ
+  closeQ -->|yes| slow --> done
+  closeQ -->|no| spreadQ
+  spreadQ -->|yes| collect --> done
+  spreadQ -->|no| drive --> done
+
+  classDef question fill:#fff9c4,stroke:#f9a825,color:#000000
+  classDef domain fill:#c8e6c9,stroke:#2e7d32,color:#000000
+  classDef wiring fill:#e1bee7,stroke:#7b1fa2,color:#000000
+  classDef start fill:#eceff1,stroke:#546e7a,color:#000000
+
+  class startNode,done start
+  class closeQ,spreadQ question
+  class collect,drive domain
+  class slow wiring
+```
+
+Legend: grey = start/end, yellow = decision, green = Collect/Drive, purple = close-range slowdown.
 
 ### Cohesion threshold
 
@@ -150,7 +217,7 @@ substantially.
 
 **Paper-informed elements:** topological sheep neighbour rules, dog close-speed inside `r_a`, and the small-flock setting (N=14). HerdSim combines these sheep rules with a Collect/Drive-style dog controller.
 
-**Differs by design:** scenario goal instead of MATLAB origin; arena wall reflection. Role in HerdSim: empirically informed third model family alongside Strombom and Kubo for fair shared-scenario comparison.
+**HerdSim differences:** scenario goal instead of MATLAB origin; arena wall reflection. Role in HerdSim: a third sheep model alongside Strombom and Kubo for shared-scenario comparison.
 
 ## Fidelity notes
 

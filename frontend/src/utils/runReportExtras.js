@@ -84,7 +84,7 @@ export function buildSetupLines({
 } = {}) {
   const cfg = config || {};
   const lines = [];
-  const instrumentId = cfg.instrument || cfg.algorithm_id || null;
+  const instrumentId = cfg.instrument || null;
   pushKv(lines, 'Instrument', instrumentName || instrumentId);
   if (instrumentName && instrumentId && instrumentName !== instrumentId) {
     pushKv(lines, 'Instrument id', instrumentId);

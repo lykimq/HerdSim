@@ -30,7 +30,7 @@ describe('buildRunReport', () => {
       instrumentId: 'strombom',
       scenarioId: 'drive_to_goal',
       config: {
-        algorithm_id: 'strombom',
+        instrument: 'strombom',
         scenario_id: 'drive_to_goal',
         preset: 'paper',
         seed: 42,
@@ -176,7 +176,7 @@ describe('buildRunReport', () => {
       instrumentId: 'strombom',
       scenarioId: 'drive_to_goal',
       config: {
-        algorithm_id: 'strombom',
+        instrument: 'strombom',
         scenario_id: 'drive_to_goal',
         seed: 7,
         num_sheep: 4,

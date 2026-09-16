@@ -36,7 +36,7 @@ These two conventions are not interchangeable. The number of ticks to complete a
 
 ## Reproducibility
 
-Every stochastic element in a run -- initial sheep positions, heading noise, random grazing steps, stubborn sheep assignment -- is drawn from a single seeded random number generator. Given the same seed, instrument, scenario, and parameter values, a run is fully deterministic and reproducible. Different seeds produce statistically independent runs, which is what the Experiments multi-seed mode exploits.
+Every stochastic element in a run (initial sheep positions, heading noise, random grazing steps, stubborn sheep assignment) is drawn from a single seeded random number generator. Given the same seed, instrument, scenario, and parameter values, a run is fully deterministic and reproducible. Different seeds produce statistically independent runs, which is what the Experiments multi-seed mode exploits.
 
 ## Experimental measurement radius
 

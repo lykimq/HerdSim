@@ -1,4 +1,10 @@
-"""Kubo 2022 sheep dynamics."""
+"""Kubo 2022 sheep motion (sheep_model=kubo).
+
+Each sheep integrates a force sum over continuous time step dt: self-propulsion,
+alignment, cohesion, and dog repulsion within sensing radius, with gains K_s1
+through K_s4. Speed is clipped to sheep_speed_max. Paired with the Kubo force
+dog controller in the kubo instrument; not a Collect/Drive sheep model.
+"""
 
 from __future__ import annotations
 

@@ -53,8 +53,7 @@ export function buildRunReport({
   const tick = last.tick;
   const frame = last.frame || {};
   const flockSize = flockSizeFrom(last);
-  const resolvedInstrumentId =
-    instrumentId || config?.instrument || config?.algorithm_id || null;
+  const resolvedInstrumentId = instrumentId || config?.instrument || null;
 
   const cohesionSeries = series(history, 'cohesion');
   const gcmGoalSeries = series(history, 'gcm_goal');

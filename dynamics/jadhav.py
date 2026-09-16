@@ -1,4 +1,12 @@
-"""Jadhav 2024 topological flocking sheep dynamics."""
+"""Jadhav 2024 sheep motion (sheep_model=jadhav).
+
+Empirically inspired flocking under dog pressure. Beyond r_s a sheep does not
+move this tick. Within r_s it uses its k nearest neighbours, then random
+subsets for attraction and alignment, plus sheep repulsion, repulsion from the
+nearest dog, inertia, and noise. Advance is sheep_speed per tick. Used by the
+flocking_dog instrument; the dog Collect/Drive geometry is a separate
+controller chosen for shared-scenario comparison.
+"""
 
 from __future__ import annotations
 

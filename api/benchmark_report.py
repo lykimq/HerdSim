@@ -15,9 +15,9 @@ HERDSIM_VERSION = "0.1.0"
 
 COMPARISON_CAVEATS = [
     (
-        "Tick semantics differ by algorithm: Strombom and Flocking Dog use "
+        "Tick semantics differ by instrument family: Strombom and Flocking Dog use "
         "displacement per tick; Kubo integrates with its own dt (default 0.05). "
-        "Cross-algorithm path and speed comparisons are not time-normalized."
+        "Cross-family path and speed comparisons are not time-normalized."
     ),
     (
         "Unsuccessful trials include failure_mode / failure_label heuristics "
@@ -40,7 +40,7 @@ COMPARISON_CAVEATS = [
         "as final-tick-only trial columns."
     ),
     (
-        "Paper preset keeps each algorithm's own agent counts. For fair comparison, "
+        "Paper preset keeps each instrument's own agent counts. For fair comparison, "
         "fix sheep/dog counts and world layout via custom or shared Arena settings."
     ),
     (
@@ -87,15 +87,17 @@ def build_experiment_block(
     req = request or payload.get("experiment") or {}
     rows = payload.get("rows") or []
     first = rows[0] if rows else {}
-    algorithms = req.get("instruments")
-    if not algorithms:
-        algorithms = sorted({r.get("algorithm") for r in rows if r.get("algorithm")})
+    instruments = req.get("instruments")
+    if not instruments:
+        instruments = sorted(
+            {r.get("instrument") for r in rows if r.get("instrument")}
+        )
     seeds = req.get("seeds")
     if not seeds:
         seeds = sorted({int(r["seed"]) for r in rows if "seed" in r})
     resolved = first.get("resolved_config")
     return {
-        "instruments": list(algorithms),
+        "instruments": list(instruments),
         "scenario_id": req.get("scenario_id") or first.get("scenario"),
         "preset": req.get("preset") or first.get("preset"),
         "seeds": list(seeds),
@@ -200,8 +202,8 @@ def report_to_markdown(
     ]
     for row in package["summary"]:
         lines.append(
-            "| {algorithm} | {trials} | {success:.1%} | {failure:.1%} | {mean_ticks} | {median_ticks} | {iqr} | {cohesion} | {frag} | {path} | {eff} | {gcm} |".format(
-                algorithm=row.get("algorithm"),
+            "| {instrument} | {trials} | {success:.1%} | {failure:.1%} | {mean_ticks} | {median_ticks} | {iqr} | {cohesion} | {frag} | {path} | {eff} | {gcm} |".format(
+                instrument=row.get("instrument"),
                 trials=row.get("trials"),
                 success=float(row.get("success_rate") or 0),
                 failure=float(row.get("failure_rate") or 0),

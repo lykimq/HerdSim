@@ -23,9 +23,9 @@ The same instrument list appears in Compare and Experiments, so you can put two 
 - **Obstacle-Aware:** Drive bends around obstacles or through a gate instead of aiming straight through walls.
 - **Kubo 2022:** Force-based multi-dog herding without an explicit Collect / Drive switch.
 - **Flocking Dog:** Smaller flocks with neighbour-based sheep motion and a dog that slows when it is already inside the group.
-- **FAT:** Each dog aims at the farthest sheep it can see. Handy for limited sensing studies.
-- **Communication-Free:** Each dog decides from its own view only, with no shared targets.
-- **Adaptive:** Picks collect, drive, recover, or lead from the current flock state.
+- **FAT:** Each dog aims at the farthest sheep it can see under local observations (idea from Tsunoda; Strombom sheep). Useful for limited sensing studies.
+- **Communication-Free:** Each dog runs Collect / Drive from its own view, with no shared targets (idea from Li). Use with `communication=none`.
+- **Adaptive:** Classifies flock state, then picks collect, drive, recover, or lead (HerdSim mode switcher).
 
 Use the pages under Instruments in the left Guide list for the full write-up of each one.
 

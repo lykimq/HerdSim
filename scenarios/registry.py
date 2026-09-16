@@ -35,7 +35,7 @@ class ScenarioRegistry:
         return list(self._scenarios.keys())
 
 
-# Singleton registry — populated at import time
+# Singleton registry: populated at import time
 scenario_registry = ScenarioRegistry()
 
 

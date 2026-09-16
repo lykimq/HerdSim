@@ -1,4 +1,4 @@
-;; Strombom Noise -- NetLogo twin of HerdSim algorithms/strombom_noise
+;; Strombom Noise: NetLogo twin of HerdSim algorithms/strombom_noise
 ;;
 ;; Same Collect/Drive as Strombom 2014 with elevated sheep noise and lower inertia
 ;; (HerdSim defaults: noise_strength=0.9, inertia=0.35).

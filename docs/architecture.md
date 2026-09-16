@@ -93,9 +93,9 @@ New sheep models, dog controllers, and observation modes register in `core/plugi
 - `algorithms/<id>/`: instrument packages (`info.json`, paper defaults, helpers)
 - `scenarios/`, `metrics/`: task and measurement plugins
 - `analysis/`: herdability, behavioural, failure taxonomy, propagation helpers
-- `scripts/`: fair compare, factor grids, generalization, policy train
+- `scripts/`: `dev.sh` (local API + Vite; also `make dev`)
 - `frontend/`: Vite SPA (Simulate, Compare, Experiments, NetLogo, Guide)
 - `docs/`: architecture and research docs
 - `tests/`: pytest + frontend node tests
 
-API fields use `instrument` / `instruments` for endpoint payloads and UI strings. On disk, instrument packages remain under `algorithms/<id>/`.
+API fields use `instrument` / `instruments` for endpoint payloads and UI strings. On disk, instrument packages remain under `algorithms/<id>/`. Discovery: `GET /api/instruments`.

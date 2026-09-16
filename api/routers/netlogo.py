@@ -92,7 +92,7 @@ def _load_twins() -> list[dict]:
     for item in raw:
         if not isinstance(item, dict):
             continue
-        instrument = str(item.get("instrument", item.get("algorithm_id", ""))).strip()
+        instrument = str(item.get("instrument", "")).strip()
         model_file = str(item.get("model_file", "")).strip()
         if not instrument or not model_file:
             continue
