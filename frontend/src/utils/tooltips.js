@@ -20,7 +20,7 @@ export const BUTTON_TIPS = {
   'play-both': 'Fair compare: start or resume both sides together.',
   'pause-both': 'Fair compare: pause both sides.',
   'reset-both': 'Fair compare: reset both sides to start.',
-  'mode-fair': 'Use shared scenario, seed, and sheep across both sides.',
+  'mode-fair': 'Shared scenario, seed, sheep, and dogs. Each side only picks its instrument.',
   'mode-independent': 'Initialize each side with its own settings.',
 
   run: 'Run selected instruments x seeds (or the factor grid).',

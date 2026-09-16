@@ -77,6 +77,7 @@ export function applyControlPanelPlayback(controls, phase, { both = false } = {}
   if (!controls) return playbackFlags(phase);
   const flags = playbackFlags(phase);
   controls.setPlaybackEnabled({
+    init: flags.init,
     play: flags.play,
     pause: flags.pause,
     step: flags.step,
@@ -85,6 +86,7 @@ export function applyControlPanelPlayback(controls, phase, { both = false } = {}
   });
 
   const root = controls.root;
+  setTip(root.querySelector('[data-role="init"]'), flags.init ? BUTTON_TIPS.init : 'Wait for the current action to finish.');
   setTip(root.querySelector('[data-role="play"]'), playTip(phase, { both }));
   setTip(root.querySelector('[data-role="pause"]'), pauseTip(flags.pause, { both }));
   setTip(root.querySelector('[data-role="step"]'), stepTip(phase, { both }));
@@ -93,13 +95,15 @@ export function applyControlPanelPlayback(controls, phase, { both = false } = {}
 }
 
 /**
- * Fair-compare side panels: playback is driven by Play/Pause/Reset Both.
- * Keep speed available; block per-side play/pause/step/reset to avoid desync.
+ * Fair-compare side panels: shared setup + Both playback drive the run.
+ * Lock per-side scenario/seed/sheep/init/play so sides cannot desync.
  */
 export function applyFairSidePlayback(controls, phase) {
   if (!controls) return playbackFlags(phase);
   const flags = playbackFlags(phase);
+  controls.setFairSharedLocked?.(true);
   controls.setPlaybackEnabled({
+    init: false,
     play: false,
     pause: false,
     step: false,
@@ -107,6 +111,7 @@ export function applyFairSidePlayback(controls, phase) {
     speed: flags.speed,
   });
   const root = controls.root;
+  setTip(root.querySelector('[data-role="init"]'), 'Fair compare: use Init Both.');
   setTip(root.querySelector('[data-role="play"]'), 'Fair compare: use Play Both.');
   setTip(root.querySelector('[data-role="pause"]'), 'Fair compare: use Pause Both.');
   setTip(root.querySelector('[data-role="step"]'), 'Fair compare: use Play Both / Pause Both.');
@@ -132,11 +137,11 @@ export function applySharedPlaybackButtons(buttons, phase) {
 
 /**
  * Arena dual-mode playback:
- * - fair: shared bar + synced phase; per-side play locked to Both buttons
- * - independent / idle: each side like Single; shared Play/Pause/Reset off
+ * - fair: shared bar + synced phase; per-side init/play locked to Both buttons
+ * - independent: each side like Single; shared Play/Pause/Reset off
  */
 export function applyArenaPlayback({
-  mode = 'idle',
+  mode = 'fair',
   busy = false,
   left,
   right,
@@ -161,11 +166,13 @@ export function applyArenaPlayback({
     return phase;
   }
 
-  // Independent or idle: Init Both stays available; Both playback stays off.
+  // Independent: Init Both stays available; Both playback stays off.
   applySharedPlaybackButtons(
     sharedButtons,
     derivePhase({ busy, hasSession: false, statuses: [] }),
   );
+  left?.controls?.setFairSharedLocked?.(false);
+  right?.controls?.setFairSharedLocked?.(false);
   applyControlPanelPlayback(left?.controls, sidePhase(left));
   applyControlPanelPlayback(right?.controls, sidePhase(right));
   return mode;

@@ -21,8 +21,9 @@ export function arenaFairBarHtml() {
           </div>
         </div>
         <p class="arena-header-hint" data-role="mode-hint">
-          Shared scenario, seed, and sheep on both sides. Metric deltas are
-          outcome comparisons, not tick-for-tick path parity (Kubo uses dt).
+          Shared scenario, seed, sheep, and dogs. On each side, pick only the
+          instrument (and display). Metric deltas are outcome comparisons, not
+          tick-for-tick path parity (Kubo uses dt).
         </p>
       </div>
 
@@ -39,6 +40,10 @@ export function arenaFairBarHtml() {
           <div class="control-group arena-fair-field arena-fair-field--sheep">
             <label data-role="shared-sheep-label">Shared sheep (50)</label>
             <input data-role="shared-sheep" type="range" min="5" max="150" value="50" />
+          </div>
+          <div class="control-group arena-fair-field arena-fair-field--dogs">
+            <label data-role="shared-dogs-label">Shared dogs (1)</label>
+            <input data-role="shared-dogs" type="range" min="1" max="8" value="1" />
           </div>
         </div>
         <div class="arena-header-actions btn-row arena-fair-actions">

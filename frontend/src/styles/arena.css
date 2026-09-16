@@ -88,9 +88,31 @@
   pointer-events: none;
 }
 
+/* Fair mode: shared fields on each side are driven by the top bar. */
+.control-panel--fair-shared-locked [data-role="preset"],
+.control-panel--fair-shared-locked [data-role="scenario"],
+.control-panel--fair-shared-locked [data-role="seed"],
+.control-panel--fair-shared-locked [data-role="sheep"],
+.control-panel--fair-shared-locked [data-role="dogs"] {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Shared fair bar owns init + play; hide duplicates on Setup A/B. */
+.control-panel--fair-shared-locked [data-role="init"],
+.control-panel--fair-shared-locked .control-run-playback {
+  display: none;
+}
+
+.control-panel--fair-shared-locked .param-section.is-fair-locked,
+.control-panel--fair-shared-locked details.is-fair-locked {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
 .arena-header-shared-fields {
   display: grid;
-  grid-template-columns: minmax(10rem, 1.4fr) minmax(5.5rem, 7rem) minmax(10rem, 1fr);
+  grid-template-columns: minmax(10rem, 1.4fr) minmax(5.5rem, 7rem) minmax(8rem, 1fr) minmax(8rem, 1fr);
   gap: 0.55rem 0.85rem;
   align-items: end;
   min-width: 0;
@@ -232,7 +254,8 @@
     grid-template-columns: 1fr 1fr;
   }
 
-  .arena-fair-field--sheep {
+  .arena-fair-field--sheep,
+  .arena-fair-field--dogs {
     grid-column: 1 / -1;
   }
 
@@ -246,7 +269,8 @@
     grid-template-columns: 1fr;
   }
 
-  .arena-fair-field--sheep {
+  .arena-fair-field--sheep,
+  .arena-fair-field--dogs {
     grid-column: auto;
   }
 

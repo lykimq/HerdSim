@@ -123,6 +123,7 @@ export function createArenaSide(
       controls.setScenario(sharedCfg.scenario_id);
       controls.setSeed(sharedCfg.seed);
       controls.setSheepCount(sharedCfg.num_sheep);
+      controls.setDogsCount(sharedCfg.num_shepherds ?? 1);
       controls.setFairSheepOverride(sharedCfg.num_sheep);
 
       const local = controls.getConfig();
@@ -132,7 +133,7 @@ export function createArenaSide(
         seed: sharedCfg.seed,
         num_sheep: sharedCfg.num_sheep,
         num_shepherds: sharedCfg.num_shepherds ?? local.num_shepherds,
-        preset: local.preset === 'custom' ? 'custom' : sharedCfg.preset || local.preset,
+        preset: sharedCfg.preset || 'paper',
       };
       const session = await sim.openBusy(cfg);
       updateTitle();

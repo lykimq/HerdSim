@@ -1,4 +1,4 @@
-import { mountTips, setInfoTip } from '../utils/tooltips.js';
+import { mountTips, setInfoTip, setTip } from '../utils/tooltips.js';
 import {
   assignmentModeOptionHtml,
   assignmentModesFromInstrument,
@@ -102,6 +102,7 @@ export function createControlPanel({
     scenarioDefaults: {},
     lockCustom: false,
     fairSheepOverride: null,
+    fairSharedLocked: false,
     assignmentModes: [],
     factors: { ...DEFAULT_FACTORS },
   };
@@ -256,6 +257,7 @@ export function createControlPanel({
   root.querySelector('[data-role="reset"]').addEventListener('click', () => onReset?.());
 
   const playbackEls = {
+    init: root.querySelector('[data-role="init"]'),
     play: root.querySelector('[data-role="play"]'),
     pause: root.querySelector('[data-role="pause"]'),
     step: root.querySelector('[data-role="step"]'),
@@ -269,12 +271,14 @@ export function createControlPanel({
     step = true,
     reset = true,
     speed = true,
+    init = true,
   } = {}) {
     playbackEls.play.disabled = !play;
     playbackEls.pause.disabled = !pause;
     playbackEls.step.disabled = !step;
     playbackEls.reset.disabled = !reset;
     playbackEls.speed.disabled = !speed;
+    if (playbackEls.init) playbackEls.init.disabled = !init;
   }
 
   setPlaybackEnabled({
@@ -283,9 +287,70 @@ export function createControlPanel({
     step: false,
     reset: false,
     speed: false,
+    init: true,
   });
 
   mountTips(root);
+
+  /**
+   * Fair compare: only Instrument + Display stay editable on each side.
+   * Shared scenario, seed, sheep, and dogs come from the top fair bar.
+   */
+  function setFairSharedLocked(locked) {
+    const on = Boolean(locked);
+    state.fairSharedLocked = on;
+    root.classList.toggle('control-panel--fair-shared-locked', on);
+
+    const lead = root.querySelector('.panel-lead');
+    if (lead) {
+      lead.textContent = on
+        ? 'Fair compare: choose only the instrument for this side. Shared scenario, seed, and counts are above.'
+        : 'Pick an instrument and mode.';
+    }
+
+    if (on && els.preset && els.preset.value !== 'paper') {
+      els.preset.value = 'paper';
+    }
+    refreshParamControls();
+
+    if (els.preset) els.preset.disabled = on;
+    if (els.scenario) els.scenario.disabled = on;
+    if (els.seed) els.seed.disabled = on;
+    if (els.sheep) els.sheep.disabled = on;
+    if (els.dogs) els.dogs.disabled = on;
+
+    [els.factorsSection, els.paramsSection, els.worldSection].forEach((section) => {
+      if (!section) return;
+      section.classList.toggle('is-fair-locked', on);
+      section.inert = on;
+    });
+
+    if (on) {
+      setInfoTip(els.presetLabel, 'Fair compare uses Paper defaults on both sides.');
+      setInfoTip(els.scenarioLabel, 'Fair compare: use the shared Scenario above.');
+      setTip(els.seed, 'Fair compare: use the shared Seed above.');
+      setTip(els.sheep, 'Fair compare: use the shared Sheep count above.');
+      setTip(els.dogs, 'Fair compare: use the shared Dog/Shepherd count above.');
+      if (playbackEls.init) {
+        setTip(playbackEls.init, 'Fair compare: use Init Both.');
+      }
+    } else {
+      setInfoTip(els.presetLabel, '');
+      setInfoTip(els.scenarioLabel, '');
+      setTip(els.seed, '');
+      setTip(els.sheep, '');
+      setTip(els.dogs, '');
+      [els.factorsSection, els.paramsSection, els.worldSection].forEach((section) => {
+        if (section) section.inert = false;
+      });
+    }
+  }
+
+  function setDogsCount(n) {
+    els.dogs.value = String(n);
+    els.dogCount.textContent = String(n);
+    refreshConfigSummary();
+  }
 
   function setOptions(instruments, scenarios, preferredInstrument = null, models = null) {
     state.instruments = instruments;
@@ -410,7 +475,9 @@ export function createControlPanel({
     setSeed,
     setScenario,
     setSheepCount,
+    setDogsCount,
     setFairSheepOverride,
+    setFairSharedLocked,
     setInstrument,
     getInstrumentName,
     getInstrumentId,

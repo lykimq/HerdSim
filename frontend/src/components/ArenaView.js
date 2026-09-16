@@ -16,8 +16,8 @@ export function createArenaView({ instruments, scenarios, models = null, onStatu
   const root = document.createElement('div');
   root.className = 'arena-layout';
 
-  /** @type {'idle'|'fair'|'independent'} */
-  let compareMode = 'idle';
+  /** @type {'fair'|'independent'} */
+  let compareMode = 'fair';
   let left;
   let right;
   let btnInit;
@@ -48,7 +48,7 @@ export function createArenaView({ instruments, scenarios, models = null, onStatu
         reset: btnReset,
       },
     });
-    const fair = compareMode !== 'independent';
+    const fair = compareMode === 'fair';
     modeFairBtn?.classList.toggle('active', fair);
     modeIndepBtn?.classList.toggle('active', !fair);
     modeFairBtn?.setAttribute('aria-pressed', fair ? 'true' : 'false');
@@ -56,7 +56,7 @@ export function createArenaView({ instruments, scenarios, models = null, onStatu
     fairControls?.classList.toggle('is-disabled', !fair);
     if (modeHint) {
       modeHint.textContent = fair
-        ? 'Shared scenario, seed, and sheep. Deltas compare outcomes; Kubo path/ticks use dt.'
+        ? 'Shared scenario, seed, sheep, and dogs. Each side only picks its instrument.'
         : 'Each side uses its own setup. Initialize and play A and B separately.';
     }
     const leftStatus = left?.getRunStatus?.();
@@ -140,24 +140,32 @@ export function createArenaView({ instruments, scenarios, models = null, onStatu
 
   const sheepInput = shared.querySelector('[data-role="shared-sheep"]');
   const sheepLabel = shared.querySelector('[data-role="shared-sheep-label"]');
+  const dogsInput = shared.querySelector('[data-role="shared-dogs"]');
+  const dogsLabel = shared.querySelector('[data-role="shared-dogs-label"]');
 
-  function syncFairSheepLabels() {
+  function syncFairSharedCounts() {
     sheepLabel.textContent = `Shared Sheep (${sheepInput.value})`;
+    dogsLabel.textContent = `Shared Dogs (${dogsInput.value})`;
     if (compareMode === 'fair') {
-      const n = Number(sheepInput.value);
-      left.controls.setFairSheepOverride(n);
-      right.controls.setFairSheepOverride(n);
+      const nSheep = Number(sheepInput.value);
+      const nDogs = Number(dogsInput.value);
+      left.controls.setFairSheepOverride(nSheep);
+      right.controls.setFairSheepOverride(nSheep);
+      left.controls.setDogsCount(nDogs);
+      right.controls.setDogsCount(nDogs);
     }
   }
 
-  sheepInput.addEventListener('input', syncFairSheepLabels);
-  syncFairSheepLabels();
+  sheepInput.addEventListener('input', syncFairSharedCounts);
+  dogsInput.addEventListener('input', syncFairSharedCounts);
+  syncFairSharedCounts();
 
   function sharedConfig() {
     return {
       scenario_id: scenSelect.value,
       seed: Number(shared.querySelector('[data-role="shared-seed"]').value),
       num_sheep: Number(sheepInput.value),
+      num_shepherds: Number(dogsInput.value),
       preset: 'paper',
     };
   }
@@ -196,7 +204,6 @@ export function createArenaView({ instruments, scenarios, models = null, onStatu
       setArenaStatus('Fair compare ready. Agents placed — click Play Both to start.');
       return true;
     } catch (err) {
-      setCompareMode('idle');
       setArenaStatus(`Init Both failed: ${err.message || err}`, { error: true });
       return false;
     } finally {
@@ -230,7 +237,7 @@ export function createArenaView({ instruments, scenarios, models = null, onStatu
   }
 
   modeFairBtn.addEventListener('click', () => {
-    setCompareMode('idle');
+    setCompareMode('fair');
     setArenaStatus('Fair compare selected. Set shared settings, then Init Both.');
   });
   modeIndepBtn.addEventListener('click', () => {
@@ -268,7 +275,7 @@ export function createArenaView({ instruments, scenarios, models = null, onStatu
   root.appendChild(rightCol);
 
   mountTips(shared);
-  setCompareMode('idle');
+  setCompareMode('fair');
 
   async function mount() {
     log.info('arena', 'Mounting Arena view');
