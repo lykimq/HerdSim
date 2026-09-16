@@ -20,7 +20,9 @@ import {
 } from './analyticsMarkup.js';
 import { bindAnalyticsMode } from './analyticsMode.js';
 import { mountTips } from '../utils/tooltips.js';
+import { clearLeaveBlock, setLeaveBlock } from '../utils/leaveGuard.js';
 
+const LEAVE_SOURCE = 'experiments';
 const DEFAULT_BENCHMARK_INSTRUMENT_IDS = [
   'strombom',
   'kubo',
@@ -247,6 +249,10 @@ export function createAnalyticsDashboard({ instruments, scenarios, models = null
     const started = performance.now();
     runBtn.disabled = true;
     clearBtn.disabled = true;
+    setLeaveBlock(
+      LEAVE_SOURCE,
+      'An experiment batch is still running. Leave and lose these trials, or stay?',
+    );
     setProgress(0, 1, 'Starting trials...');
 
     try {
@@ -285,6 +291,7 @@ export function createAnalyticsDashboard({ instruments, scenarios, models = null
     } catch (err) {
       setIdleStatus(`Failed: ${err.message}`);
     } finally {
+      clearLeaveBlock(LEAVE_SOURCE);
       runBtn.disabled = false;
       clearBtn.disabled = false;
     }
@@ -343,7 +350,9 @@ export function createAnalyticsDashboard({ instruments, scenarios, models = null
     }
   }
 
-  function destroy() {}
+  function destroy() {
+    clearLeaveBlock(LEAVE_SOURCE);
+  }
 
   return { root, mount, destroy };
 }

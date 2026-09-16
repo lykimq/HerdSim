@@ -8,6 +8,9 @@ import { mountTips, setInfoTip } from '../utils/tooltips.js';
 import { scenarioBlurb } from '../utils/params.js';
 import { applyArenaPlayback } from '../utils/playback.js';
 import { setStatusMessage } from '../utils/dom.js';
+import { clearLeaveBlock, setLeaveBlock } from '../utils/leaveGuard.js';
+
+const LEAVE_SOURCE = 'compare';
 
 export function createArenaView({ instruments, scenarios, models = null, onStatus }) {
   const root = document.createElement('div');
@@ -55,6 +58,18 @@ export function createArenaView({ instruments, scenarios, models = null, onStatu
       modeHint.textContent = fair
         ? 'Shared scenario, seed, and sheep. Deltas compare outcomes; Kubo path/ticks use dt.'
         : 'Each side uses its own setup. Initialize and play A and B separately.';
+    }
+    const leftStatus = left?.getRunStatus?.();
+    const rightStatus = right?.getRunStatus?.();
+    if (anyBusy()) {
+      setLeaveBlock(LEAVE_SOURCE, 'A comparison session is still starting. Leave and cancel it, or stay?');
+    } else if (leftStatus === 'running' || rightStatus === 'running') {
+      setLeaveBlock(
+        LEAVE_SOURCE,
+        'A comparison run is playing. Leave and lose this live run, or stay?',
+      );
+    } else {
+      clearLeaveBlock(LEAVE_SOURCE);
     }
   }
 
@@ -284,6 +299,7 @@ export function createArenaView({ instruments, scenarios, models = null, onStatu
 
   function destroy() {
     stopDeltas();
+    clearLeaveBlock(LEAVE_SOURCE);
     left.destroy();
     right.destroy();
   }

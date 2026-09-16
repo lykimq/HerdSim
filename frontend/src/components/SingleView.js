@@ -10,6 +10,9 @@ import { createSimulationController } from '../utils/simulationController.js';
 import { log, withTimeout } from '../utils/logger.js';
 import { applyControlPanelPlayback, derivePhase, DONE_STATUSES } from '../utils/playback.js';
 import { buildRunReport } from '../utils/runReport.js';
+import { clearLeaveBlock, setLeaveBlock } from '../utils/leaveGuard.js';
+
+const LEAVE_SOURCE = 'simulate';
 
 export function createSingleView({
   instruments,
@@ -81,6 +84,16 @@ export function createSingleView({
       statuses: sim.hasSession() ? [sim.getStatus()] : [],
     });
     applyControlPanelPlayback(controls, phase);
+    if (phase === 'busy') {
+      setLeaveBlock(LEAVE_SOURCE, 'A simulation is still starting. Leave and cancel it, or stay?');
+    } else if (phase === 'running') {
+      setLeaveBlock(
+        LEAVE_SOURCE,
+        'A simulation is playing. Leave and lose this live run, or stay?',
+      );
+    } else {
+      clearLeaveBlock(LEAVE_SOURCE);
+    }
   }
 
   const sim = createSimulationController({
@@ -222,6 +235,7 @@ export function createSingleView({
   }
 
   function destroy() {
+    clearLeaveBlock(LEAVE_SOURCE);
     sim.destroy();
   }
 

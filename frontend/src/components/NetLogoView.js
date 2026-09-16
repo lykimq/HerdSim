@@ -10,6 +10,9 @@ import {
 import { log } from '../utils/logger.js';
 import { mountTips } from '../utils/tooltips.js';
 import { setStatusMessage } from '../utils/dom.js';
+import { clearLeaveBlock, setLeaveBlock } from '../utils/leaveGuard.js';
+
+const LEAVE_SOURCE = 'netlogo';
 
 function panelHtml() {
   return `
@@ -212,6 +215,10 @@ export function createNetLogoView({ onStatus, onRunInHerdSim } = {}) {
 
   async function openModel(modelFile, label) {
     busy = true;
+    setLeaveBlock(
+      LEAVE_SOURCE,
+      'HerdSim is opening NetLogo. Leave and abandon that request, or stay?',
+    );
     syncButtons();
     setActionStatus(`Opening ${label} in NetLogo...`);
     onStatus?.({ status: 'running', tick: 0, seed: '-' });
@@ -228,6 +235,7 @@ export function createNetLogoView({ onStatus, onRunInHerdSim } = {}) {
       onStatus?.({ status: 'idle', tick: 0, seed: '-' });
     } finally {
       busy = false;
+      clearLeaveBlock(LEAVE_SOURCE);
       syncButtons();
     }
   }
@@ -258,6 +266,10 @@ export function createNetLogoView({ onStatus, onRunInHerdSim } = {}) {
     const file = els.upload.files?.[0];
     if (!file) return;
     busy = true;
+    setLeaveBlock(
+      LEAVE_SOURCE,
+      'A NetLogo model upload is still in progress. Leave and cancel it, or stay?',
+    );
     syncButtons();
     setActionStatus(`Uploading ${file.name}...`);
     try {
@@ -271,6 +283,7 @@ export function createNetLogoView({ onStatus, onRunInHerdSim } = {}) {
     } finally {
       els.upload.value = '';
       busy = false;
+      clearLeaveBlock(LEAVE_SOURCE);
       syncButtons();
     }
   });
@@ -310,7 +323,9 @@ export function createNetLogoView({ onStatus, onRunInHerdSim } = {}) {
     log.info('netlogo', 'NetLogo view ready');
   }
 
-  function destroy() {}
+  function destroy() {
+    clearLeaveBlock(LEAVE_SOURCE);
+  }
 
   return { root, mount, destroy };
 }

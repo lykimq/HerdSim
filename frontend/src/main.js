@@ -9,6 +9,7 @@ import { log, withTimeout, sleep } from './utils/logger.js';
 import { mountTips } from './utils/tooltips.js';
 import { applyFactorMetadata } from './utils/factors.js';
 import { escapeHtml } from './utils/dom.js';
+import { confirmLeaveIfNeeded, getLeaveBlockReason, isLeaveBlocked } from './utils/leaveGuard.js';
 
 const VIEW_META = {
   single: {
@@ -261,6 +262,16 @@ async function switchView(name, instruments, scenarios, models) {
       preferredSingleInstrument = null;
     }
     return;
+  }
+
+  if (isLeaveBlocked() && activeViewName && activeViewName !== name) {
+    const leave = await confirmLeaveIfNeeded({
+      title: 'Leave this view?',
+      body:
+        getLeaveBlockReason() ||
+        'Work is still in progress here. Switch tabs and lose that progress, or stay?',
+    });
+    if (!leave) return;
   }
 
   switching = true;
