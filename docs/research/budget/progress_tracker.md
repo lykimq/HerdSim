@@ -185,13 +185,76 @@ Same qualitative picture as scout on the overlapping band. Report: [pilot/REPORT
 
 ---
 
+## 6.1 Reproduce and resume commands
+
+Run from the repo root (`/path/to/HerdSim`). Keep `results/budget/phase1/scout/` intact when moving machines
+(at minimum `manifest.jsonl` + `trials.csv`; timeseries optional for analyse, required only if you must rebuild trials again).
+
+### Resume Phase-1 scout (remaining ~317 cells)
+
+Resume skips keys already listed as `ok` in `manifest.jsonl`, then rewrites Packages A and F.
+
+```bash
+# On a stronger machine, raise WORKERS (e.g. 8 or 16). Do not pass --no-resume.
+make budget-scout WORKERS=16
+
+# Equivalent explicit form (same defaults as Makefile):
+make budget-scout \
+  WORKERS=16 \
+  SCOUT_OUT=results/budget/phase1/scout \
+  SCOUT_CAMPAIGN_ID=phase1_scout \
+  SCOUT_LAYOUT=compact \
+  SCOUT_N="25 50 75 100 150 200" \
+  SCOUT_D="1 2 3 4 6 10 15 20" \
+  SCOUT_SEEDS=30 \
+  BUDGET_INSTRUMENT=strombom_multi
+```
+
+Notes:
+
+- Leave `BUDGET_MAX_TICKS` unset so protocol `T0=10000` is used.
+- Do **not** delete `manifest.jsonl` or you will rerun all 1440 cells.
+- After a clean finish, `trials.csv` is rewritten with all completed rows and Packages A/F are regenerated automatically by `budget-scout`.
+
+### Re-analyse only (reproduce Package A/F from existing `trials.csv`)
+
+Use this if the grid is already finished (or you only want to refresh exports / report tables):
+
+```bash
+make budget-analyse \
+  PACKAGE=A \
+  TRIALS=results/budget/phase1/scout/trials.csv \
+  OUT=results/budget/phase1/scout/package_a
+
+make budget-analyse \
+  PACKAGE=F \
+  TRIALS=results/budget/phase1/scout/trials.csv \
+  OUT=results/budget/phase1/scout/package_f
+```
+
+Report narrative to refresh after a successful full scout: `results/budget/phase1/scout/REPORT.md`
+and the phase rollup `results/budget/phase1/REPORT.md` (edit Section 6 / campaign log in this tracker too).
+
+### Reproduce smoke pilot (optional)
+
+```bash
+make budget-test
+make budget-pilot BUDGET_MAX_TICKS=3000 WORKERS=1
+make budget-analyse \
+  PACKAGE=F \
+  TRIALS=results/budget/phase1/pilot/trials.csv \
+  OUT=results/budget/phase1/pilot/package_f
+```
+
+---
+
 ## 7. Campaign log
 
 Append one row per campaign (or notable re-analyse). Newest at top.
 
 | Date | Campaign id | Command / notes | Grade | Packages | Key outcome | Report |
 |------|-------------|-----------------|-------|----------|-------------|--------|
-| 2026-09-17 | phase1_scout | `make budget-scout WORKERS=4`; stopped at 1123/1440; trials rebuilt from timeseries; Packages A/F | SCOUT incomplete | A, F | R=1; D_min=1; slow due to N=150 long-tail successes; N=200 not run | [scout/REPORT.md](../../../results/budget/phase1/scout/REPORT.md) |
+| 2026-09-17 | phase1_scout | `make budget-scout WORKERS=4`; stopped at 1123/1440; trials rebuilt from timeseries; Packages A/F. Resume later: `make budget-scout WORKERS=16` (see Section 6.1) | SCOUT incomplete | A, F | R=1; D_min=1; slow due to N=150 long-tail successes; N=200 not run | [scout/REPORT.md](../../../results/budget/phase1/scout/REPORT.md) |
 | 2026-09-17 | budget_pilot | `make budget-test`; `make budget-pilot BUDGET_MAX_TICKS=3000 WORKERS=1`; Package F | SMOKE | A, F | R=1; D_min=1; wasteful overspend for D>1; scaling flat | [pilot/REPORT.md](../../../results/budget/phase1/pilot/REPORT.md) |
 
 ---
@@ -201,7 +264,9 @@ Append one row per campaign (or notable re-analyse). Newest at top.
 Update this list when priorities change; mark items done by moving detail into Sections 2-7.
 
 1. **Decide Phase 1 continuation strategy**
-   - Option A: resume remaining 317 scout cells (`make budget-scout WORKERS=4`) to finish N=150 high-D and N=200.
+   - Option A: resume remaining ~317 scout cells on a stronger machine:
+     `make budget-scout WORKERS=16`
+     (full command block in Section 6.1). Then refresh reports from new Package A/F outputs.
    - Option B (recommended if compact stays easy): skip more compact grind and start **Phase 2** harder X0 (`make budget-pilot-state`) where D_min>1 / failures are more likely.
    - Optional engineering: flush `trials.csv` incrementally in `api/budget_runner.py` so kills do not require timeseries reconstruction.
 
@@ -232,3 +297,4 @@ When finishing a campaign or Cap change:
 - [ ] Adjust Section 8 next actions
 - [ ] Set "Last updated" at top
 - [ ] Link the campaign REPORT under `results/budget/...`
+- [ ] Keep Section 6.1 commands in sync with Makefile defaults
