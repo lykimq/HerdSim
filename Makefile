@@ -12,19 +12,21 @@ BUDGET_LAYOUTS_STATE ?= compact wide split outlier_rich
 BUDGET_N ?= 25 50 100
 BUDGET_D ?= 1 2 3 4 6 10
 BUDGET_SEEDS ?= 5
-BUDGET_OUT ?= results/budget/pilot
+BUDGET_OUT ?= results/budget/phase1/pilot
 BUDGET_MAX_TICKS ?=
 WORKERS ?= 1
 PACKAGE ?= A
 TRIALS ?= $(BUDGET_OUT)/trials.csv
 OUT ?= $(BUDGET_OUT)/package_$(shell echo $(PACKAGE) | tr A-Z a-z)
 
-# Scout defaults (long-running; see budget-help).
+# Phase-1 scout defaults (long-running; see budget-help).
+# Subset of frozen Section 8: compact only, N through 200, D through 20, scout seeds.
 SCOUT_N ?= 25 50 75 100 150 200
 SCOUT_D ?= 1 2 3 4 6 10 15 20
 SCOUT_SEEDS ?= 30
-SCOUT_OUT ?= results/budget/scout
+SCOUT_OUT ?= results/budget/phase1/scout
 SCOUT_LAYOUT ?= compact
+SCOUT_CAMPAIGN_ID ?= phase1_scout
 
 # Default target
 help:
@@ -102,16 +104,20 @@ clean:
 # ---------------------------------------------------------------------------
 # Override examples:
 #   make budget-pilot BUDGET_MAX_TICKS=3000 WORKERS=1
-#   make budget-analyse PACKAGE=A TRIALS=results/budget/pilot/trials.csv OUT=results/budget/pilot/package_a
+#   make budget-analyse PACKAGE=A TRIALS=results/budget/phase1/pilot/trials.csv OUT=results/budget/phase1/pilot/package_a
+#   make budget-scout WORKERS=4
 
 budget-help:
 	@echo "Shepherding budget targets"
 	@echo ""
 	@echo "  make budget-test          Unit tests for the budget stack"
-	@echo "  make budget-pilot         Phase-1 pilot: compact layout, Package A analyse"
-	@echo "  make budget-pilot-state   Same N/D grid over all X0 layouts, Package B"
+	@echo "  make budget-pilot         Phase-1 smoke pilot: compact, Package A"
+	@echo "  make budget-pilot-state   Phase-2 smoke: all X0 layouts, Package B"
 	@echo "  make budget-analyse       Analyse trials (PACKAGE, TRIALS, OUT)"
-	@echo "  make budget-scout         Fuller scout grid (LONG-RUNNING)"
+	@echo "  make budget-scout         Phase-1 scout grid + Packages A/F (LONG-RUNNING)"
+	@echo ""
+	@echo "Results layout: results/budget/phase<N>/<campaign>/"
+	@echo "  Phase 1: results/budget/phase1/{pilot,scout}/"
 	@echo ""
 	@echo "Pilot defaults (override on the command line):"
 	@echo "  BUDGET_INSTRUMENT=$(BUDGET_INSTRUMENT)"
@@ -126,12 +132,13 @@ budget-help:
 	@echo "Analyse defaults:"
 	@echo "  PACKAGE=$(PACKAGE)  TRIALS=$(TRIALS)  OUT=$(OUT)"
 	@echo ""
-	@echo "Scout defaults (long-running; one instrument, one layout):"
+	@echo "Phase-1 scout defaults (long-running; one instrument, one layout):"
 	@echo "  SCOUT_N=$(SCOUT_N)"
 	@echo "  SCOUT_D=$(SCOUT_D)"
 	@echo "  SCOUT_SEEDS=$(SCOUT_SEEDS)"
 	@echo "  SCOUT_OUT=$(SCOUT_OUT)"
 	@echo "  SCOUT_LAYOUT=$(SCOUT_LAYOUT)"
+	@echo "  SCOUT_CAMPAIGN_ID=$(SCOUT_CAMPAIGN_ID)"
 
 budget-test:
 	$(PYTHON) -m pytest tests/backend/correctness/test_budget_stack.py -q
@@ -173,9 +180,11 @@ budget-analyse:
 		--trials $(TRIALS) \
 		--output $(OUT)
 
-# Fuller scout: still a protocol subset vs full claim-grade sweep. LONG-RUNNING.
+# Phase-1 scout: Section 8 subset (compact, scout seeds, T0). LONG-RUNNING.
+# Still short of full frozen N/D and claim-grade boundary reseeds.
 budget-scout:
 	@echo "NOTE: budget-scout is long-running (many N x D x seeds cells)."
+	@echo "Phase 1 scout output: $(SCOUT_OUT)  campaign_id=$(SCOUT_CAMPAIGN_ID)"
 	@mkdir -p $(SCOUT_OUT)
 	$(PYTHON) scripts/budget/run_grid.py \
 		--output $(SCOUT_OUT) \
@@ -185,6 +194,7 @@ budget-scout:
 		--d $(SCOUT_D) \
 		--seeds $(SCOUT_SEEDS) \
 		--workers $(WORKERS) \
-		--campaign-id budget_scout \
+		--campaign-id $(SCOUT_CAMPAIGN_ID) \
 		$(BUDGET_MAX_TICKS_FLAG)
 	$(MAKE) budget-analyse PACKAGE=A TRIALS=$(SCOUT_OUT)/trials.csv OUT=$(SCOUT_OUT)/package_a
+	$(MAKE) budget-analyse PACKAGE=F TRIALS=$(SCOUT_OUT)/trials.csv OUT=$(SCOUT_OUT)/package_f

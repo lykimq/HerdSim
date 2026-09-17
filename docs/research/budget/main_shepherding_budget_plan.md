@@ -2,7 +2,18 @@
 
 Status: active (Section 8 protocol frozen 2026-09-17)  
 Role: single source of truth for the research program and HerdSim implementation  
-Execution ledger (phases, Caps, campaigns, claim verdicts): [progress_tracker.md](progress_tracker.md)
+Execution ledger (phases, Caps, campaigns, claim verdicts): [progress_tracker.md](progress_tracker.md)  
+Results index: [results/budget/README.md](../../../results/budget/README.md)
+
+### Execution status (keep short; details in the tracker)
+
+| Phase | Status | Latest evidence |
+|-------|--------|-----------------|
+| 0 Protocol freeze | DONE | `shepherding_budget_v1` / Section 8 frozen |
+| 1 Herdability maps (RQ2 / Package A) | IN PROGRESS | Pilot SMOKE + scout 1123/1440 (stopped); compact R=1, D_min=1; C2 unevaluable — see [phase1/REPORT.md](../../../results/budget/phase1/REPORT.md) |
+| 2–7 | NOT STARTED | — |
+
+Caps I1–I14: **built** (see Section 10.1). Claim verdicts C1–C7: **UNEVALUATED** until claim-grade campaigns exist.
 
 This document defines (1) what must be scientifically established, (2) how each research question earns its place, and (3) what HerdSim must implement so the experiments can actually answer those questions. An implementation step is in scope only if it maps to an RQ, contribution, or evidence package below.
 
@@ -420,16 +431,16 @@ More shepherds -> coverage saturation + interference
 
 ### 9. Phase plan
 
-| Phase | Focus | Questions | Output | Depends on | Phase done when |
-|-------|-------|-----------|--------|------------|-----------------|
-| 0 | Freeze protocol | -- | Confirmed Section 8 | -- | All rows in Section 8 marked frozen |
-| 1 | Herdability maps (baseline) | RQ2, data for RQ6 | Package A | Phase 0 | C2 claims evaluable on baseline method; frontier+regimes exported |
-| 2 | Collective-state manipulation | RQ1 | Package B | Phase 1 | C1a/C1b evaluable; X₀ families verified by metric stats |
-| 3 | Overcrowding mechanism | RQ3 | Package C | Phase 1 | C3 evaluable; I_dir and C time series stored |
-| 4 | Cross-method transfer | RQ4 | Package D | Phases 1–3 | Transfer table filled for ≥ 3 herding methods |
-| 5 | Information substitution | RQ5 | Package E | Phase 1 | C5a/C5b evaluable on instruments that consume I factors |
-| 6 | Scaling regimes | RQ6 | Package F | Phases 1–2 | C6a or C6b decided with model comparison table |
-| 7 | Early warning | RQ7 | Package G | Phases 1–3 | C7a/C7b evaluable with reported lead-time distribution |
+| Phase | Focus | Questions | Output | Depends on | Phase done when | Status |
+|-------|-------|-----------|--------|------------|-----------------|--------|
+| 0 | Freeze protocol | -- | Confirmed Section 8 | -- | All rows in Section 8 marked frozen | DONE (2026-09-17) |
+| 1 | Herdability maps (baseline) | RQ2, data for RQ6 | Package A | Phase 0 | C2 claims evaluable on baseline method; frontier+regimes exported | IN PROGRESS (pilot + partial scout; C2 unevaluable) |
+| 2 | Collective-state manipulation | RQ1 | Package B | Phase 1 | C1a/C1b evaluable; X₀ families verified by metric stats | NOT STARTED |
+| 3 | Overcrowding mechanism | RQ3 | Package C | Phase 1 | C3 evaluable; I_dir and C time series stored | NOT STARTED |
+| 4 | Cross-method transfer | RQ4 | Package D | Phases 1–3 | Transfer table filled for ≥ 3 herding methods | NOT STARTED |
+| 5 | Information substitution | RQ5 | Package E | Phase 1 | C5a/C5b evaluable on instruments that consume I factors | NOT STARTED |
+| 6 | Scaling regimes | RQ6 | Package F | Phases 1–2 | C6a or C6b decided with model comparison table | SMOKE only (flat D_min) |
+| 7 | Early warning | RQ7 | Package G | Phases 1–3 | C7a/C7b evaluable with reported lead-time distribution | NOT STARTED |
 
 ---
 
