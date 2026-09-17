@@ -31,6 +31,7 @@ Mode switcher (collect, drive, recover, lead) inspired by context-aware and lead
 ## Research themes HerdSim targets
 
 - **Herdability limits:** minimum dogs vs flock size/density.
+- **Shepherding budgets:** controllability frontiers over count, time, and effort (see [shepherding_budget_agenda.md](shepherding_budget_agenda.md)).
 - **Information requirements:** global, local, bearing-only, noisy sensing.
 - **Heterogeneity and failure:** stubborn sheep, dog dropout/degradation.
 - **Generalization:** ranking stability under distribution shift.
