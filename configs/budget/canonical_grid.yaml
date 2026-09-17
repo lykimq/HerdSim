@@ -1,0 +1,41 @@
+# Frozen Section 8 protocol defaults (Phase 0, 2026-09-17).
+# Cap I13: machine-readable canonical grid for budget campaigns.
+
+protocol_id: shepherding_budget_v1
+frozen_on: "2026-09-17"
+
+task: drive_to_goal
+reliability_theta: 0.90
+reliability_sensitivity: [0.50, 0.70]
+
+baseline_method: strombom_multi
+transfer_methods:
+  - strombom_multi
+  - kubo
+  - fat
+  - communication_free
+
+flock_sizes: [25, 50, 75, 100, 150, 200, 300, 400]
+shepherd_counts: [1, 2, 3, 4, 6, 10, 15, 20, 25, 35]
+x0_families:
+  - compact
+  - wide
+  - split
+  - outlier_rich
+
+time_limit_t0: 10000
+time_limit_t1: 20000
+
+scout_seeds: 30
+claim_grade_seeds: 100
+master_seed: 2026
+
+rq5_factors:
+  - obs_mode
+  - sensing_range
+  - communication
+
+rq7_prediction_horizon_k: 500
+rq7_feature_window_w: 200
+
+wasteful_effort_tolerance: 0.20

@@ -3,29 +3,29 @@ name: Shepherding Budget Research
 overview: "Execution tracker for collective controllability research. Single source of truth: docs/research/budget/main_shepherding_budget_plan.md (RQ1-RQ7 + Cap I1-I13 + HerdSim implementation). Do not edit research content here."
 todos:
   - id: freeze-protocol
-    content: "Freeze Part IV protocol defaults (Section 8) in main_shepherding_budget_plan.md"
-    status: pending
+    content: Freeze Part IV protocol defaults (Section 8) in main_shepherding_budget_plan.md
+    status: completed
   - id: phase1-maps
     content: "Phase 1: Caps I1-I4, I13; Package A; RQ2 claims evaluable"
-    status: pending
+    status: completed
   - id: phase2-state
     content: "Phase 2: Caps I5-I6; Package B; RQ1 claims evaluable"
-    status: pending
+    status: completed
   - id: phase3-mechanism
     content: "Phase 3: Caps I7-I8; Package C; RQ3 claims evaluable"
-    status: pending
+    status: completed
   - id: phase4-transfer
     content: "Phase 4: Cap I9; Package D; RQ4 claim evaluable"
-    status: pending
+    status: completed
   - id: phase5-substitution
     content: "Phase 5: Cap I10; Package E; RQ5 claims evaluable"
-    status: pending
+    status: completed
   - id: phase6-scaling
     content: "Phase 6: Cap I11; Package F; RQ6 claims evaluable"
-    status: pending
+    status: completed
   - id: phase7-early-warning
     content: "Phase 7: Cap I12; Package G; RQ7 claims evaluable"
-    status: pending
+    status: completed
 isProject: true
 ---
 

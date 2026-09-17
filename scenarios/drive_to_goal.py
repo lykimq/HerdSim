@@ -58,15 +58,31 @@ class DriveToGoalScenario(BaseScenario):
     def initial_positions(
         self, config: dict[str, Any], rng: np.random.Generator
     ) -> tuple[np.ndarray, np.ndarray]:
+        from core.x0_generators import generate_initial_positions, normalize_layout
+
         n_sheep = config.get("n_sheep", 50)
         n_shepherds = config.get("n_shepherds", 1)
         world_width = config.get("world_width", 150.0)
         world_height = config.get("world_height", 150.0)
 
-        # Sheep start clustered near the centre of the field
+        # Sheep start according to the X0 family in initial_layout.
         center = np.array([world_width / 2, world_height / 2])
         spread = config.get("initial_spread", 30.0)
-        sheep_pos = center + rng.uniform(-spread, spread, size=(n_sheep, 2))
+        layout = normalize_layout(str(config.get("initial_layout", "compact")))
+        measurement_radius = float(config.get("measurement_radius", 5.0))
+        r_a = float(config.get("r_a", 2.0))
+        lost_threshold = r_a * (float(n_sheep) ** (2.0 / 3.0))
+        sheep_pos = generate_initial_positions(
+            int(n_sheep),
+            layout,
+            center,
+            rng,
+            spread=float(spread),
+            interaction_radius=measurement_radius,
+            lost_threshold=lost_threshold,
+            world_width=float(world_width),
+            world_height=float(world_height),
+        )
 
         # Shepherd starts at a distance behind the flock (opposite side from goal)
         shepherd_offset = config.get("shepherd_start_offset", 50.0)

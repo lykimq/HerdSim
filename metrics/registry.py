@@ -42,12 +42,16 @@ metric_registry = MetricRegistry()
 
 def _auto_register():
     from metrics.cohesion import CohesionMetric
+    from metrics.extent import ExtentMetric
     from metrics.fragmentation import FragmentationMetric
     from metrics.gcm_goal import GcmGoalMetric
+    from metrics.mean_spread import MeanSpreadMetric
     from metrics.min_separation import MinSeparationMetric
     from metrics.outlier_count import OutlierCountMetric
     from metrics.polarization import PolarizationMetric
     from metrics.sheep_in_goal import SheepInGoalMetric
+    from metrics.shepherd_coverage import ShepherdCoverageMetric
+    from metrics.shepherd_interference import ShepherdInterferenceMetric
     from metrics.shepherd_path import ShepherdPathMetric
     from metrics.success_rate import SuccessRateMetric
     from metrics.time_to_goal import TimeToGoalMetric
@@ -63,6 +67,10 @@ def _auto_register():
         OutlierCountMetric,
         MinSeparationMetric,
         FragmentationMetric,
+        MeanSpreadMetric,
+        ExtentMetric,
+        ShepherdInterferenceMetric,
+        ShepherdCoverageMetric,
     ]:
         metric_registry.register(cls)
 

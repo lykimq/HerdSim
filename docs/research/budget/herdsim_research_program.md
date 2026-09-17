@@ -1,138 +1,249 @@
 # HerdSim Research Program
 
-## Scaling Laws of Collective Control
+## Scaling of Collective Control
 
-## 1. Scientific Goal
+This document is a research plan for a multi-stage program. It is not a claim that one final law already exists, and it is not a single-paper checklist.
+
+The plan is meant to do two jobs:
+
+1. State the scientific problem in clear questions.
+2. Guide what HerdSim should implement so those questions can be tested fairly.
+
+---
+
+# 0. The Problem in Plain Language
+
+Imagine a large group that moves together: sheep, robots, drones, or people. Often we do not control every member of the group. Instead, a few outside agents try to guide the whole group. In sheep herding, those outside agents are dogs. In other settings they might be robots, drones, or human operators.
+
+The basic practical question is simple:
+
+> If the group gets larger, or more spread out, how many guides do I need to finish the task reliably?
+
+A draft study already looked at one version of this question for sheep and dogs in simulation. It asked how the number of dogs should grow with flock size, and whether flock "spread" helps explain the difficulty.
+
+That draft is a useful starting point. This program keeps the same problem, but treats it more carefully:
+
+* define "how much control is needed" in a clear and reusable way,
+* separate group size from group shape,
+* ask why the pattern appears,
+* and check whether the pattern still holds when the guiding method changes.
+
+We do not start by claiming a universal scaling law. We start by asking questions that experiments can answer.
+
+### What we hope to achieve
+
+By the end of the core program, we want to be able to say, with evidence:
+
+* how control need changes as the group grows,
+* whether the shape of the group matters beyond size,
+* which processes help explain that pattern,
+* and which parts of the pattern look shared across guiding methods, versus method-specific.
+
+If a simple predictive rule appears, that is a strong success. If the pattern turns out to depend heavily on the method, that is also a useful scientific result.
+
+---
+
+# 1. Scientific Goal
 
 HerdSim studies how much external control is needed to reliably steer a collective system.
 
-The central question is:
+Central question:
 
-> **How does the amount of control needed to reliably steer a collective scale with the size and structure of the collective?**
+> How does the amount of control needed to reliably steer a collective scale with the size and structure of the collective?
 
-A second question follows:
+Follow-up question:
 
-> **Which parts of this scaling remain consistent when the control method changes?**
+> Which parts of this scaling remain consistent when the control method changes?
 
-HerdSim uses collective herding as a controlled model system for studying these questions. The goal is not primarily to develop or compare individual herding algorithms, but to understand the relationship between **collective structure** and **control demand**.
+HerdSim uses herding as a controlled model system. The main goal is not to invent the best herding algorithm. The main goal is to understand how group size and group structure shape control demand.
 
-The longer-term goal is to determine whether this relationship can be described by simple, testable scaling laws that predict how control requirements change as a collective becomes larger or more structurally complex.
+A longer-term hope is that the relationship can be described by simple, testable scaling rules. That hope is an outcome to test, not an assumption.
 
 ---
 
-# 2. Central Concept
+# 2. Terms Used in This Plan
 
-Consider a collective containing `N` individuals and controlled by `D` external controllers.
+These terms are used throughout the document.
 
-For a fixed task, success criterion, reliability target, time budget, and information setting, define:
+### Collective
+
+A group of many individuals that interact and move together. In HerdSim, the collective is usually a flock of sheep.
+
+### Controller / shepherd / dog
+
+An external agent that tries to guide the collective. The individuals in the collective are not commanded one by one. The controllers influence them indirectly.
+
+### Task
+
+What success means in an experiment. Example: gather the flock and move it into a goal region within a time limit.
+
+### Reliability
+
+How often the task succeeds across repeated runs. Example: succeed in at least 90% of trials under the same conditions.
+
+### Control demand
+
+How much external control is needed to reach a chosen reliability. In this plan, the main measure of control demand is the minimum number of controllers.
+
+### `N`
+
+Number of individuals in the collective. Example: number of sheep.
+
+### `D`
+
+Number of external controllers. Example: number of dogs.
+
+### `D_min`
+
+The smallest number of controllers that still meets the reliability target, under fixed experimental conditions.
+
+Important: `D_min` is not a universal property of a flock. It depends on the task, time limit, information available to the controllers, success rule, and other fixed settings.
+
+### Structure (`X`)
+
+The spatial organization of the collective, not only how many members it has. Examples:
+
+* spread: how widely members are distributed,
+* density: how tightly packed they are,
+* fragmentation: whether the group is one piece or several separated pieces,
+* elongation: whether the group is long and thin rather than round,
+* clustering: whether members form local clumps,
+* outliers: whether some individuals are far from the rest.
+
+### Scaling
+
+How a quantity changes when the system gets larger or changes in structure. Here, scaling mainly means how `D_min` changes when `N` or `X` changes.
+
+### Control method / instrument
+
+The specific rules used by the controllers (and, when relevant, by the flock). In HerdSim, a named method package is called an instrument.
+
+### Model system
+
+A simplified setting that is useful for studying a broader question. Sheep herding is used here as a model of indirect collective control, not as a full replica of real farms.
+
+### Mechanism
+
+A process that helps explain why a scaling pattern appears. Example: a fragmented flock may need more controllers because several subgroups must be handled at once.
+
+### Generality / transfer
+
+Whether a finding still holds when something important changes, especially when the control method changes.
+
+### Protocol
+
+The fixed rules of an experiment: task, success rule, reliability target, time budget, information setting, and how `D_min` is measured.
+
+---
+
+# 3. Central Concept
+
+Consider a collective with `N` individuals and `D` external controllers.
+
+For a fixed protocol, define:
 
 `D_min(N, X)`
 
-as the smallest number of controllers required to achieve the chosen reliability, where `X` describes the structure of the collective.
+as the smallest number of controllers needed to reach the chosen reliability, where `X` describes collective structure.
 
-Possible structural properties include:
-
-* spatial spread,
-* density,
-* fragmentation,
-* elongation,
-* clustering,
-* connectivity,
-* isolated individuals or groups.
-
-The research begins with:
+The research begins with size only:
 
 `D_min(N)`
 
-and then extends to:
+and then asks whether structure is also needed:
 
 `D_min(N, X)`.
 
-The exact form of these relationships is not assumed in advance.
-
-A power law such as
+We do not assume the mathematical form in advance. A power-law form such as
 
 `D_min ∝ N^α`
 
-is one possible outcome. Other possibilities include linear, sublinear, superlinear, piecewise, saturating, or threshold-like relationships.
+is one possible outcome. Other possibilities include linear growth, slower-than-linear growth, faster-than-linear growth, different regions at different sizes, saturation, thresholds, or no simple pattern.
 
-The goal is therefore not to find a particular mathematical form, but to **discover and test how control demand changes with collective size and structure**.
-
-`D_min` should also not be interpreted as an absolute property of a collective. It is defined relative to a particular task and set of experimental conditions.
+The goal is to discover and test how control demand changes with size and structure, not to force one formula.
 
 ---
 
-# 3. What Scaling Means
+# 4. What Scaling Means Here
 
-Here, scaling describes how control demand changes when the collective changes.
+Scaling, in this plan, means answering questions such as:
 
-For example:
+* If the group doubles in size, how many more controllers are needed?
+* Does a compact group need less control than a dispersed group of the same size?
+* Does fragmentation create extra control demand?
+* Does adding controllers eventually stop helping, or even start hurting?
+* Does the same pattern appear when a different control method is used?
 
-* If the number of individuals doubles, how much additional control is required?
-* Does control demand increase at the same rate for compact and dispersed collectives?
-* Does fragmentation create additional control demand?
-* Does adding controllers eventually provide little additional benefit?
-* Does the same relationship appear when the control method changes?
-
-Scaling is therefore more than estimating an exponent.
-
-The aim is to identify the collective properties that determine control demand and to determine which aspects of that relationship remain robust.
+So scaling is more than fitting one exponent. It is about identifying what drives control demand and what remains stable.
 
 ---
 
-# 4. Why Collective Structure Matters
+# 5. Why Structure Matters
 
-Collective size alone may not determine how difficult a collective is to control.
+Two groups can have the same size and still be very different to control.
 
-Two collectives can contain the same number of individuals while having very different structures. One may be compact and connected, while another may be widely spread, elongated, fragmented, or contain several separated groups.
+One group may be compact and connected. Another may be spread out, elongated, broken into pieces, or full of outliers. Those differences change how hard the controllers must work.
 
-These differences can change the spatial and coordination demands placed on the controllers.
+Basic question:
 
-This leads to a fundamental question:
+> Is group size enough to explain control demand, or does group structure add important information?
 
-> **Is collective size sufficient to explain control demand, or does collective structure provide additional information?**
-
-The research will not assume in advance which structural properties are important. Instead, it will identify which measurable properties explain systematic variation in control demand.
+We will not assume in advance which structural properties matter. Experiments will show which measurable properties explain systematic changes in control demand.
 
 ---
 
-# 5. Core Research Questions
+# 6. Core Research Questions
 
-## RQ1 — How does control demand scale with collective size?
+Each question below has three parts:
 
-The first question establishes the basic scaling relationship:
+* Question: what we want to know,
+* Approach: how we will study it,
+* Possible results: what we may find.
 
-> **How does the minimum control required for reliable steering change as the collective becomes larger?**
-
-The initial experiments will vary collective size while keeping other conditions controlled.
-
-The main quantity is:
-
-`D_min(N)`
-
-The analysis will determine whether control demand changes systematically with collective size and what form that relationship takes.
-
-Possible outcomes include:
-
-* approximately linear scaling,
-* sublinear scaling,
-* superlinear scaling,
-* multiple scaling regions,
-* saturation,
-* thresholds,
-* or no simple scaling relationship.
-
-The relationship should also be tested on collective sizes that were not used to estimate it.
+We do not pre-commit to one preferred result.
 
 ---
 
-## RQ2 — How does collective structure change control demand?
+## RQ1 -- How does control demand scale with collective size?
 
-Once the basic size relationship is established, the next question is:
+### Question
 
-> **At the same collective size, how does internal structure affect the amount of control required?**
+> How does the minimum control required for reliable steering change as the collective becomes larger?
 
-This extends the relationship from:
+### Approach
+
+1. Freeze a protocol: task, success rule, reliability target, time budget, and information setting.
+2. Vary collective size `N` while keeping other conditions as constant as possible.
+3. For each `N`, find the smallest controller count `D_min(N)` that meets the reliability target.
+4. Also record what happens when more controllers are added: improvement, saturation, or interference.
+
+### Possible results
+
+* roughly linear growth of control demand with size,
+* slower-than-linear growth,
+* faster-than-linear growth,
+* different behavior in different size ranges,
+* saturation or thresholds,
+* or no simple relationship.
+
+A useful outcome is a clear empirical map of `D_min(N)`, including breakpoints and diminishing returns. Any fitted relationship should also be checked on sizes not used to estimate it.
+
+---
+
+## RQ2 -- How does collective structure change control demand?
+
+### Question
+
+> At the same collective size, how does internal structure affect the amount of control required?
+
+### Approach
+
+1. Keep `N` fixed in matched comparisons.
+2. Vary structure `X` in a controlled way when possible.
+3. Measure candidate structural properties such as spread, density, fragmentation, elongation, clustering, and outliers.
+4. Compare how much of the variation in control demand is explained by size alone versus size plus structure.
+
+This extends the study from:
 
 `D_min(N)`
 
@@ -140,416 +251,373 @@ to:
 
 `D_min(N, X)`.
 
-Candidate structural variables include:
+### Possible results
 
-* spatial spread,
-* density,
-* fragmentation,
-* elongation,
-* connectivity,
-* clustering,
-* outliers,
-* and other measurable properties of the collective.
+* size is almost enough, and structure adds little,
+* one or a few structural measures explain most remaining variation,
+* or different structural properties matter in different size ranges.
 
-The experiments will distinguish between:
-
-1. variation explained by collective size, and
-2. additional variation explained by collective structure.
-
-This will determine whether collective size is sufficient to describe control demand or whether structural information is also needed.
+A useful outcome is evidence for whether control demand is mainly a size effect or a size-plus-structure effect.
 
 ---
 
-## RQ3 — What produces the observed scaling?
+## RQ3 -- What produces the observed scaling?
 
-A scaling relationship describes what happens, but not why.
+### Question
 
-The third question is:
+> What mechanisms help explain the observed relationship between collective structure and control demand?
 
-> **What mechanisms produce the observed relationship between collective structure and control demand?**
+### Approach
 
-Possible mechanisms include:
+Candidate mechanisms include:
 
-### Spatial demand
+* Spatial demand: larger or more dispersed groups need influence over a wider area.
+* Fragmentation: separated subgroups may need to be handled at the same time.
+* Controller interference: extra controllers may conflict with each other.
+* Redundant control: after enough control is present, extra controllers add little benefit.
+* Local instability: some configurations are hard to recover once they start failing.
 
-Larger or more dispersed collectives may require controllers to influence a larger spatial region.
+These are hypotheses to test, not assumptions.
 
-### Fragmentation
+Working method:
 
-Separated groups may require controllers to manage several parts of the collective at the same time.
+1. Measure run-level quantities linked to these ideas.
+2. Check which quantities track control demand.
+3. Where possible, intervene on the suspected mechanism and test whether control demand or the scaling pattern changes.
 
-### Controller interference
+Correlation alone is not treated as proof of causation.
 
-Additional controllers may eventually reduce effectiveness if they interfere with one another or create conflicting effects.
+### Possible results
 
-### Redundant control
+* one dominant mechanism explains most of the pattern,
+* several mechanisms matter in different regimes,
+* or the pattern remains hard to reduce to one simple mechanism.
 
-Once sufficient control is available, additional controllers may provide little additional benefit.
-
-### Local instability
-
-Some collective configurations may be more difficult to recover once they begin moving away from the desired state.
-
-These mechanisms are hypotheses rather than assumptions.
-
-Trajectory measurements can identify associations between these mechanisms and control demand. Where possible, experiments will directly manipulate suspected mechanisms and test whether those changes alter control demand or the observed scaling relationship.
-
-Correlation alone will not be treated as evidence of causation.
+A useful outcome is a tested explanation of why `D_min` rises, saturates, or breaks down, not only a curve fit.
 
 ---
 
-## RQ4 — Which parts of the scaling generalize across control methods?
+## RQ4 -- Which parts of the scaling generalize across control methods?
 
-The next question is whether observed scaling relationships mainly reflect properties of the collective or properties of a particular control method.
+### Question
 
-For control method `m`, define:
+> Does the relationship between collective properties and control demand remain similar when the control method changes?
+
+### Approach
+
+For each control method `m`, measure:
 
 `D_min,m(N, X)`.
 
-The question is:
+1. Repeat the core size and structure experiments with more than one method.
+2. Compare the shape of the scaling, not only raw success rates.
+3. Separate features that look shared from features that look method-specific.
 
-> **Does the relationship between collective properties and control demand remain similar when the control method changes?**
+The point is not mainly to crown a best algorithm. The point is to learn which findings look like properties of the collective, and which depend on the controller.
 
-Several outcomes are possible.
+### Possible results
 
-### Method-specific scaling
+* Method-specific scaling: different methods give different relationships.
+* Shared form with different magnitude: similar pattern, but different absolute control need.
+* Shared form with method-dependent details: similar pattern, but different thresholds or slopes.
 
-Different control methods may produce fundamentally different relationships.
-
-### Shared scaling with different magnitude
-
-Different methods may follow a similar relationship while requiring different amounts of control.
-
-For example:
-
-`D_min,m(N, X) ≈ a_m f(N, X)`
-
-where `f(N, X)` describes a common relationship and `a_m` captures method-specific differences.
-
-### Shared scaling with method-dependent parameters
-
-The overall relationship may be similar across methods while quantities such as scaling exponents, thresholds, or boundaries differ.
-
-None of these outcomes is assumed in advance.
-
-A finding that scaling is strongly method-dependent would itself be informative because it identifies which aspects of control demand cannot be separated from the control method.
-
-The purpose of cross-method experiments is therefore not primarily to identify the "best" algorithm. It is to determine **which features of control demand are properties of the collective and which depend on the controller**.
+Any of these outcomes is scientifically useful. Strong method dependence would show a limit on how far scaling can be separated from the controller.
 
 ---
 
-# 6. Control Boundaries and Diminishing Returns
+# 7. Control Boundaries and Diminishing Returns
 
-The relationship between collective size, structure, and control may contain important boundaries.
+As controller count increases, performance may pass through several regions:
 
-For example, increasing the number of controllers may produce:
+1. too little control: the task often fails,
+2. useful extra control: reliability rises strongly,
+3. diminishing returns: extra controllers help little,
+4. possible overcrowding: too many controllers interfere and can hurt performance.
 
-1. low reliability when control is insufficient,
-2. a region where additional control strongly improves reliability,
-3. diminishing returns once sufficient control is available,
-4. and potentially reduced performance if controllers interfere with one another.
-
-These regions are not separate research objectives. They are features that may emerge from the underlying relationship between:
-
-`N`, `X`, and `D`.
-
-The research will therefore examine whether control demand contains identifiable boundaries or changes in behavior.
-
-These may include minimum-control boundaries, diminishing-return regions, or other transitions.
-
-The exact structure will be determined from the data rather than imposed in advance.
+These regions are not separate research goals. They are features that may appear while we study how `N`, `X`, and `D` relate. We will look for them in the data rather than assume their exact shape in advance.
 
 ---
 
-# 7. Extensions: Information and Time
+# 8. Extensions After the Core Program
 
-Once the basic relationship between collective structure and control demand is understood, the framework can be extended to other control resources.
-
-Two important resources are information and time.
+These topics come later. They should not redefine the first scientific question.
 
 ### Information
 
-The question is:
+Can better sensing or communication reduce the number of physical controllers needed?
 
-> **Can better information reduce the amount of physical control required?**
-
-This can be represented as:
-
-`D_min(N, X, I)`
-
-where `I` describes the available information.
-
-Examples include:
-
-* sensing range,
-* observation quality,
-* local versus global information,
-* communication,
-* knowledge of collective state.
+Written as: `D_min(N, X, I)`.
 
 ### Time
 
-The question is:
+How does a tighter or looser time limit change control demand?
 
-> **How does the available time to complete the task affect control demand?**
+Written as: `D_min(N, X, I, T)`.
 
-This gives:
+### Early warning
 
-`D_min(N, X, I, T)`.
+Can changes in group state signal that the system is approaching a control limit?
 
-These are extensions rather than starting points.
+### Other systems
 
-The research first establishes the basic relationship between collective structure and physical control demand, and then asks how additional resources modify that relationship.
+Do similar patterns appear outside sheep-herding simulations?
 
----
+### More general description
 
-# 8. From Scaling Relationships to a General Description
+Can different experiments be summarized by a shared normalized quantity, conceptually:
 
-A longer-term objective is to determine whether the results can be expressed through a more general measure of control capacity.
+`available control / required control`?
 
-Conceptually, this can be viewed as:
-
-`available control capacity / required control demand`.
-
-If different experiments can be described by a common dimensionless quantity, reliability might eventually be expressed approximately as:
-
-`R ≈ F(control capacity / control demand)`.
-
-This would be a strong result, but its existence is not assumed.
-
-The research therefore progresses from empirical relationships toward increasingly general descriptions:
-
-`D_min(N)`
-
-→ `D_min(N, X)`
-
-→ `D_min,m(N, X)`
-
-→ possible normalized control-demand relationship.
-
-A general scaling description will only be proposed if supported by the experimental evidence.
+That would be a strong later result if evidence supports it. It is not assumed.
 
 ---
 
 # 9. Validation and Prediction
 
-A useful scaling relationship should do more than describe the experiments from which it was estimated.
+A useful relationship should do more than describe the experiments used to fit it. It should also make predictions for new conditions.
 
-It should also provide predictions for new conditions.
-
-Validation will therefore include, where appropriate:
+Where appropriate, validation includes:
 
 * unseen collective sizes,
-* unseen collective structures,
-* new initial configurations,
-* new controller configurations,
+* unseen structures,
+* new initial layouts,
+* new controller setups,
 * and different control methods.
 
-A particularly strong test is:
+A strong test is:
 
-> **Can a relationship learned from one set of experiments predict control demand in another set without being refitted?**
-
-This distinguishes a relationship with predictive value from a model that only describes the original data.
+> Can a relationship learned from one set of experiments predict control demand in another set without being refitted?
 
 ---
 
 # 10. Research Progression
 
-The research program follows a progression from simple relationships toward more general explanations.
+### Core program
 
-### Step 1 — Establish size scaling
+1. Size scaling: measure `D_min(N)`.
+2. Structure: test whether `D_min(N, X)` is needed.
+3. Mechanism: test explanations of the observed pattern.
+4. Method transfer: check what remains when the control method changes.
 
-Determine how control demand changes with collective size.
+### Later extensions
 
-`D_min(N)`
+5. Information and time as extra resources.
+6. Search for a more general normalized description, only if evidence supports it.
 
-### Step 2 — Add collective structure
+### Throughout
 
-Determine whether size alone is sufficient.
-
-`D_min(N, X)`
-
-### Step 3 — Explain the relationship
-
-Identify and test mechanisms that produce the observed scaling and its limits.
-
-### Step 4 — Change the control method
-
-Determine which parts of the relationship remain consistent.
-
-`D_min,m(N, X)`
-
-### Step 5 — Add other control resources
-
-Determine how information and time modify control demand.
-
-### Step 6 — Search for a general description
-
-Test whether different experiments can be represented by a common normalized relationship.
-
-### Step 7 — Validate
-
-Test the resulting relationships on conditions not used to construct them.
-
-This progression moves from describing the scaling to explaining it, testing its generality, and evaluating its predictive value.
+7. Validate on conditions not used to build the relationship.
 
 ---
 
 # 11. Possible Scientific Outcomes
 
-The research does not require one particular outcome.
+The program does not require one preferred outcome. Possible useful outcomes include:
 
-Possible results include:
+* a clear size-scaling map for control demand,
+* evidence that structure matters beyond size,
+* a tested mechanistic explanation,
+* evidence that some scaling features transfer across methods,
+* or evidence that scaling is strongly method-dependent.
 
-### Size scaling
-
-Control demand changes systematically with collective size.
-
-### Structural scaling
-
-Collective structure explains important variation beyond size alone.
-
-### Mechanistic explanation
-
-Measurable collective or controller processes explain why the scaling takes its observed form.
-
-### Cross-method generality
-
-Important features of the scaling persist across different control methods.
-
-### General scaling relationship
-
-A compact relationship describes control demand across different sizes, structures, and methods and predicts unseen cases.
-
-The project should make only the strongest claim supported by the evidence.
-
-If different control methods produce different scaling relationships, that is also a meaningful result: it would show that the scaling depends substantially on the control method and identify a limit to generalization.
+The project should claim only what the evidence supports.
 
 ---
 
 # 12. Role of HerdSim
 
-HerdSim is a controlled experimental environment for studying collective control.
+HerdSim is the experimental workbench for this program.
 
-It allows collective size, structure, controller number, controller behavior, information, and other conditions to be varied systematically.
+It lets us vary group size, structure-related conditions, controller number, control method, information, and other settings under shared tasks and shared metrics.
 
-The immediate scientific target is therefore not to reproduce every aspect of real livestock herding.
+HerdSim is not meant to copy every detail of real livestock. It is meant to provide a controlled model system where collective control demand can be measured.
 
-Instead:
+Herding is useful because it captures a key feature of indirect control:
 
-> **HerdSim provides a controlled model system in which the relationship between collective structure and external control demand can be measured.**
-
-The initial conclusions will apply to the simulated collective-control setting.
-
-Broader claims about livestock, drones, crowds, environmental robots, or other collective systems require additional validation.
-
-Herding is useful as a model system because it captures a central feature of indirect collective control:
-
-> **A relatively small number of external controllers attempts to steer a larger collective whose individual members are not directly controlled.**
+> A small number of external controllers tries to steer a larger group whose members are not directly commanded one by one.
 
 ---
 
 # 13. Scope
 
-The core research program focuses on:
+### In scope for the core program
 
 * collective size,
 * collective structure,
 * external control demand,
 * scaling relationships,
 * mechanisms behind those relationships,
-* and generality across control methods.
+* generality across control methods.
 
-The following are not primary objectives:
+### Not primary goals
 
 * finding the single best herding algorithm,
 * reproducing every detail of real livestock behavior,
 * optimizing one controller architecture,
-* immediately generalizing to every collective system,
-* or building a real-time failure prediction system.
+* immediately claiming results for every collective system,
+* building a real-time failure prediction product.
 
-These may become useful applications or extensions after the basic scaling relationships are understood.
+Those can become later applications after the core scaling questions are clearer.
 
 ---
 
-# 14. Future Extensions
+# 14. Implementation Guidance for HerdSim
 
-Several directions can build on the core research.
+This section turns the research questions into build priorities. The rule is simple:
 
-### Information as a control resource
+> Implement what is needed to answer the questions. Do not build features that only support a preferred claim.
 
-Study how sensing and communication alter physical control demand.
+## 14.1 Shared protocol layer (needed first)
 
-### Time as a control resource
+Before RQ-specific studies, HerdSim should make the experimental protocol explicit and reusable:
 
-Study the trade-off between available time and required control.
+* fixed task / scenario definition,
+* clear success rule,
+* chosen reliability target (for example success rate across seeds),
+* time budget,
+* information setting,
+* reproducible seeds,
+* shared metrics across methods,
+* a standard way to estimate `D_min` from a sweep over controller count `D`.
 
-### Early warning
+Without this layer, results from different experiments are hard to compare.
 
-Investigate whether changes in collective state can indicate that the system is approaching a control boundary.
+### Practical meaning of `D_min` in software
 
-### Other collective systems
+For a frozen protocol and a chosen size/structure condition:
 
-Test whether similar scaling relationships appear in other simulated or physical collective-control problems.
+1. run multiple seeds for each controller count `D`,
+2. compute success rate,
+3. find the smallest `D` that meets the reliability target,
+4. store that value as `D_min` for that condition.
 
-### Dimensionless scaling
+Also store nearby information, such as whether larger `D` keeps helping, saturates, or starts to hurt.
 
-Investigate whether control capacity and collective demand can be combined into a common normalized quantity.
+## 14.2 What to build for each core RQ
 
-These extensions should follow evidence from the core scaling program rather than define its initial scientific question.
+### For RQ1 (size scaling)
+
+Build and keep stable:
+
+* sweeps over collective size `N`,
+* sweeps over controller count `D`,
+* batch multi-seed experiments,
+* export of success rates and estimated `D_min(N)`,
+* plots or tables of control demand versus size.
+
+Question this answers: how does required control change as the group grows?
+
+### For RQ2 (structure)
+
+Build and keep stable:
+
+* measurable structure metrics during and/or at the start of a run (spread, density, fragmentation, elongation, clustering, outliers),
+* ways to create or select different structures at similar `N`,
+* matched comparisons where size is fixed and structure varies,
+* analysis that separates size effects from structure effects.
+
+Question this answers: at the same size, does group shape change control demand?
+
+### For RQ3 (mechanisms)
+
+Build and keep stable:
+
+* trajectory and event logs that can support mechanism tests,
+* quantities linked to candidate mechanisms (for example dispersion over time, number of separated subgroups, signs of controller conflict, recovery after disturbance),
+* optional intervention experiments that change one suspected factor at a time.
+
+Question this answers: why does the observed scaling pattern appear?
+
+### For RQ4 (method transfer)
+
+Build and keep stable:
+
+* multiple control methods (instruments) under the same scenario and metrics,
+* fair comparison settings: same task, same `N`, same seed list, same success rule,
+* repeated `D_min` estimation across methods,
+* comparison of scaling shape across methods, not only single-score ranking.
+
+Question this answers: which parts of the scaling look shared, and which look method-specific?
+
+## 14.3 Build order
+
+Suggested order for HerdSim work:
+
+1. Protocol freeze and `D_min` estimation pipeline.
+2. RQ1 size sweeps and reporting.
+3. Structure metrics and RQ2 controlled comparisons.
+4. Mechanism logging and targeted interventions for RQ3.
+5. Cross-method `D_min` comparisons for RQ4.
+6. Only later: information/time extensions and stronger normalized summaries.
+
+## 14.4 Implementation rule
+
+Every major HerdSim change should map to one of:
+
+* a clearer protocol definition,
+* a core RQ,
+* a validation need,
+* or a clearly marked later extension.
+
+If a feature does not help answer a stated question, it should wait.
+
+## 14.5 How claims stay weak during implementation
+
+When implementing and reporting:
+
+* prefer "measure whether" over "prove that",
+* report possible outcomes, not one expected victory condition,
+* treat negative or mixed results as valid scientific progress,
+* keep method comparison focused on transfer of scaling features, not on crowning a winner.
 
 ---
 
 # 15. Scientific Contribution
 
-The intended contribution of HerdSim is a better understanding of how collective properties determine the amount of external control required for reliable steering.
+The intended contribution is a clearer, evidence-based understanding of how collective properties shape the amount of external control needed for reliable steering.
 
-The research moves through three increasingly general questions:
+Compared with a single-method scaling study, this program aims to:
 
-> **How does control demand scale with collective size?**
+* define control demand in a reusable way,
+* separate size effects from structure effects,
+* test mechanisms rather than stop at correlation,
+* and check which scaling features survive method change.
 
-> **How does collective structure modify that scaling?**
+The work moves through three increasingly broad questions:
 
-> **Which parts of the resulting relationship are independent of the specific control method?**
+> How does control demand scale with collective size?
 
-If successful, the work can provide more than a collection of results for individual herding algorithms.
+> How does collective structure modify that scaling?
 
-It could provide an empirical framework for studying **scaling in indirect control of collective systems**.
+> Which parts of the resulting relationship are independent of the specific control method?
 
-The strongest possible outcome would be a simple, testable relationship between collective structure, control demand, and reliability that predicts behavior beyond the experiments used to discover it.
+If successful, the program can provide more than results for one herding algorithm. It can provide a practical empirical framework for studying scaling in indirect control of collective systems.
 
-That broader relationship should be treated as an outcome to be demonstrated, not as an assumption of the research program.
+A simple predictive relationship would be a strong outcome. It is not assumed at the start.
 
 ---
 
 # 16. Summary
 
-The research program can be summarized in four core questions:
+### Problem
 
-### 1. Size
+When a few external controllers guide a larger group, how does the needed amount of control change as the group grows or changes shape?
 
-**How does control demand change as the collective becomes larger?**
+### Core questions
 
-`D_min(N)`
+1. Size: how does `D_min` change with `N`?
+2. Structure: does `X` matter beyond size?
+3. Mechanism: what processes explain the pattern?
+4. Generality: which parts remain when the method changes?
 
-### 2. Structure
+### Approach
 
-**How does the internal structure of the collective change control demand?**
+Use HerdSim as a controlled experimental workbench. Freeze a protocol, measure `D_min`, vary size and structure, test explanations, then compare across methods.
 
-`D_min(N, X)`
+### What success looks like
 
-### 3. Mechanism
+Not one forced claim. Success means the questions are answerable with clear evidence, and HerdSim has the protocol, metrics, and experiment tools needed to produce that evidence.
 
-**What processes produce the observed scaling and its limits?**
+### Overall goal
 
-### 4. Generality
-
-**Which parts of the scaling remain when the control method changes?**
-
-Information and time then provide extensions of the same framework, while validation tests whether the resulting relationships predict unseen cases.
-
-The overall scientific goal is:
-
-> **To discover how the control required to reliably steer a collective scales with collective size and structure, to understand the mechanisms behind that scaling, and to determine which aspects of that scaling generalize across control methods.**
-
-HerdSim provides the controlled environment in which this question can be tested.
+> Discover how the control required to reliably steer a collective scales with collective size and structure, understand the mechanisms behind that scaling, and determine which aspects of that scaling generalize across control methods.

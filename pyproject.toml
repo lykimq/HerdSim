@@ -19,6 +19,8 @@ dependencies = [
     "pydantic>=2.5",
     "matplotlib>=3.8",
     "python-multipart>=0.0.9",
+    "pyyaml>=6.0",
+    "pyarrow>=14.0",
 ]
 
 [project.optional-dependencies]

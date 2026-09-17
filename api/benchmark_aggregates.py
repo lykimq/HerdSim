@@ -13,6 +13,10 @@ TRAJECTORY_METRICS = (
     "polarization",
     "fragmentation",
     "outlier_count",
+    "mean_spread",
+    "extent",
+    "i_dir",
+    "coverage",
 )
 
 # Final-tick outcome scalars kept under explicit names (not bare metric ids).

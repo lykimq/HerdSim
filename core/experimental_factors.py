@@ -25,13 +25,14 @@ COMMUNICATION_MODES = ("none", "neighbour_broadcast", "global_shared")
 
 GOAL_MODES = ("static", "moving")
 
-INITIAL_LAYOUTS = ("cluster", "split", "wide")
+# Canonical X0 families from the budget protocol, plus legacy aliases.
+INITIAL_LAYOUTS = ("compact", "wide", "split", "outlier_rich", "cluster")
 
 
 @dataclass
 class FlockFactors:
     n_sheep: int | None = None
-    initial_layout: str = "cluster"
+    initial_layout: str = "compact"
     initial_spread: float | None = None
     cohesion_scale: float = 1.0
     stubborn_fraction: float = 0.0
@@ -88,6 +89,10 @@ class ExperimentalFactors:
     params: dict[str, Any] = field(default_factory=dict)
 
     def validate(self) -> None:
+        from core.x0_generators import normalize_layout
+
+        # Accept legacy "cluster" and store the canonical family name.
+        self.flock.initial_layout = normalize_layout(self.flock.initial_layout)
         if self.flock.initial_layout not in INITIAL_LAYOUTS:
             raise ValueError(
                 f"Unknown initial_layout '{self.flock.initial_layout}'. "
