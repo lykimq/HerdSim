@@ -4,7 +4,7 @@ This directory holds shepherding-budget campaign outputs. Heavy artefacts are
 gitignored; this README is tracked so the layout stays documented.
 
 Science and protocol: `docs/research/budget/main_shepherding_budget_plan.md`  
-Live status: `docs/research/budget/progress_tracker.md`  
+Live status / ordered run plan / hardware: `docs/research/budget/progress_tracker.md`  
 Campaign subsets: `configs/budget/campaigns/`  
 Human report template: `docs/research/budget/REPORT_TEMPLATE.md`
 

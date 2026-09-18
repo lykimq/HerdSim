@@ -30,6 +30,8 @@ One short paragraph: what we ran, the main result, and the decision this implies
 - Theta:
 - Command used:
 - Output path: `results/budget/phase{k}/{campaign}/`
+- Host / hardware (see tracker Section 6; note if different):
+- WORKERS / CPU governor:
 
 ## Completeness
 
