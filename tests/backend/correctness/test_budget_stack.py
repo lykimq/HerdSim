@@ -141,12 +141,22 @@ def test_package_a_export(tmp_path: Path):
     paths = export_package_a(
         trials,
         tmp_path,
-        protocol={"reliability_theta": 0.9},
+        protocol={"reliability_theta": 0.9, "protocol_id": "test"},
         campaign_id="test_a",
     )
     assert paths["frontier"].exists()
     assert paths["regimes"].exists()
     assert paths["provenance"].exists()
+    assert paths["report"].exists()
+    report = paths["report"].read_text()
+    assert "Setup" in report
+    assert "Diagnostics" in report
+    assert "Claim stubs" in report
+    # Figures require matplotlib (installed in project deps).
+    figures = tmp_path / "figures"
+    assert figures.is_dir()
+    assert any(figures.glob("*.png"))
+    assert "figures/" in report
 
 
 def test_predictors_and_scaling_and_transfer():

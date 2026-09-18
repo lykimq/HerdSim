@@ -1,41 +1,99 @@
 # Frozen Section 8 protocol defaults (Phase 0, 2026-09-17).
 # Cap I13: machine-readable canonical grid for budget campaigns.
+#
+# Rule: every field below must state WHY it was chosen. Do not change a frozen
+# value without updating this rationale and logging a protocol exception in
+# docs/research/budget/progress_tracker.md. Full prose: main plan Section 8.1.
 
 protocol_id: shepherding_budget_v1
+# Stable id for provenance stamps; bump only on intentional protocol change.
 frozen_on: "2026-09-17"
+# Date the Section 8 freeze was confirmed.
 
+# Task: single shared scenario so size/structure/method comparisons stay fair.
+# drive_to_goal is HerdSim's default herding task and matches the program's
+# operational herdability definition (guide flock to a goal under a time budget).
 task: drive_to_goal
+
+# Primary reliability bar for D_min / regimes. 0.90 matches the sheep-scaling
+# draft "reliable" band (SR >= 90%) and is strict enough for force-sizing claims.
 reliability_theta: 0.90
+# Sensitivity checks so results are not an artefact of one threshold only.
 reliability_sensitivity: [0.50, 0.70]
 
+# Baseline instrument: coordinated multi-dog Collect/Drive; primary HerdSim
+# multi-shepherd baseline and closest operational cousin to the draft study's
+# collect-or-drive family.
 baseline_method: strombom_multi
+# Transfer set spans distinct architectures for RQ4 (not near-duplicates):
+# force-based (kubo), local farthest-sheep (fat), decentralised Collect/Drive
+# without shared targets (communication_free). Baseline listed first for tables.
 transfer_methods:
   - strombom_multi
   - kubo
   - fat
   - communication_free
 
-flock_sizes: [25, 50, 75, 100, 150, 200, 300, 400]
+# N grid: full size ladder for general scaling tests (independent of any single
+# paper). Floor is N=5, not 1-4, because below 5 the *research object* (a
+# collective under indirect shepherding) is not well-defined in this protocol:
+#   (1) N=1: zero sheep-sheep interaction; mean_spread is identically 0.
+#   (2) Structure RQs need a core vs periphery: outlier_rich is defined as
+#       ~80% core + ~20% outliers, and x0_generators only applies that 20%
+#       rule for N>=5 (below that it forces a single outlier hack).
+#   (3) Coverage uses "peripheral = farther than median": at N=2-3 that split
+#       is almost arbitrary (nearly every sheep is peripheral by construction).
+#   (4) Collect/Drive targets outliers relative to GCM / f(N)=r_a*N^(2/3);
+#       with N<5 the core is too small for "gather then drive a flock" to be
+#       the same task as at larger N (it collapses toward chasing individuals).
+#   (5) Central question assumes few shepherds guide a *larger* group; N=1-4
+#       with D up to 35 is mostly over-actuated individual control.
+# N=5-10 still probes the hard small-flock regime while remaining a flock.
+# Mid points (75, 150) resolve the ~100 breakpoint; 300/400 probe large-N growth.
+flock_sizes: [5, 10, 25, 50, 75, 100, 150, 200, 300, 400]
+
+# D grid: same set as the sheep-scaling draft for frontier comparability.
+# Fine steps at low D (where D_min usually sits); coarser steps at high D for
+# overcrowding / waste. Cap 35 is the draft experimental ceiling.
 shepherd_counts: [1, 2, 3, 4, 6, 10, 15, 20, 25, 35]
+
+# Initial structure families for RQ1 causal manipulation (not only emergent
+# spread). compact/wide = cohesion/spread; split = fragmentation;
+# outlier_rich = outliers. Must differ on intended metrics before claim runs.
 x0_families:
   - compact
   - wide
   - split
   - outlier_rich
 
+# T0: default per-trial horizon. 10000 matches the draft paper timeout and
+# overrides drive_to_goal's scenario default (3000) so budget failures are not
+# short-horizon artefacts.
 time_limit_t0: 10000
+# T1: extended horizon only for C2b hard-ceiling tests (overcrowding that
+# remains unreliable even with more time).
 time_limit_t1: 20000
 
+# Scout seeds: cheap map of the (N,D) surface; 30 balances wall time vs
+# binomial noise for identifying boundary cells.
 scout_seeds: 30
+# Claim seeds: 100 on boundary cells for D_min CI / falsifiable claims
+# (see main plan D_min procedure).
 claim_grade_seeds: 100
+# Master seed: fixed base so seed lists are reproducible (seed = master + i).
 master_seed: 2026
 
+# RQ5 information axes already supported as HerdSim experimental factors;
+# ordered ladders are defined in the main plan (RQ5), not duplicated here.
 rq5_factors:
   - obs_mode
   - sensing_range
   - communication
 
+# RQ7: k = 5% of T0 (500/10000); w = 200 tick feature window (plan Phase 0 freeze).
 rq7_prediction_horizon_k: 500
 rq7_feature_window_w: 200
 
+# Wasteful-overspend: median effort >= 20% above efficient reference without
+# reliability gain. Sensitivity at 10%/30% is analysis-only (main plan Sec 6).
 wasteful_effort_tolerance: 0.20

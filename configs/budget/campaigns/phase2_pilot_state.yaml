@@ -1,22 +1,35 @@
 # Phase-2 state pilot (all X0 families).
 # Grade: SMOKE. Path is under phase2/, not nested under phase1.
+#
+# Why this subset: first causal check that structure changes control demand at
+# fixed N (RQ1 / C1a path). Small N/D/seed grid keeps wall time low while
+# exercising all four X0 generators and Package B export.
 
 campaign_id: phase2_pilot_state
 phase: 2
+# RQ1 collective state beyond N.
 grade: SMOKE
+# Metric-gate + pipeline for Package B; not claim-grade for C1a/C1b.
 output: results/budget/phase2/pilot_state
 protocol: configs/budget/canonical_grid.yaml
 
 instruments:
   - strombom_multi
+  # Hold method fixed so layout differences are not confounded by transfer.
 layouts:
   - compact
   - wide
   - split
   - outlier_rich
+  # Full frozen X0 set: must differ on cohesion / fragmentation / outliers
+  # before any claim-grade Package B campaign.
 flock_sizes: [25, 50, 100]
+# Same smoke N band as phase1_pilot for cross-phase comparability.
 shepherd_counts: [1, 2, 3, 4, 6, 10]
+# Same low-D smoke band; enough to see D_min shifts of >= 2 if layouts matter.
 seeds: 5
+# Smoke only; claim runs will raise seeds on boundary cells.
 seed_mode: scout
 store_timeseries: true
 packages: [B]
+# Package B: D_min by layout + state vs (N,D) predictors.

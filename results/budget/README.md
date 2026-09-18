@@ -45,10 +45,30 @@ phase{k}/{campaign_slug}/
 4. Trial table is always `trials.csv` (not `summary.csv`).
 5. Timeseries stem matches the resume cell key, e.g.
    `N50_D2_Lcompact_S2026_Istrombom_multi.parquet`.
-6. Auto analysis goes under `packages/{letter}/`. Reserve `REPORT.md` for claims,
-   grade, and narrative.
-7. Frozen Section 8 defaults live in `configs/budget/canonical_grid.yaml`.
-   Per-run subsets live in `configs/budget/campaigns/*.yaml`.
+6. Auto analysis goes under `packages/{letter}/` (tables + `package_*.md` +
+   `figures/` when generated). Reserve `REPORT.md` for human narrative
+   (template: `docs/research/budget/REPORT_TEMPLATE.md`).
+7. Frozen Section 8 defaults live in `configs/budget/canonical_grid.yaml`
+   (each field has a WHY comment; see also main plan Section 8.1).
+   Per-run subsets live in `configs/budget/campaigns/*.yaml` with the same
+   rule. New campaigns: follow `configs/budget/campaigns/README.md`.
+
+### Package A auto report contents
+
+After `budget-analyse PACKAGE=A` (or pilot/scout), expect:
+
+```text
+packages/a/
+  package_a.md           # setup, diagnostics, claim stubs, tables, figure links
+  trials.csv reliability.csv frontier.csv regimes.csv
+  provenance.json artefacts.json
+  figures/
+    reliability_heatmap.png   # or reliability_heatmap_<layout>.png
+    frontier_dmin.png
+    regime_counts.png
+```
+
+Human `REPORT.md` at the campaign root interprets those artefacts.
 
 ## Operator commands
 

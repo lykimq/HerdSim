@@ -13,8 +13,9 @@ live in the main plan -- do not duplicate them here.
 | [results/budget/README.md](../../../results/budget/README.md) | Results layout conventions |
 | This file | Where we are, what ran, what is next |
 
-Campaign subsets: `configs/budget/campaigns/`.  
+Campaign subsets: `configs/budget/campaigns/` (each field has a WHY comment; new campaigns must follow `campaigns/README.md`).  
 Operator entry: `make -f Makefile.budget help` (or `make budget-help`).
+Protocol rationale: main plan Section 8.1 and comments in `configs/budget/canonical_grid.yaml`.
 
 ---
 

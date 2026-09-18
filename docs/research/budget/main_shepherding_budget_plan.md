@@ -443,7 +443,7 @@ More shepherds -> coverage saturation + interference
 **Why this RQ is valuable:** Operators need growth laws, not single-N anecdotes. State-conditioned scaling is only justified if RQ1 holds; otherwise report N-only scaling and stop.
 
 **Approach:**
-- Compute D_min(N, X₀) for each X₀ family across N in {25, 50, 75, 100, 150, 200, 300, 400}
+- Compute D_min(N, X₀) for each X₀ family across N in {5, 10, 25, 50, 75, 100, 150, 200, 300, 400}
 - Fit power-law, piecewise-linear, and state-conditioned candidates; compare with AIC/BIC and cross-validation
 - Test across herding methods after RQ4 data exist
 
@@ -483,13 +483,17 @@ More shepherds -> coverage saturation + interference
 
 ### 8. Protocol defaults (freeze in Phase 0)
 
+Machine-readable freeze: [configs/budget/canonical_grid.yaml](../../../configs/budget/canonical_grid.yaml)  
+Campaign subsets (with per-field rationale): [configs/budget/campaigns/](../../../configs/budget/campaigns/)  
+New campaign rule: every override needs a WHY comment -- see `campaigns/README.md`.
+
 | Item | Default | Status |
 |------|---------|--------|
 | Task τ₀ | `drive_to_goal` | frozen |
 | Reliability θ | 0.90 (also report 0.50, 0.70) | frozen |
 | Baseline herding method | `strombom_multi` | frozen |
 | Transfer herding methods | `strombom_multi`, `kubo`, `fat`, `communication_free` | frozen |
-| Flock sizes N | {25, 50, 75, 100, 150, 200, 300, 400} | frozen |
+| Flock sizes N | {5, 10, 25, 50, 75, 100, 150, 200, 300, 400} | frozen |
 | Shepherd counts D | {1, 2, 3, 4, 6, 10, 15, 20, 25, 35} | frozen |
 | X₀ families | compact, wide, split, outlier_rich | frozen |
 | Time limit T₀ | 10,000 ticks (overrides scenario default 3,000) | frozen |
@@ -499,6 +503,46 @@ More shepherds -> coverage saturation + interference
 | RQ5 factors | obs mode, sensing range, communication mode | frozen |
 | RQ7 prediction horizon k | 500 ticks | frozen |
 | Master seed | 2026 | frozen |
+
+### 8.1 Protocol rationale (why these values)
+
+Do not treat the freeze as arbitrary. Summary (details live as comments in `canonical_grid.yaml`):
+
+| Choice | Why |
+|--------|-----|
+| `drive_to_goal` | Shared HerdSim task; matches operational herdability (goal under time budget) |
+| θ = 0.90 | Aligns with sheep-scaling "reliable" band (SR ≥ 90%); sensitivity at 0.50/0.70 |
+| `strombom_multi` baseline | Coordinated Collect/Drive multi-dog baseline in HerdSim |
+| Transfer set | Distinct architectures (force / local FAT / no shared targets), not near-duplicates |
+| N grid | Full scale ladder; floor N=5 (see Section 8.1.1); 5-10 = hard small-flock regime; 75/150 resolve ~100 breakpoint; 300/400 probe large-N growth |
+
+#### 8.1.1 Why the N floor is 5 (not 1, 2, or 4)
+
+This is not an aesthetic preference. Below N=5, several quantities this program *defines as its object of study* become degenerate or change meaning:
+
+1. **Collective interaction.** Herdability here is control of a group whose members interact. At N=1 there are no sheep-sheep interactions. Mean-spread is defined as variance of distances to the GCM and is identically 0 for N=1 in HerdSim.
+
+2. **Structure as an independent factor (RQ1).** X0 family `outlier_rich` is specified as about 80% core + 20% outliers. In code (`core/x0_generators.py`), the 20% rule applies only for `N >= 5`; smaller N falls back to a one-outlier special case. So N<5 does not implement the same structure manipulation the RQ assumes.
+
+3. **Mechanism metrics.** Coverage treats "peripheral" sheep as those farther from the GCM than the median. At N=2-3 that median split is almost tautological (a large fraction of the flock is "peripheral" by construction), so interference/coverage comparisons are not comparable to larger-N regimes.
+
+4. **Task semantics under Collect/Drive.** Baseline herding collects outliers relative to the flock GCM and a size-dependent threshold `f(N) = r_a * N^(2/3)`, then drives the flock. With only a handful of sheep, "compact the flock then drive it" collapses toward chasing individuals -- a different control problem than indirect collective nudging.
+
+5. **Budget question scope.** The central question is how much control a *few* shepherds need for a *larger* group. Grids with N in {1,2,3,4} and D up to 35 mostly measure over-actuated individual pursuit, not collective control demand.
+
+Therefore N=5 is the smallest size at which (a) sheep-sheep structure is present, (b) the frozen X0 definitions apply as specified, and (c) the herding task remains the same scientific object as at larger N. N=5 and 10 are kept in the freeze to study the hard *small-flock* regime without leaving the collective setting.
+
+If we later want N=1-4, treat it as a separate control campaign (individual-pursuit baseline) with its own YAML rationale -- do not silently mix it into the collective scaling freeze.
+| D grid | Same as draft paper; fine at low D, coarse at high D; ceiling 35 |
+| X₀ families | Causal structure axes for RQ1 (spread, fragmentation, outliers) |
+| T₀ = 10000 | Draft-paper horizon; overrides scenario 3000 so failures are not short-timeout artefacts |
+| T₁ = 20000 | C2b only: hard ceiling vs timeout |
+| Scout 30 / claim 100 | Cheap map then precise boundary CI (D_min procedure) |
+| Master seed 2026 | Fixed reproducible seed base |
+| RQ7 k=500, w=200 | 5% of T₀ horizon; fixed feature window from Phase 0 |
+| Wasteful 20% | Default effort tolerance; analyse sensitivity at 10%/30% |
+
+**Future experiments:** any new `configs/budget/campaigns/*.yaml` must document why each subset differs from this freeze. Changing a frozen default requires a tracker protocol exception (and usually a new `protocol_id`).
 
 ### 9. Phase plan
 
@@ -851,6 +895,8 @@ This is the *only* permitted core-module change. It is gated behind an empirical
 | 2026-09-17 | Freeze protocol (Section 8) — all defaults confirmed |
 | 2026-09-18 | Front matter rewritten for plain-language "At a glance" (central question, protocol summary, reader RQs, short approach, mapping to formal RQ1--RQ7); parent framing and progress tracker slimmed to remove status/definition duplication |
 | 2026-09-18 | Results layout cleanup: `phase{k}/{slug}/`, `packages/{a-g}/`, campaign YAMLs, `status.json`, timeseries stem = cell key, `artefacts.json`, tracked `results/budget/README.md` |
+| 2026-09-18 | Protocol rationale added: comments on all budget YAML fields + main plan Section 8.1; campaigns/README checklist for future experiments |
+| 2026-09-18 | N grid includes 5 and 10 (full small-N regime); framed as general scale test, not paper exclusion |
 
 ### 18. Protocol freeze (Phase 0 complete)
 
@@ -859,7 +905,7 @@ Section 8 defaults are **frozen** as of 2026-09-17. Confirmed choices:
 1. Task τ₀ = `drive_to_goal` (optional later robustness: `narrow_gate`).
 2. Reliability θ = 0.90 (also report 0.50, 0.70).
 3. Transfer instruments: strombom_multi, kubo, fat, communication_free.
-4. Flock sizes N = {25, 50, 75, 100, 150, 200, 300, 400}.
+4. Flock sizes N = {5, 10, 25, 50, 75, 100, 150, 200, 300, 400}.
 5. Time limits T₀ = 10,000; T₁ = 20,000 for C2b.
 6. X₀ families: compact, wide, split, outlier_rich.
 7. RQ7 horizons: k = 500 ticks (prediction), w = 200 ticks (feature window).

@@ -1,5 +1,10 @@
 # Phase-5 information factor sweep (RQ5).
 # Grade: SCOUT subset. Observation-mode ladder by default.
+#
+# Why this subset: first measure of whether better observation reduces D_min
+# at fixed reliability (C5a/C5b path) without also sweeping sensing-range and
+# communication ladders (those are protocol factors; add in a follow-up campaign
+# YAML when obs_mode results exist).
 
 campaign_id: phase5_factor_sweep
 phase: 5
@@ -8,14 +13,23 @@ output: results/budget/phase5/factor_sweep
 protocol: configs/budget/canonical_grid.yaml
 
 instrument: strombom_multi
+# Instrument that consumes observation mode; report as instrument-conditional.
 layouts:
   - compact
+  # Hold X0 fixed so substitution is attributed to information, not structure.
 flock_sizes: [50, 100]
+# Mid-band sizes from the plan's RQ5 focus set {100, 200}; 50 included as a
+# cheaper lower point for smoke/scout. Raise to {100, 200} for claim-grade.
 shepherd_counts: [1, 2, 3, 4, 6, 10]
+# Low-D band where a 1-shepherd saving is detectable.
 seeds: 10
+# Between smoke (5) and full scout (30): enough to see D_min shifts of >= 1.
 obs_modes:
   - bearing_only
   - local_positions
   - global
+  # Ordered ladder (least -> most informative) for C5a first-step / C5b second-step.
 store_timeseries: false
+# RQ5 needs D_min(N,I), not tick trajectories; skip parquet to cut I/O.
 packages: [E]
+# Package E: substitution curves.
