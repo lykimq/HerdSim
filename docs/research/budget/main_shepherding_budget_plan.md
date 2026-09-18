@@ -515,35 +515,36 @@ Do not treat the freeze as arbitrary. Summary (details live as comments in `cano
 | `strombom_multi` baseline | Coordinated Collect/Drive multi-dog baseline in HerdSim |
 | Transfer set | Distinct architectures (force / local FAT / no shared targets), not near-duplicates |
 | N grid | Full scale ladder; floor N=5 (see Section 8.1.1); 5-10 = hard small-flock regime; 75/150 resolve ~100 breakpoint; 300/400 probe large-N growth |
-
-#### 8.1.1 Why the N floor is 5 (not 1, 2, or 4)
-
-This is not an aesthetic preference. Below N=5, several quantities this program *defines as its object of study* become degenerate or change meaning:
-
-1. **Collective interaction.** Herdability here is control of a group whose members interact. At N=1 there are no sheep-sheep interactions. Mean-spread is defined as variance of distances to the GCM and is identically 0 for N=1 in HerdSim.
-
-2. **Structure as an independent factor (RQ1).** X0 family `outlier_rich` is specified as about 80% core + 20% outliers. In code (`core/x0_generators.py`), the 20% rule applies only for `N >= 5`; smaller N falls back to a one-outlier special case. So N<5 does not implement the same structure manipulation the RQ assumes.
-
-3. **Mechanism metrics.** Coverage treats "peripheral" sheep as those farther from the GCM than the median. At N=2-3 that median split is almost tautological (a large fraction of the flock is "peripheral" by construction), so interference/coverage comparisons are not comparable to larger-N regimes.
-
-4. **Task semantics under Collect/Drive.** Baseline herding collects outliers relative to the flock GCM and a size-dependent threshold `f(N) = r_a * N^(2/3)`, then drives the flock. With only a handful of sheep, "compact the flock then drive it" collapses toward chasing individuals -- a different control problem than indirect collective nudging.
-
-5. **Budget question scope.** The central question is how much control a *few* shepherds need for a *larger* group. Grids with N in {1,2,3,4} and D up to 35 mostly measure over-actuated individual pursuit, not collective control demand.
-
-Therefore N=5 is the smallest size at which (a) sheep-sheep structure is present, (b) the frozen X0 definitions apply as specified, and (c) the herding task remains the same scientific object as at larger N. N=5 and 10 are kept in the freeze to study the hard *small-flock* regime without leaving the collective setting.
-
-If we later want N=1-4, treat it as a separate control campaign (individual-pursuit baseline) with its own YAML rationale -- do not silently mix it into the collective scaling freeze.
-| D grid | Same as draft paper; fine at low D, coarse at high D; ceiling 35 |
+| D grid | Fine steps at low D, coarser at high D; ceiling 35 as practical experimental cap |
 | X₀ families | Causal structure axes for RQ1 (spread, fragmentation, outliers) |
-| T₀ = 10000 | Draft-paper horizon; overrides scenario 3000 so failures are not short-timeout artefacts |
+| T₀ = 10000 | Per-trial horizon so failures reflect control limits, not a short default clock; overrides scenario 3000 |
 | T₁ = 20000 | C2b only: hard ceiling vs timeout |
 | Scout 30 / claim 100 | Cheap map then precise boundary CI (D_min procedure) |
 | Master seed 2026 | Fixed reproducible seed base |
 | RQ7 k=500, w=200 | 5% of T₀ horizon; fixed feature window from Phase 0 |
 | Wasteful 20% | Default effort tolerance; analyse sensitivity at 10%/30% |
 
-**Future experiments:** any new `configs/budget/campaigns/*.yaml` must document why each subset differs from this freeze. Changing a frozen default requires a tracker protocol exception (and usually a new `protocol_id`).
+**Future experiments:** any new `configs/budget/campaigns/*.yaml` must document why each subset differs from this freeze. Changing a frozen default requires a tracker protocol exception (and usually a new `protocol_id`). Code must follow the protocol; the protocol must not be justified by "the code does not support it yet."
 
+#### 8.1.1 Why the N floor is 5 (not 1, 2, or 4)
+
+This is a scientific scope choice about what counts as the *research object* (indirect control of a collective). It is not justified by current implementation limits: if the science required N<5, we would change the generators/metrics, not the other way around.
+
+Below N=5, the quantities this program asks about change meaning:
+
+1. **Collective interaction.** Herdability here is control of a group whose members interact with each other. At N=1 there are no sheep-sheep interactions, so "collective structure" and interaction-driven cohesion are undefined as group phenomena. Spread-as-variance around a GCM is trivially zero for a single agent.
+
+2. **Structure as an independent factor (RQ1).** Structure families such as `outlier_rich` are defined as a *majority core plus a minority of outliers* (about 80%/20%). That definition needs enough agents for both parts to coexist as roles in one flock. At N=2-4, "20% outliers" cannot describe a minority subpopulation in the same sense (one sheep is already a huge fraction of the group), so the X0 contrast is no longer the same experimental factor.
+
+3. **Mechanism metrics.** Coverage defines periphery as farther from the GCM than the median. At N=2-3 that split is nearly tautological: a large share of agents are "peripheral" by construction. Interference/coverage comparisons then do not mean the same thing as in larger flocks.
+
+4. **Task semantics.** The herding task is: gather a dispersed group into a flock, then drive that flock to a goal (Collect then Drive relative to a flock GCM / size-dependent cohesion rule). With only a few sheep, the same controller mostly reduces to chasing individuals. That is a different control problem than indirect nudging of a collective.
+
+5. **Question scope.** The central question is how much control a *few* shepherds need for a *larger* group. Studying N in {1,2,3,4} on a D grid up to 35 mainly measures over-actuated individual pursuit, not collective control demand.
+
+Therefore N=5 is the smallest size where (a) sheep-sheep collective structure is present, (b) majority-core / minority-outlier structure is definable as intended, and (c) the herding task remains the same scientific object as at larger N. N=5 and 10 stay in the freeze to study the hard *small-flock* regime without leaving that object.
+
+If we later want N=1-4, run a separate control campaign (individual-pursuit baseline) with its own rationale -- and implement whatever generators/metrics that campaign needs -- rather than mixing it into the collective scaling freeze.
 ### 9. Phase plan
 
 Live status for each phase: [progress_tracker.md](progress_tracker.md). This table is the plan contract only.

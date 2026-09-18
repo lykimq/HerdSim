@@ -35,20 +35,17 @@ transfer_methods:
   - communication_free
 
 # N grid: full size ladder for general scaling tests (independent of any single
-# paper). Floor is N=5, not 1-4, because below 5 the *research object* (a
-# collective under indirect shepherding) is not well-defined in this protocol:
-#   (1) N=1: zero sheep-sheep interaction; mean_spread is identically 0.
-#   (2) Structure RQs need a core vs periphery: outlier_rich is defined as
-#       ~80% core + ~20% outliers, and x0_generators only applies that 20%
-#       rule for N>=5 (below that it forces a single outlier hack).
-#   (3) Coverage uses "peripheral = farther than median": at N=2-3 that split
-#       is almost arbitrary (nearly every sheep is peripheral by construction).
-#   (4) Collect/Drive targets outliers relative to GCM / f(N)=r_a*N^(2/3);
-#       with N<5 the core is too small for "gather then drive a flock" to be
-#       the same task as at larger N (it collapses toward chasing individuals).
-#   (5) Central question assumes few shepherds guide a *larger* group; N=1-4
-#       with D up to 35 is mostly over-actuated individual control.
-# N=5-10 still probes the hard small-flock regime while remaining a flock.
+# paper). Floor is N=5, not 1-4: scientific scope of the research object, not
+# an implementation limit (if science needed N<5, we would change code).
+#   (1) N=1: no sheep-sheep interaction; collective structure undefined.
+#   (2) Structure factors need a majority core + minority outliers (~80/20);
+#       at N=2-4 one "outlier" is already a huge fraction, so the X0 contrast
+#       is not the same factor as at larger N.
+#   (3) Coverage "peripheral = above median" is nearly tautological at N=2-3.
+#   (4) Collect-then-drive a flock vs GCM collapses to chasing individuals.
+#   (5) Question assumes few shepherds guide a larger group; N=1-4 with large D
+#       is over-actuated individual pursuit, a different study.
+# N=5-10 still probes hard small-flock behaviour while remaining a collective.
 # Mid points (75, 150) resolve the ~100 breakpoint; 300/400 probe large-N growth.
 flock_sizes: [5, 10, 25, 50, 75, 100, 150, 200, 300, 400]
 
