@@ -1,300 +1,195 @@
 # Shepherding-budget progress tracker
 
-Status: living document (update after each campaign or Cap change)  
-Last updated: 2026-09-17 (after stopped `phase1_scout`)
+Last updated: 2026-09-18
 
-This file tracks **plan coverage**, **implementation**, and **experimental results** for the shepherding-budget program. It does not replace the scientific source of truth.
+Living execution ledger for the shepherding-budget program. Use this to resume work. Do not copy scientific definitions, claim criteria, Cap designs, or protocol defaults here -- those live in the main plan.
 
 | Document | Role |
 |----------|------|
-| [herdsim_research_program.md](herdsim_research_program.md) | Parent framing (size, structure, mechanism, transfer) |
-| [main_shepherding_budget_plan.md](main_shepherding_budget_plan.md) | Single source of truth (RQs, claims, phases, Caps, Section 8) |
-| This file | Execution ledger: what is built, what ran, what claims are evaluable |
-| [results/budget/README.md](../../../results/budget/README.md) | Results directory index by phase |
-| [results/budget/phase1/REPORT.md](../../../results/budget/phase1/REPORT.md) | Phase-1 rollup |
-| [results/budget/phase1/scout/REPORT.md](../../../results/budget/phase1/scout/REPORT.md) | Phase-1 scout (stopped early) |
-| [results/budget/phase1/pilot/REPORT.md](../../../results/budget/phase1/pilot/REPORT.md) | Phase-1 smoke pilot |
-
-How to use: after a run or Cap change, update Sections 2-6 and append a row to Section 7. Keep verdicts honest (pilot/scout != claim-grade).
+| [herdsim_research_program.md](herdsim_research_program.md) | Plain-language framing (Size / Structure / Mechanism / Generality) |
+| [main_shepherding_budget_plan.md](main_shepherding_budget_plan.md) | Source of truth: formal RQs, claims, Caps, Section 8 freeze |
+| This file | Where we are, what ran, what is next |
+| [results/budget/](../../../results/budget/) | Campaign artefacts and REPORT.md files |
 
 ---
 
-## 1. Status legend
+## 1. Current snapshot
+
+| Item | Status |
+|------|--------|
+| Protocol (Section 8) | DONE -- frozen 2026-09-17 as `shepherding_budget_v1` |
+| Caps I1--I14 | BUILT (unit-tested); claim-grade use still pending for most |
+| Active phase | Phase 1 (Package A) -- IN PROGRESS |
+| Blocking issue | Compact + `strombom_multi` still too easy (D_min=1); C2/C6 not evaluable yet |
+| Recommended next | Prefer Phase 2 state pilot (harder X0) over more compact scout grind -- see Section 5 |
+
+Minimum publishable unit (from main plan): **RQ1 + RQ2 + RQ3 + S8**.
+
+---
+
+## 2. Status legend
 
 | Tag | Meaning |
 |-----|---------|
 | NOT STARTED | No work yet |
 | BUILT | Code exists and is unit-tested; not yet used for claim evaluation |
-| SMOKE | Exercised on a reduced grid; pipeline works; not claim-grade |
-| IN PROGRESS | Scout or claim campaign running / partial |
-| DONE | Phase "done when" met, or claim decided (support / reject / inconclusive domain) |
-| BLOCKED | Waiting on a dependency (data, Cap, or harder grid) |
+| SMOKE | Pipeline works on a reduced grid; not claim-grade |
+| IN PROGRESS | Scout/claim campaign running or partial |
+| DONE | Phase done-when met, or claim decided |
+| BLOCKED | Waiting on a dependency |
 
-Claim verdicts (only when claim-grade evidence exists):
-
-| Verdict | Meaning |
-|---------|---------|
-| UNEVALUATED | Insufficient evidence |
-| SUPPORTED | Claim criteria met |
-| REJECTED | Claim criteria failed in the stated domain |
-| INCONCLUSIVE | Ran claim-grade protocol; result ambiguous |
+Claim verdicts (only with claim-grade evidence): UNEVALUATED / SUPPORTED / REJECTED / INCONCLUSIVE.
 
 ---
 
-## 2. Phase checklist (main plan Section 9)
+## 3. Phase board
 
-Minimum publishable scientific unit: **RQ1 + RQ2 + RQ3 + S8**.
+Done-when criteria and package contents: main plan Sections 3.1 and 9. Update only status and evidence here.
 
-| Phase | Focus | RQ | Package | Status | Done when (plan) | Current evidence |
-|-------|-------|----|---------|--------|------------------|------------------|
-| 0 | Freeze protocol | -- | Section 8 | DONE | All Section 8 rows frozen | Frozen 2026-09-17; `shepherding_budget_v1` |
-| 1 | Herdability maps (baseline) | RQ2 (+ data for RQ6) | A | IN PROGRESS | C2 evaluable on baseline; frontier+regimes exported | Pilot + partial scout; R=1 on completed compact cells; C2 still unevaluable |
-| 2 | Collective-state manipulation | RQ1 | B | NOT STARTED | C1a/C1b evaluable; X0 families verified | `budget-pilot-state` not run |
-| 3 | Overcrowding mechanism | RQ3 | C | NOT STARTED | C3 evaluable; I_dir/C series stored | Needs overcrowding cells from Phase 1 |
-| 4 | Cross-method transfer | RQ4 | D | NOT STARTED | Transfer table for >= 3 methods | -- |
-| 5 | Information substitution | RQ5 | E | NOT STARTED | C5a/C5b evaluable | -- |
-| 6 | Scaling regimes | RQ6 | F | SMOKE | C6a or C6b decided | Pilot + partial scout: flat D_min=1 |
-| 7 | Early warning | RQ7 | G | NOT STARTED | C7a/C7b evaluable | -- |
-
-### Map from research-program progression
-
-| Research program step | Main-plan phases / RQs | Status |
-|-----------------------|------------------------|--------|
-| 1. Size scaling `D_min(N)` | Phase 1 + Phase 6 (RQ2 data, RQ6) | IN PROGRESS (compact still flat) |
-| 2. Structure `D_min(N, X)` | Phase 2 (RQ1) | NOT STARTED |
-| 3. Mechanism | Phase 3 (RQ3) | NOT STARTED |
-| 4. Method transfer | Phase 4 (RQ4) | NOT STARTED |
-| 5. Information / time | Phase 5 (RQ5); T0/T1 in protocol | NOT STARTED |
-| 6. Early warning / generality | Phase 7 (RQ7); later extensions | NOT STARTED |
+| Phase | Focus | Formal RQ | Package | Status | Evidence / note |
+|-------|-------|-----------|---------|--------|-----------------|
+| 0 | Protocol freeze | S8 | Section 8 | DONE | Frozen 2026-09-17 |
+| 1 | Herdability maps | RQ2 (+ data for RQ6) | A | IN PROGRESS | Pilot SMOKE + scout 1123/1440 stopped; compact R=1, D_min=1; C2 unevaluable. [phase1/REPORT.md](../../../results/budget/phase1/REPORT.md) |
+| 2 | State beyond N | RQ1 | B | NOT STARTED | X0 Cap I5 built; no Package B run yet |
+| 3 | Overcrowding mechanism | RQ3 | C | BLOCKED | Needs overcrowding / efficient contrast cells |
+| 4 | Cross-method transfer | RQ4 | D | NOT STARTED | -- |
+| 5 | Information substitution | RQ5 | E | NOT STARTED | -- |
+| 6 | Scaling fits | RQ6 | F | SMOKE | Flat D_min=1 on completed compact N; not publishable |
+| 7 | Early warning | RQ7 | G | NOT STARTED | -- |
 
 ---
 
-## 3. Research questions and claims
+## 4. Claims board
 
-| RQ | Question (short) | Package | Claims | Status | Result note |
-|----|------------------|---------|--------|--------|-------------|
-| RQ1 | State beyond N? | B | C1a, C1b | NOT STARTED | Need multi-X0 campaign |
-| RQ2 | Boundary and regimes? | A | C2a, C2b | IN PROGRESS | Scout partial: R=1 through N=100 (+ partial 150); no overcrowding; C2 unevaluable |
-| RQ3 | Why diminishing returns? | C | C3 | BLOCKED | Needs overcrowding / efficient contrast cells |
-| RQ4 | Cross-method generality? | D | C4 | NOT STARTED | Baseline instrument only so far |
-| RQ5 | Information vs shepherds? | E | C5a, C5b | NOT STARTED | -- |
-| RQ6 | Scaling with N and state? | F | C6a, C6b | SMOKE | Constant D_min=1 on completed compact N; not publishable |
-| RQ7 | Early warning of failure? | G | C7a, C7b | NOT STARTED | -- |
-| S8 | Reproducible protocol | all | (infra) | DONE | Config + provenance path in place |
+Claim criteria: main plan Part III. Record only verdict + pointer here.
 
-### Claim detail
-
-| Claim | Criterion (short) | Verdict | Evidence pointer |
-|-------|-------------------|---------|------------------|
-| C1a | D_min differs by >= 2 across X0 at some N | UNEVALUATED | -- |
-| C1b | State features beat (N, D) predictors (dAIC > 4) | UNEVALUATED | -- |
-| C2a | Overcrowding for >= 2 methods at theta=0.90 | UNEVALUATED | Compact scout (1 method, partial): no overcrowding |
-| C2b | Hard ceiling: R < theta at T1=20000 past D_overcrowd | UNEVALUATED | -- |
-| C3 | Overcrowding cells higher I_dir and/or fragmentation | UNEVALUATED | -- |
-| C4 | Shared mechanism label across >= 3 methods | UNEVALUATED | -- |
-| C5a | Info step reduces D_min by >= 1 at N in {100,200} | UNEVALUATED | -- |
-| C5b | Second info step saves fewer shepherds than first | UNEVALUATED | -- |
-| C6a | Global power law rejected vs piecewise/state (dAIC > 10) | UNEVALUATED | Flat D_min; AIC comparison degenerate |
-| C6b | Stable sublinear alpha < 1 in a stated domain | UNEVALUATED | Alpha effectively 0 on flat D_min |
-| C7a | State warning AUROC > (N, D) baseline | UNEVALUATED | -- |
-| C7b | Lead time >= 500 ticks on >= 30% failure trajectories | UNEVALUATED | -- |
+| Claim | Verdict | Evidence pointer |
+|-------|---------|------------------|
+| C1a | UNEVALUATED | -- |
+| C1b | UNEVALUATED | -- |
+| C2a | UNEVALUATED | Compact scout (1 method, partial): no overcrowding |
+| C2b | UNEVALUATED | -- |
+| C3 | UNEVALUATED | -- |
+| C4 | UNEVALUATED | -- |
+| C5a | UNEVALUATED | -- |
+| C5b | UNEVALUATED | -- |
+| C6a | UNEVALUATED | Flat D_min; AIC comparison degenerate |
+| C6b | UNEVALUATED | Alpha effectively 0 on flat D_min |
+| C7a | UNEVALUATED | -- |
+| C7b | UNEVALUATED | -- |
 
 ---
 
-## 4. Implementation Caps (main plan Section 10.1)
+## 5. Next actions
 
-| Cap | Capability | Code | Built? | Used in a campaign? | Notes |
-|-----|------------|------|--------|---------------------|-------|
-| I1 | Grid runner + provenance | `api/budget_runner.py`, `analysis/budget/provenance.py` | yes | IN PROGRESS | Pilot + partial scout; `trials.csv` only flushed at end (kill required timeseries rebuild) |
-| I2 | Frontier extraction | `analysis/budget/frontier.py` | yes | IN PROGRESS | `phase1/scout/package_a/frontier.csv` |
-| I3 | Regime labelling | `analysis/budget/regimes.py` | yes | IN PROGRESS | `phase1/scout/package_a/regimes.csv` |
-| I4 | Mean-spread, extent | `metrics/mean_spread.py`, `metrics/extent.py` | yes | IN PROGRESS | Timeseries columns |
-| I5 | X0 generators + wiring | `core/x0_generators.py`, `scenarios/drive_to_goal.py` | yes | no | Awaiting Package B run |
-| I6 | State vs (N, D) predictors | `analysis/budget/predictors.py` | yes | no | Needs Package B |
-| I7 | I_dir, coverage metrics | `metrics/shepherd_interference.py`, `metrics/shepherd_coverage.py` | yes | SMOKE | Present in scout timeseries; not claim-tested |
-| I8 | Mechanism tests | `analysis/budget/mechanism.py` | yes | no | Phase 3 |
-| I9 | Transfer table | `analysis/budget/transfer.py` | yes | no | Phase 4 |
-| I10 | Factor sweep + substitution | `scripts/budget/run_factor_sweep.py`, `analysis/budget/substitution.py` | yes | no | Phase 5 |
-| I11 | Scaling fits | `analysis/budget/scaling.py` | yes | IN PROGRESS | `phase1/scout/package_f/scaling_fits.csv` |
-| I12 | Early warning | `analysis/budget/early_warning.py` | yes | no | Phase 7 |
-| I13 | Canonical protocol + dossier | `configs/budget/canonical_grid.yaml`, `analysis/budget/export.py` | yes | IN PROGRESS | Phase-1 exports |
-| I14 | Timeseries Parquet | `api/budget_runner.py` | yes | IN PROGRESS | `results/budget/phase1/scout/timeseries/` (1123 files) |
+Ordered. Move finished items into the campaign log; keep this list short.
+
+1. **Choose Phase 1 continuation**
+   - Option A: resume remaining ~317 compact scout cells: `make budget-scout WORKERS=16` (resume-safe; see Section 7).
+   - Option B (recommended if compact stays easy): start Phase 2 harder X0 via `make budget-pilot-state`.
+2. **If Option B:** run Package B path toward C1a/C1b; verify X0 families differ on intended metrics.
+3. **Only after real frontiers exist:** Phase 3 (C3); re-fit Package F for C6a/C6b.
+4. **Later:** Phase 4 transfer (C4); Phase 5 information (C5); Phase 7 early warning (C7).
+
+Do not advance claim verdicts until Section 8 scout/claim seed rules are met, or an explicit protocol exception is logged in Section 8 below.
+
+---
+
+## 6. Caps in use
+
+Full Cap table and designs: main plan Section 10.1. Here only whether each Cap has been used in a campaign.
+
+| Cap | Used in a campaign? | Note |
+|-----|---------------------|------|
+| I1 grid runner + provenance | yes | Pilot + partial scout |
+| I2 frontier | yes | Scout Package A |
+| I3 regimes | yes | Scout Package A |
+| I4 mean-spread, extent | yes | Timeseries columns |
+| I5 X0 generators | no | Awaiting Package B |
+| I6 state predictors | no | Needs Package B |
+| I7 I_dir, coverage | smoke | In scout timeseries; not claim-tested |
+| I8 mechanism tests | no | Phase 3 |
+| I9 transfer table | no | Phase 4 |
+| I10 factor sweep / substitution | no | Phase 5 |
+| I11 scaling fits | yes | Scout Package F (degenerate) |
+| I12 early warning | no | Phase 7 |
+| I13 canonical protocol + dossier | yes | Phase-1 exports |
+| I14 timeseries Parquet | yes | Scout timeseries present |
 
 Operator entry points: `make budget-help`, `budget-test`, `budget-pilot`, `budget-pilot-state`, `budget-analyse`, `budget-scout`.
 
-Results layout: `results/budget/phase<N>/<campaign>/` with per-campaign `REPORT.md` and phase rollup `REPORT.md`.
-
-Tests: `make budget-test` (12 passed as of pilot date).
-
 ---
 
-## 5. Protocol coverage vs Section 8 freeze
+## 7. Protocol drift (scout vs freeze)
 
-| Item | Frozen default | Latest scout (partial) | Gap |
-|------|----------------|------------------------|-----|
-| Task | `drive_to_goal` | same | none |
-| Instrument | `strombom_multi` (+ transfer set later) | baseline only | transfer methods unused |
-| Theta | 0.90 (also 0.50, 0.70) | 0.90 only | sensitivity not reported |
-| N | {25,50,75,100,150,200,300,400} | 25..100 complete; 150 partial; 200 not started | finish 150/200; still missing 300/400 |
-| D | {1,2,3,4,6,10,15,20,25,35} | through 20 for N<=100; N=150 missing D=15/20 (and part of D=10) | D=25/35 unused |
-| X0 | compact, wide, split, outlier_rich | compact only | Package B not run |
-| T0 | 10000 | 10000 | none for scout |
-| T1 | 20000 (C2b) | not used | -- |
-| Scout seeds | 30 | 30 on completed cells | remaining cells unfinished |
+Defaults: main plan Section 8. List only gaps vs the freeze for the latest primary campaign.
+
+| Item | Frozen | Latest scout (partial) | Gap |
+|------|--------|------------------------|-----|
+| Layout X0 | compact, wide, split, outlier_rich | compact only | Package B not run |
+| N | 25..400 | 25..100 complete; 150 partial; 200+ not started | unfinished / incomplete grid |
+| D | through 35 | through 20 for N<=100 | D=25/35 unused |
+| Methods | baseline + transfer set | `strombom_multi` only | transfer unused |
+| theta | 0.90 (+ report 0.50, 0.70) | 0.90 only | sensitivity not reported |
 | Claim seeds | 100 on boundary | not used | -- |
-| Master seed | 2026 | 2026..2055 (30 seeds) | ok |
 
 ---
 
-## 6. Latest experimental results summary
+## 8. Latest results (keep one primary campaign)
 
-### Campaign: `phase1_scout` (2026-09-17) — STOPPED
-
-| Field | Value |
-|-------|-------|
-| Grade | SCOUT incomplete (operator stop) |
-| Planned grid | 6 N x 8 D x 30 seeds x compact x strombom_multi = 1440 |
-| Completed | **1123/1440 (78%)** before stop |
-| Wall time | ~2h 8m (`WORKERS=4`) |
-| Success on completed | 1123/1123 (R=1.0 all completed cells) |
-| Artefacts | `results/budget/phase1/scout/` (trials reconstructed from timeseries; package_a; package_f; REPORT.md) |
-
-Coverage: N in {25,50,75,100} full; N=150 at 163/240 (no D=15/20); N=200 at 0/240.
-
-Frontier: D_min=1 for all completed N; no overcrowding; B*_D=1.
-
-Regimes: 5 efficient_operation; 33 wasteful_overspend; 0 failure/overcrowding labels.
-
-Scaling: best model constant (c=1); degenerate.
-
-**Why slow:** not because every trial hit T0=10000. Median ticks stayed ~120–150 through N=100, but N=150 developed a heavy tail (max 7786 ticks on a *successful* trial). The longest ~10% of trials consumed ~33% of simulated ticks. Combined with 16x more cells than the pilot and Parquet I/O, wall time grew steeply once N=150 started.
-
-Scientific reading: compact + strombom_multi remains easy through the completed band. Do not cite for C2/C6. Full narrative: [scout/REPORT.md](../../../results/budget/phase1/scout/REPORT.md).
-
-### Campaign: `budget_pilot` (2026-09-17)
+### `phase1_scout` (2026-09-17) -- STOPPED
 
 | Field | Value |
 |-------|-------|
-| Grade | SMOKE |
-| Grid | 90 trials (N={25,50,100}, D through 10, 5 seeds, T=3000) |
-| Wall time | ~8.3 min |
-| Success | 90/90 |
-| Artefacts | `results/budget/phase1/pilot/` |
+| Grade | SCOUT incomplete |
+| Planned | 6 N x 8 D x 30 seeds x compact x strombom_multi = 1440 |
+| Completed | 1123/1440 (78%) |
+| Outcome | R=1.0 on all completed cells; D_min=1; no overcrowding |
+| Artefacts | `results/budget/phase1/scout/` |
+| Report | [scout/REPORT.md](../../../results/budget/phase1/scout/REPORT.md) |
 
-Same qualitative picture as scout on the overlapping band. Report: [pilot/REPORT.md](../../../results/budget/phase1/pilot/REPORT.md).
+Scientific reading: compact + strombom_multi remains easy through the completed band. Do not cite for C2/C6.
 
----
-
-## 6.1 Reproduce and resume commands
-
-Run from the repo root (`/path/to/HerdSim`). Keep `results/budget/phase1/scout/` intact when moving machines
-(at minimum `manifest.jsonl` + `trials.csv`; timeseries optional for analyse, required only if you must rebuild trials again).
-
-### Resume Phase-1 scout (remaining ~317 cells)
-
-Resume skips keys already listed as `ok` in `manifest.jsonl`, then rewrites Packages A and F.
+Resume remaining cells (do not delete `manifest.jsonl`):
 
 ```bash
-# On a stronger machine, raise WORKERS (e.g. 8 or 16). Do not pass --no-resume.
 make budget-scout WORKERS=16
-
-# Equivalent explicit form (same defaults as Makefile):
-make budget-scout \
-  WORKERS=16 \
-  SCOUT_OUT=results/budget/phase1/scout \
-  SCOUT_CAMPAIGN_ID=phase1_scout \
-  SCOUT_LAYOUT=compact \
-  SCOUT_N="25 50 75 100 150 200" \
-  SCOUT_D="1 2 3 4 6 10 15 20" \
-  SCOUT_SEEDS=30 \
-  BUDGET_INSTRUMENT=strombom_multi
 ```
 
-Notes:
-
-- Leave `BUDGET_MAX_TICKS` unset so protocol `T0=10000` is used.
-- Do **not** delete `manifest.jsonl` or you will rerun all 1440 cells.
-- After a clean finish, `trials.csv` is rewritten with all completed rows and Packages A/F are regenerated automatically by `budget-scout`.
-
-### Re-analyse only (reproduce Package A/F from existing `trials.csv`)
-
-Use this if the grid is already finished (or you only want to refresh exports / report tables):
+Re-analyse Packages A/F from existing `trials.csv`:
 
 ```bash
-make budget-analyse \
-  PACKAGE=A \
-  TRIALS=results/budget/phase1/scout/trials.csv \
-  OUT=results/budget/phase1/scout/package_a
-
-make budget-analyse \
-  PACKAGE=F \
-  TRIALS=results/budget/phase1/scout/trials.csv \
-  OUT=results/budget/phase1/scout/package_f
+make budget-analyse PACKAGE=A TRIALS=results/budget/phase1/scout/trials.csv OUT=results/budget/phase1/scout/package_a
+make budget-analyse PACKAGE=F TRIALS=results/budget/phase1/scout/trials.csv OUT=results/budget/phase1/scout/package_f
 ```
 
-Report narrative to refresh after a successful full scout: `results/budget/phase1/scout/REPORT.md`
-and the phase rollup `results/budget/phase1/REPORT.md` (edit Section 6 / campaign log in this tracker too).
+### Prior smoke: `budget_pilot` (2026-09-17)
 
-### Reproduce smoke pilot (optional)
-
-```bash
-make budget-test
-make budget-pilot BUDGET_MAX_TICKS=3000 WORKERS=1
-make budget-analyse \
-  PACKAGE=F \
-  TRIALS=results/budget/phase1/pilot/trials.csv \
-  OUT=results/budget/phase1/pilot/package_f
-```
+Same qualitative picture on N in {25,50,100}. Report: [pilot/REPORT.md](../../../results/budget/phase1/pilot/REPORT.md).
 
 ---
 
-## 7. Campaign log
+## 9. Campaign log
 
-Append one row per campaign (or notable re-analyse). Newest at top.
+Newest first. One row per campaign or notable re-analyse.
 
-| Date | Campaign id | Command / notes | Grade | Packages | Key outcome | Report |
-|------|-------------|-----------------|-------|----------|-------------|--------|
-| 2026-09-17 | phase1_scout | `make budget-scout WORKERS=4`; stopped at 1123/1440; trials rebuilt from timeseries; Packages A/F. Resume later: `make budget-scout WORKERS=16` (see Section 6.1) | SCOUT incomplete | A, F | R=1; D_min=1; slow due to N=150 long-tail successes; N=200 not run | [scout/REPORT.md](../../../results/budget/phase1/scout/REPORT.md) |
-| 2026-09-17 | budget_pilot | `make budget-test`; `make budget-pilot BUDGET_MAX_TICKS=3000 WORKERS=1`; Package F | SMOKE | A, F | R=1; D_min=1; wasteful overspend for D>1; scaling flat | [pilot/REPORT.md](../../../results/budget/phase1/pilot/REPORT.md) |
-
----
-
-## 8. Next actions (ordered)
-
-Update this list when priorities change; mark items done by moving detail into Sections 2-7.
-
-1. **Decide Phase 1 continuation strategy**
-   - Option A: resume remaining ~317 scout cells on a stronger machine:
-     `make budget-scout WORKERS=16`
-     (full command block in Section 6.1). Then refresh reports from new Package A/F outputs.
-   - Option B (recommended if compact stays easy): skip more compact grind and start **Phase 2** harder X0 (`make budget-pilot-state`) where D_min>1 / failures are more likely.
-   - Optional engineering: flush `trials.csv` incrementally in `api/budget_runner.py` so kills do not require timeseries reconstruction.
-
-2. **Phase 2 state pilot (RQ1 / Package B)** — if choosing Option B
-   - Goal: C1a/C1b path; verify X0 families via metric stats.
-
-3. **Only after real frontiers exist**
-   - Phase 3 mechanism Package C (C3).
-   - Re-fit Package F for C6a/C6b on non-flat D_min(N[, X0]).
-
-4. **Later**
-   - Phase 4 transfer (C4); Phase 5 information (C5); Phase 7 early warning (C7).
-
-Do not advance claim verdicts until scout/claim seed and grid rules in Section 8 are met (or an explicit, documented protocol exception is recorded here).
+| Date | Campaign | Grade | Packages | Outcome | Report |
+|------|----------|-------|----------|---------|--------|
+| 2026-09-17 | phase1_scout (stopped 1123/1440) | SCOUT incomplete | A, F | R=1; D_min=1; compact easy | [scout](../../../results/budget/phase1/scout/REPORT.md) |
+| 2026-09-17 | budget_pilot | SMOKE | A, F | R=1; D_min=1; flat scaling | [pilot](../../../results/budget/phase1/pilot/REPORT.md) |
 
 ---
 
-## 9. Update checklist (for editors)
+## 10. Tracker update checklist
 
 When finishing a campaign or Cap change:
 
-- [ ] Update phase row in Section 2
-- [ ] Update RQ/claim rows in Section 3
-- [ ] Update Cap "used in a campaign" in Section 4 if newly exercised
-- [ ] Refresh Section 5 if protocol subset changed
-- [ ] Rewrite Section 6 for the latest primary campaign (or add a subsection)
-- [ ] Append Section 7 campaign log row
-- [ ] Adjust Section 8 next actions
+- [ ] Refresh Section 1 snapshot
+- [ ] Update phase row in Section 3
+- [ ] Update claim verdicts in Section 4 if claim-grade
+- [ ] Adjust Section 5 next actions
+- [ ] Mark Cap "used" in Section 6 if newly exercised
+- [ ] Refresh Section 7 drift table if protocol subset changed
+- [ ] Rewrite Section 8 for the primary campaign (or point to a new REPORT)
+- [ ] Append Section 9 log row
 - [ ] Set "Last updated" at top
-- [ ] Link the campaign REPORT under `results/budget/...`
-- [ ] Keep Section 6.1 commands in sync with Makefile defaults
