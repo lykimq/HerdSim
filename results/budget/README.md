@@ -1,12 +1,14 @@
 # Budget experiment results
 
-This directory holds shepherding-budget campaign outputs. Heavy artefacts are
-gitignored; this README is tracked so the layout stays documented.
+Campaign outputs for the shepherding-budget work live here. Run data under
+`results/budget/` is kept in git (trials, packages, provenance, timeseries, etc.)
+so a finished campaign stays available for analysis and claims. Other paths under
+`results/` stay ignored.
 
 Science and protocol: `docs/research/budget/main_shepherding_budget_plan.md`  
-Live status / ordered run plan / hardware: `docs/research/budget/progress_tracker.md`  
+Status / run plan / hardware: `docs/research/budget/progress_tracker.md`  
 Campaign subsets: `configs/budget/campaigns/`  
-Human report template: `docs/research/budget/REPORT_TEMPLATE.md`
+Report template: `docs/research/budget/REPORT_TEMPLATE.md`
 
 ## Layout
 
@@ -34,7 +36,7 @@ phase{k}/{campaign_slug}/
   timeseries/              # stem == cell key (includes instrument)
   packages/
     a/ ... g/              # auto analysis (Package A-G)
-  REPORT.md                # human narrative only (optional, may be committed)
+  REPORT.md                # hand-written note (from REPORT_TEMPLATE.md)
 ```
 
 ## Conventions
@@ -46,7 +48,7 @@ phase{k}/{campaign_slug}/
 5. Timeseries stem matches the resume cell key, e.g.
    `N50_D2_Lcompact_S2026_Istrombom_multi.parquet`.
 6. Auto analysis goes under `packages/{letter}/` (tables + `package_*.md` +
-   `figures/` when generated). Reserve `REPORT.md` for human narrative
+   `figures/` when generated). `REPORT.md` is the hand-written note
    (template: `docs/research/budget/REPORT_TEMPLATE.md`).
 7. Frozen Section 8 defaults live in `configs/budget/canonical_grid.yaml`
    (each field has a WHY comment; see also main plan Section 8.1).
@@ -68,7 +70,7 @@ packages/a/
     regime_counts.png
 ```
 
-Human `REPORT.md` at the campaign root interprets those artefacts.
+`REPORT.md` at the campaign root is where you write what you make of those files.
 
 ## Operator commands
 
@@ -84,7 +86,7 @@ make -f Makefile.budget budget-factor-sweep
 make -f Makefile.budget budget-analyse PACKAGE=A TRIALS=results/budget/phase1/scout/trials.csv
 ```
 
-The main `Makefile` still forwards `make budget-*` to `Makefile.budget`, so existing habits keep working.
+The main `Makefile` still forwards `make budget-*` to `Makefile.budget`.
 
 ## Resume rules
 
@@ -96,9 +98,18 @@ The main `Makefile` still forwards `make budget-*` to `Makefile.budget`, so exis
 
 ## What to commit
 
-- Tracked: this README; optional `REPORT.md` files under campaigns.
-- Ignored: `trials.csv`, parquet timeseries, package CSVs, manifests (local only
-  unless you choose otherwise).
+After a campaign (or a useful partial run), commit the campaign folder under
+`results/budget/phase{k}/{slug}/` so the run stays with the repo:
 
-When citing a claim, point the tracker at the campaign `REPORT.md` and the
-matching `packages/` exports, and record grade (SMOKE / SCOUT / CLAIM).
+- `campaign.yaml`, `provenance.json`, `status.json`, `manifest.jsonl`
+- `trials.csv`
+- `timeseries/` (needed for mechanism / early-warning work)
+- `packages/`
+- `REPORT.md` when you have written it
+
+Point the tracker at that path and the grade (SMOKE / SCOUT / CLAIM) when citing
+a claim.
+
+Note: full claim-grade grids with timeseries can get large. Prefer one campaign
+folder per commit (or per logical batch) rather than mixing unfinished scratch
+runs with claim data.

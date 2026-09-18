@@ -1,83 +1,84 @@
-# Human campaign report template
+# Campaign report template
 #
 # Copy to: results/budget/phase{k}/{campaign}/REPORT.md
-# Fill after reading auto packages under packages/{a-g}/.
-# Do not replace auto `package_*.md` files with this document.
+# Fill after looking at packages/{a-g}/.
+# Leave the auto package_*.md files alone; this file is the hand-written note.
 
 # Campaign report: `<campaign_id>`
 
-## Executive summary
+## Summary
 
-One short paragraph: what we ran, the main result, and the decision this implies.
+What we ran, what came out, what to do next.
 
 ## Intent
 
-- Phase / formal RQ:
-- Reader question (Size / Structure / Mechanism / Generality / follow-on):
-- Claims targeted (C1a-C7b):
-- Grade goal: SMOKE | SCOUT | CLAIM
+- Phase / RQ:
+- Size / Structure / Mechanism / Generality / follow-on:
+- Claims (C1a-C7b):
+- Grade: SMOKE | SCOUT | CLAIM
 
-## What we did (how)
+## Setup
 
-- Protocol: `shepherding_budget_v1` (frozen date: )
+- Protocol: `shepherding_budget_v1` (frozen: )
 - Task / success rule:
 - Instrument(s):
 - Layout(s) X0:
-- Grid N:
-- Grid D:
+- N grid:
+- D grid:
 - Seeds (scout / claim):
-- Time limit T0 (and T1 if used):
+- T0 (and T1 if used):
 - Theta:
-- Command used:
-- Output path: `results/budget/phase{k}/{campaign}/`
-- Host / hardware (see tracker Section 6; note if different):
+- Command:
+- Output: `results/budget/phase{k}/{campaign}/`
+- Host (see tracker Section 6 if not primary):
 - WORKERS / CPU governor:
 
 ## Completeness
 
 - Planned cells:
-- Completed cells:
+- Done:
 - `status.json` complete? yes / no
 - Resume notes:
 
-## What happened (results)
+## Results
 
-- Overall success pattern:
-- D_min / frontier (by N and layout if any):
-- Regimes seen (too few / efficient / wasteful / overcrowding / hard failure):
-- Surprises / anomalies:
+- Success pattern:
+- D_min / frontier (by N / layout):
+- Regimes (too few / efficient / wasteful / overcrowding / hard failure):
+- Surprises:
 
-## Figures to review
+## Figures
 
-Link or list auto figures from `packages/*/figures/` (and any extra plots):
+From `packages/*/figures/` (tick what you looked at):
 
 - [ ] Reliability heatmap R(N, D)
 - [ ] Frontier D_min(N) (+ D_overcrowd / D_max if present)
 - [ ] Regime counts
 - [ ] Other (Phase 2+):
 
-## Why we think that
+## Interpretation
 
-Mechanism / structure / method interpretation in plain language. Point to metrics
-(I_dir, coverage, fragmentation, predictors) when available.
+What we think is going on (mechanism / structure / method). Cite I_dir,
+coverage, fragmentation, predictors if you have them.
 
-## What we do not claim
+## Limits
 
-Limits of grade, protocol drift vs Section 8, single-method scope, unfinished cells, etc.
+What this run does **not** support (grade, protocol drift, single method,
+unfinished cells, etc.).
 
-## Claims board update
+## Claims update
 
-| Claim | Verdict | Evidence pointer |
-|-------|---------|------------------|
+| Claim | Verdict | Evidence |
+|-------|---------|----------|
 | C? | UNEVALUATED / SUPPORTED / REJECTED / INCONCLUSIVE | `packages/...` |
 
-## Decision / next action
+## Next
 
-- Keep grinding this grid? switch to harder X0? change method? raise seeds?
-- Tracker updates needed:
+- Keep this grid / harder X0 / other method / more seeds?
+- Tracker updates:
 
 ## Links
 
-- Auto Package A: `packages/a/package_a.md`
+- Package A: `packages/a/package_a.md`
 - Other packages:
-- `status.json`, `provenance.json`, `campaign.yaml`
+- `status.json`, `provenance.json`, `campaign.yaml`, `trials.csv`

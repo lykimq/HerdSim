@@ -2,17 +2,15 @@
 
 ## Scaling of Collective Control
 
-Parent framing for the shepherding-budget program. It states the scientific problem in plain language and the build priorities that follow from it.
-
-Execution detail (formal RQ1--RQ7, claims, Caps, protocol freeze, phases) lives in:
+Formal RQs, claims, Caps, protocol freeze, and phases:
 
 [main_shepherding_budget_plan.md](main_shepherding_budget_plan.md)
 
-Live status and campaigns live in:
+Where we are and what to run next:
 
 [progress_tracker.md](progress_tracker.md)
 
-If anything conflicts, the main plan wins on scientific content; the tracker wins on current status.
+If the docs disagree: the main plan wins on science; the tracker wins on status.
 
 ---
 
@@ -20,33 +18,41 @@ If anything conflicts, the main plan wins on scientific content; the tracker win
 
 > When a few shepherds guide a larger flock, how much control do we actually need as the flock gets bigger or more spread out?
 
-A draft sheep-scaling study asked how dog count should grow with flock size, and whether flock "spread" helps explain difficulty. This program keeps that problem, but treats it more carefully:
+That is the same basic problem as the draft sheep-scaling paper (dog count vs flock
+size, and whether "spread" helps explain difficulty). We keep it, but we try to be
+more careful:
 
-- define "how much control is needed" in a reusable way,
-- separate group size from group shape,
-- ask why the pattern appears,
-- and check whether the pattern still holds when the guiding method changes.
+- say clearly what "how much control" means,
+- separate size from shape / state,
+- ask why a pattern shows up, not only that it does,
+- check whether it still shows up under a different herding method.
 
-We do not start by claiming a universal scaling law. We start with questions experiments can answer.
+We are not starting from a claimed universal scaling law. We start from questions
+we can actually run.
 
-### What success looks like
+### What we want out of the core program
 
-By the end of the core program, evidence should show:
+After the core runs, we should be able to say something concrete about:
 
 - how control need changes as the group grows,
-- whether the shape of the group matters beyond size,
-- which processes help explain that pattern,
-- and which parts look shared across guiding methods versus method-specific.
+- whether shape / state matters beyond size,
+- which processes look like they drive the pattern,
+- and what looks shared across methods vs method-specific.
 
-A simple predictive rule would be a strong success. Strong method dependence would also be a useful result.
+A simple predictive rule would be great. Finding that the pattern is strongly
+method-dependent would also be useful -- that still bounds how far you can
+generalise.
 
 ---
 
 ## HerdSim
 
-HerdSim is a reproducible experimental platform for multi-agent sheep herding: a small number of shepherds (dogs) guides a larger flock toward a goal under controlled conditions. It is the experimental workbench for this program -- a controlled model system for measuring collective control demand, not a full replica of real farms.
+HerdSim is our experimental platform for multi-agent sheep herding: a few shepherds
+(dogs) guide a larger flock to a goal under controlled settings. For this program it
+is the workbench -- a model system for measuring control demand -- not an attempt to
+copy real farms in full.
 
-Herding is useful because it captures indirect control:
+Herding is a good fit because control is indirect:
 
 > A small number of external controllers tries to steer a larger group whose members are not commanded one by one.
 
@@ -54,17 +60,19 @@ Herding is useful because it captures indirect control:
 
 ## Shared protocol (idea)
 
-Before RQ-specific studies, experiments share one frozen protocol so comparisons stay fair. In practice that means locking:
+Before diving into RQ-specific grids, we freeze one shared protocol so later
+comparisons are fair. That means locking at least:
 
 - the herding task,
 - what counts as success,
-- a reliability target (for example succeed in at least 90% of runs),
+- a reliability target (e.g. succeed in at least 90% of runs),
 - a time budget,
-- flock sizes and shepherd counts to sweep,
-- a baseline herding method and the methods compared against it,
-- and a common way to estimate the viable shepherd range (minimum needed for reliable success, and where adding more stops helping or starts hurting).
+- which flock sizes and shepherd counts we sweep,
+- a baseline method and the methods we compare against it,
+- how we estimate the viable shepherd range (minimum for reliable success, and
+  where adding more stops helping or starts hurting).
 
-Full frozen defaults are in the main plan, Section 8.
+Frozen defaults: main plan, Section 8.
 
 ---
 
@@ -91,47 +99,48 @@ Full frozen defaults are in the main plan, Section 8.
 
 ## Core research questions
 
-Each question has three parts: what we want to know, how we study it, and what we may find. We do not pre-commit to one preferred result.
+For each question: what we want to know, how we plan to study it, and what kinds of
+answers would count. We are not locking in a preferred outcome ahead of time.
 
-Formal IDs used in the main plan are noted in parentheses.
+Formal IDs from the main plan are in parentheses.
 
 ### 1. Size -- how does the viable shepherd range change with collective size? (RQ2, RQ6)
 
 **Question.** As flock size grows, how does the viable shepherd range change: the minimum needed for reliable herding, and the point where adding more stops helping or starts hurting?
 
-**Approach.** Freeze a protocol. Vary `N` while holding other conditions as constant as possible. For each `N`, find the smallest `D` that meets the reliability target, and record whether larger `D` keeps helping, saturates, or hurts. Fit scaling candidates only after real frontiers exist.
+**Approach.** Freeze the protocol. Vary `N`, keep other settings as fixed as we can. For each `N`, find the smallest `D` that hits the reliability target, and note whether larger `D` still helps, plateaus, or hurts. Only fit scaling models once we have real frontiers.
 
-**Possible results.** Linear, sublinear, or superlinear growth; different regimes at different sizes; saturation or thresholds; or no simple relationship. Also: clear operating regimes (too few / efficient / wasteful / overcrowding).
+**Possible results.** Linear, sublinear, or superlinear growth; different behaviour in different size bands; saturation or thresholds; or nothing simple. We also care about operating regimes (too few / efficient / wasteful / overcrowding).
 
 ### 2. Structure -- does shape/state change control demand at fixed size? (RQ1)
 
 **Question.** At the same flock size, does flock shape/state (spread, fragmentation, outliers, etc.) change how much control we need?
 
-**Approach.** Keep `N` fixed in matched comparisons. Vary initial structure in a controlled way. Measure candidate structural properties. Compare how much variation is explained by size alone versus size plus structure.
+**Approach.** Hold `N` fixed in matched comparisons. Change initial structure on purpose. Measure a few structural properties and see how much of the leftover variation size alone cannot explain.
 
-**Possible results.** Size is almost enough; one or a few structural measures explain remaining variation; or different properties matter in different size ranges.
+**Possible results.** Size is almost enough; one or a few structure measures pick up the rest; or different properties matter at different sizes.
 
 ### 3. Mechanism -- what produces the observed pattern? (RQ3)
 
 **Question.** Why does that pattern appear (for example interference, coverage limits, fragmentation)?
 
-**Approach.** Candidate mechanisms include spatial demand, fragmentation, controller interference, redundant control, and local instability. Measure run-level quantities linked to these ideas, check which track control demand, and intervene where possible. Correlation alone is not treated as causation.
+**Approach.** Candidates include spatial demand, fragmentation, controller interference, redundant control, and local instability. Log run-level quantities tied to those ideas, see which track control demand, and intervene when we can. Correlation by itself is not treated as causation.
 
-**Possible results.** One dominant mechanism; several mechanisms in different regimes; or a pattern that resists a single simple explanation.
+**Possible results.** One main mechanism; several mechanisms in different regimes; or a pattern that does not reduce to one clean story.
 
 ### 4. Generality -- which parts transfer across herding methods? (RQ4)
 
 **Question.** Which parts of the pattern still hold when we change the herding method?
 
-**Approach.** Repeat core size and structure experiments under more than one method. Compare scaling shape and regime labels, not only raw success rates. Separate shared features from method-specific ones.
+**Approach.** Rerun the core size and structure experiments under more than one method. Compare scaling shape and regime labels, not only raw success rates. Mark what looks shared vs method-specific.
 
-**Possible results.** Method-specific scaling; shared form with different magnitude; or shared form with method-dependent thresholds and slopes. Strong method dependence bounds how far scaling can be separated from the controller.
+**Possible results.** Fully method-specific scaling; same shape with different magnitude; or same shape with method-dependent thresholds and slopes. Strong method dependence would limit how far we can talk about "scaling" apart from the controller.
 
 ---
 
 ## Follow-on questions
 
-These come after the core four. They should not redefine the first scientific question.
+These sit after the core four. They should not rewrite the first scientific question.
 
 | Topic | Formal ID | Question in brief |
 |-------|-----------|-------------------|
@@ -140,22 +149,22 @@ These come after the core four. They should not redefine the first scientific qu
 | Time as a resource | (protocol T₀/T₁) | How does a tighter or looser time limit change control demand? |
 | Other systems | later | Do similar patterns appear outside sheep-herding simulations? |
 
-Operating regimes (too few / efficient / wasteful / overcrowding) are part of the Size question and Package A, not a separate RQ.
+Operating regimes (too few / efficient / wasteful / overcrowding) belong with the Size question and Package A -- not a separate RQ.
 
 ---
 
 ## Short approach
 
 1. Freeze the shared HerdSim protocol.
-2. Sweep flock size and shepherd count with the baseline method; map viable control range and regimes.
-3. Hold size fixed and vary initial flock structure to separate size from shape/state.
-4. Use run logs to test candidate mechanisms.
-5. Repeat measurements across other herding methods to see what transfers.
+2. Sweep flock size and shepherd count with the baseline method; map viable range and regimes.
+3. Hold size fixed and vary initial flock structure so we can separate size from shape / state.
+4. Use run logs to pressure-test candidate mechanisms.
+5. Repeat the same measurements on other herding methods and see what transfers.
 6. Later: information substitution and early-warning tests.
 
-Suggested HerdSim build order matches that progression: protocol and `D_min` pipeline first; then size maps; then structure metrics and matched comparisons; then mechanism logging; then cross-method comparison; only later information/time and stronger normalized summaries.
+Build order should follow that: protocol + `D_min` pipeline first, then size maps, then structure metrics and matched comparisons, then mechanism logging, then cross-method work. Information / time and heavier summary analysis come later.
 
-Implementation rule: every major HerdSim change should map to a clearer protocol definition, a core or follow-on RQ, a validation need, or a clearly marked later extension.
+Rule of thumb for HerdSim changes: if a change does not clarify the protocol, serve a core or follow-on RQ, support validation, or is explicitly marked as later work, it probably does not belong in this program yet.
 
 ---
 
@@ -174,22 +183,24 @@ Implementation rule: every major HerdSim change should map to a clearer protocol
 - finding the single best herding algorithm
 - reproducing every detail of real livestock behaviour
 - optimizing one controller architecture
-- immediately claiming results for every collective system
-- building a real-time failure prediction product
+- claiming results for every collective system out of the gate
+- shipping a real-time failure-prediction product
 
-Those can become later applications after the core scaling questions are clearer.
+Those can wait until the core scaling questions are clearer.
 
 ---
 
 ## Scientific contribution
 
-The intended contribution is a clearer, evidence-based understanding of how collective properties shape the amount of external control needed for reliable steering.
+What we are aiming for is a clearer, evidence-backed account of how collective
+properties change how much external control you need for reliable steering.
 
-Compared with a single-method scaling study, this program aims to:
+Relative to a single-method scaling study, that means:
 
-- define control demand in a reusable way,
-- separate size effects from structure effects,
-- test mechanisms rather than stop at correlation,
-- and check which scaling features survive method change.
+- defining control demand in a reusable way,
+- separating size effects from structure effects,
+- testing mechanisms instead of stopping at correlation,
+- checking which scaling features survive a method change.
 
-Claim only what the evidence supports. Formal claims, Cap IDs, and phase done-when criteria are in the main plan.
+Only claim what the evidence supports. Formal claims, Cap IDs, and phase
+done-when criteria live in the main plan.

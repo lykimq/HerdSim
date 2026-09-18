@@ -1,14 +1,21 @@
 # Collective Herdability Under Shepherding
 
 Status: active (Section 8 protocol frozen 2026-09-17)  
-Role: single source of truth for the research program and HerdSim implementation  
-Parent framing (plain-language program arc): [herdsim_research_program.md](herdsim_research_program.md)  
-Execution ledger (status, campaigns, next actions): [progress_tracker.md](progress_tracker.md)  
-Results index: [results/budget/README.md](../../../results/budget/README.md)
+Role: detailed research plan and HerdSim implementation contract for this program  
+Program overview: [herdsim_research_program.md](herdsim_research_program.md)  
+Status / campaigns / run plan: [progress_tracker.md](progress_tracker.md)  
+Results layout: [results/budget/README.md](../../../results/budget/README.md)
 
-This document defines (1) the scientific questions and claims, (2) the frozen experimental protocol, and (3) what HerdSim must provide so those claims can be evaluated. An implementation step is in scope only if it maps to an RQ, contribution, Cap, or evidence package below. Live phase status and campaign outcomes live only in the progress tracker -- do not duplicate them here.
+This is the detailed plan: scientific questions and claims, the frozen protocol, and
+what HerdSim has to provide so we can evaluate those claims. A code change belongs
+here only if it serves an RQ, contribution, Cap, or evidence package below. Phase
+status and campaign outcomes stay in the progress tracker -- keep them out of this
+file so we do not maintain two status boards.
 
-**Terminology.** *Herdability* means operational reliability of shepherding a collective to a goal. It is not control-theoretic *controllability*. Prose uses *herding method* or *instrument* for the dog algorithm; code may still say `dog_controller` for compatibility.
+**Terminology.** *Herdability* here means operational reliability of shepherding a
+collective to a goal. It is not control-theoretic *controllability*. In prose we say
+*herding method* or *instrument* for the dog algorithm; the code may still use
+`dog_controller` for compatibility.
 
 ---
 
@@ -18,15 +25,21 @@ This document defines (1) the scientific questions and claims, (2) the frozen ex
 
 > When a few shepherds guide a larger flock, how much control do we actually need as the flock gets bigger or more spread out?
 
-Inspired by the sheep-scaling draft paper (dog count vs flock size, and correlation with spread). This program tests that idea more carefully and does not assume a single scaling law.
+Same starting point as the sheep-scaling draft (dog count vs flock size, and
+correlation with spread). We want to test that idea carefully, without assuming
+one scaling law up front.
 
 ### HerdSim
 
-HerdSim is a reproducible experimental platform for multi-agent sheep herding: a small number of shepherds (dogs) guides a larger flock toward a goal under controlled conditions. It supports controlled experiments, shared scenarios and metrics, and fair comparison across herding methods.
+HerdSim is the experimental platform we use for multi-agent sheep herding: a few
+shepherds (dogs) guide a larger flock to a goal under controlled conditions. It
+gives us shared scenarios, metrics, and a fair way to compare herding methods.
 
 ### Shared protocol (summary)
 
-The shared protocol is the frozen experimental setup reused across comparisons (full freeze: Section 8). If the protocol stays fixed, observed differences can be attributed to flock size, flock structure, or herding method -- not to changing the rules of the experiment.
+One frozen experimental setup reused across comparisons (full freeze: Section 8).
+If the protocol stays fixed, differences we see can be attributed to flock size,
+flock structure, or herding method -- not to quietly changing the experiment.
 
 It includes:
 
@@ -44,14 +57,17 @@ It includes:
 
 ### Core questions (reader view)
 
-These four questions are the spine of the program. Formal IDs RQ1--RQ7 (used by phases, Caps, and claims) map onto them below.
+These four questions carry the program. Formal IDs RQ1--RQ7 (phases, Caps, claims)
+map onto them in the table below.
 
 1. **Size.** As flock size grows, how does the viable shepherd range change: the minimum needed for reliable herding, and the point where adding more stops helping or starts hurting?
 2. **Structure.** At the same flock size, does flock shape/state (spread, fragmentation, outliers, etc.) change how much control we need?
 3. **Mechanism.** Why does that pattern appear (for example interference, coverage limits, fragmentation)?
 4. **Generality.** Which parts of the pattern still hold when we change the herding method?
 
-Beyond those four, the plan treats **information--shepherd tradeoffs** and **early failure warning** as explicit follow-on questions, and maps results into operating regimes, not only a min/max shepherd count.
+Beyond those four, the plan also covers **information--shepherd tradeoffs** and
+**early failure warning** as follow-ons, and we report operating regimes, not only
+a min/max shepherd count.
 
 ### Short approach
 
@@ -74,7 +90,8 @@ Beyond those four, the plan treats **information--shepherd tradeoffs** and **ear
 | Early warning | RQ7 | Phase 7 | G |
 | Reproducible protocol | S8 | Phase 0 | all |
 
-Minimum publishable scientific unit: **RQ1 + RQ2 + RQ3 + S8**. RQ4--RQ7 reuse the same protocol and are staged extensions.
+Smallest unit we would treat as scientifically publishable: **RQ1 + RQ2 + RQ3 + S8**.
+RQ4--RQ7 reuse the same protocol and come in stages after that.
 
 ---
 
@@ -82,7 +99,10 @@ Minimum publishable scientific unit: **RQ1 + RQ2 + RQ3 + S8**. RQ4--RQ7 reuse th
 
 ### 1. Problem
 
-Shepherding and related collective-nudging work usually asks: how many shepherds are needed for a flock of size N? That framing is too narrow. It treats flock size as the sole predictor and shepherd count as the sole resource, and therefore cannot answer decisions operators actually face:
+Shepherding and related collective-nudging work often asks: how many shepherds are
+needed for a flock of size N? That is too narrow. It treats flock size as the only
+predictor and shepherd count as the only resource, so it cannot answer decisions
+operators actually face:
 
 | Decision | What N-only sizing cannot answer |
 |----------|----------------------------------|
@@ -92,7 +112,10 @@ Shepherding and related collective-nudging work usually asks: how many shepherds
 | Live monitoring | Failure is often recognised only at timeout; early state signals are unused |
 | Method choice | Limits found on one herding method may or may not transfer |
 
-The same decisions appear in livestock robotics, drone escort, crowd guidance, and autonomous convoy routing. The scientific gap is not "another herding heuristic." It is a missing account of what makes a collective *operationally herdable* under indirect shepherd influence.
+Similar decisions show up in livestock robotics, drone escort, crowd guidance, and
+autonomous convoy routing. What is missing is not "another herding heuristic," but
+a clearer account of what makes a collective *operationally herdable* under
+indirect shepherd influence.
 
 ### 1.1 Operational definition
 
@@ -110,23 +133,30 @@ R(m, τ, N, D, T, X₀, I) = P(success | locked seeds) >= θ.
 | Shepherd / dog | A physical or simulated agent that exerts repulsive influence on sheep |
 | `dog_controller` | HerdSim code identifier for the herding-method plugin -- retained for compatibility |
 
-Claims matter only if they change this reliability, the minimum budget that achieves it, or the ability to anticipate its loss. Mechanism metrics (interference, coverage) explain patterns; they do not replace R.
+Claims only matter if they change this reliability, the budget needed to hit it, or
+our ability to see failure coming. Mechanism metrics (interference, coverage) help
+explain patterns; they do not replace R.
 
 ### 2. Goal
 
-Determine what governs operational herdability of a cohesive collective under indirect shepherd influence.
+Figure out what actually governs operational herdability of a cohesive collective
+under indirect shepherd influence.
 
-Central hypothesis:
+Working hypothesis:
 
 ```text
 Herdability = f(collective state, shepherding resources, information quality, interference, task)
 ```
 
-Herdability is not determined by flock size alone. It depends on the interaction between the flock's measurable state and effective shepherding capacity -- limited by interference, information, and coordination.
+Flock size alone is not enough. Herdability depends on how the flock's measurable
+state interacts with effective shepherding capacity -- limited by interference,
+information, and coordination.
 
 ### 2.1 Why each formal RQ is kept
 
-Each RQ stays only if it (a) closes a decision gap above, (b) has a falsifiable claim, and (c) produces an evidence package HerdSim can emit. Rejecting a claim is still a result: it bounds where N-only or D-only rules remain adequate.
+Keep an RQ only if it (a) closes a decision gap above, (b) has a claim we can
+falsify, and (c) produces an evidence package HerdSim can emit. Rejecting a claim
+still counts as a result: it bounds where N-only or D-only rules are enough.
 
 Task τ₀ = `drive_to_goal` (Section 8).
 
@@ -154,7 +184,7 @@ Task τ₀ = `drive_to_goal` (Section 8).
 
 ### 3.1 Evidence packages
 
-Each evidence package is an exportable dataset that enables the matching claims to be evaluated.
+Each package is an exportable dataset used to evaluate the matching claims.
 
 | Package | Contents | Produced by |
 |---------|----------|-------------|
@@ -196,7 +226,8 @@ Each evidence package is an exportable dataset that enables the matching claims 
 
 Equal-sized collectives can differ in herdability; extra shepherds can saturate and interfere; information can substitute for physical shepherds within bounds; scaling depends on collective state; and loss of herding can be anticipated from measurable state.
 
-This compound claim is the program-level thesis. Individual papers or phases may support only a subset; each subset must still map to falsifiable claims C1a–C7b.
+That is the overall thesis for the program. A paper or phase may only cover part of
+it; whatever subset we claim still has to land on the falsifiable claims C1a–C7b.
 
 ---
 
@@ -302,7 +333,8 @@ Wasteful-overspend threshold: default 20%; sensitivity at 10% and 30%.
 
 ## Part III — Research Questions in Detail
 
-Formal IDs below are the ones used by phases, Caps, and claims. Reader-view labels (Size / Structure / Mechanism / Generality) are defined in **At a glance**.
+Formal IDs below are what phases, Caps, and claims use. The reader labels (Size /
+Structure / Mechanism / Generality) are in **At a glance**.
 
 ### RQ1 — Structure: collective state beyond N
 
@@ -506,7 +538,8 @@ New campaign rule: every override needs a WHY comment -- see `campaigns/README.m
 
 ### 8.1 Protocol rationale (why these values)
 
-Do not treat the freeze as arbitrary. Summary (details live as comments in `canonical_grid.yaml`):
+These defaults are deliberate, not arbitrary. Short version below; longer notes are
+in comments in `canonical_grid.yaml`:
 
 | Choice | Why |
 |--------|-----|
@@ -524,13 +557,18 @@ Do not treat the freeze as arbitrary. Summary (details live as comments in `cano
 | RQ7 k=500, w=200 | 5% of T₀ horizon; fixed feature window from Phase 0 |
 | Wasteful 20% | Default effort tolerance; analyse sensitivity at 10%/30% |
 
-**Future experiments:** any new `configs/budget/campaigns/*.yaml` must document why each subset differs from this freeze. Changing a frozen default requires a tracker protocol exception (and usually a new `protocol_id`). Code must follow the protocol; the protocol must not be justified by "the code does not support it yet."
+**Future experiments:** any new `configs/budget/campaigns/*.yaml` must say why each
+subset differs from this freeze. Changing a frozen default needs a tracker protocol
+exception (and usually a new `protocol_id`). Code follows the protocol -- we do not
+rewrite the science to match whatever the code already supports.
 
 #### 8.1.1 Why the N floor is 5 (not 1, 2, or 4)
 
-This is a scientific scope choice about what counts as the *research object* (indirect control of a collective). It is not justified by current implementation limits: if the science required N<5, we would change the generators/metrics, not the other way around.
+This is a science choice about what we are studying (indirect control of a
+collective). It is not justified by current implementation limits: if the science
+needed N<5, we would change the generators/metrics, not the other way around.
 
-Below N=5, the quantities this program asks about change meaning:
+Below N=5, the quantities this program asks about stop meaning the same thing:
 
 1. **Collective interaction.** Herdability here is control of a group whose members interact with each other. At N=1 there are no sheep-sheep interactions, so "collective structure" and interaction-driven cohesion are undefined as group phenomena. Spread-as-variance around a GCM is trivially zero for a single agent.
 
@@ -542,12 +580,18 @@ Below N=5, the quantities this program asks about change meaning:
 
 5. **Question scope.** The central question is how much control a *few* shepherds need for a *larger* group. Studying N in {1,2,3,4} on a D grid up to 35 mainly measures over-actuated individual pursuit, not collective control demand.
 
-Therefore N=5 is the smallest size where (a) sheep-sheep collective structure is present, (b) majority-core / minority-outlier structure is definable as intended, and (c) the herding task remains the same scientific object as at larger N. N=5 and 10 stay in the freeze to study the hard *small-flock* regime without leaving that object.
+Therefore N=5 is the smallest size where (a) sheep-sheep collective structure is still
+present, (b) majority-core / minority-outlier structure can be defined as intended, and
+(c) the herding task is still the same object as at larger N. N=5 and 10 stay in the
+freeze so we can study the hard *small-flock* regime without leaving that object.
 
-If we later want N=1-4, run a separate control campaign (individual-pursuit baseline) with its own rationale -- and implement whatever generators/metrics that campaign needs -- rather than mixing it into the collective scaling freeze.
+If we later want N=1-4, run a separate control campaign (individual-pursuit baseline)
+with its own rationale -- and implement whatever generators/metrics that campaign
+needs -- rather than mixing it into the collective scaling freeze.
 ### 9. Phase plan
 
-Live status for each phase: [progress_tracker.md](progress_tracker.md). This table is the plan contract only.
+Live status for each phase: [progress_tracker.md](progress_tracker.md). This table is
+the planned phase contract only (not a status board).
 
 | Phase | Focus | Questions | Output | Depends on | Phase done when |
 |-------|-------|-----------|--------|------------|-----------------|
@@ -566,15 +610,17 @@ Live status for each phase: [progress_tracker.md](progress_tracker.md). This tab
 
 ### 10. Design principles
 
-1. **Additive, not invasive.** New modules over core rewrites. Extend BaseMetric and wrap `iter_one_trial()`.
-2. **Composable analysis.** Every analysis function is `DataFrame -> DataFrame`. No hidden state.
+1. **Additive, not invasive.** Prefer new modules over rewriting the core. Extend BaseMetric and wrap `iter_one_trial()`.
+2. **Composable analysis.** Analysis functions take a `DataFrame` and return a `DataFrame`. No hidden global state.
 3. **Reproducible by default.** Every campaign exports a provenance stamp (git hash, config hash, seed list, metric versions).
-4. **Phase-gated.** Build and test each phase's tooling before running experiments. Do not pre-build later phases.
-5. **Traceability gate.** Do not merge HerdSim work unless it maps to a row in Section 10.1. Orphan tooling is out of scope.
+4. **Phase-gated.** Build and test the tooling for a phase before running its experiments. Do not pre-build later phases "just in case."
+5. **Traceability.** Do not merge HerdSim work unless it maps to a row in Section 10.1. Orphan tooling is out of scope.
 
 ### 10.1 Traceability: RQ to HerdSim capability (implementation must meet the plan)
 
-HerdSim meets this plan when every required capability below exists, is tested, and is used by the matching evidence package. Status is relative to the current codebase at plan time.
+The plan is met when each capability below exists, is tested, and is used by the
+matching evidence package. Status below was relative to the codebase when the plan
+was written.
 
 | Cap | Serves | Capability | HerdSim location | Status | Package |
 |-----|--------|------------|------------------|--------|---------|
@@ -595,7 +641,9 @@ HerdSim meets this plan when every required capability below exists, is tested, 
 
 **Already available (do not rebuild):** cohesion, fragmentation, outlier_count metrics; `iter_one_trial` / Experiments path; observation modes and communication factor injection in the simulation runner; instrument presets listed in RQ4; failure taxonomy via benchmark runner.
 
-**Acceptance rule:** Phase k implementation is complete only when its Cap row(s) are built, unit-tested, and the phase "done when" criterion in Section 9 is met. Running campaigns without the matching Cap does not count as answering the RQ.
+**Acceptance rule:** Phase k is done on the implementation side only when its Cap
+row(s) are built, unit-tested, and the Section 9 "done when" criterion is met.
+Running campaigns without the matching Cap does not count as answering the RQ.
 
 ### 11. What to build
 
@@ -776,7 +824,7 @@ HerdSim/
 │   ├── run_grid.py
 │   ├── run_factor_sweep.py
 │   └── analyse.py
-├── results/budget/            # gitignored artefacts; README tracked
+├── results/budget/            # campaign run data (kept in git)
 │   ├── README.md
 │   └── phase{k}/{campaign}/
 │       ├── campaign.yaml

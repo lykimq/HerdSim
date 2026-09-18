@@ -26,10 +26,25 @@ environment updates -> sheep dynamics -> observation -> dog controller
 -> constraints -> obstacles/walls -> metrics
 ```
 
-See [docs/architecture.md](docs/architecture.md) for the factor-based plugin layout.
+See [docs/architecture.md](docs/architecture.md) for the factor-based plugin layout,
+including the shepherding-budget campaign stack (CLI grids, analysis packages,
+`results/budget/`).
 
 ## Getting Started
 
 1. `make install`
 2. `make dev`
 3. Open http://localhost:5173
+
+## Shepherding-budget campaigns
+
+For the longer research program (frozen protocol, phases, claim packages):
+
+```bash
+make budget-help
+# or: make -f Makefile.budget help
+```
+
+- Layout and what to commit: [results/budget/README.md](results/budget/README.md)
+- Status / run plan: [docs/research/budget/progress_tracker.md](docs/research/budget/progress_tracker.md)
+- Detailed plan: [docs/research/budget/main_shepherding_budget_plan.md](docs/research/budget/main_shepherding_budget_plan.md)

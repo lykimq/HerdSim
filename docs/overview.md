@@ -24,6 +24,12 @@ Typical research themes:
 | Generalization | Does the ranking of methods flip on a harder scenario or seed set? |
 | Method contrast | Collect/Drive vs force-based vs local farthest-sheep targeting |
 
+For the longer shepherding-budget program (Size / Structure / Mechanism /
+Generality, frozen protocol, claim packages), see
+[docs/research/budget/herdsim_research_program.md](research/budget/herdsim_research_program.md)
+and the run layout in [results/budget/README.md](../results/budget/README.md).
+That work uses `Makefile.budget` campaigns, not only the Experiments tab.
+
 ## What you get (features)
 
 - **Simulate:** one live run with scrub history, metrics, inspect panel, and a run report
@@ -89,7 +95,14 @@ They do not advance motion the same way. Kubo uses a continuous time step (`dt`)
 Yes: use Instrument (paper) settings. Say clearly that those runs are paper-default replication, not locked-count fair compare.
 
 **Where do batch results and provenance go?**
-Experiments exports (CSV, JSON, Markdown) carry trial outcomes, trajectory summaries, failure labels, design, and resolved config. Live Compare is for watching; Experiments is for evidence you can cite.
+Two paths:
+
+- **Experiments tab:** CSV / JSON / Markdown exports from the browser (trial
+  outcomes, trajectory summaries, failure labels, design, resolved config). Live
+  Compare is for watching; Experiments is for UI-side evidence you can download.
+- **Shepherding-budget campaigns:** CLI runs under `results/budget/phase{k}/{slug}/`
+  (`trials.csv`, timeseries, `packages/`, provenance). Those folders are kept in
+  git. Operator entry: `make budget-help`. See [results/budget/README.md](../results/budget/README.md).
 
 **Is NetLogo inside the browser sim?**
 No. HerdSim runs the Python engine in Simulate, Compare, and Experiments. The NetLogo tab opens desktop models that mirror selected instruments for visual cross-check.
@@ -101,5 +114,7 @@ No. HerdSim runs the Python engine in Simulate, Compare, and Experiments. The Ne
 - Score definitions: **Metrics**
 - World and timing conventions: **Environment**
 - Live A/B UI: **Compare**
-- Batch studies: **Experiments**
+- Batch studies (UI): **Experiments**
+- Shepherding-budget campaigns (CLI): [results/budget/README.md](../results/budget/README.md), [research/budget/progress_tracker.md](research/budget/progress_tracker.md)
 - Desktop twins: **NetLogo**
+- Extending the stack: [architecture.md](architecture.md)

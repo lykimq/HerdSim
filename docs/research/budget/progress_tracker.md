@@ -2,13 +2,13 @@
 
 Last updated: 2026-09-18
 
-Living execution ledger. Definitions, claim criteria, Caps, and Section 8 freeze
-live in the main plan -- do not duplicate them here.
+Working notes for where we are. Definitions, claim criteria, Caps, and the Section 8
+freeze stay in the main plan -- do not copy them here.
 
 | Document | Role |
 |----------|------|
-| [herdsim_research_program.md](herdsim_research_program.md) | Plain-language framing |
-| [main_shepherding_budget_plan.md](main_shepherding_budget_plan.md) | Source of truth |
+| [herdsim_research_program.md](herdsim_research_program.md) | Program framing |
+| [main_shepherding_budget_plan.md](main_shepherding_budget_plan.md) | Detailed plan |
 | [REPORT_TEMPLATE.md](REPORT_TEMPLATE.md) | Human REPORT.md template |
 | [results/budget/README.md](../../../results/budget/README.md) | Results layout conventions |
 | This file | Where we are, what ran, what is next; hardware + ordered run plan |
@@ -17,9 +17,8 @@ Campaign subsets: `configs/budget/campaigns/` (each field has a WHY comment; new
 Operator entry: `make -f Makefile.budget help` (or `make budget-help`).
 Protocol rationale: main plan Section 8.1 and comments in `configs/budget/canonical_grid.yaml`.
 
-Wall-clock times and throughput depend on hardware. Record the machine used for
-each claim-grade campaign (Section 6) and prefer comparing scientific outcomes
-(frontiers, regimes) across machines, not raw hours.
+Wall-clock times depend on the machine. For claim-grade campaigns, note which host
+you used (Section 6). Across machines, compare frontiers and regimes -- not hours.
 
 ---
 
@@ -35,7 +34,7 @@ each claim-grade campaign (Section 6) and prefer comparing scientific outcomes
 | Recommended next | Prefer Phase 2 state pilot (harder X0) over more compact scout grind -- see Sections 5 and 7 |
 | Primary machine | `gwen` -- Intel Ultra 7 165H, 64 GB RAM (see Section 6) |
 
-Minimum publishable unit: **RQ1 + RQ2 + RQ3 + S8**.
+Smallest publishable slice we are aiming for: **RQ1 + RQ2 + RQ3 + S8**.
 
 ---
 
@@ -106,8 +105,8 @@ Longer path: Section 7 (ordered run plan). Do not advance claim verdicts until S
 
 ## 6. Hardware profile (primary machine)
 
-Recorded so others know wall times and `WORKERS` choices are machine-dependent.
-Re-measure and append a new row if the primary box changes or a campaign runs elsewhere.
+So others know that wall times and `WORKERS` choices are machine-dependent.
+Re-measure and add a row if the primary box changes or a campaign runs elsewhere.
 
 | Field | Value (snapshot 2026-09-18) |
 |-------|-----------------------------|
@@ -123,10 +122,10 @@ Re-measure and append a new row if the primary box changes or a campaign runs el
 
 Notes for other machines:
 
-- Scientific results (R, D_min, regimes) should match given the same protocol, seeds, and code revision; wall-clock will not.
-- Timeout-heavy cells (hard X0, many failures to T0=10000) multiply wall time vs the compact scout baseline below.
+- With the same protocol, seeds, and code revision, scientific results (R, D_min, regimes) should match; wall-clock will not.
+- Timeout-heavy cells (hard X0, many failures to T0=10000) take much longer than the compact scout baseline below.
 - Rough calibration on this host: historical compact scout ~1123 cells in ~2 h at `WORKERS=4` (many short successes). At `WORKERS=8--16`, similar scout ~1--4 h; harder layouts can be much longer.
-- For claim-grade campaigns, copy this table into the campaign `REPORT.md` (or note host + `WORKERS` + governor) so the run is attributable.
+- For claim-grade campaigns, copy this table into the campaign `REPORT.md` (or at least note host + `WORKERS` + governor).
 
 If you run on a different machine, add a row here:
 
@@ -138,13 +137,16 @@ If you run on a different machine, add a row here:
 
 ## 7. Ordered run plan (one campaign at a time)
 
-Goal: finish the original program (Size -> Structure -> Mechanism -> Generality, then follow-ons) without one mega-grid. Run **one campaign**, write `REPORT.md`, update this tracker, then the next. Times (`*`) are rough for the primary machine in Section 6 and assume many short successes.
+Finish the original program (Size -> Structure -> Mechanism -> Generality, then
+follow-ons) without one giant grid. Run **one campaign**, write `REPORT.md`, update
+this tracker, then the next. Times (`*`) are rough for the primary machine in
+Section 6 and assume many short successes.
 
-Program finish line:
+Finish line we are working toward:
 
-- Minimum publishable unit: **RQ1 + RQ2 + RQ3 + S8**
-- Then staged: **RQ4 -> RQ5 -> RQ6 polish -> RQ7**
-- Paper cross-check: **after** real HerdSim frontiers (not on the core path)
+- Core slice: **RQ1 + RQ2 + RQ3 + S8**
+- Then: **RQ4 -> RQ5 -> RQ6 polish -> RQ7**
+- Paper cross-check: **after** we have real HerdSim frontiers (not on the core path)
 
 ### Phase 0 -- done
 
@@ -185,7 +187,8 @@ Gate B: need some failure / D_min>1 / overcrowding contrast. If still all easy, 
 
 Run **one method per campaign**, not all four in one job.
 
-Gate C -- core program scientifically closable: claim path for **C1 + C2 + C3** (and S8) with honest grades. RQ4 may be partial (>=3 methods) for a first paper cut.
+Gate C -- core program closable: claim path for **C1 + C2 + C3** (and S8) with honest
+grades. RQ4 can be partial (>=3 methods) for a first paper cut.
 
 ### Wave 5 -- Follow-ons (after core)
 
@@ -203,12 +206,13 @@ When a frontier exists: for important boundary cells, re-run **100 seeds** (not 
 ### Operator rules (keep manageable)
 
 1. One campaign -> `REPORT.md` -> update this tracker -> next.
-2. `WORKERS=8` safe; `12--16` if plugged in / no sleep / performance governor.
+2. `WORKERS=8` is safe; `12--16` if plugged in / no sleep / performance governor.
 3. Always resume; never delete `manifest.jsonl`.
 4. Keep timeseries for mechanism / early-warning; optional off for pure RQ5 sweeps.
 5. Stop at each Gate; do not "just add more N."
 
-\*Hard layouts that often hit T0=10000 can multiply wall time; still OK one campaign at a time with resume.
+\*Hard layouts that often hit T0=10000 can multiply wall time; still fine one campaign
+at a time if you resume.
 
 ---
 
@@ -250,7 +254,8 @@ Defaults: main plan Section 8. Gaps only.
 
 ## 10. Latest results
 
-Artefacts may be absent on a fresh clone (gitignored). Paths below are the canonical locations after the 2026-09-18 layout cleanup.
+Paths below are the canonical locations after the 2026-09-18 layout cleanup.
+Run data under `results/budget/` is kept in git once committed.
 
 ### `phase1_scout` (2026-09-17) -- STOPPED (historical)
 

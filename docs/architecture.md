@@ -87,16 +87,74 @@ New sheep models, dog controllers, and observation modes register in `core/plugi
 
 ## Implementation Layout
 
-- `api/`: FastAPI routers and factor-grid benchmarks
+- `api/`: FastAPI routers, factor-grid benchmarks, and shepherding-budget campaign runner (`budget_runner.py`, `budget_layout.py`)
 - `core/`: runner, factors, observation, agent attributes, presets
 - `dynamics/`, `controllers/`: sheep and dog plugins
 - `algorithms/<id>/`: on-disk instrument packages (`info.json`, paper defaults, helpers). Folder name is historical; product language is instrument. This is not an HTTP path.
 - `scenarios/`, `metrics/`: task and measurement plugins
-- `analysis/`: herdability, behavioural, failure taxonomy, propagation helpers
-- `scripts/`: `dev.sh` (local API + Vite; also `make dev`)
+- `analysis/`: UI/batch helpers (herdability, behavioural, failure taxonomy, propagation) plus `analysis/budget/` for shepherding-budget packages A--G
+- `configs/budget/`: frozen protocol (`canonical_grid.yaml`) and per-run campaign subsets
+- `scripts/`: `dev.sh` (local API + Vite; also `make dev`) and `scripts/budget/` (grid / factor-sweep / analyse CLIs)
+- `Makefile.budget`: operator targets for budget campaigns (`make budget-help`)
+- `results/budget/`: campaign run data under `phase{k}/{slug}/` (kept in git; see `results/budget/README.md`)
 - `frontend/`: Vite SPA (Simulate, Compare, Experiments, NetLogo, Guide)
-- `docs/`: architecture and research docs
+- `docs/`: architecture, Guide pages, and research plans under `docs/research/`
 - `tests/`: pytest + frontend node tests
+
+## Shepherding-budget stack
+
+Separate from the Experiments **UI** tab: a CLI campaign layer for the
+shepherding-budget research program (Size / Structure / Mechanism / Generality,
+then follow-ons). Science and status live under `docs/research/budget/`; this
+section is the engineering shape.
+
+### What exists now
+
+| Piece | Role |
+|-------|------|
+| `configs/budget/canonical_grid.yaml` | Frozen protocol defaults (task, θ, N/D grids, T₀/T₁, seeds, methods) |
+| `configs/budget/campaigns/*.yaml` | Per-run subsets (pilot, scout, state, factor sweep) with WHY comments |
+| `api/budget_runner.py` | Expand grid, run trials, resume via `manifest.jsonl`, write timeseries |
+| `api/budget_layout.py` | Path conventions (`phase{k}/{slug}/`, cell keys, package dirs) |
+| `analysis/budget/` | Frontier, regimes, export, plots, plus modules for later packages |
+| `scripts/budget/` | `run_grid.py`, `run_factor_sweep.py`, `analyse.py` |
+| `Makefile.budget` | `budget-pilot`, `budget-scout`, `budget-pilot-state`, `budget-factor-sweep`, `budget-analyse` |
+| `results/budget/phase{k}/{slug}/` | `campaign.yaml`, provenance, `trials.csv`, `timeseries/`, `packages/{a-g}/`, optional `REPORT.md` |
+
+Operator entry: `make -f Makefile.budget help` (or `make budget-help`). Layout
+detail: [results/budget/README.md](../results/budget/README.md).
+
+### Target design (after the budget plan is finished)
+
+The research plan drives a phase sequence. When the program is complete, the same
+layout should support claim-grade work end to end -- not only smoke/scout runs:
+
+| Phase focus | Formal RQs | Evidence package | Engineering outcome |
+|-------------|------------|------------------|---------------------|
+| Protocol freeze | S8 | all | Locked `canonical_grid.yaml` + provenance on every campaign |
+| Herdability maps | RQ2 (+ data for RQ6) | A | Reliability maps, D_min frontier, regimes, figures |
+| Structure beyond N | RQ1 | B | All four X₀ layouts; state vs (N, D) predictors |
+| Overcrowding mechanism | RQ3 | C | I_dir / coverage timeseries + mechanism tests |
+| Cross-method transfer | RQ4 | D | Same grids on transfer instruments; transfer table |
+| Information vs shepherds | RQ5 | E | Factor sweeps; substitution curves |
+| Scaling fits | RQ6 | F | Model comparison on real (non-flat) frontiers |
+| Early warning | RQ7 | G | Lead-time / AUROC from failure trajectories |
+
+Caps I1--I14 in the plan are the capability checklist (grid runner, frontier,
+regimes, X₀ generators, predictors, interference/coverage, mechanism tests,
+transfer, substitution, scaling fits, early warning, dossier export, timeseries).
+Several Caps are already built and unit-tested; claim-grade use follows the
+campaign waves in the progress tracker.
+
+### Where to read the science
+
+- Program framing: [docs/research/budget/herdsim_research_program.md](research/budget/herdsim_research_program.md)
+- Detailed plan (RQs, claims, Caps, protocol): [docs/research/budget/main_shepherding_budget_plan.md](research/budget/main_shepherding_budget_plan.md)
+- Status, hardware, ordered run plan: [docs/research/budget/progress_tracker.md](research/budget/progress_tracker.md)
+
+Do not treat the Experiments UI exports as a substitute for this campaign stack:
+UI batch studies stay in the browser; budget campaigns write under `results/budget/`
+and are meant to stay with the repo.
 
 ## HTTP API (instruments)
 
@@ -106,3 +164,6 @@ Discovery and UI payloads use **instrument** wording:
 - Related routes under `/api/instruments/...` (for example models meta used by Experiments)
 
 There is no `/api/algorithms` route. Prefer `instrument` / `instruments` in new API fields and clients. On disk, packages remain under `algorithms/<id>/` until a deliberate folder rename.
+
+Shepherding-budget campaigns are CLI/Makefile driven today; they wrap the same
+simulation runner and instruments, not a separate HTTP surface.

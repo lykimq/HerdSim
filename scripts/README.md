@@ -1,6 +1,6 @@
 # Scripts
 
-Only local development helpers live here.
+Local helpers and CLI entry points that sit outside the web UI.
 
 ## `dev.sh`
 
@@ -14,6 +14,25 @@ health check before launching the frontend. Ctrl+C stops both.
 
 Optional env: `HERDSIM_API_URL`, `HERDSIM_API_WAIT_SECONDS`.
 
-Batch experiments, fair compares, and factor grids run in the **Experiments**
-tab in the web UI (same `run_benchmark` engine). See
+## `budget/`
+
+Shepherding-budget campaign CLIs (also wired through `Makefile.budget`):
+
+| Script | Role |
+|--------|------|
+| `budget/run_grid.py` | N x D (x layout / instrument) grid with resume |
+| `budget/run_factor_sweep.py` | RQ5-style information / communication sweeps |
+| `budget/analyse.py` | Export evidence packages under `packages/{a-g}/` |
+
+```bash
+make budget-help
+# or: make -f Makefile.budget help
+```
+
+Campaign outputs land in `results/budget/phase{k}/{slug}/` (kept in git). See
+[results/budget/README.md](../results/budget/README.md) and
+[docs/architecture.md](../docs/architecture.md) (Shepherding-budget stack).
+
+UI batch studies (fair compares, factor grids in the browser) still run from the
+**Experiments** tab. See `docs/experiments.md` and
 `docs/research/comparison_framework.md`.

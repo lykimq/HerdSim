@@ -4,6 +4,12 @@ This page covers the **Experiments** tab only: batch runs without the live arena
 
 Simulate and Compare are for watching behaviour. Experiments is for measuring it across seeds and exporting a record.
 
+For the shepherding-budget research campaigns (frozen protocol, phases, packages
+A--G, claim-grade frontiers), use `make budget-help` and
+[results/budget/README.md](../results/budget/README.md) instead. That stack is
+separate from this tab; see [architecture.md](architecture.md) (Shepherding-budget
+stack).
+
 ## When to use Experiments
 
 | Goal | Mode |
@@ -116,3 +122,4 @@ Keep the export with your notes so later readers know exactly what was locked an
 - Metrics: what each score means
 - Scenarios: task layouts and success rules
 - Instruments: what each method package contains
+- Shepherding-budget CLI: [results/budget/README.md](../results/budget/README.md) / `make budget-help`
