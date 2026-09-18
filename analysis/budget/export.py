@@ -127,7 +127,8 @@ def export_package_dossier(
     ]
     report.write_text("\n".join(body) + "\n")
     paths["report"] = report
-    (out / "manifest.json").write_text(
+    # Path index for this package (not the campaign resume ledger).
+    (out / "artefacts.json").write_text(
         json.dumps({k: str(v) for k, v in paths.items()}, indent=2) + "\n"
     )
     return paths

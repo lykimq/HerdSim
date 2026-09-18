@@ -224,6 +224,11 @@ netlogo/models/uploads/*
 # Offline experiment outputs (CLI scripts write here by default)
 results/*
 !results/.gitkeep
+!results/budget/
+results/budget/**
+!results/budget/README.md
+!results/budget/**/
+!results/budget/**/REPORT.md
 
 # Node / frontend
 node_modules/

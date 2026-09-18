@@ -1,37 +1,22 @@
-.PHONY: help install dev dev-backend dev-frontend test test-backend test-stress test-frontend lint format build clean \
-	budget-help budget-test budget-pilot budget-pilot-state budget-analyse budget-scout
+# HerdSim -- basic project targets (install, dev, test, lint, build).
+# Shepherding-budget campaigns live in Makefile.budget:
+#   make -f Makefile.budget help
+#   make budget-help
+
+.PHONY: help install dev dev-backend dev-frontend test test-backend test-stress \
+	test-frontend lint format build clean budget-help \
+	budget-test budget-pilot budget-pilot-state budget-analyse budget-scout \
+	budget-factor-sweep
 
 PYTHON ?= python
 # Editable install may predate analysis/; scripts need the repo root on PYTHONPATH.
 export PYTHONPATH := $(CURDIR)$(if $(PYTHONPATH),:$(PYTHONPATH),)
 
-# Budget campaign defaults (override on the make command line).
-BUDGET_INSTRUMENT ?= strombom_multi
-BUDGET_LAYOUT ?= compact
-BUDGET_LAYOUTS_STATE ?= compact wide split outlier_rich
-BUDGET_N ?= 25 50 100
-BUDGET_D ?= 1 2 3 4 6 10
-BUDGET_SEEDS ?= 5
-BUDGET_OUT ?= results/budget/phase1/pilot
-BUDGET_MAX_TICKS ?=
-WORKERS ?= 1
-PACKAGE ?= A
-TRIALS ?= $(BUDGET_OUT)/trials.csv
-OUT ?= $(BUDGET_OUT)/package_$(shell echo $(PACKAGE) | tr A-Z a-z)
-
-# Phase-1 scout defaults (long-running; see budget-help).
-# Subset of frozen Section 8: compact only, N through 200, D through 20, scout seeds.
-SCOUT_N ?= 25 50 75 100 150 200
-SCOUT_D ?= 1 2 3 4 6 10 15 20
-SCOUT_SEEDS ?= 30
-SCOUT_OUT ?= results/budget/phase1/scout
-SCOUT_LAYOUT ?= compact
-SCOUT_CAMPAIGN_ID ?= phase1_scout
-
 # Default target
 help:
-	@echo "HerdSim make targets"
+	@echo "HerdSim -- basic targets"
 	@echo ""
+	@echo "  make help            Show this help"
 	@echo "  make install         Install Python (editable + dev) and frontend deps"
 	@echo "  make dev             Start API + Vite together (Ctrl+C stops both)"
 	@echo "  make dev-backend     Start FastAPI only (port 8000, reload)"
@@ -44,10 +29,10 @@ help:
 	@echo "  make format          Ruff format + frontend prettier"
 	@echo "  make build           Frontend production build"
 	@echo "  make clean           Remove caches, dist, and Vite cache"
-	@echo "  make budget-help     List shepherding-budget campaign targets"
-	@echo "  make budget-test     Budget stack unit tests"
-	@echo "  make budget-pilot    Small Phase-1 pilot grid + Package A"
-	@echo "  make help            Show this help"
+	@echo ""
+	@echo "Shepherding-budget campaigns (separate Makefile):"
+	@echo "  make -f Makefile.budget help"
+	@echo "  make budget-help              (same as above)"
 
 # Install
 install:
@@ -100,101 +85,10 @@ clean:
 	cd frontend && rm -rf dist node_modules/.vite
 
 # ---------------------------------------------------------------------------
-# Shepherding budget campaigns (docs/research/budget/main_shepherding_budget_plan.md)
+# Forward budget targets to Makefile.budget (keeps existing make budget-* habit)
 # ---------------------------------------------------------------------------
-# Override examples:
-#   make budget-pilot BUDGET_MAX_TICKS=3000 WORKERS=1
-#   make budget-analyse PACKAGE=A TRIALS=results/budget/phase1/pilot/trials.csv OUT=results/budget/phase1/pilot/package_a
-#   make budget-scout WORKERS=4
-
 budget-help:
-	@echo "Shepherding budget targets"
-	@echo ""
-	@echo "  make budget-test          Unit tests for the budget stack"
-	@echo "  make budget-pilot         Phase-1 smoke pilot: compact, Package A"
-	@echo "  make budget-pilot-state   Phase-2 smoke: all X0 layouts, Package B"
-	@echo "  make budget-analyse       Analyse trials (PACKAGE, TRIALS, OUT)"
-	@echo "  make budget-scout         Phase-1 scout grid + Packages A/F (LONG-RUNNING)"
-	@echo ""
-	@echo "Results layout: results/budget/phase<N>/<campaign>/"
-	@echo "  Phase 1: results/budget/phase1/{pilot,scout}/"
-	@echo ""
-	@echo "Pilot defaults (override on the command line):"
-	@echo "  BUDGET_INSTRUMENT=$(BUDGET_INSTRUMENT)"
-	@echo "  BUDGET_LAYOUT=$(BUDGET_LAYOUT)   (state: BUDGET_LAYOUTS_STATE)"
-	@echo "  BUDGET_N=$(BUDGET_N)"
-	@echo "  BUDGET_D=$(BUDGET_D)"
-	@echo "  BUDGET_SEEDS=$(BUDGET_SEEDS)"
-	@echo "  BUDGET_OUT=$(BUDGET_OUT)"
-	@echo "  BUDGET_MAX_TICKS=<empty uses protocol time_limit_t0=10000>"
-	@echo "  WORKERS=$(WORKERS)"
-	@echo ""
-	@echo "Analyse defaults:"
-	@echo "  PACKAGE=$(PACKAGE)  TRIALS=$(TRIALS)  OUT=$(OUT)"
-	@echo ""
-	@echo "Phase-1 scout defaults (long-running; one instrument, one layout):"
-	@echo "  SCOUT_N=$(SCOUT_N)"
-	@echo "  SCOUT_D=$(SCOUT_D)"
-	@echo "  SCOUT_SEEDS=$(SCOUT_SEEDS)"
-	@echo "  SCOUT_OUT=$(SCOUT_OUT)"
-	@echo "  SCOUT_LAYOUT=$(SCOUT_LAYOUT)"
-	@echo "  SCOUT_CAMPAIGN_ID=$(SCOUT_CAMPAIGN_ID)"
+	@$(MAKE) -f Makefile.budget help
 
-budget-test:
-	$(PYTHON) -m pytest tests/backend/correctness/test_budget_stack.py -q
-
-# Optional --max-ticks only when BUDGET_MAX_TICKS is set.
-BUDGET_MAX_TICKS_FLAG = $(if $(BUDGET_MAX_TICKS),--max-ticks $(BUDGET_MAX_TICKS),)
-
-budget-pilot:
-	@mkdir -p $(BUDGET_OUT)
-	$(PYTHON) scripts/budget/run_grid.py \
-		--output $(BUDGET_OUT) \
-		--instruments $(BUDGET_INSTRUMENT) \
-		--layouts $(BUDGET_LAYOUT) \
-		--n $(BUDGET_N) \
-		--d $(BUDGET_D) \
-		--seeds $(BUDGET_SEEDS) \
-		--workers $(WORKERS) \
-		--campaign-id budget_pilot \
-		$(BUDGET_MAX_TICKS_FLAG)
-	$(MAKE) budget-analyse PACKAGE=A TRIALS=$(BUDGET_OUT)/trials.csv OUT=$(BUDGET_OUT)/package_a
-
-budget-pilot-state:
-	@mkdir -p $(BUDGET_OUT)/state
-	$(PYTHON) scripts/budget/run_grid.py \
-		--output $(BUDGET_OUT)/state \
-		--instruments $(BUDGET_INSTRUMENT) \
-		--layouts $(BUDGET_LAYOUTS_STATE) \
-		--n $(BUDGET_N) \
-		--d $(BUDGET_D) \
-		--seeds $(BUDGET_SEEDS) \
-		--workers $(WORKERS) \
-		--campaign-id budget_pilot_state \
-		$(BUDGET_MAX_TICKS_FLAG)
-	$(MAKE) budget-analyse PACKAGE=B TRIALS=$(BUDGET_OUT)/state/trials.csv OUT=$(BUDGET_OUT)/state/package_b
-
-budget-analyse:
-	$(PYTHON) scripts/budget/analyse.py \
-		--package $(PACKAGE) \
-		--trials $(TRIALS) \
-		--output $(OUT)
-
-# Phase-1 scout: Section 8 subset (compact, scout seeds, T0). LONG-RUNNING.
-# Still short of full frozen N/D and claim-grade boundary reseeds.
-budget-scout:
-	@echo "NOTE: budget-scout is long-running (many N x D x seeds cells)."
-	@echo "Phase 1 scout output: $(SCOUT_OUT)  campaign_id=$(SCOUT_CAMPAIGN_ID)"
-	@mkdir -p $(SCOUT_OUT)
-	$(PYTHON) scripts/budget/run_grid.py \
-		--output $(SCOUT_OUT) \
-		--instruments $(BUDGET_INSTRUMENT) \
-		--layouts $(SCOUT_LAYOUT) \
-		--n $(SCOUT_N) \
-		--d $(SCOUT_D) \
-		--seeds $(SCOUT_SEEDS) \
-		--workers $(WORKERS) \
-		--campaign-id $(SCOUT_CAMPAIGN_ID) \
-		$(BUDGET_MAX_TICKS_FLAG)
-	$(MAKE) budget-analyse PACKAGE=A TRIALS=$(SCOUT_OUT)/trials.csv OUT=$(SCOUT_OUT)/package_a
-	$(MAKE) budget-analyse PACKAGE=F TRIALS=$(SCOUT_OUT)/trials.csv OUT=$(SCOUT_OUT)/package_f
+budget-test budget-pilot budget-pilot-state budget-analyse budget-scout budget-factor-sweep:
+	@$(MAKE) -f Makefile.budget $@

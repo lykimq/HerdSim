@@ -1,0 +1,22 @@
+# Phase-2 state pilot (all X0 families).
+# Grade: SMOKE. Path is under phase2/, not nested under phase1.
+
+campaign_id: phase2_pilot_state
+phase: 2
+grade: SMOKE
+output: results/budget/phase2/pilot_state
+protocol: configs/budget/canonical_grid.yaml
+
+instruments:
+  - strombom_multi
+layouts:
+  - compact
+  - wide
+  - split
+  - outlier_rich
+flock_sizes: [25, 50, 100]
+shepherd_counts: [1, 2, 3, 4, 6, 10]
+seeds: 5
+seed_mode: scout
+store_timeseries: true
+packages: [B]

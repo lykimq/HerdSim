@@ -246,3 +246,32 @@ def test_canonical_protocol_loads():
     assert protocol["reliability_theta"] == 0.90
     assert protocol["baseline_method"] == "strombom_multi"
     assert 10000 == protocol["time_limit_t0"]
+
+
+def test_budget_layout_and_cell_key(tmp_path: Path):
+    from api.budget_layout import (
+        CAMPAIGNS_DIR,
+        load_campaign_spec,
+        package_output_dir,
+        resolve_campaign_output,
+    )
+    from api.budget_runner import BudgetCell, _cell_key, timeseries_stem
+
+    spec = load_campaign_spec(CAMPAIGNS_DIR / "phase1_pilot.yaml")
+    assert spec["campaign_id"] == "phase1_pilot"
+    assert resolve_campaign_output(spec).name == "pilot"
+    assert package_output_dir(tmp_path, "A") == tmp_path / "packages" / "a"
+
+    cell = BudgetCell(
+        n_sheep=50,
+        n_shepherds=2,
+        seed=2026,
+        initial_layout="compact",
+        instrument="strombom_multi",
+        obs_mode="bearing_only",
+    )
+    key = _cell_key(cell)
+    assert key == timeseries_stem(cell)
+    assert "Istrombom_multi" in key
+    assert "Obearing_only" in key
+    assert key.startswith("N50_D2_Lcompact_S2026_")

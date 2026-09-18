@@ -16,6 +16,7 @@ import yaml
 from analysis.budget.provenance import build_provenance_stamp, write_provenance
 from analysis.failure_taxonomy import classify_failure
 from api.benchmark_aggregates import build_trial_metric_fields
+from api.budget_layout import write_status
 from core.experiment_config import resolve_experiment_config
 from core.presets import get_preset
 from core.simulation_runner import RunResult, SimulationRunner
@@ -51,10 +52,26 @@ def load_canonical_protocol(path: Path | str | None = None) -> dict[str, Any]:
 
 
 def _cell_key(cell: BudgetCell) -> str:
-    return (
+    """Stable resume / timeseries stem. Includes info factors when set."""
+    key = (
         f"N{cell.n_sheep}_D{cell.n_shepherds}_L{cell.initial_layout}_"
         f"S{cell.seed}_I{cell.instrument}"
     )
+    extras: list[str] = []
+    if cell.obs_mode is not None:
+        extras.append(f"O{cell.obs_mode}")
+    if cell.sensing_range is not None:
+        extras.append(f"R{cell.sensing_range}")
+    if cell.communication is not None:
+        extras.append(f"C{cell.communication}")
+    if extras:
+        return key + "_" + "_".join(extras)
+    return key
+
+
+def timeseries_stem(cell: BudgetCell) -> str:
+    """Filename stem for per-trial timeseries (matches resume key)."""
+    return _cell_key(cell)
 
 
 def _manifest_path(output_dir: Path) -> Path:
@@ -286,24 +303,27 @@ def run_budget_grid(
         rows.append(row)
         if store_timeseries and payload.get("history") is not None:
             ts_dir = out / "timeseries"
-            fname = (
-                f"N{cell.n_sheep}_D{cell.n_shepherds}_seed{cell.seed}_"
-                f"{cell.initial_layout}"
+            _write_timeseries(
+                payload["history"],
+                ts_dir / f"{timeseries_stem(cell)}.parquet",
             )
-            _write_timeseries(payload["history"], ts_dir / f"{fname}.parquet")
-        _append_manifest(
-            out,
-            {
-                "key": payload["key"],
-                "N": cell.n_sheep,
-                "D": cell.n_shepherds,
-                "seed": cell.seed,
-                "initial_layout": cell.initial_layout,
-                "instrument": cell.instrument,
-                "status": "ok",
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-            },
-        )
+        man: dict[str, Any] = {
+            "key": payload["key"],
+            "N": cell.n_sheep,
+            "D": cell.n_shepherds,
+            "seed": cell.seed,
+            "initial_layout": cell.initial_layout,
+            "instrument": cell.instrument,
+            "status": "ok",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+        if cell.obs_mode is not None:
+            man["obs_mode"] = cell.obs_mode
+        if cell.sensing_range is not None:
+            man["sensing_range"] = cell.sensing_range
+        if cell.communication is not None:
+            man["communication"] = cell.communication
+        _append_manifest(out, man)
 
     if pending:
         if workers <= 1 or len(pending) == 1:
@@ -317,6 +337,18 @@ def run_budget_grid(
 
     trials = pd.DataFrame(rows)
     trials.to_csv(trials_path, index=False)
+    n_done = len(_load_completed(out))
+    write_status(
+        out,
+        campaign_id=campaign_id,
+        n_planned=len(cells),
+        n_done=n_done,
+        n_pending_at_start=len(pending),
+        extra={
+            "n_rows_trials_csv": int(len(trials)),
+            "store_timeseries": bool(store_timeseries),
+        },
+    )
     return trials
 
 

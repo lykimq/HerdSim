@@ -1,0 +1,19 @@
+# Phase-1 scout (compact only; subset of frozen N/D).
+# Grade: SCOUT. LONG-RUNNING. Resume-safe via manifest.jsonl.
+
+campaign_id: phase1_scout
+phase: 1
+grade: SCOUT
+output: results/budget/phase1/scout
+protocol: configs/budget/canonical_grid.yaml
+
+instruments:
+  - strombom_multi
+layouts:
+  - compact
+flock_sizes: [25, 50, 75, 100, 150, 200]
+shepherd_counts: [1, 2, 3, 4, 6, 10, 15, 20]
+seeds: 30
+seed_mode: scout
+store_timeseries: true
+packages: [A, F]

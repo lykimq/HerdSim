@@ -1,0 +1,141 @@
+# HerdSim -- shepherding-budget campaign targets.
+#
+# Usage:
+#   make -f Makefile.budget help
+#   make -f Makefile.budget budget-pilot
+#   make budget-help                  (forwarded from the main Makefile)
+#
+# Layout and conventions: results/budget/README.md
+# Science / protocol: docs/research/budget/main_shepherding_budget_plan.md
+
+.PHONY: help budget-help budget-test budget-pilot budget-pilot-state \
+	budget-analyse budget-scout budget-factor-sweep
+
+PYTHON ?= python
+export PYTHONPATH := $(CURDIR)$(if $(PYTHONPATH),:$(PYTHONPATH),)
+
+# Campaign subsets (frozen protocol subsets).
+BUDGET_CAMPAIGN_DIR ?= configs/budget/campaigns
+PHASE1_PILOT_CAMPAIGN ?= $(BUDGET_CAMPAIGN_DIR)/phase1_pilot.yaml
+PHASE1_SCOUT_CAMPAIGN ?= $(BUDGET_CAMPAIGN_DIR)/phase1_scout.yaml
+PHASE2_STATE_CAMPAIGN ?= $(BUDGET_CAMPAIGN_DIR)/phase2_pilot_state.yaml
+PHASE5_SWEEP_CAMPAIGN ?= $(BUDGET_CAMPAIGN_DIR)/phase5_factor_sweep.yaml
+
+BUDGET_OUT ?= results/budget/phase1/pilot
+STATE_OUT ?= results/budget/phase2/pilot_state
+SCOUT_OUT ?= results/budget/phase1/scout
+SWEEP_OUT ?= results/budget/phase5/factor_sweep
+
+WORKERS ?= 1
+BUDGET_MAX_TICKS ?=
+PACKAGE ?= A
+TRIALS ?= $(BUDGET_OUT)/trials.csv
+OUT ?= $(BUDGET_OUT)/packages/$(shell echo $(PACKAGE) | tr A-Z a-z)
+
+# Optional CLI overrides for ad-hoc grids.
+BUDGET_INSTRUMENT ?=
+BUDGET_LAYOUT ?=
+BUDGET_N ?=
+BUDGET_D ?=
+BUDGET_SEEDS ?=
+
+BUDGET_MAX_TICKS_FLAG = $(if $(BUDGET_MAX_TICKS),--max-ticks $(BUDGET_MAX_TICKS),)
+BUDGET_OVERRIDE_FLAGS = \
+	$(if $(BUDGET_INSTRUMENT),--instruments $(BUDGET_INSTRUMENT),) \
+	$(if $(BUDGET_LAYOUT),--layouts $(BUDGET_LAYOUT),) \
+	$(if $(BUDGET_N),--n $(BUDGET_N),) \
+	$(if $(BUDGET_D),--d $(BUDGET_D),) \
+	$(if $(BUDGET_SEEDS),--seeds $(BUDGET_SEEDS),)
+
+# Default when using: make -f Makefile.budget
+.DEFAULT_GOAL := help
+
+help budget-help:
+	@echo "HerdSim -- shepherding-budget targets"
+	@echo ""
+	@echo "  make -f Makefile.budget help"
+	@echo "  make budget-help                 (same, via main Makefile)"
+	@echo ""
+	@echo "  make -f Makefile.budget budget-test"
+	@echo "  make -f Makefile.budget budget-pilot"
+	@echo "  make -f Makefile.budget budget-pilot-state"
+	@echo "  make -f Makefile.budget budget-scout"
+	@echo "  make -f Makefile.budget budget-factor-sweep"
+	@echo "  make -f Makefile.budget budget-analyse"
+	@echo ""
+	@echo "Campaign YAMLs: $(BUDGET_CAMPAIGN_DIR)/"
+	@echo "  pilot:  $(PHASE1_PILOT_CAMPAIGN)"
+	@echo "  scout:  $(PHASE1_SCOUT_CAMPAIGN)"
+	@echo "  state:  $(PHASE2_STATE_CAMPAIGN)"
+	@echo "  sweep:  $(PHASE5_SWEEP_CAMPAIGN)"
+	@echo ""
+	@echo "Results layout: results/budget/phase<N>/<campaign>/"
+	@echo "  Auto analysis:   <campaign>/packages/{a-g}/"
+	@echo "  Human narrative: <campaign>/REPORT.md"
+	@echo "  Index: results/budget/README.md"
+	@echo ""
+	@echo "Defaults:"
+	@echo "  WORKERS=$(WORKERS)  BUDGET_MAX_TICKS=$(BUDGET_MAX_TICKS)"
+	@echo "  PACKAGE=$(PACKAGE)  TRIALS=$(TRIALS)  OUT=$(OUT)"
+	@echo "  BUDGET_OUT=$(BUDGET_OUT)  STATE_OUT=$(STATE_OUT)"
+	@echo "  SCOUT_OUT=$(SCOUT_OUT)  SWEEP_OUT=$(SWEEP_OUT)"
+	@echo ""
+	@echo "Resume: keep manifest.jsonl; re-run the same target / --output."
+	@echo "Optional overrides: BUDGET_INSTRUMENT BUDGET_LAYOUT BUDGET_N BUDGET_D BUDGET_SEEDS"
+	@echo ""
+	@echo "Basic project targets: make -f Makefile help   (or: make help)"
+
+budget-test:
+	$(PYTHON) -m pytest tests/backend/correctness/test_budget_stack.py -q
+
+budget-pilot:
+	@mkdir -p $(BUDGET_OUT)
+	$(PYTHON) scripts/budget/run_grid.py \
+		--campaign $(PHASE1_PILOT_CAMPAIGN) \
+		--output $(BUDGET_OUT) \
+		--workers $(WORKERS) \
+		$(BUDGET_MAX_TICKS_FLAG) \
+		$(BUDGET_OVERRIDE_FLAGS)
+	$(MAKE) -f Makefile.budget budget-analyse \
+		PACKAGE=A TRIALS=$(BUDGET_OUT)/trials.csv OUT=$(BUDGET_OUT)/packages/a
+
+budget-pilot-state:
+	@mkdir -p $(STATE_OUT)
+	$(PYTHON) scripts/budget/run_grid.py \
+		--campaign $(PHASE2_STATE_CAMPAIGN) \
+		--output $(STATE_OUT) \
+		--workers $(WORKERS) \
+		$(BUDGET_MAX_TICKS_FLAG) \
+		$(BUDGET_OVERRIDE_FLAGS)
+	$(MAKE) -f Makefile.budget budget-analyse \
+		PACKAGE=B TRIALS=$(STATE_OUT)/trials.csv OUT=$(STATE_OUT)/packages/b
+
+budget-analyse:
+	$(PYTHON) scripts/budget/analyse.py \
+		--package $(PACKAGE) \
+		--trials $(TRIALS) \
+		--output $(OUT)
+
+budget-scout:
+	@echo "NOTE: budget-scout is long-running (many N x D x seeds cells)."
+	@echo "Output: $(SCOUT_OUT)  campaign=$(PHASE1_SCOUT_CAMPAIGN)"
+	@mkdir -p $(SCOUT_OUT)
+	$(PYTHON) scripts/budget/run_grid.py \
+		--campaign $(PHASE1_SCOUT_CAMPAIGN) \
+		--output $(SCOUT_OUT) \
+		--workers $(WORKERS) \
+		$(BUDGET_MAX_TICKS_FLAG) \
+		$(BUDGET_OVERRIDE_FLAGS)
+	$(MAKE) -f Makefile.budget budget-analyse \
+		PACKAGE=A TRIALS=$(SCOUT_OUT)/trials.csv OUT=$(SCOUT_OUT)/packages/a
+	$(MAKE) -f Makefile.budget budget-analyse \
+		PACKAGE=F TRIALS=$(SCOUT_OUT)/trials.csv OUT=$(SCOUT_OUT)/packages/f
+
+budget-factor-sweep:
+	@mkdir -p $(SWEEP_OUT)
+	$(PYTHON) scripts/budget/run_factor_sweep.py \
+		--campaign $(PHASE5_SWEEP_CAMPAIGN) \
+		--output $(SWEEP_OUT) \
+		--workers $(WORKERS)
+	$(MAKE) -f Makefile.budget budget-analyse \
+		PACKAGE=E TRIALS=$(SWEEP_OUT)/trials.csv OUT=$(SWEEP_OUT)/packages/e

@@ -643,11 +643,14 @@ The grid runner wraps [iter_one_trial()](file:///home/quyen/HerdSim/api/benchmar
 
 RQ3 and RQ7 require per-tick mechanism metrics (I_dir, C) and collective-state trajectories, not just scalar summaries. The grid runner must store per-trial time-series data.
 
-**Format:** Apache Parquet, one file per trial.
+**Format:** Apache Parquet, one file per trial. Filename stem equals the resume cell key
+(includes N, D, layout, seed, instrument, and any info-factor suffixes).
 
 ```
-results/budget/<campaign_id>/timeseries/N{n}_D{d}_seed{s}.parquet
+results/budget/phase{k}/{campaign_slug}/timeseries/<cell_key>.parquet
 ```
+
+Example: `N50_D2_Lcompact_S2026_Istrombom_multi.parquet`
 
 **Columns (Phase 1):** `tick, cohesion, fragmentation, outlier_count, mean_spread, extent`
 
@@ -655,7 +658,7 @@ results/budget/<campaign_id>/timeseries/N{n}_D{d}_seed{s}.parquet
 
 **Storage budget:** ~10,000 ticks × 8 columns × 8 bytes ≈ 640 KB per trial (Parquet compresses ~5×, so ~130 KB). Full scout sweep (9,600 trials): ~1.2 GB. Manageable.
 
-**Implementation:** After `iter_one_trial()` yields the final `"trial"` event, extract `result.history` (the [HistoryRecorder](file:///home/quyen/HerdSim/core/history_recorder.py) DataFrame) and write it to Parquet. The recorder already stores all registered metrics per tick.
+**Implementation:** After each trial completes, write `result.history` to Parquet under `timeseries/`. Also write `status.json` with planned/done counts. Campaign subset YAML is copied to `campaign.yaml` in the output folder.
 
 #### 11.5 Analysis modules (Phases 2–7)
 
@@ -706,50 +709,44 @@ These are diagnostic and paper-ready. Build each plot when the matching phase da
 
 ```
 HerdSim/
-├── analysis/budget/           [NEW — all budget-specific analysis]
-│   ├── __init__.py
-│   ├── provenance.py          Phase 0
-│   ├── frontier.py            Phase 1
-│   ├── regimes.py             Phase 1
-│   ├── export.py              Phase 1
-│   ├── plots.py               Phase 1+
-│   ├── mechanism.py           Phase 3
-│   ├── transfer.py            Phase 4
-│   ├── substitution.py        Phase 5
-│   ├── scaling.py             Phase 6
-│   ├── predictors.py          Phase 2
-│   └── early_warning.py       Phase 7
+├── analysis/budget/           # Caps analysis (packages A-G)
+│   ├── provenance.py
+│   ├── frontier.py
+│   ├── regimes.py
+│   ├── export.py
+│   ├── plots.py
+│   ├── mechanism.py
+│   ├── transfer.py
+│   ├── substitution.py
+│   ├── scaling.py
+│   ├── predictors.py
+│   └── early_warning.py
 ├── api/
-│   ├── benchmark_runner.py    [UNCHANGED — wrapped, not modified]
-│   └── budget_runner.py       [NEW]
-├── configs/budget/            [NEW]
-│   └── canonical_grid.yaml
-├── core/
-│   ├── x0_generators.py       [NEW — X₀ family generation]
-│   └── ...                    [existing files unchanged; see Section 13 exception E1]
-├── metrics/
-│   ├── mean_spread.py         [NEW — Phase 1]
-│   ├── extent.py              [NEW — Phase 1]
-│   ├── shepherd_interference.py [NEW — Phase 3]
-│   ├── shepherd_coverage.py   [NEW — Phase 3]
-│   └── ...                    [existing metrics unchanged]
-├── scripts/budget/            [NEW]
+│   ├── budget_runner.py       # grid expand + resume + timeseries
+│   └── budget_layout.py       # path conventions + campaign helpers
+├── configs/budget/
+│   ├── canonical_grid.yaml    # frozen Section 8 protocol
+│   └── campaigns/             # per-run subsets (pilot, scout, state, ...)
+├── scripts/budget/
 │   ├── run_grid.py
 │   ├── run_factor_sweep.py
 │   └── analyse.py
-├── results/budget/            [NEW — gitignored output]
-│   └── <campaign_id>/
+├── results/budget/            # gitignored artefacts; README tracked
+│   ├── README.md
+│   └── phase{k}/{campaign}/
+│       ├── campaign.yaml
 │       ├── manifest.jsonl
-│       ├── summary.csv
-│       └── timeseries/        [per-trial Parquet files]
-└── tests/
-    ├── test_budget_frontier.py [NEW]
-    ├── test_budget_regimes.py  [NEW]
-    ├── test_budget_runner.py   [NEW]
-    ├── test_x0_generators.py   [NEW]
-    └── test_budget_smoke.py    [NEW]
+│       ├── provenance.json
+│       ├── status.json
+│       ├── trials.csv
+│       ├── timeseries/
+│       ├── packages/{a-g}/
+│       └── REPORT.md          # human narrative (optional)
+└── tests/backend/correctness/
+    └── test_budget_stack.py
 ```
 
+Operator facade: `Makefile.budget` (`make -f Makefile.budget help`, or `make budget-help`). Targets: `budget-pilot`, `budget-scout`, `budget-pilot-state`, `budget-factor-sweep`, `budget-analyse`.
 ### 13. What is NOT modified
 
 | Module | Reason |
@@ -853,6 +850,7 @@ This is the *only* permitted core-module change. It is gated behind an empirical
 | 2026-09-17 | Diagnostic visualisation module added |
 | 2026-09-17 | Freeze protocol (Section 8) — all defaults confirmed |
 | 2026-09-18 | Front matter rewritten for plain-language "At a glance" (central question, protocol summary, reader RQs, short approach, mapping to formal RQ1--RQ7); parent framing and progress tracker slimmed to remove status/definition duplication |
+| 2026-09-18 | Results layout cleanup: `phase{k}/{slug}/`, `packages/{a-g}/`, campaign YAMLs, `status.json`, timeseries stem = cell key, `artefacts.json`, tracked `results/budget/README.md` |
 
 ### 18. Protocol freeze (Phase 0 complete)
 

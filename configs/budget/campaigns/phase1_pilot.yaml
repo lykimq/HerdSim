@@ -1,0 +1,19 @@
+# Phase-1 smoke pilot (compact layout, reduced grid).
+# Grade: SMOKE. Not claim-grade.
+
+campaign_id: phase1_pilot
+phase: 1
+grade: SMOKE
+output: results/budget/phase1/pilot
+protocol: configs/budget/canonical_grid.yaml
+
+instruments:
+  - strombom_multi
+layouts:
+  - compact
+flock_sizes: [25, 50, 100]
+shepherd_counts: [1, 2, 3, 4, 6, 10]
+seeds: 5
+seed_mode: scout
+store_timeseries: true
+packages: [A]

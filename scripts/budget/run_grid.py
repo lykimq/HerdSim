@@ -6,6 +6,14 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+from api.budget_layout import (
+    CAMPAIGNS_DIR,
+    copy_campaign_spec,
+    load_campaign_spec,
+    package_output_dir,
+    protocol_path_for_spec,
+    resolve_campaign_output,
+)
 from api.budget_runner import (
     expand_budget_grid,
     load_canonical_protocol,
@@ -13,15 +21,20 @@ from api.budget_runner import (
 )
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Run a shepherding budget grid")
+def _add_common_args(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--campaign",
+        type=Path,
+        default=None,
+        help="Campaign YAML under configs/budget/campaigns/ (sets output, grid, id)",
+    )
     parser.add_argument(
         "--protocol",
         type=Path,
         default=None,
-        help="Path to canonical_grid.yaml (default: configs/budget/canonical_grid.yaml)",
+        help="Path to canonical_grid.yaml (default: from campaign or configs/budget)",
     )
-    parser.add_argument("--output", type=Path, required=True, help="Output directory")
+    parser.add_argument("--output", type=Path, default=None, help="Output directory")
     parser.add_argument(
         "--instruments",
         nargs="+",
@@ -36,16 +49,11 @@ def main() -> None:
     )
     parser.add_argument("--n", nargs="+", type=int, default=None, help="Flock sizes")
     parser.add_argument("--d", nargs="+", type=int, default=None, help="Shepherd counts")
-    parser.add_argument(
-        "--seeds",
-        type=int,
-        default=None,
-        help="Override number of seeds",
-    )
+    parser.add_argument("--seeds", type=int, default=None, help="Override number of seeds")
     parser.add_argument(
         "--seed-mode",
         choices=("scout", "claim"),
-        default="scout",
+        default=None,
         help="Use scout_seeds or claim_grade_seeds from protocol",
     )
     parser.add_argument("--workers", type=int, default=1, help="Process pool size")
@@ -65,30 +73,90 @@ def main() -> None:
         action="store_true",
         help="Ignore existing manifest and rerun all cells",
     )
-    parser.add_argument("--campaign-id", default="budget_grid")
+    parser.add_argument("--campaign-id", default=None)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Run a shepherding budget grid")
+    _add_common_args(parser)
     args = parser.parse_args()
 
-    protocol = load_canonical_protocol(args.protocol)
+    spec: dict | None = None
+    spec_path: Path | None = None
+    if args.campaign is not None:
+        spec_path = args.campaign
+        if not spec_path.is_absolute() and not spec_path.exists():
+            candidate = CAMPAIGNS_DIR / spec_path.name
+            if candidate.exists():
+                spec_path = candidate
+        spec = load_campaign_spec(spec_path)
+
+    protocol_path = args.protocol
+    if protocol_path is None and spec is not None:
+        protocol_path = protocol_path_for_spec(spec)
+    protocol = load_canonical_protocol(protocol_path)
+
+    output = args.output
+    if output is None and spec is not None:
+        output = resolve_campaign_output(spec)
+    if output is None:
+        raise SystemExit("Provide --output or --campaign with an output field")
+
+    campaign_id = args.campaign_id
+    if campaign_id is None and spec is not None:
+        campaign_id = str(spec["campaign_id"])
+    if campaign_id is None:
+        campaign_id = output.name
+
+    instruments = args.instruments
+    layouts = args.layouts
+    n_values = args.n
+    d_values = args.d
+    n_seeds = args.seeds
+    seed_mode = args.seed_mode or "scout"
+    store_timeseries = not args.no_timeseries
+
+    if spec is not None:
+        instruments = instruments or list(spec.get("instruments") or [])
+        layouts = layouts or list(spec.get("layouts") or [])
+        n_values = n_values or list(spec.get("flock_sizes") or [])
+        d_values = d_values or list(spec.get("shepherd_counts") or [])
+        if n_seeds is None and "seeds" in spec:
+            n_seeds = int(spec["seeds"])
+        if args.seed_mode is None and "seed_mode" in spec:
+            seed_mode = str(spec["seed_mode"])
+        if "store_timeseries" in spec and not args.no_timeseries:
+            store_timeseries = bool(spec["store_timeseries"])
+
     cells = expand_budget_grid(
         protocol,
-        instruments=args.instruments,
-        layouts=args.layouts,
-        n_values=args.n,
-        d_values=args.d,
-        n_seeds=args.seeds,
-        seed_mode=args.seed_mode,
+        instruments=instruments or None,
+        layouts=layouts or None,
+        n_values=n_values or None,
+        d_values=d_values or None,
+        n_seeds=n_seeds,
+        seed_mode=seed_mode,
         max_ticks=args.max_ticks,
     )
+    if spec_path is not None:
+        copy_campaign_spec(spec_path, output)
+
     trials = run_budget_grid(
         cells,
-        args.output,
+        output,
         protocol=protocol,
-        campaign_id=args.campaign_id,
+        campaign_id=campaign_id,
         max_workers=args.workers,
-        store_timeseries=not args.no_timeseries,
+        store_timeseries=store_timeseries,
         resume=not args.no_resume,
     )
-    print(f"Wrote {len(trials)} trial rows to {args.output / 'trials.csv'}")
+    print(f"Wrote {len(trials)} trial rows to {output / 'trials.csv'}")
+    packages = list((spec or {}).get("packages") or [])
+    if packages:
+        print(
+            "Suggested analyse paths: "
+            + ", ".join(str(package_output_dir(output, p)) for p in packages)
+        )
 
 
 if __name__ == "__main__":

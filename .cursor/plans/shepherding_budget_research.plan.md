@@ -51,3 +51,4 @@ See progress tracker Section 1. As of 2026-09-18: Phase 1 in progress; Caps buil
 
 - 2026-09-17: Canonical content consolidated into `main_shepherding_budget_plan.md`
 - 2026-09-18: Docs rewritten for clearer framing; this plan re-synced to real phase status (not all completed)
+- 2026-09-18: Results layout cleanup (`phase{k}/{slug}/`, campaign YAMLs, `packages/{a-g}/`)
