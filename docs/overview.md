@@ -18,7 +18,7 @@ An instrument is a ready-made herding setup: how sheep move plus how dogs decide
 
 | Name | Role |
 |------|------|
-| Strombom 2014 | Collect / Drive switch; defaults 50 sheep, 1 shepherd; baseline open-field method |
+| Strombom 2014 | Collect / Drive controller; defaults 50 sheep, 1 shepherd; usual starting instrument |
 | Strombom Multi-Dog | Same sheep rules; 3 dogs share Collect / Drive assignments instead of stacking |
 | Strombom Noise | Same as Strombom 2014 (50 sheep, 1 shepherd) but noise_strength 0.9 (vs 0.3) |
 | Heterogeneous Sheep | Strombom Collect / Drive (50 sheep, 1 shepherd); 20% stubborn sheep (weaker dog response) |
@@ -42,6 +42,31 @@ environment -> sheep motion -> observation -> dog decisions
 ```
 
 You choose an **instrument**, a **scenario**, a **seed**, and optional **factors**. Same instrument + scenario + seed replays the same way. Metrics use the same definitions across instruments so Compare and Experiments stay meaningful.
+
+## Fixed conditions (always on)
+
+These apply in Simulate, Compare, and Experiments. They are not optional instrument settings.
+
+**Bounded arena.** Every run is inside a rectangular world. Agents that hit a wall bounce back (position and velocity are reflected). This differs from some papers that use an open field with no walls. Usual starting scenario **Drive to Goal**: arena **150 x 150**, circular goal of radius **15** near a corner (centre near `(15, 15)`). **Wide Field** uses **250 x 250** and goal radius **20**. Other scenarios keep 150 x 150 unless you override world settings in Custom.
+
+**Obstacles are solid.** If the scenario places obstacles or a gate, agents cannot pass through them; they are pushed to the edge. Most instruments still aim as if obstacles were not there; only Obstacle-Aware bends its Drive target around them.
+
+**Tick limit (timeout).** A trial stops at the scenario's `max_ticks` if success has not been reached:
+
+| Scenario | Default max ticks | Default success rule |
+|----------|-------------------|----------------------|
+| Drive to Goal | 3000 | All sheep in goal (`success_fraction` 1.0) |
+| Containment | 2000 | >= 95% in pen for 200 continuous ticks |
+| Obstacle Course | 4000 | All sheep in goal |
+| Split Flock | 4000 | >= 95% in goal |
+| Narrow Gate | 4500 | All sheep in goal |
+| Wide Field | 6000 | All sheep in goal |
+
+**Success vs live occupancy.** Scenario success is the boolean win condition above. The live **Success Rate** metric is only the current fraction of sheep inside the goal (0-1); it can be high without the trial having succeeded yet (and the reverse under Containment).
+
+**Seeded randomness.** Same instrument + scenario + seed + settings => same replay.
+
+Paper defaults for sheep and dog counts are starting values only. Custom mode can change counts, factors, and (when exposed) world overrides; it does not remove walls. Full layout detail: **Environment** and **Scenarios** in this Guide.
 
 ## Core ideas
 

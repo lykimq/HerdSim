@@ -33,7 +33,7 @@ An instrument is a ready-made `sheep_model` x `dog_controller` bundle with paper
 
 | Id | Name | Role |
 |----|------|------|
-| `strombom` | Strombom 2014 | Collect / Drive switch; defaults 50 sheep, 1 shepherd; baseline open-field method |
+| `strombom` | Strombom 2014 | Collect / Drive controller; defaults 50 sheep, 1 shepherd; usual starting instrument |
 | `strombom_multi` | Strombom Multi-Dog | Same sheep rules; 3 dogs share Collect / Drive assignments instead of stacking |
 | `strombom_noise` | Strombom Noise | Same as Strombom 2014 (50 sheep, 1 shepherd) but noise_strength 0.9 (vs 0.3) |
 | `heterogeneous` | Heterogeneous Sheep | Strombom Collect / Drive (50 sheep, 1 shepherd); 20% stubborn sheep (weaker dog response) |
@@ -79,6 +79,8 @@ environment -> sheep motion -> observation -> dog decisions
 ```
 
 You choose an **instrument**, a **scenario**, a **seed**, and optional **factors**. Same instrument + scenario + seed replays the same way.
+
+Hard conditions that always apply: rectangular arena with wall bounce (Drive to Goal default 150 x 150, goal radius 15; not an open field), solid obstacles when the scenario has them, a max-tick timeout (3000 on Drive to Goal; other scenarios differ), and scenario-defined success. Details: in-app Guide under Overview and Environment.
 
 ## Project layout
 
