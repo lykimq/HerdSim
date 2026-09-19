@@ -18,7 +18,7 @@ An instrument is a ready-made herding setup: how sheep move plus how dogs decide
 
 | Name | Role |
 |------|------|
-| Strombom 2014 | Collect / Drive controller; defaults 50 sheep, 1 shepherd; usual starting instrument |
+| Strombom 2014 | 50 sheep, 1 shepherd; if flock is spread, Collect the farthest straggler, else Drive from behind the flock toward the goal |
 | Strombom Multi-Dog | Same sheep rules; 3 dogs share Collect / Drive assignments instead of stacking |
 | Strombom Noise | Same as Strombom 2014 (50 sheep, 1 shepherd) but noise_strength 0.9 (vs 0.3) |
 | Heterogeneous Sheep | Strombom Collect / Drive (50 sheep, 1 shepherd); 20% stubborn sheep (weaker dog response) |
@@ -27,8 +27,8 @@ An instrument is a ready-made herding setup: how sheep move plus how dogs decide
 | Kubo 2022 | Force-based sheep and dogs (not Collect / Drive); defaults 40 sheep, 4 dogs |
 | Flocking Dog 2024 | Jadhav neighbour sheep + Collect / Drive; small flock default (14 sheep, 1 dog) |
 | FAT | Strombom sheep; 2 dogs each chase the farthest sheep they can see (local sensing) |
-| Communication-Free | Strombom sheep; 3 dogs each run Collect / Drive alone (no shared targets or messages) |
-| Adaptive | Strombom sheep; 2 dogs switch collect / drive / recover / lead from flock state |
+| Communication-Free | Strombom sheep; 3 dogs; each dog Collect/Drives only from sheep it can see (no team assignment, no shared GCM/target) |
+| Adaptive | Strombom sheep; 2 dogs; switch by outlier count: Collect if some stragglers, Recover (stand back at 2*r_a behind flock) if many, Lead/Drive if cohesive |
 
 Open **Instruments** in this Guide for the full write-up of each one.
 

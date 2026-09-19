@@ -33,7 +33,7 @@ An instrument is a ready-made `sheep_model` x `dog_controller` bundle with paper
 
 | Id | Name | Role |
 |----|------|------|
-| `strombom` | Strombom 2014 | Collect / Drive controller; defaults 50 sheep, 1 shepherd; usual starting instrument |
+| `strombom` | Strombom 2014 | 50 sheep, 1 shepherd; if flock is spread, Collect the farthest straggler, else Drive from behind the flock toward the goal |
 | `strombom_multi` | Strombom Multi-Dog | Same sheep rules; 3 dogs share Collect / Drive assignments instead of stacking |
 | `strombom_noise` | Strombom Noise | Same as Strombom 2014 (50 sheep, 1 shepherd) but noise_strength 0.9 (vs 0.3) |
 | `heterogeneous` | Heterogeneous Sheep | Strombom Collect / Drive (50 sheep, 1 shepherd); 20% stubborn sheep (weaker dog response) |
@@ -42,8 +42,8 @@ An instrument is a ready-made `sheep_model` x `dog_controller` bundle with paper
 | `kubo` | Kubo 2022 | Force-based sheep and dogs (not Collect / Drive); defaults 40 sheep, 4 dogs |
 | `flocking_dog` | Flocking Dog 2024 | Jadhav neighbour sheep + Collect / Drive; small flock default (14 sheep, 1 dog) |
 | `fat` | FAT | Strombom sheep; 2 dogs each chase the farthest sheep they can see (local sensing) |
-| `communication_free` | Communication-Free | Strombom sheep; 3 dogs each run Collect / Drive alone (no shared targets or messages) |
-| `adaptive` | Adaptive | Strombom sheep; 2 dogs switch collect / drive / recover / lead from flock state |
+| `communication_free` | Communication-Free | Strombom sheep; 3 dogs; each dog Collect/Drives only from sheep it can see (no team assignment, no shared GCM/target) |
+| `adaptive` | Adaptive | Strombom sheep; 2 dogs; switch by outlier count: Collect if some stragglers, Recover (stand back at 2*r_a behind flock) if many, Lead/Drive if cohesive |
 
 ### Adding an instrument
 
