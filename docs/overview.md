@@ -77,14 +77,3 @@ Use the **Experiments** tab to download CSV, JSON, or Markdown from the browser.
 
 **Is NetLogo inside the browser sim?**
 No. HerdSim runs its own engine in Simulate, Compare, and Experiments. The NetLogo tab opens desktop models that mirror selected instruments for a visual cross-check.
-
-**Where should I read next?**
-
-- Live single run: **Simulate**
-- Method details: **Instruments**
-- Task layouts: **Scenarios**
-- Score definitions: **Metrics**
-- World and timing: **Environment**
-- Live A/B: **Compare**
-- Batch studies: **Experiments**
-- Desktop twins: **NetLogo**
