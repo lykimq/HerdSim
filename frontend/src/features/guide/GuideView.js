@@ -6,6 +6,7 @@ import { escapeHtml } from '../../shared/ui/dom.js';
 
 const FALLBACK_NAV = [
   { slug: 'overview', label: 'Overview', group: 'Start here' },
+  { slug: 'simulate', label: 'Simulate', group: 'How to use' },
   { slug: 'research/comparison_framework', label: 'Compare', group: 'How to use' },
   { slug: 'experiments', label: 'Experiments', group: 'How to use' },
   { slug: 'research/netlogo', label: 'NetLogo', group: 'How to use' },
@@ -17,6 +18,7 @@ const FALLBACK_NAV = [
 
 const LABEL_OVERRIDES = {
   overview: 'Overview',
+  simulate: 'Simulate',
   experiments: 'Experiments',
   'research/instruments': 'Instruments',
   'research/instruments/strombom_2014': 'Strombom 2014',

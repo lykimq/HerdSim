@@ -18,17 +18,17 @@ An instrument is a ready-made herding setup: how sheep move plus how dogs decide
 
 | Name | Role |
 |------|------|
-| Strombom 2014 | Classic Collect / Drive, one shepherd |
-| Strombom Multi-Dog | Strombom variant: shared Collect / Drive across several dogs |
-| Strombom Noise | Strombom variant: elevated process noise |
-| Heterogeneous Sheep | Strombom variant: stubborn sheep fraction (harder finish) |
-| V-Formation | Strombom variant: multi-dog drive on a V-arc behind the flock |
-| Obstacle-Aware | Strombom variant: drive deflected around obstacles / gates |
-| Kubo 2022 | Force-based multi-dog herding |
-| Flocking Dog 2024 | Neighbour-based sheep motion + Collect / Drive |
-| FAT | Strombom variant: farthest-agent targeting under local observations |
-| Communication-Free | Strombom variant: independent Collect / Drive, no shared targets |
-| Adaptive | Strombom variant: collect / drive / recover / lead mode switcher |
+| Strombom 2014 | Collect / Drive switch; defaults 50 sheep, 1 shepherd; baseline open-field method |
+| Strombom Multi-Dog | Same sheep rules; 3 dogs share Collect / Drive assignments instead of stacking |
+| Strombom Noise | Same as Strombom 2014 (50 sheep, 1 shepherd) but noise_strength 0.9 (vs 0.3) |
+| Heterogeneous Sheep | Strombom Collect / Drive (50 sheep, 1 shepherd); 20% stubborn sheep (weaker dog response) |
+| V-Formation | Strombom sheep; 2 dogs drive on a V-arc behind the flock (no classic Collect switch) |
+| Obstacle-Aware | Strombom Collect / Drive (50 sheep, 1 shepherd); Drive target bends around obstacles / gates |
+| Kubo 2022 | Force-based sheep and dogs (not Collect / Drive); defaults 40 sheep, 4 dogs |
+| Flocking Dog 2024 | Jadhav neighbour sheep + Collect / Drive; small flock default (14 sheep, 1 dog) |
+| FAT | Strombom sheep; 2 dogs each chase the farthest sheep they can see (local sensing) |
+| Communication-Free | Strombom sheep; 3 dogs each run Collect / Drive alone (no shared targets or messages) |
+| Adaptive | Strombom sheep; 2 dogs switch collect / drive / recover / lead from flock state |
 
 Open **Instruments** in this Guide for the full write-up of each one.
 
@@ -67,12 +67,13 @@ You choose an **instrument**, a **scenario**, a **seed**, and optional **factors
 
 ## First minutes in Simulate
 
+See **Simulate** in this Guide for the full how-to. Short path:
+
 1. Open **Simulate**.
-2. Pick an **instrument** (Strombom 2014 is a good first choice) and a **scenario** (Drive to Goal).
-3. Note the seed and agent counts; switch to **Custom** if you plan to change factors.
-4. Click **Initialize New Run**, then **Play**.
-5. Pause to **scrub** the timeline, read live metrics, and open **Inspect** for mode and model details.
-6. When the run ends, read the **run report** (and download Markdown if you want notes).
+2. Pick an **instrument** (Strombom 2014 is a good first choice) and leave **Mode** on **Paper original**, or choose **Scenarios** / **Custom**.
+3. Click **Initialize New Run**, then **Play**.
+4. Pause to scrub **Metric history**, read **Live Metrics**, and open **Inspect**.
+5. When the run ends, read the **Run report** (and download Markdown or JSON if you want notes).
 
 When you want two methods side by side, open **Compare**. When you need many seeds and a table, open **Experiments**.
 
@@ -101,6 +102,7 @@ No. HerdSim runs its own engine in Simulate, Compare, and Experiments. The NetLo
 
 **Where should I read next?**
 
+- Live single run: **Simulate**
 - Method details: **Instruments**
 - Task layouts: **Scenarios**
 - Score definitions: **Metrics**

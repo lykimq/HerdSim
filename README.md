@@ -33,19 +33,17 @@ An instrument is a ready-made `sheep_model` x `dog_controller` bundle with paper
 
 | Id | Name | Role |
 |----|------|------|
-| `strombom` | Strombom 2014 | Classic Collect / Drive, one shepherd |
-| `strombom_multi` | Strombom Multi-Dog | Strombom variant: shared Collect / Drive across several dogs |
-| `strombom_noise` | Strombom Noise | Strombom variant: elevated process noise |
-| `heterogeneous` | Heterogeneous Sheep | Strombom variant: stubborn sheep fraction (harder finish) |
-| `v_formation` | V-Formation | Strombom variant: multi-dog drive on a V-arc behind the flock |
-| `obstacle_aware` | Obstacle-Aware | Strombom variant: drive deflected around obstacles / gates |
-| `kubo` | Kubo 2022 | Force-based multi-dog herding |
-| `flocking_dog` | Flocking Dog 2024 | Jadhav sheep + Collect / Drive |
-| `fat` | FAT | Strombom variant: farthest-agent targeting under local observations |
-| `communication_free` | Communication-Free | Strombom variant: independent Collect / Drive, no shared targets |
-| `adaptive` | Adaptive | Strombom variant: collect / drive / recover / lead mode switcher |
-
-Guide write-ups: [docs/research/instruments/](docs/research/instruments/).
+| `strombom` | Strombom 2014 | Collect / Drive switch; defaults 50 sheep, 1 shepherd; baseline open-field method |
+| `strombom_multi` | Strombom Multi-Dog | Same sheep rules; 3 dogs share Collect / Drive assignments instead of stacking |
+| `strombom_noise` | Strombom Noise | Same as Strombom 2014 (50 sheep, 1 shepherd) but noise_strength 0.9 (vs 0.3) |
+| `heterogeneous` | Heterogeneous Sheep | Strombom Collect / Drive (50 sheep, 1 shepherd); 20% stubborn sheep (weaker dog response) |
+| `v_formation` | V-Formation | Strombom sheep; 2 dogs drive on a V-arc behind the flock (no classic Collect switch) |
+| `obstacle_aware` | Obstacle-Aware | Strombom Collect / Drive (50 sheep, 1 shepherd); Drive target bends around obstacles / gates |
+| `kubo` | Kubo 2022 | Force-based sheep and dogs (not Collect / Drive); defaults 40 sheep, 4 dogs |
+| `flocking_dog` | Flocking Dog 2024 | Jadhav neighbour sheep + Collect / Drive; small flock default (14 sheep, 1 dog) |
+| `fat` | FAT | Strombom sheep; 2 dogs each chase the farthest sheep they can see (local sensing) |
+| `communication_free` | Communication-Free | Strombom sheep; 3 dogs each run Collect / Drive alone (no shared targets or messages) |
+| `adaptive` | Adaptive | Strombom sheep; 2 dogs switch collect / drive / recover / lead from flock state |
 
 ### Adding an instrument
 
@@ -84,15 +82,15 @@ You choose an **instrument**, a **scenario**, a **seed**, and optional **factors
 
 ## Project layout
 
-- `core/` -- engine, factors, instrument catalog
-- `plugins/` -- sheep, dogs, scenarios, metrics
-- `instruments/` -- named packages (`info.json`, paper defaults)
-- `api/` -- HTTP and WebSocket for the UI
-- `services/` -- Experiments engine and budget campaign runners
-- `frontend/` -- Vite app
-- `docs/` -- architecture and Guide pages
-- `integrations/` -- NetLogo and MATLAB references
-- `configs/budget/`, `scripts/budget/`, `results/budget/` -- budget campaigns
+- `core/`: engine, factors, instrument catalog
+- `plugins/`: sheep, dogs, scenarios, metrics
+- `instruments/`: named packages (`info.json`, paper defaults)
+- `api/`: HTTP and WebSocket for the UI
+- `services/`: Experiments engine and budget campaign runners
+- `frontend/`: Vite app
+- `docs/`: architecture and Guide pages
+- `integrations/`: NetLogo and MATLAB references
+- `configs/budget/`, `scripts/budget/`, `results/budget/`: budget campaigns
 
 ## Shepherding-budget campaigns
 

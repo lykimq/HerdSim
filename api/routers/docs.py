@@ -15,6 +15,7 @@ _DOCS_ROOT = Path(__file__).resolve().parents[2] / "docs"
 _DOC_ENTRIES: list[tuple[str, Path, str, str]] = [
     # slug, path, title, nav group
     ("overview", _DOCS_ROOT / "overview.md", "Overview", "Start here"),
+    ("simulate", _DOCS_ROOT / "simulate.md", "Simulate", "How to use"),
     (
         "research/comparison_framework",
         _DOCS_ROOT / "research" / "comparison_framework.md",
