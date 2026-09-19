@@ -1,12 +1,5 @@
-# HerdSim -- shepherding-budget campaign targets.
-#
-# Usage:
-#   make -f Makefile.budget help
-#   make -f Makefile.budget budget-pilot
-#   make budget-help                  (forwarded from the main Makefile)
-#
-# Layout and conventions: results/budget/README.md
-# Science / protocol: docs/research/budget/main_shepherding_budget_plan.md
+# Shepherding-budget campaigns: run protocol grids under results/budget/.
+# Invoke: make budget-help  or  make -f Makefile.budget help
 
 .PHONY: help budget-help budget-test budget-pilot budget-pilot-state \
 	budget-analyse budget-scout budget-factor-sweep
@@ -47,43 +40,59 @@ BUDGET_OVERRIDE_FLAGS = \
 	$(if $(BUDGET_D),--d $(BUDGET_D),) \
 	$(if $(BUDGET_SEEDS),--seeds $(BUDGET_SEEDS),)
 
-# Default when using: make -f Makefile.budget
 .DEFAULT_GOAL := help
 
 help budget-help:
-	@echo "HerdSim -- shepherding-budget targets"
+	@echo "HerdSim -- shepherding-budget campaigns"
 	@echo ""
-	@echo "  make -f Makefile.budget help"
-	@echo "  make budget-help                 (same, via main Makefile)"
+	@echo "What this is:"
+	@echo "  Batch simulations that ask: for flock size N sheep and D dogs,"
+	@echo "  how often does herding succeed? Each target runs many (N, D)"
+	@echo "  combinations and writes results under results/budget/."
+	@echo "  Interrupted runs resume if you keep manifest.jsonl and"
+	@echo "  re-run the same target."
 	@echo ""
-	@echo "  make -f Makefile.budget budget-test"
-	@echo "  make -f Makefile.budget budget-pilot"
-	@echo "  make -f Makefile.budget budget-pilot-state"
-	@echo "  make -f Makefile.budget budget-scout"
-	@echo "  make -f Makefile.budget budget-factor-sweep"
-	@echo "  make -f Makefile.budget budget-analyse"
+	@echo "Targets (grids match configs/budget/campaigns/*.yaml):"
+	@echo "  help                 Show this help"
+	@echo "  budget-test          Pytest for the budget runner and analysis code"
 	@echo ""
-	@echo "Campaign YAMLs: $(BUDGET_CAMPAIGN_DIR)/"
-	@echo "  pilot:  $(PHASE1_PILOT_CAMPAIGN)"
-	@echo "  scout:  $(PHASE1_SCOUT_CAMPAIGN)"
-	@echo "  state:  $(PHASE2_STATE_CAMPAIGN)"
-	@echo "  sweep:  $(PHASE5_SWEEP_CAMPAIGN)"
+	@echo "  budget-pilot         First run to try. Small grid so you can check the"
+	@echo "                       tooling works (about 90 trials; usually minutes)."
+	@echo "                       Sheep N in {25,50,100}, dogs D in {1,2,3,4,6,10},"
+	@echo "                       5 random seeds, one layout (compact)."
+	@echo "                       Output: results/budget/phase1/pilot/"
 	@echo ""
-	@echo "Results layout: results/budget/phase<N>/<campaign>/"
-	@echo "  Auto analysis:   <campaign>/packages/{a-g}/"
-	@echo "  Human narrative: <campaign>/REPORT.md"
-	@echo "  Index: results/budget/README.md"
+	@echo "  budget-scout         Same question as pilot, but denser and more seeds"
+	@echo "                       so you can see where success rises/falls with N and D"
+	@echo "                       (about 1440 trials; often hours). N up to 200,"
+	@echo "                       D up to 20, 30 seeds."
+	@echo "                       Output: results/budget/phase1/scout/"
 	@echo ""
-	@echo "Defaults:"
-	@echo "  WORKERS=$(WORKERS)  BUDGET_MAX_TICKS=$(BUDGET_MAX_TICKS)"
-	@echo "  PACKAGE=$(PACKAGE)  TRIALS=$(TRIALS)  OUT=$(OUT)"
-	@echo "  BUDGET_OUT=$(BUDGET_OUT)  STATE_OUT=$(STATE_OUT)"
-	@echo "  SCOUT_OUT=$(SCOUT_OUT)  SWEEP_OUT=$(SWEEP_OUT)"
+	@echo "  budget-pilot-state   Like pilot, but repeats the grid on four starting"
+	@echo "                       flock shapes (compact, wide, split, outlier-rich)"
+	@echo "                       to see if layout changes how many dogs you need"
+	@echo "                       (about 360 trials)."
+	@echo "                       Output: results/budget/phase2/pilot_state/"
 	@echo ""
-	@echo "Resume: keep manifest.jsonl; re-run the same target / --output."
-	@echo "Optional overrides: BUDGET_INSTRUMENT BUDGET_LAYOUT BUDGET_N BUDGET_D BUDGET_SEEDS"
+	@echo "  budget-factor-sweep  Varies dog sensing (bearing-only, local, global)"
+	@echo "                       at N in {50,100}, D in {1..10}, 10 seeds"
+	@echo "                       (about 360 trials). Asks if better sensing means"
+	@echo "                       fewer dogs."
+	@echo "                       Output: results/budget/phase5/factor_sweep/"
 	@echo ""
-	@echo "Basic project targets: make -f Makefile help   (or: make help)"
+	@echo "  budget-analyse       Re-run analysis on an existing trials.csv"
+	@echo "                       (no new simulations). Example:"
+	@echo "                       make budget-analyse PACKAGE=A \\"
+	@echo "                         TRIALS=results/budget/phase1/pilot/trials.csv \\"
+	@echo "                         OUT=results/budget/phase1/pilot/packages/a"
+	@echo ""
+	@echo "Variables:"
+	@echo "  WORKERS=N            Run N trials in parallel (default: $(WORKERS))"
+	@echo "  BUDGET_MAX_TICKS=N   Optional early stop per trial (useful for quick tests)"
+	@echo "  PACKAGE TRIALS OUT   Inputs for budget-analyse only"
+	@echo ""
+	@echo "Example:  make budget-pilot WORKERS=4"
+	@echo "Docs:     results/budget/README.md"
 
 budget-test:
 	$(UV) run pytest tests/backend/correctness/test_budget_stack.py -q
