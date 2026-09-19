@@ -12,23 +12,99 @@ HerdSim is a research platform for **multi-agent sheep herding**: a few dogs (or
 | **NetLogo** | Open desktop NetLogo twins for instruments that have a counterpart |
 | **Guide** | This documentation: overview, instruments, scenarios, metrics, and how-tos |
 
+## Terms
+
+### App tabs
+
+- **Simulate**: one live run; scrub history; inspect; download a run report.
+- **Compare**: two live runs side by side (Fair = matched settings; Independent = each side free).
+- **Experiments**: many trials over seeds or factor grids; charts and CSV / JSON / Markdown export.
+- **NetLogo**: opens a desktop NetLogo model that mirrors some instruments (not inside the browser sim).
+- **Guide**: this in-app documentation.
+
+### Core setup
+
+- **Instrument**: a named ready-made package (how sheep move + how dogs decide), with paper-style defaults.
+- **Scenario**: the task and world layout (arena, goal or pen, obstacles, success rule). Examples: Drive to Goal, Obstacle Course.
+- **Seed**: the random draw for start positions and chance events. Same instrument + scenario + seed + settings => same replay.
+- **Experimental factors**: knobs around an instrument (sensing, noise, stubborn fraction, dog failure, goal motion, sheep/dog counts, and similar).
+- **Mode / settings source**: how defaults are locked in the UI -- **Paper original** (paper counts and params; Drive to Goal), **Scenarios** (scenario-recommended setup), or **Custom** (you lock counts and factors for fair compare).
+- **Paper defaults**: published-style sheep/dog counts and parameters for an instrument (replication, not always a fair head-to-head).
+- **Fair compare**: same scenario, sheep count, dog count, seed(s), and success rule across methods so rankings are matched.
+- **Trial / run**: one simulation from initialize until success or timeout.
+- **Metric**: a number computed each tick or summarised over a trial (shared definitions across instruments).
+
+### Agents and flock
+
+- **Sheep**: flock agents that move, graze, and usually flee dogs.
+- **Shepherd / dog**: the herding agent; naming differs by instrument, same role in the UI.
+- **Flock**: the set of sheep in the run.
+- **Straggler**: a sheep that has drifted far from the rest of the flock.
+- **Group centre (GCM)**: average position of the sheep in the current flock view. Metrics often label this GCM.
+- **Stubborn sheep**: sheep marked at the start of a Heterogeneous run that react much less to a nearby dog (harder to push). Default: 20% of the flock feel about 25% of the usual push.
+- **Neighbour-based flocking**: sheep update from nearby sheep (used by Flocking Dog), not only the classic Strombom sheep rules.
+- **Force-based motion**: Kubo-style continuous push/pull forces instead of Collect / Drive modes.
+
+### Dog behaviours
+
+- **Collect**: move to gather a sheep that has drifted away from the group.
+- **Drive**: stand behind the group and push it toward the goal.
+- **Recover**: Adaptive-only; when many sheep are far out, stand farther back behind the whole flock and press it together (not chase one straggler).
+- **Lead**: Adaptive-only; when the flock is tight, move ahead of the group toward the goal. Sheep still only flee dogs; they do not follow a leader.
+- **V-formation**: multi-dog Drive on a V-shaped arc behind the flock (no classic Collect of one straggler).
+- **FAT**: each dog always heads for the farthest sheep it can see (no Collect / Drive switch).
+- **Communication-Free**: each dog Collects / Drives from its own view only; no shared team target or assignment.
+- **Assignment**: coordinated Multi-Dog sharing of who Collects which sheep and where to Drive so dogs do not stack.
+
+### Sensing and variation
+
+- **Observation / sensing**: what each dog is allowed to know about sheep (and sometimes other dogs) on a tick.
+- **Local sensing**: a dog only sees sheep within its sensing setup, not the whole flock.
+- **Global sensing**: a dog can use the full flock picture.
+- **Heading noise**: random wobble in which way an agent faces each tick (higher = twitchier paths).
+- **Inertia**: how much an agent keeps its previous facing / memory of the last heading (higher = smoother; lower = less memory, so noise shows more).
+- **Shepherd failure**: a factor that can disable a dog mid-run.
+- **Goal motion**: a factor where the goal moves over time instead of staying fixed.
+
+### World and success
+
+- **Arena**: rectangular world from the scenario. Agents that hit a wall bounce back (not an open field).
+- **Wall bounce / reflection**: leaving the arena flips the agent back inside and reverses that velocity component.
+- **Goal / goal zone**: circular target region; sheep inside it count toward occupancy and usually toward success.
+- **Pen**: Containment scenario's hold-inside region (same idea as a goal zone, different success rule).
+- **Obstacle**: solid rectangle agents cannot pass through; they are pushed to the edge.
+- **Gate**: narrow opening between walls (Narrow Gate scenario).
+- **Open field**: unbounded world with no walls (some papers); HerdSim does not use this -- arenas are bounded.
+- **Scenario success**: boolean win for the trial (scenario rule first holds).
+- **Success Rate (live metric)**: current fraction of sheep inside the goal (0-1), not the same as scenario success.
+- **Timeout**: trial ends because max ticks were reached without success.
+- **Max ticks**: tick limit for the scenario (for example Drive to Goal default 3000).
+
+### Timing and motion
+
+- **Tick**: one simulation step (environment, sheep, observation, dog decisions, walls/obstacles, metrics).
+- **Displacement-per-tick**: Strombom-family motion: fixed step length per tick along heading.
+- **Continuous time step (dt)**: Kubo-style motion: position updates with velocity times `dt`. Path lengths are not directly comparable across the two conventions.
+- **Scrub**: drag the history slider to replay a past tick in Simulate or Compare.
+- **Run report**: end-of-run summary in Simulate (download Markdown or JSON).
+
 ## Instruments
 
-An instrument is a ready-made herding setup: how sheep move plus how dogs decide where to go, with sensible defaults. Pick one in Simulate, Compare, or Experiments; you can still change sensing, counts, noise, and other factors around it.
+An instrument is a ready-made herding setup: how sheep move plus how dogs decide where to go, with sensible defaults. Pick one in Simulate, Compare, or Experiments; you can still change sensing, counts, noise, and other factors around it. Terms above apply to the table.
 
 | Name | Role |
 |------|------|
-| Strombom 2014 | 50 sheep, 1 shepherd; if flock is spread, Collect the farthest straggler, else Drive from behind the flock toward the goal |
-| Strombom Multi-Dog | Same sheep rules; 3 dogs share Collect / Drive assignments instead of stacking |
-| Strombom Noise | Same as Strombom 2014 (50 sheep, 1 shepherd) but noise_strength 0.9 (vs 0.3) |
-| Heterogeneous Sheep | Strombom Collect / Drive (50 sheep, 1 shepherd); 20% stubborn sheep (weaker dog response) |
-| V-Formation | Strombom sheep; 2 dogs drive on a V-arc behind the flock (no classic Collect switch) |
-| Obstacle-Aware | Strombom Collect / Drive (50 sheep, 1 shepherd); Drive target bends around obstacles / gates |
-| Kubo 2022 | Force-based sheep and dogs (not Collect / Drive); defaults 40 sheep, 4 dogs |
-| Flocking Dog 2024 | Jadhav neighbour sheep + Collect / Drive; small flock default (14 sheep, 1 dog) |
-| FAT | Strombom sheep; 2 dogs each chase the farthest sheep they can see (local sensing) |
-| Communication-Free | Strombom sheep; 3 dogs; each dog Collect/Drives only from sheep it can see (no team assignment, no shared GCM/target) |
-| Adaptive | Strombom sheep; 2 dogs; switch by outlier count: Collect if some stragglers, Recover (stand back at 2*r_a behind flock) if many, Lead/Drive if cohesive |
+| Strombom 2014 | Defaults 50 sheep and 1 shepherd. If the flock is spread out, Collect the farthest straggler; if it is tight, Drive from behind toward the goal. |
+| Strombom Multi-Dog | Same sheep rules as Strombom 2014, but with 3 dogs. The dogs share the work (who Collects which sheep, where to Drive) so they do not all pile on the same spot. |
+| Strombom Noise | Same rules and counts as Strombom 2014, but stress-tested: heading noise is tripled (0.9 instead of 0.3) and inertia is lowered (0.3 instead of 0.5), so agents have less memory of their previous facing, jitter more, and smooth the wobble less. |
+| Heterogeneous Sheep | Same Collect / Drive as Strombom 2014 (50 sheep, 1 shepherd). At the start of the run, 20% of sheep are marked stubborn and then feel only about 25% of the usual push from the dog for the whole trial. The shepherd does not know which sheep those are. |
+| V-Formation | Strombom sheep with 2 dogs. Dogs stay on a V-shaped arc behind the flock and Drive; they do not switch into classic Collect of a single straggler. |
+| Obstacle-Aware | Same Collect / Drive as Strombom 2014 (50 sheep, 1 shepherd), but when Driving the aim point bends around walls, obstacles, or a gate instead of pointing straight through them. |
+| Kubo 2022 | Different physics: sheep and dogs move by continuous forces (attraction, repulsion, goal pull), not Collect / Drive modes. Defaults 40 sheep and 4 dogs. |
+| Flocking Dog 2024 | Smaller default flock (14 sheep, 1 dog). Sheep use neighbour-based flocking; the dog still uses Collect / Drive and slows when already inside the group. |
+| FAT | Strombom sheep with 2 dogs. Each dog only uses sheep it can see locally, and always heads for the farthest visible sheep (no Collect / Drive mode switch). |
+| Communication-Free | Strombom sheep with 3 dogs. Each dog runs Collect / Drive using only the sheep it can see. Dogs do not share a common target or tell each other who is Collecting what. |
+| Adaptive | Strombom sheep with 2 dogs. Each tick counts how many sheep are far from the group centre: a few stragglers -> Collect; many stragglers -> Recover (stand farther back behind the whole flock to press it together); tight flock -> Lead ahead toward the goal, or Drive from behind if leading is off. |
 
 Open **Instruments** in this Guide for the full write-up of each one.
 
@@ -51,34 +127,22 @@ These apply in Simulate, Compare, and Experiments. They are not optional instrum
 
 **Obstacles are solid.** If the scenario places obstacles or a gate, agents cannot pass through them; they are pushed to the edge. Most instruments still aim as if obstacles were not there; only Obstacle-Aware bends its Drive target around them.
 
-**Tick limit (timeout).** A trial stops at the scenario's `max_ticks` if success has not been reached:
+**Tick limit (timeout).** A trial stops at the scenario's max ticks if success has not been reached:
 
 | Scenario | Default max ticks | Default success rule |
 |----------|-------------------|----------------------|
-| Drive to Goal | 3000 | All sheep in goal (`success_fraction` 1.0) |
+| Drive to Goal | 3000 | All sheep in goal (success fraction 1.0) |
 | Containment | 2000 | >= 95% in pen for 200 continuous ticks |
 | Obstacle Course | 4000 | All sheep in goal |
 | Split Flock | 4000 | >= 95% in goal |
 | Narrow Gate | 4500 | All sheep in goal |
 | Wide Field | 6000 | All sheep in goal |
 
-**Success vs live occupancy.** Scenario success is the boolean win condition above. The live **Success Rate** metric is only the current fraction of sheep inside the goal (0-1); it can be high without the trial having succeeded yet (and the reverse under Containment).
+**Success vs live occupancy.** Scenario success is the boolean win condition above. The live Success Rate metric is only the current fraction of sheep inside the goal (0-1); it can be high without the trial having succeeded yet (and the reverse under Containment).
 
 **Seeded randomness.** Same instrument + scenario + seed + settings => same replay.
 
 Paper defaults for sheep and dog counts are starting values only. Custom mode can change counts, factors, and (when exposed) world overrides; it does not remove walls. Full layout detail: **Environment** and **Scenarios** in this Guide.
-
-## Core ideas
-
-**Instrument.** The named method package you select (for example Strombom 2014 or Kubo 2022).
-
-**Scenario.** The task and world layout (for example Drive to Goal or Obstacle Course), including how success is judged.
-
-**Seed.** The random draw for initial positions and stochastic bits. Same instrument + scenario + seed means the same replay; different seeds are independent trials.
-
-**Experimental factors.** Conditions around the instrument: observation mode, sensing range, noise, stubborn fraction, shepherd failure, goal motion, sheep/dog counts, and similar knobs.
-
-**Settings source.** Instrument (paper-style defaults), Scenario (task defaults), or Custom (you lock counts and factors). Use Custom for a fair head-to-head ranking.
 
 ## Frequently asked questions
 
