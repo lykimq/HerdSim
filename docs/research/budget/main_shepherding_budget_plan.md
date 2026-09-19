@@ -276,11 +276,11 @@ Default: θ = 0.90. Sensitivity: also report at θ ∈ {0.50, 0.70}.
 
 | Variable | Definition | HerdSim source |
 |----------|-----------|----------------|
-| Cohesion | Mean Euclidean distance of sheep to flock centroid (GCM) | `metrics/cohesion.py` — exists |
-| Fragmentation | Largest connected-component fraction under measurement radius | `metrics/fragmentation.py` — exists |
-| Outlier count | Sheep beyond the lost-distance threshold | `metrics/outlier_count.py` — exists |
-| Spread | Variance of sheep distances to centroid (mean-spread S̄) | `metrics/mean_spread.py` — built (Cap I4) |
-| Extent | Radius of gyration: RMS distance to centroid | `metrics/extent.py` — built (Cap I4) |
+| Cohesion | Mean Euclidean distance of sheep to flock centroid (GCM) | `plugins/metrics/cohesion.py` — exists |
+| Fragmentation | Largest connected-component fraction under measurement radius | `plugins/metrics/fragmentation.py` — exists |
+| Outlier count | Sheep beyond the lost-distance threshold | `plugins/metrics/outlier_count.py` — exists |
+| Spread | Variance of sheep distances to centroid (mean-spread S̄) | `plugins/metrics/mean_spread.py` — built (Cap I4) |
+| Extent | Radius of gyration: RMS distance to centroid | `plugins/metrics/extent.py` — built (Cap I4) |
 
 Secondary (add only if primary variables are insufficient as predictors):
 
@@ -627,10 +627,10 @@ was written.
 | I1 | RQ2, RQ6 | N × D × seed grid runner with resume + provenance | `services/budget/runner.py`, `analysis/budget/provenance.py` | built | A, F |
 | I2 | RQ2 | Frontier extraction D_min, D_overcrowd, D_max, B* | `analysis/budget/frontier.py` | built | A |
 | I3 | RQ2 | Regime labelling | `analysis/budget/regimes.py` | built | A |
-| I4 | RQ1, RQ6, RQ7 | Mean-spread and extent metrics | `metrics/mean_spread.py`, `metrics/extent.py` | built | B, F, G |
+| I4 | RQ1, RQ6, RQ7 | Mean-spread and extent metrics | `plugins/metrics/mean_spread.py`, `plugins/metrics/extent.py` | built | B, F, G |
 | I5 | RQ1 | X₀ generators + scenario wiring | `core/x0_generators.py`; update `drive_to_goal` + `INITIAL_LAYOUTS` | built | B |
 | I6 | RQ1 | State vs (N, D) predictor comparison | `analysis/budget/predictors.py` | built | B |
-| I7 | RQ3, RQ7 | Interference I_dir and coverage C metrics | `metrics/shepherd_interference.py`, `metrics/shepherd_coverage.py` | built | C, G |
+| I7 | RQ3, RQ7 | Interference I_dir and coverage C metrics | `plugins/metrics/shepherd_interference.py`, `plugins/metrics/shepherd_coverage.py` | built | C, G |
 | I8 | RQ3 | Mechanism hypothesis tests | `analysis/budget/mechanism.py` | built | C |
 | I9 | RQ4 | Locked multi-instrument campaigns + transfer table | `analysis/budget/transfer.py` | built | D |
 | I10 | RQ5 | Factor sweeps (obs, range, communication) + substitution curves | `scripts/budget/run_factor_sweep.py`, `analysis/budget/substitution.py` | built | E |
@@ -682,10 +682,10 @@ def generate_initial_positions(
 
 | Metric | File | Phase | Cap | Serves |
 |--------|------|-------|-----|--------|
-| Mean spread (variance of distances to centroid) | `metrics/mean_spread.py` [NEW] | 1 | I4 | RQ1, RQ6, RQ7 |
-| Extent (radius of gyration: RMS distance to centroid) | `metrics/extent.py` [NEW] | 1 | I4 | RQ1, RQ6 |
-| Shepherd interference I_dir | `metrics/shepherd_interference.py` [NEW] | 3 | I7 | RQ3, RQ7 |
-| Shepherd coverage C | `metrics/shepherd_coverage.py` [NEW] | 3 | I7 | RQ3, RQ7 |
+| Mean spread (variance of distances to centroid) | `plugins/metrics/mean_spread.py` [NEW] | 1 | I4 | RQ1, RQ6, RQ7 |
+| Extent (radius of gyration: RMS distance to centroid) | `plugins/metrics/extent.py` [NEW] | 1 | I4 | RQ1, RQ6 |
+| Shepherd interference I_dir | `plugins/metrics/shepherd_interference.py` [NEW] | 3 | I7 | RQ3, RQ7 |
+| Shepherd coverage C | `plugins/metrics/shepherd_coverage.py` [NEW] | 3 | I7 | RQ3, RQ7 |
 
 **Conditional** (add only if primary state variables are insufficient as predictors):
 - Cluster count (DBSCAN)
@@ -814,9 +814,12 @@ HerdSim/
 │   ├── scaling.py
 │   ├── predictors.py
 │   └── early_warning.py
-├── api/
-│   ├── budget_runner.py       # grid expand + resume + timeseries
-│   └── budget_layout.py       # path conventions + campaign helpers
+├── api/                       # FastAPI HTTP only
+├── services/
+│   ├── budget/
+│   │   ├── runner.py          # grid expand + resume + timeseries
+│   │   └── layout.py          # path conventions + campaign helpers
+│   └── experiments/           # UI Experiments / factor-grid engine
 ├── configs/budget/
 │   ├── canonical_grid.yaml    # frozen Section 8 protocol
 │   └── campaigns/             # per-run subsets (pilot, scout, state, ...)
@@ -846,14 +849,14 @@ Operator facade: `Makefile.budget` (`make -f Makefile.budget help`, or `make bud
 |--------|--------|
 | `core/simulation_runner.py` | Grid runner wraps it |
 | `core/experiment_config.py` | Config resolution is already flexible |
-| `analysis/failure_taxonomy.py` | Already integrated via benchmark_runner |
+| `analysis/failure_taxonomy.py` | Already integrated via experiments runner |
 | `instruments/*` | We study existing instruments as-is |
-| `dynamics/*` | No sheep/dog model changes |
+| `plugins/sheep/*`, `plugins/dogs/*` | No sheep/dog model changes |
 
 **Minimal changes to existing files:**
 - `core/experimental_factors.py`: `INITIAL_LAYOUTS = ("compact", "wide", "split", "outlier_rich")`
-- `scenarios/drive_to_goal.py`: call `x0_generators.generate_initial_positions()` when `initial_layout` is set
-- `metrics/registry.py`: register new metric classes
+- `plugins/scenarios/drive_to_goal.py`: call `x0_generators.generate_initial_positions()` when `initial_layout` is set
+- `plugins/metrics/registry.py`: register new metric classes
 
 **Exception E1 — conditional core change (shepherd intended velocities):**
 
@@ -962,4 +965,4 @@ Section 8 defaults are **frozen** as of 2026-09-17. Confirmed choices:
 
 Phase 1 implementation targets Caps I1–I4, I13, and I14.
 
-- 2026-09-17: Caps I1-I14 implemented in HerdSim (metrics, analysis/budget, api/budget_runner, configs/budget, scripts/budget). Phase done-when = claim-evaluable tooling + unit tests; full scout campaigns remain operator runs.
+- 2026-09-17: Caps I1-I14 implemented in HerdSim (metrics, analysis/budget, services/budget/runner, configs/budget, scripts/budget). Phase done-when = claim-evaluable tooling + unit tests; full scout campaigns remain operator runs.
