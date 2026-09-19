@@ -86,15 +86,20 @@ Hard conditions that always apply: rectangular arena with wall bounce (Drive to 
 
 ## Project layout
 
-- `core/`: engine, factors, instrument catalog
+- `core/`: simulation engine, factors, observation, instrument catalog
 - `plugins/`: sheep, dogs, scenarios, metrics
-- `instruments/`: named packages (`info.json`, paper defaults)
-- `api/`: HTTP and WebSocket for the UI
-- `services/`: Experiments engine and budget campaign runners
-- `frontend/`: Vite app
-- `docs/`: architecture and Guide pages
-- `integrations/`: NetLogo and MATLAB references
-- `configs/budget/`, `scripts/budget/`, `results/budget/`: budget campaigns
+- `instruments/`: named packages (`info.json`, paper defaults, helpers)
+- `api/`: HTTP and WebSocket API for the UI
+- `services/`: Experiments engine (`services/experiments/`) and budget campaign runners (`services/budget/`)
+- `analysis/`: failure taxonomy helpers and budget analysis packages (`analysis/budget/`)
+- `frontend/`: Vite app (Simulate, Compare, Experiments, NetLogo, Guide)
+- `docs/`: architecture, in-app Guide pages, and research notes under `docs/research/`
+- `integrations/`: NetLogo models and MATLAB reference code
+- `scripts/`: local `dev.sh` and budget CLIs under `scripts/budget/`
+- `configs/budget/`: frozen protocol and campaign YAML subsets
+- `results/budget/`: campaign outputs (`phase{k}/{slug}/`; see `results/budget/README.md`)
+- `tests/`: backend pytest and frontend node tests
+- `Makefile` / `Makefile.budget`: project targets and budget campaign targets
 
 ## Shepherding-budget campaigns
 
