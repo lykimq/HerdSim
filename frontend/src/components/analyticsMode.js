@@ -6,7 +6,7 @@ import {
   defaultFactorGridValues,
   defaultRequiredFactorGridRows,
   estimateGridCells,
-  factorGridMeaning,
+  factorFieldDescription,
   factorGridOptionItems,
   getMaxFactorGridCells,
   isFactorGridEnumKey,
@@ -190,7 +190,7 @@ export function bindAnalyticsMode({
       .map((row, index) => {
         const enumKey = isFactorGridEnumKey(row.key);
         const required = isRequiredFactorGridKey(row.key);
-        const meaning = factorGridMeaning(row.key);
+        const meaning = factorFieldDescription(row.key);
         return `
       <div class="factor-grid-row" data-row-index="${index}" data-kind="${enumKey ? 'enum' : 'number'}" data-required="${required ? '1' : '0'}">
         ${meaning ? `<p class="factor-grid-help"><span class="factor-grid-meaning">${escapeHtml(meaning)}</span></p>` : ''}

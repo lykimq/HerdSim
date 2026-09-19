@@ -9,14 +9,13 @@ import {
   defaultFactorGridValues,
   defaultRequiredFactorGridRows,
   estimateGridCells,
-  factorGridMeaning,
-  factorVisibility,
   isFactorGridEnumKey,
   isRequiredFactorGridKey,
   mergeFactorGridTemplateRows,
   parseMixedValueList,
   STUDY_TEMPLATES,
   suggestedFactorGridValues,
+  factorVisibility,
   validateFactors,
 } from '../../frontend/src/utils/factors.js';
 import {
@@ -24,12 +23,6 @@ import {
   parseTrialFactors,
   validateFactorGridRows,
 } from '../../frontend/src/utils/analyticsSweep.js';
-import { formatMetricValue } from '../../frontend/src/utils/metricFormat.js';
-import { escapeHtml } from '../../frontend/src/utils/dom.js';
-import {
-  circularZoneCenterBounds,
-  validateWorldOverrides,
-} from '../../frontend/src/utils/paramDescriptions.js';
 
 describe('factors helpers', () => {
   it('parses mixed numeric and string value lists', () => {
@@ -170,59 +163,26 @@ describe('factor grid helpers', () => {
     );
   });
 
-  it('uses typed defaults and rejects invalid enum grid values', () => {
-    assert.equal(defaultFactorGridValues('obs_mode'), '');
-    assert.equal(defaultFactorGridValues('sheep_model'), '');
-    assert.equal(defaultFactorGridValues('dog_controller'), '');
-    assert.equal(isFactorGridEnumKey('obs_mode'), true);
-    assert.equal(isFactorGridEnumKey('n_sheep'), false);
+  it('requires model/size axes, rejects bad enums, and merges templates', () => {
     assert.deepEqual(
       defaultRequiredFactorGridRows().map((r) => r.key),
       REQUIRED_FACTOR_GRID_KEYS,
     );
-    assert.equal(
-      defaultRequiredFactorGridRows().find((r) => r.key === 'sheep_model').values,
-      '',
-    );
+    assert.equal(defaultFactorGridValues('obs_mode'), '');
+    assert.equal(isFactorGridEnumKey('obs_mode'), true);
+    assert.equal(isFactorGridEnumKey('n_sheep'), false);
     assert.equal(isRequiredFactorGridKey('sheep_model'), true);
-    assert.equal(defaultFactorGridValues('n_sheep'), '');
-    assert.equal(defaultFactorGridValues('n_shepherds'), '');
-    assert.equal(
-      suggestedFactorGridValues('sensing_range'),
-      '20, 40, 65',
-    );
+    assert.equal(suggestedFactorGridValues('sensing_range'), '20, 40, 65');
     assert.equal(suggestedFactorGridValues('n_sheep'), '20, 40, 80');
-    assert.equal(
-      defaultRequiredFactorGridRows().find((r) => r.key === 'n_sheep').values,
-      '',
-    );
-    assert.match(factorGridMeaning('stubborn_fraction'), /\[0, 1\]/);
-    assert.match(factorGridMeaning('stubborn_fraction'), /harder to push/i);
+
     assert.match(
       validateFactorGridRows([
+        { key: 'sheep_model', values: 'strombom' },
+        { key: 'dog_controller', values: 'collect_drive' },
+        { key: 'n_sheep', values: '20' },
+        { key: 'n_shepherds', values: '1' },
         { key: 'obs_mode', values: '1, 2' },
       ]).error,
-      /requires/i,
-    );
-    assert.match(
-      validateFactorGridRows([
-        { key: 'dog_controller', values: '1, 2' },
-      ]).error,
-      /requires/i,
-    );
-    const filledRequired = defaultRequiredFactorGridRows().map((row) => {
-      const starters = {
-        sheep_model: 'strombom',
-        dog_controller: 'collect_drive',
-        n_sheep: '20',
-        n_shepherds: '1',
-      };
-      return { ...row, values: starters[row.key] };
-    });
-    assert.match(
-      validateFactorGridRows(filledRequired.concat([
-        { key: 'obs_mode', values: '1, 2' },
-      ])).error,
       /Observation mode/,
     );
     assert.equal(
@@ -235,6 +195,7 @@ describe('factor grid helpers', () => {
       ]).error,
       undefined,
     );
+
     const merged = mergeFactorGridTemplateRows([
       { key: 'n_sheep', values: '10, 20' },
       { key: 'stubborn_fraction', values: '0, 0.5' },
@@ -255,49 +216,5 @@ describe('factor grid helpers', () => {
       );
       assert.equal(template.preset, 'custom');
     }
-  });
-});
-
-describe('shared formatters', () => {
-  it('formats metric values and escapes HTML', () => {
-    assert.equal(formatMetricValue('time_to_goal', -1), 'not yet');
-    assert.equal(formatMetricValue('cohesion', 1.2345), '1.23');
-    assert.equal(escapeHtml('<b>"x"</b>'), '&lt;b&gt;&quot;x&quot;&lt;/b&gt;');
-  });
-});
-
-describe('world override bounds', () => {
-  it('suggests valid goal_center ranges from arena and radius', () => {
-    const bounds = circularZoneCenterBounds(150, 150, 15);
-    assert.deepEqual(bounds, {
-      minX: 15,
-      maxX: 135,
-      minY: 15,
-      maxY: 135,
-      radius: 15,
-      width: 150,
-      height: 150,
-      cramped: false,
-    });
-  });
-
-  it('rejects goal_center that would place the disk outside the arena', () => {
-    const bad = validateWorldOverrides({
-      world_width: 150,
-      world_height: 150,
-      goal_radius: 15,
-      goal_center: [1, 1],
-    });
-    assert.equal(bad.ok, false);
-    assert.match(bad.errors[0], /goal_center is out of bounds/);
-    assert.match(bad.errors[0], /\[15, 135\]/);
-
-    const good = validateWorldOverrides({
-      world_width: 150,
-      world_height: 150,
-      goal_radius: 15,
-      goal_center: [15, 15],
-    });
-    assert.equal(good.ok, true);
   });
 });

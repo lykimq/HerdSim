@@ -10,17 +10,17 @@ import {
   factorFieldLabel,
   factorVisibility,
   factorsFromInstrument,
-  optionHtml,
   summarizeFactors,
   validateFactors,
 } from '../utils/factors.js';
+import { optionListHtml } from '../utils/dom.js';
 import { setParamItemDescription } from '../utils/paramDescriptions.js';
 import { setInfoTip } from '../utils/tooltips.js';
 
 export function createFactorControls({ els, state, currentPreset, markCustom }) {
   function setSelectOptions(select, items, selected) {
     if (!select) return;
-    select.innerHTML = optionHtml(items, selected);
+    select.innerHTML = optionListHtml(items, selected);
   }
 
   function fillStaticEnums() {

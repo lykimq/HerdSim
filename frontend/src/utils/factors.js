@@ -1,7 +1,5 @@
 /** Experimental factor helpers shared by Single, Arena, and Analytics. */
 
-import { optionListHtml } from './dom.js';
-
 export const MAX_FACTOR_GRID_CELLS = 500;
 
 export const OBSERVATION_MODES = [
@@ -139,10 +137,6 @@ export function factorGridOptionItems(key) {
     return allowed.map((id) => ({ id, label: byId[id] || id }));
   }
   return allowed.map((id) => ({ id, label: id }));
-}
-
-export function factorGridMeaning(key) {
-  return FACTOR_FIELD_META[key]?.description || '';
 }
 
 /** Suggested numeric examples (also used as input placeholders). */
@@ -369,9 +363,6 @@ export function applyFactorMetadata(meta) {
   if (meta.enums.goal_mode?.length) {
     GOAL_MODES.splice(0, GOAL_MODES.length, ...meta.enums.goal_mode);
   }
-  if (Number.isFinite(meta.max_grid_cells)) {
-    // Keep exported constant in sync with backend when available.
-  }
   if (Array.isArray(meta.fields) && meta.fields.length) {
     const byKey = Object.fromEntries(meta.fields.map((f) => [f.key, f]));
     for (const item of FACTOR_GRID_KEYS) {
@@ -560,8 +551,4 @@ export function summarizeFactors(factors = {}) {
     f.goal_mode === 'moving' ? 'goal=moving' : null,
   ].filter(Boolean);
   return bits.join(' · ');
-}
-
-export function optionHtml(items, selected) {
-  return optionListHtml(items, selected);
 }
