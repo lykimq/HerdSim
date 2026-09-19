@@ -55,18 +55,6 @@ You choose an **instrument**, a **scenario**, a **seed**, and optional **factors
 
 **Settings source.** Instrument (paper-style defaults), Scenario (task defaults), or Custom (you lock counts and factors). Use Custom for a fair head-to-head ranking.
 
-## First minutes in Simulate
-
-See **Simulate** in this Guide for the full how-to. Short path:
-
-1. Open **Simulate**.
-2. Pick an **instrument** (Strombom 2014 is a good first choice) and leave **Mode** on **Paper original**, or choose **Scenarios** / **Custom**.
-3. Click **Initialize New Run**, then **Play**.
-4. Pause to scrub **Metric history**, read **Live Metrics**, and open **Inspect**.
-5. When the run ends, read the **Run report** (and download Markdown or JSON if you want notes).
-
-When you want two methods side by side, open **Compare**. When you need many seeds and a table, open **Experiments**.
-
 ## Frequently asked questions
 
 **Is HerdSim a single algorithm demo?**
