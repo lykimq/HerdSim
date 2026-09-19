@@ -33,7 +33,7 @@ def test_list_netlogo_models_includes_example():
     assert res.status_code == 200
     payload = res.json()
     paths = [m["path"] for m in payload["models"]]
-    assert "netlogo/models/example.nlogo" in paths
+    assert "integrations/netlogo/models/example.nlogo" in paths
     example = next(m for m in payload["models"] if m["name"] == "example.nlogo")
     assert example["source"] == "bundled"
 
@@ -71,7 +71,7 @@ def test_open_in_desktop_launches_gui(monkeypatch):
 
     res = client.post(
         "/api/netlogo/open",
-        json={"model_file": "netlogo/models/example.nlogo"},
+        json={"model_file": "integrations/netlogo/models/example.nlogo"},
     )
     assert res.status_code == 200, res.text
     body = res.json()

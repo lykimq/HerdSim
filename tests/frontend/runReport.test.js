@@ -4,7 +4,7 @@ import {
   buildRunReport,
   formatRunReportMarkdown,
   formatRunReportText,
-} from '../../frontend/src/utils/runReport.js';
+} from '../../frontend/src/shared/sim/runReport.js';
 
 function makeHistory(rows) {
   return rows.map((row) => ({

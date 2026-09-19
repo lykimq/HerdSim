@@ -14,7 +14,7 @@ from core.observation_models import (
     NoisyBearingObservation,
 )
 from core.experiment_config import resolve_experiment_config
-from scenarios.drive_to_goal import DriveToGoalScenario
+from plugins.scenarios.drive_to_goal import DriveToGoalScenario
 from tests.backend.helpers import make_state, make_world
 
 

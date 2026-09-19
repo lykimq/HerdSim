@@ -5,7 +5,7 @@ import {
   parseOverlayColor,
   sheepCentroid,
   GCM_GOAL_COLOR,
-} from '../../frontend/src/utils/displayOverlays.js';
+} from '../../frontend/src/shared/sim/displayOverlays.js';
 
 describe('displayOverlays', () => {
   it('returns empty assignment modes when instrument has none', () => {

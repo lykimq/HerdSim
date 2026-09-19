@@ -5,9 +5,9 @@ from __future__ import annotations
 import pandas as pd
 import pytest
 
-from api.benchmark_runner import run_benchmark
-from api.benchmark_summary import summarize_rows
-from api.benchmark_sweep import expand_factor_grid, parse_factor_specs, sweep_label
+from services.experiments.runner import run_benchmark
+from services.experiments.summary import summarize_rows
+from services.experiments.sweep import expand_factor_grid, parse_factor_specs, sweep_label
 from core.experimental_factors import MAX_FACTOR_GRID_CELLS
 
 
@@ -54,11 +54,11 @@ def test_run_benchmark_param_sweep_labels_rows():
 
 
 def test_find_preset_for_models_prefers_canonical():
-    from core.presets import find_preset_for_models
+    from core.instruments import find_instrument_for_models
 
-    assert find_preset_for_models("strombom", "collect_drive") == "strombom"
-    assert find_preset_for_models("kubo", "kubo_forces") == "kubo"
-    assert find_preset_for_models("jadhav", "fat") is None
+    assert find_instrument_for_models("strombom", "collect_drive") == "strombom"
+    assert find_instrument_for_models("kubo", "kubo_forces") == "kubo"
+    assert find_instrument_for_models("jadhav", "fat") is None
 
 
 def test_run_benchmark_factor_grid_without_instrument_uses_param_bundle():

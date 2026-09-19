@@ -18,14 +18,14 @@ from analysis.budget.scaling import fit_scaling_models
 from analysis.budget.substitution import substitution_curves
 from analysis.budget.transfer import build_transfer_table
 from core.x0_generators import generate_initial_positions, normalize_layout
-from metrics.cohesion import CohesionMetric
-from metrics.extent import ExtentMetric
-from metrics.fragmentation import FragmentationMetric
-from metrics.mean_spread import MeanSpreadMetric
-from metrics.outlier_count import OutlierCountMetric
-from metrics.registry import metric_registry
-from metrics.shepherd_coverage import ShepherdCoverageMetric
-from metrics.shepherd_interference import ShepherdInterferenceMetric
+from plugins.metrics.cohesion import CohesionMetric
+from plugins.metrics.extent import ExtentMetric
+from plugins.metrics.fragmentation import FragmentationMetric
+from plugins.metrics.mean_spread import MeanSpreadMetric
+from plugins.metrics.outlier_count import OutlierCountMetric
+from plugins.metrics.registry import metric_registry
+from plugins.metrics.shepherd_coverage import ShepherdCoverageMetric
+from plugins.metrics.shepherd_interference import ShepherdInterferenceMetric
 from tests.backend.helpers import make_state
 
 
@@ -219,7 +219,7 @@ def test_mechanism_and_substitution_and_early_warning():
 
 
 def test_drive_to_goal_uses_initial_layout():
-    from scenarios.drive_to_goal import DriveToGoalScenario
+    from plugins.scenarios.drive_to_goal import DriveToGoalScenario
 
     scenario = DriveToGoalScenario()
     rng = np.random.default_rng(1)
@@ -249,7 +249,7 @@ def test_drive_to_goal_uses_initial_layout():
 
 
 def test_canonical_protocol_loads():
-    from api.budget_runner import load_canonical_protocol
+    from services.budget.runner import load_canonical_protocol
 
     protocol = load_canonical_protocol()
     assert protocol["task"] == "drive_to_goal"
@@ -259,13 +259,13 @@ def test_canonical_protocol_loads():
 
 
 def test_budget_layout_and_cell_key(tmp_path: Path):
-    from api.budget_layout import (
+    from services.budget.layout import (
         CAMPAIGNS_DIR,
         load_campaign_spec,
         package_output_dir,
         resolve_campaign_output,
     )
-    from api.budget_runner import BudgetCell, _cell_key
+    from services.budget.runner import BudgetCell, _cell_key
 
     spec = load_campaign_spec(CAMPAIGNS_DIR / "phase1_pilot.yaml")
     assert spec["campaign_id"] == "phase1_pilot"

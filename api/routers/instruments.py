@@ -16,7 +16,10 @@ from core.experimental_factors import (
     OBSERVATION_MODES,
 )
 from core.plugin_registry import dog_controller_registry, sheep_dynamics_registry
-from core.presets import get_preset, list_presets
+from core.instruments import (
+    get_instrument as load_instrument,
+    list_instruments as list_instrument_catalog,
+)
 
 router = APIRouter()
 
@@ -126,7 +129,7 @@ def _factor_catalog() -> dict:
         },
     }
 
-_ALGORITHMS_ROOT = Path(__file__).resolve().parents[2] / "algorithms"
+_INSTRUMENTS_ROOT = Path(__file__).resolve().parents[2] / "instruments"
 _INFO_FALLBACK = {
     "strombom": {"herder_kind": "human", "herder_label": "Shepherd"},
     "strombom_multi": {"herder_kind": "human", "herder_label": "Shepherd"},
@@ -143,7 +146,7 @@ _INFO_FALLBACK = {
 
 
 def _load_info(preset_id: str) -> dict:
-    info_path = _ALGORITHMS_ROOT / preset_id / "info.json"
+    info_path = _INSTRUMENTS_ROOT / preset_id / "info.json"
     if info_path.is_file():
         with info_path.open(encoding="utf-8") as fh:
             return json.load(fh)
@@ -169,7 +172,7 @@ def _with_herder_meta(entry: dict) -> dict:
 @router.get("/")
 def list_instruments():
     """List named instrument presets (sheep_model x dog_controller bundles)."""
-    return [_with_herder_meta(item) for item in list_presets()]
+    return [_with_herder_meta(item) for item in list_instrument_catalog()]
 
 
 @router.get("/meta/models")
@@ -185,7 +188,7 @@ def list_models():
 @router.get("/{instrument}")
 def get_instrument(instrument: str):
     try:
-        preset = get_preset(instrument)
+        preset = load_instrument(instrument)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     payload = {

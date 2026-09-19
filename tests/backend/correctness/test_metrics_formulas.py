@@ -5,16 +5,16 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from metrics.cohesion import CohesionMetric
-from metrics.fragmentation import FragmentationMetric, largest_component_fraction
-from metrics.gcm_goal import GcmGoalMetric
-from metrics.min_separation import MinSeparationMetric
-from metrics.outlier_count import OutlierCountMetric
-from metrics.polarization import PolarizationMetric
-from metrics.sheep_in_goal import SheepInGoalMetric
-from metrics.shepherd_path import ShepherdPathMetric
-from metrics.success_rate import SuccessRateMetric
-from metrics.time_to_goal import TimeToGoalMetric
+from plugins.metrics.cohesion import CohesionMetric
+from plugins.metrics.fragmentation import FragmentationMetric, largest_component_fraction
+from plugins.metrics.gcm_goal import GcmGoalMetric
+from plugins.metrics.min_separation import MinSeparationMetric
+from plugins.metrics.outlier_count import OutlierCountMetric
+from plugins.metrics.polarization import PolarizationMetric
+from plugins.metrics.sheep_in_goal import SheepInGoalMetric
+from plugins.metrics.shepherd_path import ShepherdPathMetric
+from plugins.metrics.success_rate import SuccessRateMetric
+from plugins.metrics.time_to_goal import TimeToGoalMetric
 from tests.backend.helpers import make_state, make_world
 
 

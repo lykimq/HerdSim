@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from scenarios.registry import scenario_registry
+from plugins.scenarios.registry import scenario_registry
 from tests.backend.helpers import make_state
 
 

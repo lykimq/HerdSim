@@ -4,14 +4,14 @@ from __future__ import annotations
 
 import numpy as np
 
-from controllers.v_formation import VFormationController
+from plugins.dogs.v_formation import VFormationController
 from core.observation_models import GlobalObservation
-from core.presets import PRESETS, get_preset
+from core.instruments import INSTRUMENTS, get_instrument
 from tests.backend.helpers import build_runner, make_state, make_world, snapshot_positions
 
 
 def test_v_formation_registered():
-    assert "v_formation" in PRESETS
+    assert "v_formation" in INSTRUMENTS
 
 
 def test_v_formation_step_runs():

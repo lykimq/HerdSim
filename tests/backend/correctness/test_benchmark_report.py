@@ -5,14 +5,14 @@ from __future__ import annotations
 import pandas as pd
 import pytest
 
-from api.benchmark_aggregates import build_trial_metric_fields, control_efficiency
-from api.benchmark_report import (
+from services.shared.trial_aggregates import build_trial_metric_fields, control_efficiency
+from services.experiments.report import (
     HERDSIM_VERSION,
     build_report_package,
     report_to_csv,
     report_to_markdown,
 )
-from api.benchmark_runner import run_benchmark
+from services.experiments.runner import run_benchmark
 
 
 def test_report_package_includes_provenance():

@@ -4,18 +4,18 @@ from __future__ import annotations
 
 import numpy as np
 
-from algorithms.kubo.forces import (
+from instruments.kubo.forces import (
     clamp_speed,
     dog_force_components,
     sheep_force_components,
     target_sheep_farthest_from_goal,
 )
-from core.presets import get_preset
+from core.instruments import get_instrument
 from tests.backend.helpers import make_state
 
 
 def test_kubo_registered_with_force_gains():
-    alg = get_preset("kubo")
+    alg = get_instrument("kubo")
     assert alg["id"] == "kubo"
     assert {"K_f4", "K_s4", "radius"} <= set(alg["default_config"])
 
@@ -84,9 +84,9 @@ def test_clamp_speed_caps_fast_agents_only():
 
 def test_kubo_step_dogs_see_updated_sheep_positions():
     """Runner updates sheep before dog forces use sheep positions."""
-    from controllers.kubo_forces import KuboDogController
+    from plugins.dogs.kubo_forces import KuboDogController
     from core.observation_models import GlobalObservation
-    from dynamics.kubo import KuboSheepDynamics
+    from plugins.sheep.kubo import KuboSheepDynamics
     from tests.backend.helpers import make_world
 
     sheep_dyn = KuboSheepDynamics()

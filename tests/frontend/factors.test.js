@@ -17,12 +17,12 @@ import {
   suggestedFactorGridValues,
   factorVisibility,
   validateFactors,
-} from '../../frontend/src/utils/factors.js';
+} from '../../frontend/src/shared/factors/factors.js';
 import {
   chartGroupKey,
   parseTrialFactors,
   validateFactorGridRows,
-} from '../../frontend/src/utils/analyticsSweep.js';
+} from '../../frontend/src/features/experiments/analyticsSweep.js';
 
 describe('factors helpers', () => {
   it('parses mixed numeric and string value lists', () => {

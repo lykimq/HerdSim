@@ -63,18 +63,18 @@ def _register_builtins() -> None:
         LocalPositionsObservation,
         NoisyBearingObservation,
     )
-    from dynamics.jadhav import JadhavSheepDynamics
-    from dynamics.kubo import KuboSheepDynamics
-    from dynamics.strombom import StrombomSheepDynamics
-    from controllers.adaptive import AdaptiveController
-    from controllers.collect_drive import CollectDriveController
-    from controllers.collect_drive_multi import CollectDriveMultiController
-    from controllers.communication_free import CommunicationFreeController
-    from controllers.fat import FatController
-    from controllers.kubo_forces import KuboDogController
-    from controllers.obstacle_aware_drive import ObstacleAwareDriveController
-    from controllers.policy_file import PolicyFileController
-    from controllers.v_formation import VFormationController
+    from plugins.sheep.jadhav import JadhavSheepDynamics
+    from plugins.sheep.kubo import KuboSheepDynamics
+    from plugins.sheep.strombom import StrombomSheepDynamics
+    from plugins.dogs.adaptive import AdaptiveController
+    from plugins.dogs.collect_drive import CollectDriveController
+    from plugins.dogs.collect_drive_multi import CollectDriveMultiController
+    from plugins.dogs.communication_free import CommunicationFreeController
+    from plugins.dogs.fat import FatController
+    from plugins.dogs.kubo_forces import KuboDogController
+    from plugins.dogs.obstacle_aware_drive import ObstacleAwareDriveController
+    from plugins.dogs.policy_file import PolicyFileController
+    from plugins.dogs.v_formation import VFormationController
 
     sheep_dynamics_registry.register("strombom", StrombomSheepDynamics)
     sheep_dynamics_registry.register("kubo", KuboSheepDynamics)

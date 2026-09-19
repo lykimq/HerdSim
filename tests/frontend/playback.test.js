@@ -5,7 +5,7 @@ import {
   derivePhase,
   playbackFlags,
   statusAfterManualStep,
-} from '../../frontend/src/utils/playback.js';
+} from '../../frontend/src/shared/sim/playback.js';
 
 describe('derivePhase', () => {
   it('returns busy when busy regardless of sessions', () => {

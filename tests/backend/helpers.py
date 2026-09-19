@@ -10,8 +10,8 @@ from core.experiment_config import resolve_experiment_config
 from core.simulation_runner import RunResult, SimulationRunner
 from core.simulation_state import SimulationState
 from core.world import GoalZone, World
-from metrics.registry import metric_registry
-from scenarios.registry import scenario_registry
+from plugins.metrics.registry import metric_registry
+from plugins.scenarios.registry import scenario_registry
 
 
 def make_world(

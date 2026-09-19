@@ -11,7 +11,7 @@ from pathlib import Path
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from pydantic import BaseModel, Field
 
-from algorithms.netlogo.bridge import (
+from instruments.netlogo.bridge import (
     find_netlogo_gui_launcher,
     find_netlogo_home,
     resolve_model_path,
@@ -21,7 +21,7 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
-_MODELS_ROOT = _REPO_ROOT / "netlogo" / "models"
+_MODELS_ROOT = _REPO_ROOT / "integrations" / "netlogo" / "models"
 _UPLOADS_ROOT = _MODELS_ROOT / "uploads"
 _MAX_UPLOAD_BYTES = 5 * 1024 * 1024
 _SAFE_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,120}\.nlogo$")
@@ -57,7 +57,7 @@ def _list_nlogo(directory: Path, source: str) -> list[dict]:
 
 
 def _resolve_allowed_model(model_file: str) -> Path:
-    """Resolve a model path and require it to live under netlogo/models/."""
+    """Resolve a model path and require it to live under integrations/netlogo/models/."""
     path = resolve_model_path(model_file).resolve()
     if not path.is_file():
         raise HTTPException(status_code=404, detail=f"Model not found: {model_file}")
@@ -68,7 +68,7 @@ def _resolve_allowed_model(model_file: str) -> Path:
     except ValueError as exc:
         raise HTTPException(
             status_code=400,
-            detail="Model must be under netlogo/models/ (bundled or uploads).",
+            detail="Model must be under integrations/netlogo/models/ (bundled or uploads).",
         ) from exc
     return path
 
@@ -78,7 +78,7 @@ class OpenDesktopRequest(BaseModel):
     netlogo_home: str | None = None
 
 
-_TWINS_PATH = _REPO_ROOT / "netlogo" / "twins.json"
+_TWINS_PATH = _REPO_ROOT / "integrations" / "netlogo" / "twins.json"
 
 
 def _load_twins() -> list[dict]:
@@ -129,7 +129,7 @@ def netlogo_status():
         "gui_launcher": str(launcher) if launcher else None,
         "models_dir": _rel_model_path(_MODELS_ROOT)
         if _MODELS_ROOT.is_dir()
-        else "netlogo/models",
+        else "integrations/netlogo/models",
         "twins_count": len(_load_twins()),
     }
 
@@ -145,7 +145,7 @@ def list_models():
 
 @router.post("/upload")
 async def upload_model(file: UploadFile = File(...)):
-    """Save an uploaded .nlogo into netlogo/models/uploads/."""
+    """Save an uploaded .nlogo into integrations/netlogo/models/uploads/."""
     _ensure_dirs()
     filename = Path(file.filename or "").name
     if not _SAFE_NAME.match(filename):

@@ -62,7 +62,7 @@ Defined in `core/experimental_factors.py`:
 - Environment: world keys, `goal_mode`
 - Model: `sheep_model`, `dog_controller`, scenario, preset
 
-Named instruments in `core/presets.py` are factor bundles (e.g. `strombom` = Strombom sheep + Collect/Drive).
+Named instruments in `core/instruments.py` are factor bundles (e.g. `strombom` = Strombom sheep + Collect/Drive).
 
 ## Plugin Interfaces
 
@@ -70,9 +70,9 @@ Named instruments in `core/presets.py` are factor bundles (e.g. `strombom` = Str
 - `BaseObservationModel` / `ShepherdObservation` in `core/observation.py`
 - `BaseDogController` in `core/dog_controller.py`
 - Registries in `core/plugin_registry.py`
-- Named instruments (presets) in `core/presets.py`
+- Named instruments (catalog) in `core/instruments.py`
 
-New sheep models, dog controllers, and observation modes register in `core/plugin_registry.py`. Scenarios and metrics register in their package registries. Named instruments are factor bundles in `core/presets.py` with package metadata under `algorithms/<id>/` (on-disk package name; UI and docs say instrument).
+New sheep models, dog controllers, and observation modes register in `core/plugin_registry.py`. Scenarios and metrics register in their package registries. Named instruments are factor bundles in `core/instruments.py` with package metadata under `instruments/<id>/`.
 
 ## Config Composition
 
@@ -86,11 +86,13 @@ New sheep models, dog controllers, and observation modes register in `core/plugi
 
 ## Implementation Layout
 
-- `api/`: FastAPI routers, factor-grid benchmarks, and shepherding-budget campaign runner (`budget_runner.py`, `budget_layout.py`)
-- `core/`: runner, factors, observation, agent attributes, presets
-- `dynamics/`, `controllers/`: sheep and dog plugins
-- `algorithms/<id>/`: on-disk instrument packages (`info.json`, paper defaults, helpers). Folder name is historical; product language is instrument. This is not an HTTP path.
-- `scenarios/`, `metrics/`: task and measurement plugins
+- `api/`: FastAPI HTTP surface (`main.py`, `session_manager.py`, routers)
+- `services/experiments/`: UI Experiments / factor-grid benchmark engine
+- `services/budget/`: shepherding-budget campaign runner and layout
+- `core/`: runner, factors, observation, agent attributes, instrument catalog
+- `plugins/sheep/`, `plugins/dogs/`: sheep and dog plugins
+- `instruments/<id>/`: instrument packages (`info.json`, paper defaults, helpers). This is not an HTTP path.
+- `plugins/scenarios/`, `plugins/metrics/`: task and measurement plugins
 - `analysis/`: failure taxonomy helpers plus `analysis/budget/` for shepherding-budget packages A--G
 - `configs/budget/`: frozen protocol (`canonical_grid.yaml`) and per-run campaign subsets
 - `scripts/`: `dev.sh` (local API + Vite; also `make dev`) and `scripts/budget/` (grid / factor-sweep / analyse CLIs)
@@ -98,6 +100,7 @@ New sheep models, dog controllers, and observation modes register in `core/plugi
 - `results/budget/`: campaign run data under `phase{k}/{slug}/` (kept in git; see `results/budget/README.md`)
 - `frontend/`: Vite SPA (Simulate, Compare, Experiments, NetLogo, Guide)
 - `docs/`: architecture, Guide pages, and research plans under `docs/research/`
+- `integrations/netlogo/`, `integrations/matlab/`: external tool bridges and models
 - `tests/`: pytest + frontend node tests
 
 ## Shepherding-budget stack
@@ -113,8 +116,8 @@ section is the engineering shape.
 |-------|------|
 | `configs/budget/canonical_grid.yaml` | Frozen protocol defaults (task, θ, N/D grids, T₀/T₁, seeds, methods) |
 | `configs/budget/campaigns/*.yaml` | Per-run subsets (pilot, scout, state, factor sweep) with WHY comments |
-| `api/budget_runner.py` | Expand grid, run trials, resume via `manifest.jsonl`, write timeseries |
-| `api/budget_layout.py` | Path conventions (`phase{k}/{slug}/`, cell keys, package dirs) |
+| `services/budget/runner.py` | Expand grid, run trials, resume via `manifest.jsonl`, write timeseries |
+| `services/budget/layout.py` | Path conventions (`phase{k}/{slug}/`, cell keys, package dirs) |
 | `analysis/budget/` | Frontier, regimes, export, plots, plus modules for later packages |
 | `scripts/budget/` | `run_grid.py`, `run_factor_sweep.py`, `analyse.py` |
 | `Makefile.budget` | `budget-pilot`, `budget-scout`, `budget-pilot-state`, `budget-factor-sweep`, `budget-analyse` |
@@ -159,10 +162,10 @@ and are meant to stay with the repo.
 
 Discovery and UI payloads use **instrument** wording:
 
-- `GET /api/instruments` lists named instruments (from `core/presets.py`, with package metadata from `algorithms/<id>/info.json` where present)
+- `GET /api/instruments` lists named instruments (from `core/instruments.py`, with package metadata from `instruments/<id>/info.json` where present)
 - Related routes under `/api/instruments/...` (for example models meta used by Experiments)
 
-There is no `/api/algorithms` route. Prefer `instrument` / `instruments` in new API fields and clients. On disk, packages remain under `algorithms/<id>/` until a deliberate folder rename.
+There is no `/api/algorithms` route. Prefer `instrument` / `instruments` in new API fields and clients.
 
 Shepherding-budget campaigns are CLI/Makefile driven today; they wrap the same
 simulation runner and instruments, not a separate HTTP surface.

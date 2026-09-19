@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from algorithms.strombom.heuristics import (
+from instruments.strombom.heuristics import (
     collect_offset,
     collect_target,
     compute_threshold,
@@ -85,7 +85,7 @@ def test_drive_target_is_behind_gcm_from_goal():
 
 
 def test_shepherd_stops_within_three_ra():
-    from controllers.collect_drive import CollectDriveController
+    from plugins.dogs.collect_drive import CollectDriveController
     from core.observation_models import GlobalObservation
 
     ctrl = CollectDriveController()
@@ -99,7 +99,7 @@ def test_shepherd_stops_within_three_ra():
 
 
 def test_sheep_graze_when_shepherd_beyond_rs():
-    from dynamics.strombom import StrombomSheepDynamics
+    from plugins.sheep.strombom import StrombomSheepDynamics
 
     sheep_dyn = StrombomSheepDynamics()
     cfg = {**sheep_dyn.default_config, "graze_move_prob": 0.0}

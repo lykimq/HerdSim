@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter
 
-from scenarios.registry import scenario_registry
+from plugins.scenarios.registry import scenario_registry
 
 router = APIRouter()
 

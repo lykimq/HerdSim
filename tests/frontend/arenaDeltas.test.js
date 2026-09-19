@@ -3,7 +3,7 @@ import { describe, it } from 'node:test';
 import {
   formatMetricDelta,
   formatTimeToGoalDelta,
-} from '../../frontend/src/utils/arenaDeltas.js';
+} from '../../frontend/src/features/compare/arenaDeltas.js';
 
 describe('formatTimeToGoalDelta', () => {
   it('reports A faster when A finishes in fewer ticks', () => {

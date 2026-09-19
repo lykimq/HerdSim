@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "herdsim"
 version = "0.1.0"
-description = "A generic platform for benchmarking herding and swarming algorithms"
+description = "A factor-based platform for investigating multi-agent shepherding and herdability"
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.11"
@@ -32,7 +32,7 @@ dev = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["core*", "algorithms*", "scenarios*", "metrics*", "api*", "analysis*", "dynamics*", "controllers*"]
+include = ["core*", "instruments*", "plugins*", "api*", "analysis*", "services*"]
 
 [tool.ruff]
 line-length = 100

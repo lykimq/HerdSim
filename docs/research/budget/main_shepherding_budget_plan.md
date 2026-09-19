@@ -624,7 +624,7 @@ was written.
 
 | Cap | Serves | Capability | HerdSim location | Status | Package |
 |-----|--------|------------|------------------|--------|---------|
-| I1 | RQ2, RQ6 | N × D × seed grid runner with resume + provenance | `api/budget_runner.py`, `analysis/budget/provenance.py` | built | A, F |
+| I1 | RQ2, RQ6 | N × D × seed grid runner with resume + provenance | `services/budget/runner.py`, `analysis/budget/provenance.py` | built | A, F |
 | I2 | RQ2 | Frontier extraction D_min, D_overcrowd, D_max, B* | `analysis/budget/frontier.py` | built | A |
 | I3 | RQ2 | Regime labelling | `analysis/budget/regimes.py` | built | A |
 | I4 | RQ1, RQ6, RQ7 | Mean-spread and extent metrics | `metrics/mean_spread.py`, `metrics/extent.py` | built | B, F, G |
@@ -637,7 +637,7 @@ was written.
 | I11 | RQ6 | Scaling model fits | `analysis/budget/scaling.py` | built | F |
 | I12 | RQ7 | Early-warning features and evaluation | `analysis/budget/early_warning.py` | built | G |
 | I13 | S8 | Canonical protocol config + dossier export | `configs/budget/canonical_grid.yaml`, `analysis/budget/export.py` | built | all |
-| I14 | RQ3, RQ7 | Per-trial time-series storage (Parquet) | `api/budget_runner.py` (write path) | built | C, G |
+| I14 | RQ3, RQ7 | Per-trial time-series storage (Parquet) | `services/budget/runner.py` (write path) | built | C, G |
 
 **Already available (do not rebuild):** cohesion, fragmentation, outlier_count metrics; `iter_one_trial` / Experiments path; observation modes and communication factor injection in the simulation runner; instrument presets listed in RQ4; failure taxonomy via benchmark runner.
 
@@ -718,13 +718,13 @@ Compute from `state.shepherd_velocities` (realised, post-constraint). Document c
 | Component | File | Purpose |
 |-----------|------|---------|
 | Canonical grid config | `configs/budget/canonical_grid.yaml` [NEW] | Machine-readable protocol defaults |
-| Budget grid runner | `api/budget_runner.py` [NEW] | N×D×seed campaigns with resumability and provenance |
+| Budget grid runner | `services/budget/runner.py` [NEW] | N×D×seed campaigns with resumability and provenance |
 | Provenance stamps | `analysis/budget/provenance.py` [NEW] | Git hash, config hash, seed list, timestamps |
 | Frontier extraction | `analysis/budget/frontier.py` [NEW] | D_min, D_overcrowd, D_max, B* |
 | Regime labelling | `analysis/budget/regimes.py` [NEW] | Assigns regime labels to (N, D) cells |
 | Export / dossier | `analysis/budget/export.py` [NEW] | CSV + markdown report per package |
 
-The grid runner wraps [iter_one_trial()](file:///home/quyen/HerdSim/api/benchmark_runner.py#L77) from the existing benchmark runner. It does NOT modify the benchmark runner.
+The grid runner wraps [iter_one_trial()](file:///home/quyen/HerdSim/services/experiments/runner.py#L77) from the existing benchmark runner. It does NOT modify the benchmark runner.
 
 **Resumability:** On startup, scan `output_dir` for completed `(N, D, seed)` tuples and skip them. Critical because a full grid (8 × 10 × 30 = 2,400 trials) can take hours. Implement a JSON manifest (e.g., `output_dir/manifest.jsonl`) that appends one line per completed trial with keys `{N, D, seed, status, timestamp}`. On resume, load the manifest and skip listed triples.
 
@@ -847,7 +847,7 @@ Operator facade: `Makefile.budget` (`make -f Makefile.budget help`, or `make bud
 | `core/simulation_runner.py` | Grid runner wraps it |
 | `core/experiment_config.py` | Config resolution is already flexible |
 | `analysis/failure_taxonomy.py` | Already integrated via benchmark_runner |
-| `algorithms/*` | We study existing instruments as-is |
+| `instruments/*` | We study existing instruments as-is |
 | `dynamics/*` | No sheep/dog model changes |
 
 **Minimal changes to existing files:**

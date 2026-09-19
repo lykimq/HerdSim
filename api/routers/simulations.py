@@ -7,10 +7,10 @@ from pydantic import BaseModel, Field
 
 from api.session_manager import session_manager
 from core.experiment_config import resolve_experiment_config
-from core.presets import get_preset
+from core.instruments import get_instrument
 from core.simulation_runner import SimulationRunner
-from metrics.registry import metric_registry
-from scenarios.registry import scenario_registry
+from plugins.metrics.registry import metric_registry
+from plugins.scenarios.registry import scenario_registry
 
 router = APIRouter()
 
@@ -56,7 +56,7 @@ def create_session(req: CreateSessionRequest):
     """Create and initialize a new simulation session."""
     instrument = req.instrument or "strombom"
     try:
-        get_preset(instrument)
+        get_instrument(instrument)
     except KeyError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 

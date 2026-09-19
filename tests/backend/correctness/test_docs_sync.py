@@ -1,14 +1,14 @@
-"""Ensure registered algorithms have research docs and info.json."""
+"""Ensure registered instruments have research docs and info.json."""
 
 from __future__ import annotations
 
 from pathlib import Path
 
-from core.presets import PRESETS
+from core.instruments import INSTRUMENTS
 
 ROOT = Path(__file__).resolve().parents[3]
-ALG_DOCS = ROOT / "docs" / "research" / "algorithms"
-# Map algorithm id -> docs page stem (when names differ)
+ALG_DOCS = ROOT / "docs" / "research" / "instruments"
+# Map instrument id -> docs page stem (when names differ)
 DOC_BY_ID = {
     "strombom": "strombom_2014",
     "strombom_noise": "strombom_noise",
@@ -24,9 +24,9 @@ DOC_BY_ID = {
 }
 
 
-def test_each_registered_algorithm_has_info_and_docs():
-    for alg_id in PRESETS:
-        info = ROOT / "algorithms" / alg_id / "info.json"
+def test_each_registered_instrument_has_info_and_docs():
+    for alg_id in INSTRUMENTS:
+        info = ROOT / "instruments" / alg_id / "info.json"
         assert info.is_file(), f"missing info.json for {alg_id}"
         stem = DOC_BY_ID.get(alg_id, alg_id)
         page = ALG_DOCS / f"{stem}.md"

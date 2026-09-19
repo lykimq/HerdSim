@@ -4,17 +4,17 @@ from __future__ import annotations
 
 import numpy as np
 
-from algorithms.flocking_dog.dynamics import sheep_repulsion
-from controllers.collect_drive import CollectDriveController
+from instruments.flocking_dog.dynamics import sheep_repulsion
+from plugins.dogs.collect_drive import CollectDriveController
 from core.agents.sheep import nearest_neighbor_indices
 from core.observation_models import GlobalObservation
-from core.presets import get_preset
-from dynamics.jadhav import JadhavSheepDynamics
+from core.instruments import get_instrument
+from plugins.sheep.jadhav import JadhavSheepDynamics
 from tests.backend.helpers import make_state, make_world
 
 
 def test_flocking_dog_defaults_match_paper():
-    cfg = get_preset("flocking_dog")["default_config"]
+    cfg = get_instrument("flocking_dog")["default_config"]
     assert cfg["r_a"] == 2.0
     assert cfg["r_s"] == 12.0
     assert cfg["k_neighbors"] == 10
@@ -40,7 +40,7 @@ def test_sheep_graze_when_dog_beyond_rd():
 
 def test_dog_slows_within_ra():
     ctrl = CollectDriveController()
-    cfg = {**get_preset("flocking_dog")["default_config"]}
+    cfg = {**get_instrument("flocking_dog")["default_config"]}
     state = make_state(
         [[50.0, 50.0], [52.0, 50.0], [50.0, 52.0]],
         [[51.0, 50.5]],

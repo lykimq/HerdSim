@@ -1,6 +1,6 @@
 import { Assets } from 'pixi.js';
 import { icons } from '../assets/icons.js';
-import { log, withTimeout } from '../utils/logger.js';
+import { log, withTimeout } from '../shared/ui/logger.js';
 
 let cache = null;
 let loading = null;

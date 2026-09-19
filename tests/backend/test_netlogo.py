@@ -6,20 +6,20 @@ from pathlib import Path
 
 import pytest
 
-from algorithms.netlogo.bridge import (
+from instruments.netlogo.bridge import (
     find_netlogo_gui_launcher,
     find_netlogo_home,
     resolve_model_path,
 )
-from core.presets import PRESETS
+from core.instruments import INSTRUMENTS
 
 
 def test_netlogo_not_registered_as_herdsim_algorithm():
-    assert "netlogo" not in PRESETS
+    assert "netlogo" not in INSTRUMENTS
 
 
 def test_example_model_exists():
-    path = resolve_model_path("netlogo/models/example.nlogo")
+    path = resolve_model_path("integrations/netlogo/models/example.nlogo")
     assert path.is_file()
     text = path.read_text(encoding="utf-8")
     assert "to setup" in text
@@ -27,7 +27,7 @@ def test_example_model_exists():
 
 
 def test_resolve_model_path_prefers_repo_root():
-    path = resolve_model_path("netlogo/models/example.nlogo")
+    path = resolve_model_path("integrations/netlogo/models/example.nlogo")
     assert path.name == "example.nlogo"
     assert path.is_file()
 

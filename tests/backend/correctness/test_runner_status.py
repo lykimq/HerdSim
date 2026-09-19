@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from scenarios.drive_to_goal import DriveToGoalScenario
+from plugins.scenarios.drive_to_goal import DriveToGoalScenario
 from tests.backend.helpers import build_runner, make_state
 
 

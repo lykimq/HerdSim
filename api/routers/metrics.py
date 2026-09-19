@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import JSONResponse, PlainTextResponse, Response
 
 from api.session_manager import session_manager
-from metrics.registry import metric_registry
+from plugins.metrics.registry import metric_registry
 
 router = APIRouter()
 

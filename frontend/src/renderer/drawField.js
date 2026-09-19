@@ -1,5 +1,5 @@
 import { Graphics } from 'pixi.js';
-import { log } from '../utils/logger.js';
+import { log } from '../shared/ui/logger.js';
 
 /** Major grid spacing in world units (simulation meters / paper units). */
 const GRID_MAJOR = 25;

@@ -7,7 +7,7 @@ from typing import Any
 from core.base_scenario import BaseScenario
 from core.experimental_factors import ExperimentalFactors
 from core.plugin_registry import dog_controller_registry, sheep_dynamics_registry
-from core.presets import get_preset
+from core.instruments import get_instrument
 from core.shared_defaults import (
     SHARED_WORLD_DEFAULTS,
     WORLD_KEYS,
@@ -109,7 +109,7 @@ def resolve_experiment_config(
     raw: dict[str, Any] = {}
     explicit_params = dict(algorithm_params or {})
     if instrument:
-        bundle = get_preset(instrument)
+        bundle = get_instrument(instrument)
         raw.update(bundle["factors"])
         raw.setdefault("params", {})
         raw["params"] = {

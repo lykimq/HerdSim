@@ -10,14 +10,14 @@ from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import PlainTextResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field
 
-from api.benchmark_defs import benchmark_definitions_payload
-from api.benchmark_report import build_report_package, report_to_csv, report_to_markdown
-from api.benchmark_runner import (
+from services.experiments.defs import benchmark_definitions_payload
+from services.experiments.report import build_report_package, report_to_csv, report_to_markdown
+from services.experiments.runner import (
     iter_one_trial,
     run_benchmark,
     summarize_rows,
 )
-from api.benchmark_sweep import expand_factor_grid, parse_factor_specs
+from services.experiments.sweep import expand_factor_grid, parse_factor_specs
 
 router = APIRouter()
 

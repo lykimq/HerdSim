@@ -2,20 +2,20 @@
 
 from __future__ import annotations
 
-from algorithms.flocking_dog.config import FLOCKING_DOG_DEFAULTS
-from algorithms.kubo.config import KUBO_DEFAULTS
-from algorithms.strombom.config import STROMBOM_DEFAULTS
+from instruments.flocking_dog.config import FLOCKING_DOG_DEFAULTS
+from instruments.kubo.config import KUBO_DEFAULTS
+from instruments.strombom.config import STROMBOM_DEFAULTS
 from core.experiment_config import resolve_experiment_config
-from core.presets import get_preset, list_presets
+from core.instruments import get_instrument, list_instruments
 from core.shared_defaults import SHARED_WORLD_DEFAULTS, WORLD_KEYS
-from scenarios.drive_to_goal import DriveToGoalScenario
-from scenarios.obstacle_course import ObstacleCourseScenario
+from plugins.scenarios.drive_to_goal import DriveToGoalScenario
+from plugins.scenarios.obstacle_course import ObstacleCourseScenario
 
 _LAYOUT_ONLY_KEYS = set(WORLD_KEYS) - {"collect_threshold_scale"}
 
 
 def test_paper_preset_keeps_algorithm_agent_counts():
-    preset = get_preset("strombom")
+    preset = get_instrument("strombom")
     config = resolve_experiment_config(
         scenario=DriveToGoalScenario(),
         instrument="strombom",
@@ -26,7 +26,7 @@ def test_paper_preset_keeps_algorithm_agent_counts():
 
 
 def test_paper_preset_uses_scenario_world_layout():
-    preset = get_preset("strombom")
+    preset = get_instrument("strombom")
     scen = ObstacleCourseScenario()
     config = resolve_experiment_config(
         scenario=scen, instrument="strombom", preset="paper"
@@ -76,15 +76,15 @@ def test_algorithm_configs_omit_layout_world_keys():
         overlap = _LAYOUT_ONLY_KEYS.intersection(defaults)
         assert not overlap, f"layout keys in algorithm defaults: {overlap}"
 
-    for entry in list_presets():
+    for entry in list_instruments():
         overlap = _LAYOUT_ONLY_KEYS.intersection(entry["default_config"])
         assert not overlap, f"{entry['id']} default_config has layout keys: {overlap}"
 
 
 def test_kubo_paper_keeps_force_params_under_narrow_gate_world():
-    from scenarios.narrow_gate import NarrowGateScenario
+    from plugins.scenarios.narrow_gate import NarrowGateScenario
 
-    preset = get_preset("kubo")
+    preset = get_instrument("kubo")
     scen = NarrowGateScenario()
     config = resolve_experiment_config(
         scenario=scen, instrument="kubo", preset="paper"
@@ -99,7 +99,7 @@ def test_kubo_paper_keeps_force_params_under_narrow_gate_world():
 
 
 def test_paper_preset_includes_containment_scenario_keys():
-    from scenarios.containment import ContainmentScenario
+    from plugins.scenarios.containment import ContainmentScenario
 
     config = resolve_experiment_config(
         scenario=ContainmentScenario(), instrument="strombom", preset="paper"

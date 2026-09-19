@@ -8,8 +8,8 @@ import {
   trailColor,
   trailsFromFrames,
 } from './herderTrails.js';
-import { parseOverlayColor, GCM_GOAL_COLOR, sheepCentroid } from '../utils/displayOverlays.js';
-import { log } from '../utils/logger.js';
+import { parseOverlayColor, GCM_GOAL_COLOR, sheepCentroid } from '../shared/sim/displayOverlays.js';
+import { log } from '../shared/ui/logger.js';
 
 /**
  * PixiJS renderer for the herding field, goal, obstacles, and agents.

@@ -6,14 +6,14 @@ import numpy as np
 import pytest
 from fastapi.testclient import TestClient
 
-from api.benchmark_sweep import expand_factor_grid, parse_factor_specs, sweep_label
+from services.experiments.sweep import expand_factor_grid, parse_factor_specs, sweep_label
 from api.main import app
 from core.agent_attributes import apply_robot_constraints
 from core.experiment_config import resolve_experiment_config
-from core.presets import get_preset
+from core.instruments import get_instrument
 from core.simulation_runner import SimulationRunner
-from metrics.registry import metric_registry
-from scenarios.drive_to_goal import DriveToGoalScenario
+from plugins.metrics.registry import metric_registry
+from plugins.scenarios.drive_to_goal import DriveToGoalScenario
 
 
 @pytest.fixture
@@ -156,6 +156,6 @@ def test_resolve_failure_and_blind_masks():
 
 
 def test_presets_expose_model_pair():
-    fat = get_preset("fat")
+    fat = get_instrument("fat")
     assert fat["sheep_model"]
     assert fat["dog_controller"] == "fat"
