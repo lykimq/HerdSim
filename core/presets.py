@@ -9,7 +9,6 @@ from algorithms.kubo.config import KUBO_DEFAULTS
 from algorithms.obstacle_aware.config import OBSTACLE_AWARE_DEFAULTS
 from algorithms.strombom.config import STROMBOM_DEFAULTS
 from algorithms.v_formation.config import V_FORMATION_DEFAULTS
-from core.experimental_factors import ExperimentalFactors, ModelFactors
 
 
 def _bundle(
@@ -182,8 +181,3 @@ def get_preset(preset_id: str) -> dict[str, Any]:
             f"Unknown preset '{preset_id}'. Available: {list(PRESETS.keys())}"
         )
     return PRESETS[preset_id]
-
-
-def factors_from_preset(preset_id: str) -> ExperimentalFactors:
-    preset = get_preset(preset_id)
-    return ExperimentalFactors.from_dict(preset["factors"])

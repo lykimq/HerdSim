@@ -102,8 +102,18 @@ assert_ports_free
 echo "Starting backend (port 8000)..."
 echo "Press Ctrl+C once to stop both."
 
+# Prefer the project venv (uv sync), then fall back to uv run.
+if [[ -x "$ROOT/.venv/bin/uvicorn" ]]; then
+  UVICORN=("$ROOT/.venv/bin/uvicorn")
+elif command -v uv >/dev/null 2>&1; then
+  UVICORN=(uv run uvicorn)
+else
+  echo "No project uvicorn found. Run: make install" >&2
+  exit 1
+fi
+
 # Own process groups so children (WatchFiles / vite) die with the leader.
-setsid uvicorn api.main:app --reload --port 8000 </dev/null &
+setsid "${UVICORN[@]}" api.main:app --reload --port 8000 </dev/null &
 BACKEND_PID=$!
 
 if ! wait_for_api; then

@@ -17,7 +17,7 @@ from api.benchmark_runner import (
     run_benchmark,
     summarize_rows,
 )
-from api.benchmark_sweep import expand_param_grid, parse_sweep_specs
+from api.benchmark_sweep import expand_factor_grid, parse_factor_specs
 
 router = APIRouter()
 
@@ -59,7 +59,7 @@ def _validate_request(req: BenchmarkRequest) -> list[dict[str, Any]]:
     if not req.seeds:
         raise HTTPException(status_code=400, detail="seeds required")
     try:
-        specs = parse_sweep_specs(
+        specs = parse_factor_specs(
             [item.model_dump() for item in req.sweep] if req.sweep else None
         )
     except ValueError as exc:
@@ -121,7 +121,7 @@ def benchmark_run(
         global _LAST_BENCHMARK, _LAST_REQUEST
         try:
             rows = []
-            param_sets = expand_param_grid(specs)
+            param_sets = expand_factor_grid(specs)
             instrument_loop = list(req.instruments) if req.instruments else [None]
             total = len(instrument_loop) * len(req.seeds) * len(param_sets)
             index = 0

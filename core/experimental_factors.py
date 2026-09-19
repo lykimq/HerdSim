@@ -25,8 +25,8 @@ COMMUNICATION_MODES = ("none", "neighbour_broadcast", "global_shared")
 
 GOAL_MODES = ("static", "moving")
 
-# Canonical X0 families from the budget protocol, plus legacy aliases.
-INITIAL_LAYOUTS = ("compact", "wide", "split", "outlier_rich", "cluster")
+# Canonical X0 families from the budget protocol.
+INITIAL_LAYOUTS = ("compact", "wide", "split", "outlier_rich")
 
 
 @dataclass
@@ -91,7 +91,6 @@ class ExperimentalFactors:
     def validate(self) -> None:
         from core.x0_generators import normalize_layout
 
-        # Accept legacy "cluster" and store the canonical family name.
         self.flock.initial_layout = normalize_layout(self.flock.initial_layout)
         if self.flock.initial_layout not in INITIAL_LAYOUTS:
             raise ValueError(

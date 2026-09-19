@@ -144,7 +144,6 @@ export function paramFieldDescription(key) {
 
 /**
  * Attach field help as a hover tip on the field name (no always-on paragraph).
- * Removes any leftover .param-desc paragraphs from the older layout.
  */
 export function setParamItemDescription(paramItem, text) {
   if (!paramItem) return;

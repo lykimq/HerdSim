@@ -6,7 +6,7 @@ from typing import Any, Callable, Iterator
 
 from analysis.failure_taxonomy import classify_failure
 from api.benchmark_aggregates import build_trial_metric_fields
-from api.benchmark_summary import summarize_rows, summary_to_csv, summary_to_markdown
+from api.benchmark_summary import summarize_rows
 from api.benchmark_sweep import expand_factor_grid, parse_factor_specs, sweep_label
 from core.experiment_config import resolve_experiment_config
 from core.presets import find_preset_for_models, get_preset
@@ -19,10 +19,7 @@ ProgressFn = Callable[[dict[str, Any]], None]
 __all__ = [
     "iter_one_trial",
     "run_benchmark",
-    "run_one_trial",
     "summarize_rows",
-    "summary_to_csv",
-    "summary_to_markdown",
 ]
 
 
@@ -185,36 +182,6 @@ def iter_one_trial(
         sweep_params=sweep_params,
     )
     yield {"type": "trial", "row": row, "index": index, "total": total}
-
-
-def run_one_trial(
-    *,
-    instrument: str | None = None,
-    scenario_id: str,
-    seed: int,
-    preset: str = "paper",
-    num_sheep: int | None = None,
-    num_shepherds: int | None = None,
-    algorithm_params: dict[str, Any] | None = None,
-    on_progress: ProgressFn | None = None,
-) -> dict[str, Any]:
-    row: dict[str, Any] | None = None
-    for event in iter_one_trial(
-        instrument=instrument,
-        scenario_id=scenario_id,
-        seed=seed,
-        preset=preset,
-        num_sheep=num_sheep,
-        num_shepherds=num_shepherds,
-        algorithm_params=algorithm_params,
-    ):
-        if on_progress and event.get("type") in {"progress", "tick"}:
-            on_progress(event)
-        if event.get("type") == "trial":
-            row = event["row"]
-    if row is None:
-        raise RuntimeError("Trial produced no result row")
-    return row
 
 
 def run_benchmark(

@@ -15,6 +15,7 @@ import {
   isRequiredFactorGridKey,
   mergeFactorGridTemplateRows,
   parseMixedValueList,
+  STUDY_TEMPLATES,
   suggestedFactorGridValues,
   validateFactors,
 } from '../../frontend/src/utils/factors.js';
@@ -241,6 +242,19 @@ describe('factor grid helpers', () => {
     assert.equal(merged[0].key, 'sheep_model');
     assert.equal(merged.find((r) => r.key === 'n_sheep').values, '10, 20');
     assert.ok(merged.some((r) => r.key === 'stubborn_fraction'));
+  });
+
+  it('study templates merge into runnable required factor grids', () => {
+    for (const template of STUDY_TEMPLATES) {
+      const rows = mergeFactorGridTemplateRows(template.rows);
+      const checked = validateFactorGridRows(rows);
+      assert.equal(
+        checked.error,
+        undefined,
+        `${template.id}: ${checked.error || 'ok'}`,
+      );
+      assert.equal(template.preset, 'custom');
+    }
   });
 });
 

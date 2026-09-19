@@ -32,7 +32,9 @@ including the shepherding-budget campaign stack (CLI grids, analysis packages,
 
 ## Getting Started
 
-1. `make install`
+Requires [uv](https://docs.astral.sh/uv/) and Node.js.
+
+1. `make install`   (creates `.venv` via `uv sync --extra dev`, then `npm install`)
 2. `make dev`
 3. Open http://localhost:5173
 

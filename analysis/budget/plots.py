@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
 
 import pandas as pd
 
@@ -66,12 +65,6 @@ def save_reliability_heatmap(
     fig.savefig(out, dpi=150)
     plt.close(fig)
     return out
-
-
-def frontier_overlay_data(frontier: pd.DataFrame) -> dict[str, Any]:
-    """Extract series useful for D_min(N) overlay plots."""
-    cols = [c for c in ("n_sheep", "d_min", "d_overcrowd", "d_max") if c in frontier.columns]
-    return frontier[cols].to_dict(orient="list")
 
 
 def save_frontier_curve(

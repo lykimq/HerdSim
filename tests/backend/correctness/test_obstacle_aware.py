@@ -9,16 +9,15 @@ from algorithms.obstacle_aware.geometry import (
     find_gate_gap_center,
     segment_intersects_aabb,
 )
-from algorithms.registry import instrument_registry
 from controllers.obstacle_aware_drive import ObstacleAwareDriveController
 from core.observation_models import GlobalObservation
-from core.presets import get_preset
+from core.presets import PRESETS, get_preset
 from core.world import Obstacle
 from tests.backend.helpers import build_runner, make_state, make_world, run_trial, snapshot_positions
 
 
 def test_obstacle_aware_registered():
-    assert "obstacle_aware" in instrument_registry.names()
+    assert "obstacle_aware" in PRESETS
 
 
 def test_obstacle_aware_determinism_same_seed():

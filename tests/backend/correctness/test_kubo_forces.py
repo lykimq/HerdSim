@@ -10,14 +10,14 @@ from algorithms.kubo.forces import (
     sheep_force_components,
     target_sheep_farthest_from_goal,
 )
-from algorithms.registry import instrument_registry
+from core.presets import get_preset
 from tests.backend.helpers import make_state
 
 
 def test_kubo_registered_with_force_gains():
-    alg = instrument_registry.get("kubo")
-    assert alg.id == "kubo"
-    assert {"K_f4", "K_s4", "radius"} <= set(alg.default_config)
+    alg = get_preset("kubo")
+    assert alg["id"] == "kubo"
+    assert {"K_f4", "K_s4", "radius"} <= set(alg["default_config"])
 
 
 def test_target_sheep_is_farthest_from_goal():

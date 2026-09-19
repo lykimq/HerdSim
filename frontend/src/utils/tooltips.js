@@ -142,13 +142,12 @@ function tipKey(btn) {
 /**
  * Attach a hover tip directly to anchorEl (label/title text).
  * No glyph -- hover or focus the text to see the tip.
- * Empty/nullish text clears the tip. Also removes any leftover .info-dot nodes.
+ * Empty/nullish text clears the tip.
  */
 export function setInfoTip(anchorEl, text) {
   if (!anchorEl) return null;
   installGlobalTipHiders();
 
-  // Clean up the previous icon-based tips if still present.
   anchorEl.querySelectorAll?.('.info-dot').forEach((el) => el.remove());
   if (anchorEl.nextElementSibling?.classList?.contains('info-dot')) {
     anchorEl.nextElementSibling.remove();

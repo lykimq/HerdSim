@@ -49,8 +49,3 @@ def sweep_label(params: dict[str, Any]) -> str:
     if not params:
         return ""
     return ", ".join(f"{k}={params[k]}" for k in sorted(params))
-
-
-# Backward names used by older imports inside this repo during migration.
-parse_sweep_specs = parse_factor_specs
-expand_param_grid = expand_factor_grid

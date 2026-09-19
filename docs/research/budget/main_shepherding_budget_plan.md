@@ -669,12 +669,12 @@ def generate_initial_positions(
 
 | Layout (plan) | Factor value stored | Definition | Key parameter |
 |---------------|---------------------|------------|---------------|
-| `compact` | `compact` (alias: legacy `cluster` → `compact`) | Single Gaussian cluster, σ = 0.3 × default spread | Low cohesion distance |
+| `compact` | `compact` | Single Gaussian cluster, σ = 0.3 × default spread | Low cohesion distance |
 | `wide` | `wide` | Single Gaussian cluster, σ = 2.0 × default spread | High cohesion distance |
 | `split` | `split` | 2–3 separated subclusters at distance ≥ 2× interaction radius | Low fragmentation index |
 | `outlier_rich` | `outlier_rich` | Core cluster (80%) + outliers (20%) beyond lost threshold | High outlier count |
 
-Update `INITIAL_LAYOUTS` in [experimental_factors.py](file:///home/quyen/HerdSim/core/experimental_factors.py) to `("compact", "wide", "split", "outlier_rich")` and accept legacy `"cluster"` as an alias for `"compact"`. The `validate()` method checks membership in the `INITIAL_LAYOUTS` tuple, so updating the tuple is sufficient — no separate validation change is needed, but verify that existing configs using `"cluster"` still pass by mapping the alias before validation. Update `DriveToGoalScenario.initial_positions()` to call this generator when `initial_layout` is set.
+`INITIAL_LAYOUTS` in `core/experimental_factors.py` is `("compact", "wide", "split", "outlier_rich")`. `DriveToGoalScenario.initial_positions()` calls `x0_generators.generate_initial_positions()` when `initial_layout` is set.
 
 **RQ1 gate:** unit tests must verify that sampled layouts differ on the intended metric (cohesion for compact/wide; fragmentation for split; outlier_count for outlier_rich) before any claim-grade campaign.
 
@@ -846,13 +846,12 @@ Operator facade: `Makefile.budget` (`make -f Makefile.budget help`, or `make bud
 |--------|--------|
 | `core/simulation_runner.py` | Grid runner wraps it |
 | `core/experiment_config.py` | Config resolution is already flexible |
-| `analysis/herdability.py` | Superseded by frontier.py but kept for backward compatibility |
 | `analysis/failure_taxonomy.py` | Already integrated via benchmark_runner |
 | `algorithms/*` | We study existing instruments as-is |
 | `dynamics/*` | No sheep/dog model changes |
 
 **Minimal changes to existing files:**
-- `core/experimental_factors.py`: update `INITIAL_LAYOUTS` to `("compact", "wide", "split", "outlier_rich")`; add alias mapping so `"cluster"` is accepted and silently mapped to `"compact"` before validation
+- `core/experimental_factors.py`: `INITIAL_LAYOUTS = ("compact", "wide", "split", "outlier_rich")`
 - `scenarios/drive_to_goal.py`: call `x0_generators.generate_initial_positions()` when `initial_layout` is set
 - `metrics/registry.py`: register new metric classes
 

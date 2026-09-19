@@ -8,10 +8,9 @@ from __future__ import annotations
 
 import numpy as np
 
-from core.agents.sheep import nearest_neighbor_indices, unit_vector
+from core.agents.sheep import unit_vector
 
 __all__ = [
-    "nearest_neighbor_indices",
     "sheep_repulsion",
     "random_attraction",
     "random_alignment",

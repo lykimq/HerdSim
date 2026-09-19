@@ -21,7 +21,7 @@ export function analyticsRunnerHtml() {
         <option value="">(none)</option>
         ${studyOptions}
       </select>
-      <p class="param-hint">Templates fill factor-grid rows for common herdability / sensing / heterogeneity studies.</p>
+      <p class="param-hint">Templates fill factor-grid rows for common herdability / sensing / heterogeneity studies. The selected template stays applied until you change it.</p>
     </div>
     <div class="control-group">
       <label>Mode</label>
@@ -51,8 +51,8 @@ export function analyticsRunnerHtml() {
       <p class="param-hint" data-role="scenario-blurb"></p>
     </div>
     <div class="control-group">
-      <label>Mode</label>
-      <select data-role="preset">${presetSelectHtml(false)}</select>
+      <label>Config mode</label>
+      <select data-role="preset">${presetSelectHtml(true)}</select>
       <p class="param-hint" data-role="preset-blurb"></p>
     </div>
     <div class="control-group">

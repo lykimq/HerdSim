@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from algorithms.registry import instrument_registry
+from core.presets import PRESETS
 
 ROOT = Path(__file__).resolve().parents[3]
 ALG_DOCS = ROOT / "docs" / "research" / "algorithms"
@@ -25,7 +25,7 @@ DOC_BY_ID = {
 
 
 def test_each_registered_algorithm_has_info_and_docs():
-    for alg_id in instrument_registry.names():
+    for alg_id in PRESETS:
         info = ROOT / "algorithms" / alg_id / "info.json"
         assert info.is_file(), f"missing info.json for {alg_id}"
         stem = DOC_BY_ID.get(alg_id, alg_id)

@@ -3,10 +3,8 @@
 from __future__ import annotations
 
 import numpy as np
-import pytest
 
 from algorithms.flocking_dog.dynamics import sheep_repulsion
-from algorithms.strombom.heuristics import compute_threshold
 from controllers.collect_drive import CollectDriveController
 from core.agents.sheep import nearest_neighbor_indices
 from core.observation_models import GlobalObservation
@@ -56,12 +54,6 @@ def test_dog_slows_within_ra():
     assert np.allclose(
         new_state.shepherd_velocities[0] / 0.05, [1.0, 0.0], atol=1e-9
     )
-
-
-def test_collect_threshold_is_ra_n_two_thirds():
-    n = 14
-    r_a = 2.0
-    assert compute_threshold(n, r_a) == pytest.approx(r_a * (n ** (2.0 / 3.0)))
 
 
 def test_nearest_neighbors_topological():

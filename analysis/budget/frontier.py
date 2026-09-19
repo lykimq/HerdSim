@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from typing import Any
 
-import numpy as np
 import pandas as pd
 
 
@@ -155,49 +154,3 @@ def extract_frontier(
         }
         rows.append(row)
     return pd.DataFrame(rows)
-
-
-def bootstrap_d_min_ci(
-    df: pd.DataFrame,
-    *,
-    n_sheep: int,
-    theta: float = 0.90,
-    n_boot: int = 1000,
-    dog_col: str = "n_shepherds",
-    success_col: str = "success",
-    sheep_col: str = "n_sheep",
-    seed: int = 2026,
-) -> dict[str, Any]:
-    """Bootstrap 95% CI on D_min for one flock size."""
-    sub = df[df[sheep_col] == n_sheep]
-    if sub.empty:
-        return {"d_min": None, "ci_low": None, "ci_high": None}
-    rng = np.random.default_rng(seed)
-    ds = sorted(sub[dog_col].unique())
-    # Resample seeds within each D cell.
-    estimates: list[int | None] = []
-    for _ in range(n_boot):
-        parts = []
-        for d in ds:
-            cell = sub[sub[dog_col] == d]
-            if cell.empty:
-                continue
-            idx = rng.integers(0, len(cell), size=len(cell))
-            parts.append(cell.iloc[idx])
-        if not parts:
-            estimates.append(None)
-            continue
-        boot = pd.concat(parts, ignore_index=True)
-        rates = boot.groupby(dog_col)[success_col].mean().sort_index()
-        estimates.append(_d_min_for_rates(rates, theta))
-    valid = [e for e in estimates if e is not None]
-    point = _d_min_for_rates(
-        sub.groupby(dog_col)[success_col].mean().sort_index(), theta
-    )
-    if not valid:
-        return {"d_min": point, "ci_low": None, "ci_high": None}
-    return {
-        "d_min": point,
-        "ci_low": int(np.percentile(valid, 2.5)),
-        "ci_high": int(np.percentile(valid, 97.5)),
-    }

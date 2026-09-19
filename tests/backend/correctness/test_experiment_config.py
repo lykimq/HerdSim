@@ -4,10 +4,9 @@ from __future__ import annotations
 
 from algorithms.flocking_dog.config import FLOCKING_DOG_DEFAULTS
 from algorithms.kubo.config import KUBO_DEFAULTS
-from algorithms.registry import instrument_registry
 from algorithms.strombom.config import STROMBOM_DEFAULTS
 from core.experiment_config import resolve_experiment_config
-from core.presets import get_preset
+from core.presets import get_preset, list_presets
 from core.shared_defaults import SHARED_WORLD_DEFAULTS, WORLD_KEYS
 from scenarios.drive_to_goal import DriveToGoalScenario
 from scenarios.obstacle_course import ObstacleCourseScenario
@@ -77,7 +76,7 @@ def test_algorithm_configs_omit_layout_world_keys():
         overlap = _LAYOUT_ONLY_KEYS.intersection(defaults)
         assert not overlap, f"layout keys in algorithm defaults: {overlap}"
 
-    for entry in instrument_registry.list_all():
+    for entry in list_presets():
         overlap = _LAYOUT_ONLY_KEYS.intersection(entry["default_config"])
         assert not overlap, f"{entry['id']} default_config has layout keys: {overlap}"
 

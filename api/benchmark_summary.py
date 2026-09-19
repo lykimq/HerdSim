@@ -6,8 +6,6 @@ from typing import Any
 
 import pandas as pd
 
-from api.benchmark_report import report_to_csv, report_to_markdown
-
 
 def _iqr(series: pd.Series) -> float | None:
     values = pd.to_numeric(series, errors="coerce").dropna()
@@ -67,11 +65,3 @@ def summarize_rows(df: pd.DataFrame) -> list[dict[str, Any]]:
             }
         )
     return out
-
-
-def summary_to_csv(payload: dict[str, Any]) -> str:
-    return report_to_csv(payload)
-
-
-def summary_to_markdown(payload: dict[str, Any]) -> str:
-    return report_to_markdown(payload)

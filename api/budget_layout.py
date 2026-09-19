@@ -115,12 +115,3 @@ def write_status(
 def campaign_id_from_dir(campaign_dir: Path | str) -> str:
     """Default campaign_id = leaf folder name (e.g. pilot, scout, pilot_state)."""
     return Path(campaign_dir).resolve().name
-
-
-def infer_phase_from_dir(campaign_dir: Path | str) -> int | None:
-    """Parse phase number from .../phase{N}/... if present."""
-    parts = Path(campaign_dir).resolve().parts
-    for part in parts:
-        if part.startswith("phase") and part[5:].isdigit():
-            return int(part[5:])
-    return None

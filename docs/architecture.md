@@ -71,7 +71,6 @@ Named instruments in `core/presets.py` are factor bundles (e.g. `strombom` = Str
 - `BaseDogController` in `core/dog_controller.py`
 - Registries in `core/plugin_registry.py`
 - Named instruments (presets) in `core/presets.py`
-- `algorithms/registry.py` exposes `instrument_registry` for scripts and docs sync; prefer `core.presets` or `instrument` in new code
 
 New sheep models, dog controllers, and observation modes register in `core/plugin_registry.py`. Scenarios and metrics register in their package registries. Named instruments are factor bundles in `core/presets.py` with package metadata under `algorithms/<id>/` (on-disk package name; UI and docs say instrument).
 
@@ -92,7 +91,7 @@ New sheep models, dog controllers, and observation modes register in `core/plugi
 - `dynamics/`, `controllers/`: sheep and dog plugins
 - `algorithms/<id>/`: on-disk instrument packages (`info.json`, paper defaults, helpers). Folder name is historical; product language is instrument. This is not an HTTP path.
 - `scenarios/`, `metrics/`: task and measurement plugins
-- `analysis/`: UI/batch helpers (herdability, behavioural, failure taxonomy, propagation) plus `analysis/budget/` for shepherding-budget packages A--G
+- `analysis/`: failure taxonomy helpers plus `analysis/budget/` for shepherding-budget packages A--G
 - `configs/budget/`: frozen protocol (`canonical_grid.yaml`) and per-run campaign subsets
 - `scripts/`: `dev.sh` (local API + Vite; also `make dev`) and `scripts/budget/` (grid / factor-sweep / analyse CLIs)
 - `Makefile.budget`: operator targets for budget campaigns (`make budget-help`)

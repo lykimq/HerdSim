@@ -63,9 +63,9 @@ def test_coverage_peripheral_fraction():
     assert ShepherdCoverageMetric().compute(state) == pytest.approx(1.0)
 
 
-def test_normalize_layout_alias():
-    assert normalize_layout("cluster") == "compact"
-    assert normalize_layout("wide") == "wide"
+def test_normalize_layout():
+    assert normalize_layout(" Wide ") == "wide"
+    assert normalize_layout("compact") == "compact"
 
 
 def test_x0_families_differ_on_target_metrics():
@@ -265,7 +265,7 @@ def test_budget_layout_and_cell_key(tmp_path: Path):
         package_output_dir,
         resolve_campaign_output,
     )
-    from api.budget_runner import BudgetCell, _cell_key, timeseries_stem
+    from api.budget_runner import BudgetCell, _cell_key
 
     spec = load_campaign_spec(CAMPAIGNS_DIR / "phase1_pilot.yaml")
     assert spec["campaign_id"] == "phase1_pilot"
@@ -281,7 +281,6 @@ def test_budget_layout_and_cell_key(tmp_path: Path):
         obs_mode="bearing_only",
     )
     key = _cell_key(cell)
-    assert key == timeseries_stem(cell)
     assert "Istrombom_multi" in key
     assert "Obearing_only" in key
     assert key.startswith("N50_D2_Lcompact_S2026_")

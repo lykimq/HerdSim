@@ -7,18 +7,18 @@ import pytest
 
 from api.benchmark_runner import run_benchmark
 from api.benchmark_summary import summarize_rows
-from api.benchmark_sweep import expand_param_grid, parse_sweep_specs, sweep_label
+from api.benchmark_sweep import expand_factor_grid, parse_factor_specs, sweep_label
 from core.experimental_factors import MAX_FACTOR_GRID_CELLS
 
 
 def test_parse_and_expand_param_grid():
-    specs = parse_sweep_specs(
+    specs = parse_factor_specs(
         [
             {"key": "n_neighbors", "values": [1, 5]},
             {"key": "rs_weight", "values": [1.0]},
         ]
     )
-    grid = expand_param_grid(specs)
+    grid = expand_factor_grid(specs)
     assert grid == [
         {"n_neighbors": 1, "rs_weight": 1.0},
         {"n_neighbors": 5, "rs_weight": 1.0},
@@ -28,7 +28,7 @@ def test_parse_and_expand_param_grid():
 
 def test_parse_sweep_rejects_oversized_grid():
     with pytest.raises(ValueError, match="max is"):
-        expand_param_grid(
+        expand_factor_grid(
             [
                 {"key": "n_sheep", "values": list(range(MAX_FACTOR_GRID_CELLS + 1))},
             ]

@@ -302,6 +302,8 @@ export const STUDY_TEMPLATES = [
     seeds: '1, 2, 3, 4, 5',
     preset: 'custom',
     rows: [
+      { key: 'sheep_model', values: 'strombom' },
+      { key: 'dog_controller', values: 'collect_drive' },
       { key: 'n_sheep', values: '20, 40, 80' },
       { key: 'n_shepherds', values: '1, 2, 4' },
     ],
@@ -313,6 +315,10 @@ export const STUDY_TEMPLATES = [
     seeds: '1, 2, 3, 4, 5',
     preset: 'custom',
     rows: [
+      { key: 'sheep_model', values: 'strombom' },
+      { key: 'dog_controller', values: 'collect_drive' },
+      { key: 'n_sheep', values: '40' },
+      { key: 'n_shepherds', values: '1' },
       { key: 'obs_mode', values: 'global,local_positions,bearing_only,noisy_bearing' },
       { key: 'noise_sigma', values: '0, 0.15, 0.3' },
     ],
@@ -324,8 +330,11 @@ export const STUDY_TEMPLATES = [
     seeds: '1, 2, 3, 4, 5',
     preset: 'custom',
     rows: [
-      { key: 'stubborn_fraction', values: '0, 0.25, 0.5, 0.75' },
+      { key: 'sheep_model', values: 'strombom' },
+      { key: 'dog_controller', values: 'collect_drive' },
+      { key: 'n_sheep', values: '40' },
       { key: 'n_shepherds', values: '1, 2' },
+      { key: 'stubborn_fraction', values: '0, 0.25, 0.5, 0.75' },
     ],
   },
 ];

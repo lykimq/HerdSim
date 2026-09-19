@@ -104,5 +104,3 @@ export function classifyRunFailure({ status, history = [], nShepherds = 0 } = {}
     lines,
   };
 }
-
-export { FAILURE_LABELS };

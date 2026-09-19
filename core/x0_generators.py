@@ -7,16 +7,10 @@ import numpy as np
 # Canonical X0 family names from the budget protocol.
 X0_FAMILIES = ("compact", "wide", "split", "outlier_rich")
 
-# Legacy factor value used in older configs.
-_LAYOUT_ALIASES = {
-    "cluster": "compact",
-}
-
 
 def normalize_layout(layout: str) -> str:
-    """Map legacy aliases to canonical X0 family names."""
-    key = str(layout).strip().lower()
-    return _LAYOUT_ALIASES.get(key, key)
+    """Normalize layout name for comparison (strip + lower)."""
+    return str(layout).strip().lower()
 
 
 def generate_initial_positions(
@@ -76,8 +70,7 @@ def generate_initial_positions(
         )
     else:
         raise ValueError(
-            f"Unknown initial_layout '{layout}'. Expected one of {X0_FAMILIES} "
-            f"(alias: cluster -> compact)."
+            f"Unknown initial_layout '{layout}'. Expected one of {X0_FAMILIES}."
         )
 
     if world_width is not None and world_height is not None:

@@ -8,7 +8,7 @@
 	budget-test budget-pilot budget-pilot-state budget-analyse budget-scout \
 	budget-factor-sweep
 
-PYTHON ?= python
+UV ?= uv
 # Editable install may predate analysis/; scripts need the repo root on PYTHONPATH.
 export PYTHONPATH := $(CURDIR)$(if $(PYTHONPATH),:$(PYTHONPATH),)
 
@@ -34,9 +34,9 @@ help:
 	@echo "  make -f Makefile.budget help"
 	@echo "  make budget-help              (same as above)"
 
-# Install
+# Install (uv-managed .venv; avoids system pip / PEP 668)
 install:
-	pip install -e ".[dev]"
+	$(UV) sync --extra dev
 	cd frontend && npm install
 
 # Development Servers
@@ -45,7 +45,7 @@ dev:
 	@exec bash scripts/dev.sh
 
 dev-backend:
-	uvicorn api.main:app --reload --port 8000
+	$(UV) run uvicorn api.main:app --reload --port 8000
 
 dev-frontend:
 	cd frontend && npm run dev
@@ -55,10 +55,10 @@ dev-frontend:
 test: test-backend test-frontend
 
 test-backend:
-	pytest tests/backend/ -v -m "not stress"
+	$(UV) run pytest tests/backend/ -v -m "not stress"
 
 test-stress:
-	pytest tests/backend/ -v -m stress
+	$(UV) run pytest tests/backend/ -v -m stress
 
 test-frontend:
 	node --test tests/frontend/*.test.js
@@ -67,11 +67,11 @@ test-frontend:
 # Code Quality
 # Frontend eslint/prettier use npx (not pinned in package.json).
 lint:
-	ruff check .
+	$(UV) run ruff check .
 	cd frontend && npx eslint src/
 
 format:
-	ruff format .
+	$(UV) run ruff format .
 	cd frontend && npx prettier --write src/
 
 # Build

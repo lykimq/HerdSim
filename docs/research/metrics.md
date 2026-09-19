@@ -74,13 +74,10 @@ For fair comparison, lock the same `n_sheep`, `n_shepherds`, scenario, and seeds
 
 ## Factor-derived analysis outputs
 
-Trial tables from factor grids also support:
-
-- `required_shepherds` estimates via `analysis.herdability.required_shepherds`
-- sensing/noise degradation slopes via `analysis.herdability.degradation_slope`
-- dimensionless predictors (`pi_speed`, `pi_dogs`, `pi_sensing`, `pi_density`)
-- behavioural event transitions via `analysis.behavioural`
-- velocity-correlation delay proxies via `analysis.propagation`
+Trial tables from factor grids also support failure taxonomy labels via
+`analysis.failure_taxonomy.classify_failure`. Shepherding-budget campaigns
+compute reliability frontiers and regimes under `analysis/budget/`
+(`frontier.py`, `regimes.py`).
 
 These are analysis-layer outputs, not per-tick metric plugins.
 

@@ -11,7 +11,7 @@
 .PHONY: help budget-help budget-test budget-pilot budget-pilot-state \
 	budget-analyse budget-scout budget-factor-sweep
 
-PYTHON ?= python
+UV ?= uv
 export PYTHONPATH := $(CURDIR)$(if $(PYTHONPATH),:$(PYTHONPATH),)
 
 # Campaign subsets (frozen protocol subsets).
@@ -86,11 +86,11 @@ help budget-help:
 	@echo "Basic project targets: make -f Makefile help   (or: make help)"
 
 budget-test:
-	$(PYTHON) -m pytest tests/backend/correctness/test_budget_stack.py -q
+	$(UV) run pytest tests/backend/correctness/test_budget_stack.py -q
 
 budget-pilot:
 	@mkdir -p $(BUDGET_OUT)
-	$(PYTHON) scripts/budget/run_grid.py \
+	$(UV) run scripts/budget/run_grid.py \
 		--campaign $(PHASE1_PILOT_CAMPAIGN) \
 		--output $(BUDGET_OUT) \
 		--workers $(WORKERS) \
@@ -101,7 +101,7 @@ budget-pilot:
 
 budget-pilot-state:
 	@mkdir -p $(STATE_OUT)
-	$(PYTHON) scripts/budget/run_grid.py \
+	$(UV) run scripts/budget/run_grid.py \
 		--campaign $(PHASE2_STATE_CAMPAIGN) \
 		--output $(STATE_OUT) \
 		--workers $(WORKERS) \
@@ -111,7 +111,7 @@ budget-pilot-state:
 		PACKAGE=B TRIALS=$(STATE_OUT)/trials.csv OUT=$(STATE_OUT)/packages/b
 
 budget-analyse:
-	$(PYTHON) scripts/budget/analyse.py \
+	$(UV) run scripts/budget/analyse.py \
 		--package $(PACKAGE) \
 		--trials $(TRIALS) \
 		--output $(OUT)
@@ -120,7 +120,7 @@ budget-scout:
 	@echo "NOTE: budget-scout is long-running (many N x D x seeds cells)."
 	@echo "Output: $(SCOUT_OUT)  campaign=$(PHASE1_SCOUT_CAMPAIGN)"
 	@mkdir -p $(SCOUT_OUT)
-	$(PYTHON) scripts/budget/run_grid.py \
+	$(UV) run scripts/budget/run_grid.py \
 		--campaign $(PHASE1_SCOUT_CAMPAIGN) \
 		--output $(SCOUT_OUT) \
 		--workers $(WORKERS) \
@@ -133,7 +133,7 @@ budget-scout:
 
 budget-factor-sweep:
 	@mkdir -p $(SWEEP_OUT)
-	$(PYTHON) scripts/budget/run_factor_sweep.py \
+	$(UV) run scripts/budget/run_factor_sweep.py \
 		--campaign $(PHASE5_SWEEP_CAMPAIGN) \
 		--output $(SWEEP_OUT) \
 		--workers $(WORKERS)

@@ -8,7 +8,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
 import pandas as pd
 import yaml
@@ -67,11 +67,6 @@ def _cell_key(cell: BudgetCell) -> str:
     if extras:
         return key + "_" + "_".join(extras)
     return key
-
-
-def timeseries_stem(cell: BudgetCell) -> str:
-    """Filename stem for per-trial timeseries (matches resume key)."""
-    return _cell_key(cell)
 
 
 def _manifest_path(output_dir: Path) -> Path:
@@ -305,7 +300,7 @@ def run_budget_grid(
             ts_dir = out / "timeseries"
             _write_timeseries(
                 payload["history"],
-                ts_dir / f"{timeseries_stem(cell)}.parquet",
+                ts_dir / f"{_cell_key(cell)}.parquet",
             )
         man: dict[str, Any] = {
             "key": payload["key"],
@@ -350,16 +345,3 @@ def run_budget_grid(
         },
     )
     return trials
-
-
-def iter_budget_progress(cells: list[BudgetCell]) -> Iterator[dict[str, Any]]:
-    """Yield per-cell completion events (serial; useful for tests/UI)."""
-    for i, cell in enumerate(cells, start=1):
-        payload = _run_cell(cell)
-        yield {
-            "type": "cell",
-            "index": i,
-            "total": len(cells),
-            "key": payload["key"],
-            "row": payload["row"],
-        }

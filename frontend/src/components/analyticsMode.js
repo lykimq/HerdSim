@@ -286,7 +286,6 @@ export function bindAnalyticsMode({
       presetSelect.value = template.preset;
     }
     syncModeUi();
-    studySelect.value = '';
   });
 
   modeSelect.addEventListener('change', syncModeUi);
