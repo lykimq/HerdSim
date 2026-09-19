@@ -1,10 +1,6 @@
 # HerdSim
 
-HerdSim is a research platform for **multi-agent sheep herding**: a few dogs
-(or shepherds) guide a larger flock toward a goal under controlled, repeatable
-conditions. Named **instruments** (sheep + dog setups) and shared **metrics**
-let you measure when herding works, when it fails, and how methods compare when
-flock size, sensing, scenario, and seeds are held fair.
+HerdSim is a research platform for **multi-agent sheep herding**: a few dogs (or shepherds) guide a larger flock toward a goal under controlled, repeatable conditions. Named **instruments** (sheep + dog setups) and shared **metrics** let you measure when herding works, when it fails, and how methods compare when flock size, sensing, scenario, and seeds are held fair.
 
 ## Getting started
 
@@ -29,14 +25,11 @@ Useful targets: `make test`, `make help`.
 | **NetLogo** | Open desktop NetLogo twins for instruments that have a counterpart |
 | **Guide** | In-app docs: overview, instruments, scenarios, metrics, how-tos |
 
-Larger claim-oriented **shepherding-budget** campaigns use the CLI
-(`make budget-help`) and `results/budget/`, separate from the Experiments tab.
+Larger claim-oriented **shepherding-budget** campaigns use the CLI (`make budget-help`) and `results/budget/`, separate from the Experiments tab.
 
 ## Instruments
 
-An instrument is a ready-made `sheep_model` x `dog_controller` bundle with
-paper-style defaults. Pick one in Simulate, Compare, or Experiments; vary
-sensing, counts, noise, and other factors around it without changing the method.
+An instrument is a ready-made `sheep_model` x `dog_controller` bundle with paper-style defaults. Pick one in Simulate, Compare, or Experiments; vary sensing, counts, noise, and other factors around it without changing the method.
 
 | Id | Name | Role |
 |----|------|------|
@@ -56,9 +49,7 @@ Guide write-ups: [docs/research/instruments/](docs/research/instruments/).
 
 ### Adding an instrument
 
-Most new instruments reuse existing sheep and dog plugins. You package defaults
-and metadata, then register one catalog entry; only new behaviours need a
-plugin implementation and registry hook first.
+Most new instruments reuse existing sheep and dog plugins. You package defaults and metadata, then register one catalog entry; only new behaviours need a plugin implementation and registry hook first.
 
 ```mermaid
 flowchart LR
@@ -74,8 +65,7 @@ flowchart LR
   catalog --> ui
 ```
 
-1. Reuse or implement plugins under `plugins/sheep/` and `plugins/dogs/`, then
-   register them in `core/plugin_registry.py` if they are new.
+1. Reuse or implement plugins under `plugins/sheep/` and `plugins/dogs/`, then register them in `core/plugin_registry.py` if they are new.
 2. Add `instruments/<id>/` with `info.json` and paper defaults.
 3. Add a `_bundle(...)` entry to `INSTRUMENTS` in `core/instruments.py`.
 
@@ -90,8 +80,7 @@ environment -> sheep motion -> observation -> dog decisions
   -> constraints / walls -> metrics
 ```
 
-You choose an **instrument**, a **scenario**, a **seed**, and optional
-**factors**. Same instrument + scenario + seed replays the same way.
+You choose an **instrument**, a **scenario**, a **seed**, and optional **factors**. Same instrument + scenario + seed replays the same way.
 
 ## Project layout
 
