@@ -55,16 +55,6 @@ You choose an **instrument**, a **scenario**, a **seed**, and optional **factors
 
 **Settings source.** Instrument (paper-style defaults), Scenario (task defaults), or Custom (you lock counts and factors). Use Custom for a fair head-to-head ranking.
 
-## Map of the app
-
-| Tab | Use it to... |
-|-----|----------------|
-| Simulate | Watch one run, scrub, inspect, download a run report |
-| Compare | Watch two instruments matched or independently |
-| Experiments | Rank methods over seeds, sweep factors, export results |
-| NetLogo | Open a desktop twin beside HerdSim |
-| Guide | Read this overview and the reference pages |
-
 ## First minutes in Simulate
 
 See **Simulate** in this Guide for the full how-to. Short path:
