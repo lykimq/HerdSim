@@ -13,7 +13,6 @@ const FALLBACK_NAV = [
   { slug: 'research/scenarios', label: 'Scenarios', group: 'Reference' },
   { slug: 'research/metrics', label: 'Metrics', group: 'Reference' },
   { slug: 'research/environment', label: 'Environment', group: 'Reference' },
-  { slug: 'architecture', label: 'Architecture', group: 'For developers' },
 ];
 
 const LABEL_OVERRIDES = {
@@ -32,7 +31,6 @@ const LABEL_OVERRIDES = {
   'research/instruments/communication_free': 'Communication-Free',
   'research/instruments/adaptive': 'Adaptive',
   'research/comparison_framework': 'Compare',
-  architecture: 'Architecture',
   'research/scenarios': 'Scenarios',
   'research/metrics': 'Metrics',
   'research/environment': 'Environment',

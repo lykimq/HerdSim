@@ -27,7 +27,7 @@ Useful targets: `make test`, `make help`.
 | **Compare** | Side-by-side A/B runs (fair shared settings, or independent) with live metric deltas |
 | **Experiments** | Multi-seed batches and factor grids; charts; CSV / JSON / Markdown export |
 | **NetLogo** | Open desktop NetLogo twins for instruments that have a counterpart |
-| **Guide** | In-app docs: overview, instruments, scenarios, metrics, architecture |
+| **Guide** | In-app docs: overview, instruments, scenarios, metrics, how-tos |
 
 Larger claim-oriented **shepherding-budget** campaigns use the CLI
 (`make budget-help`) and `results/budget/`, separate from the Experiments tab.

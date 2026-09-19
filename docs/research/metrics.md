@@ -70,20 +70,11 @@ Cohesion, GCM to Goal, Success Rate, Sheep in Goal, Fragmentation, Outlier Count
 
 **Shepherd Path** and tick counts are comparable across instruments only when they share the same time-step convention. Strombom-family instruments advance by a fixed displacement per tick; Kubo integrates over continuous `dt`. Path lengths are not directly comparable without normalising by the integration step.
 
-For fair comparison, lock the same `n_sheep`, `n_shepherds`, scenario, and seeds (custom preset). Do not use paper preset when comparing models that declare different paper agent counts. See `docs/research/comparison_framework.md`.
-
-## Factor-derived analysis outputs
-
-Trial tables from factor grids also support failure taxonomy labels via
-`analysis.failure_taxonomy.classify_failure`. Shepherding-budget campaigns
-compute reliability frontiers and regimes under `analysis/budget/`
-(`frontier.py`, `regimes.py`).
-
-These are analysis-layer outputs, not per-tick metric plugins.
+For fair comparison, lock the same `n_sheep`, `n_shepherds`, scenario, and seeds (custom preset). Do not use paper preset when comparing models that declare different paper agent counts. See **Compare** in this Guide.
 
 ## Failure taxonomy (trial exports)
 
-Unsuccessful trials also receive a heuristic `failure_mode` from `analysis.failure_taxonomy.classify_failure`: 
+Unsuccessful trials in Experiments exports also receive a heuristic `failure_mode`:
 
 | Id | Meaning |
 |----|---------|

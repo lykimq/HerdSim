@@ -30,7 +30,7 @@ const VIEW_META = {
   },
   guide: {
     label: 'Guide',
-    description: 'User guide, instruments, scenarios, metrics, and architecture.',
+    description: 'User guide: overview, instruments, scenarios, metrics, and how-tos.',
   },
 };
 

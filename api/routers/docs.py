@@ -108,7 +108,6 @@ _DOC_ENTRIES: list[tuple[str, Path, str, str]] = [
         "Environment",
         "Reference",
     ),
-    ("architecture", _DOCS_ROOT / "architecture.md", "Architecture", "For developers"),
 ]
 
 DOC_SLUGS: dict[str, Path] = {slug: path for slug, path, _title, _group in _DOC_ENTRIES}
