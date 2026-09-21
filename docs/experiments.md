@@ -57,7 +57,21 @@ Use this mode to answer: where does one setup succeed or fail as factors change?
 
 There is no instrument checklist in factor-grid mode. Sheep model and dog controller rows (when present) select a matching instrument parameter bundle when HerdSim knows one.
 
-Keep grids within the cell limit shown in the UI. Very large grids take longer and are harder to interpret.
+### Limits (cells, trials, ticks)
+
+These limits come from the Experiments engine and the UI estimate shown in the toolbar.
+
+**Factor-grid cells (hard limit): 500.**
+A cell is one combination of factor values (the product of how many values you put on each axis). Backend and frontend both enforce `MAX_FACTOR_GRID_CELLS = 500` (`core/experimental_factors.py`, mirrored in the UI). If the grid goes above 500 cells, the run is rejected with an error such as "Factor grid has N cells; max is 500."
+
+**Soft warning above 100 cells.**
+The UI still allows 101 to 500 cells, but shows "Large grid: expect a longer run." Keep grids smaller when you are still checking the design.
+
+**Trials = cells x seeds.**
+There is no separate hard cap on total trials. If you have 50 cells and 10 seeds, that is 500 trials. If you have 500 cells and 5 seeds, that is 2500 trials. The hard gate is on cells, not on the seed multiplier. Watch the toolbar line that looks like `50 cells x 5 seeds = 250 trials`.
+
+**Ticks per trial (scenario timeout, not a batch limit).**
+Each individual trial still stops at the scenario's `max_ticks` if success is not reached (for example Drive to Goal default 3000). That is a per-run time budget, not a limit on how many Experiments trials you can queue.
 
 Typical study questions:
 
@@ -106,7 +120,7 @@ Keep the export with your notes so later readers know exactly what was locked an
 
 - Start with a small seed list while you check the design, then rerun with more seeds for reporting.
 - For instrument ranking, prefer Custom counts and the same scenario for every method.
-- Watch the cell estimate before a factor grid so you know how many trials you asked for.
+- Watch the cell estimate before a factor grid so you know how many trials you asked for. Stay at or under 500 cells; expect longer runs once you pass about 100 cells.
 - Do not treat shepherd path as interchangeable across Kubo and Strombom-style instruments without reading the export caveats.
 
 ## Related pages
