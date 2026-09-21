@@ -31,7 +31,7 @@ Mode switcher (collect, drive, recover, lead) inspired by context-aware and lead
 ## Research themes HerdSim targets
 
 - **Herdability limits:** minimum dogs vs flock size/density.
-- **Collective controllability / scalings:** state, regimes, interference, information substitution, scaling, early warning -- see [main_scaling_plan.md](main_scaling_plan.md) (single source of truth).
+- **Collective controllability / scalings:** state, regimes, interference, information substitution, scaling, early warning; see [main_scaling_plan.md](main_scaling_plan.md).
 - **Information requirements:** global, local, bearing-only, noisy sensing.
 - **Heterogeneity and failure:** stubborn sheep, dog dropout/degradation.
 - **Generalization:** ranking stability under distribution shift.

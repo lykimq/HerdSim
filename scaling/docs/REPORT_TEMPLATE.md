@@ -3,6 +3,7 @@
 # Copy to: scaling/results/phase{k}/{protocol}/REPORT.md
 # Fill after looking at packages/{a-g}/.
 # Leave the auto package_*.md files alone; this file is the hand-written note.
+# Claim criteria: main_scaling_plan.md (Claims). Copy verdicts into progress_tracker.md.
 
 # Protocol report: `<protocol_id>`
 
@@ -13,8 +14,8 @@ What we ran, what came out, what to do next.
 ## Intent
 
 - Phase / RQ:
-- Size / Structure / Mechanism / Generality / follow-on:
-- Claims (C1a-C7b):
+- Focus (Size / Structure / Mechanism / Generality / follow-on):
+- Claims touched (C1a-C7b): leave blank at run start; fill Claims update after packages
 - Grade: SMOKE | SCOUT | CLAIM
 
 ## Setup
@@ -30,7 +31,7 @@ What we ran, what came out, what to do next.
 - Theta:
 - Command:
 - Output: `scaling/results/phase{k}/{protocol}/`
-- Host (see tracker Section 6 if not primary):
+- Host:
 - WORKERS / CPU governor:
 
 ## Completeness
@@ -44,7 +45,7 @@ What we ran, what came out, what to do next.
 
 - Success pattern:
 - D_min / frontier (by N / layout):
-- Regimes (too few / efficient / wasteful / overcrowding / hard failure):
+- Regimes (under-budget / efficient / wasteful / overcrowding / hard failure):
 - Surprises:
 
 ## Figures
@@ -58,15 +59,15 @@ From `packages/*/figures/` (tick what you looked at):
 
 ## Interpretation
 
-What we think is going on (mechanism / structure / method). Cite I_dir,
-coverage, fragmentation, predictors if you have them.
+What we think is going on (mechanism / structure / method). Cite I_dir, coverage, fragmentation, predictors if present.
 
 ## Limits
 
-What this run does **not** support (grade, protocol drift, single method,
-unfinished cells, etc.).
+What this run does **not** support (grade, protocol drift, single method, unfinished cells, etc.).
 
 ## Claims update
+
+CLAIM grade only, after `packages/*/`. Criteria: [main_scaling_plan.md](main_scaling_plan.md) Claims. Then copy rows into the tracker.
 
 | Claim | Verdict | Evidence |
 |-------|---------|----------|

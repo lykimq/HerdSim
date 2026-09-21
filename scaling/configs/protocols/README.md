@@ -3,7 +3,7 @@
 # Before adding a protocol:
 # 1. Point canonical: at scaling/configs/canonical_grid.yaml (or a dated fork).
 # 2. For EVERY override (N, D, layouts, seeds, methods, max ticks, factors),
-#    write a one-line WHY comment. "Faster" alone is not enough -- say what
+#    write a one-line WHY comment. "Faster" alone is not enough; say what
 #    scientific or engineering question the subset still answers.
 # 3. Set grade: SMOKE | SCOUT | CLAIM and do not cite below that grade.
 # 4. Set output: scaling/results/phase{k}/{slug}/ matching protocol_id.

@@ -67,15 +67,15 @@ x0_families:
 # overrides drive_to_goal's scenario default (3000) so budget failures are not
 # short-horizon artefacts.
 time_limit_t0: 10000
-# T1: extended horizon only for C2b hard-ceiling tests (overcrowding that
+# T1: extended horizon only for hard-ceiling tests (overcrowding that
 # remains unreliable even with more time).
 time_limit_t1: 20000
 
 # Scout seeds: cheap map of the (N,D) surface; 30 balances wall time vs
 # binomial noise for identifying boundary cells.
 scout_seeds: 30
-# Claim seeds: 100 on boundary cells for D_min CI / falsifiable claims
-# (see main plan D_min procedure).
+# Claim seeds: 100 on boundary cells for D_min CI / claim-grade evaluation
+# (see progress tracker claims board).
 claim_grade_seeds: 100
 # Master seed: fixed base so seed lists are reproducible (seed = master + i).
 master_seed: 2026

@@ -1,34 +1,19 @@
 # HerdSim Research Program
 
-## Scaling of Collective Control
-
-Formal RQs, claims, Caps, protocol freeze, and phases:
-
-[main_scaling_plan.md](main_scaling_plan.md)
-
-Where we are and what to run next:
-
-[progress_tracker.md](progress_tracker.md)
-
-If the docs disagree: the main plan wins on science; the tracker wins on status.
-
 ---
 
 ## Central question
 
 > When a few shepherds guide a larger flock, how much control do we actually need as the flock gets bigger or more spread out?
 
-That is the same basic problem as the draft sheep-scaling paper (dog count vs flock
-size, and whether "spread" helps explain difficulty). We keep it, but we try to be
-more careful:
+That is the same basic problem as the draft sheep-scaling paper (dog count vs flock size, and whether "spread" helps explain difficulty). We keep it, but we try to be more careful:
 
 - say clearly what "how much control" means,
 - separate size from shape / state,
 - ask why a pattern shows up, not only that it does,
 - check whether it still shows up under a different herding method.
 
-We are not starting from a claimed universal scaling law. We start from questions
-we can actually run.
+We are not starting from a claimed universal scaling law. We start from questions we can actually run.
 
 ### What we want out of the core program
 
@@ -39,18 +24,13 @@ After the core runs, we should be able to say something concrete about:
 - which processes look like they drive the pattern,
 - and what looks shared across methods vs method-specific.
 
-A simple predictive rule would be great. Finding that the pattern is strongly
-method-dependent would also be useful -- that still bounds how far you can
-generalise.
+A simple predictive rule would be great. Finding that the pattern is strongly method-dependent would also be useful: that still bounds how far you can generalise.
 
 ---
 
 ## HerdSim
 
-HerdSim is our experimental platform for multi-agent sheep herding: a few shepherds
-(dogs) guide a larger flock to a goal under controlled settings. For this program it
-is the workbench -- a model system for measuring control demand -- not an attempt to
-copy real farms in full.
+HerdSim is our experimental platform for multi-agent sheep herding: a few shepherds (dogs) guide a larger flock to a goal under controlled settings. For this program it is the testbed (a model system for measuring control demand), not an attempt to copy real farms in full.
 
 Herding is a good fit because control is indirect:
 
@@ -60,8 +40,7 @@ Herding is a good fit because control is indirect:
 
 ## Shared protocol (idea)
 
-Before diving into RQ-specific grids, we freeze one shared protocol so later
-comparisons are fair. That means locking at least:
+Before diving into RQ-specific grids, we freeze one shared protocol so later comparisons are fair. That means locking at least:
 
 - the herding task,
 - what counts as success,
@@ -69,8 +48,7 @@ comparisons are fair. That means locking at least:
 - a time budget,
 - which flock sizes and shepherd counts we sweep,
 - a baseline method and the methods we compare against it,
-- how we estimate the viable shepherd range (minimum for reliable success, and
-  where adding more stops helping or starts hurting).
+- how we estimate the viable shepherd range (minimum for reliable success, and where adding more stops helping or starts hurting).
 
 Frozen defaults: main plan, Section 8.
 
@@ -99,12 +77,11 @@ Frozen defaults: main plan, Section 8.
 
 ## Core research questions
 
-For each question: what we want to know, how we plan to study it, and what kinds of
-answers would count. We are not locking in a preferred outcome ahead of time.
+For each question: what we want to know, how we plan to study it, and what kinds of answers would count. We are not locking in a preferred outcome ahead of time.
 
 Formal IDs from the main plan are in parentheses.
 
-### 1. Size -- how does the viable shepherd range change with collective size? (RQ2, RQ6)
+### 1. Size: how does the viable shepherd range change with collective size? (RQ2, RQ6)
 
 **Question.** As flock size grows, how does the viable shepherd range change: the minimum needed for reliable herding, and the point where adding more stops helping or starts hurting?
 
@@ -112,7 +89,7 @@ Formal IDs from the main plan are in parentheses.
 
 **Possible results.** Linear, sublinear, or superlinear growth; different behaviour in different size bands; saturation or thresholds; or nothing simple. We also care about operating regimes (too few / efficient / wasteful / overcrowding).
 
-### 2. Structure -- does shape/state change control demand at fixed size? (RQ1)
+### 2. Structure: does shape/state change control demand at fixed size? (RQ1)
 
 **Question.** At the same flock size, does flock shape/state (spread, fragmentation, outliers, etc.) change how much control we need?
 
@@ -120,7 +97,7 @@ Formal IDs from the main plan are in parentheses.
 
 **Possible results.** Size is almost enough; one or a few structure measures pick up the rest; or different properties matter at different sizes.
 
-### 3. Mechanism -- what produces the observed pattern? (RQ3)
+### 3. Mechanism: what produces the observed pattern? (RQ3)
 
 **Question.** Why does that pattern appear (for example interference, coverage limits, fragmentation)?
 
@@ -128,7 +105,7 @@ Formal IDs from the main plan are in parentheses.
 
 **Possible results.** One main mechanism; several mechanisms in different regimes; or a pattern that does not reduce to one clean story.
 
-### 4. Generality -- which parts transfer across herding methods? (RQ4)
+### 4. Generality: which parts transfer across herding methods? (RQ4)
 
 **Question.** Which parts of the pattern still hold when we change the herding method?
 
@@ -146,10 +123,10 @@ These sit after the core four. They should not rewrite the first scientific ques
 |-------|-----------|-------------------|
 | Information vs shepherds | RQ5 | Can better sensing or communication reduce required shepherd count at fixed reliability? |
 | Early warning | RQ7 | Can flock-state signals warn of failure before a run times out? |
-| Time as a resource | (protocol T₀/T₁) | How does a tighter or looser time limit change control demand? |
+| Time as a resource | (protocol T_0/T_1) | How does a tighter or looser time limit change control demand? |
 | Other systems | later | Do similar patterns appear outside sheep-herding simulations? |
 
-Operating regimes (too few / efficient / wasteful / overcrowding) belong with the Size question and Package A -- not a separate RQ.
+Operating regimes (too few / efficient / wasteful / overcrowding) belong with the Size question and Package A, not a separate RQ.
 
 ---
 
@@ -192,8 +169,7 @@ Those can wait until the core scaling questions are clearer.
 
 ## Scientific contribution
 
-What we are aiming for is a clearer, evidence-backed account of how collective
-properties change how much external control you need for reliable steering.
+What we are aiming for is a clearer, evidence-backed account of how collective properties change how much external control you need for reliable steering.
 
 Relative to a single-method scaling study, that means:
 
@@ -202,5 +178,4 @@ Relative to a single-method scaling study, that means:
 - testing mechanisms instead of stopping at correlation,
 - checking which scaling features survive a method change.
 
-Only claim what the evidence supports. Formal claims, Cap IDs, and phase
-done-when criteria live in the main plan.
+Only claim what the evidence supports.
