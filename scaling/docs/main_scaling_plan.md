@@ -109,6 +109,64 @@ Peripheral sheep: distance to GCM above the median. Influence radius: `r_s` from
 4. D_min = smallest D with 100-seed R >= theta
 5. Bootstrap 95% CI on D_min (1,000 resamples of the 100 seeds)
 
+### Trial plan: what we run, what it meets, what it does not
+
+#### What HerdSim will run
+
+Draft reference ([sheep-scaling_paper2025.md](sheep-scaling_paper2025.md)): **11,000** trials = 11 N x 10 D x **100** flat (every cell claim-grade, one method, one layout).
+
+HerdSim freeze: `|N| = 10`, `|D| = 10` -> **100 cells** per (method, layout). **30** seeds on every cell (scout); **100** seeds on frontier boundary cells (claim). A claimed cell counts once at 100, not 30+100.
+
+**Boundary planning assumption** (until scout measures the real band): about **2 claim D per N**. Recompute after Phase 1.
+
+| Building block | Trials |
+|----------------|--------|
+| One (N, D) map, scout only | 3,000 |
+| One claim-grade map (80 @ 30 + 20 @ 100) | **4,400** |
+| Same map flat 100 (draft style) | 10,000 |
+| Phase 1 (RQ2) claim-grade size map | **4,400** |
+| Phase 1 T_1 hard-ceiling (~10 cells x 100) | **+1,000** |
+| Phase 2 (RQ1) 3 N x 4 X_0 x 10 D claim mix | **5,280** |
+| Phase 3 (RQ3) | **0** new (reuse timeseries) |
+| **Core Minimum Publishable Unit (MPU) (RQ1+RQ2+RQ3+S8)** | **~10,700** |
+| Each extra transfer method (RQ4) | **+4,400** |
+| MPU + required RQ4 (baseline + kubo + fat) | **~19,500** |
+| Phase 5 information ladders (order of magnitude) | **~11,600** scout+claim |
+| Phase 6-7 | **0** new (analysis) |
+
+Pilots and protocol YAML subsets may use smaller N/D/seeds; each `REPORT.md` must state its own trial count. Scout-only runs are never claim-grade.
+
+#### What these trials will meet (and why)
+
+The program goal is a **locked-protocol account** of control demand: how it changes with size, whether structure matters, which mechanisms show up, and (later) what transfers across methods. It is not a promise of one universal scaling law.
+
+| These trials meet | Why the count is enough |
+|-------------------|-------------------------|
+| Claim-grade **D_min / regimes** for the baseline method (RQ2) | Frontier cells use **100** seeds, same per-cell depth as the draft. At theta = 0.90, CI on R is about +/-0.06, enough to resolve **Delta D_min >= 2** when the reliability jump is clear |
+| **Structure** effects at fixed N (RQ1) | ~5.3k trials across four X_0 families the draft never ran; enough to support or reject C1a-style shifts |
+| **Mechanism** contrasts (RQ3) | Power sits in efficient vs overcrowding cells already collected at claim depth, not in adding a new grid |
+| Core paper-scale effort | **~10.7k** is the same order as the draft's 11k, but spent on size *and* structure instead of 100 seeds on every interior cell |
+| Method-transfer claims (RQ4), when budgeted | Each extra method adds ~4.4k; **~19.5k** covers baseline + two required transfer maps |
+
+#### What these trials will not meet (and why)
+
+| These trials do not meet | Why |
+|--------------------------|-----|
+| Claim-grade R on **every** heatmap cell | Interiors stay at **30** on purpose (scout). That maps the surface cheaply; it does not justify publishing every cell as a precise rate. Label scout maps as scout |
+| A **method-general** scaling story from the core MPU alone | Core ~10.7k is **one** baseline method. Generality needs RQ4 maps. Until then, say "under `strombom_multi`" |
+| A **universal** law for all collectives, tasks, or real farms | Single task (`drive_to_goal`), simulated methods, fixed world. More seeds cannot buy that scope; see research program non-goals |
+| Reliable D_min when the frontier is **soft** (several D with R ~ 0.88-0.94) | Same edge case the draft hit at large N. If bootstrap CI on D_min spans more than one D-grid step, raise boundary seeds to **200** before Phase 2; do not force a scaling fit |
+| Substitution / early-warning claims without their phases | RQ5/RQ7 need their own trials or trajectories; core MPU does not include them |
+
+#### Verdict
+
+| If you want to claim... | Run at least... | Enough? |
+|-------------------------|-----------------|--------|
+| Size + structure + mechanism (MPU) | **~10.7k** core | **Yes** |
+| Plus transfer across required methods | **~19.5k** | **Yes**, for those methods only |
+| Draft-style precision on all Phase 1 cells | **10k** flat on one map | Optional; not required by this plan |
+| Universal / cross-domain scaling | n/a | **No**; out of scope |
+
 | Regime | Definition |
 |--------|------------|
 | Under-resourced failure | R < theta |
@@ -303,7 +361,7 @@ Canonical freeze rationale (machine-readable comments: `canonical_grid.yaml`). R
 | X_0 families | Causal axes for RQ1 (definitions: Caps) |
 | T_0 = 10000 | Failures reflect control limits, not scenario default 3000 |
 | T_1 = 20000 | Hard-ceiling vs timeout only |
-| Scout 30 / claim 100 | Cheap map then precise D_min (procedure: How we measure) |
+| Scout 30 / claim 100 | Cheap map then precise D_min; totals and meet/not-meet: Trial plan under How we measure |
 | Master seed 2026 | Reproducible base |
 | RQ7 k/w | 5% of T_0; fixed feature window (purpose: RQ7) |
 | Wasteful 20% | Default effort tolerance; sensitivity 10%/30% |
