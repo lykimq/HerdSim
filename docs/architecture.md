@@ -1,15 +1,15 @@
-# HerdSim Architecture & Design
+# HerdSim Architecture and Design
 
 HerdSim is a factor-based platform for simulating and analyzing multi-agent shepherding. The engine separates sheep dynamics, shepherd observation, and dog control so experiments can vary information, heterogeneity, environment, and controller architecture independently.
 
-## Design Requirements
+## Design requirements
 
-- **Modularity:** sheep models, dog controllers, observation modes, scenarios, and metrics plug in without rewriting the runner.
-- **Reproducibility:** discrete deterministic ticks with seeded RNG.
-- **Factorial experiments:** herdability and sensing studies are first-class factor grids.
-- **Separation of Concerns:** backend owns state and logic; frontend owns rendering.
+- **Modularity.** Sheep models, dog controllers, observation modes, scenarios, and metrics plug in without rewriting the runner.
+- **Reproducibility.** Discrete deterministic ticks with seeded random number generation (RNG).
+- **Factorial experiments.** Herdability and sensing studies are first-class factor grids.
+- **Separation of concerns.** Backend owns state and logic. Frontend owns rendering.
 
-## High-Level Data Flow
+## High-level data flow
 
 ```mermaid
 flowchart LR
@@ -38,7 +38,7 @@ flowchart LR
   runner --> out
 ```
 
-## Tick Lifecycle
+## Tick lifecycle
 
 ```text
 state(t)
@@ -52,7 +52,7 @@ state(t)
   -> metrics(state(t+1))
 ```
 
-## Experimental Factors
+## Experimental factors
 
 Defined in `core/experimental_factors.py`:
 
@@ -62,9 +62,9 @@ Defined in `core/experimental_factors.py`:
 - Environment: world keys, `goal_mode`
 - Model: `sheep_model`, `dog_controller`, scenario, preset
 
-Named instruments in `core/instruments.py` are factor bundles (e.g. `strombom` = Strombom sheep + Collect/Drive).
+Named instruments in `core/instruments.py` are factor bundles (for example `strombom` equals Strombom sheep plus Collect/Drive).
 
-## Plugin Interfaces
+## Plugin interfaces
 
 - `BaseSheepDynamics` in `core/sheep_dynamics.py`
 - `BaseObservationModel` / `ShepherdObservation` in `core/observation.py`
@@ -74,7 +74,7 @@ Named instruments in `core/instruments.py` are factor bundles (e.g. `strombom` =
 
 New sheep models, dog controllers, and observation modes register in `core/plugin_registry.py`. Scenarios and metrics register in their package registries. Named instruments are factor bundles in `core/instruments.py` with package metadata under `instruments/<id>/`.
 
-## Config Composition
+## Config composition
 
 `resolve_experiment_config` merges:
 
@@ -84,7 +84,7 @@ New sheep models, dog controllers, and observation modes register in `core/plugi
 4. scenario overlay (`paper`/`custom`: world keys; `scenario`: full overlay)
 5. explicit algorithm_params / world_overrides / agent counts
 
-## Implementation Layout
+## Implementation layout
 
 - `api/`: FastAPI HTTP surface (`main.py`, `session_manager.py`, routers)
 - `services/experiments/`: UI Experiments / factor-grid benchmark engine
@@ -93,7 +93,7 @@ New sheep models, dog controllers, and observation modes register in `core/plugi
 - `plugins/sheep/`, `plugins/dogs/`: sheep and dog plugins
 - `instruments/<id>/`: instrument packages (`info.json`, paper defaults, helpers). This is not an HTTP path.
 - `plugins/scenarios/`, `plugins/metrics/`: task and measurement plugins
-- `analysis/`: failure taxonomy helpers plus `analysis/budget/` for shepherding-budget packages A--G
+- `analysis/`: failure taxonomy helpers plus `analysis/budget/` for shepherding-budget packages A to G
 - `configs/budget/`: frozen protocol (`canonical_grid.yaml`) and per-run campaign subsets
 - `scripts/`: `dev.sh` (local API + Vite; also `make dev`) and `scripts/budget/` (grid / factor-sweep / analyse CLIs)
 - `Makefile.budget`: operator targets for budget campaigns (`make budget-help`)
@@ -107,14 +107,14 @@ New sheep models, dog controllers, and observation modes register in `core/plugi
 
 Separate from the Experiments **UI** tab: a CLI campaign layer for the
 shepherding-budget research program (Size / Structure / Mechanism / Generality,
-then follow-ons). Science and status live under `docs/research/budget/`; this
+then follow-ons). Science and status live under `docs/research/budget/`. This
 section is the engineering shape.
 
 ### What exists now
 
 | Piece | Role |
 |-------|------|
-| `configs/budget/canonical_grid.yaml` | Frozen protocol defaults (task, θ, N/D grids, T₀/T₁, seeds, methods) |
+| `configs/budget/canonical_grid.yaml` | Frozen protocol defaults (task, theta, N/D grids, T0/T1, seeds, methods) |
 | `configs/budget/campaigns/*.yaml` | Per-run subsets (pilot, scout, state, factor sweep) with WHY comments |
 | `services/budget/runner.py` | Expand grid, run trials, resume via `manifest.jsonl`, write timeseries |
 | `services/budget/layout.py` | Path conventions (`phase{k}/{slug}/`, cell keys, package dirs) |
@@ -129,23 +129,23 @@ detail: [results/budget/README.md](../results/budget/README.md).
 ### Target design (after the budget plan is finished)
 
 The research plan drives a phase sequence. When the program is complete, the same
-layout should support claim-grade work end to end -- not only smoke/scout runs:
+layout should support claim-grade work end to end, not only smoke/scout runs:
 
-| Phase focus | Formal RQs | Evidence package | Engineering outcome |
-|-------------|------------|------------------|---------------------|
-| Protocol freeze | S8 | all | Locked `canonical_grid.yaml` + provenance on every campaign |
-| Herdability maps | RQ2 (+ data for RQ6) | A | Reliability maps, D_min frontier, regimes, figures |
-| Structure beyond N | RQ1 | B | All four X₀ layouts; state vs (N, D) predictors |
-| Overcrowding mechanism | RQ3 | C | I_dir / coverage timeseries + mechanism tests |
+| Phase focus | Formal research questions (RQs) | Evidence package | Engineering outcome |
+|-------------|---------------------------------|------------------|---------------------|
+| Protocol freeze | S8 | all | Locked `canonical_grid.yaml` plus provenance on every campaign |
+| Herdability maps | RQ2 (plus data for RQ6) | A | Reliability maps, D_min frontier, regimes, figures |
+| Structure beyond N | RQ1 | B | All four X0 layouts; state vs (N, D) predictors |
+| Overcrowding mechanism | RQ3 | C | I_dir / coverage timeseries plus mechanism tests |
 | Cross-method transfer | RQ4 | D | Same grids on transfer instruments; transfer table |
 | Information vs shepherds | RQ5 | E | Factor sweeps; substitution curves |
 | Scaling fits | RQ6 | F | Model comparison on real (non-flat) frontiers |
 | Early warning | RQ7 | G | Lead-time / AUROC from failure trajectories |
 
-Caps I1--I14 in the plan are the capability checklist (grid runner, frontier,
-regimes, X₀ generators, predictors, interference/coverage, mechanism tests,
+Caps I1 to I14 in the plan are the capability checklist (grid runner, frontier,
+regimes, X0 generators, predictors, interference/coverage, mechanism tests,
 transfer, substitution, scaling fits, early warning, dossier export, timeseries).
-Several Caps are already built and unit-tested; claim-grade use follows the
+Several Caps are already built and unit-tested. Claim-grade use follows the
 campaign waves in the progress tracker.
 
 ### Where to read the science
@@ -154,8 +154,8 @@ campaign waves in the progress tracker.
 - Detailed plan (RQs, claims, Caps, protocol): [docs/research/budget/main_shepherding_budget_plan.md](research/budget/main_shepherding_budget_plan.md)
 - Status, hardware, ordered run plan: [docs/research/budget/progress_tracker.md](research/budget/progress_tracker.md)
 
-Do not treat the Experiments UI exports as a substitute for this campaign stack:
-UI batch studies stay in the browser; budget campaigns write under `results/budget/`
+Do not treat the Experiments UI exports as a substitute for this campaign stack.
+UI batch studies stay in the browser. Budget campaigns write under `results/budget/`
 and are meant to stay with the repo.
 
 ## HTTP API (instruments)
@@ -167,5 +167,5 @@ Discovery and UI payloads use **instrument** wording:
 
 There is no `/api/algorithms` route. Prefer `instrument` / `instruments` in new API fields and clients.
 
-Shepherding-budget campaigns are CLI/Makefile driven today; they wrap the same
+Shepherding-budget campaigns are CLI/Makefile driven today. They wrap the same
 simulation runner and instruments, not a separate HTTP surface.

@@ -4,7 +4,7 @@ This page covers the **Simulate** tab only: one live run at a time. For watching
 
 ## What Simulate is for
 
-Use Simulate when you want to **watch** a single instrument, scrub the timeline, inspect controller state, and download an end-of-run report.
+Use Simulate when you want to watch a single instrument, scrub the timeline, inspect controller state, and download an end-of-run report.
 
 It answers questions like: on this seed and layout, does the flock gather, stay together, and reach the goal before the tick limit?
 
@@ -45,19 +45,19 @@ Changing sheep or dog counts while not already on Custom switches Mode to **Cust
 
 ## Display
 
-- **Trails**: agent path trails on the arena
-- **GCM to goal**: line from flock centre of mass to the goal
+- **Trails:** agent path trails on the arena
+- **GCM to goal:** line from flock centre of mass to the goal
 - Instrument overlays (for example Collect / Drive assignment links when the instrument provides them)
-- **Clear trails**: wipe drawn trails without resetting the run
+- **Clear trails:** wipe drawn trails without resetting the run
 
 ## Experimental factors (Custom only)
 
 Optional groups under Custom:
 
-- **Observation**: observation mode, sensing range, noise, communication
-- **Flock**: stubborn fraction, cohesion scale
-- **Shepherds**: failure mode, failure tick, shepherd speed scale
-- **Environment**: goal mode and goal velocity (with quick chips for slow/hard motion)
+- **Observation:** observation mode, sensing range, noise, communication
+- **Flock:** stubborn fraction, cohesion scale
+- **Shepherds:** failure mode, failure tick, shepherd speed scale
+- **Environment:** goal mode and goal velocity (with quick chips for slow/hard motion)
 
 Leave them at instrument defaults when you only want the named method package.
 
@@ -69,9 +69,9 @@ Leave them at instrument defaults when you only want the named method package.
 
 ## Right panels
 
-- **Live Metrics**: cohesion, distance to goal, path length, polarisation, fragmentation, outliers, separation, sheep in goal, and related scores
-- **Inspect**: herding mode, flock state, assignments, and which sheep model / dog controller / observation mode are active
-- **Distributions**: sheep headings and distance to GCM
+- **Live Metrics:** cohesion, distance to goal, path length, polarisation, fragmentation, outliers, separation, sheep in goal, and related scores
+- **Inspect:** herding mode, flock state, assignments, and which sheep model / dog controller / observation mode are active
+- **Distributions:** sheep headings and distance to GCM
 
 ## Related pages
 
