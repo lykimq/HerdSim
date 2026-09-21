@@ -57,7 +57,7 @@ export function createAnalyticsDashboard({ methods, scenarios, models = null, gl
   sidePanel.innerHTML = analyticsSideTabsHtml();
 
   const results = sidePanel.querySelector('[data-panel="summary"]');
-  const methods = sidePanel.querySelector('[data-panel="methods"]');
+  const methodsPanel = sidePanel.querySelector('[data-panel="methods"]');
   const headlineEl = results.querySelector('[data-role="headline"]');
 
   left.appendChild(runner);
@@ -334,7 +334,7 @@ export function createAnalyticsDashboard({ methods, scenarios, models = null, gl
       setIdleStatus(`Showing previous results. ${lastPayload.rows.length} trials.`);
     }
 
-    const methodsHost = methods.querySelector('[data-role="methods"]');
+    const methodsHost = methodsPanel.querySelector('[data-role="methods"]');
     methodsHost.innerHTML = '';
     for (const alg of methods) {
       let details = alg;

@@ -40,19 +40,40 @@ A method is a ready-made sheep plus dog package with paper-style defaults. You p
 
 For the glossary (Collect, Drive, inertia, arena, timeout, and more), open the in-app Guide, Overview, then Terms.
 
-Here are the methods currently in the catalog:
+Here are the methods currently in the catalog.
 
-- **`strombom` (Strombom 2014).** Defaults: 50 sheep and 1 shepherd. If the flock is spread out, Collect the farthest straggler. If it is tight, Drive from behind toward the goal.
-- **`strombom_multi` (Strombom Multi-Dog).** Same sheep rules as Strombom 2014, but with 3 dogs. The dogs share the work (who Collects which sheep, where to Drive) so they do not all pile on the same spot.
-- **`strombom_noise` (Strombom Noise).** Same rules and counts as Strombom 2014, but stress-tested: heading noise is tripled (0.9 instead of 0.3) and inertia is lowered (0.3 instead of 0.5). Agents keep less memory of their previous facing, jitter more, and smooth the wobble less.
-- **`heterogeneous` (Heterogeneous Sheep).** Same Collect / Drive as Strombom 2014 (50 sheep, 1 shepherd). At the start of the run, 20% of sheep are marked stubborn and then feel only about 25% of the usual push from the dog for the whole trial. The shepherd does not know which sheep those are.
-- **`v_formation` (V-Formation).** Strombom sheep with 2 dogs. Dogs stay on a V-shaped arc behind the flock and Drive. They do not switch into classic Collect of a single straggler.
-- **`obstacle_aware` (Obstacle-Aware).** Same Collect / Drive as Strombom 2014 (50 sheep, 1 shepherd), but when Driving the aim point bends around walls, obstacles, or a gate instead of pointing straight through them.
-- **`kubo` (Kubo 2022).** Different physics. Sheep and dogs move by continuous forces (attraction, repulsion, goal pull), not Collect / Drive modes. Defaults: 40 sheep and 4 dogs.
-- **`flocking_dog` (Flocking Dog 2024).** Smaller default flock (14 sheep, 1 dog). Sheep use neighbour-based flocking. The dog still uses Collect / Drive and slows when already inside the group.
-- **`fat` (FAT).** Strombom sheep with 2 dogs. Each dog only uses sheep it can see locally, and always heads for the farthest visible sheep (no Collect / Drive mode switch).
-- **`communication_free` (Communication-Free).** Strombom sheep with 3 dogs. Each dog runs Collect / Drive using only the sheep it can see. Dogs do not share a common target or tell each other who is Collecting what.
-- **`adaptive` (Adaptive).** Strombom sheep with 2 dogs. Each tick counts how many sheep are far from the group centre. A few stragglers: Collect. Many stragglers: Recover (stand farther back behind the whole flock to press it together). Tight flock: Lead ahead toward the goal, or Drive from behind if leading is off.
+| ID | Name | Defaults |
+|----|------|----------|
+| `strombom` | Strombom 2014 | 50 sheep, 1 shepherd |
+| `strombom_multi` | Strombom Multi-Dog | same sheep rules, 3 dogs |
+| `strombom_noise` | Strombom Noise | same as 2014, noisier motion |
+| `heterogeneous` | Heterogeneous Sheep | 50 sheep, 1 shepherd |
+| `v_formation` | V-Formation | Strombom sheep, 2 dogs |
+| `obstacle_aware` | Obstacle-Aware | 50 sheep, 1 shepherd |
+| `fat` | FAT | Strombom sheep, 2 dogs |
+| `communication_free` | Communication-Free | Strombom sheep, 3 dogs |
+| `adaptive` | Adaptive | Strombom sheep, 2 dogs |
+| `kubo` | Kubo 2022 | 40 sheep, 4 dogs |
+| `flocking_dog` | Flocking Dog 2024 | 14 sheep, 1 dog |
+
+### What each method does
+
+**Strombom family** (Collect / Drive sheep unless noted)
+
+- **`strombom`** : If the flock is spread out, Collect the farthest straggler. If it is tight, Drive from behind toward the goal.
+- **`strombom_multi`** : Same sheep rules as Strombom 2014. The dogs share the work (who Collects which sheep, where to Drive) so they do not all pile on the same spot.
+- **`strombom_noise`** : Same rules and counts as Strombom 2014, but stress-tested: heading noise is tripled (0.9 instead of 0.3) and inertia is lowered (0.3 instead of 0.5). Agents keep less memory of their previous facing, jitter more, and smooth the wobble less.
+- **`heterogeneous`** : Same Collect / Drive as Strombom 2014. At the start of the run, 20% of sheep are marked stubborn and then feel only about 25% of the usual push from the dog for the whole trial. The shepherd does not know which sheep those are.
+- **`v_formation`** : Dogs stay on a V-shaped arc behind the flock and Drive. They do not switch into classic Collect of a single straggler.
+- **`obstacle_aware`** : Same Collect / Drive as Strombom 2014, but when Driving the aim point bends around walls, obstacles, or a gate instead of pointing straight through them.
+- **`fat`** : Each dog only uses sheep it can see locally, and always heads for the farthest visible sheep (no Collect / Drive mode switch).
+- **`communication_free`** : Each dog runs Collect / Drive using only the sheep it can see. Dogs do not share a common target or tell each other who is Collecting what.
+- **`adaptive`** : Each tick counts how many sheep are far from the group centre. A few stragglers: Collect. Many stragglers: Recover (stand farther back behind the whole flock to press it together). Tight flock: Lead ahead toward the goal, or Drive from behind if leading is off.
+
+**Other sheep physics**
+
+- **`kubo`** : Sheep and dogs move by continuous forces (attraction, repulsion, goal pull), not Collect / Drive modes.
+- **`flocking_dog`** : Sheep use neighbour-based flocking. The dog still uses Collect / Drive and slows when already inside the group.
 
 ### Adding a method
 
