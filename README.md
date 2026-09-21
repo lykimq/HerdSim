@@ -6,8 +6,8 @@ The point of the platform is fairness and comparison. You pick a named setup (a 
 
 HerdSim has **two goals** on one shared engine:
 
-1. **Simulate + frontend** (`platform/`) -- interactive UI: Simulate, Compare, Experiments, NetLogo, Guide.
-2. **Scaling research** (`scaling/`) -- CLI protocols that answer the scaling / control-demand research questions.
+1. **Simulate + frontend** (`platform/`) - interactive UI: Simulate, Compare, Experiments, NetLogo, Guide.
+2. **Scaling research** (`scaling/`) - CLI protocols that answer the scaling / control-demand research questions.
 
 ## Getting started
 
