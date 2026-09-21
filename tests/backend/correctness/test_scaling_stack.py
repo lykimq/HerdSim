@@ -8,14 +8,25 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from analysis.scaling.early_warning import evaluate_early_warning
+from analysis.scaling.early_warning import (
+    default_eval_ticks,
+    evaluate_early_warning,
+    evaluate_early_warning_campaign,
+)
 from analysis.scaling.export import export_package_a
-from analysis.scaling.frontier import extract_frontier
-from analysis.scaling.mechanism import evaluate_overcrowding_mechanisms
+from analysis.scaling.frontier import (
+    bootstrap_d_min_ci,
+    extract_frontier,
+    select_boundary_cells,
+)
+from analysis.scaling.mechanism import (
+    evaluate_overcrowding_mechanisms,
+    evaluate_temporal_order,
+)
 from analysis.scaling.predictors import compare_state_vs_nd_predictors
 from analysis.scaling.regimes import label_regimes
 from analysis.scaling.fits import fit_scaling_models
-from analysis.scaling.substitution import substitution_curves
+from analysis.scaling.substitution import OBS_LADDER, substitution_curves
 from analysis.scaling.transfer import build_transfer_table
 from core.x0_generators import generate_initial_positions, normalize_layout
 from plugins.metrics.cohesion import CohesionMetric
@@ -131,9 +142,23 @@ def test_frontier_and_regimes_extract_dmin_overcrowd():
     assert len(frontier) == 1
     assert int(frontier.iloc[0]["d_min"]) == 2
     assert frontier.iloc[0]["d_overcrowd"] == 6
+    assert "b_star_d" in frontier.columns
+    assert "b_star_t" in frontier.columns
     regimes = label_regimes(trials, theta=0.90)
     assert "under_resourced_failure" in set(regimes["regime"])
     assert "overcrowding_collapse" in set(regimes["regime"])
+
+
+def test_boundary_cells_and_bootstrap_dmin():
+    trials = _synthetic_trials()
+    boundaries = select_boundary_cells(trials, low_r=0.80, high_r=0.95)
+    assert not boundaries.empty
+    assert set(boundaries["n_shepherds"]).issubset({1, 2, 3, 4, 6, 10})
+    boot = bootstrap_d_min_ci(trials, theta=0.90, n_boot=50, seed=0)
+    assert len(boot) == 1
+    assert int(boot.iloc[0]["d_min"]) == 2
+    assert boot.iloc[0]["d_min_ci_low"] is not None
+    assert boot.iloc[0]["d_min_ci_high"] is not None
 
 
 def test_package_a_export(tmp_path: Path):
@@ -146,6 +171,7 @@ def test_package_a_export(tmp_path: Path):
     )
     assert paths["frontier"].exists()
     assert paths["regimes"].exists()
+    assert paths["dmin_bootstrap"].exists()
     assert paths["provenance"].exists()
     assert paths["report"].exists()
     report = paths["report"].read_text()
@@ -163,9 +189,42 @@ def test_predictors_and_scaling_and_transfer():
     trials = _synthetic_trials()
     pred = compare_state_vs_nd_predictors(trials)
     assert "delta_aic" in pred
-    frontier = extract_frontier(trials, theta=0.90)
+    # Multi-N frontier for piecewise / power candidates.
+    rows = []
+    for n, dmin in ((25, 1), (50, 2), (100, 3), (150, 6), (200, 10)):
+        for seed in range(5):
+            rows.append(
+                {
+                    "n_sheep": n,
+                    "n_shepherds": dmin,
+                    "seed": seed,
+                    "success": True,
+                    "mean_shepherd_path": 100.0,
+                    "first_success_tick": 100.0,
+                    "initial_layout": "compact",
+                    "method": "strombom_multi",
+                }
+            )
+            if dmin > 1:
+                rows.append(
+                    {
+                        "n_sheep": n,
+                        "n_shepherds": dmin - 1,
+                        "seed": seed,
+                        "success": False,
+                        "mean_shepherd_path": 100.0,
+                        "first_success_tick": -1.0,
+                        "initial_layout": "compact",
+                        "method": "strombom_multi",
+                    }
+                )
+    frontier = extract_frontier(pd.DataFrame(rows), theta=0.90)
     fits = fit_scaling_models(frontier)
-    assert fits["best"] in (None, "constant", "linear", "power") or fits["n_points"] >= 1
+    assert fits["n_points"] >= 1
+    assert "bic" in next(iter(fits["models"].values()))
+    assert set(fits["models"]).issubset(
+        {"constant", "linear", "power", "piecewise"}
+    )
 
     other = trials.copy()
     other["method"] = "kubo"
@@ -178,6 +237,7 @@ def test_predictors_and_scaling_and_transfer():
     )
     assert not table.empty
     assert set(table["transfer_label"]).issubset({"shared", "shifted", "absent"})
+    assert "i_dir_signature" in set(table["feature"])
 
 
 def test_mechanism_and_substitution_and_early_warning():
@@ -185,6 +245,31 @@ def test_mechanism_and_substitution_and_early_warning():
     regimes = label_regimes(trials, theta=0.90)
     mech = evaluate_overcrowding_mechanisms(trials, regimes)
     assert "interference" in mech["overall"]
+    assert mech.get("correction") == "holm"
+    assert "p_value_holm" in mech["overall"]["interference"]
+
+    ticks = np.arange(0, 1000)
+    ts = pd.DataFrame(
+        {
+            "tick": ticks,
+            "i_dir": np.concatenate(
+                [np.full(200, 0.1), np.linspace(0.1, 0.9, 800)]
+            ),
+            "fragmentation": np.linspace(1.0, 0.2, len(ticks)),
+            "mean_spread": np.linspace(1.0, 20.0, len(ticks)),
+            "cohesion": np.linspace(5.0, 30.0, len(ticks)),
+        }
+    )
+    temporal = evaluate_temporal_order(
+        [
+            {
+                "timeseries": ts,
+                "success": False,
+                "regime": "overcrowding_collapse",
+            }
+        ]
+    )
+    assert temporal["n_failed_overcrowd"] == 1
 
     sweeps = []
     for obs, boost in (("bearing_only", 0), ("global", 1)):
@@ -203,19 +288,45 @@ def test_mechanism_and_substitution_and_early_warning():
                 )
     curves = substitution_curves(pd.DataFrame(sweeps), theta=0.90)
     assert set(curves["obs_mode"]) == {"bearing_only", "global"}
+    assert OBS_LADDER[0] == "bearing_only"
 
-    ticks = np.arange(0, 1000)
-    ts = pd.DataFrame(
-        {
-            "tick": ticks,
-            "mean_spread": np.linspace(1.0, 20.0, len(ticks)),
-            "cohesion": np.linspace(5.0, 30.0, len(ticks)),
-            "fragmentation": np.linspace(1.0, 0.2, len(ticks)),
-        }
+    ew = evaluate_early_warning(
+        ts,
+        success=False,
+        horizon_k=200,
+        window_w=50,
+        eval_ticks=default_eval_ticks(start=200, stop=800, step=200),
     )
-    ew = evaluate_early_warning(ts, success=False, horizon_k=200, window_w=50)
     assert ew["n_ticks"] == 1000
     assert "auroc" in ew
+
+    campaign = evaluate_early_warning_campaign(
+        [
+            {
+                "timeseries": ts,
+                "success": False,
+                "n_sheep": 50,
+                "n_shepherds": 6,
+            },
+            {
+                "timeseries": ts,
+                "success": True,
+                "n_sheep": 100,
+                "n_shepherds": 2,
+            },
+            {
+                "timeseries": ts,
+                "success": False,
+                "n_sheep": 100,
+                "n_shepherds": 10,
+            },
+        ],
+        horizon_k=200,
+        window_w=50,
+        eval_ticks=[200, 400, 600, 800],
+    )
+    assert campaign["n_trials"] == 3
+    assert "beats_nd_baseline" in campaign
 
 
 def test_drive_to_goal_uses_initial_layout():

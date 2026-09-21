@@ -8,7 +8,11 @@ from typing import Any
 
 import pandas as pd
 
-from analysis.scaling.frontier import extract_frontier, reliability_table
+from analysis.scaling.frontier import (
+    bootstrap_d_min_ci,
+    extract_frontier,
+    reliability_table,
+)
 from analysis.scaling.plots import (
     save_frontier_curve,
     save_regime_counts,
@@ -179,12 +183,14 @@ def export_package_a(
     rates = reliability_table(trials, group_cols=groups)
     frontier = extract_frontier(trials, theta=theta, group_cols=groups)
     regimes = label_regimes(trials, theta=theta, group_cols=groups)
+    bootstrap = bootstrap_d_min_ci(trials, theta=theta, group_cols=groups)
 
     paths: dict[str, Path] = {
         "trials": out / "trials.csv",
         "reliability": out / "reliability.csv",
         "frontier": out / "frontier.csv",
         "regimes": out / "regimes.csv",
+        "dmin_bootstrap": out / "dmin_bootstrap.csv",
         "provenance": out / "provenance.json",
         "report": out / "package_a.md",
         "artefacts": out / "artefacts.json",
@@ -194,6 +200,7 @@ def export_package_a(
     front_csv = frontier.drop(columns=["rates"], errors="ignore")
     _write_df(front_csv, paths["frontier"])
     _write_df(regimes, paths["regimes"])
+    _write_df(bootstrap, paths["dmin_bootstrap"])
 
     figure_paths = _write_package_a_figures(
         rates=rates,
@@ -296,6 +303,7 @@ def export_package_a(
             "- reliability.csv",
             "- frontier.csv",
             "- regimes.csv",
+            "- dmin_bootstrap.csv",
             "- provenance.json",
             "- figures/",
             "",

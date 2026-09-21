@@ -2,7 +2,8 @@
 # From repo root: make -C scaling help   or   make scaling-help
 
 .PHONY: help scaling-help scaling-test scaling-pilot scaling-pilot-state \
-	scaling-analyse scaling-scout scaling-factor-sweep
+	scaling-analyse scaling-scout scaling-factor-sweep \
+	scaling-claim-plan scaling-claim-reseed
 
 ROOT := $(abspath $(CURDIR)/..)
 UV ?= uv
@@ -11,13 +12,16 @@ export PYTHONPATH := $(ROOT):$(ROOT)/platform:$(ROOT)/scaling$(if $(PYTHONPATH),
 SCALING_PROTOCOL_DIR ?= configs/protocols
 PHASE1_PILOT_PROTOCOL ?= $(SCALING_PROTOCOL_DIR)/phase1_pilot.yaml
 PHASE1_SCOUT_PROTOCOL ?= $(SCALING_PROTOCOL_DIR)/phase1_scout.yaml
+PHASE1_CLAIM_PROTOCOL ?= $(SCALING_PROTOCOL_DIR)/phase1_claim.yaml
 PHASE2_STATE_PROTOCOL ?= $(SCALING_PROTOCOL_DIR)/phase2_pilot_state.yaml
 PHASE5_SWEEP_PROTOCOL ?= $(SCALING_PROTOCOL_DIR)/phase5_factor_sweep.yaml
 
 SCALING_OUT ?= results/phase1/pilot
 STATE_OUT ?= results/phase2/pilot_state
 SCOUT_OUT ?= results/phase1/scout
+CLAIM_OUT ?= results/phase1/claim
 SWEEP_OUT ?= results/phase5/factor_sweep
+SCOUT_TRIALS ?= $(SCOUT_OUT)/trials.csv
 
 WORKERS ?= 1
 SCALING_MAX_TICKS ?=
@@ -58,13 +62,17 @@ help scaling-help:
 	@echo "                       Output: scaling/results/phase1/pilot/"
 	@echo "  scaling-scout         Denser Phase-1 map (~1440 trials)."
 	@echo "                       Output: scaling/results/phase1/scout/"
+	@echo "  scaling-claim-plan    Boundary cells from scout (no new trials)."
+	@echo "  scaling-claim-reseed  Claim-grade 100-seed reseed on boundaries."
+	@echo "                       Output: scaling/results/phase1/claim/"
 	@echo "  scaling-pilot-state   Four X0 layouts (~600 trials)."
 	@echo "                       Output: scaling/results/phase2/pilot_state/"
 	@echo "  scaling-factor-sweep  Observation-mode sweep (~360 trials)."
 	@echo "                       Output: scaling/results/phase5/factor_sweep/"
 	@echo "  scaling-analyse       Re-run analysis on an existing trials.csv"
 	@echo ""
-	@echo "Variables: WORKERS, SCALING_MAX_TICKS, PACKAGE, TRIALS, OUT"
+	@echo "Variables: WORKERS, SCALING_MAX_TICKS, PACKAGE, TRIALS, OUT,"
+	@echo "           SCOUT_TRIALS, CLAIM_OUT"
 	@echo "Example:   make scaling-pilot WORKERS=4"
 	@echo "Docs:      scaling/results/README.md"
 	@echo "Platform:  make -C ../platform help"
@@ -114,6 +122,26 @@ scaling-scout:
 		PACKAGE=A TRIALS=$(SCOUT_OUT)/trials.csv OUT=$(SCOUT_OUT)/packages/a
 	$(MAKE) scaling-analyse \
 		PACKAGE=F TRIALS=$(SCOUT_OUT)/trials.csv OUT=$(SCOUT_OUT)/packages/f
+
+scaling-claim-plan:
+	@mkdir -p $(CLAIM_OUT)
+	cd $(ROOT) && $(UV) run scaling/scripts/plan_claim_cells.py \
+		--scout-trials $(CURDIR)/$(SCOUT_TRIALS) \
+		--protocol $(CURDIR)/$(PHASE1_CLAIM_PROTOCOL) \
+		--output $(CURDIR)/$(CLAIM_OUT) \
+		--plan-only
+
+scaling-claim-reseed:
+	@echo "NOTE: claim reseed runs 100 seeds on scout boundary cells only."
+	@echo "Output: $(CLAIM_OUT)  scout=$(SCOUT_TRIALS)"
+	@mkdir -p $(CLAIM_OUT)
+	cd $(ROOT) && $(UV) run scaling/scripts/plan_claim_cells.py \
+		--scout-trials $(CURDIR)/$(SCOUT_TRIALS) \
+		--protocol $(CURDIR)/$(PHASE1_CLAIM_PROTOCOL) \
+		--output $(CURDIR)/$(CLAIM_OUT) \
+		--workers $(WORKERS)
+	$(MAKE) scaling-analyse \
+		PACKAGE=A TRIALS=$(CLAIM_OUT)/trials.csv OUT=$(CLAIM_OUT)/packages/a
 
 scaling-factor-sweep:
 	@mkdir -p $(SWEEP_OUT)

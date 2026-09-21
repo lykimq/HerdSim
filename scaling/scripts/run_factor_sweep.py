@@ -24,11 +24,29 @@ def main() -> None:
         default=None,
         help="Default: scaling/configs/protocols/phase5_factor_sweep.yaml",
     )
+    parser.add_argument(
+        "--canonical",
+        type=Path,
+        default=None,
+        help="Path to canonical_grid.yaml (default: from protocol YAML)",
+    )
     parser.add_argument("--output", type=Path, default=None)
-    parser.add_argument("--protocol", type=Path, default=None)
     parser.add_argument("--n", nargs="+", type=int, default=None)
     parser.add_argument("--d", nargs="+", type=int, default=None)
     parser.add_argument("--obs-modes", nargs="+", default=None)
+    parser.add_argument(
+        "--sensing-ranges",
+        nargs="+",
+        type=float,
+        default=None,
+        help="Absolute sensing ranges (range ladder); omit for obs_mode-only sweep",
+    )
+    parser.add_argument(
+        "--communications",
+        nargs="+",
+        default=None,
+        help="Communication ladder values; omit for obs_mode-only sweep",
+    )
     parser.add_argument("--seeds", type=int, default=None)
     parser.add_argument("--method", default=None)
     parser.add_argument("--workers", type=int, default=1)
@@ -45,7 +63,7 @@ def main() -> None:
             spec_path = candidate
     spec = load_protocol_spec(spec_path) if spec_path.exists() else {}
 
-    protocol_path = args.protocol
+    protocol_path = args.canonical
     if protocol_path is None and spec:
         protocol_path = protocol_path_for_spec(spec)
     protocol = load_canonical_protocol(protocol_path)
@@ -63,28 +81,47 @@ def main() -> None:
     obs_modes = args.obs_modes or list(
         spec.get("obs_modes") or ["bearing_only", "local_positions", "global"]
     )
+    sensing_ranges = args.sensing_ranges
+    if sensing_ranges is None and "sensing_ranges" in spec:
+        sensing_ranges = [float(x) for x in spec["sensing_ranges"]]
+    communications = args.communications
+    if communications is None and "communications" in spec:
+        communications = [str(x) for x in spec["communications"]]
+
     n_seeds = args.seeds if args.seeds is not None else int(spec.get("seeds", 10))
     layout = (list(spec.get("layouts") or ["compact"]) or ["compact"])[0]
 
     master = int(protocol.get("master_seed", 2026))
     max_ticks = int(protocol.get("time_limit_t0", 10000))
     seeds = [master + i for i in range(int(n_seeds))]
+
+    # Default: obs ladder only. Optional range/comm expand as additional axes.
+    obs_list = list(obs_modes) if sensing_ranges is None and communications is None else (
+        list(obs_modes) if args.obs_modes or "obs_modes" in spec else [None]
+    )
+    range_list = list(sensing_ranges) if sensing_ranges else [None]
+    comm_list = list(communications) if communications else [None]
+
     cells: list[ScalingCell] = []
-    for obs in obs_modes:
-        for n in n_values:
-            for d in d_values:
-                for seed in seeds:
-                    cells.append(
-                        ScalingCell(
-                            n_sheep=int(n),
-                            n_shepherds=int(d),
-                            seed=int(seed),
-                            initial_layout=str(layout),
-                            method=method,
-                            obs_mode=str(obs),
-                            max_ticks=max_ticks,
-                        )
-                    )
+    for obs in obs_list:
+        for sense in range_list:
+            for comm in comm_list:
+                for n in n_values:
+                    for d in d_values:
+                        for seed in seeds:
+                            cells.append(
+                                ScalingCell(
+                                    n_sheep=int(n),
+                                    n_shepherds=int(d),
+                                    seed=int(seed),
+                                    initial_layout=str(layout),
+                                    method=method,
+                                    obs_mode=str(obs) if obs is not None else None,
+                                    sensing_range=float(sense) if sense is not None else None,
+                                    communication=str(comm) if comm is not None else None,
+                                    max_ticks=max_ticks,
+                                )
+                            )
 
     if spec_path.exists():
         copy_protocol_spec(spec_path, output)

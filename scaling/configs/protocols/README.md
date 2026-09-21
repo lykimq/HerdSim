@@ -11,6 +11,10 @@
 # 6. Log the protocol in scaling/docs/progress_tracker.md after it runs.
 # 7. If you change a frozen Section 8 default, bump protocol_id / document an
 #    exception in the tracker; do not silently diverge.
+# 8. Claim-grade Phase 1: use phase1_claim.yaml with
+#    make scaling-claim-plan / scaling-claim-reseed after a scout map exists.
+#    Do not run a flat 100-seed full grid unless you intentionally opt into
+#    draft-style cost.
 #
 # Template:
 #

@@ -122,10 +122,15 @@ def _trial_row_from_result(
         "n_sheep": config["n_sheep"],
         "n_shepherds": config["n_shepherds"],
         "initial_layout": cell.initial_layout,
+        "time_limit": int(cell.max_ticks),
         "success": bool(result.success),
         "total_ticks": int(result.total_ticks),
         "resolved_config": dict(config),
     }
+    if cell.sensing_range is not None:
+        row["sensing_range"] = float(cell.sensing_range)
+    if cell.communication is not None:
+        row["communication"] = str(cell.communication)
     row.update(build_trial_metric_fields(result.history))
     if result.success:
         row["first_success_tick"] = float(result.total_ticks)
@@ -240,6 +245,60 @@ def expand_scaling_grid(
                                 max_ticks=ticks,
                             )
                         )
+    return cells
+
+
+def expand_claim_cells_from_boundaries(
+    protocol: dict[str, Any],
+    boundaries: pd.DataFrame,
+    *,
+    methods: list[str] | None = None,
+    layouts: list[str] | None = None,
+    n_seeds: int | None = None,
+    max_ticks: int | None = None,
+    sheep_col: str = "n_sheep",
+    dog_col: str = "n_shepherds",
+    layout_col: str = "initial_layout",
+    method_col: str = "method",
+) -> list[ScalingCell]:
+    """Expand claim-grade seeds on scout boundary (N, D) cells only."""
+    if boundaries.empty:
+        return []
+    methods = methods or [protocol.get("baseline_method", "strombom_multi")]
+    default_layouts = layouts or list(protocol.get("x0_families", ["compact"]))
+    if n_seeds is None:
+        n_seeds = int(protocol.get("claim_grade_seeds", 100))
+    master = int(protocol.get("master_seed", 2026))
+    ticks = int(protocol.get("time_limit_t0", 10000) if max_ticks is None else max_ticks)
+    rng_seeds = [master + i for i in range(int(n_seeds))]
+
+    cells: list[ScalingCell] = []
+    for _, brow in boundaries.iterrows():
+        n = int(brow[sheep_col])
+        d = int(brow[dog_col])
+        layout_list = (
+            [str(brow[layout_col])]
+            if layout_col in boundaries.columns and pd.notna(brow.get(layout_col))
+            else list(default_layouts)
+        )
+        method_list = (
+            [str(brow[method_col])]
+            if method_col in boundaries.columns and pd.notna(brow.get(method_col))
+            else list(methods)
+        )
+        for method in method_list:
+            for layout in layout_list:
+                for seed in rng_seeds:
+                    cells.append(
+                        ScalingCell(
+                            n_sheep=n,
+                            n_shepherds=d,
+                            seed=int(seed),
+                            initial_layout=str(layout),
+                            method=str(method),
+                            max_ticks=ticks,
+                        )
+                    )
     return cells
 
 

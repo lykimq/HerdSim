@@ -29,6 +29,9 @@ obs_modes:
   - local_positions
   - global
   # Ordered ladder (least -> most informative) for C5a first-step / C5b second-step.
+# Optional follow-up axes (omit for obs-only scout; pass via CLI or uncomment):
+# sensing_ranges: [25.0, 50.0, 75.0, 100.0]  # 0.5x..2x of base 50
+# communications: [none, neighbour_broadcast, global_shared]
 store_timeseries: false
 # RQ5 needs D_min(N,I), not tick trajectories; skip parquet to cut I/O.
 packages: [E]

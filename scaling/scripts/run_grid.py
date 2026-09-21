@@ -29,10 +29,10 @@ def _add_common_args(parser: argparse.ArgumentParser) -> None:
         help="Protocol YAML under scaling/configs/protocols/ (sets output, grid, id)",
     )
     parser.add_argument(
-        "--protocol",
+        "--canonical",
         type=Path,
         default=None,
-        help="Path to canonical_grid.yaml (default: from protocol or scaling/configs)",
+        help="Path to canonical_grid.yaml (default: from protocol YAML canonical:)",
     )
     parser.add_argument("--output", type=Path, default=None, help="Output directory")
     parser.add_argument(
@@ -91,7 +91,7 @@ def main() -> None:
                 spec_path = candidate
         spec = load_protocol_spec(spec_path)
 
-    protocol_path = args.protocol
+    protocol_path = args.canonical
     if protocol_path is None and spec is not None:
         protocol_path = protocol_path_for_spec(spec)
     protocol = load_canonical_protocol(protocol_path)
