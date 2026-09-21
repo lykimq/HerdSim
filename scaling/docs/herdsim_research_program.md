@@ -6,7 +6,7 @@
 
 > When a few shepherds guide a larger flock, how much control do we actually need as the flock gets bigger or more spread out?
 
-That is the same basic problem as the draft sheep-scaling paper (dog count vs flock size, and whether "spread" helps explain difficulty). We keep it, but we try to be more careful:
+That is the same basic problem as the draft sheep-scaling paper (dog count vs flock size, and whether "spread" helps explain difficulty). Reference summary of that draft's methods, runs, and results: [sheep-scaling_paper2025.md](sheep-scaling_paper2025.md). We keep the problem, but we try to be more careful:
 
 - say clearly what "how much control" means,
 - separate size from shape / state,

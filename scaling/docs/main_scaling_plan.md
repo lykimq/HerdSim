@@ -2,6 +2,11 @@
 
 Status note: Section 8 protocol frozen (`scaling_v1`). Caps I1-I14 built. Claim-grade phases: tracker.
 
+Why / what: [herdsim_research_program.md](herdsim_research_program.md)  
+Prior draft (2025) methods/results: [sheep-scaling_paper2025.md](sheep-scaling_paper2025.md)  
+Status: [progress_tracker.md](progress_tracker.md)  
+Report form: [REPORT_TEMPLATE.md](REPORT_TEMPLATE.md)
+
 Domain terms (`N`, `D`, `D_min`, control demand, ...): research program Terms table.
 
 | Abbreviation | Meaning |
@@ -23,7 +28,7 @@ Domain terms (`N`, `D`, `D_min`, control demand, ...): research program Terms ta
 
 ## Work map
 
-| Phase | Focus | RQ | Package | Depends on | Done when |
+| Phase | Focus | RQ | Package | Depends on phase | Done when |
 |-------|-------|----|---------|------------|-----------|
 | 0 | Freeze protocol | S8 | all | n/a | Section 8 rows frozen |
 | 1 | Size map: R(N, D), frontier, regimes (baseline) | RQ2 | A | 0 | R(N, D) maps; D_min, D_overcrowd, D_max, B*; regime labels; provenance |
@@ -121,17 +126,39 @@ Peripheral sheep: distance to GCM above the median. Influence radius: `r_s` from
 Does the same N have different herdability under different X_0?
 
 - Fix N in {50, 100, 200}
-- X_0: compact, wide, split, outlier_rich (layout contract under Caps)
+- X_0: compact, wide, split, outlier_rich (definitions and gates: Caps)
 - Sweep D from the frozen D grid
 - Compare D_min(N, X_0); fit R ~ f(N, D, state) vs R ~ f(N, D); OOS log-likelihood and Delta AIC
+
+**Why this subset.** Matched structure contrast at fixed size, not a full scale ladder (RQ2 / RQ6). Three N keep wall time feasible (3 N x 4 X_0 x full D) while spanning size bands the 2025 draft already separated:
+
+| Choice | Why |
+|--------|-----|
+| N = 50 | Draft "easy" band (Dmin = 1) but large enough for outlier_rich (~80/20) and periphery metrics |
+| N = 100 | Draft single-dog breakpoint; best place to ask if structure moves D_min at the size edge |
+| N = 200 | Draft steep band (Dmin jumped sharply); does structure still matter when size already demands many shepherds? |
+| Omit rest of N ladder here | Small N confounds structure (8.1.1); other ladder points belong to Packages A/F. Add an N only if Phase 1 shows a new breakpoint structure must resolve |
+| Four X_0 families | One causal axis each: cohesion/spread (compact/wide), fragmentation (split), outliers (outlier_rich) |
+| Full frozen D | Same D set as Phase 1 so frontiers compare across packages |
+
+Protocol theta/seeds: Section 8. Pass Caps layout gates before claim-grade Package B.
 
 ### RQ2: Size boundary and regimes (Package A, Phase 1)
 
 Where does reliable herding end as D grows, and how sharp is the boundary?
 
-- R(N, D) at T_0; label regimes
-- Transition width in D-grid steps (efficient to overcrowding)
+- R(N, D) at T_0 on the frozen N x D grids; baseline method; baseline compact layout
+- Label regimes; transition width in D-grid steps (efficient to overcrowding)
 - T_1 hard-ceiling check on overcrowding cells
+
+**Why this run.** Builds the size map later packages reuse. N, D, theta, seeds, T_0, baseline method: Section 8 (not repeated here).
+
+| Choice | Why |
+|--------|-----|
+| Compact only (default) | Isolate size from structure; RQ1 varies X_0 later |
+| Full N x D freeze | Breakpoints for RQ6; small-flock and large-N bands in one map |
+| T_1 on overcrowding cells | Separates true overcrowding from "needed more time" |
+| Transition width in grid steps | Matches D_overcrowd definition (ordered D grid, not arithmetic spacing) |
 
 ### RQ3: Mechanism (Package C, Phase 3)
 
@@ -144,7 +171,17 @@ Why do extra shepherds stop helping?
 | Induced fragmentation | Fragmentation higher in overcrowding vs efficient |
 | Redundant effort | E rises, R flat, I_dir not necessarily high |
 
-Compare overcrowding vs efficient cells at the same N (median I_dir / fragmentation, rank tests; temporal order).
+Compare overcrowding vs efficient cells at the same N (median I_dir / fragmentation, rank tests; temporal order). Metric definitions: How we measure. I_dir wall caveat / E1: Caps.
+
+**Why this design.** No new grid. Reuse Phase 1 (and Phase 2 if structure moves the frontier); log mechanism series only on contrast cells.
+
+| Choice | Why |
+|--------|-----|
+| Efficient vs overcrowding at same N | Matched size; intended difference is helpful vs harmful D |
+| Only N with a clear overcrowding label | If overcrowding is absent, mechanism contrast is undefined for that method |
+| I_dir + C + fragmentation | Conflict, under-coverage, breakup; redundant effort is the residual if I_dir stays low |
+| Temporal order before R drop | Separates lead signal from post-failure chaos |
+| Rank tests, corrected | Uneven cell counts; non-parametric |
 
 ### RQ4: Generality (Package D, Phase 4)
 
@@ -161,21 +198,49 @@ Which patterns transfer across methods under locked task, seeds, and metrics?
 | I_dir signature (RQ3) | r(I_dir, R) < -0.3 in both | present, magnitude differs | not significant |
 | Coverage saturation; RQ5 / RQ7 patterns | analogous thresholds | magnitude/threshold differs | not observed |
 
+**Why this design.** Architecture diversity under one protocol, not "best controller". Grids and locks: Section 8. Run after Phases 1-3 so there is a baseline pattern to transfer.
+
+| Choice | Why |
+|--------|-----|
+| Required trio | Collect/Drive coordinated, force-based, local farthest-target: three decision families |
+| Recommended `communication_free` | Collect/Drive without shared dog targets (coordination vs decentralisation) |
+| Optional pair | Extra formation / mode-switch; not required for the minimum transfer claim |
+| shared / shifted / absent bars | Stops vague "looks similar"; quantitative labels for the transfer table |
+
 ### RQ5: Information vs shepherds (Package E, Phase 5)
 
 Can better sensing or communication cut D_min at fixed reliability?
 
-- N in {100, 200}, theta = 0.90
+- N in {100, 200}; frozen theta
 - Ladders: obs (bearing_only -> local_positions -> global); range (x0.5 -> x1 -> x1.5 -> x2); comm (none -> neighbour_broadcast -> global_shared)
 - D_min(N, I_k); first and second step Delta D_min
+
+**Why this subset.** Substitution study (information vs shepherd count), not a second full scale map. Factor list is frozen in Section 8; ladders below are the ordinal steps.
+
+| Choice | Why |
+|--------|-----|
+| N = 100, 200 | Breakpoint / steep sizes (same hard pair as RQ1). Skip easy N where D_min is already 1 (nothing to substitute) |
+| Three ladders | Separate *what* is sensed, *how far*, and *what is shared* among shepherds |
+| Multiplicative range steps | Comparable relative steps across methods |
+| Track first and second Delta D_min | Tests diminishing returns on information |
+| Method-conditional notes | Some methods ignore some I factors; do not claim substitution where the controller is blind |
 
 ### RQ6: Scaling fits (Package F, Phase 6)
 
 How does required resource grow with N and state?
 
-- D_min(N, X_0) on the frozen N grid
+- D_min(N, X_0) from Packages A/B on the frozen N grid
 - Fit power-law, piecewise, state-conditioned; AIC/BIC + CV
 - Cross-method after RQ4 data exist
+
+**Why this design.** Analysis only. No new trials or physics. Fit only when D_min is claim-grade and not flat.
+
+| Choice | Why |
+|--------|-----|
+| Full frozen N | Enough points for slope and breakpoints |
+| Candidate set | Global power law is the naive claim; piecewise captures band changes; state-conditioned ties to RQ1 |
+| State curves when available | Else compact-only and say so |
+| Domain-scoped alpha | Do not quote one alpha for the whole ladder if bands differ |
 
 ### RQ7: Early warning (Package G, Phase 7)
 
@@ -183,7 +248,18 @@ Can state predict failure before timeout?
 
 - Windowed X(t), I_dir(t), C(t) -> P(failure within k | features at t)
 - Baseline: logistic on (N, D); leave-one-N-out CV
-- Frozen: k = 500; w = 200; evaluate every 200 ticks from 1,000 to 8,000
+- Frozen horizons: k = 500; w = 200; evaluate every 200 ticks from 1,000 to 8,000 (Section 8)
+
+**Why this design.** Follow-on diagnostic: only valuable if state beats knowing N and D. Needs Phase 1-3 timeseries (Cap I14).
+
+| Choice | Why |
+|--------|-----|
+| Features from X / I_dir / C | Same channels as RQ1/RQ3; no new sensors |
+| (N, D) logistic baseline | If state loses, there is no early-warning result |
+| k = 500 (5% of T_0) | Lead time long enough to matter |
+| w = 200 | Warning from recent state, not the whole trial |
+| Eval 1,000..8,000 step 200 | Skip startup; keep "failure within k" defined before timeout |
+| Leave-one-N-out | Generalise across flock sizes |
 
 ---
 
@@ -214,22 +290,22 @@ Changing a frozen default needs a tracker protocol exception and usually a new `
 
 ### 8.1 Why these defaults
 
-Longer notes: comments in `canonical_grid.yaml`.
+Canonical freeze rationale (machine-readable comments: `canonical_grid.yaml`). RQ-specific subsets (which N for RQ1/RQ5, contrast cells, ladders): How we run each RQ. Do not restate those here.
 
 | Choice | Why |
 |--------|-----|
 | `drive_to_goal` | Shared operational herdability task |
-| theta = 0.90 | Reliable band (SR >= 90%); sensitivity at 0.50/0.70 |
+| theta = 0.90 | Reliable band (SR >= 90%); also report 0.50/0.70 |
 | `strombom_multi` | Coordinated Collect/Drive multi-dog baseline |
-| Transfer set | Distinct architectures (force / local FAT / no shared targets) |
+| Transfer set | Distinct architectures (force / local FAT / no shared targets); optional methods are RQ4-only |
 | N grid | Scale ladder; floor N=5 (8.1.1); 5-10 = hard small flock; 75/150 resolve ~100; 300/400 large-N |
-| D grid | Fine at low D; ceiling 35 practical cap |
-| X_0 | Causal axes for RQ1 (spread, fragmentation, outliers) |
-| T_0 = 10000 | Failures reflect control limits, not a short default clock |
+| D grid | Fine at low D; ceiling 35 practical / draft-comparable cap |
+| X_0 families | Causal axes for RQ1 (definitions: Caps) |
+| T_0 = 10000 | Failures reflect control limits, not scenario default 3000 |
 | T_1 = 20000 | Hard-ceiling vs timeout only |
-| Scout 30 / claim 100 | Cheap map then precise D_min CI |
+| Scout 30 / claim 100 | Cheap map then precise D_min (procedure: How we measure) |
 | Master seed 2026 | Reproducible base |
-| RQ7 k/w | 5% of T_0; fixed feature window |
+| RQ7 k/w | 5% of T_0; fixed feature window (purpose: RQ7) |
 | Wasteful 20% | Default effort tolerance; sensitivity 10%/30% |
 
 ### 8.1.1 Why N floor is 5
@@ -269,14 +345,14 @@ Already available (do not rebuild): cohesion, fragmentation, outlier_count; `ite
 
 ### Layout contract (X_0) and RQ1 gate
 
+Implementation contract for the four families (why RQ1 uses them: How we run each RQ). Wired via `INITIAL_LAYOUTS` and `DriveToGoalScenario` -> `x0_generators.generate_initial_positions()`.
+
 | Layout | Definition | Gate metric |
 |--------|------------|-------------|
 | compact | Single Gaussian, sigma = 0.3 x default spread | Low cohesion distance |
 | wide | Single Gaussian, sigma = 2.0 x default | High cohesion distance |
 | split | 2-3 subclusters at distance >= 2x interaction radius | Low fragmentation index |
 | outlier_rich | Core ~80% + outliers ~20% beyond lost threshold | High outlier count |
-
-Wired via `INITIAL_LAYOUTS` and `DriveToGoalScenario` -> `x0_generators.generate_initial_positions()`.
 
 **RQ1 gate:** unit tests must show sampled layouts differ on the intended metric before claim-grade Package B.
 
@@ -333,7 +409,7 @@ Allowed touch: `INITIAL_LAYOUTS`; DriveToGoal initial positions; metric registry
 
 ## Claims
 
-Canonical support criteria. Tracker holds verdicts. Reports cite evidence paths. Fill claims only at **CLAIM** grade after reading `packages/*/`.
+Canonical support criteria (do not restate inside RQ sections). Tracker holds verdicts. Reports cite evidence paths. Fill only at **CLAIM** grade after reading `packages/*/`.
 
 | Claim | RQ | Supported when |
 |-------|----|----------------|
