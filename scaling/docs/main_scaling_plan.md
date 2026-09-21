@@ -23,8 +23,6 @@ Domain terms (`N`, `D`, `D_min`, control demand, ...): research program Terms ta
 
 ## Work map
 
-One phase table. Questions in prose: research program. Verdicts after data: tracker. Criteria: Claims below.
-
 | Phase | Focus | RQ | Package | Depends on | Done when |
 |-------|-------|----|---------|------------|-----------|
 | 0 | Freeze protocol | S8 | all | n/a | Section 8 rows frozen |
@@ -204,7 +202,7 @@ Can state predict failure before timeout?
 Machine-readable: [../configs/canonical_grid.yaml](../configs/canonical_grid.yaml).  
 Subsets: [../configs/protocols/](../configs/protocols/). Every override needs a WHY comment (`protocols/README.md`).
 
-Frozen as of 2026-09-17:
+Frozen:
 
 | Item | Default |
 |------|---------|
