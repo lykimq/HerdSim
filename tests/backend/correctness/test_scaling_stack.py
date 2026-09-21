@@ -132,7 +132,7 @@ def test_frontier_and_regimes_extract_dmin_overcrowd():
     assert int(frontier.iloc[0]["d_min"]) == 2
     assert frontier.iloc[0]["d_overcrowd"] == 6
     regimes = label_regimes(trials, theta=0.90)
-    assert "under_budget_failure" in set(regimes["regime"])
+    assert "under_resourced_failure" in set(regimes["regime"])
     assert "overcrowding_collapse" in set(regimes["regime"])
 
 

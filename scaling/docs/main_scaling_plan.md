@@ -1,14 +1,8 @@
 # Collective Herdability Under Shepherding
 
-Role: **how** (measure, protocol, phases, Caps, claim criteria)
-Why / what: [herdsim_research_program.md](herdsim_research_program.md)
-Status: [progress_tracker.md](progress_tracker.md)
-Per-run report form: [REPORT_TEMPLATE.md](REPORT_TEMPLATE.md)
-Results layout: [../results/README.md](../results/README.md)
-
 Status note: Section 8 protocol frozen (`scaling_v1`). Caps I1-I14 built. Claim-grade phases: tracker.
 
-Domain terms (`N`, `D`, `D_min`, control demand, …): research program Terms table.
+Domain terms (`N`, `D`, `D_min`, control demand, ...): research program Terms table.
 
 | Abbreviation | Meaning |
 |--------------|---------|
@@ -16,7 +10,7 @@ Domain terms (`N`, `D`, `D_min`, control demand, …): research program Terms ta
 | *R* / *theta* | Success rate; reliability threshold |
 | *I_dir* | Shepherd interference index |
 | *C* | Shepherd coverage of peripheral sheep |
-| `B*` | Best budget (D, T) at target R with least effort |
+| `B*` | Best (D, T) at target R with least effort |
 | *AIC* / *BIC* | Model-comparison scores (lower is better; Package F) |
 | *Delta AIC* / *Delta BIC* | Difference between two fitted models |
 | *AUROC* | Ranking quality for early warning (Package G) |
@@ -58,7 +52,7 @@ Smallest publishable unit: **RQ1 + RQ2 + RQ3 + S8**. RQ4-RQ7 reuse the same prot
 
 ## How we measure
 
-### Notation and budget
+### Notation
 
 **Herdability / R.** How often a fixed setup (method, task, N, D, T, X_0, I) reaches the goal under locked seeds. Herdable at `theta` when `R >= theta`.
 
@@ -70,8 +64,8 @@ Default theta = 0.90; also report 0.50 and 0.70. Mechanism metrics explain patte
 
 | Kind | Symbol | Meaning |
 |------|--------|---------|
-| Budget input | D | Shepherd count |
-| Budget input | T | Time limit (ticks) |
+| Input | D | Shepherd count |
+| Input | T | Time limit (ticks) |
 | Outcome | S | Success (binary) |
 | Outcome | t_s | Time to success (if successful) |
 | Outcome | E | Realised effort: total shepherd path length |
@@ -124,7 +118,7 @@ Peripheral sheep: distance to GCM above the median. Influence radius: `r_s` from
 
 | Regime | Definition |
 |--------|------------|
-| Under-budget failure | R < theta |
+| Under-resourced failure | R < theta |
 | Efficient operation | R >= theta, D at or near D_min, effort competitive |
 | Wasteful overspend | R >= theta, median E >= 20% above efficient with no reliability gain (sensitivity 10%/30%) |
 | Overcrowding collapse | R < theta for D > D_overcrowd |

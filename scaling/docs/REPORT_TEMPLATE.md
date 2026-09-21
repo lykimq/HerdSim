@@ -45,7 +45,7 @@ What we ran, what came out, what to do next.
 
 - Success pattern:
 - D_min / frontier (by N / layout):
-- Regimes (under-budget / efficient / wasteful / overcrowding / hard failure):
+- Regimes (under-resourced / efficient / wasteful / overcrowding / hard failure):
 - Surprises:
 
 ## Figures

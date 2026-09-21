@@ -45,7 +45,7 @@ Before diving into RQ-specific grids, we freeze one shared protocol so later com
 - the herding task,
 - what counts as success,
 - a reliability target (e.g. succeed in at least 90% of runs),
-- a time budget,
+- a time limit,
 - which flock sizes and shepherd counts we sweep,
 - a baseline method and the methods we compare against it,
 - how we estimate the viable shepherd range (minimum for reliable success, and where adding more stops helping or starts hurting).

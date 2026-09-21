@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 
-# Canonical X0 family names from the budget protocol.
+# Canonical X0 family names from the scaling protocol.
 X0_FAMILIES = ("compact", "wide", "split", "outlier_rich")
 
 

@@ -12,7 +12,7 @@ frozen_on: "2026-09-17"
 
 # Task: single shared scenario so size/structure/method comparisons stay fair.
 # drive_to_goal is HerdSim's default herding task and matches the program's
-# operational herdability definition (guide flock to a goal under a time budget).
+# operational herdability definition (guide flock to a goal under a time limit).
 task: drive_to_goal
 
 # Primary reliability bar for D_min / regimes. 0.90 matches the sheep-scaling
@@ -64,7 +64,7 @@ x0_families:
   - outlier_rich
 
 # T0: default per-trial horizon. 10000 matches the draft paper timeout and
-# overrides drive_to_goal's scenario default (3000) so budget failures are not
+# overrides drive_to_goal's scenario default (3000) so reliability failures are not
 # short-horizon artefacts.
 time_limit_t0: 10000
 # T1: extended horizon only for hard-ceiling tests (overcrowding that
