@@ -114,8 +114,8 @@ Details live in the in-app Guide under Overview and Environment.
 flowchart TB
   subgraph goals [ ]
     direction LR
-    plat["Goal 1 · platform/<br/>Simulate + UI<br/>make -C platform"]
-    scale["Goal 2 · scaling/<br/>RQ protocols<br/>make -C scaling"]
+    plat["platform/<br/>Simulate + UI<br/>make -C platform"]
+    scale["scaling/<br/>RQ protocols<br/>make -C scaling"]
   end
 
   engine["Shared engine<br/>core · plugins · methods · services/shared · analysis"]
@@ -127,8 +127,8 @@ flowchart TB
 | Area | Path | Entry |
 |------|------|-------|
 | Shared engine | `core/`, `plugins/`, `methods/`, `integrations/`, `services/shared/`, `analysis/` | used by both goals |
-| Goal 1 -- Simulate + UI | `platform/` | `make install` / `make dev` |
-| Goal 2 -- scaling RQs | `scaling/` | `make scaling-help` |
+| Simulate + UI | `platform/` | `make install` / `make dev` |
+| Scaling RQs | `scaling/` | `make scaling-help` |
 | Cross-cutting docs | `docs/architecture.md`, `docs/papers/` | engineering overview + PDFs |
 | Tests | `tests/` | `make test` |
 
