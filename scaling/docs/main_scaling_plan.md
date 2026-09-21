@@ -26,25 +26,15 @@ Domain terms (`N`, `D`, `D_min`, control demand, ...): research program Terms ta
 | Phase | Focus | RQ | Package | Depends on | Done when |
 |-------|-------|----|---------|------------|-----------|
 | 0 | Freeze protocol | S8 | all | n/a | Section 8 rows frozen |
-| 1 | Size map: R(N, D), frontier, regimes (baseline) | RQ2 | A | 0 | Package A: frontier + regimes + reliability map |
-| 2 | Structure: vary X_0 at fixed N; compare D_min | RQ1 | B | 1 | Package B: verified X_0 families; D_min(N, X_0) comparable |
-| 3 | Mechanism: I_dir / C / fragmentation on contrast cells | RQ3 | C | 1 | Package C: I_dir and C series for contrast cells |
-| 4 | Generality: other methods; transfer table | RQ4 | D | 1-3 | Transfer table for >= 3 methods |
-| 5 | Follow-on: information vs shepherd count | RQ5 | E | 1 | Package E on methods that consume I factors |
-| 6 | Scaling fits (uses Phase 1-2 data) | RQ6 | F | 1-2 | Package F model-comparison table |
-| 7 | Follow-on: early warning from trajectories | RQ7 | G | 1-3 | Package G: AUROC + lead-time distribution |
+| 1 | Size map: R(N, D), frontier, regimes (baseline) | RQ2 | A | 0 | R(N, D) maps; D_min, D_overcrowd, D_max, B*; regime labels; provenance |
+| 2 | Structure: vary X_0 at fixed N; compare D_min | RQ1 | B | 1 | X_0 families verified; per-(N, X_0, D) reliability; D_min(N, X_0); predictor comparison |
+| 3 | Mechanism: I_dir / C / fragmentation on contrast cells | RQ3 | C | 1 | Per-trial I_dir(t), C(t); regime-paired rank tests; mechanism verdicts |
+| 4 | Generality: other methods; transfer table | RQ4 | D | 1-3 | Transfer table (property x method -> shared / shifted / absent) for >= 3 methods |
+| 5 | Follow-on: information vs shepherd count | RQ5 | E | 1 | D_min(N, I); Delta D_min/Delta I; method-conditional notes (methods that consume I) |
+| 6 | Scaling fits (uses Phase 1-2 data) | RQ6 | F | 1-2 | Power-law / piecewise / state-conditioned fits; Delta AIC/BIC |
+| 7 | Follow-on: early warning from trajectories | RQ7 | G | 1-3 | AUROC; lead-time distributions; feature-importance ranks |
 
 Smallest publishable unit: **RQ1 + RQ2 + RQ3 + S8**. RQ4-RQ7 reuse the same protocol afterward.
-
-| Package | Must contain |
-|---------|--------------|
-| A | R(N, D) maps; D_min, D_overcrowd, D_max, B*; regime labels; provenance |
-| B | Per-(N, X_0, D) reliability; D_min(N, X_0); predictor comparison |
-| C | Per-trial I_dir(t), C(t); regime-paired rank tests; mechanism verdicts |
-| D | Transfer table: property x method -> shared / shifted / absent |
-| E | D_min(N, I); Delta D_min/Delta I; method-conditional notes |
-| F | Power-law / piecewise / state-conditioned fits; Delta AIC/BIC |
-| G | AUROC; lead-time distributions; feature-importance ranks |
 
 ---
 
