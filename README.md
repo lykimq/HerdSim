@@ -118,7 +118,7 @@ flowchart TB
     scale["scaling/<br/>RQ protocols<br/>make -C scaling"]
   end
 
-  engine["Shared engine<br/>core · plugins · methods · services/shared · analysis"]
+  engine["Shared engine<br/>core - plugins - methods - services/shared - analysis"]
 
   plat -.->|imports / runs| engine
   scale -.->|imports / runs| engine
