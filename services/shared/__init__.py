@@ -1,1 +1,1 @@
-"""Shared helpers used by experiments and budget services."""
+"""Shared helpers used by experiments and scaling services."""

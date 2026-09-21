@@ -6,16 +6,16 @@ from pathlib import Path
 
 import pytest
 
-from instruments.netlogo.bridge import (
+from methods.netlogo.bridge import (
     find_netlogo_gui_launcher,
     find_netlogo_home,
     resolve_model_path,
 )
-from core.instruments import INSTRUMENTS
+from core.methods import METHODS
 
 
 def test_netlogo_not_registered_as_herdsim_algorithm():
-    assert "netlogo" not in INSTRUMENTS
+    assert "netlogo" not in METHODS
 
 
 def test_example_model_exists():

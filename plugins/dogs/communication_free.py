@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from instruments.strombom.config import STROMBOM_DEFAULTS
-from instruments.strombom.heuristics import (
+from methods.strombom.config import STROMBOM_DEFAULTS
+from methods.strombom.heuristics import (
     compute_shepherd_velocity,
     should_collect,
 )

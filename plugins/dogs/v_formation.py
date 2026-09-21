@@ -6,13 +6,13 @@ from typing import Any
 
 import numpy as np
 
-from instruments.strombom.heuristics import (
+from methods.strombom.heuristics import (
     collect_offset,
     compute_threshold,
     drive_offset,
     shepherd_step_toward,
 )
-from instruments.v_formation.config import V_FORMATION_DEFAULTS
+from methods.v_formation.config import V_FORMATION_DEFAULTS
 from plugins.dogs.helpers import apply_dog_speeds, empty_dog_velocities, view_from_observation
 from core.agents.goal import resolve_goal_center
 from core.agents.shepherd import position_behind_target

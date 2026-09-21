@@ -31,8 +31,41 @@ dev = [
     "ruff>=0.1",
 ]
 
-[tool.setuptools.packages.find]
-include = ["core*", "instruments*", "plugins*", "api*", "analysis*", "services*"]
+# Shared packages live at the repo root. Goal-owned packages are mapped from
+# platform/ and scaling/ so imports stay api / services.experiments / services.scaling.
+[tool.setuptools]
+packages = [
+    "analysis",
+    "analysis.scaling",
+    "api",
+    "api.routers",
+    "core",
+    "core.agents",
+    "methods",
+    "methods.flocking_dog",
+    "methods.heterogeneous",
+    "methods.kubo",
+    "methods.netlogo",
+    "methods.obstacle_aware",
+    "methods.strombom",
+    "methods.strombom_multi",
+    "methods.strombom_noise",
+    "methods.v_formation",
+    "plugins",
+    "plugins.dogs",
+    "plugins.metrics",
+    "plugins.scenarios",
+    "plugins.sheep",
+    "services.scaling",
+    "services.experiments",
+    "services.shared",
+]
+
+[tool.setuptools.package-dir]
+"api" = "platform/api"
+"services.scaling" = "scaling/services/scaling"
+"services.experiments" = "platform/services/experiments"
+"services.shared" = "services/shared"
 
 [tool.ruff]
 line-length = 100
@@ -44,6 +77,7 @@ select = ["E", "F", "I", "W", "UP"]
 [tool.pytest.ini_options]
 testpaths = ["tests/backend"]
 asyncio_mode = "auto"
+pythonpath = [".", "platform", "scaling"]
 markers = [
     "stress: heavy / long runs; use make test-stress",
 ]

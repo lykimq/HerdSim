@@ -4,18 +4,18 @@ from __future__ import annotations
 
 import numpy as np
 
-from instruments.kubo.forces import (
+from methods.kubo.forces import (
     clamp_speed,
     dog_force_components,
     sheep_force_components,
     target_sheep_farthest_from_goal,
 )
-from core.instruments import get_instrument
+from core.methods import get_method
 from tests.backend.helpers import make_state
 
 
 def test_kubo_registered_with_force_gains():
-    alg = get_instrument("kubo")
+    alg = get_method("kubo")
     assert alg["id"] == "kubo"
     assert {"K_f4", "K_s4", "radius"} <= set(alg["default_config"])
 

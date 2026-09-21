@@ -4,7 +4,7 @@ import {
   buildRunReport,
   formatRunReportMarkdown,
   formatRunReportText,
-} from '../../frontend/src/shared/sim/runReport.js';
+} from '../../platform/frontend/src/shared/sim/runReport.js';
 
 function makeHistory(rows) {
   return rows.map((row) => ({
@@ -26,11 +26,11 @@ describe('buildRunReport', () => {
   it('summarizes a successful finished run with trends', () => {
     const report = buildRunReport({
       status: 'success',
-      instrumentName: 'Strombom',
-      instrumentId: 'strombom',
+      methodName: 'Strombom',
+      methodId: 'strombom',
       scenarioId: 'drive_to_goal',
       config: {
-        instrument: 'strombom',
+        method: 'strombom',
         scenario_id: 'drive_to_goal',
         preset: 'paper',
         seed: 42,
@@ -95,7 +95,7 @@ describe('buildRunReport', () => {
 
     const setup = report.sections.find((s) => s.id === 'setup');
     assert.ok(setup);
-    assert.ok(setup.lines.some((l) => /Instrument: Strombom/.test(l)));
+    assert.ok(setup.lines.some((l) => /Method: Strombom/.test(l)));
     assert.ok(setup.lines.some((l) => /Seed: 42/.test(l)));
     assert.ok(setup.lines.some((l) => /Number of sheep: 50/.test(l)));
     assert.ok(setup.lines.some((l) => /ra: 65/.test(l) || /Ra: 65/.test(l)));
@@ -127,7 +127,7 @@ describe('buildRunReport', () => {
     assert.match(md, /## Setup/);
     assert.match(md, /## Insights/);
     assert.match(md, /- Seed: 42/);
-    assert.match(md, /\*\*Instrument parameters\*\*/);
+    assert.match(md, /\*\*Method parameters\*\*/);
   });
 
   it('uses pen wording for containment scenarios', () => {
@@ -173,10 +173,10 @@ describe('buildRunReport', () => {
   it('explains timeout with remaining outliers and grounded Collect insight', () => {
     const report = buildRunReport({
       status: 'timeout',
-      instrumentId: 'strombom',
+      methodId: 'strombom',
       scenarioId: 'drive_to_goal',
       config: {
-        instrument: 'strombom',
+        method: 'strombom',
         scenario_id: 'drive_to_goal',
         seed: 7,
         num_sheep: 4,
@@ -238,7 +238,7 @@ describe('buildRunReport', () => {
   it('omits invented insights when evidence is weak', () => {
     const report = buildRunReport({
       status: 'completed',
-      instrumentId: 'potential_field',
+      methodId: 'potential_field',
       scenarioId: 'drive_to_goal',
       history: makeHistory([
         {

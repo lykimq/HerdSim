@@ -8,7 +8,7 @@ import {
   isLeaveBlocked,
   resetLeaveBlocksForTests,
   setLeaveBlock,
-} from '../../frontend/src/shared/sim/leaveGuard.js';
+} from '../../platform/frontend/src/shared/sim/leaveGuard.js';
 
 describe('leaveGuard', () => {
   it('tracks and clears named blockers', () => {

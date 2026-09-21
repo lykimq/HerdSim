@@ -7,7 +7,7 @@ from typing import Any
 from core.base_scenario import BaseScenario
 from core.experimental_factors import ExperimentalFactors
 from core.plugin_registry import dog_controller_registry, sheep_dynamics_registry
-from core.instruments import get_instrument
+from core.methods import get_method
 from core.shared_defaults import (
     SHARED_WORLD_DEFAULTS,
     WORLD_KEYS,
@@ -91,7 +91,7 @@ def resolve_experiment_config(
     *,
     scenario: BaseScenario,
     factors: ExperimentalFactors | dict[str, Any] | None = None,
-    instrument: str | None = None,
+    method: str | None = None,
     preset: str = "paper",
     num_sheep: int | None = None,
     num_shepherds: int | None = None,
@@ -100,16 +100,16 @@ def resolve_experiment_config(
     sheep_model: str | None = None,
     dog_controller: str | None = None,
 ) -> dict[str, Any]:
-    """Resolve config from factors and/or a named instrument preset.
+    """Resolve config from factors and/or a named method preset.
 
-    When ``instrument`` is provided, its sheep_model, dog_controller, and default
+    When ``method`` is provided, its sheep_model, dog_controller, and default
     params are applied first. Explicit ``algorithm_params`` and ``world_overrides``
     win last.
     """
     raw: dict[str, Any] = {}
     explicit_params = dict(algorithm_params or {})
-    if instrument:
-        bundle = get_instrument(instrument)
+    if method:
+        bundle = get_method(method)
         raw.update(bundle["factors"])
         raw.setdefault("params", {})
         raw["params"] = {

@@ -6,8 +6,8 @@ from typing import Any
 
 import numpy as np
 
-from instruments.strombom.config import STROMBOM_DEFAULTS
-from instruments.strombom.heuristics import (
+from methods.strombom.config import STROMBOM_DEFAULTS
+from methods.strombom.heuristics import (
     compute_shepherd_velocity,
     should_collect,
     strombom_assignment_lines,

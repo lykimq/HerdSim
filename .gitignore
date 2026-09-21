@@ -223,11 +223,8 @@ netlogo/models/uploads/*
 !netlogo/models/uploads/.gitkeep
 
 # Offline experiment outputs (CLI scripts write here by default).
-# Budget campaign runs are kept under results/budget/ so we retain the data.
-results/*
-!results/.gitkeep
-!results/budget/
-!results/budget/**
+# Optional scratch outputs at repo root (not used by scaling protocols).
+results/
 
 # Node / frontend
 node_modules/

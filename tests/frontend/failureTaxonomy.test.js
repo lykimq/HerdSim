@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { classifyRunFailure } from '../../frontend/src/shared/sim/failureTaxonomy.js';
+import { classifyRunFailure } from '../../platform/frontend/src/shared/sim/failureTaxonomy.js';
 
 describe('classifyRunFailure', () => {
   it('returns none on success', () => {

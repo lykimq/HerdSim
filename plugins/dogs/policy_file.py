@@ -8,7 +8,7 @@ from typing import Any
 
 import numpy as np
 
-from instruments.strombom.config import STROMBOM_DEFAULTS
+from methods.strombom.config import STROMBOM_DEFAULTS
 from plugins.dogs.collect_drive import CollectDriveController
 from plugins.dogs.helpers import apply_dog_speeds, empty_dog_velocities
 from core.dog_controller import BaseDogController

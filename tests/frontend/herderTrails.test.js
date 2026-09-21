@@ -3,7 +3,7 @@ import { describe, it } from 'node:test';
 import {
   appendTrailPositions,
   trailsFromFrames,
-} from '../../frontend/src/renderer/herderTrails.js';
+} from '../../platform/frontend/src/renderer/herderTrails.js';
 
 describe('herderTrails', () => {
   it('appends positions and skips consecutive duplicates', () => {

@@ -26,7 +26,7 @@ def test_factors_validate_obs_mode():
 def test_resolve_sets_obs_and_stubborn_factors():
     config = resolve_experiment_config(
         scenario=DriveToGoalScenario(),
-        instrument="strombom",
+        method="strombom",
         preset="custom",
         num_sheep=10,
         num_shepherds=2,

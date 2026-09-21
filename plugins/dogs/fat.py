@@ -6,8 +6,8 @@ from typing import Any
 
 import numpy as np
 
-from instruments.strombom.config import STROMBOM_DEFAULTS
-from instruments.strombom.heuristics import shepherd_step_toward
+from methods.strombom.config import STROMBOM_DEFAULTS
+from methods.strombom.heuristics import shepherd_step_toward
 from plugins.dogs.helpers import apply_dog_speeds, empty_dog_velocities, view_from_observation
 from core.agents.goal import resolve_goal_center
 from core.agents.shepherd import position_behind_target

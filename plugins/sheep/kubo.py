@@ -3,7 +3,7 @@
 Each sheep integrates a force sum over continuous time step dt: self-propulsion,
 alignment, cohesion, and dog repulsion within sensing radius, with gains K_s1
 through K_s4. Speed is clipped to sheep_speed_max. Paired with the Kubo force
-dog controller in the kubo instrument; not a Collect/Drive sheep model.
+dog controller in the kubo method; not a Collect/Drive sheep model.
 """
 
 from __future__ import annotations
@@ -12,8 +12,8 @@ from typing import Any
 
 import numpy as np
 
-from instruments.kubo.config import KUBO_DEFAULTS
-from instruments.kubo.forces import clamp_speed, sheep_force_components
+from methods.kubo.config import KUBO_DEFAULTS
+from methods.kubo.forces import clamp_speed, sheep_force_components
 from core.sheep_dynamics import BaseSheepDynamics
 from core.simulation_state import SimulationState
 

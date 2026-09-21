@@ -10,7 +10,7 @@ from services.experiments.sweep import expand_factor_grid, parse_factor_specs, s
 from api.main import app
 from core.agent_attributes import apply_robot_constraints
 from core.experiment_config import resolve_experiment_config
-from core.instruments import get_instrument
+from core.methods import get_method
 from core.simulation_runner import SimulationRunner
 from plugins.metrics.registry import metric_registry
 from plugins.scenarios.drive_to_goal import DriveToGoalScenario
@@ -22,7 +22,7 @@ def client():
 
 
 def test_meta_models_lists_plugins(client):
-    res = client.get("/api/instruments/meta/models")
+    res = client.get("/api/methods/meta/models")
     assert res.status_code == 200
     payload = res.json()
     sheep_ids = {
@@ -47,7 +47,7 @@ def test_create_session_echoes_obs_mode_and_factors(client):
     res = client.post(
         "/api/simulations",
         json={
-            "instrument": "strombom",
+            "method": "strombom",
             "scenario_id": "drive_to_goal",
             "preset": "custom",
             "num_sheep": 12,
@@ -71,18 +71,18 @@ def test_create_session_echoes_obs_mode_and_factors(client):
 
 
 @pytest.mark.parametrize(
-    "instrument,obs_mode",
+    "method,obs_mode",
     [
         ("fat", "local_positions"),
         ("adaptive", "bearing_only"),
         ("communication_free", "global"),
     ],
 )
-def test_instrument_session_steps_with_local_obs(client, instrument, obs_mode):
+def test_method_session_steps_with_local_obs(client, method, obs_mode):
     create = client.post(
         "/api/simulations",
         json={
-            "instrument": instrument,
+            "method": method,
             "scenario_id": "drive_to_goal",
             "preset": "custom",
             "num_sheep": 10,
@@ -130,7 +130,7 @@ def test_factor_grid_helpers_parse_and_label():
 def test_resolve_failure_and_blind_masks():
     config = resolve_experiment_config(
         scenario=DriveToGoalScenario(),
-        instrument="strombom",
+        method="strombom",
         preset="custom",
         num_sheep=8,
         num_shepherds=2,
@@ -147,7 +147,7 @@ def test_resolve_failure_and_blind_masks():
         metrics=metric_registry.get_all(),
         config=config,
         seed=2,
-        instrument="strombom",
+        method="strombom",
     )
     runner.initialize()
     assert runner.state is not None
@@ -156,6 +156,6 @@ def test_resolve_failure_and_blind_masks():
 
 
 def test_presets_expose_model_pair():
-    fat = get_instrument("fat")
+    fat = get_method("fat")
     assert fat["sheep_model"]
     assert fat["dog_controller"] == "fat"

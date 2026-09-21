@@ -6,12 +6,12 @@ import numpy as np
 
 from plugins.dogs.v_formation import VFormationController
 from core.observation_models import GlobalObservation
-from core.instruments import INSTRUMENTS, get_instrument
+from core.methods import METHODS, get_method
 from tests.backend.helpers import build_runner, make_state, make_world, snapshot_positions
 
 
 def test_v_formation_registered():
-    assert "v_formation" in INSTRUMENTS
+    assert "v_formation" in METHODS
 
 
 def test_v_formation_step_runs():

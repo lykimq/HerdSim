@@ -1,26 +1,26 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import {
-  assignmentModesFromInstrument,
+  assignmentModesFromMethod,
   parseOverlayColor,
   sheepCentroid,
   GCM_GOAL_COLOR,
-} from '../../frontend/src/shared/sim/displayOverlays.js';
+} from '../../platform/frontend/src/shared/sim/displayOverlays.js';
 
 describe('displayOverlays', () => {
-  it('returns empty assignment modes when instrument has none', () => {
+  it('returns empty assignment modes when method has none', () => {
     assert.deepEqual(
-      assignmentModesFromInstrument({
+      assignmentModesFromMethod({
         id: 'kubo',
         info: { overlays: { assignment_modes: [] } },
       }),
       [],
     );
-    assert.deepEqual(assignmentModesFromInstrument({ id: 'kubo', info: {} }), []);
+    assert.deepEqual(assignmentModesFromMethod({ id: 'kubo', info: {} }), []);
   });
 
   it('normalizes declared Collect/Drive modes', () => {
-    const modes = assignmentModesFromInstrument({
+    const modes = assignmentModesFromMethod({
       id: 'strombom',
       info: {
         overlays: {

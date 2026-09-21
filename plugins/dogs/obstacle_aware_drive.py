@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from typing import Any
 
-from instruments.obstacle_aware.config import OBSTACLE_AWARE_DEFAULTS
-from instruments.obstacle_aware.geometry import deflect_drive_point
-from instruments.strombom.heuristics import (
+from methods.obstacle_aware.config import OBSTACLE_AWARE_DEFAULTS
+from methods.obstacle_aware.geometry import deflect_drive_point
+from methods.strombom.heuristics import (
     collect_target,
     drive_offset,
     shepherd_step_toward,

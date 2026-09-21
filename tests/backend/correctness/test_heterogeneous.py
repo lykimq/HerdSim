@@ -5,13 +5,13 @@ from __future__ import annotations
 import numpy as np
 
 from core.agent_attributes import init_agent_attributes
-from core.instruments import INSTRUMENTS, get_instrument
+from core.methods import METHODS, get_method
 from plugins.sheep.strombom import StrombomSheepDynamics
 from tests.backend.helpers import build_runner, make_state, make_world, snapshot_positions
 
 
 def test_heterogeneous_registered():
-    assert "heterogeneous" in INSTRUMENTS
+    assert "heterogeneous" in METHODS
 
 
 def test_heterogeneous_determinism_same_seed():
@@ -47,7 +47,7 @@ def test_heterogeneous_stubborn_weaker_dog_response():
     dog = np.array([[48.0, 41.0]])
     world = make_world(goal_center=(10.0, 10.0))
     base = {
-        **get_instrument("heterogeneous")["default_config"],
+        **get_method("heterogeneous")["default_config"],
         "noise_strength": 0.0,
         "graze_move_prob": 0.0,
         "r_s": 65.0,

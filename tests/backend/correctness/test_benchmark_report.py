@@ -17,7 +17,7 @@ from services.experiments.runner import run_benchmark
 
 def test_report_package_includes_provenance():
     payload = run_benchmark(
-        instruments=["strombom"],
+        methods=["strombom"],
         scenario_id="drive_to_goal",
         seeds=[1],
         preset="paper",
@@ -25,7 +25,7 @@ def test_report_package_includes_provenance():
         num_shepherds=1,
     )
     request = {
-        "instruments": ["strombom"],
+        "methods": ["strombom"],
         "scenario_id": "drive_to_goal",
         "preset": "paper",
         "seeds": [1],
@@ -61,7 +61,7 @@ def test_csv_export_includes_caveats_and_columns():
     payload = {
         "rows": [
             {
-                "instrument": "strombom",
+                "method": "strombom",
                 "scenario": "drive_to_goal",
                 "preset": "paper",
                 "seed": 1,
@@ -81,17 +81,17 @@ def test_csv_export_includes_caveats_and_columns():
     assert text.startswith(f"# HerdSim benchmark CSV (version {HERDSIM_VERSION})")
     assert "# git_commit:" in text
     assert "# caveat:" in text
-    assert "instrument" in text
+    assert "method" in text
     assert "first_success_tick" in text
     assert "resolved_config" not in text.split("\n")[-1]
 
 
 def test_markdown_export_shares_caveats():
     payload = {
-        "rows": [{"instrument": "strombom", "scenario": "drive_to_goal", "seed": 1}],
+        "rows": [{"method": "strombom", "scenario": "drive_to_goal", "seed": 1}],
         "summary": [
             {
-                "instrument": "strombom",
+                "method": "strombom",
                 "trials": 1,
                 "success_rate": 1.0,
                 "failure_rate": 0.0,
@@ -115,7 +115,7 @@ def test_markdown_export_shares_caveats():
 def test_first_success_tick_matches_scenario_success_not_time_to_goal():
     """Successful trials set first_success_tick from scenario stop, not all-in-goal."""
     payload = run_benchmark(
-        instruments=["strombom"],
+        methods=["strombom"],
         scenario_id="drive_to_goal",
         seeds=[1],
         preset="paper",

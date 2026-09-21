@@ -56,12 +56,12 @@ class SimulationRunner:
         sheep_dynamics: BaseSheepDynamics | None = None,
         dog_controller: BaseDogController | None = None,
         observation_model: BaseObservationModel | None = None,
-        instrument: str | None = None,
+        method: str | None = None,
     ):
         self.scenario = scenario
         self.config = config
         self.seed = seed
-        self.instrument = instrument or config.get("instrument")
+        self.method = method or config.get("method")
         self.sheep_dynamics = sheep_dynamics or sheep_dynamics_registry.get(
             str(config.get("sheep_model", "strombom"))
         )
@@ -92,7 +92,7 @@ class SimulationRunner:
             "obs_mode": self.observation_model.id,
             "scenario_id": self.scenario.id,
             "seed": self.seed,
-            "instrument": self.instrument,
+            "method": self.method,
         }
         state = SimulationState(
             tick=0,

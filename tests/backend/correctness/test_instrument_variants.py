@@ -1,4 +1,4 @@
-"""Correctness: instrument variants keep distinct herding behaviour."""
+"""Correctness: method variants keep distinct herding behaviour."""
 
 from __future__ import annotations
 
@@ -6,14 +6,14 @@ import numpy as np
 
 from plugins.dogs.collect_drive_multi import CollectDriveMultiController
 from core.observation_models import GlobalObservation
-from core.instruments import INSTRUMENTS, get_instrument
+from core.methods import METHODS, get_method
 from plugins.sheep.jadhav import JadhavSheepDynamics
 from plugins.sheep.strombom import StrombomSheepDynamics
 from tests.backend.helpers import make_state, make_world
 
 
 def test_variants_registered():
-    names = set(INSTRUMENTS)
+    names = set(METHODS)
     assert {
         "strombom_multi",
         "strombom_noise",
@@ -27,7 +27,7 @@ def test_variants_registered():
 
 
 def test_strombom_noise_default_strength():
-    assert get_instrument("strombom_noise")["default_config"]["noise_strength"] >= 0.8
+    assert get_method("strombom_noise")["default_config"]["noise_strength"] >= 0.8
 
 
 def test_strombom_multi_dogs_take_distinct_positions():

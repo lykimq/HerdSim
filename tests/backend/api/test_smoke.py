@@ -21,7 +21,7 @@ def test_health(client):
 
 
 def test_lists_core_catalog(client):
-    algs = client.get("/api/instruments").json()
+    algs = client.get("/api/methods").json()
     by_id = {item["id"]: item for item in algs}
     assert by_id["strombom"]["herder_kind"] == "human"
     assert by_id["kubo"]["herder_kind"] == "dog"
@@ -40,7 +40,7 @@ def test_create_session_paper_strombom(client):
     res = client.post(
         "/api/simulations",
         json={
-            "instrument": "strombom",
+            "method": "strombom",
             "scenario_id": "drive_to_goal",
             "preset": "paper",
             "seed": 7,
@@ -57,7 +57,7 @@ def test_create_session_scenario_preset_kubo(client):
     res = client.post(
         "/api/simulations",
         json={
-            "instrument": "kubo",
+            "method": "kubo",
             "scenario_id": "obstacle_course",
             "preset": "scenario",
             "seed": 1,
@@ -73,7 +73,7 @@ def test_websocket_step_and_reset(client):
     create = client.post(
         "/api/simulations",
         json={
-            "instrument": "strombom",
+            "method": "strombom",
             "scenario_id": "drive_to_goal",
             "num_sheep": 8,
             "num_shepherds": 1,
@@ -102,7 +102,7 @@ def test_benchmark_run_and_export(client):
     res = client.post(
         "/api/benchmarks/run",
         json={
-            "instruments": ["strombom"],
+            "methods": ["strombom"],
             "scenario_id": "drive_to_goal",
             "seeds": [1],
             "preset": "paper",
@@ -119,7 +119,7 @@ def test_benchmark_run_and_export(client):
     assert csv_res.status_code == 200
     assert csv_res.text.startswith("# HerdSim benchmark CSV (version")
     assert "# caveat:" in csv_res.text
-    assert "instrument" in csv_res.text
+    assert "method" in csv_res.text
     json_res = client.get("/api/benchmarks/export?format=json")
     assert json_res.status_code == 200
     package = json_res.json()
@@ -143,7 +143,7 @@ async def test_async_create_session():
         res = await ac.post(
             "/api/simulations",
             json={
-                "instrument": "strombom",
+                "method": "strombom",
                 "scenario_id": "drive_to_goal",
                 "num_sheep": 5,
                 "num_shepherds": 1,

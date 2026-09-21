@@ -17,12 +17,12 @@ import {
   suggestedFactorGridValues,
   factorVisibility,
   validateFactors,
-} from '../../frontend/src/shared/factors/factors.js';
+} from '../../platform/frontend/src/shared/factors/factors.js';
 import {
   chartGroupKey,
   parseTrialFactors,
   validateFactorGridRows,
-} from '../../frontend/src/features/experiments/analyticsSweep.js';
+} from '../../platform/frontend/src/features/experiments/analyticsSweep.js';
 
 describe('factors helpers', () => {
   it('parses mixed numeric and string value lists', () => {
@@ -33,9 +33,9 @@ describe('factors helpers', () => {
     ]);
   });
 
-  it('builds session payload with instrument and observation factors', () => {
+  it('builds session payload with method and observation factors', () => {
     const payload = buildSessionPayload({
-      instrumentId: 'strombom',
+      methodId: 'strombom',
       scenarioId: 'drive_to_goal',
       preset: 'custom',
       numSheep: 40,
@@ -60,7 +60,7 @@ describe('factors helpers', () => {
         goal_velocity_y: 0,
       },
     });
-    assert.equal(payload.instrument, 'strombom');
+    assert.equal(payload.method, 'strombom');
     assert.equal(payload.obs_mode, 'local_positions');
     assert.equal(payload.sheep_model, 'strombom');
     assert.equal(payload.dog_controller, 'collect_drive');
@@ -140,7 +140,7 @@ describe('factor grid helpers', () => {
 
   it('groups charts by sweep_label when present', () => {
     assert.equal(chartGroupKey([{ sweep_label: 'n_sheep=20' }]), 'sweep_label');
-    assert.equal(chartGroupKey([{ instrument: 'strombom' }]), 'instrument');
+    assert.equal(chartGroupKey([{ method: 'strombom' }]), 'method');
   });
 
   it('parses two-axis sweep labels and ignores factor_label meta', () => {

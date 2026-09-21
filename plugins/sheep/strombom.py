@@ -4,7 +4,7 @@ Beyond shepherd range r_s, sheep graze: usually stay still, sometimes take a
 random step. Within r_s they update heading from inertia, attraction to the
 local neighbour centre, sheep-sheep repulsion inside r_a, repulsion from active
 shepherds, and angular noise, then advance by sheep_speed (displacement per
-tick). Used by the Strombom-family instruments; the dog side is a separate
+tick). Used by the Strombom-family methods; the dog side is a separate
 controller (typically Collect/Drive).
 """
 
@@ -14,7 +14,7 @@ from typing import Any
 
 import numpy as np
 
-from instruments.strombom.config import STROMBOM_DEFAULTS
+from methods.strombom.config import STROMBOM_DEFAULTS
 from core.agents.sheep import (
     compose_strombom_heading,
     compute_attraction,

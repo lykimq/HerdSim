@@ -1,4 +1,4 @@
-"""Analysis package for validation studies and budget campaigns."""
+"""Analysis package for validation studies and scaling protocols."""
 
 from analysis.failure_taxonomy import FAILURE_LABELS, classify_failure
 

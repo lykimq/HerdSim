@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from instruments.strombom.heuristics import (
+from methods.strombom.heuristics import (
     collect_offset,
     collect_target,
     compute_threshold,

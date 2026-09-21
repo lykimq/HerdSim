@@ -20,6 +20,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
       - name: Run backend tests
+        env:
+          PYTHONPATH: ${{ github.workspace }}:${{ github.workspace }}/platform:${{ github.workspace }}/scaling
         run: |
           pytest tests/backend/ -v
 
@@ -33,6 +35,6 @@ jobs:
           node-version: '20'
       - name: Install & build frontend
         run: |
-          cd frontend
+          cd platform/frontend
           npm ci
           npm run build

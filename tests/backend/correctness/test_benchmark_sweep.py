@@ -37,7 +37,7 @@ def test_parse_sweep_rejects_oversized_grid():
 
 def test_run_benchmark_param_sweep_labels_rows():
     payload = run_benchmark(
-        instruments=["strombom"],
+        methods=["strombom"],
         scenario_id="drive_to_goal",
         seeds=[1],
         preset="paper",
@@ -50,20 +50,20 @@ def test_run_benchmark_param_sweep_labels_rows():
     assert labels == {"n_neighbors=-1", "n_neighbors=2"}
     summary = summarize_rows(pd.DataFrame(payload["rows"]))
     assert len(summary) == 2
-    assert all("[" in row["instrument"] for row in summary)
+    assert all("[" in row["method"] for row in summary)
 
 
 def test_find_preset_for_models_prefers_canonical():
-    from core.instruments import find_instrument_for_models
+    from core.methods import find_method_for_models
 
-    assert find_instrument_for_models("strombom", "collect_drive") == "strombom"
-    assert find_instrument_for_models("kubo", "kubo_forces") == "kubo"
-    assert find_instrument_for_models("jadhav", "fat") is None
+    assert find_method_for_models("strombom", "collect_drive") == "strombom"
+    assert find_method_for_models("kubo", "kubo_forces") == "kubo"
+    assert find_method_for_models("jadhav", "fat") is None
 
 
-def test_run_benchmark_factor_grid_without_instrument_uses_param_bundle():
+def test_run_benchmark_factor_grid_without_method_uses_param_bundle():
     payload = run_benchmark(
-        instruments=[],
+        methods=[],
         scenario_id="drive_to_goal",
         seeds=[1],
         preset="custom",
@@ -78,7 +78,7 @@ def test_run_benchmark_factor_grid_without_instrument_uses_param_bundle():
     row = payload["rows"][0]
     assert row["sheep_model"] == "strombom"
     assert row["dog_controller"] == "collect_drive"
-    assert row["instrument"] == "strombom"
+    assert row["method"] == "strombom"
     assert row["sweep_label"]
     assert "n_sheep=8" in row["sweep_label"]
 
@@ -86,7 +86,7 @@ def test_run_benchmark_factor_grid_without_instrument_uses_param_bundle():
 def test_run_benchmark_factor_grid_without_models_rejected():
     with pytest.raises(ValueError, match="sheep_model"):
         run_benchmark(
-            instruments=[],
+            methods=[],
             scenario_id="drive_to_goal",
             seeds=[1],
             preset="custom",

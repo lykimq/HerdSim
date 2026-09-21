@@ -25,7 +25,7 @@ COMMUNICATION_MODES = ("none", "neighbour_broadcast", "global_shared")
 
 GOAL_MODES = ("static", "moving")
 
-# Canonical X0 families from the budget protocol.
+# Canonical X0 families from the scaling protocol.
 INITIAL_LAYOUTS = ("compact", "wide", "split", "outlier_rich")
 
 

@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from instruments.flocking_dog.config import FLOCKING_DOG_DEFAULTS
-from instruments.kubo.config import KUBO_DEFAULTS
-from instruments.strombom.config import STROMBOM_DEFAULTS
+from methods.flocking_dog.config import FLOCKING_DOG_DEFAULTS
+from methods.kubo.config import KUBO_DEFAULTS
+from methods.strombom.config import STROMBOM_DEFAULTS
 from core.experiment_config import resolve_experiment_config
-from core.instruments import get_instrument, list_instruments
+from core.methods import get_method, list_methods
 from core.shared_defaults import SHARED_WORLD_DEFAULTS, WORLD_KEYS
 from plugins.scenarios.drive_to_goal import DriveToGoalScenario
 from plugins.scenarios.obstacle_course import ObstacleCourseScenario
@@ -15,10 +15,10 @@ _LAYOUT_ONLY_KEYS = set(WORLD_KEYS) - {"collect_threshold_scale"}
 
 
 def test_paper_preset_keeps_algorithm_agent_counts():
-    preset = get_instrument("strombom")
+    preset = get_method("strombom")
     config = resolve_experiment_config(
         scenario=DriveToGoalScenario(),
-        instrument="strombom",
+        method="strombom",
         preset="paper",
     )
     assert config["n_sheep"] == preset["default_config"]["n_sheep"]
@@ -26,10 +26,10 @@ def test_paper_preset_keeps_algorithm_agent_counts():
 
 
 def test_paper_preset_uses_scenario_world_layout():
-    preset = get_instrument("strombom")
+    preset = get_method("strombom")
     scen = ObstacleCourseScenario()
     config = resolve_experiment_config(
-        scenario=scen, instrument="strombom", preset="paper"
+        scenario=scen, method="strombom", preset="paper"
     )
     assert config["n_sheep"] == preset["default_config"]["n_sheep"]
     assert config["goal_center"] == scen.default_config["goal_center"]
@@ -40,7 +40,7 @@ def test_paper_preset_uses_scenario_world_layout():
 def test_scenario_preset_overlays_world_and_counts():
     scen = ObstacleCourseScenario()
     config = resolve_experiment_config(
-        scenario=scen, instrument="kubo", preset="scenario"
+        scenario=scen, method="kubo", preset="scenario"
     )
     assert config["n_sheep"] == scen.default_config["n_sheep"]
     assert config["goal_center"] == scen.default_config["goal_center"]
@@ -50,7 +50,7 @@ def test_scenario_preset_overlays_world_and_counts():
 def test_custom_overrides_win():
     config = resolve_experiment_config(
         scenario=DriveToGoalScenario(),
-        instrument="strombom",
+        method="strombom",
         preset="custom",
         num_sheep=12,
         num_shepherds=2,
@@ -64,7 +64,7 @@ def test_custom_overrides_win():
 
 def test_resolve_includes_shared_world_fallbacks():
     config = resolve_experiment_config(
-        scenario=DriveToGoalScenario(), instrument="kubo", preset="paper"
+        scenario=DriveToGoalScenario(), method="kubo", preset="paper"
     )
     for key, value in SHARED_WORLD_DEFAULTS.items():
         assert key in config
@@ -76,7 +76,7 @@ def test_algorithm_configs_omit_layout_world_keys():
         overlap = _LAYOUT_ONLY_KEYS.intersection(defaults)
         assert not overlap, f"layout keys in algorithm defaults: {overlap}"
 
-    for entry in list_instruments():
+    for entry in list_methods():
         overlap = _LAYOUT_ONLY_KEYS.intersection(entry["default_config"])
         assert not overlap, f"{entry['id']} default_config has layout keys: {overlap}"
 
@@ -84,10 +84,10 @@ def test_algorithm_configs_omit_layout_world_keys():
 def test_kubo_paper_keeps_force_params_under_narrow_gate_world():
     from plugins.scenarios.narrow_gate import NarrowGateScenario
 
-    preset = get_instrument("kubo")
+    preset = get_method("kubo")
     scen = NarrowGateScenario()
     config = resolve_experiment_config(
-        scenario=scen, instrument="kubo", preset="paper"
+        scenario=scen, method="kubo", preset="paper"
     )
     assert config["K_f4"] == preset["default_config"]["K_f4"]
     assert config["dog_speed_max"] == preset["default_config"]["dog_speed_max"]
@@ -102,7 +102,7 @@ def test_paper_preset_includes_containment_scenario_keys():
     from plugins.scenarios.containment import ContainmentScenario
 
     config = resolve_experiment_config(
-        scenario=ContainmentScenario(), instrument="strombom", preset="paper"
+        scenario=ContainmentScenario(), method="strombom", preset="paper"
     )
     assert config["containment_fraction"] == 0.95
     assert config["containment_min_ticks"] == 200

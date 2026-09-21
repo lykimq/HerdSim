@@ -1,0 +1,36 @@
+# Phase-1 scout (compact only; subset of frozen N/D).
+# Grade: SCOUT. LONG-RUNNING. Resume-safe via manifest.jsonl.
+#
+# Why this subset: map R(N,D) and frontiers under the baseline method before
+# spending wall time on all X0 families or transfer methods. Compact-first
+# because early pilots showed compact + strombom_multi can stay too easy;
+# finishing this scout either finds a real frontier or justifies moving to
+# harder X0 (Phase 2) without grinding empty overcrowding cells.
+
+protocol_id: phase1_scout
+phase: 1
+grade: SCOUT
+# Orientation map for frontiers; claim-grade boundary reseeds still required later.
+output: scaling/results/phase1/scout
+canonical: scaling/configs/canonical_grid.yaml
+
+methods:
+  - strombom_multi
+  # Single method until Package A frontiers exist; RQ4 comes after phenomenology.
+layouts:
+  - compact
+  # Hold structure fixed so Phase-1 isolates size + D effects (RQ2/RQ6 data).
+flock_sizes: [25, 50, 75, 100, 150, 200]
+# Subset of freeze (omits 5/10 and 300/400) to cut cells. Keep 75/150 for the
+# ~100 breakpoint; stop at 200 until mid-band behaviour is clear. Add 5/10 in a
+# follow-up scout if compact mid-band stays too easy or to map small-N hardness.
+shepherd_counts: [1, 2, 3, 4, 6, 10, 15, 20]
+# Omits 25/35 from the freeze to reduce high-D cost while still probing
+# diminishing returns / early overcrowding past D=10.
+seeds: 30
+# Protocol scout_seeds: enough to locate boundary cells for later 100-seed claims.
+seed_mode: scout
+store_timeseries: true
+# Required for later RQ3/RQ7; also enables tick/runtime diagnostics in reports.
+packages: [A, F]
+# A = maps/regimes; F = early scaling fits (often degenerate if D_min flat).
