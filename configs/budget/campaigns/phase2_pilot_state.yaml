@@ -23,8 +23,8 @@ layouts:
   - outlier_rich
   # Full frozen X0 set: must differ on cohesion / fragmentation / outliers
   # before any claim-grade Package B campaign.
-flock_sizes: [25, 50, 100]
-# Same smoke N band as phase1_pilot for cross-phase comparability.
+flock_sizes: [5, 10, 25, 50, 100]
+# Same smoke N band as phase1_pilot (aligned with canonical floor N=5).
 shepherd_counts: [1, 2, 3, 4, 6, 10]
 # Same low-D smoke band; enough to see D_min shifts of >= 2 if layouts matter.
 seeds: 5

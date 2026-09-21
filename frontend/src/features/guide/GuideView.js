@@ -221,6 +221,45 @@ async function renderGuideMermaid(rootEl) {
   }
 }
 
+function bindGuideReadingAids(bodyEl) {
+  const tocLinks = bodyEl.querySelectorAll('[data-guide-anchor]');
+  const sections = bodyEl.querySelectorAll('[data-guide-section]');
+
+  tocLinks.forEach((link) => {
+    link.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      const id = link.getAttribute('data-guide-anchor');
+      const target = id ? bodyEl.querySelector(`#${CSS.escape(id)}`) : null;
+      if (!target) return;
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      tocLinks.forEach((el) => el.classList.toggle('is-active', el === link));
+    });
+  });
+
+  if (!sections.length || !tocLinks.length || typeof IntersectionObserver !== 'function') {
+    return;
+  }
+
+  const byId = new Map(
+    [...tocLinks].map((link) => [link.getAttribute('data-guide-anchor'), link]),
+  );
+  const observer = new IntersectionObserver(
+    (entries) => {
+      const visible = entries
+        .filter((e) => e.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+      if (!visible.length) return;
+      const id = visible[0].target.getAttribute('data-guide-section');
+      tocLinks.forEach((el) => {
+        el.classList.toggle('is-active', el.getAttribute('data-guide-anchor') === id);
+      });
+    },
+    { root: bodyEl, rootMargin: '-12% 0px -55% 0px', threshold: [0.15, 0.35, 0.6] },
+  );
+  sections.forEach((sec) => observer.observe(sec));
+  bodyEl._guideSectionObserver = observer;
+}
+
 export function createGuideView() {
   const root = document.createElement('div');
   root.className = 'guide-layout';
@@ -318,9 +357,15 @@ export function createGuideView() {
     else markNavActive(slug);
     bodyEl.innerHTML = '<p class="text-muted">Loading this page...</p>';
     try {
+      if (bodyEl._guideSectionObserver) {
+        bodyEl._guideSectionObserver.disconnect();
+        bodyEl._guideSectionObserver = null;
+      }
       const md = await fetchDoc(slug);
       bodyEl.innerHTML = `<div class="guide-md">${renderMarkdown(md)}</div>`;
       await renderGuideMermaid(bodyEl);
+      bindGuideReadingAids(bodyEl);
+      bodyEl.scrollTop = 0;
     } catch (err) {
       log.error('guide', err.message, err);
       bodyEl.innerHTML = `<p class="text-muted">Could not open ${escapeHtml(slug)}. ${escapeHtml(err.message)}</p>`;
@@ -379,6 +424,10 @@ export function createGuideView() {
     onShow() {},
     onHide() {},
     destroy() {
+      if (bodyEl._guideSectionObserver) {
+        bodyEl._guideSectionObserver.disconnect();
+        bodyEl._guideSectionObserver = null;
+      }
       root.remove();
     },
   };
