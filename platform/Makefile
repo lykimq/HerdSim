@@ -1,8 +1,8 @@
-# Goal 1: Simulate + frontend (API, Vite, UI Experiments).
+# Area: platform (Simulate + frontend: API, Vite, UI Experiments).
 # From repo root: make -C platform help   or   make help
 
-.PHONY: help install dev dev-backend dev-frontend test test-backend test-stress \
-	test-frontend lint format typecheck build clean
+.PHONY: help install dev dev-backend dev-frontend test test-backend test-ci \
+	test-stress test-frontend lint format typecheck check build clean
 
 ROOT := $(abspath $(CURDIR)/..)
 UV ?= uv
@@ -17,11 +17,13 @@ help:
 	@echo "  make dev-frontend    Start Vite only"
 	@echo "  make test            Backend tests (no stress) + frontend tests/build"
 	@echo "  make test-backend    Pytest under tests/backend/ (excludes stress)"
-	@echo "  make test-stress     Pytest stress-marked backend tests"
+	@echo "  make test-ci         Cheap CI suite only (no stress, no campaigns)"
+	@echo "  make test-stress     Pytest stress-marked backend tests (local only)"
 	@echo "  make test-frontend   Node frontend tests + production build"
-	@echo "  make lint            Ruff check + frontend eslint"
+	@echo "  make lint            Ruff + eslint + Python typecheck"
 	@echo "  make format          Ruff format + frontend prettier"
 	@echo "  make typecheck       Python static type check (basedpyright)"
+	@echo "  make check           lint + test-backend (pre-push gate)"
 	@echo "  make build           Python typecheck + frontend production build"
 	@echo "  make clean           Remove caches, dist, and Vite cache"
 	@echo ""
@@ -45,6 +47,12 @@ test: test-backend test-frontend
 test-backend:
 	cd $(ROOT) && $(UV) run pytest tests/backend/ -v -m "not stress"
 
+# CI / pre-merge only: unit and short runs. Never stress sims or scaling campaigns.
+test-ci:
+	cd $(ROOT) && $(UV) run pytest tests/backend/ -q \
+		-m "not stress" \
+		--ignore=tests/backend/stress
+
 test-stress:
 	cd $(ROOT) && $(UV) run pytest tests/backend/ -v -m stress
 
@@ -52,7 +60,10 @@ test-frontend:
 	cd $(ROOT) && node --test tests/frontend/*.test.js
 	cd frontend && npm run build
 
-lint:
+typecheck:
+	cd $(ROOT) && $(UV) run basedpyright --project $(ROOT) --level error
+
+lint: typecheck
 	cd $(ROOT) && $(UV) run ruff check .
 	cd frontend && npx eslint src/
 
@@ -60,8 +71,7 @@ format:
 	cd $(ROOT) && $(UV) run ruff format .
 	cd frontend && npx prettier --write src/
 
-typecheck:
-	cd $(ROOT) && $(UV) run basedpyright --project $(ROOT) --level error
+check: lint test-backend
 
 build: typecheck
 	cd frontend && npm run build

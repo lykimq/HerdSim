@@ -1,5 +1,8 @@
 name: CI/CD Pipeline
 
+# Cheap gates only: unit/short tests, typecheck, frontend build.
+# Do not run stress sims, scaling campaigns, or long experiment grids here.
+
 on:
   push:
     branches: [ main, master, dev ]
@@ -9,45 +12,41 @@ on:
 jobs:
   backend-tests:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
         with:
-          python-version: '3.12'
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev]"
-      - name: Run backend tests
-        env:
-          PYTHONPATH: ${{ github.workspace }}:${{ github.workspace }}/platform:${{ github.workspace }}/scaling
-        run: |
-          pytest tests/backend/ -v -m "not stress"
+          python-version: "3.12"
+      - name: Sync Python deps
+        run: uv sync --extra dev
+      - name: Run cheap backend suite
+        run: make test-ci
 
   python-typecheck:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
         with:
-          python-version: '3.12'
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev]"
+          python-version: "3.12"
+      - name: Sync Python deps
+        run: uv sync --extra dev
       - name: Typecheck Python
-        run: basedpyright --project . --level error
+        run: make typecheck
 
   frontend-build:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
       - name: Install & build frontend
         run: |
           cd platform/frontend

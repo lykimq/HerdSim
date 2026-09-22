@@ -1,4 +1,4 @@
-# Goal 2: scaling protocols. Orchestration lives in
+# Area: scaling protocols. Orchestration lives in
 # scaling/scripts/campaign.py (services.scaling.campaign).
 # From repo root: make -C scaling help
 
