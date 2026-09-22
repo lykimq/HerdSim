@@ -3,6 +3,7 @@
 Role: status (1 = code, 2 = experiment runs, then Claims)
 Why / what: [herdsim_research_program.md](herdsim_research_program.md)
 How: [main_scaling_plan.md](main_scaling_plan.md)
+Run strategy (pilot / scout / plan / reseed): [experiment_run_strategy.md](experiment_run_strategy.md)
 Report form: [REPORT_TEMPLATE.md](REPORT_TEMPLATE.md)
 Help: `make -C scaling help` (wraps `scaling/scripts/campaign.py`)
 
@@ -45,7 +46,7 @@ Default from repo root. Example: `WORKERS=8`. Transfer examples use `TRANSFER_ME
 | # | Step | Grade | Command | Output | Status |
 |---|------|-------|---------|--------|--------|
 | 0 | Sanity tests | n/a | `make -C scaling scaling-test` | pytest | TODO |
-| 1 | Phase 1 smoke | SMOKE | `make -C scaling scaling-pilot WORKERS=4` | `scaling/results/phase1/pilot/` | TODO |
+| 1 | Phase 1 smoke | SMOKE | `make -C scaling scaling-pilot WORKERS=8` | `scaling/results/phase1/pilot/` | TODO |
 | 2 | Phase 1 scout | SCOUT | `make -C scaling scaling-scout WORKERS=8` | `scaling/results/phase1/scout/` | TODO |
 | 3 | Plan claim windows | n/a | `make -C scaling scaling-claim-plan` | `scaling/results/phase1/claim/boundary_cells.csv` | TODO |
 | 4 | Phase 1 claim reseed | CLAIM | `make -C scaling scaling-claim-reseed WORKERS=8` | `scaling/results/phase1/claim/` | TODO |

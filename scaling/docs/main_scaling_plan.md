@@ -1,6 +1,6 @@
 # Collective Herdability Under Shepherding
 
-Protocol `scaling_v2`. Why / what: [herdsim_research_program.md](herdsim_research_program.md). Status: [progress_tracker.md](progress_tracker.md). Report form: [REPORT_TEMPLATE.md](REPORT_TEMPLATE.md). Draft reference: [sheep-scaling_paper2025.md](sheep-scaling_paper2025.md).
+Protocol `scaling_v2`. Why / what: [herdsim_research_program.md](herdsim_research_program.md). Status: [progress_tracker.md](progress_tracker.md). Run strategy: [experiment_run_strategy.md](experiment_run_strategy.md). Report form: [REPORT_TEMPLATE.md](REPORT_TEMPLATE.md). Draft reference: [sheep-scaling_paper2025.md](sheep-scaling_paper2025.md).
 
 | Abbreviation | Meaning |
 |--------------|---------|
@@ -89,6 +89,8 @@ Success is every sheep inside that disk. Strombom's collect switch `r_a * N^(2/3
 Effects are in grid steps. The dog-count gap equals the local spacing of `{1, 2, 3, 4, 6, 10, 15, 20, 25, 35}`.
 
 ### Claim-grade map
+
+Operator narrative (verbs, artifacts, why we stage): [experiment_run_strategy.md](experiment_run_strategy.md).
 
 Scout: 30 seeds on every frozen (N, D) cell.
 
