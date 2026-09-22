@@ -2,16 +2,22 @@
 
 from __future__ import annotations
 
-from typing import Callable, TypeVar
+from typing import Any, Callable, Generic, Protocol, TypeVar
 
 from core.dog_controller import BaseDogController
 from core.observation import BaseObservationModel
 from core.sheep_dynamics import BaseSheepDynamics
 
-T = TypeVar("T")
+
+class _PluginLike(Protocol):
+    @property
+    def id(self) -> str: ...
 
 
-class PluginRegistry:
+T = TypeVar("T", bound=_PluginLike)
+
+
+class PluginRegistry(Generic[T]):
     """Simple id -> factory registry."""
 
     def __init__(self, kind: str):
@@ -30,11 +36,11 @@ class PluginRegistry:
     def names(self) -> list[str]:
         return list(self._factories.keys())
 
-    def list_all(self) -> list[dict]:
+    def list_all(self) -> list[dict[str, Any]]:
         items = []
         for plugin_id in self._factories:
             plugin = self.get(plugin_id)
-            entry = {"id": plugin.id, "name": getattr(plugin, "name", plugin.id)}
+            entry: dict[str, Any] = {"id": plugin.id, "name": getattr(plugin, "name", plugin.id)}
             defaults = getattr(plugin, "default_config", None)
             if defaults is not None:
                 entry["default_config"] = dict(defaults)

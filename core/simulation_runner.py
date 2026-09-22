@@ -117,6 +117,7 @@ class SimulationRunner:
         """Execute one tick. Returns (state, metrics_dict, status)."""
         if self._state is None:
             self.initialize()
+        assert self._state is not None
 
         state = apply_environment_updates(self._state, self.config)
         state = apply_failure_factors(state, self.config)
@@ -192,6 +193,7 @@ class SimulationRunner:
         while status == "running":
             _, _, status = self.step()
 
+        assert self._state is not None
         return RunResult(
             success=(status == "success"),
             total_ticks=self._state.tick,

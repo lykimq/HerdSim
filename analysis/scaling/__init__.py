@@ -9,6 +9,7 @@ from analysis.scaling.frontier import (
     bootstrap_d_min_ci,
     extract_frontier,
     select_claim_windows,
+    select_t1_windows,
 )
 from analysis.scaling.mechanism import (
     evaluate_overcrowding_mechanisms,
@@ -25,6 +26,7 @@ __all__ = [
     "build_provenance_stamp",
     "extract_frontier",
     "select_claim_windows",
+    "select_t1_windows",
     "bootstrap_d_min_ci",
     "label_regimes",
     "export_package_a",

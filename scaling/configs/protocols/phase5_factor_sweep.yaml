@@ -13,6 +13,7 @@ output: scaling/results/phase5/factor_sweep
 canonical: scaling/configs/canonical_grid.yaml
 
 method: strombom_multi
+runner: factor
 layouts:
   - compact
 flock_sizes: [100, 200]
@@ -24,7 +25,7 @@ obs_modes:
   - bearing_only
   - local_positions
   - global
-# sensing_ranges: [32.5, 65.0, 97.5, 130.0]  # 0.5x, 1x, 1.5x, 2x of r_s 65
-# communications: [none, neighbour_broadcast, global_shared]
+# sensing_ranges and communications live in phase5_range_scout.yaml and
+# phase5_comm_scout.yaml so each ladder is one campaign, not a product.
 store_timeseries: false
 packages: [E]

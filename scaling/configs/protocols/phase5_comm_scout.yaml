@@ -1,0 +1,24 @@
+# Phase-5 communication scout (RQ5).
+# Grade: SCOUT. none / neighbour_broadcast / global_shared on the baseline
+# method. No obs_modes so the ladder is communication only.
+
+protocol_id: phase5_comm_scout
+phase: 5
+grade: SCOUT
+output: scaling/results/phase5/comm_scout
+canonical: scaling/configs/canonical_grid.yaml
+
+method: strombom_multi
+runner: factor
+layouts:
+  - compact
+flock_sizes: [100, 200]
+shepherd_counts: [1, 2, 3, 4, 6, 10]
+seeds: 30
+seed_mode: scout
+communications:
+  - none
+  - neighbour_broadcast
+  - global_shared
+store_timeseries: false
+packages: [E]

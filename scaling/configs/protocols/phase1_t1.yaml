@@ -1,0 +1,28 @@
+# Phase-1 T1. Longer budget on overcrowding D only (C2b).
+# Grade: CLAIM. Run after merged Phase-1 claim trials exist.
+#
+# plan_t1_cells.py selects D_overcrowd and the next grid D from the source
+# trials, then reseeds those cells at time_limit_t1 with claim seed depth.
+
+protocol_id: phase1_t1
+phase: 1
+grade: CLAIM
+output: scaling/results/phase1/t1
+canonical: scaling/configs/canonical_grid.yaml
+
+methods:
+  - strombom_multi
+layouts:
+  - compact
+# Document the freeze; the runner uses only the planned overcrowding cells.
+flock_sizes: [5, 10, 25, 50, 75, 100, 150, 200, 300, 400]
+shepherd_counts: [1, 2, 3, 4, 6, 10, 15, 20, 25, 35]
+seeds: 100
+seed_mode: claim
+# Separate "needed more time" from "more dogs made it worse".
+time_budget: t1
+# Prefer the claim merge so overcrowding D is estimated at claim depth.
+upstream_protocol: phase1_claim
+upstream_trials: merged_trials.csv
+store_timeseries: true
+packages: [A, C]

@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 import numpy as np
+import numpy.typing as npt
 
 from core.experiment_config import resolve_experiment_config
 from core.simulation_runner import RunResult, SimulationRunner
@@ -29,22 +30,22 @@ def make_world(
 
 
 def make_state(
-    sheep: np.ndarray,
-    shepherds: np.ndarray,
+    sheep: npt.ArrayLike,
+    shepherds: npt.ArrayLike,
     *,
     world: World | None = None,
     seed: int = 0,
     tick: int = 0,
     metadata: dict[str, Any] | None = None,
 ) -> SimulationState:
-    sheep = np.asarray(sheep, dtype=float)
-    shepherds = np.asarray(shepherds, dtype=float)
+    sheep_arr = np.asarray(sheep, dtype=float)
+    shepherds_arr = np.asarray(shepherds, dtype=float)
     return SimulationState(
         tick=tick,
-        sheep_positions=sheep,
-        sheep_velocities=np.zeros_like(sheep),
-        shepherd_positions=shepherds,
-        shepherd_velocities=np.zeros_like(shepherds),
+        sheep_positions=sheep_arr,
+        sheep_velocities=np.zeros_like(sheep_arr),
+        shepherd_positions=shepherds_arr,
+        shepherd_velocities=np.zeros_like(shepherds_arr),
         world=world or make_world(),
         rng=np.random.default_rng(seed),
         metadata=metadata or {"r_a": 2.0},

@@ -24,19 +24,21 @@ from services.scaling.layout import (
 from services.scaling.runner import (
     expand_claim_cells_from_boundaries,
     load_canonical_protocol,
+    resolve_cell_max_ticks,
     run_scaling_grid,
+    scaling_group_cols,
 )
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Select scout boundary cells and optionally run claim reseeds"
+        description="Select scout claim windows and optionally run claim reseeds"
     )
     parser.add_argument(
         "--scout-trials",
         type=Path,
         required=True,
-        help="Scout trials.csv used to locate boundary D values",
+        help="Scout trials.csv used to locate claim D windows",
     )
     parser.add_argument(
         "--protocol",
@@ -59,7 +61,7 @@ def main() -> None:
     args = parser.parse_args()
 
     scout = pd.read_csv(args.scout_trials)
-    group_cols = [c for c in ("initial_layout", "method") if c in scout.columns]
+    group_cols = scaling_group_cols(scout)
     spec_path = args.protocol
     if spec_path is None:
         spec_path = PROTOCOLS_DIR / "phase1_claim.yaml"
@@ -73,7 +75,9 @@ def main() -> None:
     if protocol_path is None and spec:
         protocol_path = protocol_path_for_spec(spec)
     protocol = load_canonical_protocol(protocol_path)
-    theta = float(args.theta if args.theta is not None else protocol.get("reliability_theta", 0.90))
+    theta = float(
+        args.theta if args.theta is not None else protocol.get("reliability_theta", 0.90)
+    )
     n_boot = int(protocol.get("bootstrap_resamples", 1000))
 
     boundaries = select_claim_windows(
@@ -123,7 +127,14 @@ def main() -> None:
     if spec_path.exists():
         copy_protocol_spec(spec_path, output)
 
-    cells = expand_claim_cells_from_boundaries(protocol, boundaries)
+    n_seeds = int(spec["seeds"]) if "seeds" in spec else None
+    max_ticks = resolve_cell_max_ticks(protocol, spec=spec)
+    cells = expand_claim_cells_from_boundaries(
+        protocol,
+        boundaries,
+        n_seeds=n_seeds,
+        max_ticks=max_ticks,
+    )
     store_ts = True
     if "store_timeseries" in spec:
         store_ts = bool(spec["store_timeseries"])
@@ -152,7 +163,7 @@ def main() -> None:
         merged,
         theta=theta,
         n_boot=n_boot,
-        group_cols=group_cols or None,
+        group_cols=scaling_group_cols(merged) or None,
     )
     merged_boot.to_csv(output / "merged_dmin_bootstrap.csv", index=False)
     print(f"Wrote {len(trials)} claim trial rows to {output / 'trials.csv'}")

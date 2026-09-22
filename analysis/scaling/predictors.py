@@ -140,12 +140,12 @@ def compare_state_vs_nd_predictors(
     y_st: list[float] = []
     p_st: list[float] = []
     for held in flocks:
-        test = work[work[sheep_col] == held]
-        train = work[work[sheep_col] != held]
+        test = work.loc[work[sheep_col] == held].copy()
+        train = work.loc[work[sheep_col] != held].copy()
         if train["_y"].nunique() < 2 or test.empty:
             continue
-        y_train = train["_y"].to_numpy()
-        y_test = test["_y"].to_numpy()
+        y_train = train.loc[:, "_y"].to_numpy()
+        y_test = test.loc[:, "_y"].to_numpy()
         x_nd_tr = _numeric_block(train, nd_cols)
         x_nd_te = _numeric_block(test, nd_cols)
         beta, mu, sigma = _fit_logistic(x_nd_tr, y_train)

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 import pandas as pd
@@ -49,7 +49,7 @@ def evaluate_overcrowding_mechanisms(
     near-zero curve.
     """
     key = [sheep_col, dog_col]
-    reg = regimes[key + ["regime"]].drop_duplicates(key)
+    reg = regimes.loc[:, key + ["regime"]].drop_duplicates(subset=key)
     merged = trials.merge(reg, on=key, how="left")
 
     metric_cols = [
@@ -68,14 +68,16 @@ def evaluate_overcrowding_mechanisms(
     by_n: list[dict[str, Any]] = []
     overall: dict[str, Any] = {}
 
-    for n, g in cells.groupby(sheep_col):
-        eff = g[g["regime"] == "efficient_operation"]
-        ovr = g[g["regime"] == "overcrowding_collapse"]
+    for n_key, g in cells.groupby(sheep_col):
+        n = int(cast(Any, n_key))
+        g = g.copy()
+        eff = g.loc[g["regime"] == "efficient_operation"].copy()
+        ovr = g.loc[g["regime"] == "overcrowding_collapse"].copy()
         raw_p: list[float | None] = []
         payloads: list[dict[str, Any]] = []
         for metric, hyp, alternative in hyp_specs:
             payload: dict[str, Any] = {
-                "n_sheep": int(n),
+                "n_sheep": n,
                 "hypothesis": hyp,
                 "metric": metric,
                 "available": metric in g.columns,
@@ -93,8 +95,8 @@ def evaluate_overcrowding_mechanisms(
                 )
                 raw_p.append(None)
             else:
-                a = ovr[metric].dropna()
-                b = eff[metric].dropna()
+                a = pd.Series(ovr.loc[:, metric]).dropna()
+                b = pd.Series(eff.loc[:, metric]).dropna()
                 if len(a) < 2 or len(b) < 2:
                     payload.update(
                         {"p_value": None, "supported": False, "note": "insufficient cells"}
@@ -105,15 +107,16 @@ def evaluate_overcrowding_mechanisms(
                     med_o = float(np.median(a))
                     med_e = float(np.median(b))
                     direction = med_o > med_e if alternative == "greater" else med_o < med_e
+                    p_value = float(cast(Any, stat).pvalue)
                     payload.update(
                         {
                             "median_efficient": med_e,
                             "median_overcrowd": med_o,
-                            "p_value": float(stat.pvalue),
+                            "p_value": p_value,
                             "direction_ok": bool(direction),
                         }
                     )
-                    raw_p.append(float(stat.pvalue))
+                    raw_p.append(p_value)
             payloads.append(payload)
 
         adjusted = _holm_adjust(raw_p)
@@ -125,28 +128,24 @@ def evaluate_overcrowding_mechanisms(
             by_n.append(payload)
 
         # Coverage saturation on reliable cells at this N.
-        sat = {
-            "n_sheep": int(n),
+        sat: dict[str, Any] = {
+            "n_sheep": n,
             "hypothesis": "coverage_saturation",
             "metric": coverage_col,
             "supported": False,
         }
         if coverage_col in eff.columns and effort_col in eff.columns and len(eff) >= 2:
-            cov = eff[coverage_col].dropna()
-            ordered = eff.sort_values(dog_col)
-            effort = ordered[effort_col].dropna()
+            cov = pd.Series(eff.loc[:, coverage_col]).dropna()
+            ordered = eff.sort_values(by=dog_col)
+            effort = pd.Series(ordered.loc[:, effort_col]).dropna()
             if len(cov) >= 2 and len(effort) >= 2:
                 cov_range = float(cov.max() - cov.min())
                 effort_up = float(effort.iloc[-1] - effort.iloc[0])
                 high = float(np.median(cov)) > 0.5
-                sat.update(
-                    {
-                        "median_coverage": float(np.median(cov)),
-                        "coverage_range": cov_range,
-                        "effort_rise": effort_up,
-                        "supported": bool(high and cov_range < 0.1 and effort_up > 0),
-                    }
-                )
+                sat["median_coverage"] = float(np.median(cov))
+                sat["coverage_range"] = cov_range
+                sat["effort_rise"] = effort_up
+                sat["supported"] = bool(high and cov_range < 0.1 and effort_up > 0)
         by_n.append(sat)
 
     for hyp in (

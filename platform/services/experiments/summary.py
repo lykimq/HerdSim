@@ -8,7 +8,7 @@ import pandas as pd
 
 
 def _iqr(series: pd.Series) -> float | None:
-    values = pd.to_numeric(series, errors="coerce").dropna()
+    values = pd.Series(pd.to_numeric(series, errors="coerce")).dropna()
     if len(values) < 2:
         return None
     q75 = float(values.quantile(0.75))
@@ -19,7 +19,7 @@ def _iqr(series: pd.Series) -> float | None:
 def _mean_col(group: pd.DataFrame, col: str) -> float | None:
     if col not in group.columns:
         return None
-    values = pd.to_numeric(group[col], errors="coerce").dropna()
+    values = pd.Series(pd.to_numeric(group[col], errors="coerce")).dropna()
     if values.empty:
         return None
     return float(values.mean())
@@ -39,8 +39,8 @@ def summarize_rows(df: pd.DataFrame) -> list[dict[str, Any]]:
             keys = (keys,)
         method = keys[0]
         label = keys[1] if len(keys) > 1 else ""
-        success_rate = float(group["success"].mean())
-        success_ticks = group.loc[group["success"], "total_ticks"]
+        success_rate = float(pd.Series(group["success"]).mean())
+        success_ticks = pd.Series(group.loc[group["success"], "total_ticks"])
         display = f"{method} [{label}]" if label else method
         out.append(
             {

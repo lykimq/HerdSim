@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from core.base_scenario import BaseScenario
 
 
@@ -20,7 +22,7 @@ class ScenarioRegistry:
             raise KeyError(f"Unknown scenario '{scenario_id}'. Available: {available}")
         return self._scenarios[scenario_id]
 
-    def list_all(self) -> list[dict]:
+    def list_all(self) -> list[dict[str, Any]]:
         return [
             {
                 "id": s.id,

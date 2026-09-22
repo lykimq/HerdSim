@@ -1,0 +1,10 @@
+# Phase-4 structure claim windows for kubo (RQ4).
+
+extends: phase2_claim.yaml
+protocol_id: phase4_kubo_structure_claim
+phase: 4
+output: scaling/results/phase4/kubo_structure/claim
+methods:
+  - kubo
+upstream_protocol: phase4_kubo_structure_scout
+packages: [B, D]

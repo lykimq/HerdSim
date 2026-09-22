@@ -1,0 +1,9 @@
+# Phase-4 structure scout for fat (RQ4). Same grid as Phase-2 structure.
+
+extends: phase2_scout.yaml
+protocol_id: phase4_fat_structure_scout
+phase: 4
+output: scaling/results/phase4/fat_structure/scout
+methods:
+  - fat
+packages: [B, D]

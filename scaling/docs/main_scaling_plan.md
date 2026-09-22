@@ -296,11 +296,14 @@ Points that would leave the field or land in the goal are redrawn. They are not 
 analysis/scaling/          # packages A-G
 scaling/services/scaling/  # runner
 scaling/configs/           # canonical_grid.yaml + protocols/
-scaling/scripts/           # run_grid, plan_claim_cells, run_factor_sweep, analyse
+scaling/scripts/           # campaign, run_grid, plan_claim_cells, plan_t1_cells,
+                           # run_factor_sweep, analyse
 scaling/results/phase{k}/{protocol}/
 ```
 
-CLI: `make -C scaling help`.
+CLI: `make -C scaling help` or `uv run scaling/scripts/campaign.py help`.
+Campaigns: Phase 1 size/claim/T1, Phase 2 structure, Phase 4 transfer
+(`TRANSFER_METHOD=kubo|fat`), Phase 5 obs/range/communication.
 
 ### Do not modify, and E1
 

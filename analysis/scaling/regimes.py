@@ -78,8 +78,8 @@ def label_regimes(
         except KeyError:
             fr = None
 
-        r = float(cell["reliability"])
-        d = int(cell[dog_col])
+        r = float(cell.at["reliability"])
+        d = int(cell.at[dog_col])
         d_min = None if fr is None else fr.get("d_min")
         d_overcrowd = None if fr is None else fr.get("d_overcrowd")
         hard = True if fr is None else bool(fr.get("hard_failure"))
@@ -87,11 +87,11 @@ def label_regimes(
         if fr is not None and fr.get("b_star_effort") is not None:
             efficient_effort = float(fr["b_star_effort"])
         elif fr is not None and d_min is not None and effort_col in df.columns:
-            mask = df[sheep_col] == cell[sheep_col]
+            mask = df[sheep_col] == cell.at[sheep_col]
             for gcol in groups:
-                mask = mask & (df[gcol] == cell[gcol])
+                mask = mask & (df[gcol] == cell.at[gcol])
             mask = mask & (df[dog_col] == d_min)
-            if mask.any():
+            if bool(mask.to_numpy().any()):
                 efficient_effort = float(df.loc[mask, effort_col].median())
 
         if hard or d_min is None:
@@ -103,8 +103,8 @@ def label_regimes(
                 regime = REGIME_UNDER
         elif (
             efficient_effort is not None
-            and cell["median_effort"] == cell["median_effort"]
-            and float(cell["median_effort"]) >= efficient_effort * (1.0 + wasteful_effort_tol)
+            and cell.at["median_effort"] == cell.at["median_effort"]
+            and float(cell.at["median_effort"]) >= efficient_effort * (1.0 + wasteful_effort_tol)
         ):
             regime = REGIME_WASTEFUL
         else:

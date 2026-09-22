@@ -30,6 +30,7 @@ def test_drive_to_goal_success_requires_fraction_in_goal():
     )
     state = runner.initialize()
     scen = DriveToGoalScenario()
+    assert state.world.goal is not None
     inside = make_state(
         [state.world.goal.center] * 4,
         [[50.0, 50.0]],

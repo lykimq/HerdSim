@@ -273,16 +273,16 @@ def evaluate_early_warning_campaign(
     state_aurocs = []
     nd_aurocs = []
     for hold_n in sorted(meta[n_col].unique()):
-        test = meta[meta[n_col] == hold_n]
-        train = meta[meta[n_col] != hold_n]
+        test = meta.loc[meta[n_col] == hold_n].copy()
+        train = meta.loc[meta[n_col] != hold_n].copy()
         if train.empty or test.empty or train["label"].nunique() < 2:
             continue
-        y_train = train["label"].astype(float).to_numpy()
-        x_train = train[[n_col, d_col]].astype(float).to_numpy()
-        x_te = test[[n_col, d_col]].astype(float).to_numpy()
+        y_train = train.loc[:, "label"].astype(float).to_numpy()
+        x_train = train.loc[:, [n_col, d_col]].astype(float).to_numpy()
+        x_te = test.loc[:, [n_col, d_col]].astype(float).to_numpy()
         nd_score = _fit_nd_scores(x_train, y_train, x_te)
-        labels = test["label"].astype(int).to_numpy()
-        st = _auroc(test["state_score"].to_numpy(), labels)
+        labels = test.loc[:, "label"].astype(int).to_numpy()
+        st = _auroc(test.loc[:, "state_score"].to_numpy(), labels)
         nd = _auroc(nd_score, labels)
         folds.append(
             {

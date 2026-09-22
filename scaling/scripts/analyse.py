@@ -7,6 +7,7 @@ import argparse
 import json
 import re
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 
@@ -91,12 +92,12 @@ def _success_for_timeseries(stem: str, trials: pd.DataFrame) -> bool:
     parsed = _parse_timeseries_stem(stem)
     if parsed is None or trials.empty:
         return False
-    q = trials
+    q = trials.copy()
     for col in ("n_sheep", "n_shepherds", "seed", "initial_layout", "method"):
         if col in q.columns:
-            q = q[q[col] == parsed[col]]
+            q = q.loc[q[col] == parsed[col]]
     if parsed.get("obs_mode") is not None and "obs_mode" in q.columns:
-        q = q[q["obs_mode"] == parsed["obs_mode"]]
+        q = q.loc[q["obs_mode"] == parsed["obs_mode"]]
     if q.empty or "success" not in q.columns:
         return False
     return bool(q.iloc[0]["success"])
@@ -119,7 +120,7 @@ def _attach_early_window(
         ts = pd.read_parquet(path) if path.suffix == ".parquet" else pd.read_csv(path)
         if "tick" not in ts.columns or ts.empty:
             continue
-        window = ts[(ts["tick"] > 0) & (ts["tick"] <= int(window_ticks))]
+        window = ts.loc[(ts["tick"] > 0) & (ts["tick"] <= int(window_ticks))]
         if window.empty:
             continue
         rec: dict[str, object] = {
@@ -129,7 +130,7 @@ def _attach_early_window(
         for col in window.columns:
             if col == "tick" or not pd.api.types.is_numeric_dtype(window[col]):
                 continue
-            rec[f"early_{col}"] = float(window[col].mean())
+            rec[f"early_{col}"] = float(window[col].to_numpy(dtype=float).mean())
         rows.append(rec)
     if not rows:
         return trials
@@ -148,14 +149,16 @@ def _load_timeseries_trials(
     trials: pd.DataFrame,
     ts_dir: Path,
     regimes: pd.DataFrame | None = None,
-) -> list[dict]:
-    rows: list[dict] = []
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
     if not ts_dir.exists():
         return rows
-    regime_map = {}
+    regime_map: dict[tuple[int, int], Any] = {}
     if regimes is not None and not regimes.empty:
         for _, r in regimes.iterrows():
-            regime_map[(int(r["n_sheep"]), int(r["n_shepherds"]))] = r.get("regime")
+            regime_map[(int(r.at["n_sheep"]), int(r.at["n_shepherds"]))] = r.get(
+                "regime"
+            )
     paths = sorted(ts_dir.glob("*.parquet")) + sorted(ts_dir.glob("*.csv"))
     for path in paths:
         ts = pd.read_parquet(path) if path.suffix == ".parquet" else pd.read_csv(path)
@@ -163,7 +166,11 @@ def _load_timeseries_trials(
         success = _success_for_timeseries(path.stem, trials)
         n = parsed.get("n_sheep")
         d = parsed.get("n_shepherds")
-        regime = regime_map.get((int(n), int(d))) if n is not None and d is not None else None
+        regime = (
+            regime_map.get((n, d))
+            if isinstance(n, int) and isinstance(d, int)
+            else None
+        )
         rows.append(
             {
                 "timeseries": ts,

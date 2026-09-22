@@ -92,24 +92,25 @@ def apply_environment_updates(state: SimulationState, config: dict[str, Any]) ->
         return state
     if state.world.goal is None:
         return state
+    goal = state.world.goal
     vel = np.asarray(config.get("goal_velocity", [0.0, 0.0]), dtype=float)
     if vel.shape != (2,) or float(np.linalg.norm(vel)) < 1e-12:
         return state
-    new_center = state.world.goal.center + vel
+    new_center = goal.center + vel
     # Keep the full goal disk inside the arena (not only the centre point).
     new_center = clamp_goal_center(
         new_center,
-        state.world.goal.radius,
+        goal.radius,
         state.world.width,
         state.world.height,
     )
     world = state.world
-    world.goal = GoalZone(center=new_center, radius=world.goal.radius)
+    world.goal = GoalZone(center=new_center, radius=goal.radius)
     return state
 
 
 def apply_robot_constraints(
-    state: SimulationState,
+    state: SimulationState | None,
     desired_velocities: np.ndarray,
     config: dict[str, Any],
     prev_velocities: np.ndarray,

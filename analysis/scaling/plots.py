@@ -92,7 +92,7 @@ def save_frontier_curve(
             ax.plot(n, ordered["d_min"], marker="o", label=f"{label_prefix}D_min".strip())
         if "d_overcrowd" in ordered.columns:
             y = ordered["d_overcrowd"]
-            if y.notna().any():
+            if bool(y.notna().to_numpy().any()):
                 ax.plot(
                     n,
                     y,
@@ -102,7 +102,7 @@ def save_frontier_curve(
                 )
         if "d_max" in ordered.columns:
             y = ordered["d_max"]
-            if y.notna().any():
+            if bool(y.notna().to_numpy().any()):
                 ax.plot(
                     n,
                     y,

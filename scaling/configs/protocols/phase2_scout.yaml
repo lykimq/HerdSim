@@ -1,0 +1,26 @@
+# Phase-2 structure scout (RQ1).
+# Grade: SCOUT. Full D grid on structure sizes and all four X0 families.
+#
+# Why N={50,100,200}: 50 can show structure while size is still easy, 100 is
+# the size edge, 200 is where size already demands many dogs. Full D so claim
+# windows can sit on the same grid as the size map.
+
+protocol_id: phase2_scout
+phase: 2
+grade: SCOUT
+output: scaling/results/phase2/scout
+canonical: scaling/configs/canonical_grid.yaml
+
+methods:
+  - strombom_multi
+layouts:
+  - compact
+  - wide
+  - split
+  - outlier_rich
+flock_sizes: [50, 100, 200]
+shepherd_counts: [1, 2, 3, 4, 6, 10, 15, 20, 25, 35]
+seeds: 30
+seed_mode: scout
+store_timeseries: true
+packages: [B]

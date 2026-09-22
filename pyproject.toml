@@ -29,6 +29,7 @@ dev = [
     "pytest-asyncio>=0.23",
     "httpx>=0.25",
     "ruff>=0.1",
+    "basedpyright>=1.18",
 ]
 
 # Shared packages live at the repo root. Goal-owned packages are mapped from
@@ -81,3 +82,11 @@ pythonpath = [".", "platform", "scaling"]
 markers = [
     "stress: heavy / long runs; use make test-stress",
 ]
+
+# Match pytest pythonpath so Pylance/Pyright resolve the split services
+# namespace (services.shared, services.experiments, services.scaling).
+[tool.pyright]
+pythonVersion = "3.11"
+extraPaths = [".", "platform", "scaling"]
+venvPath = "."
+venv = ".venv"

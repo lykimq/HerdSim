@@ -21,7 +21,7 @@ from core.observation import ShepherdObservation
 from core.simulation_state import SimulationState
 
 
-def v_arc_targets(state: SimulationState, config: dict) -> list[np.ndarray]:
+def v_arc_targets(state: SimulationState, config: dict[str, Any]) -> list[np.ndarray]:
     m = state.n_shepherds
     centroid = state.sheep_centroid
     goal = resolve_goal_center(state, config)

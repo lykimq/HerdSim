@@ -27,6 +27,7 @@ def _classify_d_min_transfer(
     """Shared only when both sides have the same grid D_min."""
     if _missing_grid_value(base_dmin) or _missing_grid_value(other_dmin):
         return "absent"
+    assert base_dmin is not None and other_dmin is not None
     if int(base_dmin) == int(other_dmin):
         return "shared"
     return "shifted"
@@ -89,12 +90,14 @@ def _coverage_saturation_flag(trials: pd.DataFrame, theta: float) -> bool | None
         )
         .sort_index()
     )
-    reliable = rates[rates["reliability"] >= theta]
+    reliable = rates.loc[rates["reliability"] >= theta].copy()
     if len(reliable) < 2:
         return None
-    cov_range = float(reliable["coverage"].max() - reliable["coverage"].min())
-    effort_up = float(reliable["effort"].iloc[-1] - reliable["effort"].iloc[0])
-    high = float(np.median(reliable["coverage"])) > 0.5
+    coverage = pd.Series(reliable.loc[:, "coverage"])
+    effort = pd.Series(reliable.loc[:, "effort"])
+    cov_range = float(coverage.max() - coverage.min())
+    effort_up = float(effort.iloc[-1] - effort.iloc[0])
+    high = float(np.median(coverage)) > 0.5
     return bool(high and cov_range < 0.1 and effort_up > 0)
 
 

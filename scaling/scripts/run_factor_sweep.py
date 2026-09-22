@@ -16,6 +16,7 @@ from services.scaling.layout import (
 from services.scaling.runner import (
     ScalingCell,
     load_canonical_protocol,
+    resolve_cell_max_ticks,
     run_scaling_grid,
     scaling_world_overrides,
 )
@@ -101,15 +102,20 @@ def main() -> None:
     layout = (list(spec.get("layouts") or ["compact"]) or ["compact"])[0]
 
     master = int(protocol.get("master_seed", 2026))
-    max_ticks = int(protocol.get("time_limit_t0", 10000))
+    max_ticks = resolve_cell_max_ticks(protocol, spec=spec)
     seeds = [master + i for i in range(int(n_seeds))]
 
-    # Default: obs ladder only. Optional range/comm expand as additional axes.
-    obs_list = (
-        list(obs_modes)
-        if sensing_ranges is None and communications is None
-        else (list(obs_modes) if args.obs_modes or "obs_modes" in spec else [None])
-    )
+    # Obs ladder alone when no range/comm axes are set. A range or comm scout
+    # omits obs_modes so the product does not explode.
+    has_range = sensing_ranges is not None
+    has_comm = communications is not None
+    if has_range or has_comm:
+        if args.obs_modes or "obs_modes" in spec:
+            obs_list = list(obs_modes)
+        else:
+            obs_list = [None]
+    else:
+        obs_list = list(obs_modes)
     range_list = list(sensing_ranges) if sensing_ranges else [None]
     comm_list = list(communications) if communications else [None]
 

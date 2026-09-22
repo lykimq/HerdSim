@@ -1,0 +1,10 @@
+# Phase-4 size claim windows for fat (RQ4).
+
+extends: phase1_claim.yaml
+protocol_id: phase4_fat_size_claim
+phase: 4
+output: scaling/results/phase4/fat_size/claim
+methods:
+  - fat
+upstream_protocol: phase4_fat_size_scout
+packages: [A, D, F]

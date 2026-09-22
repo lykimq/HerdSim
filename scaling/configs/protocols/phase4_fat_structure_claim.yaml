@@ -1,0 +1,10 @@
+# Phase-4 structure claim windows for fat (RQ4).
+
+extends: phase2_claim.yaml
+protocol_id: phase4_fat_structure_claim
+phase: 4
+output: scaling/results/phase4/fat_structure/claim
+methods:
+  - fat
+upstream_protocol: phase4_fat_structure_scout
+packages: [B, D]

@@ -23,7 +23,22 @@ jobs:
         env:
           PYTHONPATH: ${{ github.workspace }}:${{ github.workspace }}/platform:${{ github.workspace }}/scaling
         run: |
-          pytest tests/backend/ -v
+          pytest tests/backend/ -v -m "not stress"
+
+  python-typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Typecheck Python
+        run: basedpyright --project . --level error
 
   frontend-build:
     runs-on: ubuntu-latest

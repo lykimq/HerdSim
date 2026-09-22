@@ -38,7 +38,7 @@ class PolicyFileController(BaseDogController):
 
     @property
     def default_config(self) -> dict[str, Any]:
-        cfg = {
+        cfg: dict[str, Any] = {
             k: STROMBOM_DEFAULTS[k]
             for k in ("n_shepherds", "r_a", "shepherd_speed", "noise_strength")
         }

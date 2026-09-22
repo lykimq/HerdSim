@@ -15,7 +15,7 @@ class HistoryRecorder:
 
     def __init__(self, metrics: list[BaseMetric]):
         self._metrics = metrics
-        self._records: list[dict] = []
+        self._records: list[dict[str, Any]] = []
 
     def record(self, state: SimulationState) -> dict[str, float]:
         """Compute all metrics for the current state and store the snapshot.

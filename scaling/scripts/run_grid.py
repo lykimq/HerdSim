@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+from typing import Any
 
 from services.scaling.layout import (
     PROTOCOLS_DIR,
@@ -17,6 +18,7 @@ from services.scaling.layout import (
 from services.scaling.runner import (
     expand_scaling_grid,
     load_canonical_protocol,
+    resolve_cell_max_ticks,
     run_scaling_grid,
 )
 
@@ -81,10 +83,10 @@ def main() -> None:
     _add_common_args(parser)
     args = parser.parse_args()
 
-    spec: dict | None = None
+    spec: dict[str, Any] | None = None
     spec_path: Path | None = None
     if args.protocol is not None:
-        spec_path = args.protocol
+        spec_path = Path(args.protocol)
         if not spec_path.is_absolute() and not spec_path.exists():
             candidate = PROTOCOLS_DIR / spec_path.name
             if candidate.exists():
@@ -115,6 +117,7 @@ def main() -> None:
     n_seeds = args.seeds
     seed_mode = args.seed_mode or "scout"
     store_timeseries = not args.no_timeseries
+    max_ticks = args.max_ticks
 
     if spec is not None:
         methods = methods or list(spec.get("methods") or [])
@@ -127,6 +130,8 @@ def main() -> None:
             seed_mode = str(spec["seed_mode"])
         if "store_timeseries" in spec and not args.no_timeseries:
             store_timeseries = bool(spec["store_timeseries"])
+        if max_ticks is None:
+            max_ticks = resolve_cell_max_ticks(protocol, spec=spec)
 
     cells = expand_scaling_grid(
         protocol,
@@ -136,7 +141,7 @@ def main() -> None:
         d_values=d_values or None,
         n_seeds=n_seeds,
         seed_mode=seed_mode,
-        max_ticks=args.max_ticks,
+        max_ticks=max_ticks,
     )
     if spec_path is not None:
         copy_protocol_spec(spec_path, output)

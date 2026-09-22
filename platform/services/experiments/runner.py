@@ -165,12 +165,14 @@ def iter_one_trial(
                 "status": status,
             }
 
+    final_state = runner.state
+    assert final_state is not None
     result = RunResult(
         success=(status == "success"),
-        total_ticks=runner.state.tick if runner.state else 0,
+        total_ticks=final_state.tick,
         seed=seed,
         history=runner.recorder.to_dataframe(),
-        final_state=runner.state,
+        final_state=final_state,
     )
     row = _trial_row(
         method=label_id,

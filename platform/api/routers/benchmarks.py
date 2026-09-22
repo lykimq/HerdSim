@@ -22,11 +22,11 @@ from services.experiments.sweep import expand_factor_grid, parse_factor_specs
 router = APIRouter()
 
 # In-memory last benchmark for export convenience.
-_LAST_BENCHMARK: dict | None = None
-_LAST_REQUEST: dict | None = None
+_last_benchmark: dict[str, Any] | None = None
+_last_request: dict[str, Any] | None = None
 
 
-def _request_meta(req: BenchmarkRequest, sweep_payload: list[dict[str, Any]] | None) -> dict:
+def _request_meta(req: BenchmarkRequest, sweep_payload: list[dict[str, Any]] | None) -> dict[str, Any]:
     return {
         "methods": list(req.methods),
         "scenario_id": req.scenario_id,
@@ -90,7 +90,7 @@ def benchmark_run(
         description="If true, stream NDJSON progress events then a final done payload.",
     ),
 ):
-    global _LAST_BENCHMARK
+    global _last_benchmark
     specs = _validate_request(req)
     sweep_payload = [s for s in specs] if specs else None
 
@@ -110,12 +110,12 @@ def benchmark_run(
             raise HTTPException(status_code=400, detail=str(exc)) from exc
         meta = _request_meta(req, sweep_payload)
         payload["experiment"] = meta
-        _LAST_BENCHMARK = payload
-        _LAST_REQUEST = meta
+        _last_benchmark = payload
+        _last_request = meta
         return payload
 
     def event_stream():
-        global _LAST_BENCHMARK, _LAST_REQUEST
+        global _last_benchmark, _last_request
         try:
             rows = []
             param_sets = expand_factor_grid(specs)
@@ -147,8 +147,8 @@ def benchmark_run(
                 "summary": summarize_rows(pd.DataFrame(rows)),
                 "experiment": meta,
             }
-            _LAST_BENCHMARK = payload
-            _LAST_REQUEST = meta
+            _last_benchmark = payload
+            _last_request = meta
             yield json.dumps({"type": "done", **payload}) + "\n"
         except (KeyError, ValueError) as exc:
             yield json.dumps({"type": "error", "message": str(exc)}) + "\n"
@@ -166,24 +166,24 @@ def benchmark_definitions():
 
 @router.get("/last")
 def benchmark_last():
-    if _LAST_BENCHMARK is None:
+    if _last_benchmark is None:
         raise HTTPException(status_code=404, detail="No benchmark has been run yet")
-    return _LAST_BENCHMARK
+    return _last_benchmark
 
 
 @router.get("/export")
 def benchmark_export(format: str = Query(default="json", pattern="^(json|csv|md)$")):
-    if _LAST_BENCHMARK is None:
+    if _last_benchmark is None:
         raise HTTPException(status_code=404, detail="No benchmark has been run yet")
     if format == "json":
-        return build_report_package(_LAST_BENCHMARK, request=_LAST_REQUEST)
+        return build_report_package(_last_benchmark, request=_last_request)
     if format == "csv":
         return Response(
-            content=report_to_csv(_LAST_BENCHMARK, request=_LAST_REQUEST),
+            content=report_to_csv(_last_benchmark, request=_last_request),
             media_type="text/csv",
             headers={"Content-Disposition": 'attachment; filename="herdsim_benchmark.csv"'},
         )
     return PlainTextResponse(
-        report_to_markdown(_LAST_BENCHMARK, request=_LAST_REQUEST),
+        report_to_markdown(_last_benchmark, request=_last_request),
         media_type="text/markdown",
     )

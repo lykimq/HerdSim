@@ -9,6 +9,8 @@ Paper rules:
 
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 
 from core.agents.goal import resolve_goal_center
@@ -22,7 +24,7 @@ def compute_threshold(n_sheep: int, r_a: float) -> float:
     return r_a * (n_sheep ** (2.0 / 3.0))
 
 
-def should_collect(state: SimulationState, config: dict) -> bool:
+def should_collect(state: SimulationState, config: dict[str, Any]) -> bool:
     """True if any sheep is farther than f(N) from the GCM (Collect mode)."""
     scale = float(config.get("collect_threshold_scale", 1.0))
     threshold = compute_threshold(state.n_sheep, config["r_a"]) * scale
@@ -30,21 +32,21 @@ def should_collect(state: SimulationState, config: dict) -> bool:
     return bool(max_dist > threshold)
 
 
-def collect_offset(config: dict) -> float:
+def collect_offset(config: dict[str, Any]) -> float:
     """Collect stand-off Pc: r_a behind the furthest agent (paper Table 1)."""
     if "collect_offset" in config:
         return float(config["collect_offset"])
     return float(config.get("r_a", 2.0))
 
 
-def drive_offset(state: SimulationState, config: dict) -> float:
+def drive_offset(state: SimulationState, config: dict[str, Any]) -> float:
     """Drive stand-off Pd: r_a * sqrt(N) behind the flock (paper Table 1)."""
     if "drive_offset" in config:
         return float(config["drive_offset"])
     return float(config["r_a"]) * (state.n_sheep**0.5)
 
 
-def collect_target(state: SimulationState, config: dict) -> np.ndarray:
+def collect_target(state: SimulationState, config: dict[str, Any]) -> np.ndarray:
     """Shepherd target for Collect: behind furthest sheep relative to GCM."""
     centroid = state.sheep_centroid
     furthest_idx = state.furthest_sheep_index()
@@ -52,7 +54,7 @@ def collect_target(state: SimulationState, config: dict) -> np.ndarray:
     return position_behind_target(furthest_pos, centroid, collect_offset(config))
 
 
-def drive_target(state: SimulationState, config: dict) -> np.ndarray:
+def drive_target(state: SimulationState, config: dict[str, Any]) -> np.ndarray:
     """Shepherd target for Drive: behind GCM relative to goal."""
     centroid = state.sheep_centroid
     goal_center = resolve_goal_center(state, config)
@@ -60,7 +62,7 @@ def drive_target(state: SimulationState, config: dict) -> np.ndarray:
 
 
 def shepherd_step_toward(
-    state: SimulationState, config: dict, shepherd_idx: int, target: np.ndarray
+    state: SimulationState, config: dict[str, Any], shepherd_idx: int, target: np.ndarray
 ) -> np.ndarray:
     """Velocity toward target with paper 3*r_a stop and angular noise."""
     speed = float(config.get("shepherd_speed", 1.5))
@@ -80,7 +82,7 @@ def shepherd_step_toward(
 
 
 def compute_shepherd_velocity(
-    state: SimulationState, config: dict, shepherd_idx: int = 0
+    state: SimulationState, config: dict[str, Any], shepherd_idx: int = 0
 ) -> np.ndarray:
     """Collect/Drive velocity with 3*r_a stop and paper angular noise."""
     if should_collect(state, config):
@@ -90,7 +92,9 @@ def compute_shepherd_velocity(
     return shepherd_step_toward(state, config, shepherd_idx, target)
 
 
-def strombom_assignment_line(state: SimulationState, config: dict, shepherd_idx: int = 0) -> dict:
+def strombom_assignment_line(
+    state: SimulationState, config: dict[str, Any], shepherd_idx: int = 0
+) -> dict[str, Any]:
     """Overlay line from herder to Collect sheep or Drive stand-off point."""
     shepherd_pos = state.shepherd_positions[shepherd_idx]
     if should_collect(state, config):
@@ -109,6 +113,8 @@ def strombom_assignment_line(state: SimulationState, config: dict, shepherd_idx:
     }
 
 
-def strombom_assignment_lines(state: SimulationState, config: dict) -> list[dict]:
+def strombom_assignment_lines(
+    state: SimulationState, config: dict[str, Any]
+) -> list[dict[str, Any]]:
     """One assignment line per shepherd using Strombom Collect/Drive targets."""
     return [strombom_assignment_line(state, config, i) for i in range(state.n_shepherds)]

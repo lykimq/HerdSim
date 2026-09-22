@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+from typing import Any
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
@@ -22,7 +23,7 @@ def _heading_from_velocity(velocities) -> list[float]:
     return headings.tolist()
 
 
-def _frame_payload(runner, status: str, frame_type: str = "tick") -> dict:
+def _frame_payload(runner, status: str, frame_type: str = "tick") -> dict[str, Any]:
     state = runner.state
     if state is None:
         return {"type": frame_type, "status": status, "tick": 0}

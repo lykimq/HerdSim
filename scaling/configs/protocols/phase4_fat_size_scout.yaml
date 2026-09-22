@@ -1,0 +1,9 @@
+# Phase-4 size scout for fat (RQ4). Same freeze as Phase-1 size map.
+
+extends: phase1_scout.yaml
+protocol_id: phase4_fat_size_scout
+phase: 4
+output: scaling/results/phase4/fat_size/scout
+methods:
+  - fat
+packages: [A, D, F]

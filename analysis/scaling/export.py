@@ -42,9 +42,9 @@ def _package_a_claim_stubs(
     lines: list[str] = []
     has_overcrowd = False
     if not regimes.empty and "regime" in regimes.columns:
-        has_overcrowd = (regimes["regime"] == "overcrowding_collapse").any()
+        has_overcrowd = bool((regimes["regime"] == "overcrowding_collapse").to_numpy().any())
     if "d_overcrowd" in frontier.columns:
-        has_overcrowd = has_overcrowd or frontier["d_overcrowd"].notna().any()
+        has_overcrowd = has_overcrowd or bool(frontier["d_overcrowd"].notna().to_numpy().any())
 
     if has_overcrowd:
         lines.append(
@@ -83,7 +83,7 @@ def _package_a_diagnostics(trials: pd.DataFrame, regimes: pd.DataFrame) -> list[
     lines: list[str] = []
     lines.append(f"- Trial rows: {len(trials)}")
     if "success" in trials.columns and len(trials):
-        rate = float(trials["success"].mean())
+        rate = float(pd.Series(trials["success"]).mean())
         lines.append(f"- Overall success rate: {rate:.3f}")
     if "failure_mode" in trials.columns:
         top = trials["failure_mode"].value_counts().head(5)
@@ -219,10 +219,18 @@ def export_package_a(
     else:
         seeds = []
 
-    methods = _unique_sorted(trials["method"]) if "method" in trials.columns else []
-    layouts = _unique_sorted(trials["initial_layout"]) if "initial_layout" in trials.columns else []
-    n_values = _unique_sorted(trials["n_sheep"]) if "n_sheep" in trials.columns else []
-    d_values = _unique_sorted(trials["n_shepherds"]) if "n_shepherds" in trials.columns else []
+    methods = _unique_sorted(pd.Series(trials["method"])) if "method" in trials.columns else []
+    layouts = (
+        _unique_sorted(pd.Series(trials["initial_layout"]))
+        if "initial_layout" in trials.columns
+        else []
+    )
+    n_values = _unique_sorted(pd.Series(trials["n_sheep"])) if "n_sheep" in trials.columns else []
+    d_values = (
+        _unique_sorted(pd.Series(trials["n_shepherds"]))
+        if "n_shepherds" in trials.columns
+        else []
+    )
 
     stamp = build_provenance_stamp(
         protocol_id=protocol_id,

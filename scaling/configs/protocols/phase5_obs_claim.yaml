@@ -1,0 +1,14 @@
+# Phase-5 observation claim windows (RQ5 / Package E).
+# Grade: CLAIM. After phase5/factor_sweep/trials.csv (obs scout) exists.
+#
+# Windows are per (obs_mode, N). Seeds are 100.
+
+extends: phase5_factor_sweep.yaml
+protocol_id: phase5_obs_claim
+grade: CLAIM
+output: scaling/results/phase5/obs_claim
+seeds: 100
+seed_mode: claim
+upstream_protocol: phase5_factor_sweep
+store_timeseries: false
+packages: [E]

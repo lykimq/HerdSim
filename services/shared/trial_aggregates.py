@@ -31,7 +31,7 @@ OUTCOME_FROM_FINAL = {
 
 
 def _series_stats(series: pd.Series) -> dict[str, float]:
-    values = pd.to_numeric(series, errors="coerce").dropna()
+    values = pd.Series(pd.to_numeric(series, errors="coerce")).dropna()
     if values.empty:
         return {"mean": float("nan"), "min": float("nan"), "max": float("nan"), "auc": float("nan")}
     mean_v = float(values.mean())
@@ -66,7 +66,7 @@ def build_trial_metric_fields(history: pd.DataFrame) -> dict[str, Any]:
     for metric_id in TRAJECTORY_METRICS:
         if metric_id not in history.columns:
             continue
-        stats = _series_stats(history[metric_id])
+        stats = _series_stats(pd.Series(history[metric_id]))
         out[f"mean_{metric_id}"] = stats["mean"]
         out[f"min_{metric_id}"] = stats["min"]
         out[f"max_{metric_id}"] = stats["max"]

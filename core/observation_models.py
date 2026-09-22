@@ -47,7 +47,7 @@ def _base_observation(
     )
 
 
-def _sensing_range(state: SimulationState, shepherd_index: int, config: dict) -> float:
+def _sensing_range(state: SimulationState, shepherd_index: int, config: dict[str, Any]) -> float:
     base = config.get("sensing_range")
     if base is None:
         base = config.get("r_s", config.get("radius", 65.0))

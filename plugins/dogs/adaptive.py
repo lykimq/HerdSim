@@ -21,7 +21,7 @@ from core.observation import ShepherdObservation
 from core.simulation_state import SimulationState
 
 
-def classify_flock_state(state: SimulationState, config: dict) -> str:
+def classify_flock_state(state: SimulationState, config: dict[str, Any]) -> str:
     """Classify observed flock as dispersed, cohesive, or fragmented."""
     if state.n_sheep == 0:
         return "dispersed"

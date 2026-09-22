@@ -1,0 +1,11 @@
+# Phase-5 sensing-range claim windows (RQ5).
+# Grade: CLAIM. After phase5/range_scout/trials.csv exists.
+
+extends: phase5_range_scout.yaml
+protocol_id: phase5_range_claim
+grade: CLAIM
+output: scaling/results/phase5/range_claim
+seeds: 100
+seed_mode: claim
+upstream_protocol: phase5_range_scout
+packages: [E]

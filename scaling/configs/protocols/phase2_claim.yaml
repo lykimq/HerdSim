@@ -1,0 +1,14 @@
+# Phase-2 structure claim windows (RQ1 / Package B).
+# Grade: CLAIM. After phase2/scout/trials.csv exists.
+#
+# Same window rule as Phase 1, per (layout, N). Seeds are 100. Analysis uses
+# merged_trials.csv.
+
+extends: phase2_scout.yaml
+protocol_id: phase2_claim
+grade: CLAIM
+output: scaling/results/phase2/claim
+seeds: 100
+seed_mode: claim
+upstream_protocol: phase2_scout
+packages: [B]

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Any
 
 from fastapi import APIRouter, HTTPException
 
@@ -83,11 +84,11 @@ _ENUM_LABELS = {
 }
 
 
-def _enum_items(values: tuple[str, ...] | list[str]) -> list[dict]:
+def _enum_items(values: tuple[str, ...] | list[str]) -> list[dict[str, str]]:
     return [{"id": value, "label": _ENUM_LABELS.get(value, value)} for value in values]
 
 
-def _factor_catalog() -> dict:
+def _factor_catalog() -> dict[str, Any]:
     return {
         "max_grid_cells": MAX_FACTOR_GRID_CELLS,
         "grid_keys": sorted(FACTOR_GRID_KEYS),
@@ -150,7 +151,7 @@ _INFO_FALLBACK = {
 }
 
 
-def _load_info(preset_id: str) -> dict:
+def _load_info(preset_id: str) -> dict[str, Any]:
     info_path = _METHODS_ROOT / preset_id / "info.json"
     if info_path.is_file():
         with info_path.open(encoding="utf-8") as fh:
@@ -158,7 +159,7 @@ def _load_info(preset_id: str) -> dict:
     return dict(_INFO_FALLBACK.get(preset_id, {"herder_kind": "dog"}))
 
 
-def _with_herder_meta(entry: dict) -> dict:
+def _with_herder_meta(entry: dict[str, Any]) -> dict[str, Any]:
     info = _load_info(entry["id"])
     herder_kind = info.get("herder_kind", "dog")
     herder_label = info.get(

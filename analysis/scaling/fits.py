@@ -57,14 +57,14 @@ def _power_predict(n_tr: np.ndarray, d_tr: np.ndarray, n_i: float) -> float | No
     log_alpha, log_a = np.polyfit(np.log(nn), np.log(dd), 1)
     guess = (float(np.exp(log_a)), float(log_alpha))
 
-    def _model(x, A, alpha):
-        return A * np.power(x, alpha)
+    def _model(x, amp, alpha):
+        return amp * np.power(x, alpha)
 
     try:
-        (A, alpha), _ = curve_fit(_model, nn, dd, p0=guess, maxfev=4000)
+        (amp, alpha), _ = curve_fit(_model, nn, dd, p0=guess, maxfev=4000)
     except (RuntimeError, ValueError):
-        A, alpha = guess
-    return float(A * (n_i**alpha))
+        amp, alpha = guess
+    return float(amp * (n_i**alpha))
 
 
 def _fit_piecewise(n: np.ndarray, d: np.ndarray) -> dict[str, Any] | None:
@@ -170,20 +170,20 @@ def fit_scaling_models(
         log_alpha, log_a = np.polyfit(np.log(nn), np.log(dd), 1)
         guess = (float(np.exp(log_a)), float(log_alpha))
 
-        def _model(x, A, alpha):
-            return A * np.power(x, alpha)
+        def _model(x, amp, alpha):
+            return amp * np.power(x, alpha)
 
         try:
-            (A, alpha), _ = curve_fit(_model, nn, dd, p0=guess, maxfev=4000)
+            (amp, alpha), _ = curve_fit(_model, nn, dd, p0=guess, maxfev=4000)
         except (RuntimeError, ValueError):
-            A, alpha = guess
+            amp, alpha = guess
         yhat = np.full_like(d, np.nan, dtype=float)
-        yhat[mask] = A * np.power(nn, alpha)
+        yhat[mask] = amp * np.power(nn, alpha)
         sse = float(np.nansum((d - yhat) ** 2))
         scored = d[mask]
         models["power"] = {
             "params": {
-                "A": float(A),
+                "A": float(amp),
                 "alpha": float(alpha),
                 "log_log_slope": float(log_alpha),
             },
@@ -306,18 +306,18 @@ def _separate_curve_loo(
         return None
     errs = []
     for held in unique:
-        train = work[work[sheep_col] != held]
-        test = work[work[sheep_col] == held]
+        train = work.loc[work[sheep_col] != held].copy()
+        test = work.loc[work[sheep_col] == held].copy()
         for _, row in test.iterrows():
-            sub = train[train[state_col] == row[state_col]]
+            sub = train.loc[train[state_col] == row.at[state_col]].copy()
             yhat = _power_predict(
-                sub[sheep_col].astype(float).to_numpy(),
-                sub[dmin_col].astype(float).to_numpy(),
-                float(row[sheep_col]),
+                pd.Series(sub.loc[:, sheep_col]).astype(float).to_numpy(),
+                pd.Series(sub.loc[:, dmin_col]).astype(float).to_numpy(),
+                float(row.at[sheep_col]),
             )
             if yhat is None:
                 continue
-            errs.append((float(row[dmin_col]) - yhat) ** 2)
+            errs.append((float(row.at[dmin_col]) - yhat) ** 2)
     if not errs:
         return None
     return float(np.sqrt(np.mean(errs)))

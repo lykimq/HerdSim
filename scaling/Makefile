@@ -1,42 +1,44 @@
-# Goal 2: scaling protocols (RQ grids under scaling/results/).
-# From repo root: make -C scaling help   or   make scaling-help
+# Goal 2: scaling protocols. Orchestration lives in
+# scaling/scripts/campaign.py (services.scaling.campaign).
+# From repo root: make -C scaling help
 
-.PHONY: help scaling-help scaling-test scaling-pilot scaling-pilot-state \
-	scaling-analyse scaling-scout scaling-factor-sweep \
-	scaling-claim-plan scaling-claim-reseed
+.PHONY: help scaling-help scaling-test scaling-analyse \
+	scaling-pilot scaling-scout scaling-claim-plan scaling-claim-reseed \
+	scaling-t1-plan scaling-t1 \
+	scaling-pilot-state scaling-phase2-scout \
+	scaling-phase2-claim-plan scaling-phase2-claim-reseed \
+	scaling-transfer-size-scout scaling-transfer-size-claim-plan \
+	scaling-transfer-size-claim-reseed \
+	scaling-transfer-structure-scout scaling-transfer-structure-claim-plan \
+	scaling-transfer-structure-claim-reseed \
+	scaling-factor-sweep \
+	scaling-phase5-obs-claim-plan scaling-phase5-obs-claim-reseed \
+	scaling-phase5-range-scout scaling-phase5-range-claim-plan \
+	scaling-phase5-range-claim-reseed \
+	scaling-phase5-comm-scout scaling-phase5-comm-claim-plan \
+	scaling-phase5-comm-claim-reseed
 
 ROOT := $(abspath $(CURDIR)/..)
 UV ?= uv
 export PYTHONPATH := $(ROOT):$(ROOT)/platform:$(ROOT)/scaling$(if $(PYTHONPATH),:$(PYTHONPATH),)
 
-SCALING_PROTOCOL_DIR ?= configs/protocols
-PHASE1_PILOT_PROTOCOL ?= $(SCALING_PROTOCOL_DIR)/phase1_pilot.yaml
-PHASE1_SCOUT_PROTOCOL ?= $(SCALING_PROTOCOL_DIR)/phase1_scout.yaml
-PHASE1_CLAIM_PROTOCOL ?= $(SCALING_PROTOCOL_DIR)/phase1_claim.yaml
-PHASE2_STATE_PROTOCOL ?= $(SCALING_PROTOCOL_DIR)/phase2_pilot_state.yaml
-PHASE5_SWEEP_PROTOCOL ?= $(SCALING_PROTOCOL_DIR)/phase5_factor_sweep.yaml
-
-SCALING_OUT ?= results/phase1/pilot
-STATE_OUT ?= results/phase2/pilot_state
-SCOUT_OUT ?= results/phase1/scout
-CLAIM_OUT ?= results/phase1/claim
-SWEEP_OUT ?= results/phase5/factor_sweep
-SCOUT_TRIALS ?= $(SCOUT_OUT)/trials.csv
-
 WORKERS ?= 1
-SCALING_MAX_TICKS ?=
 PACKAGE ?= A
-TRIALS ?= $(SCALING_OUT)/trials.csv
-OUT ?= $(SCALING_OUT)/packages/$(shell echo $(PACKAGE) | tr A-Z a-z)
-
+TRANSFER_METHOD ?= kubo
+PROTOCOL ?=
+TRIALS ?=
+OUT ?=
+SCALING_MAX_TICKS ?=
 SCALING_METHOD ?=
 SCALING_LAYOUT ?=
 SCALING_N ?=
 SCALING_D ?=
 SCALING_SEEDS ?=
 
-SCALING_MAX_TICKS_FLAG = $(if $(SCALING_MAX_TICKS),--max-ticks $(SCALING_MAX_TICKS),)
-SCALING_OVERRIDE_FLAGS = \
+CAMPAIGN = cd $(ROOT) && $(UV) run scaling/scripts/campaign.py
+
+CAMPAIGN_FLAGS = --workers $(WORKERS) \
+	$(if $(SCALING_MAX_TICKS),--max-ticks $(SCALING_MAX_TICKS),) \
 	$(if $(SCALING_METHOD),--methods $(SCALING_METHOD),) \
 	$(if $(SCALING_LAYOUT),--layouts $(SCALING_LAYOUT),) \
 	$(if $(SCALING_N),--n $(SCALING_N),) \
@@ -46,108 +48,97 @@ SCALING_OVERRIDE_FLAGS = \
 .DEFAULT_GOAL := help
 
 help scaling-help:
-	@echo "HerdSim scaling -- RQ protocols"
-	@echo ""
-	@echo "What this is:"
-	@echo "  Batch simulations that ask: for flock size N sheep and D dogs,"
-	@echo "  how often does herding succeed? Writes under scaling/results/."
-	@echo "  Interrupted runs resume if you keep manifest.jsonl and"
-	@echo "  re-run the same target."
-	@echo ""
-	@echo "Targets (grids match scaling/configs/protocols/*.yaml):"
-	@echo "  help                 Show this help"
-	@echo "  scaling-test          Pytest for the scaling runner and analysis code"
-	@echo ""
-	@echo "  scaling-pilot         Small smoke grid (~150 trials)."
-	@echo "                       Output: scaling/results/phase1/pilot/"
-	@echo "  scaling-scout         Full Phase-1 map (10 N x 10 D x 30 seeds)."
-	@echo "                       Output: scaling/results/phase1/scout/"
-	@echo "  scaling-claim-plan    Claim windows from scout (no new trials)."
-	@echo "  scaling-claim-reseed  100-seed reseed on those windows."
-	@echo "                       Output: scaling/results/phase1/claim/"
-	@echo "  scaling-pilot-state   Four X0 layouts (~600 trials)."
-	@echo "                       Output: scaling/results/phase2/pilot_state/"
-	@echo "  scaling-factor-sweep  Observation-mode sweep (~360 trials)."
-	@echo "                       Output: scaling/results/phase5/factor_sweep/"
-	@echo "  scaling-analyse       Re-run analysis on an existing trials.csv"
-	@echo ""
-	@echo "Variables: WORKERS, SCALING_MAX_TICKS, PACKAGE, TRIALS, OUT,"
-	@echo "           SCOUT_TRIALS, CLAIM_OUT"
-	@echo "Example:   make scaling-pilot WORKERS=4"
-	@echo "Docs:      scaling/results/README.md"
-	@echo "Platform:  make -C ../platform help"
+	@$(CAMPAIGN) help
+	@echo "Make aliases (same verbs; PROTOCOL id under configs/protocols/):"
+	@echo "  scaling-test"
+	@echo "  scaling-pilot | scaling-scout | scaling-claim-plan | scaling-claim-reseed"
+	@echo "  scaling-t1-plan | scaling-t1"
+	@echo "  scaling-pilot-state | scaling-phase2-scout | scaling-phase2-claim-*"
+	@echo "  scaling-transfer-*-scout|claim-*   TRANSFER_METHOD=kubo|fat"
+	@echo "  scaling-factor-sweep | scaling-phase5-*-scout|claim-*"
+	@echo "  scaling-analyse PROTOCOL=... PACKAGE=A [TRIALS=...]"
+	@echo "Example: make scaling-scout WORKERS=8"
+	@echo "         make scaling-transfer-size-scout TRANSFER_METHOD=fat WORKERS=8"
 
 scaling-test:
 	cd $(ROOT) && $(UV) run pytest tests/backend/correctness/test_scaling_stack.py -q
 
-scaling-pilot:
-	@mkdir -p $(SCALING_OUT)
-	cd $(ROOT) && $(UV) run scaling/scripts/run_grid.py \
-		--protocol $(CURDIR)/$(PHASE1_PILOT_PROTOCOL) \
-		--output $(CURDIR)/$(SCALING_OUT) \
-		--workers $(WORKERS) \
-		$(SCALING_MAX_TICKS_FLAG) \
-		$(SCALING_OVERRIDE_FLAGS)
-	$(MAKE) scaling-analyse \
-		PACKAGE=A TRIALS=$(SCALING_OUT)/trials.csv OUT=$(SCALING_OUT)/packages/a
-
-scaling-pilot-state:
-	@mkdir -p $(STATE_OUT)
-	cd $(ROOT) && $(UV) run scaling/scripts/run_grid.py \
-		--protocol $(CURDIR)/$(PHASE2_STATE_PROTOCOL) \
-		--output $(CURDIR)/$(STATE_OUT) \
-		--workers $(WORKERS) \
-		$(SCALING_MAX_TICKS_FLAG) \
-		$(SCALING_OVERRIDE_FLAGS)
-	$(MAKE) scaling-analyse \
-		PACKAGE=B TRIALS=$(STATE_OUT)/trials.csv OUT=$(STATE_OUT)/packages/b
-
 scaling-analyse:
-	cd $(ROOT) && $(UV) run scaling/scripts/analyse.py \
-		--package $(PACKAGE) \
-		--trials $(CURDIR)/$(TRIALS) \
-		--output $(CURDIR)/$(OUT)
+	$(CAMPAIGN) analyse --protocol $(PROTOCOL) --package $(PACKAGE) \
+		$(if $(TRIALS),--trials $(TRIALS),) \
+		$(if $(OUT),--output $(OUT),)
+
+scaling-pilot:
+	$(CAMPAIGN) run --protocol phase1_pilot $(CAMPAIGN_FLAGS)
 
 scaling-scout:
-	@echo "NOTE: scaling-scout is long-running (many N x D x seeds cells)."
-	@echo "Output: $(SCOUT_OUT)  protocol=$(PHASE1_SCOUT_PROTOCOL)"
-	@mkdir -p $(SCOUT_OUT)
-	cd $(ROOT) && $(UV) run scaling/scripts/run_grid.py \
-		--protocol $(CURDIR)/$(PHASE1_SCOUT_PROTOCOL) \
-		--output $(CURDIR)/$(SCOUT_OUT) \
-		--workers $(WORKERS) \
-		$(SCALING_MAX_TICKS_FLAG) \
-		$(SCALING_OVERRIDE_FLAGS)
-	$(MAKE) scaling-analyse \
-		PACKAGE=A TRIALS=$(SCOUT_OUT)/trials.csv OUT=$(SCOUT_OUT)/packages/a
-	$(MAKE) scaling-analyse \
-		PACKAGE=F TRIALS=$(SCOUT_OUT)/trials.csv OUT=$(SCOUT_OUT)/packages/f
+	$(CAMPAIGN) run --protocol phase1_scout $(CAMPAIGN_FLAGS)
 
 scaling-claim-plan:
-	@mkdir -p $(CLAIM_OUT)
-	cd $(ROOT) && $(UV) run scaling/scripts/plan_claim_cells.py \
-		--scout-trials $(CURDIR)/$(SCOUT_TRIALS) \
-		--protocol $(CURDIR)/$(PHASE1_CLAIM_PROTOCOL) \
-		--output $(CURDIR)/$(CLAIM_OUT) \
-		--plan-only
+	$(CAMPAIGN) claim-plan --protocol phase1_claim
 
 scaling-claim-reseed:
-	@echo "NOTE: claim reseed runs 100 seeds on scout claim windows."
-	@echo "Analysis uses merged_trials.csv (claim rows replace scout rows)."
-	@mkdir -p $(CLAIM_OUT)
-	cd $(ROOT) && $(UV) run scaling/scripts/plan_claim_cells.py \
-		--scout-trials $(CURDIR)/$(SCOUT_TRIALS) \
-		--protocol $(CURDIR)/$(PHASE1_CLAIM_PROTOCOL) \
-		--output $(CURDIR)/$(CLAIM_OUT) \
-		--workers $(WORKERS)
-	$(MAKE) scaling-analyse \
-		PACKAGE=A TRIALS=$(CLAIM_OUT)/merged_trials.csv OUT=$(CLAIM_OUT)/packages/a
+	$(CAMPAIGN) claim-reseed --protocol phase1_claim $(CAMPAIGN_FLAGS)
+
+scaling-t1-plan:
+	$(CAMPAIGN) t1-plan --protocol phase1_t1
+
+scaling-t1:
+	$(CAMPAIGN) t1 --protocol phase1_t1 $(CAMPAIGN_FLAGS)
+
+scaling-pilot-state:
+	$(CAMPAIGN) run --protocol phase2_pilot_state $(CAMPAIGN_FLAGS)
+
+scaling-phase2-scout:
+	$(CAMPAIGN) run --protocol phase2_scout $(CAMPAIGN_FLAGS)
+
+scaling-phase2-claim-plan:
+	$(CAMPAIGN) claim-plan --protocol phase2_claim
+
+scaling-phase2-claim-reseed:
+	$(CAMPAIGN) claim-reseed --protocol phase2_claim $(CAMPAIGN_FLAGS)
+
+scaling-transfer-size-scout:
+	$(CAMPAIGN) run --protocol phase4_$(TRANSFER_METHOD)_size_scout $(CAMPAIGN_FLAGS)
+
+scaling-transfer-size-claim-plan:
+	$(CAMPAIGN) claim-plan --protocol phase4_$(TRANSFER_METHOD)_size_claim
+
+scaling-transfer-size-claim-reseed:
+	$(CAMPAIGN) claim-reseed --protocol phase4_$(TRANSFER_METHOD)_size_claim $(CAMPAIGN_FLAGS)
+
+scaling-transfer-structure-scout:
+	$(CAMPAIGN) run --protocol phase4_$(TRANSFER_METHOD)_structure_scout $(CAMPAIGN_FLAGS)
+
+scaling-transfer-structure-claim-plan:
+	$(CAMPAIGN) claim-plan --protocol phase4_$(TRANSFER_METHOD)_structure_claim
+
+scaling-transfer-structure-claim-reseed:
+	$(CAMPAIGN) claim-reseed --protocol phase4_$(TRANSFER_METHOD)_structure_claim $(CAMPAIGN_FLAGS)
 
 scaling-factor-sweep:
-	@mkdir -p $(SWEEP_OUT)
-	cd $(ROOT) && $(UV) run scaling/scripts/run_factor_sweep.py \
-		--protocol $(CURDIR)/$(PHASE5_SWEEP_PROTOCOL) \
-		--output $(CURDIR)/$(SWEEP_OUT) \
-		--workers $(WORKERS)
-	$(MAKE) scaling-analyse \
-		PACKAGE=E TRIALS=$(SWEEP_OUT)/trials.csv OUT=$(SWEEP_OUT)/packages/e
+	$(CAMPAIGN) run --protocol phase5_factor_sweep $(CAMPAIGN_FLAGS)
+
+scaling-phase5-obs-claim-plan:
+	$(CAMPAIGN) claim-plan --protocol phase5_obs_claim
+
+scaling-phase5-obs-claim-reseed:
+	$(CAMPAIGN) claim-reseed --protocol phase5_obs_claim $(CAMPAIGN_FLAGS)
+
+scaling-phase5-range-scout:
+	$(CAMPAIGN) run --protocol phase5_range_scout $(CAMPAIGN_FLAGS)
+
+scaling-phase5-range-claim-plan:
+	$(CAMPAIGN) claim-plan --protocol phase5_range_claim
+
+scaling-phase5-range-claim-reseed:
+	$(CAMPAIGN) claim-reseed --protocol phase5_range_claim $(CAMPAIGN_FLAGS)
+
+scaling-phase5-comm-scout:
+	$(CAMPAIGN) run --protocol phase5_comm_scout $(CAMPAIGN_FLAGS)
+
+scaling-phase5-comm-claim-plan:
+	$(CAMPAIGN) claim-plan --protocol phase5_comm_claim
+
+scaling-phase5-comm-claim-reseed:
+	$(CAMPAIGN) claim-reseed --protocol phase5_comm_claim $(CAMPAIGN_FLAGS)

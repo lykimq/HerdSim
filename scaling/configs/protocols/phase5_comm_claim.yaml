@@ -1,0 +1,11 @@
+# Phase-5 communication claim windows (RQ5).
+# Grade: CLAIM. After phase5/comm_scout/trials.csv exists.
+
+extends: phase5_comm_scout.yaml
+protocol_id: phase5_comm_claim
+grade: CLAIM
+output: scaling/results/phase5/comm_claim
+seeds: 100
+seed_mode: claim
+upstream_protocol: phase5_comm_scout
+packages: [E]

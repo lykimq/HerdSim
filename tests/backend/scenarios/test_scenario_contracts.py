@@ -50,6 +50,7 @@ def test_drive_to_goal_success_when_all_sheep_in_goal():
     scen = scenario_registry.get("drive_to_goal")
     config = {"goal_center": [15.0, 15.0], "goal_radius": 20.0, "n_sheep": 5}
     world = scen.create_world(config)
+    assert world.goal is not None
     state = make_state(
         np.tile(world.goal.center, (5, 1)),
         [[50.0, 50.0]],

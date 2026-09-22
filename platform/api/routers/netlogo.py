@@ -7,6 +7,7 @@ import logging
 import re
 import subprocess
 from pathlib import Path
+from typing import Any
 
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from pydantic import BaseModel, Field
@@ -36,7 +37,7 @@ def _rel_model_path(path: Path) -> str:
     return path.resolve().relative_to(_REPO_ROOT.resolve()).as_posix()
 
 
-def _model_entry(path: Path, source: str) -> dict:
+def _model_entry(path: Path, source: str) -> dict[str, Any]:
     return {
         "id": _rel_model_path(path),
         "name": path.name,
@@ -46,7 +47,7 @@ def _model_entry(path: Path, source: str) -> dict:
     }
 
 
-def _list_nlogo(directory: Path, source: str) -> list[dict]:
+def _list_nlogo(directory: Path, source: str) -> list[dict[str, Any]]:
     if not directory.is_dir():
         return []
     entries = []
@@ -81,7 +82,7 @@ class OpenDesktopRequest(BaseModel):
 _TWINS_PATH = _REPO_ROOT / "integrations" / "netlogo" / "twins.json"
 
 
-def _load_twins() -> list[dict]:
+def _load_twins() -> list[dict[str, Any]]:
     if not _TWINS_PATH.is_file():
         return []
     with _TWINS_PATH.open(encoding="utf-8") as fh:

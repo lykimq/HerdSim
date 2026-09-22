@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 
 import pandas as pd
 
@@ -69,12 +69,14 @@ def substitution_curves(
 
     rank = level_fn or (lambda v: information_level(str(v)))
     rows: list[dict[str, Any]] = []
-    for (n, info), g in df.groupby([sheep_col, info_col], dropna=False):
+    for key_vals, g in df.groupby([sheep_col, info_col], dropna=False):
+        n_raw, info = cast(tuple[Any, Any], key_vals)
+        n = int(n_raw)
         front = extract_frontier(g, theta=theta)
         d_min = None if front.empty else front.iloc[0]["d_min"]
         rows.append(
             {
-                sheep_col: int(n),
+                sheep_col: n,
                 info_col: info,
                 "info_level": int(rank(info)),
                 "d_min": d_min,
@@ -126,7 +128,7 @@ def substitution_curves_communication(
 
 def summarize_substitution(curves: pd.DataFrame) -> dict[str, Any]:
     """Summarise whether D_min falls as information level rises (first/second step)."""
-    if curves.empty or curves["d_min"].isna().all():
+    if curves.empty or bool(curves["d_min"].isna().to_numpy().all()):
         return {
             "n_compared": 0,
             "median_delta_dmin": None,

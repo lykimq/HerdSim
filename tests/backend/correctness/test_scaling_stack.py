@@ -20,6 +20,7 @@ from analysis.scaling.frontier import (
     extract_frontier,
     merge_scout_and_claim,
     select_claim_windows,
+    select_t1_windows,
 )
 from analysis.scaling.mechanism import (
     evaluate_overcrowding_mechanisms,
@@ -39,6 +40,13 @@ from plugins.metrics.outlier_count import OutlierCountMetric
 from plugins.metrics.registry import metric_registry
 from plugins.metrics.shepherd_coverage import ShepherdCoverageMetric
 from plugins.metrics.shepherd_interference import ShepherdInterferenceMetric
+from services.scaling.campaign import (
+    find_protocol_path,
+    resolve_upstream_trials,
+    runner_kind,
+)
+from services.scaling.layout import PROTOCOLS_DIR, load_protocol_spec
+from services.scaling.runner import load_canonical_protocol, resolve_cell_max_ticks
 from tests.backend.helpers import make_state, make_world
 
 
@@ -162,7 +170,11 @@ def test_claim_windows_merge_and_censored_bootstrap():
     assert any("reliability" in role for role in roles)
     assert any("overcrowd" in role for role in roles)
 
-    claim = trials[trials["n_shepherds"] == 2].copy()
+    t1 = select_t1_windows(trials, theta=0.90)
+    assert set(t1["n_shepherds"]) == {6, 10}
+    assert set(t1["role"]) == {"overcrowd_onset", "overcrowd_next"}
+
+    claim = trials.loc[trials["n_shepherds"] == 2].copy()
     claim["seed"] = claim["seed"] + 1000
     merged = merge_scout_and_claim(trials, claim)
     assert set(merged.loc[merged["n_shepherds"] == 2, "seed"]) == set(claim["seed"])
@@ -443,8 +455,6 @@ def test_drive_to_goal_uses_initial_layout():
 
 
 def test_canonical_protocol_loads():
-    from services.scaling.runner import load_canonical_protocol
-
     protocol = load_canonical_protocol()
     assert protocol["task"] == "drive_to_goal"
     assert protocol["reliability_theta"] == 0.90
@@ -452,14 +462,58 @@ def test_canonical_protocol_loads():
     assert protocol["protocol_id"] == "scaling_v2"
     assert protocol["world_width"] == 500.0
     assert 10000 == protocol["time_limit_t0"]
+    assert 20000 == protocol["time_limit_t1"]
+
+
+def test_protocol_extends_and_campaign_specs():
+    claim = load_protocol_spec(PROTOCOLS_DIR / "phase2_claim.yaml")
+    assert claim["protocol_id"] == "phase2_claim"
+    assert claim["flock_sizes"] == [50, 100, 200]
+    assert claim["layouts"] == ["compact", "wide", "split", "outlier_rich"]
+    assert claim["seeds"] == 100
+    assert claim["grade"] == "CLAIM"
+    assert claim["upstream_protocol"] == "phase2_scout"
+
+    kubo = load_protocol_spec(PROTOCOLS_DIR / "phase4_kubo_size_scout.yaml")
+    assert kubo["methods"] == ["kubo"]
+    assert kubo["flock_sizes"][0] == 5
+    assert kubo["output"].endswith("kubo_size/scout")
+
+    t1 = load_protocol_spec(PROTOCOLS_DIR / "phase1_t1.yaml")
+    protocol = load_canonical_protocol()
+    assert resolve_cell_max_ticks(protocol, spec=t1) == 20000
+    assert t1["upstream_trials"] == "merged_trials.csv"
+    up = resolve_upstream_trials(t1)
+    assert up.name == "merged_trials.csv"
+    assert "phase1/claim" in str(up)
+
+    range_scout = load_protocol_spec(PROTOCOLS_DIR / "phase5_range_scout.yaml")
+    assert range_scout["sensing_ranges"] == [32.5, 65.0, 97.5, 130.0]
+    assert "obs_modes" not in range_scout
+    assert runner_kind(range_scout) == "factor"
+    assert runner_kind(load_protocol_spec(PROTOCOLS_DIR / "phase1_scout.yaml")) == "grid"
+    assert find_protocol_path("phase1_scout").name == "phase1_scout.yaml"
+
+    for name in (
+        "phase1_t1.yaml",
+        "phase2_scout.yaml",
+        "phase2_claim.yaml",
+        "phase4_fat_structure_claim.yaml",
+        "phase5_obs_claim.yaml",
+        "phase5_comm_claim.yaml",
+    ):
+        spec = load_protocol_spec(PROTOCOLS_DIR / name)
+        assert "protocol_id" in spec and "output" in spec
+        if spec.get("seed_mode") == "claim" or spec.get("time_budget") == "t1":
+            assert "upstream_protocol" in spec
 
 
 def test_scaling_layout_and_cell_key(tmp_path: Path):
     from services.scaling.layout import (
-        PROTOCOLS_DIR,
-        load_protocol_spec,
         package_output_dir,
+        read_status,
         resolve_protocol_output,
+        write_status,
     )
     from services.scaling.runner import ScalingCell, _cell_key
 
@@ -480,6 +534,40 @@ def test_scaling_layout_and_cell_key(tmp_path: Path):
     assert "Mstrombom_multi" in key
     assert "Obearing_only" in key
     assert key.startswith("N50_D2_Lcompact_S2026_")
+
+    started = "2026-09-22T10:00:00+00:00"
+    write_status(
+        tmp_path,
+        protocol_id="timing_probe",
+        n_planned=10,
+        n_done=3,
+        n_pending_at_start=10,
+        started_at=started,
+        updated_at="2026-09-22T10:05:00+00:00",
+        running=True,
+    )
+    mid = read_status(tmp_path)
+    assert mid["started_at"] == started
+    assert mid["running"] is True
+    assert "finished_at" not in mid
+    assert mid["elapsed_seconds"] == pytest.approx(300.0)
+    write_status(
+        tmp_path,
+        protocol_id="timing_probe",
+        n_planned=10,
+        n_done=10,
+        n_pending_at_start=10,
+        started_at=started,
+        updated_at="2026-09-22T10:10:00+00:00",
+        finished_at="2026-09-22T10:10:00+00:00",
+        running=False,
+    )
+    done = read_status(tmp_path)
+    assert done["started_at"] == started
+    assert done["finished_at"] == "2026-09-22T10:10:00+00:00"
+    assert done["complete"] is True
+    assert done["running"] is False
+    assert done["elapsed_seconds"] == pytest.approx(600.0)
 
 
 def test_wasteful_regime_uses_path_not_neighbor_rule():
@@ -504,24 +592,56 @@ def test_wasteful_regime_uses_path_not_neighbor_rule():
 def test_x0_families_on_scaling_arena():
     center = np.array([250.0, 250.0])
     goal = np.array([370.0, 250.0])
-    bounds = dict(
-        spread=30.0,
-        world_width=500.0,
-        world_height=500.0,
-        goal_center=goal,
-        goal_radius=15.0,
-    )
+    spread = 30.0
+    world_width = 500.0
+    world_height = 500.0
+    goal_radius = 15.0
     rng = np.random.default_rng(0)
-    compact = generate_initial_positions(50, "compact", center, rng, **bounds)
-    wide = generate_initial_positions(50, "wide", center, rng, **bounds)
-    split = generate_initial_positions(50, "split", center, rng, interaction_radius=5.0, **bounds)
+    compact = generate_initial_positions(
+        50,
+        "compact",
+        center,
+        rng,
+        spread=spread,
+        world_width=world_width,
+        world_height=world_height,
+        goal_center=goal,
+        goal_radius=goal_radius,
+    )
+    wide = generate_initial_positions(
+        50,
+        "wide",
+        center,
+        rng,
+        spread=spread,
+        world_width=world_width,
+        world_height=world_height,
+        goal_center=goal,
+        goal_radius=goal_radius,
+    )
+    split = generate_initial_positions(
+        50,
+        "split",
+        center,
+        rng,
+        spread=spread,
+        interaction_radius=5.0,
+        world_width=world_width,
+        world_height=world_height,
+        goal_center=goal,
+        goal_radius=goal_radius,
+    )
     outliers = generate_initial_positions(
         50,
         "outlier_rich",
         center,
         rng,
+        spread=spread,
         lost_threshold=2.0 * (50 ** (2.0 / 3.0)),
-        **bounds,
+        world_width=world_width,
+        world_height=world_height,
+        goal_center=goal,
+        goal_radius=goal_radius,
     )
 
     def _inside(pos: np.ndarray) -> None:

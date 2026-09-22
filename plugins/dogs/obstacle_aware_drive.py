@@ -20,7 +20,7 @@ from core.observation import ShepherdObservation
 from core.simulation_state import SimulationState
 
 
-def obstacle_aware_drive_target(state: SimulationState, config: dict):
+def obstacle_aware_drive_target(state: SimulationState, config: dict[str, Any]):
     centroid = state.sheep_centroid
     goal = resolve_goal_center(state, config)
     offset = drive_offset(state, config)

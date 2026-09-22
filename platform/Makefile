@@ -2,7 +2,7 @@
 # From repo root: make -C platform help   or   make help
 
 .PHONY: help install dev dev-backend dev-frontend test test-backend test-stress \
-	test-frontend lint format build clean
+	test-frontend lint format typecheck build clean
 
 ROOT := $(abspath $(CURDIR)/..)
 UV ?= uv
@@ -21,7 +21,8 @@ help:
 	@echo "  make test-frontend   Node frontend tests + production build"
 	@echo "  make lint            Ruff check + frontend eslint"
 	@echo "  make format          Ruff format + frontend prettier"
-	@echo "  make build           Frontend production build"
+	@echo "  make typecheck       Python static type check (basedpyright)"
+	@echo "  make build           Python typecheck + frontend production build"
 	@echo "  make clean           Remove caches, dist, and Vite cache"
 	@echo ""
 	@echo "Scaling protocols: make -C ../scaling help"
@@ -59,7 +60,10 @@ format:
 	cd $(ROOT) && $(UV) run ruff format .
 	cd frontend && npx prettier --write src/
 
-build:
+typecheck:
+	cd $(ROOT) && $(UV) run basedpyright --project $(ROOT) --level error
+
+build: typecheck
 	cd frontend && npm run build
 
 clean:

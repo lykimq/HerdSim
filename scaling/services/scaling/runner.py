@@ -16,7 +16,7 @@ import yaml
 from analysis.scaling.provenance import build_provenance_stamp, write_provenance
 from analysis.failure_taxonomy import classify_failure
 from services.shared.trial_aggregates import build_trial_metric_fields
-from services.scaling.layout import CANONICAL_PROTOCOL, write_status
+from services.scaling.layout import CANONICAL_PROTOCOL, read_status, write_status
 from core.experiment_config import resolve_experiment_config
 from core.methods import get_method
 from core.simulation_runner import RunResult, SimulationRunner
@@ -71,6 +71,40 @@ def load_canonical_protocol(path: Path | str | None = None) -> dict[str, Any]:
     path = Path(path)
     with path.open() as f:
         return yaml.safe_load(f)
+
+
+def resolve_cell_max_ticks(
+    protocol: dict[str, Any],
+    *,
+    spec: dict[str, Any] | None = None,
+    override: int | None = None,
+) -> int:
+    """Resolve per-cell tick budget from CLI override, protocol spec, then T0."""
+    if override is not None:
+        return int(override)
+    spec = spec or {}
+    if "max_ticks" in spec:
+        return int(spec["max_ticks"])
+    budget = spec.get("time_budget")
+    if budget == "t1":
+        return int(protocol.get("time_limit_t1", 20000))
+    if budget == "t0":
+        return int(protocol.get("time_limit_t0", 10000))
+    return int(protocol.get("time_limit_t0", 10000))
+
+
+SCALING_GROUP_CANDIDATES = (
+    "method",
+    "initial_layout",
+    "obs_mode",
+    "sensing_range",
+    "communication",
+)
+
+
+def scaling_group_cols(frame: pd.DataFrame) -> list[str]:
+    """Group columns present on a trials or window table."""
+    return [c for c in SCALING_GROUP_CANDIDATES if c in frame.columns]
 
 
 def _cell_key(cell: ScalingCell) -> str:
@@ -216,12 +250,15 @@ def _run_cell(cell: ScalingCell) -> dict[str, Any]:
     status = "running"
     while status == "running":
         state, _, status = runner.step()
+    final_state = runner.state
+    if final_state is None:
+        raise RuntimeError("scaling trial finished without a simulation state")
     result = RunResult(
         success=(status == "success"),
-        total_ticks=runner.state.tick if runner.state else 0,
+        total_ticks=final_state.tick,
         seed=cell.seed,
         history=runner.recorder.to_dataframe(),
-        final_state=runner.state,
+        final_state=final_state,
     )
     row = _trial_row_from_result(
         method=cell.method,
@@ -282,6 +319,31 @@ def expand_scaling_grid(
     return cells
 
 
+def _row_int(row: pd.Series, col: str) -> int:
+    return int(row.at[col])
+
+
+def _row_optional_str(row: pd.Series, col: str) -> str | None:
+    if col not in row.index:
+        return None
+    value: object = row.at[col]
+    if value is None or value is pd.NA:
+        return None
+    if isinstance(value, float) and value != value:
+        return None
+    text = str(value)
+    if text in {"nan", "NaT", "<NA>", "None"}:
+        return None
+    return text
+
+
+def _row_optional_float(row: pd.Series, col: str) -> float | None:
+    text = _row_optional_str(row, col)
+    if text is None:
+        return None
+    return float(text)
+
+
 def expand_claim_cells_from_boundaries(
     protocol: dict[str, Any],
     boundaries: pd.DataFrame,
@@ -295,7 +357,7 @@ def expand_claim_cells_from_boundaries(
     layout_col: str = "initial_layout",
     method_col: str = "method",
 ) -> list[ScalingCell]:
-    """Expand claim-grade seeds on scout boundary (N, D) cells only."""
+    """Expand claim-grade seeds on planned (N, D) window cells only."""
     if boundaries.empty:
         return []
     methods = methods or [protocol.get("baseline_method", "strombom_multi")]
@@ -308,18 +370,15 @@ def expand_claim_cells_from_boundaries(
 
     cells: list[ScalingCell] = []
     for _, brow in boundaries.iterrows():
-        n = int(brow[sheep_col])
-        d = int(brow[dog_col])
-        layout_list = (
-            [str(brow[layout_col])]
-            if layout_col in boundaries.columns and pd.notna(brow.get(layout_col))
-            else list(default_layouts)
-        )
-        method_list = (
-            [str(brow[method_col])]
-            if method_col in boundaries.columns and pd.notna(brow.get(method_col))
-            else list(methods)
-        )
+        n = _row_int(brow, sheep_col)
+        d = _row_int(brow, dog_col)
+        layout_val = _row_optional_str(brow, layout_col)
+        layout_list = [layout_val] if layout_val is not None else list(default_layouts)
+        method_val = _row_optional_str(brow, method_col)
+        method_list = [method_val] if method_val is not None else list(methods)
+        obs = _row_optional_str(brow, "obs_mode")
+        sense = _row_optional_float(brow, "sensing_range")
+        comm = _row_optional_str(brow, "communication")
         for method in method_list:
             for layout in layout_list:
                 arena = scaling_world_overrides(protocol, n)
@@ -331,6 +390,9 @@ def expand_claim_cells_from_boundaries(
                             seed=int(seed),
                             initial_layout=str(layout),
                             method=str(method),
+                            obs_mode=obs,
+                            sensing_range=sense,
+                            communication=comm,
                             max_ticks=ticks,
                             **arena,
                         )
@@ -354,6 +416,25 @@ def run_scaling_grid(
     protocol = protocol or {}
     done = _load_completed(out) if resume else set()
     pending = [c for c in cells if _cell_key(c) not in done]
+    n_planned = len(cells)
+    n_pending_at_start = len(pending)
+
+    # Campaign wall-clock: preserve started_at across resumes. Metadata only.
+    prior = read_status(out) if resume else {}
+    started_at = str(prior["started_at"]) if prior.get("started_at") else (
+        datetime.now(timezone.utc).isoformat()
+    )
+    write_status(
+        out,
+        protocol_id=protocol_id,
+        n_planned=n_planned,
+        n_done=len(done),
+        n_pending_at_start=n_pending_at_start,
+        started_at=started_at,
+        updated_at=datetime.now(timezone.utc).isoformat(),
+        running=True,
+        extra={"store_timeseries": bool(store_timeseries)},
+    )
 
     stamp = build_provenance_stamp(
         protocol_id=protocol_id,
@@ -382,7 +463,10 @@ def run_scaling_grid(
         cpu = os.cpu_count() or 2
         workers = max(1, cpu - 1)
 
+    n_done_so_far = len(done)
+
     def _consume(payload: dict[str, Any]) -> None:
+        nonlocal n_done_so_far
         cell: ScalingCell = payload["cell"]
         row = dict(payload["row"])
         rows.append(row)
@@ -392,6 +476,7 @@ def run_scaling_grid(
                 payload["history"],
                 ts_dir / f"{_cell_key(cell)}.parquet",
             )
+        now = datetime.now(timezone.utc).isoformat()
         man: dict[str, Any] = {
             "key": payload["key"],
             "N": cell.n_sheep,
@@ -400,7 +485,7 @@ def run_scaling_grid(
             "initial_layout": cell.initial_layout,
             "method": cell.method,
             "status": "ok",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": now,
         }
         if cell.obs_mode is not None:
             man["obs_mode"] = cell.obs_mode
@@ -409,6 +494,19 @@ def run_scaling_grid(
         if cell.communication is not None:
             man["communication"] = cell.communication
         _append_manifest(out, man)
+        n_done_so_far += 1
+        # Progress clock only: same cells, seeds, and resume keys as before.
+        write_status(
+            out,
+            protocol_id=protocol_id,
+            n_planned=n_planned,
+            n_done=n_done_so_far,
+            n_pending_at_start=n_pending_at_start,
+            started_at=started_at,
+            updated_at=now,
+            running=True,
+            extra={"store_timeseries": bool(store_timeseries)},
+        )
 
     if pending:
         if workers <= 1 or len(pending) == 1:
@@ -423,12 +521,17 @@ def run_scaling_grid(
     trials = pd.DataFrame(rows)
     trials.to_csv(trials_path, index=False)
     n_done = len(_load_completed(out))
+    finished_at = datetime.now(timezone.utc).isoformat()
     write_status(
         out,
         protocol_id=protocol_id,
-        n_planned=len(cells),
+        n_planned=n_planned,
         n_done=n_done,
-        n_pending_at_start=len(pending),
+        n_pending_at_start=n_pending_at_start,
+        started_at=started_at,
+        updated_at=finished_at,
+        finished_at=finished_at if n_done >= n_planned and n_planned > 0 else None,
+        running=n_done < n_planned,
         extra={
             "n_rows_trials_csv": int(len(trials)),
             "store_timeseries": bool(store_timeseries),

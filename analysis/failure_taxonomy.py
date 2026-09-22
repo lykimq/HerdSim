@@ -41,10 +41,13 @@ _PRIORITY = (
 )
 
 
-def _col(history: pd.DataFrame, name: str) -> np.ndarray | None:
+def _col(history: pd.DataFrame | None, name: str) -> np.ndarray | None:
     if history is None or history.empty or name not in history.columns:
         return None
-    values = pd.to_numeric(history[name], errors="coerce").to_numpy(dtype=float)
+    values = np.asarray(
+        pd.Series(pd.to_numeric(history[name], errors="coerce")),
+        dtype=float,
+    )
     if values.size == 0 or np.all(np.isnan(values)):
         return None
     return values

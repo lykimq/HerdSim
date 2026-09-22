@@ -1,0 +1,9 @@
+# Phase-4 structure scout for kubo (RQ4). Same grid as Phase-2 structure.
+
+extends: phase2_scout.yaml
+protocol_id: phase4_kubo_structure_scout
+phase: 4
+output: scaling/results/phase4/kubo_structure/scout
+methods:
+  - kubo
+packages: [B, D]

@@ -1,0 +1,21 @@
+# Phase-5 sensing-range scout (RQ5).
+# Grade: SCOUT. Multiples of method r_s=65. Obs mode left unset so the ladder
+# is range only. Claim sizes {100, 200}, low-D band, scout seeds.
+
+protocol_id: phase5_range_scout
+phase: 5
+grade: SCOUT
+output: scaling/results/phase5/range_scout
+canonical: scaling/configs/canonical_grid.yaml
+
+method: strombom_multi
+runner: factor
+layouts:
+  - compact
+flock_sizes: [100, 200]
+shepherd_counts: [1, 2, 3, 4, 6, 10]
+seeds: 30
+seed_mode: scout
+sensing_ranges: [32.5, 65.0, 97.5, 130.0]
+store_timeseries: false
+packages: [E]

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 import pandas as pd
@@ -18,23 +18,19 @@ def reliability_table(
 ) -> pd.DataFrame:
     """Mean success rate per (group, N, D) cell."""
     keys = list(group_cols or []) + [sheep_col, dog_col]
-    rates = (
-        df.groupby(keys, dropna=False)[success_col]
-        .mean()
-        .reset_index()
-        .rename(columns={success_col: "reliability"})
-    )
+    grouped = df.groupby(keys, dropna=False)[success_col].mean()
+    rates = pd.Series(grouped).reset_index(name="reliability")
     return rates
 
 
 def _ordered_d_values(rates: pd.DataFrame, dog_col: str) -> list[int]:
-    return sorted({int(d) for d in rates[dog_col].tolist()})
+    return sorted({int(cast(Any, d)) for d in rates[dog_col].tolist()})
 
 
 def _d_min_for_rates(rates: pd.Series, theta: float) -> int | None:
     for d, r in rates.items():
-        if float(r) >= theta:
-            return int(d)
+        if float(cast(Any, r)) >= theta:
+            return int(cast(Any, d))
     return None
 
 
@@ -50,10 +46,11 @@ def _d_overcrowd_for_rates(
     ds = list(rates.index)
     below_run: list[int] = []
     for d in ds:
-        if int(d) <= d_min:
+        d_i = int(cast(Any, d))
+        if d_i <= d_min:
             continue
-        if float(rates[d]) < theta:
-            below_run.append(int(d))
+        if float(cast(Any, rates.loc[d])) < theta:
+            below_run.append(d_i)
             if len(below_run) >= 2:
                 return below_run[0]
         else:
@@ -70,7 +67,7 @@ def _d_max_for_rates(
 ) -> int | None:
     if d_min is None:
         return None
-    achieving = [int(d) for d, r in rates.items() if float(r) >= theta]
+    achieving = [int(cast(Any, d)) for d, r in rates.items() if float(cast(Any, r)) >= theta]
     if not achieving:
         return None
     if d_overcrowd is None:
@@ -114,7 +111,10 @@ def select_claim_windows(
         meta = dict(zip(keys, key_vals))
         ordered = g.sort_values(dog_col)
         ds = [int(v) for v in ordered[dog_col].tolist()]
-        rel = {int(row[dog_col]): float(row["reliability"]) for _, row in ordered.iterrows()}
+        rel = {
+            int(row.at[dog_col]): float(row.at["reliability"])
+            for _, row in ordered.iterrows()
+        }
         d_min = _d_min_for_rates(pd.Series(rel).sort_index(), theta)
         chosen: dict[int, str] = {}
         if d_min is None:
@@ -162,13 +162,92 @@ def merge_scout_and_claim(
         return claim.copy()
     keys = key_cols or [
         c
-        for c in ("method", "initial_layout", "n_sheep", "n_shepherds")
+        for c in (
+            "method",
+            "initial_layout",
+            "obs_mode",
+            "sensing_range",
+            "communication",
+            "n_sheep",
+            "n_shepherds",
+        )
         if c in scout.columns and c in claim.columns
     ]
-    claim_keys = claim[keys].drop_duplicates()
+    claim_keys = claim.loc[:, keys].drop_duplicates()
     tagged = scout.merge(claim_keys, on=keys, how="left", indicator=True)
-    kept = tagged[tagged["_merge"] == "left_only"].drop(columns="_merge")
-    return pd.concat([kept, claim], ignore_index=True)
+    kept = tagged.loc[tagged["_merge"] == "left_only"].drop(columns="_merge")
+    return pd.DataFrame(pd.concat([kept, claim], ignore_index=True))
+
+
+def select_t1_windows(
+    df: pd.DataFrame,
+    *,
+    theta: float = 0.90,
+    sheep_col: str = "n_sheep",
+    dog_col: str = "n_shepherds",
+    success_col: str = "success",
+    group_cols: list[str] | None = None,
+) -> pd.DataFrame:
+    """Cells that define overcrowding: D_overcrowd and the next grid D.
+
+    Used for the T1 budget (20,000 ticks). Curves with no overcrowding yield
+    no rows.
+    """
+    groups = list(group_cols or [])
+    rates = reliability_table(
+        df,
+        sheep_col=sheep_col,
+        dog_col=dog_col,
+        success_col=success_col,
+        group_cols=groups,
+    )
+    frontier = extract_frontier(
+        df,
+        theta=theta,
+        sheep_col=sheep_col,
+        dog_col=dog_col,
+        success_col=success_col,
+        group_cols=groups,
+    )
+    columns = groups + [sheep_col, dog_col, "reliability", "role"]
+    if rates.empty or frontier.empty:
+        return pd.DataFrame(columns=columns)
+
+    keys = groups + [sheep_col]
+    front_map: dict[tuple[Any, ...], pd.Series] = {}
+    for _, fr in frontier.iterrows():
+        front_map[tuple(fr[k] for k in keys)] = fr
+
+    rows: list[dict[str, Any]] = []
+    for key_vals, g in rates.groupby(keys, dropna=False):
+        if not isinstance(key_vals, tuple):
+            key_vals = (key_vals,)
+        meta = dict(zip(keys, key_vals))
+        fr = front_map.get(key_vals)
+        if fr is None:
+            continue
+        d_over = fr.get("d_overcrowd")
+        if d_over is None or (isinstance(d_over, float) and d_over != d_over):
+            continue
+        d_over = int(d_over)
+        ordered = g.sort_values(dog_col)
+        ds = [int(v) for v in ordered[dog_col].tolist()]
+        rel = {
+            int(row.at[dog_col]): float(row.at["reliability"])
+            for _, row in ordered.iterrows()
+        }
+        if d_over not in ds:
+            continue
+        idx = ds.index(d_over)
+        chosen = [d_over]
+        if idx + 1 < len(ds):
+            chosen.append(ds[idx + 1])
+        for d in chosen:
+            role = "overcrowd_onset" if d == d_over else "overcrowd_next"
+            rows.append(
+                {**meta, dog_col: d, "reliability": rel[d], "role": role}
+            )
+    return pd.DataFrame(rows)
 
 
 def _rank_endpoint(samples: np.ndarray, q: float) -> float:
@@ -218,7 +297,10 @@ def bootstrap_d_min_ci(
         if not isinstance(key_vals, tuple):
             key_vals = (key_vals,)
         meta = dict(zip(keys, key_vals))
-        point = _d_min_for_rates(g.groupby(dog_col)[success_col].mean().sort_index(), theta)
+        point = _d_min_for_rates(
+            pd.Series(g.groupby(dog_col)[success_col].mean()).sort_index(),
+            theta,
+        )
 
         if seed_col not in g.columns:
             rows.append(
@@ -237,10 +319,14 @@ def bootstrap_d_min_ci(
         # Build per-D success vectors aligned on the union of seeds.
         by_d: dict[int, np.ndarray] = {}
         n_seeds_ref = 0
-        for d, sub in g.groupby(dog_col):
+        for d_key, sub in g.groupby(dog_col):
             # One success flag per seed (last wins if duplicates).
-            seed_success = sub.groupby(seed_col)[success_col].max().astype(float).to_numpy()
-            by_d[int(d)] = seed_success
+            seed_success = (
+                pd.Series(sub.groupby(seed_col)[success_col].max())
+                .astype(float)
+                .to_numpy()
+            )
+            by_d[int(cast(Any, d_key))] = seed_success
             n_seeds_ref = max(n_seeds_ref, len(seed_success))
 
         if n_seeds_ref < 1 or not by_d:
@@ -332,7 +418,7 @@ def extract_frontier(
         if not isinstance(key_vals, tuple):
             key_vals = (key_vals,)
         meta = dict(zip(keys, key_vals))
-        rates = g.groupby(dog_col)[success_col].mean().sort_index()
+        rates = pd.Series(g.groupby(dog_col)[success_col].mean()).sort_index()
         d_min = _d_min_for_rates(rates, theta)
         d_overcrowd = _d_overcrowd_for_rates(rates, d_min=d_min, theta=theta)
         d_max = _d_max_for_rates(rates, d_min=d_min, d_overcrowd=d_overcrowd, theta=theta)
@@ -352,21 +438,25 @@ def extract_frontier(
                     d, t_lim = key
                 else:
                     d, t_lim = key, None
-                r = float(sub[success_col].mean())
+                r = float(pd.Series(sub.loc[:, success_col]).mean())
                 if r < theta:
                     continue
-                effort = float(sub[effort_col].median())
-                t_s = float(sub[time_col].median()) if time_col in sub.columns else float("inf")
+                effort = float(pd.Series(sub.loc[:, effort_col]).median())
+                t_s = (
+                    float(pd.Series(sub.loc[:, time_col]).median())
+                    if time_col in sub.columns
+                    else float("inf")
+                )
                 t_val = (
-                    float(t_lim)
+                    float(cast(Any, t_lim))
                     if t_lim is not None
                     else (
-                        float(sub[time_limit_col].median())
+                        float(pd.Series(sub.loc[:, time_limit_col]).median())
                         if time_limit_col in sub.columns
                         else float("nan")
                     )
                 )
-                candidates.append((effort, int(d), t_s, t_val))
+                candidates.append((effort, int(cast(Any, d)), t_s, t_val))
             if candidates:
                 candidates.sort(key=lambda x: (x[0], x[1], x[2]))
                 b_star_effort, b_star_d, _, b_star_t = candidates[0]
@@ -382,7 +472,7 @@ def extract_frontier(
             "b_star_t": b_star_t,
             "b_star_effort": b_star_effort,
             "hard_failure": d_min is None,
-            "rates": {int(k): float(v) for k, v in rates.items()},
+            "rates": {int(cast(Any, k)): float(cast(Any, v)) for k, v in rates.items()},
         }
         rows.append(row)
     return pd.DataFrame(rows)

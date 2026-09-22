@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from core.base_metric import BaseMetric
 
 
@@ -25,7 +27,7 @@ class MetricRegistry:
         """Return fresh metric instances for a simulation session."""
         return [cls() for cls in self._metric_classes.values()]
 
-    def list_all(self) -> list[dict]:
+    def list_all(self) -> list[dict[str, Any]]:
         return [
             {
                 "id": m.id,

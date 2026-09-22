@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field, fields
-from typing import Any
+from typing import Any, TypeVar, cast
+
+_T = TypeVar("_T")
 
 
 FAILURE_MODES = (
@@ -182,14 +184,15 @@ class ExperimentalFactors:
         return factors
 
 
-def _merge_dataclass(cls: type, nested: Any, flat: dict[str, Any]):
-    data = {f.name: getattr(cls(), f.name) for f in fields(cls)}
+def _merge_dataclass(cls: type[_T], nested: Any, flat: dict[str, Any]) -> _T:
+    field_list = fields(cast(Any, cls))
+    data = {f.name: getattr(cls(), f.name) for f in field_list}
     if isinstance(nested, dict):
         for key, value in nested.items():
             if key in data:
                 data[key] = value
     # Allow flat keys that match dataclass field names.
-    for f in fields(cls):
+    for f in field_list:
         if f.name in flat and f.name not in ("world_overrides", "params"):
             data[f.name] = flat[f.name]
     if cls is EnvironmentFactors and isinstance(flat.get("world_overrides"), dict):
@@ -197,7 +200,7 @@ def _merge_dataclass(cls: type, nested: Any, flat: dict[str, Any]):
     if cls is EnvironmentFactors and "goal_velocity" in flat:
         gv = flat["goal_velocity"]
         data["goal_velocity"] = tuple(gv) if not isinstance(gv, tuple) else gv
-    return cls(**data)
+    return cast(_T, cls(**data))
 
 
 # Allowlisted factor keys for factorial grids (flat dotted or short names).

@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
+from typing import Any
 
 import numpy as np
 
@@ -15,6 +16,9 @@ class SimulationState:
 
     Sheep dynamics and dog controllers return an updated copy each tick.
     Metrics read this to compute scalar values.
+
+    Per-agent arrays are always length-N or length-M after construction.
+    Empty defaults are resized in ``__post_init__``.
     """
 
     tick: int
@@ -24,33 +28,47 @@ class SimulationState:
     shepherd_velocities: np.ndarray  # shape (M, 2)
     world: World
     rng: np.random.Generator
-    metadata: dict = field(default_factory=dict)
-    sheep_response: np.ndarray | None = None
-    sheep_cohesion: np.ndarray | None = None
-    shepherd_speed_scale: np.ndarray | None = None
-    shepherd_sensing_scale: np.ndarray | None = None
-    shepherd_active: np.ndarray | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
+    sheep_response: np.ndarray = field(
+        default_factory=lambda: np.ones(0, dtype=float)
+    )
+    sheep_cohesion: np.ndarray = field(
+        default_factory=lambda: np.ones(0, dtype=float)
+    )
+    shepherd_speed_scale: np.ndarray = field(
+        default_factory=lambda: np.ones(0, dtype=float)
+    )
+    shepherd_sensing_scale: np.ndarray = field(
+        default_factory=lambda: np.ones(0, dtype=float)
+    )
+    shepherd_active: np.ndarray = field(
+        default_factory=lambda: np.ones(0, dtype=bool)
+    )
 
     def __post_init__(self) -> None:
         n = int(self.sheep_positions.shape[0])
         m = int(self.shepherd_positions.shape[0])
-        if self.sheep_response is None:
+        if int(self.sheep_response.shape[0]) != n:
             self.sheep_response = np.ones(n, dtype=float)
         else:
             self.sheep_response = np.asarray(self.sheep_response, dtype=float)
-        if self.sheep_cohesion is None:
+        if int(self.sheep_cohesion.shape[0]) != n:
             self.sheep_cohesion = np.ones(n, dtype=float)
         else:
             self.sheep_cohesion = np.asarray(self.sheep_cohesion, dtype=float)
-        if self.shepherd_speed_scale is None:
+        if int(self.shepherd_speed_scale.shape[0]) != m:
             self.shepherd_speed_scale = np.ones(m, dtype=float)
         else:
-            self.shepherd_speed_scale = np.asarray(self.shepherd_speed_scale, dtype=float)
-        if self.shepherd_sensing_scale is None:
+            self.shepherd_speed_scale = np.asarray(
+                self.shepherd_speed_scale, dtype=float
+            )
+        if int(self.shepherd_sensing_scale.shape[0]) != m:
             self.shepherd_sensing_scale = np.ones(m, dtype=float)
         else:
-            self.shepherd_sensing_scale = np.asarray(self.shepherd_sensing_scale, dtype=float)
-        if self.shepherd_active is None:
+            self.shepherd_sensing_scale = np.asarray(
+                self.shepherd_sensing_scale, dtype=float
+            )
+        if int(self.shepherd_active.shape[0]) != m:
             self.shepherd_active = np.ones(m, dtype=bool)
         else:
             self.shepherd_active = np.asarray(self.shepherd_active, dtype=bool)
@@ -79,22 +97,6 @@ class SimulationState:
         """Index of the sheep furthest from the flock centroid."""
         return int(np.argmax(self.distances_to_centroid()))
 
-    def copy_with(self, **kwargs) -> SimulationState:
+    def copy_with(self, **kwargs: Any) -> SimulationState:
         """Return a new state with selected fields replaced."""
-        data = {
-            "tick": self.tick,
-            "sheep_positions": self.sheep_positions,
-            "sheep_velocities": self.sheep_velocities,
-            "shepherd_positions": self.shepherd_positions,
-            "shepherd_velocities": self.shepherd_velocities,
-            "world": self.world,
-            "rng": self.rng,
-            "metadata": self.metadata,
-            "sheep_response": self.sheep_response,
-            "sheep_cohesion": self.sheep_cohesion,
-            "shepherd_speed_scale": self.shepherd_speed_scale,
-            "shepherd_sensing_scale": self.shepherd_sensing_scale,
-            "shepherd_active": self.shepherd_active,
-        }
-        data.update(kwargs)
-        return SimulationState(**data)
+        return replace(self, **kwargs)
