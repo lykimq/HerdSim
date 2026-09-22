@@ -1,0 +1,126 @@
+{
+  "protocol_id": "phase1_pilot",
+  "created_at": "2026-09-22T10:46:27.239114+00:00",
+  "git_hash": "51fbe27db730d838a7662b419c201564c2ab1e74",
+  "protocol": {
+    "protocol_id": "scaling_v2",
+    "frozen_on": "2026-09-22",
+    "task": "drive_to_goal",
+    "world_width": 500.0,
+    "world_height": 500.0,
+    "goal_center": [
+      370.0,
+      250.0
+    ],
+    "goal_radius_at_n50": 15.0,
+    "drive_length": 120.0,
+    "initial_spread": 30.0,
+    "measurement_radius": 5.0,
+    "reliability_theta": 0.9,
+    "reliability_sensitivity": [
+      0.5,
+      0.7
+    ],
+    "baseline_method": "strombom_multi",
+    "transfer_methods": [
+      "strombom_multi",
+      "kubo",
+      "fat",
+      "communication_free"
+    ],
+    "required_transfer_methods": [
+      "strombom_multi",
+      "kubo",
+      "fat"
+    ],
+    "flock_sizes": [
+      5,
+      10,
+      25,
+      50,
+      75,
+      100,
+      150,
+      200,
+      300,
+      400
+    ],
+    "shepherd_counts": [
+      1,
+      2,
+      3,
+      4,
+      6,
+      10,
+      15,
+      20,
+      25,
+      35
+    ],
+    "structure_flock_sizes": [
+      50,
+      100,
+      200
+    ],
+    "rq5_flock_sizes": [
+      100,
+      200
+    ],
+    "x0_families": [
+      "compact",
+      "wide",
+      "split",
+      "outlier_rich"
+    ],
+    "time_limit_t0": 10000,
+    "time_limit_t1": 20000,
+    "scout_seeds": 30,
+    "claim_grade_seeds": 100,
+    "master_seed": 2026,
+    "bootstrap_resamples": 1000,
+    "rq5_base_sensing_range": 65.0,
+    "rq5_factors": [
+      "obs_mode",
+      "sensing_range",
+      "communication"
+    ],
+    "rq7_prediction_horizon_k": 500,
+    "rq7_feature_window_w": 200,
+    "rq7_eval_start": 1000,
+    "rq7_eval_stop": 8000,
+    "rq7_eval_step": 200,
+    "predictor_window_ticks": 100,
+    "wasteful_effort_tolerance": 0.2,
+    "wasteful_effort_sensitivity": [
+      0.1,
+      0.3
+    ]
+  },
+  "protocol_hash": "54dfb46837e3971a",
+  "seed_list": [
+    2026,
+    2027,
+    2028,
+    2029,
+    2030
+  ],
+  "n_seeds": 5,
+  "metric_ids": [
+    "success",
+    "mean_spread",
+    "extent",
+    "cohesion",
+    "fragmentation"
+  ],
+  "extra": {
+    "package": "A",
+    "theta": 0.9,
+    "n_figures": 3,
+    "methods": [
+      "strombom_multi"
+    ],
+    "layouts": [
+      "compact"
+    ]
+  }
+}

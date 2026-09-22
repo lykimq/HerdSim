@@ -22,7 +22,9 @@ ROOT := $(abspath $(CURDIR)/..)
 UV ?= uv
 export PYTHONPATH := $(ROOT):$(ROOT)/platform:$(ROOT)/scaling$(if $(PYTHONPATH),:$(PYTHONPATH),)
 
-WORKERS ?= 1
+# Default pool size for this host (Ultra 7 165H, 22 threads). Override down on
+# smaller machines: make scaling-scout WORKERS=4
+WORKERS ?= 16
 PACKAGE ?= A
 TRANSFER_METHOD ?= kubo
 PROTOCOL ?=
@@ -57,8 +59,9 @@ help scaling-help:
 	@echo "  scaling-transfer-*-scout|claim-*   TRANSFER_METHOD=kubo|fat"
 	@echo "  scaling-factor-sweep | scaling-phase5-*-scout|claim-*"
 	@echo "  scaling-analyse PROTOCOL=... PACKAGE=A [TRIALS=...]"
-	@echo "Example: make scaling-scout WORKERS=8"
-	@echo "         make scaling-transfer-size-scout TRANSFER_METHOD=fat WORKERS=8"
+	@echo "Default WORKERS=$(WORKERS) on this Makefile (override as needed)."
+	@echo "Example: make scaling-scout"
+	@echo "         make scaling-transfer-size-scout TRANSFER_METHOD=fat WORKERS=16"
 
 scaling-test:
 	cd $(ROOT) && $(UV) run pytest tests/backend/correctness/test_scaling_stack.py -q

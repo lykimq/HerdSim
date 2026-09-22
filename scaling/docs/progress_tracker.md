@@ -8,7 +8,9 @@ Report form: [REPORT_TEMPLATE.md](REPORT_TEMPLATE.md)
 Help: `make -C scaling help` (wraps `scaling/scripts/campaign.py`)
 
 Protocol: `scaling_v2`
-Host: `gwen` (prefer `WORKERS=8`, up to 12-16 if plugged in)
+Host: `gwen` (Intel Core Ultra 7 165H, 22 threads, 61 GiB RAM)
+Workers: prefer `WORKERS=16` on AC (leave headroom; not all 22). Cap at 18 if the machine stays cool.
+CPU: set governor to `performance` before long campaigns (see below).
 Results: `scaling/results/` is gitignored.
 
 How to read this file:
@@ -41,27 +43,37 @@ All Section 2 experiment steps can run with the current code. No campaign YAML i
 
 ## 2. Experiment runs
 
-Default from repo root. Example: `WORKERS=8`. Transfer examples use `TRANSFER_METHOD=kubo` (repeat with `fat`).
+Default from repo root: `WORKERS=16` on this host (AC). Transfer examples use
+`TRANSFER_METHOD=kubo` (repeat with `fat`).
+
+Before a long scout or claim (once per boot, as root or with sudo):
+
+```bash
+for g in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo performance | sudo tee "$g" >/dev/null; done
+```
+
+Check: `cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor` should print `performance`.
+When finished or on battery, you can switch back to `powersave` the same way.
 
 | # | Step | Grade | Command | Output | Status |
 |---|------|-------|---------|--------|--------|
-| 0 | Sanity tests | n/a | `make -C scaling scaling-test` | pytest | TODO |
-| 1 | Phase 1 smoke | SMOKE | `make -C scaling scaling-pilot WORKERS=8` | `scaling/results/phase1/pilot/` | TODO |
-| 2 | Phase 1 scout | SCOUT | `make -C scaling scaling-scout WORKERS=8` | `scaling/results/phase1/scout/` | TODO |
+| 0 | Sanity tests | n/a | `make -C scaling scaling-test` | pytest | DONE |
+| 1 | Phase 1 smoke | SMOKE | `make -C scaling scaling-pilot WORKERS=16` | `scaling/results/phase1/pilot/` | DONE |
+| 2 | Phase 1 scout | SCOUT | `make -C scaling scaling-scout WORKERS=16` | `scaling/results/phase1/scout/` | DONE |
 | 3 | Plan claim windows | n/a | `make -C scaling scaling-claim-plan` | `scaling/results/phase1/claim/boundary_cells.csv` | TODO |
-| 4 | Phase 1 claim reseed | CLAIM | `make -C scaling scaling-claim-reseed WORKERS=8` | `scaling/results/phase1/claim/` | TODO |
+| 4 | Phase 1 claim reseed | CLAIM | `make -C scaling scaling-claim-reseed WORKERS=16` | `scaling/results/phase1/claim/` | TODO |
 | 5 | Analyse Package A and F on the merge | CLAIM | `make -C scaling scaling-analyse PACKAGE=A TRIALS=results/phase1/claim/merged_trials.csv OUT=results/phase1/claim/packages/a` | packages | TODO |
-| 6 | Phase 1 T1 | CLAIM | `make -C scaling scaling-t1 WORKERS=8` | `scaling/results/phase1/t1/` | TODO |
-| 7 | Phase 2 structure scout | SCOUT | `make -C scaling scaling-phase2-scout WORKERS=8` | `scaling/results/phase2/scout/` | TODO |
-| 8 | Phase 2 claim | CLAIM | `make -C scaling scaling-phase2-claim-reseed WORKERS=8` | `scaling/results/phase2/claim/` | TODO |
+| 6 | Phase 1 T1 | CLAIM | `make -C scaling scaling-t1 WORKERS=16` | `scaling/results/phase1/t1/` | TODO |
+| 7 | Phase 2 structure scout | SCOUT | `make -C scaling scaling-phase2-scout WORKERS=16` | `scaling/results/phase2/scout/` | TODO |
+| 8 | Phase 2 claim | CLAIM | `make -C scaling scaling-phase2-claim-reseed WORKERS=16` | `scaling/results/phase2/claim/` | TODO |
 | 9 | Phase 3 mechanism | CLAIM | `make -C scaling scaling-analyse PACKAGE=C TRIALS=results/phase1/claim/merged_trials.csv OUT=results/phase1/claim/packages/c` | Package C | BLOCKED on steps 4-5 |
 | 10 | Phase 6 fits | CLAIM | `make -C scaling scaling-analyse PACKAGE=F TRIALS=results/phase1/claim/merged_trials.csv OUT=results/phase1/claim/packages/f` | Package F | BLOCKED on step 5 |
-| 11 | Phase 4 size (kubo then fat) | SCOUT then CLAIM | `make -C scaling scaling-transfer-size-scout TRANSFER_METHOD=kubo WORKERS=8` then claim-reseed; repeat `fat` | `scaling/results/phase4/` | TODO |
-| 12 | Phase 4 structure (kubo then fat) | SCOUT then CLAIM | `make -C scaling scaling-transfer-structure-scout TRANSFER_METHOD=kubo WORKERS=8` then claim-reseed; repeat `fat` | `scaling/results/phase4/` | TODO |
+| 11 | Phase 4 size (kubo then fat) | SCOUT then CLAIM | `make -C scaling scaling-transfer-size-scout TRANSFER_METHOD=kubo WORKERS=16` then claim-reseed; repeat `fat` | `scaling/results/phase4/` | TODO |
+| 12 | Phase 4 structure (kubo then fat) | SCOUT then CLAIM | `make -C scaling scaling-transfer-structure-scout TRANSFER_METHOD=kubo WORKERS=16` then claim-reseed; repeat `fat` | `scaling/results/phase4/` | TODO |
 | 13 | Phase 4 transfer table | CLAIM | `make -C scaling scaling-analyse PACKAGE=D TRIALS=... --trials-by-method ...` | packages/d | BLOCKED on 11-12 |
-| 14 | Phase 5 obs scout/claim | SCOUT then CLAIM | `make -C scaling scaling-factor-sweep` then `scaling-phase5-obs-claim-reseed` | `scaling/results/phase5/` | TODO |
-| 15 | Phase 5 range | SCOUT then CLAIM | `scaling-phase5-range-scout` then `scaling-phase5-range-claim-reseed` | `scaling/results/phase5/` | TODO |
-| 16 | Phase 5 communication | SCOUT then CLAIM | `scaling-phase5-comm-scout` then `scaling-phase5-comm-claim-reseed` | `scaling/results/phase5/` | TODO |
+| 14 | Phase 5 obs scout/claim | SCOUT then CLAIM | `make -C scaling scaling-factor-sweep WORKERS=16` then `scaling-phase5-obs-claim-reseed` | `scaling/results/phase5/` | TODO |
+| 15 | Phase 5 range | SCOUT then CLAIM | `scaling-phase5-range-scout WORKERS=16` then `scaling-phase5-range-claim-reseed` | `scaling/results/phase5/` | TODO |
+| 16 | Phase 5 communication | SCOUT then CLAIM | `scaling-phase5-comm-scout WORKERS=16` then `scaling-phase5-comm-claim-reseed` | `scaling/results/phase5/` | TODO |
 | 17 | Phase 7 early warning | CLAIM | `make -C scaling scaling-analyse PACKAGE=G TRIALS=results/phase1/claim/merged_trials.csv OUT=results/phase1/claim/packages/g` | Package G | BLOCKED on steps 4-8 |
 
 After step 2, if the bootstrap interval on D_min covers more than one grid step, raise that window to 200 seeds before the structure claim.
