@@ -76,9 +76,7 @@ class CollectDriveController(BaseDogController):
                 if not state.shepherd_active[i]:
                     continue
                 dog = state.shepherd_positions[i]
-                min_dist = float(
-                    np.min(np.linalg.norm(state.sheep_positions - dog, axis=1))
-                )
+                min_dist = float(np.min(np.linalg.norm(state.sheep_positions - dog, axis=1)))
                 if min_dist <= r_a:
                     prev = state.shepherd_velocities[i]
                     norm = np.linalg.norm(prev)

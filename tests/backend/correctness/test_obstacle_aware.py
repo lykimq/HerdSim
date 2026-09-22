@@ -13,7 +13,13 @@ from plugins.dogs.obstacle_aware_drive import ObstacleAwareDriveController
 from core.observation_models import GlobalObservation
 from core.methods import METHODS, get_method
 from core.world import Obstacle
-from tests.backend.helpers import build_runner, make_state, make_world, run_trial, snapshot_positions
+from tests.backend.helpers import (
+    build_runner,
+    make_state,
+    make_world,
+    run_trial,
+    snapshot_positions,
+)
 
 
 def test_obstacle_aware_registered():
@@ -77,12 +83,8 @@ def test_segment_intersects_and_gate_gap():
         min_corner=np.array([50.0, 0.0]),
         max_corner=np.array([60.0, 40.0]),
     )
-    assert segment_intersects_aabb(
-        np.array([0.0, 20.0]), np.array([100.0, 20.0]), wall
-    )
-    assert not segment_intersects_aabb(
-        np.array([0.0, 80.0]), np.array([100.0, 80.0]), wall
-    )
+    assert segment_intersects_aabb(np.array([0.0, 20.0]), np.array([100.0, 20.0]), wall)
+    assert not segment_intersects_aabb(np.array([0.0, 80.0]), np.array([100.0, 80.0]), wall)
 
     lower = Obstacle(min_corner=np.array([70.0, 0.0]), max_corner=np.array([78.0, 66.0]))
     upper = Obstacle(min_corner=np.array([70.0, 84.0]), max_corner=np.array([78.0, 150.0]))

@@ -25,13 +25,8 @@ def test_meta_models_lists_plugins(client):
     res = client.get("/api/methods/meta/models")
     assert res.status_code == 200
     payload = res.json()
-    sheep_ids = {
-        item if isinstance(item, str) else item["id"] for item in payload["sheep_models"]
-    }
-    dog_ids = {
-        item if isinstance(item, str) else item["id"]
-        for item in payload["dog_controllers"]
-    }
+    sheep_ids = {item if isinstance(item, str) else item["id"] for item in payload["sheep_models"]}
+    dog_ids = {item if isinstance(item, str) else item["id"] for item in payload["dog_controllers"]}
     assert "strombom" in sheep_ids
     assert "collect_drive" in dog_ids
     assert "fat" in dog_ids

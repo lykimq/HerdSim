@@ -113,7 +113,11 @@ def _factor_catalog() -> dict:
             for key in sorted(FACTOR_GRID_KEYS)
         ],
         "dependencies": {
-            "sensing_range": {"when": {"obs_mode": ["local_positions", "bearing_only", "noisy_bearing", "intermittent"]}},
+            "sensing_range": {
+                "when": {
+                    "obs_mode": ["local_positions", "bearing_only", "noisy_bearing", "intermittent"]
+                }
+            },
             "noise_sigma": {"when": {"obs_mode": ["noisy_bearing"]}},
             "observation_frequency": {"when": {"obs_mode": ["intermittent"]}},
             "failure_tick": {
@@ -128,6 +132,7 @@ def _factor_catalog() -> dict:
             "goal_velocity": {"when": {"goal_mode": ["moving"]}},
         },
     }
+
 
 _METHODS_ROOT = Path(__file__).resolve().parents[3] / "methods"
 _INFO_FALLBACK = {

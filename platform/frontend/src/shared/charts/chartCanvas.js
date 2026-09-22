@@ -1,6 +1,6 @@
 /** Shared canvas helpers for history series and distribution hover tips. */
 
-import { formatScale } from './metricFormat.js';
+import { formatScale } from "./metricFormat.js";
 
 export function indexFromPointer(canvas, clientX, length) {
   if (length <= 0) return -1;
@@ -32,11 +32,11 @@ export function placeHoverTip(tipEl, rootEl, clientX, clientY) {
 }
 
 export function drawSeries(canvas, values, color, scrubIndex, hoverIndex) {
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext("2d");
   const w = canvas.width;
   const h = canvas.height;
   ctx.clearRect(0, 0, w, h);
-  ctx.fillStyle = '#0b1220';
+  ctx.fillStyle = "#0b1220";
   ctx.fillRect(0, 0, w, h);
   if (!values.length) return;
 
@@ -63,7 +63,7 @@ export function drawSeries(canvas, values, color, scrubIndex, hoverIndex) {
   if (scrubIndex >= 0 && scrubIndex < values.length) {
     const x = scrubIndex * step;
     const y = yAt(values[scrubIndex]);
-    ctx.strokeStyle = '#94a3b8';
+    ctx.strokeStyle = "#94a3b8";
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(x, 0);
@@ -75,9 +75,13 @@ export function drawSeries(canvas, values, color, scrubIndex, hoverIndex) {
     ctx.fill();
   }
 
-  if (hoverIndex >= 0 && hoverIndex < values.length && hoverIndex !== scrubIndex) {
+  if (
+    hoverIndex >= 0 &&
+    hoverIndex < values.length &&
+    hoverIndex !== scrubIndex
+  ) {
     const x = hoverIndex * step;
-    ctx.strokeStyle = '#cbd5e1';
+    ctx.strokeStyle = "#cbd5e1";
     ctx.lineWidth = 1;
     ctx.setLineDash([3, 3]);
     ctx.beginPath();
@@ -87,22 +91,26 @@ export function drawSeries(canvas, values, color, scrubIndex, hoverIndex) {
     ctx.setLineDash([]);
   }
 
-  ctx.fillStyle = '#64748b';
-  ctx.font = '10px JetBrains Mono, monospace';
-  ctx.textAlign = 'left';
+  ctx.fillStyle = "#64748b";
+  ctx.font = "10px JetBrains Mono, monospace";
+  ctx.textAlign = "left";
   ctx.fillText(formatScale(min), 4, h - 2);
-  ctx.textAlign = 'right';
+  ctx.textAlign = "right";
   ctx.fillText(formatScale(max), w - 4, h - 2);
-  ctx.textAlign = 'left';
+  ctx.textAlign = "left";
 }
 
-export function drawHistogram(canvas, bins, { minLabel, maxLabel, color, hoverIndex = -1, peakIndex = -1 }) {
+export function drawHistogram(
+  canvas,
+  bins,
+  { minLabel, maxLabel, color, hoverIndex = -1, peakIndex = -1 },
+) {
   const values = Array.isArray(bins) ? bins : [];
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext("2d");
   const w = canvas.width;
   const h = canvas.height;
   ctx.clearRect(0, 0, w, h);
-  ctx.fillStyle = '#0b1220';
+  ctx.fillStyle = "#0b1220";
   ctx.fillRect(0, 0, w, h);
   if (!values.length) return;
 
@@ -116,7 +124,7 @@ export function drawHistogram(canvas, bins, { minLabel, maxLabel, color, hoverIn
     const bw = Math.max(1, barW - 2);
     const isPeak = i === peakIndex && count > 0;
     const isHover = i === hoverIndex;
-    ctx.fillStyle = isHover ? '#e2e8f0' : isPeak ? '#ffffff' : color;
+    ctx.fillStyle = isHover ? "#e2e8f0" : isPeak ? "#ffffff" : color;
     ctx.globalAlpha = isHover || isPeak ? 1 : 0.85;
     ctx.fillRect(x, y, bw, bh);
     ctx.globalAlpha = 1;
@@ -124,7 +132,7 @@ export function drawHistogram(canvas, bins, { minLabel, maxLabel, color, hoverIn
 
   if (hoverIndex >= 0 && hoverIndex < values.length) {
     const x = hoverIndex * barW + barW / 2;
-    ctx.strokeStyle = '#cbd5e1';
+    ctx.strokeStyle = "#cbd5e1";
     ctx.lineWidth = 1;
     ctx.setLineDash([3, 3]);
     ctx.beginPath();
@@ -134,11 +142,11 @@ export function drawHistogram(canvas, bins, { minLabel, maxLabel, color, hoverIn
     ctx.setLineDash([]);
   }
 
-  ctx.fillStyle = '#64748b';
-  ctx.font = '10px JetBrains Mono, monospace';
-  ctx.textAlign = 'left';
+  ctx.fillStyle = "#64748b";
+  ctx.font = "10px JetBrains Mono, monospace";
+  ctx.textAlign = "left";
   ctx.fillText(minLabel, 4, h - 2);
-  ctx.textAlign = 'right';
+  ctx.textAlign = "right";
   ctx.fillText(maxLabel, w - 4, h - 2);
-  ctx.textAlign = 'left';
+  ctx.textAlign = "left";
 }

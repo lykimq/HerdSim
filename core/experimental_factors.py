@@ -25,9 +25,6 @@ COMMUNICATION_MODES = ("none", "neighbour_broadcast", "global_shared")
 
 GOAL_MODES = ("static", "moving")
 
-# Canonical X0 families from the scaling protocol.
-INITIAL_LAYOUTS = ("compact", "wide", "split", "outlier_rich")
-
 
 @dataclass
 class FlockFactors:
@@ -89,13 +86,12 @@ class ExperimentalFactors:
     params: dict[str, Any] = field(default_factory=dict)
 
     def validate(self) -> None:
-        from core.x0_generators import normalize_layout
+        from core.x0_generators import X0_FAMILIES, normalize_layout
 
         self.flock.initial_layout = normalize_layout(self.flock.initial_layout)
-        if self.flock.initial_layout not in INITIAL_LAYOUTS:
+        if self.flock.initial_layout not in X0_FAMILIES:
             raise ValueError(
-                f"Unknown initial_layout '{self.flock.initial_layout}'. "
-                f"Use one of {INITIAL_LAYOUTS}."
+                f"Unknown initial_layout '{self.flock.initial_layout}'. Use one of {X0_FAMILIES}."
             )
         if not (0.0 <= float(self.flock.stubborn_fraction) <= 1.0):
             raise ValueError("stubborn_fraction must be in [0, 1].")
@@ -105,8 +101,7 @@ class ExperimentalFactors:
             raise ValueError("cohesion_scale must be >= 0.")
         if self.shepherds.failure_mode not in FAILURE_MODES:
             raise ValueError(
-                f"Unknown failure_mode '{self.shepherds.failure_mode}'. "
-                f"Use one of {FAILURE_MODES}."
+                f"Unknown failure_mode '{self.shepherds.failure_mode}'. Use one of {FAILURE_MODES}."
             )
         if self.observation.mode not in OBSERVATION_MODES:
             raise ValueError(
@@ -122,8 +117,7 @@ class ExperimentalFactors:
             raise ValueError("observation_frequency must be >= 1.")
         if self.environment.goal_mode not in GOAL_MODES:
             raise ValueError(
-                f"Unknown goal_mode '{self.environment.goal_mode}'. "
-                f"Use one of {GOAL_MODES}."
+                f"Unknown goal_mode '{self.environment.goal_mode}'. Use one of {GOAL_MODES}."
             )
         if self.flock.n_sheep is not None and int(self.flock.n_sheep) < 1:
             raise ValueError("n_sheep must be >= 1.")
@@ -139,9 +133,7 @@ class ExperimentalFactors:
         flock = _merge_dataclass(FlockFactors, raw.get("flock"), raw)
         shepherds = _merge_dataclass(ShepherdFactors, raw.get("shepherds"), raw)
         observation = _merge_dataclass(ObservationFactors, raw.get("observation"), raw)
-        environment = _merge_dataclass(
-            EnvironmentFactors, raw.get("environment"), raw
-        )
+        environment = _merge_dataclass(EnvironmentFactors, raw.get("environment"), raw)
         model = _merge_dataclass(ModelFactors, raw.get("model"), raw)
         # Flat aliases used by API / CLI.
         if "n_sheep" in raw and flock.n_sheep is None:

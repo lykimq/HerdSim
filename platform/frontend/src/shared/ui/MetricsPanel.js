@@ -3,11 +3,11 @@ import {
   formatMetricValue,
   metricLabelText,
   metricTipText,
-} from '../charts/metricFormat.js';
+} from "../charts/metricFormat.js";
 
-export function createMetricsPanel(metricDefs = null, title = 'Live Metrics') {
-  const root = document.createElement('div');
-  root.className = 'card-glass';
+export function createMetricsPanel(metricDefs = null, title = "Live Metrics") {
+  const root = document.createElement("div");
+  root.className = "card-glass";
   root.innerHTML = `
     <div class="section-title">${title}</div>
     <div data-role="cards"></div>
@@ -23,13 +23,13 @@ export function createMetricsPanel(metricDefs = null, title = 'Live Metrics') {
   const labelEls = {};
 
   metricIds.forEach((id) => {
-    const card = document.createElement('div');
-    card.className = 'metric-card';
+    const card = document.createElement("div");
+    card.className = "metric-card";
     card.innerHTML = `<span data-role="label">${metricLabelText(defsById[id], id)}</span><span class="metric-value" data-id="${id}">-</span>`;
     const labelEl = card.querySelector('[data-role="label"]');
     labelEl.title = metricTipText(defsById[id], id);
     cards.appendChild(card);
-    valueEls[id] = card.querySelector('.metric-value');
+    valueEls[id] = card.querySelector(".metric-value");
     labelEls[id] = labelEl;
   });
 

@@ -26,9 +26,7 @@ def obstacle_aware_drive_target(state: SimulationState, config: dict):
     offset = drive_offset(state, config)
     base = position_behind_target(centroid, goal, offset)
     clearance = float(config.get("obstacle_clearance", 5.0))
-    return deflect_drive_point(
-        centroid, goal, base, state.world.obstacles, clearance
-    )
+    return deflect_drive_point(centroid, goal, base, state.world.obstacles, clearance)
 
 
 class ObstacleAwareDriveController(BaseDogController):

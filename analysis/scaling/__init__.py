@@ -8,7 +8,7 @@ from analysis.scaling.export import export_package_a, export_package_dossier
 from analysis.scaling.frontier import (
     bootstrap_d_min_ci,
     extract_frontier,
-    select_boundary_cells,
+    select_claim_windows,
 )
 from analysis.scaling.mechanism import (
     evaluate_overcrowding_mechanisms,
@@ -24,7 +24,7 @@ from analysis.scaling.transfer import build_transfer_table
 __all__ = [
     "build_provenance_stamp",
     "extract_frontier",
-    "select_boundary_cells",
+    "select_claim_windows",
     "bootstrap_d_min_ci",
     "label_regimes",
     "export_package_a",

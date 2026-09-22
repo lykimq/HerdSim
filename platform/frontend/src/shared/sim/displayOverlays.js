@@ -1,20 +1,20 @@
 /** Normalize Display overlays: trails, GCM-to-goal, and method assignment modes. */
 
 export const DEFAULT_MODE_COLORS = {
-  collect: '#fbbf24',
-  drive: '#67e8f9',
+  collect: "#fbbf24",
+  drive: "#67e8f9",
 };
 
-export const TRAIL_LABEL = 'Trails';
+export const TRAIL_LABEL = "Trails";
 
 export const TRAIL_TIP =
-  'Where herders walked this run (not shepherd_path length).';
+  "Where herders walked this run (not shepherd_path length).";
 
-export const GCM_GOAL_LABEL = 'GCM to goal';
+export const GCM_GOAL_LABEL = "GCM to goal";
 
-export const GCM_GOAL_TIP = 'Line from flock centre of mass to the goal.';
+export const GCM_GOAL_TIP = "Line from flock centre of mass to the goal.";
 
-export const GCM_GOAL_COLOR = '#c084fc';
+export const GCM_GOAL_COLOR = "#c084fc";
 
 /** Mean of sheep world positions (flock GCM); null if none usable. */
 export function sheepCentroid(sheepPositions) {
@@ -38,9 +38,9 @@ export function sheepCentroid(sheepPositions) {
 
 /** Parse #rrggbb or numeric color to Pixi integer. */
 export function parseOverlayColor(value, fallback = 0xcbd5e1) {
-  if (typeof value === 'number' && Number.isFinite(value)) return value;
-  if (typeof value === 'string') {
-    const hex = value.trim().replace(/^#/, '');
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const hex = value.trim().replace(/^#/, "");
     if (/^[0-9a-fA-F]{6}$/.test(hex)) return parseInt(hex, 16);
   }
   return fallback;
@@ -55,14 +55,14 @@ export function assignmentModesFromMethod(method) {
   if (!Array.isArray(raw)) return [];
   return raw
     .map((mode) => {
-      const id = String(mode?.id || '').trim();
+      const id = String(mode?.id || "").trim();
       if (!id) return null;
       const color =
-        typeof mode.color === 'string' && mode.color.trim()
+        typeof mode.color === "string" && mode.color.trim()
           ? mode.color.trim()
-          : DEFAULT_MODE_COLORS[id] || '#94a3b8';
+          : DEFAULT_MODE_COLORS[id] || "#94a3b8";
       const label =
-        typeof mode.label === 'string' && mode.label.trim()
+        typeof mode.label === "string" && mode.label.trim()
           ? mode.label.trim()
           : id;
       return { id, label, color };
@@ -71,12 +71,12 @@ export function assignmentModesFromMethod(method) {
 }
 
 export function assignmentModeOptionHtml(mode) {
-  const safeId = String(mode.id).replace(/"/g, '');
-  const color = String(mode.color).replace(/"/g, '');
+  const safeId = String(mode.id).replace(/"/g, "");
+  const color = String(mode.color).replace(/"/g, "");
   const label = String(mode.label)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
   return `
     <label class="check-item overlay-option">
       <input data-role="assignment-mode" data-mode="${safeId}" type="checkbox" checked />

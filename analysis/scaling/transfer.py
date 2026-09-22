@@ -10,14 +10,24 @@ import pandas as pd
 from analysis.scaling.frontier import extract_frontier
 
 
+def _missing_grid_value(value: float | None) -> bool:
+    if value is None:
+        return True
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return True
+    return number != number
+
+
 def _classify_d_min_transfer(
     base_dmin: float | None,
     other_dmin: float | None,
 ) -> str:
-    if base_dmin is None or other_dmin is None:
+    """Shared only when both sides have the same grid D_min."""
+    if _missing_grid_value(base_dmin) or _missing_grid_value(other_dmin):
         return "absent"
-    delta = abs(float(other_dmin) - float(base_dmin))
-    if delta <= 2:
+    if int(base_dmin) == int(other_dmin):
         return "shared"
     return "shifted"
 
@@ -67,7 +77,7 @@ def _classify_idir_transfer(base_r: float | None, other_r: float | None) -> str:
 
 def _coverage_saturation_flag(trials: pd.DataFrame, theta: float) -> bool | None:
     """True when reliable cells show flat coverage while effort rises with D."""
-    need = {"n_shepherds", "success", "mean_coverage", "mean_shepherd_path"}
+    need = {"n_shepherds", "success", "mean_coverage", "shepherd_path"}
     if not need.issubset(trials.columns):
         return None
     rates = (
@@ -75,7 +85,7 @@ def _coverage_saturation_flag(trials: pd.DataFrame, theta: float) -> bool | None
         .agg(
             reliability=("success", "mean"),
             coverage=("mean_coverage", "median"),
-            effort=("mean_shepherd_path", "median"),
+            effort=("shepherd_path", "median"),
         )
         .sort_index()
     )
@@ -84,7 +94,8 @@ def _coverage_saturation_flag(trials: pd.DataFrame, theta: float) -> bool | None
         return None
     cov_range = float(reliable["coverage"].max() - reliable["coverage"].min())
     effort_up = float(reliable["effort"].iloc[-1] - reliable["effort"].iloc[0])
-    return bool(cov_range < 0.1 and effort_up > 0)
+    high = float(np.median(reliable["coverage"])) > 0.5
+    return bool(high and cov_range < 0.1 and effort_up > 0)
 
 
 def _classify_flag_transfer(base: bool | None, other: bool | None) -> str:
@@ -112,21 +123,23 @@ def build_transfer_table(
     if baseline not in trials_by_method:
         raise KeyError(f"baseline method '{baseline}' missing from trials_by_method")
 
-    features = [feature] if feature else [
-        "d_min",
-        "overcrowd",
-        "i_dir_signature",
-        "coverage_saturation",
-    ]
+    features = (
+        [feature]
+        if feature
+        else [
+            "d_min",
+            "overcrowd",
+            "i_dir_signature",
+            "coverage_saturation",
+        ]
+    )
 
     fronts = {
         m: extract_frontier(df, theta=theta).set_index("n_sheep")
         for m, df in trials_by_method.items()
     }
     idir_r = {m: _idir_correlation(df) for m, df in trials_by_method.items()}
-    cov_flags = {
-        m: _coverage_saturation_flag(df, theta) for m, df in trials_by_method.items()
-    }
+    cov_flags = {m: _coverage_saturation_flag(df, theta) for m, df in trials_by_method.items()}
 
     base = fronts[baseline]
     rows: list[dict[str, Any]] = []

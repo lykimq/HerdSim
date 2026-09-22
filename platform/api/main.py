@@ -3,7 +3,16 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.routers import benchmarks, docs, methods, metrics, netlogo, scenarios, simulations, websocket
+from api.routers import (
+    benchmarks,
+    docs,
+    methods,
+    metrics,
+    netlogo,
+    scenarios,
+    simulations,
+    websocket,
+)
 
 app = FastAPI(
     title="HerdSim API",

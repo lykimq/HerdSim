@@ -50,9 +50,7 @@ def test_local_observation_filters_by_range():
         world=make_world(),
         seed=1,
     )
-    obs = LocalPositionsObservation().observe(
-        state, 0, {"sensing_range": 10.0, "r_s": 10.0}
-    )
+    obs = LocalPositionsObservation().observe(state, 0, {"sensing_range": 10.0, "r_s": 10.0})
     assert obs.n_sheep_seen == 1
     assert obs.mode == "local_positions"
 
@@ -64,9 +62,7 @@ def test_bearing_only_hides_metric_distances():
         world=make_world(),
         seed=1,
     )
-    obs = BearingOnlyObservation().observe(
-        state, 0, {"sensing_range": 20.0, "r_s": 20.0}
-    )
+    obs = BearingOnlyObservation().observe(state, 0, {"sensing_range": 20.0, "r_s": 20.0})
     assert obs.n_sheep_seen == 2
     assert obs.distances_to_sheep is None
     assert obs.bearings_to_sheep is not None
@@ -79,9 +75,7 @@ def test_noisy_bearing_changes_angles():
         world=make_world(),
         seed=1,
     )
-    clean = BearingOnlyObservation().observe(
-        state, 0, {"sensing_range": 20.0, "r_s": 20.0}
-    )
+    clean = BearingOnlyObservation().observe(state, 0, {"sensing_range": 20.0, "r_s": 20.0})
     noisy = NoisyBearingObservation().observe(
         state, 0, {"sensing_range": 20.0, "r_s": 20.0, "noise_sigma": 0.5}
     )

@@ -1,6 +1,6 @@
 /** Wire Analytics runner mode (compare vs factor grid) and build run payloads. */
 
-import { escapeHtml } from '../../shared/ui/dom.js';
+import { escapeHtml } from "../../shared/ui/dom.js";
 import {
   STUDY_TEMPLATES,
   defaultFactorGridValues,
@@ -14,18 +14,15 @@ import {
   mergeFactorGridTemplateRows,
   parseMixedValueList,
   suggestedFactorGridValues,
-} from '../../shared/factors/factors.js';
-import {
-  factorKeyOptions,
-  validateFactorGridRows,
-} from './analyticsSweep.js';
+} from "../../shared/factors/factors.js";
+import { factorKeyOptions, validateFactorGridRows } from "./analyticsSweep.js";
 
 function valuesList(text) {
   return parseMixedValueList(text).map(String);
 }
 
 function joinValues(list) {
-  return list.join(', ');
+  return list.join(", ");
 }
 
 export function bindAnalyticsMode({
@@ -71,32 +68,32 @@ export function bindAnalyticsMode({
       .filter((o) => o.key === selected || !used.has(o.key))
       .map(
         (o) =>
-          `<option value="${o.key}" ${o.key === selected ? 'selected' : ''}>${o.label}</option>`,
+          `<option value="${o.key}" ${o.key === selected ? "selected" : ""}>${o.label}</option>`,
       )
-      .join('');
+      .join("");
   }
 
   function updateCellEstimate() {
     const cells = estimateGridCells(gridRows);
-    const seedCount = String(seedsInput.value || '')
-      .split(',')
+    const seedCount = String(seedsInput.value || "")
+      .split(",")
       .map((s) => s.trim())
       .filter(Boolean).length;
     const trials = cells * Math.max(1, seedCount);
     if (gridEstimate) {
-      gridEstimate.textContent = `${cells} cells x ${seedCount || '?'} seeds = ${trials} trials`;
+      gridEstimate.textContent = `${cells} cells x ${seedCount || "?"} seeds = ${trials} trials`;
     }
     const maxCells = getMaxFactorGridCells();
     if (gridWarn) {
       if (cells > maxCells) {
         gridWarn.textContent = `Too many cells (${cells} > ${maxCells}).`;
-        gridWarn.classList.add('factor-grid-warn');
+        gridWarn.classList.add("factor-grid-warn");
       } else if (cells > 100) {
-        gridWarn.textContent = 'Large grid: expect a longer run.';
-        gridWarn.classList.remove('factor-grid-warn');
+        gridWarn.textContent = "Large grid: expect a longer run.";
+        gridWarn.classList.remove("factor-grid-warn");
       } else {
-        gridWarn.textContent = '';
-        gridWarn.classList.remove('factor-grid-warn');
+        gridWarn.textContent = "";
+        gridWarn.classList.remove("factor-grid-warn");
       }
     }
   }
@@ -122,7 +119,7 @@ export function bindAnalyticsMode({
             >x</button>
           </span>`,
           )
-          .join('')}
+          .join("")}
       </div>`;
   }
 
@@ -136,21 +133,26 @@ export function bindAnalyticsMode({
       const remaining = enumOptions.filter((o) => !selectedSet.has(o.id));
       const pickOptions = remaining.length
         ? remaining
-            .map((o) => `<option value="${escapeHtml(o.id)}">${escapeHtml(o.label)}</option>`)
-            .join('')
+            .map(
+              (o) =>
+                `<option value="${escapeHtml(o.id)}">${escapeHtml(o.label)}</option>`,
+            )
+            .join("")
         : '<option value="">All options added</option>';
       return `
         <div class="factor-grid-value-editor" data-role="grid-value-editor" data-editor="enum">
-          <select data-role="grid-pick" ${remaining.length ? '' : 'disabled'}>${pickOptions}</select>
-          <button type="button" class="btn btn-secondary" data-role="grid-add-value" ${remaining.length ? '' : 'disabled'}>Add</button>
+          <select data-role="grid-pick" ${remaining.length ? "" : "disabled"}>${pickOptions}</select>
+          <button type="button" class="btn btn-secondary" data-role="grid-add-value" ${remaining.length ? "" : "disabled"}>Add</button>
         </div>`;
     }
 
-    const suggestions = parseMixedValueList(suggestedFactorGridValues(row.key) || '')
+    const suggestions = parseMixedValueList(
+      suggestedFactorGridValues(row.key) || "",
+    )
       .map(String)
       .filter((value) => !selectedSet.has(value));
     const listId = `factor-suggest-${row.key}`;
-    const hint = suggestedFactorGridValues(row.key) || 'value';
+    const hint = suggestedFactorGridValues(row.key) || "value";
     return `
       <div class="factor-grid-value-editor" data-role="grid-value-editor" data-editor="number">
         <input
@@ -162,7 +164,7 @@ export function bindAnalyticsMode({
           placeholder="e.g. ${escapeHtml(hint)}"
         />
         <datalist id="${escapeHtml(listId)}">
-          ${suggestions.map((value) => `<option value="${escapeHtml(value)}"></option>`).join('')}
+          ${suggestions.map((value) => `<option value="${escapeHtml(value)}"></option>`).join("")}
         </datalist>
         <button type="button" class="btn btn-secondary" data-role="grid-add-value">Add</button>
       </div>`;
@@ -192,112 +194,135 @@ export function bindAnalyticsMode({
         const required = isRequiredFactorGridKey(row.key);
         const meaning = factorFieldDescription(row.key);
         return `
-      <div class="factor-grid-row" data-row-index="${index}" data-kind="${enumKey ? 'enum' : 'number'}" data-required="${required ? '1' : '0'}">
-        ${meaning ? `<p class="factor-grid-help"><span class="factor-grid-meaning">${escapeHtml(meaning)}</span></p>` : ''}
+      <div class="factor-grid-row" data-row-index="${index}" data-kind="${enumKey ? "enum" : "number"}" data-required="${required ? "1" : "0"}">
+        ${meaning ? `<p class="factor-grid-help"><span class="factor-grid-meaning">${escapeHtml(meaning)}</span></p>` : ""}
         <div class="factor-grid-row-top">
-          <select data-role="grid-key" ${required ? 'disabled' : ''}>${keySelectHtml(row.key, { locked: required })}</select>
+          <select data-role="grid-key" ${required ? "disabled" : ""}>${keySelectHtml(row.key, { locked: required })}</select>
           ${valueEditorHtml(row)}
-          <button type="button" class="btn btn-secondary" data-role="grid-remove" ${required ? 'disabled' : ''}>Remove</button>
+          <button type="button" class="btn btn-secondary" data-role="grid-remove" ${required ? "disabled" : ""}>Remove</button>
         </div>
         ${chipsHtml(row)}
       </div>`;
       })
-      .join('');
+      .join("");
 
-    gridRowsHost.querySelectorAll('.factor-grid-row').forEach((rowEl) => {
+    gridRowsHost.querySelectorAll(".factor-grid-row").forEach((rowEl) => {
       const index = Number(rowEl.dataset.rowIndex);
-      const required = rowEl.dataset.required === '1';
+      const required = rowEl.dataset.required === "1";
 
-      rowEl.querySelector('[data-role="grid-key"]')?.addEventListener('change', (ev) => {
-        if (required) return;
-        const key = ev.target.value;
-        gridRows[index].key = key;
-        gridRows[index].values = defaultFactorGridValues(key);
-        renderGridRows();
-      });
+      rowEl
+        .querySelector('[data-role="grid-key"]')
+        ?.addEventListener("change", (ev) => {
+          if (required) return;
+          const key = ev.target.value;
+          gridRows[index].key = key;
+          gridRows[index].values = defaultFactorGridValues(key);
+          renderGridRows();
+        });
 
       const addValue = () => {
         const editor = rowEl.querySelector('[data-role="grid-value-editor"]');
         if (!editor) return;
-        if (editor.dataset.editor === 'enum') {
+        if (editor.dataset.editor === "enum") {
           const pick = editor.querySelector('[data-role="grid-pick"]');
           if (!pick?.value || pick.disabled) return;
           if (!appendValues(index, pick.value)) return;
           renderGridRows();
           return;
         }
-        const numberInput = editor.querySelector('[data-role="grid-number-input"]');
+        const numberInput = editor.querySelector(
+          '[data-role="grid-number-input"]',
+        );
         const raw = numberInput?.value?.trim();
         if (!raw) return;
         if (!appendValues(index, raw)) return;
         renderGridRows();
       };
 
-      rowEl.querySelector('[data-role="grid-add-value"]')?.addEventListener('click', addValue);
-      rowEl.querySelector('[data-role="grid-number-input"]')?.addEventListener('keydown', (ev) => {
-        if (ev.key !== 'Enter') return;
-        ev.preventDefault();
-        addValue();
-      });
+      rowEl
+        .querySelector('[data-role="grid-add-value"]')
+        ?.addEventListener("click", addValue);
+      rowEl
+        .querySelector('[data-role="grid-number-input"]')
+        ?.addEventListener("keydown", (ev) => {
+          if (ev.key !== "Enter") return;
+          ev.preventDefault();
+          addValue();
+        });
 
-      rowEl.querySelectorAll('[data-role="grid-chip-remove"]').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          const value = btn.getAttribute('data-value');
-          const next = valuesList(gridRows[index].values).filter((v) => v !== value);
-          gridRows[index].values = joinValues(next);
+      rowEl
+        .querySelectorAll('[data-role="grid-chip-remove"]')
+        .forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const value = btn.getAttribute("data-value");
+            const next = valuesList(gridRows[index].values).filter(
+              (v) => v !== value,
+            );
+            gridRows[index].values = joinValues(next);
+            renderGridRows();
+          });
+        });
+
+      rowEl
+        .querySelector('[data-role="grid-remove"]')
+        ?.addEventListener("click", () => {
+          if (required) return;
+          gridRows.splice(index, 1);
           renderGridRows();
         });
-      });
-
-      rowEl.querySelector('[data-role="grid-remove"]')?.addEventListener('click', () => {
-        if (required) return;
-        gridRows.splice(index, 1);
-        renderGridRows();
-      });
     });
     updateCellEstimate();
   }
 
   function syncModeUi() {
-    const grid = modeSelect.value === 'grid';
-    compareWrap.classList.toggle('hidden', grid);
-    gridFields.classList.toggle('hidden', !grid);
+    const grid = modeSelect.value === "grid";
+    compareWrap.classList.toggle("hidden", grid);
+    gridFields.classList.toggle("hidden", !grid);
     if (grid) renderGridRows();
     syncContextBlurbs();
   }
 
-  runner.querySelector('[data-role="grid-add-row"]')?.addEventListener('click', () => {
-    const opts = factorKeyOptions(defaultsById.strombom || {});
-    const used = new Set(gridRows.map((r) => r.key));
-    const next = opts.find((o) => !used.has(o.key) && !isRequiredFactorGridKey(o.key))
-      || opts.find((o) => !used.has(o.key));
-    if (!next) return;
-    gridRows.push({ key: next.key, values: defaultFactorGridValues(next.key) });
-    renderGridRows();
-  });
+  runner
+    .querySelector('[data-role="grid-add-row"]')
+    ?.addEventListener("click", () => {
+      const opts = factorKeyOptions(defaultsById.strombom || {});
+      const used = new Set(gridRows.map((r) => r.key));
+      const next =
+        opts.find((o) => !used.has(o.key) && !isRequiredFactorGridKey(o.key)) ||
+        opts.find((o) => !used.has(o.key));
+      if (!next) return;
+      gridRows.push({
+        key: next.key,
+        values: defaultFactorGridValues(next.key),
+      });
+      renderGridRows();
+    });
 
-  studySelect?.addEventListener('change', () => {
+  studySelect?.addEventListener("change", () => {
     const template = STUDY_TEMPLATES.find((t) => t.id === studySelect.value);
     if (!template) return;
-    modeSelect.value = 'grid';
+    modeSelect.value = "grid";
     gridRows = mergeFactorGridTemplateRows(template.rows);
     if (template.seeds) seedsInput.value = template.seeds;
-    if (template.preset && [...presetSelect.options].some((o) => o.value === template.preset)) {
+    if (
+      template.preset &&
+      [...presetSelect.options].some((o) => o.value === template.preset)
+    ) {
       presetSelect.value = template.preset;
     }
     syncModeUi();
   });
 
-  modeSelect.addEventListener('change', syncModeUi);
-  seedsInput.addEventListener('input', updateCellEstimate);
+  modeSelect.addEventListener("change", syncModeUi);
+  seedsInput.addEventListener("input", updateCellEstimate);
   syncModeUi();
 
   function buildRequest(seeds) {
     const preset = presetSelect.value;
     const scenario_id = runner.querySelector('[data-role="scenario"]').value;
-    if (modeSelect.value !== 'grid') {
+    if (modeSelect.value !== "grid") {
       const selected = selectedMethodIds();
-      if (!selected.length) return { error: 'Select at least one method.' };
+      if (!selected.length) return { error: "Select at least one method." };
       return {
         payload: {
           methods: selected,
@@ -322,7 +347,7 @@ export function bindAnalyticsMode({
 
   return {
     buildRequest,
-    isGrid: () => modeSelect.value === 'grid',
+    isGrid: () => modeSelect.value === "grid",
     getGridRows: () => gridRows.map((r) => ({ ...r })),
   };
 }

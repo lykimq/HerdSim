@@ -177,7 +177,5 @@ def find_method_for_models(sheep_model: str, dog_controller: str) -> str | None:
 
 def get_method(method_id: str) -> dict[str, Any]:
     if method_id not in METHODS:
-        raise KeyError(
-            f"Unknown method '{method_id}'. Available: {list(METHODS.keys())}"
-        )
+        raise KeyError(f"Unknown method '{method_id}'. Available: {list(METHODS.keys())}")
     return METHODS[method_id]

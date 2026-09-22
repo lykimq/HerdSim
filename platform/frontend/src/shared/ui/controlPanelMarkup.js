@@ -1,10 +1,10 @@
-import { presetSelectHtml } from './params.js';
-import { iconImg } from '../../assets/icons.js';
-import { factorFieldLabel } from '../factors/factors.js';
+import { presetSelectHtml } from "./params.js";
+import { iconImg } from "../../assets/icons.js";
+import { factorFieldLabel } from "../factors/factors.js";
 
 function setupHtml(sideLabel) {
   return `
-    <div class="section-title">Setup ${sideLabel ? `- ${sideLabel}` : ''}</div>
+    <div class="section-title">Setup ${sideLabel ? `- ${sideLabel}` : ""}</div>
     <p class="panel-lead">Pick a method and mode.</p>
     <div class="control-group">
       <label data-role="method-label">Method</label>
@@ -23,12 +23,12 @@ function setupHtml(sideLabel) {
       <p class="mode-fixed-value" data-role="paper-task-label">Drive to Goal</p>
     </div>
     <div class="control-group hidden" data-role="agent-counts-group">
-      <label>${iconImg('sheep', 'icon icon-inline')} Number of Sheep (<span data-role="sheep-count">50</span>)</label>
+      <label>${iconImg("sheep", "icon icon-inline")} Number of Sheep (<span data-role="sheep-count">50</span>)</label>
       <input data-role="sheep" type="range" min="5" max="150" value="50" />
     </div>
     <div class="control-group hidden" data-role="agent-counts-group">
       <label data-role="herder-label">
-        <span data-role="herder-icon">${iconImg('dog', 'icon icon-inline')}</span>
+        <span data-role="herder-icon">${iconImg("dog", "icon icon-inline")}</span>
         Number of <span data-role="herder-word">Dogs</span> (<span data-role="dog-count">1</span>)
       </label>
       <input data-role="dogs" type="range" min="1" max="8" value="1" />
@@ -47,7 +47,7 @@ function setupHtml(sideLabel) {
 
 function factorsHtml(factorsOpen) {
   return `
-    <details class="param-section hidden" ${factorsOpen ? 'open' : ''} data-role="factors-section">
+    <details class="param-section hidden" ${factorsOpen ? "open" : ""} data-role="factors-section">
       <summary class="section-title" data-role="factors-summary-el">
         Experimental factors
         <span class="hint-badge">Optional</span>
@@ -56,50 +56,50 @@ function factorsHtml(factorsOpen) {
       <div class="param-list factors-grid" data-role="factors">
         <div class="param-group-title">Observation</div>
         <div class="param-item">
-          <label><span class="param-key">${factorFieldLabel('obs_mode')}</span></label>
+          <label><span class="param-key">${factorFieldLabel("obs_mode")}</span></label>
           <select data-factor="obs_mode"></select>
         </div>
         <div class="param-item">
-          <label><span class="param-key">${factorFieldLabel('sensing_range')}</span></label>
+          <label><span class="param-key">${factorFieldLabel("sensing_range")}</span></label>
           <input data-factor="sensing_range" type="number" step="any" placeholder="default" />
         </div>
         <div class="param-item">
-          <label><span class="param-key">${factorFieldLabel('noise_sigma')}</span></label>
+          <label><span class="param-key">${factorFieldLabel("noise_sigma")}</span></label>
           <input data-factor="noise_sigma" type="number" step="any" min="0" value="0" />
         </div>
         <div class="param-item">
-          <label><span class="param-key">${factorFieldLabel('communication')}</span></label>
+          <label><span class="param-key">${factorFieldLabel("communication")}</span></label>
           <select data-factor="communication"></select>
         </div>
         <div class="param-group-title">Flock</div>
         <div class="param-item">
-          <label><span class="param-key">${factorFieldLabel('stubborn_fraction')}</span></label>
+          <label><span class="param-key">${factorFieldLabel("stubborn_fraction")}</span></label>
           <input data-factor="stubborn_fraction" type="number" step="0.05" min="0" max="1" value="0" />
         </div>
         <div class="param-item">
-          <label><span class="param-key">${factorFieldLabel('cohesion_scale')}</span></label>
+          <label><span class="param-key">${factorFieldLabel("cohesion_scale")}</span></label>
           <input data-factor="cohesion_scale" type="number" step="0.1" min="0" value="1" />
         </div>
         <div class="param-group-title">Shepherds</div>
         <div class="param-item">
-          <label><span class="param-key">${factorFieldLabel('failure_mode')}</span></label>
+          <label><span class="param-key">${factorFieldLabel("failure_mode")}</span></label>
           <select data-factor="failure_mode"></select>
         </div>
         <div class="param-item">
-          <label><span class="param-key">${factorFieldLabel('failure_tick')}</span></label>
+          <label><span class="param-key">${factorFieldLabel("failure_tick")}</span></label>
           <input data-factor="failure_tick" type="number" step="1" value="-1" />
         </div>
         <div class="param-item">
-          <label><span class="param-key">${factorFieldLabel('speed_scale')}</span></label>
+          <label><span class="param-key">${factorFieldLabel("speed_scale")}</span></label>
           <input data-factor="speed_scale" type="number" step="0.1" min="0" value="1" />
         </div>
         <div class="param-group-title">Environment</div>
         <div class="param-item">
-          <label><span class="param-key">${factorFieldLabel('goal_mode')}</span></label>
+          <label><span class="param-key">${factorFieldLabel("goal_mode")}</span></label>
           <select data-factor="goal_mode"></select>
         </div>
         <div class="param-item" data-role="goal-velocity-wrap">
-          <label><span class="param-key">${factorFieldLabel('goal_velocity')}</span></label>
+          <label><span class="param-key">${factorFieldLabel("goal_velocity")}</span></label>
           <div class="factor-pair factor-pair--labeled">
             <label class="factor-axis">
               <span class="factor-axis-key">vx</span>
@@ -125,12 +125,12 @@ function factorsHtml(factorsOpen) {
 function runControlsHtml() {
   return `
     <div class="control-run-strip" data-role="run-strip">
-      <button class="btn btn-secondary" data-role="init">${iconImg('release')} Initialize New Run</button>
+      <button class="btn btn-secondary" data-role="init">${iconImg("release")} Initialize New Run</button>
       <div class="btn-row control-run-playback">
-        <button class="btn" data-role="play">${iconImg('play')} Play</button>
-        <button class="btn btn-secondary" data-role="pause">${iconImg('pause')} Pause</button>
-        <button class="btn btn-secondary" data-role="step">${iconImg('step')} Step</button>
-        <button class="btn btn-secondary" data-role="reset">${iconImg('reset')} Reset</button>
+        <button class="btn" data-role="play">${iconImg("play")} Play</button>
+        <button class="btn btn-secondary" data-role="pause">${iconImg("pause")} Pause</button>
+        <button class="btn btn-secondary" data-role="step">${iconImg("step")} Step</button>
+        <button class="btn btn-secondary" data-role="reset">${iconImg("reset")} Reset</button>
       </div>
       <div class="control-group control-run-speed">
         <label data-role="speed-label">Simulation Speed (1.0x)</label>
@@ -166,7 +166,7 @@ function displayHtml() {
 
 function advancedHtml(paramsOpen) {
   return `
-    <details class="param-section hidden" ${paramsOpen ? 'open' : ''} data-role="params-section">
+    <details class="param-section hidden" ${paramsOpen ? "open" : ""} data-role="params-section">
       <summary class="section-title" data-role="params-summary-el">
         <span data-role="params-title">Method parameters</span>
         <span class="hint-badge">Optional</span>
@@ -185,7 +185,7 @@ function advancedHtml(paramsOpen) {
 }
 
 export function controlPanelHtml({
-  sideLabel = '',
+  sideLabel = "",
   paramsOpen = true,
   factorsOpen = true,
   runFirst = false,
@@ -194,7 +194,7 @@ export function controlPanelHtml({
   const setup = setupHtml(sideLabel);
   const factors = factorsHtml(factorsOpen);
   const run = runControlsHtml();
-  const display = includeDisplay ? displayHtml() : '';
+  const display = includeDisplay ? displayHtml() : "";
   const advanced = advancedHtml(paramsOpen);
 
   if (runFirst) {

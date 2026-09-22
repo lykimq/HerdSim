@@ -59,9 +59,7 @@ def _validate_request(req: BenchmarkRequest) -> list[dict[str, Any]]:
     if not req.seeds:
         raise HTTPException(status_code=400, detail="seeds required")
     try:
-        specs = parse_factor_specs(
-            [item.model_dump() for item in req.sweep] if req.sweep else None
-        )
+        specs = parse_factor_specs([item.model_dump() for item in req.sweep] if req.sweep else None)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     if specs:
@@ -76,8 +74,7 @@ def _validate_request(req: BenchmarkRequest) -> list[dict[str, Any]]:
             raise HTTPException(
                 status_code=400,
                 detail=(
-                    "Factor grids without a method require sheep_model "
-                    "and dog_controller factors"
+                    "Factor grids without a method require sheep_model and dog_controller factors"
                 ),
             )
     elif not req.methods:
@@ -99,7 +96,7 @@ def benchmark_run(
 
     if not stream:
         try:
-                payload = run_benchmark(
+            payload = run_benchmark(
                 methods=req.methods,
                 scenario_id=req.scenario_id,
                 seeds=req.seeds,
@@ -184,9 +181,7 @@ def benchmark_export(format: str = Query(default="json", pattern="^(json|csv|md)
         return Response(
             content=report_to_csv(_LAST_BENCHMARK, request=_LAST_REQUEST),
             media_type="text/csv",
-            headers={
-                "Content-Disposition": 'attachment; filename="herdsim_benchmark.csv"'
-            },
+            headers={"Content-Disposition": 'attachment; filename="herdsim_benchmark.csv"'},
         )
     return PlainTextResponse(
         report_to_markdown(_LAST_BENCHMARK, request=_LAST_REQUEST),

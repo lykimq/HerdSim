@@ -45,9 +45,7 @@ def export_session_metrics(
         return Response(
             content=df.to_csv(index=False),
             media_type="text/csv",
-            headers={
-                "Content-Disposition": f'attachment; filename="herdsim_{session_id}.csv"'
-            },
+            headers={"Content-Disposition": f'attachment; filename="herdsim_{session_id}.csv"'},
         )
 
     lines = [

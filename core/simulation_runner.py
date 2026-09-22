@@ -81,12 +81,15 @@ class SimulationRunner:
         world = self.scenario.create_world(self.config)
         sheep_pos, shepherd_pos = self.scenario.initial_positions(self.config, rng)
 
+        sensing = self.config.get("sensing_range")
+        if sensing is None:
+            sensing = self.config.get("r_s")
+        influence = float(sensing) if sensing is not None else float("nan")
         metadata = {
             "r_a": float(self.config.get("r_a", 2.0)),
-            "collect_threshold_scale": float(
-                self.config.get("collect_threshold_scale", 1.0)
-            ),
+            "collect_threshold_scale": float(self.config.get("collect_threshold_scale", 1.0)),
             "measurement_radius": float(self.config.get("measurement_radius", 5.0)),
+            "influence_radius": influence,
             "sheep_model": self.sheep_dynamics.id,
             "dog_controller": self.dog_controller.id,
             "obs_mode": self.observation_model.id,
@@ -163,13 +166,9 @@ class SimulationRunner:
 
         state.tick += 1
         state.sheep_positions = state.world.resolve_obstacles(state.sheep_positions)
-        state.shepherd_positions = state.world.resolve_obstacles(
-            state.shepherd_positions
-        )
+        state.shepherd_positions = state.world.resolve_obstacles(state.shepherd_positions)
         state.sheep_positions = state.world.reflect_positions(state.sheep_positions)
-        state.shepherd_positions = state.world.reflect_positions(
-            state.shepherd_positions
-        )
+        state.shepherd_positions = state.world.reflect_positions(state.shepherd_positions)
         state.sheep_velocities = state.world.reflect_velocities(
             state.sheep_positions, state.sheep_velocities
         )

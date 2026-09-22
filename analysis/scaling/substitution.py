@@ -65,9 +65,7 @@ def substitution_curves(
     ``level_fn(value) -> int`` overrides the default obs_mode ladder ranking.
     """
     if info_col not in df.columns:
-        return pd.DataFrame(
-            columns=[sheep_col, info_col, "info_level", "d_min", "hard_failure"]
-        )
+        return pd.DataFrame(columns=[sheep_col, info_col, "info_level", "d_min", "hard_failure"])
 
     rank = level_fn or (lambda v: information_level(str(v)))
     rows: list[dict[str, Any]] = []
@@ -94,10 +92,12 @@ def substitution_curves_range(
     *,
     theta: float = 0.90,
     range_col: str = "sensing_range",
-    base_range: float = 50.0,
+    base_range: float | None = None,
     sheep_col: str = "n_sheep",
 ) -> pd.DataFrame:
-    """D_min vs sensing-range ladder (multiples of base_range)."""
+    """D_min vs sensing-range ladder (multiples of the method r_s)."""
+    if base_range is None or float(base_range) <= 0:
+        raise ValueError("base_range must be the method sensing radius (r_s)")
     return substitution_curves(
         df,
         theta=theta,

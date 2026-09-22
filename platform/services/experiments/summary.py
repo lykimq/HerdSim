@@ -31,8 +31,7 @@ def summarize_rows(df: pd.DataFrame) -> list[dict[str, Any]]:
     out = []
     group_cols = (
         ["method", "sweep_label"]
-        if "sweep_label" in df.columns
-        and df["sweep_label"].astype(str).str.len().gt(0).any()
+        if "sweep_label" in df.columns and df["sweep_label"].astype(str).str.len().gt(0).any()
         else ["method"]
     )
     for keys, group in df.groupby(group_cols, sort=False):
@@ -50,9 +49,7 @@ def summarize_rows(df: pd.DataFrame) -> list[dict[str, Any]]:
                 "trials": int(len(group)),
                 "success_rate": success_rate,
                 "failure_rate": float(1.0 - success_rate),
-                "mean_ticks_success": (
-                    float(success_ticks.mean()) if len(success_ticks) else None
-                ),
+                "mean_ticks_success": (float(success_ticks.mean()) if len(success_ticks) else None),
                 "median_ticks_success": (
                     float(success_ticks.median()) if len(success_ticks) else None
                 ),

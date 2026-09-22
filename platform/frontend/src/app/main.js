@@ -1,43 +1,53 @@
-import { checkApiHealth, fetchMethods, fetchModels, fetchScenarios } from '../shared/api/rest.js';
-import { createSingleView } from '../features/simulate/SingleView.js';
-import { createArenaView } from '../features/compare/ArenaView.js';
-import { createAnalyticsDashboard } from '../features/experiments/AnalyticsDashboard.js';
-import { createNetLogoView } from '../features/netlogo/NetLogoView.js';
-import { createGuideView } from '../features/guide/GuideView.js';
-import { GAME_ICONS_ATTRIBUTION } from '../assets/icons.js';
-import { log, withTimeout, sleep } from '../shared/ui/logger.js';
-import { mountTips } from '../shared/ui/tooltips.js';
-import { applyFactorMetadata } from '../shared/factors/factors.js';
-import { escapeHtml } from '../shared/ui/dom.js';
-import { confirmLeaveIfNeeded, getLeaveBlockReason, isLeaveBlocked } from '../shared/sim/leaveGuard.js';
+import {
+  checkApiHealth,
+  fetchMethods,
+  fetchModels,
+  fetchScenarios,
+} from "../shared/api/rest.js";
+import { createSingleView } from "../features/simulate/SingleView.js";
+import { createArenaView } from "../features/compare/ArenaView.js";
+import { createAnalyticsDashboard } from "../features/experiments/AnalyticsDashboard.js";
+import { createNetLogoView } from "../features/netlogo/NetLogoView.js";
+import { createGuideView } from "../features/guide/GuideView.js";
+import { GAME_ICONS_ATTRIBUTION } from "../assets/icons.js";
+import { log, withTimeout, sleep } from "../shared/ui/logger.js";
+import { mountTips } from "../shared/ui/tooltips.js";
+import { applyFactorMetadata } from "../shared/factors/factors.js";
+import { escapeHtml } from "../shared/ui/dom.js";
+import {
+  confirmLeaveIfNeeded,
+  getLeaveBlockReason,
+  isLeaveBlocked,
+} from "../shared/sim/leaveGuard.js";
 
 const VIEW_META = {
   single: {
-    label: 'Simulate',
-    description: 'Run one method with experimental factors and live metrics.',
+    label: "Simulate",
+    description: "Run one method with experimental factors and live metrics.",
   },
   arena: {
-    label: 'Compare',
-    description: 'Fair or independent side-by-side method comparison.',
+    label: "Compare",
+    description: "Fair or independent side-by-side method comparison.",
   },
   analytics: {
-    label: 'Experiments',
-    description: 'Batch method comparison and multi-axis factor grids.',
+    label: "Experiments",
+    description: "Batch method comparison and multi-axis factor grids.",
   },
   netlogo: {
-    label: 'NetLogo',
-    description: 'Open method twins and library models in desktop NetLogo.',
+    label: "NetLogo",
+    description: "Open method twins and library models in desktop NetLogo.",
   },
   guide: {
-    label: 'Guide',
-    description: 'User guide: overview, methods, scenarios, metrics, and how-tos.',
+    label: "Guide",
+    description:
+      "User guide: overview, methods, scenarios, metrics, and how-tos.",
   },
 };
 
-const app = document.getElementById('app');
+const app = document.getElementById("app");
 
-const header = document.createElement('header');
-header.className = 'app-header';
+const header = document.createElement("header");
+header.className = "app-header";
 header.innerHTML = `
   <div class="brand-block">
     <span class="logo-title">HerdSim</span>
@@ -48,14 +58,14 @@ header.innerHTML = `
       .map(
         ([id, meta], index) => `
       <button
-        class="nav-tab${index === 0 ? ' active' : ''}"
+        class="nav-tab${index === 0 ? " active" : ""}"
         data-view="${id}"
         role="tab"
-        aria-selected="${index === 0 ? 'true' : 'false'}"
+        aria-selected="${index === 0 ? "true" : "false"}"
         title="${escapeHtml(meta.description)}"
       >${escapeHtml(meta.label)}</button>`,
       )
-      .join('')}
+      .join("")}
   </nav>
   <div class="header-meta" data-role="header-meta">
     <span class="header-context" data-role="view-context"></span>
@@ -65,11 +75,11 @@ header.innerHTML = `
   </div>
 `;
 
-const viewHost = document.createElement('div');
-viewHost.className = 'view-root';
+const viewHost = document.createElement("div");
+viewHost.className = "view-root";
 
-const credit = document.createElement('footer');
-credit.className = 'icon-credit';
+const credit = document.createElement("footer");
+credit.className = "icon-credit";
 credit.innerHTML = `${GAME_ICONS_ATTRIBUTION} UI icons: Lucide.`;
 
 app.appendChild(header);
@@ -97,17 +107,18 @@ let activeViewName = null;
 let switching = false;
 
 function setStatus({ status, tick, seed }) {
-  statusEl.textContent = (status || 'idle').toUpperCase();
-  statusEl.className = 'badge';
-  if (status === 'running') statusEl.classList.add('badge-running');
-  if (status === 'paused') statusEl.classList.add('badge-paused');
-  if (status === 'success' || status === 'completed') statusEl.classList.add('badge-success');
+  statusEl.textContent = (status || "idle").toUpperCase();
+  statusEl.className = "badge";
+  if (status === "running") statusEl.classList.add("badge-running");
+  if (status === "paused") statusEl.classList.add("badge-paused");
+  if (status === "success" || status === "completed")
+    statusEl.classList.add("badge-success");
   if (tick != null) tickEl.textContent = String(tick);
   if (seed != null) seedEl.textContent = String(seed);
 }
 
 function rememberStatus(viewName, payload = {}) {
-  const prev = statusByView[viewName] || { status: 'idle', tick: 0, seed: '-' };
+  const prev = statusByView[viewName] || { status: "idle", tick: 0, seed: "-" };
   statusByView[viewName] = {
     status: payload.status != null ? payload.status : prev.status,
     tick: payload.tick != null ? payload.tick : prev.tick,
@@ -123,33 +134,33 @@ function makeStatusHandler(viewName) {
 }
 
 function applyHeaderForView(viewName) {
-  const snap = statusByView[viewName] || { status: 'idle', tick: 0, seed: '-' };
+  const snap = statusByView[viewName] || { status: "idle", tick: 0, seed: "-" };
   setStatus(snap);
   const meta = VIEW_META[viewName];
-  viewContextEl.textContent = meta?.description || '';
-  const showSimMeta = viewName === 'single' || viewName === 'arena';
-  tickWrap.classList.toggle('hidden', !showSimMeta);
-  seedWrap.classList.toggle('hidden', !showSimMeta && viewName !== 'analytics');
-  if (viewName === 'analytics') {
-    seedWrap.classList.remove('hidden');
+  viewContextEl.textContent = meta?.description || "";
+  const showSimMeta = viewName === "single" || viewName === "arena";
+  tickWrap.classList.toggle("hidden", !showSimMeta);
+  seedWrap.classList.toggle("hidden", !showSimMeta && viewName !== "analytics");
+  if (viewName === "analytics") {
+    seedWrap.classList.remove("hidden");
   }
 }
 
 function hideViewPanel(view) {
   if (!view?.root) return;
-  view.root.classList.add('view-panel--hidden');
-  view.root.setAttribute('aria-hidden', 'true');
+  view.root.classList.add("view-panel--hidden");
+  view.root.setAttribute("aria-hidden", "true");
   view.root.inert = true;
 }
 
 function showViewPanel(view) {
   if (!view?.root) return;
-  view.root.classList.remove('view-panel--hidden');
-  view.root.removeAttribute('aria-hidden');
+  view.root.classList.remove("view-panel--hidden");
+  view.root.removeAttribute("aria-hidden");
   view.root.inert = false;
-  view.root.classList.remove('view-panel--enter');
+  view.root.classList.remove("view-panel--enter");
   void view.root.offsetWidth;
-  view.root.classList.add('view-panel--enter');
+  view.root.classList.add("view-panel--enter");
 }
 
 function destroyCachedViews() {
@@ -158,35 +169,41 @@ function destroyCachedViews() {
     try {
       view?.destroy?.();
     } catch (err) {
-      log.error('ui', `Error destroying cached view ${name}: ${err.message}`, err);
+      log.error(
+        "ui",
+        `Error destroying cached view ${name}: ${err.message}`,
+        err,
+      );
     }
     delete viewCache[name];
   });
   Object.keys(statusByView).forEach((name) => {
     delete statusByView[name];
   });
-  viewHost.innerHTML = '';
+  viewHost.innerHTML = "";
   activeViewName = null;
 }
 
-function showBootError(message, detail = '') {
+function showBootError(message, detail = "") {
   destroyCachedViews();
   viewHost.innerHTML = `
     <div class="card-glass boot-error notice notice--error">
       <div class="section-title">Cannot reach API</div>
       <p>${escapeHtml(message)}</p>
-      ${detail ? `<pre class="boot-error-detail">${escapeHtml(detail)}</pre>` : ''}
+      ${detail ? `<pre class="boot-error-detail">${escapeHtml(detail)}</pre>` : ""}
       <p class="boot-error-hint">Start the backend API on port 8000, then click Retry:</p>
       <pre class="boot-error-detail">uvicorn api.main:app --reload --port 8000</pre>
       <button class="btn" data-role="retry-boot">Retry</button>
     </div>
   `;
-  viewHost.querySelector('[data-role="retry-boot"]').addEventListener('click', () => {
-    boot().catch((err) => {
-      log.error('boot', err.message || String(err), err);
-      showBootError(err.message || String(err));
+  viewHost
+    .querySelector('[data-role="retry-boot"]')
+    .addEventListener("click", () => {
+      boot().catch((err) => {
+        log.error("boot", err.message || String(err), err);
+        showBootError(err.message || String(err));
+      });
     });
-  });
   mountTips(viewHost);
 }
 
@@ -194,17 +211,17 @@ async function waitForApi({ attempts = 8, delayMs = 500 } = {}) {
   let lastErr;
   for (let i = 1; i <= attempts; i += 1) {
     try {
-      log.info('boot', `API health check ${i}/${attempts}`);
-      const health = await withTimeout(checkApiHealth(), 3000, 'API health');
-      log.info('boot', 'API ready', health);
+      log.info("boot", `API health check ${i}/${attempts}`);
+      const health = await withTimeout(checkApiHealth(), 3000, "API health");
+      log.info("boot", "API ready", health);
       return health;
     } catch (err) {
       lastErr = err;
-      log.warn('boot', `API not ready (${i}/${attempts}): ${err.message}`);
+      log.warn("boot", `API not ready (${i}/${attempts}): ${err.message}`);
       if (i < attempts) await sleep(delayMs);
     }
   }
-  throw lastErr || new Error('API health check failed');
+  throw lastErr || new Error("API health check failed");
 }
 
 const globalState = {
@@ -215,10 +232,10 @@ let preferredSingleMethod = null;
 
 function createView(name, methods, scenarios, models) {
   const onStatus = makeStatusHandler(name);
-  if (name === 'arena') {
+  if (name === "arena") {
     return createArenaView({ methods, scenarios, models, onStatus });
   }
-  if (name === 'analytics') {
+  if (name === "analytics") {
     return createAnalyticsDashboard({
       methods,
       scenarios,
@@ -226,16 +243,16 @@ function createView(name, methods, scenarios, models) {
       globalState,
     });
   }
-  if (name === 'netlogo') {
+  if (name === "netlogo") {
     return createNetLogoView({
       onStatus,
       onRunInHerdSim: (methodId) => {
         preferredSingleMethod = methodId;
-        switchView('single', methods, scenarios, models);
+        switchView("single", methods, scenarios, models);
       },
     });
   }
-  if (name === 'guide') {
+  if (name === "guide") {
     return createGuideView();
   }
   const preferredMethod = preferredSingleMethod;
@@ -251,13 +268,13 @@ function createView(name, methods, scenarios, models) {
 
 async function switchView(name, methods, scenarios, models) {
   if (switching) {
-    log.warn('ui', `Ignoring view switch to ${name}; mount in progress`);
+    log.warn("ui", `Ignoring view switch to ${name}; mount in progress`);
     return;
   }
 
   const cached = viewCache[name];
   if (activeViewName === name && cached) {
-    if (name === 'single' && preferredSingleMethod) {
+    if (name === "single" && preferredSingleMethod) {
       cached.preferMethod?.(preferredSingleMethod);
       preferredSingleMethod = null;
     }
@@ -266,16 +283,16 @@ async function switchView(name, methods, scenarios, models) {
 
   if (isLeaveBlocked() && activeViewName && activeViewName !== name) {
     const leave = await confirmLeaveIfNeeded({
-      title: 'Leave this view?',
+      title: "Leave this view?",
       body:
         getLeaveBlockReason() ||
-        'Work is still in progress here. Switch tabs and lose that progress, or stay?',
+        "Work is still in progress here. Switch tabs and lose that progress, or stay?",
     });
     if (!leave) return;
   }
 
   switching = true;
-  log.info('ui', `Switching to ${name}`);
+  log.info("ui", `Switching to ${name}`);
   try {
     const previousName = activeViewName;
     const previous = previousName ? viewCache[previousName] : null;
@@ -283,7 +300,7 @@ async function switchView(name, methods, scenarios, models) {
       try {
         previous.onHide?.();
       } catch (err) {
-        log.error('ui', `Error hiding ${previousName}: ${err.message}`, err);
+        log.error("ui", `Error hiding ${previousName}: ${err.message}`, err);
       }
       hideViewPanel(previous);
     }
@@ -291,42 +308,42 @@ async function switchView(name, methods, scenarios, models) {
     let view = cached;
     if (!view) {
       view = createView(name, methods, scenarios, models);
-      view.root.classList.add('view-panel');
+      view.root.classList.add("view-panel");
       viewCache[name] = view;
       viewHost.appendChild(view.root);
       activeViewName = name;
-      rememberStatus(name, { status: 'idle', tick: 0, seed: '-' });
+      rememberStatus(name, { status: "idle", tick: 0, seed: "-" });
       applyHeaderForView(name);
-      header.querySelectorAll('.nav-tab').forEach((btn) => {
+      header.querySelectorAll(".nav-tab").forEach((btn) => {
         const on = btn.dataset.view === name;
-        btn.classList.toggle('active', on);
-        btn.setAttribute('aria-selected', on ? 'true' : 'false');
+        btn.classList.toggle("active", on);
+        btn.setAttribute("aria-selected", on ? "true" : "false");
       });
       showViewPanel(view);
       await withTimeout(view.mount(), 45000, `${name} view mount`);
-      log.info('ui', `${name} view ready (created)`);
+      log.info("ui", `${name} view ready (created)`);
     } else {
       activeViewName = name;
-      if (name === 'single' && preferredSingleMethod) {
+      if (name === "single" && preferredSingleMethod) {
         view.preferMethod?.(preferredSingleMethod);
         preferredSingleMethod = null;
       }
-      header.querySelectorAll('.nav-tab').forEach((btn) => {
+      header.querySelectorAll(".nav-tab").forEach((btn) => {
         const on = btn.dataset.view === name;
-        btn.classList.toggle('active', on);
-        btn.setAttribute('aria-selected', on ? 'true' : 'false');
+        btn.classList.toggle("active", on);
+        btn.setAttribute("aria-selected", on ? "true" : "false");
       });
       showViewPanel(view);
       applyHeaderForView(name);
       try {
         view.onShow?.();
       } catch (err) {
-        log.error('ui', `Error showing ${name}: ${err.message}`, err);
+        log.error("ui", `Error showing ${name}: ${err.message}`, err);
       }
-      log.info('ui', `${name} view ready (cached)`);
+      log.info("ui", `${name} view ready (cached)`);
     }
   } catch (err) {
-    log.error('ui', `Failed to open ${name}: ${err.message}`, err);
+    log.error("ui", `Failed to open ${name}: ${err.message}`, err);
     if (viewCache[name]) {
       try {
         viewCache[name].destroy?.();
@@ -336,9 +353,9 @@ async function switchView(name, methods, scenarios, models) {
       delete viewCache[name];
     }
     if (activeViewName === name) activeViewName = null;
-    viewHost.querySelectorAll('.boot-error').forEach((el) => el.remove());
-    const errorCard = document.createElement('div');
-    errorCard.className = 'card-glass boot-error notice notice--error';
+    viewHost.querySelectorAll(".boot-error").forEach((el) => el.remove());
+    const errorCard = document.createElement("div");
+    errorCard.className = "card-glass boot-error notice notice--error";
     errorCard.innerHTML = `
       <div class="section-title">View failed: ${escapeHtml(name)}</div>
       <p>${escapeHtml(err.message || err)}</p>
@@ -351,11 +368,11 @@ async function switchView(name, methods, scenarios, models) {
 }
 
 async function boot() {
-  log.info('boot', 'Starting HerdSim UI');
+  log.info("boot", "Starting HerdSim UI");
   destroyCachedViews();
   viewHost.innerHTML = `<div class="card-glass boot-loading">Connecting to API on :8000...</div>`;
   await waitForApi();
-  viewHost.innerHTML = '';
+  viewHost.innerHTML = "";
 
   const [methods, scenarios, models] = await Promise.all([
     fetchMethods(),
@@ -364,30 +381,30 @@ async function boot() {
   ]);
   applyFactorMetadata(models?.factors || null);
   log.info(
-    'boot',
+    "boot",
     `Loaded ${methods.length} methods, ${scenarios.length} scenarios, ${models?.sheep_models?.length || 0} sheep models`,
   );
 
-  header.querySelectorAll('.nav-tab').forEach((btn) => {
+  header.querySelectorAll(".nav-tab").forEach((btn) => {
     btn.replaceWith(btn.cloneNode(true));
   });
-  header.querySelectorAll('.nav-tab').forEach((btn) => {
-    btn.addEventListener('click', () => {
+  header.querySelectorAll(".nav-tab").forEach((btn) => {
+    btn.addEventListener("click", () => {
       switchView(btn.dataset.view, methods, scenarios, models);
     });
   });
 
-  await switchView('single', methods, scenarios, models);
+  await switchView("single", methods, scenarios, models);
 }
 
-window.addEventListener('pagehide', () => {
+window.addEventListener("pagehide", () => {
   destroyCachedViews();
 });
 
 boot().catch((err) => {
-  log.error('boot', err.message || String(err), err);
+  log.error("boot", err.message || String(err), err);
   showBootError(
     err.message || String(err),
-    'Connection refused usually means the API is not listening on port 8000.',
+    "Connection refused usually means the API is not listening on port 8000.",
   );
 });

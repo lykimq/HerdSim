@@ -35,9 +35,7 @@ from analysis.scaling.transfer import build_transfer_table, transfer_summary
 from services.scaling.layout import protocol_id_from_dir, package_output_dir
 from services.scaling.runner import load_canonical_protocol
 
-_CELL_BASE = re.compile(
-    r"^N(?P<N>\d+)_D(?P<D>\d+)_L(?P<L>[^_]+)_S(?P<S>\d+)_M(?P<rest>.+)$"
-)
+_CELL_BASE = re.compile(r"^N(?P<N>\d+)_D(?P<D>\d+)_L(?P<L>[^_]+)_S(?P<S>\d+)_M(?P<rest>.+)$")
 
 
 def _parse_timeseries_stem(stem: str) -> dict[str, object] | None:
@@ -102,6 +100,48 @@ def _success_for_timeseries(stem: str, trials: pd.DataFrame) -> bool:
     if q.empty or "success" not in q.columns:
         return False
     return bool(q.iloc[0]["success"])
+
+
+def _attach_early_window(
+    trials: pd.DataFrame,
+    ts_dir: Path,
+    window_ticks: int,
+) -> pd.DataFrame:
+    """Join means from ticks in (0, window_ticks] onto each trial row."""
+    if not ts_dir.exists():
+        return trials
+    rows: list[dict[str, object]] = []
+    paths = sorted(ts_dir.glob("*.parquet")) + sorted(ts_dir.glob("*.csv"))
+    for path in paths:
+        parsed = _parse_timeseries_stem(path.stem)
+        if parsed is None:
+            continue
+        ts = pd.read_parquet(path) if path.suffix == ".parquet" else pd.read_csv(path)
+        if "tick" not in ts.columns or ts.empty:
+            continue
+        window = ts[(ts["tick"] > 0) & (ts["tick"] <= int(window_ticks))]
+        if window.empty:
+            continue
+        rec: dict[str, object] = {
+            key: parsed[key]
+            for key in ("n_sheep", "n_shepherds", "initial_layout", "seed", "method")
+        }
+        for col in window.columns:
+            if col == "tick" or not pd.api.types.is_numeric_dtype(window[col]):
+                continue
+            rec[f"early_{col}"] = float(window[col].mean())
+        rows.append(rec)
+    if not rows:
+        return trials
+    early = pd.DataFrame(rows)
+    keys = [
+        c
+        for c in ("n_sheep", "n_shepherds", "seed", "initial_layout", "method")
+        if c in trials.columns and c in early.columns
+    ]
+    drop = [c for c in trials.columns if str(c).startswith("early_")]
+    base = trials.drop(columns=drop, errors="ignore")
+    return base.merge(early, on=keys, how="left")
 
 
 def _load_timeseries_trials(
@@ -187,7 +227,9 @@ def main() -> None:
             theta=args.theta,
             group_cols=["initial_layout"] if "initial_layout" in trials.columns else None,
         )
-        pred = compare_state_vs_nd_predictors(trials)
+        window = int(protocol.get("predictor_window_ticks", 100))
+        featured = _attach_early_window(trials, args.trials.parent / "timeseries", window)
+        pred = compare_state_vs_nd_predictors(featured)
         export_package_dossier(
             "B",
             {
@@ -200,7 +242,7 @@ def main() -> None:
             notes=[
                 "RQ1 state vs size: compare d_min across initial_layout.",
                 f"Predictor prefers_state={pred.get('prefers_state')} "
-                f"delta_aic={pred.get('delta_aic')}",
+                f"nd_nll={pred.get('nd_nll')} state_nll={pred.get('state_nll')}",
             ],
         )
     elif args.package == "C":
@@ -263,9 +305,11 @@ def main() -> None:
             artefacts["substitution_summary_obs"] = pd.DataFrame([summary])
             notes.append(f"obs: {summary}")
         if "sensing_range" in trials.columns:
-            base_range = float(protocol.get("rq5_base_sensing_range", 50.0))
+            base_range = protocol.get("rq5_base_sensing_range")
+            if base_range is None:
+                raise SystemExit("Package E range ladder needs rq5_base_sensing_range (method r_s)")
             curves_r = substitution_curves_range(
-                trials, theta=args.theta, base_range=base_range
+                trials, theta=args.theta, base_range=float(base_range)
             )
             summary_r = summarize_substitution(curves_r)
             artefacts["substitution_curves_range"] = curves_r
@@ -294,9 +338,7 @@ def main() -> None:
             notes=notes,
         )
     elif args.package == "F":
-        group_cols = (
-            ["initial_layout"] if "initial_layout" in trials.columns else None
-        )
+        group_cols = ["initial_layout"] if "initial_layout" in trials.columns else None
         frontier = extract_frontier(trials, theta=args.theta, group_cols=group_cols)
         fits = fit_scaling_models(frontier)
         model_rows = []
@@ -314,15 +356,14 @@ def main() -> None:
                 "frontier": frontier.drop(columns=["rates"], errors="ignore"),
                 "scaling_fits": pd.DataFrame(model_rows),
                 "scaling_cv": pd.DataFrame([fits.get("cv") or {}]),
-                "delta_aic_vs_power": pd.DataFrame(
-                    [fits.get("delta_aic_vs_power") or {}]
-                ),
+                "delta_aic_vs_power": pd.DataFrame([fits.get("delta_aic_vs_power") or {}]),
             },
             output,
             protocol=protocol,
             protocol_id=protocol_id,
             notes=[
-                f"best_model={fits.get('best')}",
+                f"best_model={fits.get('best')} by leave-one-N RMSE",
+                f"prefers_piecewise_or_state={fits.get('prefers_piecewise_or_state')}",
                 f"state_models={list((fits.get('state_models') or {}).keys())}",
             ],
         )

@@ -12,12 +12,14 @@ from analysis.scaling.early_warning import (
     default_eval_ticks,
     evaluate_early_warning,
     evaluate_early_warning_campaign,
+    summarise_early_warning,
 )
 from analysis.scaling.export import export_package_a
 from analysis.scaling.frontier import (
     bootstrap_d_min_ci,
     extract_frontier,
-    select_boundary_cells,
+    merge_scout_and_claim,
+    select_claim_windows,
 )
 from analysis.scaling.mechanism import (
     evaluate_overcrowding_mechanisms,
@@ -37,7 +39,7 @@ from plugins.metrics.outlier_count import OutlierCountMetric
 from plugins.metrics.registry import metric_registry
 from plugins.metrics.shepherd_coverage import ShepherdCoverageMetric
 from plugins.metrics.shepherd_interference import ShepherdInterferenceMetric
-from tests.backend.helpers import make_state
+from tests.backend.helpers import make_state, make_world
 
 
 def test_scaling_metrics_registered():
@@ -66,12 +68,13 @@ def test_interference_zero_when_aligned_or_stationary():
     assert ShepherdInterferenceMetric().compute(state) == pytest.approx(1.0)
 
 
-def test_coverage_peripheral_fraction():
-    # Centroid near origin; one far sheep; one nearby shepherd covers it.
+def test_coverage_uses_influence_radius():
     sheep = [[0.0, 0.0], [0.1, 0.0], [10.0, 0.0]]
     shepherds = [[10.0, 0.0]]
-    state = make_state(sheep, shepherds, metadata={"r_s": 2.0})
-    assert ShepherdCoverageMetric().compute(state) == pytest.approx(1.0)
+    missing = make_state(sheep, shepherds, metadata={"r_a": 2.0, "r_s": 2.0})
+    assert np.isnan(ShepherdCoverageMetric().compute(missing))
+    covered = make_state(sheep, shepherds, metadata={"influence_radius": 2.0, "r_a": 2.0})
+    assert ShepherdCoverageMetric().compute(covered) == pytest.approx(1.0)
 
 
 def test_normalize_layout():
@@ -121,7 +124,7 @@ def _synthetic_trials() -> pd.DataFrame:
                     "n_shepherds": d,
                     "seed": seed,
                     "success": success,
-                    "mean_shepherd_path": 100.0 + 10.0 * d,
+                    "shepherd_path": 100.0 + 10.0 * d,
                     "first_success_tick": 500.0 if success else -1.0,
                     "mean_i_dir": 0.1 if d <= 4 else 0.6,
                     "mean_coverage": 0.8,
@@ -149,16 +152,34 @@ def test_frontier_and_regimes_extract_dmin_overcrowd():
     assert "overcrowding_collapse" in set(regimes["regime"])
 
 
-def test_boundary_cells_and_bootstrap_dmin():
+def test_claim_windows_merge_and_censored_bootstrap():
     trials = _synthetic_trials()
-    boundaries = select_boundary_cells(trials, low_r=0.80, high_r=0.95)
-    assert not boundaries.empty
-    assert set(boundaries["n_shepherds"]).issubset({1, 2, 3, 4, 6, 10})
-    boot = bootstrap_d_min_ci(trials, theta=0.90, n_boot=50, seed=0)
+    windows = select_claim_windows(trials, theta=0.90)
+    assert not windows.empty
+    chosen = set(windows["n_shepherds"])
+    assert {1, 2, 3, 6, 10} <= chosen
+    roles = set(windows["role"])
+    assert any("reliability" in role for role in roles)
+    assert any("overcrowd" in role for role in roles)
+
+    claim = trials[trials["n_shepherds"] == 2].copy()
+    claim["seed"] = claim["seed"] + 1000
+    merged = merge_scout_and_claim(trials, claim)
+    assert set(merged.loc[merged["n_shepherds"] == 2, "seed"]) == set(claim["seed"])
+    assert set(merged.loc[merged["n_shepherds"] == 1, "seed"]) == set(range(20))
+
+    failed = trials.copy()
+    failed["success"] = False
+    boot = bootstrap_d_min_ci(failed, theta=0.90, n_boot=40, seed=0)
     assert len(boot) == 1
-    assert int(boot.iloc[0]["d_min"]) == 2
-    assert boot.iloc[0]["d_min_ci_low"] is not None
-    assert boot.iloc[0]["d_min_ci_high"] is not None
+    assert int(boot.iloc[0]["n_boot"]) == 40
+    assert pd.isna(boot.iloc[0]["d_min"])
+    assert bool(boot.iloc[0]["d_min_ci_high_above_grid"])
+
+    defined = bootstrap_d_min_ci(trials, theta=0.90, n_boot=50, seed=0)
+    assert int(defined.iloc[0]["d_min"]) == 2
+    assert defined.iloc[0]["d_min_ci_low"] is not None
+    assert defined.iloc[0]["d_min_ci_high"] is not None
 
 
 def test_package_a_export(tmp_path: Path):
@@ -187,8 +208,30 @@ def test_package_a_export(tmp_path: Path):
 
 def test_predictors_and_scaling_and_transfer():
     trials = _synthetic_trials()
-    pred = compare_state_vs_nd_predictors(trials)
-    assert "delta_aic" in pred
+    single = compare_state_vs_nd_predictors(trials)
+    assert single["prefers_state"] is False
+    assert np.isnan(single["nd_nll"])
+
+    pred_rows = []
+    for n in (50, 100):
+        for seed in range(40):
+            high = seed % 2 == 0
+            pred_rows.append(
+                {
+                    "n_sheep": n,
+                    "n_shepherds": 1 + (seed % 4),
+                    "seed": seed,
+                    "success": high,
+                    "early_spread": 1.0 if high else 40.0,
+                    "initial_layout": "compact",
+                    "shepherd_path": 10.0,
+                }
+            )
+    pred = compare_state_vs_nd_predictors(pd.DataFrame(pred_rows))
+    assert pred["n_folds"] == 2
+    assert pred["state_nll"] < pred["nd_nll"]
+    assert pred["prefers_state"] is True
+
     # Multi-N frontier for piecewise / power candidates.
     rows = []
     for n, dmin in ((25, 1), (50, 2), (100, 3), (150, 6), (200, 10)):
@@ -199,7 +242,7 @@ def test_predictors_and_scaling_and_transfer():
                     "n_shepherds": dmin,
                     "seed": seed,
                     "success": True,
-                    "mean_shepherd_path": 100.0,
+                    "shepherd_path": 100.0,
                     "first_success_tick": 100.0,
                     "initial_layout": "compact",
                     "method": "strombom_multi",
@@ -212,7 +255,7 @@ def test_predictors_and_scaling_and_transfer():
                         "n_shepherds": dmin - 1,
                         "seed": seed,
                         "success": False,
-                        "mean_shepherd_path": 100.0,
+                        "shepherd_path": 100.0,
                         "first_success_tick": -1.0,
                         "initial_layout": "compact",
                         "method": "strombom_multi",
@@ -222,13 +265,25 @@ def test_predictors_and_scaling_and_transfer():
     fits = fit_scaling_models(frontier)
     assert fits["n_points"] >= 1
     assert "bic" in next(iter(fits["models"].values()))
-    assert set(fits["models"]).issubset(
-        {"constant", "linear", "power", "piecewise"}
-    )
+    assert set(fits["models"]).issubset({"constant", "linear", "power", "piecewise"})
+    assert "power" in fits["cv"]
+
+    same_curve = []
+    for layout in ("compact", "wide"):
+        for n, dmin in ((25, 1), (50, 2), (100, 4), (200, 8)):
+            same_curve.append(
+                {
+                    "n_sheep": n,
+                    "d_min": dmin,
+                    "initial_layout": layout,
+                }
+            )
+    same = fit_scaling_models(pd.DataFrame(same_curve))
+    assert same["prefers_piecewise_or_state"] is False
 
     other = trials.copy()
     other["method"] = "kubo"
-    # Shift D_min by forcing D=2 to fail.
+    # Different grid D_min: D=2 no longer clears theta.
     other.loc[other["n_shepherds"] == 2, "success"] = False
     table = build_transfer_table(
         {"strombom_multi": trials, "kubo": other},
@@ -237,6 +292,8 @@ def test_predictors_and_scaling_and_transfer():
     )
     assert not table.empty
     assert set(table["transfer_label"]).issubset({"shared", "shifted", "absent"})
+    dmin_rows = table[table["feature"] == "d_min"]
+    assert set(dmin_rows["transfer_label"]) == {"shifted"}
     assert "i_dir_signature" in set(table["feature"])
 
 
@@ -247,14 +304,13 @@ def test_mechanism_and_substitution_and_early_warning():
     assert "interference" in mech["overall"]
     assert mech.get("correction") == "holm"
     assert "p_value_holm" in mech["overall"]["interference"]
+    assert {int(row["n_sheep"]) for row in mech["by_n"]} == {50}
 
     ticks = np.arange(0, 1000)
     ts = pd.DataFrame(
         {
             "tick": ticks,
-            "i_dir": np.concatenate(
-                [np.full(200, 0.1), np.linspace(0.1, 0.9, 800)]
-            ),
+            "i_dir": np.concatenate([np.full(200, 0.1), np.linspace(0.1, 0.9, 800)]),
             "fragmentation": np.linspace(1.0, 0.2, len(ticks)),
             "mean_spread": np.linspace(1.0, 20.0, len(ticks)),
             "cohesion": np.linspace(5.0, 30.0, len(ticks)),
@@ -283,7 +339,7 @@ def test_mechanism_and_substitution_and_early_warning():
                         "seed": seed,
                         "success": success,
                         "obs_mode": obs,
-                        "mean_shepherd_path": 100.0,
+                        "shepherd_path": 100.0,
                     }
                 )
     curves = substitution_curves(pd.DataFrame(sweeps), theta=0.90)
@@ -299,6 +355,33 @@ def test_mechanism_and_substitution_and_early_warning():
     )
     assert ew["n_ticks"] == 1000
     assert "auroc" in ew
+
+    long_ticks = np.arange(0, 2001)
+    rising = pd.DataFrame(
+        {
+            "tick": long_ticks,
+            "mean_spread": np.where(long_ticks < 1000, 1.0, 40.0),
+        }
+    )
+    lead = evaluate_early_warning(
+        rising,
+        success=False,
+        horizon_k=500,
+        window_w=200,
+        time_limit=10000,
+    )
+    assert lead["lead_time"] is not None
+    assert lead["lead_time"] > 500
+    flat = evaluate_early_warning(
+        pd.DataFrame({"tick": long_ticks, "mean_spread": np.ones(len(long_ticks))}),
+        success=False,
+        horizon_k=500,
+        window_w=200,
+        time_limit=10000,
+    )
+    summary = summarise_early_warning([lead, flat])
+    assert summary["n_failures"] == 2
+    assert summary["frac_lead_ge_500"] == pytest.approx(0.5)
 
     campaign = evaluate_early_warning_campaign(
         [
@@ -366,6 +449,8 @@ def test_canonical_protocol_loads():
     assert protocol["task"] == "drive_to_goal"
     assert protocol["reliability_theta"] == 0.90
     assert protocol["baseline_method"] == "strombom_multi"
+    assert protocol["protocol_id"] == "scaling_v2"
+    assert protocol["world_width"] == 500.0
     assert 10000 == protocol["time_limit_t0"]
 
 
@@ -395,3 +480,115 @@ def test_scaling_layout_and_cell_key(tmp_path: Path):
     assert "Mstrombom_multi" in key
     assert "Obearing_only" in key
     assert key.startswith("N50_D2_Lcompact_S2026_")
+
+
+def test_wasteful_regime_uses_path_not_neighbor_rule():
+    rows = []
+    for d, path in ((2, 100.0), (3, 200.0)):
+        for seed in range(10):
+            rows.append(
+                {
+                    "n_sheep": 50,
+                    "n_shepherds": d,
+                    "seed": seed,
+                    "success": True,
+                    "shepherd_path": path,
+                }
+            )
+    regimes = label_regimes(pd.DataFrame(rows), theta=0.90)
+    by_d = dict(zip(regimes["n_shepherds"], regimes["regime"]))
+    assert by_d[2] == "efficient_operation"
+    assert by_d[3] == "wasteful_overspend"
+
+
+def test_x0_families_on_scaling_arena():
+    center = np.array([250.0, 250.0])
+    goal = np.array([370.0, 250.0])
+    bounds = dict(
+        spread=30.0,
+        world_width=500.0,
+        world_height=500.0,
+        goal_center=goal,
+        goal_radius=15.0,
+    )
+    rng = np.random.default_rng(0)
+    compact = generate_initial_positions(50, "compact", center, rng, **bounds)
+    wide = generate_initial_positions(50, "wide", center, rng, **bounds)
+    split = generate_initial_positions(50, "split", center, rng, interaction_radius=5.0, **bounds)
+    outliers = generate_initial_positions(
+        50,
+        "outlier_rich",
+        center,
+        rng,
+        lost_threshold=2.0 * (50 ** (2.0 / 3.0)),
+        **bounds,
+    )
+
+    def _inside(pos: np.ndarray) -> None:
+        assert np.all((pos[:, 0] >= 1.0) & (pos[:, 0] <= 499.0))
+        assert np.all((pos[:, 1] >= 1.0) & (pos[:, 1] <= 499.0))
+        assert np.all(np.linalg.norm(pos - goal, axis=1) > 15.0)
+
+    for pos in (compact, wide, split, outliers):
+        _inside(pos)
+
+    def cohesion(pos):
+        return CohesionMetric().compute(make_state(pos, [[250.0, 250.0]]))
+
+    def frag(pos):
+        return FragmentationMetric().compute(
+            make_state(pos, [[250.0, 250.0]], metadata={"measurement_radius": 5.0})
+        )
+
+    def outliers_n(pos):
+        return OutlierCountMetric().compute(
+            make_state(pos, [[250.0, 250.0]], metadata={"r_a": 2.0})
+        )
+
+    assert cohesion(wide) > cohesion(compact)
+    assert frag(split) < frag(compact)
+    assert outliers_n(outliers) > outliers_n(compact)
+
+
+def test_collect_drive_multi_uses_each_dogs_observation():
+    from core.observation import ShepherdObservation
+    from plugins.dogs.collect_drive_multi import CollectDriveMultiController
+
+    seen = np.array([[50.0, 50.0], [51.0, 50.0], [50.0, 51.0], [51.0, 51.0]], dtype=float)
+    hidden = np.array([[50.0, 130.0]], dtype=float)
+    sheep = np.vstack([seen, hidden])
+    dogs = np.array([[90.0, 50.0], [90.0, 80.0]], dtype=float)
+    state = make_state(sheep, dogs, world=make_world(), seed=1)
+
+    def _obs(index: int, positions: np.ndarray) -> ShepherdObservation:
+        positions = np.asarray(positions, dtype=float).reshape(-1, 2)
+        other = 1 - index
+        return ShepherdObservation(
+            shepherd_index=index,
+            self_position=dogs[index],
+            self_velocity=np.zeros(2),
+            goal_center=np.array([15.0, 15.0]),
+            sheep_positions=positions,
+            sheep_velocities=np.zeros_like(positions),
+            sheep_indices=np.arange(len(positions)),
+            other_shepherd_positions=dogs[other : other + 1],
+            other_shepherd_indices=np.array([other]),
+        )
+
+    ctrl = CollectDriveMultiController()
+    cfg = {
+        **ctrl.default_config,
+        "noise_strength": 0.0,
+        "n_shepherds": 2,
+        "communication": "none",
+    }
+    none_obs = [_obs(0, seen), _obs(1, np.zeros((0, 2)))]
+    none_state = ctrl.step(state, none_obs, cfg)
+    assert np.linalg.norm(none_state.shepherd_velocities[0]) > 0
+    assert np.allclose(none_state.shepherd_velocities[1], 0.0)
+    assert none_state.metadata["herding_mode"] == "drive"
+
+    cfg["communication"] = "global_shared"
+    shared_state = ctrl.step(state, none_obs, cfg)
+    assert np.linalg.norm(shared_state.shepherd_velocities[1]) > 0
+    assert shared_state.metadata["herding_mode"] == "drive"

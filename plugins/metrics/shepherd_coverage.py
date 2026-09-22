@@ -12,8 +12,8 @@ class ShepherdCoverageMetric(BaseMetric):
     """Fraction of peripheral sheep within at least one shepherd influence radius.
 
     Peripheral sheep are those farther from the flock centroid than the median
-    sheep-centroid distance. Influence radius is ``r_s`` from state.metadata
-    (default 2.0).
+    sheep-centroid distance. Influence radius is ``influence_radius`` on
+    state.metadata (the trial sensing range, else the method ``r_s``).
     """
 
     @property
@@ -28,7 +28,7 @@ class ShepherdCoverageMetric(BaseMetric):
     def description(self) -> str:
         return (
             "Fraction of peripheral sheep (distance to centroid > median) that "
-            "lie within at least one shepherd's influence radius r_s."
+            "lie within at least one shepherd's influence radius."
         )
 
     @property
@@ -45,7 +45,12 @@ class ShepherdCoverageMetric(BaseMetric):
             # All sheep at the same distance (or single sheep): treat as covered
             # if any sheep is within range of a shepherd.
             peripheral = np.ones(state.n_sheep, dtype=bool)
-        r_s = float(state.metadata.get("r_s", 2.0))
+        raw = state.metadata.get("influence_radius")
+        if raw is None:
+            return float("nan")
+        r_s = float(raw)
+        if not np.isfinite(r_s):
+            return float("nan")
         sheep = state.sheep_positions[peripheral]
         shepherds = state.shepherd_positions
         # Pairwise sheep-shepherd distances.

@@ -106,7 +106,5 @@ def snapshot_positions(runner: SimulationRunner, ticks: int) -> list[tuple[np.nd
     out: list[tuple[np.ndarray, np.ndarray]] = []
     for _ in range(ticks):
         state, _, _ = runner.step()
-        out.append(
-            (state.sheep_positions.copy(), state.shepherd_positions.copy())
-        )
+        out.append((state.sheep_positions.copy(), state.shepherd_positions.copy()))
     return out

@@ -1,8 +1,8 @@
-import { createControlPanel } from '../../shared/ui/ControlPanel.js';
-import { createMetricsPanel } from '../../shared/ui/MetricsPanel.js';
-import { PixiRenderer } from '../../renderer/PixiRenderer.js';
-import { createSimulationController } from '../../shared/sim/simulationController.js';
-import { log, withTimeout } from '../../shared/ui/logger.js';
+import { createControlPanel } from "../../shared/ui/ControlPanel.js";
+import { createMetricsPanel } from "../../shared/ui/MetricsPanel.js";
+import { PixiRenderer } from "../../renderer/PixiRenderer.js";
+import { createSimulationController } from "../../shared/sim/simulationController.js";
+import { log, withTimeout } from "../../shared/ui/logger.js";
 
 /**
  * One Arena column: canvas + control panel + metrics.
@@ -15,12 +15,12 @@ export function createArenaSide(
   preferredMethod,
   { onStatus, onPhaseHint, onIndependentInit, onSideError, models = null } = {},
 ) {
-  const panel = document.createElement('div');
-  panel.className = 'arena-panel';
-  const title = document.createElement('h4');
+  const panel = document.createElement("div");
+  panel.className = "arena-panel";
+  const title = document.createElement("h4");
   title.textContent = `${label}: -`;
-  const canvasHost = document.createElement('div');
-  canvasHost.className = 'canvas-host';
+  const canvasHost = document.createElement("div");
+  canvasHost.className = "canvas-host";
   panel.appendChild(title);
   panel.appendChild(canvasHost);
 
@@ -38,7 +38,7 @@ export function createArenaSide(
     getHerderKind: () => controls.getHerderKind(),
     onPhaseHint,
     onFrame: (msg, ctx) => {
-      if (msg.type === 'tick') {
+      if (msg.type === "tick") {
         metrics.update(msg.metrics, ctx.history.length);
         onStatus?.({
           status: ctx.status,
@@ -47,7 +47,7 @@ export function createArenaSide(
         });
       } else {
         metrics.update({}, 0);
-        onStatus?.({ status: 'initialized', tick: 0, seed: ctx.seed });
+        onStatus?.({ status: "initialized", tick: 0, seed: ctx.seed });
       }
     },
     onTerminated: (_msg, ctx) => {
@@ -58,7 +58,7 @@ export function createArenaSide(
       });
     },
     onError: () => {
-      log.error('arena', `${label}: websocket error`);
+      log.error("arena", `${label}: websocket error`);
     },
   });
 
@@ -69,7 +69,7 @@ export function createArenaSide(
     lockPaperScenario: false,
     onInit: async (cfg) => {
       try {
-        log.info('arena', `${label}: independent init`, {
+        log.info("arena", `${label}: independent init`, {
           method: cfg.method,
           scenario: cfg.scenario_id,
           seed: cfg.seed,
@@ -79,7 +79,7 @@ export function createArenaSide(
         updateTitle();
         onIndependentInit?.(label);
       } catch (err) {
-        log.error('arena', `${label}: init failed: ${err.message || err}`, err);
+        log.error("arena", `${label}: init failed: ${err.message || err}`, err);
         sim.close();
         onSideError?.(label, err);
       }
@@ -110,11 +110,13 @@ export function createArenaSide(
   renderer.setHerderKind(controls.getHerderKind());
   sim.wireRendererOverlays(controls);
   updateTitle();
-  controls.root.querySelector('[data-role="method"]').addEventListener('change', updateTitle);
+  controls.root
+    .querySelector('[data-role="method"]')
+    .addEventListener("change", updateTitle);
 
   async function initFromShared(sharedCfg) {
     try {
-      log.info('arena', `${label}: fair init`, {
+      log.info("arena", `${label}: fair init`, {
         method: controls.getConfig().method,
         scenario: sharedCfg.scenario_id,
         seed: sharedCfg.seed,
@@ -133,7 +135,7 @@ export function createArenaSide(
         seed: sharedCfg.seed,
         num_sheep: sharedCfg.num_sheep,
         num_shepherds: sharedCfg.num_shepherds ?? local.num_shepherds,
-        preset: sharedCfg.preset || 'paper',
+        preset: sharedCfg.preset || "paper",
       };
       const session = await sim.openBusy(cfg);
       updateTitle();
@@ -153,7 +155,7 @@ export function createArenaSide(
     getRunStatus: () => sim.getStatus(),
     isBusy: () => sim.isBusy(),
     async mount() {
-      log.info('arena', `Mounting side ${label}`);
+      log.info("arena", `Mounting side ${label}`);
       await withTimeout(renderer.init(), 20000, `Arena ${label} renderer`);
       sim.wireRendererOverlays(controls);
     },

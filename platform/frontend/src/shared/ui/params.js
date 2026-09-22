@@ -56,9 +56,7 @@ export const PRESET_OPTIONS = [
 ];
 
 export function getPresetOption(presetId) {
-  return (
-    PRESET_OPTIONS.find((p) => p.id === presetId) || PRESET_OPTIONS[0]
-  );
+  return PRESET_OPTIONS.find((p) => p.id === presetId) || PRESET_OPTIONS[0];
 }
 
 export function presetSelectHtml(includeCustom = true) {
@@ -140,7 +138,9 @@ export function applyScenarioWorld(target, scenarioDefaults) {
 }
 
 function isPointParam(key, value) {
-  return (key === "goal_center" || key === "pen_center") && Array.isArray(value);
+  return (
+    (key === "goal_center" || key === "pen_center") && Array.isArray(value)
+  );
 }
 
 function isInfoWorldParam(key, value) {
@@ -194,7 +194,10 @@ function appendPointInputs(group, label, key, values, defaultValue, onChange) {
     input.addEventListener("input", () => {
       current[index] = Number(input.value);
       values[key] = [...current];
-      label.querySelector(".param-val").textContent = formatParamValue(key, current);
+      label.querySelector(".param-val").textContent = formatParamValue(
+        key,
+        current,
+      );
       if (onChange) onChange(key, values[key]);
     });
     row.appendChild(input);
@@ -203,7 +206,13 @@ function appendPointInputs(group, label, key, values, defaultValue, onChange) {
   group.appendChild(row);
 }
 
-export function buildParamControls(container, defaults, values, onChange, options = {}) {
+export function buildParamControls(
+  container,
+  defaults,
+  values,
+  onChange,
+  options = {},
+) {
   container.innerHTML = "";
   const readOnly = Boolean(options.readOnly);
   const groups = options.paramGroups;
@@ -253,7 +262,10 @@ export function buildParamControls(container, defaults, values, onChange, option
         input.addEventListener("input", () => {
           const num = Number(input.value);
           values[key] = num;
-          label.querySelector(".param-val").textContent = formatParamValue(key, num);
+          label.querySelector(".param-val").textContent = formatParamValue(
+            key,
+            num,
+          );
           if (onChange) onChange(key, num);
         });
       }

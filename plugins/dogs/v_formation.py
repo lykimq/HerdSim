@@ -25,8 +25,8 @@ def v_arc_targets(state: SimulationState, config: dict) -> list[np.ndarray]:
     m = state.n_shepherds
     centroid = state.sheep_centroid
     goal = resolve_goal_center(state, config)
-    offset = float(config["v_arc_offset"]) if "v_arc_offset" in config else drive_offset(
-        state, config
+    offset = (
+        float(config["v_arc_offset"]) if "v_arc_offset" in config else drive_offset(state, config)
     )
     spacing = np.radians(float(config.get("v_angle_deg", 35.0)))
     behind = centroid - goal

@@ -219,18 +219,10 @@ def export_package_a(
     else:
         seeds = []
 
-    methods = (
-        _unique_sorted(trials["method"]) if "method" in trials.columns else []
-    )
-    layouts = (
-        _unique_sorted(trials["initial_layout"])
-        if "initial_layout" in trials.columns
-        else []
-    )
+    methods = _unique_sorted(trials["method"]) if "method" in trials.columns else []
+    layouts = _unique_sorted(trials["initial_layout"]) if "initial_layout" in trials.columns else []
     n_values = _unique_sorted(trials["n_sheep"]) if "n_sheep" in trials.columns else []
-    d_values = (
-        _unique_sorted(trials["n_shepherds"]) if "n_shepherds" in trials.columns else []
-    )
+    d_values = _unique_sorted(trials["n_shepherds"]) if "n_shepherds" in trials.columns else []
 
     stamp = build_provenance_stamp(
         protocol_id=protocol_id,

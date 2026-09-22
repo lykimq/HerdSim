@@ -5,9 +5,7 @@ from __future__ import annotations
 import numpy as np
 
 
-def move_toward(
-    current_pos: np.ndarray, target_pos: np.ndarray, speed: float
-) -> np.ndarray:
+def move_toward(current_pos: np.ndarray, target_pos: np.ndarray, speed: float) -> np.ndarray:
     """Velocity from current toward target at most `speed` (zeros if at target)."""
     diff = target_pos - current_pos
     dist = np.linalg.norm(diff)

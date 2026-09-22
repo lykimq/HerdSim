@@ -1,21 +1,25 @@
 /** Per-tick metric history charts with scrub, hover readout, and scale labels. */
 
-import { formatMetricValue } from '../../shared/charts/metricFormat.js';
-import { drawSeries, indexFromPointer, placeHoverTip } from '../../shared/charts/chartCanvas.js';
-import { setInfoTip } from '../../shared/ui/tooltips.js';
+import { formatMetricValue } from "../../shared/charts/metricFormat.js";
+import {
+  drawSeries,
+  indexFromPointer,
+  placeHoverTip,
+} from "../../shared/charts/chartCanvas.js";
+import { setInfoTip } from "../../shared/ui/tooltips.js";
 
 const SERIES = [
-  { id: 'cohesion', label: 'Cohesion', color: '#f87171' },
-  { id: 'fragmentation', label: 'Fragment', color: '#c084fc' },
-  { id: 'sheep_in_goal', label: 'In goal', color: '#4ade80' },
-  { id: 'shepherd_path', label: 'Path', color: '#fbbf24' },
-  { id: 'min_separation', label: 'Min sep', color: '#67e8f9' },
-  { id: 'polarization', label: 'Polarisation', color: '#38bdf8' },
+  { id: "cohesion", label: "Cohesion", color: "#f87171" },
+  { id: "fragmentation", label: "Fragment", color: "#c084fc" },
+  { id: "sheep_in_goal", label: "In goal", color: "#4ade80" },
+  { id: "shepherd_path", label: "Path", color: "#fbbf24" },
+  { id: "min_separation", label: "Min sep", color: "#67e8f9" },
+  { id: "polarization", label: "Polarisation", color: "#38bdf8" },
 ];
 
 export function createMetricHistoryPanel({ onScrub } = {}) {
-  const root = document.createElement('div');
-  root.className = 'card-glass metric-history-panel';
+  const root = document.createElement("div");
+  root.className = "card-glass metric-history-panel";
   root.innerHTML = `
     <div class="section-title">Metric history</div>
     <div data-role="charts"></div>
@@ -28,8 +32,8 @@ export function createMetricHistoryPanel({ onScrub } = {}) {
   `;
 
   setInfoTip(
-    root.querySelector('.section-title'),
-    'Live tick series. Scrub to replay a frame; hover a chart for the value at that tick.',
+    root.querySelector(".section-title"),
+    "Live tick series. Scrub to replay a frame; hover a chart for the value at that tick.",
   );
   const chartsEl = root.querySelector('[data-role="charts"]');
   const scrub = root.querySelector('[data-role="scrub"]');
@@ -48,8 +52,8 @@ export function createMetricHistoryPanel({ onScrub } = {}) {
   let hoverSeriesId = null;
 
   SERIES.forEach((series) => {
-    const block = document.createElement('div');
-    block.className = 'dist-block';
+    const block = document.createElement("div");
+    block.className = "dist-block";
     block.innerHTML = `
       <div class="metric-history-label">
         <span class="dist-label" data-role="name">${series.label}</span>
@@ -61,7 +65,7 @@ export function createMetricHistoryPanel({ onScrub } = {}) {
     chartsEl.appendChild(block);
     const valueEl = block.querySelector('[data-role="value"]');
     valueEl.style.color = series.color;
-    canvases[series.id] = block.querySelector('canvas');
+    canvases[series.id] = block.querySelector("canvas");
     valueEls[series.id] = valueEl;
     labelEls[series.id] = block.querySelector('[data-role="name"]');
     unitEls[series.id] = block.querySelector('[data-role="unit"]');
@@ -70,13 +74,13 @@ export function createMetricHistoryPanel({ onScrub } = {}) {
   function tipText(id) {
     const def = defsById[id];
     if (!def) return id;
-    const unitPart = def.unit ? ` Unit: ${def.unit}.` : '';
+    const unitPart = def.unit ? ` Unit: ${def.unit}.` : "";
     return `${def.description || id}${unitPart}`;
   }
 
   function unitSuffix(id) {
     const unit = defsById[id]?.unit;
-    return unit ? unit : '';
+    return unit ? unit : "";
   }
 
   function activeIndex() {
@@ -85,8 +89,8 @@ export function createMetricHistoryPanel({ onScrub } = {}) {
   }
 
   function hideHoverTip() {
-    hoverTip.classList.add('hidden');
-    hoverTip.textContent = '';
+    hoverTip.classList.add("hidden");
+    hoverTip.textContent = "";
   }
 
   function showHoverTip(series, idx, clientX, clientY) {
@@ -97,21 +101,32 @@ export function createMetricHistoryPanel({ onScrub } = {}) {
     }
     const raw = row.metrics?.[series.id];
     const unit = unitSuffix(series.id);
-    const valueText = formatMetricValue(series.id, raw == null ? null : Number(raw));
-    hoverTip.textContent = `Tick ${row.tick ?? idx}: ${valueText}${unit ? ` ${unit}` : ''}`;
-    hoverTip.classList.remove('hidden');
+    const valueText = formatMetricValue(
+      series.id,
+      raw == null ? null : Number(raw),
+    );
+    hoverTip.textContent = `Tick ${row.tick ?? idx}: ${valueText}${unit ? ` ${unit}` : ""}`;
+    hoverTip.classList.remove("hidden");
     placeHoverTip(hoverTip, root, clientX, clientY);
   }
 
   function paint() {
     const idx = activeIndex();
     SERIES.forEach((series) => {
-      const values = history.map((row) => Number(row.metrics?.[series.id] ?? 0));
+      const values = history.map((row) =>
+        Number(row.metrics?.[series.id] ?? 0),
+      );
       const hoverForSeries = hoverSeriesId === series.id ? hoverIndex : -1;
-      drawSeries(canvases[series.id], values, series.color, idx, hoverForSeries);
+      drawSeries(
+        canvases[series.id],
+        values,
+        series.color,
+        idx,
+        hoverForSeries,
+      );
 
       if (idx < 0 || !history[idx]) {
-        valueEls[series.id].textContent = '-';
+        valueEls[series.id].textContent = "-";
       } else {
         const raw = history[idx].metrics?.[series.id];
         valueEls[series.id].textContent = formatMetricValue(
@@ -125,7 +140,7 @@ export function createMetricHistoryPanel({ onScrub } = {}) {
       scrub.disabled = true;
       scrub.max = 0;
       scrub.value = 0;
-      scrubLabel.textContent = 'No history yet';
+      scrubLabel.textContent = "No history yet";
       return;
     }
     scrub.disabled = false;
@@ -143,7 +158,7 @@ export function createMetricHistoryPanel({ onScrub } = {}) {
       if (def?.name) labelEls[series.id].textContent = def.name;
       labelEls[series.id].title = tipText(series.id);
       const unit = unitSuffix(series.id);
-      unitEls[series.id].textContent = unit ? `(${unit})` : '';
+      unitEls[series.id].textContent = unit ? `(${unit})` : "";
     });
     paint();
   }
@@ -164,7 +179,7 @@ export function createMetricHistoryPanel({ onScrub } = {}) {
     paint();
   }
 
-  scrub.addEventListener('input', () => {
+  scrub.addEventListener("input", () => {
     scrubbing = true;
     scrubIndex = Number(scrub.value);
     paint();
@@ -174,14 +189,14 @@ export function createMetricHistoryPanel({ onScrub } = {}) {
 
   SERIES.forEach((series) => {
     const canvas = canvases[series.id];
-    canvas.addEventListener('mousemove', (event) => {
+    canvas.addEventListener("mousemove", (event) => {
       if (!history.length) return;
       hoverSeriesId = series.id;
       hoverIndex = indexFromPointer(canvas, event.clientX, history.length);
       paint();
       showHoverTip(series, hoverIndex, event.clientX, event.clientY);
     });
-    canvas.addEventListener('mouseleave', () => {
+    canvas.addEventListener("mouseleave", () => {
       if (hoverSeriesId !== series.id) return;
       hoverSeriesId = null;
       hoverIndex = -1;

@@ -1,5 +1,5 @@
-import { createSession } from '../api/rest.js';
-import { createSimulationSocket } from '../api/websocket.js';
+import { createSession } from "../api/rest.js";
+import { createSimulationSocket } from "../api/websocket.js";
 
 /**
  * Create a simulation session and open its websocket.
@@ -26,12 +26,12 @@ export async function openSimulationSession({
 
   const socket = createSimulationSocket(session.session_id, {
     onMessage: (msg) => {
-      if (msg.type === 'tick' || msg.type === 'reset') {
-        if (msg.type === 'reset') renderer.clearTrails();
+      if (msg.type === "tick" || msg.type === "reset") {
+        if (msg.type === "reset") renderer.clearTrails();
         if (msg.world) renderer.setWorld(msg.world);
         renderer.render(msg);
         onFrame?.(msg);
-      } else if (msg.type === 'terminated') {
+      } else if (msg.type === "terminated") {
         onTerminated?.(msg);
       }
     },

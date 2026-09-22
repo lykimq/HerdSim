@@ -38,4 +38,4 @@ class ExtentMetric(BaseMetric):
         if state.n_sheep == 0:
             return 0.0
         distances = state.distances_to_centroid()
-        return float(np.sqrt(np.mean(distances ** 2)))
+        return float(np.sqrt(np.mean(distances**2)))

@@ -14,9 +14,7 @@ def _unit(vec: np.ndarray) -> np.ndarray:
     return vec / n
 
 
-def segment_intersects_aabb(
-    p0: np.ndarray, p1: np.ndarray, obs: Obstacle
-) -> bool:
+def segment_intersects_aabb(p0: np.ndarray, p1: np.ndarray, obs: Obstacle) -> bool:
     """True if segment p0->p1 intersects the axis-aligned obstacle (Liang-Barsky)."""
     x0, y0 = float(obs.min_corner[0]), float(obs.min_corner[1])
     x1, y1 = float(obs.max_corner[0]), float(obs.max_corner[1])
@@ -49,9 +47,7 @@ def segment_intersects_aabb(
     return t0 <= t1
 
 
-def blocking_obstacles(
-    p0: np.ndarray, p1: np.ndarray, obstacles: list[Obstacle]
-) -> list[Obstacle]:
+def blocking_obstacles(p0: np.ndarray, p1: np.ndarray, obstacles: list[Obstacle]) -> list[Obstacle]:
     """Obstacles whose AABB intersects the segment from p0 to p1."""
     return [o for o in obstacles if segment_intersects_aabb(p0, p1, o)]
 
@@ -117,18 +113,12 @@ def find_gate_gap_center(obstacles: list[Obstacle]) -> np.ndarray | None:
 
 
 def _obs_center(obs: Obstacle) -> np.ndarray:
-    return 0.5 * (
-        np.asarray(obs.min_corner, dtype=float)
-        + np.asarray(obs.max_corner, dtype=float)
-    )
+    return 0.5 * (np.asarray(obs.min_corner, dtype=float) + np.asarray(obs.max_corner, dtype=float))
 
 
 def _half_extent_along(obs: Obstacle, direction: np.ndarray) -> float:
     """Approximate half-width of AABB projected onto a unit direction."""
-    half = 0.5 * (
-        np.asarray(obs.max_corner, dtype=float)
-        - np.asarray(obs.min_corner, dtype=float)
-    )
+    half = 0.5 * (np.asarray(obs.max_corner, dtype=float) - np.asarray(obs.min_corner, dtype=float))
     d = _unit(direction)
     return float(abs(half[0] * d[0]) + abs(half[1] * d[1]))
 

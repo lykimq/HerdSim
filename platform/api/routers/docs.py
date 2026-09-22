@@ -138,4 +138,6 @@ async def get_doc(slug: str):
         raise HTTPException(status_code=404, detail=f"Unknown doc slug '{slug}'")
     if not path.is_file():
         raise HTTPException(status_code=404, detail=f"Doc file missing for '{slug}'")
-    return PlainTextResponse(path.read_text(encoding="utf-8"), media_type="text/markdown; charset=utf-8")
+    return PlainTextResponse(
+        path.read_text(encoding="utf-8"), media_type="text/markdown; charset=utf-8"
+    )

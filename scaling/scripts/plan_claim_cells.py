@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Plan claim-grade boundary reseeds from a scout trials.csv (Cap I2 procedure)."""
+"""Plan claim-grade windows from a scout trials.csv and optionally reseed them."""
 
 from __future__ import annotations
 
@@ -9,7 +9,11 @@ from pathlib import Path
 
 import pandas as pd
 
-from analysis.scaling.frontier import bootstrap_d_min_ci, select_boundary_cells
+from analysis.scaling.frontier import (
+    bootstrap_d_min_ci,
+    merge_scout_and_claim,
+    select_claim_windows,
+)
 from services.scaling.layout import (
     PROTOCOLS_DIR,
     copy_protocol_spec,
@@ -42,9 +46,7 @@ def main() -> None:
     )
     parser.add_argument("--canonical", type=Path, default=None)
     parser.add_argument("--output", type=Path, default=None)
-    parser.add_argument("--theta", type=float, default=0.90)
-    parser.add_argument("--low-r", type=float, default=0.80)
-    parser.add_argument("--high-r", type=float, default=0.95)
+    parser.add_argument("--theta", type=float, default=None)
     parser.add_argument("--workers", type=int, default=1)
     parser.add_argument(
         "--plan-only",
@@ -57,18 +59,7 @@ def main() -> None:
     args = parser.parse_args()
 
     scout = pd.read_csv(args.scout_trials)
-    group_cols = [
-        c
-        for c in ("initial_layout", "method")
-        if c in scout.columns and scout[c].nunique(dropna=True) >= 1
-    ]
-    boundaries = select_boundary_cells(
-        scout,
-        group_cols=group_cols or None,
-        low_r=args.low_r,
-        high_r=args.high_r,
-    )
-
+    group_cols = [c for c in ("initial_layout", "method") if c in scout.columns]
     spec_path = args.protocol
     if spec_path is None:
         spec_path = PROTOCOLS_DIR / "phase1_claim.yaml"
@@ -77,6 +68,19 @@ def main() -> None:
         if candidate.exists():
             spec_path = candidate
     spec = load_protocol_spec(spec_path) if spec_path.exists() else {}
+
+    protocol_path = args.canonical
+    if protocol_path is None and spec:
+        protocol_path = protocol_path_for_spec(spec)
+    protocol = load_canonical_protocol(protocol_path)
+    theta = float(args.theta if args.theta is not None else protocol.get("reliability_theta", 0.90))
+    n_boot = int(protocol.get("bootstrap_resamples", 1000))
+
+    boundaries = select_claim_windows(
+        scout,
+        theta=theta,
+        group_cols=group_cols or None,
+    )
 
     output = args.output
     if output is None and spec:
@@ -89,7 +93,8 @@ def main() -> None:
     boundaries.to_csv(output / "boundary_cells.csv", index=False)
     boot = bootstrap_d_min_ci(
         scout,
-        theta=args.theta,
+        theta=theta,
+        n_boot=n_boot,
         group_cols=group_cols or None,
     )
     boot.to_csv(output / "scout_dmin_bootstrap_preview.csv", index=False)
@@ -98,9 +103,7 @@ def main() -> None:
             {
                 "n_boundary_cells": int(len(boundaries)),
                 "group_cols": group_cols,
-                "low_r": args.low_r,
-                "high_r": args.high_r,
-                "theta": args.theta,
+                "theta": theta,
                 "scout_trials": str(args.scout_trials),
             },
             indent=2,
@@ -115,10 +118,6 @@ def main() -> None:
     if boundaries.empty:
         raise SystemExit("No boundary cells found; not running claim reseed")
 
-    protocol_path = args.canonical
-    if protocol_path is None and spec:
-        protocol_path = protocol_path_for_spec(spec)
-    protocol = load_canonical_protocol(protocol_path)
     protocol_id = args.protocol_id or str(spec.get("protocol_id", "phase1_claim"))
 
     if spec_path.exists():
@@ -142,11 +141,22 @@ def main() -> None:
     )
     claim_boot = bootstrap_d_min_ci(
         trials,
-        theta=args.theta,
+        theta=theta,
+        n_boot=n_boot,
         group_cols=group_cols or None,
     )
     claim_boot.to_csv(output / "dmin_bootstrap.csv", index=False)
+    merged = merge_scout_and_claim(scout, trials)
+    merged.to_csv(output / "merged_trials.csv", index=False)
+    merged_boot = bootstrap_d_min_ci(
+        merged,
+        theta=theta,
+        n_boot=n_boot,
+        group_cols=group_cols or None,
+    )
+    merged_boot.to_csv(output / "merged_dmin_bootstrap.csv", index=False)
     print(f"Wrote {len(trials)} claim trial rows to {output / 'trials.csv'}")
+    print(f"Wrote {len(merged)} merged rows to {output / 'merged_trials.csv'}")
 
 
 if __name__ == "__main__":

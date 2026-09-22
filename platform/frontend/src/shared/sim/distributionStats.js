@@ -38,7 +38,7 @@ export function headingBins(headings, nBins = 18) {
     peakHi: (peakIdx + 1) * binWidth,
     min: 0,
     max: 360,
-    unit: 'deg',
+    unit: "deg",
   };
 }
 
@@ -55,7 +55,7 @@ export function gcmDistanceBins(positions, nBins = 16) {
       mean: null,
       min: 0,
       max: 50,
-      unit: '',
+      unit: "",
     };
   }
   const cx = positions.reduce((s, p) => s + p[0], 0) / positions.length;
@@ -79,6 +79,6 @@ export function gcmDistanceBins(positions, nBins = 16) {
     mean,
     min: 0,
     max: Number(maxDist.toFixed(1)),
-    unit: '',
+    unit: "",
   };
 }

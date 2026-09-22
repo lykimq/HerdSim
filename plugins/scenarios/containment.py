@@ -47,9 +47,7 @@ class ContainmentScenario(BaseScenario):
         # Re-use GoalZone as the pen region for success checks.
         from core.world import GoalZone
 
-        pen_center = np.array(
-            config.get("pen_center", [width / 2.0, height / 2.0]), dtype=float
-        )
+        pen_center = np.array(config.get("pen_center", [width / 2.0, height / 2.0]), dtype=float)
         pen_radius = float(config.get("pen_radius", 35.0))
         return World(
             dt=float(config.get("dt", 0.1)),
@@ -73,9 +71,7 @@ class ContainmentScenario(BaseScenario):
         # Dogs start around the pen perimeter.
         angles = np.linspace(0, 2 * np.pi, n_shepherds, endpoint=False)
         radius = float(config.get("pen_radius", 35.0)) + 10.0
-        shepherd_pos = center + np.stack(
-            [radius * np.cos(angles), radius * np.sin(angles)], axis=1
-        )
+        shepherd_pos = center + np.stack([radius * np.cos(angles), radius * np.sin(angles)], axis=1)
         shepherd_pos += rng.uniform(-2, 2, size=shepherd_pos.shape)
         return sheep_pos, shepherd_pos
 

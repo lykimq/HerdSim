@@ -1,4 +1,4 @@
-import { mountTips, setInfoTip, setTip } from './tooltips.js';
+import { mountTips, setInfoTip, setTip } from "./tooltips.js";
 import {
   assignmentModeOptionHtml,
   assignmentModesFromMethod,
@@ -6,13 +6,21 @@ import {
   GCM_GOAL_TIP,
   TRAIL_LABEL,
   TRAIL_TIP,
-} from '../sim/displayOverlays.js';
-import { buildSessionPayload, DEFAULT_FACTORS, summarizeFactors } from '../factors/factors.js';
-import { getPresetOption, PAPER_TASK_SCENARIO_ID, scenarioOptionLabel } from './params.js';
-import { validateWorldOverrides } from './paramDescriptions.js';
-import { controlPanelHtml } from './controlPanelMarkup.js';
-import { createParamRefresh } from './controlPanelParams.js';
-import { createFactorControls } from './controlPanelFactors.js';
+} from "../sim/displayOverlays.js";
+import {
+  buildSessionPayload,
+  DEFAULT_FACTORS,
+  summarizeFactors,
+} from "../factors/factors.js";
+import {
+  getPresetOption,
+  PAPER_TASK_SCENARIO_ID,
+  scenarioOptionLabel,
+} from "./params.js";
+import { validateWorldOverrides } from "./paramDescriptions.js";
+import { controlPanelHtml } from "./controlPanelMarkup.js";
+import { createParamRefresh } from "./controlPanelParams.js";
+import { createFactorControls } from "./controlPanelFactors.js";
 
 export function createControlPanel({
   onInit,
@@ -27,7 +35,7 @@ export function createControlPanel({
   onAssignmentModesChange,
   onAssignmentModeVisibleChange,
   onClearTrails,
-  sideLabel = '',
+  sideLabel = "",
   paramsOpen = true,
   factorsOpen = true,
   runFirst = false,
@@ -36,10 +44,10 @@ export function createControlPanel({
   /** When true, Paper original locks the task to Drive to Goal. */
   lockPaperScenario = true,
 }) {
-  const root = document.createElement('div');
-  root.className = 'card-glass control-panel';
-  if (compact) root.classList.add('control-panel--compact');
-  if (runFirst) root.classList.add('control-panel--run-first');
+  const root = document.createElement("div");
+  root.className = "card-glass control-panel";
+  if (compact) root.classList.add("control-panel--compact");
+  if (runFirst) root.classList.add("control-panel--run-first");
   root.innerHTML = controlPanelHtml({
     sideLabel,
     paramsOpen,
@@ -56,7 +64,9 @@ export function createControlPanel({
     scenarioLabel: root.querySelector('[data-role="scenario-label"]'),
     paperTaskGroup: root.querySelector('[data-role="paper-task-group"]'),
     paperTaskLabel: root.querySelector('[data-role="paper-task-label"]'),
-    paperTaskInfoLabel: root.querySelector('[data-role="paper-task-info-label"]'),
+    paperTaskInfoLabel: root.querySelector(
+      '[data-role="paper-task-info-label"]',
+    ),
     preset: root.querySelector('[data-role="preset"]'),
     presetLabel: root.querySelector('[data-role="preset-label"]'),
     sheep: root.querySelector('[data-role="sheep"]'),
@@ -94,8 +104,8 @@ export function createControlPanel({
     methods: [],
     scenarios: [],
     models: { sheep_models: [], dog_controllers: [] },
-    selectedMethod: '',
-    selectedScen: '',
+    selectedMethod: "",
+    selectedScen: "",
     algorithmParams: {},
     worldOverrides: {},
     defaults: {},
@@ -112,8 +122,8 @@ export function createControlPanel({
   }
 
   function markCustom() {
-    if (currentPreset() === 'custom') return;
-    els.preset.value = 'custom';
+    if (currentPreset() === "custom") return;
+    els.preset.value = "custom";
     state.lockCustom = true;
   }
 
@@ -134,12 +144,14 @@ export function createControlPanel({
     }
     els.assignmentOverlays.innerHTML = state.assignmentModes
       .map((mode) => assignmentModeOptionHtml(mode))
-      .join('');
-    els.assignmentOverlays.querySelectorAll('[data-role="assignment-mode"]').forEach((input) => {
-      input.addEventListener('change', () => {
-        onAssignmentModeVisibleChange?.(input.dataset.mode, input.checked);
+      .join("");
+    els.assignmentOverlays
+      .querySelectorAll('[data-role="assignment-mode"]')
+      .forEach((input) => {
+        input.addEventListener("change", () => {
+          onAssignmentModeVisibleChange?.(input.dataset.mode, input.checked);
+        });
       });
-    });
     onAssignmentModesChange?.(state.assignmentModes);
   }
 
@@ -165,17 +177,17 @@ export function createControlPanel({
     const scen = state.scenarios.find((s) => s.id === state.selectedScen);
     const modeLabel = getPresetOption(currentPreset()).label;
     const factorBits =
-      currentPreset() === 'custom' ? summarizeFactors(state.factors) : null;
+      currentPreset() === "custom" ? summarizeFactors(state.factors) : null;
     els.configSummary.textContent = [
       modeLabel,
-      alg?.name || state.selectedMethod || 'Method',
-      scen?.name || state.selectedScen || 'Scenario',
+      alg?.name || state.selectedMethod || "Method",
+      scen?.name || state.selectedScen || "Scenario",
       `${els.sheep.value} sheep / ${els.dogs.value} dogs`,
       `seed ${els.seed.value}`,
       factorBits || null,
     ]
       .filter(Boolean)
-      .join(' · ');
+      .join(" · ");
   }
 
   function refreshParamControls() {
@@ -184,32 +196,32 @@ export function createControlPanel({
     refreshConfigSummary();
   }
 
-  els.method.addEventListener('change', () => {
+  els.method.addEventListener("change", () => {
     state.selectedMethod = els.method.value;
-    if (currentPreset() !== 'custom') state.lockCustom = false;
+    if (currentPreset() !== "custom") state.lockCustom = false;
     refreshParamControls();
   });
-  els.scenario.addEventListener('change', () => {
+  els.scenario.addEventListener("change", () => {
     state.selectedScen = els.scenario.value;
-    if (currentPreset() !== 'custom') state.lockCustom = false;
+    if (currentPreset() !== "custom") state.lockCustom = false;
     refreshParamControls();
   });
-  els.preset.addEventListener('change', () => {
-    state.lockCustom = currentPreset() === 'custom';
+  els.preset.addEventListener("change", () => {
+    state.lockCustom = currentPreset() === "custom";
     refreshParamControls();
   });
-  els.sheep.addEventListener('input', () => {
+  els.sheep.addEventListener("input", () => {
     els.sheepCount.textContent = els.sheep.value;
-    if (currentPreset() !== 'custom') markCustom();
+    if (currentPreset() !== "custom") markCustom();
     refreshConfigSummary();
   });
-  els.dogs.addEventListener('input', () => {
+  els.dogs.addEventListener("input", () => {
     els.dogCount.textContent = els.dogs.value;
-    if (currentPreset() !== 'custom') markCustom();
+    if (currentPreset() !== "custom") markCustom();
     refreshConfigSummary();
   });
-  els.seed.addEventListener('input', refreshConfigSummary);
-  els.speed.addEventListener('input', () => {
+  els.seed.addEventListener("input", refreshConfigSummary);
+  els.speed.addEventListener("input", () => {
     const speed = Number(els.speed.value);
     els.speedLabel.textContent = `Simulation Speed (${speed.toFixed(1)}x)`;
     onSpeedChange?.(speed);
@@ -218,23 +230,23 @@ export function createControlPanel({
   const trailVisible = root.querySelector('[data-role="trail-visible"]');
   const gcmGoalVisible = root.querySelector('[data-role="gcm-goal-visible"]');
   const clearTrailsBtn = root.querySelector('[data-role="clear-trails"]');
-  trailVisible?.addEventListener('change', () => {
+  trailVisible?.addEventListener("change", () => {
     onTrailVisibleChange?.(trailVisible.checked);
   });
-  gcmGoalVisible?.addEventListener('change', () => {
+  gcmGoalVisible?.addEventListener("change", () => {
     onGcmGoalVisibleChange?.(gcmGoalVisible.checked);
   });
-  clearTrailsBtn?.addEventListener('click', () => onClearTrails?.());
+  clearTrailsBtn?.addEventListener("click", () => onClearTrails?.());
 
   factorApi.bindFactorInputs();
 
-  root.querySelector('[data-role="init"]').addEventListener('click', () => {
-    if (currentPreset() === 'custom') {
+  root.querySelector('[data-role="init"]').addEventListener("click", () => {
+    if (currentPreset() === "custom") {
       const checked = factorApi.validateCurrent();
       if (!checked.ok) {
         if (els.factorsError) {
           els.factorsError.textContent = checked.errors[0];
-          els.factorsError.classList.remove('hidden');
+          els.factorsError.classList.remove("hidden");
         }
         if (els.factorsSection) els.factorsSection.open = true;
         return;
@@ -243,7 +255,7 @@ export function createControlPanel({
       if (!worldChecked.ok) {
         if (els.worldError) {
           els.worldError.textContent = worldChecked.errors[0];
-          els.worldError.classList.remove('hidden');
+          els.worldError.classList.remove("hidden");
         }
         if (els.worldSection) els.worldSection.open = true;
         return;
@@ -251,10 +263,18 @@ export function createControlPanel({
     }
     onInit?.(getConfig());
   });
-  root.querySelector('[data-role="play"]').addEventListener('click', () => onPlay?.());
-  root.querySelector('[data-role="pause"]').addEventListener('click', () => onPause?.());
-  root.querySelector('[data-role="step"]').addEventListener('click', () => onStep?.());
-  root.querySelector('[data-role="reset"]').addEventListener('click', () => onReset?.());
+  root
+    .querySelector('[data-role="play"]')
+    .addEventListener("click", () => onPlay?.());
+  root
+    .querySelector('[data-role="pause"]')
+    .addEventListener("click", () => onPause?.());
+  root
+    .querySelector('[data-role="step"]')
+    .addEventListener("click", () => onStep?.());
+  root
+    .querySelector('[data-role="reset"]')
+    .addEventListener("click", () => onReset?.());
 
   const playbackEls = {
     init: root.querySelector('[data-role="init"]'),
@@ -299,17 +319,17 @@ export function createControlPanel({
   function setFairSharedLocked(locked) {
     const on = Boolean(locked);
     state.fairSharedLocked = on;
-    root.classList.toggle('control-panel--fair-shared-locked', on);
+    root.classList.toggle("control-panel--fair-shared-locked", on);
 
-    const lead = root.querySelector('.panel-lead');
+    const lead = root.querySelector(".panel-lead");
     if (lead) {
       lead.textContent = on
-        ? 'Fair compare: choose only the method for this side. Shared scenario, seed, and counts are above.'
-        : 'Pick a method and mode.';
+        ? "Fair compare: choose only the method for this side. Shared scenario, seed, and counts are above."
+        : "Pick a method and mode.";
     }
 
-    if (on && els.preset && els.preset.value !== 'paper') {
-      els.preset.value = 'paper';
+    if (on && els.preset && els.preset.value !== "paper") {
+      els.preset.value = "paper";
     }
     refreshParamControls();
 
@@ -319,30 +339,43 @@ export function createControlPanel({
     if (els.sheep) els.sheep.disabled = on;
     if (els.dogs) els.dogs.disabled = on;
 
-    [els.factorsSection, els.paramsSection, els.worldSection].forEach((section) => {
-      if (!section) return;
-      section.classList.toggle('is-fair-locked', on);
-      section.inert = on;
-    });
+    [els.factorsSection, els.paramsSection, els.worldSection].forEach(
+      (section) => {
+        if (!section) return;
+        section.classList.toggle("is-fair-locked", on);
+        section.inert = on;
+      },
+    );
 
     if (on) {
-      setInfoTip(els.presetLabel, 'Fair compare uses Paper defaults on both sides.');
-      setInfoTip(els.scenarioLabel, 'Fair compare: use the shared Scenario above.');
-      setTip(els.seed, 'Fair compare: use the shared Seed above.');
-      setTip(els.sheep, 'Fair compare: use the shared Sheep count above.');
-      setTip(els.dogs, 'Fair compare: use the shared Dog/Shepherd count above.');
+      setInfoTip(
+        els.presetLabel,
+        "Fair compare uses Paper defaults on both sides.",
+      );
+      setInfoTip(
+        els.scenarioLabel,
+        "Fair compare: use the shared Scenario above.",
+      );
+      setTip(els.seed, "Fair compare: use the shared Seed above.");
+      setTip(els.sheep, "Fair compare: use the shared Sheep count above.");
+      setTip(
+        els.dogs,
+        "Fair compare: use the shared Dog/Shepherd count above.",
+      );
       if (playbackEls.init) {
-        setTip(playbackEls.init, 'Fair compare: use Init Both.');
+        setTip(playbackEls.init, "Fair compare: use Init Both.");
       }
     } else {
-      setInfoTip(els.presetLabel, '');
-      setInfoTip(els.scenarioLabel, '');
-      setTip(els.seed, '');
-      setTip(els.sheep, '');
-      setTip(els.dogs, '');
-      [els.factorsSection, els.paramsSection, els.worldSection].forEach((section) => {
-        if (section) section.inert = false;
-      });
+      setInfoTip(els.presetLabel, "");
+      setInfoTip(els.scenarioLabel, "");
+      setTip(els.seed, "");
+      setTip(els.sheep, "");
+      setTip(els.dogs, "");
+      [els.factorsSection, els.paramsSection, els.worldSection].forEach(
+        (section) => {
+          if (section) section.inert = false;
+        },
+      );
     }
   }
 
@@ -352,24 +385,29 @@ export function createControlPanel({
     refreshConfigSummary();
   }
 
-  function setOptions(methods, scenarios, preferredMethod = null, models = null) {
+  function setOptions(
+    methods,
+    scenarios,
+    preferredMethod = null,
+    models = null,
+  ) {
     state.methods = methods;
     state.scenarios = scenarios;
     if (models) state.models = models;
     els.method.innerHTML = methods
       .map((a) => `<option value="${a.id}">${a.name}</option>`)
-      .join('');
+      .join("");
     els.scenario.innerHTML = scenarios
       .map((s) => `<option value="${s.id}">${scenarioOptionLabel(s)}</option>`)
-      .join('');
-    state.selectedMethod = preferredMethod || methods[0]?.id || '';
+      .join("");
+    state.selectedMethod = preferredMethod || methods[0]?.id || "";
     const preferredScen =
       (lockPaperScenario &&
       scenarios.some((s) => s.id === PAPER_TASK_SCENARIO_ID)
         ? PAPER_TASK_SCENARIO_ID
         : null) ||
       scenarios[0]?.id ||
-      '';
+      "";
     state.selectedScen = preferredScen;
     if (state.selectedMethod) els.method.value = state.selectedMethod;
     if (state.selectedScen) els.scenario.value = state.selectedScen;
@@ -415,7 +453,8 @@ export function createControlPanel({
   }
 
   function setFairSheepOverride(n) {
-    state.fairSheepOverride = n == null || Number.isNaN(Number(n)) ? null : Number(n);
+    state.fairSheepOverride =
+      n == null || Number.isNaN(Number(n)) ? null : Number(n);
     if (state.fairSheepOverride != null) {
       setSheepCount(state.fairSheepOverride);
     }
@@ -431,7 +470,7 @@ export function createControlPanel({
 
   function getHerderKind() {
     const alg = state.methods.find((a) => a.id === els.method.value);
-    return alg?.herder_kind === 'human' ? 'human' : 'dog';
+    return alg?.herder_kind === "human" ? "human" : "dog";
   }
 
   function getMethodName() {
@@ -453,9 +492,11 @@ export function createControlPanel({
 
   function getAssignmentModeVisibility() {
     const out = {};
-    els.assignmentOverlays?.querySelectorAll('[data-role="assignment-mode"]').forEach((input) => {
-      out[input.dataset.mode] = input.checked;
-    });
+    els.assignmentOverlays
+      ?.querySelectorAll('[data-role="assignment-mode"]')
+      .forEach((input) => {
+        out[input.dataset.mode] = input.checked;
+      });
     return out;
   }
 

@@ -1,15 +1,19 @@
-import { Application, Container, Graphics, Sprite, Text } from 'pixi.js';
-import { loadIconTextures } from './iconTextures.js';
-import { drawField } from './drawField.js';
+import { Application, Container, Graphics, Sprite, Text } from "pixi.js";
+import { loadIconTextures } from "./iconTextures.js";
+import { drawField } from "./drawField.js";
 import {
   appendTrailPositions,
   ASSIGNMENT_COLLECT_COLOR,
   ASSIGNMENT_DRIVE_COLOR,
   trailColor,
   trailsFromFrames,
-} from './herderTrails.js';
-import { parseOverlayColor, GCM_GOAL_COLOR, sheepCentroid } from '../shared/sim/displayOverlays.js';
-import { log } from '../shared/ui/logger.js';
+} from "./herderTrails.js";
+import {
+  parseOverlayColor,
+  GCM_GOAL_COLOR,
+  sheepCentroid,
+} from "../shared/sim/displayOverlays.js";
+import { log } from "../shared/ui/logger.js";
 
 /**
  * PixiJS renderer for the herding field, goal, obstacles, and agents.
@@ -27,8 +31,14 @@ export class PixiRenderer {
     this.assignmentLayer = null;
     this.gcmGoalLayer = null;
     this.hudLayer = null;
-    this.textures = { sheep: null, dog: null, shepherd: null, goal: null, pen: null };
-    this.herderKind = 'dog';
+    this.textures = {
+      sheep: null,
+      dog: null,
+      shepherd: null,
+      goal: null,
+      pen: null,
+    };
+    this.herderKind = "dog";
     this.trailVisible = true;
     this.gcmGoalVisible = true;
     this.assignmentModeVisible = {};
@@ -46,16 +56,16 @@ export class PixiRenderer {
   }
 
   async init() {
-    log.info('pixi', 'Initializing renderer');
+    log.info("pixi", "Initializing renderer");
     try {
       this.app = new Application();
       await this.app.init({
-        background: '#090d16',
+        background: "#090d16",
         antialias: true,
         resizeTo: this.hostEl,
-        preference: 'webgl',
+        preference: "webgl",
       });
-      this.hostEl.innerHTML = '';
+      this.hostEl.innerHTML = "";
       this.hostEl.appendChild(this.app.canvas);
 
       this.fieldLayer = new Container();
@@ -73,18 +83,17 @@ export class PixiRenderer {
 
       this.textures = await loadIconTextures();
       this._ready = true;
-      this.app.renderer.on('resize', () => {
+      this.app.renderer.on("resize", () => {
         if (this._ready) this._drawField();
       });
       this._drawField();
-      log.info('pixi', 'Renderer ready', {
+      log.info("pixi", "Renderer ready", {
         w: this.app.renderer.width,
         h: this.app.renderer.height,
       });
     } catch (err) {
-      log.error('pixi', err.message || String(err), err);
-      this.hostEl.innerHTML =
-        `<div class="canvas-error">Renderer failed: ${err.message || err}</div>`;
+      log.error("pixi", err.message || String(err), err);
+      this.hostEl.innerHTML = `<div class="canvas-error">Renderer failed: ${err.message || err}</div>`;
       throw err;
     }
   }
@@ -102,7 +111,7 @@ export class PixiRenderer {
   }
 
   setHerderKind(kind) {
-    this.herderKind = kind === 'human' ? 'human' : 'dog';
+    this.herderKind = kind === "human" ? "human" : "dog";
   }
 
   setTrailVisible(visible) {
@@ -127,7 +136,7 @@ export class PixiRenderer {
           : true;
       nextColors[id] = parseOverlayColor(
         mode.color,
-        id === 'collect' ? ASSIGNMENT_COLLECT_COLOR : ASSIGNMENT_DRIVE_COLOR,
+        id === "collect" ? ASSIGNMENT_COLLECT_COLOR : ASSIGNMENT_DRIVE_COLOR,
       );
     });
     this.assignmentModeVisible = nextVisible;
@@ -161,7 +170,9 @@ export class PixiRenderer {
   }
 
   _herderTexture() {
-    return this.herderKind === 'human' ? this.textures.shepherd : this.textures.dog;
+    return this.herderKind === "human"
+      ? this.textures.shepherd
+      : this.textures.dog;
   }
 
   _scale() {
@@ -196,10 +207,10 @@ export class PixiRenderer {
     const label = new Text({
       text,
       style: {
-        fontFamily: 'JetBrains Mono, monospace',
+        fontFamily: "JetBrains Mono, monospace",
         fontSize: opts.size || 10,
         fill: opts.fill || 0x94a3b8,
-        fontWeight: opts.bold ? '600' : '400',
+        fontWeight: opts.bold ? "600" : "400",
       },
     });
     label.anchor.set(opts.ax ?? 0.5, opts.ay ?? 0.5);
@@ -234,7 +245,9 @@ export class PixiRenderer {
     sheep.forEach(([x, y]) => {
       const [px, py] = this._toScreen(x, y);
       if (this.textures.sheep) {
-        this.agentLayer.addChild(this._placeSprite(this.textures.sheep, px, py, sheepSize));
+        this.agentLayer.addChild(
+          this._placeSprite(this.textures.sheep, px, py, sheepSize),
+        );
       } else {
         const g = new Graphics();
         g.circle(px, py, sheepSize * 0.35);
@@ -251,7 +264,7 @@ export class PixiRenderer {
       } else {
         const g = new Graphics();
         g.circle(px, py, dogSize * 0.35);
-        g.fill({ color: this.herderKind === 'human' ? 0x76a04d : 0xfbbf24 });
+        g.fill({ color: this.herderKind === "human" ? 0x76a04d : 0xfbbf24 });
         this.agentLayer.addChild(g);
       }
     });
@@ -297,7 +310,7 @@ export class PixiRenderer {
       const from = line?.from;
       const to = line?.to;
       if (!Array.isArray(from) || !Array.isArray(to)) return;
-      const mode = String(line.mode || 'target');
+      const mode = String(line.mode || "target");
       if (this.assignmentModeVisible[mode] === false) return;
       // If modes are declared and this mode is unknown, hide it.
       if (
@@ -310,13 +323,15 @@ export class PixiRenderer {
       const [x2, y2] = this._toScreen(to[0], to[1]);
       const color =
         this.assignmentModeColors[mode] ??
-        (mode === 'collect' ? ASSIGNMENT_COLLECT_COLOR : ASSIGNMENT_DRIVE_COLOR);
+        (mode === "collect"
+          ? ASSIGNMENT_COLLECT_COLOR
+          : ASSIGNMENT_DRIVE_COLOR);
       g.moveTo(x1, y1);
       g.lineTo(x2, y2);
       g.stroke({
-        width: mode === 'collect' ? 1.6 : 1.1,
+        width: mode === "collect" ? 1.6 : 1.1,
         color,
-        alpha: mode === 'collect' ? 0.85 : 0.55,
+        alpha: mode === "collect" ? 0.85 : 0.55,
       });
     });
     this.assignmentLayer.addChild(g);
@@ -357,7 +372,7 @@ export class PixiRenderer {
       this.app = null;
     }
     this._ready = false;
-    log.debug('pixi', 'Renderer destroyed');
+    log.debug("pixi", "Renderer destroyed");
   }
 
   /** Force a layout pass after the host was display:none (tab keep-alive). */

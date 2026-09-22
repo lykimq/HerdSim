@@ -1,10 +1,10 @@
-# Phase-5 information factor sweep (RQ5).
-# Grade: SCOUT subset. Observation-mode ladder by default.
+# Phase-5 information scout (RQ5).
+# Grade: SCOUT. Observation ladder on the baseline method.
 #
-# Why this subset: first measure of whether better observation reduces D_min
-# at fixed reliability (C5a/C5b path) without also sweeping sensing-range and
-# communication ladders (those are protocol factors; add in a follow-up campaign
-# YAML when obs_mode results exist).
+# Claim sizes are {100, 200}: the size edge and the steep band. N=50 is omitted
+# because a D_min of 1 cannot fall by a grid step. Seeds are the scout depth
+# (30). Range and communication ladders are separate campaigns; range steps are
+# 0.5, 1, 1.5, 2 times r_s (65 for Strombom), not a base of 50.
 
 protocol_id: phase5_factor_sweep
 phase: 5
@@ -13,26 +13,18 @@ output: scaling/results/phase5/factor_sweep
 canonical: scaling/configs/canonical_grid.yaml
 
 method: strombom_multi
-# Method that consumes observation mode; report as method-conditional.
 layouts:
   - compact
-  # Hold X0 fixed so substitution is attributed to information, not structure.
-flock_sizes: [50, 100]
-# Mid-band sizes from the plan's RQ5 focus set {100, 200}; 50 included as a
-# cheaper lower point for smoke/scout. Raise to {100, 200} for claim-grade.
+flock_sizes: [100, 200]
 shepherd_counts: [1, 2, 3, 4, 6, 10]
-# Low-D band where a 1-shepherd saving is detectable.
-seeds: 10
-# Between smoke (5) and full scout (30): enough to see D_min shifts of >= 1.
+# Low-D band, where a one-step saving can appear. High D stays on the size map.
+seeds: 30
+seed_mode: scout
 obs_modes:
   - bearing_only
   - local_positions
   - global
-  # Ordered ladder (least -> most informative) for C5a first-step / C5b second-step.
-# Optional follow-up axes (omit for obs-only scout; pass via CLI or uncomment):
-# sensing_ranges: [25.0, 50.0, 75.0, 100.0]  # 0.5x..2x of base 50
+# sensing_ranges: [32.5, 65.0, 97.5, 130.0]  # 0.5x, 1x, 1.5x, 2x of r_s 65
 # communications: [none, neighbour_broadcast, global_shared]
 store_timeseries: false
-# RQ5 needs D_min(N,I), not tick trajectories; skip parquet to cut I/O.
 packages: [E]
-# Package E: substitution curves.

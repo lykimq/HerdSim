@@ -154,21 +154,24 @@
 }
 
 .single-layout {
-  grid-template-columns: minmax(280px, 320px) minmax(0, 1fr) minmax(250px, 300px);
+  grid-template-columns: minmax(280px, 320px) minmax(0, 1fr) minmax(
+      250px,
+      300px
+    );
   min-height: 100%;
   height: auto;
   align-items: start;
   overflow: visible;
 }
 
-.single-layout>.control-panel,
-.single-layout>.single-side {
+.single-layout > .control-panel,
+.single-layout > .single-side {
   min-height: 0;
   max-height: none;
   overflow: visible;
 }
 
-.single-layout>.control-panel {
+.single-layout > .control-panel {
   align-self: start;
   height: auto;
 }
@@ -186,7 +189,10 @@
 }
 
 .arena-layout {
-  grid-template-columns: minmax(260px, 320px) minmax(0, 1fr) minmax(0, 1fr) minmax(260px, 320px);
+  grid-template-columns: minmax(260px, 320px) minmax(0, 1fr) minmax(
+      0,
+      1fr
+    ) minmax(260px, 320px);
   grid-template-rows: auto auto;
   overflow: visible;
 }
@@ -386,7 +392,7 @@
   padding-left: 0.85rem;
 }
 
-.guide-nav-group>.guide-nav-folder>.guide-nav-children {
+.guide-nav-group > .guide-nav-folder > .guide-nav-children {
   padding-left: 0.35rem;
 }
 
@@ -426,7 +432,7 @@
   font-weight: 600;
 }
 
-.guide-layout>.guide-content.card-glass {
+.guide-layout > .guide-content.card-glass {
   padding: 1.35rem 1.35rem 2.5rem 1.25rem;
   overflow: auto;
   gap: 0;
@@ -434,7 +440,7 @@
   scroll-behavior: smooth;
 }
 
-.guide-content>.text-muted {
+.guide-content > .text-muted {
   margin: 0;
   padding: 0.35rem 0;
   font-size: 0.95rem;
@@ -647,11 +653,11 @@
   line-height: 1.7;
 }
 
-.guide-md li+li {
+.guide-md li + li {
   margin-top: 0.45rem;
 }
 
-.guide-md li>strong:first-child {
+.guide-md li > strong:first-child {
   color: var(--text-main);
 }
 
@@ -760,7 +766,7 @@
   font-size: inherit;
 }
 
-.guide-md :not(pre)>code {
+.guide-md :not(pre) > code {
   font-family: var(--font-mono);
   font-size: 0.84em;
   color: #cffafe;
@@ -831,7 +837,7 @@
     align-items: start;
   }
 
-  .single-layout>.control-panel {
+  .single-layout > .control-panel {
     align-self: start;
     height: auto;
   }
@@ -885,8 +891,8 @@
     align-items: start;
   }
 
-  .single-layout>.control-panel,
-  .single-layout>.single-side {
+  .single-layout > .control-panel,
+  .single-layout > .single-side {
     max-height: none;
     overflow: visible;
   }
@@ -901,7 +907,7 @@
     max-height: none;
   }
 
-  .guide-layout>.guide-content.card-glass {
+  .guide-layout > .guide-content.card-glass {
     padding: 1.15rem 0.95rem 1.75rem;
     min-height: 0;
   }
@@ -934,7 +940,7 @@
     padding: 0.85rem;
   }
 
-  .guide-md :not(pre)>code {
+  .guide-md :not(pre) > code {
     white-space: normal;
   }
 

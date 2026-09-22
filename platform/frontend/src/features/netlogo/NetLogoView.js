@@ -6,13 +6,13 @@ import {
   fetchNetLogoTwins,
   openNetLogoDesktop,
   uploadNetLogoModel,
-} from '../../shared/api/rest.js';
-import { log } from '../../shared/ui/logger.js';
-import { mountTips } from '../../shared/ui/tooltips.js';
-import { setStatusMessage } from '../../shared/ui/dom.js';
-import { clearLeaveBlock, setLeaveBlock } from '../../shared/sim/leaveGuard.js';
+} from "../../shared/api/rest.js";
+import { log } from "../../shared/ui/logger.js";
+import { mountTips } from "../../shared/ui/tooltips.js";
+import { setStatusMessage } from "../../shared/ui/dom.js";
+import { clearLeaveBlock, setLeaveBlock } from "../../shared/sim/leaveGuard.js";
 
-const LEAVE_SOURCE = 'netlogo';
+const LEAVE_SOURCE = "netlogo";
 
 function panelHtml() {
   return `
@@ -112,8 +112,8 @@ function helpHtml() {
 }
 
 export function createNetLogoView({ onStatus, onRunInHerdSim } = {}) {
-  const root = document.createElement('div');
-  root.className = 'netlogo-layout';
+  const root = document.createElement("div");
+  root.className = "netlogo-layout";
 
   let busy = false;
   let models = [];
@@ -121,12 +121,12 @@ export function createNetLogoView({ onStatus, onRunInHerdSim } = {}) {
   let twinPaths = new Set();
   let guiAvailable = false;
 
-  const left = document.createElement('div');
-  left.className = 'card-glass netlogo-controls';
+  const left = document.createElement("div");
+  left.className = "card-glass netlogo-controls";
   left.innerHTML = panelHtml();
 
-  const right = document.createElement('div');
-  right.className = 'netlogo-side';
+  const right = document.createElement("div");
+  right.className = "netlogo-side";
   right.innerHTML = helpHtml();
 
   root.appendChild(left);
@@ -147,7 +147,7 @@ export function createNetLogoView({ onStatus, onRunInHerdSim } = {}) {
   };
 
   function setActionStatus(text, { error = false } = {}) {
-    setStatusMessage(els.actionStatus, text || '', { error });
+    setStatusMessage(els.actionStatus, text || "", { error });
   }
 
   function selectedTwin() {
@@ -161,14 +161,15 @@ export function createNetLogoView({ onStatus, onRunInHerdSim } = {}) {
   function syncButtons() {
     const twin = selectedTwin();
     els.openTwin.disabled = busy || !guiAvailable || !twin;
-    els.runHerdSim.disabled = busy || !twin || typeof onRunInHerdSim !== 'function';
+    els.runHerdSim.disabled =
+      busy || !twin || typeof onRunInHerdSim !== "function";
     els.openDesktop.disabled = busy || !guiAvailable || !selectedModel();
   }
 
   function refreshTwinMeta() {
     const twin = selectedTwin();
     if (!twin) {
-      els.twinMeta.textContent = 'No method twins available yet.';
+      els.twinMeta.textContent = "No method twins available yet.";
       syncButtons();
       return;
     }
@@ -179,7 +180,8 @@ export function createNetLogoView({ onStatus, onRunInHerdSim } = {}) {
   function refreshModelMeta() {
     const model = selectedModel();
     if (!model) {
-      els.modelMeta.textContent = 'No other models under integrations/netlogo/models/.';
+      els.modelMeta.textContent =
+        "No other models under integrations/netlogo/models/.";
       syncButtons();
       return;
     }
@@ -193,7 +195,7 @@ export function createNetLogoView({ onStatus, onRunInHerdSim } = {}) {
     twinPaths = new Set(twins.map((t) => t.model_file));
     els.twin.innerHTML = twins
       .map((t) => `<option value="${t.method}">${t.name}</option>`)
-      .join('');
+      .join("");
     refreshTwinMeta();
   }
 
@@ -201,10 +203,10 @@ export function createNetLogoView({ onStatus, onRunInHerdSim } = {}) {
     models = (list || []).filter((m) => !twinPaths.has(m.path));
     els.model.innerHTML = models
       .map((m) => {
-        const label = m.source === 'upload' ? `${m.name} (upload)` : m.name;
+        const label = m.source === "upload" ? `${m.name} (upload)` : m.name;
         return `<option value="${m.path}">${label}</option>`;
       })
-      .join('');
+      .join("");
     if (preferPath && models.some((m) => m.path === preferPath)) {
       els.model.value = preferPath;
     } else if (models.length) {
@@ -217,22 +219,22 @@ export function createNetLogoView({ onStatus, onRunInHerdSim } = {}) {
     busy = true;
     setLeaveBlock(
       LEAVE_SOURCE,
-      'HerdSim is opening NetLogo. Leave and abandon that request, or stay?',
+      "HerdSim is opening NetLogo. Leave and abandon that request, or stay?",
     );
     syncButtons();
     setActionStatus(`Opening ${label} in NetLogo...`);
-    onStatus?.({ status: 'running', tick: 0, seed: '-' });
+    onStatus?.({ status: "running", tick: 0, seed: "-" });
     try {
       await openNetLogoDesktop({
         model_file: modelFile,
         netlogo_home: els.netlogoHome.value.trim(),
       });
       setActionStatus(`Opened ${label} in NetLogo desktop.`);
-      onStatus?.({ status: 'idle', tick: 0, seed: '-' });
+      onStatus?.({ status: "idle", tick: 0, seed: "-" });
     } catch (err) {
       setActionStatus(err.message || String(err), { error: true });
-      log.error('netlogo', err.message || String(err), err);
-      onStatus?.({ status: 'idle', tick: 0, seed: '-' });
+      log.error("netlogo", err.message || String(err), err);
+      onStatus?.({ status: "idle", tick: 0, seed: "-" });
     } finally {
       busy = false;
       clearLeaveBlock(LEAVE_SOURCE);
@@ -240,35 +242,35 @@ export function createNetLogoView({ onStatus, onRunInHerdSim } = {}) {
     }
   }
 
-  els.twin.addEventListener('change', refreshTwinMeta);
-  els.model.addEventListener('change', refreshModelMeta);
+  els.twin.addEventListener("change", refreshTwinMeta);
+  els.model.addEventListener("change", refreshModelMeta);
 
-  els.openTwin.addEventListener('click', async () => {
+  els.openTwin.addEventListener("click", async () => {
     const twin = selectedTwin();
     if (!twin) return;
     await openModel(twin.model_file, twin.name);
   });
 
-  els.runHerdSim.addEventListener('click', () => {
+  els.runHerdSim.addEventListener("click", () => {
     const twin = selectedTwin();
-    if (!twin || typeof onRunInHerdSim !== 'function') return;
+    if (!twin || typeof onRunInHerdSim !== "function") return;
     setActionStatus(`Opening HerdSim Simulate with ${twin.name}...`);
     onRunInHerdSim(twin.method);
   });
 
-  els.openDesktop.addEventListener('click', async () => {
+  els.openDesktop.addEventListener("click", async () => {
     const model = selectedModel();
     if (!model) return;
     await openModel(model.path, model.name);
   });
 
-  els.upload.addEventListener('change', async () => {
+  els.upload.addEventListener("change", async () => {
     const file = els.upload.files?.[0];
     if (!file) return;
     busy = true;
     setLeaveBlock(
       LEAVE_SOURCE,
-      'A NetLogo model upload is still in progress. Leave and cancel it, or stay?',
+      "A NetLogo model upload is still in progress. Leave and cancel it, or stay?",
     );
     syncButtons();
     setActionStatus(`Uploading ${file.name}...`);
@@ -279,9 +281,9 @@ export function createNetLogoView({ onStatus, onRunInHerdSim } = {}) {
       setActionStatus(`Saved ${result.model.path}`);
     } catch (err) {
       setActionStatus(err.message || String(err), { error: true });
-      log.error('netlogo', err.message || String(err), err);
+      log.error("netlogo", err.message || String(err), err);
     } finally {
-      els.upload.value = '';
+      els.upload.value = "";
       busy = false;
       clearLeaveBlock(LEAVE_SOURCE);
       syncButtons();
@@ -289,14 +291,14 @@ export function createNetLogoView({ onStatus, onRunInHerdSim } = {}) {
   });
 
   mountTips(left, {
-    'open-twin': 'Open this method twin in your local NetLogo desktop app.',
-    'run-herdsim': 'Switch to Simulate and select the matching HerdSim method.',
-    'open-desktop': 'Open the selected library/upload model in NetLogo.',
+    "open-twin": "Open this method twin in your local NetLogo desktop app.",
+    "run-herdsim": "Switch to Simulate and select the matching HerdSim method.",
+    "open-desktop": "Open the selected library/upload model in NetLogo.",
   });
 
   async function mount() {
-    log.info('netlogo', 'Mounting NetLogo view');
-    onStatus?.({ status: 'idle', tick: 0, seed: '-' });
+    log.info("netlogo", "Mounting NetLogo view");
+    onStatus?.({ status: "idle", tick: 0, seed: "-" });
     try {
       const [twinPayload, modelPayload, homeStatus] = await Promise.all([
         fetchNetLogoTwins(),
@@ -309,18 +311,21 @@ export function createNetLogoView({ onStatus, onRunInHerdSim } = {}) {
       if (homeStatus.detected && homeStatus.gui_available) {
         els.homeStatus.textContent = `Detected: ${homeStatus.netlogo_home}`;
       } else if (homeStatus.detected) {
-        els.homeStatus.textContent =
-          `Install found, but no GUI launcher under ${homeStatus.netlogo_home}`;
+        els.homeStatus.textContent = `Install found, but no GUI launcher under ${homeStatus.netlogo_home}`;
       } else {
         els.homeStatus.textContent =
-          'NetLogo not auto-detected. Install NetLogo 6.x or set netlogo_home.';
+          "NetLogo not auto-detected. Install NetLogo 6.x or set netlogo_home.";
       }
       syncButtons();
     } catch (err) {
       setActionStatus(err.message || String(err), { error: true });
-      log.error('netlogo', `Could not load NetLogo catalog: ${err.message || err}`, err);
+      log.error(
+        "netlogo",
+        `Could not load NetLogo catalog: ${err.message || err}`,
+        err,
+      );
     }
-    log.info('netlogo', 'NetLogo view ready');
+    log.info("netlogo", "NetLogo view ready");
   }
 
   function destroy() {

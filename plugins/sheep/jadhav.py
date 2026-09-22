@@ -71,9 +71,7 @@ class JadhavSheepDynamics(BaseSheepDynamics):
         h = float(config["inertia"])
         rho_a = float(config["sheep_repulsion_weight"])
         rho_d = float(config["dog_repulsion_weight"])
-        c = float(config["attraction_weight"]) * float(
-            config.get("cohesion_scale", 1.0)
-        )
+        c = float(config["attraction_weight"]) * float(config.get("cohesion_scale", 1.0))
         alg_w = float(config["alignment_weight"])
         e = float(config["noise_strength"])
         speed = float(config["sheep_speed"])
@@ -87,9 +85,7 @@ class JadhavSheepDynamics(BaseSheepDynamics):
                 continue
 
             neighbors = nearest_neighbor_indices(state.sheep_positions, i, k)
-            atr, atr_idx = random_attraction(
-                state.sheep_positions, i, neighbors, n_att, state.rng
-            )
+            atr, atr_idx = random_attraction(state.sheep_positions, i, neighbors, n_att, state.rng)
             ali = random_alignment(state.sheep_velocities, atr_idx, n_ali, state.rng)
             rep = sheep_repulsion(state.sheep_positions, i, r_a)
             dog_rep = dog_repulsion_unit(state.sheep_positions[i], dog)

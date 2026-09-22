@@ -15,10 +15,7 @@ class CohesionMetric(BaseMetric):
 
     @property
     def description(self) -> str:
-        return (
-            "Mean Euclidean distance of all sheep to the flock centroid (GCM), "
-            "in world units."
-        )
+        return "Mean Euclidean distance of all sheep to the flock centroid (GCM), in world units."
 
     @property
     def unit(self) -> str:

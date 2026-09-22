@@ -35,6 +35,33 @@ class ScalingCell:
     sensing_range: float | None = None
     communication: str | None = None
     max_ticks: int = 10000
+    world_width: float = 500.0
+    world_height: float = 500.0
+    goal_center_x: float = 370.0
+    goal_center_y: float = 250.0
+    goal_radius: float = 15.0
+    initial_spread: float = 30.0
+    measurement_radius: float = 5.0
+
+
+def goal_radius_for_n(n_sheep: int, radius_at_n50: float = 15.0) -> float:
+    """Goal disk with the same area per sheep as radius_at_n50 at N=50."""
+    return float(radius_at_n50) * (float(n_sheep) / 50.0) ** 0.5
+
+
+def scaling_world_overrides(protocol: dict[str, Any], n_sheep: int) -> dict[str, Any]:
+    """Arena fields for one flock size. Interactive drive_to_goal defaults stay put."""
+    radius_at_n50 = float(protocol.get("goal_radius_at_n50", 15.0))
+    center = protocol.get("goal_center", [370.0, 250.0])
+    return {
+        "world_width": float(protocol.get("world_width", 500.0)),
+        "world_height": float(protocol.get("world_height", 500.0)),
+        "goal_center_x": float(center[0]),
+        "goal_center_y": float(center[1]),
+        "goal_radius": goal_radius_for_n(n_sheep, radius_at_n50),
+        "initial_spread": float(protocol.get("initial_spread", 30.0)),
+        "measurement_radius": float(protocol.get("measurement_radius", 5.0)),
+    }
 
 
 def load_canonical_protocol(path: Path | str | None = None) -> dict[str, Any]:
@@ -48,10 +75,7 @@ def load_canonical_protocol(path: Path | str | None = None) -> dict[str, Any]:
 
 def _cell_key(cell: ScalingCell) -> str:
     """Stable resume / timeseries stem. Includes info factors when set."""
-    key = (
-        f"N{cell.n_sheep}_D{cell.n_shepherds}_L{cell.initial_layout}_"
-        f"S{cell.seed}_M{cell.method}"
-    )
+    key = f"N{cell.n_sheep}_D{cell.n_shepherds}_L{cell.initial_layout}_S{cell.seed}_M{cell.method}"
     extras: list[str] = []
     if cell.obs_mode is not None:
         extras.append(f"O{cell.obs_mode}")
@@ -144,9 +168,6 @@ def _trial_row_from_result(
     row["failure_mode"] = failure["failure_mode"]
     row["failure_label"] = failure["failure_label"]
     row["failure_hints"] = list(failure.get("failure_hints") or [])
-    # Effort alias used by frontier B* extraction.
-    if "shepherd_path" in row and "mean_shepherd_path" not in row:
-        row["mean_shepherd_path"] = row["shepherd_path"]
     return row
 
 
@@ -157,6 +178,8 @@ def _run_cell(cell: ScalingCell) -> dict[str, Any]:
     algorithm_params: dict[str, Any] = {
         "max_ticks": cell.max_ticks,
         "initial_layout": cell.initial_layout,
+        "initial_spread": cell.initial_spread,
+        "measurement_radius": cell.measurement_radius,
     }
     if cell.obs_mode is not None:
         algorithm_params["obs_mode"] = cell.obs_mode
@@ -172,6 +195,15 @@ def _run_cell(cell: ScalingCell) -> dict[str, Any]:
         num_sheep=cell.n_sheep,
         num_shepherds=cell.n_shepherds,
         algorithm_params=algorithm_params,
+        world_overrides={
+            "world_width": cell.world_width,
+            "world_height": cell.world_height,
+            "goal_center": [cell.goal_center_x, cell.goal_center_y],
+            "goal_radius": cell.goal_radius,
+            "initial_spread": cell.initial_spread,
+            "measurement_radius": cell.measurement_radius,
+            "max_ticks": cell.max_ticks,
+        },
     )
     runner = SimulationRunner(
         scenario=scenario,
@@ -233,6 +265,7 @@ def expand_scaling_grid(
     for method in methods:
         for layout in layouts:
             for n in n_values:
+                arena = scaling_world_overrides(protocol, int(n))
                 for d in d_values:
                     for seed in rng_seeds:
                         cells.append(
@@ -243,6 +276,7 @@ def expand_scaling_grid(
                                 initial_layout=str(layout),
                                 method=str(method),
                                 max_ticks=ticks,
+                                **arena,
                             )
                         )
     return cells
@@ -288,6 +322,7 @@ def expand_claim_cells_from_boundaries(
         )
         for method in method_list:
             for layout in layout_list:
+                arena = scaling_world_overrides(protocol, n)
                 for seed in rng_seeds:
                     cells.append(
                         ScalingCell(
@@ -297,6 +332,7 @@ def expand_claim_cells_from_boundaries(
                             initial_layout=str(layout),
                             method=str(method),
                             max_ticks=ticks,
+                            **arena,
                         )
                     )
     return cells

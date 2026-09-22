@@ -151,10 +151,7 @@ async def upload_model(file: UploadFile = File(...)):
     if not _SAFE_NAME.match(filename):
         raise HTTPException(
             status_code=400,
-            detail=(
-                "Invalid filename. Use a simple .nlogo name "
-                "(letters, numbers, ., _, -)."
-            ),
+            detail=("Invalid filename. Use a simple .nlogo name (letters, numbers, ., _, -)."),
         )
 
     dest = _UPLOADS_ROOT / filename

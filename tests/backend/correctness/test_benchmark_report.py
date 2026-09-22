@@ -150,7 +150,5 @@ def test_trial_aggregates_from_history():
     assert fields["mean_cohesion"] == pytest.approx(2.0)
     assert fields["auc_cohesion"] == pytest.approx(2.0)
     assert fields["final_gcm_goal"] == pytest.approx(4.0)
-    assert fields["control_efficiency"] == pytest.approx(
-        control_efficiency(10.0, 4.0, 10.0)
-    )
+    assert fields["control_efficiency"] == pytest.approx(control_efficiency(10.0, 4.0, 10.0))
     assert "cohesion" not in fields

@@ -69,15 +69,9 @@ def test_heterogeneous_stubborn_weaker_dog_response():
 
     dog_pos = dog[0]
     away_r = np.mean(
-        [
-            np.dot(out_r.sheep_positions[i] - sheep[i], sheep[i] - dog_pos)
-            for i in range(len(sheep))
-        ]
+        [np.dot(out_r.sheep_positions[i] - sheep[i], sheep[i] - dog_pos) for i in range(len(sheep))]
     )
     away_s = np.mean(
-        [
-            np.dot(out_s.sheep_positions[i] - sheep[i], sheep[i] - dog_pos)
-            for i in range(len(sheep))
-        ]
+        [np.dot(out_s.sheep_positions[i] - sheep[i], sheep[i] - dog_pos) for i in range(len(sheep))]
     )
     assert away_r > away_s

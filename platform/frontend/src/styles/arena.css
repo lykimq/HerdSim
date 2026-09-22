@@ -112,7 +112,10 @@
 
 .arena-header-shared-fields {
   display: grid;
-  grid-template-columns: minmax(10rem, 1.4fr) minmax(5.5rem, 7rem) minmax(8rem, 1fr) minmax(8rem, 1fr);
+  grid-template-columns: minmax(10rem, 1.4fr) minmax(5.5rem, 7rem) minmax(
+      8rem,
+      1fr
+    ) minmax(8rem, 1fr);
   gap: 0.55rem 0.85rem;
   align-items: end;
   min-width: 0;

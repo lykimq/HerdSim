@@ -3,65 +3,65 @@
 export const MAX_FACTOR_GRID_CELLS = 500;
 
 export const OBSERVATION_MODES = [
-  { id: 'global', label: 'Global state' },
-  { id: 'local_positions', label: 'Local positions' },
-  { id: 'bearing_only', label: 'Bearing only' },
-  { id: 'noisy_bearing', label: 'Noisy bearings' },
-  { id: 'intermittent', label: 'Intermittent' },
+  { id: "global", label: "Global state" },
+  { id: "local_positions", label: "Local positions" },
+  { id: "bearing_only", label: "Bearing only" },
+  { id: "noisy_bearing", label: "Noisy bearings" },
+  { id: "intermittent", label: "Intermittent" },
 ];
 
 export const COMMUNICATION_MODES = [
-  { id: 'none', label: 'None' },
-  { id: 'neighbour_broadcast', label: 'Neighbour broadcast' },
-  { id: 'global_shared', label: 'Global shared' },
+  { id: "none", label: "None" },
+  { id: "neighbour_broadcast", label: "Neighbour broadcast" },
+  { id: "global_shared", label: "Global shared" },
 ];
 
 export const FAILURE_MODES = [
-  { id: 'none', label: 'None' },
-  { id: 'inactive_after_tick', label: 'Inactive after tick' },
-  { id: 'reduced_speed_after_tick', label: 'Reduced speed after tick' },
-  { id: 'blind_after_tick', label: 'Blind after tick' },
+  { id: "none", label: "None" },
+  { id: "inactive_after_tick", label: "Inactive after tick" },
+  { id: "reduced_speed_after_tick", label: "Reduced speed after tick" },
+  { id: "blind_after_tick", label: "Blind after tick" },
 ];
 
 export const GOAL_MODES = [
-  { id: 'static', label: 'Static' },
-  { id: 'moving', label: 'Moving' },
+  { id: "static", label: "Static" },
+  { id: "moving", label: "Moving" },
 ];
 
 /** Scientific factor keys preferred in Analytics grids. */
 export const FACTOR_GRID_KEYS = [
-  { key: 'n_sheep', label: 'Sheep count', kind: 'number' },
-  { key: 'n_shepherds', label: 'Shepherd count', kind: 'number' },
-  { key: 'obs_mode', label: 'Observation mode', kind: 'enum' },
-  { key: 'sensing_range', label: 'Sensing range', kind: 'number' },
-  { key: 'noise_sigma', label: 'Observation noise', kind: 'number' },
-  { key: 'communication', label: 'Communication', kind: 'enum' },
-  { key: 'stubborn_fraction', label: 'Stubborn fraction', kind: 'number' },
-  { key: 'cohesion_scale', label: 'Cohesion scale', kind: 'number' },
-  { key: 'failure_mode', label: 'Failure mode', kind: 'enum' },
-  { key: 'failure_tick', label: 'Failure tick', kind: 'number' },
-  { key: 'goal_mode', label: 'Goal mode', kind: 'enum' },
-  { key: 'speed_scale', label: 'Shepherd speed scale', kind: 'number' },
+  { key: "n_sheep", label: "Sheep count", kind: "number" },
+  { key: "n_shepherds", label: "Shepherd count", kind: "number" },
+  { key: "obs_mode", label: "Observation mode", kind: "enum" },
+  { key: "sensing_range", label: "Sensing range", kind: "number" },
+  { key: "noise_sigma", label: "Observation noise", kind: "number" },
+  { key: "communication", label: "Communication", kind: "enum" },
+  { key: "stubborn_fraction", label: "Stubborn fraction", kind: "number" },
+  { key: "cohesion_scale", label: "Cohesion scale", kind: "number" },
+  { key: "failure_mode", label: "Failure mode", kind: "enum" },
+  { key: "failure_tick", label: "Failure tick", kind: "number" },
+  { key: "goal_mode", label: "Goal mode", kind: "enum" },
+  { key: "speed_scale", label: "Shepherd speed scale", kind: "number" },
   {
-    key: 'sheep_model',
-    label: 'Sheep model',
-    kind: 'enum',
-    values: ['strombom', 'kubo', 'jadhav'],
+    key: "sheep_model",
+    label: "Sheep model",
+    kind: "enum",
+    values: ["strombom", "kubo", "jadhav"],
   },
   {
-    key: 'dog_controller',
-    label: 'Dog controller',
-    kind: 'enum',
+    key: "dog_controller",
+    label: "Dog controller",
+    kind: "enum",
     values: [
-      'collect_drive',
-      'collect_drive_multi',
-      'kubo_forces',
-      'v_formation',
-      'obstacle_aware_drive',
-      'fat',
-      'communication_free',
-      'adaptive',
-      'policy_file',
+      "collect_drive",
+      "collect_drive_multi",
+      "kubo_forces",
+      "v_formation",
+      "obstacle_aware_drive",
+      "fat",
+      "communication_free",
+      "adaptive",
+      "policy_file",
     ],
   },
 ];
@@ -72,26 +72,27 @@ export const FACTOR_GRID_KEYS = [
  * and research-script conventions (world ~150, default sensing ~r_s 65).
  */
 const FACTOR_GRID_DEFAULT_VALUES = {
-  n_sheep: '20, 40, 80',
-  n_shepherds: '1, 2, 4',
-  obs_mode: 'global,local_positions,bearing_only,noisy_bearing',
-  sensing_range: '20, 40, 65',
-  noise_sigma: '0, 0.15, 0.3',
-  communication: 'none,neighbour_broadcast,global_shared',
-  stubborn_fraction: '0, 0.25, 0.5, 0.75',
-  cohesion_scale: '0.5, 1, 1.5',
-  failure_mode: 'none,inactive_after_tick,reduced_speed_after_tick,blind_after_tick',
-  failure_tick: '100, 200, 400',
-  goal_mode: 'static,moving',
-  speed_scale: '0.5, 1, 1.5',
+  n_sheep: "20, 40, 80",
+  n_shepherds: "1, 2, 4",
+  obs_mode: "global,local_positions,bearing_only,noisy_bearing",
+  sensing_range: "20, 40, 65",
+  noise_sigma: "0, 0.15, 0.3",
+  communication: "none,neighbour_broadcast,global_shared",
+  stubborn_fraction: "0, 0.25, 0.5, 0.75",
+  cohesion_scale: "0.5, 1, 1.5",
+  failure_mode:
+    "none,inactive_after_tick,reduced_speed_after_tick,blind_after_tick",
+  failure_tick: "100, 200, 400",
+  goal_mode: "static,moving",
+  speed_scale: "0.5, 1, 1.5",
 };
 
 /** Always present in Factor grid mode (models + herd size). */
 export const REQUIRED_FACTOR_GRID_KEYS = [
-  'sheep_model',
-  'dog_controller',
-  'n_sheep',
-  'n_shepherds',
+  "sheep_model",
+  "dog_controller",
+  "n_sheep",
+  "n_shepherds",
 ];
 
 const ENUM_MODE_LISTS = {
@@ -143,10 +144,10 @@ export function factorGridOptionItems(key) {
 export function suggestedFactorGridValues(key) {
   if (FACTOR_GRID_DEFAULT_VALUES[key]) return FACTOR_GRID_DEFAULT_VALUES[key];
   const allowed = factorGridAllowedValues(key);
-  if (allowed?.length) return allowed.join(',');
+  if (allowed?.length) return allowed.join(",");
   const meta = factorGridKeyMeta(key);
-  if (meta?.kind === 'number') return '1, 2';
-  return '';
+  if (meta?.kind === "number") return "1, 2";
+  return "";
 }
 
 /**
@@ -154,7 +155,7 @@ export function suggestedFactorGridValues(key) {
  * Start empty so the user chooses and adds levels.
  */
 export function defaultFactorGridValues(key) {
-  return '';
+  return "";
 }
 
 export function defaultRequiredFactorGridRows() {
@@ -171,18 +172,15 @@ export function mergeFactorGridTemplateRows(templateRows = []) {
   );
   const extras = [];
   for (const row of templateRows) {
-    const key = String(row.key || '').trim();
+    const key = String(row.key || "").trim();
     if (!key) continue;
     if (isRequiredFactorGridKey(key)) {
-      byKey[key] = { key, values: String(row.values ?? '') };
+      byKey[key] = { key, values: String(row.values ?? "") };
     } else {
-      extras.push({ key, values: String(row.values ?? '') });
+      extras.push({ key, values: String(row.values ?? "") });
     }
   }
-  return [
-    ...REQUIRED_FACTOR_GRID_KEYS.map((key) => byKey[key]),
-    ...extras,
-  ];
+  return [...REQUIRED_FACTOR_GRID_KEYS.map((key) => byKey[key]), ...extras];
 }
 
 export function factorFieldLabel(key) {
@@ -190,160 +188,163 @@ export function factorFieldLabel(key) {
 }
 
 export function factorFieldDescription(key) {
-  return FACTOR_FIELD_META[key]?.description || '';
+  return FACTOR_FIELD_META[key]?.description || "";
 }
 
 export const FACTOR_FIELD_META = {
   n_sheep: {
-    label: 'Sheep count',
+    label: "Sheep count",
     description:
-      'Flock size. Larger N usually makes herding harder and runs slower.',
+      "Flock size. Larger N usually makes herding harder and runs slower.",
   },
   n_shepherds: {
-    label: 'Shepherd count',
+    label: "Shepherd count",
     description:
-      'Number of herders. More can help coverage; coordination cost may rise.',
+      "Number of herders. More can help coverage; coordination cost may rise.",
   },
   sheep_model: {
-    label: 'Sheep model',
+    label: "Sheep model",
     description:
-      'Sheep motion model. Chosen by Method in Setup (not edited here).',
+      "Sheep motion model. Chosen by Method in Setup (not edited here).",
   },
   dog_controller: {
-    label: 'Dog controller',
+    label: "Dog controller",
     description:
-      'Shepherd controller. Chosen by Method in Setup (not edited here).',
+      "Shepherd controller. Chosen by Method in Setup (not edited here).",
   },
   obs_mode: {
-    label: 'Observation mode',
+    label: "Observation mode",
     description:
-      'What each shepherd perceives each tick. global = full state; local_positions / bearing_only = limited sensing; noisy_bearing adds noise; intermittent updates less often. Harder modes usually slow or fail herding.',
+      "What each shepherd perceives each tick. global = full state; local_positions / bearing_only = limited sensing; noisy_bearing adds noise; intermittent updates less often. Harder modes usually slow or fail herding.",
   },
   sensing_range: {
-    label: 'Sensing range',
+    label: "Sensing range",
     description:
-      'Local sensing radius in world units (typical world ~150; default near 65). Only for local/bearing modes. Lower = fewer sheep seen and harder control; higher = closer to global.',
+      "Local sensing radius in world units (typical world ~150; default near 65). Only for local/bearing modes. Lower = fewer sheep seen and harder control; higher = closer to global.",
   },
   noise_sigma: {
-    label: 'Observation noise',
+    label: "Observation noise",
     description:
-      'Noise on bearings for noisy_bearing mode. Must be >= 0. 0 = clean; higher = less reliable sensing and weaker herding.',
+      "Noise on bearings for noisy_bearing mode. Must be >= 0. 0 = clean; higher = less reliable sensing and weaker herding.",
   },
   communication: {
-    label: 'Communication',
+    label: "Communication",
     description:
-      'Whether shepherds share information. none = independent; neighbour_broadcast / global_shared share more and can improve multi-herder coordination.',
+      "Whether shepherds share information. none = independent; neighbour_broadcast / global_shared share more and can improve multi-herder coordination.",
   },
   stubborn_fraction: {
-    label: 'Stubborn fraction',
+    label: "Stubborn fraction",
     description:
-      'Share of sheep with reduced shepherd response. Must be in [0, 1]. 0 = normal flock; higher = harder to push and more splits.',
+      "Share of sheep with reduced shepherd response. Must be in [0, 1]. 0 = normal flock; higher = harder to push and more splits.",
   },
   cohesion_scale: {
-    label: 'Cohesion scale',
+    label: "Cohesion scale",
     description:
-      'Scales flocking cohesion. Must be >= 0 (1 is nominal). Lower = looser/split-prone flock; higher = sheep stick together more.',
+      "Scales flocking cohesion. Must be >= 0 (1 is nominal). Lower = looser/split-prone flock; higher = sheep stick together more.",
   },
   failure_mode: {
-    label: 'Failure mode',
+    label: "Failure mode",
     description:
-      'How shepherds degrade after failure_tick. none = healthy; inactive_after_tick / reduced_speed_after_tick / blind_after_tick = progressive failure that usually hurts success.',
+      "How shepherds degrade after failure_tick. none = healthy; inactive_after_tick / reduced_speed_after_tick / blind_after_tick = progressive failure that usually hurts success.",
   },
   failure_tick: {
-    label: 'Failure tick',
+    label: "Failure tick",
     description:
-      'Tick when failure_mode starts (-1 often means unused). Earlier ticks = failure hits sooner; compare against max_ticks (~3000).',
+      "Tick when failure_mode starts (-1 often means unused). Earlier ticks = failure hits sooner; compare against max_ticks (~3000).",
   },
   speed_scale: {
-    label: 'Shepherd speed scale',
+    label: "Shepherd speed scale",
     description:
-      'Multiplier on shepherd speed. Must be >= 0 (1 is nominal). Lower = slower herders; higher = faster but can overshoot/scatter.',
+      "Multiplier on shepherd speed. Must be >= 0 (1 is nominal). Lower = slower herders; higher = faster but can overshoot/scatter.",
   },
   goal_mode: {
-    label: 'Goal mode',
+    label: "Goal mode",
     description:
-      'Goal behavior. static = fixed target; moving = goal drifts and is harder to track.',
+      "Goal behavior. static = fixed target; moving = goal drifts and is harder to track.",
   },
   goal_velocity: {
-    label: 'Goal velocity',
+    label: "Goal velocity",
     description:
-      'Per-tick velocity (vx, vy) in world units. Same scale as sheep_speed (~1.0) and shepherd_speed (~1.5). Try 0.2-0.5 for a trackable moving goal; (1,1) outruns the flock quickly. The centre is clamped so the full goal disk stays inside the arena.',
+      "Per-tick velocity (vx, vy) in world units. Same scale as sheep_speed (~1.0) and shepherd_speed (~1.5). Try 0.2-0.5 for a trackable moving goal; (1,1) outruns the flock quickly. The centre is clamped so the full goal disk stays inside the arena.",
   },
 };
 
 export const DEFAULT_FACTORS = {
-  sheep_model: '',
-  dog_controller: '',
-  obs_mode: 'global',
-  sensing_range: '',
+  sheep_model: "",
+  dog_controller: "",
+  obs_mode: "global",
+  sensing_range: "",
   noise_sigma: 0,
-  communication: 'none',
+  communication: "none",
   stubborn_fraction: 0,
   cohesion_scale: 1,
-  failure_mode: 'none',
+  failure_mode: "none",
   failure_tick: -1,
   speed_scale: 1,
-  goal_mode: 'static',
+  goal_mode: "static",
   goal_velocity_x: 0,
   goal_velocity_y: 0,
 };
 
 export const STUDY_TEMPLATES = [
   {
-    id: 'herdability',
-    label: 'Herdability N x M',
-    mode: 'grid',
-    seeds: '1, 2, 3, 4, 5',
-    preset: 'custom',
+    id: "herdability",
+    label: "Herdability N x M",
+    mode: "grid",
+    seeds: "1, 2, 3, 4, 5",
+    preset: "custom",
     rows: [
-      { key: 'sheep_model', values: 'strombom' },
-      { key: 'dog_controller', values: 'collect_drive' },
-      { key: 'n_sheep', values: '20, 40, 80' },
-      { key: 'n_shepherds', values: '1, 2, 4' },
+      { key: "sheep_model", values: "strombom" },
+      { key: "dog_controller", values: "collect_drive" },
+      { key: "n_sheep", values: "20, 40, 80" },
+      { key: "n_shepherds", values: "1, 2, 4" },
     ],
   },
   {
-    id: 'sensing',
-    label: 'Sensing degradation',
-    mode: 'grid',
-    seeds: '1, 2, 3, 4, 5',
-    preset: 'custom',
+    id: "sensing",
+    label: "Sensing degradation",
+    mode: "grid",
+    seeds: "1, 2, 3, 4, 5",
+    preset: "custom",
     rows: [
-      { key: 'sheep_model', values: 'strombom' },
-      { key: 'dog_controller', values: 'collect_drive' },
-      { key: 'n_sheep', values: '40' },
-      { key: 'n_shepherds', values: '1' },
-      { key: 'obs_mode', values: 'global,local_positions,bearing_only,noisy_bearing' },
-      { key: 'noise_sigma', values: '0, 0.15, 0.3' },
+      { key: "sheep_model", values: "strombom" },
+      { key: "dog_controller", values: "collect_drive" },
+      { key: "n_sheep", values: "40" },
+      { key: "n_shepherds", values: "1" },
+      {
+        key: "obs_mode",
+        values: "global,local_positions,bearing_only,noisy_bearing",
+      },
+      { key: "noise_sigma", values: "0, 0.15, 0.3" },
     ],
   },
   {
-    id: 'heterogeneity',
-    label: 'Stubborn fraction',
-    mode: 'grid',
-    seeds: '1, 2, 3, 4, 5',
-    preset: 'custom',
+    id: "heterogeneity",
+    label: "Stubborn fraction",
+    mode: "grid",
+    seeds: "1, 2, 3, 4, 5",
+    preset: "custom",
     rows: [
-      { key: 'sheep_model', values: 'strombom' },
-      { key: 'dog_controller', values: 'collect_drive' },
-      { key: 'n_sheep', values: '40' },
-      { key: 'n_shepherds', values: '1, 2' },
-      { key: 'stubborn_fraction', values: '0, 0.25, 0.5, 0.75' },
+      { key: "sheep_model", values: "strombom" },
+      { key: "dog_controller", values: "collect_drive" },
+      { key: "n_sheep", values: "40" },
+      { key: "n_shepherds", values: "1, 2" },
+      { key: "stubborn_fraction", values: "0, 0.25, 0.5, 0.75" },
     ],
   },
 ];
 
 const LOCAL_OBS = new Set([
-  'local_positions',
-  'bearing_only',
-  'noisy_bearing',
-  'intermittent',
+  "local_positions",
+  "bearing_only",
+  "noisy_bearing",
+  "intermittent",
 ]);
 
 const ACTIVE_FAILURE = new Set([
-  'inactive_after_tick',
-  'reduced_speed_after_tick',
-  'blind_after_tick',
+  "inactive_after_tick",
+  "reduced_speed_after_tick",
+  "blind_after_tick",
 ]);
 
 let runtimeFactorMeta = null;
@@ -352,10 +353,18 @@ export function applyFactorMetadata(meta) {
   runtimeFactorMeta = meta || null;
   if (!meta?.enums) return;
   if (meta.enums.obs_mode?.length) {
-    OBSERVATION_MODES.splice(0, OBSERVATION_MODES.length, ...meta.enums.obs_mode);
+    OBSERVATION_MODES.splice(
+      0,
+      OBSERVATION_MODES.length,
+      ...meta.enums.obs_mode,
+    );
   }
   if (meta.enums.communication?.length) {
-    COMMUNICATION_MODES.splice(0, COMMUNICATION_MODES.length, ...meta.enums.communication);
+    COMMUNICATION_MODES.splice(
+      0,
+      COMMUNICATION_MODES.length,
+      ...meta.enums.communication,
+    );
   }
   if (meta.enums.failure_mode?.length) {
     FAILURE_MODES.splice(0, FAILURE_MODES.length, ...meta.enums.failure_mode);
@@ -388,15 +397,15 @@ export function getMaxFactorGridCells() {
 }
 
 export function factorVisibility(factors = {}) {
-  const obs = factors.obs_mode || 'global';
-  const failure = factors.failure_mode || 'none';
-  const goal = factors.goal_mode || 'static';
+  const obs = factors.obs_mode || "global";
+  const failure = factors.failure_mode || "none";
+  const goal = factors.goal_mode || "static";
   return {
     sensing_range: LOCAL_OBS.has(obs),
-    noise_sigma: obs === 'noisy_bearing',
-    observation_frequency: obs === 'intermittent',
+    noise_sigma: obs === "noisy_bearing",
+    observation_frequency: obs === "intermittent",
     failure_tick: ACTIVE_FAILURE.has(failure),
-    goal_velocity: goal === 'moving',
+    goal_velocity: goal === "moving",
   };
 }
 
@@ -405,26 +414,30 @@ export function validateFactors(factors = {}) {
   const errors = [];
   const stubborn = Number(f.stubborn_fraction);
   if (!Number.isFinite(stubborn) || stubborn < 0 || stubborn > 1) {
-    errors.push('stubborn_fraction must be between 0 and 1.');
+    errors.push("stubborn_fraction must be between 0 and 1.");
   }
   const cohesion = Number(f.cohesion_scale);
   if (!Number.isFinite(cohesion) || cohesion < 0) {
-    errors.push('cohesion_scale must be >= 0.');
+    errors.push("cohesion_scale must be >= 0.");
   }
   const noise = Number(f.noise_sigma);
   if (!Number.isFinite(noise) || noise < 0) {
-    errors.push('noise_sigma must be >= 0.');
+    errors.push("noise_sigma must be >= 0.");
   }
   if (ACTIVE_FAILURE.has(f.failure_mode)) {
     const tick = Number(f.failure_tick);
     if (!Number.isFinite(tick) || tick < 0) {
-      errors.push('failure_tick must be >= 0 when a failure mode is active.');
+      errors.push("failure_tick must be >= 0 when a failure mode is active.");
     }
   }
-  if (LOCAL_OBS.has(f.obs_mode) && f.sensing_range !== '' && f.sensing_range != null) {
+  if (
+    LOCAL_OBS.has(f.obs_mode) &&
+    f.sensing_range !== "" &&
+    f.sensing_range != null
+  ) {
     const range = Number(f.sensing_range);
     if (!Number.isFinite(range) || range <= 0) {
-      errors.push('sensing_range must be a positive number when set.');
+      errors.push("sensing_range must be a positive number when set.");
     }
   }
   return { ok: errors.length === 0, errors };
@@ -433,11 +446,13 @@ export function validateFactors(factors = {}) {
 export function factorsFromMethod(method) {
   const next = { ...DEFAULT_FACTORS };
   if (!method) return next;
-  next.sheep_model = method.sheep_model || '';
-  next.dog_controller = method.dog_controller || '';
+  next.sheep_model = method.sheep_model || "";
+  next.dog_controller = method.dog_controller || "";
   const cfg = method.default_config || {};
-  if (cfg.stubborn_fraction != null) next.stubborn_fraction = Number(cfg.stubborn_fraction);
-  if (cfg.cohesion_scale != null) next.cohesion_scale = Number(cfg.cohesion_scale);
+  if (cfg.stubborn_fraction != null)
+    next.stubborn_fraction = Number(cfg.stubborn_fraction);
+  if (cfg.cohesion_scale != null)
+    next.cohesion_scale = Number(cfg.cohesion_scale);
   if (cfg.obs_mode) next.obs_mode = cfg.obs_mode;
   if (cfg.failure_mode) next.failure_mode = cfg.failure_mode;
   if (cfg.communication) next.communication = cfg.communication;
@@ -446,14 +461,18 @@ export function factorsFromMethod(method) {
 }
 
 export function parseMixedValueList(text) {
-  return String(text || '')
-    .split(',')
+  return String(text || "")
+    .split(",")
     .map((part) => part.trim())
     .filter(Boolean)
     .map((part) => {
       const num = Number(part);
       if (Number.isFinite(num) && String(num) === part) return num;
-      if (Number.isFinite(num) && !Number.isNaN(num) && /^-?\d+(\.\d+)?$/.test(part)) {
+      if (
+        Number.isFinite(num) &&
+        !Number.isNaN(num) &&
+        /^-?\d+(\.\d+)?$/.test(part)
+      ) {
         return num;
       }
       return part;
@@ -471,7 +490,7 @@ export function estimateGridCells(rows) {
 export function buildFactorGridSpecs(rows) {
   const specs = [];
   for (const row of rows || []) {
-    const key = String(row.key || '').trim();
+    const key = String(row.key || "").trim();
     const values = parseMixedValueList(row.values);
     if (!key || !values.length) continue;
     specs.push({ key, values });
@@ -486,24 +505,35 @@ export function applyFactorsToParams(algorithmParams, factors) {
   const visible = factorVisibility(f);
 
   if (f.obs_mode) params.obs_mode = f.obs_mode;
-  if (visible.sensing_range && f.sensing_range !== '' && f.sensing_range != null
-      && Number.isFinite(Number(f.sensing_range))) {
+  if (
+    visible.sensing_range &&
+    f.sensing_range !== "" &&
+    f.sensing_range != null &&
+    Number.isFinite(Number(f.sensing_range))
+  ) {
     params.sensing_range = Number(f.sensing_range);
   } else {
     delete params.sensing_range;
   }
-  if (Number.isFinite(Number(f.noise_sigma))) params.noise_sigma = Number(f.noise_sigma);
+  if (Number.isFinite(Number(f.noise_sigma)))
+    params.noise_sigma = Number(f.noise_sigma);
   if (f.communication) params.communication = f.communication;
   if (Number.isFinite(Number(f.stubborn_fraction))) {
     params.stubborn_fraction = Number(f.stubborn_fraction);
   }
-  if (Number.isFinite(Number(f.cohesion_scale))) params.cohesion_scale = Number(f.cohesion_scale);
+  if (Number.isFinite(Number(f.cohesion_scale)))
+    params.cohesion_scale = Number(f.cohesion_scale);
   if (f.failure_mode) params.failure_mode = f.failure_mode;
-  if (Number.isFinite(Number(f.failure_tick))) params.failure_tick = Number(f.failure_tick);
-  if (Number.isFinite(Number(f.speed_scale))) params.speed_scale = Number(f.speed_scale);
+  if (Number.isFinite(Number(f.failure_tick)))
+    params.failure_tick = Number(f.failure_tick);
+  if (Number.isFinite(Number(f.speed_scale)))
+    params.speed_scale = Number(f.speed_scale);
   if (f.goal_mode) params.goal_mode = f.goal_mode;
   if (visible.goal_velocity) {
-    params.goal_velocity = [Number(f.goal_velocity_x) || 0, Number(f.goal_velocity_y) || 0];
+    params.goal_velocity = [
+      Number(f.goal_velocity_x) || 0,
+      Number(f.goal_velocity_y) || 0,
+    ];
   } else {
     delete params.goal_velocity;
   }
@@ -534,7 +564,7 @@ export function buildSessionPayload({
   if (f.sheep_model) payload.sheep_model = f.sheep_model;
   if (f.dog_controller) payload.dog_controller = f.dog_controller;
   if (f.obs_mode) payload.obs_mode = f.obs_mode;
-  if (preset === 'custom' && worldOverrides) {
+  if (preset === "custom" && worldOverrides) {
     payload.world_overrides = { ...worldOverrides };
   }
   return payload;
@@ -547,8 +577,10 @@ export function summarizeFactors(factors = {}) {
     f.dog_controller || null,
     f.obs_mode ? `obs=${f.obs_mode}` : null,
     Number(f.stubborn_fraction) > 0 ? `stubborn=${f.stubborn_fraction}` : null,
-    f.failure_mode && f.failure_mode !== 'none' ? `fail=${f.failure_mode}` : null,
-    f.goal_mode === 'moving' ? 'goal=moving' : null,
+    f.failure_mode && f.failure_mode !== "none"
+      ? `fail=${f.failure_mode}`
+      : null,
+    f.goal_mode === "moving" ? "goal=moving" : null,
   ].filter(Boolean);
-  return bits.join(' · ');
+  return bits.join(" · ");
 }

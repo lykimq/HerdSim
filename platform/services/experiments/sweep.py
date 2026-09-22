@@ -39,9 +39,7 @@ def expand_factor_grid(specs: list[dict[str, Any]]) -> list[dict[str, Any]]:
     value_lists = [s["values"] for s in specs]
     combos = [dict(zip(keys, combo)) for combo in product(*value_lists)]
     if len(combos) > MAX_FACTOR_GRID_CELLS:
-        raise ValueError(
-            f"Factor grid has {len(combos)} cells; max is {MAX_FACTOR_GRID_CELLS}"
-        )
+        raise ValueError(f"Factor grid has {len(combos)} cells; max is {MAX_FACTOR_GRID_CELLS}")
     return combos
 
 

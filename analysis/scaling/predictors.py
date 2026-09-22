@@ -17,35 +17,72 @@ def _fit_logistic(
     x: np.ndarray,
     y: np.ndarray,
     *,
-    n_iter: int = 200,
-    lr: float = 0.1,
-) -> tuple[np.ndarray, float]:
-    """Simple L2-regularised logistic regression via gradient descent."""
-    n, d = x.shape
-    # Standardise features.
+    n_iter: int = 400,
+    lr: float = 0.2,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """L2 logistic regression. Returns weights, training mean, and training std."""
     mu = x.mean(axis=0)
     sigma = x.std(axis=0)
-    sigma[sigma < 1e-9] = 1.0
+    sigma = np.where(sigma < 1e-9, 1.0, sigma)
     xs = (x - mu) / sigma
+    n, d = xs.shape
     w = np.zeros(d)
     b = 0.0
     for _ in range(n_iter):
         z = xs @ w + b
-        p = 1.0 / (1.0 + np.exp(-z))
+        p = 1.0 / (1.0 + np.exp(-np.clip(z, -50, 50)))
         err = p - y
-        w -= lr * ((xs.T @ err) / n + 1e-3 * w)
+        w -= lr * ((xs.T @ err) / max(n, 1) + 1e-3 * w)
         b -= lr * float(err.mean())
-    return np.concatenate([[b], w]), float("nan")  # AIC filled by caller
+    return np.concatenate([[b], w]), mu, sigma
 
 
-def _predict_proba(beta: np.ndarray, x: np.ndarray) -> np.ndarray:
+def _predict_proba(
+    beta: np.ndarray,
+    x: np.ndarray,
+    mu: np.ndarray,
+    sigma: np.ndarray,
+) -> np.ndarray:
     b, w = beta[0], beta[1:]
-    mu = x.mean(axis=0)
-    sigma = x.std(axis=0)
-    sigma[sigma < 1e-9] = 1.0
     xs = (x - mu) / sigma
     z = xs @ w + b
     return 1.0 / (1.0 + np.exp(-np.clip(z, -50, 50)))
+
+
+def _layout_dummies(
+    frame: pd.DataFrame,
+    layout_col: str,
+    levels: list[str] | None,
+) -> tuple[np.ndarray, list[str]]:
+    if layout_col not in frame.columns:
+        return np.zeros((len(frame), 0)), levels or []
+    raw = frame[layout_col].astype(str)
+    if levels is None:
+        levels = sorted(raw.unique().tolist())
+    if len(levels) < 2:
+        return np.zeros((len(frame), 0)), levels
+    cols = [(raw == level).to_numpy(dtype=float) for level in levels[1:]]
+    return np.column_stack(cols), levels
+
+
+def _numeric_block(frame: pd.DataFrame, cols: list[str]) -> np.ndarray:
+    if not cols:
+        return np.zeros((len(frame), 0))
+    return frame[cols].astype(float).to_numpy()
+
+
+def _default_state_cols(df: pd.DataFrame, nd_cols: list[str]) -> list[str]:
+    """Early-window numeric columns. Full-trial means are not predictors."""
+    cols = []
+    for col in df.columns:
+        if not str(col).startswith("early_"):
+            continue
+        if col in nd_cols:
+            continue
+        if not pd.api.types.is_numeric_dtype(df[col]):
+            continue
+        cols.append(col)
+    return cols
 
 
 def compare_state_vs_nd_predictors(
@@ -54,72 +91,89 @@ def compare_state_vs_nd_predictors(
     success_col: str = "success",
     nd_cols: list[str] | None = None,
     state_cols: list[str] | None = None,
-    test_fraction: float = 0.3,
-    seed: int = 2026,
+    layout_col: str = "initial_layout",
+    sheep_col: str = "n_sheep",
 ) -> dict[str, Any]:
-    """Compare (N, D) logistic predictor vs (N, D + state features).
+    """Leave-one-N-out negative log-likelihood of (N, D) versus layout plus early state.
 
-    Returns out-of-sample negative log-likelihood and AIC-like scores. A state
-    model is preferred when delta_aic > 4 (plan claim C1b threshold).
+    Numeric columns are standardized on the training flocks and those moments
+    are applied to the held-out flock. The state model is preferred when its
+    out-of-sample negative log-likelihood is lower. One flock size cannot be
+    cross-validated.
     """
-    nd_cols = nd_cols or ["n_sheep", "n_shepherds"]
-    state_cols = state_cols or [
-        c
-        for c in (
-            "mean_cohesion",
-            "mean_mean_spread",
-            "mean_extent",
-            "mean_fragmentation",
-            "mean_outlier_count",
-            "initial_mean_spread",
-            "initial_cohesion",
-        )
-        if c in df.columns
-    ]
-    needed = nd_cols + [success_col]
-    work = df.dropna(subset=[c for c in needed if c in df.columns]).copy()
-    if work.empty or success_col not in work.columns:
+    nd_cols = list(nd_cols or ["n_sheep", "n_shepherds"])
+    if state_cols is None:
+        state_cols = _default_state_cols(df, nd_cols)
+    else:
+        state_cols = [c for c in state_cols if c in df.columns and c not in nd_cols]
+
+    needed = [c for c in nd_cols + [success_col, sheep_col] if c in df.columns]
+    if (
+        success_col not in df.columns
+        or sheep_col not in df.columns
+        or any(c not in df.columns for c in nd_cols)
+    ):
         return {
-            "n_train": 0,
-            "n_test": 0,
+            "n_folds": 0,
             "nd_nll": float("nan"),
             "state_nll": float("nan"),
-            "delta_aic": float("nan"),
             "prefers_state": False,
             "state_cols": state_cols,
+            "note": "missing N, D, or success",
         }
 
-    y = work[success_col].astype(float).to_numpy()
-    x_nd = work[nd_cols].astype(float).to_numpy()
-    x_state = work[nd_cols + state_cols].astype(float).to_numpy() if state_cols else x_nd
+    work = df.dropna(subset=needed + state_cols).copy()
+    work["_y"] = work[success_col].astype(float)
+    flocks = sorted(int(v) for v in work[sheep_col].dropna().unique())
+    if len(flocks) < 2 or work["_y"].nunique() < 2:
+        return {
+            "n_folds": 0,
+            "nd_nll": float("nan"),
+            "state_nll": float("nan"),
+            "prefers_state": False,
+            "state_cols": state_cols,
+            "note": "need at least two flock sizes and both outcomes",
+        }
 
-    rng = np.random.default_rng(seed)
-    idx = np.arange(len(work))
-    rng.shuffle(idx)
-    n_test = max(1, int(round(test_fraction * len(idx))))
-    test_idx = idx[:n_test]
-    train_idx = idx[n_test:] if len(idx) > n_test else idx
+    y_nd: list[float] = []
+    p_nd: list[float] = []
+    y_st: list[float] = []
+    p_st: list[float] = []
+    for held in flocks:
+        test = work[work[sheep_col] == held]
+        train = work[work[sheep_col] != held]
+        if train["_y"].nunique() < 2 or test.empty:
+            continue
+        y_train = train["_y"].to_numpy()
+        y_test = test["_y"].to_numpy()
+        x_nd_tr = _numeric_block(train, nd_cols)
+        x_nd_te = _numeric_block(test, nd_cols)
+        beta, mu, sigma = _fit_logistic(x_nd_tr, y_train)
+        p_nd.extend(_predict_proba(beta, x_nd_te, mu, sigma).tolist())
+        y_nd.extend(y_test.tolist())
 
-    beta_nd, _ = _fit_logistic(x_nd[train_idx], y[train_idx])
-    beta_st, _ = _fit_logistic(x_state[train_idx], y[train_idx])
-    p_nd = _predict_proba(beta_nd, x_nd[test_idx])
-    p_st = _predict_proba(beta_st, x_state[test_idx])
-    nll_nd = _logistic_nll(y[test_idx], p_nd)
-    nll_st = _logistic_nll(y[test_idx], p_st)
+        dummies_tr, levels = _layout_dummies(train, layout_col, None)
+        dummies_te, _ = _layout_dummies(test, layout_col, levels)
+        x_st_tr = np.column_stack([x_nd_tr, _numeric_block(train, state_cols), dummies_tr])
+        x_st_te = np.column_stack([x_nd_te, _numeric_block(test, state_cols), dummies_te])
+        if x_st_tr.shape[1] == 0:
+            x_st_tr = np.zeros((len(train), 1))
+            x_st_te = np.zeros((len(test), 1))
+        beta_s, mu_s, sigma_s = _fit_logistic(x_st_tr, y_train)
+        p_st.extend(_predict_proba(beta_s, x_st_te, mu_s, sigma_s).tolist())
+        y_st.extend(y_test.tolist())
 
-    # AIC ≈ 2k + 2n*NLL (using mean NLL * n)
-    n_te = len(test_idx)
-    aic_nd = 2 * (1 + len(nd_cols)) + 2 * n_te * nll_nd
-    aic_st = 2 * (1 + x_state.shape[1]) + 2 * n_te * nll_st
-    delta = aic_nd - aic_st
+    if not y_nd or not y_st:
+        nll_nd = float("nan")
+        nll_st = float("nan")
+    else:
+        nll_nd = _logistic_nll(np.asarray(y_nd), np.asarray(p_nd))
+        nll_st = _logistic_nll(np.asarray(y_st), np.asarray(p_st))
     return {
-        "n_train": int(len(train_idx)),
-        "n_test": int(n_te),
+        "n_folds": int(len(flocks)),
         "nd_nll": nll_nd,
         "state_nll": nll_st,
-        "aic_nd": aic_nd,
-        "aic_state": aic_st,
-        "delta_aic": float(delta),
-        "prefers_state": bool(delta > 4.0),
+        "prefers_state": bool(nll_st < nll_nd),
         "state_cols": state_cols,
+        "layout_col": layout_col if layout_col in work.columns else None,
     }

@@ -1,96 +1,128 @@
-# Frozen Section 8 protocol defaults (Phase 0, 2026-09-17).
+# Frozen protocol defaults (scaling_v2).
 # Cap I13: machine-readable canonical grid for scaling protocols.
 #
-# Rule: every field below must state WHY it was chosen. Do not change a frozen
-# value without updating this rationale and logging a protocol exception in
-# scaling/docs/progress_tracker.md. Full prose: main plan Section 8.1.
+# Rule: every field states why it was chosen. Do not change a frozen value
+# without updating this rationale and scaling/docs/main_scaling_plan.md.
+# Full prose: main plan Section 8.
 
-protocol_id: scaling_v1
-# Stable id for provenance stamps; bump only on intentional protocol change.
-frozen_on: "2026-09-17"
-# Date the Section 8 freeze was confirmed.
+protocol_id: scaling_v2
+# Stable id for provenance stamps. Bump only when the locked rules change.
+frozen_on: "2026-09-22"
 
-# Task: single shared scenario so size/structure/method comparisons stay fair.
-# drive_to_goal is HerdSim's default herding task and matches the program's
-# operational herdability definition (guide flock to a goal under a time limit).
+# Task: one shared scenario so size, structure, and method comparisons stay fair.
+# drive_to_goal is the operational herdability task (guide the flock into a
+# goal disk under a time limit). The app's 150-field corner goal stays the
+# interactive default. Scaling runs override the arena fields below.
 task: drive_to_goal
 
-# Primary reliability bar for D_min / regimes. 0.90 matches the sheep-scaling
-# draft "reliable" band (SR >= 90%) and is strict enough for force-sizing claims.
+# Open interior. A 150 field cannot hold a wide start (3-sigma reach 180) or
+# the N=400 outlier reach (about 174). A 400 field leaves about 20 beyond the
+# wide draw, so walls clip the layout. 500 leaves a margin of about 70 at the
+# center. A 1000 field adds empty space once walls are already clear.
+# Square so split clusters on a circle are not pushed into a short side.
+world_width: 500.0
+world_height: 500.0
+# Flock starts at the field center (250, 250). Goal sits 120 to the right on
+# the midline so the drive length does not change with N and the vertical
+# margins match. 370 = 250 + 120.
+goal_center: [370.0, 250.0]
+# Radius at N=50 matches the app's existing goal. Packed radius there is about
+# 8 (r_a * sqrt(N/pi) with r_a=2). Radius 8 would jam. Radius 30 would be a
+# pasture. 15 is about 1.9 times the packed radius.
+goal_radius_at_n50: 15.0
+# Center-to-center drive. Near edge at N=400 is 120 - 42 = 78, outside a
+# compact start (sigma 9) and past one wide sigma (60). Length 80 would land
+# inside the wide cloud. Length 200 would put the far edge of the goal on the wall.
+drive_length: 120.0
+# Scenario spread. Compact sigma = 0.3 * 30 = 9 (one packed flock at N=50).
+# Wide sigma = 2 * 30 = 60. Four times 30 would leave the 500 field.
+initial_spread: 30.0
+# Flock connectivity, not the goal diameter. Above r_a=2 so a compact flock
+# is one component, below the split gap of 10 so split clusters stay apart.
+measurement_radius: 5.0
+
+# Primary reliability bar for D_min and regimes. 0.90 is the reliable band
+# (same as the draft). 0.50 is a coin flip and is reported, not used for D_min.
+# 0.99 at 100 seeds would call stable cells short.
 reliability_theta: 0.90
-# Sensitivity checks so results are not an artefact of one threshold only.
 reliability_sensitivity: [0.50, 0.70]
 
-# Baseline method: coordinated multi-dog Collect/Drive; primary HerdSim
-# multi-shepherd baseline and closest operational cousin to the draft study's
-# collect-or-drive family.
+# Baseline: coordinated multi-dog Collect/Drive.
 baseline_method: strombom_multi
-# Transfer set spans distinct architectures for RQ4 (not near-duplicates):
-# force-based (kubo), local farthest-sheep (fat), decentralised Collect/Drive
-# without shared targets (communication_free). Baseline listed first for tables.
+# Required transfer set is the first three. communication_free is recommended
+# and is not part of the minimum three-method claim.
 transfer_methods:
   - strombom_multi
   - kubo
   - fat
   - communication_free
+required_transfer_methods:
+  - strombom_multi
+  - kubo
+  - fat
 
-# N grid: full size ladder for general scaling tests (independent of any single
-# paper). Floor is N=5, not 1-4: scientific scope of the research object, not
-# an implementation limit (if science needed N<5, we would change code).
-#   (1) N=1: no sheep-sheep interaction; collective structure undefined.
-#   (2) Structure factors need a majority core + minority outliers (~80/20);
-#       at N=2-4 one "outlier" is already a huge fraction, so the X0 contrast
-#       is not the same factor as at larger N.
-#   (3) Coverage "peripheral = above median" is nearly tautological at N=2-3.
-#   (4) Collect-then-drive a flock vs GCM collapses to chasing individuals.
-#   (5) Question assumes few shepherds guide a larger group; N=1-4 with large D
-#       is over-actuated individual pursuit, a different study.
-# N=5-10 still probes hard small-flock behaviour while remaining a collective.
-# Mid points (75, 150) resolve the ~100 breakpoint; 300/400 probe large-N growth.
+# Ten sizes. Tight around 100, where a one-dog policy stops being enough in
+# the draft. 75 and 150 locate that change. 300 and 400 give the large-N slope
+# more than one step. Floor is 5: below that the quantities are not a collective.
+# 250 and 350 are omitted: each extra N is a full dog sweep.
 flock_sizes: [5, 10, 25, 50, 75, 100, 150, 200, 300, 400]
-
-# D grid: same set as the sheep-scaling draft for frontier comparability.
-# Fine steps at low D (where D_min usually sits); coarser steps at high D for
-# overcrowding / waste. Cap 35 is the draft experimental ceiling.
+# Steps of 1 while D_min is likely 1 to 4. Wider after that: the question is
+# whether a large increase helps or hurts. Cap 35 is where "a few shepherds" ends.
+# Not every integer to 35: that scout would be about 10,500 trials instead of 3,000.
 shepherd_counts: [1, 2, 3, 4, 6, 10, 15, 20, 25, 35]
 
-# Initial structure families for RQ1 causal manipulation (not only emergent
-# spread). compact/wide = cohesion/spread; split = fragmentation;
-# outlier_rich = outliers. Must differ on intended metrics before claim runs.
+# Structure sizes: 50 can show a structure effect while size is still easy,
+# 100 is the size edge, 200 is where size already demands many dogs.
+structure_flock_sizes: [50, 100, 200]
+# Information claim sizes. Skip N where D_min is already 1: sensing cannot
+# remove a dog that was never required.
+rq5_flock_sizes: [100, 200]
+
 x0_families:
   - compact
   - wide
   - split
   - outlier_rich
 
-# T0: default per-trial horizon. 10000 matches the draft paper timeout and
-# overrides drive_to_goal's scenario default (3000) so reliability failures are not
-# short-horizon artefacts.
+# A straight 120-unit drive at speed 1 takes 120 ticks. 10,000 is about 80
+# crossings, so a timeout means loss of control. The scenario default 3,000
+# would mix slow successes into failures.
 time_limit_t0: 10000
-# T1: extended horizon only for hard-ceiling tests (overcrowding that
-# remains unreliable even with more time).
+# Longer budget only on overcrowding cells, to separate "needed more time"
+# from "more dogs made it worse".
 time_limit_t1: 20000
 
-# Scout seeds: cheap map of the (N,D) surface; 30 balances wall time vs
-# binomial noise for identifying boundary cells.
+# At R=0.90, 30 seeds have a standard error of about 0.055: enough to tell a
+# broken cell from a solid one, not enough to publish D_min. 10 seeds flip
+# the boundary. 100 seeds bring the error to about 0.03.
 scout_seeds: 30
-# Claim seeds: 100 on boundary cells for D_min CI / claim-grade evaluation
-# (see progress tracker claims board).
 claim_grade_seeds: 100
-# Master seed: fixed base so seed lists are reproducible (seed = master + i).
+# Fixed integer so scout and claim share one seed list. The particular value
+# does not matter; changing it changes every trial.
 master_seed: 2026
+# Resamples of seeds already run. 1,000 puts about 25 draws in each 2.5% tail.
+bootstrap_resamples: 1000
 
-# RQ5 information axes already supported as HerdSim experimental factors;
-# ordered ladders are defined in the main plan (RQ5), not duplicated here.
+# Strombom shepherd sensing distance. Range ladder is 0.5, 1, 1.5, 2 times this,
+# not an absolute step of 10, so the ladder means the same thing for another base.
+rq5_base_sensing_range: 65.0
 rq5_factors:
   - obs_mode
   - sensing_range
   - communication
 
-# RQ7: k = 5% of T0 (500/10000); w = 200 tick feature window (plan Phase 0 freeze).
+# k = 5% of T0. Eval stops at 8,000 so 8,000 + 500 is still before timeout.
+# Window 200 is recent and shorter than k. Step 200 matches that window.
+# Predictor window is 100: shorter than the 120-tick straight drive, so an
+# easy arrival is not inside the features.
 rq7_prediction_horizon_k: 500
 rq7_feature_window_w: 200
+rq7_eval_start: 1000
+rq7_eval_stop: 8000
+rq7_eval_step: 200
+predictor_window_ticks: 100
 
-# Wasteful-overspend: median effort >= 20% above efficient reference without
-# reliability gain. Sensitivity at 10%/30% is analysis-only (main plan Sec 6).
+# 10% sits in the noise of path length. 50% would only mark extreme overspend.
+# 10% and 30% are reported beside the default.
 wasteful_effort_tolerance: 0.20
+wasteful_effort_sensitivity: [0.10, 0.30]

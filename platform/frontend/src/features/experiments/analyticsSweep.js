@@ -12,27 +12,28 @@ import {
   getMaxFactorGridCells,
   isRequiredFactorGridKey,
   parseMixedValueList,
-} from '../../shared/factors/factors.js';
+} from "../../shared/factors/factors.js";
 
 export function chartGroupKey(rows) {
   const list = rows || [];
-  if (list.some((r) => r.sweep_label)) return 'sweep_label';
-  if (list.some((r) => r.factor_label)) return 'factor_label';
-  return 'method';
+  if (list.some((r) => r.sweep_label)) return "sweep_label";
+  if (list.some((r) => r.factor_label)) return "factor_label";
+  return "method";
 }
 
 /** Reserved row fields that start with factor_ but are labels, not axes. */
-const FACTOR_META_KEYS = new Set(['factor_label']);
+const FACTOR_META_KEYS = new Set(["factor_label"]);
 
 function parseFactorLabel(label) {
   const factors = {};
-  String(label || '')
+  String(label || "")
     .split(/[|,]/)
     .map((part) => part.trim())
     .filter(Boolean)
     .forEach((part) => {
-      const idx = part.indexOf('=');
-      if (idx > 0) factors[part.slice(0, idx).trim()] = part.slice(idx + 1).trim();
+      const idx = part.indexOf("=");
+      if (idx > 0)
+        factors[part.slice(0, idx).trim()] = part.slice(idx + 1).trim();
     });
   return factors;
 }
@@ -44,9 +45,9 @@ function parseFactorLabel(label) {
  */
 export function parseTrialFactors(row) {
   const factors = {};
-  if (!row || typeof row !== 'object') return factors;
+  if (!row || typeof row !== "object") return factors;
   Object.keys(row).forEach((key) => {
-    if (!key.startsWith('factor_') || FACTOR_META_KEYS.has(key)) return;
+    if (!key.startsWith("factor_") || FACTOR_META_KEYS.has(key)) return;
     factors[key.slice(7)] = row[key];
   });
   if (Object.keys(factors).length) return factors;
@@ -55,7 +56,7 @@ export function parseTrialFactors(row) {
 
 export function numericParamKeys(defaults = {}) {
   return Object.keys(defaults || {})
-    .filter((key) => typeof defaults[key] === 'number')
+    .filter((key) => typeof defaults[key] === "number")
     .sort();
 }
 
@@ -77,17 +78,19 @@ export function factorKeyOptions(defaults = {}) {
 export function validateFactorGridRows(rows) {
   const specs = buildFactorGridSpecs(rows);
   if (!specs.length) {
-    return { error: 'Add at least one value to each required factor.' };
+    return { error: "Add at least one value to each required factor." };
   }
   const keys = specs.map((s) => s.key);
   if (new Set(keys).size !== keys.length) {
-    return { error: 'Each factor key must be unique.' };
+    return { error: "Each factor key must be unique." };
   }
-  const missing = REQUIRED_FACTOR_GRID_KEYS.filter((key) => !keys.includes(key));
+  const missing = REQUIRED_FACTOR_GRID_KEYS.filter(
+    (key) => !keys.includes(key),
+  );
   if (missing.length) {
     const labels = missing.map((key) => factorGridKeyMeta(key)?.label || key);
     return {
-      error: `Factor grid requires: ${labels.join(', ')}.`,
+      error: `Factor grid requires: ${labels.join(", ")}.`,
     };
   }
   for (const spec of specs) {
@@ -99,7 +102,7 @@ export function validateFactorGridRows(rows) {
     if (bad.length) {
       const label = meta?.label || spec.key;
       return {
-        error: `${label} values must be one of: ${allowedList.join(', ')}. Invalid: ${bad.join(', ')}.`,
+        error: `${label} values must be one of: ${allowedList.join(", ")}. Invalid: ${bad.join(", ")}.`,
       };
     }
   }

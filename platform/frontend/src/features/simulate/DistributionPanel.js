@@ -1,9 +1,16 @@
 /** Live heading and GCM-distance distribution plots for Simulate view. */
 
-import { gcmDistanceBins, headingBins } from '../../shared/sim/distributionStats.js';
-import { formatScale } from '../../shared/charts/metricFormat.js';
-import { binFromPointer, drawHistogram, placeHoverTip } from '../../shared/charts/chartCanvas.js';
-import { setInfoTip } from '../../shared/ui/tooltips.js';
+import {
+  gcmDistanceBins,
+  headingBins,
+} from "../../shared/sim/distributionStats.js";
+import { formatScale } from "../../shared/charts/metricFormat.js";
+import {
+  binFromPointer,
+  drawHistogram,
+  placeHoverTip,
+} from "../../shared/charts/chartCanvas.js";
+import { setInfoTip } from "../../shared/ui/tooltips.js";
 
 function binRangeLabel(lo, hi, unit) {
   const a = formatScale(lo);
@@ -12,8 +19,8 @@ function binRangeLabel(lo, hi, unit) {
 }
 
 export function createDistributionPanel() {
-  const root = document.createElement('div');
-  root.className = 'card-glass distribution-panel';
+  const root = document.createElement("div");
+  root.className = "card-glass distribution-panel";
   root.innerHTML = `
     <div class="section-title">Distributions</div>
     <div class="dist-block" data-role="heading-block">
@@ -36,16 +43,16 @@ export function createDistributionPanel() {
   `;
 
   setInfoTip(
-    root.querySelector('.section-title'),
-    'Heading and distance-to-GCM shapes. Hover a bin for its count.',
+    root.querySelector(".section-title"),
+    "Heading and distance-to-GCM shapes. Hover a bin for its count.",
   );
   setInfoTip(
     root.querySelector('[data-role="heading-label"]'),
-    'Compass heading of each sheep (0-360 deg).',
+    "Compass heading of each sheep (0-360 deg).",
   );
   setInfoTip(
     root.querySelector('[data-role="gcm-label"]'),
-    'Distance of each sheep from the group center of mass.',
+    "Distance of each sheep from the group center of mass.",
   );
   const headingCanvas = root.querySelector('[data-role="heading"]');
   const gcmCanvas = root.querySelector('[data-role="gcm"]');
@@ -61,8 +68,8 @@ export function createDistributionPanel() {
   let hoverIndex = -1;
 
   function hideHoverTip() {
-    hoverTip.classList.add('hidden');
-    hoverTip.textContent = '';
+    hoverTip.classList.add("hidden");
+    hoverTip.textContent = "";
   }
 
   function showHoverTip(text, clientX, clientY) {
@@ -71,40 +78,40 @@ export function createDistributionPanel() {
       return;
     }
     hoverTip.textContent = text;
-    hoverTip.classList.remove('hidden');
+    hoverTip.classList.remove("hidden");
     placeHoverTip(hoverTip, root, clientX, clientY);
   }
 
   function paint() {
-    const headingHover = hoverKind === 'heading' ? hoverIndex : -1;
-    const gcmHover = hoverKind === 'gcm' ? hoverIndex : -1;
+    const headingHover = hoverKind === "heading" ? hoverIndex : -1;
+    const gcmHover = hoverKind === "gcm" ? hoverIndex : -1;
 
     drawHistogram(headingCanvas, headingState.bins, {
-      minLabel: '0 deg',
-      maxLabel: '360 deg',
-      color: '#67e8f9',
+      minLabel: "0 deg",
+      maxLabel: "360 deg",
+      color: "#67e8f9",
       hoverIndex: headingHover,
       peakIndex: headingState.count ? headingState.peakIndex : -1,
     });
     drawHistogram(gcmCanvas, gcmState.bins, {
-      minLabel: '0',
+      minLabel: "0",
       maxLabel: formatScale(gcmState.max),
-      color: '#fbbf24',
+      color: "#fbbf24",
       hoverIndex: gcmHover,
       peakIndex: gcmState.count ? gcmState.peakIndex : -1,
     });
 
     if (!headingState.count) {
-      headingValue.textContent = '-';
-      headingUnit.textContent = '';
+      headingValue.textContent = "-";
+      headingUnit.textContent = "";
     } else {
       headingValue.textContent = String(headingState.peak);
       headingUnit.textContent = `peak | n=${headingState.count}`;
     }
 
     if (!gcmState.count) {
-      gcmValue.textContent = '-';
-      gcmUnit.textContent = '';
+      gcmValue.textContent = "-";
+      gcmUnit.textContent = "";
     } else {
       gcmValue.textContent = formatScale(gcmState.mean);
       gcmUnit.textContent = `mean | n=${gcmState.count}`;
@@ -114,12 +121,12 @@ export function createDistributionPanel() {
   function update(frame = {}) {
     headingState = headingBins(frame.sheep_headings || []);
     gcmState = gcmDistanceBins(frame.sheep_positions || []);
-    if (hoverKind === 'heading' && hoverIndex >= headingState.bins.length) {
+    if (hoverKind === "heading" && hoverIndex >= headingState.bins.length) {
       hoverKind = null;
       hoverIndex = -1;
       hideHoverTip();
     }
-    if (hoverKind === 'gcm' && hoverIndex >= gcmState.bins.length) {
+    if (hoverKind === "gcm" && hoverIndex >= gcmState.bins.length) {
       hoverKind = null;
       hoverIndex = -1;
       hideHoverTip();
@@ -135,7 +142,7 @@ export function createDistributionPanel() {
   }
 
   function bindHover(canvas, kind, getState) {
-    canvas.addEventListener('mousemove', (event) => {
+    canvas.addEventListener("mousemove", (event) => {
       const state = getState();
       if (!state.count) {
         hoverKind = null;
@@ -149,7 +156,8 @@ export function createDistributionPanel() {
       const count = state.bins[hoverIndex] || 0;
       const nBins = state.bins.length;
       const lo = state.min + ((state.max - state.min) * hoverIndex) / nBins;
-      const hi = state.min + ((state.max - state.min) * (hoverIndex + 1)) / nBins;
+      const hi =
+        state.min + ((state.max - state.min) * (hoverIndex + 1)) / nBins;
       showHoverTip(
         `${binRangeLabel(lo, hi, state.unit)}: ${count} sheep`,
         event.clientX,
@@ -157,7 +165,7 @@ export function createDistributionPanel() {
       );
       paint();
     });
-    canvas.addEventListener('mouseleave', () => {
+    canvas.addEventListener("mouseleave", () => {
       if (hoverKind !== kind) return;
       hoverKind = null;
       hoverIndex = -1;
@@ -166,8 +174,8 @@ export function createDistributionPanel() {
     });
   }
 
-  bindHover(headingCanvas, 'heading', () => headingState);
-  bindHover(gcmCanvas, 'gcm', () => gcmState);
+  bindHover(headingCanvas, "heading", () => headingState);
+  bindHover(gcmCanvas, "gcm", () => gcmState);
 
   clear();
   return { root, update, clear };

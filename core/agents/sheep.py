@@ -13,9 +13,7 @@ def unit_vector(vec: np.ndarray) -> np.ndarray:
     return vec / norm
 
 
-def nearest_neighbor_indices(
-    positions: np.ndarray, index: int, k: int
-) -> np.ndarray:
+def nearest_neighbor_indices(positions: np.ndarray, index: int, k: int) -> np.ndarray:
     """Indices of up to k nearest other agents (topological neighbourhood)."""
     n = positions.shape[0]
     if n <= 1:
@@ -28,9 +26,7 @@ def nearest_neighbor_indices(
     return np.argpartition(distances, k - 1)[:k]
 
 
-def compute_local_centroid_knn(
-    positions: np.ndarray, index: int, n_neighbors: int
-) -> np.ndarray:
+def compute_local_centroid_knn(positions: np.ndarray, index: int, n_neighbors: int) -> np.ndarray:
     """Local centre of mass of the n nearest neighbours (Strombom 2014).
 
     If n_neighbors < 0, uses all other agents (global case n = N-1).

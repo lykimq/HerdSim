@@ -9,8 +9,8 @@
 # 4. Set output: scaling/results/phase{k}/{slug}/ matching protocol_id.
 # 5. List packages: that this run is meant to feed (A-G).
 # 6. Log the protocol in scaling/docs/progress_tracker.md after it runs.
-# 7. If you change a frozen Section 8 default, bump protocol_id / document an
-#    exception in the tracker; do not silently diverge.
+# 7. If you change a frozen Section 8 default, bump protocol_id in
+#    canonical_grid.yaml and update main_scaling_plan.md Section 8.
 # 8. Claim-grade Phase 1: use phase1_claim.yaml with
 #    make scaling-claim-plan / scaling-claim-reseed after a scout map exists.
 #    Do not run a flat 100-seed full grid unless you intentionally opt into

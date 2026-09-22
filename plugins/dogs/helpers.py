@@ -10,9 +10,7 @@ from core.observation import ShepherdObservation
 from core.simulation_state import SimulationState
 
 
-def view_from_observation(
-    state: SimulationState, obs: ShepherdObservation
-) -> SimulationState:
+def view_from_observation(state: SimulationState, obs: ShepherdObservation) -> SimulationState:
     """Build a controller-local state view from one shepherd observation."""
     if obs.n_sheep_seen == 0:
         sheep_pos = np.zeros((0, 2))

@@ -1,69 +1,69 @@
-import mermaid from 'mermaid';
-import { fetchDoc, fetchDocIndex } from '../../shared/api/rest.js';
-import { renderMarkdown } from './markdown.js';
-import { log } from '../../shared/ui/logger.js';
-import { escapeHtml } from '../../shared/ui/dom.js';
+import mermaid from "mermaid";
+import { fetchDoc, fetchDocIndex } from "../../shared/api/rest.js";
+import { renderMarkdown } from "./markdown.js";
+import { log } from "../../shared/ui/logger.js";
+import { escapeHtml } from "../../shared/ui/dom.js";
 
 const FALLBACK_NAV = [
-  { slug: 'overview', label: 'Overview', group: 'Start here' },
-  { slug: 'simulate', label: 'Simulate', group: 'How to use' },
-  { slug: 'guide/compare', label: 'Compare', group: 'How to use' },
-  { slug: 'experiments', label: 'Experiments', group: 'How to use' },
-  { slug: 'guide/netlogo', label: 'NetLogo', group: 'How to use' },
-  { slug: 'guide/methods', label: 'Methods', group: 'Reference' },
-  { slug: 'guide/scenarios', label: 'Scenarios', group: 'Reference' },
-  { slug: 'guide/metrics', label: 'Metrics', group: 'Reference' },
-  { slug: 'guide/environment', label: 'Environment', group: 'Reference' },
+  { slug: "overview", label: "Overview", group: "Start here" },
+  { slug: "simulate", label: "Simulate", group: "How to use" },
+  { slug: "guide/compare", label: "Compare", group: "How to use" },
+  { slug: "experiments", label: "Experiments", group: "How to use" },
+  { slug: "guide/netlogo", label: "NetLogo", group: "How to use" },
+  { slug: "guide/methods", label: "Methods", group: "Reference" },
+  { slug: "guide/scenarios", label: "Scenarios", group: "Reference" },
+  { slug: "guide/metrics", label: "Metrics", group: "Reference" },
+  { slug: "guide/environment", label: "Environment", group: "Reference" },
 ];
 
 const LABEL_OVERRIDES = {
-  overview: 'Overview',
-  simulate: 'Simulate',
-  experiments: 'Experiments',
-  'guide/methods': 'Methods',
-  'guide/methods/strombom_2014': 'Strombom 2014',
-  'guide/methods/strombom_multi': 'Strombom Multi-Dog',
-  'guide/methods/strombom_noise': 'Strombom Noise',
-  'guide/methods/v_formation': 'V-Formation',
-  'guide/methods/heterogeneous': 'Heterogeneous',
-  'guide/methods/obstacle_aware': 'Obstacle-Aware',
-  'guide/methods/kubo_2022': 'Kubo 2022',
-  'guide/methods/flocking_dog_2024': 'Flocking Dog',
-  'guide/methods/fat': 'FAT',
-  'guide/methods/communication_free': 'Communication-Free',
-  'guide/methods/adaptive': 'Adaptive',
-  'guide/compare': 'Compare',
-  'guide/scenarios': 'Scenarios',
-  'guide/metrics': 'Metrics',
-  'guide/environment': 'Environment',
-  'guide/netlogo': 'NetLogo',
+  overview: "Overview",
+  simulate: "Simulate",
+  experiments: "Experiments",
+  "guide/methods": "Methods",
+  "guide/methods/strombom_2014": "Strombom 2014",
+  "guide/methods/strombom_multi": "Strombom Multi-Dog",
+  "guide/methods/strombom_noise": "Strombom Noise",
+  "guide/methods/v_formation": "V-Formation",
+  "guide/methods/heterogeneous": "Heterogeneous",
+  "guide/methods/obstacle_aware": "Obstacle-Aware",
+  "guide/methods/kubo_2022": "Kubo 2022",
+  "guide/methods/flocking_dog_2024": "Flocking Dog",
+  "guide/methods/fat": "FAT",
+  "guide/methods/communication_free": "Communication-Free",
+  "guide/methods/adaptive": "Adaptive",
+  "guide/compare": "Compare",
+  "guide/scenarios": "Scenarios",
+  "guide/metrics": "Metrics",
+  "guide/environment": "Environment",
+  "guide/netlogo": "NetLogo",
 };
 
 /** Logical parents when slug path alone is not nested (Strombom family). */
 const NAV_PARENT_OVERRIDES = {
-  'guide/methods/strombom_multi': 'guide/methods/strombom_2014',
-  'guide/methods/strombom_noise': 'guide/methods/strombom_2014',
-  'guide/methods/v_formation': 'guide/methods/strombom_2014',
-  'guide/methods/heterogeneous': 'guide/methods/strombom_2014',
-  'guide/methods/obstacle_aware': 'guide/methods/strombom_2014',
+  "guide/methods/strombom_multi": "guide/methods/strombom_2014",
+  "guide/methods/strombom_noise": "guide/methods/strombom_2014",
+  "guide/methods/v_formation": "guide/methods/strombom_2014",
+  "guide/methods/heterogeneous": "guide/methods/strombom_2014",
+  "guide/methods/obstacle_aware": "guide/methods/strombom_2014",
 };
 
 function titleFromSlug(slug, remoteTitle) {
   if (LABEL_OVERRIDES[slug]) return LABEL_OVERRIDES[slug];
-  if (remoteTitle && remoteTitle !== slug.split('/').pop()) return remoteTitle;
+  if (remoteTitle && remoteTitle !== slug.split("/").pop()) return remoteTitle;
   return slug
-    .split('/')
+    .split("/")
     .pop()
-    .replace(/_/g, ' ')
+    .replace(/_/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 function resolveParentSlug(slug, bySlug) {
   const forced = NAV_PARENT_OVERRIDES[slug];
   if (forced && bySlug.has(forced)) return forced;
-  const parts = slug.split('/');
+  const parts = slug.split("/");
   for (let i = parts.length - 1; i >= 1; i -= 1) {
-    const candidate = parts.slice(0, i).join('/');
+    const candidate = parts.slice(0, i).join("/");
     if (bySlug.has(candidate)) return candidate;
   }
   return null;
@@ -86,33 +86,33 @@ function ensureMermaid() {
   if (mermaidReady) return;
   mermaid.initialize({
     startOnLoad: false,
-    securityLevel: 'antiscript',
+    securityLevel: "antiscript",
     htmlLabels: true,
-    theme: 'base',
+    theme: "base",
     themeVariables: {
-      primaryColor: '#cfe2f3',
-      primaryTextColor: '#000000',
-      primaryBorderColor: '#1565c0',
-      secondaryColor: '#b2dfdb',
-      secondaryTextColor: '#000000',
-      tertiaryColor: '#c8e6c9',
-      tertiaryTextColor: '#000000',
-      lineColor: '#94a3b8',
-      textColor: '#000000',
-      mainBkg: '#cfe2f3',
-      nodeBorder: '#1565c0',
-      clusterBkg: '#020617',
-      titleColor: '#000000',
-      edgeLabelBackground: '#e2e8f0',
-      background: '#020617',
+      primaryColor: "#cfe2f3",
+      primaryTextColor: "#000000",
+      primaryBorderColor: "#1565c0",
+      secondaryColor: "#b2dfdb",
+      secondaryTextColor: "#000000",
+      tertiaryColor: "#c8e6c9",
+      tertiaryTextColor: "#000000",
+      lineColor: "#94a3b8",
+      textColor: "#000000",
+      mainBkg: "#cfe2f3",
+      nodeBorder: "#1565c0",
+      clusterBkg: "#020617",
+      titleColor: "#000000",
+      edgeLabelBackground: "#e2e8f0",
+      background: "#020617",
     },
-    flowchart: { curve: 'basis' },
+    flowchart: { curve: "basis" },
   });
   mermaidReady = true;
 }
 
 function navItemClass(depth) {
-  if (!depth) return 'guide-nav-item';
+  if (!depth) return "guide-nav-item";
   return `guide-nav-item is-nested is-depth-${depth}`;
 }
 
@@ -144,7 +144,9 @@ function buildNavTree(items) {
 
 function itemMatchesQuery(item, q) {
   if (!q) return true;
-  return item.label.toLowerCase().includes(q) || item.slug.toLowerCase().includes(q);
+  return (
+    item.label.toLowerCase().includes(q) || item.slug.toLowerCase().includes(q)
+  );
 }
 
 function filterNavTree(nodes, q) {
@@ -165,7 +167,7 @@ function groupRootNodes(nodes) {
   const order = [];
   const byGroup = new Map();
   nodes.forEach((node) => {
-    const label = node.item.group || '';
+    const label = node.item.group || "";
     if (!byGroup.has(label)) {
       byGroup.set(label, []);
       order.push(label);
@@ -192,56 +194,66 @@ function isUnderFolder(activeSlug, folderSlug, items) {
 }
 
 function forceMermaidLabelColor(rootEl) {
-  rootEl.querySelectorAll('.guide-mermaid text, .guide-mermaid tspan').forEach((el) => {
-    el.setAttribute('fill', '#000000');
-    el.style.fill = '#000000';
-  });
-  rootEl.querySelectorAll('.guide-mermaid foreignObject, .guide-mermaid foreignObject *').forEach((el) => {
-    el.style.color = '#000000';
-  });
-  rootEl.querySelectorAll('.guide-mermaid svg').forEach((svg) => {
-    svg.style.background = 'transparent';
-    const backdrop = svg.querySelector(':scope > rect');
+  rootEl
+    .querySelectorAll(".guide-mermaid text, .guide-mermaid tspan")
+    .forEach((el) => {
+      el.setAttribute("fill", "#000000");
+      el.style.fill = "#000000";
+    });
+  rootEl
+    .querySelectorAll(
+      ".guide-mermaid foreignObject, .guide-mermaid foreignObject *",
+    )
+    .forEach((el) => {
+      el.style.color = "#000000";
+    });
+  rootEl.querySelectorAll(".guide-mermaid svg").forEach((svg) => {
+    svg.style.background = "transparent";
+    const backdrop = svg.querySelector(":scope > rect");
     if (backdrop) {
-      backdrop.setAttribute('fill', '#020617');
-      backdrop.style.fill = '#020617';
+      backdrop.setAttribute("fill", "#020617");
+      backdrop.style.fill = "#020617";
     }
   });
 }
 
 async function renderGuideMermaid(rootEl) {
-  const nodes = rootEl.querySelectorAll('.guide-mermaid pre.mermaid');
+  const nodes = rootEl.querySelectorAll(".guide-mermaid pre.mermaid");
   if (!nodes.length) return;
   ensureMermaid();
   try {
     await mermaid.run({ nodes });
     forceMermaidLabelColor(rootEl);
   } catch (err) {
-    log.error('guide', `Mermaid render failed: ${err.message}`, err);
+    log.error("guide", `Mermaid render failed: ${err.message}`, err);
   }
 }
 
 function bindGuideReadingAids(bodyEl) {
-  const tocLinks = bodyEl.querySelectorAll('[data-guide-anchor]');
-  const sections = bodyEl.querySelectorAll('[data-guide-section]');
+  const tocLinks = bodyEl.querySelectorAll("[data-guide-anchor]");
+  const sections = bodyEl.querySelectorAll("[data-guide-section]");
 
   tocLinks.forEach((link) => {
-    link.addEventListener('click', (ev) => {
+    link.addEventListener("click", (ev) => {
       ev.preventDefault();
-      const id = link.getAttribute('data-guide-anchor');
+      const id = link.getAttribute("data-guide-anchor");
       const target = id ? bodyEl.querySelector(`#${CSS.escape(id)}`) : null;
       if (!target) return;
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      tocLinks.forEach((el) => el.classList.toggle('is-active', el === link));
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+      tocLinks.forEach((el) => el.classList.toggle("is-active", el === link));
     });
   });
 
-  if (!sections.length || !tocLinks.length || typeof IntersectionObserver !== 'function') {
+  if (
+    !sections.length ||
+    !tocLinks.length ||
+    typeof IntersectionObserver !== "function"
+  ) {
     return;
   }
 
   const byId = new Map(
-    [...tocLinks].map((link) => [link.getAttribute('data-guide-anchor'), link]),
+    [...tocLinks].map((link) => [link.getAttribute("data-guide-anchor"), link]),
   );
   const observer = new IntersectionObserver(
     (entries) => {
@@ -249,20 +261,27 @@ function bindGuideReadingAids(bodyEl) {
         .filter((e) => e.isIntersecting)
         .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
       if (!visible.length) return;
-      const id = visible[0].target.getAttribute('data-guide-section');
+      const id = visible[0].target.getAttribute("data-guide-section");
       tocLinks.forEach((el) => {
-        el.classList.toggle('is-active', el.getAttribute('data-guide-anchor') === id);
+        el.classList.toggle(
+          "is-active",
+          el.getAttribute("data-guide-anchor") === id,
+        );
       });
     },
-    { root: bodyEl, rootMargin: '-12% 0px -55% 0px', threshold: [0.15, 0.35, 0.6] },
+    {
+      root: bodyEl,
+      rootMargin: "-12% 0px -55% 0px",
+      threshold: [0.15, 0.35, 0.6],
+    },
   );
   sections.forEach((sec) => observer.observe(sec));
   bodyEl._guideSectionObserver = observer;
 }
 
 export function createGuideView() {
-  const root = document.createElement('div');
-  root.className = 'guide-layout';
+  const root = document.createElement("div");
+  root.className = "guide-layout";
   root.innerHTML = `
     <aside class="guide-nav card-glass">
       <div class="panel-title">Guide</div>
@@ -284,13 +303,13 @@ export function createGuideView() {
     ...item,
     depth: 0,
   }));
-  let activeSlug = navItems[0]?.slug || 'overview';
+  let activeSlug = navItems[0]?.slug || "overview";
   /** Parent slugs the user has expanded; auto-open when the active page is inside. */
   const expandedFolders = new Set();
 
   function renderNavLink(item) {
     return `<button type="button" class="guide-nav-link${
-      item.slug === activeSlug ? ' active' : ''
+      item.slug === activeSlug ? " active" : ""
     }" data-slug="${item.slug}">${escapeHtml(item.label)}</button>`;
   }
 
@@ -304,12 +323,12 @@ export function createGuideView() {
         const open =
           expandedFolders.has(item.slug) ||
           isUnderFolder(activeSlug, item.slug, navItems) ||
-          Boolean(String(filterEl.value || '').trim());
+          Boolean(String(filterEl.value || "").trim());
         if (open) expandedFolders.add(item.slug);
         return `<li class="guide-nav-group ${navItemClass(item.depth)}">
-          <details class="guide-nav-folder" data-folder="${item.slug}"${open ? ' open' : ''}>
+          <details class="guide-nav-folder" data-folder="${item.slug}"${open ? " open" : ""}>
             <summary class="guide-nav-link guide-nav-folder-summary${
-              item.slug === activeSlug ? ' active' : ''
+              item.slug === activeSlug ? " active" : ""
             }" data-folder-summary="${item.slug}">${escapeHtml(item.label)}</summary>
             <ul class="guide-nav-list guide-nav-children">
               ${renderNavNodes(children)}
@@ -317,11 +336,13 @@ export function createGuideView() {
           </details>
         </li>`;
       })
-      .join('');
+      .join("");
   }
 
   function renderNav() {
-    const q = String(filterEl.value || '').trim().toLowerCase();
+    const q = String(filterEl.value || "")
+      .trim()
+      .toLowerCase();
     const tree = filterNavTree(buildNavTree(navItems), q);
     const sections = groupRootNodes(tree);
     const html = sections
@@ -330,29 +351,37 @@ export function createGuideView() {
           ? `<li class="guide-nav-section" aria-hidden="true">
               <span class="guide-nav-section-label">${escapeHtml(section.label)}</span>
             </li>`
-          : '';
+          : "";
         return `${heading}${renderNavNodes(section.nodes)}`;
       })
-      .join('');
+      .join("");
     navEl.innerHTML = `<ul class="guide-nav-list">${html}</ul>`;
   }
 
   function markNavActive(slug) {
-    navEl.querySelectorAll('.guide-nav-link.active, .guide-nav-folder-summary.active').forEach((el) => {
-      el.classList.remove('active');
-    });
+    navEl
+      .querySelectorAll(
+        ".guide-nav-link.active, .guide-nav-folder-summary.active",
+      )
+      .forEach((el) => {
+        el.classList.remove("active");
+      });
     const leaf = navEl.querySelector(`button[data-slug="${slug}"]`);
     if (leaf) {
-      leaf.classList.add('active');
+      leaf.classList.add("active");
       return;
     }
     const folder = navEl.querySelector(`[data-folder="${slug}"]`);
-    folder?.querySelector(':scope > .guide-nav-folder-summary')?.classList.add('active');
+    folder
+      ?.querySelector(":scope > .guide-nav-folder-summary")
+      ?.classList.add("active");
   }
 
   async function showSlug(slug, { syncNav = true } = {}) {
     activeSlug = slug;
-    ancestorsOf(slug, navItems).forEach((parent) => expandedFolders.add(parent));
+    ancestorsOf(slug, navItems).forEach((parent) =>
+      expandedFolders.add(parent),
+    );
     if (syncNav) renderNav();
     else markNavActive(slug);
     bodyEl.innerHTML = '<p class="text-muted">Loading this page...</p>';
@@ -367,20 +396,20 @@ export function createGuideView() {
       bindGuideReadingAids(bodyEl);
       bodyEl.scrollTop = 0;
     } catch (err) {
-      log.error('guide', err.message, err);
+      log.error("guide", err.message, err);
       bodyEl.innerHTML = `<p class="text-muted">Could not open ${escapeHtml(slug)}. ${escapeHtml(err.message)}</p>`;
     }
   }
 
-  navEl.addEventListener('click', (ev) => {
-    const leaf = ev.target.closest('button[data-slug]');
+  navEl.addEventListener("click", (ev) => {
+    const leaf = ev.target.closest("button[data-slug]");
     if (leaf) {
       showSlug(leaf.dataset.slug);
       return;
     }
-    const summary = ev.target.closest('[data-folder-summary]');
+    const summary = ev.target.closest("[data-folder-summary]");
     if (!summary) return;
-    const folder = summary.closest('[data-folder]');
+    const folder = summary.closest("[data-folder]");
     if (!folder) return;
     const slug = folder.dataset.folder;
     // Parent rows are both folders and pages. If already open on a child,
@@ -392,15 +421,15 @@ export function createGuideView() {
     void showSlug(slug, { syncNav: false });
   });
 
-  navEl.addEventListener('toggle', (ev) => {
+  navEl.addEventListener("toggle", (ev) => {
     const folder = ev.target;
-    if (!folder?.matches?.('[data-folder]')) return;
+    if (!folder?.matches?.("[data-folder]")) return;
     const slug = folder.dataset.folder;
     if (folder.open) expandedFolders.add(slug);
     else expandedFolders.delete(slug);
   });
 
-  filterEl.addEventListener('input', renderNav);
+  filterEl.addEventListener("input", renderNav);
 
   return {
     root,
@@ -412,7 +441,7 @@ export function createGuideView() {
           navItems = docs.map((d) => ({
             slug: d.slug,
             label: titleFromSlug(d.slug, d.title),
-            group: d.group || '',
+            group: d.group || "",
           }));
         }
       } catch {

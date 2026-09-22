@@ -89,9 +89,7 @@ def build_experiment_block(
     first = rows[0] if rows else {}
     methods = req.get("methods")
     if not methods:
-        methods = sorted(
-            {r.get("method") for r in rows if r.get("method")}
-        )
+        methods = sorted({r.get("method") for r in rows if r.get("method")})
     seeds = req.get("seeds")
     if not seeds:
         seeds = sorted({int(r["seed"]) for r in rows if "seed" in r})
@@ -176,9 +174,7 @@ def _fmt(value: Any, digits: int = 2) -> str:
         return "n/a"
 
 
-def report_to_markdown(
-    payload: dict[str, Any], *, request: dict[str, Any] | None = None
-) -> str:
+def report_to_markdown(payload: dict[str, Any], *, request: dict[str, Any] | None = None) -> str:
     """Short methods/results note for appendices; same facts as JSON/CSV."""
     package = build_report_package(payload, request=request)
     exp = package["experiment"]

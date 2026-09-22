@@ -1,23 +1,28 @@
-import { createArenaSide } from './ArenaSide.js';
-import { arenaFairBarHtml } from './arenaMarkup.js';
-import { formatMetricDelta } from './arenaDeltas.js';
-import { ARENA_DELTA_METRIC_IDS } from '../../shared/charts/metricFormat.js';
-import { fetchMetrics } from '../../shared/api/rest.js';
-import { log, sleep } from '../../shared/ui/logger.js';
-import { mountTips, setInfoTip } from '../../shared/ui/tooltips.js';
-import { scenarioBlurb } from '../../shared/ui/params.js';
-import { applyArenaPlayback } from '../../shared/sim/playback.js';
-import { setStatusMessage } from '../../shared/ui/dom.js';
-import { clearLeaveBlock, setLeaveBlock } from '../../shared/sim/leaveGuard.js';
+import { createArenaSide } from "./ArenaSide.js";
+import { arenaFairBarHtml } from "./arenaMarkup.js";
+import { formatMetricDelta } from "./arenaDeltas.js";
+import { ARENA_DELTA_METRIC_IDS } from "../../shared/charts/metricFormat.js";
+import { fetchMetrics } from "../../shared/api/rest.js";
+import { log, sleep } from "../../shared/ui/logger.js";
+import { mountTips, setInfoTip } from "../../shared/ui/tooltips.js";
+import { scenarioBlurb } from "../../shared/ui/params.js";
+import { applyArenaPlayback } from "../../shared/sim/playback.js";
+import { setStatusMessage } from "../../shared/ui/dom.js";
+import { clearLeaveBlock, setLeaveBlock } from "../../shared/sim/leaveGuard.js";
 
-const LEAVE_SOURCE = 'compare';
+const LEAVE_SOURCE = "compare";
 
-export function createArenaView({ methods, scenarios, models = null, onStatus }) {
-  const root = document.createElement('div');
-  root.className = 'arena-layout';
+export function createArenaView({
+  methods,
+  scenarios,
+  models = null,
+  onStatus,
+}) {
+  const root = document.createElement("div");
+  root.className = "arena-layout";
 
   /** @type {'fair'|'independent'} */
-  let compareMode = 'fair';
+  let compareMode = "fair";
   let left;
   let right;
   let btnInit;
@@ -48,25 +53,28 @@ export function createArenaView({ methods, scenarios, models = null, onStatus })
         reset: btnReset,
       },
     });
-    const fair = compareMode === 'fair';
-    modeFairBtn?.classList.toggle('active', fair);
-    modeIndepBtn?.classList.toggle('active', !fair);
-    modeFairBtn?.setAttribute('aria-pressed', fair ? 'true' : 'false');
-    modeIndepBtn?.setAttribute('aria-pressed', fair ? 'false' : 'true');
-    fairControls?.classList.toggle('is-disabled', !fair);
+    const fair = compareMode === "fair";
+    modeFairBtn?.classList.toggle("active", fair);
+    modeIndepBtn?.classList.toggle("active", !fair);
+    modeFairBtn?.setAttribute("aria-pressed", fair ? "true" : "false");
+    modeIndepBtn?.setAttribute("aria-pressed", fair ? "false" : "true");
+    fairControls?.classList.toggle("is-disabled", !fair);
     if (modeHint) {
       modeHint.textContent = fair
-        ? 'Shared scenario, seed, sheep, and dogs. Each side only picks its method.'
-        : 'Each side uses its own setup. Initialize and play A and B separately.';
+        ? "Shared scenario, seed, sheep, and dogs. Each side only picks its method."
+        : "Each side uses its own setup. Initialize and play A and B separately.";
     }
     const leftStatus = left?.getRunStatus?.();
     const rightStatus = right?.getRunStatus?.();
     if (anyBusy()) {
-      setLeaveBlock(LEAVE_SOURCE, 'A comparison session is still starting. Leave and cancel it, or stay?');
-    } else if (leftStatus === 'running' || rightStatus === 'running') {
       setLeaveBlock(
         LEAVE_SOURCE,
-        'A comparison run is playing. Leave and lose this live run, or stay?',
+        "A comparison session is still starting. Leave and cancel it, or stay?",
+      );
+    } else if (leftStatus === "running" || rightStatus === "running") {
+      setLeaveBlock(
+        LEAVE_SOURCE,
+        "A comparison run is playing. Leave and lose this live run, or stay?",
       );
     } else {
       clearLeaveBlock(LEAVE_SOURCE);
@@ -75,7 +83,7 @@ export function createArenaView({ methods, scenarios, models = null, onStatus })
 
   function setCompareMode(next) {
     compareMode = next;
-    if (next !== 'fair') {
+    if (next !== "fair") {
       left?.controls.setFairSheepOverride(null);
       right?.controls.setFairSheepOverride(null);
     }
@@ -84,8 +92,8 @@ export function createArenaView({ methods, scenarios, models = null, onStatus })
 
   function setArenaStatus(message, { error = false } = {}) {
     setStatusMessage(statusEl, message, { error });
-    if (error) log.error('arena', message);
-    else log.info('arena', message);
+    if (error) log.error("arena", message);
+    else log.info("arena", message);
   }
 
   const sideOpts = {
@@ -93,27 +101,29 @@ export function createArenaView({ methods, scenarios, models = null, onStatus })
     onStatus,
     onPhaseHint: syncControls,
     onIndependentInit: (sideLabel) => {
-      setCompareMode('independent');
+      setCompareMode("independent");
       setArenaStatus(
         `Independent mode (${sideLabel}): Play this side with its own settings. Initialize the other side separately if needed.`,
       );
     },
     onSideError: (sideLabel, err) => {
-      setArenaStatus(`${sideLabel} init failed: ${err.message || err}`, { error: true });
+      setArenaStatus(`${sideLabel} init failed: ${err.message || err}`, {
+        error: true,
+      });
     },
   };
 
-  left = createArenaSide('A', methods, scenarios, methods[0]?.id, sideOpts);
+  left = createArenaSide("A", methods, scenarios, methods[0]?.id, sideOpts);
   right = createArenaSide(
-    'B',
+    "B",
     methods,
     scenarios,
     methods[1]?.id || methods[0]?.id,
     sideOpts,
   );
 
-  const shared = document.createElement('div');
-  shared.className = 'card-glass arena-fair-bar';
+  const shared = document.createElement("div");
+  shared.className = "card-glass arena-fair-bar";
   shared.innerHTML = arenaFairBarHtml();
 
   statusEl = shared.querySelector('[data-role="arena-status"]');
@@ -130,12 +140,12 @@ export function createArenaView({ methods, scenarios, models = null, onStatus })
   const scenLabel = shared.querySelector('[data-role="shared-scenario-label"]');
   scenSelect.innerHTML = scenarios
     .map((s) => `<option value="${s.id}">${s.name}</option>`)
-    .join('');
+    .join("");
   function syncSharedScenarioBlurb() {
     const scen = scenarios.find((s) => s.id === scenSelect.value);
     setInfoTip(scenLabel, scenarioBlurb(scen));
   }
-  scenSelect.addEventListener('change', syncSharedScenarioBlurb);
+  scenSelect.addEventListener("change", syncSharedScenarioBlurb);
   syncSharedScenarioBlurb();
 
   const sheepInput = shared.querySelector('[data-role="shared-sheep"]');
@@ -146,7 +156,7 @@ export function createArenaView({ methods, scenarios, models = null, onStatus })
   function syncFairSharedCounts() {
     sheepLabel.textContent = `Shared Sheep (${sheepInput.value})`;
     dogsLabel.textContent = `Shared Dogs (${dogsInput.value})`;
-    if (compareMode === 'fair') {
+    if (compareMode === "fair") {
       const nSheep = Number(sheepInput.value);
       const nDogs = Number(dogsInput.value);
       left.controls.setFairSheepOverride(nSheep);
@@ -156,8 +166,8 @@ export function createArenaView({ methods, scenarios, models = null, onStatus })
     }
   }
 
-  sheepInput.addEventListener('input', syncFairSharedCounts);
-  dogsInput.addEventListener('input', syncFairSharedCounts);
+  sheepInput.addEventListener("input", syncFairSharedCounts);
+  dogsInput.addEventListener("input", syncFairSharedCounts);
   syncFairSharedCounts();
 
   function sharedConfig() {
@@ -166,7 +176,7 @@ export function createArenaView({ methods, scenarios, models = null, onStatus })
       seed: Number(shared.querySelector('[data-role="shared-seed"]').value),
       num_sheep: Number(sheepInput.value),
       num_shepherds: Number(dogsInput.value),
-      preset: 'paper',
+      preset: "paper",
     };
   }
 
@@ -195,16 +205,22 @@ export function createArenaView({ methods, scenarios, models = null, onStatus })
 
   async function initBoth() {
     if (anyBusy() || btnInit.disabled) return false;
-    setCompareMode('fair');
-    setArenaStatus('Fair compare: initializing A and B (shared settings, do not run yet)...');
+    setCompareMode("fair");
+    setArenaStatus(
+      "Fair compare: initializing A and B (shared settings, do not run yet)...",
+    );
     const cfg = sharedConfig();
     try {
       await Promise.all([left.initFromShared(cfg), right.initFromShared(cfg)]);
       refreshDeltas();
-      setArenaStatus('Fair compare ready. Agents placed — click Play Both to start.');
+      setArenaStatus(
+        "Fair compare ready. Agents placed — click Play Both to start.",
+      );
       return true;
     } catch (err) {
-      setArenaStatus(`Init Both failed: ${err.message || err}`, { error: true });
+      setArenaStatus(`Init Both failed: ${err.message || err}`, {
+        error: true,
+      });
       return false;
     } finally {
       syncControls();
@@ -212,59 +228,66 @@ export function createArenaView({ methods, scenarios, models = null, onStatus })
   }
 
   function playBoth() {
-    if (compareMode !== 'fair' || btnPlay.disabled) return;
+    if (compareMode !== "fair" || btnPlay.disabled) return;
     const a = left.play();
     const b = right.play();
-    if (a && b) setArenaStatus('Fair compare: playing both sides.');
-    else setArenaStatus('Play Both failed — check the browser console.', { error: true });
+    if (a && b) setArenaStatus("Fair compare: playing both sides.");
+    else
+      setArenaStatus("Play Both failed — check the browser console.", {
+        error: true,
+      });
     syncControls();
   }
 
   function pauseBoth() {
-    if (compareMode !== 'fair' || btnPause.disabled) return;
+    if (compareMode !== "fair" || btnPause.disabled) return;
     left.pause();
     right.pause();
-    setArenaStatus('Fair compare: paused both sides.');
+    setArenaStatus("Fair compare: paused both sides.");
     syncControls();
   }
 
   function resetBoth() {
-    if (compareMode !== 'fair' || btnReset.disabled) return;
+    if (compareMode !== "fair" || btnReset.disabled) return;
     left.reset();
     right.reset();
-    setArenaStatus('Fair compare: reset to start. Click Play Both to run again.');
+    setArenaStatus(
+      "Fair compare: reset to start. Click Play Both to run again.",
+    );
     syncControls();
   }
 
-  modeFairBtn.addEventListener('click', () => {
-    setCompareMode('fair');
-    setArenaStatus('Fair compare selected. Set shared settings, then Init Both.');
+  modeFairBtn.addEventListener("click", () => {
+    setCompareMode("fair");
+    setArenaStatus(
+      "Fair compare selected. Set shared settings, then Init Both.",
+    );
   });
-  modeIndepBtn.addEventListener('click', () => {
-    setCompareMode('independent');
-    setArenaStatus('Independent mode: initialize each side separately.');
+  modeIndepBtn.addEventListener("click", () => {
+    setCompareMode("independent");
+    setArenaStatus("Independent mode: initialize each side separately.");
   });
 
-  btnInit.addEventListener('click', () => {
+  btnInit.addEventListener("click", () => {
     initBoth();
   });
-  btnPlay.addEventListener('click', () => {
+  btnPlay.addEventListener("click", () => {
     playBoth();
   });
-  btnPause.addEventListener('click', () => {
+  btnPause.addEventListener("click", () => {
     pauseBoth();
   });
-  btnReset.addEventListener('click', () => {
+  btnReset.addEventListener("click", () => {
     resetBoth();
   });
 
-  const leftCol = document.createElement('div');
-  leftCol.className = 'arena-side-col';
+  const leftCol = document.createElement("div");
+  leftCol.className = "arena-side-col";
   leftCol.appendChild(left.controls.root);
   leftCol.appendChild(left.metrics.root);
 
-  const rightCol = document.createElement('div');
-  rightCol.className = 'arena-side-col';
+  const rightCol = document.createElement("div");
+  rightCol.className = "arena-side-col";
   rightCol.appendChild(right.controls.root);
   rightCol.appendChild(right.metrics.root);
 
@@ -275,10 +298,10 @@ export function createArenaView({ methods, scenarios, models = null, onStatus })
   root.appendChild(rightCol);
 
   mountTips(shared);
-  setCompareMode('fair');
+  setCompareMode("fair");
 
   async function mount() {
-    log.info('arena', 'Mounting Arena view');
+    log.info("arena", "Mounting Arena view");
     await new Promise((resolve) => requestAnimationFrame(() => resolve()));
     try {
       try {
@@ -286,20 +309,22 @@ export function createArenaView({ methods, scenarios, models = null, onStatus })
         left.metrics.setDefinitions(defs);
         right.metrics.setDefinitions(defs);
       } catch (err) {
-        log.warn('arena', `Could not load metric definitions: ${err.message}`);
+        log.warn("arena", `Could not load metric definitions: ${err.message}`);
       }
       await left.mount();
       await sleep(0);
       await right.mount();
-      log.info('arena', 'Arena mount complete');
+      log.info("arena", "Arena mount complete");
       syncControls();
     } catch (err) {
-      log.error('arena', err.message || String(err), err);
+      log.error("arena", err.message || String(err), err);
       root.insertAdjacentHTML(
-        'afterbegin',
+        "afterbegin",
         `<div class="card-glass canvas-error">Arena failed to load: ${err.message || err}</div>`,
       );
-      setArenaStatus(`Arena failed to load: ${err.message || err}`, { error: true });
+      setArenaStatus(`Arena failed to load: ${err.message || err}`, {
+        error: true,
+      });
       syncControls();
     }
   }
@@ -313,17 +338,17 @@ export function createArenaView({ methods, scenarios, models = null, onStatus })
 
   function onHide() {
     const running =
-      left.getRunStatus() === 'running' || right.getRunStatus() === 'running';
+      left.getRunStatus() === "running" || right.getRunStatus() === "running";
     if (running) {
       left.pause();
       right.pause();
       setArenaStatus(
-        compareMode === 'fair'
-          ? 'Paused (switched tabs). Click Play Both to continue.'
-          : 'Paused (switched tabs). Use each side Play to continue.',
+        compareMode === "fair"
+          ? "Paused (switched tabs). Click Play Both to continue."
+          : "Paused (switched tabs). Use each side Play to continue.",
       );
       syncControls();
-      onStatus?.({ status: 'paused' });
+      onStatus?.({ status: "paused" });
     }
     stopDeltas();
   }

@@ -1,10 +1,10 @@
-import { presetSelectHtml } from '../../shared/ui/params.js';
-import { STUDY_TEMPLATES } from '../../shared/factors/factors.js';
+import { presetSelectHtml } from "../../shared/ui/params.js";
+import { STUDY_TEMPLATES } from "../../shared/factors/factors.js";
 
 export function analyticsRunnerHtml() {
   const studyOptions = STUDY_TEMPLATES.map(
     (t) => `<option value="${t.id}">${t.label}</option>`,
-  ).join('');
+  ).join("");
   return `
     <div class="section-title">Experiment design</div>
     <p class="analytics-intro">
@@ -131,54 +131,54 @@ function chartBlock(title, blurb, role) {
 export function analyticsChartsHtml() {
   return `
     ${chartBlock(
-      'Herdability heatmap',
-      'When a factor grid has two (or more) swept keys, success rate is shown as a matrix over the first two factors. Empty cells mean no trials for that combination.',
-      'chart-heatmap',
+      "Herdability heatmap",
+      "When a factor grid has two (or more) swept keys, success rate is shown as a matrix over the first two factors. Empty cells mean no trials for that combination.",
+      "chart-heatmap",
     )}
     ${chartBlock(
-      'Convergence Time',
-      'Successful trials only in the box: simulation ticks to finish. Red X marks failed (timeout) trials at their final tick count. Lower and tighter is usually better.',
-      'chart-ticks',
+      "Convergence Time",
+      "Successful trials only in the box: simulation ticks to finish. Red X marks failed (timeout) trials at their final tick count. Lower and tighter is usually better.",
+      "chart-ticks",
     )}
     ${chartBlock(
-      'Shepherd Path',
-      'Cumulative dog travel distance at end of run (world units). Lower usually means less effort for the same outcome. Red X = failed trials.',
-      'chart-path',
+      "Shepherd Path",
+      "Cumulative dog travel distance at end of run (world units). Lower usually means less effort for the same outcome. Red X = failed trials.",
+      "chart-path",
     )}
     ${chartBlock(
-      'AUC Cohesion',
-      'Mean sheep distance to the flock centroid averaged over the full trial trajectory. Lower is a tighter flock over time. Red X = failed trials.',
-      'chart-cohesion',
+      "AUC Cohesion",
+      "Mean sheep distance to the flock centroid averaged over the full trial trajectory. Lower is a tighter flock over time. Red X = failed trials.",
+      "chart-cohesion",
     )}
     ${chartBlock(
-      'AUC Polarization',
-      'Mean heading alignment of the flock over the trial (0-1). Higher means sheep moved more coherently in direction. Red X = failed trials.',
-      'chart-polarization',
+      "AUC Polarization",
+      "Mean heading alignment of the flock over the trial (0-1). Higher means sheep moved more coherently in direction. Red X = failed trials.",
+      "chart-polarization",
     )}
     ${chartBlock(
-      'AUC Fragmentation',
-      'Mean largest connected-component fraction over ticks (measurement_radius). Closer to 1.0 means the flock stayed connected. Red X = failed trials.',
-      'chart-fragmentation',
+      "AUC Fragmentation",
+      "Mean largest connected-component fraction over ticks (measurement_radius). Closer to 1.0 means the flock stayed connected. Red X = failed trials.",
+      "chart-fragmentation",
     )}
     ${chartBlock(
-      'Final Min Separation',
-      'Closest pair of sheep at the end of each trial (world units). Very low values can mean crowding. Red X = failed trials.',
-      'chart-min-sep',
+      "Final Min Separation",
+      "Closest pair of sheep at the end of each trial (world units). Very low values can mean crowding. Red X = failed trials.",
+      "chart-min-sep",
     )}
     ${chartBlock(
-      'Final GCM to Goal',
-      'Distance from flock centroid to goal centre at the end of each trial (world units). Lower means the flock ended closer to the goal. Red X = failed trials.',
-      'chart-gcm-goal',
+      "Final GCM to Goal",
+      "Distance from flock centroid to goal centre at the end of each trial (world units). Lower means the flock ended closer to the goal. Red X = failed trials.",
+      "chart-gcm-goal",
     )}
     ${chartBlock(
-      'Control Efficiency',
-      'Goal progress per unit shepherd travel: (gcm_start - gcm_end) / path. Higher means more progress for less dog movement. Red X = failed trials.',
-      'chart-ctrl-eff',
+      "Control Efficiency",
+      "Goal progress per unit shepherd travel: (gcm_start - gcm_end) / path. Higher means more progress for less dog movement. Red X = failed trials.",
+      "chart-ctrl-eff",
     )}
     ${chartBlock(
-      'Path vs Convergence',
-      'Each point is one seed. Circles are successes; X are failures. Compare whether faster methods also walk less, or trade time for path length.',
-      'chart-scatter',
+      "Path vs Convergence",
+      "Each point is one seed. Circles are successes; X are failures. Compare whether faster methods also walk less, or trade time for path length.",
+      "chart-scatter",
     )}
   `;
 }

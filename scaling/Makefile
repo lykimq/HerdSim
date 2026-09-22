@@ -60,10 +60,10 @@ help scaling-help:
 	@echo ""
 	@echo "  scaling-pilot         Small smoke grid (~150 trials)."
 	@echo "                       Output: scaling/results/phase1/pilot/"
-	@echo "  scaling-scout         Denser Phase-1 map (~1440 trials)."
+	@echo "  scaling-scout         Full Phase-1 map (10 N x 10 D x 30 seeds)."
 	@echo "                       Output: scaling/results/phase1/scout/"
-	@echo "  scaling-claim-plan    Boundary cells from scout (no new trials)."
-	@echo "  scaling-claim-reseed  Claim-grade 100-seed reseed on boundaries."
+	@echo "  scaling-claim-plan    Claim windows from scout (no new trials)."
+	@echo "  scaling-claim-reseed  100-seed reseed on those windows."
 	@echo "                       Output: scaling/results/phase1/claim/"
 	@echo "  scaling-pilot-state   Four X0 layouts (~600 trials)."
 	@echo "                       Output: scaling/results/phase2/pilot_state/"
@@ -132,8 +132,8 @@ scaling-claim-plan:
 		--plan-only
 
 scaling-claim-reseed:
-	@echo "NOTE: claim reseed runs 100 seeds on scout boundary cells only."
-	@echo "Output: $(CLAIM_OUT)  scout=$(SCOUT_TRIALS)"
+	@echo "NOTE: claim reseed runs 100 seeds on scout claim windows."
+	@echo "Analysis uses merged_trials.csv (claim rows replace scout rows)."
 	@mkdir -p $(CLAIM_OUT)
 	cd $(ROOT) && $(UV) run scaling/scripts/plan_claim_cells.py \
 		--scout-trials $(CURDIR)/$(SCOUT_TRIALS) \
@@ -141,7 +141,7 @@ scaling-claim-reseed:
 		--output $(CURDIR)/$(CLAIM_OUT) \
 		--workers $(WORKERS)
 	$(MAKE) scaling-analyse \
-		PACKAGE=A TRIALS=$(CLAIM_OUT)/trials.csv OUT=$(CLAIM_OUT)/packages/a
+		PACKAGE=A TRIALS=$(CLAIM_OUT)/merged_trials.csv OUT=$(CLAIM_OUT)/packages/a
 
 scaling-factor-sweep:
 	@mkdir -p $(SWEEP_OUT)

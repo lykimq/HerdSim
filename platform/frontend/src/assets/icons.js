@@ -7,8 +7,8 @@
  * Attribution: Icons made by Delapouite, Lorc & contributors. Available on https://game-icons.net
  */
 
-import gameIconSet from './game-icons-subset.json';
-import { getIconData, iconToSVG } from '@iconify/utils';
+import gameIconSet from "./game-icons-subset.json";
+import { getIconData, iconToSVG } from "@iconify/utils";
 import {
   Play,
   Pause,
@@ -30,27 +30,27 @@ import {
   ZoomIn,
   ZoomOut,
   Grid3x3,
-} from 'lucide';
+} from "lucide";
 
 export const ICON_COLORS = {
-  sheep: '#FFFFFF',
-  dog: '#FBBF24',
-  shepherd: '#76A04D',
-  goal: '#D13438',
-  pen: '#8E644B',
-  waypoint: '#54B948',
-  ui: 'currentColor',
+  sheep: "#FFFFFF",
+  dog: "#FBBF24",
+  shepherd: "#76A04D",
+  goal: "#D13438",
+  pen: "#8E644B",
+  waypoint: "#54B948",
+  ui: "currentColor",
 };
 
 const GAME_ICON_NAMES = {
-  sheep: 'sheep',
-  dog: 'sitting-dog',
-  dogStanding: 'jumping-dog',
-  shepherd: 'farmer',
-  goal: 'archery-target',
-  pen: 'wooden-fence',
-  gate: 'stakes-fence',
-  waypoint: 'golf-flag',
+  sheep: "sheep",
+  dog: "sitting-dog",
+  dogStanding: "jumping-dog",
+  shepherd: "farmer",
+  goal: "archery-target",
+  pen: "wooden-fence",
+  gate: "stakes-fence",
+  waypoint: "golf-flag",
 };
 
 const LUCIDE_NODES = {
@@ -79,12 +79,12 @@ const LUCIDE_NODES = {
 
 function attrsToString(attrs) {
   return Object.entries(attrs)
-    .map(([key, value]) => `${key}="${String(value).replace(/"/g, '&quot;')}"`)
-    .join(' ');
+    .map(([key, value]) => `${key}="${String(value).replace(/"/g, "&quot;")}"`)
+    .join(" ");
 }
 
 /** Build a data-URL SVG from a Game Icons glyph. */
-export function gameIconDataUrl(name, color = '#ffffff', size = 128) {
+export function gameIconDataUrl(name, color = "#ffffff", size = 128) {
   const data = getIconData(gameIconSet, name);
   if (!data) {
     throw new Error(`Unknown game-icons glyph: ${name}`);
@@ -95,10 +95,10 @@ export function gameIconDataUrl(name, color = '#ffffff', size = 128) {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }
 
-function lucideToSvg(iconNode, className = 'icon', size = 18) {
+function lucideToSvg(iconNode, className = "icon", size = 18) {
   const children = iconNode
     .map(([tag, attrs]) => `<${tag} ${attrsToString(attrs)} />`)
-    .join('');
+    .join("");
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${className}" aria-hidden="true">${children}</svg>`;
 }
 
@@ -106,43 +106,51 @@ function lucideToSvg(iconNode, className = 'icon', size = 18) {
 export const icons = {
   sheep: gameIconDataUrl(GAME_ICON_NAMES.sheep, ICON_COLORS.sheep, 128),
   dog: gameIconDataUrl(GAME_ICON_NAMES.dog, ICON_COLORS.dog, 128),
-  shepherd: gameIconDataUrl(GAME_ICON_NAMES.shepherd, ICON_COLORS.shepherd, 128),
+  shepherd: gameIconDataUrl(
+    GAME_ICON_NAMES.shepherd,
+    ICON_COLORS.shepherd,
+    128,
+  ),
   goal: gameIconDataUrl(GAME_ICON_NAMES.goal, ICON_COLORS.goal, 128),
   pen: gameIconDataUrl(GAME_ICON_NAMES.pen, ICON_COLORS.pen, 128),
   gate: gameIconDataUrl(GAME_ICON_NAMES.gate, ICON_COLORS.pen, 128),
-  waypoint: gameIconDataUrl(GAME_ICON_NAMES.waypoint, ICON_COLORS.waypoint, 128),
+  waypoint: gameIconDataUrl(
+    GAME_ICON_NAMES.waypoint,
+    ICON_COLORS.waypoint,
+    128,
+  ),
 };
 
 /** Resolve which Game Icon key to use for a herding agent. */
 export function herderIconName(herderKind) {
-  return herderKind === 'human' ? 'shepherd' : 'dog';
+  return herderKind === "human" ? "shepherd" : "dog";
 }
 
 /**
  * Inline icon HTML for buttons/labels.
  * Animals/objects use Game Icons; playback/UI use Lucide.
  */
-export function iconImg(name, className = 'icon') {
+export function iconImg(name, className = "icon") {
   if (GAME_ICON_NAMES[name]) {
     const color =
-      name === 'sheep'
+      name === "sheep"
         ? ICON_COLORS.sheep
-        : name === 'dog' || name === 'dogStanding'
+        : name === "dog" || name === "dogStanding"
           ? ICON_COLORS.dog
-          : name === 'shepherd'
+          : name === "shepherd"
             ? ICON_COLORS.shepherd
-            : name === 'goal'
+            : name === "goal"
               ? ICON_COLORS.goal
-              : name === 'waypoint'
+              : name === "waypoint"
                 ? ICON_COLORS.waypoint
                 : ICON_COLORS.pen;
     const src = gameIconDataUrl(GAME_ICON_NAMES[name], color, 64);
     return `<img class="${className}" src="${src}" alt="" aria-hidden="true" />`;
   }
   const node = LUCIDE_NODES[name];
-  if (!node) return '';
+  if (!node) return "";
   return lucideToSvg(node, className);
 }
 
 export const GAME_ICONS_ATTRIBUTION =
-  'Simulation icons by Delapouite, Lorc & contributors (game-icons.net), CC BY 3.0.';
+  "Simulation icons by Delapouite, Lorc & contributors (game-icons.net), CC BY 3.0.";

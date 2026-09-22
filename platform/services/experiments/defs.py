@@ -68,7 +68,10 @@ SUMMARY_METRIC_DEFS: list[dict[str, str]] = [
 
 # Per-trial columns written by Export CSV.
 CSV_COLUMN_DEFS: list[dict[str, str]] = [
-    {"id": "sweep_label", "description": "Param-grid label when Analytics ran a sweep (empty otherwise)."},
+    {
+        "id": "sweep_label",
+        "description": "Param-grid label when Analytics ran a sweep (empty otherwise).",
+    },
     {"id": "method", "description": "Method id for this trial."},
     {"id": "scenario", "description": "Scenario id used for this trial."},
     {"id": "preset", "description": "Config preset: paper, scenario, or custom."},
@@ -155,11 +158,17 @@ CSV_COLUMN_DEFS: list[dict[str, str]] = [
     },
     {"id": "min_fragmentation", "description": "Minimum fragmentation over ticks."},
     {"id": "max_fragmentation", "description": "Maximum fragmentation over ticks."},
-    {"id": "auc_fragmentation", "description": "Trajectory AUC of fragmentation (mean over ticks)."},
+    {
+        "id": "auc_fragmentation",
+        "description": "Trajectory AUC of fragmentation (mean over ticks).",
+    },
     {"id": "mean_outlier_count", "description": "Mean outlier_count over ticks."},
     {"id": "min_outlier_count", "description": "Minimum outlier_count over ticks."},
     {"id": "max_outlier_count", "description": "Maximum outlier_count over ticks."},
-    {"id": "auc_outlier_count", "description": "Trajectory AUC of outlier_count (mean over ticks)."},
+    {
+        "id": "auc_outlier_count",
+        "description": "Trajectory AUC of outlier_count (mean over ticks).",
+    },
 ]
 
 

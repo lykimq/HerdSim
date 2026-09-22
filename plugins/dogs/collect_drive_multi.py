@@ -13,12 +13,60 @@ from methods.strombom.heuristics import (
     drive_offset,
     shepherd_step_toward,
 )
-from plugins.dogs.helpers import apply_dog_speeds, empty_dog_velocities, view_from_observation
+from plugins.dogs.helpers import apply_dog_speeds, empty_dog_velocities
 from core.agents.goal import resolve_goal_center
 from core.agents.shepherd import position_behind_target
 from core.dog_controller import BaseDogController
 from core.observation import ShepherdObservation
 from core.simulation_state import SimulationState
+
+
+def _sensing_radius(config: dict[str, Any]) -> float:
+    if config.get("sensing_range") is not None:
+        return float(config["sensing_range"])
+    return float(config.get("r_s", 65.0))
+
+
+def _sheep_for_dog(
+    dog_index: int,
+    observations: list[ShepherdObservation],
+    state: SimulationState,
+    config: dict[str, Any],
+) -> np.ndarray:
+    """Sheep positions this dog may use under the communication rule.
+
+    none: this dog's observation only.
+    neighbour_broadcast: own observation plus dogs inside the sensing radius.
+    global_shared: union of sheep the dogs actually sensed, not true positions.
+    """
+    by_idx = {int(o.shepherd_index): o for o in observations}
+    own = by_idx.get(dog_index)
+    comm = str(config.get("communication", "none"))
+
+    def _stack(obs_list: list[ShepherdObservation]) -> np.ndarray:
+        parts = [o.sheep_positions for o in obs_list if o.n_sheep_seen]
+        if not parts:
+            return np.zeros((0, 2))
+        return np.vstack(parts)
+
+    if comm == "global_shared":
+        return _stack(list(observations))
+    if comm == "neighbour_broadcast":
+        if own is None:
+            selected: list[ShepherdObservation] = []
+        else:
+            selected = [own]
+        origin = state.shepherd_positions[dog_index]
+        radius = _sensing_radius(config)
+        for obs in observations:
+            if int(obs.shepherd_index) == dog_index:
+                continue
+            if float(np.linalg.norm(obs.self_position - origin)) <= radius:
+                selected.append(obs)
+        return _stack(selected)
+    if own is None or own.n_sheep_seen == 0:
+        return np.zeros((0, 2))
+    return np.asarray(own.sheep_positions, dtype=float)
 
 
 class CollectDriveMultiController(BaseDogController):
@@ -54,50 +102,34 @@ class CollectDriveMultiController(BaseDogController):
         velocities = empty_dog_velocities(state)
         lines: list[dict[str, Any]] = []
         mode = "drive"
-        # Use union of observed sheep when communication is global_shared;
-        # otherwise each dog uses its own observation for local decisions.
-        comm = str(config.get("communication", "none"))
         if not observations:
             return state.copy_with(shepherd_velocities=velocities)
 
-        if comm == "global_shared":
-            sheep_pos = state.sheep_positions
-            local_state = state
-        else:
-            # Merge observed sheep from all observations for assignment when
-            # communication is neighbour_broadcast; else per-dog views.
-            if comm == "neighbour_broadcast":
-                chunks = [o.sheep_positions for o in observations if o.n_sheep_seen]
-                if chunks:
-                    sheep_pos = np.vstack(chunks)
-                else:
-                    sheep_pos = np.zeros((0, 2))
-                local_state = state.copy_with(sheep_positions=sheep_pos)
-            else:
-                local_state = view_from_observation(state, observations[0])
-                sheep_pos = local_state.sheep_positions
-
         m = state.n_shepherds
-        if m == 0 or sheep_pos.shape[0] == 0:
+        if m == 0:
             return state.copy_with(shepherd_velocities=velocities)
 
-        centroid = np.mean(sheep_pos, axis=0)
-        scale = float(config.get("collect_threshold_scale", 1.0))
-        threshold = compute_threshold(sheep_pos.shape[0], config["r_a"]) * scale
-        distances = np.linalg.norm(sheep_pos - centroid, axis=1)
-        outliers = np.where(distances > threshold)[0]
         goal = resolve_goal_center(state, config)
         c_offset = collect_offset(config)
-        # drive_offset needs n_sheep on state
-        drive_state = local_state.copy_with(sheep_positions=sheep_pos)
-        d_offset = drive_offset(drive_state, config)
+        scale = float(config.get("collect_threshold_scale", 1.0))
+        any_collect = False
 
-        if len(outliers) == 0:
-            base = position_behind_target(centroid, goal, d_offset)
-            spacing = 4.0 * float(config.get("r_a", 2.0))
-            for i in range(m):
-                if not state.shepherd_active[i]:
-                    continue
+        for i in range(m):
+            if not state.shepherd_active[i]:
+                continue
+            sheep_pos = _sheep_for_dog(i, observations, state, config)
+            if sheep_pos.shape[0] == 0:
+                continue
+            centroid = np.mean(sheep_pos, axis=0)
+            threshold = compute_threshold(sheep_pos.shape[0], config["r_a"]) * scale
+            distances = np.linalg.norm(sheep_pos - centroid, axis=1)
+            outliers = np.where(distances > threshold)[0]
+            drive_state = state.copy_with(sheep_positions=sheep_pos)
+            d_offset = drive_offset(drive_state, config)
+
+            if len(outliers) == 0:
+                base = position_behind_target(centroid, goal, d_offset)
+                spacing = 4.0 * float(config.get("r_a", 2.0))
                 angle = (2 * np.pi * i) / m
                 spaced = base + spacing * np.array([np.cos(angle), np.sin(angle)])
                 velocities[i] = shepherd_step_toward(drive_state, config, i, spaced)
@@ -108,17 +140,12 @@ class CollectDriveMultiController(BaseDogController):
                         "mode": "drive",
                     }
                 )
-        else:
-            mode = "collect"
-            order = outliers[np.argsort(-distances[outliers])]
-            lateral_step = 2.0 * float(config.get("r_a", 2.0))
-            for i in range(m):
-                if not state.shepherd_active[i]:
-                    continue
+            else:
+                any_collect = True
+                order = outliers[np.argsort(-distances[outliers])]
+                lateral_step = 2.0 * float(config.get("r_a", 2.0))
                 sheep_idx = int(order[i % len(order)])
-                target = position_behind_target(
-                    sheep_pos[sheep_idx], centroid, c_offset
-                )
+                target = position_behind_target(sheep_pos[sheep_idx], centroid, c_offset)
                 tangential = np.array(
                     [
                         -(sheep_pos[sheep_idx][1] - centroid[1]),
@@ -127,9 +154,7 @@ class CollectDriveMultiController(BaseDogController):
                 )
                 tn = np.linalg.norm(tangential)
                 if tn > 1e-10:
-                    target = target + (tangential / tn) * (
-                        lateral_step * (i - (m - 1) / 2.0)
-                    )
+                    target = target + (tangential / tn) * (lateral_step * (i - (m - 1) / 2.0))
                 velocities[i] = shepherd_step_toward(drive_state, config, i, target)
                 lines.append(
                     {
@@ -139,6 +164,9 @@ class CollectDriveMultiController(BaseDogController):
                         "sheep_index": sheep_idx,
                     }
                 )
+
+        if any_collect:
+            mode = "collect"
 
         velocities = apply_dog_speeds(velocities, state, config)
         metadata = dict(state.metadata)

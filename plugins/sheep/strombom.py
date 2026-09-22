@@ -88,9 +88,7 @@ class StrombomSheepDynamics(BaseSheepDynamics):
 
             lcm = compute_local_centroid_knn(state.sheep_positions, i, n_neighbors)
             attraction = compute_attraction(state.sheep_positions[i], lcm)
-            repulsion_sheep = compute_repulsion_from_neighbours(
-                state.sheep_positions, i, r_a
-            )
+            repulsion_sheep = compute_repulsion_from_neighbours(state.sheep_positions, i, r_a)
             active_dogs = state.shepherd_positions[state.shepherd_active]
             repulsion_shep = compute_repulsion_from_shepherds(
                 state.sheep_positions[i], active_dogs, r_s

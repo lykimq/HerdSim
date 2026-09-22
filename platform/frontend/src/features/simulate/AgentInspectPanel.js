@@ -1,14 +1,14 @@
 /** Live inspect card for herding mode / factors from websocket frame metadata. */
 
 function textOrDash(value) {
-  if (value == null || value === '') return '-';
-  if (typeof value === 'number' && Number.isFinite(value)) return String(value);
+  if (value == null || value === "") return "-";
+  if (typeof value === "number" && Number.isFinite(value)) return String(value);
   return String(value);
 }
 
 export function createAgentInspectPanel() {
-  const root = document.createElement('div');
-  root.className = 'card-glass';
+  const root = document.createElement("div");
+  root.className = "card-glass";
   root.innerHTML = `
     <div class="section-title">Inspect</div>
     <p class="param-hint">
@@ -37,7 +37,7 @@ export function createAgentInspectPanel() {
 
   function clear() {
     Object.values(els).forEach((el) => {
-      el.textContent = '-';
+      el.textContent = "-";
     });
   }
 
@@ -56,7 +56,7 @@ export function createAgentInspectPanel() {
     els.mode.textContent = textOrDash(meta.herding_mode);
     els.flockState.textContent = textOrDash(meta.flock_state);
     els.counts.textContent =
-      nSheep != null && nDogs != null ? `${nSheep} / ${nDogs}` : '-';
+      nSheep != null && nDogs != null ? `${nSheep} / ${nDogs}` : "-";
     els.assignments.textContent = textOrDash(nAssign);
     els.sheepModel.textContent = textOrDash(meta.sheep_model);
     els.dogController.textContent = textOrDash(meta.dog_controller);

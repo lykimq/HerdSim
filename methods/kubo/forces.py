@@ -75,9 +75,7 @@ def sheep_force_components(
     return a_i, b_i, c_i, d_i
 
 
-def target_sheep_farthest_from_goal(
-    goal_pos: np.ndarray, sheep_in_range: np.ndarray
-) -> np.ndarray:
+def target_sheep_farthest_from_goal(goal_pos: np.ndarray, sheep_in_range: np.ndarray) -> np.ndarray:
     """Return the sheep position farthest from the goal."""
     dists = np.linalg.norm(sheep_in_range - goal_pos, axis=1)
     return sheep_in_range[int(np.argmax(dists))]

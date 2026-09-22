@@ -1,6 +1,9 @@
 /** Herder trail polylines: visited world positions per herder this run. */
 
-const TRAIL_COLORS = [0xcbd5e1, 0x34d399, 0xa78bfa, 0xf472b6, 0xfda4af, 0x86efac, 0xfcd34d, 0x818cf8];
+const TRAIL_COLORS = [
+  0xcbd5e1, 0x34d399, 0xa78bfa, 0xf472b6, 0xfda4af, 0x86efac, 0xfcd34d,
+  0x818cf8,
+];
 
 /** Canvas stroke colors for Collect / Drive assignment overlays. */
 export const ASSIGNMENT_COLLECT_COLOR = 0xfbbf24;

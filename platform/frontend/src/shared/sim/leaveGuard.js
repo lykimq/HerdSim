@@ -14,39 +14,39 @@ let dialogEl = null;
 let dialogOpen = false;
 let allowNextUnload = false;
 
-const DEFAULT_TITLE = 'Work in progress';
+const DEFAULT_TITLE = "Work in progress";
 const DEFAULT_BODY =
-  'Something is still running. Stay on this page, or leave and lose that progress?';
+  "Something is still running. Stay on this page, or leave and lose that progress?";
 
 function isReloadChord(event) {
-  if (event.key === 'F5') return true;
-  if (event.key === 'r' || event.key === 'R') {
+  if (event.key === "F5") return true;
+  if (event.key === "r" || event.key === "R") {
     return Boolean(event.ctrlKey || event.metaKey);
   }
   return false;
 }
 
 function installGuards() {
-  if (guardsInstalled || typeof window === 'undefined') return;
+  if (guardsInstalled || typeof window === "undefined") return;
   guardsInstalled = true;
 
-  window.addEventListener('beforeunload', (event) => {
+  window.addEventListener("beforeunload", (event) => {
     if (allowNextUnload || !isLeaveBlocked()) return;
     event.preventDefault();
-    event.returnValue = '';
+    event.returnValue = "";
   });
 
   window.addEventListener(
-    'keydown',
+    "keydown",
     (event) => {
       if (!isLeaveBlocked() || dialogOpen || !isReloadChord(event)) return;
       event.preventDefault();
       event.stopPropagation();
       confirmLeaveIfNeeded({
-        title: 'Reload this page?',
+        title: "Reload this page?",
         body:
           getLeaveBlockReason() ||
-          'Work is still in progress. Reload and lose it, or stay?',
+          "Work is still in progress. Reload and lose it, or stay?",
       }).then((leave) => {
         if (!leave) return;
         allowNextUnload = true;
@@ -64,7 +64,7 @@ function installGuards() {
  */
 export function setLeaveBlock(sourceId, reason) {
   if (!sourceId) return;
-  const text = typeof reason === 'string' ? reason.trim() : '';
+  const text = typeof reason === "string" ? reason.trim() : "";
   if (text) blockers.set(sourceId, text);
   else blockers.delete(sourceId);
   installGuards();
@@ -79,7 +79,7 @@ export function isLeaveBlocked() {
 }
 
 export function getLeaveBlockReason() {
-  if (!blockers.size) return '';
+  if (!blockers.size) return "";
   return [...blockers.values()][0];
 }
 
@@ -88,12 +88,12 @@ export function getLeaveBlockSources() {
 }
 
 function ensureDialog() {
-  if (dialogEl || typeof document === 'undefined') return dialogEl;
-  dialogEl = document.createElement('div');
-  dialogEl.className = 'leave-guard-overlay hidden';
-  dialogEl.setAttribute('role', 'dialog');
-  dialogEl.setAttribute('aria-modal', 'true');
-  dialogEl.setAttribute('aria-labelledby', 'leave-guard-title');
+  if (dialogEl || typeof document === "undefined") return dialogEl;
+  dialogEl = document.createElement("div");
+  dialogEl.className = "leave-guard-overlay hidden";
+  dialogEl.setAttribute("role", "dialog");
+  dialogEl.setAttribute("aria-modal", "true");
+  dialogEl.setAttribute("aria-labelledby", "leave-guard-title");
   dialogEl.innerHTML = `
     <div class="leave-guard-card card-glass">
       <h2 class="leave-guard-title" id="leave-guard-title" data-role="leave-title">${DEFAULT_TITLE}</h2>
@@ -120,7 +120,9 @@ export function confirmLeaveIfNeeded(options = {}) {
   const overlay = ensureDialog();
   if (!overlay) {
     return Promise.resolve(
-      typeof window !== 'undefined' ? window.confirm(`${title}\n\n${body}`) : true,
+      typeof window !== "undefined"
+        ? window.confirm(`${title}\n\n${body}`)
+        : true,
     );
   }
 
@@ -132,17 +134,17 @@ export function confirmLeaveIfNeeded(options = {}) {
   bodyEl.textContent = body;
 
   dialogOpen = true;
-  overlay.classList.remove('hidden');
+  overlay.classList.remove("hidden");
   stayBtn.focus();
 
   return new Promise((resolve) => {
     const finish = (leave) => {
       dialogOpen = false;
-      overlay.classList.add('hidden');
-      stayBtn.removeEventListener('click', onStay);
-      quitBtn.removeEventListener('click', onQuit);
-      overlay.removeEventListener('click', onBackdrop);
-      overlay.removeEventListener('keydown', onKey);
+      overlay.classList.add("hidden");
+      stayBtn.removeEventListener("click", onStay);
+      quitBtn.removeEventListener("click", onQuit);
+      overlay.removeEventListener("click", onBackdrop);
+      overlay.removeEventListener("keydown", onKey);
       resolve(leave);
     };
     const onStay = () => finish(false);
@@ -151,15 +153,15 @@ export function confirmLeaveIfNeeded(options = {}) {
       if (event.target === overlay) finish(false);
     };
     const onKey = (event) => {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         event.preventDefault();
         finish(false);
       }
     };
-    stayBtn.addEventListener('click', onStay);
-    quitBtn.addEventListener('click', onQuit);
-    overlay.addEventListener('click', onBackdrop);
-    overlay.addEventListener('keydown', onKey);
+    stayBtn.addEventListener("click", onStay);
+    quitBtn.addEventListener("click", onQuit);
+    overlay.addEventListener("click", onBackdrop);
+    overlay.addEventListener("keydown", onKey);
   });
 }
 

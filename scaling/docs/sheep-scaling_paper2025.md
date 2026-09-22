@@ -195,21 +195,25 @@ For N >= 100, mean angular error to true GCM ~18-22 deg; correct sector often >=
 
 ## How this maps to HerdSim (quick compare)
 
-| Item | 2025 draft | HerdSim scaling freeze (`scaling_v1`) |
-|------|------------|--------------------------------------|
+| Item | 2025 draft | HerdSim (`scaling_v2`) |
+|------|------------|----------------------|
 | Engine | NetLogo | HerdSim |
-| Task | Collect + hold 800 + gate exit | `drive_to_goal` (no hold/gate phase stack) |
-| D grid | same set to 35 | same |
-| N grid | includes 250, 350; no 75 | includes 75; drops 250, 350 |
-| Seeds | 100 every cell | scout 30; claim 100 on boundaries |
-| Reliability | SR >= 90% | theta = 0.90 (also 0.50, 0.70) |
-| Timeout | 10,000 | T0 = 10,000; T1 = 20,000 for hard-ceiling |
-| Dmin uncertainty | none | plan: bootstrap CI (implement when claiming) |
-| Methods | one NetLogo collect/drive family | baseline `strombom_multi` + transfer set |
-| Structure | emergent spread; correlate `S_bar` | also **manipulate** X0 families (RQ1) |
-| Mechanism | mostly correlate + failure phase | I_dir / coverage tests (RQ3) |
+| Task | Collect + hold 800 + gate exit | `drive_to_goal`: every sheep in a goal disk |
+| Arena | 101 x 71, pen at center, radius `clamp(2.5 * sqrt(N), 23, 27)` | 500 x 500, flock at center, goal at (370, 250), radius `15 * sqrt(N/50)` |
+| D grid | {1, 2, 3, 4, 6, 10, 15, 20, 25, 35} | same |
+| N grid | includes 250, 350; no 75 | includes 75; no 250, 350 |
+| Seeds | 100 every cell | scout 30 on every cell; 100 on claim windows |
+| Reliability | SR >= 90% | theta = 0.90 (also report 0.50, 0.70) |
+| Timeout | 10,000 | T0 = 10,000; T1 = 20,000 on overcrowding cells |
+| Dmin | smallest D with SR >= 90% | smallest D with R >= theta |
+| Dovercrowd | smallest D > Dmin where SR starts decreasing | smallest D > D_min where this D and the next grid D are both below theta |
+| Dmax | smallest D > Dmin with SR < 90%, else the ceiling | largest D still at or above theta and below D_overcrowd; if none, the largest tested D that still meets theta |
+| Dmin uncertainty | none | bootstrap of seeds, censored when a resample has no D_min |
+| Methods | one NetLogo collect/drive family | baseline `strombom_multi`; required transfer `kubo`, `fat` |
+| Structure | emergent spread; correlate `S_bar` | also set X0 families (compact, wide, split, outlier_rich) |
+| Mechanism | correlate + failure phase | I_dir and coverage, compared within N |
 
-Reuse from the draft: reliability band, D grid shape, timeout scale, mean-spread idea, vocabulary (Dmin / overcrowding / viable range). Do **not** expect numerical Dmin(N) to copy across engines or tasks.
+The studies share the reliability band, the D grid, the timeout scale, and the mean-spread idea. HerdSim D_min(N) is for the open-interior drive, not for the draft's hold-and-gate task.
 
 ---
 

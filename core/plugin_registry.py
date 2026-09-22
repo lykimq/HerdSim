@@ -24,9 +24,7 @@ class PluginRegistry:
     def get(self, plugin_id: str) -> T:
         if plugin_id not in self._factories:
             available = list(self._factories.keys())
-            raise KeyError(
-                f"Unknown {self.kind} '{plugin_id}'. Available: {available}"
-            )
+            raise KeyError(f"Unknown {self.kind} '{plugin_id}'. Available: {available}")
         return self._factories[plugin_id]()
 
     def names(self) -> list[str]:
@@ -44,15 +42,9 @@ class PluginRegistry:
         return items
 
 
-sheep_dynamics_registry: PluginRegistry[BaseSheepDynamics] = PluginRegistry(
-    "sheep_model"
-)
-dog_controller_registry: PluginRegistry[BaseDogController] = PluginRegistry(
-    "dog_controller"
-)
-observation_registry: PluginRegistry[BaseObservationModel] = PluginRegistry(
-    "observation_model"
-)
+sheep_dynamics_registry: PluginRegistry[BaseSheepDynamics] = PluginRegistry("sheep_model")
+dog_controller_registry: PluginRegistry[BaseDogController] = PluginRegistry("dog_controller")
+observation_registry: PluginRegistry[BaseObservationModel] = PluginRegistry("observation_model")
 
 
 def _register_builtins() -> None:
@@ -84,13 +76,9 @@ def _register_builtins() -> None:
     dog_controller_registry.register("collect_drive_multi", CollectDriveMultiController)
     dog_controller_registry.register("kubo_forces", KuboDogController)
     dog_controller_registry.register("v_formation", VFormationController)
-    dog_controller_registry.register(
-        "obstacle_aware_drive", ObstacleAwareDriveController
-    )
+    dog_controller_registry.register("obstacle_aware_drive", ObstacleAwareDriveController)
     dog_controller_registry.register("fat", FatController)
-    dog_controller_registry.register(
-        "communication_free", CommunicationFreeController
-    )
+    dog_controller_registry.register("communication_free", CommunicationFreeController)
     dog_controller_registry.register("adaptive", AdaptiveController)
     dog_controller_registry.register("policy_file", PolicyFileController)
 

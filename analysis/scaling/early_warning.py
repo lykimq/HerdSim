@@ -8,10 +8,16 @@ import numpy as np
 import pandas as pd
 
 
+_LOWER_IS_RISK = {"cohesion", "coverage"}
+
+
 def _auroc(scores: np.ndarray, labels: np.ndarray) -> float:
     """Compute AUROC without sklearn."""
     scores = np.asarray(scores, dtype=float)
     labels = np.asarray(labels, dtype=int)
+    ok = np.isfinite(scores)
+    scores = scores[ok]
+    labels = labels[ok]
     pos = scores[labels == 1]
     neg = scores[labels == 0]
     if len(pos) == 0 or len(neg) == 0:
@@ -22,32 +28,60 @@ def _auroc(scores: np.ndarray, labels: np.ndarray) -> float:
     return float(correct / (len(pos) * len(neg)))
 
 
-def _risk_score(
+def _feature_matrix(
     ts: pd.DataFrame,
     feature_cols: list[str],
-    *,
-    window_w: int,
-    tick_col: str,
-) -> np.ndarray:
-    score = np.zeros(len(ts), dtype=float)
-    used = 0
+) -> tuple[np.ndarray, np.ndarray, list[str]]:
+    used: list[str] = []
+    cols: list[np.ndarray] = []
     for col in feature_cols:
         if col not in ts.columns:
             continue
-        x = ts[col].astype(float).to_numpy()
-        w = max(1, window_w)
-        kernel = np.ones(w) / w
-        smooth = np.convolve(x, kernel, mode="same")
-        mu = float(np.nanmean(smooth))
-        sd = float(np.nanstd(smooth)) or 1.0
-        z = (smooth - mu) / sd
-        if col in ("cohesion", "coverage"):
-            z = -z
-        score += z
-        used += 1
-    if used:
-        score /= used
-    return score
+        used.append(col)
+        cols.append(ts[col].astype(float).to_numpy())
+    if not cols:
+        return np.zeros(len(ts)), np.zeros((len(ts), 0)), []
+    ticks = ts["tick"].to_numpy() if "tick" in ts.columns else np.arange(len(ts))
+    return ticks.astype(float), np.column_stack(cols), used
+
+
+def _window_means(
+    ticks: np.ndarray,
+    values: np.ndarray,
+    feature_names: list[str],
+    query_ticks: np.ndarray,
+    window_w: int,
+) -> np.ndarray:
+    """Mean of each feature on (t - window_w, t], higher means more risk."""
+    out = np.full(len(query_ticks), np.nan)
+    if values.size == 0 or len(feature_names) == 0:
+        return out
+    signs = np.array([-1.0 if name in _LOWER_IS_RISK else 1.0 for name in feature_names])
+    w = max(1, int(window_w))
+    for i, t in enumerate(query_ticks):
+        mask = (ticks > float(t) - w) & (ticks <= float(t))
+        if not np.any(mask):
+            continue
+        window = np.nanmean(values[mask], axis=0)
+        out[i] = float(np.nanmean(window * signs))
+    return out
+
+
+def _opening_threshold(
+    ticks: np.ndarray,
+    scores: np.ndarray,
+    window_w: int,
+) -> tuple[float, float] | None:
+    """Threshold from the opening of the series, before later rises."""
+    if len(ticks) == 0:
+        return None
+    baseline_end = float(np.min(ticks) + 2 * max(1, window_w))
+    base = scores[(ticks <= baseline_end) & np.isfinite(scores)]
+    if len(base) == 0:
+        return None
+    sd = float(np.std(base))
+    thr = float(np.mean(base) + (sd if sd > 1e-9 else 1e-6))
+    return thr, baseline_end
 
 
 def evaluate_early_warning(
@@ -59,68 +93,70 @@ def evaluate_early_warning(
     feature_cols: list[str] | None = None,
     tick_col: str = "tick",
     eval_ticks: list[int] | None = None,
+    time_limit: int | None = None,
 ) -> dict[str, Any]:
-    """Evaluate whether state features anticipate failure within horizon k.
+    """Score imminent failure from a causal feature window.
 
-    For failed trials, a positive label is assigned to ticks in
-    [T_end - k, T_end). Feature score is a simple z-scored rise in mean_spread
-    / drop in cohesion / rise in fragmentation over the last window_w ticks.
-
-    When ``eval_ticks`` is set (plan: 1000..8000 step 200), AUROC uses only those
-    evaluation times that exist in the series.
+    At each eval tick t with t + horizon_k still inside the time limit, the
+    score uses only ticks in (t - window_w, t]. The label is 1 when this trial
+    fails inside (t, t + horizon_k]. Lead time is the gap from the first
+    opening-threshold crossing until failure and may be longer than horizon_k.
     """
     feature_cols = feature_cols or [
         c
         for c in ("mean_spread", "cohesion", "fragmentation", "i_dir", "coverage")
         if c in timeseries.columns
     ]
+    empty = {
+        "auroc": float("nan"),
+        "lead_time": None,
+        "n_ticks": 0,
+        "feature_cols": feature_cols,
+        "failed_trial": not success,
+        "horizon_k": horizon_k,
+        "window_w": window_w,
+    }
     if timeseries.empty or tick_col not in timeseries.columns:
-        return {
-            "auroc": float("nan"),
-            "lead_time": None,
-            "n_ticks": 0,
-            "feature_cols": feature_cols,
-        }
+        return empty
 
     ts = timeseries.sort_values(tick_col).reset_index(drop=True)
+    ticks, values, used = _feature_matrix(ts, feature_cols)
     t_end = int(ts[tick_col].iloc[-1])
-    labels = np.zeros(len(ts), dtype=int)
-    if not success:
-        labels[(ts[tick_col] >= max(0, t_end - horizon_k)).to_numpy()] = 1
-
-    score = _risk_score(ts, feature_cols, window_w=window_w, tick_col=tick_col)
-
-    if eval_ticks:
-        mask = ts[tick_col].isin(eval_ticks).to_numpy()
-        if mask.any() and labels[mask].sum() > 0 and labels[mask].sum() < int(mask.sum()):
-            auroc = _auroc(score[mask], labels[mask])
-        elif mask.any():
-            auroc = float("nan")
-        else:
-            auroc = float("nan")
+    limit = int(time_limit) if time_limit is not None else t_end
+    if eval_ticks is None:
+        candidates = [int(t) for t in ts[tick_col].tolist()]
     else:
-        auroc = (
-            _auroc(score, labels)
-            if labels.sum() > 0 and labels.sum() < len(labels)
-            else float("nan")
-        )
+        candidates = [int(t) for t in eval_ticks]
+    valid = [t for t in candidates if t + int(horizon_k) <= limit]
+    query = np.asarray(valid, dtype=float)
+    scores = _window_means(ticks, values, used, query, window_w)
+    labels = np.zeros(len(valid), dtype=int)
+    if not success:
+        for i, t in enumerate(valid):
+            if t < t_end <= t + int(horizon_k):
+                labels[i] = 1
+    auroc = _auroc(scores, labels) if len(valid) else float("nan")
 
     lead_time = None
-    if not success and feature_cols:
-        thr = float(np.nanmean(score) + np.nanstd(score))
-        hits = np.where((labels == 1) & (score >= thr))[0]
-        if len(hits):
-            lead_time = int(t_end - int(ts.loc[int(hits[0]), tick_col]))
+    if not success and used:
+        all_scores = _window_means(ticks, values, used, ticks, window_w)
+        opened = _opening_threshold(ticks, all_scores, window_w)
+        if opened is not None:
+            thr, baseline_end = opened
+            hits = np.where((ticks > baseline_end) & (all_scores >= thr))[0]
+            if len(hits):
+                lead_time = int(t_end - int(ticks[int(hits[0])]))
 
     return {
         "auroc": auroc,
         "lead_time": lead_time,
         "n_ticks": int(len(ts)),
-        "feature_cols": feature_cols,
+        "feature_cols": used,
         "horizon_k": horizon_k,
         "window_w": window_w,
         "failed_trial": not success,
-        "eval_ticks": list(eval_ticks) if eval_ticks else None,
+        "eval_ticks": valid,
+        "time_limit": limit,
     }
 
 
@@ -134,6 +170,28 @@ def default_eval_ticks(
     return list(range(int(start), int(stop) + 1, int(step)))
 
 
+def _fit_nd_scores(
+    x_train: np.ndarray,
+    y_train: np.ndarray,
+    x_test: np.ndarray,
+) -> np.ndarray:
+    mu = x_train.mean(axis=0)
+    sigma = x_train.std(axis=0)
+    sigma = np.where(sigma < 1e-9, 1.0, sigma)
+    xs = (x_train - mu) / sigma
+    w = np.zeros(x_train.shape[1])
+    b = 0.0
+    n_tr = max(len(y_train), 1)
+    for _ in range(200):
+        z = xs @ w + b
+        p = 1.0 / (1.0 + np.exp(-np.clip(z, -50, 50)))
+        err = p - y_train
+        w -= 0.1 * ((xs.T @ err) / n_tr + 1e-3 * w)
+        b -= 0.1 * float(err.mean())
+    xs_te = (x_test - mu) / sigma
+    return 1.0 / (1.0 + np.exp(-np.clip(xs_te @ w + b, -50, 50)))
+
+
 def evaluate_early_warning_campaign(
     trial_rows: list[dict[str, Any]],
     *,
@@ -142,12 +200,13 @@ def evaluate_early_warning_campaign(
     eval_ticks: list[int] | None = None,
     n_col: str = "n_sheep",
     d_col: str = "n_shepherds",
+    time_limit: int | None = None,
 ) -> dict[str, Any]:
-    """Leave-one-N-out early-warning eval vs (N, D) logistic baseline.
+    """Leave-one-N-out state scores versus an (N, D) logistic on the same labels.
 
-    Each trial_rows item: timeseries, success, n_sheep, n_shepherds (and optional id).
-    State AUROC is computed per held-out N from per-trial risk at mid eval tick;
-    baseline AUROC uses (N, D) failure probability on the same held-out trials.
+    Each row is one eval tick. Features at t use only (t - window_w, t]. The
+    (N, D) model is fit on other flock sizes and applied with that training
+    standardization.
     """
     ticks = eval_ticks if eval_ticks is not None else default_eval_ticks()
     if not trial_rows:
@@ -159,9 +218,8 @@ def evaluate_early_warning_campaign(
             "folds": [],
         }
 
-    # Per-trial state score: mean risk on eval ticks (or whole-series fallback).
-    records = []
-    per_trial_eval = []
+    records: list[dict[str, Any]] = []
+    per_trial_eval: list[dict[str, Any]] = []
     for item in trial_rows:
         ts = item.get("timeseries")
         success = bool(item.get("success", False))
@@ -175,39 +233,40 @@ def evaluate_early_warning_campaign(
             horizon_k=horizon_k,
             window_w=window_w,
             eval_ticks=ticks,
+            time_limit=time_limit,
         )
         per_trial_eval.append(ev)
         frame = ts.sort_values("tick") if "tick" in ts.columns else ts
-        score = _risk_score(
-            frame.reset_index(drop=True),
-            ev.get("feature_cols") or [],
-            window_w=window_w,
-            tick_col="tick",
-        )
-        if "tick" in frame.columns:
-            mask = frame["tick"].isin(ticks).to_numpy()
-            state_score = float(np.nanmean(score[mask])) if mask.any() else float(np.nanmean(score))
-        else:
-            state_score = float(np.nanmean(score))
-        records.append(
-            {
-                n_col: int(n_sheep),
-                d_col: int(n_shepherds),
-                "success": success,
-                "failed": not success,
-                "state_score": state_score,
-            }
-        )
+        tick_arr, values, used = _feature_matrix(frame.reset_index(drop=True), ev["feature_cols"])
+        valid = ev.get("eval_ticks") or []
+        scores = _window_means(tick_arr, values, used, np.asarray(valid, dtype=float), window_w)
+        t_end = int(frame["tick"].iloc[-1]) if "tick" in frame.columns and len(frame) else 0
+        limit = int(time_limit) if time_limit is not None else t_end
+        for t, score in zip(valid, scores):
+            if int(t) + int(horizon_k) > limit:
+                continue
+            label = 0
+            if not success and int(t) < t_end <= int(t) + int(horizon_k):
+                label = 1
+            records.append(
+                {
+                    n_col: int(n_sheep),
+                    d_col: int(n_shepherds),
+                    "label": label,
+                    "state_score": float(score),
+                }
+            )
 
     meta = pd.DataFrame(records)
+    summary = summarise_early_warning(per_trial_eval)
     if meta.empty:
         return {
-            "n_trials": 0,
+            "n_trials": len(per_trial_eval),
             "state_auroc_mean": None,
             "nd_auroc_mean": None,
             "beats_nd_baseline": False,
             "folds": [],
-            "trial_summaries": summarise_early_warning(per_trial_eval),
+            "trial_summaries": summary,
         }
 
     folds = []
@@ -216,28 +275,13 @@ def evaluate_early_warning_campaign(
     for hold_n in sorted(meta[n_col].unique()):
         test = meta[meta[n_col] == hold_n]
         train = meta[meta[n_col] != hold_n]
-        if train.empty or test.empty:
+        if train.empty or test.empty or train["label"].nunique() < 2:
             continue
-        # Fit ND baseline on train folds; score held-out N.
-        y_train = (~train["success"].astype(bool)).astype(float).to_numpy()
+        y_train = train["label"].astype(float).to_numpy()
         x_train = train[[n_col, d_col]].astype(float).to_numpy()
-        mu = x_train.mean(axis=0)
-        sigma = x_train.std(axis=0)
-        sigma[sigma < 1e-9] = 1.0
-        xs = (x_train - mu) / sigma
-        w = np.zeros(2)
-        b = 0.0
-        n_tr = len(y_train)
-        for _ in range(200):
-            z = xs @ w + b
-            p = 1.0 / (1.0 + np.exp(-np.clip(z, -50, 50)))
-            err = p - y_train
-            w -= 0.1 * ((xs.T @ err) / max(n_tr, 1) + 1e-3 * w)
-            b -= 0.1 * float(err.mean())
         x_te = test[[n_col, d_col]].astype(float).to_numpy()
-        xs_te = (x_te - mu) / sigma
-        nd_score = 1.0 / (1.0 + np.exp(-np.clip(xs_te @ w + b, -50, 50)))
-        labels = test["failed"].astype(int).to_numpy()
+        nd_score = _fit_nd_scores(x_train, y_train, x_te)
+        labels = test["label"].astype(int).to_numpy()
         st = _auroc(test["state_score"].to_numpy(), labels)
         nd = _auroc(nd_score, labels)
         folds.append(
@@ -256,7 +300,7 @@ def evaluate_early_warning_campaign(
     state_mean = float(np.mean(state_aurocs)) if state_aurocs else None
     nd_mean = float(np.mean(nd_aurocs)) if nd_aurocs else None
     return {
-        "n_trials": int(len(meta)),
+        "n_trials": len(per_trial_eval),
         "state_auroc_mean": state_mean,
         "nd_auroc_mean": nd_mean,
         "beats_nd_baseline": bool(
@@ -266,25 +310,37 @@ def evaluate_early_warning_campaign(
         "horizon_k": horizon_k,
         "window_w": window_w,
         "eval_ticks": ticks,
-        "trial_summaries": summarise_early_warning(per_trial_eval),
+        "trial_summaries": summary,
     }
 
 
-def summarise_early_warning(results: list[dict[str, Any]]) -> dict[str, Any]:
-    """Aggregate AUROC and lead-time distribution across trials."""
+def summarise_early_warning(
+    results: list[dict[str, Any]],
+    *,
+    min_lead: int = 500,
+) -> dict[str, Any]:
+    """Aggregate AUROC and lead time. Misses count in the lead-time fraction."""
     if not results:
-        return {"n_trials": 0, "median_auroc": None, "median_lead_time": None}
+        return {
+            "n_trials": 0,
+            "median_auroc": None,
+            "median_lead_time": None,
+            "frac_lead_ge_500": 0.0,
+        }
     aurocs = [r["auroc"] for r in results if r.get("auroc") == r.get("auroc")]
-    leads = [r["lead_time"] for r in results if r.get("lead_time") is not None]
+    failed = [r for r in results if r.get("failed_trial")]
+    leads = [r.get("lead_time") for r in failed]
+    defined = [lt for lt in leads if lt is not None]
+    if failed:
+        frac = float(np.mean([1.0 if (lt is not None and lt >= min_lead) else 0.0 for lt in leads]))
+    else:
+        frac = 0.0
     return {
         "n_trials": len(results),
+        "n_failures": len(failed),
         "median_auroc": float(np.median(aurocs)) if aurocs else None,
         "mean_auroc": float(np.mean(aurocs)) if aurocs else None,
-        "median_lead_time": float(np.median(leads)) if leads else None,
-        "n_with_lead_time": len(leads),
-        "frac_lead_ge_500": (
-            float(np.mean([1.0 if (lt is not None and lt >= 500) else 0.0 for lt in leads]))
-            if leads
-            else 0.0
-        ),
+        "median_lead_time": float(np.median(defined)) if defined else None,
+        "n_with_lead_time": len(defined),
+        "frac_lead_ge_500": frac,
     }

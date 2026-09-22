@@ -37,114 +37,133 @@ def evaluate_overcrowding_mechanisms(
     i_dir_col: str = "mean_i_dir",
     coverage_col: str = "mean_coverage",
     fragmentation_col: str = "mean_fragmentation",
-    effort_col: str = "mean_shepherd_path",
+    effort_col: str = "shepherd_path",
     alpha: float = 0.05,
 ) -> dict[str, Any]:
     """Compare mechanism metrics between efficient and overcrowding cells.
 
-    Claim C3 style: overcrowding cells have higher median I_dir and/or
-    fragmentation than efficient cells at the same N (rank test). p-values are
-    Holm-corrected across the four primary hypotheses.
+    One median per (N, D) cell. Rank tests stay inside each N. Holm correction
+    is across the rank-test hypotheses at that N. Fragmentation is the largest
+    component fraction, so induced fragmentation is a lower value in
+    overcrowding cells. Coverage saturation is descriptive and is not a
+    near-zero curve.
     """
     key = [sheep_col, dog_col]
     reg = regimes[key + ["regime"]].drop_duplicates(key)
     merged = trials.merge(reg, on=key, how="left")
 
-    results: dict[str, Any] = {"by_n": [], "overall": {}, "correction": "holm"}
-    hyp_order: list[str] = []
-    raw_p: list[float | None] = []
+    metric_cols = [
+        c for c in (i_dir_col, fragmentation_col, coverage_col, effort_col) if c in merged.columns
+    ]
+    if not metric_cols:
+        return {"by_n": [], "overall": {}, "correction": "holm"}
 
-    for metric, hyp in (
-        (i_dir_col, "interference"),
-        (fragmentation_col, "induced_fragmentation"),
-        (coverage_col, "coverage_saturation"),
-        (effort_col, "redundant_effort"),
-    ):
-        hyp_order.append(hyp)
-        if metric not in merged.columns:
-            results["overall"][hyp] = {
+    cells = merged.groupby(key + ["regime"], dropna=False)[metric_cols].median().reset_index()
+
+    hyp_specs = (
+        (i_dir_col, "interference", "greater"),
+        (fragmentation_col, "induced_fragmentation", "less"),
+        (effort_col, "redundant_effort", "greater"),
+    )
+    by_n: list[dict[str, Any]] = []
+    overall: dict[str, Any] = {}
+
+    for n, g in cells.groupby(sheep_col):
+        eff = g[g["regime"] == "efficient_operation"]
+        ovr = g[g["regime"] == "overcrowding_collapse"]
+        raw_p: list[float | None] = []
+        payloads: list[dict[str, Any]] = []
+        for metric, hyp, alternative in hyp_specs:
+            payload: dict[str, Any] = {
+                "n_sheep": int(n),
+                "hypothesis": hyp,
                 "metric": metric,
-                "available": False,
-                "p_value": None,
-                "p_value_holm": None,
-                "supported": False,
+                "available": metric in g.columns,
+                "n_efficient_cells": int(len(eff)),
+                "n_overcrowd_cells": int(len(ovr)),
             }
-            raw_p.append(None)
-            continue
+            if metric not in g.columns or len(eff) < 2 or len(ovr) < 2:
+                payload.update(
+                    {
+                        "p_value": None,
+                        "p_value_holm": None,
+                        "supported": False,
+                        "note": "insufficient cells",
+                    }
+                )
+                raw_p.append(None)
+            else:
+                a = ovr[metric].dropna()
+                b = eff[metric].dropna()
+                if len(a) < 2 or len(b) < 2:
+                    payload.update(
+                        {"p_value": None, "supported": False, "note": "insufficient cells"}
+                    )
+                    raw_p.append(None)
+                else:
+                    stat = stats.mannwhitneyu(a, b, alternative=alternative)
+                    med_o = float(np.median(a))
+                    med_e = float(np.median(b))
+                    direction = med_o > med_e if alternative == "greater" else med_o < med_e
+                    payload.update(
+                        {
+                            "median_efficient": med_e,
+                            "median_overcrowd": med_o,
+                            "p_value": float(stat.pvalue),
+                            "direction_ok": bool(direction),
+                        }
+                    )
+                    raw_p.append(float(stat.pvalue))
+            payloads.append(payload)
 
-        eff = merged[merged["regime"] == "efficient_operation"][metric].dropna()
-        ovr = merged[merged["regime"] == "overcrowding_collapse"][metric].dropna()
-        if len(eff) < 2 or len(ovr) < 2:
-            results["overall"][hyp] = {
-                "metric": metric,
-                "available": True,
-                "n_efficient": int(len(eff)),
-                "n_overcrowd": int(len(ovr)),
-                "p_value": None,
-                "p_value_holm": None,
-                "supported": False,
-                "note": "insufficient samples",
-            }
-            raw_p.append(None)
-            continue
-
-        if hyp in ("interference", "induced_fragmentation", "redundant_effort"):
-            stat = stats.mannwhitneyu(ovr, eff, alternative="greater")
-            raw_supported = bool(stat.pvalue < alpha) and float(np.median(ovr)) > float(
-                np.median(eff)
+        adjusted = _holm_adjust(raw_p)
+        for payload, p_adj in zip(payloads, adjusted):
+            payload["p_value_holm"] = p_adj
+            payload["supported"] = bool(
+                p_adj is not None and p_adj < alpha and payload.get("direction_ok")
             )
-        else:
-            # Coverage saturation: overcrowding coverage not much higher than efficient.
-            stat = stats.mannwhitneyu(ovr, eff, alternative="two-sided")
-            raw_supported = bool(abs(float(np.median(ovr)) - float(np.median(eff))) < 0.1)
+            by_n.append(payload)
 
-        results["overall"][hyp] = {
-            "metric": metric,
-            "available": True,
-            "n_efficient": int(len(eff)),
-            "n_overcrowd": int(len(ovr)),
-            "median_efficient": float(np.median(eff)),
-            "median_overcrowd": float(np.median(ovr)),
-            "p_value": float(stat.pvalue),
-            "p_value_holm": None,
-            "supported_uncorrected": raw_supported,
+        # Coverage saturation on reliable cells at this N.
+        sat = {
+            "n_sheep": int(n),
+            "hypothesis": "coverage_saturation",
+            "metric": coverage_col,
             "supported": False,
         }
-        raw_p.append(float(stat.pvalue))
+        if coverage_col in eff.columns and effort_col in eff.columns and len(eff) >= 2:
+            cov = eff[coverage_col].dropna()
+            ordered = eff.sort_values(dog_col)
+            effort = ordered[effort_col].dropna()
+            if len(cov) >= 2 and len(effort) >= 2:
+                cov_range = float(cov.max() - cov.min())
+                effort_up = float(effort.iloc[-1] - effort.iloc[0])
+                high = float(np.median(cov)) > 0.5
+                sat.update(
+                    {
+                        "median_coverage": float(np.median(cov)),
+                        "coverage_range": cov_range,
+                        "effort_rise": effort_up,
+                        "supported": bool(high and cov_range < 0.1 and effort_up > 0),
+                    }
+                )
+        by_n.append(sat)
 
-    adjusted = _holm_adjust(raw_p)
-    for hyp, p_adj in zip(hyp_order, adjusted):
-        payload = results["overall"][hyp]
-        payload["p_value_holm"] = p_adj
-        if hyp == "coverage_saturation":
-            # Saturation is a similarity claim; keep the descriptive flag.
-            payload["supported"] = bool(payload.get("supported_uncorrected"))
-        elif p_adj is None:
-            payload["supported"] = False
-        else:
-            payload["supported"] = bool(
-                p_adj < alpha
-                and float(payload.get("median_overcrowd", 0))
-                > float(payload.get("median_efficient", 0))
-            )
-
-    if i_dir_col in merged.columns:
-        for n, g in merged.groupby(sheep_col):
-            eff = g[g["regime"] == "efficient_operation"][i_dir_col].dropna()
-            ovr = g[g["regime"] == "overcrowding_collapse"][i_dir_col].dropna()
-            if len(eff) < 2 or len(ovr) < 2:
-                continue
-            stat = stats.mannwhitneyu(ovr, eff, alternative="greater")
-            results["by_n"].append(
-                {
-                    "n_sheep": int(n),
-                    "p_value": float(stat.pvalue),
-                    "median_efficient": float(np.median(eff)),
-                    "median_overcrowd": float(np.median(ovr)),
-                    "supported": bool(stat.pvalue < alpha),
-                }
-            )
-    return results
+    for hyp in (
+        "interference",
+        "induced_fragmentation",
+        "redundant_effort",
+        "coverage_saturation",
+    ):
+        rows = [r for r in by_n if r["hypothesis"] == hyp]
+        holm_vals = [r["p_value_holm"] for r in rows if r.get("p_value_holm") is not None]
+        overall[hyp] = {
+            "supported": any(bool(r.get("supported")) for r in rows),
+            "n_flocks_tested": len(rows),
+            "n_flocks_supported": int(sum(bool(r.get("supported")) for r in rows)),
+            "p_value_holm": float(min(holm_vals)) if holm_vals else None,
+        }
+    return {"by_n": by_n, "overall": overall, "correction": "holm"}
 
 
 def evaluate_temporal_order(

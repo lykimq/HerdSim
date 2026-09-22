@@ -31,40 +31,54 @@ export function firstWhere(history, pred) {
 
 export function minPoint(points) {
   if (!points.length) return null;
-  return points.reduce((best, p) => (p.value < best.value ? p : best), points[0]);
+  return points.reduce(
+    (best, p) => (p.value < best.value ? p : best),
+    points[0],
+  );
 }
 
 export function maxPoint(points) {
   if (!points.length) return null;
-  return points.reduce((best, p) => (p.value > best.value ? p : best), points[0]);
+  return points.reduce(
+    (best, p) => (p.value > best.value ? p : best),
+    points[0],
+  );
 }
 
 export function outcomeInfo(status) {
-  if (status === 'success') {
-    return { label: 'Success', tone: 'success', verb: 'met the success criterion' };
+  if (status === "success") {
+    return {
+      label: "Success",
+      tone: "success",
+      verb: "met the success criterion",
+    };
   }
-  if (status === 'timeout') {
-    return { label: 'Timeout', tone: 'warn', verb: 'reached max ticks without success' };
+  if (status === "timeout") {
+    return {
+      label: "Timeout",
+      tone: "warn",
+      verb: "reached max ticks without success",
+    };
   }
-  if (status === 'failed') {
-    return { label: 'Failed', tone: 'danger', verb: 'failed' };
+  if (status === "failed") {
+    return { label: "Failed", tone: "danger", verb: "failed" };
   }
-  if (status === 'completed') {
-    return { label: 'Completed', tone: 'neutral', verb: 'ended' };
+  if (status === "completed") {
+    return { label: "Completed", tone: "neutral", verb: "ended" };
   }
-  return { label: 'Ended', tone: 'neutral', verb: 'ended' };
+  return { label: "Ended", tone: "neutral", verb: "ended" };
 }
 
 export function isContainmentScenario(scenarioId) {
-  return scenarioId === 'containment';
+  return scenarioId === "containment";
 }
 
 export function flockSpreadPhrase(cohesion) {
   const c = num(cohesion);
   if (c == null) return null;
-  if (c < 5) return 'tight';
-  if (c < 12) return 'moderately spread';
-  return 'spread out';
+  if (c < 5) return "tight";
+  if (c < 12) return "moderately spread";
+  return "spread out";
 }
 
 export function headingPhrase(peak, count) {
@@ -72,20 +86,20 @@ export function headingPhrase(peak, count) {
   const n = num(count);
   if (p == null || n == null || n <= 0) return null;
   const share = p / n;
-  if (share >= 0.4) return 'mostly aligned';
-  if (share >= 0.25) return 'somewhat aligned';
-  return 'scattered';
+  if (share >= 0.4) return "mostly aligned";
+  if (share >= 0.25) return "somewhat aligned";
+  return "scattered";
 }
 
 export function alignmentPhrase(polarization) {
   const p = num(polarization);
   if (p == null) return null;
-  if (p >= 0.7) return 'high';
-  if (p >= 0.4) return 'moderate';
-  return 'low';
+  if (p >= 0.7) return "high";
+  if (p >= 0.4) return "moderate";
+  return "low";
 }
 
-export function changePhrase(delta, upWord, downWord, flatWord = 'unchanged') {
+export function changePhrase(delta, upWord, downWord, flatWord = "unchanged") {
   if (delta == null || !Number.isFinite(delta)) return null;
   if (Math.abs(delta) < 1e-6) return flatWord;
   if (delta > 0) return upWord;
@@ -98,7 +112,8 @@ export function flockSizeFrom(row) {
     return frame.sheep_positions.length;
   }
   if (Array.isArray(frame.sheep_headings) && frame.sheep_headings.length) {
-    return frame.sheep_headings.filter((h) => h != null && !Number.isNaN(h)).length;
+    return frame.sheep_headings.filter((h) => h != null && !Number.isNaN(h))
+      .length;
   }
   return null;
 }
@@ -118,7 +133,7 @@ export function buildTakeaway({
   pathPerTick,
 }) {
   const containment = isContainmentScenario(scenarioId);
-  const zone = containment ? 'pen' : 'goal';
+  const zone = containment ? "pen" : "goal";
   const spread = flockSpreadPhrase(cohesion);
   const occupancy =
     successRate != null
@@ -127,23 +142,23 @@ export function buildTakeaway({
         ? inGoal / flockSize
         : null;
 
-  if (status === 'success') {
+  if (status === "success") {
     if (containment) {
       if (occupancy != null) {
         return `Containment criterion met; final pen occupancy ${fmt(occupancy * 100, 0)}%.`;
       }
-      return 'Containment criterion met before max ticks.';
+      return "Containment criterion met before max ticks.";
     }
-    if (spread === 'tight' && (outliers == null || outliers === 0)) {
+    if (spread === "tight" && (outliers == null || outliers === 0)) {
       return `Success criterion met; final flock was tight with no sheep beyond the collect threshold.`;
     }
     if (outliers != null && outliers > 0) {
       return `Success criterion met; ${fmt(outliers, 0)} sheep still beyond the collect threshold at the end.`;
     }
-    return 'Success criterion met before max ticks.';
+    return "Success criterion met before max ticks.";
   }
 
-  if (status === 'timeout' || status === 'failed') {
+  if (status === "timeout" || status === "failed") {
     if (occupancy != null) {
       return (
         `Did not meet the success criterion by max ticks; final ${zone} occupancy ` +
@@ -153,20 +168,20 @@ export function buildTakeaway({
     if (outliers != null && outliers > 0) {
       return (
         `Did not meet the success criterion; ${fmt(outliers, 0)} sheep beyond the ` +
-        'collect threshold at the end.'
+        "collect threshold at the end."
       );
     }
-    if (spread === 'spread out' && cohesion != null) {
+    if (spread === "spread out" && cohesion != null) {
       return `Did not meet the success criterion; final cohesion ${fmt(cohesion)} (spread flock).`;
     }
     if (pathPerTick != null && pathPerTick > 2.5) {
       return (
         `Did not meet the success criterion; mean shepherd travel ${fmt(pathPerTick)} ` +
-        'world units per tick.'
+        "world units per tick."
       );
     }
-    return 'Did not meet the scenario success criterion before max ticks.';
+    return "Did not meet the scenario success criterion before max ticks.";
   }
 
-  return 'Run ended; see sections for flock metrics and shepherd path.';
+  return "Run ended; see sections for flock metrics and shepherd path.";
 }

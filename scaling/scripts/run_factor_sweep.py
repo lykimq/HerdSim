@@ -13,7 +13,12 @@ from services.scaling.layout import (
     protocol_path_for_spec,
     resolve_protocol_output,
 )
-from services.scaling.runner import ScalingCell, load_canonical_protocol, run_scaling_grid
+from services.scaling.runner import (
+    ScalingCell,
+    load_canonical_protocol,
+    run_scaling_grid,
+    scaling_world_overrides,
+)
 
 
 def main() -> None:
@@ -88,7 +93,11 @@ def main() -> None:
     if communications is None and "communications" in spec:
         communications = [str(x) for x in spec["communications"]]
 
-    n_seeds = args.seeds if args.seeds is not None else int(spec.get("seeds", 10))
+    n_seeds = (
+        args.seeds
+        if args.seeds is not None
+        else int(spec.get("seeds", protocol.get("scout_seeds", 30)))
+    )
     layout = (list(spec.get("layouts") or ["compact"]) or ["compact"])[0]
 
     master = int(protocol.get("master_seed", 2026))
@@ -96,8 +105,10 @@ def main() -> None:
     seeds = [master + i for i in range(int(n_seeds))]
 
     # Default: obs ladder only. Optional range/comm expand as additional axes.
-    obs_list = list(obs_modes) if sensing_ranges is None and communications is None else (
-        list(obs_modes) if args.obs_modes or "obs_modes" in spec else [None]
+    obs_list = (
+        list(obs_modes)
+        if sensing_ranges is None and communications is None
+        else (list(obs_modes) if args.obs_modes or "obs_modes" in spec else [None])
     )
     range_list = list(sensing_ranges) if sensing_ranges else [None]
     comm_list = list(communications) if communications else [None]
@@ -107,6 +118,7 @@ def main() -> None:
         for sense in range_list:
             for comm in comm_list:
                 for n in n_values:
+                    arena = scaling_world_overrides(protocol, int(n))
                     for d in d_values:
                         for seed in seeds:
                             cells.append(
@@ -120,6 +132,7 @@ def main() -> None:
                                     sensing_range=float(sense) if sense is not None else None,
                                     communication=str(comm) if comm is not None else None,
                                     max_ticks=max_ticks,
+                                    **arena,
                                 )
                             )
 

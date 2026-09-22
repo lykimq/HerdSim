@@ -20,7 +20,7 @@ What we ran, what came out, what to do next.
 
 ## Setup
 
-- Protocol: `scaling_v1` (frozen: )
+- Protocol: `scaling_v2`
 - Task / success rule:
 - Method(s):
 - Layout(s) X0:

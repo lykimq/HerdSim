@@ -195,7 +195,6 @@
   background: #c084fc;
 }
 
-
 .param-item input[type="number"] {
   width: 100%;
   min-width: 0;
@@ -224,7 +223,11 @@
   gap: 0.25rem;
 }
 
-select, input[type="number"], input[type="range"], input[type="text"], input[type="search"] {
+select,
+input[type="number"],
+input[type="range"],
+input[type="text"],
+input[type="search"] {
   width: 100%;
   min-width: 0;
   max-width: 100%;
@@ -248,8 +251,12 @@ select, input[type="number"], input[type="range"], input[type="text"], input[typ
   margin: 0;
 }
 
-.chart-meta-value--cyan { color: #67e8f9; }
-.chart-meta-value--amber { color: #fbbf24; }
+.chart-meta-value--cyan {
+  color: #67e8f9;
+}
+.chart-meta-value--amber {
+  color: #fbbf24;
+}
 
 .param-hint.is-error {
   color: #f87171;

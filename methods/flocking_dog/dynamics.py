@@ -18,9 +18,7 @@ __all__ = [
 ]
 
 
-def sheep_repulsion(
-    positions: np.ndarray, index: int, radius: float
-) -> np.ndarray:
+def sheep_repulsion(positions: np.ndarray, index: int, radius: float) -> np.ndarray:
     """Unit repulsion away from neighbours within radius (normalised sum)."""
     diffs = positions - positions[index]
     dist = np.linalg.norm(diffs, axis=1)

@@ -1,4 +1,4 @@
-"""Frontier extraction: D_min, D_overcrowd, D_max, B*, boundary cells, bootstrap (Cap I2)."""
+"""Frontier extraction: D_min, D_overcrowd, D_max, B*, claim windows, bootstrap (Cap I2)."""
 
 from __future__ import annotations
 
@@ -79,21 +79,20 @@ def _d_max_for_rates(
     return max(below) if below else d_min
 
 
-def select_boundary_cells(
+def select_claim_windows(
     df: pd.DataFrame,
     *,
+    theta: float = 0.90,
     sheep_col: str = "n_sheep",
     dog_col: str = "n_shepherds",
     success_col: str = "success",
     group_cols: list[str] | None = None,
-    low_r: float = 0.80,
-    high_r: float = 0.95,
 ) -> pd.DataFrame:
-    """Select claim-reseed boundary D values from a scout reliability map.
+    """Claim-reseed D values from a scout reliability map.
 
-    Per (group, N), in ordered D-grid order: first D with R > low_r and first
-    with R < high_r (plan D_min procedure step 2). Returns unique (group, N, D)
-    rows; empty when the scout surface has no such crossings.
+    Per (group, N): scout D_min and its grid neighbors; if two consecutive D
+    after that candidate are below theta, those two plus the last D still at
+    or above theta. If no D meets theta, the two largest D.
     """
     groups = list(group_cols or [])
     rates = reliability_table(
@@ -103,8 +102,9 @@ def select_boundary_cells(
         success_col=success_col,
         group_cols=groups,
     )
+    columns = groups + [sheep_col, dog_col, "reliability", "role"]
     if rates.empty:
-        return pd.DataFrame(columns=groups + [sheep_col, dog_col, "reliability", "role"])
+        return pd.DataFrame(columns=columns)
 
     keys = groups + [sheep_col]
     rows: list[dict[str, Any]] = []
@@ -113,29 +113,79 @@ def select_boundary_cells(
             key_vals = (key_vals,)
         meta = dict(zip(keys, key_vals))
         ordered = g.sort_values(dog_col)
-        d_enter = None
-        d_exit = None
-        for _, cell in ordered.iterrows():
-            r = float(cell["reliability"])
-            d = int(cell[dog_col])
-            if d_enter is None and r > low_r:
-                d_enter = d
-            if d_exit is None and r < high_r:
-                d_exit = d
+        ds = [int(v) for v in ordered[dog_col].tolist()]
+        rel = {int(row[dog_col]): float(row["reliability"]) for _, row in ordered.iterrows()}
+        d_min = _d_min_for_rates(pd.Series(rel).sort_index(), theta)
         chosen: dict[int, str] = {}
-        if d_enter is not None:
-            chosen[d_enter] = "enter_above_low_r"
-        if d_exit is not None:
-            chosen[d_exit] = (
-                "exit_below_high_r"
-                if d_exit not in chosen
-                else "enter_and_exit"
-            )
+        if d_min is None:
+            for d in ds[-2:]:
+                chosen[d] = "hard_failure_top"
+        else:
+            idx = ds.index(int(d_min))
+            for j in (idx - 1, idx, idx + 1):
+                if 0 <= j < len(ds):
+                    chosen[ds[j]] = "reliability"
+            d_over = None
+            for i, d in enumerate(ds):
+                if d <= int(d_min) or i + 1 >= len(ds):
+                    continue
+                nxt = ds[i + 1]
+                if rel[d] < theta and rel[nxt] < theta:
+                    d_over = d
+                    break
+            if d_over is not None:
+                i = ds.index(d_over)
+                for d in (d_over, ds[i + 1]):
+                    chosen[d] = "overcrowd" if d not in chosen else f"{chosen[d]}_and_overcrowd"
+                reliable = [d for d in ds if d < d_over and rel[d] >= theta]
+                if reliable:
+                    last = reliable[-1]
+                    if last in chosen:
+                        chosen[last] = f"{chosen[last]}_and_last_reliable"
+                    else:
+                        chosen[last] = "last_reliable"
         for d, role in chosen.items():
-            sub = ordered[ordered[dog_col] == d]
-            r = float(sub.iloc[0]["reliability"]) if not sub.empty else float("nan")
-            rows.append({**meta, dog_col: d, "reliability": r, "role": role})
+            rows.append({**meta, dog_col: d, "reliability": rel[d], "role": role})
     return pd.DataFrame(rows)
+
+
+def merge_scout_and_claim(
+    scout: pd.DataFrame,
+    claim: pd.DataFrame,
+    *,
+    key_cols: list[str] | None = None,
+) -> pd.DataFrame:
+    """Keep claim rows on reseeded cells and scout rows everywhere else."""
+    if claim.empty:
+        return scout.copy()
+    if scout.empty:
+        return claim.copy()
+    keys = key_cols or [
+        c
+        for c in ("method", "initial_layout", "n_sheep", "n_shepherds")
+        if c in scout.columns and c in claim.columns
+    ]
+    claim_keys = claim[keys].drop_duplicates()
+    tagged = scout.merge(claim_keys, on=keys, how="left", indicator=True)
+    kept = tagged[tagged["_merge"] == "left_only"].drop(columns="_merge")
+    return pd.concat([kept, claim], ignore_index=True)
+
+
+def _rank_endpoint(samples: np.ndarray, q: float) -> float:
+    """Nearest-rank percentile. Values may include +inf."""
+    ordered = np.sort(np.asarray(samples, dtype=float))
+    n = len(ordered)
+    if n == 0:
+        return float("nan")
+    idx = int(np.ceil(q * n) - 1)
+    idx = min(max(idx, 0), n - 1)
+    return float(ordered[idx])
+
+
+def _grid_or_above(value: float) -> tuple[int | None, bool]:
+    if not np.isfinite(value):
+        return None, True
+    return int(value), False
 
 
 def bootstrap_d_min_ci(
@@ -152,15 +202,14 @@ def bootstrap_d_min_ci(
 ) -> pd.DataFrame:
     """Bootstrap 95% CI on D_min by resampling seeds within each (N, D) cell.
 
-    Plan step 5: 1,000 resamples of the (claim-grade) seeds. Requires a seed
-    column so each (group, N, D) cell can be resampled with replacement.
+    1,000 resamples. A resample with no D_min stays in the sample as above the
+    largest tested D. Endpoints are nearest-rank grid values.
     """
     groups = list(group_cols or [])
     keys = groups + [sheep_col]
     if df.empty or success_col not in df.columns:
         return pd.DataFrame(
-            columns=keys
-            + ["d_min", "d_min_ci_low", "d_min_ci_high", "n_boot", "n_seeds_ref"]
+            columns=keys + ["d_min", "d_min_ci_low", "d_min_ci_high", "n_boot", "n_seeds_ref"]
         )
 
     rng = np.random.default_rng(seed)
@@ -190,9 +239,7 @@ def bootstrap_d_min_ci(
         n_seeds_ref = 0
         for d, sub in g.groupby(dog_col):
             # One success flag per seed (last wins if duplicates).
-            seed_success = (
-                sub.groupby(seed_col)[success_col].max().astype(float).to_numpy()
-            )
+            seed_success = sub.groupby(seed_col)[success_col].max().astype(float).to_numpy()
             by_d[int(d)] = seed_success
             n_seeds_ref = max(n_seeds_ref, len(seed_success))
 
@@ -221,24 +268,24 @@ def bootstrap_d_min_ci(
                 idx = rng.integers(0, len(vec), size=len(vec))
                 rates[d] = float(np.mean(vec[idx]))
             dmin = _d_min_for_rates(pd.Series(rates).sort_index(), theta)
-            # Use +inf so percentile stays defined when some resamples have no D_min.
             boot_dmins.append(float(dmin) if dmin is not None else float("inf"))
 
-        finite = [x for x in boot_dmins if np.isfinite(x)]
-        if not finite:
-            low = high = None
-        else:
-            low = float(np.percentile(finite, 2.5))
-            high = float(np.percentile(finite, 97.5))
+        samples = np.asarray(boot_dmins, dtype=float)
+        low_raw = _rank_endpoint(samples, 0.025)
+        high_raw = _rank_endpoint(samples, 0.975)
+        low, low_above = _grid_or_above(low_raw)
+        high, high_above = _grid_or_above(high_raw)
         rows.append(
             {
                 **meta,
                 "d_min": point,
                 "d_min_ci_low": low,
                 "d_min_ci_high": high,
+                "d_min_ci_low_above_grid": low_above,
+                "d_min_ci_high_above_grid": high_above,
                 "n_boot": int(n_boot),
                 "n_seeds_ref": int(n_seeds_ref),
-                "n_boot_defined": len(finite),
+                "n_boot_defined": int(np.isfinite(samples).sum()),
             }
         )
     return pd.DataFrame(rows)
@@ -251,7 +298,7 @@ def extract_frontier(
     sheep_col: str = "n_sheep",
     dog_col: str = "n_shepherds",
     success_col: str = "success",
-    effort_col: str = "mean_shepherd_path",
+    effort_col: str = "shepherd_path",
     time_col: str = "first_success_tick",
     time_limit_col: str = "time_limit",
     group_cols: list[str] | None = None,
@@ -288,9 +335,7 @@ def extract_frontier(
         rates = g.groupby(dog_col)[success_col].mean().sort_index()
         d_min = _d_min_for_rates(rates, theta)
         d_overcrowd = _d_overcrowd_for_rates(rates, d_min=d_min, theta=theta)
-        d_max = _d_max_for_rates(
-            rates, d_min=d_min, d_overcrowd=d_overcrowd, theta=theta
-        )
+        d_max = _d_max_for_rates(rates, d_min=d_min, d_overcrowd=d_overcrowd, theta=theta)
 
         b_star_d = None
         b_star_t = None
@@ -301,7 +346,7 @@ def extract_frontier(
             if time_limit_col in g.columns:
                 cell_iter = g.groupby([dog_col, time_limit_col])
             else:
-                cell_iter = (( (d, None), sub) for d, sub in g.groupby(dog_col))
+                cell_iter = (((d, None), sub) for d, sub in g.groupby(dog_col))
             for key, sub in cell_iter:
                 if isinstance(key, tuple):
                     d, t_lim = key
@@ -311,11 +356,7 @@ def extract_frontier(
                 if r < theta:
                     continue
                 effort = float(sub[effort_col].median())
-                t_s = (
-                    float(sub[time_col].median())
-                    if time_col in sub.columns
-                    else float("inf")
-                )
+                t_s = float(sub[time_col].median()) if time_col in sub.columns else float("inf")
                 t_val = (
                     float(t_lim)
                     if t_lim is not None

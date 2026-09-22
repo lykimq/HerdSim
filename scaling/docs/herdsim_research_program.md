@@ -50,7 +50,9 @@ Before diving into RQ-specific grids, we freeze one shared protocol so later com
 - a baseline method and the methods we compare against it,
 - how we estimate the viable shepherd range (minimum for reliable success, and where adding more stops helping or starts hurting).
 
-Frozen defaults: main plan, Section 8.
+Frozen defaults: main plan, Section 8 (`scaling_v2`).
+
+Scaling runs use a 500 by 500 field, flock at the center, goal center `(370, 250)`, and goal radius `15 * sqrt(N/50)`. Scout is 30 seeds on the full N by D grid. Claim reseeds the D_min neighborhood and, when the scout shows it, the overcrowding onset, at 100 seeds. A baseline size map plus the structure contrast is on the order of 20,000 simulations. Each required transfer method (`kubo`, `fat`, beside `strombom_multi`) repeats both. Overcrowding for the baseline is an RQ2 result. Whether other methods show it is RQ4.
 
 ---
 
@@ -132,11 +134,11 @@ Operating regimes (too few / efficient / wasteful / overcrowding) belong with th
 
 ## Short approach
 
-1. Freeze the shared HerdSim protocol.
-2. Sweep flock size and shepherd count with the baseline method; map viable range and regimes.
-3. Hold size fixed and vary initial flock structure so we can separate size from shape / state.
-4. Use run logs to pressure-test candidate mechanisms.
-5. Repeat the same measurements on other herding methods and see what transfers.
+1. Freeze the shared HerdSim protocol (arena, grids, theta, seeds, frontiers).
+2. Sweep flock size and shepherd count with the baseline method on the open-interior arena; map D_min and regimes from the merged scout and claim windows.
+3. Hold size fixed at 50, 100, and 200 and vary initial flock structure.
+4. Use run logs to pressure-test candidate mechanisms at matched N.
+5. Repeat the size map and the structure contrast on `kubo` and `fat`.
 6. Later: information substitution and early-warning tests.
 
 Build order should follow that: protocol + `D_min` pipeline first, then size maps, then structure metrics and matched comparisons, then mechanism logging, then cross-method work. Information / time and heavier summary analysis come later.

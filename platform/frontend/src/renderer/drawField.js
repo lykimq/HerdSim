@@ -1,5 +1,5 @@
-import { Graphics } from 'pixi.js';
-import { log } from '../shared/ui/logger.js';
+import { Graphics } from "pixi.js";
+import { log } from "../shared/ui/logger.js";
 
 /** Major grid spacing in world units (simulation meters / paper units). */
 const GRID_MAJOR = 25;
@@ -18,7 +18,7 @@ export function drawField(ctx) {
   ctx.hudLayer.removeChildren();
   const { s, offsetX, offsetY, pad, w, h } = ctx._scale();
   if (w < 40 || h < 40) {
-    log.debug('pixi', 'Skip field draw; canvas not laid out yet', { w, h });
+    log.debug("pixi", "Skip field draw; canvas not laid out yet", { w, h });
     return;
   }
   const fieldW = ctx.world.width * s;
@@ -83,13 +83,13 @@ export function drawField(ctx) {
     );
   }
   ctx.hudLayer.addChild(
-    ctx._makeLabel('x', offsetX + fieldW / 2, offsetY + fieldH + 20, {
+    ctx._makeLabel("x", offsetX + fieldW / 2, offsetY + fieldH + 20, {
       size: 10,
       fill: 0x64748b,
     }),
   );
   ctx.hudLayer.addChild(
-    ctx._makeLabel('y', Math.max(10, offsetX - pad + 4), offsetY + fieldH / 2, {
+    ctx._makeLabel("y", Math.max(10, offsetX - pad + 4), offsetY + fieldH / 2, {
       size: 10,
       fill: 0x64748b,
       ax: 0.5,
@@ -128,7 +128,12 @@ export function drawField(ctx) {
     const cx = (sx0 + sx1) / 2;
     const cy = (sy0 + sy1) / 2;
     if (ctx.textures.pen) {
-      const fence = ctx._placeSprite(ctx.textures.pen, cx, cy, Math.min(ow, oh));
+      const fence = ctx._placeSprite(
+        ctx.textures.pen,
+        cx,
+        cy,
+        Math.min(ow, oh),
+      );
       fence.width = ow;
       fence.height = oh;
       ctx.fieldLayer.addChild(fence);
@@ -165,7 +170,7 @@ export function drawField(ctx) {
       ctx.fieldLayer.addChild(marker);
     }
     ctx.hudLayer.addChild(
-      ctx._makeLabel('GOAL', sx, sy - gr - 8, {
+      ctx._makeLabel("GOAL", sx, sy - gr - 8, {
         size: 11,
         fill: 0xfca5a5,
         bold: true,

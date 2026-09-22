@@ -118,9 +118,7 @@ def test_fragmentation_is_largest_component_over_n():
     sheep = [[0.0, 0.0], [1.0, 0.0], [50.0, 0.0], [51.0, 0.0]]
     state = make_state(sheep, [[10.0, 10.0]], metadata={"measurement_radius": 2.0})
     assert FragmentationMetric().compute(state) == pytest.approx(0.5)
-    assert largest_component_fraction(np.asarray(sheep, dtype=float), 2.0) == pytest.approx(
-        0.5
-    )
+    assert largest_component_fraction(np.asarray(sheep, dtype=float), 2.0) == pytest.approx(0.5)
 
 
 def test_fragmentation_is_one_when_fully_connected():

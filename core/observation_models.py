@@ -97,9 +97,7 @@ class LocalPositionsObservation(BaseObservationModel):
         other_mask = (other_dist <= radius) & (np.arange(state.n_shepherds) != shepherd_index)
         diffs = state.sheep_positions[sheep_mask] - origin
         distances = np.linalg.norm(diffs, axis=1) if diffs.size else np.zeros(0)
-        bearings = (
-            np.arctan2(diffs[:, 1], diffs[:, 0]) if diffs.size else np.zeros(0)
-        )
+        bearings = np.arctan2(diffs[:, 1], diffs[:, 0]) if diffs.size else np.zeros(0)
         return _base_observation(
             state,
             shepherd_index,
@@ -168,7 +166,7 @@ class IntermittentObservation(BaseObservationModel):
         self, state: SimulationState, shepherd_index: int, config: dict[str, Any]
     ) -> ShepherdObservation:
         freq = max(1, int(config.get("observation_frequency", 1)))
-        last = self._last_tick.get(shepherd_index, -10**9)
+        last = self._last_tick.get(shepherd_index, -(10**9))
         if shepherd_index not in self._cache or state.tick - last >= freq:
             obs = self._inner.observe(state, shepherd_index, config)
             obs.mode = "intermittent"

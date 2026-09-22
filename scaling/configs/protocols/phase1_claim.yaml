@@ -1,12 +1,11 @@
-# Phase-1 claim-grade boundary reseed (RQ2 / Package A).
-# Grade: CLAIM. Do not run until a scout map exists under phase1/scout/.
+# Phase-1 claim windows (RQ2 / Package A).
+# Grade: CLAIM. Run only after phase1/scout/trials.csv exists.
 #
-# Why this protocol: Section 8 D_min procedure. Scout (30 seeds) maps R(N,D);
-# this campaign reseeds only boundary cells at claim_grade_seeds (100) and
-# writes bootstrap CIs. Use:
-#   make -C scaling scaling-claim-plan SCOUT_TRIALS=results/phase1/scout/trials.csv
-#   make -C scaling scaling-claim-reseed SCOUT_TRIALS=... WORKERS=...
-# Do not cite SMOKE/SCOUT runs for C2a/C2b.
+# The runner does not execute this full grid. plan_claim_cells.py keeps, per N:
+# the scout D_min and its grid neighbors, and when the scout shows two
+# consecutive D below theta, those two plus the last D still at or above theta.
+# If no D meets theta, the two largest D only. Seeds are 100.
+# Analysis uses merged_trials.csv: claim rows replace scout rows on those cells.
 
 protocol_id: phase1_claim
 phase: 1
@@ -16,18 +15,11 @@ canonical: scaling/configs/canonical_grid.yaml
 
 methods:
   - strombom_multi
-  # Baseline only until Package A frontiers exist for transfer (RQ4).
 layouts:
   - compact
-  # Hold structure fixed; RQ1 varies X0 after size frontiers are claim-grade.
 flock_sizes: [5, 10, 25, 50, 75, 100, 150, 200, 300, 400]
-# Full freeze N ladder; actual claim jobs are filtered to scout boundary cells.
 shepherd_counts: [1, 2, 3, 4, 6, 10, 15, 20, 25, 35]
-# Full freeze D; plan_claim_cells.py keeps only enter/exit boundary D per N.
 seeds: 100
-# claim_grade_seeds from canonical; explicit here so the YAML is self-describing.
 seed_mode: claim
 store_timeseries: true
-# Needed for later RQ3/RQ7 on contrast cells.
 packages: [A, F]
-# A = claim frontiers + bootstrap; F = scaling fits once D_min is not flat.

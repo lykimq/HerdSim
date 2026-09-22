@@ -21,8 +21,7 @@ class GcmGoalMetric(BaseMetric):
     @property
     def description(self) -> str:
         return (
-            "Euclidean distance from the flock centroid (GCM) to the goal centre, "
-            "in world units."
+            "Euclidean distance from the flock centroid (GCM) to the goal centre, in world units."
         )
 
     @property

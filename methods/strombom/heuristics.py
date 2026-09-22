@@ -41,7 +41,7 @@ def drive_offset(state: SimulationState, config: dict) -> float:
     """Drive stand-off Pd: r_a * sqrt(N) behind the flock (paper Table 1)."""
     if "drive_offset" in config:
         return float(config["drive_offset"])
-    return float(config["r_a"]) * (state.n_sheep ** 0.5)
+    return float(config["r_a"]) * (state.n_sheep**0.5)
 
 
 def collect_target(state: SimulationState, config: dict) -> np.ndarray:
@@ -65,9 +65,7 @@ def shepherd_step_toward(
     """Velocity toward target with paper 3*r_a stop and angular noise."""
     speed = float(config.get("shepherd_speed", 1.5))
     shepherd_pos = state.shepherd_positions[shepherd_idx]
-    min_sheep_dist = float(
-        np.min(np.linalg.norm(state.sheep_positions - shepherd_pos, axis=1))
-    )
+    min_sheep_dist = float(np.min(np.linalg.norm(state.sheep_positions - shepherd_pos, axis=1)))
     stop_multiple = float(config.get("shepherd_stop_multiple", 3.0))
     stop_radius = stop_multiple * float(config.get("r_a", 2.0))
 
@@ -92,9 +90,7 @@ def compute_shepherd_velocity(
     return shepherd_step_toward(state, config, shepherd_idx, target)
 
 
-def strombom_assignment_line(
-    state: SimulationState, config: dict, shepherd_idx: int = 0
-) -> dict:
+def strombom_assignment_line(state: SimulationState, config: dict, shepherd_idx: int = 0) -> dict:
     """Overlay line from herder to Collect sheep or Drive stand-off point."""
     shepherd_pos = state.shepherd_positions[shepherd_idx]
     if should_collect(state, config):
@@ -113,11 +109,6 @@ def strombom_assignment_line(
     }
 
 
-def strombom_assignment_lines(
-    state: SimulationState, config: dict
-) -> list[dict]:
+def strombom_assignment_lines(state: SimulationState, config: dict) -> list[dict]:
     """One assignment line per shepherd using Strombom Collect/Drive targets."""
-    return [
-        strombom_assignment_line(state, config, i)
-        for i in range(state.n_shepherds)
-    ]
+    return [strombom_assignment_line(state, config, i) for i in range(state.n_shepherds)]

@@ -1,5 +1,5 @@
-import { iconImg } from '../../assets/icons.js';
-import { ARENA_DELTA_METRIC_IDS } from '../../shared/charts/metricFormat.js';
+import { iconImg } from "../../assets/icons.js";
+import { ARENA_DELTA_METRIC_IDS } from "../../shared/charts/metricFormat.js";
 
 /** Fair-compare bar + mode help for the Arena view. */
 export function arenaFairBarHtml() {
@@ -9,7 +9,7 @@ export function arenaFairBarHtml() {
         <span class="arena-delta-key">${key}</span>
         <span class="arena-delta-value metric-value" data-delta="${key}">-</span>
       </div>`,
-  ).join('');
+  ).join("");
   return `
     <div class="arena-header">
       <div class="arena-header-top">
@@ -47,10 +47,10 @@ export function arenaFairBarHtml() {
           </div>
         </div>
         <div class="arena-header-actions btn-row arena-fair-actions">
-          <button class="btn" data-role="init-both">${iconImg('release')} Init Both</button>
-          <button class="btn" data-role="play-both">${iconImg('play')} Play Both</button>
-          <button class="btn btn-secondary" data-role="pause-both">${iconImg('pause')} Pause Both</button>
-          <button class="btn btn-secondary" data-role="reset-both">${iconImg('reset')} Reset Both</button>
+          <button class="btn" data-role="init-both">${iconImg("release")} Init Both</button>
+          <button class="btn" data-role="play-both">${iconImg("play")} Play Both</button>
+          <button class="btn btn-secondary" data-role="pause-both">${iconImg("pause")} Pause Both</button>
+          <button class="btn btn-secondary" data-role="reset-both">${iconImg("reset")} Reset Both</button>
         </div>
       </div>
 

@@ -136,6 +136,7 @@ def test_benchmark_run_and_export(client):
     assert any(d["id"] == "first_success_tick" for d in body["csv"])
     assert not any(d["id"] == "cohesion" for d in body["csv"])
 
+
 @pytest.mark.asyncio
 async def test_async_create_session():
     transport = ASGITransport(app=app)
@@ -148,7 +149,7 @@ async def test_async_create_session():
                 "num_sheep": 5,
                 "num_shepherds": 1,
                 "seed": 1,
-                },
+            },
         )
     assert res.status_code == 200
     assert res.json()["session_id"]

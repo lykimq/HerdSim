@@ -72,6 +72,8 @@ class DriveToGoalScenario(BaseScenario):
         measurement_radius = float(config.get("measurement_radius", 5.0))
         r_a = float(config.get("r_a", 2.0))
         lost_threshold = r_a * (float(n_sheep) ** (2.0 / 3.0))
+        goal_center = np.array(config.get("goal_center", [15.0, 15.0]), dtype=float)
+        goal_radius = float(config.get("goal_radius", 15.0))
         sheep_pos = generate_initial_positions(
             int(n_sheep),
             layout,
@@ -82,11 +84,21 @@ class DriveToGoalScenario(BaseScenario):
             lost_threshold=lost_threshold,
             world_width=float(world_width),
             world_height=float(world_height),
+            goal_center=goal_center,
+            goal_radius=goal_radius,
         )
 
-        # Shepherd starts at a distance behind the flock (opposite side from goal)
-        shepherd_offset = config.get("shepherd_start_offset", 50.0)
-        shepherd_base = center + np.array([shepherd_offset, shepherd_offset])
+        # Shepherds start on the side of the flock opposite the goal.
+        # The default corner goal keeps the historical diagonal offset.
+        shepherd_offset = float(config.get("shepherd_start_offset", 50.0))
+        default_corner = np.array([15.0, 15.0])
+        if np.allclose(goal_center, default_corner):
+            shepherd_base = center + np.array([shepherd_offset, shepherd_offset])
+        else:
+            away = center - goal_center
+            norm = float(np.linalg.norm(away))
+            direction = away / norm if norm > 1e-9 else np.array([1.0, 0.0])
+            shepherd_base = center + direction * shepherd_offset
         jitter = config.get("shepherd_jitter", 5.0)
         shepherd_pos = shepherd_base + rng.uniform(-jitter, jitter, size=(n_shepherds, 2))
 

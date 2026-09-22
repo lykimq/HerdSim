@@ -33,16 +33,12 @@ def assign_sheep_response(
     return response
 
 
-def assign_sheep_cohesion(
-    n_sheep: int, config: dict[str, Any]
-) -> np.ndarray:
+def assign_sheep_cohesion(n_sheep: int, config: dict[str, Any]) -> np.ndarray:
     scale = float(config.get("cohesion_scale", 1.0))
     return np.full(n_sheep, scale, dtype=float)
 
 
-def init_agent_attributes(
-    state: SimulationState, config: dict[str, Any]
-) -> SimulationState:
+def init_agent_attributes(state: SimulationState, config: dict[str, Any]) -> SimulationState:
     """Set per-agent arrays on a freshly initialized state."""
     response = assign_sheep_response(state.n_sheep, config, state.rng)
     cohesion = assign_sheep_cohesion(state.n_sheep, config)
@@ -62,9 +58,7 @@ def init_agent_attributes(
     )
 
 
-def apply_failure_factors(
-    state: SimulationState, config: dict[str, Any]
-) -> SimulationState:
+def apply_failure_factors(state: SimulationState, config: dict[str, Any]) -> SimulationState:
     """Update active/speed/sensing masks according to failure_mode."""
     mode = str(config.get("failure_mode", "none"))
     fail_tick = int(config.get("failure_tick", -1))
@@ -92,9 +86,7 @@ def apply_failure_factors(
     )
 
 
-def apply_environment_updates(
-    state: SimulationState, config: dict[str, Any]
-) -> SimulationState:
+def apply_environment_updates(state: SimulationState, config: dict[str, Any]) -> SimulationState:
     """Advance moving goals when goal_mode=moving."""
     if str(config.get("goal_mode", "static")) != "moving":
         return state

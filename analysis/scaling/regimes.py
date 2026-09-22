@@ -24,7 +24,7 @@ def label_regimes(
     sheep_col: str = "n_sheep",
     dog_col: str = "n_shepherds",
     success_col: str = "success",
-    effort_col: str = "mean_shepherd_path",
+    effort_col: str = "shepherd_path",
     group_cols: list[str] | None = None,
 ) -> pd.DataFrame:
     """Label each (group, N, D) cell with a herdability regime.
@@ -86,11 +86,7 @@ def label_regimes(
         efficient_effort = None
         if fr is not None and fr.get("b_star_effort") is not None:
             efficient_effort = float(fr["b_star_effort"])
-        elif (
-            fr is not None
-            and d_min is not None
-            and effort_col in df.columns
-        ):
+        elif fr is not None and d_min is not None and effort_col in df.columns:
             mask = df[sheep_col] == cell[sheep_col]
             for gcol in groups:
                 mask = mask & (df[gcol] == cell[gcol])
@@ -105,39 +101,14 @@ def label_regimes(
                 regime = REGIME_OVERCROWD
             else:
                 regime = REGIME_UNDER
-        else:
-            # Reliable cell.
-            if d_overcrowd is not None and d >= int(d_overcrowd):
-                # Still >= theta but past overcrowding onset: treat as wasteful
-                # if effort is high, else efficient edge.
-                regime = REGIME_EFFICIENT
-            elif (
-                efficient_effort is not None
-                and cell["median_effort"] == cell["median_effort"]
-                and float(cell["median_effort"])
-                >= efficient_effort * (1.0 + wasteful_effort_tol)
-            ):
-                regime = REGIME_WASTEFUL
-            elif d_min is not None and d <= int(d_min) + 1:
-                regime = REGIME_EFFICIENT
-            elif (
-                efficient_effort is not None
-                and cell["median_effort"] == cell["median_effort"]
-                and float(cell["median_effort"])
-                >= efficient_effort * (1.0 + wasteful_effort_tol)
-            ):
-                regime = REGIME_WASTEFUL
-            else:
-                # Reliable above D_min without large effort inflation.
-                regime = REGIME_EFFICIENT
-
-        # Overcrowding collapse overrides when R dropped.
-        if (
-            d_overcrowd is not None
-            and d >= int(d_overcrowd)
-            and r < theta
+        elif (
+            efficient_effort is not None
+            and cell["median_effort"] == cell["median_effort"]
+            and float(cell["median_effort"]) >= efficient_effort * (1.0 + wasteful_effort_tol)
         ):
-            regime = REGIME_OVERCROWD
+            regime = REGIME_WASTEFUL
+        else:
+            regime = REGIME_EFFICIENT
 
         row = {k: cell[k] for k in rates.columns}
         row["regime"] = regime

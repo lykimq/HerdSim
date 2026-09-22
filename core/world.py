@@ -53,6 +53,7 @@ def clamp_goal_center(
 
     return np.array([cx, cy], dtype=float)
 
+
 @dataclass
 class Obstacle:
     """Rectangular obstacle that agents cannot pass through."""
@@ -94,9 +95,7 @@ class World:
 
         return reflected
 
-    def reflect_velocities(
-        self, positions: np.ndarray, velocities: np.ndarray
-    ) -> np.ndarray:
+    def reflect_velocities(self, positions: np.ndarray, velocities: np.ndarray) -> np.ndarray:
         """Reverse velocity components for agents at boundaries."""
         reflected = velocities.copy()
         at_x_boundary = (positions[:, 0] <= 0) | (positions[:, 0] >= self.width)

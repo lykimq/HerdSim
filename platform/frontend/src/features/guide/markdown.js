@@ -2,28 +2,33 @@
 
 function escapeHtml(text) {
   return String(text)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
 function inlineFormat(text) {
   let s = escapeHtml(text);
-  s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
-  s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-  s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" rel="noopener">$1</a>');
+  s = s.replace(/`([^`]+)`/g, "<code>$1</code>");
+  s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  s = s.replace(
+    /\[([^\]]+)\]\(([^)]+)\)/g,
+    '<a href="$2" rel="noopener">$1</a>',
+  );
   return s;
 }
 
 function slugify(text) {
-  return String(text || '')
-    .toLowerCase()
-    .replace(/<[^>]+>/g, '')
-    .replace(/&[a-z]+;/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 80) || 'section';
+  return (
+    String(text || "")
+      .toLowerCase()
+      .replace(/<[^>]+>/g, "")
+      .replace(/&[a-z]+;/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 80) || "section"
+  );
 }
 
 function uniqueSlug(base, used) {
@@ -42,14 +47,14 @@ function uniqueSlug(base, used) {
  * and one card per ## section (with optional ### subsections).
  */
 function structureGuideHtml(blocks) {
-  if (!blocks.length) return '';
+  if (!blocks.length) return "";
 
   const usedSlugs = new Set();
   const pieces = [];
   let i = 0;
 
   // Title
-  let titleHtml = '';
+  let titleHtml = "";
   if (blocks[i] && /^<h1[\s>]/.test(blocks[i])) {
     titleHtml = blocks[i];
     i += 1;
@@ -74,7 +79,9 @@ function structureGuideHtml(blocks) {
     }
     const heading = blocks[i];
     const titleMatch = heading.match(/^<h2[^>]*>([\s\S]*)<\/h2>$/);
-    const titleText = titleMatch ? titleMatch[1].replace(/<[^>]+>/g, '') : 'Section';
+    const titleText = titleMatch
+      ? titleMatch[1].replace(/<[^>]+>/g, "")
+      : "Section";
     const slug = uniqueSlug(slugify(titleText), usedSlugs);
     i += 1;
     const raw = [];
@@ -89,9 +96,9 @@ function structureGuideHtml(blocks) {
     pieces.push('<header class="guide-md-header">');
     if (titleHtml) pieces.push(titleHtml);
     if (lede.length) {
-      pieces.push(`<div class="guide-md-lede">${lede.join('\n')}</div>`);
+      pieces.push(`<div class="guide-md-lede">${lede.join("\n")}</div>`);
     }
-    pieces.push('</header>');
+    pieces.push("</header>");
   }
 
   if (sections.length >= 2) {
@@ -106,7 +113,7 @@ function structureGuideHtml(blocks) {
           `</a></li>`,
       );
     });
-    pieces.push('</ol></nav>');
+    pieces.push("</ol></nav>");
   }
 
   sections.forEach((sec, idx) => {
@@ -114,14 +121,18 @@ function structureGuideHtml(blocks) {
       `<section class="guide-section" id="${sec.slug}" data-guide-section="${sec.slug}">`,
     );
     pieces.push('<div class="guide-section-head">');
-    pieces.push(`<span class="guide-section-index" aria-hidden="true">${idx + 1}</span>`);
+    pieces.push(
+      `<span class="guide-section-index" aria-hidden="true">${idx + 1}</span>`,
+    );
     pieces.push(sec.heading.replace(/^<h2/, `<h2 id="${sec.slug}-title"`));
-    pieces.push('</div>');
-    pieces.push(`<div class="guide-section-body">${wrapSubsections(sec.raw, usedSlugs).join('\n')}</div>`);
-    pieces.push('</section>');
+    pieces.push("</div>");
+    pieces.push(
+      `<div class="guide-section-body">${wrapSubsections(sec.raw, usedSlugs).join("\n")}</div>`,
+    );
+    pieces.push("</section>");
   });
 
-  return pieces.join('\n');
+  return pieces.join("\n");
 }
 
 /** Group ### blocks into guide-subsection cards inside a section body. */
@@ -144,7 +155,9 @@ function wrapSubsections(blocks, usedSlugs) {
     }
     const heading = blocks[i];
     const titleMatch = heading.match(/^<h3[^>]*>([\s\S]*)<\/h3>$/);
-    const titleText = titleMatch ? titleMatch[1].replace(/<[^>]+>/g, '') : 'Subsection';
+    const titleText = titleMatch
+      ? titleMatch[1].replace(/<[^>]+>/g, "")
+      : "Subsection";
     const slug = uniqueSlug(slugify(titleText), usedSlugs);
     i += 1;
     const body = [];
@@ -154,18 +167,21 @@ function wrapSubsections(blocks, usedSlugs) {
     }
     out.push(`<div class="guide-subsection" id="${slug}">`);
     out.push(heading.replace(/^<h3/, `<h3 id="${slug}-title"`));
-    if (body.length) out.push(`<div class="guide-subsection-body">${body.join('\n')}</div>`);
-    out.push('</div>');
+    if (body.length)
+      out.push(`<div class="guide-subsection-body">${body.join("\n")}</div>`);
+    out.push("</div>");
   }
   return out;
 }
 
 export function renderMarkdown(md) {
-  const lines = String(md || '').replace(/\r\n/g, '\n').split('\n');
+  const lines = String(md || "")
+    .replace(/\r\n/g, "\n")
+    .split("\n");
   const out = [];
   let i = 0;
   let inCode = false;
-  let codeLang = '';
+  let codeLang = "";
   let codeBuf = [];
   let inTable = false;
   let tableBuf = [];
@@ -175,18 +191,26 @@ export function renderMarkdown(md) {
     const rows = tableBuf.filter((r) => !/^\s*\|?\s*-/.test(r));
     out.push('<div class="guide-table-wrap"><table>');
     rows.forEach((row, idx) => {
-      const cells = row.replace(/^\|/, '').replace(/\|$/, '').split('|').map((c) => c.trim());
-      const tag = idx === 0 ? 'th' : 'td';
-      out.push('<tr>' + cells.map((c) => `<${tag}>${inlineFormat(c)}</${tag}>`).join('') + '</tr>');
+      const cells = row
+        .replace(/^\|/, "")
+        .replace(/\|$/, "")
+        .split("|")
+        .map((c) => c.trim());
+      const tag = idx === 0 ? "th" : "td";
+      out.push(
+        "<tr>" +
+          cells.map((c) => `<${tag}>${inlineFormat(c)}</${tag}>`).join("") +
+          "</tr>",
+      );
     });
-    out.push('</table></div>');
+    out.push("</table></div>");
     tableBuf = [];
     inTable = false;
   }
 
   function flushCode() {
-    const body = codeBuf.join('\n');
-    if (codeLang === 'mermaid') {
+    const body = codeBuf.join("\n");
+    if (codeLang === "mermaid") {
       out.push(
         `<div class="guide-mermaid"><pre class="mermaid">${escapeHtml(body)}</pre></div>`,
       );
@@ -194,13 +218,13 @@ export function renderMarkdown(md) {
       out.push(`<pre><code>${escapeHtml(body)}</code></pre>`);
     }
     codeBuf = [];
-    codeLang = '';
+    codeLang = "";
     inCode = false;
   }
 
   while (i < lines.length) {
     const line = lines[i];
-    if (line.startsWith('```')) {
+    if (line.startsWith("```")) {
       if (inCode) {
         flushCode();
       } else {
@@ -216,7 +240,7 @@ export function renderMarkdown(md) {
       i += 1;
       continue;
     }
-    if (line.trim().startsWith('|')) {
+    if (line.trim().startsWith("|")) {
       inTable = true;
       tableBuf.push(line);
       i += 1;
@@ -224,27 +248,31 @@ export function renderMarkdown(md) {
     }
     if (inTable) flushTable();
 
-    if (/^#### /.test(line)) out.push(`<h4>${inlineFormat(line.slice(5))}</h4>`);
-    else if (/^### /.test(line)) out.push(`<h3>${inlineFormat(line.slice(4))}</h3>`);
-    else if (/^## /.test(line)) out.push(`<h2>${inlineFormat(line.slice(3))}</h2>`);
-    else if (/^# /.test(line)) out.push(`<h1>${inlineFormat(line.slice(2))}</h1>`);
+    if (/^#### /.test(line))
+      out.push(`<h4>${inlineFormat(line.slice(5))}</h4>`);
+    else if (/^### /.test(line))
+      out.push(`<h3>${inlineFormat(line.slice(4))}</h3>`);
+    else if (/^## /.test(line))
+      out.push(`<h2>${inlineFormat(line.slice(3))}</h2>`);
+    else if (/^# /.test(line))
+      out.push(`<h1>${inlineFormat(line.slice(2))}</h1>`);
     else if (/^[-*] /.test(line)) {
       const items = [];
       while (i < lines.length && /^[-*] /.test(lines[i])) {
         items.push(`<li>${inlineFormat(lines[i].slice(2))}</li>`);
         i += 1;
       }
-      out.push(`<ul>${items.join('')}</ul>`);
+      out.push(`<ul>${items.join("")}</ul>`);
       continue;
     } else if (/^\d+\. /.test(line)) {
       const items = [];
       while (i < lines.length && /^\d+\. /.test(lines[i])) {
-        items.push(`<li>${inlineFormat(lines[i].replace(/^\d+\. /, ''))}</li>`);
+        items.push(`<li>${inlineFormat(lines[i].replace(/^\d+\. /, ""))}</li>`);
         i += 1;
       }
-      out.push(`<ol>${items.join('')}</ol>`);
+      out.push(`<ol>${items.join("")}</ol>`);
       continue;
-    } else if (line.trim() === '') {
+    } else if (line.trim() === "") {
       // skip blank lines between blocks
     } else out.push(`<p>${inlineFormat(line)}</p>`);
     i += 1;

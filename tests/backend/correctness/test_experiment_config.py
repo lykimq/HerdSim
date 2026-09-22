@@ -28,9 +28,7 @@ def test_paper_preset_keeps_algorithm_agent_counts():
 def test_paper_preset_uses_scenario_world_layout():
     preset = get_method("strombom")
     scen = ObstacleCourseScenario()
-    config = resolve_experiment_config(
-        scenario=scen, method="strombom", preset="paper"
-    )
+    config = resolve_experiment_config(scenario=scen, method="strombom", preset="paper")
     assert config["n_sheep"] == preset["default_config"]["n_sheep"]
     assert config["goal_center"] == scen.default_config["goal_center"]
     assert config["obstacles"] == scen.default_config["obstacles"]
@@ -39,9 +37,7 @@ def test_paper_preset_uses_scenario_world_layout():
 
 def test_scenario_preset_overlays_world_and_counts():
     scen = ObstacleCourseScenario()
-    config = resolve_experiment_config(
-        scenario=scen, method="kubo", preset="scenario"
-    )
+    config = resolve_experiment_config(scenario=scen, method="kubo", preset="scenario")
     assert config["n_sheep"] == scen.default_config["n_sheep"]
     assert config["goal_center"] == scen.default_config["goal_center"]
     assert "obstacles" in config
@@ -86,9 +82,7 @@ def test_kubo_paper_keeps_force_params_under_narrow_gate_world():
 
     preset = get_method("kubo")
     scen = NarrowGateScenario()
-    config = resolve_experiment_config(
-        scenario=scen, method="kubo", preset="paper"
-    )
+    config = resolve_experiment_config(scenario=scen, method="kubo", preset="paper")
     assert config["K_f4"] == preset["default_config"]["K_f4"]
     assert config["dog_speed_max"] == preset["default_config"]["dog_speed_max"]
     assert config["n_shepherds"] == 4

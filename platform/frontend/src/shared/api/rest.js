@@ -1,38 +1,38 @@
 /** REST client for HerdSim API. */
 
-import { log } from '../ui/logger.js';
+import { log } from "../ui/logger.js";
 
 async function apiFetch(path, options = {}) {
-  const method = options.method || 'GET';
-  log.debug('api', `${method} ${path}`);
+  const method = options.method || "GET";
+  log.debug("api", `${method} ${path}`);
   let res;
   try {
     res = await fetch(path, options);
   } catch (err) {
     const msg = `Network error calling ${path} (is the API on :8000 running?)`;
-    log.error('api', msg, err);
+    log.error("api", msg, err);
     throw new Error(msg);
   }
   if (!res.ok) {
     const detail = await res.text();
-    log.error('api', `${method} ${path} -> ${res.status}`, detail);
+    log.error("api", `${method} ${path} -> ${res.status}`, detail);
     throw new Error(detail || `${method} ${path} failed (${res.status})`);
   }
   return res;
 }
 
 export async function checkApiHealth() {
-  const res = await apiFetch('/api/health');
+  const res = await apiFetch("/api/health");
   return res.json();
 }
 
 export async function fetchMethods() {
-  const res = await apiFetch('/api/methods');
+  const res = await apiFetch("/api/methods");
   return res.json();
 }
 
 export async function fetchModels() {
-  const res = await apiFetch('/api/methods/meta/models');
+  const res = await apiFetch("/api/methods/meta/models");
   return res.json();
 }
 
@@ -42,46 +42,46 @@ export async function fetchMethod(methodId) {
 }
 
 export async function fetchScenarios() {
-  const res = await apiFetch('/api/scenarios');
+  const res = await apiFetch("/api/scenarios");
   return res.json();
 }
 
 export async function fetchMetrics() {
-  const res = await apiFetch('/api/metrics');
+  const res = await apiFetch("/api/metrics");
   return res.json();
 }
 
 export async function createSession(payload) {
-  const res = await apiFetch('/api/simulations', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+  const res = await apiFetch("/api/simulations", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
   return res.json();
 }
 
 export async function runBenchmark(payload, { onEvent } = {}) {
-  const res = await apiFetch('/api/benchmarks/run?stream=1', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+  const res = await apiFetch("/api/benchmarks/run?stream=1", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
 
   const reader = res.body?.getReader();
   if (!reader) {
-    throw new Error('Benchmark stream not available');
+    throw new Error("Benchmark stream not available");
   }
 
   const decoder = new TextDecoder();
-  let buffer = '';
+  let buffer = "";
   let donePayload = null;
 
   while (true) {
     const { value, done } = await reader.read();
     if (done) break;
     buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split('\n');
-    buffer = lines.pop() || '';
+    const lines = buffer.split("\n");
+    buffer = lines.pop() || "";
     for (const line of lines) {
       const trimmed = line.trim();
       if (!trimmed) continue;
@@ -89,14 +89,14 @@ export async function runBenchmark(payload, { onEvent } = {}) {
       try {
         event = JSON.parse(trimmed);
       } catch (err) {
-        log.warn('api', 'Bad benchmark stream line', trimmed);
+        log.warn("api", "Bad benchmark stream line", trimmed);
         continue;
       }
       onEvent?.(event);
-      if (event.type === 'done') {
+      if (event.type === "done") {
         donePayload = { rows: event.rows, summary: event.summary };
-      } else if (event.type === 'error') {
-        throw new Error(event.message || 'Benchmark failed');
+      } else if (event.type === "error") {
+        throw new Error(event.message || "Benchmark failed");
       }
     }
   }
@@ -105,14 +105,14 @@ export async function runBenchmark(payload, { onEvent } = {}) {
     try {
       const event = JSON.parse(buffer.trim());
       onEvent?.(event);
-      if (event.type === 'done') {
+      if (event.type === "done") {
         donePayload = { rows: event.rows, summary: event.summary };
-      } else if (event.type === 'error') {
-        throw new Error(event.message || 'Benchmark failed');
+      } else if (event.type === "error") {
+        throw new Error(event.message || "Benchmark failed");
       }
     } catch (err) {
       if (err instanceof SyntaxError) {
-        log.warn('api', 'Trailing benchmark stream junk', buffer);
+        log.warn("api", "Trailing benchmark stream junk", buffer);
       } else {
         throw err;
       }
@@ -120,50 +120,50 @@ export async function runBenchmark(payload, { onEvent } = {}) {
   }
 
   if (!donePayload) {
-    throw new Error('Benchmark ended without a result');
+    throw new Error("Benchmark ended without a result");
   }
   return donePayload;
 }
 
 export async function fetchBenchmarkDefinitions() {
-  return apiFetch('/api/benchmarks/definitions').then((r) => r.json());
+  return apiFetch("/api/benchmarks/definitions").then((r) => r.json());
 }
 
-export async function exportBenchmark(format = 'json') {
+export async function exportBenchmark(format = "json") {
   const res = await apiFetch(`/api/benchmarks/export?format=${format}`);
-  if (format === 'json') return res.json();
+  if (format === "json") return res.json();
   return res.text();
 }
 
 export async function fetchNetLogoModels() {
-  const res = await apiFetch('/api/netlogo/models');
+  const res = await apiFetch("/api/netlogo/models");
   return res.json();
 }
 
 export async function fetchNetLogoTwins() {
-  const res = await apiFetch('/api/netlogo/twins');
+  const res = await apiFetch("/api/netlogo/twins");
   return res.json();
 }
 
 export async function fetchNetLogoStatus() {
-  const res = await apiFetch('/api/netlogo/status');
+  const res = await apiFetch("/api/netlogo/status");
   return res.json();
 }
 
 export async function uploadNetLogoModel(file) {
   const body = new FormData();
-  body.append('file', file);
-  const res = await apiFetch('/api/netlogo/upload', {
-    method: 'POST',
+  body.append("file", file);
+  const res = await apiFetch("/api/netlogo/upload", {
+    method: "POST",
     body,
   });
   return res.json();
 }
 
-export async function openNetLogoDesktop({ model_file, netlogo_home = '' }) {
-  const res = await apiFetch('/api/netlogo/open', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+export async function openNetLogoDesktop({ model_file, netlogo_home = "" }) {
+  const res = await apiFetch("/api/netlogo/open", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       model_file,
       netlogo_home: netlogo_home || null,
@@ -173,7 +173,7 @@ export async function openNetLogoDesktop({ model_file, netlogo_home = '' }) {
 }
 
 export async function fetchDocIndex() {
-  const res = await apiFetch('/api/docs');
+  const res = await apiFetch("/api/docs");
   return res.json();
 }
 

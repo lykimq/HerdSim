@@ -70,7 +70,7 @@ def test_collect_target_is_behind_furthest_sheep():
 def test_drive_offset_is_ra_sqrt_n():
     sheep = [[40.0, 0.0], [42.0, 0.0], [41.0, 1.0], [39.0, -1.0]]
     state = make_state(sheep, [[60.0, 0.0]], world=make_world(goal_center=(0.0, 0.0)))
-    assert drive_offset(state, {"r_a": 2.0}) == pytest.approx(2.0 * (4 ** 0.5))
+    assert drive_offset(state, {"r_a": 2.0}) == pytest.approx(2.0 * (4**0.5))
 
 
 def test_drive_target_is_behind_gcm_from_goal():
@@ -79,7 +79,7 @@ def test_drive_target_is_behind_gcm_from_goal():
     state = make_state(sheep, [[60.0, 0.0]], world=world)
     target = drive_target(state, {"r_a": 2.0})
     assert target[0] > state.sheep_centroid[0]
-    expected_offset = 2.0 * (3 ** 0.5)
+    expected_offset = 2.0 * (3**0.5)
     gcm = state.sheep_centroid
     assert abs(np.linalg.norm(target - gcm) - expected_offset) < 1e-6
 

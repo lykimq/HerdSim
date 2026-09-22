@@ -49,9 +49,7 @@ class SimulationState:
         if self.shepherd_sensing_scale is None:
             self.shepherd_sensing_scale = np.ones(m, dtype=float)
         else:
-            self.shepherd_sensing_scale = np.asarray(
-                self.shepherd_sensing_scale, dtype=float
-            )
+            self.shepherd_sensing_scale = np.asarray(self.shepherd_sensing_scale, dtype=float)
         if self.shepherd_active is None:
             self.shepherd_active = np.ones(m, dtype=bool)
         else:

@@ -4,8 +4,11 @@ from __future__ import annotations
 
 from typing import Any
 
+import warnings
+
 import numpy as np
 import pandas as pd
+from scipy.optimize import curve_fit
 
 
 def _rmse(y: np.ndarray, yhat: np.ndarray) -> float:
@@ -20,26 +23,48 @@ def _bic(sse: float, m: int, k: int) -> float:
     return float(k * np.log(max(m, 1)) + m * np.log(sse / m + 1e-12))
 
 
-def _leave_one_out_rmse(
+def _leave_one_n_rmse(
     n: np.ndarray,
     d: np.ndarray,
     predict_fn,
 ) -> float | None:
-    """LOO-CV RMSE; None when fewer than 3 points."""
-    m = len(d)
-    if m < 3:
+    """Leave-one-flock-size RMSE. None when fewer than 3 distinct N."""
+    unique = np.unique(n)
+    if len(unique) < 3:
         return None
     errs = []
-    for i in range(m):
-        mask = np.ones(m, dtype=bool)
-        mask[i] = False
-        yhat_i = predict_fn(n[mask], d[mask], float(n[i]))
-        if yhat_i is None:
+    for held in unique:
+        mask = n != held
+        if int(mask.sum()) < 2:
             continue
-        errs.append((float(d[i]) - float(yhat_i)) ** 2)
+        for n_i, d_i in zip(n[~mask], d[~mask]):
+            yhat_i = predict_fn(n[mask], d[mask], float(n_i))
+            if yhat_i is None or yhat_i != yhat_i:
+                continue
+            errs.append((float(d_i) - float(yhat_i)) ** 2)
     if not errs:
         return None
     return float(np.sqrt(np.mean(errs)))
+
+
+def _power_predict(n_tr: np.ndarray, d_tr: np.ndarray, n_i: float) -> float | None:
+    """Power law fit by linear-space least squares."""
+    ok = (n_tr > 0) & (d_tr > 0)
+    if int(ok.sum()) < 2 or n_i <= 0:
+        return None
+    nn = n_tr[ok]
+    dd = d_tr[ok]
+    log_alpha, log_a = np.polyfit(np.log(nn), np.log(dd), 1)
+    guess = (float(np.exp(log_a)), float(log_alpha))
+
+    def _model(x, A, alpha):
+        return A * np.power(x, alpha)
+
+    try:
+        (A, alpha), _ = curve_fit(_model, nn, dd, p0=guess, maxfev=4000)
+    except (RuntimeError, ValueError):
+        A, alpha = guess
+    return float(A * (n_i**alpha))
 
 
 def _fit_piecewise(n: np.ndarray, d: np.ndarray) -> dict[str, Any] | None:
@@ -57,8 +82,10 @@ def _fit_piecewise(n: np.ndarray, d: np.ndarray) -> dict[str, Any] | None:
         n2, d2 = n_s[i + 1 :], d_s[i + 1 :]
         if len(n1) < 2 or len(n2) < 2:
             continue
-        b1, a1 = np.polyfit(n1, d1, 1)
-        b2, a2 = np.polyfit(n2, d2, 1)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", np.exceptions.RankWarning)
+            b1, a1 = np.polyfit(n1, d1, 1)
+            b2, a2 = np.polyfit(n2, d2, 1)
         yhat = np.empty(m)
         yhat[: i + 1] = a1 + b1 * n1
         yhat[i + 1 :] = a2 + b2 * n2
@@ -135,55 +162,75 @@ def fit_scaling_models(
             "bic": _bic(sse, m, 2),
         }
 
-    # Power law D = A * N^alpha
+    # Power law D = A * N^alpha, least squares in D (same space as the other models).
     mask = (n > 0) & (d > 0)
     if int(mask.sum()) >= 2:
         nn = n[mask]
         dd = d[mask]
-        alpha, log_a = np.polyfit(np.log(nn), np.log(dd), 1)
-        A = float(np.exp(log_a))
-        yhat = A * (n ** alpha)
-        sse = float(np.sum((d - yhat) ** 2))
+        log_alpha, log_a = np.polyfit(np.log(nn), np.log(dd), 1)
+        guess = (float(np.exp(log_a)), float(log_alpha))
+
+        def _model(x, A, alpha):
+            return A * np.power(x, alpha)
+
+        try:
+            (A, alpha), _ = curve_fit(_model, nn, dd, p0=guess, maxfev=4000)
+        except (RuntimeError, ValueError):
+            A, alpha = guess
+        yhat = np.full_like(d, np.nan, dtype=float)
+        yhat[mask] = A * np.power(nn, alpha)
+        sse = float(np.nansum((d - yhat) ** 2))
+        scored = d[mask]
         models["power"] = {
-            "params": {"A": A, "alpha": float(alpha)},
-            "rmse": _rmse(d, yhat),
-            "aic": _aic(sse, m, 2),
-            "bic": _bic(sse, m, 2),
+            "params": {
+                "A": float(A),
+                "alpha": float(alpha),
+                "log_log_slope": float(log_alpha),
+            },
+            "rmse": _rmse(scored, yhat[mask]),
+            "aic": _aic(sse, int(mask.sum()), 2),
+            "bic": _bic(sse, int(mask.sum()), 2),
         }
 
     piecewise = _fit_piecewise(n, d)
     if piecewise is not None:
         models["piecewise"] = piecewise
 
-    best = min(models.items(), key=lambda kv: kv[1]["aic"])[0] if models else None
+    def _pred_const(n_tr, d_tr, n_i):
+        return float(np.mean(d_tr))
 
-    # LOO-CV for models with closed-form refits.
+    def _pred_linear(n_tr, d_tr, n_i):
+        if len(d_tr) < 2:
+            return None
+        b_, a_ = np.polyfit(n_tr, d_tr, 1)
+        return float(a_ + b_ * n_i)
+
+    def _pred_piecewise(n_tr, d_tr, n_i):
+        fitted = _fit_piecewise(n_tr, d_tr)
+        if fitted is None:
+            return None
+        params = fitted["params"]
+        if float(n_i) <= float(params["break_n"]):
+            return float(params["a1"] + params["b1"] * n_i)
+        return float(params["a2"] + params["b2"] * n_i)
+
     cv: dict[str, Any] = {}
-    if m >= 3:
+    for name, fn in (
+        ("constant", _pred_const),
+        ("linear", _pred_linear),
+        ("power", _power_predict),
+        ("piecewise", _pred_piecewise),
+    ):
+        if name in models:
+            cv[name] = _leave_one_n_rmse(n, d, fn)
 
-        def _pred_const(n_tr, d_tr, n_i):
-            return float(np.mean(d_tr))
-
-        def _pred_linear(n_tr, d_tr, n_i):
-            if len(d_tr) < 2:
-                return None
-            b_, a_ = np.polyfit(n_tr, d_tr, 1)
-            return float(a_ + b_ * n_i)
-
-        def _pred_power(n_tr, d_tr, n_i):
-            ok = (n_tr > 0) & (d_tr > 0)
-            if int(ok.sum()) < 2 or n_i <= 0:
-                return None
-            alpha_, log_a_ = np.polyfit(np.log(n_tr[ok]), np.log(d_tr[ok]), 1)
-            return float(np.exp(log_a_) * (n_i ** alpha_))
-
-        for name, fn in (
-            ("constant", _pred_const),
-            ("linear", _pred_linear),
-            ("power", _pred_power),
-        ):
-            if name in models:
-                cv[name] = _leave_one_out_rmse(n, d, fn)
+    scored = {name: rmse for name, rmse in cv.items() if rmse is not None}
+    if scored:
+        best = min(scored.items(), key=lambda kv: kv[1])[0]
+    elif models:
+        best = min(models.items(), key=lambda kv: kv[1]["rmse"])[0]
+    else:
+        best = None
 
     # State-conditioned power laws (compact vs other X0, etc.).
     state_models: dict[str, Any] = {}
@@ -215,6 +262,19 @@ def fit_scaling_models(
                 continue
             delta_aic[name] = float(payload["aic"] - models["power"]["aic"])
 
+    power_loo = cv.get("power")
+    piece_loo = cv.get("piecewise")
+    separate_loo = _separate_curve_loo(
+        work, state_col=state_col, sheep_col=sheep_col, dmin_col=dmin_col
+    )
+    if separate_loo is not None:
+        cv["separate_curves"] = separate_loo
+    prefers = False
+    if power_loo is not None and piece_loo is not None and piece_loo < power_loo:
+        prefers = True
+    if power_loo is not None and separate_loo is not None and separate_loo < power_loo:
+        prefers = True
+
     return {
         "models": models,
         "best": best,
@@ -222,8 +282,42 @@ def fit_scaling_models(
         "state_models": state_models,
         "cv": cv,
         "delta_aic_vs_power": delta_aic,
-        "prefers_piecewise_or_state": bool(
-            (best in ("piecewise",) and delta_aic.get("piecewise", 0) < -10)
-            or bool(state_models)
-        ),
+        "prefers_piecewise_or_state": prefers,
     }
+
+
+def _separate_curve_loo(
+    work: pd.DataFrame,
+    *,
+    state_col: str | None,
+    sheep_col: str,
+    dmin_col: str,
+) -> float | None:
+    """Leave-one-N RMSE of a separate power law per layout."""
+    if (
+        state_col is None
+        or state_col not in work.columns
+        or work[state_col].nunique(dropna=True) < 2
+    ):
+        return None
+    n = work[sheep_col].astype(float).to_numpy()
+    unique = np.unique(n)
+    if len(unique) < 3:
+        return None
+    errs = []
+    for held in unique:
+        train = work[work[sheep_col] != held]
+        test = work[work[sheep_col] == held]
+        for _, row in test.iterrows():
+            sub = train[train[state_col] == row[state_col]]
+            yhat = _power_predict(
+                sub[sheep_col].astype(float).to_numpy(),
+                sub[dmin_col].astype(float).to_numpy(),
+                float(row[sheep_col]),
+            )
+            if yhat is None:
+                continue
+            errs.append((float(row[dmin_col]) - yhat) ** 2)
+    if not errs:
+        return None
+    return float(np.sqrt(np.mean(errs)))

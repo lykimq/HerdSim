@@ -18,10 +18,7 @@ class MinSeparationMetric(BaseMetric):
 
     @property
     def description(self) -> str:
-        return (
-            "Minimum pairwise distance between any two sheep (collision risk), "
-            "in world units."
-        )
+        return "Minimum pairwise distance between any two sheep (collision risk), in world units."
 
     @property
     def unit(self) -> str:

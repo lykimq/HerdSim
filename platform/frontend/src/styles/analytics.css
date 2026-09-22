@@ -146,8 +146,14 @@
   gap: 0.5rem;
 }
 
-.algo-card h3 { font-size: 1.05rem; }
-.algo-card p { color: var(--text-muted); font-size: 0.85rem; line-height: 1.4; }
+.algo-card h3 {
+  font-size: 1.05rem;
+}
+.algo-card p {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
 
 .check-list {
   display: flex;
