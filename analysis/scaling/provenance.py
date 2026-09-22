@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import subprocess
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -42,7 +42,7 @@ def build_provenance_stamp(
     """Build a reproducible provenance record for a scaling protocol."""
     stamp: dict[str, Any] = {
         "protocol_id": protocol_id,
-        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
         "git_hash": _git_hash(repo_root),
         "protocol": dict(protocol),
         "protocol_hash": config_hash(protocol),

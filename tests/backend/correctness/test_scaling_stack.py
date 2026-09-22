@@ -7,6 +7,13 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pytest
+from services.scaling.campaign import (
+    find_protocol_path,
+    resolve_upstream_trials,
+    runner_kind,
+)
+from services.scaling.layout import PROTOCOLS_DIR, load_protocol_spec
+from services.scaling.runner import load_canonical_protocol, resolve_cell_max_ticks
 
 from analysis.scaling.early_warning import (
     default_eval_ticks,
@@ -15,6 +22,7 @@ from analysis.scaling.early_warning import (
     summarise_early_warning,
 )
 from analysis.scaling.export import export_package_a
+from analysis.scaling.fits import fit_scaling_models
 from analysis.scaling.frontier import (
     bootstrap_d_min_ci,
     extract_frontier,
@@ -28,7 +36,6 @@ from analysis.scaling.mechanism import (
 )
 from analysis.scaling.predictors import compare_state_vs_nd_predictors
 from analysis.scaling.regimes import label_regimes
-from analysis.scaling.fits import fit_scaling_models
 from analysis.scaling.substitution import OBS_LADDER, substitution_curves
 from analysis.scaling.transfer import build_transfer_table
 from core.x0_generators import generate_initial_positions, normalize_layout
@@ -40,13 +47,6 @@ from plugins.metrics.outlier_count import OutlierCountMetric
 from plugins.metrics.registry import metric_registry
 from plugins.metrics.shepherd_coverage import ShepherdCoverageMetric
 from plugins.metrics.shepherd_interference import ShepherdInterferenceMetric
-from services.scaling.campaign import (
-    find_protocol_path,
-    resolve_upstream_trials,
-    runner_kind,
-)
-from services.scaling.layout import PROTOCOLS_DIR, load_protocol_spec
-from services.scaling.runner import load_canonical_protocol, resolve_cell_max_ticks
 from tests.backend.helpers import make_state, make_world
 
 

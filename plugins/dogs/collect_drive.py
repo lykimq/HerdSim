@@ -6,6 +6,9 @@ from typing import Any
 
 import numpy as np
 
+from core.dog_controller import BaseDogController
+from core.observation import ShepherdObservation
+from core.simulation_state import SimulationState
 from methods.strombom.config import STROMBOM_DEFAULTS
 from methods.strombom.heuristics import (
     compute_shepherd_velocity,
@@ -13,9 +16,6 @@ from methods.strombom.heuristics import (
     strombom_assignment_lines,
 )
 from plugins.dogs.helpers import apply_dog_speeds, empty_dog_velocities, view_from_observation
-from core.dog_controller import BaseDogController
-from core.observation import ShepherdObservation
-from core.simulation_state import SimulationState
 
 
 class CollectDriveController(BaseDogController):

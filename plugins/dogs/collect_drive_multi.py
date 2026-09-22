@@ -6,6 +6,11 @@ from typing import Any
 
 import numpy as np
 
+from core.agents.goal import resolve_goal_center
+from core.agents.shepherd import position_behind_target
+from core.dog_controller import BaseDogController
+from core.observation import ShepherdObservation
+from core.simulation_state import SimulationState
 from methods.strombom.config import STROMBOM_DEFAULTS
 from methods.strombom.heuristics import (
     collect_offset,
@@ -14,11 +19,6 @@ from methods.strombom.heuristics import (
     shepherd_step_toward,
 )
 from plugins.dogs.helpers import apply_dog_speeds, empty_dog_velocities
-from core.agents.goal import resolve_goal_center
-from core.agents.shepherd import position_behind_target
-from core.dog_controller import BaseDogController
-from core.observation import ShepherdObservation
-from core.simulation_state import SimulationState
 
 
 def _sensing_radius(config: dict[str, Any]) -> float:

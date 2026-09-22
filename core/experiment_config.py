@@ -6,8 +6,8 @@ from typing import Any
 
 from core.base_scenario import BaseScenario
 from core.experimental_factors import ExperimentalFactors
-from core.plugin_registry import dog_controller_registry, sheep_dynamics_registry
 from core.methods import get_method
+from core.plugin_registry import dog_controller_registry, sheep_dynamics_registry
 from core.shared_defaults import (
     SHARED_WORLD_DEFAULTS,
     WORLD_KEYS,

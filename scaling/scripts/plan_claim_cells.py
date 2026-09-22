@@ -8,12 +8,6 @@ import json
 from pathlib import Path
 
 import pandas as pd
-
-from analysis.scaling.frontier import (
-    bootstrap_d_min_ci,
-    merge_scout_and_claim,
-    select_claim_windows,
-)
 from services.scaling.layout import (
     PROTOCOLS_DIR,
     copy_protocol_spec,
@@ -27,6 +21,12 @@ from services.scaling.runner import (
     resolve_cell_max_ticks,
     run_scaling_grid,
     scaling_group_cols,
+)
+
+from analysis.scaling.frontier import (
+    bootstrap_d_min_ci,
+    merge_scout_and_claim,
+    select_claim_windows,
 )
 
 

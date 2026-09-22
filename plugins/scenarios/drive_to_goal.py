@@ -24,7 +24,10 @@ class DriveToGoalScenario(BaseScenario):
 
     @property
     def description(self) -> str:
-        return "Herd all sheep into a circular goal zone near the field origin (corner). Grid lines are display-only world-unit markers."
+        return (
+            "Herd all sheep into a circular goal zone near the field origin "
+            "(corner). Grid lines are display-only world-unit markers."
+        )
 
     @property
     def default_config(self) -> dict[str, Any]:

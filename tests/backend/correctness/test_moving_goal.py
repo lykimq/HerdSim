@@ -5,8 +5,7 @@ from __future__ import annotations
 import numpy as np
 
 from core.agent_attributes import apply_environment_updates
-from core.simulation_state import SimulationState
-from core.world import GoalZone, World, clamp_goal_center
+from core.world import clamp_goal_center
 from tests.backend.helpers import make_state, make_world
 
 

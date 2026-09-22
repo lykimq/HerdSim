@@ -6,12 +6,12 @@ from pathlib import Path
 
 import pytest
 
+from core.methods import METHODS
 from methods.netlogo.bridge import (
     find_netlogo_gui_launcher,
     find_netlogo_home,
     resolve_model_path,
 )
-from core.methods import METHODS
 
 
 def test_netlogo_not_registered_as_herdsim_algorithm():

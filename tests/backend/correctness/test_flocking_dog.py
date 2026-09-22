@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import numpy as np
 
+from core.agents.sheep import nearest_neighbor_indices
+from core.methods import get_method
+from core.observation_models import GlobalObservation
 from methods.flocking_dog.dynamics import sheep_repulsion
 from plugins.dogs.collect_drive import CollectDriveController
-from core.agents.sheep import nearest_neighbor_indices
-from core.observation_models import GlobalObservation
-from core.methods import get_method
 from plugins.sheep.jadhav import JadhavSheepDynamics
 from tests.backend.helpers import make_state, make_world
 

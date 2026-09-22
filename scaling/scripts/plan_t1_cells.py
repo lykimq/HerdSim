@@ -8,8 +8,6 @@ import json
 from pathlib import Path
 
 import pandas as pd
-
-from analysis.scaling.frontier import select_t1_windows
 from services.scaling.layout import (
     PROTOCOLS_DIR,
     copy_protocol_spec,
@@ -24,6 +22,8 @@ from services.scaling.runner import (
     run_scaling_grid,
     scaling_group_cols,
 )
+
+from analysis.scaling.frontier import select_t1_windows
 
 
 def main() -> None:

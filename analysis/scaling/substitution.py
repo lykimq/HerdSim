@@ -8,7 +8,6 @@ import pandas as pd
 
 from analysis.scaling.frontier import extract_frontier
 
-
 # Ordinal ladders from the main plan (RQ5). Higher index = richer / farther / more shared.
 OBS_LADDER = (
     "bearing_only",

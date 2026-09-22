@@ -8,7 +8,6 @@ import pandas as pd
 
 from analysis.scaling.frontier import extract_frontier, reliability_table
 
-
 REGIME_UNDER = "under_resourced_failure"
 REGIME_EFFICIENT = "efficient_operation"
 REGIME_WASTEFUL = "wasteful_overspend"

@@ -14,7 +14,6 @@ from typing import Any
 
 import numpy as np
 
-from methods.strombom.config import STROMBOM_DEFAULTS
 from core.agents.sheep import (
     compose_strombom_heading,
     compute_attraction,
@@ -26,6 +25,7 @@ from core.agents.sheep import (
 )
 from core.sheep_dynamics import BaseSheepDynamics
 from core.simulation_state import SimulationState
+from methods.strombom.config import STROMBOM_DEFAULTS
 
 
 class StrombomSheepDynamics(BaseSheepDynamics):

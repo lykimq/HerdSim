@@ -4,15 +4,15 @@ from __future__ import annotations
 
 import numpy as np
 
+from core.methods import METHODS
+from core.observation_models import GlobalObservation
+from core.world import Obstacle
 from methods.obstacle_aware.geometry import (
     deflect_drive_point,
     find_gate_gap_center,
     segment_intersects_aabb,
 )
 from plugins.dogs.obstacle_aware_drive import ObstacleAwareDriveController
-from core.observation_models import GlobalObservation
-from core.methods import METHODS, get_method
-from core.world import Obstacle
 from tests.backend.helpers import (
     build_runner,
     make_state,

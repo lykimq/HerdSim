@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import numpy as np
 
-from plugins.dogs.v_formation import VFormationController
+from core.methods import METHODS
 from core.observation_models import GlobalObservation
-from core.methods import METHODS, get_method
+from plugins.dogs.v_formation import VFormationController
 from tests.backend.helpers import build_runner, make_state, make_world, snapshot_positions
 
 

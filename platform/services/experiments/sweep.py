@@ -5,7 +5,7 @@ from __future__ import annotations
 from itertools import product
 from typing import Any
 
-from core.experimental_factors import FACTOR_GRID_KEYS, MAX_FACTOR_GRID_CELLS
+from core.experimental_factors import MAX_FACTOR_GRID_CELLS
 
 
 def parse_factor_specs(sweep: list[dict[str, Any]] | None) -> list[dict[str, Any]]:

@@ -4,15 +4,15 @@ from __future__ import annotations
 
 from typing import Any
 
+from core.dog_controller import BaseDogController
+from core.observation import ShepherdObservation
+from core.simulation_state import SimulationState
 from methods.strombom.config import STROMBOM_DEFAULTS
 from methods.strombom.heuristics import (
     compute_shepherd_velocity,
     should_collect,
 )
 from plugins.dogs.helpers import apply_dog_speeds, empty_dog_velocities, view_from_observation
-from core.dog_controller import BaseDogController
-from core.observation import ShepherdObservation
-from core.simulation_state import SimulationState
 
 
 class CommunicationFreeController(BaseDogController):

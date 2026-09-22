@@ -1,6 +1,6 @@
 """API router for managing simulation sessions."""
 
-from typing import Any, Optional
+from typing import Any
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
@@ -16,17 +16,17 @@ router = APIRouter()
 
 
 class CreateSessionRequest(BaseModel):
-    method: Optional[str] = None
+    method: str | None = None
     scenario_id: str = "drive_to_goal"
     preset: str = Field(default="paper", pattern="^(paper|scenario|custom)$")
-    num_sheep: Optional[int] = Field(default=None, ge=1, le=200)
-    num_shepherds: Optional[int] = Field(default=None, ge=0, le=10)
-    seed: Optional[int] = 42
-    algorithm_params: Optional[dict[str, Any]] = None
-    world_overrides: Optional[dict[str, Any]] = None
-    sheep_model: Optional[str] = None
-    dog_controller: Optional[str] = None
-    obs_mode: Optional[str] = None
+    num_sheep: int | None = Field(default=None, ge=1, le=200)
+    num_shepherds: int | None = Field(default=None, ge=0, le=10)
+    seed: int | None = 42
+    algorithm_params: dict[str, Any] | None = None
+    world_overrides: dict[str, Any] | None = None
+    sheep_model: str | None = None
+    dog_controller: str | None = None
+    obs_mode: str | None = None
 
 
 def _world_payload(runner: SimulationRunner) -> dict[str, Any]:

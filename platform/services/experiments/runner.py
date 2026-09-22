@@ -2,17 +2,19 @@
 
 from __future__ import annotations
 
-from typing import Any, Callable, Iterator
+from collections.abc import Callable, Iterator
+from typing import Any
 
-from analysis.failure_taxonomy import classify_failure
-from services.shared.trial_aggregates import build_trial_metric_fields
 from services.experiments.summary import summarize_rows
 from services.experiments.sweep import expand_factor_grid, parse_factor_specs, sweep_label
+
+from analysis.failure_taxonomy import classify_failure
 from core.experiment_config import resolve_experiment_config
 from core.methods import find_method_for_models, get_method
 from core.simulation_runner import RunResult, SimulationRunner
 from plugins.metrics.registry import metric_registry
 from plugins.scenarios.registry import scenario_registry
+from services.shared.trial_aggregates import build_trial_metric_fields
 
 ProgressFn = Callable[[dict[str, Any]], None]
 

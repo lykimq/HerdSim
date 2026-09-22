@@ -4,11 +4,10 @@ from __future__ import annotations
 
 import numpy as np
 
-from plugins.dogs.collect_drive_multi import CollectDriveMultiController
-from core.observation_models import GlobalObservation
 from core.methods import METHODS, get_method
+from core.observation_models import GlobalObservation
+from plugins.dogs.collect_drive_multi import CollectDriveMultiController
 from plugins.sheep.jadhav import JadhavSheepDynamics
-from plugins.sheep.strombom import StrombomSheepDynamics
 from tests.backend.helpers import make_state, make_world
 
 

@@ -14,6 +14,9 @@ from typing import Any
 
 import numpy as np
 
+from core.agents.sheep import compute_noise, nearest_neighbor_indices, unit_vector
+from core.sheep_dynamics import BaseSheepDynamics
+from core.simulation_state import SimulationState
 from methods.flocking_dog.config import FLOCKING_DOG_DEFAULTS
 from methods.flocking_dog.dynamics import (
     dog_repulsion_unit,
@@ -21,9 +24,6 @@ from methods.flocking_dog.dynamics import (
     random_attraction,
     sheep_repulsion,
 )
-from core.agents.sheep import compute_noise, nearest_neighbor_indices, unit_vector
-from core.sheep_dynamics import BaseSheepDynamics
-from core.simulation_state import SimulationState
 
 
 class JadhavSheepDynamics(BaseSheepDynamics):

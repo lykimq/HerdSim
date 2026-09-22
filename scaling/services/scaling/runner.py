@@ -6,22 +6,22 @@ import json
 import os
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
 import yaml
-
-from analysis.scaling.provenance import build_provenance_stamp, write_provenance
-from analysis.failure_taxonomy import classify_failure
-from services.shared.trial_aggregates import build_trial_metric_fields
 from services.scaling.layout import CANONICAL_PROTOCOL, read_status, write_status
+
+from analysis.failure_taxonomy import classify_failure
+from analysis.scaling.provenance import build_provenance_stamp, write_provenance
 from core.experiment_config import resolve_experiment_config
 from core.methods import get_method
 from core.simulation_runner import RunResult, SimulationRunner
 from plugins.metrics.registry import metric_registry
 from plugins.scenarios.registry import scenario_registry
+from services.shared.trial_aggregates import build_trial_metric_fields
 
 
 @dataclass(frozen=True)
@@ -422,7 +422,7 @@ def run_scaling_grid(
     # Campaign wall-clock: preserve started_at across resumes. Metadata only.
     prior = read_status(out) if resume else {}
     started_at = str(prior["started_at"]) if prior.get("started_at") else (
-        datetime.now(timezone.utc).isoformat()
+        datetime.now(UTC).isoformat()
     )
     write_status(
         out,
@@ -431,7 +431,7 @@ def run_scaling_grid(
         n_done=len(done),
         n_pending_at_start=n_pending_at_start,
         started_at=started_at,
-        updated_at=datetime.now(timezone.utc).isoformat(),
+        updated_at=datetime.now(UTC).isoformat(),
         running=True,
         extra={"store_timeseries": bool(store_timeseries)},
     )
@@ -476,7 +476,7 @@ def run_scaling_grid(
                 payload["history"],
                 ts_dir / f"{_cell_key(cell)}.parquet",
             )
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         man: dict[str, Any] = {
             "key": payload["key"],
             "N": cell.n_sheep,
@@ -521,7 +521,7 @@ def run_scaling_grid(
     trials = pd.DataFrame(rows)
     trials.to_csv(trials_path, index=False)
     n_done = len(_load_completed(out))
-    finished_at = datetime.now(timezone.utc).isoformat()
+    finished_at = datetime.now(UTC).isoformat()
     write_status(
         out,
         protocol_id=protocol_id,

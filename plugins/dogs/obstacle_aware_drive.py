@@ -4,6 +4,11 @@ from __future__ import annotations
 
 from typing import Any
 
+from core.agents.goal import resolve_goal_center
+from core.agents.shepherd import position_behind_target
+from core.dog_controller import BaseDogController
+from core.observation import ShepherdObservation
+from core.simulation_state import SimulationState
 from methods.obstacle_aware.config import OBSTACLE_AWARE_DEFAULTS
 from methods.obstacle_aware.geometry import deflect_drive_point
 from methods.strombom.heuristics import (
@@ -13,11 +18,6 @@ from methods.strombom.heuristics import (
     should_collect,
 )
 from plugins.dogs.helpers import apply_dog_speeds, empty_dog_velocities, view_from_observation
-from core.agents.goal import resolve_goal_center
-from core.agents.shepherd import position_behind_target
-from core.dog_controller import BaseDogController
-from core.observation import ShepherdObservation
-from core.simulation_state import SimulationState
 
 
 def obstacle_aware_drive_target(state: SimulationState, config: dict[str, Any]):

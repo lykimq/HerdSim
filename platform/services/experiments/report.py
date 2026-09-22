@@ -7,8 +7,8 @@ import sys
 from typing import Any
 
 import pandas as pd
-
 from services.experiments.defs import CSV_COLUMN_DEFS, SUMMARY_METRIC_DEFS, csv_definitions_preamble
+
 from plugins.metrics.registry import metric_registry
 
 HERDSIM_VERSION = "0.1.0"
@@ -193,12 +193,20 @@ def report_to_markdown(payload: dict[str, Any], *, request: dict[str, Any] | Non
         "",
         "## Summary",
         "",
-        "| Method | Trials | Success | Failure | Mean ticks | Median ticks | IQR ticks | AUC cohesion | AUC fragment | Mean path | Ctrl eff. | Final GCM-goal |",
+        (
+            "| Method | Trials | Success | Failure | Mean ticks | Median ticks | "
+            "IQR ticks | AUC cohesion | AUC fragment | Mean path | Ctrl eff. | "
+            "Final GCM-goal |"
+        ),
         "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for row in package["summary"]:
         lines.append(
-            "| {method} | {trials} | {success:.1%} | {failure:.1%} | {mean_ticks} | {median_ticks} | {iqr} | {cohesion} | {frag} | {path} | {eff} | {gcm} |".format(
+            (
+                "| {method} | {trials} | {success:.1%} | {failure:.1%} | "
+                "{mean_ticks} | {median_ticks} | {iqr} | {cohesion} | {frag} | "
+                "{path} | {eff} | {gcm} |"
+            ).format(
                 method=row.get("method"),
                 trials=row.get("trials"),
                 success=float(row.get("success_rate") or 0),

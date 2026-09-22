@@ -3,13 +3,12 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Optional
+from typing import Any
 
 import pandas as pd
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import PlainTextResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field
-
 from services.experiments.defs import benchmark_definitions_payload
 from services.experiments.report import build_report_package, report_to_csv, report_to_markdown
 from services.experiments.runner import (
@@ -26,7 +25,10 @@ _last_benchmark: dict[str, Any] | None = None
 _last_request: dict[str, Any] | None = None
 
 
-def _request_meta(req: BenchmarkRequest, sweep_payload: list[dict[str, Any]] | None) -> dict[str, Any]:
+def _request_meta(
+    req: BenchmarkRequest,
+    sweep_payload: list[dict[str, Any]] | None,
+) -> dict[str, Any]:
     return {
         "methods": list(req.methods),
         "scenario_id": req.scenario_id,
@@ -49,10 +51,10 @@ class BenchmarkRequest(BaseModel):
     scenario_id: str = "drive_to_goal"
     seeds: list[int] = Field(default_factory=lambda: [1, 2, 3, 4, 5])
     preset: str = Field(default="paper", pattern="^(paper|scenario|custom)$")
-    num_sheep: Optional[int] = Field(default=None, ge=1, le=200)
-    num_shepherds: Optional[int] = Field(default=None, ge=1, le=10)
-    algorithm_params: Optional[dict[str, Any]] = None
-    sweep: Optional[list[SweepParam]] = None
+    num_sheep: int | None = Field(default=None, ge=1, le=200)
+    num_shepherds: int | None = Field(default=None, ge=1, le=10)
+    algorithm_params: dict[str, Any] | None = None
+    sweep: list[SweepParam] | None = None
 
 
 def _validate_request(req: BenchmarkRequest) -> list[dict[str, Any]]:

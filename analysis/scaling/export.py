@@ -74,7 +74,8 @@ def _package_a_claim_stubs(
             )
         else:
             lines.append(
-                "- C6 (scaling): frontier varies with N; run Package F fits before deciding C6a/C6b."
+                "- C6 (scaling): frontier varies with N; "
+                "run Package F fits before deciding C6a/C6b."
             )
     return lines
 

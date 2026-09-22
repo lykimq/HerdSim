@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from methods.flocking_dog.config import FLOCKING_DOG_DEFAULTS
-from methods.kubo.config import KUBO_DEFAULTS
-from methods.strombom.config import STROMBOM_DEFAULTS
 from core.experiment_config import resolve_experiment_config
 from core.methods import get_method, list_methods
 from core.shared_defaults import SHARED_WORLD_DEFAULTS, WORLD_KEYS
+from methods.flocking_dog.config import FLOCKING_DOG_DEFAULTS
+from methods.kubo.config import KUBO_DEFAULTS
+from methods.strombom.config import STROMBOM_DEFAULTS
 from plugins.scenarios.drive_to_goal import DriveToGoalScenario
 from plugins.scenarios.obstacle_course import ObstacleCourseScenario
 

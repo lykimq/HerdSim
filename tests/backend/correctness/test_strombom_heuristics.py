@@ -5,6 +5,12 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+from core.agents.sheep import (
+    compose_strombom_heading,
+    compute_local_centroid_knn,
+    compute_repulsion_from_neighbours,
+    unit_vector,
+)
 from methods.strombom.heuristics import (
     collect_offset,
     collect_target,
@@ -13,12 +19,6 @@ from methods.strombom.heuristics import (
     drive_target,
     should_collect,
     strombom_assignment_line,
-)
-from core.agents.sheep import (
-    compose_strombom_heading,
-    compute_local_centroid_knn,
-    compute_repulsion_from_neighbours,
-    unit_vector,
 )
 from tests.backend.helpers import make_state, make_world
 
@@ -85,8 +85,8 @@ def test_drive_target_is_behind_gcm_from_goal():
 
 
 def test_shepherd_stops_within_three_ra():
-    from plugins.dogs.collect_drive import CollectDriveController
     from core.observation_models import GlobalObservation
+    from plugins.dogs.collect_drive import CollectDriveController
 
     ctrl = CollectDriveController()
     cfg = ctrl.default_config

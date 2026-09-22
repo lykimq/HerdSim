@@ -10,6 +10,8 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
+from services.scaling.layout import package_output_dir, protocol_id_from_dir
+from services.scaling.runner import load_canonical_protocol
 
 from analysis.scaling.early_warning import (
     default_eval_ticks,
@@ -18,6 +20,7 @@ from analysis.scaling.early_warning import (
     summarise_early_warning,
 )
 from analysis.scaling.export import export_package_a, export_package_dossier
+from analysis.scaling.fits import fit_scaling_models
 from analysis.scaling.frontier import extract_frontier
 from analysis.scaling.mechanism import (
     evaluate_overcrowding_mechanisms,
@@ -25,7 +28,6 @@ from analysis.scaling.mechanism import (
 )
 from analysis.scaling.predictors import compare_state_vs_nd_predictors
 from analysis.scaling.regimes import label_regimes
-from analysis.scaling.fits import fit_scaling_models
 from analysis.scaling.substitution import (
     substitution_curves,
     substitution_curves_communication,
@@ -33,8 +35,6 @@ from analysis.scaling.substitution import (
     summarize_substitution,
 )
 from analysis.scaling.transfer import build_transfer_table, transfer_summary
-from services.scaling.layout import protocol_id_from_dir, package_output_dir
-from services.scaling.runner import load_canonical_protocol
 
 _CELL_BASE = re.compile(r"^N(?P<N>\d+)_D(?P<D>\d+)_L(?P<L>[^_]+)_S(?P<S>\d+)_M(?P<rest>.+)$")
 

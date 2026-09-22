@@ -8,7 +8,6 @@ import pytest
 from plugins.scenarios.registry import scenario_registry
 from tests.backend.helpers import make_state
 
-
 REQUIRED_SCENARIOS = {
     "drive_to_goal",
     "containment",

@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Any, Callable, Generic, Protocol, TypeVar
+from collections.abc import Callable
+from typing import Any, Generic, Protocol, TypeVar
 
 from core.dog_controller import BaseDogController
 from core.observation import BaseObservationModel
@@ -61,9 +62,6 @@ def _register_builtins() -> None:
         LocalPositionsObservation,
         NoisyBearingObservation,
     )
-    from plugins.sheep.jadhav import JadhavSheepDynamics
-    from plugins.sheep.kubo import KuboSheepDynamics
-    from plugins.sheep.strombom import StrombomSheepDynamics
     from plugins.dogs.adaptive import AdaptiveController
     from plugins.dogs.collect_drive import CollectDriveController
     from plugins.dogs.collect_drive_multi import CollectDriveMultiController
@@ -73,6 +71,9 @@ def _register_builtins() -> None:
     from plugins.dogs.obstacle_aware_drive import ObstacleAwareDriveController
     from plugins.dogs.policy_file import PolicyFileController
     from plugins.dogs.v_formation import VFormationController
+    from plugins.sheep.jadhav import JadhavSheepDynamics
+    from plugins.sheep.kubo import KuboSheepDynamics
+    from plugins.sheep.strombom import StrombomSheepDynamics
 
     sheep_dynamics_registry.register("strombom", StrombomSheepDynamics)
     sheep_dynamics_registry.register("kubo", KuboSheepDynamics)

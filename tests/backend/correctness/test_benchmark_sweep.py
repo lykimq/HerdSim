@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import pandas as pd
 import pytest
-
 from services.experiments.runner import run_benchmark
 from services.experiments.summary import summarize_rows
 from services.experiments.sweep import expand_factor_grid, parse_factor_specs, sweep_label
+
 from core.experimental_factors import MAX_FACTOR_GRID_CELLS
 
 

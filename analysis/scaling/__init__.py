@@ -5,6 +5,7 @@ from analysis.scaling.early_warning import (
     evaluate_early_warning_campaign,
 )
 from analysis.scaling.export import export_package_a, export_package_dossier
+from analysis.scaling.fits import fit_scaling_models
 from analysis.scaling.frontier import (
     bootstrap_d_min_ci,
     extract_frontier,
@@ -18,7 +19,6 @@ from analysis.scaling.mechanism import (
 from analysis.scaling.predictors import compare_state_vs_nd_predictors
 from analysis.scaling.provenance import build_provenance_stamp
 from analysis.scaling.regimes import label_regimes
-from analysis.scaling.fits import fit_scaling_models
 from analysis.scaling.substitution import substitution_curves
 from analysis.scaling.transfer import build_transfer_table
 

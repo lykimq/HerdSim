@@ -27,17 +27,26 @@ SUMMARY_METRIC_DEFS: list[dict[str, str]] = [
     {
         "id": "mean_ticks_success",
         "label": "Mean ticks",
-        "description": "Average total_ticks over successful trials only, in simulation ticks (n/a if none).",
+        "description": (
+            "Average total_ticks over successful trials only, "
+            "in simulation ticks (n/a if none)."
+        ),
     },
     {
         "id": "median_ticks_success",
         "label": "Median ticks",
-        "description": "Median total_ticks over successful trials only, in simulation ticks (n/a if none).",
+        "description": (
+            "Median total_ticks over successful trials only, "
+            "in simulation ticks (n/a if none)."
+        ),
     },
     {
         "id": "iqr_ticks_success",
         "label": "IQR ticks",
-        "description": "Interquartile range of total_ticks over successful trials (n/a if fewer than two).",
+        "description": (
+            "Interquartile range of total_ticks over successful trials "
+            "(n/a if fewer than two)."
+        ),
     },
     {
         "id": "mean_auc_cohesion",
@@ -47,7 +56,10 @@ SUMMARY_METRIC_DEFS: list[dict[str, str]] = [
     {
         "id": "mean_auc_fragmentation",
         "label": "AUC fragment",
-        "description": "Mean over trials of auc_fragmentation (mean largest-component fraction over ticks).",
+        "description": (
+            "Mean over trials of auc_fragmentation "
+            "(mean largest-component fraction over ticks)."
+        ),
     },
     {
         "id": "mean_shepherd_path",
@@ -57,7 +69,10 @@ SUMMARY_METRIC_DEFS: list[dict[str, str]] = [
     {
         "id": "mean_control_efficiency",
         "label": "Ctrl eff.",
-        "description": "Average goal progress per unit shepherd travel (gcm_start - gcm_end) / path.",
+        "description": (
+            "Average goal progress per unit shepherd travel "
+            "(gcm_start - gcm_end) / path."
+        ),
     },
     {
         "id": "mean_final_gcm_goal",
@@ -118,7 +133,10 @@ CSV_COLUMN_DEFS: list[dict[str, str]] = [
     },
     {
         "id": "final_success_rate",
-        "description": "End-of-run fraction of sheep inside the goal zone (0-1). Occupancy, not trial success.",
+        "description": (
+            "End-of-run fraction of sheep inside the goal zone (0-1). "
+            "Occupancy, not trial success."
+        ),
     },
     {
         "id": "final_sheep_in_goal",
@@ -138,7 +156,10 @@ CSV_COLUMN_DEFS: list[dict[str, str]] = [
     },
     {
         "id": "control_efficiency",
-        "description": "Goal progress per unit shepherd travel: (gcm_goal at start - end) / shepherd_path.",
+        "description": (
+            "Goal progress per unit shepherd travel: "
+            "(gcm_goal at start - end) / shepherd_path."
+        ),
     },
     {"id": "mean_cohesion", "description": "Mean flock cohesion over all ticks in the trial."},
     {"id": "min_cohesion", "description": "Minimum cohesion over ticks in the trial."},

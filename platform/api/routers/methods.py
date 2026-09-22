@@ -16,11 +16,13 @@ from core.experimental_factors import (
     MAX_FACTOR_GRID_CELLS,
     OBSERVATION_MODES,
 )
-from core.plugin_registry import dog_controller_registry, sheep_dynamics_registry
 from core.methods import (
     get_method as load_method,
+)
+from core.methods import (
     list_methods as list_method_catalog,
 )
+from core.plugin_registry import dog_controller_registry, sheep_dynamics_registry
 
 router = APIRouter()
 

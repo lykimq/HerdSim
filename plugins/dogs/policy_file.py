@@ -8,12 +8,12 @@ from typing import Any
 
 import numpy as np
 
-from methods.strombom.config import STROMBOM_DEFAULTS
-from plugins.dogs.collect_drive import CollectDriveController
-from plugins.dogs.helpers import apply_dog_speeds, empty_dog_velocities
 from core.dog_controller import BaseDogController
 from core.observation import ShepherdObservation
 from core.simulation_state import SimulationState
+from methods.strombom.config import STROMBOM_DEFAULTS
+from plugins.dogs.collect_drive import CollectDriveController
+from plugins.dogs.helpers import apply_dog_speeds, empty_dog_velocities
 
 
 class PolicyFileController(BaseDogController):

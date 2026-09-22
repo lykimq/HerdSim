@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 
 from core.agent_attributes import apply_failure_factors, init_agent_attributes
+from core.experiment_config import resolve_experiment_config
 from core.experimental_factors import ExperimentalFactors
 from core.observation_models import (
     BearingOnlyObservation,
@@ -13,7 +14,6 @@ from core.observation_models import (
     LocalPositionsObservation,
     NoisyBearingObservation,
 )
-from core.experiment_config import resolve_experiment_config
 from plugins.scenarios.drive_to_goal import DriveToGoalScenario
 from tests.backend.helpers import make_state, make_world
 

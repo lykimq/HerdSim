@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-from fastapi.testclient import TestClient
-
-from services.experiments.sweep import expand_factor_grid, parse_factor_specs, sweep_label
 from api.main import app
+from fastapi.testclient import TestClient
+from services.experiments.sweep import expand_factor_grid, parse_factor_specs, sweep_label
+
 from core.agent_attributes import apply_robot_constraints
 from core.experiment_config import resolve_experiment_config
 from core.methods import get_method
