@@ -1,0 +1,13 @@
+{
+  "trials": "/home/gwen/HerdSim/scaling/results/phase1/claim/packages/a/trials.csv",
+  "reliability": "/home/gwen/HerdSim/scaling/results/phase1/claim/packages/a/reliability.csv",
+  "frontier": "/home/gwen/HerdSim/scaling/results/phase1/claim/packages/a/frontier.csv",
+  "regimes": "/home/gwen/HerdSim/scaling/results/phase1/claim/packages/a/regimes.csv",
+  "dmin_bootstrap": "/home/gwen/HerdSim/scaling/results/phase1/claim/packages/a/dmin_bootstrap.csv",
+  "provenance": "/home/gwen/HerdSim/scaling/results/phase1/claim/packages/a/provenance.json",
+  "report": "/home/gwen/HerdSim/scaling/results/phase1/claim/packages/a/package_a.md",
+  "artefacts": "/home/gwen/HerdSim/scaling/results/phase1/claim/packages/a/artefacts.json",
+  "fig_heatmap": "/home/gwen/HerdSim/scaling/results/phase1/claim/packages/a/figures/reliability_heatmap.png",
+  "fig_frontier": "/home/gwen/HerdSim/scaling/results/phase1/claim/packages/a/figures/frontier_dmin.png",
+  "fig_regimes": "/home/gwen/HerdSim/scaling/results/phase1/claim/packages/a/figures/regime_counts.png"
+}

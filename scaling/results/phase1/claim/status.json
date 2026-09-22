@@ -1,0 +1,16 @@
+{
+  "protocol_id": "phase1_claim",
+  "n_planned": 2200,
+  "n_done": 2200,
+  "n_pending_at_start": 2127,
+  "complete": true,
+  "running": false,
+  "started_at": "2026-09-22T12:07:52.788218+00:00",
+  "updated_at": "2026-09-22T13:05:23.371208+00:00",
+  "elapsed_seconds": 3450.58299,
+  "trials_csv": "trials.csv",
+  "manifest_jsonl": "manifest.jsonl",
+  "finished_at": "2026-09-22T13:05:23.371208+00:00",
+  "n_rows_trials_csv": 2127,
+  "store_timeseries": true
+}

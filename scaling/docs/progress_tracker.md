@@ -60,9 +60,9 @@ When finished or on battery, you can switch back to `powersave` the same way.
 | 0 | Sanity tests | n/a | `make -C scaling scaling-test` | pytest | DONE |
 | 1 | Phase 1 smoke | SMOKE | `make -C scaling scaling-pilot WORKERS=16` | `scaling/results/phase1/pilot/` | DONE |
 | 2 | Phase 1 scout | SCOUT | `make -C scaling scaling-scout WORKERS=16` | `scaling/results/phase1/scout/` | DONE |
-| 3 | Plan claim windows | n/a | `make -C scaling scaling-claim-plan` | `scaling/results/phase1/claim/boundary_cells.csv` | TODO |
-| 4 | Phase 1 claim reseed | CLAIM | `make -C scaling scaling-claim-reseed WORKERS=16` | `scaling/results/phase1/claim/` | TODO |
-| 5 | Analyse Package A and F on the merge | CLAIM | `make -C scaling scaling-analyse PACKAGE=A TRIALS=results/phase1/claim/merged_trials.csv OUT=results/phase1/claim/packages/a` | packages | TODO |
+| 3 | Plan claim windows | n/a | `make -C scaling scaling-claim-plan` | `scaling/results/phase1/claim/boundary_cells.csv` | DONE |
+| 4 | Phase 1 claim reseed | CLAIM | `make -C scaling scaling-claim-reseed WORKERS=16` | `scaling/results/phase1/claim/` | DONE |
+| 5 | Analyse Package A and F on the merge | CLAIM | `make -C scaling scaling-analyse PACKAGE=A TRIALS=results/phase1/claim/merged_trials.csv OUT=results/phase1/claim/packages/a` | packages | DONE |
 | 6 | Phase 1 T1 | CLAIM | `make -C scaling scaling-t1 WORKERS=16` | `scaling/results/phase1/t1/` | TODO |
 | 7 | Phase 2 structure scout | SCOUT | `make -C scaling scaling-phase2-scout WORKERS=16` | `scaling/results/phase2/scout/` | TODO |
 | 8 | Phase 2 claim | CLAIM | `make -C scaling scaling-phase2-claim-reseed WORKERS=16` | `scaling/results/phase2/claim/` | TODO |

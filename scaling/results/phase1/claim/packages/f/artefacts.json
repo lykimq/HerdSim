@@ -1,0 +1,8 @@
+{
+  "frontier": "/home/gwen/HerdSim/scaling/results/phase1/claim/packages/f/frontier.csv",
+  "scaling_fits": "/home/gwen/HerdSim/scaling/results/phase1/claim/packages/f/scaling_fits.csv",
+  "scaling_cv": "/home/gwen/HerdSim/scaling/results/phase1/claim/packages/f/scaling_cv.csv",
+  "delta_aic_vs_power": "/home/gwen/HerdSim/scaling/results/phase1/claim/packages/f/delta_aic_vs_power.csv",
+  "provenance": "/home/gwen/HerdSim/scaling/results/phase1/claim/packages/f/provenance.json",
+  "report": "/home/gwen/HerdSim/scaling/results/phase1/claim/packages/f/package_f.md"
+}
