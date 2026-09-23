@@ -103,7 +103,17 @@ def evaluate_early_warning(
     """
     feature_cols = feature_cols or [
         c
-        for c in ("mean_spread", "cohesion", "fragmentation", "i_dir", "coverage")
+        for c in (
+            "mean_spread",
+            "cohesion",
+            "fragmentation",
+            "perimeter",
+            "hull_area",
+            "flock_density",
+            "aspect_ratio",
+            "i_dir",
+            "coverage",
+        )
         if c in timeseries.columns
     ]
     empty = {

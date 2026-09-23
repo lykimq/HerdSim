@@ -237,7 +237,17 @@ def export_package_a(
         protocol_id=protocol_id,
         protocol=protocol,
         seed_list=seeds,
-        metric_ids=["success", "mean_spread", "extent", "cohesion", "fragmentation"],
+        metric_ids=[
+            "success",
+            "mean_spread",
+            "extent",
+            "perimeter",
+            "hull_area",
+            "flock_density",
+            "aspect_ratio",
+            "cohesion",
+            "fragmentation",
+        ],
         extra={
             "package": "A",
             "theta": theta,

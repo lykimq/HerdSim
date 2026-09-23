@@ -63,6 +63,10 @@ Success is every sheep inside that disk. Strombom's collect switch `r_a * N^(2/3
 | Outlier count | Sheep beyond `r_a * N^(2/3)` | `plugins/metrics/outlier_count.py` |
 | Spread | Variance of distances to the centroid | `plugins/metrics/mean_spread.py` |
 | Extent | RMS distance to the centroid | `plugins/metrics/extent.py` |
+| Perimeter | Convex-hull perimeter of sheep | `plugins/metrics/perimeter.py` |
+| Hull area | Convex-hull area of sheep | `plugins/metrics/hull_area.py` |
+| Flock density | N / hull area (0 if area is degenerate) | `plugins/metrics/flock_density.py` |
+| Aspect ratio | PCA major/minor axis ratio (1 = round) | `plugins/metrics/aspect_ratio.py` |
 
 | Metric | Definition |
 |--------|------------|
@@ -280,7 +284,7 @@ Points that would leave the field or land in the goal are redrawn. They are not 
 | I1 | Grid runner, resume, provenance | `scaling/services/scaling/runner.py` |
 | I2 | Frontiers, claim windows, bootstrap | `analysis/scaling/frontier.py` |
 | I3 | Regimes | `analysis/scaling/regimes.py` |
-| I4 | Mean-spread, extent | `plugins/metrics/mean_spread.py`, `extent.py` |
+| I4 | Mean-spread, extent, perimeter, hull area, density, aspect | `plugins/metrics/mean_spread.py`, `extent.py`, `perimeter.py`, `hull_area.py`, `flock_density.py`, `aspect_ratio.py` |
 | I5 | X0 generators | `core/x0_generators.py` |
 | I6 | State vs (N, D) | `analysis/scaling/predictors.py` |
 | I7 | I_dir, coverage | `plugins/metrics/shepherd_interference.py`, `shepherd_coverage.py` |

@@ -15,6 +15,10 @@ TRAJECTORY_METRICS = (
     "outlier_count",
     "mean_spread",
     "extent",
+    "perimeter",
+    "hull_area",
+    "flock_density",
+    "aspect_ratio",
     "i_dir",
     "coverage",
 )

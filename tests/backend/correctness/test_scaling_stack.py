@@ -52,7 +52,16 @@ from tests.backend.helpers import make_state, make_world
 
 def test_scaling_metrics_registered():
     ids = {m["id"] for m in metric_registry.list_all()}
-    for needed in ("mean_spread", "extent", "i_dir", "coverage"):
+    for needed in (
+        "mean_spread",
+        "extent",
+        "perimeter",
+        "hull_area",
+        "flock_density",
+        "aspect_ratio",
+        "i_dir",
+        "coverage",
+    ):
         assert needed in ids
 
 
@@ -62,6 +71,28 @@ def test_mean_spread_and_extent_formulas():
     distances = np.full(4, np.sqrt(2.0))
     assert MeanSpreadMetric().compute(state) == pytest.approx(float(np.var(distances)))
     assert ExtentMetric().compute(state) == pytest.approx(np.sqrt(2.0))
+
+
+def test_hull_shape_metrics_on_unit_square():
+    from plugins.metrics.aspect_ratio import AspectRatioMetric
+    from plugins.metrics.flock_density import FlockDensityMetric
+    from plugins.metrics.hull_area import HullAreaMetric
+    from plugins.metrics.perimeter import PerimeterMetric
+
+    # Axis-aligned unit square: perimeter 4, area 1, aspect ~1.
+    sheep = [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]]
+    state = make_state(sheep, [[10.0, 10.0]])
+    assert PerimeterMetric().compute(state) == pytest.approx(4.0)
+    assert HullAreaMetric().compute(state) == pytest.approx(1.0)
+    assert FlockDensityMetric().compute(state) == pytest.approx(4.0)
+    assert AspectRatioMetric().compute(state) == pytest.approx(1.0, abs=1e-6)
+
+    # Collinear: no area, positive perimeter, elongated aspect.
+    line = make_state([[0.0, 0.0], [1.0, 0.0], [2.0, 0.0]], [[0.0, 0.0]])
+    assert HullAreaMetric().compute(line) == pytest.approx(0.0)
+    assert FlockDensityMetric().compute(line) == pytest.approx(0.0)
+    assert PerimeterMetric().compute(line) == pytest.approx(4.0)
+    assert AspectRatioMetric().compute(line) > 10.0
 
 
 def test_interference_zero_when_aligned_or_stationary():

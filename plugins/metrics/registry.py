@@ -43,13 +43,17 @@ metric_registry = MetricRegistry()
 
 
 def _auto_register():
+    from plugins.metrics.aspect_ratio import AspectRatioMetric
     from plugins.metrics.cohesion import CohesionMetric
     from plugins.metrics.extent import ExtentMetric
+    from plugins.metrics.flock_density import FlockDensityMetric
     from plugins.metrics.fragmentation import FragmentationMetric
     from plugins.metrics.gcm_goal import GcmGoalMetric
+    from plugins.metrics.hull_area import HullAreaMetric
     from plugins.metrics.mean_spread import MeanSpreadMetric
     from plugins.metrics.min_separation import MinSeparationMetric
     from plugins.metrics.outlier_count import OutlierCountMetric
+    from plugins.metrics.perimeter import PerimeterMetric
     from plugins.metrics.polarization import PolarizationMetric
     from plugins.metrics.sheep_in_goal import SheepInGoalMetric
     from plugins.metrics.shepherd_coverage import ShepherdCoverageMetric
@@ -71,6 +75,10 @@ def _auto_register():
         FragmentationMetric,
         MeanSpreadMetric,
         ExtentMetric,
+        PerimeterMetric,
+        HullAreaMetric,
+        FlockDensityMetric,
+        AspectRatioMetric,
         ShepherdInterferenceMetric,
         ShepherdCoverageMetric,
     ]:

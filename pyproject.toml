@@ -90,3 +90,5 @@ pythonVersion = "3.11"
 extraPaths = [".", "platform", "scaling"]
 venvPath = "."
 venv = ".venv"
+# Match Makefile --level error: do not fail the CLI on warnings.
+failOnWarnings = false
