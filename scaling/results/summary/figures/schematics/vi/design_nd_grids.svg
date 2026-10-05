@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="260" viewBox="0 0 720 260" role="img" aria-label="luoi N va D">
+<rect x="0" y="0" width="720" height="260" fill="#f7f6f2"/>
+<text x="16" y="24" text-anchor="start" font-size="14" font-weight="700" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Thiết kế: lưới N và D (dày ở nơi biên thường nằm)</text>
+<text x="16" y="52" text-anchor="start" font-size="12" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">Lưới N (10 kích thước)</text>
+<text x="16" y="70" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Dày quanh 100 (điểm đổi của bản thảo). Sàn 5. Bỏ 250, 350.</text>
+<rect x="30" y="88" width="58" height="36" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="59" y="111" text-anchor="middle" font-size="13" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">5</text>
+<rect x="98" y="88" width="58" height="36" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="127" y="111" text-anchor="middle" font-size="13" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">10</text>
+<rect x="166" y="88" width="58" height="36" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="195" y="111" text-anchor="middle" font-size="13" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">25</text>
+<rect x="234" y="88" width="58" height="36" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="263" y="111" text-anchor="middle" font-size="13" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">50</text>
+<rect x="302" y="88" width="58" height="36" fill="#dbeafe" stroke="#1f4e79" stroke-width="1.5" rx="6"/>
+<text x="331" y="111" text-anchor="middle" font-size="13" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">75</text>
+<rect x="370" y="88" width="58" height="36" fill="#dbeafe" stroke="#1f4e79" stroke-width="1.5" rx="6"/>
+<text x="399" y="111" text-anchor="middle" font-size="13" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">100</text>
+<rect x="438" y="88" width="58" height="36" fill="#dbeafe" stroke="#1f4e79" stroke-width="1.5" rx="6"/>
+<text x="467" y="111" text-anchor="middle" font-size="13" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">150</text>
+<rect x="506" y="88" width="58" height="36" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="535" y="111" text-anchor="middle" font-size="13" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">200</text>
+<rect x="574" y="88" width="58" height="36" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="603" y="111" text-anchor="middle" font-size="13" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">300</text>
+<rect x="642" y="88" width="58" height="36" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="671" y="111" text-anchor="middle" font-size="13" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">400</text>
+<text x="16" y="152" text-anchor="start" font-size="12" font-weight="700" fill="#2f6b45" font-family="Segoe UI,Noto Sans,sans-serif">Lưới D (10 số chó)</text>
+<text x="16" y="170" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Bước 1 gần D_min (1 đến 4); thưa sau đó. Trần 35.</text>
+<rect x="30" y="188" width="58" height="36" fill="#dcfce7" stroke="#2f6b45" stroke-width="1.5" rx="6"/>
+<text x="59" y="211" text-anchor="middle" font-size="13" font-weight="700" fill="#2f6b45" font-family="Segoe UI,Noto Sans,sans-serif">1</text>
+<rect x="98" y="188" width="58" height="36" fill="#dcfce7" stroke="#2f6b45" stroke-width="1.5" rx="6"/>
+<text x="127" y="211" text-anchor="middle" font-size="13" font-weight="700" fill="#2f6b45" font-family="Segoe UI,Noto Sans,sans-serif">2</text>
+<rect x="166" y="188" width="58" height="36" fill="#dcfce7" stroke="#2f6b45" stroke-width="1.5" rx="6"/>
+<text x="195" y="211" text-anchor="middle" font-size="13" font-weight="700" fill="#2f6b45" font-family="Segoe UI,Noto Sans,sans-serif">3</text>
+<rect x="234" y="188" width="58" height="36" fill="#dcfce7" stroke="#2f6b45" stroke-width="1.5" rx="6"/>
+<text x="263" y="211" text-anchor="middle" font-size="13" font-weight="700" fill="#2f6b45" font-family="Segoe UI,Noto Sans,sans-serif">4</text>
+<rect x="302" y="188" width="58" height="36" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="331" y="211" text-anchor="middle" font-size="13" font-weight="700" fill="#2f6b45" font-family="Segoe UI,Noto Sans,sans-serif">6</text>
+<rect x="370" y="188" width="58" height="36" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="399" y="211" text-anchor="middle" font-size="13" font-weight="700" fill="#2f6b45" font-family="Segoe UI,Noto Sans,sans-serif">10</text>
+<rect x="438" y="188" width="58" height="36" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="467" y="211" text-anchor="middle" font-size="13" font-weight="700" fill="#2f6b45" font-family="Segoe UI,Noto Sans,sans-serif">15</text>
+<rect x="506" y="188" width="58" height="36" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="535" y="211" text-anchor="middle" font-size="13" font-weight="700" fill="#2f6b45" font-family="Segoe UI,Noto Sans,sans-serif">20</text>
+<rect x="574" y="188" width="58" height="36" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="603" y="211" text-anchor="middle" font-size="13" font-weight="700" fill="#2f6b45" font-family="Segoe UI,Noto Sans,sans-serif">25</text>
+<rect x="642" y="188" width="58" height="36" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="671" y="211" text-anchor="middle" font-size="13" font-weight="700" fill="#2f6b45" font-family="Segoe UI,Noto Sans,sans-serif">35</text>
+<text x="16" y="248" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Dày nơi câu trả lời thường nằm; thưa nơi chỉ bước lớn mới quan trọng.</text>
+</svg>

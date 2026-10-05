@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="280" viewBox="0 0 720 280" role="img" aria-label="draft vs HerdSim task">
+<rect x="0" y="0" width="720" height="280" fill="#f7f6f2"/>
+<text x="16" y="24" text-anchor="start" font-size="14" font-weight="700" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Draft task vs HerdSim task (why outcomes can diverge)</text>
+<rect x="30" y="44" width="300" height="190" fill="#fff" stroke="#b45309" stroke-width="2" rx="10"/>
+<rect x="390" y="44" width="300" height="190" fill="#fff" stroke="#1f4e79" stroke-width="2" rx="10"/>
+<text x="180" y="72" text-anchor="middle" font-size="13" font-weight="700" fill="#b45309" font-family="Segoe UI,Noto Sans,sans-serif">2025 draft (NetLogo)</text>
+<text x="540" y="72" text-anchor="middle" font-size="13" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">HerdSim (this study)</text>
+<text x="50" y="105" text-anchor="start" font-size="12" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">1. Collect</text>
+<text x="50" y="129" text-anchor="start" font-size="12" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">2. Hold 800 ticks</text>
+<text x="50" y="153" text-anchor="start" font-size="12" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">3. Exit gate</text>
+<text x="50" y="177" text-anchor="start" font-size="12" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Start: random scatter</text>
+<text x="50" y="201" text-anchor="start" font-size="12" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Dogs: top-left corner</text>
+<text x="410" y="105" text-anchor="start" font-size="12" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">1. Drive into goal disk</text>
+<text x="410" y="129" text-anchor="start" font-size="12" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">(no hold / no gate)</text>
+<text x="410" y="177" text-anchor="start" font-size="12" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Start: controlled layouts</text>
+<text x="410" y="201" text-anchor="start" font-size="12" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Dogs: behind flock</text>
+<text x="360" y="140" text-anchor="middle" font-size="16" font-weight="700" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">vs</text>
+<text x="16" y="266" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Same science family (D vs N, SR &gt;= 90%), different task and starts.</text>
+</svg>

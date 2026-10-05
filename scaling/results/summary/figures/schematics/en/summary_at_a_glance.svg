@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="780" height="420" viewBox="0 0 780 420" role="img" aria-label="summary results">
+<rect width="780" height="420" fill="#f7f6f2"/>
+<text x="16" y="28" font-size="15" font-weight="700" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Results at a glance (claim-grade Phases 1, 2, 4)</text>
+<rect x="16" y="48" width="240" height="150" rx="10" fill="#fff" stroke="#1f4e79" stroke-width="2"/>
+<text x="30" y="74" font-size="12" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">Baseline D_min</text>
+<text x="30" y="116" font-size="34" font-weight="800" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">1</text>
+<text x="30" y="142" font-size="13" font-weight="600" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">dog for N = 25 to 400</text>
+<text x="30" y="166" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">N = 5 and 10 need 2 (R 0.07 / 0.24</text>
+<text x="30" y="182" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">at D=1)</text>
+<rect x="270" y="48" width="240" height="150" rx="10" fill="#fff" stroke="#b45309" stroke-width="2"/>
+<text x="284" y="74" font-size="12" font-weight="700" fill="#b45309" font-family="Segoe UI,Noto Sans,sans-serif">Extra dogs</text>
+<text x="284" y="116" font-size="34" font-weight="800" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">88%</text>
+<text x="284" y="142" font-size="13" font-weight="600" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">cells wasteful</text>
+<text x="284" y="166" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Time ~183 ticks flat; ~146 path /</text>
+<text x="284" y="182" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">dog</text>
+<rect x="524" y="48" width="240" height="150" rx="10" fill="#fff" stroke="#9b2c2c" stroke-width="2"/>
+<text x="538" y="74" font-size="12" font-weight="700" fill="#9b2c2c" font-family="Segoe UI,Noto Sans,sans-serif">Draft D_min(N)</text>
+<text x="538" y="116" font-size="34" font-weight="800" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">No</text>
+<text x="538" y="142" font-size="13" font-weight="600" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">steep curve here</text>
+<text x="538" y="166" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Draft 20 to 35 dogs at N&gt;=200;</text>
+<text x="538" y="182" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">here 1 dog</text>
+<rect x="140" y="220" width="240" height="150" rx="10" fill="#fff" stroke="#7b1fa2" stroke-width="2"/>
+<text x="154" y="246" font-size="12" font-weight="700" fill="#7b1fa2" font-family="Segoe UI,Noto Sans,sans-serif">Starting structure</text>
+<text x="154" y="288" font-size="34" font-weight="800" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Cost</text>
+<text x="154" y="314" font-size="13" font-weight="600" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">not D_min</text>
+<text x="154" y="338" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Wide 11x to 36x cost; D_min stays</text>
+<text x="154" y="354" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">1</text>
+<rect x="400" y="220" width="240" height="150" rx="10" fill="#fff" stroke="#2f6b45" stroke-width="2"/>
+<text x="414" y="246" font-size="12" font-weight="700" fill="#2f6b45" font-family="Segoe UI,Noto Sans,sans-serif">Other controllers</text>
+<text x="414" y="288" font-size="34" font-weight="800" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Mixed</text>
+<text x="414" y="314" font-size="13" font-weight="600" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">transfer</text>
+<text x="414" y="338" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Kubo ok compact, fails wide; FAT</text>
+<text x="414" y="354" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">only N&lt;=10</text>
+<text x="16" y="402" font-size="12" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Ceiling: R = 1.00 at D = 1 on almost every baseline cell, so scaling difficulty is hard to measure yet.</text>
+</svg>

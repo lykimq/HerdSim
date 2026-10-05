@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="780" height="430" viewBox="0 0 780 430" role="img" aria-label="draft extra analyses">
+<rect x="0" y="0" width="780" height="430" fill="#f7f6f2"/>
+<text x="16" y="24" text-anchor="start" font-size="14" font-weight="700" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">2025 draft extra analyses (paper Tables VIII to X)</text>
+<text x="16" y="48" text-anchor="start" font-size="12" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">Spread vs success (Spearman over 110 cells)</text>
+<text x="16" y="74" text-anchor="start" font-size="11" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">S_bar vs SR</text>
+<rect x="200" y="62" width="280" height="20" fill="#efece5" stroke="#bbb3a5" stroke-width="1" rx="4"/>
+<rect x="283.72" y="62" width="196.28" height="20" fill="#fca5a5" stroke="#9b2c2c" stroke-width="1" rx="4"/>
+<text x="500" y="76" text-anchor="start" font-size="11" font-weight="700" fill="#9b2c2c" font-family="Segoe UI,Noto Sans,sans-serif">rho = -0.701</text>
+<text x="600" y="76" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Strong negative</text>
+<text x="16" y="110" text-anchor="start" font-size="11" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">S_bar * N vs SR</text>
+<rect x="200" y="98" width="280" height="20" fill="#efece5" stroke="#bbb3a5" stroke-width="1" rx="4"/>
+<rect x="248.16000000000003" y="98" width="231.83999999999997" height="20" fill="#fca5a5" stroke="#9b2c2c" stroke-width="1" rx="4"/>
+<text x="500" y="112" text-anchor="start" font-size="11" font-weight="700" fill="#9b2c2c" font-family="Segoe UI,Noto Sans,sans-serif">rho = -0.828</text>
+<text x="600" y="112" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Best composite</text>
+<text x="16" y="146" text-anchor="start" font-size="11" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">S_bar * sqrt(N)</text>
+<rect x="200" y="134" width="280" height="20" fill="#efece5" stroke="#bbb3a5" stroke-width="1" rx="4"/>
+<rect x="250.68" y="134" width="229.32" height="20" fill="#fca5a5" stroke="#9b2c2c" stroke-width="1" rx="4"/>
+<text x="500" y="148" text-anchor="start" font-size="11" font-weight="700" fill="#9b2c2c" font-family="Segoe UI,Noto Sans,sans-serif">rho = -0.819</text>
+<text x="600" y="148" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Close second</text>
+<text x="16" y="175" text-anchor="start" font-size="12" font-weight="700" fill="#7b1fa2" font-family="Segoe UI,Noto Sans,sans-serif">Failures by control (Table VIII idea)</text>
+<rect x="16" y="186" width="254" height="24" fill="#7b1fa2" rx="4"/>
+<text x="24" y="202" text-anchor="start" font-size="11" font-weight="700" fill="#fff" font-family="Segoe UI,Noto Sans,sans-serif">Slice</text>
+<rect x="276" y="186" width="84" height="24" fill="#7b1fa2" rx="4"/>
+<text x="284" y="202" text-anchor="start" font-size="11" font-weight="700" fill="#fff" font-family="Segoe UI,Noto Sans,sans-serif">Count</text>
+<rect x="366" y="186" width="274" height="24" fill="#7b1fa2" rx="4"/>
+<text x="374" y="202" text-anchor="start" font-size="11" font-weight="700" fill="#fff" font-family="Segoe UI,Noto Sans,sans-serif">Mostly stall in</text>
+<rect x="16" y="214" width="254" height="22" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="3"/>
+<text x="22" y="229" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">S_bar &gt; 25 (no control)</text>
+<rect x="276" y="214" width="84" height="22" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="3"/>
+<text x="282" y="229" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">2,161</text>
+<rect x="366" y="214" width="274" height="22" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="3"/>
+<text x="372" y="229" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Collect 97%</text>
+<rect x="16" y="238" width="254" height="22" fill="#efece5" stroke="#bbb3a5" stroke-width="1" rx="3"/>
+<text x="22" y="253" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">S_bar &lt;= 25 (some control)</text>
+<rect x="276" y="238" width="84" height="22" fill="#efece5" stroke="#bbb3a5" stroke-width="1" rx="3"/>
+<text x="282" y="253" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">928</text>
+<rect x="366" y="238" width="274" height="22" fill="#efece5" stroke="#bbb3a5" stroke-width="1" rx="3"/>
+<text x="372" y="253" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Collect 74%; hold 9%; exit 18%</text>
+<rect x="16" y="262" width="254" height="22" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="3"/>
+<text x="22" y="277" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">All failures</text>
+<rect x="276" y="262" width="84" height="22" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="3"/>
+<text x="282" y="277" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">3,089</text>
+<rect x="366" y="262" width="274" height="22" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="3"/>
+<text x="372" y="277" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Collect 90%</text>
+<text x="16" y="300" text-anchor="start" font-size="12" font-weight="700" fill="#b45309" font-family="Segoe UI,Noto Sans,sans-serif">Sensitivity: lower sheep Rrep 3.0 to 2.5 (Table IX)</text>
+<text x="16" y="322" text-anchor="start" font-size="11" font-weight="700" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Cell          Before     After</text>
+<text x="16" y="340" text-anchor="start" font-size="12" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">D=6, N=400</text>
+<text x="160" y="340" text-anchor="start" font-size="12" font-weight="700" fill="#9b2c2c" font-family="Segoe UI,Noto Sans,sans-serif">0%</text>
+<text x="230" y="340" text-anchor="start" font-size="12" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">-&gt;</text>
+<text x="260" y="340" text-anchor="start" font-size="12" font-weight="700" fill="#2f6b45" font-family="Segoe UI,Noto Sans,sans-serif">92%</text>
+<text x="16" y="362" text-anchor="start" font-size="12" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">D=3, N=250</text>
+<text x="160" y="362" text-anchor="start" font-size="12" font-weight="700" fill="#9b2c2c" font-family="Segoe UI,Noto Sans,sans-serif">5%</text>
+<text x="230" y="362" text-anchor="start" font-size="12" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">-&gt;</text>
+<text x="260" y="362" text-anchor="start" font-size="12" font-weight="700" fill="#2f6b45" font-family="Segoe UI,Noto Sans,sans-serif">100%</text>
+<text x="400" y="300" text-anchor="start" font-size="12" font-weight="700" fill="#2f6b45" font-family="Segoe UI,Noto Sans,sans-serif">Density gradient vs true GCM (RQ3; ~80M obs; Table X)</text>
+<text x="400" y="322" text-anchor="start" font-size="11" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">- N &gt;= 100: mean angular error ~18 to 22 deg</text>
+<text x="400" y="342" text-anchor="start" font-size="11" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">- Correct sector often &gt;= 65%; correct or adjacent &gt;= 87%</text>
+<text x="400" y="362" text-anchor="start" font-size="11" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">- Worse at very small or very large N (sparse / vision limits)</text>
+<text x="16" y="418" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">These are draft findings. HerdSim did not re-run these NetLogo analyses.</text>
+</svg>

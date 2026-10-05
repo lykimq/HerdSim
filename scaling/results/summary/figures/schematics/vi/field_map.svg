@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="300" viewBox="0 0 760 300" role="img" aria-label="ban do linh vuc">
+<rect x="0" y="0" width="760" height="300" fill="#f7f6f2"/>
+<text x="16" y="24" text-anchor="start" font-size="14" font-weight="700" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Nghiên cứu này nằm đâu trong lĩnh vực chăn đàn</text>
+<rect x="16" y="40" width="212" height="36" fill="#1f4e79" rx="6"/>
+<text x="26" y="62" text-anchor="start" font-size="11" font-weight="700" fill="#fff" font-family="Segoe UI,Noto Sans,sans-serif">Chủ đề / bài báo</text>
+<rect x="236" y="40" width="232" height="36" fill="#7b1fa2" rx="6"/>
+<text x="246" y="62" text-anchor="start" font-size="11" font-weight="700" fill="#fff" font-family="Segoe UI,Noto Sans,sans-serif">Trọng tâm cổ điển</text>
+<rect x="476" y="40" width="252" height="36" fill="#2f6b45" rx="6"/>
+<text x="486" y="62" text-anchor="start" font-size="11" font-weight="700" fill="#fff" font-family="Segoe UI,Noto Sans,sans-serif">Phát hiện HerdSim ở đây</text>
+<rect x="16" y="86" width="212" height="32" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="4"/>
+<text x="24" y="107" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Strombom 2014</text>
+<rect x="236" y="86" width="232" height="32" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="4"/>
+<text x="244" y="107" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Gom/Lùa; một chó, N vừa</text>
+<rect x="476" y="86" width="252" height="32" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="4"/>
+<text x="484" y="107" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">1 chó đến N=400 trên drive_to_goal; N=5,10 cần 2</text>
+<rect x="16" y="122" width="212" height="32" fill="#efece5" stroke="#bbb3a5" stroke-width="1" rx="4"/>
+<text x="24" y="143" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Kubo 2022</text>
+<rect x="236" y="122" width="232" height="32" fill="#efece5" stroke="#bbb3a5" stroke-width="1" rx="4"/>
+<text x="244" y="143" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Đẩy giữa chó hỗ trợ dẫn đàn</text>
+<rect x="476" y="122" width="252" height="32" fill="#efece5" stroke="#bbb3a5" stroke-width="1" rx="4"/>
+<text x="484" y="143" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Khớp bản đồ tập trung; thất bại ở phân tán</text>
+<rect x="16" y="158" width="212" height="32" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="4"/>
+<text x="24" y="179" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Tsunoda / FAT</text>
+<rect x="236" y="158" width="232" height="32" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="4"/>
+<text x="244" y="179" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Nhắm cừu xa nhất (cục bộ)</text>
+<rect x="476" y="158" width="252" height="32" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="4"/>
+<text x="484" y="179" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Quan sát toàn cục: R&gt;=0.90 chỉ khi N&lt;=10</text>
+<rect x="16" y="194" width="212" height="32" fill="#efece5" stroke="#bbb3a5" stroke-width="1" rx="4"/>
+<text x="24" y="215" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Bản thảo 2025</text>
+<rect x="236" y="194" width="232" height="32" fill="#efece5" stroke="#bbb3a5" stroke-width="1" rx="4"/>
+<text x="244" y="215" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">D_min(N) dốc; quá tải</text>
+<rect x="476" y="194" width="252" height="32" fill="#efece5" stroke="#bbb3a5" stroke-width="1" rx="4"/>
+<text x="484" y="215" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Không tái hiện (nhiệm vụ và xuất phát khác)</text>
+<rect x="16" y="230" width="212" height="32" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="4"/>
+<text x="24" y="251" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Cấu trúc / herdability</text>
+<rect x="236" y="230" width="232" height="32" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="4"/>
+<text x="244" y="251" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Trạng thái đầu và điều khiển được</text>
+<rect x="476" y="230" width="252" height="32" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="4"/>
+<text x="484" y="251" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Chi phí lệch lớn; D_min chạm sàn ở cơ sở</text>
+<text x="16" y="288" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Ghép chủ đề, không khẳng định đã chạy lại số liệu bài báo từng bit.</text>
+</svg>

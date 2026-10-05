@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="280" viewBox="0 0 720 280" role="img" aria-label="so sanh y nghia xa nhat">
+<rect x="0" y="0" width="720" height="280" fill="#f7f6f2"/>
+<text x="16" y="24" text-anchor="start" font-size="14" font-weight="700" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Ý nghĩa &quot;xa nhất&quot; ở mỗi bộ điều khiển</text>
+<defs>
+  <marker id="s13" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+    <path d="M0,0 L6,3 L0,6 Z" fill="#5b4a2f"/>
+  </marker>
+  <marker id="s13p" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+    <path d="M0,0 L6,3 L0,6 Z" fill="#7b1fa2"/>
+  </marker>
+  <marker id="s13d" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+    <path d="M0,0 L6,3 L0,6 Z" fill="#1f4e79"/>
+  </marker>
+  <marker id="s13r" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+    <path d="M0,0 L6,3 L0,6 Z" fill="#9b2c2c"/>
+  </marker>
+</defs>
+<rect x="30" y="44" width="210" height="190" fill="#fff" stroke="#1f4e79" stroke-width="2" rx="8"/>
+<text x="135.0" y="68" text-anchor="middle" font-size="12" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">strombom_multi Gom</text>
+<circle cx="115.0062379614343" cy="153.27483375362195" r="2.0" fill="#3d6b3a"/>
+<circle cx="117.5337254541817" cy="137.5311989961656" r="2.0" fill="#3d6b3a"/>
+<circle cx="123.48153591039554" cy="145.6740701349085" r="2.0" fill="#3d6b3a"/>
+<circle cx="107.01105912170853" cy="146.55921895916978" r="2.0" fill="#3d6b3a"/>
+<circle cx="125.27327525997023" cy="137.45424502587204" r="2.0" fill="#3d6b3a"/>
+<circle cx="120.75567213406407" cy="148.4875978474849" r="2.0" fill="#3d6b3a"/>
+<circle cx="108.65148012657451" cy="136.10267164600205" r="2.0" fill="#3d6b3a"/>
+<circle cx="130.6496121611736" cy="143.48749962495037" r="2.0" fill="#3d6b3a"/>
+<circle cx="115.35121845625969" cy="148.0616549460392" r="2.0" fill="#3d6b3a"/>
+<circle cx="120.46481616324775" cy="130.405740147489" r="2.0" fill="#3d6b3a"/>
+<circle cx="120" cy="144" r="3" fill="#fff" stroke="#1f4e79" stroke-width="1.2"/>
+<text x="125" y="139" text-anchor="start" font-size="8" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">GCM</text>
+<circle cx="148" cy="116" r="3" fill="#9b2c2c"/>
+<rect x="82.0" y="166.0" width="6" height="6" rx="1" fill="#1f4e79"/>
+<line x1="85" y1="169" x2="148" y2="116" stroke="#1f4e79" stroke-width="1.1" marker-end="url(#s13d)"/>
+<text x="135.0" y="202" text-anchor="middle" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">xa nhất so với GCM</text>
+<text x="135.0" y="216" text-anchor="middle" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">(cá thể lạc vs tâm đàn)</text>
+<rect x="260" y="44" width="210" height="190" fill="#fff" stroke="#7b1fa2" stroke-width="2" rx="8"/>
+<text x="365.0" y="68" text-anchor="middle" font-size="12" font-weight="700" fill="#7b1fa2" font-family="Segoe UI,Noto Sans,sans-serif">kubo</text>
+<circle cx="334.16012005439285" cy="145.9192321096142" r="2.0" fill="#3d6b3a"/>
+<circle cx="357.60703753084954" cy="136.11133230177185" r="2.0" fill="#3d6b3a"/>
+<circle cx="350.4476191840896" cy="150.78934737513188" r="2.0" fill="#3d6b3a"/>
+<circle cx="347.1345517650099" cy="141.62772226897906" r="2.0" fill="#3d6b3a"/>
+<circle cx="363.3274810915363" cy="144.33575057296508" r="2.0" fill="#3d6b3a"/>
+<circle cx="342.9400147494855" cy="149.18901987348735" r="2.0" fill="#3d6b3a"/>
+<circle cx="350.6132560128163" cy="139.49673549644882" r="2.0" fill="#3d6b3a"/>
+<circle cx="358.6093808406591" cy="154.09282113637127" r="2.0" fill="#3d6b3a"/>
+<circle cx="339.5477645801043" cy="142.19116634685275" r="2.0" fill="#3d6b3a"/>
+<circle cx="355.7120810215261" cy="141.07810415523497" r="2.0" fill="#3d6b3a"/>
+<circle cx="442" cy="144" r="7" fill="#cfe0f0" stroke="#1f4e79" stroke-width="1.2"/>
+<text x="442" y="132" text-anchor="middle" font-size="8" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">đích</text>
+<circle cx="320" cy="149" r="3" fill="#9b2c2c"/>
+<rect x="307.0" y="121.0" width="6" height="6" rx="1" fill="#1f4e79"/>
+<line x1="310" y1="124" x2="320" y2="149" stroke="#7b1fa2" stroke-width="1.1" marker-end="url(#s13p)"/>
+<text x="365.0" y="202" text-anchor="middle" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">xa nhất so với đích</text>
+<text x="365.0" y="216" text-anchor="middle" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">(trong tầm cảm)</text>
+<rect x="490" y="44" width="210" height="190" fill="#fff" stroke="#9b2c2c" stroke-width="2" rx="8"/>
+<text x="595.0" y="68" text-anchor="middle" font-size="12" font-weight="700" fill="#9b2c2c" font-family="Segoe UI,Noto Sans,sans-serif">fat</text>
+<circle cx="575.6423758609093" cy="139.7114525265884" r="2.0" fill="#3d6b3a"/>
+<circle cx="595.8928155416193" cy="145.57156108078829" r="2.0" fill="#3d6b3a"/>
+<circle cx="570.2809413007567" cy="149.98268972164522" r="2.0" fill="#3d6b3a"/>
+<circle cx="581.6005313721312" cy="137.33748011157712" r="2.0" fill="#3d6b3a"/>
+<circle cx="582.0605461476869" cy="146.9141676456023" r="2.0" fill="#3d6b3a"/>
+<circle cx="567.2121730641311" cy="140.7914036751187" r="2.0" fill="#3d6b3a"/>
+<circle cx="588.3814881063406" cy="140.50963790569782" r="2.0" fill="#3d6b3a"/>
+<circle cx="578.0582254250896" cy="148.2221953022129" r="2.0" fill="#3d6b3a"/>
+<circle cx="574.6970604244013" cy="132.37673738596354" r="2.0" fill="#3d6b3a"/>
+<circle cx="589.5661243089907" cy="148.01097730188815" r="2.0" fill="#3d6b3a"/>
+<circle cx="672" cy="144" r="7" fill="#cfe0f0" stroke="#1f4e79" stroke-width="1.2"/>
+<text x="672" y="132" text-anchor="middle" font-size="8" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">đích</text>
+<rect x="537.0" y="161.0" width="6" height="6" rx="1" fill="#1f4e79"/>
+<circle cx="605" cy="119" r="3" fill="#9b2c2c"/>
+<line x1="540" y1="164" x2="605" y2="119" stroke="#9b2c2c" stroke-width="1.1" marker-end="url(#s13r)"/>
+<text x="536" y="182" text-anchor="start" font-size="8" fill="#9b2c2c" font-family="Segoe UI,Noto Sans,sans-serif">chó</text>
+<text x="595.0" y="202" text-anchor="middle" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">xa nhất so với chó</text>
+<text x="595.0" y="216" text-anchor="middle" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">(trong tập quan sát)</text>
+<text x="16" y="268" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Cùng chữ, ba đích khác nhau. Đó là lý do kết quả chuyển giao có thể lệch.</text>
+</svg>

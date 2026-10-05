@@ -96,7 +96,7 @@ Criteria: [main_scaling_plan.md](main_scaling_plan.md). Update after a claim-gra
 | C2a | REJECTED | Phase 1 Package A: 0 overcrowding cells on strombom_multi at theta=0.90 |
 | C2b | SKIPPED | Phase 1: No overcrowding cells to extend to T=20,000 |
 | C3 | INCONCLUSIVE | Phase 1: Mechanism contrast undefined without overcrowding cells |
-| C4 | SUPPORTED | Phase 4 Package D: Transfer tables compiled across strombom_multi, kubo, and fat |
+| C4 | SUPPORTED (partial) | Phase 4 Package D: size map shared for N>=25 (Strombom/Kubo); Kubo wide has no D_min; Kubo outlier_rich N=200 shifts (D_min=4, soft overcrowding at 10); FAT absent for N>=25 |
 | C5a | UNEVALUATED | Phase 5 TODO |
 | C5b | UNEVALUATED | Phase 5 TODO |
 | C6a | EVALUATED | Phase 1/6 Package F: Leave-one-N-out scaling fits generated |

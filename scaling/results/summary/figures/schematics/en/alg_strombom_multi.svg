@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="340" viewBox="0 0 720 340" role="img" aria-label="strombom_multi Collect and Drive">
+<rect x="0" y="0" width="720" height="340" fill="#f7f6f2"/>
+<text x="16" y="24" text-anchor="start" font-size="14" font-weight="700" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">strombom_multi: Collect then Drive (coordinated multi-dog)</text>
+<defs>
+  <marker id="s10" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+    <path d="M0,0 L6,3 L0,6 Z" fill="#5b4a2f"/>
+  </marker>
+  <marker id="s10p" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+    <path d="M0,0 L6,3 L0,6 Z" fill="#7b1fa2"/>
+  </marker>
+  <marker id="s10d" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+    <path d="M0,0 L6,3 L0,6 Z" fill="#1f4e79"/>
+  </marker>
+  <marker id="s10r" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+    <path d="M0,0 L6,3 L0,6 Z" fill="#9b2c2c"/>
+  </marker>
+</defs>
+<rect x="20" y="44" width="330" height="250" fill="#efece5" stroke="#bbb3a5" stroke-width="1"/>
+<text x="30" y="64" text-anchor="start" font-size="12" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">Collect: dogs assigned to distinct outliers</text>
+<circle cx="185.94332536454954" cy="191.86775370795382" r="2.2" fill="#3d6b3a"/>
+<circle cx="174.68120712368088" cy="182.80986572614884" r="2.2" fill="#3d6b3a"/>
+<circle cx="196.21745660633115" cy="176.7323651776865" r="2.2" fill="#3d6b3a"/>
+<circle cx="175.68375027565767" cy="194.27285513721606" r="2.2" fill="#3d6b3a"/>
+<circle cx="177.14714120063115" cy="178.25768696088906" r="2.2" fill="#3d6b3a"/>
+<circle cx="198.34231467386442" cy="191.12449783308824" r="2.2" fill="#3d6b3a"/>
+<circle cx="166.05028305315076" cy="187.8500879450399" r="2.2" fill="#3d6b3a"/>
+<circle cx="184.5088416746065" cy="177.21605609002208" r="2.2" fill="#3d6b3a"/>
+<circle cx="184.98020279563795" cy="202.21456152732193" r="2.2" fill="#3d6b3a"/>
+<circle cx="166.3805782891384" cy="176.08260920447356" r="2.2" fill="#3d6b3a"/>
+<circle cx="190.8881273236276" cy="182.66989709222082" r="2.2" fill="#3d6b3a"/>
+<circle cx="176.51832911680248" cy="187.61904086459947" r="2.2" fill="#3d6b3a"/>
+<circle cx="178.95318249445634" cy="168.4420906658441" r="2.2" fill="#3d6b3a"/>
+<circle cx="189.2035915757989" cy="191.60207737283778" r="2.2" fill="#3d6b3a"/>
+<circle cx="172.66964070637147" cy="183.82249361432312" r="2.2" fill="#3d6b3a"/>
+<circle cx="195.23945056170692" cy="172.7731251225818" r="2.2" fill="#3d6b3a"/>
+<circle cx="110" cy="129" r="3.0" fill="#9b2c2c"/>
+<circle cx="235" cy="254" r="3.0" fill="#9b2c2c"/>
+<circle cx="140" cy="259" r="3.0" fill="#9b2c2c"/>
+<circle cx="180" cy="184" r="3.5" fill="#fff" stroke="#1f4e79" stroke-width="1.5"/>
+<text x="186" y="178" text-anchor="start" font-size="10" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">GCM</text>
+<circle cx="180" cy="184" r="58" fill="none" stroke="#1f4e79" stroke-width="1" stroke-dasharray="3 3" opacity="0.7"/>
+<text x="222" y="136" text-anchor="start" font-size="9" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">f(N) cohesion ring</text>
+<rect x="81.5" y="140.5" width="7" height="7" rx="1" fill="#1f4e79"/>
+<line x1="85" y1="144" x2="110" y2="129" stroke="#7b1fa2" stroke-width="1.2" stroke-dasharray="3 2" marker-end="url(#s10p)"/>
+<rect x="266.5" y="225.5" width="7" height="7" rx="1" fill="#1f4e79"/>
+<line x1="270" y1="229" x2="235" y2="254" stroke="#7b1fa2" stroke-width="1.2" stroke-dasharray="3 2" marker-end="url(#s10p)"/>
+<rect x="106.5" y="275.5" width="7" height="7" rx="1" fill="#1f4e79"/>
+<line x1="110" y1="279" x2="140" y2="259" stroke="#7b1fa2" stroke-width="1.2" stroke-dasharray="3 2" marker-end="url(#s10p)"/>
+<text x="30" y="282" text-anchor="start" font-size="10" fill="#7b1fa2" font-family="Segoe UI,Noto Sans,sans-serif">assign</text>
+<rect x="370" y="44" width="330" height="250" fill="#efece5" stroke="#bbb3a5" stroke-width="1"/>
+<text x="380" y="64" text-anchor="start" font-size="12" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">Drive: dogs spaced on a circle behind the flock</text>
+<circle cx="503.75779745179284" cy="195.59354219202743" r="2.2" fill="#3d6b3a"/>
+<circle cx="506.9171568177271" cy="175.913998745207" r="2.2" fill="#3d6b3a"/>
+<circle cx="514.3519198879944" cy="186.09258766863562" r="2.2" fill="#3d6b3a"/>
+<circle cx="493.76382390213564" cy="187.19902369896224" r="2.2" fill="#3d6b3a"/>
+<circle cx="516.5915940749628" cy="175.81780628234003" r="2.2" fill="#3d6b3a"/>
+<circle cx="510.9445901675801" cy="189.6094973093561" r="2.2" fill="#3d6b3a"/>
+<circle cx="495.81435015821813" cy="174.12833955750256" r="2.2" fill="#3d6b3a"/>
+<circle cx="523.312015201467" cy="183.35937453118797" r="2.2" fill="#3d6b3a"/>
+<circle cx="504.1890230703246" cy="189.077068682549" r="2.2" fill="#3d6b3a"/>
+<circle cx="510.58102020405966" cy="167.00717518436124" r="2.2" fill="#3d6b3a"/>
+<circle cx="519.8176865106664" cy="193.63965327775364" r="2.2" fill="#3d6b3a"/>
+<circle cx="500.06566959167856" cy="183.0274724569856" r="2.2" fill="#3d6b3a"/>
+<circle cx="514.0462367049324" cy="181.50326067415267" r="2.2" fill="#3d6b3a"/>
+<circle cx="506.6843177304265" cy="197.88349598822185" r="2.2" fill="#3d6b3a"/>
+<circle cx="503.9785924167057" cy="175.50621739623762" r="2.2" fill="#3d6b3a"/>
+<circle cx="516.3960770816808" cy="185.5980547991124" r="2.2" fill="#3d6b3a"/>
+<circle cx="493.5456378701273" cy="190.87213713937032" r="2.2" fill="#3d6b3a"/>
+<circle cx="514.8401699780363" cy="173.4397793758284" r="2.2" fill="#3d6b3a"/>
+<circle cx="513.0219557844069" cy="190.60118053835131" r="2.2" fill="#3d6b3a"/>
+<circle cx="492.0533664552448" cy="176.49693370438334" r="2.2" fill="#3d6b3a"/>
+<circle cx="510" cy="184" r="3.5" fill="#fff" stroke="#1f4e79" stroke-width="1.5"/>
+<text x="516" y="178" text-anchor="start" font-size="10" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">GCM</text>
+<circle cx="650" cy="184" r="10" fill="#cfe0f0" stroke="#1f4e79" stroke-width="1.5"/>
+<text x="650" y="168" text-anchor="middle" font-size="10" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">goal</text>
+<line x1="535" y1="184" x2="636" y2="184" stroke="#5b4a2f" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#s10)"/>
+<text x="580.0" y="172" text-anchor="middle" font-size="10" fill="#5b4a2f" font-family="Segoe UI,Noto Sans,sans-serif">drive</text>
+<rect x="474.42376512921874" y="196.84365799062368" width="7" height="7" rx="1" fill="#1f4e79"/>
+<rect x="470.5" y="180.5" width="7" height="7" rx="1" fill="#1f4e79"/>
+<rect x="474.42376512921874" y="164.15634200937635" width="7" height="7" rx="1" fill="#1f4e79"/>
+<circle cx="510" cy="184" r="36" fill="none" stroke="#7b1fa2" stroke-width="1" stroke-dasharray="2 2" opacity="0.8"/>
+<text x="470" y="234" text-anchor="end" font-size="9" fill="#7b1fa2" font-family="Segoe UI,Noto Sans,sans-serif">4*r_a</text>
+<text x="16" y="326" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Green = sheep · red = outliers · blue squares = dogs · Collect if any sheep beyond f(N) from GCM; else Drive</text>
+</svg>

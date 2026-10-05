@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="780" height="420" viewBox="0 0 780 420" role="img" aria-label="netlogo platform vs herdsim system">
+<rect x="0" y="0" width="780" height="420" fill="#f7f6f2"/>
+<text x="16" y="24" text-anchor="start" font-size="14" font-weight="700" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">NetLogo the platform versus HerdSim the system</text>
+<rect x="16" y="40" width="340" height="190" fill="#fff" stroke="#b45309" stroke-width="2" rx="10"/>
+<rect x="424" y="40" width="340" height="190" fill="#fff" stroke="#1f4e79" stroke-width="2" rx="10"/>
+<text x="186" y="66" text-anchor="middle" font-size="13" font-weight="700" fill="#b45309" font-family="Segoe UI,Noto Sans,sans-serif">NetLogo (ABM platform)</text>
+<text x="594" y="66" text-anchor="middle" font-size="13" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">HerdSim (shepherding stack)</text>
+<text x="32" y="96" text-anchor="start" font-size="11" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">- General agent-based modeling language</text>
+<text x="32" y="120" text-anchor="start" font-size="11" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">- Patch / turtle world (discrete space)</text>
+<text x="32" y="144" text-anchor="start" font-size="11" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">- Desktop IDE: setup, go, monitors</text>
+<text x="32" y="168" text-anchor="start" font-size="11" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">- BehaviorSpace for batch sweeps</text>
+<text x="32" y="192" text-anchor="start" font-size="11" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">- Any .nlogo model (education + research)</text>
+<text x="440" y="96" text-anchor="start" font-size="11" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">- Domain stack for sheep herding methods</text>
+<text x="440" y="120" text-anchor="start" font-size="11" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">- Continuous space, elastic walls, discrete ticks</text>
+<text x="440" y="144" text-anchor="start" font-size="11" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">- Simulate / Compare / Experiments apps</text>
+<text x="440" y="168" text-anchor="start" font-size="11" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">- Scout-claim staging, seeds, CSV provenance</text>
+<text x="440" y="192" text-anchor="start" font-size="11" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">- Shared scenarios + metrics across methods</text>
+<text x="390" y="120" text-anchor="middle" font-size="18" font-weight="700" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">&lt;-&gt;</text>
+<text x="390" y="145" text-anchor="middle" font-size="9" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">related, not the same binary</text>
+<text x="390" y="162" text-anchor="middle" font-size="9" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">twins bridge shared methods</text>
+<rect x="16" y="250" width="124" height="26" fill="#1f4e79" rx="4"/>
+<text x="24" y="267" text-anchor="start" font-size="11" font-weight="700" fill="#fff" font-family="Segoe UI,Noto Sans,sans-serif">Design axis</text>
+<rect x="146" y="250" width="274" height="26" fill="#b45309" rx="4"/>
+<text x="154" y="267" text-anchor="start" font-size="11" font-weight="700" fill="#fff" font-family="Segoe UI,Noto Sans,sans-serif">NetLogo (ABM platform)</text>
+<rect x="426" y="250" width="294" height="26" fill="#1f4e79" rx="4"/>
+<text x="434" y="267" text-anchor="start" font-size="11" font-weight="700" fill="#fff" font-family="Segoe UI,Noto Sans,sans-serif">HerdSim</text>
+<rect x="16" y="282" width="124" height="22" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="3"/>
+<text x="22" y="297" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Purpose</text>
+<rect x="146" y="282" width="274" height="22" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="3"/>
+<text x="152" y="297" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">General ABM toolkit</text>
+<rect x="426" y="282" width="294" height="22" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="3"/>
+<text x="432" y="297" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Controlled herding experiments</text>
+<rect x="16" y="306" width="124" height="22" fill="#efece5" stroke="#bbb3a5" stroke-width="1" rx="3"/>
+<text x="22" y="321" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Space</text>
+<rect x="146" y="306" width="274" height="22" fill="#efece5" stroke="#bbb3a5" stroke-width="1" rx="3"/>
+<text x="152" y="321" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Patches / turtles</text>
+<rect x="426" y="306" width="294" height="22" fill="#efece5" stroke="#bbb3a5" stroke-width="1" rx="3"/>
+<text x="432" y="321" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Continuous positions</text>
+<rect x="16" y="330" width="124" height="22" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="3"/>
+<text x="22" y="345" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Batch</text>
+<rect x="146" y="330" width="274" height="22" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="3"/>
+<text x="152" y="345" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">BehaviorSpace / manual</text>
+<rect x="426" y="330" width="294" height="22" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="3"/>
+<text x="432" y="345" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Experiments + claim pipeline</text>
+<rect x="16" y="354" width="124" height="22" fill="#efece5" stroke="#bbb3a5" stroke-width="1" rx="3"/>
+<text x="22" y="369" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Compare</text>
+<rect x="146" y="354" width="274" height="22" fill="#efece5" stroke="#bbb3a5" stroke-width="1" rx="3"/>
+<text x="152" y="369" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Separate windows</text>
+<rect x="426" y="354" width="294" height="22" fill="#efece5" stroke="#bbb3a5" stroke-width="1" rx="3"/>
+<text x="432" y="369" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Compare tab + shared metrics</text>
+<text x="16" y="406" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Twins exist for some methods (behaviour check, not bit-identical). The 2025 draft is one NetLogo model with its own task; not NetLogo itself.</text>
+</svg>

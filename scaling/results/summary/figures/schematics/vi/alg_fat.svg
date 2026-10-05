@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="320" viewBox="0 0 720 320" role="img" aria-label="FAT nham ca the xa nhat">
+<rect x="0" y="0" width="720" height="320" fill="#f7f6f2"/>
+<text x="16" y="24" text-anchor="start" font-size="14" font-weight="700" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">fat: mỗi chó ép cừu xa nhất so với chính nó</text>
+<text x="16" y="44" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Không Gom / Lùa. Đứng lệch r_a sau cừu đã chọn về phía đích</text>
+<defs>
+  <marker id="s12" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+    <path d="M0,0 L6,3 L0,6 Z" fill="#5b4a2f"/>
+  </marker>
+  <marker id="s12p" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+    <path d="M0,0 L6,3 L0,6 Z" fill="#7b1fa2"/>
+  </marker>
+  <marker id="s12d" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+    <path d="M0,0 L6,3 L0,6 Z" fill="#1f4e79"/>
+  </marker>
+  <marker id="s12r" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+    <path d="M0,0 L6,3 L0,6 Z" fill="#9b2c2c"/>
+  </marker>
+</defs>
+<rect x="20" y="58" width="680" height="220" fill="#efece5" stroke="#bbb3a5" stroke-width="1"/>
+<circle cx="297.9629995266794" cy="181.77336313481825" r="2.2" fill="#3d6b3a"/>
+<circle cx="295.5055055738701" cy="164.37459751714204" r="2.2" fill="#3d6b3a"/>
+<circle cx="321.41246006623845" cy="174.29284115723308" r="2.2" fill="#3d6b3a"/>
+<circle cx="286.0436182828826" cy="176.6506408162684" r="2.2" fill="#3d6b3a"/>
+<circle cx="303.119458611019" cy="161.92415102999593" r="2.2" fill="#3d6b3a"/>
+<circle cx="309.90340003277316" cy="188.58222611741937" r="2.2" fill="#3d6b3a"/>
+<circle cx="283.44095662866147" cy="164.00174069438648" r="2.2" fill="#3d6b3a"/>
+<circle cx="311.3140911701399" cy="166.60092014392228" r="2.2" fill="#3d6b3a"/>
+<circle cx="297.1843878200603" cy="174.50358268689456" r="2.2" fill="#3d6b3a"/>
+<circle cx="294.971927028036" cy="153.54600038345487" r="2.2" fill="#3d6b3a"/>
+<circle cx="311.7557415443231" cy="176.4623784852694" r="2.2" fill="#3d6b3a"/>
+<circle cx="292.11332629420673" cy="171.14051435881225" r="2.2" fill="#3d6b3a"/>
+<circle cx="313.4830864530413" cy="155.22352852223796" r="2.2" fill="#3d6b3a"/>
+<circle cx="301.325011530191" cy="183.55328516860072" r="2.2" fill="#3d6b3a"/>
+<circle cx="292.65112472639953" cy="164.23539348489953" r="2.2" fill="#3d6b3a"/>
+<circle cx="323.9999123352926" cy="170.05513806762076" r="2.2" fill="#3d6b3a"/>
+<circle cx="286.70622855276537" cy="180.31535992644118" r="2.2" fill="#3d6b3a"/>
+<circle cx="301.05838938970624" cy="159.83975078565615" r="2.2" fill="#3d6b3a"/>
+<circle cx="640" cy="170" r="12" fill="#cfe0f0" stroke="#1f4e79" stroke-width="1.5"/>
+<text x="640" y="152" text-anchor="middle" font-size="10" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">đích</text>
+<rect x="206.0" y="96.0" width="8" height="8" rx="1" fill="#1f4e79"/>
+<circle cx="340" cy="115" r="3.4" fill="#9b2c2c"/>
+<line x1="210" y1="100" x2="340" y2="115" stroke="#1f4e79" stroke-width="1.2" stroke-dasharray="3 2"/>
+<circle cx="322.2950819672131" cy="111.75409836065573" r="3" fill="#fff" stroke="#1f4e79" stroke-width="1.5"/>
+<line x1="210" y1="100" x2="322.2950819672131" y2="111.75409836065573" stroke="#1f4e79" stroke-width="1.3" marker-end="url(#s12d)"/>
+<text x="348" y="105" text-anchor="start" font-size="9" fill="#9b2c2c" font-family="Segoe UI,Noto Sans,sans-serif">xa nhất so với tôi</text>
+<text x="328.2950819672131" y="115.75409836065573" text-anchor="start" font-size="9" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">lệch r_a</text>
+<rect x="196.0" y="176.0" width="8" height="8" rx="1" fill="#1f4e79"/>
+<circle cx="265" cy="175" r="3.4" fill="#7b1fa2"/>
+<line x1="200" y1="180" x2="265" y2="175" stroke="#7b1fa2" stroke-width="1.2" stroke-dasharray="3 2"/>
+<circle cx="247.00159978669828" cy="175.2399786695107" r="3" fill="#fff" stroke="#7b1fa2" stroke-width="1.5"/>
+<line x1="200" y1="180" x2="247.00159978669828" y2="175.2399786695107" stroke="#7b1fa2" stroke-width="1.3" marker-end="url(#s12p)"/>
+<rect x="216.0" y="246.0" width="8" height="8" rx="1" fill="#1f4e79"/>
+<circle cx="335" cy="230" r="3.4" fill="#9b2c2c"/>
+<line x1="220" y1="250" x2="335" y2="230" stroke="#9b2c2c" stroke-width="1.2" stroke-dasharray="3 2"/>
+<circle cx="317.3384997831599" cy="233.47439348528002" r="3" fill="#fff" stroke="#9b2c2c" stroke-width="1.5"/>
+<line x1="220" y1="250" x2="317.3384997831599" y2="233.47439348528002" stroke="#9b2c2c" stroke-width="1.3" marker-end="url(#s12r)"/>
+<text x="420" y="265" text-anchor="start" font-size="10" fill="#7b1fa2" font-family="Segoe UI,Noto Sans,sans-serif">độc lập (không đích chung)</text>
+<text x="16" y="306" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Cừu là Strombom 2014. Ở Giai đoạn 1/2/4, obs_mode=global (mỗi chó thấy cả đàn)</text>
+</svg>

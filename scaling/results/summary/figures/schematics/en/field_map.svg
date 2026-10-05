@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="300" viewBox="0 0 760 300" role="img" aria-label="field map">
+<rect x="0" y="0" width="760" height="300" fill="#f7f6f2"/>
+<text x="16" y="24" text-anchor="start" font-size="14" font-weight="700" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Where this study sits in the shepherding field</text>
+<rect x="16" y="40" width="212" height="36" fill="#1f4e79" rx="6"/>
+<text x="26" y="62" text-anchor="start" font-size="11" font-weight="700" fill="#fff" font-family="Segoe UI,Noto Sans,sans-serif">Theme / paper</text>
+<rect x="236" y="40" width="232" height="36" fill="#7b1fa2" rx="6"/>
+<text x="246" y="62" text-anchor="start" font-size="11" font-weight="700" fill="#fff" font-family="Segoe UI,Noto Sans,sans-serif">Classic focus</text>
+<rect x="476" y="40" width="252" height="36" fill="#2f6b45" rx="6"/>
+<text x="486" y="62" text-anchor="start" font-size="11" font-weight="700" fill="#fff" font-family="Segoe UI,Noto Sans,sans-serif">HerdSim finding here</text>
+<rect x="16" y="86" width="212" height="32" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="4"/>
+<text x="24" y="107" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Strombom 2014</text>
+<rect x="236" y="86" width="232" height="32" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="4"/>
+<text x="244" y="107" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Collect/Drive; one dog, moderate N</text>
+<rect x="476" y="86" width="252" height="32" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="4"/>
+<text x="484" y="107" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">1 dog to N=400 on drive_to_goal; N=5,10 need 2</text>
+<rect x="16" y="122" width="212" height="32" fill="#efece5" stroke="#bbb3a5" stroke-width="1" rx="4"/>
+<text x="24" y="143" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Kubo 2022</text>
+<rect x="236" y="122" width="232" height="32" fill="#efece5" stroke="#bbb3a5" stroke-width="1" rx="4"/>
+<text x="244" y="143" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Multi-dog repulsion aids guidance</text>
+<rect x="476" y="122" width="252" height="32" fill="#efece5" stroke="#bbb3a5" stroke-width="1" rx="4"/>
+<text x="484" y="143" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Matches compact size map; fails on wide starts</text>
+<rect x="16" y="158" width="212" height="32" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="4"/>
+<text x="24" y="179" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Tsunoda / FAT</text>
+<rect x="236" y="158" width="232" height="32" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="4"/>
+<text x="244" y="179" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Local farthest-sheep targeting</text>
+<rect x="476" y="158" width="252" height="32" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="4"/>
+<text x="484" y="179" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Under global obs: R&gt;=0.90 only for N&lt;=10</text>
+<rect x="16" y="194" width="212" height="32" fill="#efece5" stroke="#bbb3a5" stroke-width="1" rx="4"/>
+<text x="24" y="215" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">2025 draft</text>
+<rect x="236" y="194" width="232" height="32" fill="#efece5" stroke="#bbb3a5" stroke-width="1" rx="4"/>
+<text x="244" y="215" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Steep D_min(N); overcrowding</text>
+<rect x="476" y="194" width="252" height="32" fill="#efece5" stroke="#bbb3a5" stroke-width="1" rx="4"/>
+<text x="484" y="215" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Not reproduced (task and starts differ)</text>
+<rect x="16" y="230" width="212" height="32" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="4"/>
+<text x="24" y="251" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Structure / herdability</text>
+<rect x="236" y="230" width="232" height="32" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="4"/>
+<text x="244" y="251" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Start state and controllability</text>
+<rect x="476" y="230" width="252" height="32" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="4"/>
+<text x="484" y="251" text-anchor="start" font-size="10" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Cost shifts huge; D_min floor on baseline</text>
+<text x="16" y="288" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Mapping themes, not a claim that published numbers were re-run bit-for-bit.</text>
+</svg>

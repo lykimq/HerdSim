@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="260" viewBox="0 0 720 260" role="img" aria-label="het gio va lua">
+<rect x="0" y="0" width="720" height="260" fill="#f7f6f2"/>
+<text x="16" y="24" text-anchor="start" font-size="14" font-weight="700" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Thiết kế: sân, quãng đường lùa, và ngân sách thời gian</text>
+<rect x="40" y="50" width="280" height="160" fill="#efece5" stroke="#bbb3a5" stroke-width="1"/>
+<text x="180" y="70" text-anchor="middle" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">sân 500 x 500</text>
+<circle cx="120" cy="140" r="8" fill="#3d6b3a"/>
+<circle cx="300" cy="140" r="14" fill="#cfe0f0" stroke="#1f4e79" stroke-width="1.5"/>
+<text x="120" y="165" text-anchor="middle" font-size="10" fill="#3d6b3a" font-family="Segoe UI,Noto Sans,sans-serif">N</text>
+<text x="300" y="120" text-anchor="middle" font-size="10" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">đích</text>
+<line x1="132" y1="140" x2="282" y2="140" stroke="#5b4a2f" stroke-width="2" stroke-dasharray="5 3"/>
+<text x="207" y="132" text-anchor="middle" font-size="11" font-weight="700" fill="#5b4a2f" font-family="Segoe UI,Noto Sans,sans-serif">lùa ~120</text>
+<rect x="360" y="60" width="330" height="140" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="8"/>
+<text x="375" y="90" text-anchor="start" font-size="13" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">T0 = 10,000 bước</text>
+<text x="375" y="118" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">~80 lần đi thẳng ở tốc độ 1: hết giờ = mất kiểm soát, không phải cuộc đua ngắn</text>
+<text x="375" y="150" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">T1 = 20,000 chỉ khi có ô quá tải (không có ở mức cơ sở)</text>
+<text x="16" y="246" text-anchor="start" font-size="11" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif"></text>
+</svg>
