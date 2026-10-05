@@ -1,0 +1,33 @@
+protocol_id: phase4_fat_structure_claim
+phase: 4
+grade: CLAIM
+output: scaling/results/phase4/fat_structure/claim
+canonical: scaling/configs/canonical_grid.yaml
+methods:
+- fat
+layouts:
+- compact
+- wide
+- split
+- outlier_rich
+flock_sizes:
+- 50
+- 100
+- 200
+shepherd_counts:
+- 1
+- 2
+- 3
+- 4
+- 6
+- 10
+- 15
+- 20
+- 25
+- 35
+seeds: 100
+seed_mode: claim
+store_timeseries: true
+packages:
+- B
+upstream_protocol: phase4_fat_structure_scout

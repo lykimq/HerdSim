@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Phase 2 structure map: results</title>
+  <style>
+    :root {
+      --bg: #f7f6f2; --fg: #1c1b19; --muted: #5c5852; --card: #ffffff;
+      --line: #ddd8ce; --ok: #2f6b45; --bad: #9b2c2c; --accent: #1f4e79;
+      --plan: #5b4a2f; --code: #2a4a3a; --result: #1f4e79;
+    }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:"Segoe UI","Noto Sans","Helvetica Neue",Arial,sans-serif;
+           color:var(--fg); background:var(--bg); line-height:1.55; }
+    h1 { font-size:1.7rem; margin:0 0 8px; line-height:1.25; }
+    h2 { font-size:1.22rem; margin:40px 0 12px; border-top:1px solid var(--line);
+         padding-top:28px; line-height:1.3; }
+    h3 { font-size:1.05rem; margin:22px 0 8px; }
+    .muted { color:var(--muted); }
+    .lead { font-size:1.05rem; margin:0 0 18px; }
+    a { color:var(--accent); }
+    .tag { display:inline-block; font-size:0.72rem; font-weight:700; letter-spacing:0.04em;
+           padding:2px 8px; border-radius:999px; margin-right:6px; vertical-align:middle; }
+    .tag-out { background:#d6e2ef; color:var(--result); }
+    .tag-plan { background:#e8dcc8; color:var(--plan); }
+    .tag-run { background:#e4d7c3; color:#6b4f2a; }
+    .callout { background:#efece5; border-left:4px solid var(--accent); padding:12px 14px;
+               margin:14px 0; border-radius:0 8px 8px 0; }
+    .note { background:#efece5; padding:10px 12px; border-radius:8px; font-size:0.92rem;
+            color:var(--muted); margin:12px 0; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:10px;
+            padding:16px 18px; margin:12px 0; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+            gap:10px; margin:12px 0; }
+    .stat strong { display:block; font-size:1.2rem; }
+    .stat span { color:var(--muted); font-size:0.88rem; }
+    table { width:100%; border-collapse:collapse; background:var(--card);
+            border:1px solid var(--line); font-size:0.94rem; margin:10px 0; }
+    th, td { border-bottom:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:top; }
+    th { background:#efece5; }
+    .mono, code { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:0.88em; }
+    pre.cmd { background:#1c1b19; color:#f2efe8; padding:12px 14px; border-radius:8px;
+              overflow:auto; font-size:0.85rem; }
+    figure, figure.viz { margin:14px 0; background:var(--card); border:1px solid var(--line);
+             border-radius:10px; padding:12px; }
+    figure img, figure.viz img { width:100%; height:auto; display:block; border-radius:4px; background:#f7f6f2; }
+    figcaption { color:var(--muted); font-size:0.9rem; margin-top:8px; }
+    .layout-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+                   gap:10px; margin:12px 0; }
+    .layout-grid figure { margin:0; }
+    details.box { background:var(--card); border:1px solid var(--line); border-radius:10px;
+                  padding:10px 14px; margin:10px 0; }
+    details.box summary { cursor:pointer; font-weight:600; }
+    .layout { display:grid; grid-template-columns:240px 1fr; gap:20px;
+              max-width:1100px; margin:0 auto; padding:20px 18px 60px; }
+    aside.side { position:sticky; top:12px; align-self:start; max-height:calc(100vh - 24px);
+                 overflow:auto; background:var(--card); border:1px solid var(--line);
+                 border-radius:10px; padding:12px 10px; font-size:0.86rem; }
+    .side-title { font-weight:700; margin:0 0 8px; }
+    .side-group { color:var(--muted); font-size:0.75rem; text-transform:uppercase;
+                  letter-spacing:0.04em; margin:12px 0 4px; }
+    aside.side a { display:block; text-decoration:none; color:var(--fg); padding:5px 8px;
+                   border-radius:6px; border-left:3px solid transparent; }
+    aside.side a:hover { background:#efece5; color:var(--accent); }
+    .content { min-width:0; }
+    .side-toggle { display:none; position:fixed; right:14px; bottom:14px; z-index:40;
+                   border:1px solid var(--line); background:var(--card); border-radius:999px;
+                   padding:10px 14px; font-size:0.9rem; box-shadow:0 4px 16px rgba(0,0,0,0.12); cursor:pointer; }
+    @media (max-width:960px) {
+      .layout { grid-template-columns:1fr; }
+      aside.side { position:fixed; inset:0 auto 0 0; width:min(300px,86vw); max-height:none;
+                   transform:translateX(-105%); transition:transform 0.2s ease; z-index:50; }
+      aside.side.open { transform:translateX(0); }
+      .side-toggle { display:inline-flex; }
+      .side-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:45; }
+      .side-backdrop.show { display:block; }
+    }
+
+  </style>
+</head>
+<body>
+<div class="layout">
+  <aside class="side" id="side" aria-label="Contents">
+
+    <p class="side-title">Contents</p>
+    <div class="side-group">Start</div>
+    <a href="#summary">At a glance</a>
+    <a href="#question">What Phase 2 asks</a>
+    <div class="side-group">Design and run</div>
+    <a href="#design">What we froze</a>
+    <a href="#layouts">Four layouts</a>
+    <a href="#strategy">How we ran it</a>
+    <div class="side-group">Results</div>
+    <a href="#results">Results</a>
+    <a href="#metrics">Metrics (perimeter…)</a>
+    <a href="#interpretation">What it means</a>
+    <a href="#claims">Claims C1a / C1b</a>
+    <a href="#limits">Limits</a>
+    <a href="#next">Next steps</a>
+    <div class="side-group">Appendix</div>
+    <a href="#appendix">Why these values</a>
+    <a href="#raw-data">Raw data</a>
+
+  </aside>
+  <div class="side-backdrop" id="backdrop" hidden></div>
+  <button type="button" class="side-toggle" id="toggle">Contents</button>
+<main class="content">
+
+  <p><a href="index.html">Package home</a> · <a href="../REPORT_vi.html">Vietnamese report</a></p>
+  <h1>Phase 2 structure map</h1>
+  <p class="lead muted">
+    Baseline structure contrast for HerdSim (protocol <span class="mono">scaling_v2</span>):
+    at fixed flock size N, does initial layout X0 change the dogs needed for reliable herding?
+    Read top to bottom: summary -> question -> design -> how we ran it -> results -> what it means.
+  </p>
+
+  <h2 id="summary"><span class="tag tag-out">SUMMARY</span> At a glance</h2>
+  <div class="callout">
+    <strong>One-sentence result:</strong>
+    On this structure map, every layout (compact, wide, split, outlier-rich) reaches R = 1.0 from D = 1
+    at N in {50, 100, 200}. C1a (D_min differs by layout) is not supported. Structure still changes
+    effort, time-to-success, and shape metrics such as perimeter and hull area.
+  </div>
+  <table>
+    <thead><tr><th>Field</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td>Dog method</td><td><span class="mono">strombom_multi</span></td></tr>
+      <tr><td>Layouts X0</td><td>compact, wide, split, outlier_rich</td></tr>
+      <tr><td>Flock sizes N</td><td>50, 100, 200 (claim grid; smoke also used 5, 10, 25)</td></tr>
+      <tr><td>Dog counts D</td><td>1, 2, 3, 4, 6, 10, 15, 20, 25, 35</td></tr>
+      <tr><td>Reliability threshold</td><td>R &gt;= 0.90</td></tr>
+      <tr><td>Arena / goal</td><td>Same as Phase 1: 500 x 500; goal (370, 250); radius 15 * sqrt(N/50)</td></tr>
+      <tr><td>Sampling</td><td>Smoke 5 seeds; scout 30; claim 100 on D = 1 and 2 windows</td></tr>
+      <tr><td>Cited dataset</td><td>Claim merge: 5,280 rows (24 cells at 100 seeds + 96 cells at 30)</td></tr>
+      <tr><td>Metrics logged</td><td>cohesion, spread, extent, <strong>perimeter</strong>, hull_area, flock_density, aspect_ratio, fragmentation, outliers, i_dir, coverage (+ timeseries parquet)</td></tr>
+    </tbody>
+  </table>
+  <div class="grid">
+    <div class="card stat"><span>Claim D_min (all layouts)</span><strong>1 dog</strong></div>
+    <div class="card stat"><span>C1a (D_min gap)</span><strong>Not supported</strong></div>
+    <div class="card stat"><span>C1b (state vs N,D)</span><strong>Cannot evaluate</strong></div>
+    <div class="card stat"><span>Overall R (merge)</span><strong>1.00</strong></div>
+  </div>
+  <figure>
+    <img src="assets/figures/takeaway_sketch.png" alt="Phase 2 takeaway sketch" />
+    <figcaption>Same reliability floor, different control cost and flock shape.</figcaption>
+  </figure>
+
+  <h2 id="question"><span class="tag tag-plan">QUESTION</span> What Phase 2 asks</h2>
+  <p>
+    Research question (structure / RQ1, Package B): at the same flock size N, does a different
+    initial layout X0 change D_min for reliable herding (R &gt;= 0.90)?
+  </p>
+  <ul>
+    <li><strong>C1a:</strong> for at least one N, D_min differs by at least one dog-grid step across layouts.</li>
+    <li><strong>C1b:</strong> an early-state model predicts success better than (N, D) alone (leave-one-N-out).</li>
+  </ul>
+  <p class="muted">
+    Phase 1 already showed D_min = 1 on compact for these N. Phase 2 asks whether other layouts
+    push that floor up. Method transfer is Phase 4.
+  </p>
+
+  <h2 id="design"><span class="tag tag-out">DESIGN</span> What we froze</h2>
+  <table>
+    <thead><tr><th>Choice</th><th>Value</th><th>One-line why</th></tr></thead>
+    <tbody>
+      <tr><td>N for claim</td><td>50, 100, 200</td><td>Large enough for split/outliers; same compact D_min floor as Phase 1.</td></tr>
+      <tr><td>Layouts</td><td>4 families</td><td>Layout contract: compact reference + wide / split / outlier contrasts.</td></tr>
+      <tr><td>D grid</td><td>same as Phase 1</td><td>C1a is measured in the same dog-grid steps as the size map.</td></tr>
+      <tr><td>Method</td><td>strombom_multi only</td><td>RQ1 baseline; kubo/fat are Phase 4.</td></tr>
+      <tr><td>Seeds</td><td>30 then 100</td><td>Full scout map, then precise D_min window (here D = 1 and next grid D = 2).</td></tr>
+    </tbody>
+  </table>
+  <p class="note">Full layout-parameter rationale (sigma, gaps, outlier fraction) is in the <a href="#appendix">Appendix</a>.</p>
+
+  <h2 id="layouts"><span class="tag tag-out">DESIGN</span> Four layouts (pictures)</h2>
+  <figure>
+    <img src="assets/layouts/arena_overview.svg" alt="Arena overview with goal" />
+    <figcaption>Same arena as Phase 1. Only the sheep start pattern changes.</figcaption>
+  </figure>
+  <div class="layout-grid">
+    <figure><img src="assets/layouts/compact.svg" alt="Compact layout" /><figcaption>Compact (reference)</figcaption></figure>
+    <figure><img src="assets/layouts/wide.svg" alt="Wide layout" /><figcaption>Wide (spread cloud)</figcaption></figure>
+    <figure><img src="assets/layouts/split.svg" alt="Split layout" /><figcaption>Split (clusters)</figcaption></figure>
+    <figure><img src="assets/layouts/outlier_rich.svg" alt="Outlier-rich layout" /><figcaption>Outlier-rich</figcaption></figure>
+  </div>
+
+  <h2 id="strategy"><span class="tag tag-run">RUN</span> How we ran it</h2>
+  <div class="callout">
+    <ol>
+      <li><strong>Smoke</strong> (<span class="mono">phase2_pilot_state</span>): 600 trials, ~7 min. Pipeline + four X0 generators.</li>
+      <li><strong>Scout</strong>: 3 N x 4 layouts x 10 D x 30 seeds = 3,600 trials, ~3.2 h. Full R map.</li>
+      <li><strong>Claim plan</strong>: 24 boundary cells (D = 1 and 2 for every layout x N).</li>
+      <li><strong>Claim reseed</strong>: 24 x 100 = 2,400 trials, ~3.0 h (slow tail on wide N = 200).</li>
+      <li><strong>Merge + Package B</strong>: 5,280 rows; frontiers and predictor comparison exported.</li>
+    </ol>
+  </div>
+  <details class="box" open>
+    <summary>1. Smoke: 600 trials (~7 min)</summary>
+    <p>N in {5,10,25,50,100}, D in {1..10}, 5 seeds, all four layouts. Complete. Not cited for C1a.</p>
+  </details>
+  <details class="box" open>
+    <summary>2. Scout: 3,600 trials (~3.2 h)</summary>
+    <p>Every scout cell had R = 1.0. That already suggested D_min = 1 for all layouts.</p>
+    <figure>
+      <img src="assets/figures/reliability_heatmaps_by_layout.png" alt="Scout reliability heatmaps" />
+      <figcaption>Scout heatmaps: all cells yellow (R = 1) across the D grid.</figcaption>
+    </figure>
+  </details>
+  <details class="box" open>
+    <summary>3–4. Claim: 24 cells x 100 seeds = 2,400 (~3.0 h)</summary>
+    <p>
+      Window = D_min candidate and the next grid D. With scout D_min = 1, that is D = 1 and 2.
+      Claim R at D = 1 is still 1.0 on all 12 (layout, N) pairs. Bootstrap CI on D_min is [1, 1] everywhere.
+    </p>
+    <figure>
+      <img src="assets/figures/claim_r_d1.png" alt="Claim R at D=1" />
+      <figcaption>Claim R at D = 1 (100 seeds) vs theta = 0.90.</figcaption>
+    </figure>
+  </details>
+
+  <h2 id="results"><span class="tag tag-out">RESULTS</span> Results</h2>
+  <table>
+    <thead><tr><th>Stage</th><th>Trials</th><th>Elapsed</th><th>Cite science?</th></tr></thead>
+    <tbody>
+      <tr><td>Smoke</td><td>600</td><td>~7 min</td><td>No</td></tr>
+      <tr><td>Scout</td><td>3,600</td><td>~3.2 h</td><td>No (planning)</td></tr>
+      <tr><td>Claim reseed</td><td>2,400</td><td>~3.0 h</td><td>Yes (with merge)</td></tr>
+      <tr><td>Merged map</td><td>5,280</td><td>-</td><td>Yes</td></tr>
+    </tbody>
+  </table>
+
+  <h3>D_min by layout (claim / Package B)</h3>
+  <table>
+    <thead><tr><th>N</th><th>compact</th><th>wide</th><th>split</th><th>outlier_rich</th><th>Gap &gt;= 1 step?</th></tr></thead>
+    <tbody>
+      <tr><td>50</td><td>1</td><td>1</td><td>1</td><td>1</td><td>No</td></tr>
+      <tr><td>100</td><td>1</td><td>1</td><td>1</td><td>1</td><td>No</td></tr>
+      <tr><td>200</td><td>1</td><td>1</td><td>1</td><td>1</td><td>No</td></tr>
+    </tbody>
+  </table>
+  <figure>
+    <img src="assets/figures/dmin_by_layout.png" alt="D_min bars by layout" />
+    <figcaption>Claim-grade D_min: floor at 1 for every layout.</figcaption>
+  </figure>
+
+  <h3>Same D_min, different effort and time (claim, D = 1)</h3>
+  <p>Median shepherd path / median ticks at D = 1, 100 seeds:</p>
+  <table>
+    <thead><tr><th>N</th><th>metric</th><th>compact</th><th>split</th><th>outlier_rich</th><th>wide</th></tr></thead>
+    <tbody>
+      <tr><td>50</td><td>path</td><td>158</td><td>158</td><td>209</td><td>2,925</td></tr>
+      <tr><td>100</td><td>path</td><td>161</td><td>162</td><td>554</td><td>4,320</td></tr>
+      <tr><td>200</td><td>path</td><td>144</td><td>144</td><td>1,647</td><td>5,213</td></tr>
+      <tr><td>100</td><td>ticks (mean)</td><td>204</td><td>205</td><td>518</td><td>3,167</td></tr>
+    </tbody>
+  </table>
+  <div class="layout-grid">
+    <figure>
+      <img src="assets/figures/effort_d1_by_layout.png" alt="Path effort by layout" />
+      <figcaption>Median path length at D = 1.</figcaption>
+    </figure>
+    <figure>
+      <img src="assets/figures/ticks_d1_by_layout.png" alt="Ticks by layout" />
+      <figcaption>Median ticks to finish at D = 1.</figcaption>
+    </figure>
+  </div>
+  <p class="note">
+    Wide is roughly 25–35x the compact path at N = 100, and finishes much later, but still before timeout
+    with R = 1. Split stays almost identical to compact on this controller.
+  </p>
+
+  <h2 id="metrics"><span class="tag tag-out">RESULTS</span> Metrics logged (including perimeter)</h2>
+  <p>
+    Every trial writes mean / min / max / auc columns on <span class="mono">trials.csv</span>.
+    With <span class="mono">store_timeseries: true</span>, parquet histories also store per-tick
+    <span class="mono">perimeter</span>, <span class="mono">hull_area</span>, and the rest.
+    The runner always attaches the full metric registry (Phases 2+ use the same path; some Phase 5
+    protocols only skip parquet to save disk).
+  </p>
+  <table>
+    <thead><tr><th>Group</th><th>Metrics</th></tr></thead>
+    <tbody>
+      <tr><td>Cohesion / spread</td><td>cohesion, mean_spread, extent</td></tr>
+      <tr><td>Hull shape</td><td><strong>perimeter</strong>, hull_area, flock_density, aspect_ratio</td></tr>
+      <tr><td>Structure</td><td>fragmentation, outlier_count</td></tr>
+      <tr><td>Dogs</td><td>i_dir, coverage</td></tr>
+      <tr><td>Task</td><td>success, shepherd_path, total_ticks</td></tr>
+    </tbody>
+  </table>
+  <h3>Claim means at N = 100, D = 1 (100 seeds)</h3>
+  <table>
+    <thead><tr><th>Metric</th><th>compact</th><th>split</th><th>outlier_rich</th><th>wide</th></tr></thead>
+    <tbody>
+      <tr><td>Perimeter</td><td>86</td><td>84</td><td>171</td><td>549</td></tr>
+      <tr><td>Hull area</td><td>486</td><td>458</td><td>2,304</td><td>22,765</td></tr>
+      <tr><td>Cohesion</td><td>6.8</td><td>7.0</td><td>8.5</td><td>27.9</td></tr>
+      <tr><td>Fragmentation</td><td>0.99</td><td>0.99</td><td>0.92</td><td>0.65</td></tr>
+      <tr><td>Outlier count</td><td>~0</td><td>0</td><td>3.3</td><td>23.2</td></tr>
+      <tr><td>Flock density</td><td>0.22</td><td>0.22</td><td>0.13</td><td>0.04</td></tr>
+      <tr><td>Aspect ratio</td><td>1.46</td><td>1.45</td><td>1.61</td><td>1.63</td></tr>
+      <tr><td>Coverage</td><td>1.00</td><td>1.00</td><td>0.91</td><td>0.34</td></tr>
+    </tbody>
+  </table>
+  <div class="layout-grid">
+    <figure>
+      <img src="assets/figures/shape_metrics_n100_d1.png" alt="Shape metrics bars" />
+      <figcaption>Eight state metrics side by side.</figcaption>
+    </figure>
+    <figure>
+      <img src="assets/figures/shape_ratio_vs_compact.png" alt="Ratios vs compact" />
+      <figcaption>Ratio vs compact (1 = same as compact).</figcaption>
+    </figure>
+  </div>
+  <figure>
+    <img src="assets/figures/timeseries_perimeter_example.png" alt="Perimeter over time" />
+    <figcaption>Example perimeter trajectory (seed 2026): wide starts high then shrinks; compact/split stay low.</figcaption>
+  </figure>
+
+  <h2 id="interpretation"><span class="tag tag-out">INTERPRETATION</span> What it means</h2>
+  <ul>
+    <li>
+      <strong>Reliability question:</strong> on this protocol, layout does not force extra dogs.
+      One dog already clears theta for all four starts at these N.
+    </li>
+    <li>
+      <strong>Cost / difficulty question:</strong> layout still matters. Wide (and to a lesser degree
+      outlier-rich) costs far more path and time, and the flock state stays more spread (perimeter, hull, outliers).
+    </li>
+    <li>
+      <strong>Split ≈ compact</strong> here for Strombom on D_min, path, and most shape means:
+      the controller appears to reassemble clusters without needing a second dog.
+    </li>
+    <li>
+      <strong>Vs Phase 1:</strong> Phase 1 said compact D_min is flat at 1 for N &gt;= 25.
+      Phase 2 says that floor is not layout-specific on {50,100,200} for this method.
+    </li>
+  </ul>
+
+  <h2 id="claims"><span class="tag tag-out">CLAIMS</span> Claims C1a / C1b</h2>
+  <table>
+    <thead><tr><th>Claim</th><th>Rule</th><th>Verdict on this map</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>C1a</td>
+        <td>At least one N has a D_min gap of &gt;= 1 dog-grid step across X0 at theta 0.90</td>
+        <td><strong>Not supported</strong> (all D_min = 1; bootstrap CI [1,1])</td>
+      </tr>
+      <tr>
+        <td>C1b</td>
+        <td>State model has lower out-of-sample NLL than (N, D), leave-one-N-out</td>
+        <td><strong>Cannot evaluate</strong> (Package B note: need both success and failure outcomes; every cell succeeds)</td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="muted">
+    Rejecting C1a on D_min is not the same as saying layout is irrelevant. It means the dog-count
+    frontier does not move; effort and shape still do.
+  </p>
+
+  <h2 id="limits"><span class="tag tag-out">LIMITS</span> What this run does not support</h2>
+  <ul>
+    <li>Only <span class="mono">strombom_multi</span>. Other methods are Phase 4.</li>
+    <li>Only drive-to-goal on the 500 field. Not a pen/gate task, NetLogo, or a real farm.</li>
+    <li>N = 300 / 400 were not run; optional after this map (all layouts already on D_min = 1).</li>
+    <li>C1b stays unevaluable until there are failure cells for the state predictor.</li>
+  </ul>
+
+  <h2 id="next"><span class="tag tag-out">NEXT</span> Next steps</h2>
+  <ul>
+    <li>Phase 4 transfer (kubo / fat): does the flat D_min + effort-by-layout pattern transfer?</li>
+    <li>Do not raise N only to hunt a D_min gap unless a new hypothesis needs it.</li>
+    <li>Shape metrics (perimeter, hull, …) are ready for mechanism work if a later method shows overcrowding.</li>
+  </ul>
+
+  <h2 id="appendix"><span class="tag tag-plan">APPENDIX</span> Why these values</h2>
+  <ul>
+    <li><strong>N = {50,100,200}:</strong> split uses 3 clusters for N &gt;= 12; outlier ~20% needs more than a handful of sheep; compact D_min already 1 from Phase 1.</li>
+    <li><strong>Not N = 5,10 for claim:</strong> tiny-flock regime and 2-cluster split rule; smoke may use them.</li>
+    <li><strong>Compact sigma = 9, spread = 30; wide sigma = 60:</strong> clear cohesion gap that still fits the field.</li>
+    <li><strong>Split gap &gt;= 10; measurement radius = 5:</strong> clusters stay separate under the fragmentation metric.</li>
+    <li><strong>Outliers ~20% beyond r_a N^(2/3):</strong> a rim, not a second flock (50%) or a single sheep (5% at small N).</li>
+  </ul>
+
+  <h2 id="raw-data"><span class="tag tag-plan">APPENDIX</span> Raw data</h2>
+  <table>
+    <thead><tr><th>Path</th><th>What</th></tr></thead>
+    <tbody>
+      <tr><td><span class="mono">scaling/results/phase2/pilot_state/</span></td><td>Smoke 600</td></tr>
+      <tr><td><span class="mono">scaling/results/phase2/scout/</span></td><td>Scout 3,600 + timeseries</td></tr>
+      <tr><td><span class="mono">scaling/results/phase2/claim/</span></td><td>Claim 2,400, merge 5,280, Package B</td></tr>
+      <tr><td><span class="mono">assets/claim/packages/b/</span></td><td>frontier_by_layout.csv, predictor_comparison.csv</td></tr>
+      <tr><td><span class="mono">assets/figures/</span></td><td>PNGs used above</td></tr>
+    </tbody>
+  </table>
+  <pre class="cmd">make -C scaling scaling-analyse PROTOCOL=phase2_claim PACKAGE=B</pre>
+
+</main>
+</div>
+<script>
+(function () {
+  var side = document.getElementById("side");
+  var btn = document.getElementById("toggle");
+  var backdrop = document.getElementById("backdrop");
+  if (!side || !btn) return;
+  function close() {
+    side.classList.remove("open");
+    if (backdrop) { backdrop.classList.remove("show"); backdrop.hidden = true; }
+  }
+  btn.addEventListener("click", function () {
+    var open = side.classList.toggle("open");
+    if (backdrop) { backdrop.classList.toggle("show", open); backdrop.hidden = !open; }
+  });
+  if (backdrop) backdrop.addEventListener("click", close);
+})();
+</script>
+</body>
+</html>

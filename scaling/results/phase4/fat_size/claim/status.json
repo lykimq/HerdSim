@@ -1,0 +1,16 @@
+{
+  "protocol_id": "phase4_fat_size_claim",
+  "n_planned": 2000,
+  "n_done": 2000,
+  "n_pending_at_start": 1800,
+  "complete": true,
+  "running": false,
+  "started_at": "2026-09-29T06:08:34.070135+00:00",
+  "updated_at": "2026-10-04T10:51:08.828735+00:00",
+  "elapsed_seconds": 448954.7586,
+  "trials_csv": "trials.csv",
+  "manifest_jsonl": "manifest.jsonl",
+  "finished_at": "2026-10-04T10:51:08.828735+00:00",
+  "n_rows_trials_csv": 2000,
+  "store_timeseries": true
+}

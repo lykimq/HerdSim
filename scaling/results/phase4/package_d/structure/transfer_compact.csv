@@ -1,0 +1,17 @@
+layout,feature,n_sheep,baseline,method,baseline_value,method_value,transfer_label
+compact,d_min,50.0,strombom_multi,kubo,1,1,shared
+compact,d_min,100.0,strombom_multi,kubo,1,1,shared
+compact,d_min,200.0,strombom_multi,kubo,1,1,shared
+compact,overcrowd,50.0,strombom_multi,kubo,,,absent
+compact,overcrowd,100.0,strombom_multi,kubo,,,absent
+compact,overcrowd,200.0,strombom_multi,kubo,,,absent
+compact,i_dir_signature,,strombom_multi,kubo,,,absent
+compact,coverage_saturation,,strombom_multi,kubo,True,False,shifted
+compact,d_min,50.0,strombom_multi,fat,1,,absent
+compact,d_min,100.0,strombom_multi,fat,1,,absent
+compact,d_min,200.0,strombom_multi,fat,1,,absent
+compact,overcrowd,50.0,strombom_multi,fat,,,absent
+compact,overcrowd,100.0,strombom_multi,fat,,,absent
+compact,overcrowd,200.0,strombom_multi,fat,,,absent
+compact,i_dir_signature,,strombom_multi,fat,,-0.8305908743378299,absent
+compact,coverage_saturation,,strombom_multi,fat,True,,shifted

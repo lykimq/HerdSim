@@ -1,0 +1,11 @@
+initial_layout,n_sheep,d_min,d_min_ci_low,d_min_ci_high,d_min_ci_low_above_grid,d_min_ci_high_above_grid,n_boot,n_seeds_ref,n_boot_defined
+compact,5,1.0,1.0,1.0,False,False,1000,100,1000
+compact,10,1.0,1.0,1.0,False,False,1000,100,1000
+compact,25,,2.0,,False,True,1000,100,130
+compact,50,,,,True,True,1000,100,0
+compact,75,,,,True,True,1000,100,0
+compact,100,,,,True,True,1000,100,0
+compact,150,,,,True,True,1000,100,0
+compact,200,,,,True,True,1000,100,0
+compact,300,,,,True,True,1000,100,0
+compact,400,,,,True,True,1000,100,0

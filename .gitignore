@@ -196,11 +196,8 @@ cython_debug/
 .abstra/
 
 # Visual Studio Code
-#   Visual Studio Code specific template is maintained in a separate VisualStudioCode.gitignore 
-#   that can be found at https://github.com/github/gitignore/blob/main/Global/VisualStudioCode.gitignore
-#   and can be added to the global gitignore or merged into this file. However, if you prefer, 
-#   you could uncomment the following to ignore the entire vscode folder
-# .vscode/
+.vscode/
+
 # Temporary file for partial code execution
 tempCodeRunnerFile.py
 
@@ -224,3 +221,12 @@ netlogo/models/uploads/*
 
 # Node / frontend
 node_modules/
+
+# Simulation trajectory timeseries (binary parquet files, ~5+ GB)
+# Summary data (trials.csv, status.json, packages, guides) remain tracked.
+*.parquet
+**/timeseries/
+
+# Simulation background logs and monitors
+.runs/
+

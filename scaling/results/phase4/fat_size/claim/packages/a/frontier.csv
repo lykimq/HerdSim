@@ -1,0 +1,11 @@
+initial_layout,n_sheep,d_min,d_overcrowd,d_max,b_star_d,b_star_t,b_star_effort,hard_failure
+compact,5,1.0,,35.0,1.0,10000.0,630.0,False
+compact,10,1.0,,35.0,3.0,10000.0,519.75,False
+compact,25,,,,,,,True
+compact,50,,,,,,,True
+compact,75,,,,,,,True
+compact,100,,,,,,,True
+compact,150,,,,,,,True
+compact,200,,,,,,,True
+compact,300,,,,,,,True
+compact,400,,,,,,,True

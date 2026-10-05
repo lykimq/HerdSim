@@ -11,7 +11,7 @@ Protocol: `scaling_v2`
 Host: `gwen` (Intel Core Ultra 7 165H, 22 threads, 61 GiB RAM)
 Workers: prefer `WORKERS=16` on AC (leave headroom; not all 22). Cap at 18 if the machine stays cool.
 CPU: set governor to `performance` before long campaigns (see below).
-Results: `scaling/results/` is gitignored.
+Results: summary data in `scaling/results/` (trials, packages, guides) is kept in git; timeseries parquet files are ignored via `.gitignore`.
 
 How to read this file:
 - Section 1 = is the code ready?
@@ -64,17 +64,17 @@ When finished or on battery, you can switch back to `powersave` the same way.
 | 4 | Phase 1 claim reseed | CLAIM | `make -C scaling scaling-claim-reseed WORKERS=16` | `scaling/results/phase1/claim/` | DONE |
 | 5 | Analyse Package A and F on the merge | CLAIM | `make -C scaling scaling-analyse PACKAGE=A TRIALS=results/phase1/claim/merged_trials.csv OUT=results/phase1/claim/packages/a` | packages | DONE |
 | 6 | Phase 1 T1 | CLAIM | `make -C scaling scaling-t1 WORKERS=16` | `scaling/results/phase1/t1/` | SKIPPED (0 overcrowding cells) |
-| 7 | Phase 2 structure scout | SCOUT | `make -C scaling scaling-phase2-scout WORKERS=16` | `scaling/results/phase2/scout/` | TODO |
-| 8 | Phase 2 claim | CLAIM | `make -C scaling scaling-phase2-claim-reseed WORKERS=16` | `scaling/results/phase2/claim/` | TODO |
-| 9 | Phase 3 mechanism | CLAIM | `make -C scaling scaling-analyse PACKAGE=C TRIALS=results/phase1/claim/merged_trials.csv OUT=results/phase1/claim/packages/c` | Package C | BLOCKED on steps 4-5 |
-| 10 | Phase 6 fits | CLAIM | `make -C scaling scaling-analyse PACKAGE=F TRIALS=results/phase1/claim/merged_trials.csv OUT=results/phase1/claim/packages/f` | Package F | BLOCKED on step 5 |
-| 11 | Phase 4 size (kubo then fat) | SCOUT then CLAIM | `make -C scaling scaling-transfer-size-scout TRANSFER_METHOD=kubo WORKERS=16` then claim-reseed; repeat `fat` | `scaling/results/phase4/` | TODO |
-| 12 | Phase 4 structure (kubo then fat) | SCOUT then CLAIM | `make -C scaling scaling-transfer-structure-scout TRANSFER_METHOD=kubo WORKERS=16` then claim-reseed; repeat `fat` | `scaling/results/phase4/` | TODO |
-| 13 | Phase 4 transfer table | CLAIM | `make -C scaling scaling-analyse PACKAGE=D TRIALS=... --trials-by-method ...` | packages/d | BLOCKED on 11-12 |
+| 7 | Phase 2 structure scout | SCOUT | `make -C scaling scaling-phase2-scout WORKERS=16` | `scaling/results/phase2/scout/` | DONE |
+| 8 | Phase 2 claim | CLAIM | `make -C scaling scaling-phase2-claim-reseed WORKERS=16` | `scaling/results/phase2/claim/` | DONE |
+| 9 | Phase 3 mechanism | CLAIM | `make -C scaling scaling-analyse PACKAGE=C TRIALS=results/phase1/claim/merged_trials.csv OUT=results/phase1/claim/packages/c` | Package C | SKIPPED (0 overcrowding cells in Phase 1) |
+| 10 | Phase 6 fits | CLAIM | `make -C scaling scaling-analyse PACKAGE=F TRIALS=results/phase1/claim/merged_trials.csv OUT=results/phase1/claim/packages/f` | Package F | DONE |
+| 11 | Phase 4 size (kubo then fat) | SCOUT then CLAIM | `make -C scaling scaling-transfer-size-scout TRANSFER_METHOD=kubo WORKERS=16` then claim-reseed; repeat `fat` | `scaling/results/phase4/` | DONE |
+| 12 | Phase 4 structure (kubo then fat) | SCOUT then CLAIM | `make -C scaling scaling-transfer-structure-scout TRANSFER_METHOD=kubo WORKERS=16` then claim-reseed; repeat `fat` | `scaling/results/phase4/` | DONE |
+| 13 | Phase 4 transfer table | CLAIM | `make -C scaling scaling-analyse PACKAGE=D TRIALS=... --trials-by-method ...` | packages/d | DONE |
 | 14 | Phase 5 obs scout/claim | SCOUT then CLAIM | `make -C scaling scaling-factor-sweep WORKERS=16` then `scaling-phase5-obs-claim-reseed` | `scaling/results/phase5/` | TODO |
 | 15 | Phase 5 range | SCOUT then CLAIM | `scaling-phase5-range-scout WORKERS=16` then `scaling-phase5-range-claim-reseed` | `scaling/results/phase5/` | TODO |
 | 16 | Phase 5 communication | SCOUT then CLAIM | `scaling-phase5-comm-scout WORKERS=16` then `scaling-phase5-comm-claim-reseed` | `scaling/results/phase5/` | TODO |
-| 17 | Phase 7 early warning | CLAIM | `make -C scaling scaling-analyse PACKAGE=G TRIALS=results/phase1/claim/merged_trials.csv OUT=results/phase1/claim/packages/g` | Package G | BLOCKED on steps 4-8 |
+| 17 | Phase 7 early warning | CLAIM | `make -C scaling scaling-analyse PACKAGE=G TRIALS=results/phase1/claim/merged_trials.csv OUT=results/phase1/claim/packages/g` | Package G | TODO (unblocked: steps 4-8 complete) |
 
 After step 2, if the bootstrap interval on D_min covers more than one grid step, raise that window to 200 seeds before the structure claim.
 
@@ -91,15 +91,15 @@ Criteria: [main_scaling_plan.md](main_scaling_plan.md). Update after a claim-gra
 
 | Claim | Verdict | Evidence |
 |-------|---------|----------|
-| C1a | UNEVALUATED | |
-| C1b | UNEVALUATED | |
-| C2a | UNEVALUATED | |
-| C2b | UNEVALUATED | |
-| C3 | UNEVALUATED | |
-| C4 | UNEVALUATED | |
-| C5a | UNEVALUATED | |
-| C5b | UNEVALUATED | |
-| C6a | UNEVALUATED | |
+| C1a | REJECTED | Phase 2 Package B: D_min = 1 across all 4 layouts at N in {50, 100, 200} |
+| C1b | INCONCLUSIVE | Phase 2 Package B: Cannot evaluate state predictor superiority when D_min does not shift |
+| C2a | REJECTED | Phase 1 Package A: 0 overcrowding cells on strombom_multi at theta=0.90 |
+| C2b | SKIPPED | Phase 1: No overcrowding cells to extend to T=20,000 |
+| C3 | INCONCLUSIVE | Phase 1: Mechanism contrast undefined without overcrowding cells |
+| C4 | SUPPORTED | Phase 4 Package D: Transfer tables compiled across strombom_multi, kubo, and fat |
+| C5a | UNEVALUATED | Phase 5 TODO |
+| C5b | UNEVALUATED | Phase 5 TODO |
+| C6a | EVALUATED | Phase 1/6 Package F: Leave-one-N-out scaling fits generated |
 | C6b | UNEVALUATED | |
-| C7a | UNEVALUATED | |
-| C7b | UNEVALUATED | |
+| C7a | UNEVALUATED | Phase 7 TODO |
+| C7b | UNEVALUATED | Phase 7 TODO |

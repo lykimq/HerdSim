@@ -1,0 +1,2 @@
+n_folds,nd_nll,state_nll,prefers_state,state_cols,layout_col
+5,0.1532481409116406,0.13049298974730897,True,"['early_cohesion', 'early_gcm_goal', 'early_time_to_goal', 'early_shepherd_path', 'early_success_rate', 'early_sheep_in_goal', 'early_polarization', 'early_outlier_count', 'early_min_separation', 'early_fragmentation', 'early_mean_spread', 'early_extent', 'early_perimeter', 'early_hull_area', 'early_flock_density', 'early_aspect_ratio', 'early_i_dir', 'early_coverage']",initial_layout

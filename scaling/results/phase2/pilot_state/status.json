@@ -1,0 +1,16 @@
+{
+  "protocol_id": "phase2_pilot_state",
+  "n_planned": 600,
+  "n_done": 600,
+  "n_pending_at_start": 600,
+  "complete": true,
+  "running": false,
+  "started_at": "2026-09-25T09:18:26.577224+00:00",
+  "updated_at": "2026-09-25T09:25:27.943145+00:00",
+  "elapsed_seconds": 421.365921,
+  "trials_csv": "trials.csv",
+  "manifest_jsonl": "manifest.jsonl",
+  "finished_at": "2026-09-25T09:25:27.943145+00:00",
+  "n_rows_trials_csv": 600,
+  "store_timeseries": true
+}

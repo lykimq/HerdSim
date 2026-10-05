@@ -6,4 +6,8 @@ phase: 4
 output: scaling/results/phase4/kubo_size/scout
 methods:
   - kubo
-packages: [A, D, F]
+# Scout summary metrics stay on trials.csv; skip parquet to cut I/O.
+# Claim windows keep timeseries (inherited from phase1_claim).
+store_timeseries: false
+# Package D needs baseline+kubo+fat together; build after all methods finish.
+packages: [A, F]

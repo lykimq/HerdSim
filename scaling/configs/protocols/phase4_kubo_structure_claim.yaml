@@ -7,4 +7,5 @@ output: scaling/results/phase4/kubo_structure/claim
 methods:
   - kubo
 upstream_protocol: phase4_kubo_structure_scout
-packages: [B, D]
+# Package D needs baseline+kubo+fat together; build after all methods finish.
+packages: [B]

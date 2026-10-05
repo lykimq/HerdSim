@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Giai đoạn 4: chuyển giao phương pháp (RQ4 / gói D)</title>
+  <style>
+    :root {
+      --bg: #f7f6f2; --fg: #1c1b19; --muted: #5c5852; --card: #ffffff;
+      --line: #ddd8ce; --ok: #2f6b45; --bad: #9b2c2c; --accent: #1f4e79;
+      --plan: #5b4a2f; --code: #2a4a3a; --result: #1f4e79; --wait: #5b4a2f;
+    }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:"Segoe UI","Noto Sans","Helvetica Neue",Arial,sans-serif;
+           color:var(--fg); background:var(--bg); line-height:1.55; }
+    h1 { font-size:1.7rem; margin:0 0 8px; line-height:1.25; }
+    h2 { font-size:1.22rem; margin:40px 0 12px; border-top:1px solid var(--line);
+         padding-top:28px; line-height:1.3; }
+    h3 { font-size:1.05rem; margin:22px 0 8px; }
+    .muted { color:var(--muted); }
+    .lead { font-size:1.05rem; margin:0 0 18px; }
+    a { color:var(--accent); }
+    .tag { display:inline-block; font-size:0.72rem; font-weight:700; letter-spacing:0.04em;
+           padding:2px 8px; border-radius:999px; margin-right:6px; vertical-align:middle; }
+    .tag-out { background:#d6e2ef; color:var(--result); }
+    .tag-plan { background:#e8dcc8; color:var(--plan); }
+    .tag-run { background:#e4d7c3; color:#6b4f2a; }
+    .tag-wait { background:#e8dcc8; color:var(--wait); }
+    .tag-code { background:#d7e5dc; color:var(--code); }
+    .callout { background:#efece5; border-left:4px solid var(--accent); padding:12px 14px;
+               margin:14px 0; border-radius:0 8px 8px 0; }
+    .note { background:#efece5; padding:10px 12px; border-radius:8px; font-size:0.92rem;
+            color:var(--muted); margin:12px 0; }
+    .pending { background:#fff8e8; border:1px dashed #c4a574; border-radius:10px;
+               padding:12px 14px; margin:10px 0; color:#5b4a2f; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:10px;
+            padding:16px 18px; margin:12px 0; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+            gap:10px; margin:12px 0; }
+    .stat strong { display:block; font-size:1.15rem; }
+    .stat span { color:var(--muted); font-size:0.88rem; }
+    table { width:100%; border-collapse:collapse; background:var(--card);
+            border:1px solid var(--line); font-size:0.94rem; margin:10px 0; }
+    th, td { border-bottom:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:top; }
+    th { background:#efece5; }
+    .mono, code { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:0.88em; }
+    pre.cmd { background:#1c1b19; color:#f2efe8; padding:12px 14px; border-radius:8px;
+              overflow:auto; font-size:0.85rem; }
+    figure { margin:14px 0; background:var(--card); border:1px solid var(--line);
+             border-radius:10px; padding:12px; }
+    figure img { width:100%; height:auto; display:block; border-radius:4px; background:#f7f6f2; }
+    figcaption { color:var(--muted); font-size:0.9rem; margin-top:8px; }
+    .layout-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+                   gap:10px; margin:12px 0; }
+    .layout-grid figure { margin:0; }
+    .calc { background:#1c1b19; color:#f2efe8; border-radius:10px; padding:12px 14px; margin:12px 0; }
+    .calc .dong { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:0.88rem; margin:4px 0; }
+    details.box { background:var(--card); border:1px solid var(--line); border-radius:10px;
+                  padding:10px 14px; margin:10px 0; }
+    details.box summary { cursor:pointer; font-weight:600; }
+    .layout { display:grid; grid-template-columns:240px 1fr; gap:20px;
+              max-width:1100px; margin:0 auto; padding:20px 18px 60px; }
+    aside.side { position:sticky; top:12px; align-self:start; max-height:calc(100vh - 24px);
+                 overflow:auto; background:var(--card); border:1px solid var(--line);
+                 border-radius:10px; padding:12px 10px; font-size:0.86rem; }
+    .side-title { font-weight:700; margin:0 0 8px; }
+    .side-group { color:var(--muted); font-size:0.75rem; text-transform:uppercase;
+                  letter-spacing:0.04em; margin:12px 0 4px; }
+    aside.side a { display:block; text-decoration:none; color:var(--fg); padding:5px 8px;
+                   border-radius:6px; border-left:3px solid transparent; }
+    aside.side a:hover { background:#efece5; color:var(--accent); }
+    .content { min-width:0; }
+    .side-toggle { display:none; position:fixed; right:14px; bottom:14px; z-index:40;
+                   border:1px solid var(--line); background:var(--card); border-radius:999px;
+                   padding:10px 14px; font-size:0.9rem; box-shadow:0 4px 16px rgba(0,0,0,0.12); cursor:pointer; }
+    @media (max-width:960px) {
+      .layout { grid-template-columns:1fr; }
+      aside.side { position:fixed; inset:0 auto 0 0; width:min(300px,86vw); max-height:none;
+                   transform:translateX(-105%); transition:transform 0.2s ease; z-index:50; }
+      aside.side.open { transform:translateX(0); }
+      .side-toggle { display:inline-flex; }
+      .side-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:45; }
+      .side-backdrop.show { display:block; }
+    }
+
+  </style>
+</head>
+<body>
+<div class="layout">
+  <aside class="side" id="side" aria-label="Mục lục">
+
+    <p class="side-title">Mục lục</p>
+    <div class="side-group">Mở đầu</div>
+    <a href="#trang-thai">Giai đoạn 1-2 xong; 3 tạm dừng</a>
+    <a href="#tom-tat">Nhìn nhanh (kế hoạch)</a>
+    <a href="#cau-hoi">Giai đoạn 4 hỏi gì</a>
+    <div class="side-group">Thiết kế</div>
+    <a href="#thiet-ke">Những gì bị khóa</a>
+    <a href="#baseline">Baseline đã có</a>
+    <a href="#c4">Luật khẳng định C4</a>
+    <div class="side-group">Chạy</div>
+    <a href="#phep-tinh">Phép tính số lần chạy</a>
+    <a href="#lenh">Lệnh đã dùng</a>
+    <div class="side-group">Kết quả</div>
+    <a href="#ket-qua">Kết quả</a>
+    <a href="#cho">Việc còn lại</a>
+    <a href="#gioi-han">Giới hạn</a>
+
+  </aside>
+  <div class="side-backdrop" id="backdrop" hidden></div>
+  <button type="button" class="side-toggle" id="toggle">Mục lục</button>
+<main class="content">
+
+  <p class="nav">
+    <a href="index.html">Về mục lục</a> ·
+    <a href="share_en/REPORT_en.html">Bản tiếng Anh</a> ·
+    <a href="../../phase2/guides/REPORT_vi.html">Giai đoạn 2</a>
+  </p>
+  <h1>Giai đoạn 4: chuyển giao phương pháp (kết quả)</h1>
+  <p class="lead muted">
+    Kiểm tra tính tổng quát (RQ4, gói D) trên HerdSim, giao thức <span class="mono">scaling_v2</span>.
+    Thí nghiệm <strong>chưa chạy</strong>. Các ô kết quả dưới đây cố ý để trống; điền sau khi có hạng khẳng định.
+    Ngày soạn: 2026-09-25.
+  </p>
+
+  <div class="grid">
+    <div class="card stat"><span>1. Kế hoạch</span><strong>Sẵn</strong></div>
+    <div class="card stat"><span>2. File YAML</span><strong>Đã có</strong></div>
+    <div class="card stat"><span>3. Lệnh</span><strong>Liệt kê, chưa gọi</strong></div>
+    <div class="card stat"><span>4. Kết quả</span><strong>Ô trống</strong></div>
+  </div>
+
+  <h2 id="trang-thai"><span class="tag tag-out">BỐI CẢNH</span> Giai đoạn 1-2 xong; giai đoạn 3 tạm dừng</h2>
+  <p>
+    Giai đoạn 1 (kích thước, gọn + Strombom) và giai đoạn 2 (cấu trúc, bốn bố cục) đã xong.
+    Giai đoạn 3 (cơ chế) cần ô quá tải; cả hai giai đoạn trước đều không thấy quá tải trên baseline,
+    nên contrast đó chưa định nghĩa được. Giai đoạn 4 không cần quá tải: lặp lại bản đồ kích thước và cấu trúc
+    dưới phương pháp chó khác, rồi lập bảng chuyển giao.
+  </p>
+  <figure>
+    <img src="assets/figures/transfer_sketch.png" alt="Ý tưởng giai đoạn 4" />
+    <figcaption>Lặp kích thước (giai đoạn 1) + cấu trúc (giai đoạn 2) trên kubo và fat, rồi gắn nhãn shared / shifted / absent so với Strombom.</figcaption>
+  </figure>
+
+  <h2 id="tom-tat"><span class="tag tag-plan">KẾ HOẠCH</span> Nhìn nhanh</h2>
+  <table>
+    <thead><tr><th>Mục</th><th>Giá trị</th></tr></thead>
+    <tbody>
+      <tr><td>Câu hỏi</td><td>Phần nào của pattern kích thước/cấu trúc còn đúng khi đổi phương pháp chăn?</td></tr>
+      <tr><td>Phương pháp bắt buộc</td><td><span class="mono">strombom_multi</span> (đã chạy), <span class="mono">kubo</span>, <span class="mono">fat</span></td></tr>
+      <tr><td>Khuyến nghị (ngoài tối thiểu)</td><td><span class="mono">communication_free</span></td></tr>
+      <tr><td>Trục kích thước</td><td>Giống giai đoạn 1: gọn, 10 mức N, 10 mức D, hạt 30/100</td></tr>
+      <tr><td>Trục cấu trúc</td><td>Giống giai đoạn 2: N ∈ {50,100,200}, 4 bố cục, đủ lưới D, hạt 30/100</td></tr>
+      <tr><td>Sân / ngưỡng / T0</td><td>Giữ nguyên khóa Section 8</td></tr>
+      <tr><td>Gói</td><td>D (bảng chuyển giao); kích thước còn nuôi A/F; cấu trúc nuôi B</td></tr>
+      <tr><td>Khẳng định cần điền</td><td>C4 (D_min hoặc quá tải dùng chung trên ba method bắt buộc)</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="cau-hoi"><span class="tag tag-plan">CÂU HỎI</span> Giai đoạn 4 hỏi gì?</h2>
+  <p>Sau bản đồ baseline, câu chuyện còn đúng dưới bộ điều khiển khác, hay chỉ là chuyện của Strombom?</p>
+  <ul>
+    <li><strong>D_min:</strong> cùng bước lưới (shared), khác bước (shifted), hoặc một bên không có D_min (absent).</li>
+    <li><strong>Quá tải:</strong> cả hai có, D/N trong 1,5 lần (shared); có nhưng lệch rộng hơn (shifted); hoặc không đủ cả hai (absent).</li>
+    <li><strong>I_dir / bão hòa phủ:</strong> cùng dấu, lệch biên độ, hoặc không유의한 (bảng trong plan).</li>
+    <li><strong>Hàng cấu trúc:</strong> chỉ điền khi mỗi method đã có bản đối chiếu bố cục.</li>
+  </ul>
+  <p class="muted">
+    Phát hiện phụ thuộc mạnh vào method vẫn hữu ích: nó giới hạn mức độ nói về "scaling" tách khỏi bộ điều khiển.
+  </p>
+
+  <h2 id="thiet-ke"><span class="tag tag-out">THIẾT KẾ</span> Những gì bị khóa</h2>
+  <table>
+    <thead><tr><th>Lựa chọn</th><th>Giá trị</th><th>Vì sao</th></tr></thead>
+    <tbody>
+      <tr><td>Cùng lưới giai đoạn 1 / 2</td><td>extends các YAML đó</td><td>Chuyển giao công bằng: chỉ đổi method.</td></tr>
+      <tr><td>Method chạy lần này</td><td>kubo, rồi fat</td><td>Bộ bắt buộc bên cạnh baseline đã xong.</td></tr>
+      <tr><td>Thứ tự mỗi method</td><td>size scout -> size claim -> structure scout -> structure claim</td><td>Biên kích thước trước; cấu trúc dùng cùng dải N giai đoạn 2.</td></tr>
+      <tr><td>Hạt giống</td><td>30 trinh sát / 100 cửa sổ khẳng định</td><td>Cùng luật hạng khẳng định giai đoạn 1-2.</td></tr>
+      <tr><td>Metric</td><td>đủ registry + timeseries</td><td>chu vi, hull, i_dir, coverage sẵn cho hàng gói D.</td></tr>
+    </tbody>
+  </table>
+  <p class="note">
+    File: <span class="mono">phase4_{kubo,fat}_size_scout|claim.yaml</span> và
+    <span class="mono">phase4_{kubo,fat}_structure_scout|claim.yaml</span> trong
+    <span class="mono">scaling/configs/protocols/</span>.
+  </p>
+
+  <h2 id="baseline"><span class="tag tag-out">THIẾT KẾ</span> Baseline đã có (không chạy lại)</h2>
+  <p>Đây là cột Strombom của bảng chuyển giao. Giai đoạn 4 điền cột kubo và fat.</p>
+  <h3>Bản đồ kích thước (giai đoạn 1, gọn)</h3>
+  <table>
+    <thead><tr><th>Thuộc tính</th><th>strombom_multi (xong)</th><th>kubo</th><th>fat</th></tr></thead>
+    <tbody>
+      <tr><td>D_min (N=5,10)</td><td>2</td><td class="muted">-</td><td class="muted">-</td></tr>
+      <tr><td>D_min (N≥25)</td><td>1</td><td class="muted">-</td><td class="muted">-</td></tr>
+      <tr><td>Quá tải</td><td>không có trong D≤35</td><td class="muted">-</td><td class="muted">-</td></tr>
+    </tbody>
+  </table>
+  <h3>Bản đồ cấu trúc (giai đoạn 2, N ∈ {50,100,200})</h3>
+  <table>
+    <thead><tr><th>Thuộc tính</th><th>strombom_multi (xong)</th><th>kubo</th><th>fat</th></tr></thead>
+    <tbody>
+      <tr><td>D_min cả bốn bố cục</td><td>1</td><td class="muted">-</td><td class="muted">-</td></tr>
+      <tr><td>Lệch C1a</td><td>không được hỗ trợ</td><td class="muted">-</td><td class="muted">-</td></tr>
+      <tr><td>Công sức / chu vi theo bố cục</td><td>rộng ≫ gọn; tách ≈ gọn</td><td class="muted">-</td><td class="muted">-</td></tr>
+    </tbody>
+  </table>
+  <div class="layout-grid">
+    <figure><img src="assets/layouts/compact.svg" alt="Gọn" /><figcaption>Gọn</figcaption></figure>
+    <figure><img src="assets/layouts/wide.svg" alt="Rộng" /><figcaption>Rộng</figcaption></figure>
+    <figure><img src="assets/layouts/split.svg" alt="Tách" /><figcaption>Tách</figcaption></figure>
+    <figure><img src="assets/layouts/outlier_rich.svg" alt="Nhiều lạc" /><figcaption>Nhiều lạc</figcaption></figure>
+  </div>
+
+  <h2 id="c4"><span class="tag tag-plan">KẾ HOẠCH</span> Luật khẳng định C4</h2>
+  <table>
+    <thead><tr><th>Claim</th><th>Được hỗ trợ khi</th><th>Trạng thái hiện tại</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>C4</td>
+        <td>D_min hoặc quá tải dùng chung trên ba method bắt buộc. Hàng cấu trúc cần chạy cấu trúc trên từng method.</td>
+        <td><strong>CHƯA ĐÁNH GIÁ</strong> (kubo/fat chưa chạy)</td>
+      </tr>
+    </tbody>
+  </table>
+  <table>
+    <thead><tr><th>Thuộc tính</th><th>shared</th><th>shifted</th><th>absent</th></tr></thead>
+    <tbody>
+      <tr><td>D_min</td><td>cùng bước lưới D</td><td>khác bước lưới D</td><td>một bên không có D_min</td></tr>
+      <tr><td>Quá tải</td><td>cả hai, D/N trong 1,5 lần</td><td>cả hai, lệch rộng hơn</td><td>không đủ cả hai</td></tr>
+      <tr><td>I_dir</td><td>r(I_dir, success) &lt; -0,3 trên cả hai</td><td>cùng dấu nhưng lệch biên độ</td><td>không đáng kể</td></tr>
+      <tr><td>Bão hòa phủ</td><td>luật đúng trên cả hai</td><td>đúng trên một</td><td>không đúng trên bên nào</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="phep-tinh"><span class="tag tag-run">CHẠY</span> Phép tính số lần chạy</h2>
+  <div class="calc">
+    <div class="dong">Trinh sát kích thước / method = 10 N × 10 D × 30 = 3.000</div>
+    <div class="dong">Trinh sát cấu trúc / method = 3 N × 4 bố cục × 10 D × 30 = 3.600</div>
+    <div class="dong">Tổng trinh sát kubo+fat = 2 × (3.000 + 3.600) = 13.200</div>
+    <div class="dong">Khẳng định = số ô cửa sổ × 100 (chưa biết đến khi mỗi trinh sát xong)</div>
+  </div>
+  <p class="muted">
+    Trên máy này: trinh sát kích thước giai đoạn 1 ~73 phút; cấu trúc giai đoạn 2 ~3,2 giờ (16 worker).
+    Ô rộng / N lớn chậm. Giai đoạn 4 nên chia nhiều phiên. Giữ governor
+    <span class="mono">performance</span>. Không hứa một số phút tường trước khi chạy trinh sát đầu.
+  </p>
+
+  <h2 id="lenh"><span class="tag tag-run">CHẠY</span> Lệnh (liệt kê; báo cáo này không gọi)</h2>
+  <p>Từ thư mục gốc kho mã. Đặt <span class="mono">TRANSFER_METHOD=kubo</span> hoặc <span class="mono">fat</span>.</p>
+  <h3>0. Governor CPU (một lần sau mỗi lần khởi động)</h3>
+<pre class="cmd">for g in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo performance | sudo tee "$g" >/dev/null; done
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor</pre>
+  <h3>1. Bản đồ kích thước (mỗi method)</h3>
+<pre class="cmd">make -C scaling scaling-transfer-size-scout TRANSFER_METHOD=kubo WORKERS=16
+make -C scaling scaling-transfer-size-claim-plan TRANSFER_METHOD=kubo
+make -C scaling scaling-transfer-size-claim-reseed TRANSFER_METHOD=kubo WORKERS=16</pre>
+  <p class="muted">Lặp với <span class="mono">TRANSFER_METHOD=fat</span>. Kết quả:
+     <span class="mono">scaling/results/phase4/{kubo,fat}_size/</span>.</p>
+  <h3>2. Bản đồ cấu trúc (mỗi method)</h3>
+<pre class="cmd">make -C scaling scaling-transfer-structure-scout TRANSFER_METHOD=kubo WORKERS=16
+make -C scaling scaling-transfer-structure-claim-plan TRANSFER_METHOD=kubo
+make -C scaling scaling-transfer-structure-claim-reseed TRANSFER_METHOD=kubo WORKERS=16</pre>
+  <p class="muted">Lặp cho fat. Kết quả: <span class="mono">scaling/results/phase4/{kubo,fat}_structure/</span>.</p>
+  <h3>3. Gói D (sau khi có bản đồ)</h3>
+<pre class="cmd">make -C scaling scaling-analyse PROTOCOL=phase4_kubo_size_claim PACKAGE=D</pre>
+  <p class="note">Thứ tự khuyến nghị: xong cả hai size claim, rồi cả hai structure claim, rồi điền C4 / gói D.</p>
+
+
+  <h2 id="ket-qua"><span class="tag tag-out">KẾT QUẢ</span> Kết quả (claim-grade)</h2>
+  <div class="callout">
+    <strong>Tóm tắt.</strong> Kubo kích thước gần như trùng sàn D_min với strombom trên N &gt;= 25 (shared = 1).
+    Kubo cấu trúc có lệch bố cục (wide hard-failure; outlier_rich tại N=200 có D_min=4 và quá tải).
+    Fat kích thước chỉ đạt D_min tại N=5 và N=10 (D_min=1, shifted so với strombom); N&gt;=25 hard-failure trên toàn lưới D.
+    Fat cấu trúc hard-failure mọi ô.
+    <strong>C4: REJECTED</strong> trên bộ ba method bắt buộc: D_min / quá tải không dùng chung cả ba.
+  </div>
+
+  <h3>Thời gian chạy (đã ghi)</h3>
+  <table>
+    <thead><tr><th>Bước</th><th>Trials</th><th>Thời gian tường</th></tr></thead>
+    <tbody>
+      <tr><td>kubo size scout / claim</td><td>3000 / 2100</td><td>~5,5 giờ / ~4,5 giờ</td></tr>
+      <tr><td>kubo structure scout / claim</td><td>3600 / 2800</td><td>~16,7 giờ / ~16,6 giờ</td></tr>
+      <tr><td>fat size scout / claim (bản đồ đầy đủ)</td><td>3000 / 2000</td><td>~39,1 giờ / ~14,4 giờ</td></tr>
+      <tr><td>fat structure scout / claim</td><td>3600 / 2400</td><td>~34,0 giờ / ~23,6 giờ</td></tr>
+    </tbody>
+  </table>
+  <p class="note">
+    Fat size: sau lần resume làm mất <span class="mono">trials.csv</span>, đã re-scout sạch (3000)
+    rồi claim-plan lại (20 ô biên; resume giữ 200 trial N=400 cũ). Claim hoàn tất 2000/2000.
+    Gói D kích thước đã rebuild với ba method.
+  </p>
+
+  <h3>D_min kích thước (compact, theta=0,90)</h3>
+  <table>
+    <thead><tr><th>N</th><th>strombom</th><th>kubo</th><th>fat</th><th>Nhãn kubo</th><th>Nhãn fat</th></tr></thead>
+    <tbody>
+      <tr><td>5</td><td>2</td><td>3</td><td>1</td><td>shifted</td><td>shifted</td></tr>
+      <tr><td>10</td><td>2</td><td>1</td><td>1</td><td>shifted</td><td>shifted</td></tr>
+      <tr><td>25</td><td>1</td><td>1</td><td>hard failure</td><td>shared</td><td>absent</td></tr>
+      <tr><td>50</td><td>1</td><td>1</td><td>hard failure</td><td>shared</td><td>absent</td></tr>
+      <tr><td>75</td><td>1</td><td>1</td><td>hard failure</td><td>shared</td><td>absent</td></tr>
+      <tr><td>100</td><td>1</td><td>1</td><td>hard failure</td><td>shared</td><td>absent</td></tr>
+      <tr><td>150</td><td>1</td><td>1</td><td>hard failure</td><td>shared</td><td>absent</td></tr>
+      <tr><td>200</td><td>1</td><td>1</td><td>hard failure</td><td>shared</td><td>absent</td></tr>
+      <tr><td>300</td><td>1</td><td>1</td><td>hard failure</td><td>shared</td><td>absent</td></tr>
+      <tr><td>400</td><td>1</td><td>1</td><td>hard failure</td><td>shared</td><td>absent</td></tr>
+    </tbody>
+  </table>
+  <p class="muted">Không method nào trên bản đồ kích thước compact có D_overcrowd ở theta 0,90. Fat N&gt;=25: R &lt; 0,90 mọi D trên lưới (claim đỉnh D=25,35).</p>
+
+  <h3>D_min cấu trúc (theta=0,90)</h3>
+  <table>
+    <thead><tr><th>N</th><th>Bố cục</th><th>strombom</th><th>kubo</th><th>fat</th></tr></thead>
+    <tbody>
+      <tr><td>50</td><td>gọn / tách / nhiều lạc</td><td>1 / 1 / 1</td><td>1 / 1 / 1</td><td>HF / HF / HF</td></tr>
+      <tr><td>50</td><td>rộng</td><td>1</td><td>hard failure</td><td>hard failure</td></tr>
+      <tr><td>100</td><td>gọn / tách / nhiều lạc</td><td>1 / 1 / 1</td><td>1 / 1 / 1</td><td>HF / HF / HF</td></tr>
+      <tr><td>100</td><td>rộng</td><td>1</td><td>hard failure</td><td>hard failure</td></tr>
+      <tr><td>200</td><td>gọn / tách</td><td>1 / 1</td><td>1 / 1</td><td>HF / HF</td></tr>
+      <tr><td>200</td><td>nhiều lạc</td><td>1</td><td>4 (quá tải từ D=10)</td><td>hard failure</td></tr>
+      <tr><td>200</td><td>rộng</td><td>1</td><td>hard failure</td><td>hard failure</td></tr>
+    </tbody>
+  </table>
+  <p class="note">
+    Kubo: lệch kiểu C1a có (wide không đạt R&gt;=0,90; outlier_rich N=200 cần 4 chó và có quá tải).
+    Fat: không ô nào đạt D_min trên {50,100,200} x 4 bố cục (R điển hình &lt;0,5; wide/outlier_rich ~0).
+  </p>
+
+  <h3>Nhãn chuyển giao (gói D)</h3>
+  <table>
+    <thead><tr><th>Thuộc tính</th><th>kubo vs strombom</th><th>fat vs strombom</th></tr></thead>
+    <tbody>
+      <tr><td>D_min (kích thước, N&gt;=25)</td><td>shared</td><td>absent (hard failure)</td></tr>
+      <tr><td>D_min (kích thước, N=5,10)</td><td>shifted</td><td>shifted (fat D_min=1)</td></tr>
+      <tr><td>Quá tải (kích thước)</td><td>absent (cả hai không có)</td><td>absent</td></tr>
+      <tr><td>I_dir signature</td><td>absent</td><td>shifted (fat r âm mạnh hơn)</td></tr>
+      <tr><td>Bão hòa phủ</td><td>shifted</td><td>shifted</td></tr>
+      <tr><td>Cấu trúc (D_min phụ thuộc X0)</td><td>shifted (wide HF; outlier_rich N=200)</td><td>absent (fat HF mọi ô)</td></tr>
+    </tbody>
+  </table>
+  <p class="muted">Artefacts: <span class="mono">scaling/results/phase4/package_d/{size,structure}/</span>. Gói D size: 44 hàng (8 shared, 7 shifted, 29 absent).</p>
+
+  <h3>C4</h3>
+  <div class="card">
+    <p><strong>Verdict: REJECTED.</strong></p>
+    <p>
+      Luật: D_min hoặc quá tải dùng chung trên ba method bắt buộc (strombom_multi, kubo, fat), kể cả hàng cấu trúc.
+      Quan sát: fat không có D_min trên N&gt;=25 (size) và trên toàn bản đồ cấu trúc; quá tải chỉ thấy rõ trên kubo (outlier_rich, N=200), không dùng chung cả ba.
+      Kubo và strombom chia sẻ D_min kích thước trên phần lớn N, nhưng C4 yêu cầu cả bộ ba.
+    </p>
+  </div>
+
+  <h3>Chế độ (kubo kích thước, compact)</h3>
+  <table>
+    <thead><tr><th>Chế độ</th><th>Số ô</th></tr></thead>
+    <tbody>
+      <tr><td>Under-resourced</td><td>2</td></tr>
+      <tr><td>Efficient</td><td>11</td></tr>
+      <tr><td>Wasteful overspend</td><td>87</td></tr>
+      <tr><td>Overcrowding / hard failure</td><td>0 / 0</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Chế độ (fat kích thước, compact)</h3>
+  <table>
+    <thead><tr><th>Chế độ</th><th>Số ô</th></tr></thead>
+    <tbody>
+      <tr><td>Efficient</td><td>3</td></tr>
+      <tr><td>Wasteful overspend</td><td>17</td></tr>
+      <tr><td>Hard failure</td><td>80</td></tr>
+      <tr><td>Overcrowding</td><td>0</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="cho"><span class="tag tag-out">XONG</span> Phase 4 sim + báo cáo</h2>
+  <div class="callout">Fat size scout/claim đầy đủ, gói D size rebuild, và bảng kết quả ở trên đã cập nhật (2026-10-04).</div>
+
+  <h2 id="gioi-han"><span class="tag tag-plan">GIỚI HẠN</span></h2>
+  <ul>
+    <li>Vẫn một nhiệm vụ (lùa vào đĩa đích) và một khóa sân.</li>
+    <li><span class="mono">communication_free</span> khuyến nghị, không bắt buộc cho bộ tối thiểu C4.</li>
+    <li>Không trích dẫn thử khói / trinh sát cho C4; chỉ điền claim ở hạng khẳng định.</li>
+    <li>Giai đoạn 3 vẫn tạm dừng đến khi có method nào đó sinh ô quá tải.</li>
+  </ul>
+  <p class="muted">
+    Tài liệu: <span class="mono">scaling/docs/main_scaling_plan.md</span> (RQ4 / C4),
+    <span class="mono">scaling/configs/protocols/README.md</span>.
+  </p>
+
+</main>
+</div>
+<script>
+(function () {
+  var side = document.getElementById("side");
+  var btn = document.getElementById("toggle");
+  var backdrop = document.getElementById("backdrop");
+  if (!side || !btn) return;
+  function close() {
+    side.classList.remove("open");
+    if (backdrop) { backdrop.classList.remove("show"); backdrop.hidden = true; }
+  }
+  btn.addEventListener("click", function () {
+    var open = side.classList.toggle("open");
+    if (backdrop) { backdrop.classList.toggle("show", open); backdrop.hidden = !open; }
+  });
+  if (backdrop) backdrop.addEventListener("click", close);
+})();
+</script>
+</body>
+</html>

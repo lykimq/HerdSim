@@ -1,0 +1,2832 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Giai đoạn 1: từ kế hoạch đến kết quả</title>
+  <style>
+    :root {
+      --bg: #f7f6f2;
+      --fg: #1c1b19;
+      --muted: #5c5852;
+      --card: #ffffff;
+      --line: #ddd8ce;
+      --ok: #2f6b45;
+      --bad: #9b2c2c;
+      --accent: #1f4e79;
+      --plan: #5b4a2f;
+      --code: #2a4a3a;
+      --result: #1f4e79;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+      color: var(--fg);
+      background: var(--bg);
+      line-height: 1.55;
+    }
+    /* layout handled by .layout */
+    h1 { font-size: 1.7rem; margin: 0 0 8px; line-height: 1.25; }
+    h2 {
+      font-size: 1.22rem;
+      margin: 40px 0 12px;
+      border-top: 1px solid var(--line);
+      padding-top: 28px;
+      line-height: 1.3;
+    }
+    h3 { font-size: 1.05rem; margin: 22px 0 8px; }
+    .muted { color: var(--muted); }
+    .lead { font-size: 1.05rem; margin: 0 0 18px; }
+    .nav { margin: 0 0 22px; font-size: 0.95rem; }
+    a { color: var(--accent); }
+    .toc {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin: 16px 0 24px;
+    }
+    .toc ol { margin: 8px 0 0; padding-left: 1.3rem; }
+    .toc li { margin: 4px 0; }
+    .story {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+      margin: 16px 0;
+    }
+    .story .card { text-align: center; padding: 14px 10px; }
+    .story .n {
+      display: inline-flex;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      align-items: center; justify-content: center;
+      color: #fff; font-weight: 600; font-size: 0.9rem;
+      margin-bottom: 6px;
+    }
+    .n-plan { background: var(--plan); }
+    .n-code { background: var(--code); }
+    .n-run { background: #6b4f2a; }
+    .n-out { background: var(--result); }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px 18px;
+      margin: 12px 0;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin: 12px 0;
+    }
+    .stat strong { display: block; font-size: 1.2rem; }
+    .stat span { color: var(--muted); font-size: 0.88rem; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card);
+      border: 1px solid var(--line);
+      font-size: 0.94rem;
+      margin: 10px 0;
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: #efece5; }
+    .score { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+    .chip {
+      width: 42px; height: 42px; border-radius: 8px; color: #fff;
+      display: flex; align-items: center; justify-content: center; font-weight: 600;
+    }
+    .win { background: var(--ok); }
+    .lose { background: var(--bad); }
+    figure {
+      margin: 16px 0 8px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px;
+    }
+    figure img { width: 100%; height: auto; display: block; border-radius: 4px; }
+    figcaption { color: var(--muted); font-size: 0.92rem; margin-top: 8px; }
+    .mono, code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.88em;
+    }
+    pre.cmd {
+      background: #1c1b19;
+      color: #f2efe8;
+      border-radius: 8px;
+      padding: 12px 14px;
+      overflow-x: auto;
+      font-family: ui-monospace, Menlo, Consolas, monospace;
+      font-size: 0.86rem;
+      line-height: 1.45;
+    }
+    .tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+    .tag-plan { background: #e8dcc8; color: var(--plan); }
+    .tag-code { background: #d5e6dc; color: var(--code); }
+    .tag-run { background: #e8d9c4; color: #6b4f2a; }
+    .tag-out { background: #d6e2ef; color: var(--result); }
+    .flow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin: 12px 0;
+      font-size: 0.92rem;
+    }
+    .flow span.box {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+    .flow .arrow { color: var(--muted); }
+    .note {
+      border-left: 3px solid var(--accent);
+      padding-left: 12px;
+      margin: 14px 0;
+      color: var(--muted);
+    }
+    .callout {
+      background: #efece5;
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin: 14px 0;
+    }
+    .calc {
+      background: #eef4ea;
+      border: 1px solid #c5d6c0;
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin: 12px 0;
+    }
+    .calc strong.kieu { color: var(--code); }
+    .calc .dong {
+      font-family: ui-monospace, Menlo, Consolas, monospace;
+      font-size: 0.9rem;
+      margin: 6px 0;
+    }
+    details.yaml {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      margin: 10px 0;
+      overflow: hidden;
+    }
+    details.yaml > summary {
+      cursor: pointer;
+      list-style: none;
+      padding: 12px 16px;
+      font-weight: 500;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      background: #efece5;
+    }
+    details.yaml > summary::-webkit-details-marker { display: none; }
+    details.yaml > summary::before {
+      content: "+";
+      display: inline-flex;
+      width: 1.2em;
+      color: var(--code);
+      font-weight: 600;
+    }
+    details.yaml[open] > summary::before { content: "−"; }
+    details.yaml .body { padding: 4px 16px 16px; }
+    details.yaml .hint {
+      color: var(--muted);
+      font-size: 0.88rem;
+      font-weight: 400;
+      margin-left: auto;
+    }
+    .param {
+      border-top: 1px solid var(--line);
+      padding: 10px 0;
+    }
+    .param:first-child { border-top: none; }
+    .param .key {
+      font-family: ui-monospace, Menlo, Consolas, monospace;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--code);
+    }
+    .param .val {
+      font-family: ui-monospace, Menlo, Consolas, monospace;
+      font-size: 0.86rem;
+      color: var(--fg);
+      margin: 2px 0 4px;
+    }
+    .param .why { color: var(--muted); font-size: 0.92rem; margin: 0; }
+    .window-grid {
+      display: grid;
+      gap: 3px;
+      margin: 10px 0;
+    }
+    .window-grid.cols-6 {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      max-width: 360px;
+    }
+    .window-grid.cols-10 {
+      grid-template-columns: repeat(10, minmax(0, 1fr));
+      max-width: 420px;
+    }
+    .window-grid .cell {
+      aspect-ratio: 1;
+      border-radius: 3px;
+      background: #ddd8ce;
+      font-size: 0.55rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #5c5852;
+    }
+    .window-grid .cell.on {
+      background: #2f6b45;
+      color: #fff;
+      font-weight: 600;
+    }
+    .window-grid .cell.edge {
+      background: #1f4e79;
+      color: #fff;
+      font-weight: 600;
+    }
+    .window-grid .cell.weak {
+      background: #9b2c2c;
+      color: #fff;
+      font-weight: 600;
+    }
+    .window-grid .axis {
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.65rem;
+      aspect-ratio: auto;
+      min-height: 1.2rem;
+    }
+    .seed-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin: 8px 0;
+      align-items: center;
+    }
+    .seed {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #2f6b45;
+    }
+    .seed.fail { background: #9b2c2c; }
+    .seed.ghost {
+      background: #ddd8ce;
+      opacity: 0.7;
+    }
+    .seed-label {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-left: 6px;
+    }
+    .legend-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin: 8px 0 14px;
+    }
+    .legend-row i {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+    .lg-gray { background: #ddd8ce; }
+    .lg-blue { background: #1f4e79; }
+    .lg-green { background: #2f6b45; }
+    .lg-red { background: #9b2c2c; }
+
+    html { scroll-behavior: smooth; }
+    body.with-side { margin: 0; }
+    .layout {
+      display: grid;
+      grid-template-columns: 250px minmax(0, 920px);
+      gap: 28px;
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 24px 18px 72px;
+      align-items: start;
+    }
+    aside.side {
+      position: sticky;
+      top: 14px;
+      max-height: calc(100vh - 28px);
+      overflow: auto;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px 12px 16px;
+      font-size: 0.86rem;
+    }
+    aside.side .side-title {
+      font-weight: 700;
+      font-size: 0.92rem;
+      margin: 0 0 10px;
+      padding: 0 6px;
+    }
+    aside.side .side-group {
+      margin: 12px 0 4px;
+      padding: 0 6px;
+      color: var(--muted);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-weight: 600;
+    }
+    aside.side a {
+      display: block;
+      text-decoration: none;
+      color: var(--fg);
+      padding: 5px 8px;
+      border-radius: 6px;
+      line-height: 1.35;
+      border-left: 3px solid transparent;
+    }
+    aside.side a:hover { background: #efece5; color: var(--accent); }
+    aside.side a.active {
+      background: #e7eef6;
+      color: var(--accent);
+      border-left-color: var(--accent);
+      font-weight: 600;
+    }
+    .content { min-width: 0; }
+    .content > .nav { margin-top: 0; }
+    table.compact { font-size: 0.82rem; }
+    table.compact th, table.compact td {
+      padding: 5px 6px;
+      text-align: center;
+      white-space: nowrap;
+    }
+    table.compact th:first-child, table.compact td:first-child { text-align: left; }
+    table.compact td.lo { background: #f8e8e8; color: var(--bad); font-weight: 600; }
+    .scroll-x { overflow-x: auto; margin: 10px 0; }
+    .side-toggle {
+      display: none;
+      position: fixed;
+      right: 14px; bottom: 14px;
+      z-index: 40;
+      border: 1px solid var(--line);
+      background: var(--card);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      cursor: pointer;
+    }
+    @media (max-width: 960px) {
+      .layout { grid-template-columns: 1fr; padding-top: 12px; }
+      aside.side {
+        position: fixed;
+        inset: 0 auto 0 0;
+        width: min(300px, 86vw);
+        max-height: none;
+        border-radius: 0;
+        transform: translateX(-105%);
+        transition: transform 0.2s ease;
+        z-index: 50;
+        box-shadow: 8px 0 24px rgba(0,0,0,0.15);
+      }
+      aside.side.open { transform: translateX(0); }
+      .side-toggle { display: inline-flex; }
+      .side-backdrop {
+        display: none;
+        position: fixed; inset: 0;
+        background: rgba(0,0,0,0.35);
+        z-index: 45;
+      }
+      .side-backdrop.show { display: block; }
+    }
+  </style>
+</head>
+<body class="with-side">
+<div class="layout">
+
+  <aside class="side" id="muc-luc-ben" aria-label="Mục lục theo mục">
+    <p class="side-title">Mục lục</p>
+    <div class="side-group">Mở đầu</div>
+    <a href="#chuong-trinh">Chương trình và thuật ngữ</a>
+    <a href="#hinh-dung">Hình dung nhanh</a>
+    <a href="#so-do-san">Sơ đồ sân và một ô</a>
+    <div class="side-group">Kế hoạch</div>
+    <a href="#ke-hoach">Giai đoạn 1 hỏi gì?</a>
+    <a href="#c2a-c2b">Khẳng định C2a / C2b</a>
+    <a href="#thiet-ke">Thiết kế bị khóa</a>
+    <a href="#thong-so-san-bo-cuc">Vì sao thông số sân và bố cục gọn</a>
+    <a href="#dinh-nghia-bien">Định nghĩa biên và chế độ</a>
+    <div class="side-group">Lập trình và chạy</div>
+    <a href="#lap-trinh">File nào, lệnh nào</a>
+    <a href="#cach-tao-o">Cách tạo từng ô</a>
+    <a href="#cua-so-bien">Cửa sổ biên</a>
+    <a href="#chien-luoc">Chiến lược đo rẻ rồi đo kỹ</a>
+    <a href="#tung-buoc">Từng bước với số liệu thật</a>
+    <div class="side-group">Kết quả</div>
+    <a href="#phep-tinh">Bảng tổng hợp phép tính</a>
+    <a href="#bieu-do">Biểu đồ gói khẳng định</a>
+    <a href="#ket-qua-day-du">Kết quả đầy đủ giai đoạn 1</a>
+    <a href="#ket-luan">Kết luận và bước sau</a>
+    <a href="#vi-sao-dmin">Vì sao số chó tối thiểu đổi theo số cừu?</a>
+    <div class="side-group">Tham chiếu</div>
+    <a href="#nguon-docs">Bản đồ tài liệu</a>
+  </aside>
+  <div class="side-backdrop" id="nen-muc-luc" hidden></div>
+  <button type="button" class="side-toggle" id="nut-muc-luc" aria-controls="muc-luc-ben">Mục lục</button>
+
+<main class="content">
+  <p class="nav">
+    <a href="index.html">Về trang mục lục</a>
+    ·
+    <a href="share_en/REPORT_en.html">Bản tiếng Anh</a>
+    ·
+    <a href="../claim/REPORT.md">Báo cáo vận hành bước khẳng định</a>
+  </p>
+
+  <h1>Giai đoạn 1: từ kế hoạch đến kết quả</h1>
+  <p class="lead muted">
+    Một mạch liên tục để hình dung phần quy mô HerdSim: hỏi gì → khóa thiết kế thế nào →
+    mã và lệnh chạy ra sao → chiến lược đo thế nào → số liệu và biểu đồ nói gì.
+    Viết cho người mới; dùng số thật từ lần chạy 2026-09-22.
+  </p>
+
+  <div class="story" aria-label="Bốn lớp của giai đoạn 1">
+    <div class="card"><div class="n n-plan">1</div><strong>Kế hoạch</strong><div class="muted">Câu hỏi khoa học</div></div>
+    <div class="card"><div class="n n-code">2</div><strong>Lập trình</strong><div class="muted">Cấu hình + mã</div></div>
+    <div class="card"><div class="n n-run">3</div><strong>Chạy thực tế</strong><div class="muted">Chiến lược tầng</div></div>
+    <div class="card"><div class="n n-out">4</div><strong>Kết quả</strong><div class="muted">Số liệu + hình</div></div>
+  </div>
+
+  <!-- ========== chương trình ========== -->
+  <h2 id="chuong-trinh"><span class="tag tag-plan">KẾ HOẠCH</span> Chương trình nghiên cứu và thuật ngữ</h2>
+  <p class="muted">
+    Nguồn: <span class="mono">scaling/docs/herdsim_research_program.md</span>,
+    <span class="mono">main_scaling_plan.md</span>,
+    <span class="mono">experiment_run_strategy.md</span>.
+  </p>
+
+  <div class="callout">
+    <strong>Câu hỏi trung tâm của cả chương trình:</strong>
+    Khi vài chó dẫn một đàn lớn hơn, <em>cần bao nhiêu điều khiển</em> khi đàn to dần hoặc phân tán hơn?
+    Giai đoạn 1 chỉ trả lời một lát cắt: kích thước đàn (N) và số chó (D) trên một bố cục cố định.
+  </div>
+
+  <p>
+    HerdSim ở đây là <strong>bệ thử</strong> (hệ mô hình để đo nhu cầu điều khiển), không phải bản sao đầy đủ nông trại thật.
+    Điều khiển là <em>gián tiếp</em>: vài tác nhân ngoài không ra lệnh từng con cừu một.
+  </p>
+
+  <details class="yaml" open>
+    <summary>Thuật ngữ cần nhớ <span class="hint">Bảng từ chương trình</span></summary>
+    <div class="body">
+      <table>
+        <thead><tr><th>Thuật ngữ</th><th>Nghĩa dễ hiểu</th></tr></thead>
+        <tbody>
+          <tr><td>Độ tin cậy R</td><td>Tỷ lệ lần chạy thắng trên các hạt giống đã khóa</td></tr>
+          <tr><td>Nhu cầu điều khiển</td><td>Cần bao nhiêu “sức chó” để đạt độ tin cậy đã chọn; đo chính qua vùng quanh số chó tối thiểu / quá tải</td></tr>
+          <tr><td>Số chó tối thiểu</td><td>số chó D nhỏ nhất sao cho R ≥ ngưỡng (0,90), trong giao thức cố định</td></tr>
+          <tr><td>Cấu trúc / bố cục khởi đầu</td><td>Tổ chức không gian ngoài kích thước: trải, tách, con lạc…</td></tr>
+          <tr><td>Phương pháp</td><td>Bộ luật đặt tên cho cách chó quyết định</td></tr>
+          <tr><td>Cơ chế</td><td>Quá trình giúp giải thích vì sao mẫu hình xuất hiện (ví dụ chó cản nhau)</td></tr>
+          <tr><td>Giao thức</td><td>Luật thí nghiệm đóng băng để so sánh công bằng</td></tr>
+        </tbody>
+      </table>
+      <p class="note" style="margin-bottom:0">
+        Số chó tối thiểu <strong>không</strong> phải thuộc tính vũ trụ của đàn: nó phụ thuộc nhiệm vụ, hạn giờ, thông tin, luật thắng, v.v.
+      </p>
+    </div>
+  </details>
+
+  <details class="yaml">
+    <summary>Bậc thử khói / trinh sát / khẳng định: được trích dẫn thế nào? <span class="hint">experiment_run_strategy</span></summary>
+    <div class="body">
+      <table>
+        <thead><tr><th>Bậc</th><th>Vai trò</th><th>Hạt điển hình</th><th>Được dùng làm khẳng định?</th></tr></thead>
+        <tbody>
+          <tr><td>Thử khói</td><td>Kiểm đường ống</td><td>lưới nhỏ</td><td>Không</td></tr>
+          <tr><td>Trinh sát</td><td>Bản đồ rộng; chọn cửa sổ</td><td>30</td><td>Không (chỉ lập kế hoạch / chẩn đoán)</td></tr>
+          <tr><td>Khẳng định</td><td>Đo chính xác ô đã chọn</td><td>100</td><td>Có, sau khi có báo cáo vận hành</td></tr>
+        </tbody>
+      </table>
+      <p class="muted">Không nâng hình trinh sát thành phán quyết khẳng định.</p>
+    </div>
+  </details>
+
+  <details class="yaml">
+    <summary>Giai đoạn 1 nằm đâu trong cả chương trình? <span class="hint">câu hỏi / giai đoạn</span></summary>
+    <div class="body">
+      <table>
+        <thead><tr><th>Giai đoạn</th><th>Hỏi gì</th><th>Ghi chú</th></tr></thead>
+        <tbody>
+          <tr><td>1 (trang này)</td><td>Kích thước: R(số cừu, số chó), số chó tối thiểu, có quá tải?</td><td>câu hỏi kích thước / gói A</td></tr>
+          <tr><td>2</td><td>Cùng số cừu, bố cục khác → số chó tối thiểu có đổi?</td><td>câu hỏi cấu trúc</td></tr>
+          <tr><td>3</td><td>Cơ chế (interference, phân mảnh…)</td><td>Phân tích trên dữ liệu đã có</td></tr>
+          <tr><td>4</td><td>Phương pháp khác có cùng pattern?</td><td>câu hỏi chuyển giao</td></tr>
+          <tr><td>5-7</td><td>Thông tin vs chó; khớp quy mô; cảnh báo sớm</td><td>Sau lõi</td></tr>
+        </tbody>
+      </table>
+      <p class="muted" style="margin-bottom:0">
+        Không thuộc giai đoạn 1: bố cục khác, phương pháp khác, nhiệm vụ cổng, bản song song NetLogo
+        (xem <span class="mono">discuss/phase1.md</span>, <span class="mono">notice-meeting.md</span>).
+      </p>
+    </div>
+  </details>
+
+  <!-- ========== 1 ========== -->
+  <h2 id="hinh-dung">1. Hình dung nhanh: thi cử và tỷ lệ đậu</h2>
+  <p>
+    Trước khi vào kế hoạch, nhớ ba từ:
+  </p>
+  <div class="grid">
+    <div class="card stat"><span>Một lần chạy</span><strong>Một lần thi</strong></div>
+    <div class="card stat"><span>Một ô (N cừu, D chó)</span><strong>Một đề thi cố định</strong></div>
+    <div class="card stat"><span>R</span><strong>Tỷ lệ đậu của đề đó</strong></div>
+  </div>
+  <div class="card">
+    <p><strong>Đậu</strong> = mọi con cừu vào vòng đích trước khi hết giờ (10 000 bước).</p>
+    <p><strong>Rớt</strong> = hết giờ chưa xong.</p>
+    <p class="mono">R = số lần đậu / tổng số lần thi ở ô đó</p>
+    <table>
+      <thead><tr><th>R</th><th>Nghĩa đời thường</th><th>Đạt ngưỡng 0,90?</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td>Rớt hết</td><td>Không</td></tr>
+        <tr><td>0,4</td><td>Đậu 2 trên 5</td><td>Không</td></tr>
+        <tr><td>1</td><td>Đậu hết</td><td>Có</td></tr>
+      </tbody>
+    </table>
+    <div class="calc">
+      <strong class="kieu">Cách tính R (ví dụ)</strong>
+      <div class="dong">Ô “10 cừu, 1 chó” thử khói: đậu 2 lần, thi 5 lần → R = 2 ÷ 5 = 0,4</div>
+      <div class="dong">Ô “5 cừu, 1 chó” thử khói: đậu 0 lần, thi 5 lần → R = 0 ÷ 5 = 0</div>
+      <div class="dong">So với ngưỡng: 0,4 &lt; 0,90 → chưa “chăn được đáng tin”</div>
+    </div>
+    <p class="muted" style="margin-bottom:0">
+      Ngưỡng 0,90 = “đáng tin”: đậu ít nhất 9 trên 10 lần. Dưới đó vẫn có thể đôi khi thắng, nhưng chưa ổn định.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">Công thức đếm số lần chạy của một chiến dịch</h3>
+    <p>Luôn là cùng một phép nhân:</p>
+    <div class="calc">
+      <div class="dong"><strong>số lần chạy = (số mức N) × (số mức D) × (số hạt giống mỗi ô)</strong></div>
+      <p class="muted" style="margin:8px 0 0">
+        Một <em>ô</em> = một cặp (N, D). Mỗi ô được lặp lại nhiều hạt giống để ước lượng R.
+        Đừng nhầm “số mức D × số hạt” với tổng lần chạy: còn phải nhân thêm số mức N.
+      </p>
+    </div>
+  </div>
+
+  <h2 id="so-do-san"><span class="tag tag-plan">KẾ HOẠCH</span> Sơ đồ sân, nhiệm vụ, và một ô</h2>
+  <p>
+    Các hình dưới dùng chương tạo bố cục thật (gọn) và tham số giao thức.
+    Chấm xanh lá = cừu. Ô xanh đậm = chó (minh họa gần đàn). Đĩa xanh dương = đích.
+  </p>
+  <figure>
+    <img src="assets/schematics/arena_compact.svg" alt="Sân giai đoạn 1: đàn gọn, đích, hướng lùa" />
+    <figcaption>
+      Nhiệm vụ giai đoạn 1: đàn gọn quanh (250, 250), lùa vào đĩa đích (370, 250).
+      Thành công = mọi cừu vào đĩa trước 10.000 bước. Chỉ một bố cục (gọn); bốn bố cục là giai đoạn 2.
+    </figcaption>
+  </figure>
+  <figure>
+    <img src="assets/schematics/one_cell_seeds.svg" alt="Một ô số cừu số chó với nhiều hạt giống" />
+    <figcaption>
+      Một ô = một cặp (số cừu, số chó) cố định, lặp lại nhiều hạt giống. Xanh = thắng, đỏ = thua.
+      R = số thắng / số hạt. Hình hạt mang tính minh họa ý tưởng (không phải một ô thật duy nhất).
+    </figcaption>
+  </figure>
+  <figure>
+    <img src="assets/schematics/goal_radius.svg" alt="Bán kính đích tăng theo căn bậc hai số cừu" />
+    <figcaption>
+      Bán kính đích = 15 · sqrt(N/50). Giữ diện tích tương đối theo đàn; bán kính cố định sẽ kẹt khi số cừu lớn.
+    </figcaption>
+  </figure>
+
+  <!-- ========== 2 ========== -->
+  <h2 id="ke-hoach"><span class="tag tag-plan">KẾ HOẠCH</span> 2. Giai đoạn 1 hỏi gì?</h2>
+  <p>
+    Chương trình quy mô HerdSim có nhiều giai đoạn. <strong>Giai đoạn 1</strong> chỉ làm
+    <strong>bản đồ kích thước</strong>:
+  </p>
+  <div class="callout">
+    Với một phương pháp chuẩn và một cách xếp đàn ban đầu cố định,
+    khi số cừu (N) và số chó (D) đổi thì tỷ lệ thành công R thay đổi thế nào?
+    Số chó tối thiểu để “chăn được” nằm ở đâu? Có hiện tượng thêm chó lại làm hỏng không?
+  </div>
+  <p>Nói đời thường: <em>“Càng nhiều cừu thì có cần càng nhiều chó không?”</em></p>
+  <table>
+    <thead><tr><th>Khái niệm trong kế hoạch</th><th>Giải thích dễ hiểu</th></tr></thead>
+    <tbody>
+      <tr><td>Câu hỏi nghiên cứu số 2 / gói A</td><td>Bản đồ kích thước: R theo (N, D), tìm số chó tối thiểu</td></tr>
+      <tr><td>Số chó tối thiểu</td><td>số chó D nhỏ nhất sao cho R ≥ 0,90</td></tr>
+      <tr><td>Quá tải</td><td>Thêm chó mà R tụt dưới ngưỡng (hai mức D liên tiếp đều kém)</td></tr>
+      <tr><td>Khẳng định C2a / C2b</td><td>Hai câu khẳng định cụ thể về quá tải (xem khung ngay dưới)</td></tr>
+      <tr><td>Không thuộc giai đoạn 1</td><td>Đổi bố cục khởi đầu (giai đoạn 2), đổi phương pháp (giai đoạn 4)</td></tr>
+    </tbody>
+  </table>
+
+  <details class="yaml" open id="c2a-c2b">
+    <summary>
+      C2a và C2b là gì?
+      <span class="hint">Hai khẳng định về quá tải</span>
+    </summary>
+    <div class="body">
+      <p>
+        Trong kế hoạch, mỗi “C…” là một <strong>khẳng định khoa học</strong> có tiêu chí đúng/sai rõ.
+        C2a và C2b thuộc câu hỏi nghiên cứu số 2 (bản đồ kích thước). Chúng nói về
+        <em>quá tải</em>: thêm chó mà tỷ lệ thắng lại kém đi.
+      </p>
+
+      <h3>C2a: có xuất hiện quá tải không?</h3>
+      <div class="callout">
+        <strong>Nội dung khẳng định (theo kế hoạch):</strong>
+        Phương pháp đường cơ sở cho thấy quá tải ở ngưỡng 0,90 với <em>ít nhất một</em> mức N.
+      </div>
+      <p>Nói đời thường:</p>
+      <ul>
+        <li>Có tồn tại một kích thước đàn mà khi tăng số chó quá một mức nào đó, R tụt dưới 0,90
+            (và tụt ở <em>hai mức D liên tiếp</em>, không phải một điểm nhiễu)?</li>
+        <li>Nếu <strong>có</strong> → C2a được hỗ trợ.</li>
+        <li>Nếu trên cả bản đồ không tìm thấy điểm quá tải → C2a <strong>không được hỗ trợ / bác bỏ</strong> trên bản đồ này.</li>
+      </ul>
+      <div class="calc">
+        <div class="dong">Giai đoạn 1 lần này: không có D_overcrowd → C2a không được hỗ trợ</div>
+      </div>
+
+      <h3>C2b: nếu đã quá tải, kéo dài giờ có cứu được không?</h3>
+      <div class="callout">
+        <strong>Nội dung khẳng định (theo kế hoạch):</strong>
+        Có một số D nằm trên điểm quá tải mà R vẫn &lt; 0,90 kể cả khi chạy với hạn
+        <strong>T = 20 000</strong> bước (gấp đôi hết giờ chuẩn T0 = 10 000).
+      </div>
+      <p>Nói đời thường:</p>
+      <ul>
+        <li>C2a hỏi: “thêm chó có làm hỏng không?”</li>
+        <li>C2b hỏi tiếp: “chỗ bị hỏng đó là vì <em>hết giờ quá sớm</em>, hay dù cho thêm giờ vẫn hỏng
+            (thật sự do quá nhiều chó)?”</li>
+      </ul>
+      <p>
+        Để trả lời C2b phải chạy bước <strong>kéo dài giờ (kéo dài giờ)</strong>: chỉ các ô quá tải, 100 hạt, hạn 20 000 bước.
+      </p>
+      <div class="calc">
+        <div class="dong">Giai đoạn 1 lần này: 0 ô quá tải → không chạy kéo dài giờ → C2b <strong>không áp dụng</strong></div>
+        <div class="dong">(Không phải “C2b sai”; là chưa có tình huống để kiểm C2b)</div>
+      </div>
+
+      <h3>Hai khẳng định đi với nhau thế nào?</h3>
+      <table>
+        <thead><tr><th></th><th>C2a</th><th>C2b</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Hỏi gì</td>
+            <td>Có quá tải trên bản đồ hết giờ chuẩn không?</td>
+            <td>Quá tải đó có còn kém khi kéo dài giờ không?</td>
+          </tr>
+          <tr>
+            <td>Cần dữ liệu</td>
+            <td>Bản đồ R(N,D) ở 10 000 bước</td>
+            <td>Chạy lại ô quá tải ở 20 000 bước (kéo dài giờ)</td>
+          </tr>
+          <tr>
+            <td>Trên kết quả này</td>
+            <td>Không hỗ trợ (không thấy quá tải)</td>
+            <td>Không áp dụng (không có ô để chạy kéo dài giờ)</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="muted" style="margin-bottom:0">
+        Mã trong kế hoạch: C2a / C2b thuộc câu hỏi kích thước (RQ2); tiêu chí đầy đủ ở
+        <span class="mono">main_scaling_plan.md</span> bảng khẳng định.
+      </p>
+    </div>
+  </details>
+
+  <p class="note">
+    Tài liệu kế hoạch (trong repo, ngoài thư mục kết quả):
+    <span class="mono">scaling/docs/main_scaling_plan.md</span>,
+    <span class="mono">scaling/docs/experiment_run_strategy.md</span>,
+    <span class="mono">scaling/docs/discuss/phase1.md</span>,
+    <span class="mono">scaling/docs/progress_tracker.md</span>.
+  </p>
+
+  <!-- ========== 3 ========== -->
+  <h2 id="thiet-ke"><span class="tag tag-plan">KẾ HOẠCH</span> 3. Thiết kế bị khóa (giải thích dễ hiểu)</h2>
+  <p>
+    Các lựa chọn dưới đây nằm trong
+    <span class="mono">scaling/configs/canonical_grid.yaml</span>
+    và được giải thích đầy đủ ở
+    <span class="mono">scaling/docs/main_scaling_plan.md</span> (mục “Vì sao các giá trị này”).
+    Đây là bản diễn giải tiếng Việt kèm hình, để đọc được “dày quanh 100”, “mịn vùng thấp”, v.v.
+  </p>
+
+  <div class="grid">
+    <div class="card stat"><span>Nhiệm vụ</span><strong>Lùa vào đĩa đích</strong></div>
+    <div class="card stat"><span>Sân</span><strong>500 × 500</strong></div>
+    <div class="card stat"><span>Phương pháp</span><strong>Strombom nhiều chó</strong></div>
+    <div class="card stat"><span>Bố cục (giai đoạn 1)</span><strong>Chỉ gọn</strong></div>
+  </div>
+
+  <details class="yaml" open>
+    <summary>
+      “Bố cục chỉ gọn” nghĩa là gì?
+      <span class="hint">Giai đoạn 1 cố ý chưa đo hình dạng</span>
+    </summary>
+    <div class="body">
+      <p>
+        <strong>Bố cục khởi đầu</strong> = cách xếp đàn lúc bắt đầu (gọn / rộng / tách cụm / nhiều con lạc).
+        Giai đoạn 1 khóa <strong>chỉ gọn</strong> (phân bố chuẩn hẹp, độ lệch chuẩn ≈ 9 khi độ lan = 30).
+      </p>
+      <div class="calc">
+        <div class="dong">Mục tiêu giai đoạn 1 = bản đồ kích thước: R đổi theo N và D thế nào?</div>
+        <div class="dong">Nếu vừa đổi N vừa đổi bố cục → không biết thay đổi vì “nhiều cừu” hay vì “đàn lúc đầu méo”.</div>
+        <div class="dong">Vì vậy: cố định bố cục gọn → chỉ còn biến N và D.</div>
+      </div>
+      <p class="muted">
+        Bốn bố cục (gọn, rộng, tách, nhiều con lạc) sẽ được so ở <strong>giai đoạn 2</strong>
+        trên N ∈ {50, 100, 200}. Không phải giai đoạn 1 bỏ quên; là chia câu hỏi cho rõ.
+      </p>
+    </div>
+  </details>
+
+  <h2 id="thong-so-san-bo-cuc"><span class="tag tag-plan">KẾ HOẠCH</span> Vì sao chọn các thông số sân và bố cục gọn (không phải số khác)</h2>
+  <p>
+    Nguồn: mục “Vì sao các giá trị này” trong
+    <span class="mono">main_scaling_plan.md</span> và
+    <span class="mono">canonical_grid.yaml</span>.
+    Giai đoạn 1 chỉ chạy bố cục <strong>gọn</strong>; các bố cục kia được giải thích đầy đủ ở giai đoạn 2.
+  </p>
+
+  <h3>Chỉ gọn (không rộng / tách / nhiều lạc) trong giai đoạn này</h3>
+  <table>
+    <thead><tr><th>Chọn</th><th>Vì sao</th><th>Không chọn</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Khóa đúng một bố cục: gọn</td>
+        <td>
+          Câu hỏi giai đoạn 1 là bản đồ kích thước: R đổi theo số cừu và số chó thế nào.
+          Cố định hình dạng lúc đầu để thay đổi còn lại chỉ đến từ N và D.
+        </td>
+        <td>
+          Chạy cả bốn bố cục ngay: lẫn hiệu ứng “đàn to hơn” với “đàn lúc đầu méo”.
+          Đó là câu hỏi cấu trúc (giai đoạn 2).
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Độ lan = 30 và độ lệch chuẩn gọn = 9</h3>
+  <table>
+    <thead><tr><th>Chọn</th><th>Vì sao</th><th>Không chọn</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>độ lan (spread) = 30</td>
+        <td>
+          Thước chung của giao thức. Gọn dùng 0,3 × 30; rộng (giai đoạn 2) dùng 2,0 × 30 trên cùng thước.
+        </td>
+        <td>Đổi độ lan riêng cho giai đoạn 1: mất so sánh với giai đoạn 2 và với hợp đồng bố cục đã khóa.</td>
+      </tr>
+      <tr>
+        <td>sigma gọn = 0,3 × 30 = 9</td>
+        <td>
+          Khớp bán kính đóng chặt khoảng 8 khi N = 50: một đàn đã ghép, “bình thường”, không cố tình méo.
+          Đây là mốc đường cơ sở của cả chương trình.
+        </td>
+        <td>
+          Sigma ≈ 3: gần một điểm, ít còn đàn.
+          Sigma ≈ 60 (bằng rộng): mất mốc; giai đoạn 1 sẽ đo luôn độ tản, không còn chỉ kích thước.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Sân 500 × 500, tâm đàn, đích</h3>
+  <table>
+    <thead><tr><th>Chọn</th><th>Vì sao</th><th>Không chọn</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Sân 500 × 500</td>
+        <td>
+          Đủ chỗ cho khởi đầu rộng sau này (3 sigma rộng ≈ 180) và con lạc đàn lớn (≈ 174), còn lề khoảng 70.
+          Sân vuông: cụm tách trên vòng tròn không bị ép vào cạnh ngắn.
+        </td>
+        <td>
+          Sân GUI 150: không chứa khởi đầu rộng / lạc lớn.
+          Sân 400: vẫn chật (~20 thiếu trên đám rộng).
+          Sân 1000: chủ yếu thêm khoảng trống.
+        </td>
+      </tr>
+      <tr>
+        <td>Tâm đàn (250, 250)</td>
+        <td>Lề trên/dưới đối xứng.</td>
+        <td>Đặt lệch góc: mép tường thành yếu tố giả.</td>
+      </tr>
+      <tr>
+        <td>Tâm đích (370, 250), đường lùa 120</td>
+        <td>
+          Ở tốc độ 1, đi thẳng khoảng 120 bước. Chiều dài lùa cố định khi N đổi.
+          Ở N = 400 mép gần đích cách đàn khoảng 78 (ngoài đám gọn).
+        </td>
+        <td>
+          Đường 80: nằm trong đám rộng.
+          Đường 200: mép xa đích sát tường sân 500.
+        </td>
+      </tr>
+      <tr>
+        <td>Bán kính đích = 15 · sqrt(N/50)</td>
+        <td>
+          Tại N = 50 trùng bán kính 15 của app. Nhân căn bậc hai: giữ diện tích theo cừu khi đàn lớn.
+        </td>
+        <td>
+          Bán kính cố định 8: kẹt khi N lớn.
+          Cố định 30: quá dễ, kéo số chó tối thiểu xuống giả tạo.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Bán kính đo phân mảnh = 5 (khóa sẵn, dùng mạnh ở giai đoạn 2)</h3>
+  <table>
+    <thead><tr><th>Chọn</th><th>Vì sao</th><th>Không chọn</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Bán kính đo = 5</td>
+        <td>
+          Trong đàn gọn, hàng xóm thường cách 2–4 nên bán kính 5 nối thành một thành phần.
+          Khe tách (giai đoạn 2) sàn ≥ 10 nên bán kính 5 không nối các cụm tách.
+        </td>
+        <td>
+          Bán kính 2: xé cả đàn gọn hơi lỏng.
+          Bán kính 15: cầu nối khe tách.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="note">
+    Giai đoạn 1 không cần vẽ rộng/tách/nhiều lạc, nhưng các số trên đã khóa trong giao thức chung
+    để giai đoạn 2 kế thừa cùng thước. Chi tiết bốn bố cục: báo cáo giai đoạn 2, mục thông số bố cục.
+  </p>
+
+  <details class="yaml" open>
+    <summary>
+      Lưới N: “dày quanh 100” nghĩa là gì?
+      <span class="hint">Không phải khoảng cách đều</span>
+    </summary>
+    <div class="body">
+      <p>
+        Mười mức N:
+        <strong>5, 10, 25, 50, 75, 100, 150, 200, 300, 400</strong>.
+      </p>
+      <p>
+        <strong>“Dày quanh 100”</strong> = quanh vùng 100 cừu, các mức nằm gần nhau hơn
+        (50 → 75 → 100 → 150), vì tài liệu dự đoán đây là chỗ “một chó có thể bắt đầu hết đủ”
+        (theo bản nháp bài báo). Cần điểm gần nhau để bắt được chỗ chuyển.
+        Ở đàn rất lớn chỉ cần vài điểm thưa (200, 300, 400) để xem độ dốc, không cần đủ mọi bước 50.
+      </p>
+      <div class="legend-row">
+        <span><i class="lg-green"></i> Vùng dày (theo dõi chỗ chuyển)</span>
+        <span><i class="lg-blue"></i> Vùng thưa hơn (đàn lớn)</span>
+        <span><i class="lg-gray"></i> Không chọn (tiết kiệm)</span>
+      </div>
+      <div class="seed-row" aria-label="Các mức N trên trục" style="gap:6px;align-items:flex-end;min-height:48px;">
+        <span title="5" style="display:flex;flex-direction:column;align-items:center;font-size:0.7rem;color:#5c5852;"><span class="seed" style="width:10px;height:10px;"></span>5</span>
+        <span title="10" style="display:flex;flex-direction:column;align-items:center;font-size:0.7rem;color:#5c5852;"><span class="seed" style="width:10px;height:10px;"></span>10</span>
+        <span title="25" style="display:flex;flex-direction:column;align-items:center;font-size:0.7rem;color:#5c5852;"><span class="seed" style="width:10px;height:10px;"></span>25</span>
+        <span title="50" style="display:flex;flex-direction:column;align-items:center;font-size:0.7rem;color:#5c5852;"><span class="seed" style="width:12px;height:12px;"></span>50</span>
+        <span title="75" style="display:flex;flex-direction:column;align-items:center;font-size:0.7rem;color:#2f6b45;font-weight:600;"><span class="seed" style="width:14px;height:14px;"></span>75</span>
+        <span title="100" style="display:flex;flex-direction:column;align-items:center;font-size:0.7rem;color:#2f6b45;font-weight:600;"><span class="seed" style="width:16px;height:16px;"></span>100</span>
+        <span title="150" style="display:flex;flex-direction:column;align-items:center;font-size:0.7rem;color:#2f6b45;font-weight:600;"><span class="seed" style="width:14px;height:14px;"></span>150</span>
+        <span title="200" style="display:flex;flex-direction:column;align-items:center;font-size:0.7rem;color:#1f4e79;"><span class="seed" style="width:12px;height:12px;background:#1f4e79;"></span>200</span>
+        <span class="muted" style="font-size:0.65rem;">(250 bỏ)</span>
+        <span title="300" style="display:flex;flex-direction:column;align-items:center;font-size:0.7rem;color:#1f4e79;"><span class="seed" style="width:12px;height:12px;background:#1f4e79;"></span>300</span>
+        <span class="muted" style="font-size:0.65rem;">(350 bỏ)</span>
+        <span title="400" style="display:flex;flex-direction:column;align-items:center;font-size:0.7rem;color:#1f4e79;"><span class="seed" style="width:12px;height:12px;background:#1f4e79;"></span>400</span>
+      </div>
+      <table>
+        <thead><tr><th>Lựa chọn</th><th>Vì sao (theo kế hoạch)</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Sàn N = 5 (không bắt đầu từ 20)</td>
+            <td>
+              Dưới 5 không còn “đàn tập thể”: N=1 không có tương tác cừu-cừu;
+              N=2…4 chuyện 80/20 stubborn thành yếu tố khác; “ngoại vi theo trung vị” gần như mọi con.
+              Giữ 5 và 10 để còn chế độ đàn nhỏ.
+            </td>
+          </tr>
+          <tr>
+            <td>Có 75 và 150</td>
+            <td>Kẹp quanh 100 để định vị chỗ chuyển (một chó bắt đầu hết đủ trong bản nháp).</td>
+          </tr>
+          <tr>
+            <td>Có 300 và 400</td>
+            <td>Cho độ dốc đàn lớn hơn một bước duy nhất.</td>
+          </tr>
+          <tr>
+            <td>Không có 250, 350</td>
+            <td>
+              Mỗi mức N thêm = một vòng quét D đầy đủ (rất đắt).
+              Bước đều 50 từ 50→400 lại quá nhiều điểm so với nhu cầu khớp đường cong hai đoạn.
+            </td>
+          </tr>
+          <tr>
+            <td>Không chọn số khác tùy ý (ví dụ 7, 33, 999)</td>
+            <td>
+              Lưới phải đủ để thấy chế độ nhỏ / mép / lớn, nhưng trinh sát còn ~3000 lần.
+              Mười điểm là thỏa hiệp khoa học-ngân sách đã khóa trong protocol.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="note" style="margin-bottom:0">
+        Trên kết quả giai đoạn 1 thực tế, số chó tối thiểu gần như phẳng (=1 từ N≥25), nên “chỗ chuyển quanh 100”
+        của bản nháp <em>không</em> hiện trên đường cơ sở HerdSim này. Lưới N vẫn đúng thiết kế để
+        <em>có cơ hội</em> thấy chỗ đó nếu nó xuất hiện.
+      </p>
+    </div>
+  </details>
+
+  <details class="yaml" open>
+    <summary>
+      Lưới D: “mịn vùng thấp, thưa vùng cao” nghĩa là gì?
+      <span class="hint">Thấp = ít chó (1-4)</span>
+    </summary>
+    <div class="body">
+      <p>
+        <strong>“Vùng thấp”</strong> = số chó nhỏ (1, 2, 3, 4). Đây là chỗ
+        <em>số chó tối thiểu</em> thường nằm, nên cần bước nhảy <strong>1 con một</strong> (mịn)
+        để biết số chó tối thiểu là 1 hay 2 hay 3, không bị nhảy cóc.
+      </p>
+      <p>
+        <strong>“Vùng cao”</strong> = nhiều chó (6, 10, 15, … 35). Ở đây câu hỏi đổi thành
+        “thêm một cục lớn có giúp hay làm hại?” nên bước có thể <strong>thưa hơn</strong>
+        (nhảy 4-5-10), không cần mọi số nguyên.
+      </p>
+      <div class="legend-row">
+        <span><i class="lg-green"></i> Mịn: bước 1</span>
+        <span><i class="lg-blue"></i> Thưa: bước lớn hơn</span>
+      </div>
+      <div class="seed-row" style="gap:8px;">
+        <span style="text-align:center;font-size:0.75rem;"><span class="seed"></span><br>1</span>
+        <span style="text-align:center;font-size:0.75rem;"><span class="seed"></span><br>2</span>
+        <span style="text-align:center;font-size:0.75rem;"><span class="seed"></span><br>3</span>
+        <span style="text-align:center;font-size:0.75rem;"><span class="seed"></span><br>4</span>
+        <span class="muted">|</span>
+        <span style="text-align:center;font-size:0.75rem;color:#1f4e79;"><span class="seed" style="background:#1f4e79;"></span><br>6</span>
+        <span style="text-align:center;font-size:0.75rem;color:#1f4e79;"><span class="seed" style="background:#1f4e79;"></span><br>10</span>
+        <span style="text-align:center;font-size:0.75rem;color:#1f4e79;"><span class="seed" style="background:#1f4e79;"></span><br>15</span>
+        <span style="text-align:center;font-size:0.75rem;color:#1f4e79;"><span class="seed" style="background:#1f4e79;"></span><br>20</span>
+        <span style="text-align:center;font-size:0.75rem;color:#1f4e79;"><span class="seed" style="background:#1f4e79;"></span><br>25</span>
+        <span style="text-align:center;font-size:0.75rem;color:#1f4e79;"><span class="seed" style="background:#1f4e79;"></span><br>35</span>
+      </div>
+      <table>
+        <thead><tr><th>Lựa chọn</th><th>Vì sao</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>1, 2, 3, 4 liên tiếp</td>
+            <td>số chó tối thiểu thường nằm đây; cần phân biệt từng con chó.</td>
+          </tr>
+          <tr>
+            <td>Sau đó 6, 10, 15, 20, 25, 35</td>
+            <td>Hỏi tăng mạnh có ích / có hại không; khe 2 chó ở vùng cao nhỏ hơn bước lưới nên không cần mọi số.</td>
+          </tr>
+          <tr>
+            <td>Trần D = 35</td>
+            <td>Đỉnh thang đo của câu chuyện “vài chó” (xem khung bên dưới).</td>
+          </tr>
+          <tr>
+            <td>Không lấy mọi số nguyên tới 35</td>
+            <td>Tránh trinh sát ~10 500 lần; chỉ cần 10 mức D → ~3000 lần (xem phép tính bên dưới).</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin-top:16px">Trần D = 35: giải thích rõ hơn</h3>
+      <p>
+        Câu chuyện nghiên cứu giai đoạn 1 (câu hỏi kích thước / gói A) là:
+        <strong>vài chó</strong> dẫn <strong>một đàn lớn hơn</strong>
+        (điều khiển gián tiếp, không phải mỗi cừu một chó).
+      </p>
+      <ul>
+        <li>D nhỏ (1-4): hỏi “cần tối thiểu bao nhiêu chó?” (số chó tối thiểu)</li>
+        <li>D vừa-lớn (6-35): hỏi “thêm nhiều chó nữa có giúp, lãng phí, hay bắt đầu hại?” (vùng hiệu quả / lãng phí / quá tải)</li>
+      </ul>
+      <p>
+        <strong>35</strong> là mức cao nhất trên lưới: vẫn còn trong khung “một nhóm chó chăn”,
+        chưa thành “đội quân chó”. Lớn hơn (50, 100…) kỹ thuật vẫn chạy được, nhưng
+        <strong>không còn đúng câu hỏi</strong> chương trình đang đặt ở giai đoạn 1.
+      </p>
+
+      <h4 style="margin:14px 0 8px;font-size:0.95rem;">Nếu D &gt; 35 thì câu hỏi phải đổi thành gì?</h4>
+      <p>
+        Không phải cùng một câu hỏi kéo dài thêm vài mức. Khi số chó lên hàng chục lớn
+        hoặc hàng trăm, đối tượng nghiên cứu đổi: từ
+        <em>nhóm chăn nhỏ điều khiển đàn</em> sang
+        <em>đám đông chó trên sân</em> (hai “đàn” tương tác: cừu và chó).
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Khung D</th>
+            <th>Câu hỏi khoa học</th>
+            <th>Vấn đề muốn giải quyết</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1 … 35<br><span class="muted">(lưới hiện tại)</span></td>
+            <td>
+              Với một nhóm chó chăn, khi đàn to dần thì
+              số chó tối thiểu và vùng “thêm chó còn ích / bắt đầu hại”
+              đổi thế nào?
+            </td>
+            <td>
+              Bản đồ nhu cầu điều khiển theo kích thước đàn
+              (câu hỏi kích thước, giai đoạn 1): biên dưới, chế độ vận hành, có/không quá tải trong khung “vài chó”.
+            </td>
+          </tr>
+          <tr>
+            <td>&gt; 35<br><span class="muted">(ví dụ 50, 100…)</span></td>
+            <td>
+              Khi số chó trở thành đám đông (gần hoặc lớn hơn nhiều so với “nhóm chăn”),
+              độ tin cậy còn giữ được không? Có sụp vì nhiễu lẫn nhau / chen chúc không?
+              Luật điều khiển còn nghĩa “chăn” hay đã thành “bầy chó bao phủ sân”?
+            </td>
+            <td>
+              Tìm biên sụp ở D rất cao (nếu có), hoặc nghiên cứu
+              <em>nhiều bộ điều khiển xung đột</em> như một hiện tượng riêng
+              (không còn là câu “cần tối thiểu bao nhiêu chó để chăn đáng tin”).
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout">
+        <strong>Ví dụ để phân biệt hai câu hỏi</strong>
+        <ul style="margin:8px 0 0;padding-left:1.2rem;">
+          <li>
+            giai đoạn 1 cần trả lời kiểu: “Với N = 100, 1 chó đã đủ R ≥ 0,90 chưa?
+            Thêm tới 35 chó có làm R tụt không?”
+          </li>
+          <li>
+            D &gt; 35 mới nhắm kiểu: “Với N = 100, 80 chó trên sân 500×500 có bắt đầu
+            phá đàn vì nhiễu không?” Đó là bài toán mật độ bộ điều khiển / đội quân,
+            không phải bài toán “nhóm chăn tối thiểu”.
+          </li>
+        </ul>
+      </div>
+
+      <p>
+        giai đoạn 1 lần này: số chó tối thiểu nằm ở 1-2, và
+        <strong>không thấy quá tải</strong> tới D = 35. Vì vậy trần 35 đã đủ để
+        kết luận trong khung “vài chó”. Nếu sau này muốn chứng minh
+        “cuối cùng luôn có D làm R sụp”, phải mở lưới cao hơn
+        <em>và</em> viết rõ đó là theo dõi biên sụp ở D cực đại, không phải chỉnh nhẹ cùng câu hỏi kích thước.
+      </p>
+      <div class="calc">
+        <div class="dong">Trần 35 = hết thang đo của câu chuyện “vài chó”, không phải “máy cấm D &gt; 35”.</div>
+        <div class="dong">D &gt; 35 = câu hỏi mới (đội quân / nhiễu nhiều bộ điều khiển), không phải cùng câu hỏi kéo dài.</div>
+      </div>
+
+      <h3>Không lấy mọi số nguyên 1…35: giải thích rõ hơn</h3>
+      <p>
+        Lưới <strong>hiện tại</strong> chỉ có <strong>10 mức D</strong>:
+        1, 2, 3, 4, 6, 10, 15, 20, 25, 35.
+        Không phải đủ dãy 1, 2, 3, …, 34, 35 (35 mức).
+      </p>
+      <table>
+        <thead><tr><th>Cách chọn D</th><th>Số mức D</th><th>Phép tính trinh sát</th><th>Số lần chạy</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Như hiện tại (10 mức)</td>
+            <td>10</td>
+            <td>10 N × 10 D × 30 hạt</td>
+            <td><strong>3 000</strong></td>
+          </tr>
+          <tr>
+            <td>Mọi số nguyên 1…35</td>
+            <td>35</td>
+            <td>10 N × 35 D × 30 hạt</td>
+            <td><strong>10 500</strong></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="calc">
+        <div class="dong">10 × 35 × 30 = 10 500</div>
+        <div class="dong">10 × 10 × 30 = 3 000</div>
+        <div class="dong">Lấy đủ 1…35 tốn gấp khoảng 3,5 lần chỉ riêng bước trinh sát</div>
+      </div>
+      <p>
+        Ở vùng D cao, câu hỏi chỉ cần biết “nhảy một cục lớn có đổi R không”,
+        không cần phân biệt D=17 với D=18. Vì vậy:
+      </p>
+      <ul>
+        <li><strong>1-4 mịn</strong> (bước 1): để bắt đúng số chó tối thiểu</li>
+        <li><strong>sau đó thưa</strong>: 6, 10, 15…35</li>
+        <li><strong>không</strong> điền mọi số đến 35: tiết kiệm ngân sách, vẫn đủ trả lời vùng cao</li>
+      </ul>
+      <p class="muted" style="margin-bottom:0">
+        Hình dung: gần chỗ quan trọng đo từng đơn vị; rất cao chỉ cần vài mốc thưa.
+        Không cần thước từng cm từ 1 đến 35 nếu chỗ quan trọng chỉ nằm ở vài mức đầu và vài mốc cuối.
+      </p>
+    </div>
+  </details>
+
+  <details class="yaml">
+    <summary>
+      Vì sao sân 500 × 500 và đích như vậy?
+      <span class="hint">Khác sân GUI 150</span>
+    </summary>
+    <div class="body">
+      <table>
+        <thead><tr><th>Thông số</th><th>Giá trị</th><th>Vì sao (theo kế hoạch)</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Kích thước sân</td>
+            <td>500 × 500</td>
+            <td>
+              Sân 150 (GUI) không chứa nổi khởi đầu rộng (3 độ lệch chuẩn ≈ 180) hay con lạc khi N=400 (≈174).
+              Sân 400 còn hụt ~20 ở draw rộng (tường cắt bố cục).
+              Sân 500 còn dư ~70. Sân 1000 chỉ thêm khoảng trống vô ích.
+              Hình vuông: cụm tách trên vòng tròn không bị ép vào cạnh ngắn.
+            </td>
+          </tr>
+          <tr>
+            <td>Đàn bắt đầu</td>
+            <td>(250, 250) giữa sân</td>
+            <td>Lề trên/dưới đối xứng.</td>
+          </tr>
+          <tr>
+            <td>Tâm đích</td>
+            <td>(370, 250)</td>
+            <td>Lệch phải 120 (= drive_length). Chiều dài lùa không đổi khi N đổi.</td>
+          </tr>
+          <tr>
+            <td>Chiều dài lùa</td>
+            <td>120</td>
+            <td>
+              Tốc độ 1 → đi thẳng hết ~120 bước.
+              Ở N=400 mép gần đích cách đàn ~78: ngoài đàn gọn và qua một sigma rộng.
+              Dài 80 sẽ nằm trong đám rộng; dài 200 đẩy mép xa đích sát tường sân 500.
+            </td>
+          </tr>
+          <tr>
+            <td>Bán kính đích</td>
+            <td>15 × căn bậc hai(N/50)</td>
+            <td>
+              Tại N=50: bán kính 15 (như app). Bán kính đóng chặt ~8 → kẹt nếu chỉ 8;
+              30 thì quá dễ như bãi chăn (kéo số chó tối thiểu xuống giả tạo).
+              Nhân căn bậc hai: giữ diện tích/cừu khi số cừu lớn; bán kính cố định sẽ kẹt ở N=400.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <details class="yaml">
+    <summary>
+      Ngưỡng 0,90, giờ 10 000, hạt 30/100: vì sao?
+      <span class="hint">Thêm thông số đóng băng</span>
+    </summary>
+    <div class="body">
+      <table>
+        <thead><tr><th>Thông số</th><th>Giá trị</th><th>Vì sao</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Ngưỡng tin cậy</td>
+            <td>0,90 (cũng báo 0,50 và 0,70)</td>
+            <td>Vùng “đáng tin”, cùng mức với bản nháp. 0,50 chỉ báo cáo, không dùng cho số chó tối thiểu. 0,99 với 100 hạt sẽ gọi ô ổn định là “thiếu”.</td>
+          </tr>
+          <tr>
+            <td>T0</td>
+            <td>10 000 bước</td>
+            <td>~80 lần đi thẳng 120 đơn vị; hết giờ ≈ mất kiểm soát. Mặc định scenario 3000 dễ nhầm thắng chậm thành thua.</td>
+          </tr>
+          <tr>
+            <td>T1</td>
+            <td>20 000 (chỉ ô quá tải)</td>
+            <td>Tách “cần thêm giờ” khỏi “thêm chó làm tệ”.</td>
+          </tr>
+          <tr>
+            <td>Hạt trinh sát / khẳng định</td>
+            <td>30 / 100</td>
+            <td>
+              Ở R=0,90, sai số chuẩn ~0,055 với 30 hạt (đủ tách ô hỏng / vững);
+              ~0,03 với 100 hạt. 10 hạt làm biên nhảy lung tung.
+              200 chỉ khi khoảng lấy lại mẫu số chó tối thiểu rộng hơn một bước lưới.
+            </td>
+          </tr>
+          <tr>
+            <td>Phương pháp đường cơ sở</td>
+            <td>Strombom nhiều chó</td>
+            <td>Collect/Drive có phối hợp; chuẩn để vẽ bản đồ kích thước trước khi chuyển giao.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <p class="note">
+    Nguồn phân tích: <span class="mono">scaling/docs/main_scaling_plan.md</span> (mục 8 / Vì sao các giá trị này)
+    và chú thích trong <span class="mono">scaling/configs/canonical_grid.yaml</span>.
+    Đổi một giá trị đóng băng phải cập nhật cả hai chỗ đó.
+  </p>
+
+  <!-- ========== định nghĩa biên ========== -->
+  <h2 id="dinh-nghia-bien"><span class="tag tag-plan">KẾ HOẠCH</span> Định nghĩa biên và chế độ (chuẩn kế hoạch)</h2>
+  <p class="muted">Nguồn: <span class="mono">main_scaling_plan.md</span> (Cách đo / Biên và chế độ).</p>
+
+  <div class="calc">
+    <div class="dong">R = P(thành công | hạt giống đã khóa)</div>
+    <div class="dong">“Chăn được” ở ngưỡng θ khi R ≥ 0,90</div>
+  </div>
+
+  <figure>
+    <img src="assets/schematics/regimes.svg" alt="Chế độ theo số chó tại số cừu cố định" />
+    <figcaption>
+      Hình dung chế độ theo D tại một N cố định. Giai đoạn 1: R lên ngưỡng rồi giữ cao;
+      không có sụp quá tải ở D lớn trên bố cục gọn + Strombom.
+    </figcaption>
+  </figure>
+
+  <details class="yaml" open>
+    <summary>Các đại lượng biên <span class="hint">số chó tối thiểu, quá tải, B*…</span></summary>
+    <div class="body">
+      <table>
+        <thead><tr><th>Đại lượng</th><th>Định nghĩa</th><th>Trên kết quả giai đoạn 1</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Số chó tối thiểu</td>
+            <td>D nhỏ nhất trên lưới sao cho R ≥ 0,90</td>
+            <td>2 với N=5,10; 1 với N≥25</td>
+          </tr>
+          <tr>
+            <td>Điểm quá tải (D_overcrowd)</td>
+            <td>D nhỏ nhất &gt; số chó tối thiểu sao cho D đó và D kế tiếp đều R &lt; 0,90</td>
+            <td>Không có (trống mọi hàng)</td>
+          </tr>
+          <tr>
+            <td>D_max</td>
+            <td>D lớn nhất vẫn ≥ ngưỡng và còn dưới vùng quá tải (hoặc trần lưới nếu không quá tải)</td>
+            <td>35 (trần đã thử)</td>
+          </tr>
+          <tr>
+            <td>Điểm tốt nhất B*</td>
+            <td>(D, T) đạt ngưỡng với trung vị đường đi ngắn nhất; hòa thì D nhỏ hơn, rồi t_s nhanh hơn</td>
+            <td>Đúng tại số chó tối thiểu (1 hoặc 2 chó)</td>
+          </tr>
+          <tr>
+            <td>Thất bại cứng</td>
+            <td>Không D nào trên lưới đạt R ≥ 0,90</td>
+            <td>Không (mọi N đều có số chó tối thiểu)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <details class="yaml">
+    <summary>Năm chế độ vận hành <span class="hint">gán cho mỗi ô</span></summary>
+    <div class="body">
+      <table>
+        <thead><tr><th>Chế độ</th><th>Điều kiện</th><th>Số ô giai đoạn 1</th></tr></thead>
+        <tbody>
+          <tr><td>Thiếu nguồn lực</td><td>R &lt; θ và chưa vào vùng quá tải</td><td>2</td></tr>
+          <tr><td>Hiệu quả</td><td>R ≥ θ và đường đi không lãng phí so với B*</td><td>10</td></tr>
+          <tr><td>Lãng phí</td><td>R ≥ θ nhưng đường đi ≥ ~20% trên mức hiệu quả</td><td>88</td></tr>
+          <tr><td>Sụp vì quá tải</td><td>R &lt; θ khi D ≥ điểm quá tải</td><td>0</td></tr>
+          <tr><td>Thất bại cứng</td><td>Không D nào đạt ngưỡng (theo N)</td><td>0</td></tr>
+        </tbody>
+      </table>
+      <p class="muted">Thanh lãng phí mặc định 20%; kế hoạch cũng báo cáo 10% và 30%.</p>
+    </div>
+  </details>
+
+  <details class="yaml">
+    <summary>Lưu ý quan trọng về đích vs công tắc Collect của Strombom <span class="hint">tránh hiểu nhầm thất bại</span></summary>
+    <div class="body">
+      <p>
+        Thành công = mọi cừu trong đĩa đích.
+        Công tắc Collect/Drive của Strombom dùng ngưỡng <span class="mono">r_a × N^(2/3)</span>,
+        rộng hơn đĩa đích (khoảng 27 vs 15 ở N=50; khoảng 109 vs 42 ở N=400).
+        Kế hoạch <strong>không</strong> mở đích bằng ngưỡng đó.
+        Vì vậy thất bại Strombom trên nhiệm vụ này <strong>không</strong> được đọc như “kẹt đóng gói vì đích quá nhỏ theo công tắc Collect”.
+      </p>
+    </div>
+  </details>
+
+  <details class="yaml">
+    <summary>Chỉ số trạng thái đàn (ghi nhận; giai đoạn 1 không phụ thuộc khẳng định vào chúng) <span class="hint">metrics</span></summary>
+    <div class="body">
+      <p>
+        Kế hoạch liệt kê độ kết, phân mảnh, con lạc, độ lan, phạm vi, chu vi bao lồi, diện tích bao, mật độ, tỷ lệ trục;
+        cộng I_dir (chó cản hướng nhau) và coverage (phủ cừu ngoại vi).
+        Một số đã có trong timeseries; chỉ số hình dạng mới (chu vi…) phục vụ chiến dịch sau.
+        <strong>Không chạy lại giai đoạn 1 chỉ vì thêm metric hình dạng.</strong>
+      </p>
+    </div>
+  </details>
+
+  <!-- ========== 4 ========== -->
+  <h2 id="lap-trinh"><span class="tag tag-code">LẬP TRÌNH</span> 4. File nào, lệnh nào</h2>
+  <p>
+    Hình dung đường ống như nhà máy: <strong>công thức</strong> (YAML) →
+    <strong>máy chạy</strong> (CLI chiến dịch) → <strong>kho thành phẩm</strong> (thư mục kết quả).
+  </p>
+
+  <h3>4.1. Công thức chạy (YAML): bấm để mở / thu nhỏ</h3>
+  <p>
+    Nằm trong <span class="mono">scaling/configs/protocols/</span>.
+    Bấm tiêu đề từng file để xem thông số bên trong và giải thích.
+    Dòng lưới sân / bán kính đích lấy thêm từ
+    <span class="mono">canonical_grid.yaml</span> (không viết lại hết trong mỗi file con).
+  </p>
+
+  <details class="yaml">
+    <summary>
+      phase1_pilot.yaml
+      <span class="hint">Thử khói · 5×6×5 = 150 lần · bậc thử khói</span>
+    </summary>
+    <div class="body">
+      <p class="muted">Lệnh: <span class="mono">make -C scaling scaling-pilot WORKERS=16</span></p>
+      <div class="param">
+        <div class="key">protocol_id / phase / grade</div>
+        <div class="val">phase1_pilot · 1 · thử khói</div>
+        <p class="why">Tên protocol để CLI gọi; bậc thử khói = chỉ kiểm đường ống, không dùng làm khẳng định khoa học.</p>
+      </div>
+      <div class="param">
+        <div class="key">output</div>
+        <div class="val">scaling/results/phase1/pilot</div>
+        <p class="why">Thư mục ghi trials.csv, báo cáo vận hành, hình gói A.</p>
+      </div>
+      <div class="param">
+        <div class="key">canonical</div>
+        <div class="val">scaling/configs/canonical_grid.yaml</div>
+        <p class="why">Kéo sân 500×500, đích, bán kính theo N, ngưỡng 0,90, T0=10000 từ file đóng băng chung.</p>
+      </div>
+      <div class="param">
+        <div class="key">methods</div>
+        <div class="val">[strombom_multi]</div>
+        <p class="why">Chỉ phương pháp đường cơ sở. Thử khói không trả tiền cho phương pháp chuyển giao.</p>
+      </div>
+      <div class="param">
+        <div class="key">layouts</div>
+        <div class="val">[compact]</div>
+        <p class="why">Bố cục gọn. Nếu compact đã hỏng đường ống thì chưa nói được gì về bố cục khác.</p>
+      </div>
+      <div class="param">
+        <div class="key">flock_sizes</div>
+        <div class="val">[5, 10, 25, 50, 100] → 5 mức</div>
+        <p class="why">Lấy sàn lưới đóng băng đến vùng “mép kích thước”, bỏ 75 và 150…400 cho nhẹ.</p>
+      </div>
+      <div class="param">
+        <div class="key">shepherd_counts</div>
+        <div class="val">[1, 2, 3, 4, 6, 10] → 6 mức</div>
+        <p class="why">Vùng D thấp nơi số chó tối thiểu thường nằm. Bỏ 15…35.</p>
+      </div>
+      <div class="param">
+        <div class="key">seeds / seed_mode</div>
+        <div class="val">5 · chế độ trinh sát</div>
+        <p class="why">Đủ để tập hợp thống kê chạy được; chưa đủ ước lượng biên chắc chắn.</p>
+      </div>
+      <div class="param">
+        <div class="key">store_timeseries / packages</div>
+        <div class="val">true · [A]</div>
+        <p class="why">Lưu chuỗi thời gian; chỉ chạy gói phân tích A (bản đồ herdability).</p>
+      </div>
+      <div class="calc">
+        <div class="dong">5 × 6 × 5 = <strong>150</strong> lần chạy</div>
+      </div>
+    </div>
+  </details>
+
+  <details class="yaml">
+    <summary>
+      phase1_scout.yaml
+      <span class="hint">Trinh sát · 10×10×30 = 3000 lần · bậc trinh sát</span>
+    </summary>
+    <div class="body">
+      <p class="muted">Lệnh: <span class="mono">make -C scaling scaling-scout WORKERS=16</span></p>
+      <div class="param">
+        <div class="key">grade</div>
+        <div class="val">trinh sát</div>
+        <p class="why">Bản đồ thô để chọn cửa sổ. Không trích dẫn làm khẳng định cuối.</p>
+      </div>
+      <div class="param">
+        <div class="key">flock_sizes</div>
+        <div class="val">[5, 10, 25, 50, 75, 100, 150, 200, 300, 400] → 10</div>
+        <p class="why">Toàn lưới đóng băng. Thiếu N=5,10 hoặc 300,400 thì không đỡ được biên trên toàn dải.</p>
+      </div>
+      <div class="param">
+        <div class="key">shepherd_counts</div>
+        <div class="val">[1, 2, 3, 4, 6, 10, 15, 20, 25, 35] → 10</div>
+        <p class="why">Toàn lưới D đóng băng.</p>
+      </div>
+      <div class="param">
+        <div class="key">seeds / seed_mode</div>
+        <div class="val">30 · chế độ trinh sát</div>
+        <p class="why">30 hạt: đủ tách ô hỏng khỏi ô vững; chưa đắt như 100.</p>
+      </div>
+      <div class="param">
+        <div class="key">packages</div>
+        <div class="val">[A, F]</div>
+        <p class="why">Gói A (biên/chế độ) + gói F (khớp đường cong, chỉ chẩn đoán ở bậc trinh sát).</p>
+      </div>
+      <div class="calc">
+        <div class="dong">10 × 10 × 30 = <strong>3000</strong> lần chạy</div>
+      </div>
+    </div>
+  </details>
+
+  <details class="yaml" id="yaml-claim">
+    <summary>
+      phase1_claim.yaml
+      <span class="hint">Khẳng định · cửa sổ biên · không chạy cả lưới</span>
+    </summary>
+    <div class="body">
+      <p class="muted">
+        Lệnh hai bước:
+        <span class="mono">make -C scaling scaling-claim-plan</span>
+        rồi
+        <span class="mono">make -C scaling scaling-claim-reseed WORKERS=16</span>
+      </p>
+      <div class="param">
+        <div class="key">grade</div>
+        <div class="val">khẳng định</div>
+        <p class="why">Đủ sâu để bàn khẳng định (sau khi có báo cáo vận hành).</p>
+      </div>
+      <div class="param">
+        <div class="key">flock_sizes / shepherd_counts</div>
+        <div class="val">Giống trinh sát (10 × 10): nhưng chương trình chạy không chạy hết</div>
+        <p class="why">
+          YAML ghi đủ lưới để “biết thế giới là gì”. Bước lập kế hoạch chỉ giữ các ô cửa sổ biên.
+          Đây là điểm dễ hiểu nhầm nhất: thấy đủ N/D trong YAML không có nghĩa là chạy 10×10×100.
+        </p>
+      </div>
+      <div class="param">
+        <div class="key">seeds / seed_mode</div>
+        <div class="val">100 · khẳng định</div>
+        <p class="why">100 hạt chỉ trên ô đã chọn. seed_mode claim đánh dấu danh sách hạt khẳng định.</p>
+      </div>
+      <div class="param">
+        <div class="key">upstream_protocol</div>
+        <div class="val">phase1_scout</div>
+        <p class="why">Đọc trials.csv của trinh sát để biết R(N,D) rồi chọn cửa sổ.</p>
+      </div>
+      <div class="param">
+        <div class="key">packages</div>
+        <div class="val">[A, F]</div>
+        <p class="why">Phân tích trên bản hợp nhất (merged_trials.csv).</p>
+      </div>
+      <div class="calc">
+        <div class="dong">Thực tế lần này: 22 ô × 100 = <strong>2200</strong> lần (không phải 10 000)</div>
+      </div>
+      <p><a href="#cua-so-bien">Xuống mục “Cửa sổ biên nghĩa là gì?”</a></p>
+    </div>
+  </details>
+
+  <details class="yaml">
+    <summary>
+      phase1_t1.yaml
+      <span class="hint">Kéo dài giờ · chỉ ô quá tải · lần này 0 ô</span>
+    </summary>
+    <div class="body">
+      <p class="muted">Lệnh: <span class="mono">make -C scaling scaling-t1 WORKERS=16</span></p>
+      <div class="param">
+        <div class="key">time_budget</div>
+        <div class="val">t1 (20 000 bước)</div>
+        <p class="why">Tách “cần thêm thời gian” khỏi “thêm chó làm tệ hơn”.</p>
+      </div>
+      <div class="param">
+        <div class="key">upstream_protocol / upstream_trials</div>
+        <div class="val">phase1_claim · merged_trials.csv</div>
+        <p class="why">Ước lượng điểm quá tải trên bản đã đo kỹ, rồi mới lên kế hoạch T1.</p>
+      </div>
+      <div class="param">
+        <div class="key">seeds</div>
+        <div class="val">100</div>
+        <p class="why">Nếu có ô quá tải thì gieo lại 100 hạt ở hạn 20 000. Lần này planner ra 0 ô.</p>
+      </div>
+      <div class="param">
+        <div class="key">packages</div>
+        <div class="val">[A, C]</div>
+        <p class="why">A cập nhật biên; C sẵn sàng cho kiểm tra cơ chế nếu có quá tải.</p>
+      </div>
+    </div>
+  </details>
+
+  <h3>4.2. Máy chạy (mã)</h3>
+  <table>
+    <thead><tr><th>Thành phần</th><th>Chỗ trong repo</th><th>Việc nó làm</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Chiến dịch / make</td>
+        <td><span class="mono">scaling/Makefile</span>, <span class="mono">scaling/scripts/campaign.py</span></td>
+        <td>Gọi đúng protocol, gắn số worker</td>
+      </tr>
+      <tr>
+        <td>Bộ chạy lưới</td>
+        <td><span class="mono">scaling/services/scaling/runner.py</span></td>
+        <td>Mở rộng lưới, chạy trial, tiếp tục bằng bảng kê, ghi timeseries</td>
+      </tr>
+      <tr>
+        <td>Chọn cửa sổ biên</td>
+        <td>lập kế hoạch khẳng định (từ trinh sát)</td>
+        <td>Ghi <span class="mono">boundary_cells.csv</span></td>
+      </tr>
+      <tr>
+        <td>Phân tích gói A</td>
+        <td><span class="mono">analysis/scaling/</span> (biên, chế độ, xuất file)</td>
+        <td>Bản đồ R, số chó tối thiểu, chế độ, hình</td>
+      </tr>
+      <tr>
+        <td>Phân tích gói F</td>
+        <td>khớp đường cong quy mô</td>
+        <td>So hằng số / tuyến tính / lũy thừa / từng đoạn</td>
+      </tr>
+      <tr>
+        <td>Engine mô phỏng chung</td>
+        <td><span class="mono">core/</span>, <span class="mono">plugins/</span>, <span class="mono">methods/</span></td>
+        <td>Cừu, chó, metric; cả GUI và scaling dùng chung</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>4.3. Kho thành phẩm (kết quả lần này)</h3>
+  <pre class="cmd">scaling/results/phase1/
+  pilot/     ← thử khói + báo cáo vận hành
+  scout/     ← trinh sát + báo cáo vận hành
+  claim/     ← đo kỹ + merged_trials.csv + packages/a|f
+  t1/        ← kế hoạch kéo dài giờ (0 ô)
+  guides/    ← trang bạn đang đọc (tách khỏi dữ liệu chạy)</pre>
+
+  <div class="flow" aria-label="Luồng dữ liệu">
+    <span class="box">tệp cấu hình YAML</span><span class="arrow">→</span>
+    <span class="box">chiến dịch / chương trình chạy</span><span class="arrow">→</span>
+    <span class="box">trials.csv</span><span class="arrow">→</span>
+    <span class="box">gói A / F + hình</span><span class="arrow">→</span>
+    <span class="box">báo cáo vận hành + guides</span>
+  </div>
+
+  <!-- ========== cách tạo ô ========== -->
+  <h2 id="cach-tao-o"><span class="tag tag-run">CHẠY</span> Cách tạo từng ô từ N, D và hạt</h2>
+  <div class="callout">
+    Một <strong>ô</strong> = một cặp cố định (số cừu N, số chó D).<br />
+    Runner không chạy “hết N rồi hết D”, mà chạy <strong>mọi tổ hợp</strong> N × D.
+    Mỗi ô được lặp lại nhiều <strong>hạt giống</strong> (lần thi khác vị trí khởi đầu) để tính R.
+  </div>
+  <div class="calc">
+    <div class="dong">danh sách ô = mọi cặp (Nᵢ, Dⱼ)</div>
+    <div class="dong">số ô = (số mức N) × (số mức D)</div>
+    <div class="dong">số lần chạy = số ô × (số hạt mỗi ô)</div>
+  </div>
+
+  <details class="yaml" open>
+    <summary>
+      Thử khói: lưới 5 × 6, mỗi ô 5 hạt
+      <span class="hint">Bấm để thu / mở</span>
+    </summary>
+    <div class="body">
+      <p>
+        N = {5, 10, 25, 50, 100} · D = {1, 2, 3, 4, 6, 10} · hạt = 5.
+        Hàng = N (trên xuống). Cột = D (trái sang phải).
+      </p>
+      <div class="legend-row">
+        <span><i class="lg-green"></i> Ô được chạy (30 ô)</span>
+        <span><i class="lg-red"></i> Hai ô kém sau khi chạy</span>
+      </div>
+      <div class="window-grid cols-6" role="img" aria-label="Lưới thử khói 5 nhân 6">
+        <div class="cell on">5,1</div><div class="cell on">5,2</div><div class="cell on">5,3</div>
+        <div class="cell on">5,4</div><div class="cell on">5,6</div><div class="cell on">5,10</div>
+        <div class="cell on">10,1</div><div class="cell on">10,2</div><div class="cell on">10,3</div>
+        <div class="cell on">10,4</div><div class="cell on">10,6</div><div class="cell on">10,10</div>
+        <div class="cell on">25,1</div><div class="cell on">25,2</div><div class="cell on">25,3</div>
+        <div class="cell on">25,4</div><div class="cell on">25,6</div><div class="cell on">25,10</div>
+        <div class="cell on">50,1</div><div class="cell on">50,2</div><div class="cell on">50,3</div>
+        <div class="cell on">50,4</div><div class="cell on">50,6</div><div class="cell on">50,10</div>
+        <div class="cell on">100,1</div><div class="cell on">100,2</div><div class="cell on">100,3</div>
+        <div class="cell on">100,4</div><div class="cell on">100,6</div><div class="cell on">100,10</div>
+      </div>
+      <p class="muted">Sau khi chạy, tô đỏ hai ô kém (cùng lưới, chỉ đổi màu minh họa):</p>
+      <div class="window-grid cols-6" role="img" aria-label="Hai ô kém trên lưới thử khói">
+        <div class="cell weak">5,1</div><div class="cell on">5,2</div><div class="cell on">5,3</div>
+        <div class="cell on">5,4</div><div class="cell on">5,6</div><div class="cell on">5,10</div>
+        <div class="cell weak">10,1</div><div class="cell on">10,2</div><div class="cell on">10,3</div>
+        <div class="cell on">10,4</div><div class="cell on">10,6</div><div class="cell on">10,10</div>
+        <div class="cell on">25…</div><div class="cell on"></div><div class="cell on"></div>
+        <div class="cell on"></div><div class="cell on"></div><div class="cell on"></div>
+        <div class="cell on">50…</div><div class="cell on"></div><div class="cell on"></div>
+        <div class="cell on"></div><div class="cell on"></div><div class="cell on"></div>
+        <div class="cell on">100…</div><div class="cell on"></div><div class="cell on"></div>
+        <div class="cell on"></div><div class="cell on"></div><div class="cell on"></div>
+      </div>
+      <h3 style="margin-top:16px">Bên trong một ô: 5 hạt giống</h3>
+      <p>Ô <strong>(5, 1)</strong> thử khói: mỗi chấm = một lần thi (một hạt).</p>
+      <div class="seed-row" aria-label="Năm hạt ô 5 cừu 1 chó">
+        <span class="seed fail" title="rớt"></span>
+        <span class="seed fail"></span>
+        <span class="seed fail"></span>
+        <span class="seed fail"></span>
+        <span class="seed fail"></span>
+        <span class="seed-label">5 rớt → R = 0 ÷ 5 = 0</span>
+      </div>
+      <p>Ô <strong>(10, 1)</strong>:</p>
+      <div class="seed-row" aria-label="Năm hạt ô 10 cừu 1 chó">
+        <span class="seed" title="đậu"></span>
+        <span class="seed"></span>
+        <span class="seed fail"></span>
+        <span class="seed fail"></span>
+        <span class="seed fail"></span>
+        <span class="seed-label">2 đậu + 3 rớt → R = 2 ÷ 5 = 0,4</span>
+      </div>
+      <p>Ô <strong>(5, 2)</strong>:</p>
+      <div class="seed-row">
+        <span class="seed"></span><span class="seed"></span><span class="seed"></span>
+        <span class="seed"></span><span class="seed"></span>
+        <span class="seed-label">5 đậu → R = 5 ÷ 5 = 1</span>
+      </div>
+      <div class="calc">
+        <div class="dong">Số ô = 5 × 6 = 30</div>
+        <div class="dong">Mỗi ô × 5 hạt = 30 × 5 = <strong>150</strong> lần chạy</div>
+        <div class="dong">Không phải chỉ “6 × 5”: thiếu nhân thêm 5 mức N</div>
+      </div>
+    </div>
+  </details>
+
+  <details class="yaml">
+    <summary>
+      Trinh sát: lưới 10 × 10, mỗi ô 30 hạt
+      <span class="hint">Bấm để mở</span>
+    </summary>
+    <div class="body">
+      <p>
+        N đủ 10 mức · D đủ 10 mức · hạt = 30.
+        <strong>Mọi ô xanh đều chạy</strong> (khác claim: claim chỉ tô một phần).
+      </p>
+      <div class="legend-row">
+        <span><i class="lg-green"></i> Chạy 30 hạt (100 ô)</span>
+        <span><i class="lg-red"></i> Hai ô R &lt; 1 sau trinh sát</span>
+      </div>
+      <div class="window-grid cols-10" role="img" aria-label="Lưới trinh sát 10 nhân 10">
+        <div class="cell weak">·</div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div>
+        <div class="cell weak">·</div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div>
+        <div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div>
+        <div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div>
+        <div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div>
+        <div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div>
+        <div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div>
+        <div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div>
+        <div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div>
+        <div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div>
+      </div>
+      <p class="muted">Hàng 1-2 cột 1 (đỏ): (5,1) và (10,1). Các ô còn lại xanh: R = 1.</p>
+      <h3 style="margin-top:16px">Bên trong một ô: 30 hạt (minh họa rút gọn)</h3>
+      <p>Ô (10, 1) trinh sát ≈ 8 đậu / 30 → R ≈ 0,27. Dưới đây 30 chấm minh họa tỷ lệ (không liệt kê từng hạt thật):</p>
+      <div class="seed-row" aria-label="Ba mươi hạt minh họa">
+        <span class="seed"></span><span class="seed"></span><span class="seed"></span><span class="seed"></span>
+        <span class="seed"></span><span class="seed"></span><span class="seed"></span><span class="seed"></span>
+        <span class="seed fail"></span><span class="seed fail"></span><span class="seed fail"></span><span class="seed fail"></span>
+        <span class="seed fail"></span><span class="seed fail"></span><span class="seed fail"></span><span class="seed fail"></span>
+        <span class="seed fail"></span><span class="seed fail"></span><span class="seed fail"></span><span class="seed fail"></span>
+        <span class="seed fail"></span><span class="seed fail"></span><span class="seed fail"></span><span class="seed fail"></span>
+        <span class="seed fail"></span><span class="seed fail"></span><span class="seed fail"></span><span class="seed fail"></span>
+        <span class="seed fail"></span><span class="seed fail"></span>
+        <span class="seed-label">8 xanh + 22 đỏ ≈ R = 0,27</span>
+      </div>
+      <div class="calc">
+        <div class="dong">100 ô × 30 hạt = <strong>3000</strong> lần chạy</div>
+      </div>
+    </div>
+  </details>
+
+  <details class="yaml">
+    <summary>
+      Khẳng định: chỉ 22 ô cửa sổ, mỗi ô 100 hạt
+      <span class="hint">Bấm để mở · chi tiết đầy đủ ở mục sau</span>
+    </summary>
+    <div class="body">
+      <p>
+        Cùng khung lưới 10×10 với trinh sát, nhưng <strong>chỉ tô xanh dương các ô cửa sổ</strong>.
+        Ô xám: không chạy lại; giữ kết quả 30 hạt.
+      </p>
+      <div class="legend-row">
+        <span><i class="lg-gray"></i> Giữ 30 hạt</span>
+        <span><i class="lg-blue"></i> Đo lại 100 hạt</span>
+      </div>
+      <div class="window-grid cols-10" role="img" aria-label="Cửa sổ claim 22 ô">
+        <div class="cell edge"></div><div class="cell edge"></div><div class="cell edge"></div>
+        <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+        <div class="cell edge"></div><div class="cell edge"></div><div class="cell edge"></div>
+        <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+        <div class="cell edge"></div><div class="cell edge"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+        <div class="cell edge"></div><div class="cell edge"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+        <div class="cell edge"></div><div class="cell edge"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+        <div class="cell edge"></div><div class="cell edge"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+        <div class="cell edge"></div><div class="cell edge"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+        <div class="cell edge"></div><div class="cell edge"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+        <div class="cell edge"></div><div class="cell edge"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+        <div class="cell edge"></div><div class="cell edge"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      </div>
+      <p>Mỗi ô cửa sổ: 100 hạt (minh họa 20 chấm = tỷ lệ 1:5 cho gọn):</p>
+      <div class="seed-row">
+        <span class="seed"></span><span class="seed"></span><span class="seed"></span><span class="seed"></span><span class="seed"></span>
+        <span class="seed"></span><span class="seed"></span><span class="seed"></span><span class="seed"></span><span class="seed"></span>
+        <span class="seed"></span><span class="seed"></span><span class="seed"></span><span class="seed"></span><span class="seed"></span>
+        <span class="seed"></span><span class="seed"></span><span class="seed"></span><span class="seed"></span><span class="seed"></span>
+        <span class="seed-label">×5 → 100 hạt / ô (ví dụ ô đã R=1)</span>
+      </div>
+      <div class="calc">
+        <div class="dong">22 ô × 100 = <strong>2200</strong> lần đo kỹ</div>
+        <div class="dong">Chi tiết quy tắc chọn ô: <a href="#cua-so-bien">mục cửa sổ biên</a></div>
+      </div>
+    </div>
+  </details>
+
+  <p class="note">
+    Tóm lại: <strong>ô</strong> = cặp (N, D) trên lưới; <strong>hạt</strong> = lần lặp trong ô;
+    thử khói / trinh sát chạy <em>hết</em> ô trên lưới của chúng; claim chỉ chạy ô cửa sổ.
+  </p>
+
+  <!-- ========== cửa sổ biên ========== -->
+  <h2 id="cua-so-bien"><span class="tag tag-run">CHẠY</span> Cửa sổ biên (khẳng định) nghĩa là gì?</h2>
+
+  <div class="callout">
+    <strong>Đúng ý bạn đang hiểu:</strong>
+    <ul style="margin:8px 0 0;padding-left:1.2rem;">
+      <li><strong>Thử khói</strong> = chạy mọi ô trên lưới nhỏ (kiểm máy).</li>
+      <li><strong>Trinh sát</strong> = chạy giống vậy nhưng lưới đầy đủ đóng băng (10×10), 30 hạt/ô → ra file <span class="mono">scout/trials.csv</span>.</li>
+      <li><strong>Khẳng định</strong> = đọc R trong <span class="mono">scout/trials.csv</span>, chọn một danh sách ô biên, rồi <em>chỉ chạy lại các ô đó</em> với 100 hạt.</li>
+    </ul>
+  </div>
+
+  <div class="calc">
+    <strong class="kieu">Ba bước, một phép so sánh</strong>
+    <div class="dong">Pilot: chạy hết ô trên lưới nhỏ</div>
+    <div class="dong">Scout: chạy hết ô trên lưới đầy đủ (rẻ)</div>
+    <div class="dong">Khẳng định: không chạy hết lưới; chỉ chạy ô đã chọn từ trinh sát</div>
+  </div>
+
+  <div class="callout">
+    <strong>Hình dung cửa sổ:</strong> trinh sát đã chụp cả bức ảnh 100 ô (rẻ, 30 lần/ô).
+    “Biên” là chỗ R vừa vượt ngưỡng 0,90 (số chó tối thiểu).
+    “Cửa sổ biên” = vài ô quanh chỗ đó để đo lại kỹ (100 lần/ô), thay vì đo kỹ cả 100 ô.
+  </div>
+
+  <figure>
+    <img src="assets/schematics/scout_grid.svg" alt="Lưới trinh sát số cừu nhân số chó" />
+    <figcaption>
+      Ý tưởng bản đồ trinh sát 10×10. Màu phác theo kết quả giai đoạn 1 (số chó tối thiểu = 2 ở 5 và 10 cừu; còn lại = 1).
+      Không thay thế file PNG bản đồ nhiệt gói A ở mục kết quả.
+    </figcaption>
+  </figure>
+  <figure>
+    <img src="assets/schematics/claim_window.svg" alt="Cửa sổ biên quanh số chó tối thiểu" />
+    <figcaption>
+      Ví dụ 5 cừu: số chó tối thiểu = 2 → cửa sổ {1, 2, 3} được gieo lại 100 hạt.
+      Các mức số chó khác giữ 30 hạt trong bản gộp. Giai đoạn 1 có 22 ô cửa sổ, không có cửa sổ quá tải.
+    </figcaption>
+  </figure>
+
+  <h3>Vì sao cần cửa sổ?</h3>
+  <ul>
+    <li>Ô sâu trong vùng “luôn thắng” (R=1 ở 30 hạt) ít khi đổi ý khi lên 100 hạt.</li>
+    <li>Ô quan trọng cho khoa học là chỗ <em>chuyển từ thua sang thắng</em> (số chó tối thiểu) và chỗ nghi quá tải.</li>
+    <li>Đo 100 hạt chỉ quanh đó: rẻ hơn nhiều, vẫn đủ để khẳng định biên.</li>
+  </ul>
+
+  <h3>Quy tắc chọn ô (mỗi mức N)</h3>
+  <ol>
+    <li>Tìm <strong>số chó tối thiểu</strong> trên bản trinh sát: D nhỏ nhất có R ≥ 0,90.</li>
+    <li>Lấy số chó tối thiểu, cộng D <em>trước</em> và D <em>sau</em> trên lưới số chó (nếu có).</li>
+    <li>Nếu có dấu quá tải (hai mức số chó liên tiếp dưới ngưỡng sau số chó tối thiểu): thêm cửa sổ quá tải.</li>
+    <li>Nếu không D nào đạt ngưỡng: chỉ lấy hai mức số chó lớn nhất đã thử.</li>
+  </ol>
+
+  <h3>Ví dụ cụ thể trên số liệu lần này</h3>
+  <div class="card">
+    <p><strong>5 cừu.</strong> Lưới số chó: 1, 2, 3, 4, …</p>
+    <div class="calc">
+      <div class="dong">R(D=1) = 0,033 &lt; 0,90 → chưa đủ</div>
+      <div class="dong">R(D=2) = 1,0 ≥ 0,90 → số chó tối thiểu = 2</div>
+      <div class="dong">Hàng xóm: D=1 (trước), D=2 (biên), D=3 (sau)</div>
+      <div class="dong">→ cửa sổ = {(5,1), (5,2), (5,3)}</div>
+    </div>
+    <p><strong>N = 100.</strong> R(D=1) = 1 → số chó tối thiểu = 1. Không có D trước trên lưới.</p>
+    <div class="calc">
+      <div class="dong">→ cửa sổ = {(100,1), (100,2)}</div>
+    </div>
+    <p>Gộp mọi N thành 22 ô (file <span class="mono">../claim/boundary_cells.csv</span>):</p>
+    <div class="calc">
+      <div class="dong">N = 5: cửa sổ D = {1, 2, 3} → <strong>3</strong> ô</div>
+      <div class="dong">N = 10: cửa sổ D = {1, 2, 3} → <strong>3</strong> ô</div>
+      <div class="dong">N ∈ {25, 50, 75, 100, 150, 200, 300, 400}: mỗi N cửa sổ D = {1, 2}</div>
+      <div class="dong">→ 8 mức N × 2 ô = <strong>16</strong> ô</div>
+      <div class="dong">Tổng: 3 + 3 + 16 = <strong>22</strong> ô</div>
+    </div>
+    <p class="muted" style="margin-bottom:0">
+      Vì sao N lớn chỉ 2 ô? Scout cho số chó tối thiểu = 1 (không có D “trước” trên lưới), nên cửa sổ chỉ còn số chó tối thiểu và hàng xóm trên (= 2).
+      N = 5 và 10 có số chó tối thiểu = 2 nên còn thêm hàng xóm dưới D = 1 → đủ 3 ô mỗi mức.
+    </p>
+  </div>
+
+  <h3>Danh sách đủ 22 ô: scout đo rồi → claim chạy lại</h3>
+  <p>
+    Bảng dưới lấy trực tiếp từ <span class="mono">../claim/boundary_cells.csv</span>.
+    Cột <strong>R scout</strong> = tỷ lệ thắng trong <span class="mono">scout/trials.csv</span> (30 hạt).
+    Khẳng định chỉ chạy lại đúng các hàng này với 100 hạt (không chạy 78 ô còn lại của lưới).
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>N (cừu)</th>
+        <th>D (chó)</th>
+        <th>R scout (30 hạt)</th>
+        <th>Vì sao nằm trong cửa sổ</th>
+        <th>Khẳng định làm gì</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>5</td><td>1</td><td>0,033</td><td>Hàng xóm dưới số chó tối thiểu = 2</td><td>Chạy lại 100 hạt</td></tr>
+      <tr><td>2</td><td>5</td><td>2</td><td>1,000</td><td>Chính số chó tối thiểu</td><td>Chạy lại 100 hạt</td></tr>
+      <tr><td>3</td><td>5</td><td>3</td><td>1,000</td><td>Hàng xóm trên số chó tối thiểu</td><td>Chạy lại 100 hạt</td></tr>
+      <tr><td>4</td><td>10</td><td>1</td><td>0,267</td><td>Hàng xóm dưới số chó tối thiểu = 2</td><td>Chạy lại 100 hạt</td></tr>
+      <tr><td>5</td><td>10</td><td>2</td><td>1,000</td><td>Chính số chó tối thiểu</td><td>Chạy lại 100 hạt</td></tr>
+      <tr><td>6</td><td>10</td><td>3</td><td>1,000</td><td>Hàng xóm trên số chó tối thiểu</td><td>Chạy lại 100 hạt</td></tr>
+      <tr><td>7</td><td>25</td><td>1</td><td>1,000</td><td>số chó tối thiểu = 1</td><td>Chạy lại 100 hạt</td></tr>
+      <tr><td>8</td><td>25</td><td>2</td><td>1,000</td><td>Hàng xóm trên</td><td>Chạy lại 100 hạt</td></tr>
+      <tr><td>9</td><td>50</td><td>1</td><td>1,000</td><td>số chó tối thiểu = 1</td><td>Chạy lại 100 hạt</td></tr>
+      <tr><td>10</td><td>50</td><td>2</td><td>1,000</td><td>Hàng xóm trên</td><td>Chạy lại 100 hạt</td></tr>
+      <tr><td>11</td><td>75</td><td>1</td><td>1,000</td><td>số chó tối thiểu = 1</td><td>Chạy lại 100 hạt</td></tr>
+      <tr><td>12</td><td>75</td><td>2</td><td>1,000</td><td>Hàng xóm trên</td><td>Chạy lại 100 hạt</td></tr>
+      <tr><td>13</td><td>100</td><td>1</td><td>1,000</td><td>số chó tối thiểu = 1</td><td>Chạy lại 100 hạt</td></tr>
+      <tr><td>14</td><td>100</td><td>2</td><td>1,000</td><td>Hàng xóm trên</td><td>Chạy lại 100 hạt</td></tr>
+      <tr><td>15</td><td>150</td><td>1</td><td>1,000</td><td>số chó tối thiểu = 1</td><td>Chạy lại 100 hạt</td></tr>
+      <tr><td>16</td><td>150</td><td>2</td><td>1,000</td><td>Hàng xóm trên</td><td>Chạy lại 100 hạt</td></tr>
+      <tr><td>17</td><td>200</td><td>1</td><td>1,000</td><td>số chó tối thiểu = 1</td><td>Chạy lại 100 hạt</td></tr>
+      <tr><td>18</td><td>200</td><td>2</td><td>1,000</td><td>Hàng xóm trên</td><td>Chạy lại 100 hạt</td></tr>
+      <tr><td>19</td><td>300</td><td>1</td><td>1,000</td><td>số chó tối thiểu = 1</td><td>Chạy lại 100 hạt</td></tr>
+      <tr><td>20</td><td>300</td><td>2</td><td>1,000</td><td>Hàng xóm trên</td><td>Chạy lại 100 hạt</td></tr>
+      <tr><td>21</td><td>400</td><td>1</td><td>1,000</td><td>số chó tối thiểu = 1</td><td>Chạy lại 100 hạt</td></tr>
+      <tr><td>22</td><td>400</td><td>2</td><td>1,000</td><td>Hàng xóm trên</td><td>Chạy lại 100 hạt</td></tr>
+    </tbody>
+  </table>
+  <div class="calc">
+    <div class="dong">22 ô × 100 hạt = 2200 lần claim</div>
+    <div class="dong">78 ô còn lại của lưới trinh sát: không chạy khẳng định; giữ R từ 30 hạt khi hợp nhất</div>
+    <div class="dong">Ví dụ ô (5,4) hay (100,10): scout đã R=1 nhưng không nằm bảng trên → claim bỏ qua</div>
+  </div>
+
+  <h3>Nhìn lưới 10×10: ô xám không đo kỹ; ô màu mới đo 100 hạt</h3>
+  <p class="muted">Mỗi hàng ≈ một N (từ trên xuống: 5 → 400). Mỗi cột ≈ một D (trái sang phải: 1 → 35). Ô xanh dương = đúng 22 hàng bảng trên.</p>
+  <div class="legend-row">
+    <span><i class="lg-gray"></i> Chỉ giữ 30 hạt trinh sát</span>
+    <span><i class="lg-blue"></i> Cửa sổ: đo lại 100 hạt</span>
+  </div>
+  <div class="window-grid cols-10" role="img" aria-label="Lưới 10 nhân 10, 22 ô cửa sổ được tô">
+    <!-- N=5: D 1,2,3 -->
+    <div class="cell edge">5,1</div><div class="cell edge">5,2</div><div class="cell edge">5,3</div>
+    <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+    <!-- N=10 -->
+    <div class="cell edge">10,1</div><div class="cell edge">10,2</div><div class="cell edge">10,3</div>
+    <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+    <!-- N=25..400: D1,D2 each row -->
+    <div class="cell edge">25</div><div class="cell edge">25</div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+    <div class="cell edge">50</div><div class="cell edge">50</div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+    <div class="cell edge">75</div><div class="cell edge">75</div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+    <div class="cell edge">100</div><div class="cell edge">100</div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+    <div class="cell edge">150</div><div class="cell edge">150</div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+    <div class="cell edge">200</div><div class="cell edge">200</div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+    <div class="cell edge">300</div><div class="cell edge">300</div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+    <div class="cell edge">400</div><div class="cell edge">400</div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+  </div>
+
+  <h3>Chạy claim thực tế gồm hai lệnh</h3>
+  <table>
+    <thead><tr><th>Bước</th><th>Lệnh</th><th>Việc xảy ra</th><th>File ra</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>1. Lập kế hoạch</td>
+        <td><span class="mono">make -C scaling scaling-claim-plan</span></td>
+        <td>Đọc <span class="mono">scout/trials.csv</span>; chọn đúng 22 ô bảng trên; <strong>không</strong> chạy mô phỏng mới</td>
+        <td><span class="mono">claim/boundary_cells.csv</span></td>
+      </tr>
+      <tr>
+        <td>2. Gieo lại</td>
+        <td><span class="mono">make -C scaling scaling-claim-reseed WORKERS=16</span></td>
+        <td>Chỉ chạy các ô trong danh sách đó, mỗi ô 100 hạt</td>
+        <td><span class="mono">claim/trials.csv</span> + hợp nhất <span class="mono">merged_trials.csv</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="calc">
+    <strong class="kieu">Luồng một câu</strong>
+    <div class="dong">Trinh sát viết trials.csv (100 ô × 30) → lập kế hoạch khẳng định đọc file đó → boundary_cells.csv (22 ô) → gieo lại khẳng định chạy 22×100 → hợp nhất</div>
+  </div>
+  <p class="note">
+    Tệp cấu hình khẳng định vẫn liệt kê đủ 10×10 để mô tả thế giới, nhưng chương trình chạy <strong>không</strong> chạy hết lưới;
+    nó chỉ chạy các ô đã ghi trong <span class="mono">boundary_cells.csv</span>.
+    Xem lại khối thu/mở <a href="#yaml-claim">phase1_claim.yaml</a> ở mục 4.1.
+  </p>
+
+  <!-- ========== 5 ========== -->
+  <h2 id="chien-luoc"><span class="tag tag-run">CHẠY</span> 5. Chiến lược: đo rẻ rồi đo kỹ</h2>
+  <p>
+    Giống khảo sát cả thành phố: hỏi nhanh mọi nơi trước, rồi hỏi kỹ chỗ nghi ngờ.
+    Không chạy 100 lần trên mọi ô vì tốn mà ít thêm thông tin ở vùng “luôn thắng”.
+  </p>
+  <div class="flow">
+    <span class="box">Thử khói</span><span class="arrow">→</span>
+    <span class="box">Trinh sát</span><span class="arrow">→</span>
+    <span class="box">Chọn 22 ô</span><span class="arrow">→</span>
+    <span class="box">Đo kỹ</span><span class="arrow">→</span>
+    <span class="box">Phân tích</span><span class="arrow">→</span>
+    <span class="box">Kéo dài giờ?</span>
+  </div>
+  <figure>
+    <img src="assets/schematics/pipeline.svg" alt="Chuỗi giai đoạn 1 với số liệu thật" />
+    <figcaption>
+      Chuỗi đã chạy thật: khói 150 → trinh sát 3.000 → chọn 22 ô → khẳng định 2.200 → phân tích → T1 bỏ qua (0 ô).
+    </figcaption>
+  </figure>
+  <table>
+    <thead><tr><th>Bậc</th><th>Giống chỗ nào?</th><th>Khác chỗ nào?</th><th>Trích dẫn?</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Thử khói</td>
+        <td>Chạy hết mọi ô trên lưới của nó</td>
+        <td>Lưới nhỏ, 5 hạt</td>
+        <td>Không</td>
+      </tr>
+      <tr>
+        <td>Trinh sát</td>
+        <td>Cũng chạy hết mọi ô (như thử khói)</td>
+        <td>Lưới đầy đủ 10×10, 30 hạt → <span class="mono">scout/trials.csv</span></td>
+        <td>Không (chỉ để chọn cửa sổ)</td>
+      </tr>
+      <tr>
+        <td>Khẳng định</td>
+        <td>Không chạy hết lưới</td>
+        <td>Đọc trials.csv scout → chỉ chạy 22 ô biên, 100 hạt</td>
+        <td>Có (sau báo cáo vận hành)</td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="note">
+    Quy tắc hợp nhất: ô đã đo 100 hạt thì chỉ dùng 100 hạt đó; ô còn lại giữ 30 hạt trinh sát.
+    Không cộng chồng 30+100 trên cùng một ô. Danh sách 22 ô: xem
+    <a href="#cua-so-bien">mục cửa sổ biên</a>.
+  </p>
+
+  <!-- ========== 6 ========== -->
+  <h2 id="tung-buoc"><span class="tag tag-run">CHẠY</span> + <span class="tag tag-out">KẾT QUẢ</span> 6. Từng bước với số liệu thật</h2>
+
+  <h3>Bước 1. Thử khói (150 lần, ~43 giây)</h3>
+  <p>
+    Mục đích: kiểm tra máy và mã, chưa kết luận khoa học.
+    Cách tạo ô: xem lưới 5×6 và 5 hạt/ô ở
+    <a href="#cach-tao-o">mục “Cách tạo từng ô”</a>.
+    Lưới lấy từ <span class="mono">phase1_pilot.yaml</span>:
+  </p>
+  <table>
+    <thead><tr><th>Thành phần</th><th>Giá trị trong YAML</th><th>Đếm</th></tr></thead>
+    <tbody>
+      <tr><td>Số cừu N</td><td>5, 10, 25, 50, 100</td><td>5 mức</td></tr>
+      <tr><td>Số chó D</td><td>1, 2, 3, 4, 6, 10</td><td>6 mức</td></tr>
+      <tr><td>Hạt giống mỗi ô</td><td>5</td><td>5 lần lặp / ô</td></tr>
+    </tbody>
+  </table>
+  <div class="calc">
+    <strong class="kieu">Vì sao 150 lần? (không phải chỉ 6 × 5)</strong>
+    <div class="dong">Số ô = 5 × 6 = 30 ô</div>
+    <div class="dong">Số lần chạy = 30 ô × 5 hạt = <strong>150</strong></div>
+    <div class="dong">Viết gọn: 5 × 6 × 5 = 150</div>
+    <p class="muted" style="margin:8px 0 0">
+      Nếu chỉ nhân “6 mức chó × 5 hạt = 30” thì thiếu nhân thêm 5 mức cừu.
+      Đủ cả ba thừa số mới ra 150.
+    </p>
+  </div>
+  <p>R tổng ≈ <strong>0,95</strong>. Cách ước lượng nhanh:</p>
+  <div class="calc">
+    <div class="dong">Thất bại chủ yếu: ô (5,1) thua 5/5 + ô (10,1) thua 3/5 → 8 lần thua</div>
+    <div class="dong">Số lần thắng ≈ 150 − 8 = 142</div>
+    <div class="dong">R tổng ≈ 142 ÷ 150 ≈ 0,947 → làm tròn ~0,95</div>
+  </div>
+  <p><strong>Ô “5 cừu, 1 chó” → R = 0</strong> (rớt 5/5, hết giờ, kiểu dao động):</p>
+  <div class="score">
+    <div class="chip lose">X</div><div class="chip lose">X</div><div class="chip lose">X</div>
+    <div class="chip lose">X</div><div class="chip lose">X</div>
+  </div>
+  <div class="calc">
+    <div class="dong">R = 0 ÷ 5 = 0 &nbsp;&nbsp;(0 &lt; 0,90 → thiếu chó)</div>
+  </div>
+  <p><strong>Ô “10 cừu, 1 chó” → R = 0,4</strong> (đậu 2/5 ở 160 và 298 bước; ba lần kẹt):</p>
+  <div class="score">
+    <div class="chip win">T</div><div class="chip win">T</div>
+    <div class="chip lose">X</div><div class="chip lose">X</div><div class="chip lose">X</div>
+  </div>
+  <div class="calc">
+    <div class="dong">R = 2 ÷ 5 = 0,4 &nbsp;&nbsp;(0,4 &lt; 0,90 → vẫn thiếu chó)</div>
+  </div>
+  <p>
+    Ước lượng thô số chó tối thiểu: tìm D nhỏ nhất có R ≥ 0,90 trên lưới thử khói.
+  </p>
+  <div class="calc">
+    <div class="dong">N=5: D=1 → R=0 (trượt); D=2 → R=1 (đạt) → số chó tối thiểu ≈ 2</div>
+    <div class="dong">N=10: D=1 → R=0,4 (trượt); D=2 → R=1 → số chó tối thiểu ≈ 2</div>
+    <div class="dong">N∈{25,50,100}: D=1 → R=1 → số chó tối thiểu ≈ 1</div>
+  </div>
+  <p>
+    Chế độ trên lưới nhỏ (30 ô): lãng phí 23, hiệu quả 5, thiếu chó 2.
+  </p>
+  <div class="calc">
+    <div class="dong">Kiểm tra: 23 + 5 + 2 = 30 ô (đúng bằng số ô thử khói)</div>
+    <div class="dong">Thiếu chó 2 = đúng hai ô kém (5,1) và (10,1)</div>
+    <div class="dong">Hiệu quả 5 = mỗi mức N một ô “đủ và tiết kiệm” (thường đúng tại số chó tối thiểu)</div>
+    <div class="dong">Lãng phí 23 = các ô còn lại vẫn thắng nhưng D cao hơn mức cần</div>
+  </div>
+  <p class="muted">Chi tiết vận hành: <span class="mono">../pilot/REPORT.md</span></p>
+
+  <h3>Bước 2. Trinh sát (3000 lần, ~73 phút)</h3>
+  <p>
+    Lưới đầy đủ từ kế hoạch đóng băng + <span class="mono">phase1_scout.yaml</span>.
+    Mọi ô trên lưới 10×10 đều chạy (30 hạt/ô): xem
+    <a href="#cach-tao-o">hình lưới trinh sát</a>.
+  </p>
+  <table>
+    <thead><tr><th>Thành phần</th><th>Giá trị</th><th>Đếm</th></tr></thead>
+    <tbody>
+      <tr><td>N</td><td>5, 10, 25, 50, 75, 100, 150, 200, 300, 400</td><td>10 mức</td></tr>
+      <tr><td>D</td><td>1, 2, 3, 4, 6, 10, 15, 20, 25, 35</td><td>10 mức</td></tr>
+      <tr><td>Hạt mỗi ô</td><td>30</td><td>30</td></tr>
+    </tbody>
+  </table>
+  <div class="calc">
+    <strong class="kieu">Vì sao 3000 lần?</strong>
+    <div class="dong">Số ô = 10 × 10 = 100 ô</div>
+    <div class="dong">Số lần chạy = 100 × 30 = <strong>3000</strong></div>
+    <div class="dong">Viết gọn: 10 × 10 × 30 = 3000</div>
+  </div>
+  <p>R tổng ≈ <strong>0,98</strong>. Vẫn chỉ hai ô R &lt; 1:</p>
+  <table>
+    <thead><tr><th>Ô</th><th>Cách tính R</th><th>R (30 hạt)</th></tr></thead>
+    <tbody>
+      <tr><td>5 cừu, 1 chó</td><td>≈ 1 thắng / 30</td><td>0,033</td></tr>
+      <tr><td>10 cừu, 1 chó</td><td>≈ 8 thắng / 30</td><td>0,267</td></tr>
+      <tr><td>Mọi ô khác</td><td>30 / 30</td><td>1,000</td></tr>
+    </tbody>
+  </table>
+  <div class="calc">
+    <strong class="kieu">Số chó tối thiểu từ ngưỡng 0,90</strong>
+    <div class="dong">N=5: R(D=1)=0,033 &lt; 0,90; R(D=2)=1 ≥ 0,90 → số chó tối thiểu = 2</div>
+    <div class="dong">N=10: R(D=1)=0,267 &lt; 0,90; R(D=2)=1 → số chó tối thiểu = 2</div>
+    <div class="dong">N≥25: R(D=1)=1 ≥ 0,90 → số chó tối thiểu = 1</div>
+    <div class="dong">Quá tải? Cần hai mức D liên tiếp sau số chó tối thiểu đều R &lt; 0,90. Ở đây mọi D ≥ số chó tối thiểu đều R=1 → không quá tải</div>
+  </div>
+  <p>
+    Chế độ trên 100 ô: lãng phí 88, hiệu quả 10, thiếu chó 2.
+  </p>
+  <div class="calc">
+    <div class="dong">Kiểm tra: 88 + 10 + 2 = 100 ô (đúng lưới trinh sát)</div>
+  </div>
+  <p class="muted">Chi tiết: <span class="mono">../scout/REPORT.md</span></p>
+
+  <h3>Bước 3. Chọn cửa sổ (không chạy mô phỏng mới)</h3>
+  <p>
+    Đây chính là bước “cửa sổ biên” đã giải thích ở
+    <a href="#cua-so-bien">mục riêng</a>. Tóm tắt số liệu:
+  </p>
+  <table>
+    <thead><tr><th>N</th><th>số chó tối thiểu</th><th>Ô chọn</th><th>Số ô</th></tr></thead>
+    <tbody>
+      <tr><td>5</td><td>2</td><td>D = 1, 2, 3</td><td>3</td></tr>
+      <tr><td>10</td><td>2</td><td>D = 1, 2, 3</td><td>3</td></tr>
+      <tr><td>25, 50, 75, 100, 150, 200, 300, 400</td><td>1</td><td>D = 1, 2</td><td>8 × 2 = 16</td></tr>
+    </tbody>
+  </table>
+  <div class="calc">
+    <strong class="kieu">Vì sao 22 ô?</strong>
+    <div class="dong">3 + 3 + 16 = <strong>22</strong> ô</div>
+    <div class="dong">File: <span class="mono">../claim/boundary_cells.csv</span></div>
+  </div>
+  <div class="calc">
+    <strong class="kieu">Tiết kiệm ngân sách so với đo kỹ cả lưới</strong>
+    <div class="dong">Nếu 100 ô × 100 hạt = 10 000 lần</div>
+    <div class="dong">Chỉ cửa sổ: 22 ô × 100 hạt = <strong>2200</strong> lần</div>
+    <div class="dong">Tiết kiệm: 10 000 − 2200 = 7800 lần không cần chạy</div>
+  </div>
+
+  <h3>Bước 4. Đo kỹ + hợp nhất</h3>
+  <div class="calc">
+    <strong class="kieu">Kế hoạch đo kỹ</strong>
+    <div class="dong">22 ô × 100 hạt = <strong>2200</strong> lần khẳng định</div>
+  </div>
+  <p>
+    Hợp nhất <span class="mono">../claim/merged_trials.csv</span> = <strong>4540</strong> dòng.
+    R tổng ≈ <strong>0,963</strong>. Biên không đổi.
+  </p>
+  <div class="calc">
+    <strong class="kieu">Vì sao 4540 dòng? (cách hiểu hợp nhất)</strong>
+    <p style="margin:8px 0">Quy tắc: ô trong cửa sổ dùng bản 100 hạt (không cộng 30+100); ô ngoài cửa sổ giữ 30 hạt trinh sát.</p>
+    <div class="dong">Số ô ngoài cửa sổ = 100 − 22 = 78 ô</div>
+    <div class="dong">22 ô × 100 + 78 × 30 = 2200 + 2340 = <strong>4540</strong></div>
+    <div class="dong">Mọi ô cửa sổ (kể cả (5,1) và (10,1)) đều có đủ 100 hạt claim</div>
+  </div>
+  <table>
+    <thead><tr><th>Ô</th><th>Trinh sát (cách tính)</th><th>Sau đo kỹ</th></tr></thead>
+    <tbody>
+      <tr><td>5 cừu, 1 chó</td><td>≈1/30 → 0,033</td><td>7/100 → 0,07</td></tr>
+      <tr><td>10 cừu, 1 chó</td><td>≈8/30 → 0,267</td><td>24/100 → 0,24</td></tr>
+      <tr><td>5 / 10 cừu, 2 chó</td><td>30/30 → 1</td><td>100/100 → 1</td></tr>
+      <tr><td>≥ 25 cừu, 1 chó</td><td>30/30 → 1</td><td>100/100 → 1</td></tr>
+    </tbody>
+  </table>
+  <p class="muted">Ô (5,1) với 100 hạt claim: R = 0,07 vẫn ≪ 0,90 nên số chó tối thiểu vẫn = 2.</p>
+
+  <h3>Bước 5. Phân tích gói A và gói F</h3>
+  <p>
+    Gói A ghi biên, chế độ, hình. Gói F so các đường cong trên số chó tối thiểu theo số cừu:
+    mô hình <strong>từng đoạn</strong> có sai số dự đoán thấp nhất (điểm gãy quanh N=10),
+    tốt hơn lũy thừa đơn. Chỉ mang tính chẩn đoán cho khẳng định khớp quy mô.
+  </p>
+  <div class="calc">
+    <strong class="kieu">Chế độ trên bản hợp nhất (vẫn 100 ô lưới)</strong>
+    <div class="dong">2 + 10 + 88 = 100</div>
+    <div class="dong">2 thiếu = (5,1) và (10,1); 10 hiệu quả = một ô B* mỗi mức N; 88 lãng phí = phần còn lại</div>
+  </div>
+
+  <h3>Bước 6. Kéo dài giờ: 0 ô</h3>
+  <div class="calc">
+    <strong class="kieu">Vì sao 0 lần chạy T1?</strong>
+    <div class="dong">Điều kiện mở T1: có điểm quá tải (hai mức số chó liên tiếp dưới ngưỡng sau số chó tối thiểu)</div>
+    <div class="dong">Bước 2-4: không có → số ô T1 = 0 → số lần chạy T1 = 0 × 100 = 0</div>
+  </div>
+  <p>
+    Bỏ qua là đúng. Đây là bằng chứng chống “có quá tải trên bản đồ này”, không phải lỗi đường ống.
+  </p>
+  <p class="muted">Chi tiết: <span class="mono">../t1/REPORT.md</span>, <span class="mono">../claim/REPORT.md</span></p>
+
+  <!-- ========== phép tính tổng hợp ========== -->
+  <h2 id="phep-tinh"><span class="tag tag-out">KẾT QUẢ</span> 6b. Bảng tổng hợp phép tính</h2>
+  <p>Tự kiểm lại các con số quan trọng bằng một bảng:</p>
+  <table>
+    <thead><tr><th>Đại lượng</th><th>Phép tính</th><th>Kết quả</th></tr></thead>
+    <tbody>
+      <tr><td>Lần chạy thử khói</td><td>5 N × 6 D × 5 hạt</td><td>150</td></tr>
+      <tr><td>Số ô thử khói</td><td>5 × 6</td><td>30</td></tr>
+      <tr><td>R thử khói (gần đúng)</td><td>(150 − 8) ÷ 150</td><td>≈ 0,95</td></tr>
+      <tr><td>R ô (10,1) thử khói</td><td>2 ÷ 5</td><td>0,4</td></tr>
+      <tr><td>Lần chạy trinh sát</td><td>10 N × 10 D × 30 hạt</td><td>3000</td></tr>
+      <tr><td>Số ô lưới đầy đủ</td><td>10 × 10</td><td>100</td></tr>
+      <tr><td>Số ô cửa sổ</td><td>3 + 3 + 16</td><td>22</td></tr>
+      <tr><td>Lần chạy đo kỹ (kế hoạch)</td><td>22 × 100</td><td>2200</td></tr>
+      <tr><td>Ô ngoài cửa sổ</td><td>100 − 22</td><td>78</td></tr>
+      <tr><td>Hợp nhất (22×100 + 78×30)</td><td>22×100 + 78×30</td><td>4540</td></tr>
+      <tr><td>Hợp nhất thực tế</td><td>file merged_trials.csv</td><td>4540</td></tr>
+      <tr><td>Chế độ</td><td>2 + 10 + 88</td><td>100</td></tr>
+      <tr><td>Lần chạy T1</td><td>0 ô × 100</td><td>0</td></tr>
+    </tbody>
+  </table>
+
+  <!-- ========== 7 ========== -->
+  <h2 id="bieu-do"><span class="tag tag-out">KẾT QUẢ</span> 7. Biểu đồ từ gói khẳng định</h2>
+  <p class="muted">Nguồn: <span class="mono">../claim/packages/a/figures/</span></p>
+
+  <figure>
+    <img src="../claim/packages/a/figures/reliability_heatmap.png" alt="Bản đồ tỷ lệ thắng R" />
+    <figcaption>
+      <strong>Bản đồ R.</strong> Hầu như toàn vàng = hầu như luôn thắng.
+      Chỉ tối ở góc 1 chó + 5 cừu và 1 chó + 10 cừu (hai ô kém).
+      Đây là hình ảnh trả lời câu hỏi kế hoạch: trên đường cơ sở này, bài toán gần như luôn đậu.
+    </figcaption>
+  </figure>
+
+  <figure>
+    <img src="../claim/packages/a/figures/frontier_dmin.png" alt="Số chó tối thiểu theo số cừu" />
+    <figcaption>
+      <strong>Số chó tối thiểu.</strong> N = 5 và 10 cần 2 chó; từ N = 25 đến 400 chỉ cần 1 chó.
+      Đường cam 35 = mức D lớn nhất đã thử, không phải mức cần dùng.
+      Câu chuyện “số chó tối thiểu tăng theo N” <em>không</em> hiện trên bản đồ này.
+    </figcaption>
+  </figure>
+
+  <figure>
+    <img src="../claim/packages/a/figures/regime_counts.png" alt="Đếm chế độ" />
+    <figcaption>
+      <strong>Đếm chế độ (100 ô).</strong> 2 thiếu chó, 10 hiệu quả, 88 lãng phí.
+      Không cột quá tải: thêm chó không làm đổ, chỉ làm đường đi dài.
+    </figcaption>
+  </figure>
+
+  <div class="card">
+    <h3 style="margin-top:0">Chế độ nghĩa là gì?</h3>
+    <p>
+      Bốn số 2 / 10 / 88 / 0 gán nhãn cho mọi ô (N, D) trên lưới 100 ô (ngưỡng θ = 0,90;
+      công sức = đường đi chó trung vị). Trên bản đồ giai đoạn 1 này, các nhãn nói như sau.
+    </p>
+    <table>
+      <thead><tr><th>Nhãn</th><th>Số ô</th><th>Ý nghĩa đơn giản</th></tr></thead>
+      <tbody>
+        <tr><td>Thiếu chó</td><td>2</td><td>Thua vì quá ít chó (đúng hai ô kém)</td></tr>
+        <tr><td>Hiệu quả</td><td>10</td><td>Thắng với đúng số chó cần (mỗi mức N một ô tốt nhất)</td></tr>
+        <tr><td>Lãng phí</td><td>88</td><td>Vẫn thắng nhưng dùng nhiều chó → đi dài hơn ≥ ~20% so với mức hiệu quả</td></tr>
+        <tr><td>Quá tải</td><td>0</td><td>Không thấy R sụp lại khi D cao trên lưới đã thử</td></tr>
+      </tbody>
+    </table>
+    <ul>
+      <li>
+        <strong>2 thiếu chó:</strong> chỉ (5,1) và (10,1). R còn xa dưới 0,90 (0,07 và 0,24).
+        Thất bại nằm ở phía D thấp, không phải sụp ở D cao. Vì vậy số chó tối thiểu = 2 với N = 5 và 10.
+      </li>
+      <li>
+        <strong>10 hiệu quả:</strong> mỗi mức đàn một ô tin cậy rẻ nhất (vùng B* / số chó tối thiểu).
+        N = 5 và 10 dùng D = 2; từ N ≥ 25 dùng D = 1. Đó là điểm vận hành đạt ngưỡng mà không
+        trả thêm phạt đường đi so với số chó tối thiểu.
+      </li>
+      <li>
+        <strong>88 lãng phí:</strong> gần như phần còn lại của lưới. Thêm chó vẫn thắng (R = 1),
+        nhưng đường đi trung vị ≥ ~20% trên ô hiệu quả. Vậy “thêm chó” chủ yếu là đi nhiều hơn,
+        không phải tin cậy hơn. Điều này hợp lý khi số chó tối thiểu đã là 1 hoặc 2 mà trục D lên tới 35.
+      </li>
+      <li>
+        <strong>0 quá tải:</strong> không có D_overcrowd trên bản đồ này. Trong lưới đã thử,
+        R không sụp lại ở D cao. Vì vậy C2a (có quá tải) không được hỗ trợ ở đây; T1 / C2b
+        chưa chạy (không phải đã bác bỏ).
+      </li>
+    </ul>
+    <p class="note">
+      <strong>Tóm tắt:</strong> với bố cục gọn + strombom_multi + đĩa đích,
+      bản đồ kích thước là thất bại mỏng ở đàn rất nhỏ với 1 chó, rồi biên số chó tối thiểu = 1 phẳng,
+      và một dải lãng phí lớn. Nó <em>không</em> nói thêm chó giúp sau khi đã qua số chó tối thiểu,
+      và cũng <em>không</em> nói chó cản nhau tới mức thất bại ở D cao trên giao thức này.
+    </p>
+    <p class="muted" style="margin-bottom:0">
+      Ví dụ N=25: 1 chó thắng với đường đi trung vị ≈ 163 (hiệu quả);
+      2 chó cũng thắng nhưng ≈ 319.
+      Ngưỡng lãng phí ~20%: 163 × 1,20 ≈ 196. Vì 319 &gt; 196 nên ô 2 chó bị gắn lãng phí.
+    </p>
+  </div>
+
+  <!-- ========== 8 ========== -->
+  <h2 id="ket-luan"><span class="tag tag-out">KẾT QUẢ</span> 8. Kết luận và liên kết bước sau</h2>
+
+  <h3>8.1. Kết luận neo vào số liệu</h3>
+  <ol>
+    <li>
+      <strong>Một chó đủ khi đàn không còn quá nhỏ.</strong>
+      Với mọi N từ 25 đến 400: R(D=1) = 1 ở cả trinh sát và đo kỹ; lấy lại mẫu [1,1].
+      Chỉ N=5 và 10 cần số chó tối thiểu = 2.
+    </li>
+    <li>
+      <strong>Không có quá tải trên bản đồ này.</strong>
+      Mọi hàng biên trống điểm quá tải; 88 ô D cao vẫn R=1; kế hoạch T1 = 0 ô.
+      Khẳng định “có quá tải” (C2a) không được hỗ trợ trên đường cơ sở này.
+    </li>
+    <li>
+      <strong>Thêm chó chủ yếu lãng phí.</strong>
+      Thắng được nhưng đường đi đắt hơn mức tối thiểu đã đủ tin cậy.
+    </li>
+    <li>
+      <strong>Khớp quy mô (chẩn đoán):</strong> đường cong từng đoạn hợp lý hơn một luật lũy thừa đơn
+      (điểm gãy quanh N=10). Wording khẳng định C6 vẫn nên để mở cho đến khi khóa tiêu chí.
+    </li>
+  </ol>
+
+  <div class="callout">
+    <strong>Đọc làm việc:</strong> trên bố cục gọn + Strombom nhiều chó + nhiệm vụ đĩa đích mở,
+    một chó là đủ khi đàn không còn quá nhỏ. Thêm chó tăng chi phí đường đi hơn là gây sụp.
+    Câu chuyện thú vị không phải “số chó tối thiểu tăng theo N” trên đường cơ sở này.
+  </div>
+
+  <details class="yaml" open id="vi-sao-dmin">
+    <summary>
+      Vì sao số chó tối thiểu = 2 ở N nhỏ mà = 1 khi N ≥ 25?
+      <span class="hint">Điểm phản trực giác</span>
+    </summary>
+    <div class="body">
+      <p>
+        Nếu nghĩ “đàn càng lớn càng khó” thì kết quả này ngược: trên bản đồ giai đoạn 1,
+        <strong>đàn rất nhỏ + 1 chó mới khó</strong>; từ N ≥ 25, <strong>1 chó lại đủ và ổn định</strong>.
+      </p>
+
+      <h3>Số liệu (D = 1, bản hợp nhất)</h3>
+      <table>
+        <thead><tr><th>N</th><th>R</th><th>Khi thắng</th><th>Khi thua</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>5</td>
+            <td>0,07 (100 hạt)</td>
+            <td>~155 bước</td>
+            <td>hầu hết dao động đến hết 10 000 bước</td>
+          </tr>
+          <tr>
+            <td>10</td>
+            <td>0,24 (100 hạt)</td>
+            <td>~196 bước</td>
+            <td>chủ yếu kẹt / dao động hết giờ</td>
+          </tr>
+          <tr>
+            <td>≥ 25</td>
+            <td>1,00 (100 hạt)</td>
+            <td>~170-200 bước</td>
+            <td>gần như không thua</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="calc">
+        <div class="dong">Khi thắng thì thắng nhanh (cỡ một lần đi thẳng tới đích).</div>
+        <div class="dong">Khi thua thì hết giờ vì mất kiểm soát, không phải “đi chậm”.</div>
+        <div class="dong">N=5 hoặc 10 với D=2: R = 1 → số chó tối thiểu = 2 chỉ ở đàn tí hon.</div>
+      </div>
+
+      <h3>Đã quan sát rõ</h3>
+      <ul>
+        <li>Khó khăn tập trung ở <strong>chế độ đàn nhỏ</strong>, không phải đàn lớn (bố cục gọn + Strombom nhiều chó + đĩa đích mở).</li>
+        <li>Lỗi điển hình: <strong>dao động</strong> (N=5), <strong>kẹt</strong> (N=10).</li>
+        <li>Câu chuyện “số chó tối thiểu tăng theo N” của bản nháp <strong>không</strong> hiện trên đường cơ sở này.</li>
+      </ul>
+
+      <h3>Giả thuyết hợp lý (chưa chứng minh cơ chế bằng giai đoạn 3)</h3>
+      <ol>
+        <li>
+          <strong>Đàn nhỏ kém “tự gắn”:</strong> ít tương tác cừu-cừu hơn; một chó Collect/Drive dễ bị kéo đuổi từng con / đảo chiều
+          thay vì Drive một khối ổn định.
+        </li>
+        <li>
+          <strong>Luật thắng chặt:</strong> phải mọi con trong đích. Với N=5, một con lệch ≈ 20% thất bại; với N=100 chỉ 1%.
+        </li>
+        <li>
+          <strong>Controller vốn mượt hơn với đàn vừa:</strong> khi đã có khối rõ, Drive ổn định hơn; đàn 5-10 con dễ thành chuỗi phản ứng nhiễu.
+        </li>
+        <li>
+          <strong>Không đọc như “đích tuyệt đối quá nhỏ”:</strong> bán kính đích co theo căn bậc hai N (giữ diện tích/cừu).
+          Thất bại chủ yếu là hết giờ kiểu mất kiểm soát, không phải “nhét không vừa” có hệ thống ở N lớn.
+        </li>
+      </ol>
+      <p class="note" style="margin-bottom:0">
+        Giai đoạn 1 khoanh hiện tượng: thiếu nguồn lực ở N nhỏ + D=1.
+        Cơ chế chi tiết (vì sao dao động/kẹt) thuộc kiểm định sâu hơn (ví dụ giai đoạn 3), chưa khóa ở đây.
+      </p>
+      <div class="calc">
+        <div class="dong">Một câu nhớ: khó không phải “400 cừu cần nhiều chó”, mà “5-10 cừu với 1 chó dễ loạn/kẹt”.</div>
+      </div>
+    </div>
+  </details>
+
+  <h3>8.2. Bản đồ “kế hoạch ↔ lập trình ↔ kết quả”</h3>
+  <table>
+    <thead><tr><th>Ý trong kế hoạch</th><th>Hiện trong mã / lệnh</th><th>Hiện trong kết quả</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Bản đồ kích thước R(N,D)</td>
+        <td>phase1_scout / khẳng định + chương trình chạy</td>
+        <td>heatmap R; merged_trials.csv</td>
+      </tr>
+      <tr>
+        <td>Số chó tối thiểu / biên</td>
+        <td>phân tích biên + lấy mẫu lại</td>
+        <td>frontier_dmin.png; dmin_bootstrap.csv</td>
+      </tr>
+      <tr>
+        <td>Chế độ vận hành</td>
+        <td>phân tích chế độ</td>
+        <td>regime_counts.png; 2 / 10 / 88</td>
+      </tr>
+      <tr>
+        <td>Chiến lược tầng hạt giống</td>
+        <td>lập kế hoạch + gieo lại khẳng định + hợp nhất</td>
+        <td>22 ô; 4540 dòng hợp nhất</td>
+      </tr>
+      <tr>
+        <td>C2a quá tải</td>
+        <td>phase1_t1 + planner</td>
+        <td>0 ô T1; bác bỏ / không hỗ trợ trên map này</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>8.3. Đối chiếu bản nháp bài báo (discuss/phase1 + sheep-scaling)</h3>
+  <table>
+    <thead><tr><th></th><th>Bản nháp (tham chiếu)</th><th>Giai đoạn 1 HerdSim</th></tr></thead>
+    <tbody>
+      <tr><td>Họ câu hỏi</td><td>Chó theo N, SR ≥ 90%</td><td>Cùng họ</td></tr>
+      <tr><td>Nền tảng</td><td>NetLogo</td><td>HerdSim</td></tr>
+      <tr><td>Nhiệm vụ</td><td>Giữ + cổng (khác)</td><td>Đĩa đích mở</td></tr>
+      <tr><td>số chó tối thiểu theo N</td><td>Báo cáo tăng theo N</td><td>Gần phẳng: 2 rồi 1</td></tr>
+      <tr><td>Quá tải</td><td>Có dấu hiệu</td><td>Không trên đường cơ sở này</td></tr>
+    </tbody>
+  </table>
+  <div class="callout">
+    Thông điệp công bằng: giai đoạn 1 là kết quả thật cho hệ này và là
+    <strong>đối chiếu hữu ích</strong>, không phải sao chép bảng số chó tối thiểu của bản nháp.
+    Việc quy mô khó có phụ thuộc phương pháp/nhiệm vụ hay không chính là việc giai đoạn 2 và 4 sẽ kiểm.
+  </div>
+
+  <h3>8.4. Tư thế khẳng định (theo discuss/phase1; sổ theo dõi vẫn “chưa đánh giá” đến khi bạn khóa)</h3>
+  <table>
+    <thead><tr><th>Khẳng định</th><th>Gợi ý trên bản đồ này</th><th>Lý do</th></tr></thead>
+    <tbody>
+      <tr><td>C2a (có quá tải)</td><td>Không được hỗ trợ / bác bỏ</td><td>Không có khởi phát quá tải</td></tr>
+      <tr><td>C2b (kéo dài giờ vẫn kém)</td><td>Không áp dụng</td><td>Không có ô T1</td></tr>
+      <tr><td>C6 (khớp quy mô)</td><td>Còn mở</td><td>Ưa từng đoạn; cần khóa tiêu chí</td></tr>
+      <tr><td>C1a (cấu trúc)</td><td>Ngoài phạm vi</td><td>Cần giai đoạn 2</td></tr>
+    </tbody>
+  </table>
+
+  <h3>8.5. Việc tiếp theo (ngoài giai đoạn 1)</h3>
+  <ul>
+    <li>Khóa câu chữ khẳng định (đặc biệt C2a) trên sổ theo dõi.</li>
+    <li>Giữ kết quả giai đoạn 1 làm đường cơ sở kích thước; không bắt buộc chạy lại vì khoa học.</li>
+    <li>Giai đoạn 2 scout: N ∈ {50,100,200} × 4 bố cục × toàn D × 30 hạt (~3600 lần; cỡ ~1 giờ).</li>
+    <li>Giai đoạn 4: lặp bản đồ với Kubo, FAT (và khuyến nghị communication_free).</li>
+    <li>Hướng họp song song (cổng / bản song song bản nháp / NetLogo) không chặn giai đoạn 2.</li>
+    <li>Không chạy lại giai đoạn 1 chỉ vì thêm chỉ số hình dạng mới.</li>
+  </ul>
+
+  <h3>8.6. Ba ý để nhớ</h3>
+  <ol>
+    <li><strong>R</strong> = tỷ lệ đậu của một đề thi (ô).</li>
+    <li><strong>Hai ô kém</strong> = chỉ (5,1) và (10,1); còn lại gần như đậu hết.</li>
+    <li><strong>Chiến lược</strong> = đo toàn lưới rẻ (30), đo kỹ (100) chỉ quanh biên; kéo dài giờ không cần vì không quá tải.</li>
+  </ol>
+
+  <p class="note">
+    Phạm vi kết luận: một phương pháp, một bố cục, một nhiệm vụ.
+    Thư mục <span class="mono">scaling/results/</span> thường bị git bỏ qua.
+    Báo cáo vận hành từng bước: <span class="mono">../pilot|scout|claim|t1/REPORT.md</span>.
+  </p>
+
+
+  <!-- ========== kết quả đầy đủ ========== -->
+  <h2 id="ket-qua-day-du"><span class="tag tag-out">KẾT QUẢ</span> Kết quả đầy đủ giai đoạn 1</h2>
+  <p>
+    Mục này gom <strong>toàn bộ lần chạy</strong> của giai đoạn 1 vào một chỗ:
+    thử khói, trinh sát, khẳng định (cửa sổ biên + hợp nhất), và kế hoạch kéo dài giờ.
+    Số liệu lấy từ thư mục kết quả đã ghi trên máy (2026-09-22).
+  </p>
+
+  <h3>Tóm tắt bốn bậc chạy</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Bậc</th>
+        <th>Lưới / phạm vi</th>
+        <th>Hạt / ô</th>
+        <th>Số lần chạy</th>
+        <th>Thời gian máy</th>
+        <th>R tổng</th>
+        <th>Trích dẫn khoa học?</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Thử khói</td>
+        <td>5×6 (30 ô)</td>
+        <td>5</td>
+        <td>150</td>
+        <td>~43 giây</td>
+        <td>0,947</td>
+        <td>Không (chỉ kiểm đường ống)</td>
+      </tr>
+      <tr>
+        <td>Trinh sát</td>
+        <td>10×10 (100 ô)</td>
+        <td>30</td>
+        <td>3000</td>
+        <td>~73 phút</td>
+        <td>0,983</td>
+        <td>Không (chỉ để chọn cửa sổ)</td>
+      </tr>
+      <tr>
+        <td>Khẳng định</td>
+        <td>22 ô cửa sổ</td>
+        <td>100</td>
+        <td>2200 (kế hoạch)</td>
+        <td>~57 phút (cộng dồn)</td>
+        <td>xem hợp nhất</td>
+        <td>Có (sau báo cáo vận hành)</td>
+      </tr>
+      <tr>
+        <td>Hợp nhất</td>
+        <td>100 ô (22 đo kỹ + 78 giữ trinh sát)</td>
+        <td>100 hoặc 30</td>
+        <td>4540 dòng</td>
+        <td>-</td>
+        <td>0,963</td>
+        <td>Có (bản đồ dùng để kết luận)</td>
+      </tr>
+      <tr>
+        <td>Kéo dài giờ</td>
+        <td>0 ô quá tải</td>
+        <td>-</td>
+        <td>0</td>
+        <td>không chạy</td>
+        <td>-</td>
+        <td>Không áp dụng (không có ô)</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="calc">
+    <div class="dong">Máy: máy cục bộ (16 luồng), giao thức scaling_v2, phương pháp strombom_multi, bố cục compact</div>
+    <div class="dong">Ngưỡng θ = 0,90 · ngân sách thời gian T0 = 10 000 bước · T1 = 20 000 (không dùng)</div>
+  </div>
+
+  <h3>1) Thử khói</h3>
+  <p>
+    Mục đích: kiểm máy và mã. Lưới nhỏ N ∈ {5, 10, 25, 50, 100}, D ∈ {1, 2, 3, 4, 6, 10}.
+    Lệnh: <span class="mono">make -C scaling scaling-pilot WORKERS=16</span>.
+    Thư mục: <span class="mono">../pilot/</span>.
+  </p>
+  <ul>
+    <li>Thắng 142 / 150 → R tổng ≈ 0,947.</li>
+    <li>Hai ô kém: (N=5, D=1) R = 0; (N=10, D=1) R = 0,4.</li>
+    <li>Ước D tối thiểu: 2 tại N=5 và 10; 1 tại N=25, 50, 100.</li>
+    <li>Chế độ trên 30 ô: thiếu chó 2, hiệu quả 5, lãng phí 23. Không quá tải.</li>
+  </ul>
+  <div class="grid">
+    <figure style="margin:0">
+      <img src="../pilot/packages/a/figures/reliability_heatmap.png" alt="Bản đồ R thử khói" />
+      <figcaption>Bản đồ R thử khói</figcaption>
+    </figure>
+    <figure style="margin:0">
+      <img src="../pilot/packages/a/figures/frontier_dmin.png" alt="Biên D tối thiểu thử khói" />
+      <figcaption>Biên D tối thiểu (thử khói)</figcaption>
+    </figure>
+  </div>
+
+  <h3>2) Trinh sát</h3>
+  <p>
+    Mục đích: bản đồ thô toàn lưới đóng băng để chọn cửa sổ.
+    Lệnh: <span class="mono">make -C scaling scaling-scout WORKERS=16</span>.
+    Thư mục: <span class="mono">../scout/</span>.
+  </p>
+  <ul>
+    <li>Thắng 2949 / 3000 → R tổng ≈ 0,983.</li>
+    <li>Hai ô kém (30 hạt): (5,1) R ≈ 0,033; (10,1) R ≈ 0,267. Mọi ô khác trên lưới đạt R = 1.</li>
+    <li>D tối thiểu: 2 tại N=5, 10; 1 từ N=25 trở lên. D tối đa = 35 (trần lưới). Không D quá tải.</li>
+    <li>Chế độ trên 100 ô: thiếu chó 2, hiệu quả 10, lãng phí 88.</li>
+    <li>Khoảng tin cậy lấy lại mẫu của D tối thiểu hẹp một bước lưới ở mọi N → không cần nâng 200 hạt trước khẳng định.</li>
+  </ul>
+  <div class="grid">
+    <figure style="margin:0">
+      <img src="../scout/packages/a/figures/reliability_heatmap.png" alt="Bản đồ R trinh sát" />
+      <figcaption>Bản đồ R trinh sát</figcaption>
+    </figure>
+    <figure style="margin:0">
+      <img src="../scout/packages/a/figures/frontier_dmin.png" alt="Biên D tối thiểu trinh sát" />
+      <figcaption>Biên D tối thiểu (trinh sát)</figcaption>
+    </figure>
+    <figure style="margin:0">
+      <img src="../scout/packages/a/figures/regime_counts.png" alt="Đếm chế độ trinh sát" />
+      <figcaption>Đếm chế độ (trinh sát)</figcaption>
+    </figure>
+  </div>
+
+  <h3>3) Khẳng định: cửa sổ 22 ô và hợp nhất</h3>
+  <p>
+    Lập kế hoạch: <span class="mono">make -C scaling scaling-claim-plan</span>
+    → <span class="mono">../claim/boundary_cells.csv</span> (22 ô).
+    Gieo lại: <span class="mono">make -C scaling scaling-claim-reseed WORKERS=16</span>.
+    Phân tích trên <span class="mono">merged_trials.csv</span> (4540 dòng).
+  </p>
+  <p><strong>Đối chiếu R trinh sát → R hợp nhất trên đúng 22 ô cửa sổ:</strong></p>
+  <table><thead><tr><th>#</th><th>N</th><th>D</th><th>R trinh sát (30 hạt)</th><th>R hợp nhất (gói A)</th></tr></thead><tbody><tr><td>1</td><td>5</td><td>1</td><td>0,033</td><td>0,07</td></tr><tr><td>2</td><td>5</td><td>2</td><td>1</td><td>1</td></tr><tr><td>3</td><td>5</td><td>3</td><td>1</td><td>1</td></tr><tr><td>4</td><td>10</td><td>1</td><td>0,267</td><td>0,24</td></tr><tr><td>5</td><td>10</td><td>2</td><td>1</td><td>1</td></tr><tr><td>6</td><td>10</td><td>3</td><td>1</td><td>1</td></tr><tr><td>7</td><td>25</td><td>1</td><td>1</td><td>1</td></tr><tr><td>8</td><td>25</td><td>2</td><td>1</td><td>1</td></tr><tr><td>9</td><td>50</td><td>1</td><td>1</td><td>1</td></tr><tr><td>10</td><td>50</td><td>2</td><td>1</td><td>1</td></tr><tr><td>11</td><td>75</td><td>1</td><td>1</td><td>1</td></tr><tr><td>12</td><td>75</td><td>2</td><td>1</td><td>1</td></tr><tr><td>13</td><td>100</td><td>1</td><td>1</td><td>1</td></tr><tr><td>14</td><td>100</td><td>2</td><td>1</td><td>1</td></tr><tr><td>15</td><td>150</td><td>1</td><td>1</td><td>1</td></tr><tr><td>16</td><td>150</td><td>2</td><td>1</td><td>1</td></tr><tr><td>17</td><td>200</td><td>1</td><td>1</td><td>1</td></tr><tr><td>18</td><td>200</td><td>2</td><td>1</td><td>1</td></tr><tr><td>19</td><td>300</td><td>1</td><td>1</td><td>1</td></tr><tr><td>20</td><td>300</td><td>2</td><td>1</td><td>1</td></tr><tr><td>21</td><td>400</td><td>1</td><td>1</td><td>1</td></tr><tr><td>22</td><td>400</td><td>2</td><td>1</td><td>1</td></tr></tbody></table>
+  <p class="muted">
+    Ô (5,1) và (10,1) vẫn dưới ngưỡng sau đo kỹ; mọi ô cửa sổ còn lại giữ R = 1.
+  </p>
+
+  <h3>4) Bản đồ độ tin cậy hợp nhất (100 ô)</h3>
+  <p>
+    Bảng dưới là R theo từng cặp (N, D) từ gói A khẳng định.
+    Ô tô hồng: R &lt; 0,90. Chỉ hai ô (5,1) và (10,1) dưới ngưỡng; còn lại = 1.
+  </p>
+  <div class="scroll-x"><table class="compact"><thead><tr><th>N \ D</th><th>1</th><th>2</th><th>3</th><th>4</th><th>6</th><th>10</th><th>15</th><th>20</th><th>25</th><th>35</th></tr></thead><tbody><tr><th>5</th><td class="lo">0,07</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr><tr><th>10</th><td class="lo">0,24</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr><tr><th>25</th><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr><tr><th>50</th><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr><tr><th>75</th><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr><tr><th>100</th><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr><tr><th>150</th><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr><tr><th>200</th><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr><tr><th>300</th><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr><tr><th>400</th><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr></tbody></table></div>
+
+  <h3>5) Bảng biên theo từng N</h3>
+  <table><thead><tr><th>N</th><th>D tối thiểu</th><th>D quá tải</th><th>D tối đa</th><th>D tại B*</th><th>Công trung vị B*</th><th>Thất bại cứng</th></tr></thead><tbody><tr><td>5</td><td>2</td><td>không có</td><td>35</td><td>2</td><td>335.1</td><td>không</td></tr><tr><td>10</td><td>2</td><td>không có</td><td>35</td><td>2</td><td>328.8</td><td>không</td></tr><tr><td>25</td><td>1</td><td>không có</td><td>35</td><td>1</td><td>163.5</td><td>không</td></tr><tr><td>50</td><td>1</td><td>không có</td><td>35</td><td>1</td><td>157.5</td><td>không</td></tr><tr><td>75</td><td>1</td><td>không có</td><td>35</td><td>1</td><td>155.9</td><td>không</td></tr><tr><td>100</td><td>1</td><td>không có</td><td>35</td><td>1</td><td>161.4</td><td>không</td></tr><tr><td>150</td><td>1</td><td>không có</td><td>35</td><td>1</td><td>153.0</td><td>không</td></tr><tr><td>200</td><td>1</td><td>không có</td><td>35</td><td>1</td><td>144.2</td><td>không</td></tr><tr><td>300</td><td>1</td><td>không có</td><td>35</td><td>1</td><td>130.8</td><td>không</td></tr><tr><td>400</td><td>1</td><td>không có</td><td>35</td><td>1</td><td>119.8</td><td>không</td></tr></tbody></table>
+  <div class="calc">
+    <div class="dong">D quá tải trống ở mọi N → không có cửa sổ quá tải, không chạy kéo dài giờ</div>
+    <div class="dong">D tối đa = 35 ở mọi N vì vẫn đạt ngưỡng tới trần lưới (không sụp)</div>
+  </div>
+
+  <h3>6) Bootstrap D tối thiểu (1000 lần lấy mẫu lại)</h3>
+  <table><thead><tr><th>N</th><th>D tối thiểu</th><th>Khoảng dưới</th><th>Khoảng trên</th><th>Hạt tham chiếu</th><th>Số lần lấy mẫu lại</th></tr></thead><tbody><tr><td>5</td><td>2</td><td>2</td><td>2</td><td>100</td><td>1000</td></tr><tr><td>10</td><td>2</td><td>2</td><td>2</td><td>100</td><td>1000</td></tr><tr><td>25</td><td>1</td><td>1</td><td>1</td><td>100</td><td>1000</td></tr><tr><td>50</td><td>1</td><td>1</td><td>1</td><td>100</td><td>1000</td></tr><tr><td>75</td><td>1</td><td>1</td><td>1</td><td>100</td><td>1000</td></tr><tr><td>100</td><td>1</td><td>1</td><td>1</td><td>100</td><td>1000</td></tr><tr><td>150</td><td>1</td><td>1</td><td>1</td><td>100</td><td>1000</td></tr><tr><td>200</td><td>1</td><td>1</td><td>1</td><td>100</td><td>1000</td></tr><tr><td>300</td><td>1</td><td>1</td><td>1</td><td>100</td><td>1000</td></tr><tr><td>400</td><td>1</td><td>1</td><td>1</td><td>100</td><td>1000</td></tr></tbody></table>
+  <p class="muted">Khoảng dưới = khoảng trên ở mọi N: biên ổn định trong một bước lưới.</p>
+
+  <h3>7) Chế độ trên 100 ô hợp nhất</h3>
+  <table>
+    <thead><tr><th>Chế độ</th><th>Số ô</th><th>Ý nghĩa</th></tr></thead>
+    <tbody>
+      <tr><td>Thiếu chó</td><td>2</td><td>Chỉ (5,1) và (10,1); R dưới θ ở phía D thấp</td></tr>
+      <tr><td>Hiệu quả</td><td>10</td><td>Mỗi mức N một ô tại D tối thiểu (B* / số chó tối thiểu)</td></tr>
+      <tr><td>Lãng phí</td><td>88</td><td>Thắng nhưng đường đi ≥ ~20% trên mức hiệu quả</td></tr>
+      <tr><td>Quá tải</td><td>0</td><td>Không có D_overcrowd; C2a không được hỗ trợ ở đây</td></tr>
+    </tbody>
+  </table>
+  <p>
+    Đọc nhanh: thất bại mỏng ở đàn nhỏ với 1 chó → biên số chó tối thiểu phẳng (= 1 khi N ≥ 25) →
+    phần lớn lưới vẫn thắng nhưng lãng phí đường đi. Thêm chó sau số chó tối thiểu không làm tăng tin cậy
+    trên giao thức này, và cũng không làm đổ R ở D cao trong lưới đã thử.
+  </p>
+  <figure>
+    <img src="../claim/packages/a/figures/regime_counts.png" alt="Đếm chế độ hợp nhất" />
+    <figcaption>Đếm chế độ trên bản đồ hợp nhất (gói A)</figcaption>
+  </figure>
+
+  <h3>8) Kiểu thất bại trên bản hợp nhất</h3>
+  <table>
+    <thead><tr><th>Kiểu</th><th>Số lần</th><th>Ghi chú</th></tr></thead>
+    <tbody>
+      <tr><td>Không thất bại (thắng)</td><td>4371</td><td>R tổng ≈ 4371 ÷ 4540 ≈ 0,963</td></tr>
+      <tr><td>Kẹt</td><td>58</td><td>Chủ yếu ở ô thiếu chó</td></tr>
+      <tr><td>Dao động</td><td>111</td><td>Chủ yếu ở ô thiếu chó (kể cả (5,1))</td></tr>
+    </tbody>
+  </table>
+
+  <h3>9) Kéo dài giờ (kéo dài giờ)</h3>
+  <div class="callout">
+    <strong>Không chạy mô phỏng.</strong>
+    Kế hoạch T1 đọc bản hợp nhất, tìm ô quá tải → <strong>0 ô</strong>.
+    File <span class="mono">../t1/t1_cells.csv</span> rỗng.
+    Đây là kết quả đúng với bản đồ (không quá tải), không phải lỗi đường ống.
+  </div>
+
+  <h3>10) Khẳng định khoa học (tư thế sau giai đoạn 1)</h3>
+  <table>
+    <thead><tr><th>Mã</th><th>Nội dung ngắn</th><th>Tư thế</th><th>Bằng chứng</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>C1a</td>
+        <td>Có biên D tối thiểu ổn theo N</td>
+        <td>Ủng hộ (tạm thời)</td>
+        <td>Bảng biên + lấy mẫu lại một bước</td>
+      </tr>
+      <tr>
+        <td>C1b</td>
+        <td>Có đủ dải chế độ vận hành</td>
+        <td>Chưa chắc / cần đối chiếu tiêu chí</td>
+        <td>Có thiếu chó và lãng phí; không có quá tải</td>
+      </tr>
+      <tr>
+        <td>C2a</td>
+        <td>Xuất hiện quá tải tại θ = 0,90</td>
+        <td>Không ủng hộ trên bản đồ này</td>
+        <td>Không D quá tải; T1 = 0 ô</td>
+      </tr>
+      <tr>
+        <td>C2b</td>
+        <td>Quá tải vẫn thua ở ngân sách dài</td>
+        <td>Không đánh giá được</td>
+        <td>Không có ô để chạy T1</td>
+      </tr>
+      <tr>
+        <td>C6</td>
+        <td>Dạng hàm tỷ lệ theo N</td>
+        <td>Chỉ chẩn đoán</td>
+        <td>Gói F ưu tiên mô hình từng đoạn; chưa khóa claim</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>11) File kết quả nên mở kèm</h3>
+  <table>
+    <thead><tr><th>Đường dẫn</th><th>Nội dung</th></tr></thead>
+    <tbody>
+      <tr><td><span class="mono">../pilot/trials.csv</span></td><td>150 lần thử khói</td></tr>
+      <tr><td><span class="mono">../scout/trials.csv</span></td><td>3000 lần trinh sát</td></tr>
+      <tr><td><span class="mono">../claim/boundary_cells.csv</span></td><td>22 ô cửa sổ</td></tr>
+      <tr><td><span class="mono">../claim/trials.csv</span></td><td>Các lần đo kỹ cửa sổ</td></tr>
+      <tr><td><span class="mono">../claim/merged_trials.csv</span></td><td>Hợp nhất 4540 dòng</td></tr>
+      <tr><td><span class="mono">../claim/packages/a/</span></td><td>Gói A: biên, chế độ, độ tin cậy, hình</td></tr>
+      <tr><td><span class="mono">../claim/packages/f/</span></td><td>Gói F: khớp dạng tỷ lệ (chẩn đoán)</td></tr>
+      <tr><td><span class="mono">../t1/</span></td><td>Kế hoạch T1 rỗng</td></tr>
+    </tbody>
+  </table>
+
+  <!-- ========== nguồn docs ========== -->
+  <h2 id="nguon-docs">Bản đồ tài liệu docs/ (để đọc thêm)</h2>
+  <table>
+    <thead><tr><th>File</th><th>Dùng để làm gì</th><th>Đã đưa vào report này?</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="mono">herdsim_research_program.md</span></td>
+        <td>Câu hỏi trung tâm, thuật ngữ, toàn bộ RQ</td>
+        <td>Có (mục chương trình)</td>
+      </tr>
+      <tr>
+        <td><span class="mono">main_scaling_plan.md</span></td>
+        <td>Đo lường, biên, chế độ, why-values, claims</td>
+        <td>Có (thiết kế + định nghĩa biên)</td>
+      </tr>
+      <tr>
+        <td><span class="mono">experiment_run_strategy.md</span></td>
+        <td>Vì sao tầng thử khói / trinh sát / khẳng định; hợp nhất; động từ lệnh</td>
+        <td>Có (chiến lược + bậc trích dẫn)</td>
+      </tr>
+      <tr>
+        <td><span class="mono">discuss/phase1.md</span></td>
+        <td>Tóm tắt họp giai đoạn 1; đối chiếu paper; checklist</td>
+        <td>Có (kết luận + claims stance)</td>
+      </tr>
+      <tr>
+        <td><span class="mono">progress_tracker.md</span></td>
+        <td>Trạng thái chạy, host, lệnh make</td>
+        <td>Một phần (số liệu chạy); chi tiết máy xem file gốc</td>
+      </tr>
+      <tr>
+        <td><span class="mono">sheep-scaling_paper2025.md</span></td>
+        <td>Tóm tắt bản nháp bài báo</td>
+        <td>Có (bảng đối chiếu); chi tiết paper đọc file gốc</td>
+      </tr>
+      <tr>
+        <td><span class="mono">related_work.md</span></td>
+        <td>Tài liệu liên quan ngoài draft</td>
+        <td>Chưa nhúng sâu (ngoài phạm vi giai đoạn 1)</td>
+      </tr>
+      <tr>
+        <td><span class="mono">notice-meeting.md</span></td>
+        <td>Backlog họp (cổng, twin…)</td>
+        <td>Nhắc ngắn; không blocker giai đoạn 1</td>
+      </tr>
+      <tr>
+        <td><span class="mono">REPORT_TEMPLATE.md</span></td>
+        <td>Mẫu báo cáo vận hành từng bước</td>
+        <td>Áp dụng ở thư mục thử khói / trinh sát / khẳng định / kéo dài giờ; khác guides này</td>
+      </tr>
+      <tr>
+        <td><span class="mono">configs/canonical_grid.yaml</span></td>
+        <td>Giá trị đóng băng + chú thích why</td>
+        <td>Có (mục thiết kế)</td>
+      </tr>
+    </tbody>
+  </table>
+</main>
+</div>
+<script>
+(function () {
+  var side = document.getElementById('muc-luc-ben');
+  var btn = document.getElementById('nut-muc-luc');
+  var backdrop = document.getElementById('nen-muc-luc');
+  function close() {
+    side.classList.remove('open');
+    backdrop.classList.remove('show');
+    backdrop.hidden = true;
+  }
+  function open() {
+    side.classList.add('open');
+    backdrop.classList.add('show');
+    backdrop.hidden = false;
+  }
+  if (btn) btn.addEventListener('click', function () {
+    if (side.classList.contains('open')) close(); else open();
+  });
+  if (backdrop) backdrop.addEventListener('click', close);
+  side.querySelectorAll('a').forEach(function (a) {
+    a.addEventListener('click', function () { close(); });
+  });
+  var links = Array.prototype.slice.call(side.querySelectorAll('a[href^="#"]'));
+  var map = links.map(function (a) {
+    return { a: a, id: a.getAttribute('href').slice(1) };
+  });
+  function setActive() {
+    var y = window.scrollY + 90;
+    var cur = null;
+    map.forEach(function (item) {
+      var el = document.getElementById(item.id);
+      if (el && el.offsetTop <= y) cur = item;
+    });
+    map.forEach(function (item) {
+      item.a.classList.toggle('active', cur && item === cur);
+    });
+  }
+  window.addEventListener('scroll', setActive, { passive: true });
+  setActive();
+})();
+
+</script>
+</body>
+</html>

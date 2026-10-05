@@ -1,0 +1,13 @@
+initial_layout,n_sheep,d_min,d_overcrowd,d_max,b_star_d,b_star_t,b_star_effort,hard_failure
+compact,50,,,,,,,True
+compact,100,,,,,,,True
+compact,200,,,,,,,True
+outlier_rich,50,,,,,,,True
+outlier_rich,100,,,,,,,True
+outlier_rich,200,,,,,,,True
+split,50,,,,,,,True
+split,100,,,,,,,True
+split,200,,,,,,,True
+wide,50,,,,,,,True
+wide,100,,,,,,,True
+wide,200,,,,,,,True

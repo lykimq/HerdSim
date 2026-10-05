@@ -1,0 +1,6 @@
+{
+  "frontier_by_layout": "/home/gwen/HerdSim/scaling/results/phase2/pilot_state/packages/b/frontier_by_layout.csv",
+  "predictor_comparison": "/home/gwen/HerdSim/scaling/results/phase2/pilot_state/packages/b/predictor_comparison.csv",
+  "provenance": "/home/gwen/HerdSim/scaling/results/phase2/pilot_state/packages/b/provenance.json",
+  "report": "/home/gwen/HerdSim/scaling/results/phase2/pilot_state/packages/b/package_b.md"
+}

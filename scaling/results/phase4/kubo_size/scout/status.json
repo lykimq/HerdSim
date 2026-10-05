@@ -1,0 +1,16 @@
+{
+  "protocol_id": "phase4_kubo_size_scout",
+  "n_planned": 3000,
+  "n_done": 3000,
+  "n_pending_at_start": 3000,
+  "complete": true,
+  "running": false,
+  "started_at": "2026-09-25T16:12:20.342152+00:00",
+  "updated_at": "2026-09-25T21:43:57.328992+00:00",
+  "elapsed_seconds": 19896.98684,
+  "trials_csv": "trials.csv",
+  "manifest_jsonl": "manifest.jsonl",
+  "finished_at": "2026-09-25T21:43:57.328992+00:00",
+  "n_rows_trials_csv": 3000,
+  "store_timeseries": false
+}

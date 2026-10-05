@@ -22,9 +22,9 @@ ROOT := $(abspath $(CURDIR)/..)
 UV ?= uv
 export PYTHONPATH := $(ROOT):$(ROOT)/platform:$(ROOT)/scaling$(if $(PYTHONPATH),:$(PYTHONPATH),)
 
-# Default pool size for this host (Ultra 7 165H, 22 threads). Override down on
+# Default pool size for this host (Ultra 7 165H, 16c/22t). Override down on
 # smaller machines: make scaling-scout WORKERS=4
-WORKERS ?= 16
+WORKERS ?= 18
 PACKAGE ?= A
 TRANSFER_METHOD ?= kubo
 PROTOCOL ?=

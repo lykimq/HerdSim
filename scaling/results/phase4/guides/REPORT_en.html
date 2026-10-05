@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Phase 4: method transfer (RQ4 / Package D)</title>
+  <style>
+    :root {
+      --bg: #f7f6f2; --fg: #1c1b19; --muted: #5c5852; --card: #ffffff;
+      --line: #ddd8ce; --ok: #2f6b45; --bad: #9b2c2c; --accent: #1f4e79;
+      --plan: #5b4a2f; --code: #2a4a3a; --result: #1f4e79; --wait: #5b4a2f;
+    }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:"Segoe UI","Noto Sans","Helvetica Neue",Arial,sans-serif;
+           color:var(--fg); background:var(--bg); line-height:1.55; }
+    h1 { font-size:1.7rem; margin:0 0 8px; line-height:1.25; }
+    h2 { font-size:1.22rem; margin:40px 0 12px; border-top:1px solid var(--line);
+         padding-top:28px; line-height:1.3; }
+    h3 { font-size:1.05rem; margin:22px 0 8px; }
+    .muted { color:var(--muted); }
+    .lead { font-size:1.05rem; margin:0 0 18px; }
+    a { color:var(--accent); }
+    .tag { display:inline-block; font-size:0.72rem; font-weight:700; letter-spacing:0.04em;
+           padding:2px 8px; border-radius:999px; margin-right:6px; vertical-align:middle; }
+    .tag-out { background:#d6e2ef; color:var(--result); }
+    .tag-plan { background:#e8dcc8; color:var(--plan); }
+    .tag-run { background:#e4d7c3; color:#6b4f2a; }
+    .tag-wait { background:#e8dcc8; color:var(--wait); }
+    .tag-code { background:#d7e5dc; color:var(--code); }
+    .callout { background:#efece5; border-left:4px solid var(--accent); padding:12px 14px;
+               margin:14px 0; border-radius:0 8px 8px 0; }
+    .note { background:#efece5; padding:10px 12px; border-radius:8px; font-size:0.92rem;
+            color:var(--muted); margin:12px 0; }
+    .pending { background:#fff8e8; border:1px dashed #c4a574; border-radius:10px;
+               padding:12px 14px; margin:10px 0; color:#5b4a2f; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:10px;
+            padding:16px 18px; margin:12px 0; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+            gap:10px; margin:12px 0; }
+    .stat strong { display:block; font-size:1.15rem; }
+    .stat span { color:var(--muted); font-size:0.88rem; }
+    table { width:100%; border-collapse:collapse; background:var(--card);
+            border:1px solid var(--line); font-size:0.94rem; margin:10px 0; }
+    th, td { border-bottom:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:top; }
+    th { background:#efece5; }
+    .mono, code { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:0.88em; }
+    pre.cmd { background:#1c1b19; color:#f2efe8; padding:12px 14px; border-radius:8px;
+              overflow:auto; font-size:0.85rem; }
+    figure { margin:14px 0; background:var(--card); border:1px solid var(--line);
+             border-radius:10px; padding:12px; }
+    figure img { width:100%; height:auto; display:block; border-radius:4px; background:#f7f6f2; }
+    figcaption { color:var(--muted); font-size:0.9rem; margin-top:8px; }
+    .layout-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+                   gap:10px; margin:12px 0; }
+    .layout-grid figure { margin:0; }
+    .calc { background:#1c1b19; color:#f2efe8; border-radius:10px; padding:12px 14px; margin:12px 0; }
+    .calc .dong { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:0.88rem; margin:4px 0; }
+    details.box { background:var(--card); border:1px solid var(--line); border-radius:10px;
+                  padding:10px 14px; margin:10px 0; }
+    details.box summary { cursor:pointer; font-weight:600; }
+    .layout { display:grid; grid-template-columns:240px 1fr; gap:20px;
+              max-width:1100px; margin:0 auto; padding:20px 18px 60px; }
+    aside.side { position:sticky; top:12px; align-self:start; max-height:calc(100vh - 24px);
+                 overflow:auto; background:var(--card); border:1px solid var(--line);
+                 border-radius:10px; padding:12px 10px; font-size:0.86rem; }
+    .side-title { font-weight:700; margin:0 0 8px; }
+    .side-group { color:var(--muted); font-size:0.75rem; text-transform:uppercase;
+                  letter-spacing:0.04em; margin:12px 0 4px; }
+    aside.side a { display:block; text-decoration:none; color:var(--fg); padding:5px 8px;
+                   border-radius:6px; border-left:3px solid transparent; }
+    aside.side a:hover { background:#efece5; color:var(--accent); }
+    .content { min-width:0; }
+    .side-toggle { display:none; position:fixed; right:14px; bottom:14px; z-index:40;
+                   border:1px solid var(--line); background:var(--card); border-radius:999px;
+                   padding:10px 14px; font-size:0.9rem; box-shadow:0 4px 16px rgba(0,0,0,0.12); cursor:pointer; }
+    @media (max-width:960px) {
+      .layout { grid-template-columns:1fr; }
+      aside.side { position:fixed; inset:0 auto 0 0; width:min(300px,86vw); max-height:none;
+                   transform:translateX(-105%); transition:transform 0.2s ease; z-index:50; }
+      aside.side.open { transform:translateX(0); }
+      .side-toggle { display:inline-flex; }
+      .side-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:45; }
+      .side-backdrop.show { display:block; }
+    }
+
+  </style>
+</head>
+<body>
+<div class="layout">
+  <aside class="side" id="side" aria-label="Contents">
+
+    <p class="side-title">Contents</p>
+    <div class="side-group">Start</div>
+    <a href="#status">Phase 1-2 done; Phase 3 paused</a>
+    <a href="#summary">At a glance (plan)</a>
+    <a href="#question">What Phase 4 asks</a>
+    <div class="side-group">Design</div>
+    <a href="#design">What we freeze</a>
+    <a href="#baseline">Baseline to transfer</a>
+    <a href="#c4">Claim C4 rules</a>
+    <div class="side-group">Run</div>
+    <a href="#counts">Trial counts</a>
+    <a href="#commands">Commands used</a>
+    <div class="side-group">Results</div>
+    <a href="#slots">Slots to fill</a>
+    <a href="#limits">Limits</a>
+
+  </aside>
+  <div class="side-backdrop" id="backdrop" hidden></div>
+  <button type="button" class="side-toggle" id="toggle">Contents</button>
+<main class="content">
+
+  <p><a href="index.html">Package home</a> · <a href="../REPORT_vi.html">Vietnamese report</a>
+     · <a href="../../phase2/guides/share_en/REPORT_en.html">Phase 2 EN</a></p>
+  <h1>Phase 4: method transfer (results)</h1>
+  <p class="lead muted">
+    Generality check (RQ4, Package D) for HerdSim protocol <span class="mono">scaling_v2</span>.
+    Experiments are <strong>not started</strong>. Result slots below stay empty on purpose; fill them after claim-grade runs.
+    Date prepared: 2026-09-25.
+  </p>
+
+  <div class="grid">
+    <div class="card stat"><span>1. Plan</span><strong>Ready</strong></div>
+    <div class="card stat"><span>2. YAMLs</span><strong>Present</strong></div>
+    <div class="card stat"><span>3. Commands</span><strong>Listed, not run</strong></div>
+    <div class="card stat"><span>4. Results</span><strong>Empty slots</strong></div>
+  </div>
+
+  <h2 id="status"><span class="tag tag-out">CONTEXT</span> Phase 1-2 done; Phase 3 paused</h2>
+  <p>
+    Phase 1 (size, compact Strombom) and Phase 2 (structure, four layouts) are complete.
+    Phase 3 (mechanism) needs overcrowding cells; neither Phase 1 nor Phase 2 found overcrowding on the baseline,
+    so that contrast is undefined for now. Phase 4 does not need overcrowding: it repeats the size and structure maps
+    under other dog methods and builds a transfer table.
+  </p>
+  <figure>
+    <img src="assets/figures/transfer_sketch.png" alt="Phase 4 transfer idea" />
+    <figcaption>Repeat Phase 1 size + Phase 2 structure on kubo and fat, then label shared / shifted / absent vs Strombom.</figcaption>
+  </figure>
+
+  <h2 id="summary"><span class="tag tag-plan">PLAN</span> At a glance</h2>
+  <table>
+    <thead><tr><th>Field</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td>Question</td><td>Which parts of the size/structure pattern transfer across herding methods?</td></tr>
+      <tr><td>Required methods</td><td><span class="mono">strombom_multi</span> (already run), <span class="mono">kubo</span>, <span class="mono">fat</span></td></tr>
+      <tr><td>Recommended (outside minimum)</td><td><span class="mono">communication_free</span></td></tr>
+      <tr><td>Size axis</td><td>Same freeze as Phase 1: compact, N grid 10 sizes, D grid 10 values, 30/100 seeds</td></tr>
+      <tr><td>Structure axis</td><td>Same as Phase 2: N in {50,100,200}, 4 layouts, full D, 30/100 seeds</td></tr>
+      <tr><td>Arena / theta / T0</td><td>Unchanged Section 8 freeze</td></tr>
+      <tr><td>Package</td><td>D (transfer table); size also feeds A/F; structure feeds B</td></tr>
+      <tr><td>Claim to fill</td><td>C4 (shared D_min or overcrowding across the three required methods)</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="question"><span class="tag tag-plan">QUESTION</span> What Phase 4 asks</h2>
+  <p>
+    After the baseline maps, do we see the same story under a different controller, or only a Strombom story?
+  </p>
+  <ul>
+    <li><strong>D_min:</strong> same grid D (shared), different grid D (shifted), or missing on one side (absent).</li>
+    <li><strong>Overcrowding:</strong> present on both within 1.5x in D/N (shared), wider gap (shifted), or not on both (absent).</li>
+    <li><strong>I_dir / coverage saturation:</strong> same sign pattern, shifted magnitude, or not significant (see plan table).</li>
+    <li><strong>Structure row:</strong> filled only when each method has its structure contrast (C1a-style gap, or flat like Phase 2).</li>
+  </ul>
+  <p class="muted">
+    Finding strong method dependence is still useful: it bounds how far we can talk about "scaling" apart from the controller.
+  </p>
+
+  <h2 id="design"><span class="tag tag-out">DESIGN</span> What we freeze</h2>
+  <table>
+    <thead><tr><th>Choice</th><th>Value</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>Same grids as Phase 1 / 2</td><td>extends those YAMLs</td><td>Fair transfer: only the method changes.</td></tr>
+      <tr><td>Methods to run now</td><td>kubo, then fat</td><td>Required transfer set beside the finished baseline.</td></tr>
+      <tr><td>Per method order</td><td>size scout -> size claim -> structure scout -> structure claim</td><td>Size frontier first; structure uses the same N band as Phase 2.</td></tr>
+      <tr><td>Seeds</td><td>30 scout / 100 claim windows</td><td>Same claim-grade rule as Phase 1-2.</td></tr>
+      <tr><td>Metrics</td><td>full registry + timeseries</td><td>perimeter, hull, i_dir, coverage available for Package D rows.</td></tr>
+    </tbody>
+  </table>
+  <p class="note">
+    YAMLs: <span class="mono">phase4_{kubo,fat}_size_scout|claim.yaml</span> and
+    <span class="mono">phase4_{kubo,fat}_structure_scout|claim.yaml</span> under
+    <span class="mono">scaling/configs/protocols/</span>.
+  </p>
+
+  <h2 id="baseline"><span class="tag tag-out">DESIGN</span> Baseline already known (do not re-run)</h2>
+  <p>These numbers are the Strombom side of the transfer table. Phase 4 fills kubo and fat columns.</p>
+  <h3>Size map (Phase 1, compact)</h3>
+  <table>
+    <thead><tr><th>Property</th><th>strombom_multi (done)</th><th>kubo</th><th>fat</th></tr></thead>
+    <tbody>
+      <tr><td>D_min (N=5,10)</td><td>2</td><td class="muted">-</td><td class="muted">-</td></tr>
+      <tr><td>D_min (N&gt;=25)</td><td>1</td><td class="muted">-</td><td class="muted">-</td></tr>
+      <tr><td>Overcrowding</td><td>none in D&lt;=35</td><td class="muted">-</td><td class="muted">-</td></tr>
+    </tbody>
+  </table>
+  <h3>Structure map (Phase 2, N in {50,100,200})</h3>
+  <table>
+    <thead><tr><th>Property</th><th>strombom_multi (done)</th><th>kubo</th><th>fat</th></tr></thead>
+    <tbody>
+      <tr><td>D_min all four layouts</td><td>1</td><td class="muted">-</td><td class="muted">-</td></tr>
+      <tr><td>C1a gap</td><td>not supported</td><td class="muted">-</td><td class="muted">-</td></tr>
+      <tr><td>Effort / perimeter by layout</td><td>wide &gt;&gt; compact; split ~ compact</td><td class="muted">-</td><td class="muted">-</td></tr>
+    </tbody>
+  </table>
+  <div class="layout-grid">
+    <figure><img src="assets/layouts/compact.svg" alt="Compact" /><figcaption>Compact</figcaption></figure>
+    <figure><img src="assets/layouts/wide.svg" alt="Wide" /><figcaption>Wide</figcaption></figure>
+    <figure><img src="assets/layouts/split.svg" alt="Split" /><figcaption>Split</figcaption></figure>
+    <figure><img src="assets/layouts/outlier_rich.svg" alt="Outlier-rich" /><figcaption>Outlier-rich</figcaption></figure>
+  </div>
+
+  <h2 id="c4"><span class="tag tag-plan">PLAN</span> Claim C4 rules</h2>
+  <table>
+    <thead><tr><th>Claim</th><th>Supported when</th><th>Status now</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>C4</td>
+        <td>D_min or overcrowding is shared across the three required methods. Structure row needs structure runs on each method.</td>
+        <td><strong>UNEVALUATED</strong> (kubo/fat not run)</td>
+      </tr>
+    </tbody>
+  </table>
+  <table>
+    <thead><tr><th>Property</th><th>shared</th><th>shifted</th><th>absent</th></tr></thead>
+    <tbody>
+      <tr><td>D_min</td><td>equal grid D</td><td>different grid D</td><td>one side has no D_min</td></tr>
+      <tr><td>Overcrowding</td><td>both, D/N within 1.5x</td><td>both, wider gap</td><td>not on both</td></tr>
+      <tr><td>I_dir</td><td>r(I_dir, success) &lt; -0.3 on both</td><td>sign pattern differs in magnitude</td><td>not significant</td></tr>
+      <tr><td>Coverage saturation</td><td>rule holds on both</td><td>holds on one</td><td>holds on neither</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="counts"><span class="tag tag-run">RUN</span> Trial counts (planning)</h2>
+  <div class="calc">
+    <div class="dong">Size scout / method = 10 N x 10 D x 30 = 3,000</div>
+    <div class="dong">Structure scout / method = 3 N x 4 layouts x 10 D x 30 = 3,600</div>
+    <div class="dong">Scout total for kubo+fat = 2 x (3,000 + 3,600) = 13,200</div>
+    <div class="dong">Claim = window cells x 100 (unknown until each scout finishes)</div>
+  </div>
+  <p class="muted">
+    Phase 1 size scout was ~73 min; Phase 2 structure scout ~3.2 h on this machine (16 workers).
+    Wide / large N cells are slow. Expect Phase 4 to take multiple sessions. Keep CPU governor on
+    <span class="mono">performance</span>. Do not promise a single wall-clock number before the first scout.
+  </p>
+
+  <h2 id="commands"><span class="tag tag-run">RUN</span> Commands (listed; this report does not run them)</h2>
+  <p>From the repo root. Set <span class="mono">TRANSFER_METHOD=kubo</span> or <span class="mono">fat</span>.</p>
+  <h3>0. CPU governor (once after boot)</h3>
+<pre class="cmd">for g in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo performance | sudo tee "$g" >/dev/null; done
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor</pre>
+  <h3>1. Size map (per method)</h3>
+<pre class="cmd">make -C scaling scaling-transfer-size-scout TRANSFER_METHOD=kubo WORKERS=16
+make -C scaling scaling-transfer-size-claim-plan TRANSFER_METHOD=kubo
+make -C scaling scaling-transfer-size-claim-reseed TRANSFER_METHOD=kubo WORKERS=16</pre>
+  <p class="muted">Repeat with <span class="mono">TRANSFER_METHOD=fat</span>. Outputs under
+     <span class="mono">scaling/results/phase4/{kubo,fat}_size/</span>.</p>
+  <h3>2. Structure map (per method)</h3>
+<pre class="cmd">make -C scaling scaling-transfer-structure-scout TRANSFER_METHOD=kubo WORKERS=16
+make -C scaling scaling-transfer-structure-claim-plan TRANSFER_METHOD=kubo
+make -C scaling scaling-transfer-structure-claim-reseed TRANSFER_METHOD=kubo WORKERS=16</pre>
+  <p class="muted">Repeat for fat. Outputs under <span class="mono">scaling/results/phase4/{kubo,fat}_structure/</span>.</p>
+  <h3>3. Package D (after maps exist)</h3>
+<pre class="cmd">make -C scaling scaling-analyse PROTOCOL=phase4_kubo_size_claim PACKAGE=D
+# or analyse on the merged paths once the transfer script inputs are ready</pre>
+  <p class="note">Recommended order: finish both size claims, then both structure claims, then fill C4 / Package D.</p>
+
+
+  <h2 id="results"><span class="tag tag-out">RESULTS</span> Results (claim-grade)</h2>
+  <div class="callout">
+    <strong>Summary.</strong> Kubo size largely shares D_min with strombom for N &gt;= 25 (shared = 1).
+    Kubo structure does show layout gaps (wide hard-failure; outlier_rich at N=200 has D_min=4 and overcrowding).
+    Fat size reaches D_min only at N=5 and N=10 (D_min=1, shifted vs strombom); N&gt;=25 is hard-failure on the full D grid.
+    Fat structure is hard-failure on every cell.
+    <strong>C4: REJECTED</strong> for the three required methods: D_min / overcrowding are not shared across all three.
+  </div>
+
+  <h3>Wall-clock (recorded)</h3>
+  <table>
+    <thead><tr><th>Step</th><th>Trials</th><th>Wall time</th></tr></thead>
+    <tbody>
+      <tr><td>kubo size scout / claim</td><td>3000 / 2100</td><td>~5.5 h / ~4.5 h</td></tr>
+      <tr><td>kubo structure scout / claim</td><td>3600 / 2800</td><td>~16.7 h / ~16.6 h</td></tr>
+      <tr><td>fat size scout / claim (full map)</td><td>3000 / 2000</td><td>~39.1 h / ~14.4 h</td></tr>
+      <tr><td>fat structure scout / claim</td><td>3600 / 2400</td><td>~34.0 h / ~23.6 h</td></tr>
+    </tbody>
+  </table>
+  <p class="note">
+    Fat size: after a resume that truncated <span class="mono">trials.csv</span>, a clean re-scout (3000)
+    and re-planned claim (20 boundary cells; resume kept the prior 200 N=400 trials) finished at 2000/2000.
+    Package D size was rebuilt for all three methods.
+  </p>
+
+  <h3>Size-map D_min (compact, theta=0.90)</h3>
+  <table>
+    <thead><tr><th>N</th><th>strombom</th><th>kubo</th><th>fat</th><th>kubo label</th><th>fat label</th></tr></thead>
+    <tbody>
+      <tr><td>5</td><td>2</td><td>3</td><td>1</td><td>shifted</td><td>shifted</td></tr>
+      <tr><td>10</td><td>2</td><td>1</td><td>1</td><td>shifted</td><td>shifted</td></tr>
+      <tr><td>25</td><td>1</td><td>1</td><td>hard failure</td><td>shared</td><td>absent</td></tr>
+      <tr><td>50</td><td>1</td><td>1</td><td>hard failure</td><td>shared</td><td>absent</td></tr>
+      <tr><td>75</td><td>1</td><td>1</td><td>hard failure</td><td>shared</td><td>absent</td></tr>
+      <tr><td>100</td><td>1</td><td>1</td><td>hard failure</td><td>shared</td><td>absent</td></tr>
+      <tr><td>150</td><td>1</td><td>1</td><td>hard failure</td><td>shared</td><td>absent</td></tr>
+      <tr><td>200</td><td>1</td><td>1</td><td>hard failure</td><td>shared</td><td>absent</td></tr>
+      <tr><td>300</td><td>1</td><td>1</td><td>hard failure</td><td>shared</td><td>absent</td></tr>
+      <tr><td>400</td><td>1</td><td>1</td><td>hard failure</td><td>shared</td><td>absent</td></tr>
+    </tbody>
+  </table>
+  <p class="muted">No overcrowding on compact size maps at theta 0.90. Fat N&gt;=25: R &lt; 0.90 for every grid D (claim tops at D=25,35).</p>
+
+  <h3>Structure D_min (theta=0.90)</h3>
+  <table>
+    <thead><tr><th>N</th><th>Layout</th><th>strombom</th><th>kubo</th><th>fat</th></tr></thead>
+    <tbody>
+      <tr><td>50</td><td>compact / split / outlier_rich</td><td>1 / 1 / 1</td><td>1 / 1 / 1</td><td>HF / HF / HF</td></tr>
+      <tr><td>50</td><td>wide</td><td>1</td><td>hard failure</td><td>hard failure</td></tr>
+      <tr><td>100</td><td>compact / split / outlier_rich</td><td>1 / 1 / 1</td><td>1 / 1 / 1</td><td>HF / HF / HF</td></tr>
+      <tr><td>100</td><td>wide</td><td>1</td><td>hard failure</td><td>hard failure</td></tr>
+      <tr><td>200</td><td>compact / split</td><td>1 / 1</td><td>1 / 1</td><td>HF / HF</td></tr>
+      <tr><td>200</td><td>outlier_rich</td><td>1</td><td>4 (overcrowd from D=10)</td><td>hard failure</td></tr>
+      <tr><td>200</td><td>wide</td><td>1</td><td>hard failure</td><td>hard failure</td></tr>
+    </tbody>
+  </table>
+  <p class="note">
+    Kubo: C1a-style gap yes (wide never reaches R&gt;=0.90; outlier_rich at N=200 needs 4 dogs and shows overcrowding).
+    Fat: no D_min on any cell of {50,100,200} x 4 layouts (typical R &lt; 0.5; wide/outlier_rich ~0).
+  </p>
+
+  <h3>Transfer labels (Package D)</h3>
+  <table>
+    <thead><tr><th>Property</th><th>kubo vs strombom</th><th>fat vs strombom</th></tr></thead>
+    <tbody>
+      <tr><td>D_min (size, N&gt;=25)</td><td>shared</td><td>absent (hard failure)</td></tr>
+      <tr><td>D_min (size, N=5,10)</td><td>shifted</td><td>shifted (fat D_min=1)</td></tr>
+      <tr><td>Overcrowding (size)</td><td>absent (neither)</td><td>absent</td></tr>
+      <tr><td>I_dir signature</td><td>absent</td><td>shifted (stronger negative r on fat)</td></tr>
+      <tr><td>Coverage saturation</td><td>shifted</td><td>shifted</td></tr>
+      <tr><td>Structure (state-dependent D_min)</td><td>shifted (wide HF; outlier_rich N=200)</td><td>absent (fat HF everywhere)</td></tr>
+    </tbody>
+  </table>
+  <p class="muted">Artefacts: <span class="mono">scaling/results/phase4/package_d/{size,structure}/</span>. Package D size: 44 rows (8 shared, 7 shifted, 29 absent).</p>
+
+  <h3>C4</h3>
+  <div class="card">
+    <p><strong>Verdict: REJECTED.</strong></p>
+    <p>
+      Rule: D_min or overcrowding is shared across the three required methods, including the structure row.
+      Observation: fat has no D_min for N&gt;=25 on the size map and none on the structure map; overcrowding appears clearly only for kubo (outlier_rich, N=200), not across all three.
+      Kubo and strombom share size-map D_min on most N, but C4 requires the full required set.
+    </p>
+  </div>
+
+  <h3>Regimes (kubo size, compact)</h3>
+  <table>
+    <thead><tr><th>Regime</th><th>Cells</th></tr></thead>
+    <tbody>
+      <tr><td>Under-resourced</td><td>2</td></tr>
+      <tr><td>Efficient</td><td>11</td></tr>
+      <tr><td>Wasteful overspend</td><td>87</td></tr>
+      <tr><td>Overcrowding / hard failure</td><td>0 / 0</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Regimes (fat size, compact)</h3>
+  <table>
+    <thead><tr><th>Regime</th><th>Cells</th></tr></thead>
+    <tbody>
+      <tr><td>Efficient</td><td>3</td></tr>
+      <tr><td>Wasteful overspend</td><td>17</td></tr>
+      <tr><td>Hard failure</td><td>80</td></tr>
+      <tr><td>Overcrowding</td><td>0</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="slots"><span class="tag tag-out">DONE</span> Phase 4 sims + report</h2>
+  <div class="callout">Full fat size scout/claim, Package D size rebuild, and result tables above updated (2026-10-04).</div>
+
+  <h2 id="limits"><span class="tag tag-plan">LIMITS</span></h2>
+  <ul>
+    <li>Still one task (drive-to-goal) and one arena freeze.</li>
+    <li><span class="mono">communication_free</span> is recommended, not required for the minimum C4 set.</li>
+    <li>Do not cite smoke or scout alone for C4; fill claims only at claim grade.</li>
+    <li>Phase 3 stays paused until some method shows overcrowding cells.</li>
+  </ul>
+  <p class="muted">
+    Docs: <span class="mono">scaling/docs/main_scaling_plan.md</span> (RQ4 / C4),
+    <span class="mono">scaling/configs/protocols/README.md</span>.
+  </p>
+
+</main>
+</div>
+<script>
+(function () {
+  var side = document.getElementById("side");
+  var btn = document.getElementById("toggle");
+  var backdrop = document.getElementById("backdrop");
+  if (!side || !btn) return;
+  function close() {
+    side.classList.remove("open");
+    if (backdrop) { backdrop.classList.remove("show"); backdrop.hidden = true; }
+  }
+  btn.addEventListener("click", function () {
+    var open = side.classList.toggle("open");
+    if (backdrop) { backdrop.classList.toggle("show", open); backdrop.hidden = !open; }
+  });
+  if (backdrop) backdrop.addEventListener("click", close);
+})();
+</script>
+</body>
+</html>

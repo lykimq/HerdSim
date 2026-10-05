@@ -258,7 +258,7 @@ Machine-readable: [../configs/canonical_grid.yaml](../configs/canonical_grid.yam
 
 **Information ladder.** Relative steps so another method's base range uses the same rungs. Four rungs support a first step and a second step. Claim N is 100 and 200. N = 50 is skipped when D_min is already 1.
 
-**Structure N {50, 100, 200}.** Easy size, size edge, and the steep band. Four layouts: spread, fragmentation, outliers, and compact as the reference.
+**Structure N {50, 100, 200}.** On the Phase 1 compact map these sizes already have D_min at the floor (1 dog), so the draft steep band is not assumed. They are large enough for split clusters and outliers to be real flocks (split uses three clusters only for N >= 12; outlier_rich at about 20% needs more than a handful of sheep). Compact is the reference. Wide, split, and outlier_rich are the contrasts. A higher D_min on another layout is the structure effect. Do not put N in {5, 10} on the structure claim: below N = 12 split is only two clusters, and Phase 1 already covers the tiny-flock regime where compact needs two dogs. N = 25 adds little versus 50 once the compact floor is known. N = 75 and 150 densify a size transition that is already flat here. Run the three-size map first. Add N = 300 and 400 only after that claim map exists, and mainly when all four layouts still sit on D_min = 1; if C1a already has a grid-step gap, large N is optional.
 
 **Claim window.** One cell is not enough: 30 seeds can place the crossing on the wrong D. The whole grid at 100 seeds spends the draft's budget on interiors that do not move D_min. Overcrowding needs two consecutive D below theta: one dip can be noise, and requiring the rest of the grid to stay down would miss a collapse that later recovers.
 

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="220" viewBox="0 0 640 220" role="img" aria-label="Arena overview">
+  <rect width="100%" height="100%" fill="#f7f6f2"/>
+  <text x="16" y="24" font-size="14" font-weight="700" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Arena (same for every Phase 2 trial)</text>
+  <rect x="20" y="40" width="180" height="160" fill="#efece5" stroke="#bbb3a5"/>
+  <circle cx="153.2" cy="130.0" r="5.4" fill="#cfe0f0" stroke="#1f4e79" stroke-width="1.5"/>
+  <circle cx="110.0" cy="130.0" r="5" fill="#3d6b3a"/>
+  <rect x="99.8" y="123.4" width="6" height="6" rx="1" fill="#1f4e79"/>
+  <text x="110.0" y="148.0" text-anchor="middle" font-size="9" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">flock</text>
+  <text x="153.2" y="116.0" text-anchor="middle" font-size="9" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">goal</text>
+  <text x="220" y="60" font-size="12" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Gray square: field 500 by 500</text>
+  <text x="220" y="82" font-size="12" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Green dot: flock start center (250, 250)</text>
+  <text x="220" y="104" font-size="12" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Blue disk: goal center (370, 250), radius 15 at N=50</text>
+  <text x="220" y="126" font-size="12" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Blue square: dog (schematic; dogs are not part of X0)</text>
+  <text x="220" y="148" font-size="12" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Success: every sheep inside the goal disk before T0</text>
+  <text x="220" y="170" font-size="12" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Layout only changes how sheep are placed at tick 0</text>
+  <text x="220" y="192" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Drawn with core/x0_generators.py · spread=30 · seed=2026 · N=50</text>
+</svg>

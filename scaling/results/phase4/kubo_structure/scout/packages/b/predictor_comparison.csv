@@ -1,0 +1,2 @@
+n_folds,nd_nll,state_nll,prefers_state,state_cols,layout_col
+3,0.44011706771230025,0.23425295431087786,True,[],initial_layout

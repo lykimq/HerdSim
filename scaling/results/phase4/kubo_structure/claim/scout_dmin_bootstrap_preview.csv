@@ -1,0 +1,13 @@
+method,initial_layout,obs_mode,n_sheep,d_min,d_min_ci_low,d_min_ci_high,d_min_ci_low_above_grid,d_min_ci_high_above_grid,n_boot,n_seeds_ref,n_boot_defined
+kubo,compact,global,50,1.0,1.0,1.0,False,False,1000,30,1000
+kubo,compact,global,100,1.0,1.0,1.0,False,False,1000,30,1000
+kubo,compact,global,200,1.0,1.0,1.0,False,False,1000,30,1000
+kubo,outlier_rich,global,50,1.0,1.0,1.0,False,False,1000,30,1000
+kubo,outlier_rich,global,100,1.0,1.0,1.0,False,False,1000,30,1000
+kubo,outlier_rich,global,200,2.0,1.0,6.0,False,False,1000,30,1000
+kubo,split,global,50,1.0,1.0,1.0,False,False,1000,30,1000
+kubo,split,global,100,1.0,1.0,1.0,False,False,1000,30,1000
+kubo,split,global,200,1.0,1.0,1.0,False,False,1000,30,1000
+kubo,wide,global,50,,,,True,True,1000,30,0
+kubo,wide,global,100,,,,True,True,1000,30,0
+kubo,wide,global,200,,,,True,True,1000,30,0
