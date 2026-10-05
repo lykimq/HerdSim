@@ -4,7 +4,7 @@ Role: status (1 = code, 2 = experiment runs, then Claims)
 Why / what: [herdsim_research_program.md](herdsim_research_program.md)
 How: [main_scaling_plan.md](main_scaling_plan.md)
 Run strategy (pilot / scout / plan / reseed): [experiment_run_strategy.md](experiment_run_strategy.md)
-Report form: [REPORT_TEMPLATE.md](REPORT_TEMPLATE.md)
+Report form: [REPORT_TEMPLATE.md](templates/REPORT_TEMPLATE.md)
 Help: `make -C scaling help` (wraps `scaling/scripts/campaign.py`)
 
 Protocol: `scaling_v2`

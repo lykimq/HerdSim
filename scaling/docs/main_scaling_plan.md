@@ -1,6 +1,6 @@
 # Collective Herdability Under Shepherding
 
-Protocol `scaling_v2`. Why / what: [herdsim_research_program.md](herdsim_research_program.md). Status: [progress_tracker.md](progress_tracker.md). Run strategy: [experiment_run_strategy.md](experiment_run_strategy.md). Report form: [REPORT_TEMPLATE.md](REPORT_TEMPLATE.md). Draft reference: [sheep-scaling_paper2025.md](sheep-scaling_paper2025.md).
+Protocol `scaling_v2`. Why / what: [herdsim_research_program.md](herdsim_research_program.md). Status: [progress_tracker.md](progress_tracker.md). Run strategy: [experiment_run_strategy.md](experiment_run_strategy.md). Report form: [REPORT_TEMPLATE.md](templates/REPORT_TEMPLATE.md). Draft reference: [sheep-scaling_paper2025.md](notes/sheep-scaling_paper2025.md).
 
 | Abbreviation | Meaning |
 |--------------|---------|

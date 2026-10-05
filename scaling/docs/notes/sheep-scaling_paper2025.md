@@ -1,6 +1,6 @@
 # Reference: sheep-scaling paper (2025 draft)
 
-Source PDF: [../../docs/papers/sheep-scaling_paper2025.pdf](../../docs/papers/sheep-scaling_paper2025.pdf)
+Source PDF: [../../../docs/papers/sheep-scaling_paper2025.pdf](../../../docs/papers/sheep-scaling_paper2025.pdf)
 
 Title: *Collective Nudging that Scales. How many dogs do I need to herd sheep?*
 Status: draft (~2025); placeholder author lines in the PDF.
@@ -221,4 +221,4 @@ The studies share the reliability band, the D grid, the timeout scale, and the m
 
 - Protocol comments that cite the draft: `scaling/configs/canonical_grid.yaml`
 - Mean-spread metric note: `plugins/metrics/mean_spread.py`
-- Related themes (not this protocol dump): `scaling/docs/related_work.md`
+- Related themes: [related_work.md](related_work.md)

@@ -29,7 +29,7 @@ One flat 100-seed full grid would buy little extra science on obvious cells and 
 | SCOUT | Broad map; choose windows | 30 (`scout_seeds`) | No (planning / diagnostics only) |
 | CLAIM | Precision on planned cells | 100 (`claim_grade_seeds`) | Yes, after REPORT.md |
 
-Record the grade on every run report ([REPORT_TEMPLATE.md](REPORT_TEMPLATE.md)). Do not promote a SCOUT figure to a Claim verdict.
+Record the grade on every run report ([REPORT_TEMPLATE.md](templates/REPORT_TEMPLATE.md)). Do not promote a SCOUT figure to a Claim verdict.
 
 ## Verbs (make / campaign)
 
