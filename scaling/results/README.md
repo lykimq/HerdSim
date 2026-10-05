@@ -41,4 +41,6 @@ Each protocol folder contains:
 
 ## Reports
 
+**Cross-phase summary (Phases 1, 2, 4):** [`summary/SUMMARY_REPORT.html`](summary/SUMMARY_REPORT.html) (figures embedded) or [`summary/SUMMARY_REPORT.md`](summary/SUMMARY_REPORT.md). Vietnamese: [`summary/SUMMARY_REPORT_vi.html`](summary/SUMMARY_REPORT_vi.html) / [`.md`](summary/SUMMARY_REPORT_vi.md).
+
 Each phase includes standalone HTML reports in `phase{k}/guides/share_en/REPORT_en.html` for reviewing figures, tables, and claim summaries in a browser.
