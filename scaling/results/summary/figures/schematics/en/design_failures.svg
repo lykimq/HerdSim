@@ -1,78 +1,85 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="740" height="360" viewBox="0 0 740 360" role="img" aria-label="failure labels">
-<rect x="0" y="0" width="740" height="360" fill="#f7f6f2"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="740" height="358" viewBox="0 0 740 358" role="img" aria-label="failure labels">
+<rect x="0" y="0" width="740" height="358" fill="#f7f6f2"/>
 <text x="16" y="24" text-anchor="start" font-size="14" font-weight="700" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Failure labels: what they mean, and what the metric curves look like</text>
-<rect x="16" y="40" width="228" height="50" fill="#fff" stroke="#1f4e79" stroke-width="2" rx="8"/>
-<text x="28" y="62" text-anchor="start" font-size="12" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">1. stacking</text>
-<text x="28" y="80" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">dogs pile on one point</text>
-<rect x="256" y="40" width="228" height="50" fill="#fff" stroke="#7b1fa2" stroke-width="2" rx="8"/>
-<text x="268" y="62" text-anchor="start" font-size="12" font-weight="700" fill="#7b1fa2" font-family="Segoe UI,Noto Sans,sans-serif">2. split</text>
-<text x="268" y="80" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">flock stays in pieces</text>
-<rect x="496" y="40" width="228" height="50" fill="#fff" stroke="#b45309" stroke-width="2" rx="8"/>
-<text x="508" y="62" text-anchor="start" font-size="12" font-weight="700" fill="#b45309" font-family="Segoe UI,Noto Sans,sans-serif">3. scatter</text>
-<text x="508" y="80" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">cohesion distances high</text>
-<rect x="16" y="98" width="228" height="50" fill="#fff" stroke="#9b2c2c" stroke-width="2" rx="8"/>
-<text x="28" y="120" text-anchor="start" font-size="12" font-weight="700" fill="#9b2c2c" font-family="Segoe UI,Noto Sans,sans-serif">4. oscillation</text>
-<text x="28" y="138" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">GCM flips, little progress</text>
-<rect x="256" y="98" width="228" height="50" fill="#fff" stroke="#5b4a2f" stroke-width="2" rx="8"/>
-<text x="268" y="120" text-anchor="start" font-size="12" font-weight="700" fill="#5b4a2f" font-family="Segoe UI,Noto Sans,sans-serif">5. stuck</text>
-<text x="268" y="138" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">GCM barely moves to goal</text>
-<rect x="496" y="98" width="228" height="50" fill="#fff" stroke="#5c5852" stroke-width="2" rx="8"/>
-<text x="508" y="120" text-anchor="start" font-size="12" font-weight="700" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">6. timeout</text>
-<text x="508" y="138" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">still unfinished at T0</text>
-<text x="16" y="172" text-anchor="start" font-size="12" font-weight="700" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">How a failed trial looks on its metric graph (schematic)</text>
-<rect x="16" y="188" width="90" height="42" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="3"/>
-<line x1="22" y1="224" x2="100" y2="224" stroke="#bbb3a5" stroke-width="1"/>
-<line x1="22" y1="194" x2="22" y2="224" stroke="#bbb3a5" stroke-width="1"/>
-<line x1="24" y1="198" x2="44" y2="202" stroke="#2f6b45" stroke-width="2"/>
-<line x1="44" y1="202" x2="66" y2="210" stroke="#2f6b45" stroke-width="2"/>
-<line x1="66" y1="210" x2="86" y2="220" stroke="#2f6b45" stroke-width="2"/>
-<line x1="86" y1="220" x2="100" y2="224" stroke="#2f6b45" stroke-width="2"/>
-<text x="61" y="244" text-anchor="middle" font-size="10" font-weight="700" fill="#2f6b45" font-family="Segoe UI,Noto Sans,sans-serif">success</text>
-<text x="61" y="258" text-anchor="middle" font-size="9" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">gcm_goal falls to goal</text>
-<rect x="136" y="188" width="90" height="42" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="3"/>
-<line x1="142" y1="224" x2="220" y2="224" stroke="#bbb3a5" stroke-width="1"/>
-<line x1="142" y1="194" x2="142" y2="224" stroke="#bbb3a5" stroke-width="1"/>
-<line x1="144" y1="200" x2="156" y2="216" stroke="#9b2c2c" stroke-width="2"/>
-<line x1="156" y1="216" x2="168" y2="198" stroke="#9b2c2c" stroke-width="2"/>
-<line x1="168" y1="198" x2="180" y2="218" stroke="#9b2c2c" stroke-width="2"/>
-<line x1="180" y1="218" x2="192" y2="200" stroke="#9b2c2c" stroke-width="2"/>
-<line x1="192" y1="200" x2="204" y2="216" stroke="#9b2c2c" stroke-width="2"/>
-<line x1="204" y1="216" x2="220" y2="202" stroke="#9b2c2c" stroke-width="2"/>
-<text x="181" y="244" text-anchor="middle" font-size="10" font-weight="700" fill="#9b2c2c" font-family="Segoe UI,Noto Sans,sans-serif">oscillation</text>
-<text x="181" y="258" text-anchor="middle" font-size="9" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">gcm_goal zigzags, stays high</text>
-<rect x="256" y="188" width="90" height="42" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="3"/>
-<line x1="262" y1="224" x2="340" y2="224" stroke="#bbb3a5" stroke-width="1"/>
-<line x1="262" y1="194" x2="262" y2="224" stroke="#bbb3a5" stroke-width="1"/>
-<line x1="264" y1="202" x2="286" y2="203" stroke="#5b4a2f" stroke-width="2"/>
-<line x1="286" y1="203" x2="311" y2="204" stroke="#5b4a2f" stroke-width="2"/>
-<line x1="311" y1="204" x2="340" y2="205" stroke="#5b4a2f" stroke-width="2"/>
-<text x="301" y="244" text-anchor="middle" font-size="10" font-weight="700" fill="#5b4a2f" font-family="Segoe UI,Noto Sans,sans-serif">stuck</text>
-<text x="301" y="258" text-anchor="middle" font-size="9" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">gcm_goal flat / tiny drop</text>
-<rect x="376" y="188" width="90" height="42" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="3"/>
-<line x1="382" y1="224" x2="460" y2="224" stroke="#bbb3a5" stroke-width="1"/>
-<line x1="382" y1="194" x2="382" y2="224" stroke="#bbb3a5" stroke-width="1"/>
-<line x1="384" y1="200" x2="411" y2="204" stroke="#5c5852" stroke-width="2"/>
-<line x1="411" y1="204" x2="436" y2="210" stroke="#5c5852" stroke-width="2"/>
-<line x1="436" y1="210" x2="460" y2="214" stroke="#5c5852" stroke-width="2"/>
-<text x="421" y="244" text-anchor="middle" font-size="10" font-weight="700" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">timeout</text>
-<text x="421" y="258" text-anchor="middle" font-size="9" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">gcm_goal still high at T0</text>
-<rect x="496" y="188" width="90" height="42" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="3"/>
-<line x1="502" y1="224" x2="580" y2="224" stroke="#bbb3a5" stroke-width="1"/>
-<line x1="502" y1="194" x2="502" y2="224" stroke="#bbb3a5" stroke-width="1"/>
-<line x1="504" y1="200" x2="526" y2="199" stroke="#b45309" stroke-width="2"/>
-<line x1="526" y1="199" x2="551" y2="201" stroke="#b45309" stroke-width="2"/>
-<line x1="551" y1="201" x2="580" y2="200" stroke="#b45309" stroke-width="2"/>
-<text x="541" y="244" text-anchor="middle" font-size="10" font-weight="700" fill="#b45309" font-family="Segoe UI,Noto Sans,sans-serif">scatter</text>
-<text x="541" y="258" text-anchor="middle" font-size="9" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">cohesion stays high</text>
-<rect x="616" y="188" width="90" height="42" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="3"/>
-<line x1="622" y1="224" x2="700" y2="224" stroke="#bbb3a5" stroke-width="1"/>
-<line x1="622" y1="194" x2="622" y2="224" stroke="#bbb3a5" stroke-width="1"/>
-<line x1="624" y1="222" x2="646" y2="221" stroke="#7b1fa2" stroke-width="2"/>
-<line x1="646" y1="221" x2="671" y2="223" stroke="#7b1fa2" stroke-width="2"/>
-<line x1="671" y1="223" x2="700" y2="222" stroke="#7b1fa2" stroke-width="2"/>
-<text x="661" y="244" text-anchor="middle" font-size="10" font-weight="700" fill="#7b1fa2" font-family="Segoe UI,Noto Sans,sans-serif">split</text>
-<text x="661" y="258" text-anchor="middle" font-size="9" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">fragmentation stays low</text>
-<text x="16" y="332" text-anchor="start" font-size="11" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">Seen in claim data: oscillation, stuck, timeout, scatter, split. Not seen: stacking.</text>
-<text x="16" y="350" text-anchor="start" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Labels are analysis heuristics after a failed trial (not the stop reason). First match in priority order wins. stacking needs dog-separation history (rare in these runs).</text>
+<rect x="16" y="40" width="228" height="54" fill="#fff" stroke="#1f4e79" stroke-width="2" rx="8"/>
+<text x="28" y="60" text-anchor="start" font-size="12" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">1. stacking</text>
+<text x="28" y="78" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">dogs pile on one point</text>
+<rect x="256" y="40" width="228" height="54" fill="#fff" stroke="#7b1fa2" stroke-width="2" rx="8"/>
+<text x="268" y="60" text-anchor="start" font-size="12" font-weight="700" fill="#7b1fa2" font-family="Segoe UI,Noto Sans,sans-serif">2. split</text>
+<text x="268" y="78" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">flock stays in pieces</text>
+<rect x="496" y="40" width="228" height="54" fill="#fff" stroke="#b45309" stroke-width="2" rx="8"/>
+<text x="508" y="60" text-anchor="start" font-size="12" font-weight="700" fill="#b45309" font-family="Segoe UI,Noto Sans,sans-serif">3. scatter</text>
+<text x="508" y="78" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">cohesion distances high</text>
+<rect x="16" y="102" width="228" height="54" fill="#fff" stroke="#9b2c2c" stroke-width="2" rx="8"/>
+<text x="28" y="122" text-anchor="start" font-size="12" font-weight="700" fill="#9b2c2c" font-family="Segoe UI,Noto Sans,sans-serif">4. oscillation</text>
+<text x="28" y="140" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">GCM flips, little progress</text>
+<rect x="256" y="102" width="228" height="54" fill="#fff" stroke="#5b4a2f" stroke-width="2" rx="8"/>
+<text x="268" y="122" text-anchor="start" font-size="12" font-weight="700" fill="#5b4a2f" font-family="Segoe UI,Noto Sans,sans-serif">5. stuck</text>
+<text x="268" y="140" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">GCM barely moves to goal</text>
+<rect x="496" y="102" width="228" height="54" fill="#fff" stroke="#5c5852" stroke-width="2" rx="8"/>
+<text x="508" y="122" text-anchor="start" font-size="12" font-weight="700" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">6. timeout</text>
+<text x="508" y="140" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">still unfinished at T0</text>
+<text x="16" y="180" text-anchor="start" font-size="12" font-weight="700" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">How a failed trial looks on its metric graph (schematic)</text>
+<rect x="16" y="196" width="90" height="42" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="3"/>
+<line x1="22" y1="232" x2="100" y2="232" stroke="#bbb3a5" stroke-width="1"/>
+<line x1="22" y1="202" x2="22" y2="232" stroke="#bbb3a5" stroke-width="1"/>
+<line x1="24" y1="206" x2="44" y2="210" stroke="#2f6b45" stroke-width="2"/>
+<line x1="44" y1="210" x2="66" y2="218" stroke="#2f6b45" stroke-width="2"/>
+<line x1="66" y1="218" x2="86" y2="228" stroke="#2f6b45" stroke-width="2"/>
+<line x1="86" y1="228" x2="100" y2="232" stroke="#2f6b45" stroke-width="2"/>
+<text x="61" y="252" text-anchor="middle" font-size="10" font-weight="700" fill="#2f6b45" font-family="Segoe UI,Noto Sans,sans-serif">success</text>
+<text x="61" y="266" text-anchor="middle" font-size="9" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">gcm_goal falls</text>
+<text x="61" y="277" text-anchor="middle" font-size="9" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">to goal</text>
+<rect x="136" y="196" width="90" height="42" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="3"/>
+<line x1="142" y1="232" x2="220" y2="232" stroke="#bbb3a5" stroke-width="1"/>
+<line x1="142" y1="202" x2="142" y2="232" stroke="#bbb3a5" stroke-width="1"/>
+<line x1="144" y1="208" x2="156" y2="224" stroke="#9b2c2c" stroke-width="2"/>
+<line x1="156" y1="224" x2="168" y2="206" stroke="#9b2c2c" stroke-width="2"/>
+<line x1="168" y1="206" x2="180" y2="226" stroke="#9b2c2c" stroke-width="2"/>
+<line x1="180" y1="226" x2="192" y2="208" stroke="#9b2c2c" stroke-width="2"/>
+<line x1="192" y1="208" x2="204" y2="224" stroke="#9b2c2c" stroke-width="2"/>
+<line x1="204" y1="224" x2="220" y2="210" stroke="#9b2c2c" stroke-width="2"/>
+<text x="181" y="252" text-anchor="middle" font-size="10" font-weight="700" fill="#9b2c2c" font-family="Segoe UI,Noto Sans,sans-serif">oscillation</text>
+<text x="181" y="266" text-anchor="middle" font-size="9" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">gcm_goal</text>
+<text x="181" y="277" text-anchor="middle" font-size="9" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">zigzags, stays</text>
+<rect x="256" y="196" width="90" height="42" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="3"/>
+<line x1="262" y1="232" x2="340" y2="232" stroke="#bbb3a5" stroke-width="1"/>
+<line x1="262" y1="202" x2="262" y2="232" stroke="#bbb3a5" stroke-width="1"/>
+<line x1="264" y1="210" x2="286" y2="211" stroke="#5b4a2f" stroke-width="2"/>
+<line x1="286" y1="211" x2="311" y2="212" stroke="#5b4a2f" stroke-width="2"/>
+<line x1="311" y1="212" x2="340" y2="213" stroke="#5b4a2f" stroke-width="2"/>
+<text x="301" y="252" text-anchor="middle" font-size="10" font-weight="700" fill="#5b4a2f" font-family="Segoe UI,Noto Sans,sans-serif">stuck</text>
+<text x="301" y="266" text-anchor="middle" font-size="9" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">gcm_goal flat /</text>
+<text x="301" y="277" text-anchor="middle" font-size="9" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">tiny drop</text>
+<rect x="376" y="196" width="90" height="42" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="3"/>
+<line x1="382" y1="232" x2="460" y2="232" stroke="#bbb3a5" stroke-width="1"/>
+<line x1="382" y1="202" x2="382" y2="232" stroke="#bbb3a5" stroke-width="1"/>
+<line x1="384" y1="208" x2="411" y2="212" stroke="#5c5852" stroke-width="2"/>
+<line x1="411" y1="212" x2="436" y2="218" stroke="#5c5852" stroke-width="2"/>
+<line x1="436" y1="218" x2="460" y2="222" stroke="#5c5852" stroke-width="2"/>
+<text x="421" y="252" text-anchor="middle" font-size="10" font-weight="700" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">timeout</text>
+<text x="421" y="266" text-anchor="middle" font-size="9" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">gcm_goal still</text>
+<text x="421" y="277" text-anchor="middle" font-size="9" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">high at T0</text>
+<rect x="496" y="196" width="90" height="42" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="3"/>
+<line x1="502" y1="232" x2="580" y2="232" stroke="#bbb3a5" stroke-width="1"/>
+<line x1="502" y1="202" x2="502" y2="232" stroke="#bbb3a5" stroke-width="1"/>
+<line x1="504" y1="208" x2="526" y2="207" stroke="#b45309" stroke-width="2"/>
+<line x1="526" y1="207" x2="551" y2="209" stroke="#b45309" stroke-width="2"/>
+<line x1="551" y1="209" x2="580" y2="208" stroke="#b45309" stroke-width="2"/>
+<text x="541" y="252" text-anchor="middle" font-size="10" font-weight="700" fill="#b45309" font-family="Segoe UI,Noto Sans,sans-serif">scatter</text>
+<text x="541" y="266" text-anchor="middle" font-size="9" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">cohesion stays</text>
+<text x="541" y="277" text-anchor="middle" font-size="9" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">high</text>
+<rect x="616" y="196" width="90" height="42" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="3"/>
+<line x1="622" y1="232" x2="700" y2="232" stroke="#bbb3a5" stroke-width="1"/>
+<line x1="622" y1="202" x2="622" y2="232" stroke="#bbb3a5" stroke-width="1"/>
+<line x1="624" y1="230" x2="646" y2="229" stroke="#7b1fa2" stroke-width="2"/>
+<line x1="646" y1="229" x2="671" y2="231" stroke="#7b1fa2" stroke-width="2"/>
+<line x1="671" y1="231" x2="700" y2="230" stroke="#7b1fa2" stroke-width="2"/>
+<text x="661" y="252" text-anchor="middle" font-size="10" font-weight="700" fill="#7b1fa2" font-family="Segoe UI,Noto Sans,sans-serif">split</text>
+<text x="661" y="266" text-anchor="middle" font-size="9" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">fragmentation</text>
+<text x="661" y="277" text-anchor="middle" font-size="9" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">stays low</text>
+<text x="16" y="295" text-anchor="start" font-size="11" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">Seen in claim data: oscillation, stuck, timeout, scatter, split. Not seen: stacking.</text>
+<text x="16" y="318" text-anchor="start" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Labels are analysis heuristics after a failed trial (not the stop reason). First match in</text>
+<text x="16" y="331" text-anchor="start" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">priority order wins. stacking needs dog-separation history (rare in these runs).</text>
 </svg>

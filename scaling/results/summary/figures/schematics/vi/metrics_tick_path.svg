@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="320" viewBox="0 0 760 320" role="img" aria-label="buoc versus duong">
+<rect x="0" y="0" width="760" height="320" fill="#f7f6f2"/>
+<text x="16" y="26" text-anchor="start" font-size="14" font-weight="700" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Chi phí: bước (thời gian) versus đường (chó đi)</text>
+<rect x="16" y="44" width="350" height="256" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="8"/>
+<text x="34" y="70" text-anchor="start" font-size="12" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">Trục thời gian (bước / tick)</text>
+<line x1="50" y1="140" x2="340" y2="140" stroke="#bbb3a5" stroke-width="2"/>
+<line x1="50" y1="134" x2="50" y2="146" stroke="#5c5852" stroke-width="1"/>
+<line x1="79" y1="134" x2="79" y2="146" stroke="#5c5852" stroke-width="1"/>
+<line x1="108" y1="134" x2="108" y2="146" stroke="#5c5852" stroke-width="1"/>
+<line x1="137" y1="134" x2="137" y2="146" stroke="#5c5852" stroke-width="1"/>
+<line x1="166" y1="134" x2="166" y2="146" stroke="#5c5852" stroke-width="1"/>
+<line x1="195" y1="134" x2="195" y2="146" stroke="#5c5852" stroke-width="1"/>
+<line x1="224" y1="134" x2="224" y2="146" stroke="#5c5852" stroke-width="1"/>
+<line x1="253" y1="134" x2="253" y2="146" stroke="#5c5852" stroke-width="1"/>
+<line x1="282" y1="134" x2="282" y2="146" stroke="#5c5852" stroke-width="1"/>
+<line x1="311" y1="134" x2="311" y2="146" stroke="#5c5852" stroke-width="1"/>
+<line x1="340" y1="134" x2="340" y2="146" stroke="#5c5852" stroke-width="1"/>
+<text x="50" y="168" text-anchor="middle" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">0</text>
+<text x="340" y="168" text-anchor="middle" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">T0</text>
+<line x1="95" y1="120" x2="95" y2="160" stroke="#2f6b45" stroke-width="2.5"/>
+<circle cx="95" cy="140" r="5" fill="#2f6b45"/>
+<text x="95" y="108" text-anchor="middle" font-size="11" font-weight="700" fill="#2f6b45" font-family="Segoe UI,Noto Sans,sans-serif">xong ~183</text>
+<text x="250" y="108" text-anchor="middle" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">T0 = 10,000 (hạn chót)</text>
+<text x="34" y="200" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Một bước = một nhịp mô phỏng. Không phải</text>
+<text x="34" y="215" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">giây thật.</text>
+<rect x="386" y="44" width="358" height="256" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="8"/>
+<text x="404" y="70" text-anchor="start" font-size="12" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">Không gian: vết chó (đường)</text>
+<rect x="430" y="90" width="200" height="120" fill="#efece5" stroke="#bbb3a5" stroke-width="1"/>
+<circle cx="470" cy="150" r="7" fill="#3d6b3a"/>
+<circle cx="590" cy="150" r="12" fill="#cfe0f0" stroke="#1f4e79" stroke-width="1.5"/>
+<polyline points="455,175 470,165 500,158 530,152 560,150 575,150" fill="none" stroke="#1f4e79" stroke-width="2.5"/>
+<circle cx="455" cy="175" r="4" fill="#1f4e79"/>
+<text x="455" y="195" text-anchor="middle" font-size="9" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">chó</text>
+<text x="590" y="130" text-anchor="middle" font-size="9" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">đích</text>
+<text x="404" y="230" text-anchor="start" font-size="11" font-weight="700" fill="#5b4a2f" font-family="Segoe UI,Noto Sans,sans-serif">đường = tổng độ dài từng bước</text>
+<text x="404" y="248" text-anchor="start" font-size="11" font-weight="700" fill="#b45309" font-family="Segoe UI,Noto Sans,sans-serif">đường / chó = đường / D</text>
+<text x="404" y="268" text-anchor="start" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Đơn vị thế giới trên sân 500 x 500. Tổng mọi</text>
+<text x="404" y="281" text-anchor="start" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">chó.</text>
+</svg>

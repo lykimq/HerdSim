@@ -3,395 +3,248 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Giai đoạn 2: bản đồ cấu trúc, kết quả</title>
+  <title>Giai đoạn 2: bản đồ cấu trúc</title>
   <style>
-    :root {
-      --bg: #f7f6f2; --fg: #1c1b19; --muted: #5c5852; --card: #ffffff;
-      --line: #ddd8ce; --ok: #2f6b45; --bad: #9b2c2c; --accent: #1f4e79;
-      --plan: #5b4a2f; --code: #2a4a3a; --result: #1f4e79;
-    }
-    * { box-sizing: border-box; }
-    body { margin:0; font-family:"Segoe UI","Noto Sans","Helvetica Neue",Arial,sans-serif;
-           color:var(--fg); background:var(--bg); line-height:1.55; }
-    h1 { font-size:1.7rem; margin:0 0 8px; line-height:1.25; }
-    h2 { font-size:1.22rem; margin:40px 0 12px; border-top:1px solid var(--line);
-         padding-top:28px; line-height:1.3; }
-    h3 { font-size:1.05rem; margin:22px 0 8px; }
-    .muted { color:var(--muted); }
-    .lead { font-size:1.05rem; margin:0 0 18px; }
-    a { color:var(--accent); }
-    .tag { display:inline-block; font-size:0.72rem; font-weight:700; letter-spacing:0.04em;
-           padding:2px 8px; border-radius:999px; margin-right:6px; vertical-align:middle; }
-    .tag-out { background:#d6e2ef; color:var(--result); }
-    .tag-plan { background:#e8dcc8; color:var(--plan); }
-    .tag-run { background:#e4d7c3; color:#6b4f2a; }
-    .callout { background:#efece5; border-left:4px solid var(--accent); padding:12px 14px;
-               margin:14px 0; border-radius:0 8px 8px 0; }
-    .note { background:#efece5; padding:10px 12px; border-radius:8px; font-size:0.92rem;
-            color:var(--muted); margin:12px 0; }
-    .card { background:var(--card); border:1px solid var(--line); border-radius:10px;
-            padding:16px 18px; margin:12px 0; }
-    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-            gap:10px; margin:12px 0; }
-    .stat strong { display:block; font-size:1.2rem; }
-    .stat span { color:var(--muted); font-size:0.88rem; }
-    table { width:100%; border-collapse:collapse; background:var(--card);
-            border:1px solid var(--line); font-size:0.94rem; margin:10px 0; }
-    th, td { border-bottom:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:top; }
-    th { background:#efece5; }
-    .mono, code { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:0.88em; }
-    pre.cmd { background:#1c1b19; color:#f2efe8; padding:12px 14px; border-radius:8px;
-              overflow:auto; font-size:0.85rem; }
-    figure, figure.viz { margin:14px 0; background:var(--card); border:1px solid var(--line);
-             border-radius:10px; padding:12px; }
-    figure img, figure.viz img { width:100%; height:auto; display:block; border-radius:4px; background:#f7f6f2; }
-    figcaption { color:var(--muted); font-size:0.9rem; margin-top:8px; }
-    .layout-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-                   gap:10px; margin:12px 0; }
-    .layout-grid figure { margin:0; }
-    details.box { background:var(--card); border:1px solid var(--line); border-radius:10px;
-                  padding:10px 14px; margin:10px 0; }
-    details.box summary { cursor:pointer; font-weight:600; }
-    .layout { display:grid; grid-template-columns:240px 1fr; gap:20px;
-              max-width:1100px; margin:0 auto; padding:20px 18px 60px; }
-    aside.side { position:sticky; top:12px; align-self:start; max-height:calc(100vh - 24px);
-                 overflow:auto; background:var(--card); border:1px solid var(--line);
-                 border-radius:10px; padding:12px 10px; font-size:0.86rem; }
-    .side-title { font-weight:700; margin:0 0 8px; }
-    .side-group { color:var(--muted); font-size:0.75rem; text-transform:uppercase;
-                  letter-spacing:0.04em; margin:12px 0 4px; }
-    aside.side a { display:block; text-decoration:none; color:var(--fg); padding:5px 8px;
-                   border-radius:6px; border-left:3px solid transparent; }
-    aside.side a:hover { background:#efece5; color:var(--accent); }
-    .content { min-width:0; }
-    .side-toggle { display:none; position:fixed; right:14px; bottom:14px; z-index:40;
-                   border:1px solid var(--line); background:var(--card); border-radius:999px;
-                   padding:10px 14px; font-size:0.9rem; box-shadow:0 4px 16px rgba(0,0,0,0.12); cursor:pointer; }
-    @media (max-width:960px) {
-      .layout { grid-template-columns:1fr; }
-      aside.side { position:fixed; inset:0 auto 0 0; width:min(300px,86vw); max-height:none;
-                   transform:translateX(-105%); transition:transform 0.2s ease; z-index:50; }
-      aside.side.open { transform:translateX(0); }
-      .side-toggle { display:inline-flex; }
-      .side-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:45; }
-      .side-backdrop.show { display:block; }
-    }
-
-  </style>
+:root{--ink:#111827;--mut:#6b7280;--line:#e5e7eb;--acc:#2563eb;--bg:#f9fafb;--card:#fff;
+      --ok:#166534;--bad:#991b1b;--warn:#92400e;--plan:#5b4a2f;--result:#1e3a8a}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.65 -apple-system,'Segoe UI',Inter,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+header{background:linear-gradient(120deg,#1e3a8a,#0f766e);color:#fff;padding:40px 24px}
+header .in{max-width:1000px;margin:auto}
+header h1{margin:0 0 8px;font-size:1.85rem;line-height:1.25}
+header p{margin:0;opacity:.92;max-width:46rem}
+header a{color:#dbeafe}
+.layout{display:grid;grid-template-columns:230px 1fr;gap:32px;max-width:1280px;margin:0 auto;padding:24px}
+nav.side{position:sticky;top:16px;align-self:start;font-size:.88rem;max-height:calc(100vh - 32px);overflow:auto}
+nav.side .side-title{font-weight:700;margin:0 0 8px;color:var(--ink)}
+nav.side .side-group{color:var(--mut);font-size:.75rem;text-transform:uppercase;letter-spacing:.04em;margin:12px 0 4px}
+nav.side a{display:block;padding:5px 10px;color:var(--mut);text-decoration:none;border-left:2px solid var(--line)}
+nav.side a:hover,nav.side a:focus{color:var(--acc);border-color:var(--acc)}
+main.content{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 40px 40px;min-width:0}
+h2{margin-top:2.2em;padding-bottom:6px;border-bottom:2px solid var(--line);scroll-margin-top:16px;font-size:1.25rem}
+h2:first-of-type{margin-top:1.2em}
+h3{margin-top:1.6em;color:#1e3a8a;font-size:1.05rem}
+.lead{font-size:1.05rem;margin:0 0 18px;color:var(--mut)}
+.muted{color:var(--mut)}
+a{color:var(--acc)}
+.tag{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.04em;padding:2px 8px;border-radius:999px;margin-right:6px;vertical-align:middle}
+.tag-out{background:#dbeafe;color:var(--result)}
+.tag-plan{background:#fef3c7;color:var(--warn)}
+.tag-run{background:#ffedd5;color:#9a3412}
+.callout,.kpi-note{background:#eff6ff;border-left:4px solid var(--acc);padding:10px 14px;margin:12px 0;border-radius:0 8px 8px 0}
+.note{background:#f3f4f6;padding:10px 12px;border-radius:8px;font-size:.92rem;color:var(--mut);margin:12px 0}
+.card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}
+.stat strong{display:block;font-size:1.2rem}
+.stat span{color:var(--mut);font-size:.88rem}
+.table-wrap{overflow-x:auto;margin:8px 0}
+table{border-collapse:collapse;width:100%;font-size:.9rem;margin:8px 0}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+th{background:#f3f4f6}
+.mono,code{background:#eef2ff;border-radius:4px;padding:1px 5px;font-size:.88em;word-break:break-word;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre.cmd{background:#111827;color:#f9fafb;padding:12px 14px;border-radius:8px;overflow:auto;font-size:.85rem}
+figure{margin:24px 0;text-align:center}
+figure img{max-width:100%;height:auto;display:block;margin:0 auto;border:1px solid var(--line);border-radius:8px;background:#fff}
+figcaption{font-size:.88rem;color:var(--mut);margin-top:6px;text-align:left}
+.viz-block{margin:28px 0}
+.viz-block h3{margin-top:0}
+.viz-block.layout-fig figure img{width:min(100%,480px)}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.78rem;font-weight:600}
+.REJECTED,.BI_BAC_BO{background:#fee2e2;color:var(--bad)}
+.SUPPORTED,.DUOC_UNG_HO,.OK{background:#dcfce7;color:var(--ok)}
+.INCONCLUSIVE,.EVALUATED,.WEAK,.YEU,.PARTIAL,.MOT_PHAN{background:#fef3c7;color:var(--warn)}
+.SKIPPED,.UNEVALUATED,.BO_QUA,.CHUA_DANH_GIA{background:#ffedd5;color:#9a3412}
+ul{padding-left:1.2em}li{margin:6px 0}
+.side-toggle{display:none;position:fixed;right:14px;bottom:14px;z-index:40;border:1px solid var(--line);background:#fff;border-radius:999px;padding:10px 14px;font-size:.9rem;box-shadow:0 4px 16px rgba(0,0,0,.12);cursor:pointer}
+.side-backdrop{display:none}
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr}
+  nav.side{display:none}
+  nav.side.open{display:block;position:fixed;inset:0 auto 0 0;width:min(300px,86vw);background:#fff;z-index:50;padding:16px;border-right:1px solid var(--line)}
+  .side-toggle{display:inline-flex}
+  .side-backdrop.show{display:block;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:45}
+  main.content{padding:8px 18px 30px}
+  header{padding:28px 18px}header h1{font-size:1.45rem}
+}
+</style>
 </head>
 <body>
+<header><div class="in">
+  <h1>Giai đoạn 2: bản đồ cấu trúc</h1>
+  <p>Đối chiếu cấu trúc cơ sở: ở N cố định, bố cục xuất phát X0 có đổi số chó cần để chăn tin cậy không?</p>
+  <p style="margin-top:14px"><a href="REPORT_en.html">Bản tiếng Anh</a> · <a href="../../summary/SUMMARY_REPORT_vi.html">Báo cáo tổng hợp</a></p>
+</div></header>
 <div class="layout">
-  <aside class="side" id="side" aria-label="Contents">
-
+  <nav class="side" id="side" aria-label="Contents">
     <p class="side-title">Mục lục</p>
-    <div class="side-group">Mở đầu</div>
-    <a href="#tom-tat">Nhìn nhanh</a>
-    <a href="#cau-hoi">Giai đoạn 2 hỏi gì</a>
+    <div class="side-group">Bắt đầu</div>
+    <a href="#summary">Nhìn nhanh</a>
+    <a href="#question">Giai đoạn 2 hỏi gì</a>
     <div class="side-group">Thiết kế và chạy</div>
-    <a href="#thiet-ke">Những gì bị khóa</a>
-    <a href="#bo-cuc">Bốn bố cục</a>
-    <a href="#cach-chay">Cách đã chạy</a>
+    <a href="#design">Những gì bị khóa</a>
+    <a href="#layouts">Bốn bố cục</a>
+    <a href="#strategy">Cách đã chạy</a>
     <div class="side-group">Kết quả</div>
-    <a href="#ket-qua">Kết quả</a>
-    <a href="#metric">Metric (chu vi…)</a>
-    <a href="#dien-giai">Ý nghĩa</a>
-    <a href="#khang-dinh">Khẳng định C1a / C1b</a>
-    <a href="#gioi-han">Giới hạn</a>
-    <a href="#tiep">Bước sau</a>
+    <a href="#results">Kết quả</a>
+    <a href="#bstar">B* trên wide</a>
+    <a href="#claims">C1a / C1b</a>
+    <a href="#limits">Giới hạn</a>
+    <a href="#next">Tiếp</a>
     <div class="side-group">Phụ lục</div>
-    <a href="#phu-luc">Vì sao các giá trị</a>
-    <a href="#du-lieu">Dữ liệu thô</a>
-
-  </aside>
+    <a href="#raw-data">Dữ liệu thô</a>
+  </nav>
   <div class="side-backdrop" id="backdrop" hidden></div>
   <button type="button" class="side-toggle" id="toggle">Mục lục</button>
 <main class="content">
 
-  <p class="nav">
-    <a href="index.html">Về mục lục</a> ·
-    <a href="share_en/REPORT_en.html">English report</a> ·
-    <a href="../../phase1/guides/REPORT_vi.html">Giai đoạn 1</a>
-  </p>
-  <h1>Giai đoạn 2: bản đồ cấu trúc</h1>
-  <p class="lead muted">
-    Đối chiếu cấu trúc khởi đầu trên HerdSim (giao thức <span class="mono">scaling_v2</span>):
-    cùng số cừu N, bố cục X0 khác có đổi số chó cần để chăn tin cậy không?
-    Đọc từ trên xuống: tóm tắt -> câu hỏi -> thiết kế -> cách chạy -> kết quả -> ý nghĩa.
-  </p>
-
-  <h2 id="tom-tat"><span class="tag tag-out">TÓM TẮT</span> Nhìn nhanh</h2>
+  <h2 id="summary"><span class="tag tag-out">TÓM TẮT</span> Nhìn nhanh</h2>
   <div class="callout">
-    <strong>Một câu kết quả:</strong>
-    Trên bản đồ này, cả bốn bố cục (gọn, rộng, tách, nhiều lạc) đều đạt R = 1,0 từ D = 1
-    với N trong {50, 100, 200}. C1a (số chó tối thiểu lệch theo bố cục) không được hỗ trợ.
-    Cấu trúc vẫn đổi công sức, thời gian thắng, và metric hình dạng (chu vi, diện tích bao…).
+    <strong>Kết quả một câu:</strong>
+    Mọi bố cục đạt R = 1.00 từ D = 1 tại N trong {50, 100, 200}. C1a <strong>BỊ BÁC BỎ</strong>.
+    Cấu trúc vẫn đổi công sức và thời gian rất lớn.
   </div>
-  <table>
-    <thead><tr><th>Mục</th><th>Giá trị</th></tr></thead>
-    <tbody>
-      <tr><td>Phương pháp chó</td><td><span class="mono">strombom_multi</span></td></tr>
-      <tr><td>Bố cục X0</td><td>gọn, rộng, tách, nhiều lạc</td></tr>
-      <tr><td>Số cừu N</td><td>50, 100, 200 (khẳng định; khói còn dùng 5, 10, 25)</td></tr>
-      <tr><td>Số chó D</td><td>1, 2, 3, 4, 6, 10, 15, 20, 25, 35</td></tr>
-      <tr><td>Ngưỡng tin cậy</td><td>R ≥ 0,90</td></tr>
-      <tr><td>Sân / đích</td><td>Giống giai đoạn 1: 500×500; đích (370, 250); bán kính 15·√(N/50)</td></tr>
-      <tr><td>Lấy mẫu</td><td>Khói 5 hạt; trinh sát 30; khẳng định 100 trên cửa sổ D = 1 và 2</td></tr>
-      <tr><td>Dữ liệu trích dẫn</td><td>Bản gộp khẳng định: 5 280 dòng (24 ô × 100 + 96 ô × 30)</td></tr>
-      <tr><td>Metric đã ghi</td><td>cohesion, spread, extent, <strong>chu vi (perimeter)</strong>, hull_area, mật độ, tỷ lệ trục, phân mảnh, lạc đàn, i_dir, coverage (+ parquet timeseries)</td></tr>
-    </tbody>
-  </table>
   <div class="grid">
-    <div class="card stat"><span>D_min khẳng định (mọi bố cục)</span><strong>1 chó</strong></div>
-    <div class="card stat"><span>C1a (lệch D_min)</span><strong>Không được</strong></div>
-    <div class="card stat"><span>C1b (trạng thái vs N,D)</span><strong>Không đánh giá được</strong></div>
-    <div class="card stat"><span>R tổng (bản gộp)</span><strong>1,00</strong></div>
+    <div class="card stat"><span>D_min xác nhận (mọi bố cục)</span><strong>1 chó</strong></div>
+    <div class="card stat"><span>C1a (lệch D_min)</span><strong>BỊ BÁC BỎ</strong></div>
+    <div class="card stat"><span>C1b (trạng thái vs N,D)</span><strong>KHÔNG RÕ RÀNG</strong></div>
+    <div class="card stat"><span>Dòng hợp nhất / R</span><strong>5,280 / 1.00</strong></div>
   </div>
-  <figure>
-    <img src="assets/figures/takeaway_sketch.png" alt="Sơ đồ tóm tắt giai đoạn 2" />
-    <figcaption>Cùng sàn tin cậy, khác chi phí điều khiển và hình dạng đàn.</figcaption>
-  </figure>
 
-  <h2 id="cau-hoi"><span class="tag tag-plan">CÂU HỎI</span> Giai đoạn 2 hỏi gì?</h2>
+  <h2 id="question"><span class="tag tag-plan">CÂU HỎI</span> Giai đoạn 2 hỏi gì?</h2>
+  <p>RQ1 / Gói B: cùng kích thước đàn N, X0 khác có đổi D_min (R &gt;= 0.90) không?</p>
+  <ul>
+    <li><strong>C1a:</strong> với ít nhất một N, D_min lệch ít nhất một bước lưới chó giữa các bố cục.</li>
+    <li><strong>C1b:</strong> mô hình trạng thái sớm dự đoán thành công tốt hơn (N, D) đơn thuần.</li>
+  </ul>
+
+  <h2 id="design"><span class="tag tag-out">THIẾT KẾ</span> Những gì bị khóa</h2>
+  <table>
+    <thead><tr><th>Lựa chọn</th><th>Giá trị</th></tr></thead>
+    <tbody>
+      <tr><td>Phương pháp</td><td>chỉ strombom_multi</td></tr>
+      <tr><td>N (xác nhận)</td><td>50, 100, 200</td></tr>
+      <tr><td>Bố cục</td><td>bốn họ X0 (xem Bốn bố cục)</td></tr>
+      <tr><td>Lưới D / theta / T0</td><td>như Giai đoạn 1 / 0.90 / 10,000</td></tr>
+      <tr><td>Mẫu</td><td>dò 30; xác nhận 100 trên cửa sổ D=1 và D=2 (24 ô)</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="layouts"><span class="tag tag-out">THIẾT KẾ</span> Bốn bố cục</h2>
+  <figure>
+    <img src="assets/layouts/arena_overview.svg" alt="Sân" />
+    <figcaption>
+      Phác thảo sân dùng chung: sân 500 x 500, đích (370, 250), chó sau đàn.
+      Giai đoạn 2 dùng lại hình học này cho mọi bố cục; chỉ đổi X0 của cừu.
+    </figcaption>
+  </figure>
+  <p>Chỉ đổi kiểu xuất phát cừu X0. Sân, đích, chó, lưới N, lưới D, theta và T0 giữ khớp Giai đoạn 1 để hiệu ứng bố cục không lẫn với đổi sân. Đối chiếu chi phí và D_min nằm ở mục Kết quả.</p>
+  <figure>
+    <img src="assets/layouts/four_layouts_vi.svg" alt="Bốn bố cục xuất phát tại N = 50" />
+    <figcaption>Bốn họ X0 trên cùng sân (N = 50, hạt 2026). Xanh lá = cừu, ô xanh = chó (minh họa), đỏ = cá thể lạc khi có.</figcaption>
+  </figure>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Bố cục</th><th>Định nghĩa generator</th><th>Vai trò trong thiết kế</th></tr></thead>
+    <tbody>
+      <tr><td><span class="mono">compact</span></td><td>Gauss, sigma = 0.3 x 30 = 9</td><td>Đàn gọn tham chiếu (hình học cơ sở Giai đoạn 1)</td></tr>
+      <tr><td><span class="mono">wide</span></td><td>Gauss, sigma = 2.0 x 30 = 60</td><td>Đàn loãng cần gom trước</td></tr>
+      <tr><td><span class="mono">split</span></td><td>2 cụm nếu N &lt; 12, không thì 3; tách ít nhất 10</td><td>Xuất phát cụm (bố cục kiểm tra)</td></tr>
+      <tr><td><span class="mono">outlier_rich</span></td><td>Lõi ~80% (sigma = 12); ~20% cá thể lạc ngoài r_a * N^(2/3)</td><td>Lõi cộng cá thể lạc</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2 id="strategy"><span class="tag tag-run">CHẠY</span> Cách đã chạy</h2>
+  <ol>
+    <li>Thử nghiệm: 600 lượt.</li>
+    <li>Dò đường: 3 N x 4 bố cục x 10 D x 30 = 3,600.</li>
+    <li>Xác nhận: 24 ô x 100 = 2,400; hợp nhất 5,280 dòng; Gói B.</li>
+  </ol>
+
+  <h2 id="results"><span class="tag tag-out">KẾT QUẢ</span> Kết quả</h2>
   <p>
-    Câu hỏi nghiên cứu (cấu trúc / RQ1, gói B): cùng số cừu N, bố cục khởi đầu X0 khác
-    có làm đổi số chó tối thiểu D_min để chăn tin cậy (R ≥ 0,90) không?
+    D_min = 1 với cả 12 ô (bố cục, N); bootstrap độ rộng 0. Tại D = 1 mọi ô xác nhận có R = 1.00.
+    Vậy cấu trúc không dịch biên tin cậy trên cơ sở; nó dịch chi phí.
   </p>
-  <ul>
-    <li><strong>C1a:</strong> ít nhất một mức N mà D_min lệch ≥ 1 bước lưới số chó giữa các bố cục.</li>
-    <li><strong>C1b:</strong> mô hình trạng thái sớm dự đoán thắng/thua tốt hơn chỉ (N, D) (leave-one-N-out).</li>
-  </ul>
-  <p class="muted">
-    Giai đoạn 1 đã cho D_min = 1 trên bố cục gọn với các N này. Giai đoạn 2 hỏi bố cục khác
-    có đẩy sàn đó lên không. Chuyển phương pháp là giai đoạn 4.
-  </p>
-
-  <h2 id="thiet-ke"><span class="tag tag-out">THIẾT KẾ</span> Những gì bị khóa</h2>
-  <table>
-    <thead><tr><th>Lựa chọn</th><th>Giá trị</th><th>Vì sao một dòng</th></tr></thead>
-    <tbody>
-      <tr><td>N khẳng định</td><td>50, 100, 200</td><td>Đủ lớn cho tách/lạc; cùng sàn D_min = 1 trên gọn như giai đoạn 1.</td></tr>
-      <tr><td>Bố cục</td><td>4 họ</td><td>Hợp đồng bố cục: gọn là mốc; rộng / tách / lạc là đối chứng.</td></tr>
-      <tr><td>Lưới D</td><td>giống giai đoạn 1</td><td>C1a đo bằng cùng bước lưới số chó với bản đồ kích thước.</td></tr>
-      <tr><td>Phương pháp</td><td>chỉ strombom_multi</td><td>RQ1 baseline; kubo/fat là giai đoạn 4.</td></tr>
-      <tr><td>Hạt giống</td><td>30 rồi 100</td><td>Bản đồ trinh sát đầy đủ, rồi khóa cửa sổ D_min (ở đây D = 1 và 2).</td></tr>
-    </tbody>
-  </table>
-  <p class="note">Chi tiết sigma / khe / tỷ lệ lạc: xem <a href="#phu-luc">Phụ lục</a>.</p>
-
-  <h2 id="bo-cuc"><span class="tag tag-out">THIẾT KẾ</span> Bốn bố cục (hình)</h2>
   <figure>
-    <img src="assets/layouts/arena_overview.svg" alt="Tổng quan sân và đích" />
-    <figcaption>Cùng sân giai đoạn 1. Chỉ đổi cách xếp cừu lúc đầu.</figcaption>
+    <img src="assets/figures/f4_layout_cost.png" alt="Chi phí theo bố cục" />
+    <figcaption>
+      Tổng đường trung vị tại D = 1 theo bố cục và N. Wide khoảng 19x đến 36x đường compact;
+      outlier_rich tăng mạnh theo N (khoảng 11x đường tại N = 200); split khớp compact
+      (coi là kiểm tra, không phải phát hiện). Nguồn: <span class="mono">../claim/merged_trials.csv</span> (D = 1).
+    </figcaption>
   </figure>
-  <div class="layout-grid">
-    <figure><img src="assets/layouts/compact.svg" alt="Bố cục gọn" /><figcaption>Gọn (mốc)</figcaption></figure>
-    <figure><img src="assets/layouts/wide.svg" alt="Bố cục rộng" /><figcaption>Rộng</figcaption></figure>
-    <figure><img src="assets/layouts/split.svg" alt="Bố cục tách" /><figcaption>Tách cụm</figcaption></figure>
-    <figure><img src="assets/layouts/outlier_rich.svg" alt="Bố cục nhiều lạc" /><figcaption>Nhiều lạc</figcaption></figure>
-  </div>
-
-  <h2 id="cach-chay"><span class="tag tag-run">CHẠY</span> Cách đã chạy</h2>
-  <div class="callout">
-    <ol>
-      <li><strong>Thử khói</strong>: 600 lần, ~7 phút. Đường ống + bốn bộ tạo X0.</li>
-      <li><strong>Trinh sát</strong>: 3 600 lần, ~3,2 giờ. Bản đồ R đầy đủ.</li>
-      <li><strong>Lập cửa sổ</strong>: 24 ô biên (D = 1 và 2 cho mọi bố cục × N).</li>
-      <li><strong>Gieo lại</strong>: 2 400 lần, ~3,0 giờ (đuôi chậm ở rộng N = 200).</li>
-      <li><strong>Gộp + gói B</strong>: 5 280 dòng; biên và so sánh predictor.</li>
-    </ol>
-  </div>
-  <details class="box" open>
-    <summary>1. Thử khói: 600 lần (~7 phút)</summary>
-    <p>N ∈ {5,10,25,50,100}, D ∈ {1…10}, 5 hạt, đủ bốn bố cục. Xong. Không trích dẫn cho C1a.</p>
-  </details>
-  <details class="box" open>
-    <summary>2. Trinh sát: 3 600 lần (~3,2 giờ)</summary>
-    <p>Mọi ô trinh sát có R = 1,0 → gợi ý D_min = 1 mọi bố cục.</p>
-    <figure>
-      <img src="assets/figures/reliability_heatmaps_by_layout.png" alt="Bản đồ R trinh sát" />
-      <figcaption>Heatmap trinh sát: mọi ô vàng (R = 1) trên lưới D.</figcaption>
-    </figure>
-  </details>
-  <details class="box" open>
-    <summary>3–4. Khẳng định: 24 ô × 100 hạt = 2 400 (~3,0 giờ)</summary>
-    <p>
-      Cửa sổ = ứng viên D_min và bước D kế. Với D_min trinh sát = 1 thì đó là D = 1 và 2.
-      R khẳng định tại D = 1 vẫn = 1,0 trên cả 12 cặp (bố cục, N). Bootstrap CI của D_min là [1, 1] mọi nơi.
-    </p>
-    <figure>
-      <img src="assets/figures/claim_r_d1.png" alt="R khẳng định tại D=1" />
-      <figcaption>R tại D = 1 (100 hạt) so với ngưỡng 0,90.</figcaption>
-    </figure>
-  </details>
-
-  <h2 id="ket-qua"><span class="tag tag-out">KẾT QUẢ</span> Kết quả</h2>
   <table>
-    <thead><tr><th>Bậc</th><th>Số lần</th><th>Thời gian</th><th>Trích dẫn khoa học?</th></tr></thead>
+    <thead><tr><th>Bố cục</th><th>N</th><th>R tại D=1</th><th>Bước trung vị</th><th>Đường trung vị</th></tr></thead>
     <tbody>
-      <tr><td>Thử khói</td><td>600</td><td>~7 phút</td><td>Không</td></tr>
-      <tr><td>Trinh sát</td><td>3 600</td><td>~3,2 giờ</td><td>Không (lập kế hoạch)</td></tr>
-      <tr><td>Khẳng định</td><td>2 400</td><td>~3,0 giờ</td><td>Có (cùng bản gộp)</td></tr>
-      <tr><td>Bản gộp</td><td>5 280</td><td>-</td><td>Có</td></tr>
+      <tr><td>compact</td><td>50 / 100 / 200</td><td>1.00</td><td>195 / 204 / 191</td><td>157 / 161 / 144</td></tr>
+      <tr><td>split</td><td>50 / 100 / 200</td><td>1.00</td><td>195 / 205 / 193</td><td>158 / 162 / 144</td></tr>
+      <tr><td>outlier_rich</td><td>50 / 100 / 200</td><td>1.00</td><td>224 / 501 / 1,228</td><td>209 / 554 / 1,647</td></tr>
+      <tr><td>wide</td><td>50 / 100 / 200</td><td>1.00</td><td>2,138 / 3,074 / 3,870</td><td>2,925 / 4,319 / 5,213</td></tr>
     </tbody>
   </table>
+  <p class="muted">Nguồn: <span class="mono">../claim/merged_trials.csv</span> (D = 1).</p>
 
-  <h3>Số chó tối thiểu theo bố cục (khẳng định / gói B)</h3>
-  <table>
-    <thead><tr><th>N</th><th>gọn</th><th>rộng</th><th>tách</th><th>nhiều lạc</th><th>Lệch ≥ 1 bước?</th></tr></thead>
-    <tbody>
-      <tr><td>50</td><td>1</td><td>1</td><td>1</td><td>1</td><td>Không</td></tr>
-      <tr><td>100</td><td>1</td><td>1</td><td>1</td><td>1</td><td>Không</td></tr>
-      <tr><td>200</td><td>1</td><td>1</td><td>1</td><td>1</td><td>Không</td></tr>
-    </tbody>
-  </table>
-  <figure>
-    <img src="assets/figures/dmin_by_layout.png" alt="Cột D_min theo bố cục" />
-    <figcaption>D_min hạng khẳng định: sàn 1 mọi bố cục.</figcaption>
-  </figure>
-
-  <h3>Cùng D_min, khác công sức và thời gian (khẳng định, D = 1)</h3>
-  <table>
-    <thead><tr><th>N</th><th>chỉ số</th><th>gọn</th><th>tách</th><th>nhiều lạc</th><th>rộng</th></tr></thead>
-    <tbody>
-      <tr><td>50</td><td>đường đi</td><td>158</td><td>158</td><td>209</td><td>2 925</td></tr>
-      <tr><td>100</td><td>đường đi</td><td>161</td><td>162</td><td>554</td><td>4 320</td></tr>
-      <tr><td>200</td><td>đường đi</td><td>144</td><td>144</td><td>1 647</td><td>5 213</td></tr>
-      <tr><td>100</td><td>bước (trung bình)</td><td>204</td><td>205</td><td>518</td><td>3 167</td></tr>
-    </tbody>
-  </table>
-  <div class="layout-grid">
-    <figure>
-      <img src="assets/figures/effort_d1_by_layout.png" alt="Đường đi theo bố cục" />
-      <figcaption>Trung vị độ dài đường chó tại D = 1.</figcaption>
-    </figure>
-    <figure>
-      <img src="assets/figures/ticks_d1_by_layout.png" alt="Số bước theo bố cục" />
-      <figcaption>Trung vị số bước đến thắng tại D = 1.</figcaption>
-    </figure>
-  </div>
-  <p class="note">
-    Rộng tốn đường đi khoảng 25–35 lần gọn ở N = 100, và chậm hơn nhiều, nhưng vẫn thắng trước hết giờ với R = 1.
-    Tách gần như trùng gọn trên bộ điều khiển này.
-  </p>
-
-  <h2 id="metric"><span class="tag tag-out">KẾT QUẢ</span> Metric đã ghi (kể cả chu vi)</h2>
+  <h2 id="bstar"><span class="tag tag-out">KẾT QUẢ</span> B* trên wide</h2>
   <p>
-    Mỗi lần chạy ghi mean / min / max / auc trên <span class="mono">trials.csv</span>.
-    Khi bật timeseries, parquet còn lưu chu vi, diện tích bao… theo từng bước.
-    Runner luôn gắn đủ registry metric (các giai đoạn sau cùng đường; một số lệnh giai đoạn 5 chỉ tắt parquet để tiết kiệm đĩa).
+    Trên xuất phát wide, B* = 2 (không phải 1) tại N = 50, 100 và 200:
+    đường 2,337 so 2,925; 3,003 so 4,319; 3,694 so 5,213.
+    Đó là <strong>bố cục</strong> cơ sở duy nhất nơi thêm một chó giảm quãng đường đủ rõ.
   </p>
-  <h3>Trung bình khẳng định tại N = 100, D = 1 (100 hạt)</h3>
-  <table>
-    <thead><tr><th>Metric</th><th>gọn</th><th>tách</th><th>nhiều lạc</th><th>rộng</th></tr></thead>
-    <tbody>
-      <tr><td>Chu vi</td><td>86</td><td>84</td><td>171</td><td>549</td></tr>
-      <tr><td>Diện tích hull</td><td>486</td><td>458</td><td>2 304</td><td>22 765</td></tr>
-      <tr><td>Cohesion</td><td>6,8</td><td>7,0</td><td>8,5</td><td>27,9</td></tr>
-      <tr><td>Phân mảnh</td><td>0,99</td><td>0,99</td><td>0,92</td><td>0,65</td></tr>
-      <tr><td>Số lạc</td><td>~0</td><td>0</td><td>3,3</td><td>23,2</td></tr>
-      <tr><td>Mật độ đàn</td><td>0,22</td><td>0,22</td><td>0,13</td><td>0,04</td></tr>
-      <tr><td>Tỷ lệ trục</td><td>1,46</td><td>1,45</td><td>1,61</td><td>1,63</td></tr>
-      <tr><td>Phủ (coverage)</td><td>1,00</td><td>1,00</td><td>0,91</td><td>0,34</td></tr>
-    </tbody>
-  </table>
-  <div class="layout-grid">
-    <figure>
-      <img src="assets/figures/shape_metrics_n100_d1.png" alt="Các metric hình dạng" />
-      <figcaption>Tám metric trạng thái cạnh nhau.</figcaption>
-    </figure>
-    <figure>
-      <img src="assets/figures/shape_ratio_vs_compact.png" alt="Tỷ số so với gọn" />
-      <figcaption>Tỷ số so với gọn (1 = bằng gọn).</figcaption>
-    </figure>
-  </div>
   <figure>
-    <img src="assets/figures/timeseries_perimeter_example.png" alt="Chu vi theo thời gian" />
-    <figcaption>Ví dụ quỹ đạo chu vi (hạt 2026): rộng bắt đầu cao rồi thu; gọn/tách thấp và phẳng.</figcaption>
+    <img src="assets/figures/f10_wide_bstar_path.png" alt="B sao wide" />
+    <figcaption>
+      Chỉ trên xuất phát wide, số chó tin cậy rẻ nhất B* là 2 chứ không phải 1:
+      đường trung vị giảm từ 2,925 xuống 2,337 (N=50), 4,319 xuống 3,003 (N=100), và 5,213 xuống 3,694 (N=200).
+      Đây là bố cục cơ sở duy nhất mà thêm một chó cắt tổng đường đủ rõ.
+      Nguồn: <span class="mono">../claim/packages/b/frontier_by_layout.csv</span>.
+    </figcaption>
   </figure>
 
-  <h2 id="dien-giai"><span class="tag tag-out">DIỄN GIẢI</span> Ý nghĩa</h2>
-  <ul>
-    <li><strong>Câu tin cậy:</strong> trên giao thức này, bố cục không buộc phải thêm chó. Một chó đã vượt ngưỡng cho cả bốn kiểu bắt đầu.</li>
-    <li><strong>Câu chi phí / độ khó:</strong> bố cục vẫn quan trọng. Rộng (và phần nào nhiều lạc) tốn đường đi và thời gian hơn nhiều; trạng thái đàn loãng hơn (chu vi, hull, lạc).</li>
-    <li><strong>Tách ≈ gọn</strong> ở đây với Strombom trên D_min, đường đi, và hầu hết mean hình dạng: bộ điều khiển có vẻ gom lại cụm mà không cần chó thứ hai.</li>
-    <li><strong>So giai đoạn 1:</strong> giai đoạn 1 nói D_min gọn phẳng ở 1 khi N ≥ 25. Giai đoạn 2 nói sàn đó không riêng cho gọn trên {50,100,200} với phương pháp này.</li>
-  </ul>
-
-  <h2 id="khang-dinh"><span class="tag tag-out">KHẲNG ĐỊNH</span> C1a / C1b</h2>
+  <h2 id="claims"><span class="tag tag-out">KHẲNG ĐỊNH</span> C1a / C1b</h2>
   <table>
-    <thead><tr><th>Claim</th><th>Luật</th><th>Phán quyết trên map này</th></tr></thead>
+    <thead><tr><th>Kết luận</th><th>Đánh giá</th><th>Bằng chứng</th></tr></thead>
     <tbody>
-      <tr>
-        <td>C1a</td>
-        <td>Ít nhất một N có lệch D_min ≥ 1 bước lưới giữa các X0 ở ngưỡng 0,90</td>
-        <td><strong>Không được hỗ trợ</strong> (mọi D_min = 1; CI bootstrap [1,1])</td>
-      </tr>
-      <tr>
-        <td>C1b</td>
-        <td>Mô hình trạng thái có NLL ngoài mẫu thấp hơn (N, D)</td>
-        <td><strong>Không đánh giá được</strong> (cần cả thắng và thua; mọi ô đều thắng)</td>
-      </tr>
+      <tr><td>C1a</td><td>BỊ BÁC BỎ</td><td><span class="mono">../claim/packages/b/frontier_by_layout.csv</span>: D_min = 1 cả 4 bố cục</td></tr>
+      <tr><td>C1b</td><td>KHÔNG RÕ RÀNG</td><td>Không dịch D_min; NLL Gói B không thông tin</td></tr>
     </tbody>
   </table>
-  <p class="muted">
-    Bác C1a trên D_min không có nghĩa bố cục vô nghĩa: biên số chó không dịch, nhưng công sức và hình dạng vẫn đổi.
-  </p>
 
-  <h2 id="gioi-han"><span class="tag tag-out">GIỚI HẠN</span> Những gì lần chạy này không chứng minh</h2>
+  <h2 id="limits"><span class="tag tag-out">GIỚI HẠN</span> Giới hạn</h2>
   <ul>
-    <li>Chỉ <span class="mono">strombom_multi</span>. Phương pháp khác là giai đoạn 4.</li>
-    <li>Chỉ lùa vào đĩa đích trên sân 500. Không phải cổng, NetLogo, hay nông trại thật.</li>
-    <li>Chưa chạy N = 300 / 400; tùy chọn sau map này (mọi bố cục đã sàn D_min = 1).</li>
-    <li>C1b vẫn không đánh giá được cho đến khi có ô thất bại cho predictor trạng thái.</li>
+    <li>Chỉ phương pháp cơ sở. Chuyển giao bộ điều khiển là Giai đoạn 4.</li>
+    <li>Hiệu ứng sàn: D_min không xuống dưới 1 khi R = 1.00 tại D = 1.</li>
+    <li>Bộ sinh split có thể không tạo bài toán đàn con cứng (CHƯA XÁC NHẬN).</li>
   </ul>
 
-  <h2 id="tiep"><span class="tag tag-out">TIẾP</span> Bước sau</h2>
-  <ul>
-    <li>Giai đoạn 4 (kubo / fat): pattern D_min phẳng + công sức theo bố cục có chuyển phương pháp không?</li>
-    <li>Không nâng N chỉ để “săn” lệch D_min trừ khi có giả thuyết mới.</li>
-    <li>Metric hình dạng (chu vi, hull…) sẵn cho phân tích cơ chế nếu method khác sau này có quá tải.</li>
-  </ul>
+  <h2 id="next"><span class="tag tag-out">TIẾP</span> Tiếp</h2>
+  <p>Giai đoạn 4 chuyển giao. Tổng hợp: <span class="mono">../../summary/SUMMARY_REPORT_vi.html</span>.</p>
 
-  <h2 id="phu-luc"><span class="tag tag-plan">PHỤ LỤC</span> Vì sao các giá trị</h2>
-  <ul>
-    <li><strong>N = {50,100,200}:</strong> tách dùng 3 cụm khi N ≥ 12; lạc ~20% cần nhiều hơn vài con; D_min gọn đã = 1 từ giai đoạn 1.</li>
-    <li><strong>Không lấy N = 5,10 cho khẳng định:</strong> chế độ đàn nhỏ và luật tách 2 cụm; khói có thể dùng.</li>
-    <li><strong>Sigma gọn = 9, độ lan = 30; sigma rộng = 60:</strong> lệch cohesion rõ mà vẫn nằm trong sân.</li>
-    <li><strong>Khe tách ≥ 10; bán kính đo = 5:</strong> cụm còn tách dưới metric phân mảnh.</li>
-    <li><strong>Lạc ~20% ngoài r_a N^(2/3):</strong> vành đai, không phải đàn thứ hai (50%) hay một con (5% khi N nhỏ).</li>
-  </ul>
-
-  <h2 id="du-lieu"><span class="tag tag-plan">PHỤ LỤC</span> Dữ liệu thô</h2>
+  <h2 id="raw-data"><span class="tag tag-plan">PHỤ LỤC</span> Dữ liệu thô</h2>
   <table>
     <thead><tr><th>Đường dẫn</th><th>Nội dung</th></tr></thead>
     <tbody>
-      <tr><td><span class="mono">scaling/results/phase2/pilot_state/</span></td><td>Khói 600</td></tr>
-      <tr><td><span class="mono">scaling/results/phase2/scout/</span></td><td>Trinh sát 3 600 + timeseries</td></tr>
-      <tr><td><span class="mono">scaling/results/phase2/claim/</span></td><td>Khẳng định 2 400, gộp 5 280, gói B</td></tr>
-      <tr><td><span class="mono">share_en/assets/claim/packages/b/</span></td><td>frontier_by_layout.csv, predictor_comparison.csv</td></tr>
-      <tr><td><span class="mono">assets/figures/</span></td><td>Các PNG dùng ở trên</td></tr>
+      <tr><td><span class="mono">../claim/merged_trials.csv</span></td><td>Hợp nhất 5,280 dòng</td></tr>
+      <tr><td><span class="mono">../claim/packages/b/</span></td><td>Biên Gói B</td></tr>
+      <tr><td><span class="mono">../claim/README.md</span></td><td>README thư mục</td></tr>
     </tbody>
   </table>
-  <pre class="cmd">make -C scaling scaling-analyse PROTOCOL=phase2_claim PACKAGE=B</pre>
 
 </main>
 </div>
+
 <script>
-(function () {
-  var side = document.getElementById("side");
-  var btn = document.getElementById("toggle");
-  var backdrop = document.getElementById("backdrop");
-  if (!side || !btn) return;
-  function close() {
-    side.classList.remove("open");
-    if (backdrop) { backdrop.classList.remove("show"); backdrop.hidden = true; }
-  }
-  btn.addEventListener("click", function () {
-    var open = side.classList.toggle("open");
-    if (backdrop) { backdrop.classList.toggle("show", open); backdrop.hidden = !open; }
-  });
-  if (backdrop) backdrop.addEventListener("click", close);
+(function(){
+  var side=document.getElementById('side');
+  var btn=document.getElementById('toggle');
+  var bd=document.getElementById('backdrop');
+  if(!side||!btn) return;
+  function open(){ side.classList.add('open'); if(bd){ bd.hidden=false; bd.classList.add('show'); } }
+  function close(){ side.classList.remove('open'); if(bd){ bd.hidden=true; bd.classList.remove('show'); } }
+  btn.addEventListener('click', function(){ side.classList.contains('open')?close():open(); });
+  if(bd) bd.addEventListener('click', close);
 })();
 </script>
+
 </body>
 </html>

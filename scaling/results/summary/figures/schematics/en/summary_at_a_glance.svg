@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="780" height="420" viewBox="0 0 780 420" role="img" aria-label="summary results">
 <rect width="780" height="420" fill="#f7f6f2"/>
-<text x="16" y="28" font-size="15" font-weight="700" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Results at a glance (claim-grade Phases 1, 2, 4)</text>
+<text x="16" y="28" font-size="15" font-weight="700" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Main results from Phases 1, 2, and 4</text>
 <rect x="16" y="48" width="240" height="150" rx="10" fill="#fff" stroke="#1f4e79" stroke-width="2"/>
 <text x="30" y="74" font-size="12" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">Baseline D_min</text>
 <text x="30" y="116" font-size="34" font-weight="800" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">1</text>
@@ -12,7 +12,7 @@
 <text x="284" y="74" font-size="12" font-weight="700" fill="#b45309" font-family="Segoe UI,Noto Sans,sans-serif">Extra dogs</text>
 <text x="284" y="116" font-size="34" font-weight="800" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">88%</text>
 <text x="284" y="142" font-size="13" font-weight="600" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">cells wasteful</text>
-<text x="284" y="166" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Time ~183 ticks flat; ~146 path /</text>
+<text x="284" y="166" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Time ~183 ticks flat; ~148 path /</text>
 <text x="284" y="182" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">dog</text>
 <rect x="524" y="48" width="240" height="150" rx="10" fill="#fff" stroke="#9b2c2c" stroke-width="2"/>
 <text x="538" y="74" font-size="12" font-weight="700" fill="#9b2c2c" font-family="Segoe UI,Noto Sans,sans-serif">Draft D_min(N)</text>

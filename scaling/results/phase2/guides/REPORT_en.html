@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Phase 2: structure map</title>
+  <style>
+:root{--ink:#111827;--mut:#6b7280;--line:#e5e7eb;--acc:#2563eb;--bg:#f9fafb;--card:#fff;
+      --ok:#166534;--bad:#991b1b;--warn:#92400e;--plan:#5b4a2f;--result:#1e3a8a}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.65 -apple-system,'Segoe UI',Inter,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+header{background:linear-gradient(120deg,#1e3a8a,#0f766e);color:#fff;padding:40px 24px}
+header .in{max-width:1000px;margin:auto}
+header h1{margin:0 0 8px;font-size:1.85rem;line-height:1.25}
+header p{margin:0;opacity:.92;max-width:46rem}
+header a{color:#dbeafe}
+.layout{display:grid;grid-template-columns:230px 1fr;gap:32px;max-width:1280px;margin:0 auto;padding:24px}
+nav.side{position:sticky;top:16px;align-self:start;font-size:.88rem;max-height:calc(100vh - 32px);overflow:auto}
+nav.side .side-title{font-weight:700;margin:0 0 8px;color:var(--ink)}
+nav.side .side-group{color:var(--mut);font-size:.75rem;text-transform:uppercase;letter-spacing:.04em;margin:12px 0 4px}
+nav.side a{display:block;padding:5px 10px;color:var(--mut);text-decoration:none;border-left:2px solid var(--line)}
+nav.side a:hover,nav.side a:focus{color:var(--acc);border-color:var(--acc)}
+main.content{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 40px 40px;min-width:0}
+h2{margin-top:2.2em;padding-bottom:6px;border-bottom:2px solid var(--line);scroll-margin-top:16px;font-size:1.25rem}
+h2:first-of-type{margin-top:1.2em}
+h3{margin-top:1.6em;color:#1e3a8a;font-size:1.05rem}
+.lead{font-size:1.05rem;margin:0 0 18px;color:var(--mut)}
+.muted{color:var(--mut)}
+a{color:var(--acc)}
+.tag{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.04em;padding:2px 8px;border-radius:999px;margin-right:6px;vertical-align:middle}
+.tag-out{background:#dbeafe;color:var(--result)}
+.tag-plan{background:#fef3c7;color:var(--warn)}
+.tag-run{background:#ffedd5;color:#9a3412}
+.callout,.kpi-note{background:#eff6ff;border-left:4px solid var(--acc);padding:10px 14px;margin:12px 0;border-radius:0 8px 8px 0}
+.note{background:#f3f4f6;padding:10px 12px;border-radius:8px;font-size:.92rem;color:var(--mut);margin:12px 0}
+.card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}
+.stat strong{display:block;font-size:1.2rem}
+.stat span{color:var(--mut);font-size:.88rem}
+.table-wrap{overflow-x:auto;margin:8px 0}
+table{border-collapse:collapse;width:100%;font-size:.9rem;margin:8px 0}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+th{background:#f3f4f6}
+.mono,code{background:#eef2ff;border-radius:4px;padding:1px 5px;font-size:.88em;word-break:break-word;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre.cmd{background:#111827;color:#f9fafb;padding:12px 14px;border-radius:8px;overflow:auto;font-size:.85rem}
+figure{margin:24px 0;text-align:center}
+figure img{max-width:100%;height:auto;display:block;margin:0 auto;border:1px solid var(--line);border-radius:8px;background:#fff}
+figcaption{font-size:.88rem;color:var(--mut);margin-top:6px;text-align:left}
+.viz-block{margin:28px 0}
+.viz-block h3{margin-top:0}
+.viz-block.layout-fig figure img{width:min(100%,480px)}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.78rem;font-weight:600}
+.REJECTED,.BI_BAC_BO{background:#fee2e2;color:var(--bad)}
+.SUPPORTED,.DUOC_UNG_HO,.OK{background:#dcfce7;color:var(--ok)}
+.INCONCLUSIVE,.EVALUATED,.WEAK,.YEU,.PARTIAL,.MOT_PHAN{background:#fef3c7;color:var(--warn)}
+.SKIPPED,.UNEVALUATED,.BO_QUA,.CHUA_DANH_GIA{background:#ffedd5;color:#9a3412}
+ul{padding-left:1.2em}li{margin:6px 0}
+.side-toggle{display:none;position:fixed;right:14px;bottom:14px;z-index:40;border:1px solid var(--line);background:#fff;border-radius:999px;padding:10px 14px;font-size:.9rem;box-shadow:0 4px 16px rgba(0,0,0,.12);cursor:pointer}
+.side-backdrop{display:none}
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr}
+  nav.side{display:none}
+  nav.side.open{display:block;position:fixed;inset:0 auto 0 0;width:min(300px,86vw);background:#fff;z-index:50;padding:16px;border-right:1px solid var(--line)}
+  .side-toggle{display:inline-flex}
+  .side-backdrop.show{display:block;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:45}
+  main.content{padding:8px 18px 30px}
+  header{padding:28px 18px}header h1{font-size:1.45rem}
+}
+</style>
+</head>
+<body>
+<header><div class="in">
+  <h1>Phase 2: structure map</h1>
+  <p>Baseline structure contrast: at fixed N, does initial layout X0 change the dogs needed for reliable herding?</p>
+  <p style="margin-top:14px"><a href="REPORT_vi.html">Vietnamese report</a> · <a href="../../summary/SUMMARY_REPORT.html">Cross-phase summary</a></p>
+</div></header>
+<div class="layout">
+  <nav class="side" id="side" aria-label="Contents">
+    <p class="side-title">Contents</p>
+    <div class="side-group">Start</div>
+    <a href="#summary">At a glance</a>
+    <a href="#question">What Phase 2 asks</a>
+    <div class="side-group">Design and run</div>
+    <a href="#design">What we froze</a>
+    <a href="#layouts">Four layouts</a>
+    <a href="#strategy">How we ran it</a>
+    <div class="side-group">Results</div>
+    <a href="#results">Results</a>
+    <a href="#bstar">Wide B*</a>
+    <a href="#claims">Claims C1a / C1b</a>
+    <a href="#limits">Limits</a>
+    <a href="#next">Next</a>
+    <div class="side-group">Appendix</div>
+    <a href="#raw-data">Raw data</a>
+  </nav>
+  <div class="side-backdrop" id="backdrop" hidden></div>
+  <button type="button" class="side-toggle" id="toggle">Contents</button>
+<main class="content">
+
+  <h2 id="summary"><span class="tag tag-out">SUMMARY</span> At a glance</h2>
+  <div class="callout">
+    <strong>One-sentence result:</strong>
+    Every layout reaches R = 1.00 from D = 1 at N in {50, 100, 200}. C1a is <strong>REJECTED</strong>.
+    Structure still changes effort and time by a large factor.
+  </div>
+  <div class="grid">
+    <div class="card stat"><span>Claim D_min (all layouts)</span><strong>1 dog</strong></div>
+    <div class="card stat"><span>C1a (D_min gap)</span><strong>REJECTED</strong></div>
+    <div class="card stat"><span>C1b (state vs N,D)</span><strong>INCONCLUSIVE</strong></div>
+    <div class="card stat"><span>Merge rows / R</span><strong>5,280 / 1.00</strong></div>
+  </div>
+
+  <h2 id="question"><span class="tag tag-plan">QUESTION</span> What Phase 2 asks</h2>
+  <p>RQ1 / Package B: at the same flock size N, does a different X0 change D_min (R &gt;= 0.90)?</p>
+  <ul>
+    <li><strong>C1a:</strong> for at least one N, D_min differs by at least one dog-grid step across layouts.</li>
+    <li><strong>C1b:</strong> early-state model predicts success better than (N, D) alone.</li>
+  </ul>
+
+  <h2 id="design"><span class="tag tag-out">DESIGN</span> What we froze</h2>
+  <table>
+    <thead><tr><th>Choice</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td>Method</td><td>strombom_multi only</td></tr>
+      <tr><td>N (claim)</td><td>50, 100, 200</td></tr>
+      <tr><td>Layouts</td><td>four X0 families (see Four layouts)</td></tr>
+      <tr><td>D grid / theta / T0</td><td>same as Phase 1 / 0.90 / 10,000</td></tr>
+      <tr><td>Seeds</td><td>scout 30; claim 100 on D=1 and D=2 windows (24 cells)</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="layouts"><span class="tag tag-out">DESIGN</span> Four layouts</h2>
+  <figure>
+    <img src="assets/layouts/arena_overview.svg" alt="Arena" />
+    <figcaption>
+      Shared arena sketch: 500 x 500 field, goal at (370, 250), dogs behind the flock.
+      Phase 2 reuses this geometry for every layout; only sheep X0 changes.
+    </figcaption>
+  </figure>
+  <p>Only the sheep start pattern X0 changes. Field, goal, dogs, N grid, D grid, theta, and T0 stay aligned with Phase 1 so layout effects are not confounded with arena changes. Cost and D_min contrasts are reported in Results.</p>
+  <figure>
+    <img src="assets/layouts/four_layouts_en.svg" alt="Four starting layouts at N = 50" />
+    <figcaption>The four X0 families on the same arena (N = 50, seed 2026). Green = sheep, blue squares = dogs (schematic), red = outliers where shown.</figcaption>
+  </figure>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Layout</th><th>Generator definition</th><th>Role in the design</th></tr></thead>
+    <tbody>
+      <tr><td><span class="mono">compact</span></td><td>Gaussian, sigma = 0.3 x 30 = 9</td><td>Tight reference flock (Phase 1 baseline geometry)</td></tr>
+      <tr><td><span class="mono">wide</span></td><td>Gaussian, sigma = 2.0 x 30 = 60</td><td>Spread flock that must be collected first</td></tr>
+      <tr><td><span class="mono">split</span></td><td>2 clusters if N &lt; 12, else 3; separation at least 10</td><td>Clustered start (check layout)</td></tr>
+      <tr><td><span class="mono">outlier_rich</span></td><td>Core ~80% (sigma = 12); ~20% outliers beyond r_a * N^(2/3)</td><td>Core plus stragglers</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2 id="strategy"><span class="tag tag-run">RUN</span> How we ran it</h2>
+  <ol>
+    <li>Smoke: 600 trials.</li>
+    <li>Scout: 3 N x 4 layouts x 10 D x 30 = 3,600.</li>
+    <li>Claim: 24 cells x 100 = 2,400; merge 5,280 rows; Package B.</li>
+  </ol>
+
+  <h2 id="results"><span class="tag tag-out">RESULTS</span> Results</h2>
+  <p>
+    D_min = 1 for all 12 (layout, N) cells; bootstrap width zero. At D = 1 every claim cell has R = 1.00.
+    Structure therefore does not move the reliability frontier on the baseline; it moves cost.
+  </p>
+  <figure>
+    <img src="assets/figures/f4_layout_cost.png" alt="Layout cost" />
+    <figcaption>
+      Median total path at D = 1 by layout and N. Wide is about 19x to 36x the compact path;
+      outlier_rich grows sharply with N (about 11x path at N = 200); split matches compact
+      (treat as a check, not a finding). Source: <span class="mono">../claim/merged_trials.csv</span> (D = 1).
+    </figcaption>
+  </figure>
+  <table>
+    <thead><tr><th>Layout</th><th>N</th><th>R at D=1</th><th>Median ticks</th><th>Median path</th></tr></thead>
+    <tbody>
+      <tr><td>compact</td><td>50 / 100 / 200</td><td>1.00</td><td>195 / 204 / 191</td><td>157 / 161 / 144</td></tr>
+      <tr><td>split</td><td>50 / 100 / 200</td><td>1.00</td><td>195 / 205 / 193</td><td>158 / 162 / 144</td></tr>
+      <tr><td>outlier_rich</td><td>50 / 100 / 200</td><td>1.00</td><td>224 / 501 / 1,228</td><td>209 / 554 / 1,647</td></tr>
+      <tr><td>wide</td><td>50 / 100 / 200</td><td>1.00</td><td>2,138 / 3,074 / 3,870</td><td>2,925 / 4,319 / 5,213</td></tr>
+    </tbody>
+  </table>
+  <p class="muted">Source: <span class="mono">../claim/merged_trials.csv</span> (D = 1).</p>
+
+  <h2 id="bstar"><span class="tag tag-out">RESULTS</span> Wide B*</h2>
+  <p>
+    On wide starts, B* = 2 (not 1) at N = 50, 100 and 200:
+    path 2,337 vs 2,925; 3,003 vs 4,319; 3,694 vs 5,213.
+    That is the only baseline <strong>layout</strong> where adding a dog reduces total path enough to matter.
+    Source: <span class="mono">../claim/packages/b/frontier_by_layout.csv</span>.
+  </p>
+  <figure>
+    <img src="assets/figures/f10_wide_bstar_path.png" alt="Wide B star path" />
+    <figcaption>
+      On wide starts only, the cheapest reliable dog count B* is 2 rather than 1:
+      median path falls from 2,925 to 2,337 (N=50), 4,319 to 3,003 (N=100), and 5,213 to 3,694 (N=200).
+      That is the only baseline layout where adding a dog cuts total path enough to matter.
+      Source: <span class="mono">../claim/packages/b/frontier_by_layout.csv</span>.
+    </figcaption>
+  </figure>
+
+  <h2 id="claims"><span class="tag tag-out">CLAIMS</span> Claims C1a / C1b</h2>
+  <table>
+    <thead><tr><th>Claim</th><th>Verdict</th><th>Evidence</th></tr></thead>
+    <tbody>
+      <tr><td>C1a</td><td>REJECTED</td><td><span class="mono">../claim/packages/b/frontier_by_layout.csv</span>: D_min = 1 on all 4 layouts</td></tr>
+      <tr><td>C1b</td><td>INCONCLUSIVE</td><td>No D_min shift; Package B NLL not informative</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="limits"><span class="tag tag-out">LIMITS</span> Limits</h2>
+  <ul>
+    <li>Baseline method only. Controller transfer is Phase 4.</li>
+    <li>Floor effect: D_min cannot fall below 1 when R = 1.00 at D = 1.</li>
+    <li>Split generator may not create a hard sub-flock problem (UNVERIFIED).</li>
+  </ul>
+
+  <h2 id="next"><span class="tag tag-out">NEXT</span> Next</h2>
+  <p>Phase 4 transfer. Cross-phase: <span class="mono">../../summary/SUMMARY_REPORT.html</span>.</p>
+
+  <h2 id="raw-data"><span class="tag tag-plan">APPENDIX</span> Raw data</h2>
+  <table>
+    <thead><tr><th>Path</th><th>What</th></tr></thead>
+    <tbody>
+      <tr><td><span class="mono">../claim/merged_trials.csv</span></td><td>5,280-row merge</td></tr>
+      <tr><td><span class="mono">../claim/packages/b/</span></td><td>Package B frontiers</td></tr>
+      <tr><td><span class="mono">../claim/README.md</span></td><td>Folder README</td></tr>
+    </tbody>
+  </table>
+
+</main>
+</div>
+
+<script>
+(function(){
+  var side=document.getElementById('side');
+  var btn=document.getElementById('toggle');
+  var bd=document.getElementById('backdrop');
+  if(!side||!btn) return;
+  function open(){ side.classList.add('open'); if(bd){ bd.hidden=false; bd.classList.add('show'); } }
+  function close(){ side.classList.remove('open'); if(bd){ bd.hidden=true; bd.classList.remove('show'); } }
+  btn.addEventListener('click', function(){ side.classList.contains('open')?close():open(); });
+  if(bd) bd.addEventListener('click', close);
+})();
+</script>
+
+</body>
+</html>

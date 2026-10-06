@@ -1,11 +1,11 @@
 # Protocol report template
 #
-# Copy to: scaling/results/phase{k}/{protocol}/REPORT.md
+# Copy to: scaling/results/phase{k}/{protocol}/README.md
 # Fill after looking at packages/{a-g}/.
-# Leave the auto package_*.md files alone; this file is the hand-written note.
+# Leave the auto README.md files alone; this file is the hand-written folder note.
 # Claim criteria: main_scaling_plan.md (Claims). Copy verdicts into progress_tracker.md.
 
-# Protocol report: `<protocol_id>`
+# `<protocol_id>`
 
 ## Summary
 
@@ -80,6 +80,6 @@ CLAIM grade only, after `packages/*/`. Criteria: [main_scaling_plan.md](main_sca
 
 ## Links
 
-- Package A: `packages/a/package_a.md`
+- Package A: `packages/a/README.md`
 - Other packages:
 - `status.json`, `provenance.json`, `protocol.yaml`, `trials.csv`

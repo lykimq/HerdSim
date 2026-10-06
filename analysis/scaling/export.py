@@ -32,6 +32,56 @@ def _unique_sorted(series: pd.Series) -> list[Any]:
     return vals
 
 
+def _fmt_cell(value: Any) -> str:
+    """Format one table cell for a hand-written-looking markdown table."""
+    if value is None or (isinstance(value, float) and pd.isna(value)):
+        return ""
+    if isinstance(value, bool):
+        return "yes" if value else "no"
+    if isinstance(value, int) and not isinstance(value, bool):
+        return str(value)
+    if isinstance(value, float):
+        if float(value).is_integer():
+            return str(int(value))
+        return f"{value:.3f}".rstrip("0").rstrip(".")
+    text = str(value)
+    if text in {"None", "nan", "NaN", "<NA>"}:
+        return ""
+    if text == "True":
+        return "yes"
+    if text == "False":
+        return "no"
+    return text
+
+
+def _df_to_markdown_table(df: pd.DataFrame) -> str:
+    """Render a small dataframe as a GitHub-flavored markdown table."""
+    if df is None or df.empty:
+        return "_(empty)_"
+    cols = [str(c) for c in df.columns]
+    header = "| " + " | ".join(cols) + " |"
+    sep = "| " + " | ".join("---" for _ in cols) + " |"
+    rows: list[str] = []
+    for _, row in df.iterrows():
+        cells = [_fmt_cell(row[c]) for c in df.columns]
+        rows.append("| " + " | ".join(cells) + " |")
+    return "\n".join([header, sep, *rows])
+
+
+def _series_counts_to_markdown(counts: pd.Series, *, key_name: str = "regime") -> str:
+    if counts is None or counts.empty:
+        return "_(none)_"
+    frame = counts.rename("count").reset_index()
+    frame.columns = [key_name, "count"]
+    return _df_to_markdown_table(frame)
+
+
+def _fmt_list(values: list[Any]) -> str:
+    if not values:
+        return "(none)"
+    return ", ".join(str(v) for v in values)
+
+
 def _package_a_claim_stubs(
     *,
     frontier: pd.DataFrame,
@@ -193,7 +243,7 @@ def export_package_a(
         "regimes": out / "regimes.csv",
         "dmin_bootstrap": out / "dmin_bootstrap.csv",
         "provenance": out / "provenance.json",
-        "report": out / "package_a.md",
+        "report": out / "README.md",
         "artefacts": out / "artefacts.json",
     }
     _write_df(trials, paths["trials"])
@@ -259,18 +309,18 @@ def export_package_a(
     write_provenance(paths["provenance"], stamp)
 
     lines = [
-        f"# Package A -- Herdability map ({protocol_id})",
+        f"# Package A: Herdability map ({protocol_id})",
         "",
-        "Auto-generated evidence package. Interpretation belongs in the protocol `REPORT.md`.",
+        "Auto tables and figures for this package. Read the protocol `README.md` for interpretation.",
         "",
         "## Setup",
         "",
         f"- Protocol id: `{protocol.get('protocol_id', 'unknown')}`",
         f"- Reliability theta: {theta}",
-        f"- Methods: {methods or ['(not in trials.csv)']}",
-        f"- Layouts: {layouts or ['(not in trials.csv)']}",
-        f"- N grid: {n_values}",
-        f"- D grid: {d_values}",
+        f"- Methods: {_fmt_list(methods) if methods else '(not in trials.csv)'}",
+        f"- Layouts: {_fmt_list(layouts) if layouts else '(not in trials.csv)'}",
+        f"- N grid: {_fmt_list(n_values)}",
+        f"- D grid: {_fmt_list(d_values)}",
         f"- Seeds in export: {len(seeds)} unique",
         f"- Trial rows: {len(trials)}",
         f"- Frontier rows: {len(frontier)}",
@@ -285,13 +335,15 @@ def export_package_a(
         "",
         "## Frontier summary",
         "",
-        front_csv.to_string(index=False) if not front_csv.empty else "(empty)",
+        _df_to_markdown_table(front_csv),
         "",
         "## Regime counts",
         "",
-        regimes["regime"].value_counts().to_string()
-        if not regimes.empty and "regime" in regimes.columns
-        else "(none)",
+        (
+            _series_counts_to_markdown(regimes["regime"].value_counts())
+            if not regimes.empty and "regime" in regimes.columns
+            else "_(none)_"
+        ),
         "",
         "## Figures",
         "",
@@ -353,11 +405,11 @@ def export_package_dossier(
     prov = out / "provenance.json"
     write_provenance(prov, stamp)
     paths["provenance"] = prov
-    report = out / f"package_{package.lower()}.md"
+    report = out / "README.md"
     body = [
-        f"# Package {package} -- {protocol_id}",
+        f"# Package {package}: {protocol_id}",
         "",
-        "Auto-generated evidence package. Interpretation belongs in the protocol `REPORT.md`.",
+        "Auto tables and figures for this package. Read the protocol `README.md` for interpretation.",
         "",
         *(notes or []),
         "",

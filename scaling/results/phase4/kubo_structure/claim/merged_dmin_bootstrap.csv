@@ -4,7 +4,7 @@ kubo,compact,global,100,1.0,1.0,1.0,False,False,1000,100,1000
 kubo,compact,global,200,1.0,1.0,1.0,False,False,1000,100,1000
 kubo,outlier_rich,global,50,1.0,1.0,1.0,False,False,1000,100,1000
 kubo,outlier_rich,global,100,1.0,1.0,1.0,False,False,1000,100,1000
-kubo,outlier_rich,global,200,4.0,2.0,15.0,False,False,1000,100,1000
+kubo,outlier_rich,global,200,20.0,2.0,20.0,False,False,1000,200,1000
 kubo,split,global,50,1.0,1.0,1.0,False,False,1000,100,1000
 kubo,split,global,100,1.0,1.0,1.0,False,False,1000,100,1000
 kubo,split,global,200,1.0,1.0,1.0,False,False,1000,100,1000

@@ -8,12 +8,12 @@
   scaling/docs/templates/REPORT_TEMPLATE.md (the hand-written per-run note).
 
   How to use for a new phase:
-  1. Copy to scaling/results/phase{k}/guides/share_en/REPORT_en.html
+  1. Copy to scaling/results/phase{k}/guides/REPORT_en.html
   2. Replace every {{PLACEHOLDER}} and the <!-- FILL --> blocks.
   3. Keep the section order and ids; drop sections that do not apply
      (e.g. a phase with no T1) but keep the top-to-bottom arc.
-  4. Figures live under ../<stage>/packages/<x>/figures/ ; link with the
-     a.zoom lightbox pattern shown in the Run section.
+  4. Figures live under assets/figures/ (shared by REPORT_en.html and
+     REPORT_vi.html); link with the a.zoom lightbox pattern in the Run section.
   5. Numbers must match the cited package_*.md / CSV files. State the cited
      dataset (grade + trial count + overall R) in the Summary table.
 
@@ -319,8 +319,8 @@
 
   <main class="content">
     <p class="nav">
-      <a href="index.html">Guides index</a>
-      <!-- add other-language / share links here if present -->
+      <a href="REPORT_vi.html">Vietnamese report</a>
+      · <a href="../../summary/SUMMARY_REPORT.html">Cross-phase summary</a>
     </p>
 
     <h1>Phase {{K}} {{SHORT_TITLE}}</h1>

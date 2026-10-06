@@ -10,7 +10,7 @@ Canonical layout:
       trials.csv
       timeseries/         # one file per cell; stem == cell key
       packages/{a-g}/     # auto analysis exports
-      REPORT.md           # human scientific narrative only
+      README.md           # folder index and hand-written notes
 
 protocol_id in provenance must match the protocol_slug (folder name),
 or the explicit id from scaling/configs/protocols/*.yaml.

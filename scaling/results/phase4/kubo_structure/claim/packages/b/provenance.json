@@ -1,7 +1,7 @@
 {
   "protocol_id": "phase4_kubo_structure_claim",
-  "created_at": "2026-09-27T11:26:23.383357+00:00",
-  "git_hash": "efb7ef7c1ebd8783cd51169d7a42284e88148556",
+  "created_at": "2026-10-06T10:54:36.814144+00:00",
+  "git_hash": "1d78058133020a61317cf4116abf0a76e687bd8d",
   "protocol": {
     "protocol_id": "scaling_v2",
     "frozen_on": "2026-09-22",
@@ -104,7 +104,7 @@
     "package": "B",
     "notes": [
       "RQ1 state vs size: compare d_min across initial_layout.",
-      "Predictor prefers_state=False nd_nll=nan state_nll=nan"
+      "Predictor prefers_state=True nd_nll=0.42182883865301374 state_nll=0.3462265531932712"
     ]
   }
 }

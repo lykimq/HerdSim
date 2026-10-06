@@ -27,7 +27,7 @@ One flat 100-seed full grid would buy little extra science on obvious cells and 
 |-------|------|---------------|------------------|
 | SMOKE | Pipeline check (paths, resume, metrics) | tiny grid | No |
 | SCOUT | Broad map; choose windows | 30 (`scout_seeds`) | No (planning / diagnostics only) |
-| CLAIM | Precision on planned cells | 100 (`claim_grade_seeds`) | Yes, after REPORT.md |
+| CLAIM | Precision on planned cells | 100 (`claim_grade_seeds`) | Yes, after README.md |
 
 Record the grade on every run report ([REPORT_TEMPLATE.md](templates/REPORT_TEMPLATE.md)). Do not promote a SCOUT figure to a Claim verdict.
 
@@ -54,7 +54,7 @@ Example paths are Phase 1; other phases mirror under `scaling/results/phase{k}/â
 | Scout | `phase1/scout/trials.csv`, timeseries if enabled | Reliability map; input to claim plan and early diagnostics |
 | Claim plan | `phase1/claim/boundary_cells.csv` | Exact `(N, D[, layout, ...])` list for reseed |
 | Claim reseed | `phase1/claim/trials.csv`, **`merged_trials.csv`** | Claim-grade frontiers, regimes, Packages A/C/F/G inputs |
-| Analyse | `packages/{a,c,...}/` figures and tables | REPORT.md and Claims table |
+| Analyse | `packages/{a,c,...}/` figures and tables | README.md and Claims table |
 | T1 | `phase1/t1/` | Overcrowding under the long time budget |
 
 Merge rule (also in the main plan): on a cell that received claim seeds, analysis uses those claim rows only. Other cells keep scout rows. Scout and claim rows are not stacked on the same cell.

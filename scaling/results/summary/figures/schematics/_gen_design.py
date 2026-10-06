@@ -41,6 +41,42 @@ def text(x, y, s, *, size=12, weight=400, fill=INK, anchor="start"):
     )
 
 
+def wrap_words(s: str, max_chars: int) -> list[str]:
+    """Greedy word wrap for SVG labels (char budget, not pixel-perfect)."""
+    words = s.split()
+    if not words:
+        return []
+    lines: list[str] = []
+    cur = words[0]
+    for word in words[1:]:
+        trial = f"{cur} {word}"
+        if len(trial) <= max_chars:
+            cur = trial
+        else:
+            lines.append(cur)
+            cur = word
+    lines.append(cur)
+    return lines
+
+
+def text_block(
+    x: float,
+    y: float,
+    s: str,
+    *,
+    max_chars: int,
+    size: int = 11,
+    weight: int = 400,
+    fill: str = MUTED,
+    line_h: float = 15.0,
+) -> list[str]:
+    """Emit one <text> per wrapped line starting at (x, y)."""
+    return [
+        text(x, y + i * line_h, line, size=size, weight=weight, fill=fill)
+        for i, line in enumerate(wrap_words(s, max_chars))
+    ]
+
+
 def rect(x, y, w, h, fill, stroke=None, sw=1, rx=0):
     st = f' stroke="{stroke}" stroke-width="{sw}"' if stroke else ""
     r = f' rx="{rx}"' if rx else ""
@@ -207,19 +243,35 @@ def timeout_drive(lang: str) -> str:
         field = "field 500 x 500"
         drive = "drive ~120"
         t0 = "T0 = 10,000 ticks"
-        note = "~80 straight crossings at speed 1: timeout means loss of control, not a short race"
-        t1 = "T1 = 20,000 only if overcrowding cells exist (none on baseline)"
+        note = (
+            "~80 straight crossings at speed 1: timeout means loss of control, "
+            "not a short race."
+        )
+        t1 = "T1 = 20,000 only if overcrowding cells exist (none on baseline)."
+        goal = "goal"
         aria = "timeout and drive"
     else:
         title = "Thiết kế: sân, quãng đường lùa, và ngân sách thời gian"
         field = "sân 500 x 500"
         drive = "lùa ~120"
         t0 = "T0 = 10,000 bước"
-        note = "~80 lần đi thẳng ở tốc độ 1: hết giờ = mất kiểm soát, không phải cuộc đua ngắn"
-        t1 = "T1 = 20,000 chỉ khi có ô quá tải (không có ở mức cơ sở)"
+        note = (
+            "~80 lần đi thẳng ở tốc độ 1: hết giờ = mất kiểm soát, "
+            "không phải cuộc đua ngắn."
+        )
+        t1 = "T1 = 20,000 chỉ khi có ô quá tải (không có ở mức cơ sở)."
+        goal = "đích"
         aria = "het gio va lua"
 
-    w, h = 720, 260
+    # Callout is 330 wide with ~15px side padding: ~42 chars at 11px.
+    note_lines = wrap_words(note, 42)
+    t1_lines = wrap_words(t1, 42)
+    y_note = 112
+    y_t1 = y_note + len(note_lines) * 15 + 10
+    box_bottom = y_t1 + len(t1_lines) * 15 + 16
+    box_h = max(140, box_bottom - 60)
+    w, h = 720, max(260, 50 + box_h + 40)
+
     parts = [
         f'<?xml version="1.0" encoding="UTF-8"?>',
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" '
@@ -228,32 +280,19 @@ def timeout_drive(lang: str) -> str:
         text(16, 24, title, size=14, weight=700),
         rect(40, 50, 280, 160, PANEL, STROKE),
         text(180, 70, field, size=11, fill=MUTED, anchor="middle"),
-        # flock and goal
         circle(120, 140, 8, SHEEP),
         circle(300, 140, 14, GOAL_FILL, DOG, 1.5),
         text(120, 165, "N", size=10, fill=SHEEP, anchor="middle"),
-        text(300, 120, "goal", size=10, fill=DOG, anchor="middle") if lang == "en"
-        else text(300, 120, "đích", size=10, fill=DOG, anchor="middle"),
+        text(300, 120, goal, size=10, fill=DOG, anchor="middle"),
         line(132, 140, 282, 140, stroke=ACCENT, sw=2, dash="5 3"),
         text(207, 132, drive, size=11, weight=700, fill=ACCENT, anchor="middle"),
-        # callouts
-        rect(360, 60, 330, 140, "#fff", STROKE, rx=8),
+        rect(360, 60, 330, box_h, "#fff", STROKE, rx=8),
         text(375, 90, t0, size=13, weight=700, fill=DOG),
-        text(375, 118, note, size=11, fill=MUTED),
-        # wrap note manually - if long may overflow; keep short
-        text(375, 150, t1, size=11, fill=MUTED),
-        text(16, h - 14, "", size=11),
+        *text_block(375, y_note, note, max_chars=42, size=11, fill=MUTED, line_h=15),
+        *text_block(375, y_t1, t1, max_chars=42, size=11, fill=MUTED, line_h=15),
+        "</svg>",
     ]
-    # fix Vietnamese goal label without ternary mess
-    if lang != "en":
-        # replace the goal text already added - easier rebuild that part
-        pass
-    parts.append("</svg>")
-    # Rebuild goal label cleanly
-    svg = "\n".join(parts)
-    if lang != "en":
-        svg = svg.replace(">goal<", ">đích<")
-    return svg
+    return "\n".join(parts)
 
 
 # ---------------------------------------------------------------------------
@@ -344,7 +383,14 @@ def failure_labels(lang: str) -> str:
             )
         return out
 
-    w, h = 740, 360
+    # Footer wrap: ~740 - 32 padding at 10-11px ~= 95 / 100 chars.
+    seen_lines = wrap_words(seen, 88)
+    foot_lines = wrap_words(foot, 92)
+    sketch_bottom = 196 + 70 + 11  # caption can use two lines
+    y_seen = sketch_bottom + 18
+    y_foot = y_seen + len(seen_lines) * 15 + 8
+    h = y_foot + len(foot_lines) * 13 + 14
+    w = 740
     parts = [
         f'<?xml version="1.0" encoding="UTF-8"?>',
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" '
@@ -354,22 +400,30 @@ def failure_labels(lang: str) -> str:
     ]
     for i, (name, desc, col) in enumerate(items):
         x = 16 + (i % 3) * 240
-        y = 40 + (i // 3) * 58
-        parts.append(rect(x, y, 228, 50, "#fff", col, 2, rx=8))
-        parts.append(text(x + 12, y + 22, name, size=12, weight=700, fill=col))
-        parts.append(text(x + 12, y + 40, desc, size=11, fill=MUTED))
+        y = 40 + (i // 3) * 62
+        parts.append(rect(x, y, 228, 54, "#fff", col, 2, rx=8))
+        parts.append(text(x + 12, y + 20, name, size=12, weight=700, fill=col))
+        # Card body: wrap long VI/EN descriptions inside 228px.
+        desc_wrapped = wrap_words(desc, 28)
+        for j, chunk in enumerate(desc_wrapped[:2]):
+            parts.append(text(x + 12, y + 38 + j * 13, chunk, size=11, fill=MUTED))
 
-    parts.append(text(16, 172, sketch_title, size=12, weight=700, fill=INK))
+    parts.append(text(16, 180, sketch_title, size=12, weight=700, fill=INK))
     for i, (name, desc, col, kind) in enumerate(sketches):
         x = 16 + (i % 6) * 120
-        y = 188
+        y = 196
         parts.extend(mini_curve(x, y, kind, col))
         parts.append(text(x + 45, y + 56, name, size=10, weight=700, fill=col, anchor="middle"))
-        # wrap desc under in two short lines if needed
-        parts.append(text(x + 45, y + 70, desc, size=9, fill=MUTED, anchor="middle"))
+        # Sketch captions are narrow (~110px): wrap to two centered lines.
+        for j, chunk in enumerate(wrap_words(desc, 16)[:2]):
+            parts.append(
+                text(x + 45, y + 70 + j * 11, chunk, size=9, fill=MUTED, anchor="middle")
+            )
 
-    parts.append(text(16, h - 28, seen, size=11, weight=700, fill=BLUE))
-    parts.append(text(16, h - 10, foot, size=10, fill=MUTED))
+    for i, chunk in enumerate(seen_lines):
+        parts.append(text(16, y_seen + i * 15, chunk, size=11, weight=700, fill=BLUE))
+    for i, chunk in enumerate(foot_lines):
+        parts.append(text(16, y_foot + i * 13, chunk, size=10, fill=MUTED))
     parts.append("</svg>")
     return "\n".join(parts)
 
@@ -701,40 +755,66 @@ def netlogo_vs_herdsim(lang: str) -> str:
             ("So sánh", "Cửa sổ riêng", "Tab Compare + chỉ số chung"),
         ]
 
-    w, h = 780, 420
+    # Bridge note sits BETWEEN the two cards and the table (not in the narrow gap).
+    bridge = f"{mid}. {mid2}."
+    bridge_lines = wrap_words(bridge, 92)
+    foot_lines = wrap_words(foot, 96)
+    bridge_h = 16 + len(bridge_lines) * 14 + 10
+    table_top = 40 + 190 + 12 + bridge_h + 10
+    table_h = 26 + 4 * 24
+    foot_top = table_top + table_h + 16
+    w = 780
+    h = foot_top + len(foot_lines) * 14 + 16
+
+    left_x, right_x, card_w, card_h = 16, 424, 340, 190
     parts = [
         f'<?xml version="1.0" encoding="UTF-8"?>',
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" '
         f'viewBox="0 0 {w} {h}" role="img" aria-label="{esc(aria)}">',
         rect(0, 0, w, h, BG),
         text(16, 24, title, size=14, weight=700),
-        rect(16, 40, 340, 190, "#fff", ORANGE, 2, rx=10),
-        rect(424, 40, 340, 190, "#fff", DOG, 2, rx=10),
-        text(186, 66, left_h, size=13, weight=700, fill=ORANGE, anchor="middle"),
-        text(594, 66, right_h, size=13, weight=700, fill=DOG, anchor="middle"),
+        rect(left_x, 40, card_w, card_h, "#fff", ORANGE, 2, rx=10),
+        rect(right_x, 40, card_w, card_h, "#fff", DOG, 2, rx=10),
+        text(left_x + card_w / 2, 66, left_h, size=13, weight=700, fill=ORANGE, anchor="middle"),
+        text(right_x + card_w / 2, 66, right_h, size=13, weight=700, fill=DOG, anchor="middle"),
     ]
     for i, s in enumerate(left):
-        parts.append(text(32, 96 + i * 24, f"- {s}", size=11, fill=INK))
+        parts.append(text(left_x + 16, 96 + i * 24, f"- {s}", size=11, fill=INK))
     for i, s in enumerate(right):
-        parts.append(text(440, 96 + i * 24, f"- {s}", size=11, fill=INK))
-    parts.append(text(390, 120, "<->", size=18, weight=700, fill=MUTED, anchor="middle"))
-    parts.append(text(390, 145, mid, size=9, fill=MUTED, anchor="middle"))
-    parts.append(text(390, 162, mid2, size=9, fill=MUTED, anchor="middle"))
+        parts.append(text(right_x + 16, 96 + i * 24, f"- {s}", size=11, fill=INK))
 
-    # design axes table
+    # Center bridge band under both cards
+    by = 40 + card_h + 12
+    parts.append(rect(16, by, w - 32, bridge_h, "#fff", STROKE, 1, rx=8))
+    parts.append(text(w / 2, by + 16, "<->", size=14, weight=700, fill=MUTED, anchor="middle"))
+    for i, chunk in enumerate(bridge_lines):
+        parts.append(
+            text(w / 2, by + 34 + i * 14, chunk, size=11, fill=MUTED, anchor="middle")
+        )
+
+    # Design axes table
     col_w = (130, 280, 300)
     x = 16
-    parts.append(rect(x, 250, col_w[0] - 6, 26, DOG, None, 0, rx=4))
-    parts.append(text(x + 8, 267, row_h, size=11, weight=700, fill="#fff"))
+    parts.append(rect(x, table_top, col_w[0] - 6, 26, DOG, None, 0, rx=4))
+    parts.append(text(x + 8, table_top + 17, row_h, size=11, weight=700, fill="#fff"))
     x += col_w[0]
-    parts.append(rect(x, 250, col_w[1] - 6, 26, ORANGE, None, 0, rx=4))
-    parts.append(text(x + 8, 267, left_h if lang == "en" else "NetLogo", size=11, weight=700, fill="#fff"))
+    parts.append(rect(x, table_top, col_w[1] - 6, 26, ORANGE, None, 0, rx=4))
+    parts.append(
+        text(
+            x + 8,
+            table_top + 17,
+            left_h if lang == "en" else "NetLogo",
+            size=11,
+            weight=700,
+            fill="#fff",
+        )
+    )
     x += col_w[1]
-    parts.append(rect(x, 250, col_w[2] - 6, 26, DOG, None, 0, rx=4))
-    parts.append(text(x + 8, 267, "HerdSim", size=11, weight=700, fill="#fff"))
+    parts.append(rect(x, table_top, col_w[2] - 6, 26, DOG, None, 0, rx=4))
+    parts.append(text(x + 8, table_top + 17, "HerdSim", size=11, weight=700, fill="#fff"))
 
     for r_i, row in enumerate(rows):
-        y = 282 + r_i * 24
+        y = table_top + 26 + r_i * 24
         x = 16
         bg = "#fff" if r_i % 2 == 0 else PANEL
         for cell, cw in zip(row, col_w):
@@ -742,23 +822,24 @@ def netlogo_vs_herdsim(lang: str) -> str:
             parts.append(text(x + 6, y + 15, cell, size=10, fill=INK))
             x += cw
 
-    parts.append(text(16, h - 14, foot, size=11, fill=MUTED))
+    for i, chunk in enumerate(foot_lines):
+        parts.append(text(16, foot_top + i * 14, chunk, size=11, fill=MUTED))
     parts.append("</svg>")
     return "\n".join(parts)
 
 
 # ---------------------------------------------------------------------------
-# S25: phase roadmap (claim done vs remaining; no invented results)
+# S25: phase strip for this report (claim phases vs skipped / not run / weak)
 # ---------------------------------------------------------------------------
 
 def phase_roadmap(lang: str) -> str:
     if lang == "en":
-        title = "Phase roadmap: claim-grade done vs remaining"
+        title = "Phases covered in this report"
         legend = [
-            (GREEN, "Claim done"),
+            (GREEN, "Claim results here"),
             (ORANGE, "Skipped"),
             (PURPLE, "Analysed (weak)"),
-            (MUTED, "Not run"),
+            (MUTED, "Not run yet"),
         ]
         phases = [
             ("1", "Size", "Claim", GREEN),
@@ -769,20 +850,11 @@ def phase_roadmap(lang: str) -> str:
             ("6", "Fits", "Weak", PURPLE),
             ("7", "Early warn", "Not run", MUTED),
         ]
-        rem_h = "Remaining phases (planned question only; no invented numbers)"
-        rem_rows = [
-            ("3", "SKIPPED", "Efficient vs overcrowding on I_dir / fragmentation", "No result: 0 overcrowding cells"),
-            ("5", "NOT RUN", "Obs / range / comm: does one step lower D_min?", "No scout/claim folder yet"),
-            ("6", "WEAK", "Leave-one-N-out fits; C6b slope band open", "Package F / Fig 8 here; not a real law"),
-            ("7", "NOT RUN", "Held-out state AUROC and lead time on failures", "Package G not run"),
-        ]
-        cols = ("Phase", "Status", "Planned question", "Result here?")
-        foot = "Green boxes are claim-grade in this report. Grey and amber show status only; they do not invent R or D_min."
         aria = "phase roadmap"
     else:
-        title = "Lộ trình giai đoạn: đã xác nhận so với còn lại"
+        title = "Các giai đoạn trong báo cáo này"
         legend = [
-            (GREEN, "Đã xác nhận"),
+            (GREEN, "Có kết quả xác nhận"),
             (ORANGE, "Bỏ qua"),
             (PURPLE, "Đã phân tích (yếu)"),
             (MUTED, "Chưa chạy"),
@@ -796,18 +868,9 @@ def phase_roadmap(lang: str) -> str:
             ("6", "Khớp tỷ lệ", "Yếu", PURPLE),
             ("7", "Cảnh báo sớm", "Chưa chạy", MUTED),
         ]
-        rem_h = "Giai đoạn còn lại (chỉ câu hỏi dự kiến; không bịa số)"
-        rem_rows = [
-            ("3", "BỎ QUA", "Ô hiệu quả vs quá tải trên I_dir / phân mảnh", "Không kết quả: 0 ô quá tải cơ sở"),
-            ("5", "CHƯA CHẠY", "Obs / tầm / giao tiếp: một bước có hạ D_min?", "Chưa có thư mục dò đường/xác nhận"),
-            ("6", "YẾU", "Khớp leave-one-N-out; C6b dải độ dốc còn mở", "Gói F / Hình 8 đã có; không phải luật thật"),
-            ("7", "CHƯA CHẠY", "AUROC trạng thái và thời gian báo trước khi thất bại", "Gói G chưa chạy"),
-        ]
-        cols = ("Giai đoạn", "Trạng thái", "Câu hỏi dự kiến", "Có kết quả ở đây?")
-        foot = "Ô xanh là mức xác nhận trong báo cáo này. Xám và cam chỉ trạng thái; không bịa R hay D_min."
         aria = "lo trinh giai doan"
 
-    w, h = 780, 430
+    w, h = 780, 172
     parts = [
         f'<?xml version="1.0" encoding="UTF-8"?>',
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" '
@@ -815,14 +878,12 @@ def phase_roadmap(lang: str) -> str:
         rect(0, 0, w, h, BG),
         text(16, 24, title, size=14, weight=700),
     ]
-    # legend
     lx = 16
     for fill, lab in legend:
         parts.append(rect(lx, 36, 14, 14, fill if fill != MUTED else "#fff", fill, 2, rx=2))
         parts.append(text(lx + 20, 48, lab, size=11, fill=MUTED))
-        lx += 150
+        lx += 170
 
-    # phase strip
     box_w, box_h = 100, 88
     gap = 8
     x0 = 16
@@ -835,24 +896,6 @@ def phase_roadmap(lang: str) -> str:
         parts.append(text(x + box_w / 2, y0 + 50, name, size=11, weight=700, fill=INK, anchor="middle"))
         parts.append(text(x + box_w / 2, y0 + 68, status, size=10, fill=MUTED, anchor="middle"))
 
-    # remaining detail table
-    parts.append(text(16, 174, rem_h, size=12, weight=700, fill=DOG))
-    col_w = (50, 120, 340, 230)
-    x = 16
-    for hdr, cw in zip(cols, col_w):
-        parts.append(rect(x, 188, cw - 6, 28, DOG, None, 0, rx=4))
-        parts.append(text(x + 8, 206, hdr, size=11, weight=700, fill="#fff"))
-        x += cw
-    for r_i, row in enumerate(rem_rows):
-        y = 222 + r_i * 36
-        x = 16
-        bg = "#fff" if r_i % 2 == 0 else PANEL
-        for cell, cw in zip(row, col_w):
-            parts.append(rect(x, y, cw - 6, 32, bg, STROKE, 1, rx=4))
-            parts.append(text(x + 8, y + 21, cell, size=10, fill=INK))
-            x += cw
-
-    parts.append(text(16, h - 14, foot, size=11, fill=MUTED))
     parts.append("</svg>")
     return "\n".join(parts)
 
@@ -1195,7 +1238,7 @@ def herdsim_discoveries(lang: str) -> str:
         cards = [
             # (color, phase, big, title, gloss1, gloss2, evidence)
             (ORANGE, "Phase 1", "88%", "Extra dogs mostly waste",
-             "Time flat ~183 ticks", "~146 path / dog on compact",
+             "Time flat ~183 ticks", "~148 path / dog on compact",
              "Fig 2; regimes 88/10/2"),
             (PURPLE, "Phase 2", "Cost", "Structure hits cost first",
              "Wide / outlier_rich inflate", "ticks and path; D_min still 1",
@@ -1216,7 +1259,7 @@ def herdsim_discoveries(lang: str) -> str:
         aria = "phat hien herdsim"
         cards = [
             (ORANGE, "Giai đoạn 1", "88%", "Thêm chó phần lớn lãng phí",
-             "Thời gian phẳng ~183 bước", "~146 đường / chó (tập trung)",
+             "Thời gian phẳng ~183 bước", "~148 đường / chó (tập trung)",
              "Hình 2; trạng thái 88/10/2"),
             (PURPLE, "Giai đoạn 2", "Chi phí", "Cấu trúc đánh chi phí trước",
              "Phân tán / cá thể lạc phình", "thời gian và đường; D_min vẫn 1",
@@ -1272,55 +1315,68 @@ def trust_herdsim(lang: str) -> str:
     if lang == "en":
         title = "Why HerdSim results can be trusted (without being NetLogo)"
         foot = (
-            "Trust is layered evidence, not 'same IDE as everyone else'. "
-            "All claim numbers still come from HerdSim CSVs."
+            "Trust comes from stacked checks, not from sharing an IDE. "
+            "Every claim number still traces to HerdSim CSVs."
         )
         aria = "trust herdsim"
         rungs = [
             (DOG, "1", "Published lineage",
-             "Controllers reuse Strombom /",
-             "Kubo ideas with fidelity notes",
-             "Not invented from scratch"),
+             "Controllers reuse Strombom / Kubo ideas with fidelity notes.",
+             "Built on published methods"),
             (GREEN, "2", "NetLogo twins",
-             "Desktop twins for shared",
-             "methods: behaviour check",
-             "Not tick-for-tick replay"),
+             "Desktop twins for shared methods: behaviour check.",
+             "Not a tick-for-tick replay"),
             (ORANGE, "3", "Frozen protocol",
-             "scaling_v2, seeds, scout/claim,",
-             "bootstrap, open claim CSVs",
-             "Reproducible claim path"),
-            (RED, "4", "Honest limits",
-             "No quantitative twin parity",
-             "table yet; FAT has no twin;",
-             "draft model is not a twin"),
+             "scaling_v2, seeds, scout/claim, bootstrap, open claim CSVs.",
+             "Same path can be re-run"),
+            (RED, "4", "Clear limits",
+             "No quantitative twin parity table yet; FAT has no twin; draft model is not a twin.",
+             "We say what we do not claim"),
         ]
     else:
         title = "Tại sao tin kết quả HerdSim (mà không cần là NetLogo)"
         foot = (
-            "Tin cậy là bằng chứng xếp lớp, không phải 'cùng IDE với mọi người'. "
-            "Mọi số kết luận vẫn từ CSV HerdSim."
+            "Tin cậy đến từ các lớp kiểm, không phải vì cùng IDE. "
+            "Mọi số kết luận vẫn truy về CSV HerdSim."
         )
         aria = "tin cay herdsim"
         rungs = [
             (DOG, "1", "Thuật toán công bố",
-             "Bộ điều khiển tái dùng ý",
-             "Strombom / Kubo + ghi chú fidelity",
-             "Không invent từ đầu"),
+             "Bộ điều khiển tái dùng ý Strombom / Kubo kèm ghi chú fidelity.",
+             "Dựa trên phương pháp đã công bố"),
             (GREEN, "2", "Twin NetLogo",
-             "Twin máy tính cho phương pháp",
-             "chung: kiểm hành vi",
+             "Twin máy tính cho phương pháp chung: kiểm hành vi.",
              "Không phát lại từng bước"),
             (ORANGE, "3", "Giao thức đóng băng",
-             "scaling_v2, hạt giống, dò/xác nhận,",
-             "bootstrap, CSV mở",
-             "Đường kết luận tái lập được"),
-            (RED, "4", "Giới hạn nói thẳng",
-             "Chưa bảng parity định lượng;",
-             "FAT không twin; bản thảo",
-             "không phải twin"),
+             "scaling_v2, hạt giống, dò/xác nhận, bootstrap, CSV mở.",
+             "Có thể chạy lại cùng đường"),
+            (RED, "4", "Giới hạn rõ",
+             "Chưa bảng parity định lượng; FAT không twin; bản thảo không phải twin.",
+             "Nói rõ điều ta không khẳng định"),
         ]
 
-    w, h = 780, 280
+    # Card text budget: ~176px usable width -> ~22 chars at 11px.
+    body_budget = 22
+    head_budget = 16
+    foot_lines = wrap_words(foot, 96)
+    # Precompute per-card wrapped content to size height.
+    cards = []
+    max_body = 0
+    for color, num, head, body, punch in rungs:
+        hlines = wrap_words(head, head_budget)
+        blines = wrap_words(body, body_budget)
+        plines = wrap_words(punch, body_budget)
+        cards.append((color, num, hlines, blines, plines))
+        max_body = max(max_body, len(hlines) + len(blines) + len(plines))
+
+    cw, gap = 176, 12
+    # badge + head + body + punch + paddings
+    ch = 54 + max_body * 14 + 28
+    foot_top = 44 + ch + 18
+    w = 780
+    h = foot_top + len(foot_lines) * 14 + 14
+    x0 = 16
+
     parts = [
         f'<?xml version="1.0" encoding="UTF-8"?>',
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" '
@@ -1329,24 +1385,420 @@ def trust_herdsim(lang: str) -> str:
         text(16, 26, title, size=14, weight=700),
     ]
 
-    cw, ch = 176, 188
-    gap = 12
-    x0 = 16
-    for i, (color, num, head, l1, l2, l3) in enumerate(rungs):
+    for i, (color, num, hlines, blines, plines) in enumerate(cards):
         x = x0 + i * (cw + gap)
         y = 44
         parts.append(rect(x, y, cw, ch, "#fff", color, 2, rx=10))
         parts.append(circle(x + 22, y + 24, 14, color))
         parts.append(text(x + 22, y + 29, num, size=13, weight=800, fill="#fff", anchor="middle"))
-        parts.append(text(x + 44, y + 30, head, size=11, weight=700, fill=color))
-        parts.append(text(x + 14, y + 70, l1, size=11, fill=INK))
-        parts.append(text(x + 14, y + 90, l2, size=11, fill=INK))
-        parts.append(text(x + 14, y + 118, l3, size=11, weight=700, fill=MUTED))
+        # Title under / beside badge, wrapped inside card.
+        ty = y + 22
+        for j, chunk in enumerate(hlines):
+            parts.append(
+                text(x + 44, ty + j * 13, chunk, size=11, weight=700, fill=color)
+            )
+        by = y + 54
+        for j, chunk in enumerate(blines):
+            parts.append(text(x + 12, by + j * 14, chunk, size=11, fill=INK))
+        py = by + len(blines) * 14 + 12
+        for j, chunk in enumerate(plines):
+            parts.append(
+                text(x + 12, py + j * 14, chunk, size=11, weight=700, fill=MUTED)
+            )
         if i < 3:
             ax = x + cw + 2
             parts.append(line(ax, y + ch / 2, ax + gap - 4, y + ch / 2, stroke=STROKE, sw=2))
 
+    for i, chunk in enumerate(foot_lines):
+        parts.append(text(16, foot_top + i * 14, chunk, size=11, fill=MUTED))
+    parts.append("</svg>")
+    return "\n".join(parts)
+
+
+# ---------------------------------------------------------------------------
+# Claims scorecard (verdicts from progress_tracker / claim packages)
+# ---------------------------------------------------------------------------
+
+def claims_scorecard(lang: str) -> str:
+    # Verdicts aligned with scaling/docs/progress_tracker.md
+    if lang == "en":
+        title = "Claims scorecard (claim evidence only)"
+        foot = (
+            "Evidence: Packages A/B/D/F plus the measured claim merges. "
+            "WEAK / SKIPPED / UNEVALUATED match how strong the data are."
+        )
+        aria = "claims scorecard"
+        headers = ("Claim", "Verdict", "Phase", "One-line evidence")
+        rows = [
+            ("C1a", "REJECTED", "2", "D_min = 1 on all 4 layouts", GREEN),
+            ("C1b", "INCONCLUSIVE", "2", "No D_min shift to explain", ORANGE),
+            ("C2a", "REJECTED", "1", "0 overcrowding cells", GREEN),
+            ("C2b", "SKIPPED", "1", "No T1 cells to run", MUTED),
+            ("C3", "INCONCLUSIVE", "1/4", "Needs overcrowding contrast", ORANGE),
+            ("C4", "PARTIAL", "4", "Shared size; structure shifts", BLUE),
+            ("C6a", "WEAK", "1/6", "Piecewise is only {2, 1}", ORANGE),
+            ("C5/C6b/C7", "UNEVALUATED", "5/7", "Phases not run / band open", MUTED),
+        ]
+    else:
+        title = "Bảng điểm kết luận (chỉ bằng chứng xác nhận)"
+        foot = (
+            "Bằng chứng: Gói A/B/D/F và các hợp nhất xác nhận đã đo. "
+            "YẾU / BỎ QUA / CHƯA ĐÁNH GIÁ khớp với độ mạnh của dữ liệu."
+        )
+        aria = "bang diem ket luan"
+        headers = ("Kết luận", "Đánh giá", "Giai đoạn", "Bằng chứng một dòng")
+        rows = [
+            ("C1a", "BỊ BÁC BỎ", "2", "D_min = 1 cả 4 bố cục", GREEN),
+            ("C1b", "KHÔNG RÕ", "2", "Không có dịch D_min", ORANGE),
+            ("C2a", "BỊ BÁC BỎ", "1", "0 ô quá tải", GREEN),
+            ("C2b", "BỎ QUA", "1", "Không có ô T1", MUTED),
+            ("C3", "KHÔNG RÕ", "1/4", "Cần đối chiếu quá tải", ORANGE),
+            ("C4", "MỘT PHẦN", "4", "Chia sẻ kích thước; cấu trúc lệch", BLUE),
+            ("C6a", "YẾU", "1/6", "Từng mảnh chỉ {2, 1}", ORANGE),
+            ("C5/C6b/C7", "CHƯA ĐÁNH GIÁ", "5/7", "Chưa chạy / dải mở", MUTED),
+        ]
+
+    w, h = 780, 420
+    parts = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" '
+        f'viewBox="0 0 {w} {h}" role="img" aria-label="{esc(aria)}">',
+        rect(0, 0, w, h, BG),
+        text(16, 26, title, size=14, weight=700),
+        rect(16, 40, w - 32, 28, PANEL, STROKE, 1, rx=4),
+    ]
+    cols = [28, 120, 280, 360]
+    for x, head in zip(cols, headers):
+        parts.append(text(x, 59, head, size=11, weight=700, fill=MUTED))
+
+    y = 78
+    for claim, verdict, phase, evidence, color in rows:
+        parts.append(rect(16, y, w - 32, 34, "#fff", STROKE, 1, rx=4))
+        parts.append(text(28, y + 22, claim, size=12, weight=700, fill=INK))
+        parts.append(rect(118, y + 7, 148, 20, color, None, 0, rx=4))
+        parts.append(text(126, y + 21, verdict, size=11, weight=700, fill="#fff"))
+        parts.append(text(280, y + 22, phase, size=12, fill=MUTED))
+        parts.append(text(360, y + 22, evidence, size=12, fill=INK))
+        y += 38
+
     parts.append(text(16, h - 14, foot, size=11, fill=MUTED))
+    parts.append("</svg>")
+    return "\n".join(parts)
+
+
+def transfer_sketch(lang: str) -> str:
+    """S9: Phase 4 transfer idea (shared / shifted / absent)."""
+    if lang == "en":
+        title = "Phase 4 idea"
+        boxes = [
+            ("Phase 1+2", "baseline", "strombom", "#e8eef5"),
+            ("Repeat size +", "structure", "on kubo, fat", PANEL),
+            ("Transfer table", "shared / shifted /", "absent", "#e6f0e8"),
+        ]
+        aria = "phase 4 transfer idea"
+    else:
+        title = "Ý tưởng Giai đoạn 4"
+        boxes = [
+            ("Giai đoạn 1+2", "cơ sở", "strombom", "#e8eef5"),
+            ("Lặp kích thước +", "cấu trúc", "trên kubo, fat", PANEL),
+            ("Bảng chuyển giao", "chia sẻ / dịch /", "vắng", "#e6f0e8"),
+        ]
+        aria = "y tuong chuyen giao giai doan 4"
+
+    w, h = 720, 220
+    box_w, box_h = 180, 100
+    ys = 70
+    xs = [40, 270, 500]
+    parts = [
+        f'<?xml version="1.0" encoding="UTF-8"?>',
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" '
+        f'viewBox="0 0 {w} {h}" role="img" aria-label="{esc(aria)}">',
+        rect(0, 0, w, h, BG),
+        text(16, 28, title, size=16, weight=700),
+    ]
+    for i, ((a, b, c, fill), x) in enumerate(zip(boxes, xs)):
+        parts.append(rect(x, ys, box_w, box_h, fill, STROKE, 1.5, rx=14))
+        parts.append(text(x + box_w / 2, ys + 34, a, size=14, weight=700, anchor="middle"))
+        parts.append(text(x + box_w / 2, ys + 56, b, size=13, fill=MUTED, anchor="middle"))
+        parts.append(text(x + box_w / 2, ys + 78, c, size=13, fill=MUTED, anchor="middle"))
+        if i < 2:
+            x1 = x + box_w + 8
+            x2 = xs[i + 1] - 8
+            ay = ys + box_h / 2
+            parts.append(line(x1, ay, x2 - 10, ay, stroke=ACCENT, sw=2.5))
+            parts.append(
+                f'<polygon points="{x2-10},{ay - 6} {x2},{ay} {x2-10},{ay + 6}" fill="{ACCENT}"/>'
+            )
+    parts.append("</svg>")
+    return "\n".join(parts)
+
+
+def metrics_tick_path(lang: str) -> str:
+    """Two-panel schematic: discrete ticks vs cumulative dog path."""
+    if lang == "en":
+        title = "Cost metrics: ticks (time) versus path (dog travel)"
+        left_h = "Time axis (ticks)"
+        right_h = "Space: dog trail (path)"
+        t0_lab = "T0 = 10,000 (deadline)"
+        fin_lab = "finish ~183"
+        tick_note = "One tick = one simulation step. Not a real second."
+        path_lab = "path = sum of step lengths"
+        per_lab = "path / dog = path / D"
+        path_note = "World units on the 500 x 500 arena. Total over all dogs."
+        dog_lab = "dog"
+        goal_lab = "goal"
+        aria = "tick versus path metrics"
+    else:
+        title = "Chi phí: bước (thời gian) versus đường (chó đi)"
+        left_h = "Trục thời gian (bước / tick)"
+        right_h = "Không gian: vết chó (đường)"
+        t0_lab = "T0 = 10,000 (hạn chót)"
+        fin_lab = "xong ~183"
+        tick_note = "Một bước = một nhịp mô phỏng. Không phải giây thật."
+        path_lab = "đường = tổng độ dài từng bước"
+        per_lab = "đường / chó = đường / D"
+        path_note = "Đơn vị thế giới trên sân 500 x 500. Tổng mọi chó."
+        dog_lab = "chó"
+        goal_lab = "đích"
+        aria = "buoc versus duong"
+
+    w, h = 760, 320
+    panel_h = 256
+    parts = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" '
+        f'viewBox="0 0 {w} {h}" role="img" aria-label="{esc(aria)}">',
+        rect(0, 0, w, h, BG),
+        text(16, 26, title, size=14, weight=700),
+        # Left panel: timeline
+        rect(16, 44, 350, panel_h, "#fff", STROKE, rx=8),
+        text(34, 70, left_h, size=12, weight=700, fill=DOG),
+        line(50, 140, 340, 140, stroke=STROKE, sw=2),
+        *[line(50 + i * 29, 134, 50 + i * 29, 146, stroke=MUTED, sw=1) for i in range(11)],
+        text(50, 168, "0", size=10, fill=MUTED, anchor="middle"),
+        text(340, 168, "T0", size=10, fill=MUTED, anchor="middle"),
+        # Finish mark is exaggerated on the axis so ~183 stays readable next to T0.
+        line(95, 120, 95, 160, stroke=GREEN, sw=2.5),
+        circle(95, 140, 5, GREEN),
+        text(95, 108, fin_lab, size=11, weight=700, fill=GREEN, anchor="middle"),
+        text(250, 108, t0_lab, size=10, fill=MUTED, anchor="middle"),
+        *text_block(34, 200, tick_note, max_chars=40, size=11, fill=MUTED, line_h=15),
+        # Right panel: path
+        rect(386, 44, 358, panel_h, "#fff", STROKE, rx=8),
+        text(404, 70, right_h, size=12, weight=700, fill=DOG),
+        rect(430, 90, 200, 120, PANEL, STROKE),
+        circle(470, 150, 7, SHEEP),
+        circle(590, 150, 12, GOAL_FILL, DOG, 1.5),
+        f'<polyline points="455,175 470,165 500,158 530,152 560,150 575,150" '
+        f'fill="none" stroke="{DOG}" stroke-width="2.5"/>',
+        circle(455, 175, 4, DOG),
+        text(455, 195, dog_lab, size=9, fill=DOG, anchor="middle"),
+        text(590, 130, goal_lab, size=9, fill=DOG, anchor="middle"),
+        text(404, 230, path_lab, size=11, weight=700, fill=ACCENT),
+        text(404, 248, per_lab, size=11, weight=700, fill=ORANGE),
+        *text_block(404, 268, path_note, max_chars=44, size=10, fill=MUTED, line_h=13),
+        "</svg>",
+    ]
+    return "\n".join(parts)
+
+
+def metrics_idir(lang: str) -> str:
+    """Two-panel schematic: aligned dogs (I_dir=0) vs conflicting (I_dir~1)."""
+    if lang == "en":
+        title = "I_dir: dog heading alignment versus conflict"
+        left_h = "Aligned (I_dir = 0)"
+        right_h = "Conflict (I_dir near 1)"
+        formula = "I_dir = 1 - ||sum u_i|| / M_active"
+        note = (
+            "u_i = unit velocity of each moving dog (speed > 1e-6). "
+            "Reports use trial-mean mean_i_dir."
+        )
+        aria = "shepherd interference index"
+    else:
+        title = "I_dir: hướng chó thẳng hàng versus xung đột"
+        left_h = "Thẳng hàng (I_dir = 0)"
+        right_h = "Xung đột (I_dir gần 1)"
+        formula = "I_dir = 1 - ||sum u_i|| / M_active"
+        note = (
+            "u_i = hướng vận tốc đơn vị mỗi chó đang chạy (tốc độ > 1e-6). "
+            "Báo cáo dùng trung bình lượt mean_i_dir."
+        )
+        aria = "chi so nhieu cho"
+
+    w, h = 760, 280
+    parts = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" '
+        f'viewBox="0 0 {w} {h}" role="img" aria-label="{esc(aria)}">',
+        rect(0, 0, w, h, BG),
+        text(16, 26, title, size=14, weight=700),
+        text(16, 48, formula, size=12, weight=700, fill=DOG),
+        # Left panel
+        rect(16, 64, 350, 150, "#fff", STROKE, rx=8),
+        text(34, 90, left_h, size=12, weight=700, fill=GREEN),
+        # three dogs pointing right
+        circle(80, 140, 8, DOG),
+        circle(140, 140, 8, DOG),
+        circle(200, 140, 8, DOG),
+        line(88, 140, 118, 140, stroke=GREEN, sw=2.5),
+        line(148, 140, 178, 140, stroke=GREEN, sw=2.5),
+        line(208, 140, 238, 140, stroke=GREEN, sw=2.5),
+        f'<polygon points="238,140 228,134 228,146" fill="{GREEN}"/>',
+        f'<polygon points="178,140 168,134 168,146" fill="{GREEN}"/>',
+        f'<polygon points="118,140 108,134 108,146" fill="{GREEN}"/>',
+        text(34, 195, "||sum u|| / M = 1", size=11, fill=MUTED),
+        # Right panel
+        rect(386, 64, 358, 150, "#fff", STROKE, rx=8),
+        text(404, 90, right_h, size=12, weight=700, fill=RED),
+        circle(460, 140, 8, DOG),
+        circle(540, 120, 8, DOG),
+        circle(540, 160, 8, DOG),
+        line(468, 140, 510, 140, stroke=RED, sw=2.5),
+        line(540, 112, 540, 90, stroke=RED, sw=2.5),
+        line(540, 168, 540, 190, stroke=RED, sw=2.5),
+        f'<polygon points="510,140 500,134 500,146" fill="{RED}"/>',
+        f'<polygon points="540,90 534,100 546,100" fill="{RED}"/>',
+        f'<polygon points="540,190 534,180 546,180" fill="{RED}"/>',
+        text(404, 195, "||sum u|| / M ~ 0", size=11, fill=MUTED),
+        *text_block(16, 236, note, max_chars=95, size=11, fill=MUTED, line_h=15),
+        "</svg>",
+    ]
+    return "\n".join(parts)
+
+
+def metrics_reliability(lang: str) -> str:
+    """Seeds in a cell: success fraction R versus theta."""
+    if lang == "en":
+        title = "Reliability R: fraction of seeds that finish by T0"
+        cell = "One cell (N, D, layout, method)"
+        ok = "success"
+        fail = "fail / timeout"
+        r_lab = "R = 7/10 = 0.70"
+        th_lab = "theta = 0.90 (claim threshold)"
+        note = "D_min needs R >= theta. R = 1.00 means every seed succeeded."
+        aria = "reliability over seeds"
+    else:
+        title = "Độ tin cậy R: tỉ lệ mẫu hoàn thành trước T0"
+        cell = "Một ô (N, D, bố cục, phương pháp)"
+        ok = "thành công"
+        fail = "thất bại / hết giờ"
+        r_lab = "R = 7/10 = 0.70"
+        th_lab = "theta = 0.90 (ngưỡng xác nhận)"
+        note = "D_min cần R >= theta. R = 1.00 nghĩa là mọi mẫu thành công."
+        aria = "do tin cay tren mau"
+
+    w, h = 720, 260
+    parts = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" '
+        f'viewBox="0 0 {w} {h}" role="img" aria-label="{esc(aria)}">',
+        rect(0, 0, w, h, BG),
+        text(16, 26, title, size=14, weight=700),
+        rect(16, 44, 688, 196, "#fff", STROKE, rx=8),
+        text(36, 72, cell, size=12, weight=700, fill=DOG),
+    ]
+    # 10 seed dots: 7 green, 3 red
+    for i in range(10):
+        x = 50 + i * 48
+        fill = GREEN if i < 7 else RED
+        parts.append(circle(x, 120, 14, fill))
+        parts.append(text(x, 125, str(i + 1), size=10, weight=700, fill="#fff", anchor="middle"))
+    parts.extend(
+        [
+            text(50, 160, ok, size=11, fill=GREEN),
+            text(400, 160, fail, size=11, fill=RED),
+            text(36, 190, r_lab, size=13, weight=700, fill=DOG),
+            text(220, 190, th_lab, size=12, fill=ORANGE),
+            *text_block(36, 214, note, max_chars=78, size=11, fill=MUTED, line_h=15),
+            "</svg>",
+        ]
+    )
+    return "\n".join(parts)
+
+
+# ---------------------------------------------------------------------------
+# Toy overcrowding example on the real D list (waste vs overcrowd)
+# ---------------------------------------------------------------------------
+
+def overcrowd_example(lang: str) -> str:
+    """Bar sketch: working band, then two weak steps => D_overcrowd."""
+    d_vals = [1, 2, 3, 4, 6, 10, 15, 20, 25, 35]
+    # Toy R (not measured): high through 15, then two steps under 0.90.
+    r_vals = [1.00, 1.00, 1.00, 1.00, 0.98, 0.97, 0.95, 0.80, 0.70, 0.65]
+
+    if lang == "en":
+        title = "Toy example: waste vs overcrowding on the dog list"
+        theta_lab = "theta = 0.90"
+        band_ok = "Wins (>= 90%)"
+        band_bad = "Under 90%"
+        lbl_dmin, lbl_dmax, lbl_dover = "D_min = 1", "D_max = 15", "D_overcrowd = 20"
+        xlab, ylab = "D", "R"
+        aria = "overcrowding toy example"
+    else:
+        title = "Ví dụ giả định: lãng phí và quá tải trên danh sách chó"
+        theta_lab = "theta = 0.90"
+        band_ok = "Thắng (>= 90%)"
+        band_bad = "Dưới 90%"
+        lbl_dmin, lbl_dmax, lbl_dover = "D_min = 1", "D_max = 15", "D_overcrowd = 20"
+        xlab, ylab = "D", "R"
+        aria = "vi du qua tai"
+
+    w, h = 780, 330
+    ax, ay, aw, ah = 56, 56, 700, 200
+    n = len(d_vals)
+    gap = 8
+    bw = (aw - gap * (n + 1)) / n
+    y_th = ay + ah * (1 - 0.90)
+
+    parts = [
+        f'<?xml version="1.0" encoding="UTF-8"?>',
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" '
+        f'viewBox="0 0 {w} {h}" role="img" aria-label="{esc(aria)}">',
+        rect(0, 0, w, h, BG),
+        text(16, 26, title, size=14, weight=700),
+        rect(ax, ay, aw, ah, "#fff", STROKE),
+    ]
+
+    x_split = ax + gap + 7 * (bw + gap)
+    parts.append(rect(ax, ay, x_split - ax, ah, "#dcfce7", None, 0))
+    parts.append(rect(x_split, ay, ax + aw - x_split, ah, "#fee2e2", None, 0))
+    parts.append(rect(ax, ay, aw, ah, "none", STROKE, 1))
+
+    parts.append(line(ax, y_th, ax + aw, y_th, stroke=ORANGE, sw=1.4, dash="4 3"))
+    parts.append(text(ax + aw - 4, y_th - 6, theta_lab, size=10, fill=ORANGE, anchor="end"))
+
+    for i, (d, r) in enumerate(zip(d_vals, r_vals)):
+        x = ax + gap + i * (bw + gap)
+        bh = ah * r
+        y = ay + ah - bh
+        weak = r < 0.90
+        fill = "#fca5a5" if weak else "#86efac"
+        stroke = RED if weak else GREEN
+        parts.append(rect(x, y, bw, bh, fill, stroke, 1.2, rx=3))
+        parts.append(text(x + bw / 2, ay + ah + 16, str(d), size=11, weight=700, anchor="middle"))
+        parts.append(
+            text(
+                x + bw / 2,
+                ay + ah - 8,
+                f"{r:.2f}",
+                size=9,
+                fill=INK,
+                anchor="middle",
+            )
+        )
+
+    def bar_cx(i: int) -> float:
+        return ax + gap + i * (bw + gap) + bw / 2
+
+    parts.append(text(bar_cx(0), ay + ah + 34, lbl_dmin, size=11, weight=700, fill=GREEN, anchor="middle"))
+    parts.append(text(bar_cx(6), ay + ah + 34, lbl_dmax, size=11, weight=700, fill=PURPLE, anchor="middle"))
+    parts.append(text(bar_cx(7), ay + ah + 50, lbl_dover, size=11, weight=700, fill=RED, anchor="middle"))
+
+    parts.append(text(ax + 8, ay + 18, band_ok, size=11, weight=700, fill=GREEN))
+    parts.append(text(x_split + 8, ay + 18, band_bad, size=11, weight=700, fill=RED))
+
+    parts.append(text(18, ay + ah / 2, ylab, size=12, fill=MUTED, anchor="middle"))
+    parts.append(text(ax + aw / 2, ay + ah + 68, xlab, size=12, fill=MUTED, anchor="middle"))
     parts.append("</svg>")
     return "\n".join(parts)
 
@@ -1356,6 +1808,7 @@ def main() -> None:
         d = OUT / lang
         write(d / "design_nd_grids.svg", nd_grids(lang))
         write(d / "design_frontier.svg", frontier_defs(lang))
+        write(d / "overcrowd_example.svg", overcrowd_example(lang))
         write(d / "design_timeout.svg", timeout_drive(lang))
         write(d / "design_failures.svg", failure_labels(lang))
         write(d / "draft_vs_herdsim.svg", draft_vs_herdsim(lang))
@@ -1369,6 +1822,11 @@ def main() -> None:
         write(d / "draft_extra_analyses.svg", draft_extra_analyses(lang))
         write(d / "herdsim_discoveries.svg", herdsim_discoveries(lang))
         write(d / "trust_herdsim.svg", trust_herdsim(lang))
+        write(d / "claims_scorecard.svg", claims_scorecard(lang))
+        write(d / "transfer_sketch.svg", transfer_sketch(lang))
+        write(d / "metrics_tick_path.svg", metrics_tick_path(lang))
+        write(d / "metrics_reliability.svg", metrics_reliability(lang))
+        write(d / "metrics_idir.svg", metrics_idir(lang))
 
 
 if __name__ == "__main__":

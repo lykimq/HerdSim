@@ -12,7 +12,8 @@
 <text x="207" y="132" text-anchor="middle" font-size="11" font-weight="700" fill="#5b4a2f" font-family="Segoe UI,Noto Sans,sans-serif">drive ~120</text>
 <rect x="360" y="60" width="330" height="140" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="8"/>
 <text x="375" y="90" text-anchor="start" font-size="13" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">T0 = 10,000 ticks</text>
-<text x="375" y="118" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">~80 straight crossings at speed 1: timeout means loss of control, not a short race</text>
-<text x="375" y="150" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">T1 = 20,000 only if overcrowding cells exist (none on baseline)</text>
-<text x="16" y="246" text-anchor="start" font-size="11" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif"></text>
+<text x="375" y="112" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">~80 straight crossings at speed 1: timeout</text>
+<text x="375" y="127" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">means loss of control, not a short race.</text>
+<text x="375" y="152" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">T1 = 20,000 only if overcrowding cells</text>
+<text x="375" y="167" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">exist (none on baseline).</text>
 </svg>

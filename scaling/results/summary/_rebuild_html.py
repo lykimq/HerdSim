@@ -24,6 +24,9 @@ main{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12p
 h2{margin-top:2.2em;padding-bottom:6px;border-bottom:2px solid var(--line);scroll-margin-top:16px}
 h2:first-child{margin-top:1.2em}
 h3{margin-top:1.6em;color:#1e3a8a}
+h4{margin:1.35em 0 .55em;font-size:1.02rem;font-weight:700;color:#334155}
+blockquote{margin:1em 0;padding:14px 18px;border-left:4px solid #0f766e;background:#f0fdfa;border-radius:0 8px 8px 0;color:#134e4a;font-size:1.05rem;font-weight:600;line-height:1.55}
+blockquote p{margin:0}
 code{background:#eef2ff;border-radius:4px;padding:1px 5px;font-size:.88em;word-break:break-word}
 a{color:var(--acc)}
 figure{margin:24px 0;text-align:center}figure img{max-width:100%;border:1px solid var(--line);border-radius:8px;background:#fff}
@@ -31,8 +34,12 @@ figcaption{font-size:.88rem;color:var(--mut);margin-top:6px;text-align:left}
 table{border-collapse:collapse;width:100%;font-size:.9rem;margin:8px 0}
 .table-wrap{overflow-x:auto;margin:8px 0}
 th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+/* First col hugs content (short IDs); badges with nowrap still expand as needed. */
+th:first-child,td:first-child{width:1%;white-space:nowrap;min-width:3.25rem}
+/* Phase/package-style third column needs room on RQ tables. */
+th:nth-child(3),td:nth-child(3){min-width:10.5rem}
 th{background:#f3f4f6}caption{caption-side:bottom;font-size:.85rem;color:var(--mut);padding:6px;text-align:left}
-.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.78rem;font-weight:600}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.78rem;font-weight:600;white-space:nowrap}
 .REJECTED,.BI_BAC_BO,.NOT_REPRODUCED,.KHONG_TAI_HIEN{background:#fee2e2;color:#991b1b}
 .SUPPORTED,.DUOC_UNG_HO,.OK,.DUNG,.READY,.SAN_DUNG,.D_MIN_1{background:#dcfce7;color:#166534}
 .INCONCLUSIVE,.EVALUATED,.KHONG_RO_RANG,.DA_DANH_GIA,.WEAK,.YEU,.UNVERIFIED,.CHUA_XAC_NHAN,.PARTIAL,.MOT_PHAN,.COST_ONLY,.CHI_CHI_PHI{background:#fef3c7;color:#92400e}
@@ -268,8 +275,8 @@ def md_to_html(md: str) -> tuple[str, list[tuple[str, str]], str]:
             i += 1
             continue
 
-        # ATX headers
-        hm = re.match(r"^(#{2,3})\s+(.*)$", ln)
+        # ATX headers (h2 nav; h3/h4 body sections)
+        hm = re.match(r"^(#{2,4})\s+(.*)$", ln)
         if hm:
             flush_caption()
             level = len(hm.group(1))
@@ -311,6 +318,17 @@ def md_to_html(md: str) -> tuple[str, list[tuple[str, str]], str]:
             i += 1
             continue
 
+        # blockquote
+        if ln.startswith(">"):
+            flush_caption()
+            chunks: list[str] = []
+            while i < n and lines[i].startswith(">"):
+                chunks.append(re.sub(r"^>\s?", "", lines[i]).strip())
+                i += 1
+            body = " ".join(c for c in chunks if c)
+            out.append(f"<blockquote><p>{inline(body)}</p></blockquote>")
+            continue
+
         # unordered list
         if re.match(r"^[-*]\s+", ln):
             flush_caption()
@@ -337,7 +355,9 @@ def md_to_html(md: str) -> tuple[str, list[tuple[str, str]], str]:
         flush_caption()
         para = [ln]
         i += 1
-        while i < n and lines[i].strip() and not re.match(r"^(#{1,3}\s+|[-*]\s+|\d+\.\s+|!\[|\|)", lines[i]):
+        while i < n and lines[i].strip() and not re.match(
+            r"^(#{1,4}\s+|[-*]\s+|\d+\.\s+|!\[|\||>)", lines[i]
+        ):
             # stop before table separator-looking? keep simple
             if lines[i].startswith("|") and i + 1 < n and re.search(r"-{3,}", lines[i + 1]):
                 break
@@ -398,13 +418,25 @@ def main() -> None:
         "SUMMARY_REPORT.md",
         "SUMMARY_REPORT.html",
         "en",
-        "HerdSim scaling_v2: claim-grade summary of Phases 1 (size), 2 (structure) and 4 (transfer).",
+        "HerdSim scaling_v2: summary of Phases 1 (size), 2 (structure) and 4 (transfer).",
     )
     build(
         "SUMMARY_REPORT_vi.md",
         "SUMMARY_REPORT_vi.html",
         "vi",
-        "HerdSim scaling_v2: tóm tắt mức xác nhận Giai đoạn 1 (kích thước), 2 (cấu trúc) và 4 (chuyển giao).",
+        "HerdSim scaling_v2: tóm tắt Giai đoạn 1 (kích thước), 2 (cấu trúc) và 4 (chuyển giao).",
+    )
+    build(
+        "RESEARCH_PLAN.md",
+        "RESEARCH_PLAN.html",
+        "en",
+        "Plain-language guide: what the HerdSim scaling study asks, how it measures answers, and what is done so far.",
+    )
+    build(
+        "RESEARCH_PLAN_vi.md",
+        "RESEARCH_PLAN_vi.html",
+        "vi",
+        "Hướng dẫn dễ đọc: nghiên cứu scaling HerdSim hỏi gì, đo thế nào, và hiện đã có câu trả lời gì.",
     )
 
 
