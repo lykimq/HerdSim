@@ -60,6 +60,8 @@ figcaption{font-size:.88rem;color:var(--mut);margin-top:6px;text-align:left}
 ul{padding-left:1.2em}li{margin:6px 0}
 .side-toggle{display:none;position:fixed;right:14px;bottom:14px;z-index:40;border:1px solid var(--line);background:#fff;border-radius:999px;padding:10px 14px;font-size:.9rem;box-shadow:0 4px 16px rgba(0,0,0,.12);cursor:pointer}
 .side-backdrop{display:none}
+footer{max-width:1280px;margin:0 auto;padding:0 24px 28px;color:var(--mut);font-size:.88rem}
+footer p{margin:0}
 @media(max-width:900px){
   .layout{grid-template-columns:1fr}
   nav.side{display:none}
@@ -89,6 +91,7 @@ JS = """
 
 def wrap(
     lang: str,
+    phase: str,
     title: str,
     lead: str,
     nav: str,
@@ -99,15 +102,37 @@ def wrap(
     if lang == "vi":
         links = (
             f'<p style="margin-top:14px">'
-            f'<a href="{other_lang_href}">{other_label}</a>'
-            f' · <a href="../../summary/SUMMARY_REPORT_vi.html">Báo cáo tổng hợp</a></p>'
+            f'<a href="../../../docs/main_scaling_plan_vi.html">Kế hoạch chính</a>'
+            f' · <a href="../../summary/SUMMARY_REPORT_vi.html">Báo cáo tổng hợp</a>'
+            f' · <a href="{other_lang_href}">{other_label}</a>'
+            f' · <a href="../../../docs/INDEX_vi.html">Mục lục tài liệu</a></p>'
+        )
+        footer_links = (
+            f'<a href="../../../docs/main_scaling_plan_vi.html">Kế hoạch chính</a> · '
+            f'<a href="../../summary/SUMMARY_REPORT_vi.html">Báo cáo tổng hợp</a> · '
+            f'<a href="../../../docs/methods/README_vi.html">Phương pháp</a> · '
+            f'<a href="../../../docs/setup/README_vi.html">Thiết lập</a> · '
+            f'<a href="../../../docs/credibility/README_vi.html">Độ tin cậy</a> · '
+            f'<a href="../../summary/data/phase{phase}_tables_vi.html">Bảng Giai đoạn {phase}</a> · '
+            f'<a href="../../summary/data/run_ledger_vi.html">Nhật ký chạy</a>'
         )
         toggle = "Mục lục"
     else:
         links = (
             f'<p style="margin-top:14px">'
-            f'<a href="{other_lang_href}">{other_label}</a>'
-            f' · <a href="../../summary/SUMMARY_REPORT.html">Cross-phase summary</a></p>'
+            f'<a href="../../../docs/main_scaling_plan.html">Main plan</a>'
+            f' · <a href="../../summary/SUMMARY_REPORT.html">Cross-phase summary</a>'
+            f' · <a href="{other_lang_href}">{other_label}</a>'
+            f' · <a href="../../../docs/INDEX.html">Docs index</a></p>'
+        )
+        footer_links = (
+            f'<a href="../../../docs/main_scaling_plan.html">Main plan</a> · '
+            f'<a href="../../summary/SUMMARY_REPORT.html">Cross-phase summary</a> · '
+            f'<a href="../../../docs/methods/README.html">Methods</a> · '
+            f'<a href="../../../docs/setup/README.html">Setup</a> · '
+            f'<a href="../../../docs/credibility/README.html">Credibility</a> · '
+            f'<a href="../../summary/data/phase{phase}_tables.html">Phase {phase} tables</a> · '
+            f'<a href="../../summary/data/run_ledger.html">Run ledger</a>'
         )
         toggle = "Contents"
     return f"""<!DOCTYPE html>
@@ -134,6 +159,7 @@ def wrap(
 {body}
 </main>
 </div>
+<footer><p>{footer_links}</p></footer>
 {JS}
 </body>
 </html>
@@ -515,6 +541,7 @@ make -C scaling scaling-transfer-size-claim-reseed TRANSFER_METHOD=kubo WORKERS=
     body = body.replace("__LAYOUTS__", four_layouts_visuals("en", phase="4"))
     return wrap(
         "en",
+        "4",
         "Phase 4: method transfer",
         "Claim-grade transfer of size and structure maps from baseline strombom_multi to kubo and fat under protocol scaling_v2.",
         P4_NAV_EN,
@@ -746,6 +773,7 @@ __LAYOUTS__
     body = body.replace("__LAYOUTS__", four_layouts_visuals("vi", phase="4"))
     return wrap(
         "vi",
+        "4",
         "Giai đoạn 4: chuyển giao phương pháp",
         "Chuyển giao mức xác nhận bản đồ kích thước và cấu trúc từ cơ sở strombom_multi sang kubo và fat dưới giao thức scaling_v2.",
         P4_NAV_VI,
@@ -912,6 +940,7 @@ __LAYOUTS__
     body = body.replace("__LAYOUTS__", four_layouts_visuals("en"))
     return wrap(
         "en",
+        "2",
         "Phase 2: structure map",
         "Baseline structure contrast: at fixed N, does initial layout X0 change the dogs needed for reliable herding?",
         P2_NAV_EN,
@@ -1044,6 +1073,7 @@ __LAYOUTS__
     body = body.replace("__LAYOUTS__", four_layouts_visuals("vi"))
     return wrap(
         "vi",
+        "2",
         "Giai đoạn 2: bản đồ cấu trúc",
         "Đối chiếu cấu trúc cơ sở: ở N cố định, bố cục xuất phát X0 có đổi số chó cần để chăn tin cậy không?",
         P2_NAV_VI,
@@ -1299,6 +1329,7 @@ def phase1_en() -> str:
 '''
     return wrap(
         "en",
+        "1",
         "Phase 1: size map",
         "Claim-grade map of how many dogs a compact flock needs as N grows, under protocol scaling_v2.",
         P1_NAV_EN,
@@ -1521,6 +1552,7 @@ def phase1_vi() -> str:
 '''
     return wrap(
         "vi",
+        "1",
         "Giai đoạn 1: bản đồ kích thước",
         "Bản đồ mức xác nhận: đàn tập trung cần bao nhiêu chó khi N tăng, dưới giao thức scaling_v2.",
         P1_NAV_VI,

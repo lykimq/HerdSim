@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang='en'>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Collective Herdability Under Shepherding: Main Scaling Plan</title>
+<meta name='description' content='Reader-facing HerdSim documentation and evidence.'>
+<style>
+:root{--ink:#111827;--mut:#6b7280;--line:#e5e7eb;--acc:#2563eb;--bg:#f9fafb}
+*{box-sizing:border-box}body{margin:0;font:16px/1.65 -apple-system,'Segoe UI',Inter,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+header{background:linear-gradient(120deg,#1e3a8a,#0f766e);color:#fff;padding:48px 24px}
+header .in,main{max-width:1000px;margin:auto}header h1{margin:0 0 8px;font-size:2rem}header p{margin:0;opacity:.9;max-width:46rem}
+.chrome{max-width:1280px;margin:auto;padding:12px 24px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.chrome a{color:var(--acc);text-decoration:none}.chrome a:hover,.chrome a:focus{text-decoration:underline}
+.crumbs,.page-nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.sep{color:var(--mut)}
+.layout{display:grid;grid-template-columns:230px 1fr;gap:32px;max-width:1280px;margin:0 auto;padding:24px}
+nav{position:sticky;top:16px;align-self:start;font-size:.88rem;max-height:calc(100vh - 32px);overflow:auto}
+nav a{display:block;padding:5px 10px;color:var(--mut);text-decoration:none;border-left:2px solid var(--line)}
+nav a:hover,nav a:focus{color:var(--acc);border-color:var(--acc)}
+main{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 40px 40px;min-width:0}
+h2{margin-top:2.2em;padding-bottom:6px;border-bottom:2px solid var(--line);scroll-margin-top:16px}
+h2:first-child{margin-top:1.2em}
+h3{margin-top:1.6em;color:#1e3a8a}
+h4{margin:1.35em 0 .55em;font-size:1.02rem;font-weight:700;color:#334155}
+blockquote{margin:1em 0;padding:14px 18px;border-left:4px solid #0f766e;background:#f0fdfa;border-radius:0 8px 8px 0;color:#134e4a;font-size:1.05rem;font-weight:600;line-height:1.55}
+blockquote p{margin:0}
+code{background:#eef2ff;border-radius:4px;padding:1px 5px;font-size:.88em;word-break:break-word}
+a{color:var(--acc)}
+figure{margin:24px 0;text-align:center}figure img{max-width:100%;border:1px solid var(--line);border-radius:8px;background:#fff}
+figcaption{font-size:.88rem;color:var(--mut);margin-top:6px;text-align:left}
+table{border-collapse:collapse;width:100%;font-size:.9rem;margin:8px 0}
+.table-wrap{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+/* First col hugs content (short IDs); badges with nowrap still expand as needed. */
+th:first-child,td:first-child{width:1%;white-space:nowrap;min-width:3.25rem}
+/* Phase/package-style third column needs room on RQ tables. */
+th:nth-child(3),td:nth-child(3){min-width:10.5rem}
+th{background:#f3f4f6}caption{caption-side:bottom;font-size:.85rem;color:var(--mut);padding:6px;text-align:left}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.78rem;font-weight:600;white-space:nowrap}
+.REJECTED,.BI_BAC_BO,.NOT_REPRODUCED,.KHONG_TAI_HIEN{background:#fee2e2;color:#991b1b}
+.SUPPORTED,.DUOC_UNG_HO,.OK,.DUNG,.READY,.SAN_DUNG,.D_MIN_1{background:#dcfce7;color:#166534}
+.INCONCLUSIVE,.EVALUATED,.KHONG_RO_RANG,.DA_DANH_GIA,.WEAK,.YEU,.UNVERIFIED,.CHUA_XAC_NHAN,.PARTIAL,.MOT_PHAN,.COST_ONLY,.CHI_CHI_PHI{background:#fef3c7;color:#92400e}
+.SKIPPED,.UNEVALUATED,.BO_QUA,.CHUA_DANH_GIA,.NOT_RUN,.CHUA_CHAY,.WASTE,.LANG_PHI{background:#ffedd5;color:#9a3412}
+.NEEDS_RUN,.CAN_CHAY,.STALE,.LOI_THOI{background:#ffedd5;color:#9a3412}
+.kpi-note{background:#eff6ff;border-left:4px solid #2563eb;padding:10px 14px;margin:12px 0;border-radius:0 8px 8px 0;font-size:.95rem}
+ul{padding-left:1.2em}li{margin:6px 0}
+footer{max-width:1280px;margin:0 auto 32px;padding:0 24px;color:var(--mut);font-size:.85rem}
+.missing{border:1px solid #b91c1c;background:#fef2f2;color:#991b1b;padding:10px;border-radius:6px}
+pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8px}pre code{background:transparent;padding:0;color:inherit}
+@media(max-width:900px){.layout{grid-template-columns:1fr}nav{display:none}main{padding:8px 18px 30px}header{padding:32px 18px}header h1{font-size:1.55rem}.chrome{padding:10px 18px}}
+</style>
+</head>
+<body>
+<div class='chrome'><div class='crumbs'><a href="INDEX.html">Home</a><span class="sep">/</span><span>Docs</span><span class="sep">/</span><span>Collective Herdability Under Shepherding: Main Scaling Plan</span></div><div class='page-nav'><a rel="prev" href="INDEX.html">Previous</a><span class="sep">|</span><a href="main_scaling_plan_vi.html">Tieng Viet</a></div></div>
+<header><div class='in'><h1>Collective Herdability Under Shepherding: Main Scaling Plan</h1><p>Reader-facing HerdSim documentation and evidence.</p></div></header>
+<div class='layout'>
+<nav><a href="#1-research-objective">1. Research objective</a><a href="#2-work-map-and-dependencies">2. Work map and dependencies</a><a href="#3-shared-planning-contract">3. Shared planning contract</a><a href="#4-evidence-grades-and-planned-budgets">4. Evidence grades and planned budgets</a><a href="#5-research-questions-and-planned-tests">5. Research questions and planned tests</a><a href="#6-claim-support-criteria">6. Claim support criteria</a><a href="#7-execution-status-not-scientific-results">7. Execution status, not scientific results</a><a href="#8-future-decision-gates">8. Future decision gates</a><a href="#9-scope-and-threats">9. Scope and threats</a><a href="#10-source-precedence-and-document-ownership">10. Source precedence and document ownership</a></nav>
+<main>
+<p>Protocol: <code>scaling_v2</code>.</p>
+<p>This document is the scientific plan. It defines the research objective, phase dependencies, research questions, claim criteria, evidence grades, budgets, decision gates, and study boundaries. It does not duplicate setup rationale, controller explanations, implementation ownership, glossary entries, or run commands.</p>
+<p>Canonical supporting documents:</p>
+<ul>
+<li><a href="herdsim_research_program.md">Research program</a></li>
+<li><a href="setup/README.html">Setup and reference index</a></li>
+<li><a href="setup/experiment_setup.html">Experiment setup</a></li>
+<li><a href="setup/parameter_reference.html">Parameter reference</a></li>
+<li><a href="setup/glossary.html">Glossary</a></li>
+<li><a href="methods/README.html">Method guides</a></li>
+<li><a href="credibility/README.html">Credibility and comparison</a></li>
+<li><a href="experiment_run_strategy.md">Run strategy</a></li>
+<li><a href="setup/run_guide.html">Run guide</a></li>
+<li><a href="progress_tracker.md">Progress tracker</a></li>
+<li><a href="../results/summary/data/README.html">Data appendices</a></li>
+</ul>
+<h2 id="1-research-objective">1. Research objective</h2>
+<p>The program asks how much external control is needed to guide a collective reliably as flock size and initial structure change, which processes explain that demand, and which patterns transfer across shepherding methods.</p>
+<p>The primary control-demand quantity is the viable shepherd range around <code>D_min</code> and any observed overcrowding boundary under a fixed task, reliability threshold, time budget, layout, method, and information condition. <code>D_min</code> is not an intrinsic property of a flock.</p>
+<p>The smallest publishable unit is RQ1, RQ2, RQ3, and the frozen protocol. RQ4 repeats both the size map and structure contrast for the required transfer methods. RQ5 and RQ7 are follow-on studies. RQ6 uses completed frontier maps and must not determine the grid retrospectively.</p>
+<h2 id="2-work-map-and-dependencies">2. Work map and dependencies</h2>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Phase</th>
+<th>Research role</th>
+<th>RQ</th>
+<th>Package</th>
+<th>Depends on</th>
+<th>Planning completion condition</th>
+</tr></thead><tbody>
+<tr>
+<td>0</td>
+<td>Freeze shared protocol</td>
+<td>S8</td>
+<td>all</td>
+<td>none</td>
+<td>Canonical YAML and scientific plan agree</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Baseline size and regime map</td>
+<td>RQ2</td>
+<td>A</td>
+<td>Phase 0</td>
+<td>Merged baseline frontiers, regimes, and conditional T1 decision</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Structure at fixed N</td>
+<td>RQ1</td>
+<td>B</td>
+<td>Phase 1 scout and claim-window rules</td>
+<td>Merged layout frontiers and predictor comparison</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Mechanism contrasts</td>
+<td>RQ3</td>
+<td>C</td>
+<td>Matching efficient and overcrowding cells from Phases 1 or 2</td>
+<td>Prespecified within-N tests, or an explicit undefined status</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Transfer across methods</td>
+<td>RQ4</td>
+<td>D</td>
+<td>Phases 1 and 2 design fixed</td>
+<td>Size and structure maps for all required methods</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Information substitution</td>
+<td>RQ5</td>
+<td>E</td>
+<td>Stable method baseline and staged-run pipeline</td>
+<td>Observation, range, and communication ladder frontiers</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Scaling fits</td>
+<td>RQ6</td>
+<td>F</td>
+<td>Claim-grade frontier maps</td>
+<td>Leave-one-N-out comparison of candidate curves</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Early warning</td>
+<td>RQ7</td>
+<td>G</td>
+<td>Claim trajectories with required timeseries</td>
+<td>Held-out AUROC and lead-time evaluation</td>
+</tr>
+</tbody></table></div>
+<p>Dependency rules:</p>
+<ol>
+<li>Phase 0 precedes every scientific run.</li>
+<li>Phases 1, 2, and 4 use scout maps before claim reseeding.</li>
+<li>Phase 3 is analysis of collected contrast cells. It is undefined if the required regimes do not exist.</li>
+<li>Phase 4 structure claims wait for structure maps from every required method.</li>
+<li>Phase 5 is three separate ladders, not a Cartesian product.</li>
+<li>Phase 6 is fitted only after frontiers exist.</li>
+<li>Phase 7 requires stored claim-grade timeseries and whole-N holdout.</li>
+</ol>
+<h2 id="3-shared-planning-contract">3. Shared planning contract</h2>
+<p>The machine-readable values are in <a href="../configs/canonical_grid.yaml"><code>canonical_grid.yaml</code></a>. Parameter meanings and rationale are in <a href="setup/parameter_reference.html">parameter reference</a> and <a href="setup/experiment_setup.html">experiment setup</a>.</p>
+<p>The plan locks these constraints:</p>
+<ul>
+<li>Task: <code>drive_to_goal</code>, with success only when every sheep reaches the goal by the deadline.</li>
+<li>Primary reliability threshold: <code>theta = 0.90</code>; also report 0.50 and 0.70.</li>
+<li>Baseline method: <code>strombom_multi</code>.</li>
+<li>Required transfer set: <code>strombom_multi</code>, <code>kubo</code>, and <code>fat</code>.</li>
+<li>Recommended, non-minimum transfer method: <code>communication_free</code>.</li>
+<li>Flock-size grid: <code>{5, 10, 25, 50, 75, 100, 150, 200, 300, 400}</code>.</li>
+<li>Shepherd-count grid: <code>{1, 2, 3, 4, 6, 10, 15, 20, 25, 35}</code>.</li>
+<li>Layouts: <code>compact</code>, <code>wide</code>, <code>split</code>, and <code>outlier_rich</code>.</li>
+<li>Structure sizes: <code>{50, 100, 200}</code>.</li>
+<li>Information sizes: <code>{100, 200}</code>.</li>
+<li>Deadlines: <code>T0 = 10000</code>; conditional <code>T1 = 20000</code>.</li>
+<li>Locked seed list from master seed 2026.</li>
+<li>Scout depth: 30 seeds per selected cell.</li>
+<li>Claim depth: normally 100 seeds per selected cell.</li>
+<li>Bootstrap: 1000 seed resamples.</li>
+</ul>
+<p>Effects in dog count are measured in local grid steps. The study cannot resolve a difference smaller than one local step of the tested D grid.</p>
+<h3 id="frontier-and-regime-rules">Frontier and regime rules</h3>
+<p>Let <code>R(m, tau, N, D, T, X0, I)</code> be success probability over locked seeds.</p>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Quantity</th>
+<th>Planning definition</th>
+</tr></thead><tbody>
+<tr>
+<td><code>D_min</code></td>
+<td>Smallest tested D with <code>R &gt;= theta</code></td>
+</tr>
+<tr>
+<td><code>D_overcrowd</code></td>
+<td>Smallest D after <code>D_min</code> for which that D and the next tested D are both below theta</td>
+</tr>
+<tr>
+<td><code>D_max</code></td>
+<td>Largest reliable D below <code>D_overcrowd</code>; without overcrowding, the largest tested reliable D, which may only be a grid ceiling</td>
+</tr>
+<tr>
+<td><code>B*</code></td>
+<td>Reliable <code>(D, T)</code> with minimum median shepherd path; ties use smaller D, then faster median success time</td>
+</tr>
+<tr>
+<td>Hard failure</td>
+<td>No tested D reaches theta</td>
+</tr>
+<tr>
+<td>Under-resourced failure</td>
+<td><code>R &lt; theta</code> below <code>D_overcrowd</code></td>
+</tr>
+<tr>
+<td>Efficient operation</td>
+<td><code>R &gt;= theta</code> and median path is below the wasteful threshold</td>
+</tr>
+<tr>
+<td>Wasteful overspend</td>
+<td><code>R &gt;= theta</code> and median path is at least 20 percent above <code>B*</code>; also report 10 and 30 percent</td>
+</tr>
+<tr>
+<td>Overcrowding collapse</td>
+<td><code>R &lt; theta</code> at or above <code>D_overcrowd</code></td>
+</tr>
+</tbody></table></div>
+<p>A <code>D_max</code> at 35 with no <code>D_overcrowd</code> is a tested-grid ceiling, not a measured collapse point.</p>
+<h2 id="4-evidence-grades-and-planned-budgets">4. Evidence grades and planned budgets</h2>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Grade</th>
+<th>Purpose</th>
+<th>Planned depth</th>
+<th>Permitted claim use</th>
+</tr></thead><tbody>
+<tr>
+<td>SMOKE or Pilot</td>
+<td>Check paths, metrics, host, and resume behavior</td>
+<td>Small diagnostic grid, normally 5 seeds</td>
+<td>None</td>
+</tr>
+<tr>
+<td>SCOUT</td>
+<td>Map the broad grid and select precision windows</td>
+<td>30 seeds</td>
+<td>Planning and diagnostics only</td>
+</tr>
+<tr>
+<td>CLAIM</td>
+<td>Estimate selected frontiers and claim quantities</td>
+<td>Normally 100 seeds</td>
+<td>Yes, after provenance and run documentation checks</td>
+</tr>
+<tr>
+<td>T1</td>
+<td>Test the longer deadline on detected overcrowding cells</td>
+<td>100 seeds</td>
+<td>Yes, only when the trigger exists</td>
+</tr>
+</tbody></table></div>
+<p>For each method, layout, and N, claim planning selects:</p>
+<ol>
+<li>Scout <code>D_min</code>, plus the previous and next tested D.</li>
+<li>When two consecutive D values establish a candidate overcrowding onset, those two values and the last reliable D.</li>
+<li>If no D reaches theta, the two largest tested D values.</li>
+</ol>
+<p>Claim rows replace scout rows for reseeded cells. They are never stacked with scout rows from the same cell. Unselected cells retain scout depth. Bootstrap resamples seeds within D; undefined <code>D_min</code> draws remain right-censored above the tested grid. If a <code>D_min</code> interval spans more than one D-grid step, raise that window to 200 seeds before using it for a structure claim.</p>
+<h3 id="planned-estimates">Planned estimates</h3>
+<p>These figures are budget estimates, not executed counts:</p>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Campaign</th>
+<th>Scout estimate</th>
+<th>Claim estimate</th>
+<th>Planning note</th>
+</tr></thead><tbody>
+<tr>
+<td>One size map</td>
+<td>About 3000</td>
+<td>Up to about 6000</td>
+<td>Claim estimate assumes up to six D values per N</td>
+</tr>
+<tr>
+<td>One structure contrast</td>
+<td>About 3600</td>
+<td>Up to about 7200</td>
+<td>Three N values, four layouts, full scout D grid</td>
+</tr>
+<tr>
+<td>Baseline core</td>
+<td>About 20000 total</td>
+<td>Included</td>
+<td>Size, conditional T1, and structure, rounded for planning</td>
+</tr>
+<tr>
+<td>Each required transfer method</td>
+<td>Repeat size and structure budgets</td>
+<td>Recompute after scout</td>
+<td>Claim windows depend on that method&#x27;s scout</td>
+</tr>
+</tbody></table></div>
+<p>Actual work must be read from status and provenance artifacts, not inferred from these estimates.</p>
+<h2 id="5-research-questions-and-planned-tests">5. Research questions and planned tests</h2>
+<h3 id="rq1-structure">RQ1: Structure</h3>
+<p>Does <code>D_min</code> change across initial layouts at fixed N?</p>
+<p>Use N in <code>{50, 100, 200}</code>, all four layouts, and the full D grid. Compare <code>D_min</code> in grid steps. Compare an <code>(N, D)</code> model against a model that also uses layout and state measured only in the first 100 ticks. Hold out whole N values. Full-trial summaries are not predictors.</p>
+<h3 id="rq2-size-and-operating-regimes">RQ2: Size and operating regimes</h3>
+<p>How do the reliable shepherd frontier and operating regimes change with N?</p>
+<p>Map <code>R(N, D)</code> at T0 for the baseline method and compact layout. Estimate frontiers and regime labels under the shared rules. Run T1 only for cells selected by an observed scout or claim overcrowding trigger.</p>
+<h3 id="rq3-mechanism">RQ3: Mechanism</h3>
+<p>Which prespecified mechanism signatures distinguish efficient and overcrowding cells at the same N?</p>
+<p>Use one median per <code>(N, D)</code> cell, rank tests, and Holm correction across hypotheses.</p>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Hypothesis</th>
+<th>Required signature</th>
+</tr></thead><tbody>
+<tr>
+<td>Interference</td>
+<td>Higher median <code>I_dir</code> in overcrowding cells</td>
+</tr>
+<tr>
+<td>Induced fragmentation</td>
+<td>Lower largest-component fraction in overcrowding cells</td>
+</tr>
+<tr>
+<td>Coverage saturation</td>
+<td>Among reliable cells, median coverage remains above 0.5, its range across D is below 0.1, and median path rises; a near-zero curve is not saturation</td>
+</tr>
+<tr>
+<td>Redundant effort</td>
+<td>Higher median path without a reliability gain</td>
+</tr>
+</tbody></table></div>
+<p>No new grid is introduced for RQ3. If a method has no overcrowding label, the mechanism contrast is undefined for that method.</p>
+<h3 id="rq4-generality-across-methods">RQ4: Generality across methods</h3>
+<p>Which frontier, regime, and structure patterns transfer across the three required methods?</p>
+<p>Repeat the size map and structure contrast for <code>kubo</code> and <code>fat</code>, then compare them with <code>strombom_multi</code>.</p>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Property</th>
+<th>Shared</th>
+<th>Shifted</th>
+<th>Absent</th>
+</tr></thead><tbody>
+<tr>
+<td><code>D_min</code></td>
+<td>Same tested D</td>
+<td>Different tested D</td>
+<td>One side has no <code>D_min</code></td>
+</tr>
+<tr>
+<td>Overcrowding</td>
+<td>Present on both and D/N is within a factor of 1.5</td>
+<td>Present on both with a wider gap</td>
+<td>Not present on both</td>
+</tr>
+<tr>
+<td><code>I_dir</code></td>
+<td><code>r(I_dir, success) &lt; -0.3</code> on both</td>
+<td>Sign pattern agrees but magnitude differs</td>
+<td>Required significant pattern is missing</td>
+</tr>
+<tr>
+<td>Coverage saturation</td>
+<td>Saturation rule holds on both</td>
+<td>Holds on one</td>
+<td>Holds on neither</td>
+</tr>
+</tbody></table></div>
+<p>The state-dependent transfer row is filled only when every compared method has the required structure runs.</p>
+<h3 id="rq5-information-versus-shepherd-count">RQ5: Information versus shepherd count</h3>
+<p>Can richer observation, sensing range, or communication lower <code>D_min</code> at fixed reliability?</p>
+<p>Use N in <code>{100, 200}</code>. Test the observation ladder <code>bearing_only</code>, <code>local_positions</code>, <code>global</code>; range multipliers <code>0.5, 1, 1.5, 2</code> times method <code>r_s</code>; and communication ladder <code>none</code>, <code>neighbour_broadcast</code>, <code>global_shared</code>. For <code>strombom_multi</code>, shared information is the union of sensed sheep, not privileged simulator truth.</p>
+<h3 id="rq6-scaling-fits">RQ6: Scaling fits</h3>
+<p>Which planned curve best predicts held-out N, and is a single power law adequate?</p>
+<p>Compare constant, linear, power <code>A * N^alpha</code>, and two-piece linear candidates in dog-count units. Select by leave-one-N-out RMSE. Report any log slope only within an explicit N and layout band.</p>
+<h3 id="rq7-early-warning">RQ7: Early warning</h3>
+<p>Can recent state predict a later failure better than N and D alone?</p>
+<p>At ticks 1000 through 8000 in steps of 200, use features only from <code>(t - 200, t]</code>. Label failure within the next 500 ticks only where the horizon remains inside T0. Train on other N values. Lead time is measured from first crossing of the training threshold to failure and may exceed 500 ticks.</p>
+<h2 id="6-claim-support-criteria">6. Claim support criteria</h2>
+<p>Verdicts are <code>UNEVALUATED</code>, <code>SUPPORTED</code>, <code>REJECTED</code>, or <code>INCONCLUSIVE</code>. A conditional analysis that cannot run because its trigger is absent is marked <code>SKIPPED</code> in run status and explained in the tracker. Verdicts may be assigned only from claim-grade evidence.</p>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Claim</th>
+<th>RQ</th>
+<th>Supported when</th>
+</tr></thead><tbody>
+<tr>
+<td>C1a</td>
+<td>RQ1</td>
+<td>For at least one N, <code>D_min</code> differs by at least one D-grid step across layouts at theta 0.90</td>
+</tr>
+<tr>
+<td>C1b</td>
+<td>RQ1</td>
+<td>The state model has lower leave-one-N-out negative log-likelihood than the <code>(N, D)</code> model</td>
+</tr>
+<tr>
+<td>C2a</td>
+<td>RQ2</td>
+<td>The baseline method has <code>D_overcrowd</code> at theta 0.90 for at least one N</td>
+</tr>
+<tr>
+<td>C2b</td>
+<td>RQ2</td>
+<td>At least one D above <code>D_overcrowd</code> remains below theta at T = 20000</td>
+</tr>
+<tr>
+<td>C3</td>
+<td>RQ3</td>
+<td>At fixed N, overcrowding and efficient cells differ in <code>I_dir</code> and/or fragmentation with rank <code>p &lt; 0.05</code> after Holm correction</td>
+</tr>
+<tr>
+<td>C4</td>
+<td>RQ4</td>
+<td><code>D_min</code> or overcrowding is shared across the three required methods; the structure row additionally requires all structure runs</td>
+</tr>
+<tr>
+<td>C5a</td>
+<td>RQ5</td>
+<td>One ladder step lowers <code>D_min</code> by at least one D-grid step at N in <code>{100, 200}</code></td>
+</tr>
+<tr>
+<td>C5b</td>
+<td>RQ5</td>
+<td>The second ladder step saves fewer dogs than the first</td>
+</tr>
+<tr>
+<td>C6a</td>
+<td>RQ6</td>
+<td>Power has higher leave-one-N-out RMSE than piecewise or per-layout curves</td>
+</tr>
+<tr>
+<td>C6b</td>
+<td>RQ6</td>
+<td>The slope of log <code>D_min</code> on log N is below 1 in a stated N and layout band</td>
+</tr>
+<tr>
+<td>C7a</td>
+<td>RQ7</td>
+<td>Held-out state AUROC exceeds the held-out <code>(N, D)</code> baseline</td>
+</tr>
+<tr>
+<td>C7b</td>
+<td>RQ7</td>
+<td>At least 30 percent of failure trials have lead time of at least 500 ticks</td>
+</tr>
+</tbody></table></div>
+<p>These criteria support statements inside the tested protocol only. They do not support a universal law, an untested task, field performance, or a dog-count gap below one grid step.</p>
+<h2 id="7-execution-status-not-scientific-results">7. Execution status, not scientific results</h2>
+<p>This section records whether planned work ran. It does not state effect sizes, frontier values, or scientific interpretations. The <a href="progress_tracker.md">progress tracker</a> owns current run and verdict status. The <a href="../results/summary/data/run_ledger.html">run ledger</a> owns executed counts and provenance.</p>
+<p>Status as recorded on 2026-10-06:</p>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Phase</th>
+<th>Run status</th>
+<th>Executed-count note</th>
+</tr></thead><tbody>
+<tr>
+<td>0</td>
+<td>DONE</td>
+<td>Protocol frozen</td>
+</tr>
+<tr>
+<td>1</td>
+<td>DONE; conditional T1 SKIPPED</td>
+<td>Scout 3000 rows; claim reseed 2200 rows; T1 not run because its trigger selected zero cells</td>
+</tr>
+<tr>
+<td>2</td>
+<td>DONE</td>
+<td>Scout 3600 rows; claim reseed 2400 rows</td>
+</tr>
+<tr>
+<td>3</td>
+<td><span class="badge SKIPPED">SKIPPED</span></td>
+<td>Conditional mechanism analysis had no eligible overcrowding contrast</td>
+</tr>
+<tr>
+<td>4</td>
+<td>DONE for required Kubo and FAT size and structure campaigns</td>
+<td>Exact scout, claim, and merge counts are in the run ledger</td>
+</tr>
+<tr>
+<td>5</td>
+<td>TODO</td>
+<td>No completed information-ladder campaign is claimed</td>
+</tr>
+<tr>
+<td>6</td>
+<td>DONE for the planned baseline fit package</td>
+<td>Analysis status only</td>
+</tr>
+<tr>
+<td>7</td>
+<td>TODO</td>
+<td>Early-warning analysis has not run</td>
+</tr>
+</tbody></table></div>
+<p>The words <code>DONE</code>, <code>SKIPPED</code>, and <code>TODO</code> describe execution status only. A completed phase can yield a rejected or inconclusive claim. A skipped conditional phase means its prespecified trigger was absent, not that a scientific outcome was observed at the unrun condition.</p>
+<h2 id="8-future-decision-gates">8. Future decision gates</h2>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Gate</th>
+<th>Evidence checked</th>
+<th>Decision</th>
+</tr></thead><tbody>
+<tr>
+<td>G1 Protocol consistency</td>
+<td>Canonical YAML, resolved protocol, and plan</td>
+<td>Stop if frozen values disagree; version any deliberate protocol change</td>
+</tr>
+<tr>
+<td>G2 Scout quality</td>
+<td>Completion, reliability map, and provenance</td>
+<td>Stop and repair a broken map before claim planning</td>
+</tr>
+<tr>
+<td>G3 Claim-window precision</td>
+<td>Bootstrap interval for <code>D_min</code></td>
+<td>Raise selected windows to 200 seeds when the interval spans more than one D-grid step</td>
+</tr>
+<tr>
+<td>G4 T1 trigger</td>
+<td>Two consecutive post-frontier D values below theta</td>
+<td>Run T1 only on selected overcrowding cells; otherwise record <code>SKIPPED</code></td>
+</tr>
+<tr>
+<td>G5 Mechanism eligibility</td>
+<td>Efficient and overcrowding cells at the same N</td>
+<td>Run RQ3 only where the matched contrast exists</td>
+</tr>
+<tr>
+<td>G6 Transfer completeness</td>
+<td>Size and structure maps for all required methods</td>
+<td>Do not fill the full structure-transfer claim before all maps exist</td>
+</tr>
+<tr>
+<td>G7 Structure extension</td>
+<td>Three-size structure claim map</td>
+<td>Add N = 300 and 400 mainly if all four layouts remain at the <code>D_min</code> floor; otherwise the extension is optional</td>
+</tr>
+<tr>
+<td>G8 Information campaign</td>
+<td>Stable baseline and separate ladder protocol</td>
+<td>Run observation, range, and communication as separate staged campaigns</td>
+</tr>
+<tr>
+<td>G9 Early warning</td>
+<td>Claim-grade timeseries and both outcome classes</td>
+<td>Do not report AUROC or lead time without held-out eligible data</td>
+</tr>
+<tr>
+<td>G10 Intended velocity E1</td>
+<td>Claim-grade evidence of wall-driven <code>I_dir</code> spikes</td>
+<td>Keep E1 unbuilt unless that diagnostic need is demonstrated</td>
+</tr>
+<tr>
+<td>G11 External parity</td>
+<td>Matched cross-engine protocol and prespecified tolerances</td>
+<td>Make no numerical NetLogo parity claim until the credibility requirements are met</td>
+</tr>
+</tbody></table></div>
+<h2 id="9-scope-and-threats">9. Scope and threats</h2>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Threat or boundary</th>
+<th>Planning response</th>
+</tr></thead><tbody>
+<tr>
+<td>One simulated task</td>
+<td>Limit conclusions to <code>drive_to_goal</code>; a second task is later work</td>
+</tr>
+<tr>
+<td>Method dependence</td>
+<td>Require RQ4 before making method-general statements</td>
+</tr>
+<tr>
+<td>Layout and state confounding</td>
+<td>Use matched N and prespecified layout contrasts</td>
+</tr>
+<tr>
+<td>Discrete D grid</td>
+<td>Express effects in local grid steps and preserve censoring above the grid</td>
+</tr>
+<tr>
+<td>Soft reliability frontier</td>
+<td>Use locked seeds, claim windows, bootstrap intervals, and the 200-seed precision gate</td>
+</tr>
+<tr>
+<td>Conditional analyses</td>
+<td>Mark absent-trigger work as undefined or skipped, never as a measured null at an unrun condition</td>
+</tr>
+<tr>
+<td>Time conventions across methods</td>
+<td>Avoid direct physical interpretation of raw tick counts across controller families</td>
+</tr>
+<tr>
+<td>Strombom collect switch wider than the goal</td>
+<td>Do not interpret its failure as a packing failure</td>
+</tr>
+<tr>
+<td>Simulated controllers</td>
+<td>Make no field, farm, or biological-validity claim</td>
+</tr>
+<tr>
+<td>NetLogo twins and 2025 draft</td>
+<td>Treat them as separate evidence layers; follow the credibility documents</td>
+</tr>
+<tr>
+<td>Grid ceiling</td>
+<td>Do not interpret D = 35 as a physical upper limit</td>
+</tr>
+<tr>
+<td>Selective precision</td>
+<td>Preserve cell grade after merges and never stack scout and claim rows</td>
+</tr>
+</tbody></table></div>
+<p>The application default arena, sheep models, and dog force laws are outside this protocol&#x27;s modification scope. Detailed boundaries and validation limits are in <a href="credibility/README.html">credibility and comparison</a>.</p>
+<h2 id="10-source-precedence-and-document-ownership">10. Source precedence and document ownership</h2>
+<p>When sources differ, use this order:</p>
+<ol>
+<li><a href="../configs/canonical_grid.yaml"><code>canonical_grid.yaml</code></a> defines frozen machine-readable <code>scaling_v2</code> defaults.</li>
+<li>A resolved YAML in <a href="../configs/protocols/"><code>configs/protocols/</code></a> defines a campaign subset.</li>
+<li>A run&#x27;s copied <code>protocol.yaml</code>, <code>provenance.json</code>, <code>manifest.jsonl</code>, and <code>status.json</code> define what actually executed.</li>
+<li>This plan defines research questions, dependencies, claim criteria, evidence grades, budgets, gates, and scope.</li>
+<li><a href="setup/README.html">Setup documents</a> define parameter rationale, glossary, implementation caps, and operational reference.</li>
+<li><a href="methods/README.html">Method guides</a> define controller interpretation and method-specific limits.</li>
+<li><a href="credibility/README.html">Credibility documents</a> define comparison and validation boundaries.</li>
+<li><a href="experiment_run_strategy.md">Run strategy</a> and <a href="setup/run_guide.html">run guide</a> define staging intent and commands.</li>
+<li><a href="progress_tracker.md">Progress tracker</a> defines current code, run, and claim status.</li>
+<li><a href="../results/summary/data/README.html">Data appendices</a> and their direct artifacts define executed counts and reported evidence.</li>
+</ol>
+<p>Results never redefine the frozen plan. If a planning estimate differs from a run artifact, retain the estimate as a plan and report the artifact as executed. If a copied run protocol differs from generic prose, the copied protocol and provenance control interpretation of that run.</p>
+</main>
+</div>
+<footer><p>Markdown source: <code>main_scaling_plan.md</code>. Images are embedded for portable reading.</p></footer>
+</body>
+</html>

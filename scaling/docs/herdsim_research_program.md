@@ -50,7 +50,7 @@ Before diving into RQ-specific grids, we freeze one shared protocol so later com
 - a baseline method and the methods we compare against it,
 - how we estimate the viable shepherd range (minimum for reliable success, and where adding more stops helping or starts hurting).
 
-Frozen defaults: main plan, Section 8 (`scaling_v2`).
+Frozen defaults: [`canonical_grid.yaml`](../configs/canonical_grid.yaml) under protocol `scaling_v2`.
 
 Scaling runs use a 500 by 500 field, flock at the center, goal center `(370, 250)`, and goal radius `15 * sqrt(N/50)`. Scout is 30 seeds on the full N by D grid. Claim reseeds the D_min neighborhood and, when the scout shows it, the overcrowding onset, at 100 seeds. A baseline size map plus the structure contrast is on the order of 20,000 simulations. Each required transfer method (`kubo`, `fat`, beside `strombom_multi`) repeats both. Overcrowding for the baseline is an RQ2 result. Whether other methods show it is RQ4.
 

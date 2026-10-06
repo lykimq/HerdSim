@@ -61,4 +61,4 @@ SCOUT: 30 seeds. Not for Claims.
 
 - Claim stage: `../claim/`
 - Phase index: `../README.md`
-- Research plan: [../../summary/RESEARCH_PLAN.html](../../summary/RESEARCH_PLAN.html)
+- Main scaling plan: [../../../docs/main_scaling_plan.html](../../../docs/main_scaling_plan.html)

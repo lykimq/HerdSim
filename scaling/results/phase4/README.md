@@ -6,7 +6,7 @@ Question in plain terms: do the same fewest-dogs answers show up with other dog 
 
 Claim-grade size and structure maps for `kubo` and `fat`, compared to baseline `strombom_multi`. Size map: Kubo shares `D_min` = 1 with the baseline for N >= 25; FAT hard-fails for N >= 25. Structure map: Kubo matches on compact and split; hard-fails on wide; outlier_rich N=200 shifts to `D_min` = 20 (200 seeds on D in {1,2,3,4,6,10,15,20,25}; bootstrap [2, 20]). FAT hard-fails on every structure cell. C4 supported only in part.
 
-Cross-phase context: [../summary/RESEARCH_PLAN.html](../summary/RESEARCH_PLAN.html) and [../summary/SUMMARY_REPORT.html](../summary/SUMMARY_REPORT.html).
+Cross-phase context: [main scaling plan](../../docs/main_scaling_plan.html) and [results summary](../summary/SUMMARY_REPORT.html).
 
 ## Intent
 
@@ -163,5 +163,7 @@ CLAIM grade. Aligned with `scaling/docs/progress_tracker.md`:
 - Per-method Package A/B: `{kubo,fat}_{size,structure}/claim/packages/`
 - Discussion: `../../docs/discuss/phase4.md`
 - Window snapshot: `kubo_structure/claim/outlier_rich_n200_window.json`
-- Research plan: `../summary/RESEARCH_PLAN.html`
-- Results summary: `../summary/SUMMARY_REPORT.html`
+- Main scaling plan: [../../docs/main_scaling_plan.html](../../docs/main_scaling_plan.html)
+- Results summary: [../summary/SUMMARY_REPORT.html](../summary/SUMMARY_REPORT.html)
+- Documentation: [index](../../docs/INDEX.html), [methods](../../docs/methods/README.html), [setup](../../docs/setup/README.html), [credibility](../../docs/credibility/README.html)
+- Data appendices: [Phase 4 tables](../summary/data/phase4_tables.html), [run ledger](../summary/data/run_ledger.html)

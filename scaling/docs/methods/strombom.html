@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang='en'>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Strombom Collect/Drive baseline</title>
+<meta name='description' content='Reader-facing HerdSim documentation and evidence.'>
+<style>
+:root{--ink:#111827;--mut:#6b7280;--line:#e5e7eb;--acc:#2563eb;--bg:#f9fafb}
+*{box-sizing:border-box}body{margin:0;font:16px/1.65 -apple-system,'Segoe UI',Inter,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+header{background:linear-gradient(120deg,#1e3a8a,#0f766e);color:#fff;padding:48px 24px}
+header .in,main{max-width:1000px;margin:auto}header h1{margin:0 0 8px;font-size:2rem}header p{margin:0;opacity:.9;max-width:46rem}
+.chrome{max-width:1280px;margin:auto;padding:12px 24px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.chrome a{color:var(--acc);text-decoration:none}.chrome a:hover,.chrome a:focus{text-decoration:underline}
+.crumbs,.page-nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.sep{color:var(--mut)}
+.layout{display:grid;grid-template-columns:230px 1fr;gap:32px;max-width:1280px;margin:0 auto;padding:24px}
+nav{position:sticky;top:16px;align-self:start;font-size:.88rem;max-height:calc(100vh - 32px);overflow:auto}
+nav a{display:block;padding:5px 10px;color:var(--mut);text-decoration:none;border-left:2px solid var(--line)}
+nav a:hover,nav a:focus{color:var(--acc);border-color:var(--acc)}
+main{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 40px 40px;min-width:0}
+h2{margin-top:2.2em;padding-bottom:6px;border-bottom:2px solid var(--line);scroll-margin-top:16px}
+h2:first-child{margin-top:1.2em}
+h3{margin-top:1.6em;color:#1e3a8a}
+h4{margin:1.35em 0 .55em;font-size:1.02rem;font-weight:700;color:#334155}
+blockquote{margin:1em 0;padding:14px 18px;border-left:4px solid #0f766e;background:#f0fdfa;border-radius:0 8px 8px 0;color:#134e4a;font-size:1.05rem;font-weight:600;line-height:1.55}
+blockquote p{margin:0}
+code{background:#eef2ff;border-radius:4px;padding:1px 5px;font-size:.88em;word-break:break-word}
+a{color:var(--acc)}
+figure{margin:24px 0;text-align:center}figure img{max-width:100%;border:1px solid var(--line);border-radius:8px;background:#fff}
+figcaption{font-size:.88rem;color:var(--mut);margin-top:6px;text-align:left}
+table{border-collapse:collapse;width:100%;font-size:.9rem;margin:8px 0}
+.table-wrap{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+/* First col hugs content (short IDs); badges with nowrap still expand as needed. */
+th:first-child,td:first-child{width:1%;white-space:nowrap;min-width:3.25rem}
+/* Phase/package-style third column needs room on RQ tables. */
+th:nth-child(3),td:nth-child(3){min-width:10.5rem}
+th{background:#f3f4f6}caption{caption-side:bottom;font-size:.85rem;color:var(--mut);padding:6px;text-align:left}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.78rem;font-weight:600;white-space:nowrap}
+.REJECTED,.BI_BAC_BO,.NOT_REPRODUCED,.KHONG_TAI_HIEN{background:#fee2e2;color:#991b1b}
+.SUPPORTED,.DUOC_UNG_HO,.OK,.DUNG,.READY,.SAN_DUNG,.D_MIN_1{background:#dcfce7;color:#166534}
+.INCONCLUSIVE,.EVALUATED,.KHONG_RO_RANG,.DA_DANH_GIA,.WEAK,.YEU,.UNVERIFIED,.CHUA_XAC_NHAN,.PARTIAL,.MOT_PHAN,.COST_ONLY,.CHI_CHI_PHI{background:#fef3c7;color:#92400e}
+.SKIPPED,.UNEVALUATED,.BO_QUA,.CHUA_DANH_GIA,.NOT_RUN,.CHUA_CHAY,.WASTE,.LANG_PHI{background:#ffedd5;color:#9a3412}
+.NEEDS_RUN,.CAN_CHAY,.STALE,.LOI_THOI{background:#ffedd5;color:#9a3412}
+.kpi-note{background:#eff6ff;border-left:4px solid #2563eb;padding:10px 14px;margin:12px 0;border-radius:0 8px 8px 0;font-size:.95rem}
+ul{padding-left:1.2em}li{margin:6px 0}
+footer{max-width:1280px;margin:0 auto 32px;padding:0 24px;color:var(--mut);font-size:.85rem}
+.missing{border:1px solid #b91c1c;background:#fef2f2;color:#991b1b;padding:10px;border-radius:6px}
+pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8px}pre code{background:transparent;padding:0;color:inherit}
+@media(max-width:900px){.layout{grid-template-columns:1fr}nav{display:none}main{padding:8px 18px 30px}header{padding:32px 18px}header h1{font-size:1.55rem}.chrome{padding:10px 18px}}
+</style>
+</head>
+<body>
+<div class='chrome'><div class='crumbs'><a href="../INDEX.html">Home</a><span class="sep">/</span><span>Methods</span><span class="sep">/</span><span>Strombom Collect/Drive baseline</span></div><div class='page-nav'><a rel="prev" href="README.html">Previous</a><span class="sep">|</span><a rel="next" href="kubo.html">Next</a><span class="sep">|</span><a href="strombom_vi.html">Tieng Viet</a></div></div>
+<header><div class='in'><h1>Strombom Collect/Drive baseline</h1><p>Reader-facing HerdSim documentation and evidence.</p></div></header>
+<div class='layout'>
+<nav><a href="#published-inspiration">Published inspiration</a><a href="#exact-herdsim-implementation">Exact HerdSim implementation</a><a href="#scalingv2-setup">`scaling_v2` setup</a><a href="#observed-completed-results">Observed completed results</a><a href="#relevant-existing-figures">Relevant existing figures</a><a href="#limitations-and-non-claims">Limitations and non-claims</a></nav>
+<main>
+<h2 id="published-inspiration">Published inspiration</h2>
+<p>Strombom et al. (2014) describe a single shepherd that alternates between two actions. In Collect, it moves behind the sheep farthest from the flock center and pushes that outlier inward. In Drive, it moves behind the flock center relative to the goal and pushes the cohesive flock forward.</p>
+<p>The switch uses:</p>
+<pre><code class="language-text">f(N) = r_a * N^(2/3)</code></pre>
+<p>If any sheep is farther than <code>f(N)</code> from the global center of mass, the flock is treated as spread and the shepherd collects. Otherwise it drives. The published model also supplies the sheep attraction, repulsion, inertia, grazing, noise, and shepherd stop rules used as the basis of HerdSim&#x27;s Strombom sheep.</p>
+<p>Reference: D. Strombom et al., &quot;Solving the shepherding problem: heuristics for herding autonomous, interacting agents,&quot; Journal of The Royal Society Interface 11(100), 2014. DOI: <code>10.1098/rsif.2014.0719</code>.</p>
+<h2 id="exact-herdsim-implementation">Exact HerdSim implementation</h2>
+<p>HerdSim separates sheep dynamics from the dog controller.</p>
+<p>The named <code>strombom</code> preset combines:</p>
+<ul>
+<li><code>sheep_model=strombom</code>;</li>
+<li><code>dog_controller=collect_drive</code>;</li>
+<li>one shepherd by default.</li>
+</ul>
+<p>The completed scaling study did not use that preset. It used <code>strombom_multi</code>, which combines the same Strombom sheep with <code>dog_controller=collect_drive_multi</code>.</p>
+<h3 id="sheep">Sheep</h3>
+<p>When every active dog is farther than <code>r_s</code>, a sheep grazes. It normally stays still and takes a random step with probability <code>graze_move_prob</code>. When a dog is within <code>r_s</code>, the sheep combines previous heading, attraction to a neighbor center, short-range sheep repulsion, repulsion from active dogs, and random noise, then moves by <code>sheep_speed</code>.</p>
+<p>Defaults used by the method bundle include <code>r_a = 2</code>, <code>r_s = 65</code>, <code>c = 1.05</code>, <code>inertia = 0.5</code>, <code>noise_strength = 0.3</code>, <code>sheep_speed = 1.0</code>, and <code>shepherd_speed = 1.5</code>.</p>
+<h3 id="multi-dog-controller">Multi-dog controller</h3>
+<p>Under the global observations used in the completed scaling phases, each active dog sees the full flock and computes the same centroid and threshold.</p>
+<p>In Collect:</p>
+<ul>
+<li>sheep beyond <code>f(N)</code> are sorted by distance from the centroid;</li>
+<li>dog <code>i</code> is assigned outlier <code>i mod k</code>, where <code>k</code> is the number of outliers;</li>
+<li>its base target is <code>r_a</code> behind that sheep relative to the centroid;</li>
+<li>a tangential offset of <code>2 * r_a</code> per slot spreads dogs that approach the same outlier.</li>
+</ul>
+<p>In Drive:</p>
+<ul>
+<li>the base target is <code>r_a * sqrt(N)</code> behind the centroid relative to the goal;</li>
+<li>dogs are placed at equal angles on a circle of radius <code>4 * r_a</code> around that base target.</li>
+</ul>
+<p>Each dog stops when it is closer than <code>shepherd_stop_multiple * r_a</code> to any sheep in its working view. The default multiple is 3. Dog motion includes the Strombom angular noise.</p>
+<p>The outlier assignment, tangential Collect spacing, and Drive circle are HerdSim additions. They are not part of the single-shepherd 2014 algorithm and are not claimed as a port of another published multi-shepherd controller.</p>
+<p>Implementation evidence:</p>
+<ul>
+<li><a href="../../../core/methods.py"><code>../../../core/methods.py</code></a></li>
+<li><a href="../../../plugins/sheep/strombom.py"><code>../../../plugins/sheep/strombom.py</code></a></li>
+<li><a href="../../../plugins/dogs/collect_drive_multi.py"><code>../../../plugins/dogs/collect_drive_multi.py</code></a></li>
+<li><a href="../../../methods/strombom/heuristics.py"><code>../../../methods/strombom/heuristics.py</code></a></li>
+<li><a href="../../../methods/strombom/config.py"><code>../../../methods/strombom/config.py</code></a></li>
+</ul>
+<h2 id="scalingv2-setup"><code>scaling_v2</code> setup</h2>
+<p><code>strombom_multi</code> is the baseline controller in the frozen protocol.</p>
+<ul>
+<li>Phase 1: compact layout, size grid <code>N = {5, 10, 25, 50, 75, 100, 150, 200, 300, 400}</code>.</li>
+<li>Phase 2: layouts <code>compact</code>, <code>wide</code>, <code>split</code>, and <code>outlier_rich</code> at <code>N = {50, 100, 200}</code>.</li>
+<li>Dog grid: <code>{1, 2, 3, 4, 6, 10, 15, 20, 25, 35}</code>.</li>
+<li>Observation mode in the completed comparison: global.</li>
+<li>Reliability threshold: <code>R &gt;= 0.90</code>.</li>
+<li>Scout depth: 30 seeds per full-grid cell.</li>
+<li>Claim depth: 100 seeds in planned frontier windows.</li>
+</ul>
+<p>The experiment overrides the preset dog count as it sweeps <code>D</code>. It keeps the controller equations and the Strombom defaults listed above.</p>
+<p>Configuration evidence:</p>
+<ul>
+<li><a href="../../configs/canonical_grid.yaml"><code>../../configs/canonical_grid.yaml</code></a></li>
+<li><a href="../../configs/protocols/phase1_claim.yaml"><code>../../configs/protocols/phase1_claim.yaml</code></a></li>
+<li><a href="../../configs/protocols/phase2_claim.yaml"><code>../../configs/protocols/phase2_claim.yaml</code></a></li>
+</ul>
+<h2 id="observed-completed-results">Observed completed results</h2>
+<h3 id="compact-size-map">Compact size map</h3>
+<p>At the 90% reliability threshold:</p>
+<ul>
+<li><code>D_min = 2</code> for <code>N = 5</code> and <code>N = 10</code>;</li>
+<li><code>D_min = 1</code> for every tested <code>N</code> from 25 through 400;</li>
+<li>no overcrowding was observed;</li>
+<li><code>D_max = 35</code> is the grid ceiling for every size, not a measured collapse.</li>
+</ul>
+<p>The Phase 1 claim merge contains 4,540 rows and has overall <code>R = 0.963</code>. Its 169 failures are concentrated mainly at one dog for the two smallest flocks. Median completion time across the merge is 183 ticks. For <code>N &gt;= 25</code>, median path per dog is about 148 world units.</p>
+<h3 id="starting-structure">Starting structure</h3>
+<p>At <code>N = 50, 100, 200</code>, all four layouts have <code>D_min = 1</code>, with bootstrap width zero. Structure changed cost rather than the minimum reliable dog count:</p>
+<ul>
+<li>wide starts took about 11 to 20 times the compact completion time and about 19 to 36 times the compact path at one dog;</li>
+<li><code>outlier_rich</code>, <code>N = 200</code> took a median 1,228 ticks and path 1,647 at one dog;</li>
+<li>on wide starts, the minimum-path reliable choice <code>B*</code> was two dogs for all three tested sizes.</li>
+</ul>
+<p>Evidence:</p>
+<ul>
+<li><a href="../../results/phase1/claim/packages/a/frontier.csv"><code>../../results/phase1/claim/packages/a/frontier.csv</code></a></li>
+<li><a href="../../results/phase1/claim/merged_trials.csv"><code>../../results/phase1/claim/merged_trials.csv</code></a></li>
+<li><a href="../../results/phase2/claim/packages/b/frontier_by_layout.csv"><code>../../results/phase2/claim/packages/b/frontier_by_layout.csv</code></a></li>
+<li><a href="../../results/phase2/claim/merged_trials.csv"><code>../../results/phase2/claim/merged_trials.csv</code></a></li>
+</ul>
+<h2 id="relevant-existing-figures">Relevant existing figures</h2>
+<ul>
+<li><a href="../../results/phase1/guides/assets/figures/reliability_heatmap.png">Compact reliability heatmap</a></li>
+<li><a href="../../results/phase1/guides/assets/figures/f2_dmin_vs_n.png"><code>D_min</code> against flock size</a></li>
+<li><a href="../../results/phase1/guides/assets/figures/f3_cost_vs_d.png">Cost against dog count</a></li>
+<li><a href="../../results/phase2/guides/assets/figures/f4_layout_cost.png">Layout cost comparison</a></li>
+<li><a href="../../results/phase2/guides/assets/figures/f10_wide_bstar_path.png">Wide-layout path at one and two dogs</a></li>
+</ul>
+<h2 id="limitations-and-non-claims">Limitations and non-claims</h2>
+<ul>
+<li>The claim-grade baseline is HerdSim&#x27;s <code>strombom_multi</code>, not the published single-shepherd algorithm without modification.</li>
+<li>The easy compact task produces a ceiling effect. One dog succeeds for all tested <code>N &gt;= 25</code>, so these data do not support a growing dog-count scaling law.</li>
+<li><code>D_max = 35</code> means no upper collapse was found within the tested grid. It does not mean 35 is a biological or operational maximum.</li>
+<li>The split layout behaved much like compact in the completed analysis. The summary marks the intended initial separation as still needing generator confirmation, so no strong split-layout mechanism claim is made.</li>
+<li>The registered NetLogo twin is evidence that a counterpart exists, not evidence of tick-for-tick equality. Registry: <a href="../../../integrations/netlogo/twins.json"><code>../../../integrations/netlogo/twins.json</code></a>.</li>
+<li>Results do not establish real-dog performance or reproduce the quantitative outcomes of the 2014 paper.</li>
+</ul>
+</main>
+</div>
+<footer><p>Markdown source: <code>strombom.md</code>. Images are embedded for portable reading.</p></footer>
+</body>
+</html>

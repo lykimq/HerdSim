@@ -1,0 +1,684 @@
+<!doctype html>
+<html lang='en'>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Phase 2 data tables</title>
+<meta name='description' content='Reader-facing HerdSim documentation and evidence.'>
+<style>
+:root{--ink:#111827;--mut:#6b7280;--line:#e5e7eb;--acc:#2563eb;--bg:#f9fafb}
+*{box-sizing:border-box}body{margin:0;font:16px/1.65 -apple-system,'Segoe UI',Inter,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+header{background:linear-gradient(120deg,#1e3a8a,#0f766e);color:#fff;padding:48px 24px}
+header .in,main{max-width:1000px;margin:auto}header h1{margin:0 0 8px;font-size:2rem}header p{margin:0;opacity:.9;max-width:46rem}
+.chrome{max-width:1280px;margin:auto;padding:12px 24px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.chrome a{color:var(--acc);text-decoration:none}.chrome a:hover,.chrome a:focus{text-decoration:underline}
+.crumbs,.page-nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.sep{color:var(--mut)}
+.layout{display:grid;grid-template-columns:230px 1fr;gap:32px;max-width:1280px;margin:0 auto;padding:24px}
+nav{position:sticky;top:16px;align-self:start;font-size:.88rem;max-height:calc(100vh - 32px);overflow:auto}
+nav a{display:block;padding:5px 10px;color:var(--mut);text-decoration:none;border-left:2px solid var(--line)}
+nav a:hover,nav a:focus{color:var(--acc);border-color:var(--acc)}
+main{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 40px 40px;min-width:0}
+h2{margin-top:2.2em;padding-bottom:6px;border-bottom:2px solid var(--line);scroll-margin-top:16px}
+h2:first-child{margin-top:1.2em}
+h3{margin-top:1.6em;color:#1e3a8a}
+h4{margin:1.35em 0 .55em;font-size:1.02rem;font-weight:700;color:#334155}
+blockquote{margin:1em 0;padding:14px 18px;border-left:4px solid #0f766e;background:#f0fdfa;border-radius:0 8px 8px 0;color:#134e4a;font-size:1.05rem;font-weight:600;line-height:1.55}
+blockquote p{margin:0}
+code{background:#eef2ff;border-radius:4px;padding:1px 5px;font-size:.88em;word-break:break-word}
+a{color:var(--acc)}
+figure{margin:24px 0;text-align:center}figure img{max-width:100%;border:1px solid var(--line);border-radius:8px;background:#fff}
+figcaption{font-size:.88rem;color:var(--mut);margin-top:6px;text-align:left}
+table{border-collapse:collapse;width:100%;font-size:.9rem;margin:8px 0}
+.table-wrap{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+/* First col hugs content (short IDs); badges with nowrap still expand as needed. */
+th:first-child,td:first-child{width:1%;white-space:nowrap;min-width:3.25rem}
+/* Phase/package-style third column needs room on RQ tables. */
+th:nth-child(3),td:nth-child(3){min-width:10.5rem}
+th{background:#f3f4f6}caption{caption-side:bottom;font-size:.85rem;color:var(--mut);padding:6px;text-align:left}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.78rem;font-weight:600;white-space:nowrap}
+.REJECTED,.BI_BAC_BO,.NOT_REPRODUCED,.KHONG_TAI_HIEN{background:#fee2e2;color:#991b1b}
+.SUPPORTED,.DUOC_UNG_HO,.OK,.DUNG,.READY,.SAN_DUNG,.D_MIN_1{background:#dcfce7;color:#166534}
+.INCONCLUSIVE,.EVALUATED,.KHONG_RO_RANG,.DA_DANH_GIA,.WEAK,.YEU,.UNVERIFIED,.CHUA_XAC_NHAN,.PARTIAL,.MOT_PHAN,.COST_ONLY,.CHI_CHI_PHI{background:#fef3c7;color:#92400e}
+.SKIPPED,.UNEVALUATED,.BO_QUA,.CHUA_DANH_GIA,.NOT_RUN,.CHUA_CHAY,.WASTE,.LANG_PHI{background:#ffedd5;color:#9a3412}
+.NEEDS_RUN,.CAN_CHAY,.STALE,.LOI_THOI{background:#ffedd5;color:#9a3412}
+.kpi-note{background:#eff6ff;border-left:4px solid #2563eb;padding:10px 14px;margin:12px 0;border-radius:0 8px 8px 0;font-size:.95rem}
+ul{padding-left:1.2em}li{margin:6px 0}
+footer{max-width:1280px;margin:0 auto 32px;padding:0 24px;color:var(--mut);font-size:.85rem}
+.missing{border:1px solid #b91c1c;background:#fef2f2;color:#991b1b;padding:10px;border-radius:6px}
+pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8px}pre code{background:transparent;padding:0;color:inherit}
+@media(max-width:900px){.layout{grid-template-columns:1fr}nav{display:none}main{padding:8px 18px 30px}header{padding:32px 18px}header h1{font-size:1.55rem}.chrome{padding:10px 18px}}
+</style>
+</head>
+<body>
+<div class='chrome'><div class='crumbs'><a href="../../../docs/INDEX.html">Home</a><span class="sep">/</span><span>Data</span><span class="sep">/</span><span>Phase 2 data tables</span></div><div class='page-nav'><a rel="prev" href="phase1_tables.html">Previous</a><span class="sep">|</span><a rel="next" href="phase4_tables.html">Next</a><span class="sep">|</span><a href="phase2_tables_vi.html">Tieng Viet</a></div></div>
+<header><div class='in'><h1>Phase 2 data tables</h1><p>Reader-facing HerdSim documentation and evidence.</p></div></header>
+<div class='layout'>
+<nav><a href="#complete-layout-frontier">Complete layout frontier</a><a href="#complete-dmin-bootstrap-intervals">Complete D_min bootstrap intervals</a><a href="#one-dog-cost-by-layout">One-dog cost by layout</a><a href="#predictor-comparison">Predictor comparison</a><a href="#schema-for-mergedtrials-tables">Schema for merged_trials tables</a><a href="#claim-merged-trials">Claim merged trials</a><a href="#direct-sources">Direct sources</a></nav>
+<main>
+<p>Claim evidence is used for results. Scout evidence selected the precision windows and must not be read as the final estimate.</p>
+<h2 id="complete-layout-frontier">Complete layout frontier</h2>
+<p>Source: <a href="../../phase2/claim/packages/b/frontier_by_layout.csv"><code>phase2/claim/packages/b/frontier_by_layout.csv</code></a>.</p>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>initial_layout</th>
+<th>n_sheep</th>
+<th>d_min</th>
+<th>d_overcrowd</th>
+<th>d_max</th>
+<th>b_star_d</th>
+<th>b_star_t</th>
+<th>b_star_effort</th>
+<th>hard_failure</th>
+</tr></thead><tbody>
+<tr>
+<td>compact</td>
+<td>50</td>
+<td>1</td>
+<td></td>
+<td>35</td>
+<td>1</td>
+<td>10000.0</td>
+<td>157.49999999999977</td>
+<td>False</td>
+</tr>
+<tr>
+<td>compact</td>
+<td>100</td>
+<td>1</td>
+<td></td>
+<td>35</td>
+<td>1</td>
+<td>10000.0</td>
+<td>161.35167363755858</td>
+<td>False</td>
+</tr>
+<tr>
+<td>compact</td>
+<td>200</td>
+<td>1</td>
+<td></td>
+<td>35</td>
+<td>1</td>
+<td>10000.0</td>
+<td>144.17124164542776</td>
+<td>False</td>
+</tr>
+<tr>
+<td>outlier_rich</td>
+<td>50</td>
+<td>1</td>
+<td></td>
+<td>35</td>
+<td>1</td>
+<td>10000.0</td>
+<td>209.24999999999994</td>
+<td>False</td>
+</tr>
+<tr>
+<td>outlier_rich</td>
+<td>100</td>
+<td>1</td>
+<td></td>
+<td>35</td>
+<td>1</td>
+<td>10000.0</td>
+<td>553.8718780756371</td>
+<td>False</td>
+</tr>
+<tr>
+<td>outlier_rich</td>
+<td>200</td>
+<td>1</td>
+<td></td>
+<td>35</td>
+<td>1</td>
+<td>10000.0</td>
+<td>1646.6909610899515</td>
+<td>False</td>
+</tr>
+<tr>
+<td>split</td>
+<td>50</td>
+<td>1</td>
+<td></td>
+<td>35</td>
+<td>1</td>
+<td>10000.0</td>
+<td>157.5</td>
+<td>False</td>
+</tr>
+<tr>
+<td>split</td>
+<td>100</td>
+<td>1</td>
+<td></td>
+<td>35</td>
+<td>1</td>
+<td>10000.0</td>
+<td>161.95821333206823</td>
+<td>False</td>
+</tr>
+<tr>
+<td>split</td>
+<td>200</td>
+<td>1</td>
+<td></td>
+<td>35</td>
+<td>1</td>
+<td>10000.0</td>
+<td>144.40420419240473</td>
+<td>False</td>
+</tr>
+<tr>
+<td>wide</td>
+<td>50</td>
+<td>1</td>
+<td></td>
+<td>35</td>
+<td>2</td>
+<td>10000.0</td>
+<td>2336.832941075605</td>
+<td>False</td>
+</tr>
+<tr>
+<td>wide</td>
+<td>100</td>
+<td>1</td>
+<td></td>
+<td>35</td>
+<td>2</td>
+<td>10000.0</td>
+<td>3003.1703685972398</td>
+<td>False</td>
+</tr>
+<tr>
+<td>wide</td>
+<td>200</td>
+<td>1</td>
+<td></td>
+<td>35</td>
+<td>2</td>
+<td>10000.0</td>
+<td>3693.6903356986063</td>
+<td>False</td>
+</tr>
+</tbody></table></div>
+<p>Every layout and N has <code>D_min = 1</code>, <code>D_max = 35</code> at the grid ceiling, and no overcrowding. Wide layouts have <code>B_star_D = 2</code> even though one dog is reliable.</p>
+<h2 id="complete-dmin-bootstrap-intervals">Complete D_min bootstrap intervals</h2>
+<p>Source: <a href="../../phase2/claim/merged_dmin_bootstrap.csv"><code>phase2/claim/merged_dmin_bootstrap.csv</code></a>.</p>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>method</th>
+<th>initial_layout</th>
+<th>n_sheep</th>
+<th>d_min</th>
+<th>d_min_ci_low</th>
+<th>d_min_ci_high</th>
+<th>n_boot</th>
+<th>n_seeds_ref</th>
+<th>n_boot_defined</th>
+</tr></thead><tbody>
+<tr>
+<td>strombom_multi</td>
+<td>compact</td>
+<td>50</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1000</td>
+<td>100</td>
+<td>1000</td>
+</tr>
+<tr>
+<td>strombom_multi</td>
+<td>compact</td>
+<td>100</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1000</td>
+<td>100</td>
+<td>1000</td>
+</tr>
+<tr>
+<td>strombom_multi</td>
+<td>compact</td>
+<td>200</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1000</td>
+<td>100</td>
+<td>1000</td>
+</tr>
+<tr>
+<td>strombom_multi</td>
+<td>outlier_rich</td>
+<td>50</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1000</td>
+<td>100</td>
+<td>1000</td>
+</tr>
+<tr>
+<td>strombom_multi</td>
+<td>outlier_rich</td>
+<td>100</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1000</td>
+<td>100</td>
+<td>1000</td>
+</tr>
+<tr>
+<td>strombom_multi</td>
+<td>outlier_rich</td>
+<td>200</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1000</td>
+<td>100</td>
+<td>1000</td>
+</tr>
+<tr>
+<td>strombom_multi</td>
+<td>split</td>
+<td>50</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1000</td>
+<td>100</td>
+<td>1000</td>
+</tr>
+<tr>
+<td>strombom_multi</td>
+<td>split</td>
+<td>100</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1000</td>
+<td>100</td>
+<td>1000</td>
+</tr>
+<tr>
+<td>strombom_multi</td>
+<td>split</td>
+<td>200</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1000</td>
+<td>100</td>
+<td>1000</td>
+</tr>
+<tr>
+<td>strombom_multi</td>
+<td>wide</td>
+<td>50</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1000</td>
+<td>100</td>
+<td>1000</td>
+</tr>
+<tr>
+<td>strombom_multi</td>
+<td>wide</td>
+<td>100</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1000</td>
+<td>100</td>
+<td>1000</td>
+</tr>
+<tr>
+<td>strombom_multi</td>
+<td>wide</td>
+<td>200</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1000</td>
+<td>100</td>
+<td>1000</td>
+</tr>
+</tbody></table></div>
+<h2 id="one-dog-cost-by-layout">One-dog cost by layout</h2>
+<p>Computed from all D = 1 claim-merge rows. Medians use successful trials only.</p>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Layout</th>
+<th>N</th>
+<th>Successes</th>
+<th>Seeds</th>
+<th>R</th>
+<th>Median ticks</th>
+<th>Median path</th>
+</tr></thead><tbody>
+<tr>
+<td>compact</td>
+<td>50</td>
+<td>100</td>
+<td>100</td>
+<td>1</td>
+<td>195</td>
+<td>157.5</td>
+</tr>
+<tr>
+<td>compact</td>
+<td>100</td>
+<td>100</td>
+<td>100</td>
+<td>1</td>
+<td>204</td>
+<td>161.352</td>
+</tr>
+<tr>
+<td>compact</td>
+<td>200</td>
+<td>100</td>
+<td>100</td>
+<td>1</td>
+<td>191</td>
+<td>144.171</td>
+</tr>
+<tr>
+<td>outlier_rich</td>
+<td>50</td>
+<td>100</td>
+<td>100</td>
+<td>1</td>
+<td>223.5</td>
+<td>209.25</td>
+</tr>
+<tr>
+<td>outlier_rich</td>
+<td>100</td>
+<td>100</td>
+<td>100</td>
+<td>1</td>
+<td>501</td>
+<td>553.872</td>
+</tr>
+<tr>
+<td>outlier_rich</td>
+<td>200</td>
+<td>100</td>
+<td>100</td>
+<td>1</td>
+<td>1,228</td>
+<td>1,646.691</td>
+</tr>
+<tr>
+<td>split</td>
+<td>50</td>
+<td>100</td>
+<td>100</td>
+<td>1</td>
+<td>195</td>
+<td>157.5</td>
+</tr>
+<tr>
+<td>split</td>
+<td>100</td>
+<td>100</td>
+<td>100</td>
+<td>1</td>
+<td>205</td>
+<td>161.958</td>
+</tr>
+<tr>
+<td>split</td>
+<td>200</td>
+<td>100</td>
+<td>100</td>
+<td>1</td>
+<td>193</td>
+<td>144.404</td>
+</tr>
+<tr>
+<td>wide</td>
+<td>50</td>
+<td>100</td>
+<td>100</td>
+<td>1</td>
+<td>2,138.5</td>
+<td>2,925.126</td>
+</tr>
+<tr>
+<td>wide</td>
+<td>100</td>
+<td>100</td>
+<td>100</td>
+<td>1</td>
+<td>3,074</td>
+<td>4,319.485</td>
+</tr>
+<tr>
+<td>wide</td>
+<td>200</td>
+<td>100</td>
+<td>100</td>
+<td>1</td>
+<td>3,869.5</td>
+<td>5,213.019</td>
+</tr>
+</tbody></table></div>
+<h2 id="predictor-comparison">Predictor comparison</h2>
+<p>Source: <a href="../../phase2/claim/packages/b/predictor_comparison.csv"><code>phase2/claim/packages/b/predictor_comparison.csv</code></a>. This table is retained as evidence, but the state-predictor claim is inconclusive because the baseline D_min did not shift.</p>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>n_folds</th>
+<th>nd_nll</th>
+<th>state_nll</th>
+<th>prefers_state</th>
+<th>state_cols</th>
+<th>note</th>
+</tr></thead><tbody>
+<tr>
+<td>0</td>
+<td></td>
+<td></td>
+<td>False</td>
+<td>[&#x27;early_cohesion&#x27;, &#x27;early_gcm_goal&#x27;, &#x27;early_time_to_goal&#x27;, &#x27;early_shepherd_path&#x27;, &#x27;early_success_rate&#x27;, &#x27;early_sheep_in_goal&#x27;, &#x27;early_polarization&#x27;, &#x27;early_outlier_count&#x27;, &#x27;early_min_separation&#x27;, &#x27;early_fragmentation&#x27;, &#x27;early_mean_spread&#x27;, &#x27;early_extent&#x27;, &#x27;early_perimeter&#x27;, &#x27;early_hull_area&#x27;, &#x27;early_flock_density&#x27;, &#x27;early_aspect_ratio&#x27;, &#x27;early_i_dir&#x27;, &#x27;early_coverage&#x27;]</td>
+<td>need at least two flock sizes and both outcomes</td>
+</tr>
+</tbody></table></div>
+<h2 id="schema-for-mergedtrials-tables">Schema for merged_trials tables</h2>
+<p>Each row is one simulation trial with one seed. Each data-set section reports the actual column count; these groups explain the shared schema.</p>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Group</th>
+<th>Columns and meaning</th>
+</tr></thead><tbody>
+<tr>
+<td>Identity and design</td>
+<td>method, scenario, preset, seed, sheep_model, dog_controller, obs_mode, n_sheep, n_shepherds, initial_layout, time_limit</td>
+</tr>
+<tr>
+<td>Outcome and cost</td>
+<td>success, total_ticks, time_to_goal, shepherd_path, first_success_tick, control_efficiency</td>
+</tr>
+<tr>
+<td>Final state</td>
+<td>final_gcm_goal, final_success_rate, final_sheep_in_goal, final_min_separation</td>
+</tr>
+<tr>
+<td>Time summaries</td>
+<td>mean_<em>, min_</em>, max_<em>, auc_</em> for recorded flock and dog metrics</td>
+</tr>
+<tr>
+<td>Failure diagnostics</td>
+<td>failure_mode, failure_label, failure_hints</td>
+</tr>
+<tr>
+<td>Configuration</td>
+<td>resolved_config, the serialized effective trial configuration</td>
+</tr>
+</tbody></table></div>
+<h2 id="claim-merged-trials">Claim merged trials</h2>
+<p>Full source: <a href="../../phase2/claim/merged_trials.csv"><code>phase2/claim/merged_trials.csv</code></a>. The large table is not reproduced. The summaries below are computed directly from the CSV.</p>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Property</th>
+<th>Value</th>
+</tr></thead><tbody>
+<tr>
+<td>Rows</td>
+<td>5,280</td>
+</tr>
+<tr>
+<td>Columns</td>
+<td>77</td>
+</tr>
+<tr>
+<td>Design cells</td>
+<td>120</td>
+</tr>
+<tr>
+<td>Methods</td>
+<td>strombom_multi</td>
+</tr>
+<tr>
+<td>Layouts</td>
+<td>compact, outlier_rich, split, wide</td>
+</tr>
+<tr>
+<td>N values</td>
+<td>50, 100, 200</td>
+</tr>
+<tr>
+<td>D values</td>
+<td>1, 2, 3, 4, 6, 10, 15, 20, 25, 35</td>
+</tr>
+<tr>
+<td>Seed range</td>
+<td>2026 to 2125</td>
+</tr>
+</tbody></table></div>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Property</th>
+<th>Value</th>
+</tr></thead><tbody>
+<tr>
+<td>Successes</td>
+<td>5,280</td>
+</tr>
+<tr>
+<td>Failures</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Overall R</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Median ticks, successes</td>
+<td>197</td>
+</tr>
+<tr>
+<td>P90 ticks, successes</td>
+<td>1,313</td>
+</tr>
+<tr>
+<td>Median path, successes</td>
+<td>1,802.569</td>
+</tr>
+<tr>
+<td>Failure modes</td>
+<td>none</td>
+</tr>
+</tbody></table></div>
+<p>Representative-row rule: sort lexicographically by <code>method</code>, <code>initial_layout</code>, <code>n_sheep</code>, <code>n_shepherds</code>, and <code>seed</code>, then take 5 evenly spaced positions including both endpoints. This reproducible rule does not select on outcome.</p>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>method</th>
+<th>layout</th>
+<th>N</th>
+<th>D</th>
+<th>seed</th>
+<th>success</th>
+<th>ticks</th>
+<th>path</th>
+<th>failure_mode</th>
+</tr></thead><tbody>
+<tr>
+<td>strombom_multi</td>
+<td>compact</td>
+<td>50</td>
+<td>1</td>
+<td>2026</td>
+<td>True</td>
+<td>198</td>
+<td>157.5</td>
+<td>none</td>
+</tr>
+<tr>
+<td>strombom_multi</td>
+<td>outlier_rich</td>
+<td>50</td>
+<td>1</td>
+<td>2026</td>
+<td>True</td>
+<td>434</td>
+<td>362.088</td>
+<td>none</td>
+</tr>
+<tr>
+<td>strombom_multi</td>
+<td>split</td>
+<td>50</td>
+<td>1</td>
+<td>2026</td>
+<td>True</td>
+<td>195</td>
+<td>151.5</td>
+<td>none</td>
+</tr>
+<tr>
+<td>strombom_multi</td>
+<td>split</td>
+<td>200</td>
+<td>35</td>
+<td>2055</td>
+<td>True</td>
+<td>181</td>
+<td>4,681.49</td>
+<td>none</td>
+</tr>
+<tr>
+<td>strombom_multi</td>
+<td>wide</td>
+<td>200</td>
+<td>35</td>
+<td>2055</td>
+<td>True</td>
+<td>1544</td>
+<td>53,992.82</td>
+<td>none</td>
+</tr>
+</tbody></table></div>
+<h2 id="direct-sources">Direct sources</h2>
+<ul>
+<li><a href="../../phase2/claim/packages/b/frontier_by_layout.csv"><code>phase2/claim/packages/b/frontier_by_layout.csv</code></a></li>
+<li><a href="../../phase2/claim/packages/b/predictor_comparison.csv"><code>phase2/claim/packages/b/predictor_comparison.csv</code></a></li>
+<li><a href="../../phase2/claim/merged_dmin_bootstrap.csv"><code>phase2/claim/merged_dmin_bootstrap.csv</code></a></li>
+<li><a href="../../phase2/claim/merged_trials.csv"><code>phase2/claim/merged_trials.csv</code></a></li>
+<li><a href="../../phase2/claim/provenance.json"><code>phase2/claim/provenance.json</code></a></li>
+<li><a href="../../phase2/claim/status.json"><code>phase2/claim/status.json</code></a></li>
+</ul>
+</main>
+</div>
+<footer><p>Markdown source: <code>phase2_tables.md</code>. Images are embedded for portable reading.</p></footer>
+</body>
+</html>

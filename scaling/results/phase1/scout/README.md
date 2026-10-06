@@ -77,7 +77,7 @@ CLAIM grade only. Skipped for SCOUT.
 
 - Claim plan + reseed in `../claim/`
 - Phase index: `../README.md`
-- Research plan: [../../summary/RESEARCH_PLAN.html](../../summary/RESEARCH_PLAN.html)
+- Main scaling plan: [../../../docs/main_scaling_plan.html](../../../docs/main_scaling_plan.html)
 
 ## Files in this folder
 

@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang='vi'>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Tham chieu tham so</title>
+<meta name='description' content='Tai lieu HerdSim de doc va dieu huong.'>
+<style>
+:root{--ink:#111827;--mut:#6b7280;--line:#e5e7eb;--acc:#2563eb;--bg:#f9fafb}
+*{box-sizing:border-box}body{margin:0;font:16px/1.65 -apple-system,'Segoe UI',Inter,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+header{background:linear-gradient(120deg,#1e3a8a,#0f766e);color:#fff;padding:48px 24px}
+header .in,main{max-width:1000px;margin:auto}header h1{margin:0 0 8px;font-size:2rem}header p{margin:0;opacity:.9;max-width:46rem}
+.chrome{max-width:1280px;margin:auto;padding:12px 24px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.chrome a{color:var(--acc);text-decoration:none}.chrome a:hover,.chrome a:focus{text-decoration:underline}
+.crumbs,.page-nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.sep{color:var(--mut)}
+.layout{display:grid;grid-template-columns:230px 1fr;gap:32px;max-width:1280px;margin:0 auto;padding:24px}
+nav{position:sticky;top:16px;align-self:start;font-size:.88rem;max-height:calc(100vh - 32px);overflow:auto}
+nav a{display:block;padding:5px 10px;color:var(--mut);text-decoration:none;border-left:2px solid var(--line)}
+nav a:hover,nav a:focus{color:var(--acc);border-color:var(--acc)}
+main{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 40px 40px;min-width:0}
+h2{margin-top:2.2em;padding-bottom:6px;border-bottom:2px solid var(--line);scroll-margin-top:16px}
+h2:first-child{margin-top:1.2em}
+h3{margin-top:1.6em;color:#1e3a8a}
+h4{margin:1.35em 0 .55em;font-size:1.02rem;font-weight:700;color:#334155}
+blockquote{margin:1em 0;padding:14px 18px;border-left:4px solid #0f766e;background:#f0fdfa;border-radius:0 8px 8px 0;color:#134e4a;font-size:1.05rem;font-weight:600;line-height:1.55}
+blockquote p{margin:0}
+code{background:#eef2ff;border-radius:4px;padding:1px 5px;font-size:.88em;word-break:break-word}
+a{color:var(--acc)}
+figure{margin:24px 0;text-align:center}figure img{max-width:100%;border:1px solid var(--line);border-radius:8px;background:#fff}
+figcaption{font-size:.88rem;color:var(--mut);margin-top:6px;text-align:left}
+table{border-collapse:collapse;width:100%;font-size:.9rem;margin:8px 0}
+.table-wrap{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+/* First col hugs content (short IDs); badges with nowrap still expand as needed. */
+th:first-child,td:first-child{width:1%;white-space:nowrap;min-width:3.25rem}
+/* Phase/package-style third column needs room on RQ tables. */
+th:nth-child(3),td:nth-child(3){min-width:10.5rem}
+th{background:#f3f4f6}caption{caption-side:bottom;font-size:.85rem;color:var(--mut);padding:6px;text-align:left}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.78rem;font-weight:600;white-space:nowrap}
+.REJECTED,.BI_BAC_BO,.NOT_REPRODUCED,.KHONG_TAI_HIEN{background:#fee2e2;color:#991b1b}
+.SUPPORTED,.DUOC_UNG_HO,.OK,.DUNG,.READY,.SAN_DUNG,.D_MIN_1{background:#dcfce7;color:#166534}
+.INCONCLUSIVE,.EVALUATED,.KHONG_RO_RANG,.DA_DANH_GIA,.WEAK,.YEU,.UNVERIFIED,.CHUA_XAC_NHAN,.PARTIAL,.MOT_PHAN,.COST_ONLY,.CHI_CHI_PHI{background:#fef3c7;color:#92400e}
+.SKIPPED,.UNEVALUATED,.BO_QUA,.CHUA_DANH_GIA,.NOT_RUN,.CHUA_CHAY,.WASTE,.LANG_PHI{background:#ffedd5;color:#9a3412}
+.NEEDS_RUN,.CAN_CHAY,.STALE,.LOI_THOI{background:#ffedd5;color:#9a3412}
+.kpi-note{background:#eff6ff;border-left:4px solid #2563eb;padding:10px 14px;margin:12px 0;border-radius:0 8px 8px 0;font-size:.95rem}
+ul{padding-left:1.2em}li{margin:6px 0}
+footer{max-width:1280px;margin:0 auto 32px;padding:0 24px;color:var(--mut);font-size:.85rem}
+.missing{border:1px solid #b91c1c;background:#fef2f2;color:#991b1b;padding:10px;border-radius:6px}
+pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8px}pre code{background:transparent;padding:0;color:inherit}
+@media(max-width:900px){.layout{grid-template-columns:1fr}nav{display:none}main{padding:8px 18px 30px}header{padding:32px 18px}header h1{font-size:1.55rem}.chrome{padding:10px 18px}}
+</style>
+</head>
+<body>
+<div class='chrome'><div class='crumbs'><a href="../INDEX_vi.html">Trang chu</a><span class="sep">/</span><span>Setup</span><span class="sep">/</span><span>Tham chieu tham so</span></div><div class='page-nav'><a rel="prev" href="experiment_setup_vi.html">Truoc</a><span class="sep">|</span><a rel="next" href="glossary_vi.html">Sau</a><span class="sep">|</span><a href="parameter_reference.html">English</a></div></div>
+<header><div class='in'><h1>Tham chieu tham so</h1><p>Tai lieu HerdSim de doc va dieu huong.</p></div></header>
+<div class='layout'>
+<nav><a href="#protocol-cot-loi">Protocol cot loi</a><a href="#layout">Layout</a><a href="#strombommulti">`strombom_multi`</a><a href="#kubo">`kubo`</a><a href="#fat">`fat`</a><a href="#information-ladder">Information ladder</a><a href="#field-cua-protocol-recipe">Field cua protocol recipe</a><a href="#outcome-va-state-metric">Outcome va state metric</a><a href="#reliability-frontier-regime">Reliability, frontier, regime</a><a href="#prediction-va-early-warning">Prediction va early warning</a></nav>
+<main>
+<p>Gia tri o day den tu <a href="../../configs/canonical_grid.yaml"><code>scaling/configs/canonical_grid.yaml</code></a> hoac mac dinh controller trong cac module cau hinh duoc lien ket. Protocol YAML co the chon tap con nhung khong duoc ngam dinh nghia lai canonical protocol.</p>
+<h2 id="protocol-cot-loi">Protocol cot loi</h2>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Tham so</th>
+<th>Gia tri</th>
+<th>Y nghia va ly do</th>
+</tr></thead><tbody>
+<tr>
+<td><code>protocol_id</code></td>
+<td><code>scaling_v2</code></td>
+<td>ID provenance cua bo quy tac khoa</td>
+</tr>
+<tr>
+<td><code>frozen_on</code></td>
+<td><code>2026-09-22</code></td>
+<td>Ngay dong bang</td>
+</tr>
+<tr>
+<td><code>task</code></td>
+<td><code>drive_to_goal</code></td>
+<td>Moi cuu vao dia dich truoc deadline</td>
+</tr>
+<tr>
+<td><code>world_width</code>, <code>world_height</code></td>
+<td>500, 500</td>
+<td>San vuong du cho wide va outlier-rich</td>
+</tr>
+<tr>
+<td>tam dan</td>
+<td><code>(250, 250)</code></td>
+<td>Tam san</td>
+</tr>
+<tr>
+<td><code>goal_center</code></td>
+<td><code>(370, 250)</code></td>
+<td>Cach tam dan 120 theo phuong ngang</td>
+</tr>
+<tr>
+<td><code>drive_length</code></td>
+<td>120</td>
+<td>Quang duong task co dinh</td>
+</tr>
+<tr>
+<td><code>goal_radius_at_n50</code></td>
+<td>15</td>
+<td>Ban kinh dich tai N = 50</td>
+</tr>
+<tr>
+<td>ban kinh dich</td>
+<td><code>15 * sqrt(N/50)</code></td>
+<td>Giu dien tich dich tren moi cuu khong doi</td>
+</tr>
+<tr>
+<td><code>initial_spread</code></td>
+<td>30</td>
+<td>Scale co so cho layout</td>
+</tr>
+<tr>
+<td><code>measurement_radius</code></td>
+<td>5</td>
+<td>Ban kinh lien thong cua fragmentation</td>
+</tr>
+<tr>
+<td><code>reliability_theta</code></td>
+<td>0.90</td>
+<td>Nguong tin cay chinh</td>
+</tr>
+<tr>
+<td><code>reliability_sensitivity</code></td>
+<td>0.50, 0.70</td>
+<td>Nguong bao cao them, khong phai bar D_min</td>
+</tr>
+<tr>
+<td><code>baseline_method</code></td>
+<td><code>strombom_multi</code></td>
+<td>Controller baseline</td>
+</tr>
+<tr>
+<td><code>transfer_methods</code></td>
+<td>baseline, <code>kubo</code>, <code>fat</code>, <code>communication_free</code></td>
+<td>Danh sach transfer day du</td>
+</tr>
+<tr>
+<td><code>required_transfer_methods</code></td>
+<td>baseline, <code>kubo</code>, <code>fat</code></td>
+<td>Tap claim toi thieu</td>
+</tr>
+<tr>
+<td><code>flock_sizes</code></td>
+<td>5, 10, 25, 50, 75, 100, 150, 200, 300, 400</td>
+<td>Luoi N</td>
+</tr>
+<tr>
+<td><code>shepherd_counts</code></td>
+<td>1, 2, 3, 4, 6, 10, 15, 20, 25, 35</td>
+<td>Luoi D</td>
+</tr>
+<tr>
+<td><code>structure_flock_sizes</code></td>
+<td>50, 100, 200</td>
+<td>N cho structure</td>
+</tr>
+<tr>
+<td><code>rq5_flock_sizes</code></td>
+<td>100, 200</td>
+<td>N cho information</td>
+</tr>
+<tr>
+<td><code>x0_families</code></td>
+<td>compact, wide, split, outlier_rich</td>
+<td>Factor layout</td>
+</tr>
+<tr>
+<td><code>time_limit_t0</code></td>
+<td>10,000</td>
+<td>Deadline chinh</td>
+</tr>
+<tr>
+<td><code>time_limit_t1</code></td>
+<td>20,000</td>
+<td>Deadline dai chi cho overcrowding</td>
+</tr>
+<tr>
+<td><code>scout_seeds</code></td>
+<td>30</td>
+<td>Do sau map rong</td>
+</tr>
+<tr>
+<td><code>claim_grade_seeds</code></td>
+<td>100</td>
+<td>Do sau cua so claim</td>
+</tr>
+<tr>
+<td><code>master_seed</code></td>
+<td>2026</td>
+<td>Goc danh sach seed co dinh</td>
+</tr>
+<tr>
+<td><code>bootstrap_resamples</code></td>
+<td>1,000</td>
+<td>So lan resample seed</td>
+</tr>
+<tr>
+<td><code>predictor_window_ticks</code></td>
+<td>100</td>
+<td>Cua so feature dau trial</td>
+</tr>
+<tr>
+<td><code>wasteful_effort_tolerance</code></td>
+<td>0.20</td>
+<td>Bar path du thua mac dinh</td>
+</tr>
+<tr>
+<td><code>wasteful_effort_sensitivity</code></td>
+<td>0.10, 0.30</td>
+<td>Bar sensitivity</td>
+</tr>
+</tbody></table></div>
+<p>Tai R = 0.90, 30 seed co standard error khoang 0.055 va 100 seed khoang 0.03. Interval xap xi cua R tai 100 seed la cong tru 0.06. Day la uncertainty cua R, khong truc tiep la uncertainty cua D_min.</p>
+<h2 id="layout">Layout</h2>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Tham so</th>
+<th>Gia tri</th>
+<th>Y nghia</th>
+</tr></thead><tbody>
+<tr>
+<td>compact sigma</td>
+<td>9</td>
+<td><code>0.3 * initial_spread</code></td>
+</tr>
+<tr>
+<td>wide sigma</td>
+<td>60</td>
+<td><code>2.0 * initial_spread</code></td>
+</tr>
+<tr>
+<td>so split cluster</td>
+<td>2 neu N &lt; 12, nguoc lai 3</td>
+<td>Tranh nhom ba qua nho</td>
+</tr>
+<tr>
+<td>split gap toi thieu</td>
+<td>10</td>
+<td><code>2 * measurement_radius</code></td>
+</tr>
+<tr>
+<td>outlier core</td>
+<td>khoang 80 phan tram</td>
+<td>Dan chinh</td>
+</tr>
+<tr>
+<td>outlier</td>
+<td>khoang 20 phan tram</td>
+<td>Ngoai <code>r_a * N^(2/3)</code></td>
+</tr>
+</tbody></table></div>
+<p>Diem ngoai san hoac trong dich duoc draw lai.</p>
+<h2 id="strombommulti"><code>strombom_multi</code></h2>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Tham so</th>
+<th>Gia tri</th>
+<th>Y nghia</th>
+</tr></thead><tbody>
+<tr>
+<td><code>r_a</code></td>
+<td>2</td>
+<td>Do dai tuong tac cuu, cung dung trong collect threshold</td>
+</tr>
+<tr>
+<td><code>r_s</code></td>
+<td>65</td>
+<td>Khoang cach cuu phan ung voi cho; base sensing range</td>
+</tr>
+<tr>
+<td><code>sheep_speed</code></td>
+<td>1.0</td>
+<td>Dich chuyen cuu moi tick</td>
+</tr>
+<tr>
+<td><code>shepherd_speed</code></td>
+<td>1.5</td>
+<td>Dich chuyen cho moi tick</td>
+</tr>
+<tr>
+<td><code>noise_strength</code></td>
+<td>0.3</td>
+<td>Do manh angular process noise</td>
+</tr>
+<tr>
+<td><code>inertia</code></td>
+<td>0.5</td>
+<td>Trong so huong truoc cua cuu</td>
+</tr>
+<tr>
+<td>collect threshold</td>
+<td><code>r_a * N^(2/3)</code></td>
+<td>Ban kinh chuyen collect sang drive</td>
+</tr>
+</tbody></table></div>
+<p>Coverage radius la <code>sensing_range</code> neu factor da set, neu khong la <code>r_s</code> cua method. No khong phai sheep-sheep repulsion distance.</p>
+<h2 id="kubo"><code>kubo</code></h2>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Tham so</th>
+<th>Gia tri</th>
+<th>Y nghia</th>
+</tr></thead><tbody>
+<tr>
+<td><code>radius</code></td>
+<td>60</td>
+<td>Local sensing radius</td>
+</tr>
+<tr>
+<td><code>K_s1</code></td>
+<td>10</td>
+<td>Sheep-sheep repulsion gain</td>
+</tr>
+<tr>
+<td><code>K_s2</code></td>
+<td>0.5</td>
+<td>Alignment gain cua cuu</td>
+</tr>
+<tr>
+<td><code>K_s3</code></td>
+<td>2</td>
+<td>Cohesion gain cua cuu</td>
+</tr>
+<tr>
+<td><code>K_s4</code></td>
+<td>5000</td>
+<td>Sheep-dog repulsion gain</td>
+</tr>
+<tr>
+<td><code>K_f1</code></td>
+<td>10</td>
+<td>Cho hut ve target sheep</td>
+</tr>
+<tr>
+<td><code>K_f2</code></td>
+<td>200</td>
+<td>Cho day khoi target sheep</td>
+</tr>
+<tr>
+<td><code>K_f3</code></td>
+<td>8</td>
+<td>Cho day khoi goal</td>
+</tr>
+<tr>
+<td><code>K_f4</code></td>
+<td>3000</td>
+<td>Dog-dog repulsion gain</td>
+</tr>
+<tr>
+<td><code>dt</code></td>
+<td>0.05</td>
+<td>Buoc tich phan force</td>
+</tr>
+<tr>
+<td><code>sheep_speed_max</code></td>
+<td>5</td>
+<td>Speed clamp cua cuu</td>
+</tr>
+<tr>
+<td><code>dog_speed_max</code></td>
+<td>10</td>
+<td>Speed clamp cua cho</td>
+</tr>
+</tbody></table></div>
+<h2 id="fat"><code>fat</code></h2>
+<p>FAT dung tham so cuu Strombom. Moi cho chon con cuu quan sat xa no nhat va dung cach <code>r_a</code> phia sau con cuu theo huong ra xa dich. Phase 1, 2, 4 dung observation <code>global</code>.</p>
+<h2 id="information-ladder">Information ladder</h2>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Factor</th>
+<th>Gia tri</th>
+<th>Y nghia</th>
+</tr></thead><tbody>
+<tr>
+<td><code>obs_mode</code></td>
+<td><code>bearing_only</code>, <code>local_positions</code>, <code>global</code></td>
+<td>Muc thong tin quan sat tang dan</td>
+</tr>
+<tr>
+<td><code>sensing_range</code></td>
+<td>32.5, 65, 97.5, 130</td>
+<td>0.5, 1, 1.5, 2 lan <code>r_s</code></td>
+</tr>
+<tr>
+<td><code>communication</code></td>
+<td><code>none</code>, <code>neighbour_broadcast</code>, <code>global_shared</code></td>
+<td>Rieng, hop neighbor, hoac hop toan cuc cua cuu da sense</td>
+</tr>
+</tbody></table></div>
+<p>Voi <code>strombom_multi</code>, <code>global_shared</code> dung hop cua cuu da sense, khong dung true position dac quyen tu simulator. Scout Phase 5 dung D trong <code>{1, 2, 3, 4, 6, 10}</code> vi saving mot buoc co the xuat hien o vung D thap.</p>
+<h2 id="field-cua-protocol-recipe">Field cua protocol recipe</h2>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Field</th>
+<th>Y nghia</th>
+</tr></thead><tbody>
+<tr>
+<td><code>protocol_id</code></td>
+<td>ID resolve trong <code>scaling/configs/protocols/</code> va ghi vao output</td>
+</tr>
+<tr>
+<td><code>phase</code></td>
+<td>So phase nghien cuu</td>
+</tr>
+<tr>
+<td><code>grade</code></td>
+<td>Grade SMOKE, SCOUT, hoac CLAIM</td>
+</tr>
+<tr>
+<td><code>canonical</code></td>
+<td>Path toi mac dinh dong bang</td>
+</tr>
+<tr>
+<td><code>extends</code></td>
+<td>Parent YAML duoc ke thua</td>
+</tr>
+<tr>
+<td><code>output</code></td>
+<td>Dich trong <code>scaling/results/</code></td>
+</tr>
+<tr>
+<td><code>methods</code> hoac <code>method</code></td>
+<td>Danh sach controller hoac controller cua factor run</td>
+</tr>
+<tr>
+<td><code>layouts</code></td>
+<td>Tap con layout</td>
+</tr>
+<tr>
+<td><code>flock_sizes</code></td>
+<td>Tap con N</td>
+</tr>
+<tr>
+<td><code>shepherd_counts</code></td>
+<td>Tap con D</td>
+</tr>
+<tr>
+<td><code>seeds</code></td>
+<td>So seed moi cell da chon</td>
+</tr>
+<tr>
+<td><code>seed_mode</code></td>
+<td>Y nghia stage nhu scout hoac claim</td>
+</tr>
+<tr>
+<td><code>runner</code></td>
+<td>Execution path grid hoac factor</td>
+</tr>
+<tr>
+<td><code>upstream_protocol</code></td>
+<td>Protocol scout hoac claim dung de lap ke hoach</td>
+</tr>
+<tr>
+<td><code>store_timeseries</code></td>
+<td>Co ghi Parquet history moi trial hay khong</td>
+</tr>
+<tr>
+<td><code>packages</code></td>
+<td>Package phan tich export sau run</td>
+</tr>
+<tr>
+<td><code>obs_modes</code>, <code>sensing_ranges</code>, <code>communications</code></td>
+<td>Gia tri cua mot information ladder</td>
+</tr>
+</tbody></table></div>
+<p><code>canonical</code> import mac dinh; <code>extends</code> ke thua recipe day du. <code>protocol.yaml</code> da resolve duoc copy vao result directory de co the kiem tra ca gia tri ke thua.</p>
+<h2 id="outcome-va-state-metric">Outcome va state metric</h2>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Dai luong</th>
+<th>Dinh nghia</th>
+</tr></thead><tbody>
+<tr>
+<td>success</td>
+<td>Moi cuu vao dich truoc deadline</td>
+</tr>
+<tr>
+<td><code>t_s</code></td>
+<td>Tick dau tien dat success</td>
+</tr>
+<tr>
+<td><code>shepherd_path</code></td>
+<td>Tong Euclidean step length cua moi cho</td>
+</tr>
+<tr>
+<td>path moi cho</td>
+<td><code>shepherd_path / D</code></td>
+</tr>
+<tr>
+<td>cohesion</td>
+<td>Trung binh khoang cach cuu toi GCM</td>
+</tr>
+<tr>
+<td>fragmentation</td>
+<td>Largest connected component chia N, radius 5</td>
+</tr>
+<tr>
+<td>outlier count</td>
+<td>So cuu ngoai <code>r_a * N^(2/3)</code></td>
+</tr>
+<tr>
+<td>spread</td>
+<td>Variance cua khoang cach toi centroid</td>
+</tr>
+<tr>
+<td>extent</td>
+<td>RMS distance toi centroid</td>
+</tr>
+<tr>
+<td>perimeter</td>
+<td>Chu vi convex hull</td>
+</tr>
+<tr>
+<td>hull area</td>
+<td>Dien tich convex hull</td>
+</tr>
+<tr>
+<td>flock density</td>
+<td>N chia hull area; 0 neu area suy bien</td>
+</tr>
+<tr>
+<td>aspect ratio</td>
+<td>Ti so PCA major/minor; 1 la tron</td>
+</tr>
+<tr>
+<td><code>I_dir</code></td>
+<td>`1 -</td>
+<td></td>
+<td>sum unit_velocity</td>
+<td></td>
+<td>/ M_active<code>, voi speed tren </code>1e-6`</td>
+</tr>
+<tr>
+<td>coverage C</td>
+<td>Ti le cuu ngoai median GCM distance nam trong influence radius</td>
+</tr>
+</tbody></table></div>
+<p>Neu khong cho nao di chuyen, <code>I_dir = 0</code>. Metric dung realized velocity, gom ca anh huong constraint. Khong co coverage radius thi gia tri la NaN.</p>
+<h2 id="reliability-frontier-regime">Reliability, frontier, regime</h2>
+<p><code>R(m, tau, N, D, T, X0, I)</code> la xac suat success uoc luong tren seed khoa, voi method m, protocol tau, N, D, deadline T, layout X0, va information I.</p>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Dai luong</th>
+<th>Dinh nghia</th>
+</tr></thead><tbody>
+<tr>
+<td>D_min</td>
+<td>D nho nhat da thu co R &gt;= theta</td>
+</tr>
+<tr>
+<td>D_overcrowd</td>
+<td>D dau tien sau D_min ma no va D luoi ke tiep deu co R &lt; theta</td>
+</tr>
+<tr>
+<td>D_max</td>
+<td>D tin cay lon nhat truoc overcrowding; neu khong co collapse thi la D tin cay lon nhat da thu</td>
+</tr>
+<tr>
+<td>B*</td>
+<td><code>(D, T)</code> tin cay co median path nho nhat; hoa thi chon D nho, roi finish nhanh</td>
+</tr>
+<tr>
+<td>hard failure</td>
+<td>Khong D nao dat theta; frontier de trong</td>
+</tr>
+<tr>
+<td>under-resourced</td>
+<td>R duoi theta truoc D_overcrowd</td>
+</tr>
+<tr>
+<td>efficient</td>
+<td>R dat theta va path duoi wasteful bar</td>
+</tr>
+<tr>
+<td>wasteful</td>
+<td>Tin cay nhung median path cao hon B* it nhat 20 phan tram; cung bao cao 10 va 30</td>
+</tr>
+<tr>
+<td>overcrowding collapse</td>
+<td>R duoi theta tai hoac sau D_overcrowd</td>
+</tr>
+</tbody></table></div>
+<p>Effect frontier tinh theo buoc cuc bo cua luoi D. D_max = 35 va D_overcrowd trong nghia la chua thay collapse den tran da thu, khong co nghia collapse bat dau tai 35.</p>
+<p>Bootstrap resample seed trong moi D 1,000 lan. Mau khong co D_min van duoc giu nhu right-censored tren D lon nhat. Percentile 2.5 va 97.5 la gia tri luoi hoac <code>above grid</code>.</p>
+<h2 id="prediction-va-early-warning">Prediction va early warning</h2>
+<p>RQ7 dung horizon <code>k = 500</code>, feature window <code>w = 200</code>, va tick danh gia 1,000 den 8,000, buoc 200. Feature chi dung <code>(t - 200, t]</code>; label la failure trong 500 tick tiep theo khi horizon van nam trong T0.</p>
+<p>State model va N,D model hold out toan bo N. Candidate fit gom constant, linear, power <code>A * N^alpha</code>, va two-piece linear. Chon bang leave-one-N-out RMSE.</p>
+</main>
+</div>
+<footer><p>Nguon Markdown: <code>parameter_reference_vi.md</code>. Hinh anh duoc nhung de doc ngoai tuyen.</p></footer>
+</body>
+</html>

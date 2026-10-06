@@ -2,7 +2,7 @@
 
 Question in plain terms: if flock size is fixed, does a different sheep layout at the start change how many dogs we need?
 
-Baseline method: `strombom_multi`. Layouts: compact, wide, split, outlier_rich. Protocol: `scaling_v2`. Cross-phase context: [../summary/RESEARCH_PLAN.html](../summary/RESEARCH_PLAN.html) and [../summary/SUMMARY_REPORT.html](../summary/SUMMARY_REPORT.html).
+Baseline method: `strombom_multi`. Layouts: compact, wide, split, outlier_rich. Protocol: `scaling_v2`. Cross-phase context: [main scaling plan](../../docs/main_scaling_plan.html) and [results summary](../summary/SUMMARY_REPORT.html).
 
 ## Folders
 
@@ -58,6 +58,8 @@ Cited in [claim/README.md](claim/README.md) and `claim/packages/b/`:
 
 ## Cross-phase
 
-- Research plan: [../summary/RESEARCH_PLAN.html](../summary/RESEARCH_PLAN.html)
+- Main scaling plan: [../../docs/main_scaling_plan.html](../../docs/main_scaling_plan.html)
 - Results summary: [../summary/SUMMARY_REPORT.html](../summary/SUMMARY_REPORT.html)
+- Documentation: [index](../../docs/INDEX.html), [methods](../../docs/methods/README.html), [setup](../../docs/setup/README.html), [credibility](../../docs/credibility/README.html)
+- Data appendices: [Phase 2 tables](../summary/data/phase2_tables.html), [run ledger](../summary/data/run_ledger.html)
 - Tracker: [../../docs/progress_tracker.md](../../docs/progress_tracker.md)

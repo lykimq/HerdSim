@@ -86,7 +86,7 @@ CLAIM grade. Aligned with `scaling/docs/progress_tracker.md`:
 - Tracker steps 4-5 DONE; step 6 T1 SKIPPED
 - Structure map: Phase 2
 - Reader guides: `../guides/REPORT_en.html`, `../guides/REPORT_vi.html`
-- Research plan: [../../summary/RESEARCH_PLAN.html](../../summary/RESEARCH_PLAN.html)
+- Main scaling plan: [../../../docs/main_scaling_plan.html](../../../docs/main_scaling_plan.html)
 - Results summary: [../../summary/SUMMARY_REPORT.html](../../summary/SUMMARY_REPORT.html)
 
 ## Files in this folder

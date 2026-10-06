@@ -57,4 +57,4 @@ SMOKE only. Not for Claims.
 
 - Next: `../scout/`, then `../claim/`
 - Phase index: `../README.md`
-- Research plan: [../../summary/RESEARCH_PLAN.html](../../summary/RESEARCH_PLAN.html)
+- Main scaling plan: [../../../docs/main_scaling_plan.html](../../../docs/main_scaling_plan.html)

@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang='vi'>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Co so Strombom Collect/Drive</title>
+<meta name='description' content='Tai lieu HerdSim de doc va dieu huong.'>
+<style>
+:root{--ink:#111827;--mut:#6b7280;--line:#e5e7eb;--acc:#2563eb;--bg:#f9fafb}
+*{box-sizing:border-box}body{margin:0;font:16px/1.65 -apple-system,'Segoe UI',Inter,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+header{background:linear-gradient(120deg,#1e3a8a,#0f766e);color:#fff;padding:48px 24px}
+header .in,main{max-width:1000px;margin:auto}header h1{margin:0 0 8px;font-size:2rem}header p{margin:0;opacity:.9;max-width:46rem}
+.chrome{max-width:1280px;margin:auto;padding:12px 24px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.chrome a{color:var(--acc);text-decoration:none}.chrome a:hover,.chrome a:focus{text-decoration:underline}
+.crumbs,.page-nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.sep{color:var(--mut)}
+.layout{display:grid;grid-template-columns:230px 1fr;gap:32px;max-width:1280px;margin:0 auto;padding:24px}
+nav{position:sticky;top:16px;align-self:start;font-size:.88rem;max-height:calc(100vh - 32px);overflow:auto}
+nav a{display:block;padding:5px 10px;color:var(--mut);text-decoration:none;border-left:2px solid var(--line)}
+nav a:hover,nav a:focus{color:var(--acc);border-color:var(--acc)}
+main{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 40px 40px;min-width:0}
+h2{margin-top:2.2em;padding-bottom:6px;border-bottom:2px solid var(--line);scroll-margin-top:16px}
+h2:first-child{margin-top:1.2em}
+h3{margin-top:1.6em;color:#1e3a8a}
+h4{margin:1.35em 0 .55em;font-size:1.02rem;font-weight:700;color:#334155}
+blockquote{margin:1em 0;padding:14px 18px;border-left:4px solid #0f766e;background:#f0fdfa;border-radius:0 8px 8px 0;color:#134e4a;font-size:1.05rem;font-weight:600;line-height:1.55}
+blockquote p{margin:0}
+code{background:#eef2ff;border-radius:4px;padding:1px 5px;font-size:.88em;word-break:break-word}
+a{color:var(--acc)}
+figure{margin:24px 0;text-align:center}figure img{max-width:100%;border:1px solid var(--line);border-radius:8px;background:#fff}
+figcaption{font-size:.88rem;color:var(--mut);margin-top:6px;text-align:left}
+table{border-collapse:collapse;width:100%;font-size:.9rem;margin:8px 0}
+.table-wrap{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+/* First col hugs content (short IDs); badges with nowrap still expand as needed. */
+th:first-child,td:first-child{width:1%;white-space:nowrap;min-width:3.25rem}
+/* Phase/package-style third column needs room on RQ tables. */
+th:nth-child(3),td:nth-child(3){min-width:10.5rem}
+th{background:#f3f4f6}caption{caption-side:bottom;font-size:.85rem;color:var(--mut);padding:6px;text-align:left}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.78rem;font-weight:600;white-space:nowrap}
+.REJECTED,.BI_BAC_BO,.NOT_REPRODUCED,.KHONG_TAI_HIEN{background:#fee2e2;color:#991b1b}
+.SUPPORTED,.DUOC_UNG_HO,.OK,.DUNG,.READY,.SAN_DUNG,.D_MIN_1{background:#dcfce7;color:#166534}
+.INCONCLUSIVE,.EVALUATED,.KHONG_RO_RANG,.DA_DANH_GIA,.WEAK,.YEU,.UNVERIFIED,.CHUA_XAC_NHAN,.PARTIAL,.MOT_PHAN,.COST_ONLY,.CHI_CHI_PHI{background:#fef3c7;color:#92400e}
+.SKIPPED,.UNEVALUATED,.BO_QUA,.CHUA_DANH_GIA,.NOT_RUN,.CHUA_CHAY,.WASTE,.LANG_PHI{background:#ffedd5;color:#9a3412}
+.NEEDS_RUN,.CAN_CHAY,.STALE,.LOI_THOI{background:#ffedd5;color:#9a3412}
+.kpi-note{background:#eff6ff;border-left:4px solid #2563eb;padding:10px 14px;margin:12px 0;border-radius:0 8px 8px 0;font-size:.95rem}
+ul{padding-left:1.2em}li{margin:6px 0}
+footer{max-width:1280px;margin:0 auto 32px;padding:0 24px;color:var(--mut);font-size:.85rem}
+.missing{border:1px solid #b91c1c;background:#fef2f2;color:#991b1b;padding:10px;border-radius:6px}
+pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8px}pre code{background:transparent;padding:0;color:inherit}
+@media(max-width:900px){.layout{grid-template-columns:1fr}nav{display:none}main{padding:8px 18px 30px}header{padding:32px 18px}header h1{font-size:1.55rem}.chrome{padding:10px 18px}}
+</style>
+</head>
+<body>
+<div class='chrome'><div class='crumbs'><a href="../INDEX_vi.html">Trang chu</a><span class="sep">/</span><span>Methods</span><span class="sep">/</span><span>Co so Strombom Collect/Drive</span></div><div class='page-nav'><a rel="prev" href="README_vi.html">Truoc</a><span class="sep">|</span><a rel="next" href="kubo_vi.html">Sau</a><span class="sep">|</span><a href="strombom.html">English</a></div></div>
+<header><div class='in'><h1>Co so Strombom Collect/Drive</h1><p>Tai lieu HerdSim de doc va dieu huong.</p></div></header>
+<div class='layout'>
+<nav><a href="#cam-hung-tu-cong-bo">Cam hung tu cong bo</a><a href="#hien-thuc-herdsim-chinh-xac">Hien thuc HerdSim chinh xac</a><a href="#thiet-lap-scalingv2">Thiet lap `scaling_v2`</a><a href="#ket-qua-hoan-tat-da-quan-sat">Ket qua hoan tat da quan sat</a><a href="#hinh-da-co-lien-quan">Hinh da co lien quan</a><a href="#gioi-han-va-dieu-khong-khang-dinh">Gioi han va dieu khong khang dinh</a></nav>
+<main>
+<h2 id="cam-hung-tu-cong-bo">Cam hung tu cong bo</h2>
+<p>Strombom va cong su (2014) mo ta mot nguoi chan chuyen giua hai hanh dong. O che do Collect, nguoi chan di ra sau con cuu xa tam dan nhat va day no vao trong. O che do Drive, nguoi chan di ra sau tam dan theo huong nguoc dich va day dan da ket dinh tien ve dich.</p>
+<p>Quy tac chuyen che do dung:</p>
+<pre><code class="language-text">f(N) = r_a * N^(2/3)</code></pre>
+<p>Neu co cuu cach tam khoi luong toan dan xa hon <code>f(N)</code>, dan duoc xem la dang trai va nguoi chan Collect. Neu khong, nguoi chan Drive. Mo hinh cong bo cung la co so cho cac quy tac hut, day, quan tinh, an co, nhieu, va dung cua cuu Strombom trong HerdSim.</p>
+<p>Tai lieu: D. Strombom va cong su, &quot;Solving the shepherding problem: heuristics for herding autonomous, interacting agents,&quot; Journal of The Royal Society Interface 11(100), 2014. DOI: <code>10.1098/rsif.2014.0719</code>.</p>
+<h2 id="hien-thuc-herdsim-chinh-xac">Hien thuc HerdSim chinh xac</h2>
+<p>HerdSim tach dong luc cuu va bo dieu khien cho.</p>
+<p>Preset <code>strombom</code> ket hop:</p>
+<ul>
+<li><code>sheep_model=strombom</code>;</li>
+<li><code>dog_controller=collect_drive</code>;</li>
+<li>mac dinh mot nguoi chan.</li>
+</ul>
+<p>Nghien cuu scaling hoan tat khong dung preset nay. Nghien cuu dung <code>strombom_multi</code>, van dung cuu Strombom nhung ghep voi <code>dog_controller=collect_drive_multi</code>.</p>
+<h3 id="cuu">Cuu</h3>
+<p>Khi moi cho dang hoat dong deu cach xa hon <code>r_s</code>, cuu an co. Cuu thuong dung yen va buoc ngau nhien voi xac suat <code>graze_move_prob</code>. Khi co cho trong <code>r_s</code>, cuu ket hop huong truoc, luc hut ve tam lang gieng, luc day cuu o tam ngan, luc day khoi cho dang hoat dong, va nhieu ngau nhien. Sau do cuu di <code>sheep_speed</code>.</p>
+<p>Mac dinh cua bundle gom <code>r_a = 2</code>, <code>r_s = 65</code>, <code>c = 1.05</code>, <code>inertia = 0.5</code>, <code>noise_strength = 0.3</code>, <code>sheep_speed = 1.0</code>, va <code>shepherd_speed = 1.5</code>.</p>
+<h3 id="bo-dieu-khien-nhieu-cho">Bo dieu khien nhieu cho</h3>
+<p>Trong quan sat global cua cac giai doan scaling hoan tat, moi cho thay toan dan va tinh cung tam cung nguong.</p>
+<p>Trong Collect:</p>
+<ul>
+<li>cuu ngoai <code>f(N)</code> duoc sap theo khoang cach den tam;</li>
+<li>cho <code>i</code> nhan ca the lac <code>i mod k</code>, voi <code>k</code> la so ca the lac;</li>
+<li>dich co so nam sau ca the duoc gan mot khoang <code>r_a</code> theo huong ra xa tam;</li>
+<li>lech tiep tuyen <code>2 * r_a</code> moi slot tach cac cho cung tiep can mot ca the.</li>
+</ul>
+<p>Trong Drive:</p>
+<ul>
+<li>dich co so nam sau tam dan mot khoang <code>r_a * sqrt(N)</code> theo huong nguoc dich;</li>
+<li>cac cho nam o goc cach deu tren duong tron ban kinh <code>4 * r_a</code> quanh dich co so.</li>
+</ul>
+<p>Moi cho dung khi gan hon <code>shepherd_stop_multiple * r_a</code> voi bat ky cuu nao trong view dang dung. Gia tri mac dinh cua multiple la 3. Chuyen dong cho co nhieu goc Strombom.</p>
+<p>Gan ca the lac, lech tiep tuyen trong Collect, va duong tron Drive la phan bo sung cua HerdSim. Chung khong nam trong thuat toan mot nguoi chan nam 2014 va khong duoc khang dinh la ban port cua mot bo dieu khien nhieu nguoi chan da cong bo khac.</p>
+<p>Bang chung hien thuc:</p>
+<ul>
+<li><a href="../../../core/methods.py"><code>../../../core/methods.py</code></a></li>
+<li><a href="../../../plugins/sheep/strombom.py"><code>../../../plugins/sheep/strombom.py</code></a></li>
+<li><a href="../../../plugins/dogs/collect_drive_multi.py"><code>../../../plugins/dogs/collect_drive_multi.py</code></a></li>
+<li><a href="../../../methods/strombom/heuristics.py"><code>../../../methods/strombom/heuristics.py</code></a></li>
+<li><a href="../../../methods/strombom/config.py"><code>../../../methods/strombom/config.py</code></a></li>
+</ul>
+<h2 id="thiet-lap-scalingv2">Thiet lap <code>scaling_v2</code></h2>
+<p><code>strombom_multi</code> la bo dieu khien co so trong giao thuc dong bang.</p>
+<ul>
+<li>Giai doan 1: bo cuc compact, luoi kich thuoc <code>N = {5, 10, 25, 50, 75, 100, 150, 200, 300, 400}</code>.</li>
+<li>Giai doan 2: <code>compact</code>, <code>wide</code>, <code>split</code>, va <code>outlier_rich</code> tai <code>N = {50, 100, 200}</code>.</li>
+<li>Luoi cho: <code>{1, 2, 3, 4, 6, 10, 15, 20, 25, 35}</code>.</li>
+<li>Che do quan sat trong so sanh hoan tat: global.</li>
+<li>Nguong tin cay: <code>R &gt;= 0.90</code>.</li>
+<li>Scout: 30 seed moi o tren toan luoi.</li>
+<li>Claim: 100 seed trong cua so bien da len ke hoach.</li>
+</ul>
+<p>Thi nghiem ghi de so cho mac dinh khi quet <code>D</code>. Cac phuong trinh dieu khien va mac dinh Strombom o tren duoc giu.</p>
+<p>Bang chung cau hinh:</p>
+<ul>
+<li><a href="../../configs/canonical_grid.yaml"><code>../../configs/canonical_grid.yaml</code></a></li>
+<li><a href="../../configs/protocols/phase1_claim.yaml"><code>../../configs/protocols/phase1_claim.yaml</code></a></li>
+<li><a href="../../configs/protocols/phase2_claim.yaml"><code>../../configs/protocols/phase2_claim.yaml</code></a></li>
+</ul>
+<h2 id="ket-qua-hoan-tat-da-quan-sat">Ket qua hoan tat da quan sat</h2>
+<h3 id="ban-do-kich-thuoc-compact">Ban do kich thuoc compact</h3>
+<p>Tai nguong tin cay 90%:</p>
+<ul>
+<li><code>D_min = 2</code> voi <code>N = 5</code> va <code>N = 10</code>;</li>
+<li><code>D_min = 1</code> voi moi <code>N</code> da thu tu 25 den 400;</li>
+<li>khong quan sat thay overcrowding;</li>
+<li><code>D_max = 35</code> la tran luoi cho moi kich thuoc, khong phai diem sup da do.</li>
+</ul>
+<p>Ban merge claim Giai doan 1 co 4,540 dong va <code>R = 0.963</code> toan bo. Phan lon 169 lan that bai tap trung o mot cho voi hai dan nho nhat. Thoi gian hoan thanh trung vi tren merge la 183 tick. Voi <code>N &gt;= 25</code>, duong trung vi moi cho khoang 148 don vi.</p>
+<h3 id="cau-truc-ban-dau">Cau truc ban dau</h3>
+<p>Tai <code>N = 50, 100, 200</code>, ca bon bo cuc deu co <code>D_min = 1</code>, voi do rong bootstrap bang 0. Cau truc doi chi phi, khong doi so cho tin cay toi thieu:</p>
+<ul>
+<li>wide can khoang 11 den 20 lan thoi gian compact va 19 den 36 lan duong compact o mot cho;</li>
+<li><code>outlier_rich</code>, <code>N = 200</code> co trung vi 1,228 tick va duong 1,647 o mot cho;</li>
+<li>tren wide, lua chon tin cay co duong nho nhat <code>B*</code> la hai cho o ca ba kich thuoc.</li>
+</ul>
+<p>Bang chung:</p>
+<ul>
+<li><a href="../../results/phase1/claim/packages/a/frontier.csv"><code>../../results/phase1/claim/packages/a/frontier.csv</code></a></li>
+<li><a href="../../results/phase1/claim/merged_trials.csv"><code>../../results/phase1/claim/merged_trials.csv</code></a></li>
+<li><a href="../../results/phase2/claim/packages/b/frontier_by_layout.csv"><code>../../results/phase2/claim/packages/b/frontier_by_layout.csv</code></a></li>
+<li><a href="../../results/phase2/claim/merged_trials.csv"><code>../../results/phase2/claim/merged_trials.csv</code></a></li>
+</ul>
+<h2 id="hinh-da-co-lien-quan">Hinh da co lien quan</h2>
+<ul>
+<li><a href="../../results/phase1/guides/assets/figures/reliability_heatmap.png">Heatmap do tin cay compact</a></li>
+<li><a href="../../results/phase1/guides/assets/figures/f2_dmin_vs_n.png"><code>D_min</code> theo kich thuoc dan</a></li>
+<li><a href="../../results/phase1/guides/assets/figures/f3_cost_vs_d.png">Chi phi theo so cho</a></li>
+<li><a href="../../results/phase2/guides/assets/figures/f4_layout_cost.png">So sanh chi phi bo cuc</a></li>
+<li><a href="../../results/phase2/guides/assets/figures/f10_wide_bstar_path.png">Duong wide voi mot va hai cho</a></li>
+</ul>
+<h2 id="gioi-han-va-dieu-khong-khang-dinh">Gioi han va dieu khong khang dinh</h2>
+<ul>
+<li>Co so cap claim la <code>strombom_multi</code> cua HerdSim, khong phai thuat toan mot nguoi chan da cong bo ma khong sua doi.</li>
+<li>Nhiem vu compact de tao hieu ung tran. Mot cho thanh cong voi moi <code>N &gt;= 25</code>, nen du lieu nay khong ho tro mot quy luat so cho tang theo scaling.</li>
+<li><code>D_max = 35</code> nghia la chua thay sup trong luoi da thu. No khong phai gioi han sinh hoc hay van hanh.</li>
+<li>Bo cuc split hoat dong gan giong compact trong phan tich hoan tat. Bao cao tong hop danh dau viec tach cum ban dau can duoc xac nhan them trong generator, nen khong dua ra ket luan co che manh cho split.</li>
+<li>Twin NetLogo duoc dang ky chi cho thay co ban doi, khong chung minh bang nhau tung tick. Registry: <a href="../../../integrations/netlogo/twins.json"><code>../../../integrations/netlogo/twins.json</code></a>.</li>
+<li>Ket qua khong chung minh hieu nang cho that va khong tai tao ket qua dinh luong cua bai bao 2014.</li>
+</ul>
+</main>
+</div>
+<footer><p>Nguon Markdown: <code>strombom_vi.md</code>. Hinh anh duoc nhung de doc ngoai tuyen.</p></footer>
+</body>
+</html>

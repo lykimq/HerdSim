@@ -67,7 +67,7 @@ What this run does **not** support (grade, protocol drift, single method, unfini
 
 ## Claims update
 
-CLAIM grade only, after `packages/*/`. Criteria: [main_scaling_plan.md](main_scaling_plan.md) Claims. Then copy rows into the tracker.
+CLAIM grade only, after `packages/*/`. Criteria: [main_scaling_plan.md](../main_scaling_plan.md) Claims. Then copy rows into the tracker.
 
 | Claim | Verdict | Evidence |
 |-------|---------|----------|

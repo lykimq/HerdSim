@@ -2,7 +2,7 @@
 
 This folder holds the simulation outputs for the scaling study. Each phase answers a different question about how many dogs are enough when the flock grows, when sheep start in a different shape, or when we swap the dog rule (controller).
 
-For the research questions and what we can already say, see [summary/RESEARCH_PLAN.html](summary/RESEARCH_PLAN.html) (or [RESEARCH_PLAN.md](summary/RESEARCH_PLAN.md)). For the numbers across phases, see [summary/SUMMARY_REPORT.html](summary/SUMMARY_REPORT.html).
+For the documentation map, see the [English index](../docs/INDEX.md) or [Vietnamese index](../docs/INDEX_vi.md). For completed findings, see [summary/SUMMARY_REPORT.html](summary/SUMMARY_REPORT.html) or [SUMMARY_REPORT.md](summary/SUMMARY_REPORT.md).
 
 ## Layout
 
@@ -30,7 +30,7 @@ scaling/results/
     guides/                # HTML reports and comparison figures
                            # Current: Kubo outlier_rich N=200 has D_min=20 (200 seeds)
 
-  summary/                 # Cross-phase research plan and results report
+  summary/                 # Cross-phase results, readable data appendices, and HTML builds
 ```
 
 ## What sits in a protocol folder
@@ -52,8 +52,12 @@ scaling/results/
 |--------|------|
 | Cross-phase results (Phases 1, 2, 4) | [summary/SUMMARY_REPORT.html](summary/SUMMARY_REPORT.html) / [`.md`](summary/SUMMARY_REPORT.md) |
 | Same in Vietnamese | [summary/SUMMARY_REPORT_vi.html](summary/SUMMARY_REPORT_vi.html) / [`.md`](summary/SUMMARY_REPORT_vi.md) |
-| Research plan (questions, measures, status) | [summary/RESEARCH_PLAN.html](summary/RESEARCH_PLAN.html) / [`.md`](summary/RESEARCH_PLAN.md) |
-| Same in Vietnamese | [summary/RESEARCH_PLAN_vi.html](summary/RESEARCH_PLAN_vi.html) / [`.md`](summary/RESEARCH_PLAN_vi.md) |
+| Scientific plan | [`../docs/main_scaling_plan.md`](../docs/main_scaling_plan.md) |
+| Methods | [`../docs/methods/README.md`](../docs/methods/README.md) |
+| Setup and run reference | [`../docs/setup/README.md`](../docs/setup/README.md) |
+| Data appendices | [`summary/data/README.md`](summary/data/README.md) |
+| Credibility and comparison | [`../docs/credibility/README.md`](../docs/credibility/README.md) |
+| Former research-plan path | [summary/RESEARCH_PLAN.html](summary/RESEARCH_PLAN.html) compatibility page |
 
 Rebuild the HTML from the markdown with `python3 summary/_rebuild_html.py`.
 

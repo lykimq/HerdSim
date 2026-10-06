@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang='vi'>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Cac phuong phap trong `scaling_v2`</title>
+<meta name='description' content='Tai lieu HerdSim de doc va dieu huong.'>
+<style>
+:root{--ink:#111827;--mut:#6b7280;--line:#e5e7eb;--acc:#2563eb;--bg:#f9fafb}
+*{box-sizing:border-box}body{margin:0;font:16px/1.65 -apple-system,'Segoe UI',Inter,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+header{background:linear-gradient(120deg,#1e3a8a,#0f766e);color:#fff;padding:48px 24px}
+header .in,main{max-width:1000px;margin:auto}header h1{margin:0 0 8px;font-size:2rem}header p{margin:0;opacity:.9;max-width:46rem}
+.chrome{max-width:1280px;margin:auto;padding:12px 24px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.chrome a{color:var(--acc);text-decoration:none}.chrome a:hover,.chrome a:focus{text-decoration:underline}
+.crumbs,.page-nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.sep{color:var(--mut)}
+.layout{display:grid;grid-template-columns:230px 1fr;gap:32px;max-width:1280px;margin:0 auto;padding:24px}
+nav{position:sticky;top:16px;align-self:start;font-size:.88rem;max-height:calc(100vh - 32px);overflow:auto}
+nav a{display:block;padding:5px 10px;color:var(--mut);text-decoration:none;border-left:2px solid var(--line)}
+nav a:hover,nav a:focus{color:var(--acc);border-color:var(--acc)}
+main{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 40px 40px;min-width:0}
+h2{margin-top:2.2em;padding-bottom:6px;border-bottom:2px solid var(--line);scroll-margin-top:16px}
+h2:first-child{margin-top:1.2em}
+h3{margin-top:1.6em;color:#1e3a8a}
+h4{margin:1.35em 0 .55em;font-size:1.02rem;font-weight:700;color:#334155}
+blockquote{margin:1em 0;padding:14px 18px;border-left:4px solid #0f766e;background:#f0fdfa;border-radius:0 8px 8px 0;color:#134e4a;font-size:1.05rem;font-weight:600;line-height:1.55}
+blockquote p{margin:0}
+code{background:#eef2ff;border-radius:4px;padding:1px 5px;font-size:.88em;word-break:break-word}
+a{color:var(--acc)}
+figure{margin:24px 0;text-align:center}figure img{max-width:100%;border:1px solid var(--line);border-radius:8px;background:#fff}
+figcaption{font-size:.88rem;color:var(--mut);margin-top:6px;text-align:left}
+table{border-collapse:collapse;width:100%;font-size:.9rem;margin:8px 0}
+.table-wrap{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+/* First col hugs content (short IDs); badges with nowrap still expand as needed. */
+th:first-child,td:first-child{width:1%;white-space:nowrap;min-width:3.25rem}
+/* Phase/package-style third column needs room on RQ tables. */
+th:nth-child(3),td:nth-child(3){min-width:10.5rem}
+th{background:#f3f4f6}caption{caption-side:bottom;font-size:.85rem;color:var(--mut);padding:6px;text-align:left}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.78rem;font-weight:600;white-space:nowrap}
+.REJECTED,.BI_BAC_BO,.NOT_REPRODUCED,.KHONG_TAI_HIEN{background:#fee2e2;color:#991b1b}
+.SUPPORTED,.DUOC_UNG_HO,.OK,.DUNG,.READY,.SAN_DUNG,.D_MIN_1{background:#dcfce7;color:#166534}
+.INCONCLUSIVE,.EVALUATED,.KHONG_RO_RANG,.DA_DANH_GIA,.WEAK,.YEU,.UNVERIFIED,.CHUA_XAC_NHAN,.PARTIAL,.MOT_PHAN,.COST_ONLY,.CHI_CHI_PHI{background:#fef3c7;color:#92400e}
+.SKIPPED,.UNEVALUATED,.BO_QUA,.CHUA_DANH_GIA,.NOT_RUN,.CHUA_CHAY,.WASTE,.LANG_PHI{background:#ffedd5;color:#9a3412}
+.NEEDS_RUN,.CAN_CHAY,.STALE,.LOI_THOI{background:#ffedd5;color:#9a3412}
+.kpi-note{background:#eff6ff;border-left:4px solid #2563eb;padding:10px 14px;margin:12px 0;border-radius:0 8px 8px 0;font-size:.95rem}
+ul{padding-left:1.2em}li{margin:6px 0}
+footer{max-width:1280px;margin:0 auto 32px;padding:0 24px;color:var(--mut);font-size:.85rem}
+.missing{border:1px solid #b91c1c;background:#fef2f2;color:#991b1b;padding:10px;border-radius:6px}
+pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8px}pre code{background:transparent;padding:0;color:inherit}
+@media(max-width:900px){.layout{grid-template-columns:1fr}nav{display:none}main{padding:8px 18px 30px}header{padding:32px 18px}header h1{font-size:1.55rem}.chrome{padding:10px 18px}}
+</style>
+</head>
+<body>
+<div class='chrome'><div class='crumbs'><a href="../INDEX_vi.html">Trang chu</a><span class="sep">/</span><span>Methods</span><span class="sep">/</span><span>Cac phuong phap trong `scaling_v2`</span></div><div class='page-nav'><a rel="next" href="strombom_vi.html">Sau</a><span class="sep">|</span><a href="README.html">English</a></div></div>
+<header><div class='in'><h1>Cac phuong phap trong `scaling_v2`</h1><p>Tai lieu HerdSim de doc va dieu huong.</p></div></header>
+<div class='layout'>
+<nav><a href="#huong-dan">Huong dan</a><a href="#thiet-lap-chung-cua-scalingv2">Thiet lap chung cua `scaling_v2`</a><a href="#bang-chung-hoan-tat">Bang chung hoan tat</a><a href="#gioi-han-chung">Gioi han chung</a></nav>
+<main>
+<p>Thu muc nay giai thich ba ho bo dieu khien da duoc danh gia trong nghien cuu scaling hoan tat. Moi huong dan tach ro bon lop:</p>
+<ol>
+<li>y tuong da cong bo truyen cam hung cho phuong phap;</li>
+<li>bo dieu khien va mo hinh cuu chinh xac trong HerdSim;</li>
+<li>thiet lap thi nghiem dong bang <code>scaling_v2</code>;</li>
+<li>ket qua da quan sat tu cac lan chay hoan tat.</li>
+</ol>
+<p>Viec tach cac lop nay la can thiet. Nghien cuu so sanh cac bo dieu khien mo phong tren nhiem vu <code>drive_to_goal</code> cua HerdSim. Nghien cuu khong tai tao toan bo thi nghiem hay ket qua dinh luong cua cac bai bao duoc trich.</p>
+<h2 id="huong-dan">Huong dan</h2>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Huong dan</th>
+<th>Co so cong bo</th>
+<th>Phuong phap HerdSim trong <code>scaling_v2</code></th>
+</tr></thead><tbody>
+<tr>
+<td><a href="strombom_vi.html">Strombom Collect/Drive</a></td>
+<td>Strombom va cong su (2014)</td>
+<td><code>strombom_multi</code>, khong phai preset mot nguoi chan <code>strombom</code></td>
+</tr>
+<tr>
+<td><a href="kubo_vi.html">Mo hinh luc Kubo</a></td>
+<td>Kubo va cong su (2022)</td>
+<td><code>kubo</code></td>
+</tr>
+<tr>
+<td><a href="fat_vi.html">FAT</a></td>
+<td>Y tuong ca the nhin thay xa nhat cua Tsunoda va cong su (2018)</td>
+<td><code>fat</code>, dung cuu Strombom</td>
+</tr>
+</tbody></table></div>
+<p>Ban tieng Anh: <a href="README.html">README.md</a>, <a href="strombom.html">strombom.md</a>, <a href="kubo.html">kubo.md</a>, va <a href="fat.html">fat.md</a>.</p>
+<h2 id="thiet-lap-chung-cua-scalingv2">Thiet lap chung cua <code>scaling_v2</code></h2>
+<p>Tat ca so sanh hoan tat dung cung nhiem vu va dinh nghia bien:</p>
+<ul>
+<li>nhiem vu: dua moi con cuu vao dia dich truoc <code>T0 = 10000</code> tick;</li>
+<li>san: 500 x 500 don vi khong gian lien tuc;</li>
+<li>tam dan: <code>(250, 250)</code>;</li>
+<li>tam dich: <code>(370, 250)</code>;</li>
+<li>ban kinh dich: <code>15 * sqrt(N / 50)</code>;</li>
+<li>so cuu cho ban do kich thuoc: <code>{5, 10, 25, 50, 75, 100, 150, 200, 300, 400}</code>;</li>
+<li>so cho: <code>{1, 2, 3, 4, 6, 10, 15, 20, 25, 35}</code>;</li>
+<li>so cuu cho ban do cau truc: <code>N</code> trong <code>{50, 100, 200}</code>;</li>
+<li>bo cuc: <code>compact</code>, <code>wide</code>, <code>split</code>, va <code>outlier_rich</code>;</li>
+<li>do tin cay: <code>R</code>, ty le seed doc lap thanh cong truoc <code>T0</code>;</li>
+<li>bien: <code>D_min</code>, so cho nho nhat da thu co <code>R &gt;= 0.90</code>;</li>
+<li>phan tang: 30 seed scout tren toan luoi, sau do 100 seed claim trong cua so da chon, voi ngoai le 200 seed cho Kubo <code>outlier_rich</code>, <code>N = 200</code>.</li>
+</ul>
+<p>Ban merge claim thay cac dong scout tai o duoc chay lai va giu dong scout o cac o con lai. <code>D_max = 35</code> khi khong co overcrowding chi la dinh luoi da thu, khong phai nguong that bai da do.</p>
+<p>Cau hinh dong bang: <a href="../../configs/canonical_grid.yaml"><code>../../configs/canonical_grid.yaml</code></a>.</p>
+<h2 id="bang-chung-hoan-tat">Bang chung hoan tat</h2>
+<p>So sanh dat cap claim gom:</p>
+<ul>
+<li>kich thuoc va cau truc co so: <code>strombom_multi</code>, Giai doan 1 va 2;</li>
+<li>kich thuoc va cau truc chuyen giao: <code>kubo</code> va <code>fat</code>, Giai doan 4.</li>
+</ul>
+<p>Bang chung chinh:</p>
+<ul>
+<li><a href="../../results/phase1/claim/"><code>../../results/phase1/claim/</code></a></li>
+<li><a href="../../results/phase2/claim/"><code>../../results/phase2/claim/</code></a></li>
+<li><a href="../../results/phase4/"><code>../../results/phase4/</code></a></li>
+<li><a href="../../results/summary/SUMMARY_REPORT_vi.html"><code>../../results/summary/SUMMARY_REPORT_vi.md</code></a></li>
+</ul>
+<p>Huong dan phuong phap giup dien giai, nhung ket luan dinh luong nen trich CSV da do.</p>
+<h2 id="gioi-han-chung">Gioi han chung</h2>
+<ul>
+<li>Ket qua chi ap dung cho mot nhiem vu mo phong, mot hinh hoc dong bang, mot timeout, va mot nguong tin cay chinh.</li>
+<li>Khong nen so sanh vat ly so tick giua Kubo va ho Strombom. Kubo tich phan van toc voi <code>dt = 0.05</code>, con ho Strombom dich chuyen co dinh moi tick.</li>
+<li>Registry NetLogo co twin cho <code>strombom_multi</code> va <code>kubo</code>, nhung bao cao hoan tat khong khang dinh parity tung tick hay diem parity dinh luong da cong bo.</li>
+<li>FAT khong co twin NetLogo trong registry.</li>
+<li>Khong co ket qua hoan tat nao chung minh hieu nang ngoai dong, do trung thuc sinh hoc, hay quy luat scaling pho quat.</li>
+</ul>
+</main>
+</div>
+<footer><p>Nguon Markdown: <code>README_vi.md</code>. Hinh anh duoc nhung de doc ngoai tuyen.</p></footer>
+</body>
+</html>

@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang='en'>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>2025 draft and HerdSim comparison</title>
+<meta name='description' content='Reader-facing HerdSim documentation and evidence.'>
+<style>
+:root{--ink:#111827;--mut:#6b7280;--line:#e5e7eb;--acc:#2563eb;--bg:#f9fafb}
+*{box-sizing:border-box}body{margin:0;font:16px/1.65 -apple-system,'Segoe UI',Inter,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+header{background:linear-gradient(120deg,#1e3a8a,#0f766e);color:#fff;padding:48px 24px}
+header .in,main{max-width:1000px;margin:auto}header h1{margin:0 0 8px;font-size:2rem}header p{margin:0;opacity:.9;max-width:46rem}
+.chrome{max-width:1280px;margin:auto;padding:12px 24px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.chrome a{color:var(--acc);text-decoration:none}.chrome a:hover,.chrome a:focus{text-decoration:underline}
+.crumbs,.page-nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.sep{color:var(--mut)}
+.layout{display:grid;grid-template-columns:230px 1fr;gap:32px;max-width:1280px;margin:0 auto;padding:24px}
+nav{position:sticky;top:16px;align-self:start;font-size:.88rem;max-height:calc(100vh - 32px);overflow:auto}
+nav a{display:block;padding:5px 10px;color:var(--mut);text-decoration:none;border-left:2px solid var(--line)}
+nav a:hover,nav a:focus{color:var(--acc);border-color:var(--acc)}
+main{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 40px 40px;min-width:0}
+h2{margin-top:2.2em;padding-bottom:6px;border-bottom:2px solid var(--line);scroll-margin-top:16px}
+h2:first-child{margin-top:1.2em}
+h3{margin-top:1.6em;color:#1e3a8a}
+h4{margin:1.35em 0 .55em;font-size:1.02rem;font-weight:700;color:#334155}
+blockquote{margin:1em 0;padding:14px 18px;border-left:4px solid #0f766e;background:#f0fdfa;border-radius:0 8px 8px 0;color:#134e4a;font-size:1.05rem;font-weight:600;line-height:1.55}
+blockquote p{margin:0}
+code{background:#eef2ff;border-radius:4px;padding:1px 5px;font-size:.88em;word-break:break-word}
+a{color:var(--acc)}
+figure{margin:24px 0;text-align:center}figure img{max-width:100%;border:1px solid var(--line);border-radius:8px;background:#fff}
+figcaption{font-size:.88rem;color:var(--mut);margin-top:6px;text-align:left}
+table{border-collapse:collapse;width:100%;font-size:.9rem;margin:8px 0}
+.table-wrap{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+/* First col hugs content (short IDs); badges with nowrap still expand as needed. */
+th:first-child,td:first-child{width:1%;white-space:nowrap;min-width:3.25rem}
+/* Phase/package-style third column needs room on RQ tables. */
+th:nth-child(3),td:nth-child(3){min-width:10.5rem}
+th{background:#f3f4f6}caption{caption-side:bottom;font-size:.85rem;color:var(--mut);padding:6px;text-align:left}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.78rem;font-weight:600;white-space:nowrap}
+.REJECTED,.BI_BAC_BO,.NOT_REPRODUCED,.KHONG_TAI_HIEN{background:#fee2e2;color:#991b1b}
+.SUPPORTED,.DUOC_UNG_HO,.OK,.DUNG,.READY,.SAN_DUNG,.D_MIN_1{background:#dcfce7;color:#166534}
+.INCONCLUSIVE,.EVALUATED,.KHONG_RO_RANG,.DA_DANH_GIA,.WEAK,.YEU,.UNVERIFIED,.CHUA_XAC_NHAN,.PARTIAL,.MOT_PHAN,.COST_ONLY,.CHI_CHI_PHI{background:#fef3c7;color:#92400e}
+.SKIPPED,.UNEVALUATED,.BO_QUA,.CHUA_DANH_GIA,.NOT_RUN,.CHUA_CHAY,.WASTE,.LANG_PHI{background:#ffedd5;color:#9a3412}
+.NEEDS_RUN,.CAN_CHAY,.STALE,.LOI_THOI{background:#ffedd5;color:#9a3412}
+.kpi-note{background:#eff6ff;border-left:4px solid #2563eb;padding:10px 14px;margin:12px 0;border-radius:0 8px 8px 0;font-size:.95rem}
+ul{padding-left:1.2em}li{margin:6px 0}
+footer{max-width:1280px;margin:0 auto 32px;padding:0 24px;color:var(--mut);font-size:.85rem}
+.missing{border:1px solid #b91c1c;background:#fef2f2;color:#991b1b;padding:10px;border-radius:6px}
+pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8px}pre code{background:transparent;padding:0;color:inherit}
+@media(max-width:900px){.layout{grid-template-columns:1fr}nav{display:none}main{padding:8px 18px 30px}header{padding:32px 18px}header h1{font-size:1.55rem}.chrome{padding:10px 18px}}
+</style>
+</head>
+<body>
+<div class='chrome'><div class='crumbs'><a href="../INDEX.html">Home</a><span class="sep">/</span><span>Credibility</span><span class="sep">/</span><span>2025 draft and HerdSim comparison</span></div><div class='page-nav'><a rel="prev" href="README.html">Previous</a><span class="sep">|</span><a rel="next" href="validation_and_netlogo.html">Next</a><span class="sep">|</span><a href="draft_comparison_vi.html">Tieng Viet</a></div></div>
+<header><div class='in'><h1>2025 draft and HerdSim comparison</h1><p>Reader-facing HerdSim documentation and evidence.</p></div></header>
+<div class='layout'>
+<nav><a href="#comparison-status">Comparison status</a><a href="#protocol-comparison">Protocol comparison</a><a href="#reported-draft-outcomes">Reported draft outcomes</a><a href="#herdsim-outcomes-used-for-comparison">HerdSim outcomes used for comparison</a><a href="#why-the-outcomes-may-differ">Why the outcomes may differ</a><a href="#what-was-and-was-not-rerun">What was and was not rerun</a><a href="#citation-and-provenance">Citation and provenance</a></nav>
+<main>
+<h2 id="comparison-status">Comparison status</h2>
+<p>The 2025 draft, <em>Collective Nudging that Scales. How many dogs do I need to herd sheep?</em>, reports a NetLogo 7.0.3 study. HerdSim <code>scaling_v2</code> is a separate Python simulation study. They share a broad question, a dog-count grid, a 10,000-tick deadline, and a 90% reliability threshold. They do not share the same task, arena, initialization, controller, or frontier definitions.</p>
+<p>The draft was not rerun in HerdSim or NetLogo during the current program. Draft values below are transcribed from the draft PDF and its repository note. HerdSim values come from claim-stage outputs. The comparison is therefore an outcome contrast across protocols, not a replication test.</p>
+<figure><img alt="Draft collect, hold, and exit versus HerdSim drive to goal." src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3MjAiIGhlaWdodD0iMjgwIiB2aWV3Qm94PSIwIDAgNzIwIDI4MCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJkcmFmdCB2cyBIZXJkU2ltIHRhc2siPgo8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iNzIwIiBoZWlnaHQ9IjI4MCIgZmlsbD0iI2Y3ZjZmMiIvPgo8dGV4dCB4PSIxNiIgeT0iMjQiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5EcmFmdCB0YXNrIHZzIEhlcmRTaW0gdGFzayAod2h5IG91dGNvbWVzIGNhbiBkaXZlcmdlKTwvdGV4dD4KPHJlY3QgeD0iMzAiIHk9IjQ0IiB3aWR0aD0iMzAwIiBoZWlnaHQ9IjE5MCIgZmlsbD0iI2ZmZiIgc3Ryb2tlPSIjYjQ1MzA5IiBzdHJva2Utd2lkdGg9IjIiIHJ4PSIxMCIvPgo8cmVjdCB4PSIzOTAiIHk9IjQ0IiB3aWR0aD0iMzAwIiBoZWlnaHQ9IjE5MCIgZmlsbD0iI2ZmZiIgc3Ryb2tlPSIjMWY0ZTc5IiBzdHJva2Utd2lkdGg9IjIiIHJ4PSIxMCIvPgo8dGV4dCB4PSIxODAiIHk9IjcyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjEzIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjYjQ1MzA5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPjIwMjUgZHJhZnQgKE5ldExvZ28pPC90ZXh0Pgo8dGV4dCB4PSI1NDAiIHk9IjcyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjEzIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMWY0ZTc5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPkhlcmRTaW0gKHRoaXMgc3R1ZHkpPC90ZXh0Pgo8dGV4dCB4PSI1MCIgeT0iMTA1IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+MS4gQ29sbGVjdDwvdGV4dD4KPHRleHQgeD0iNTAiIHk9IjEyOSIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEyIiBmaWxsPSIjMWMxYjE5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPjIuIEhvbGQgODAwIHRpY2tzPC90ZXh0Pgo8dGV4dCB4PSI1MCIgeT0iMTUzIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+My4gRXhpdCBnYXRlPC90ZXh0Pgo8dGV4dCB4PSI1MCIgeT0iMTc3IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+U3RhcnQ6IHJhbmRvbSBzY2F0dGVyPC90ZXh0Pgo8dGV4dCB4PSI1MCIgeT0iMjAxIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+RG9nczogdG9wLWxlZnQgY29ybmVyPC90ZXh0Pgo8dGV4dCB4PSI0MTAiIHk9IjEwNSIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEyIiBmaWxsPSIjMWMxYjE5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPjEuIERyaXZlIGludG8gZ29hbCBkaXNrPC90ZXh0Pgo8dGV4dCB4PSI0MTAiIHk9IjEyOSIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEyIiBmaWxsPSIjMWMxYjE5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPihubyBob2xkIC8gbm8gZ2F0ZSk8L3RleHQ+Cjx0ZXh0IHg9IjQxMCIgeT0iMTc3IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+U3RhcnQ6IGNvbnRyb2xsZWQgbGF5b3V0czwvdGV4dD4KPHRleHQgeD0iNDEwIiB5PSIyMDEiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5Eb2dzOiBiZWhpbmQgZmxvY2s8L3RleHQ+Cjx0ZXh0IHg9IjM2MCIgeT0iMTQwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjE2IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjNWM1ODUyIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPnZzPC90ZXh0Pgo8dGV4dCB4PSIxNiIgeT0iMjY2IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiM1YzU4NTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+U2FtZSBzY2llbmNlIGZhbWlseSAoRCB2cyBOLCBTUiAmZ3Q7PSA5MCUpLCBkaWZmZXJlbnQgdGFzayBhbmQgc3RhcnRzLjwvdGV4dD4KPC9zdmc+"/></figure>
+<h2 id="protocol-comparison">Protocol comparison</h2>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Item</th>
+<th>2025 draft</th>
+<th>HerdSim <code>scaling_v2</code></th>
+</tr></thead><tbody>
+<tr>
+<td>Engine</td>
+<td>NetLogo 7.0.3 on a patch grid</td>
+<td>HerdSim in continuous space with discrete ticks</td>
+</tr>
+<tr>
+<td>Task</td>
+<td>Collect, hold for 800 ticks, then exit through a gate</td>
+<td><code>drive_to_goal</code>, with every sheep inside a goal disk</td>
+</tr>
+<tr>
+<td>Success</td>
+<td>All sheep pass through the gate by 10,000 ticks</td>
+<td>Fraction in the goal disk reaches 1.0 by T0 = 10,000</td>
+</tr>
+<tr>
+<td>Arena</td>
+<td>101 x 71 patches, central containment zone, right-wall gate</td>
+<td>500 x 500 field, flock at (250, 250), goal at (370, 250)</td>
+</tr>
+<tr>
+<td>Containment or goal</td>
+<td><code>rc = clamp(2.5 * sqrt(N), 23, 27)</code></td>
+<td>Radius <code>15 * sqrt(N/50)</code></td>
+</tr>
+<tr>
+<td>Sheep start</td>
+<td>Random scatter with wall and dog buffers</td>
+<td>Controlled <code>compact</code>, <code>wide</code>, <code>split</code>, and <code>outlier_rich</code> families</td>
+</tr>
+<tr>
+<td>Dog start</td>
+<td>Top-left corner grid</td>
+<td>Behind the flock, opposite the goal, offset 50 with jitter <code>+/-5</code></td>
+</tr>
+<tr>
+<td>Controller scope</td>
+<td>One NetLogo collect, drive, and patrol family</td>
+<td>Baseline <code>strombom_multi</code>; transfer methods <code>kubo</code> and <code>fat</code></td>
+</tr>
+<tr>
+<td>D grid</td>
+<td><code>{1, 2, 3, 4, 6, 10, 15, 20, 25, 35}</code></td>
+<td>Same</td>
+</tr>
+<tr>
+<td>N grid</td>
+<td><code>{5, 10, 25, 50, 100, 150, 200, 250, 300, 350, 400}</code></td>
+<td><code>{5, 10, 25, 50, 75, 100, 150, 200, 300, 400}</code></td>
+</tr>
+<tr>
+<td>Sampling</td>
+<td>100 runs in every cell, 11,000 total</td>
+<td>Scout 30 in every cell; claim reseeding normally 100 in planned windows</td>
+</tr>
+<tr>
+<td>Seed definition</td>
+<td>Master seed not stated in the note</td>
+<td>Master seed 2026; trial seed <code>2026 + i</code></td>
+</tr>
+<tr>
+<td>Reliability</td>
+<td>SR &gt;= 90%</td>
+<td>R &gt;= theta, with theta = 0.90 for claim frontiers</td>
+</tr>
+<tr>
+<td>D_min</td>
+<td>Smallest D with SR &gt;= 90%</td>
+<td>Smallest tested D with R &gt;= theta</td>
+</tr>
+<tr>
+<td>D_overcrowd</td>
+<td>First D above D_min where SR starts decreasing</td>
+<td>First of two consecutive tested D values below theta after D_min</td>
+</tr>
+<tr>
+<td>D_max</td>
+<td>First D above D_min with SR &lt; 90%, otherwise ceiling</td>
+<td>Largest reliable D before D_overcrowd; otherwise tested-grid ceiling 35</td>
+</tr>
+<tr>
+<td>Uncertainty</td>
+<td>No binomial interval or D_min bootstrap reported</td>
+<td>1,000 seed bootstraps for D_min</td>
+</tr>
+<tr>
+<td>Structure</td>
+<td>Emergent spread summarized by <code>S_bar</code></td>
+<td>Controlled starting layouts plus cohesion, fragmentation, and mean spread</td>
+</tr>
+<tr>
+<td>Metrics</td>
+<td>Success, ticks, phase, spread, path, and lost sheep</td>
+<td>Success, ticks, path, cohesion, fragmentation, spread, interference, and failure labels</td>
+</tr>
+</tbody></table></div>
+<figure><img alt="Reported phases of the draft task." src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3NDAiIGhlaWdodD0iMzQwIiB2aWV3Qm94PSIwIDAgNzQwIDM0MCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJkcmFmdCB0aHJlZSBwaGFzZXMiPgo8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iNzQwIiBoZWlnaHQ9IjM0MCIgZmlsbD0iI2Y3ZjZmMiIvPgo8dGV4dCB4PSIxNiIgeT0iMjQiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj4yMDI1IGRyYWZ0IHRhc2s6IHRocmVlIHBoYXNlcyBvbiBhIE5ldExvZ28gcGF0Y2ggYXJlbmE8L3RleHQ+CjxyZWN0IHg9IjE2IiB5PSI0MCIgd2lkdGg9IjIzMCIgaGVpZ2h0PSI3OCIgZmlsbD0iI2ZmZiIgc3Ryb2tlPSIjYjQ1MzA5IiBzdHJva2Utd2lkdGg9IjIiIHJ4PSIxMCIvPgo8dGV4dCB4PSIzMCIgeT0iNjQiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMyIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iI2I0NTMwOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj4xLiBDb2xsZWN0PC90ZXh0Pgo8dGV4dCB4PSIzMCIgeT0iODYiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzVjNTg1MiIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5TY2F0dGVyIC0mZ3Q7IGNvbXBhY3QgZmxvY2s8L3RleHQ+Cjx0ZXh0IHg9IjMwIiB5PSIxMDIiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzVjNTg1MiIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5pbnRvIGNvbnRhaW5tZW50PC90ZXh0Pgo8dGV4dCB4PSIyNTQiIHk9IjgwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjIyIiBmaWxsPSIjNWM1ODUyIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPuKGkjwvdGV4dD4KPHJlY3QgeD0iMjYxIiB5PSI0MCIgd2lkdGg9IjIzMCIgaGVpZ2h0PSI3OCIgZmlsbD0iI2ZmZiIgc3Ryb2tlPSIjN2IxZmEyIiBzdHJva2Utd2lkdGg9IjIiIHJ4PSIxMCIvPgo8dGV4dCB4PSIyNzUiIHk9IjY0IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTMiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiM3YjFmYTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+Mi4gSG9sZDwvdGV4dD4KPHRleHQgeD0iMjc1IiB5PSI4NiIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEyIiBmaWxsPSIjNWM1ODUyIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPktlZXAgaW5zaWRlIHpvbmU8L3RleHQ+Cjx0ZXh0IHg9IjI3NSIgeT0iMTAyIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM1YzU4NTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+Zm9yIDgwMCB0aWNrczwvdGV4dD4KPHRleHQgeD0iNDk5IiB5PSI4MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIyMiIgZmlsbD0iIzVjNTg1MiIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj7ihpI8L3RleHQ+CjxyZWN0IHg9IjUwNiIgeT0iNDAiIHdpZHRoPSIyMzAiIGhlaWdodD0iNzgiIGZpbGw9IiNmZmYiIHN0cm9rZT0iIzFmNGU3OSIgc3Ryb2tlLXdpZHRoPSIyIiByeD0iMTAiLz4KPHRleHQgeD0iNTIwIiB5PSI2NCIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEzIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMWY0ZTc5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPjMuIEV4aXQ8L3RleHQ+Cjx0ZXh0IHg9IjUyMCIgeT0iODYiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzVjNTg1MiIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5Ecml2ZSB0aHJvdWdoPC90ZXh0Pgo8dGV4dCB4PSI1MjAiIHk9IjEwMiIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEyIiBmaWxsPSIjNWM1ODUyIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPnJpZ2h0LXdhbGwgZ2F0ZTwvdGV4dD4KPHRleHQgeD0iMTYiIHk9IjE0NSIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMWY0ZTc5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPkFyZW5hIHNrZXRjaCAoMTAxIHggNzEgcGF0Y2hlcyk8L3RleHQ+CjxyZWN0IHg9IjE2IiB5PSIxNTgiIHdpZHRoPSI1MjAiIGhlaWdodD0iMTQwIiBmaWxsPSIjZmZmIiBzdHJva2U9IiNiYmIzYTUiIHN0cm9rZS13aWR0aD0iMSIgcng9IjgiLz4KPGNpcmNsZSBjeD0iMjc2IiBjeT0iMjI4IiByPSI0MiIgZmlsbD0iI2RiZWFmZSIgc3Ryb2tlPSIjMWY0ZTc5IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1kYXNoYXJyYXk9IjQgMyIvPgo8dGV4dCB4PSIyNzYiIHk9IjIzMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzFmNGU3OSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5Db250YWlubWVudDwvdGV4dD4KPHRleHQgeD0iMjc2IiB5PSIyNDYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiMxZjRlNzkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+cmMgfiAyMyB0byAyNzwvdGV4dD4KPHJlY3QgeD0iNTI4IiB5PSIyMDgiIHdpZHRoPSI4IiBoZWlnaHQ9IjQwIiBmaWxsPSIjMWY0ZTc5IiByeD0iMSIvPgo8dGV4dCB4PSI0ODYiIHk9IjIwNiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzFmNGU3OSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5HYXRlPC90ZXh0Pgo8dGV4dCB4PSI0ODYiIHk9IjIyMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzFmNGU3OSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj4oNiBwYXRjaGVzKTwvdGV4dD4KPHJlY3QgeD0iNDAiIHk9IjE3NiIgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIiBmaWxsPSIjMWY0ZTc5IiByeD0iMiIvPgo8cmVjdCB4PSI1NCIgeT0iMTc2IiB3aWR0aD0iMTAiIGhlaWdodD0iMTAiIGZpbGw9IiMxZjRlNzkiIHJ4PSIyIi8+CjxyZWN0IHg9IjY4IiB5PSIxNzYiIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCIgZmlsbD0iIzFmNGU3OSIgcng9IjIiLz4KPHRleHQgeD0iNDQiIHk9IjIwNiIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEwIiBmaWxsPSIjMWY0ZTc5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPkRvZ3Mgc3RhcnQ8L3RleHQ+Cjx0ZXh0IHg9IjQ0IiB5PSIyMTgiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzFmNGU3OSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj50b3AtbGVmdDwvdGV4dD4KPGNpcmNsZSBjeD0iMjUxIiBjeT0iMjA3IiByPSIzLjIiIGZpbGw9IiMzZDZiM2EiLz4KPGNpcmNsZSBjeD0iMjg4IiBjeT0iMjcxIiByPSIzLjIiIGZpbGw9IiMzZDZiM2EiLz4KPGNpcmNsZSBjeD0iMTEwIiBjeT0iMTk3IiByPSIzLjIiIGZpbGw9IiMzZDZiM2EiLz4KPGNpcmNsZSBjeD0iMzYwIiBjeT0iMjAwIiByPSIzLjIiIGZpbGw9IiMzZDZiM2EiLz4KPGNpcmNsZSBjeD0iMjczIiBjeT0iMjYyIiByPSIzLjIiIGZpbGw9IiMzZDZiM2EiLz4KPGNpcmNsZSBjeD0iMTE1IiBjeT0iMjUyIiByPSIzLjIiIGZpbGw9IiMzZDZiM2EiLz4KPGNpcmNsZSBjeD0iMTk1IiBjeT0iMTkyIiByPSIzLjIiIGZpbGw9IiMzZDZiM2EiLz4KPGNpcmNsZSBjeD0iMTMwIiBjeT0iMjQzIiByPSIzLjIiIGZpbGw9IiMzZDZiM2EiLz4KPGNpcmNsZSBjeD0iMzAwIiBjeT0iMTk2IiByPSIzLjIiIGZpbGw9IiMzZDZiM2EiLz4KPGNpcmNsZSBjeD0iMjA5IiBjeT0iMTk5IiByPSIzLjIiIGZpbGw9IiMzZDZiM2EiLz4KPGNpcmNsZSBjeD0iMzY4IiBjeT0iMjQyIiByPSIzLjIiIGZpbGw9IiMzZDZiM2EiLz4KPGNpcmNsZSBjeD0iMTE2IiBjeT0iMjYwIiByPSIzLjIiIGZpbGw9IiMzZDZiM2EiLz4KPGNpcmNsZSBjeD0iMTQ5IiBjeT0iMjE2IiByPSIzLjIiIGZpbGw9IiMzZDZiM2EiLz4KPGNpcmNsZSBjeD0iMzg0IiBjeT0iMTk1IiByPSIzLjIiIGZpbGw9IiMzZDZiM2EiLz4KPGNpcmNsZSBjeD0iMzgxIiBjeT0iMjYyIiByPSIzLjIiIGZpbGw9IiMzZDZiM2EiLz4KPGNpcmNsZSBjeD0iMjg5IiBjeT0iMTk0IiByPSIzLjIiIGZpbGw9IiMzZDZiM2EiLz4KPGNpcmNsZSBjeD0iMTk5IiBjeT0iMTkzIiByPSIzLjIiIGZpbGw9IiMzZDZiM2EiLz4KPGNpcmNsZSBjeD0iMzcxIiBjeT0iMjA1IiByPSIzLjIiIGZpbGw9IiMzZDZiM2EiLz4KPHRleHQgeD0iMTA2IiB5PSIyODYiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzNkNmIzYSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5TaGVlcCBzdGFydDwvdGV4dD4KPHRleHQgeD0iMTA2IiB5PSIyOTgiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzNkNmIzYSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5yYW5kb20gc2NhdHRlcjwvdGV4dD4KPHJlY3QgeD0iNTUwIiB5PSIxNTgiIHdpZHRoPSIxNzQiIGhlaWdodD0iMTQwIiBmaWxsPSIjZmZmIiBzdHJva2U9IiNiNDUzMDkiIHN0cm9rZS13aWR0aD0iMiIgcng9IjgiLz4KPHRleHQgeD0iNTY0IiB5PSIxODIiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iI2I0NTMwOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5LZXkgbnVtYmVyczwvdGV4dD4KPHRleHQgeD0iNTY0IiB5PSIyMDgiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5UMDogMTAsMDAwPC90ZXh0Pgo8dGV4dCB4PSI1NjQiIHk9IjIzMCIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEyIiBmaWxsPSIjMWMxYjE5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPkhvbGQ6IDgwMDwvdGV4dD4KPHRleHQgeD0iNTY0IiB5PSIyNTIiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5HcmlkOiAxMDEgeCA3MTwvdGV4dD4KPHRleHQgeD0iNTY0IiB5PSIyNzQiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5TUiBiYXI6ICZndDs9IDkwJTwvdGV4dD4KPHRleHQgeD0iMTYiIHk9IjMxMiIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjExIiBmaWxsPSIjMmY2YjQ1IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPlN1Y2Nlc3M6IGFsbCBzaGVlcCB0aHJvdWdoIGdhdGUgYnkgMTAsMDAwIHRpY2tzPC90ZXh0Pgo8dGV4dCB4PSIxNiIgeT0iMzI4IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiM1YzU4NTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+SG9sZCArIGdhdGUgbWFrZSB0aGUgZHJhZnQgaGFyZGVyIHRoYW4gSGVyZFNpbSBkcml2ZS10by1nb2FsIChzZWUgUzE5KS48L3RleHQ+Cjwvc3ZnPg=="/></figure>
+<h2 id="reported-draft-outcomes">Reported draft outcomes</h2>
+<p>At SR &gt;= 90%, draft Table A3 reports:</p>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>N</th>
+<th>Draft D_min</th>
+<th>Draft D_max</th>
+<th>Maximum SR</th>
+</tr></thead><tbody>
+<tr>
+<td>5</td>
+<td>1</td>
+<td>not reached</td>
+<td>100%</td>
+</tr>
+<tr>
+<td>10</td>
+<td>1</td>
+<td>15</td>
+<td>100%</td>
+</tr>
+<tr>
+<td>25</td>
+<td>1</td>
+<td>25</td>
+<td>100%</td>
+</tr>
+<tr>
+<td>50</td>
+<td>1</td>
+<td>25</td>
+<td>100%</td>
+</tr>
+<tr>
+<td>100</td>
+<td>1</td>
+<td>not reached</td>
+<td>100%</td>
+</tr>
+<tr>
+<td>150</td>
+<td>3</td>
+<td>not reached</td>
+<td>99%</td>
+</tr>
+<tr>
+<td>200</td>
+<td>20</td>
+<td>35</td>
+<td>94%</td>
+</tr>
+<tr>
+<td>250</td>
+<td>25</td>
+<td>not reached</td>
+<td>93%</td>
+</tr>
+<tr>
+<td>300</td>
+<td>20</td>
+<td>not reached</td>
+<td>93%</td>
+</tr>
+<tr>
+<td>350</td>
+<td>35</td>
+<td>not reached</td>
+<td>91%</td>
+</tr>
+<tr>
+<td>400</td>
+<td>35</td>
+<td>not reached</td>
+<td>91%</td>
+</tr>
+</tbody></table></div>
+<p>Here, &quot;not reached&quot; means the upper failure boundary was not found by D = 35. These are draft-reported values, not results regenerated by this repository.</p>
+<p>The draft also reports a negative association between mean spread and success, including Spearman rho = -0.701 for <code>S_bar</code> against SR and rho = -0.828 for <code>S_bar * N</code> against SR over 110 condition aggregates. Its sensitivity and density-gradient analyses were not rerun here.</p>
+<figure><img alt="Visual summary transcribed from draft Table A3." src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3ODAiIGhlaWdodD0iNDAwIiB2aWV3Qm94PSIwIDAgNzgwIDQwMCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJkcmFmdCBtYWluIHJlc3VsdHMiPgo8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iNzgwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2Y3ZjZmMiIvPgo8dGV4dCB4PSIxNiIgeT0iMjQiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj4yMDI1IGRyYWZ0IG1haW4gcmVzdWx0cyAoZnJvbSB0aGUgcGFwZXI7IG5vdCByZS1ydW4gaGVyZSk8L3RleHQ+CjxyZWN0IHg9IjE2IiB5PSI0MCIgd2lkdGg9IjE4MCIgaGVpZ2h0PSI3OCIgZmlsbD0iI2ZmZiIgc3Ryb2tlPSIjMmY2YjQ1IiBzdHJva2Utd2lkdGg9IjIiIHJ4PSI4Ii8+Cjx0ZXh0IHg9IjI4IiB5PSI2NCIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjE2IiBmb250LXdlaWdodD0iODAwIiBmaWxsPSIjMmY2YjQ1IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPkQ9MSBPSzwvdGV4dD4KPHRleHQgeD0iMjgiIHk9Ijg0IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+dG8gTiA9IDEwMDwvdGV4dD4KPHRleHQgeD0iMjgiIHk9IjEwNCIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEwIiBmaWxsPSIjNWM1ODUyIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPlRoZW4gY29sbGFwc2UgYXQgTj0xNTAgKFNSIH4xJSk8L3RleHQ+CjxyZWN0IHg9IjIwNiIgeT0iNDAiIHdpZHRoPSIxODAiIGhlaWdodD0iNzgiIGZpbGw9IiNmZmYiIHN0cm9rZT0iI2I0NTMwOSIgc3Ryb2tlLXdpZHRoPSIyIiByeD0iOCIvPgo8dGV4dCB4PSIyMTgiIHk9IjY0IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTYiIGZvbnQtd2VpZ2h0PSI4MDAiIGZpbGw9IiNiNDUzMDkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+RG1pbiByaXNlczwvdGV4dD4KPHRleHQgeD0iMjE4IiB5PSI4NCIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMWMxYjE5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPndpdGggTjwvdGV4dD4KPHRleHQgeD0iMjE4IiB5PSIxMDQiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzVjNTg1MiIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj4zIC8gfjIwIC8gMzUgYXQgTj0xNTAgLyAyMDAgLyA0MDA8L3RleHQ+CjxyZWN0IHg9IjM5NiIgeT0iNDAiIHdpZHRoPSIxODAiIGhlaWdodD0iNzgiIGZpbGw9IiNmZmYiIHN0cm9rZT0iIzliMmMyYyIgc3Ryb2tlLXdpZHRoPSIyIiByeD0iOCIvPgo8dGV4dCB4PSI0MDgiIHk9IjY0IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTYiIGZvbnQtd2VpZ2h0PSI4MDAiIGZpbGw9IiM5YjJjMmMiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+T3ZlcmNyb3dkPC90ZXh0Pgo8dGV4dCB4PSI0MDgiIHk9Ijg0IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+ZS5nLiBOPTEwPC90ZXh0Pgo8dGV4dCB4PSI0MDgiIHk9IjEwNCIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEwIiBmaWxsPSIjNWM1ODUyIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPkQgJmd0Oz0gMjAgd29yc2UgdGhhbiBmZXdlciBkb2dzPC90ZXh0Pgo8cmVjdCB4PSI1ODYiIHk9IjQwIiB3aWR0aD0iMTgwIiBoZWlnaHQ9Ijc4IiBmaWxsPSIjZmZmIiBzdHJva2U9IiM3YjFmYTIiIHN0cm9rZS13aWR0aD0iMiIgcng9IjgiLz4KPHRleHQgeD0iNTk4IiB5PSI2NCIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjE2IiBmb250LXdlaWdodD0iODAwIiBmaWxsPSIjN2IxZmEyIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPjMsMDg5PC90ZXh0Pgo8dGV4dCB4PSI1OTgiIHk9Ijg0IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+ZmFpbHVyZXM8L3RleHQ+Cjx0ZXh0IHg9IjU5OCIgeT0iMTA0IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiM1YzU4NTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+OTAlIHN0YWxsIGluIENvbGxlY3QgcGhhc2U8L3RleHQ+Cjx0ZXh0IHg9IjE2IiB5PSIxNDQiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzFmNGU3OSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5EbWluKE4pIGF0IFNSICZndDs9IDkwJSAoZHJhZnQgVGFibGUgQTMpPC90ZXh0Pgo8cmVjdCB4PSI1MCIgeT0iMTYwIiB3aWR0aD0iNzAwIiBoZWlnaHQ9IjE0MCIgZmlsbD0iI2ZmZiIgc3Ryb2tlPSIjYmJiM2E1IiBzdHJva2Utd2lkdGg9IjEiIHJ4PSI2Ii8+Cjx0ZXh0IHg9IjI4IiB5PSIyMzAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiM1YzU4NTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+RG1pbjwvdGV4dD4KPHJlY3QgeD0iNzAuMCIgeT0iMjczLjQyODU3MTQyODU3MTQ0IiB3aWR0aD0iNTIuMCIgaGVpZ2h0PSIyLjU3MTQyODU3MTQyODU3MSIgZmlsbD0iIzkzYzVmZCIgc3Ryb2tlPSIjMWY0ZTc5IiBzdHJva2Utd2lkdGg9IjEiIHJ4PSIzIi8+Cjx0ZXh0IHg9Ijk2LjAiIHk9IjI2Ny40Mjg1NzE0Mjg1NzE0NCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxMCIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj4xPC90ZXh0Pgo8dGV4dCB4PSI5Ni4wIiB5PSIyOTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiM1YzU4NTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+NTwvdGV4dD4KPHJlY3QgeD0iMTMwLjAiIHk9IjI3My40Mjg1NzE0Mjg1NzE0NCIgd2lkdGg9IjUyLjAiIGhlaWdodD0iMi41NzE0Mjg1NzE0Mjg1NzEiIGZpbGw9IiM5M2M1ZmQiIHN0cm9rZT0iIzFmNGU3OSIgc3Ryb2tlLXdpZHRoPSIxIiByeD0iMyIvPgo8dGV4dCB4PSIxNTYuMCIgeT0iMjY3LjQyODU3MTQyODU3MTQ0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjEwIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMWMxYjE5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPjE8L3RleHQ+Cjx0ZXh0IHg9IjE1Ni4wIiB5PSIyOTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiM1YzU4NTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+MTA8L3RleHQ+CjxyZWN0IHg9IjE5MC4wIiB5PSIyNzMuNDI4NTcxNDI4NTcxNDQiIHdpZHRoPSI1Mi4wIiBoZWlnaHQ9IjIuNTcxNDI4NTcxNDI4NTcxIiBmaWxsPSIjOTNjNWZkIiBzdHJva2U9IiMxZjRlNzkiIHN0cm9rZS13aWR0aD0iMSIgcng9IjMiLz4KPHRleHQgeD0iMjE2LjAiIHk9IjI2Ny40Mjg1NzE0Mjg1NzE0NCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxMCIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj4xPC90ZXh0Pgo8dGV4dCB4PSIyMTYuMCIgeT0iMjkwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjEwIiBmaWxsPSIjNWM1ODUyIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPjI1PC90ZXh0Pgo8cmVjdCB4PSIyNTAuMCIgeT0iMjczLjQyODU3MTQyODU3MTQ0IiB3aWR0aD0iNTIuMCIgaGVpZ2h0PSIyLjU3MTQyODU3MTQyODU3MSIgZmlsbD0iIzkzYzVmZCIgc3Ryb2tlPSIjMWY0ZTc5IiBzdHJva2Utd2lkdGg9IjEiIHJ4PSIzIi8+Cjx0ZXh0IHg9IjI3Ni4wIiB5PSIyNjcuNDI4NTcxNDI4NTcxNDQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+MTwvdGV4dD4KPHRleHQgeD0iMjc2LjAiIHk9IjI5MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzVjNTg1MiIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj41MDwvdGV4dD4KPHJlY3QgeD0iMzEwLjAiIHk9IjI3My40Mjg1NzE0Mjg1NzE0NCIgd2lkdGg9IjUyLjAiIGhlaWdodD0iMi41NzE0Mjg1NzE0Mjg1NzEiIGZpbGw9IiM5M2M1ZmQiIHN0cm9rZT0iIzFmNGU3OSIgc3Ryb2tlLXdpZHRoPSIxIiByeD0iMyIvPgo8dGV4dCB4PSIzMzYuMCIgeT0iMjY3LjQyODU3MTQyODU3MTQ0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjEwIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMWMxYjE5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPjE8L3RleHQ+Cjx0ZXh0IHg9IjMzNi4wIiB5PSIyOTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiM1YzU4NTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+MTAwPC90ZXh0Pgo8cmVjdCB4PSIzNzAuMCIgeT0iMjY4LjI4NTcxNDI4NTcxNDMiIHdpZHRoPSI1Mi4wIiBoZWlnaHQ9IjcuNzE0Mjg1NzE0Mjg1NzE0IiBmaWxsPSIjOTNjNWZkIiBzdHJva2U9IiMxZjRlNzkiIHN0cm9rZS13aWR0aD0iMSIgcng9IjMiLz4KPHRleHQgeD0iMzk2LjAiIHk9IjI2Mi4yODU3MTQyODU3MTQzIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjEwIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMWMxYjE5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPjM8L3RleHQ+Cjx0ZXh0IHg9IjM5Ni4wIiB5PSIyOTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiM1YzU4NTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+MTUwPC90ZXh0Pgo8cmVjdCB4PSI0MzAuMCIgeT0iMjI0LjU3MTQyODU3MTQyODU4IiB3aWR0aD0iNTIuMCIgaGVpZ2h0PSI1MS40Mjg1NzE0Mjg1NzE0MiIgZmlsbD0iI2I0NTMwOSIgc3Ryb2tlPSIjYjQ1MzA5IiBzdHJva2Utd2lkdGg9IjEiIHJ4PSIzIi8+Cjx0ZXh0IHg9IjQ1Ni4wIiB5PSIyMTguNTcxNDI4NTcxNDI4NTgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+MjA8L3RleHQ+Cjx0ZXh0IHg9IjQ1Ni4wIiB5PSIyOTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiM1YzU4NTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+MjAwPC90ZXh0Pgo8cmVjdCB4PSI0OTAuMCIgeT0iMjExLjcxNDI4NTcxNDI4NTcyIiB3aWR0aD0iNTIuMCIgaGVpZ2h0PSI2NC4yODU3MTQyODU3MTQyOSIgZmlsbD0iI2I0NTMwOSIgc3Ryb2tlPSIjYjQ1MzA5IiBzdHJva2Utd2lkdGg9IjEiIHJ4PSIzIi8+Cjx0ZXh0IHg9IjUxNi4wIiB5PSIyMDUuNzE0Mjg1NzE0Mjg1NzIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+MjU8L3RleHQ+Cjx0ZXh0IHg9IjUxNi4wIiB5PSIyOTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiM1YzU4NTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+MjUwPC90ZXh0Pgo8cmVjdCB4PSI1NTAuMCIgeT0iMjI0LjU3MTQyODU3MTQyODU4IiB3aWR0aD0iNTIuMCIgaGVpZ2h0PSI1MS40Mjg1NzE0Mjg1NzE0MiIgZmlsbD0iI2I0NTMwOSIgc3Ryb2tlPSIjYjQ1MzA5IiBzdHJva2Utd2lkdGg9IjEiIHJ4PSIzIi8+Cjx0ZXh0IHg9IjU3Ni4wIiB5PSIyMTguNTcxNDI4NTcxNDI4NTgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+MjA8L3RleHQ+Cjx0ZXh0IHg9IjU3Ni4wIiB5PSIyOTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiM1YzU4NTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+MzAwPC90ZXh0Pgo8cmVjdCB4PSI2MTAuMCIgeT0iMTg2LjAiIHdpZHRoPSI1Mi4wIiBoZWlnaHQ9IjkwLjAiIGZpbGw9IiNiNDUzMDkiIHN0cm9rZT0iIzliMmMyYyIgc3Ryb2tlLXdpZHRoPSIxIiByeD0iMyIvPgo8dGV4dCB4PSI2MzYuMCIgeT0iMTgwLjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+MzU8L3RleHQ+Cjx0ZXh0IHg9IjYzNi4wIiB5PSIyOTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiM1YzU4NTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+MzUwPC90ZXh0Pgo8cmVjdCB4PSI2NzAuMCIgeT0iMTg2LjAiIHdpZHRoPSI1Mi4wIiBoZWlnaHQ9IjkwLjAiIGZpbGw9IiNiNDUzMDkiIHN0cm9rZT0iIzliMmMyYyIgc3Ryb2tlLXdpZHRoPSIxIiByeD0iMyIvPgo8dGV4dCB4PSI2OTYuMCIgeT0iMTgwLjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+MzU8L3RleHQ+Cjx0ZXh0IHg9IjY5Ni4wIiB5PSIyOTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiM1YzU4NTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+NDAwPC90ZXh0Pgo8dGV4dCB4PSI0MDAuMCIgeT0iMjk2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjEwIiBmaWxsPSIjNWM1ODUyIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPk48L3RleHQ+Cjx0ZXh0IHg9IjE2IiB5PSIzMzAiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzJmNmI0NSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5Db3N0IHRyZW5kcyAoc3VjY2Vzc2Z1bCBydW5zKTwvdGV4dD4KPHRleHQgeD0iMTYiIHk9IjM1MiIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEyIiBmaWxsPSIjMWMxYjE5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPi0gTWVhbiB0aWNrcyB0byBzdWNjZXNzIHJpc2Ugd2l0aCBOLCBmYWxsIHdpdGggRDwvdGV4dD4KPHRleHQgeD0iMTYiIHk9IjM3MCIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEyIiBmaWxsPSIjMWMxYjE5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPi0gVG90YWwgZG9nIHBhdGggcmlzZXMgd2l0aCBEOyBzYXR1cmF0ZXMgbmVhciBicmVha3BvaW50czwvdGV4dD4KPHRleHQgeD0iMTYiIHk9IjM4OCIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjExIiBmaWxsPSIjNWM1ODUyIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPk51bWJlcnMgYXJlIGRyYWZ0LXJlcG9ydGVkLiBGdWxsIFtEbWluLCBEbWF4XSBhbHNvIGluIFRhYmxlIDMgbGF0ZXIgZm9yIHNpZGUtYnktc2lkZSB3aXRoIEhlcmRTaW0uPC90ZXh0Pgo8L3N2Zz4="/></figure>
+<h2 id="herdsim-outcomes-used-for-comparison">HerdSim outcomes used for comparison</h2>
+<p>For the <code>strombom_multi</code> baseline on compact starts, claim outputs report D_min = 2 for N in <code>{5, 10}</code> and D_min = 1 for N from 25 through 400. D_max = 35 is a tested-grid ceiling in every Phase 1 cell because no overcrowding pair was observed. It is not a measured upper collapse.</p>
+<p>Changing the starting layout did not change baseline D_min at N in <code>{50, 100, 200}</code>, but it changed cost substantially. Kubo broadly matched the compact baseline, while Kubo on wide starts and FAT on larger flocks often did not reach R = 0.90 anywhere on the tested D grid. Those are HerdSim transfer results, not draft or NetLogo parity results.</p>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Draft finding</th>
+<th>HerdSim result under its own protocol</th>
+<th>Comparison status</th>
+</tr></thead><tbody>
+<tr>
+<td>One dog works to about N = 100, then collapses</td>
+<td>One dog reaches R &gt;= 0.90 through N = 400 on compact baseline starts</td>
+<td><span class="badge NOT_REPRODUCED">Not reproduced</span></td>
+</tr>
+<tr>
+<td>D_min rises to 20 to 35 for N &gt;= 200</td>
+<td>Baseline D_min remains 1</td>
+<td><span class="badge NOT_REPRODUCED">Not reproduced</span></td>
+</tr>
+<tr>
+<td>High D can overcrowd small flocks</td>
+<td>No baseline overcrowding pair through D = 35</td>
+<td><span class="badge NOT_REPRODUCED">Not reproduced</span></td>
+</tr>
+<tr>
+<td>Completion time falls with D; distance saturates</td>
+<td>Baseline completion time is nearly flat; total dog path rises with D</td>
+<td>Different measured shape</td>
+</tr>
+<tr>
+<td>Spread predicts failure</td>
+<td>No claim-grade controlled counterpart analysis completed</td>
+<td>Not tested for parity</td>
+</tr>
+<tr>
+<td>One controller, no D_min uncertainty</td>
+<td>Three HerdSim controllers, four layouts, and bootstrap intervals</td>
+<td>Additional HerdSim evidence</td>
+</tr>
+</tbody></table></div>
+<figure><img alt="Draft analyses that were not rerun." src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3ODAiIGhlaWdodD0iNDMwIiB2aWV3Qm94PSIwIDAgNzgwIDQzMCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJkcmFmdCBleHRyYSBhbmFseXNlcyI+CjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSI3ODAiIGhlaWdodD0iNDMwIiBmaWxsPSIjZjdmNmYyIi8+Cjx0ZXh0IHg9IjE2IiB5PSIyNCIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMWMxYjE5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPjIwMjUgZHJhZnQgZXh0cmEgYW5hbHlzZXMgKHBhcGVyIFRhYmxlcyBWSUlJIHRvIFgpPC90ZXh0Pgo8dGV4dCB4PSIxNiIgeT0iNDgiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzFmNGU3OSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5TcHJlYWQgdnMgc3VjY2VzcyAoU3BlYXJtYW4gb3ZlciAxMTAgY2VsbHMpPC90ZXh0Pgo8dGV4dCB4PSIxNiIgeT0iNzQiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5TX2JhciB2cyBTUjwvdGV4dD4KPHJlY3QgeD0iMjAwIiB5PSI2MiIgd2lkdGg9IjI4MCIgaGVpZ2h0PSIyMCIgZmlsbD0iI2VmZWNlNSIgc3Ryb2tlPSIjYmJiM2E1IiBzdHJva2Utd2lkdGg9IjEiIHJ4PSI0Ii8+CjxyZWN0IHg9IjI4My43MiIgeT0iNjIiIHdpZHRoPSIxOTYuMjgiIGhlaWdodD0iMjAiIGZpbGw9IiNmY2E1YTUiIHN0cm9rZT0iIzliMmMyYyIgc3Ryb2tlLXdpZHRoPSIxIiByeD0iNCIvPgo8dGV4dCB4PSI1MDAiIHk9Ijc2IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiM5YjJjMmMiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+cmhvID0gLTAuNzAxPC90ZXh0Pgo8dGV4dCB4PSI2MDAiIHk9Ijc2IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiM1YzU4NTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+U3Ryb25nIG5lZ2F0aXZlPC90ZXh0Pgo8dGV4dCB4PSIxNiIgeT0iMTEwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+U19iYXIgKiBOIHZzIFNSPC90ZXh0Pgo8cmVjdCB4PSIyMDAiIHk9Ijk4IiB3aWR0aD0iMjgwIiBoZWlnaHQ9IjIwIiBmaWxsPSIjZWZlY2U1IiBzdHJva2U9IiNiYmIzYTUiIHN0cm9rZS13aWR0aD0iMSIgcng9IjQiLz4KPHJlY3QgeD0iMjQ4LjE2MDAwMDAwMDAwMDAzIiB5PSI5OCIgd2lkdGg9IjIzMS44Mzk5OTk5OTk5OTk5NyIgaGVpZ2h0PSIyMCIgZmlsbD0iI2ZjYTVhNSIgc3Ryb2tlPSIjOWIyYzJjIiBzdHJva2Utd2lkdGg9IjEiIHJ4PSI0Ii8+Cjx0ZXh0IHg9IjUwMCIgeT0iMTEyIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiM5YjJjMmMiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+cmhvID0gLTAuODI4PC90ZXh0Pgo8dGV4dCB4PSI2MDAiIHk9IjExMiIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjExIiBmaWxsPSIjNWM1ODUyIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPkJlc3QgY29tcG9zaXRlPC90ZXh0Pgo8dGV4dCB4PSIxNiIgeT0iMTQ2IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+U19iYXIgKiBzcXJ0KE4pPC90ZXh0Pgo8cmVjdCB4PSIyMDAiIHk9IjEzNCIgd2lkdGg9IjI4MCIgaGVpZ2h0PSIyMCIgZmlsbD0iI2VmZWNlNSIgc3Ryb2tlPSIjYmJiM2E1IiBzdHJva2Utd2lkdGg9IjEiIHJ4PSI0Ii8+CjxyZWN0IHg9IjI1MC42OCIgeT0iMTM0IiB3aWR0aD0iMjI5LjMyIiBoZWlnaHQ9IjIwIiBmaWxsPSIjZmNhNWE1IiBzdHJva2U9IiM5YjJjMmMiIHN0cm9rZS13aWR0aD0iMSIgcng9IjQiLz4KPHRleHQgeD0iNTAwIiB5PSIxNDgiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzliMmMyYyIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5yaG8gPSAtMC44MTk8L3RleHQ+Cjx0ZXh0IHg9IjYwMCIgeT0iMTQ4IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiM1YzU4NTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+Q2xvc2Ugc2Vjb25kPC90ZXh0Pgo8dGV4dCB4PSIxNiIgeT0iMTc1IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiM3YjFmYTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+RmFpbHVyZXMgYnkgY29udHJvbCAoVGFibGUgVklJSSBpZGVhKTwvdGV4dD4KPHJlY3QgeD0iMTYiIHk9IjE4NiIgd2lkdGg9IjI1NCIgaGVpZ2h0PSIyNCIgZmlsbD0iIzdiMWZhMiIgcng9IjQiLz4KPHRleHQgeD0iMjQiIHk9IjIwMiIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjZmZmIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPlNsaWNlPC90ZXh0Pgo8cmVjdCB4PSIyNzYiIHk9IjE4NiIgd2lkdGg9Ijg0IiBoZWlnaHQ9IjI0IiBmaWxsPSIjN2IxZmEyIiByeD0iNCIvPgo8dGV4dCB4PSIyODQiIHk9IjIwMiIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjZmZmIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPkNvdW50PC90ZXh0Pgo8cmVjdCB4PSIzNjYiIHk9IjE4NiIgd2lkdGg9IjI3NCIgaGVpZ2h0PSIyNCIgZmlsbD0iIzdiMWZhMiIgcng9IjQiLz4KPHRleHQgeD0iMzc0IiB5PSIyMDIiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iI2ZmZiIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5Nb3N0bHkgc3RhbGwgaW48L3RleHQ+CjxyZWN0IHg9IjE2IiB5PSIyMTQiIHdpZHRoPSIyNTQiIGhlaWdodD0iMjIiIGZpbGw9IiNmZmYiIHN0cm9rZT0iI2JiYjNhNSIgc3Ryb2tlLXdpZHRoPSIxIiByeD0iMyIvPgo8dGV4dCB4PSIyMiIgeT0iMjI5IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+U19iYXIgJmd0OyAyNSAobm8gY29udHJvbCk8L3RleHQ+CjxyZWN0IHg9IjI3NiIgeT0iMjE0IiB3aWR0aD0iODQiIGhlaWdodD0iMjIiIGZpbGw9IiNmZmYiIHN0cm9rZT0iI2JiYjNhNSIgc3Ryb2tlLXdpZHRoPSIxIiByeD0iMyIvPgo8dGV4dCB4PSIyODIiIHk9IjIyOSIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEwIiBmaWxsPSIjMWMxYjE5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPjIsMTYxPC90ZXh0Pgo8cmVjdCB4PSIzNjYiIHk9IjIxNCIgd2lkdGg9IjI3NCIgaGVpZ2h0PSIyMiIgZmlsbD0iI2ZmZiIgc3Ryb2tlPSIjYmJiM2E1IiBzdHJva2Utd2lkdGg9IjEiIHJ4PSIzIi8+Cjx0ZXh0IHg9IjM3MiIgeT0iMjI5IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+Q29sbGVjdCA5NyU8L3RleHQ+CjxyZWN0IHg9IjE2IiB5PSIyMzgiIHdpZHRoPSIyNTQiIGhlaWdodD0iMjIiIGZpbGw9IiNlZmVjZTUiIHN0cm9rZT0iI2JiYjNhNSIgc3Ryb2tlLXdpZHRoPSIxIiByeD0iMyIvPgo8dGV4dCB4PSIyMiIgeT0iMjUzIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+U19iYXIgJmx0Oz0gMjUgKHNvbWUgY29udHJvbCk8L3RleHQ+CjxyZWN0IHg9IjI3NiIgeT0iMjM4IiB3aWR0aD0iODQiIGhlaWdodD0iMjIiIGZpbGw9IiNlZmVjZTUiIHN0cm9rZT0iI2JiYjNhNSIgc3Ryb2tlLXdpZHRoPSIxIiByeD0iMyIvPgo8dGV4dCB4PSIyODIiIHk9IjI1MyIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEwIiBmaWxsPSIjMWMxYjE5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPjkyODwvdGV4dD4KPHJlY3QgeD0iMzY2IiB5PSIyMzgiIHdpZHRoPSIyNzQiIGhlaWdodD0iMjIiIGZpbGw9IiNlZmVjZTUiIHN0cm9rZT0iI2JiYjNhNSIgc3Ryb2tlLXdpZHRoPSIxIiByeD0iMyIvPgo8dGV4dCB4PSIzNzIiIHk9IjI1MyIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEwIiBmaWxsPSIjMWMxYjE5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPkNvbGxlY3QgNzQlOyBob2xkIDklOyBleGl0IDE4JTwvdGV4dD4KPHJlY3QgeD0iMTYiIHk9IjI2MiIgd2lkdGg9IjI1NCIgaGVpZ2h0PSIyMiIgZmlsbD0iI2ZmZiIgc3Ryb2tlPSIjYmJiM2E1IiBzdHJva2Utd2lkdGg9IjEiIHJ4PSIzIi8+Cjx0ZXh0IHg9IjIyIiB5PSIyNzciIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5BbGwgZmFpbHVyZXM8L3RleHQ+CjxyZWN0IHg9IjI3NiIgeT0iMjYyIiB3aWR0aD0iODQiIGhlaWdodD0iMjIiIGZpbGw9IiNmZmYiIHN0cm9rZT0iI2JiYjNhNSIgc3Ryb2tlLXdpZHRoPSIxIiByeD0iMyIvPgo8dGV4dCB4PSIyODIiIHk9IjI3NyIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEwIiBmaWxsPSIjMWMxYjE5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPjMsMDg5PC90ZXh0Pgo8cmVjdCB4PSIzNjYiIHk9IjI2MiIgd2lkdGg9IjI3NCIgaGVpZ2h0PSIyMiIgZmlsbD0iI2ZmZiIgc3Ryb2tlPSIjYmJiM2E1IiBzdHJva2Utd2lkdGg9IjEiIHJ4PSIzIi8+Cjx0ZXh0IHg9IjM3MiIgeT0iMjc3IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+Q29sbGVjdCA5MCU8L3RleHQ+Cjx0ZXh0IHg9IjE2IiB5PSIzMDAiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iI2I0NTMwOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5TZW5zaXRpdml0eTogbG93ZXIgc2hlZXAgUnJlcCAzLjAgdG8gMi41IChUYWJsZSBJWCk8L3RleHQ+Cjx0ZXh0IHg9IjE2IiB5PSIzMjIiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzVjNTg1MiIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5DZWxsICAgICAgICAgIEJlZm9yZSAgICAgQWZ0ZXI8L3RleHQ+Cjx0ZXh0IHg9IjE2IiB5PSIzNDAiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5EPTYsIE49NDAwPC90ZXh0Pgo8dGV4dCB4PSIxNjAiIHk9IjM0MCIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjOWIyYzJjIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPjAlPC90ZXh0Pgo8dGV4dCB4PSIyMzAiIHk9IjM0MCIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEyIiBmaWxsPSIjNWM1ODUyIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPi0mZ3Q7PC90ZXh0Pgo8dGV4dCB4PSIyNjAiIHk9IjM0MCIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMmY2YjQ1IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPjkyJTwvdGV4dD4KPHRleHQgeD0iMTYiIHk9IjM2MiIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEyIiBmaWxsPSIjMWMxYjE5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPkQ9MywgTj0yNTA8L3RleHQ+Cjx0ZXh0IHg9IjE2MCIgeT0iMzYyIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiM5YjJjMmMiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+NSU8L3RleHQ+Cjx0ZXh0IHg9IjIzMCIgeT0iMzYyIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM1YzU4NTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+LSZndDs8L3RleHQ+Cjx0ZXh0IHg9IjI2MCIgeT0iMzYyIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMyZjZiNDUiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+MTAwJTwvdGV4dD4KPHRleHQgeD0iNDAwIiB5PSIzMDAiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzJmNmI0NSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5EZW5zaXR5IGdyYWRpZW50IHZzIHRydWUgR0NNIChSUTM7IH44ME0gb2JzOyBUYWJsZSBYKTwvdGV4dD4KPHRleHQgeD0iNDAwIiB5PSIzMjIiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj4tIE4gJmd0Oz0gMTAwOiBtZWFuIGFuZ3VsYXIgZXJyb3IgfjE4IHRvIDIyIGRlZzwvdGV4dD4KPHRleHQgeD0iNDAwIiB5PSIzNDIiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj4tIENvcnJlY3Qgc2VjdG9yIG9mdGVuICZndDs9IDY1JTsgY29ycmVjdCBvciBhZGphY2VudCAmZ3Q7PSA4NyU8L3RleHQ+Cjx0ZXh0IHg9IjQwMCIgeT0iMzYyIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+LSBXb3JzZSBhdCB2ZXJ5IHNtYWxsIG9yIHZlcnkgbGFyZ2UgTiAoc3BhcnNlIC8gdmlzaW9uIGxpbWl0cyk8L3RleHQ+Cjx0ZXh0IHg9IjE2IiB5PSI0MTgiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzVjNTg1MiIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5UaGVzZSBhcmUgZHJhZnQgZmluZGluZ3MuIEhlcmRTaW0gZGlkIG5vdCByZS1ydW4gdGhlc2UgTmV0TG9nbyBhbmFseXNlcy48L3RleHQ+Cjwvc3ZnPg=="/></figure>
+<h2 id="why-the-outcomes-may-differ">Why the outcomes may differ</h2>
+<p>Plausible differences include the draft&#x27;s hold and gate phases, scattered initial sheep, corner-starting dogs, containment geometry, and controller details. HerdSim uses a shorter open-interior drive with dogs already behind the flock. This is interpretation only. No controlled component-swap study isolated any one cause.</p>
+<p>Consequently, &quot;not reproduced&quot; means that the outcome did not appear under HerdSim&#x27;s different protocol. It does not establish that the draft result is erroneous.</p>
+<h2 id="what-was-and-was-not-rerun">What was and was not rerun</h2>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Item</th>
+<th>Status</th>
+</tr></thead><tbody>
+<tr>
+<td>HerdSim Phases 1, 2, and 4 claim outputs</td>
+<td>Run and used for current claims</td>
+</tr>
+<tr>
+<td>2025 draft 11,000-cell experiment</td>
+<td>Not rerun</td>
+</tr>
+<tr>
+<td>Draft sensitivity cells</td>
+<td>Not rerun</td>
+</tr>
+<tr>
+<td>Draft density-gradient analysis</td>
+<td>Not rerun</td>
+</tr>
+<tr>
+<td>Draft spread classifiers and correlations</td>
+<td>Not rerun</td>
+</tr>
+<tr>
+<td>Draft model as a bundled twin</td>
+<td>No, it is not in <code>twins.json</code></td>
+</tr>
+<tr>
+<td>Controlled protocol swaps between draft and HerdSim</td>
+<td>Not run</td>
+</tr>
+</tbody></table></div>
+<h2 id="citation-and-provenance">Citation and provenance</h2>
+<p>Primary draft source:</p>
+<p><em>Collective Nudging that Scales. How many dogs do I need to herd sheep?</em> Draft, approximately 2025, placeholder author lines. Repository copy: <a href="../../../docs/papers/sheep-scaling_paper2025.pdf">PDF</a>.</p>
+<p>Repository interpretation aids:</p>
+<ul>
+<li><a href="../notes/sheep-scaling_paper2025.md">Draft reference note</a></li>
+<li><a href="../../results/summary/SUMMARY_REPORT.html">Current English summary</a></li>
+<li><a href="../../results/summary/SUMMARY_REPORT_vi.html">Current Vietnamese summary</a></li>
+<li><a href="validation_and_netlogo.html">Validation and NetLogo boundaries</a></li>
+</ul>
+</main>
+</div>
+<footer><p>Markdown source: <code>draft_comparison.md</code>. Images are embedded for portable reading.</p></footer>
+</body>
+</html>

@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang='vi'>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Bang thuat ngu</title>
+<meta name='description' content='Tai lieu HerdSim de doc va dieu huong.'>
+<style>
+:root{--ink:#111827;--mut:#6b7280;--line:#e5e7eb;--acc:#2563eb;--bg:#f9fafb}
+*{box-sizing:border-box}body{margin:0;font:16px/1.65 -apple-system,'Segoe UI',Inter,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+header{background:linear-gradient(120deg,#1e3a8a,#0f766e);color:#fff;padding:48px 24px}
+header .in,main{max-width:1000px;margin:auto}header h1{margin:0 0 8px;font-size:2rem}header p{margin:0;opacity:.9;max-width:46rem}
+.chrome{max-width:1280px;margin:auto;padding:12px 24px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.chrome a{color:var(--acc);text-decoration:none}.chrome a:hover,.chrome a:focus{text-decoration:underline}
+.crumbs,.page-nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.sep{color:var(--mut)}
+.layout{display:grid;grid-template-columns:230px 1fr;gap:32px;max-width:1280px;margin:0 auto;padding:24px}
+nav{position:sticky;top:16px;align-self:start;font-size:.88rem;max-height:calc(100vh - 32px);overflow:auto}
+nav a{display:block;padding:5px 10px;color:var(--mut);text-decoration:none;border-left:2px solid var(--line)}
+nav a:hover,nav a:focus{color:var(--acc);border-color:var(--acc)}
+main{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 40px 40px;min-width:0}
+h2{margin-top:2.2em;padding-bottom:6px;border-bottom:2px solid var(--line);scroll-margin-top:16px}
+h2:first-child{margin-top:1.2em}
+h3{margin-top:1.6em;color:#1e3a8a}
+h4{margin:1.35em 0 .55em;font-size:1.02rem;font-weight:700;color:#334155}
+blockquote{margin:1em 0;padding:14px 18px;border-left:4px solid #0f766e;background:#f0fdfa;border-radius:0 8px 8px 0;color:#134e4a;font-size:1.05rem;font-weight:600;line-height:1.55}
+blockquote p{margin:0}
+code{background:#eef2ff;border-radius:4px;padding:1px 5px;font-size:.88em;word-break:break-word}
+a{color:var(--acc)}
+figure{margin:24px 0;text-align:center}figure img{max-width:100%;border:1px solid var(--line);border-radius:8px;background:#fff}
+figcaption{font-size:.88rem;color:var(--mut);margin-top:6px;text-align:left}
+table{border-collapse:collapse;width:100%;font-size:.9rem;margin:8px 0}
+.table-wrap{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+/* First col hugs content (short IDs); badges with nowrap still expand as needed. */
+th:first-child,td:first-child{width:1%;white-space:nowrap;min-width:3.25rem}
+/* Phase/package-style third column needs room on RQ tables. */
+th:nth-child(3),td:nth-child(3){min-width:10.5rem}
+th{background:#f3f4f6}caption{caption-side:bottom;font-size:.85rem;color:var(--mut);padding:6px;text-align:left}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.78rem;font-weight:600;white-space:nowrap}
+.REJECTED,.BI_BAC_BO,.NOT_REPRODUCED,.KHONG_TAI_HIEN{background:#fee2e2;color:#991b1b}
+.SUPPORTED,.DUOC_UNG_HO,.OK,.DUNG,.READY,.SAN_DUNG,.D_MIN_1{background:#dcfce7;color:#166534}
+.INCONCLUSIVE,.EVALUATED,.KHONG_RO_RANG,.DA_DANH_GIA,.WEAK,.YEU,.UNVERIFIED,.CHUA_XAC_NHAN,.PARTIAL,.MOT_PHAN,.COST_ONLY,.CHI_CHI_PHI{background:#fef3c7;color:#92400e}
+.SKIPPED,.UNEVALUATED,.BO_QUA,.CHUA_DANH_GIA,.NOT_RUN,.CHUA_CHAY,.WASTE,.LANG_PHI{background:#ffedd5;color:#9a3412}
+.NEEDS_RUN,.CAN_CHAY,.STALE,.LOI_THOI{background:#ffedd5;color:#9a3412}
+.kpi-note{background:#eff6ff;border-left:4px solid #2563eb;padding:10px 14px;margin:12px 0;border-radius:0 8px 8px 0;font-size:.95rem}
+ul{padding-left:1.2em}li{margin:6px 0}
+footer{max-width:1280px;margin:0 auto 32px;padding:0 24px;color:var(--mut);font-size:.85rem}
+.missing{border:1px solid #b91c1c;background:#fef2f2;color:#991b1b;padding:10px;border-radius:6px}
+pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8px}pre code{background:transparent;padding:0;color:inherit}
+@media(max-width:900px){.layout{grid-template-columns:1fr}nav{display:none}main{padding:8px 18px 30px}header{padding:32px 18px}header h1{font-size:1.55rem}.chrome{padding:10px 18px}}
+</style>
+</head>
+<body>
+<div class='chrome'><div class='crumbs'><a href="../INDEX_vi.html">Trang chu</a><span class="sep">/</span><span>Setup</span><span class="sep">/</span><span>Bang thuat ngu</span></div><div class='page-nav'><a rel="prev" href="parameter_reference_vi.html">Truoc</a><span class="sep">|</span><a rel="next" href="run_guide_vi.html">Sau</a><span class="sep">|</span><a href="glossary.html">English</a></div></div>
+<header><div class='in'><h1>Bang thuat ngu</h1><p>Tai lieu HerdSim de doc va dieu huong.</p></div></header>
+<div class='layout'>
+<nav><a href="#failure-label">Failure label</a><a href="#ten-controller">Ten controller</a></nav>
+<main>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Thuat ngu</th>
+<th>Dinh nghia</th>
+</tr></thead><tbody>
+<tr>
+<td>B*</td>
+<td><code>(D, T)</code> tin cay co median tong path cua cho nho nhat; hoa thi D nho hon, roi finish nhanh hon</td>
+</tr>
+<tr>
+<td>C, coverage</td>
+<td>Ti le cuu peripheral nam trong influence radius</td>
+</tr>
+<tr>
+<td>cell</td>
+<td>Mot to hop co dinh cua method, layout, N, D, va information factor, lap qua cac seed</td>
+</tr>
+<tr>
+<td>CLAIM</td>
+<td>Grade chinh xac, thuong 100 seed tai cell da lap ke hoach</td>
+</tr>
+<tr>
+<td>cohesion</td>
+<td>Trung binh khoang cach cuu toi GCM</td>
+</tr>
+<tr>
+<td>D</td>
+<td>So cho hoac shepherd</td>
+</tr>
+<tr>
+<td>luoi D</td>
+<td><code>{1, 2, 3, 4, 6, 10, 15, 20, 25, 35}</code></td>
+</tr>
+<tr>
+<td>D_max</td>
+<td>D tin cay cuoi truoc overcrowding, hoac tran luoi khi chua thay collapse</td>
+</tr>
+<tr>
+<td>D_min</td>
+<td>D nho nhat co R dat theta</td>
+</tr>
+<tr>
+<td>D_overcrowd</td>
+<td>Phan tu dau cua hai D lien tiep sau D_min deu duoi theta</td>
+</tr>
+<tr>
+<td>efficient</td>
+<td>Cell tin cay co median path duoi wasteful threshold</td>
+</tr>
+<tr>
+<td>extent</td>
+<td>RMS distance cua cuu toi centroid</td>
+</tr>
+<tr>
+<td>finish time, <code>t_s</code></td>
+<td>Tick dau tien moi cuu nam trong dich</td>
+</tr>
+<tr>
+<td>fragmentation</td>
+<td>Largest connected component radius 5 chia N</td>
+</tr>
+<tr>
+<td>GCM</td>
+<td>Tam khoi hinh hoc cua dan</td>
+</tr>
+<tr>
+<td>grade</td>
+<td>Cap evidence: SMOKE, SCOUT, CLAIM, hoac T1 co dieu kien</td>
+</tr>
+<tr>
+<td>grid ceiling</td>
+<td>D = 35, gia tri lon nhat da thu; khong phai gioi han vat ly</td>
+</tr>
+<tr>
+<td>hard failure</td>
+<td>Khong D nao tren luoi dat theta</td>
+</tr>
+<tr>
+<td>hull area</td>
+<td>Dien tich convex hull cua cuu</td>
+</tr>
+<tr>
+<td>I</td>
+<td>Information condition</td>
+</tr>
+<tr>
+<td><code>I_dir</code></td>
+<td>Xung dot huong cua cho dang di; 0 cung huong, 1 triet tieu</td>
+</tr>
+<tr>
+<td>layout, X0</td>
+<td>Bo tri ban dau: compact, wide, split, outlier-rich</td>
+</tr>
+<tr>
+<td>m, method</td>
+<td>Controller cua cho</td>
+</tr>
+<tr>
+<td>manifest</td>
+<td><code>manifest.jsonl</code>, ledger dung de bo qua trial key da xong khi resume</td>
+</tr>
+<tr>
+<td>mean spread</td>
+<td>Diem spread export cho layout va prediction</td>
+</tr>
+<tr>
+<td>merged trials</td>
+<td>Row claim tai cell gieo lai cong row scout tai cell con lai</td>
+</tr>
+<tr>
+<td>N</td>
+<td>So cuu</td>
+</tr>
+<tr>
+<td>luoi N</td>
+<td><code>{5, 10, 25, 50, 75, 100, 150, 200, 300, 400}</code></td>
+</tr>
+<tr>
+<td>overcrowding collapse</td>
+<td>Cell khong tin cay tai hoac sau D_overcrowd</td>
+</tr>
+<tr>
+<td>path, <code>shepherd_path</code></td>
+<td>Tong Euclidean travel cua moi cho</td>
+</tr>
+<tr>
+<td>path moi cho</td>
+<td>Tong path chia D</td>
+</tr>
+<tr>
+<td>perimeter</td>
+<td>Chu vi convex hull</td>
+</tr>
+<tr>
+<td>Pilot, SMOKE</td>
+<td>Kiem tra pipeline nho, khong dung cho claim</td>
+</tr>
+<tr>
+<td>protocol</td>
+<td>Recipe da resolve cho factor, seed, grade, output, va canonical setting</td>
+</tr>
+<tr>
+<td>provenance</td>
+<td>Record may-doc cua protocol, seed, code state, host, metric, timestamp</td>
+</tr>
+<tr>
+<td>R</td>
+<td>Ti le seed thanh cong truoc deadline</td>
+</tr>
+<tr>
+<td>regime</td>
+<td>under-resourced, efficient, wasteful, overcrowding, hoac hard failure</td>
+</tr>
+<tr>
+<td>SCOUT</td>
+<td>Map rong 30 seed chi dung lap ke hoach va chan doan</td>
+</tr>
+<tr>
+<td>seed</td>
+<td>Mot lan lap ngau nhien doc lap; danh sach goc bat dau tu 2026</td>
+</tr>
+<tr>
+<td>success</td>
+<td>Moi cuu vao dia dich truoc deadline</td>
+</tr>
+<tr>
+<td>T0</td>
+<td>Deadline chinh 10,000 tick</td>
+</tr>
+<tr>
+<td>T1</td>
+<td>Deadline 20,000 tick chi cho overcrowding</td>
+</tr>
+<tr>
+<td>theta</td>
+<td>Nguong reliability 0.90; sensitivity 0.50 va 0.70</td>
+</tr>
+<tr>
+<td>tick</td>
+<td>Mot update roi rac, khong phai giay dong ho</td>
+</tr>
+<tr>
+<td>timeseries</td>
+<td>Lich su Parquet theo trial cho trajectory va early warning</td>
+</tr>
+<tr>
+<td>under-resourced</td>
+<td>R duoi theta truoc working band</td>
+</tr>
+<tr>
+<td>wasteful</td>
+<td>Cell tin cay co median path vuot B* theo tolerance</td>
+</tr>
+<tr>
+<td>X0</td>
+<td>Ho layout ban dau</td>
+</tr>
+</tbody></table></div>
+<h2 id="failure-label">Failure label</h2>
+<p>Trial that bai co the nhan label phan tich <code>stacking</code>, <code>split</code>, <code>scatter</code>, <code>oscillation</code>, <code>stuck</code>, hoac <code>timeout</code>. Label heuristic nay khong thay doi success nhi phan.</p>
+<h2 id="ten-controller">Ten controller</h2>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Ten</th>
+<th>Mo ta ngan</th>
+</tr></thead><tbody>
+<tr>
+<td><code>strombom_multi</code></td>
+<td>Baseline collect/drive nhieu cho co phoi hop</td>
+</tr>
+<tr>
+<td><code>kubo</code></td>
+<td>Controller force cuc bo co sensing va tich phan</td>
+</tr>
+<tr>
+<td><code>fat</code></td>
+<td>Cuu Strombom va target xa tung cho nhat</td>
+</tr>
+<tr>
+<td><code>communication_free</code></td>
+<td>Controller transfer khuyen nghi, ngoai tap bat buoc ba method</td>
+</tr>
+</tbody></table></div>
+</main>
+</div>
+<footer><p>Nguon Markdown: <code>glossary_vi.md</code>. Hinh anh duoc nhung de doc ngoai tuyen.</p></footer>
+</body>
+</html>

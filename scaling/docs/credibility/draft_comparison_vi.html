@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang='vi'>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Doi chieu ban thao 2025 va HerdSim</title>
+<meta name='description' content='Tai lieu HerdSim de doc va dieu huong.'>
+<style>
+:root{--ink:#111827;--mut:#6b7280;--line:#e5e7eb;--acc:#2563eb;--bg:#f9fafb}
+*{box-sizing:border-box}body{margin:0;font:16px/1.65 -apple-system,'Segoe UI',Inter,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+header{background:linear-gradient(120deg,#1e3a8a,#0f766e);color:#fff;padding:48px 24px}
+header .in,main{max-width:1000px;margin:auto}header h1{margin:0 0 8px;font-size:2rem}header p{margin:0;opacity:.9;max-width:46rem}
+.chrome{max-width:1280px;margin:auto;padding:12px 24px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.chrome a{color:var(--acc);text-decoration:none}.chrome a:hover,.chrome a:focus{text-decoration:underline}
+.crumbs,.page-nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.sep{color:var(--mut)}
+.layout{display:grid;grid-template-columns:230px 1fr;gap:32px;max-width:1280px;margin:0 auto;padding:24px}
+nav{position:sticky;top:16px;align-self:start;font-size:.88rem;max-height:calc(100vh - 32px);overflow:auto}
+nav a{display:block;padding:5px 10px;color:var(--mut);text-decoration:none;border-left:2px solid var(--line)}
+nav a:hover,nav a:focus{color:var(--acc);border-color:var(--acc)}
+main{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 40px 40px;min-width:0}
+h2{margin-top:2.2em;padding-bottom:6px;border-bottom:2px solid var(--line);scroll-margin-top:16px}
+h2:first-child{margin-top:1.2em}
+h3{margin-top:1.6em;color:#1e3a8a}
+h4{margin:1.35em 0 .55em;font-size:1.02rem;font-weight:700;color:#334155}
+blockquote{margin:1em 0;padding:14px 18px;border-left:4px solid #0f766e;background:#f0fdfa;border-radius:0 8px 8px 0;color:#134e4a;font-size:1.05rem;font-weight:600;line-height:1.55}
+blockquote p{margin:0}
+code{background:#eef2ff;border-radius:4px;padding:1px 5px;font-size:.88em;word-break:break-word}
+a{color:var(--acc)}
+figure{margin:24px 0;text-align:center}figure img{max-width:100%;border:1px solid var(--line);border-radius:8px;background:#fff}
+figcaption{font-size:.88rem;color:var(--mut);margin-top:6px;text-align:left}
+table{border-collapse:collapse;width:100%;font-size:.9rem;margin:8px 0}
+.table-wrap{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+/* First col hugs content (short IDs); badges with nowrap still expand as needed. */
+th:first-child,td:first-child{width:1%;white-space:nowrap;min-width:3.25rem}
+/* Phase/package-style third column needs room on RQ tables. */
+th:nth-child(3),td:nth-child(3){min-width:10.5rem}
+th{background:#f3f4f6}caption{caption-side:bottom;font-size:.85rem;color:var(--mut);padding:6px;text-align:left}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.78rem;font-weight:600;white-space:nowrap}
+.REJECTED,.BI_BAC_BO,.NOT_REPRODUCED,.KHONG_TAI_HIEN{background:#fee2e2;color:#991b1b}
+.SUPPORTED,.DUOC_UNG_HO,.OK,.DUNG,.READY,.SAN_DUNG,.D_MIN_1{background:#dcfce7;color:#166534}
+.INCONCLUSIVE,.EVALUATED,.KHONG_RO_RANG,.DA_DANH_GIA,.WEAK,.YEU,.UNVERIFIED,.CHUA_XAC_NHAN,.PARTIAL,.MOT_PHAN,.COST_ONLY,.CHI_CHI_PHI{background:#fef3c7;color:#92400e}
+.SKIPPED,.UNEVALUATED,.BO_QUA,.CHUA_DANH_GIA,.NOT_RUN,.CHUA_CHAY,.WASTE,.LANG_PHI{background:#ffedd5;color:#9a3412}
+.NEEDS_RUN,.CAN_CHAY,.STALE,.LOI_THOI{background:#ffedd5;color:#9a3412}
+.kpi-note{background:#eff6ff;border-left:4px solid #2563eb;padding:10px 14px;margin:12px 0;border-radius:0 8px 8px 0;font-size:.95rem}
+ul{padding-left:1.2em}li{margin:6px 0}
+footer{max-width:1280px;margin:0 auto 32px;padding:0 24px;color:var(--mut);font-size:.85rem}
+.missing{border:1px solid #b91c1c;background:#fef2f2;color:#991b1b;padding:10px;border-radius:6px}
+pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8px}pre code{background:transparent;padding:0;color:inherit}
+@media(max-width:900px){.layout{grid-template-columns:1fr}nav{display:none}main{padding:8px 18px 30px}header{padding:32px 18px}header h1{font-size:1.55rem}.chrome{padding:10px 18px}}
+</style>
+</head>
+<body>
+<div class='chrome'><div class='crumbs'><a href="../INDEX_vi.html">Trang chu</a><span class="sep">/</span><span>Credibility</span><span class="sep">/</span><span>Doi chieu ban thao 2025 va HerdSim</span></div><div class='page-nav'><a rel="prev" href="README_vi.html">Truoc</a><span class="sep">|</span><a rel="next" href="validation_and_netlogo_vi.html">Sau</a><span class="sep">|</span><a href="draft_comparison.html">English</a></div></div>
+<header><div class='in'><h1>Doi chieu ban thao 2025 va HerdSim</h1><p>Tai lieu HerdSim de doc va dieu huong.</p></div></header>
+<div class='layout'>
+<nav><a href="#trang-thai-doi-chieu">Trang thai doi chieu</a><a href="#doi-chieu-giao-thuc">Doi chieu giao thuc</a><a href="#ket-qua-ban-thao-duoc-bao-cao">Ket qua ban thao duoc bao cao</a><a href="#ket-qua-herdsim-dung-de-doi-chieu">Ket qua HerdSim dung de doi chieu</a><a href="#vi-sao-ket-qua-co-the-khac">Vi sao ket qua co the khac</a><a href="#da-chay-va-chua-chay-lai">Da chay va chua chay lai</a><a href="#trich-dan-va-nguon-goc">Trich dan va nguon goc</a></nav>
+<main>
+<h2 id="trang-thai-doi-chieu">Trang thai doi chieu</h2>
+<p>Ban thao 2025, <em>Collective Nudging that Scales. How many dogs do I need to herd sheep?</em>, bao cao mot nghien cuu NetLogo 7.0.3. HerdSim <code>scaling_v2</code> la mot nghien cuu mo phong Python rieng. Hai nghien cuu chia se cau hoi rong, luoi so cho, han 10,000 tick, va nguong tin cay 90%. Chung khong chia se cung nhiem vu, san, khoi tao, bo dieu khien, hoac dinh nghia bien.</p>
+<p>Ban thao khong duoc chay lai trong HerdSim hoac NetLogo trong chuong trinh hien tai. Gia tri ban thao ben duoi duoc chep tu PDF va ghi chu trong kho. Gia tri HerdSim den tu du lieu tang claim. Day la doi chieu ket qua giua hai giao thuc, khong phai kiem tra tai lap.</p>
+<figure><img alt="Ban thao gom, giu, ra cong so voi HerdSim lua vao dich." src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3MjAiIGhlaWdodD0iMjgwIiB2aWV3Qm94PSIwIDAgNzIwIDI4MCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJiYW4gdGhhbyB2cyBIZXJkU2ltIj4KPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjcyMCIgaGVpZ2h0PSIyODAiIGZpbGw9IiNmN2Y2ZjIiLz4KPHRleHQgeD0iMTYiIHk9IjI0IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTQiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+Tmhp4buHbSB24bulIGLhuqNuIHRo4bqjbyBzbyB24bubaSBIZXJkU2ltICh2w6wgc2FvIGvhur90IHF14bqjIGPDsyB0aOG7gyBs4buHY2gpPC90ZXh0Pgo8cmVjdCB4PSIzMCIgeT0iNDQiIHdpZHRoPSIzMDAiIGhlaWdodD0iMTkwIiBmaWxsPSIjZmZmIiBzdHJva2U9IiNiNDUzMDkiIHN0cm9rZS13aWR0aD0iMiIgcng9IjEwIi8+CjxyZWN0IHg9IjM5MCIgeT0iNDQiIHdpZHRoPSIzMDAiIGhlaWdodD0iMTkwIiBmaWxsPSIjZmZmIiBzdHJva2U9IiMxZjRlNzkiIHN0cm9rZS13aWR0aD0iMiIgcng9IjEwIi8+Cjx0ZXh0IHg9IjE4MCIgeT0iNzIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTMiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiNiNDUzMDkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+QuG6o24gdGjhuqNvIDIwMjUgKE5ldExvZ28pPC90ZXh0Pgo8dGV4dCB4PSI1NDAiIHk9IjcyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjEzIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMWY0ZTc5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPkhlcmRTaW0gKG5naGnDqm4gY+G7qXUgbsOgeSk8L3RleHQ+Cjx0ZXh0IHg9IjUwIiB5PSIxMDUiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj4xLiBHb208L3RleHQ+Cjx0ZXh0IHg9IjUwIiB5PSIxMjkiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj4yLiBHaeG7ryA4MDAgYsaw4bubYzwvdGV4dD4KPHRleHQgeD0iNTAiIHk9IjE1MyIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEyIiBmaWxsPSIjMWMxYjE5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPjMuIFRob8OhdCBj4buVbmc8L3RleHQ+Cjx0ZXh0IHg9IjUwIiB5PSIxNzciIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5YdeG6pXQgcGjDoXQ6IHLhuqNpIG5n4bqrdSBuaGnDqm48L3RleHQ+Cjx0ZXh0IHg9IjUwIiB5PSIyMDEiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5DaMOzOiBnw7NjIHRyw6puIHRyw6FpPC90ZXh0Pgo8dGV4dCB4PSI0MTAiIHk9IjEwNSIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEyIiBmaWxsPSIjMWMxYjE5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPjEuIEzDuWEgdsOgbyDEkcSpYSDEkcOtY2g8L3RleHQ+Cjx0ZXh0IHg9IjQxMCIgeT0iMTI5IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+KGtow7RuZyBnaeG7ryAvIGtow7RuZyBj4buVbmcpPC90ZXh0Pgo8dGV4dCB4PSI0MTAiIHk9IjE3NyIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEyIiBmaWxsPSIjMWMxYjE5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPlh14bqldCBwaMOhdDogYuG7kSBj4bulYyBraeG7g20gc2/DoXQ8L3RleHQ+Cjx0ZXh0IHg9IjQxMCIgeT0iMjAxIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+Q2jDszogc2F1IMSRw6BuPC90ZXh0Pgo8dGV4dCB4PSIzNjAiIHk9IjE0MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxNiIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzVjNTg1MiIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj52czwvdGV4dD4KPHRleHQgeD0iMTYiIHk9IjI2NiIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjExIiBmaWxsPSIjNWM1ODUyIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPkPDuW5nIGjhu40gY8OidSBo4buPaSAoRCB0aGVvIE4sIFNSICZndDs9IDkwJSksIGtow6FjIG5oaeG7h20gduG7pSB2w6AgeHXhuqV0IHBow6F0LjwvdGV4dD4KPC9zdmc+"/></figure>
+<h2 id="doi-chieu-giao-thuc">Doi chieu giao thuc</h2>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Muc</th>
+<th>Ban thao 2025</th>
+<th>HerdSim <code>scaling_v2</code></th>
+</tr></thead><tbody>
+<tr>
+<td>Dong co</td>
+<td>NetLogo 7.0.3 tren luoi patch</td>
+<td>HerdSim trong khong gian lien tuc voi tick roi rac</td>
+</tr>
+<tr>
+<td>Nhiem vu</td>
+<td>Gom, giu 800 tick, roi dua qua cong</td>
+<td><code>drive_to_goal</code>, moi cuu nam trong dia dich</td>
+</tr>
+<tr>
+<td>Thanh cong</td>
+<td>Moi cuu qua cong truoc 10,000 tick</td>
+<td>Ti le trong dia dich dat 1.0 truoc T0 = 10,000</td>
+</tr>
+<tr>
+<td>San</td>
+<td>101 x 71 patch, vung giu o tam, cong tren tuong phai</td>
+<td>San 500 x 500, dan tai (250, 250), dich tai (370, 250)</td>
+</tr>
+<tr>
+<td>Vung giu hoac dich</td>
+<td><code>rc = clamp(2.5 * sqrt(N), 23, 27)</code></td>
+<td>Ban kinh <code>15 * sqrt(N/50)</code></td>
+</tr>
+<tr>
+<td>Khoi tao cuu</td>
+<td>Rai ngau nhien, co dem voi tuong va cho</td>
+<td>Cac ho <code>compact</code>, <code>wide</code>, <code>split</code>, va <code>outlier_rich</code> duoc kiem soat</td>
+</tr>
+<tr>
+<td>Khoi tao cho</td>
+<td>Luoi tai goc tren trai</td>
+<td>Sau dan, doi dien dich, lech 50 voi nhieu <code>+/-5</code></td>
+</tr>
+<tr>
+<td>Bo dieu khien</td>
+<td>Mot ho NetLogo gom, lua, va tuan tra</td>
+<td>Co so <code>strombom_multi</code>; chuyen giao <code>kubo</code> va <code>fat</code></td>
+</tr>
+<tr>
+<td>Luoi D</td>
+<td><code>{1, 2, 3, 4, 6, 10, 15, 20, 25, 35}</code></td>
+<td>Giong</td>
+</tr>
+<tr>
+<td>Luoi N</td>
+<td><code>{5, 10, 25, 50, 100, 150, 200, 250, 300, 350, 400}</code></td>
+<td><code>{5, 10, 25, 50, 75, 100, 150, 200, 300, 400}</code></td>
+</tr>
+<tr>
+<td>Lay mau</td>
+<td>100 lan moi o, tong 11,000</td>
+<td>Scout 30 moi o; claim thuong gieo lai 100 tren cua so da chon</td>
+</tr>
+<tr>
+<td>Seed</td>
+<td>Seed goc khong neu trong ghi chu</td>
+<td>Seed goc 2026; seed thu nghiem <code>2026 + i</code></td>
+</tr>
+<tr>
+<td>Tin cay</td>
+<td>SR &gt;= 90%</td>
+<td>R &gt;= theta, voi theta = 0.90 cho bien claim</td>
+</tr>
+<tr>
+<td>D_min</td>
+<td>D nho nhat co SR &gt;= 90%</td>
+<td>D da thu nho nhat co R &gt;= theta</td>
+</tr>
+<tr>
+<td>D_overcrowd</td>
+<td>D dau tien tren D_min noi SR bat dau giam</td>
+<td>Dau cua hai D lien tiep duoi theta sau D_min</td>
+</tr>
+<tr>
+<td>D_max</td>
+<td>D dau tien tren D_min co SR &lt; 90%, neu khong thi tran</td>
+<td>D tin cay lon nhat truoc D_overcrowd; neu khong thi tran luoi 35</td>
+</tr>
+<tr>
+<td>Bat dinh</td>
+<td>Khong bao cao khoang nhi thuc hoac bootstrap D_min</td>
+<td>1,000 bootstrap seed cho D_min</td>
+</tr>
+<tr>
+<td>Cau truc</td>
+<td>Do rai phat sinh, tom tat bang <code>S_bar</code></td>
+<td>Bo cuc khoi tao kiem soat, cohesion, fragmentation, va mean spread</td>
+</tr>
+<tr>
+<td>Chi so</td>
+<td>Thanh cong, tick, pha, spread, path, va cuu lac</td>
+<td>Thanh cong, tick, path, cohesion, fragmentation, spread, interference, va nhan that bai</td>
+</tr>
+</tbody></table></div>
+<figure><img alt="Cac pha nhiem vu ban thao duoc bao cao." src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3NDAiIGhlaWdodD0iMzQwIiB2aWV3Qm94PSIwIDAgNzQwIDM0MCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJiYSBwaGEgYmFuIHRoYW8iPgo8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iNzQwIiBoZWlnaHQ9IjM0MCIgZmlsbD0iI2Y3ZjZmMiIvPgo8dGV4dCB4PSIxNiIgeT0iMjQiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5OaGnhu4dtIHbhu6UgYuG6o24gdGjhuqNvIDIwMjU6IGJhIHBoYSB0csOqbiBzw6JuIGzGsOG7m2kgTmV0TG9nbzwvdGV4dD4KPHJlY3QgeD0iMTYiIHk9IjQwIiB3aWR0aD0iMjMwIiBoZWlnaHQ9Ijc4IiBmaWxsPSIjZmZmIiBzdHJva2U9IiNiNDUzMDkiIHN0cm9rZS13aWR0aD0iMiIgcng9IjEwIi8+Cjx0ZXh0IHg9IjMwIiB5PSI2NCIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEzIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjYjQ1MzA5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPjEuIEdvbTwvdGV4dD4KPHRleHQgeD0iMzAiIHk9Ijg2IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM1YzU4NTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+UuG6o2kgLSZndDsgxJHDoG4gY2jhurd0PC90ZXh0Pgo8dGV4dCB4PSIzMCIgeT0iMTAyIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM1YzU4NTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+dsOgbyB2w7luZyBjaOG7qWE8L3RleHQ+Cjx0ZXh0IHg9IjI1NCIgeT0iODAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMjIiIGZpbGw9IiM1YzU4NTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+4oaSPC90ZXh0Pgo8cmVjdCB4PSIyNjEiIHk9IjQwIiB3aWR0aD0iMjMwIiBoZWlnaHQ9Ijc4IiBmaWxsPSIjZmZmIiBzdHJva2U9IiM3YjFmYTIiIHN0cm9rZS13aWR0aD0iMiIgcng9IjEwIi8+Cjx0ZXh0IHg9IjI3NSIgeT0iNjQiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMyIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzdiMWZhMiIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj4yLiBHaeG7rzwvdGV4dD4KPHRleHQgeD0iMjc1IiB5PSI4NiIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEyIiBmaWxsPSIjNWM1ODUyIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPkdp4buvIHRyb25nIHbDuW5nPC90ZXh0Pgo8dGV4dCB4PSIyNzUiIHk9IjEwMiIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEyIiBmaWxsPSIjNWM1ODUyIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPjgwMCBixrDhu5tjPC90ZXh0Pgo8dGV4dCB4PSI0OTkiIHk9IjgwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjIyIiBmaWxsPSIjNWM1ODUyIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPuKGkjwvdGV4dD4KPHJlY3QgeD0iNTA2IiB5PSI0MCIgd2lkdGg9IjIzMCIgaGVpZ2h0PSI3OCIgZmlsbD0iI2ZmZiIgc3Ryb2tlPSIjMWY0ZTc5IiBzdHJva2Utd2lkdGg9IjIiIHJ4PSIxMCIvPgo8dGV4dCB4PSI1MjAiIHk9IjY0IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTMiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxZjRlNzkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+My4gVGhvw6F0PC90ZXh0Pgo8dGV4dCB4PSI1MjAiIHk9Ijg2IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM1YzU4NTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+TMO5YSBxdWEgY+G7lW5nPC90ZXh0Pgo8dGV4dCB4PSI1MjAiIHk9IjEwMiIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEyIiBmaWxsPSIjNWM1ODUyIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPnTGsOG7nW5nIHBo4bqjaTwvdGV4dD4KPHRleHQgeD0iMTYiIHk9IjE0NSIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMWY0ZTc5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPlBow6FjIHRo4bqjbyBzw6JuICgxMDEgeCA3MSDDtCk8L3RleHQ+CjxyZWN0IHg9IjE2IiB5PSIxNTgiIHdpZHRoPSI1MjAiIGhlaWdodD0iMTQwIiBmaWxsPSIjZmZmIiBzdHJva2U9IiNiYmIzYTUiIHN0cm9rZS13aWR0aD0iMSIgcng9IjgiLz4KPGNpcmNsZSBjeD0iMjc2IiBjeT0iMjI4IiByPSI0MiIgZmlsbD0iI2RiZWFmZSIgc3Ryb2tlPSIjMWY0ZTc5IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1kYXNoYXJyYXk9IjQgMyIvPgo8dGV4dCB4PSIyNzYiIHk9IjIzMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzFmNGU3OSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5Ww7luZyBjaOG7qWE8L3RleHQ+Cjx0ZXh0IHg9IjI3NiIgeT0iMjQ2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjEwIiBmaWxsPSIjMWY0ZTc5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPnJjIH4gMjMgxJHhur9uIDI3PC90ZXh0Pgo8cmVjdCB4PSI1MjgiIHk9IjIwOCIgd2lkdGg9IjgiIGhlaWdodD0iNDAiIGZpbGw9IiMxZjRlNzkiIHJ4PSIxIi8+Cjx0ZXh0IHg9IjQ4NiIgeT0iMjA2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjEwIiBmaWxsPSIjMWY0ZTc5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPkPhu5VuZzwvdGV4dD4KPHRleHQgeD0iNDg2IiB5PSIyMjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiMxZjRlNzkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+KDYgw7QpPC90ZXh0Pgo8cmVjdCB4PSI0MCIgeT0iMTc2IiB3aWR0aD0iMTAiIGhlaWdodD0iMTAiIGZpbGw9IiMxZjRlNzkiIHJ4PSIyIi8+CjxyZWN0IHg9IjU0IiB5PSIxNzYiIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCIgZmlsbD0iIzFmNGU3OSIgcng9IjIiLz4KPHJlY3QgeD0iNjgiIHk9IjE3NiIgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIiBmaWxsPSIjMWY0ZTc5IiByeD0iMiIvPgo8dGV4dCB4PSI0NCIgeT0iMjA2IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiMxZjRlNzkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+Q2jDsyBi4bqvdCDEkeG6p3U8L3RleHQ+Cjx0ZXh0IHg9IjQ0IiB5PSIyMTgiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzFmNGU3OSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5nw7NjIHRyw6puIHRyw6FpPC90ZXh0Pgo8Y2lyY2xlIGN4PSIyNTEiIGN5PSIyMDciIHI9IjMuMiIgZmlsbD0iIzNkNmIzYSIvPgo8Y2lyY2xlIGN4PSIyODgiIGN5PSIyNzEiIHI9IjMuMiIgZmlsbD0iIzNkNmIzYSIvPgo8Y2lyY2xlIGN4PSIxMTAiIGN5PSIxOTciIHI9IjMuMiIgZmlsbD0iIzNkNmIzYSIvPgo8Y2lyY2xlIGN4PSIzNjAiIGN5PSIyMDAiIHI9IjMuMiIgZmlsbD0iIzNkNmIzYSIvPgo8Y2lyY2xlIGN4PSIyNzMiIGN5PSIyNjIiIHI9IjMuMiIgZmlsbD0iIzNkNmIzYSIvPgo8Y2lyY2xlIGN4PSIxMTUiIGN5PSIyNTIiIHI9IjMuMiIgZmlsbD0iIzNkNmIzYSIvPgo8Y2lyY2xlIGN4PSIxOTUiIGN5PSIxOTIiIHI9IjMuMiIgZmlsbD0iIzNkNmIzYSIvPgo8Y2lyY2xlIGN4PSIxMzAiIGN5PSIyNDMiIHI9IjMuMiIgZmlsbD0iIzNkNmIzYSIvPgo8Y2lyY2xlIGN4PSIzMDAiIGN5PSIxOTYiIHI9IjMuMiIgZmlsbD0iIzNkNmIzYSIvPgo8Y2lyY2xlIGN4PSIyMDkiIGN5PSIxOTkiIHI9IjMuMiIgZmlsbD0iIzNkNmIzYSIvPgo8Y2lyY2xlIGN4PSIzNjgiIGN5PSIyNDIiIHI9IjMuMiIgZmlsbD0iIzNkNmIzYSIvPgo8Y2lyY2xlIGN4PSIxMTYiIGN5PSIyNjAiIHI9IjMuMiIgZmlsbD0iIzNkNmIzYSIvPgo8Y2lyY2xlIGN4PSIxNDkiIGN5PSIyMTYiIHI9IjMuMiIgZmlsbD0iIzNkNmIzYSIvPgo8Y2lyY2xlIGN4PSIzODQiIGN5PSIxOTUiIHI9IjMuMiIgZmlsbD0iIzNkNmIzYSIvPgo8Y2lyY2xlIGN4PSIzODEiIGN5PSIyNjIiIHI9IjMuMiIgZmlsbD0iIzNkNmIzYSIvPgo8Y2lyY2xlIGN4PSIyODkiIGN5PSIxOTQiIHI9IjMuMiIgZmlsbD0iIzNkNmIzYSIvPgo8Y2lyY2xlIGN4PSIxOTkiIGN5PSIxOTMiIHI9IjMuMiIgZmlsbD0iIzNkNmIzYSIvPgo8Y2lyY2xlIGN4PSIzNzEiIGN5PSIyMDUiIHI9IjMuMiIgZmlsbD0iIzNkNmIzYSIvPgo8dGV4dCB4PSIxMDYiIHk9IjI4NiIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEwIiBmaWxsPSIjM2Q2YjNhIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPkPhu6t1IGLhuq90IMSR4bqndTwvdGV4dD4KPHRleHQgeD0iMTA2IiB5PSIyOTgiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzNkNmIzYSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5y4bqjaSBuZ+G6q3Ugbmhpw6puPC90ZXh0Pgo8cmVjdCB4PSI1NTAiIHk9IjE1OCIgd2lkdGg9IjE3NCIgaGVpZ2h0PSIxNDAiIGZpbGw9IiNmZmYiIHN0cm9rZT0iI2I0NTMwOSIgc3Ryb2tlLXdpZHRoPSIyIiByeD0iOCIvPgo8dGV4dCB4PSI1NjQiIHk9IjE4MiIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjYjQ1MzA5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPlPhu5EgY2jDrW5oPC90ZXh0Pgo8dGV4dCB4PSI1NjQiIHk9IjIwOCIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEyIiBmaWxsPSIjMWMxYjE5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPlQwOiAxMCwwMDA8L3RleHQ+Cjx0ZXh0IHg9IjU2NCIgeT0iMjMwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+R2nhu686IDgwMDwvdGV4dD4KPHRleHQgeD0iNTY0IiB5PSIyNTIiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5MxrDhu5tpOiAxMDEgeCA3MTwvdGV4dD4KPHRleHQgeD0iNTY0IiB5PSIyNzQiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5OZ8aw4buhbmc6ICZndDs9IDkwJTwvdGV4dD4KPHRleHQgeD0iMTYiIHk9IjMxMiIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjExIiBmaWxsPSIjMmY2YjQ1IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPlRow6BuaCBjw7RuZzogbeG7jWkgY+G7q3UgcXVhIGPhu5VuZyB0csaw4bubYyAxMCwwMDAgYsaw4bubYzwvdGV4dD4KPHRleHQgeD0iMTYiIHk9IjMyOCIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjExIiBmaWxsPSIjNWM1ODUyIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPkdp4buvICsgY+G7lW5nIGzDoG0gYuG6o24gdGjhuqNvIGtow7MgaMahbiBIZXJkU2ltIGRyaXZlLXRvLWdvYWwgKHhlbSBTMTkpLjwvdGV4dD4KPC9zdmc+"/></figure>
+<h2 id="ket-qua-ban-thao-duoc-bao-cao">Ket qua ban thao duoc bao cao</h2>
+<p>Tai SR &gt;= 90%, Bang A3 cua ban thao bao cao:</p>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>N</th>
+<th>D_min ban thao</th>
+<th>D_max ban thao</th>
+<th>SR toi da</th>
+</tr></thead><tbody>
+<tr>
+<td>5</td>
+<td>1</td>
+<td>chua dat</td>
+<td>100%</td>
+</tr>
+<tr>
+<td>10</td>
+<td>1</td>
+<td>15</td>
+<td>100%</td>
+</tr>
+<tr>
+<td>25</td>
+<td>1</td>
+<td>25</td>
+<td>100%</td>
+</tr>
+<tr>
+<td>50</td>
+<td>1</td>
+<td>25</td>
+<td>100%</td>
+</tr>
+<tr>
+<td>100</td>
+<td>1</td>
+<td>chua dat</td>
+<td>100%</td>
+</tr>
+<tr>
+<td>150</td>
+<td>3</td>
+<td>chua dat</td>
+<td>99%</td>
+</tr>
+<tr>
+<td>200</td>
+<td>20</td>
+<td>35</td>
+<td>94%</td>
+</tr>
+<tr>
+<td>250</td>
+<td>25</td>
+<td>chua dat</td>
+<td>93%</td>
+</tr>
+<tr>
+<td>300</td>
+<td>20</td>
+<td>chua dat</td>
+<td>93%</td>
+</tr>
+<tr>
+<td>350</td>
+<td>35</td>
+<td>chua dat</td>
+<td>91%</td>
+</tr>
+<tr>
+<td>400</td>
+<td>35</td>
+<td>chua dat</td>
+<td>91%</td>
+</tr>
+</tbody></table></div>
+<p>&quot;Chua dat&quot; nghia la bien that bai phia tren chua duoc tim thay tai D = 35. Day la gia tri ban thao bao cao, khong phai ket qua duoc tao lai boi kho nay.</p>
+<p>Ban thao cung bao cao lien he am giua mean spread va thanh cong, gom Spearman rho = -0.701 cho <code>S_bar</code> voi SR va rho = -0.828 cho <code>S_bar * N</code> voi SR tren 110 tong hop dieu kien. Phan tich nhay cam va density gradient khong duoc chay lai o day.</p>
+<figure><img alt="Tom tat truc quan chep tu Bang A3 cua ban thao." src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3ODAiIGhlaWdodD0iNDAwIiB2aWV3Qm94PSIwIDAgNzgwIDQwMCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJrZXQgcXVhIGNoaW5oIGJhbiB0aGFvIj4KPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9Ijc4MCIgaGVpZ2h0PSI0MDAiIGZpbGw9IiNmN2Y2ZjIiLz4KPHRleHQgeD0iMTYiIHk9IjI0IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTQiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+S+G6v3QgcXXhuqMgY2jDrW5oIGLhuqNuIHRo4bqjbyAyMDI1ICh04burIGLDoGk7IGtow7RuZyBjaOG6oXkgbOG6oWkg4bufIMSRw6J5KTwvdGV4dD4KPHJlY3QgeD0iMTYiIHk9IjQwIiB3aWR0aD0iMTgwIiBoZWlnaHQ9Ijc4IiBmaWxsPSIjZmZmIiBzdHJva2U9IiMyZjZiNDUiIHN0cm9rZS13aWR0aD0iMiIgcng9IjgiLz4KPHRleHQgeD0iMjgiIHk9IjY0IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTYiIGZvbnQtd2VpZ2h0PSI4MDAiIGZpbGw9IiMyZjZiNDUiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+RD0xIOG7lW48L3RleHQ+Cjx0ZXh0IHg9IjI4IiB5PSI4NCIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMWMxYjE5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPsSR4bq/biBOID0gMTAwPC90ZXh0Pgo8dGV4dCB4PSIyOCIgeT0iMTA0IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiM1YzU4NTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+UuG7k2kgc+G7pXAg4bufIE49MTUwIChTUiB+MSUpPC90ZXh0Pgo8cmVjdCB4PSIyMDYiIHk9IjQwIiB3aWR0aD0iMTgwIiBoZWlnaHQ9Ijc4IiBmaWxsPSIjZmZmIiBzdHJva2U9IiNiNDUzMDkiIHN0cm9rZS13aWR0aD0iMiIgcng9IjgiLz4KPHRleHQgeD0iMjE4IiB5PSI2NCIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjE2IiBmb250LXdlaWdodD0iODAwIiBmaWxsPSIjYjQ1MzA5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPkRtaW4gdMSDbmc8L3RleHQ+Cjx0ZXh0IHg9IjIxOCIgeT0iODQiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj50aGVvIE48L3RleHQ+Cjx0ZXh0IHg9IjIxOCIgeT0iMTA0IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiM1YzU4NTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+MyAvIH4yMCAvIDM1IHThuqFpIE49MTUwIC8gMjAwIC8gNDAwPC90ZXh0Pgo8cmVjdCB4PSIzOTYiIHk9IjQwIiB3aWR0aD0iMTgwIiBoZWlnaHQ9Ijc4IiBmaWxsPSIjZmZmIiBzdHJva2U9IiM5YjJjMmMiIHN0cm9rZS13aWR0aD0iMiIgcng9IjgiLz4KPHRleHQgeD0iNDA4IiB5PSI2NCIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjE2IiBmb250LXdlaWdodD0iODAwIiBmaWxsPSIjOWIyYzJjIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPlF1w6EgdOG6o2k8L3RleHQ+Cjx0ZXh0IHg9IjQwOCIgeT0iODQiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj52ZCBOPTEwPC90ZXh0Pgo8dGV4dCB4PSI0MDgiIHk9IjEwNCIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEwIiBmaWxsPSIjNWM1ODUyIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPkQgJmd0Oz0gMjAgdOG7hyBoxqFuIMOtdCBjaMOzPC90ZXh0Pgo8cmVjdCB4PSI1ODYiIHk9IjQwIiB3aWR0aD0iMTgwIiBoZWlnaHQ9Ijc4IiBmaWxsPSIjZmZmIiBzdHJva2U9IiM3YjFmYTIiIHN0cm9rZS13aWR0aD0iMiIgcng9IjgiLz4KPHRleHQgeD0iNTk4IiB5PSI2NCIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjE2IiBmb250LXdlaWdodD0iODAwIiBmaWxsPSIjN2IxZmEyIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPjMsMDg5PC90ZXh0Pgo8dGV4dCB4PSI1OTgiIHk9Ijg0IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+dGjhuqV0IGLhuqFpPC90ZXh0Pgo8dGV4dCB4PSI1OTgiIHk9IjEwNCIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEwIiBmaWxsPSIjNWM1ODUyIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPjkwJSBk4burbmcg4bufIHBoYSBHb208L3RleHQ+Cjx0ZXh0IHg9IjE2IiB5PSIxNDQiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzFmNGU3OSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5EbWluKE4pIHThuqFpIFNSICZndDs9IDkwJSAoQuG6o25nIEEzIGLhuqNuIHRo4bqjbyk8L3RleHQ+CjxyZWN0IHg9IjUwIiB5PSIxNjAiIHdpZHRoPSI3MDAiIGhlaWdodD0iMTQwIiBmaWxsPSIjZmZmIiBzdHJva2U9IiNiYmIzYTUiIHN0cm9rZS13aWR0aD0iMSIgcng9IjYiLz4KPHRleHQgeD0iMjgiIHk9IjIzMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzVjNTg1MiIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5EbWluPC90ZXh0Pgo8cmVjdCB4PSI3MC4wIiB5PSIyNzMuNDI4NTcxNDI4NTcxNDQiIHdpZHRoPSI1Mi4wIiBoZWlnaHQ9IjIuNTcxNDI4NTcxNDI4NTcxIiBmaWxsPSIjOTNjNWZkIiBzdHJva2U9IiMxZjRlNzkiIHN0cm9rZS13aWR0aD0iMSIgcng9IjMiLz4KPHRleHQgeD0iOTYuMCIgeT0iMjY3LjQyODU3MTQyODU3MTQ0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjEwIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMWMxYjE5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPjE8L3RleHQ+Cjx0ZXh0IHg9Ijk2LjAiIHk9IjI5MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzVjNTg1MiIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj41PC90ZXh0Pgo8cmVjdCB4PSIxMzAuMCIgeT0iMjczLjQyODU3MTQyODU3MTQ0IiB3aWR0aD0iNTIuMCIgaGVpZ2h0PSIyLjU3MTQyODU3MTQyODU3MSIgZmlsbD0iIzkzYzVmZCIgc3Ryb2tlPSIjMWY0ZTc5IiBzdHJva2Utd2lkdGg9IjEiIHJ4PSIzIi8+Cjx0ZXh0IHg9IjE1Ni4wIiB5PSIyNjcuNDI4NTcxNDI4NTcxNDQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+MTwvdGV4dD4KPHRleHQgeD0iMTU2LjAiIHk9IjI5MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzVjNTg1MiIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj4xMDwvdGV4dD4KPHJlY3QgeD0iMTkwLjAiIHk9IjI3My40Mjg1NzE0Mjg1NzE0NCIgd2lkdGg9IjUyLjAiIGhlaWdodD0iMi41NzE0Mjg1NzE0Mjg1NzEiIGZpbGw9IiM5M2M1ZmQiIHN0cm9rZT0iIzFmNGU3OSIgc3Ryb2tlLXdpZHRoPSIxIiByeD0iMyIvPgo8dGV4dCB4PSIyMTYuMCIgeT0iMjY3LjQyODU3MTQyODU3MTQ0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjEwIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMWMxYjE5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPjE8L3RleHQ+Cjx0ZXh0IHg9IjIxNi4wIiB5PSIyOTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiM1YzU4NTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+MjU8L3RleHQ+CjxyZWN0IHg9IjI1MC4wIiB5PSIyNzMuNDI4NTcxNDI4NTcxNDQiIHdpZHRoPSI1Mi4wIiBoZWlnaHQ9IjIuNTcxNDI4NTcxNDI4NTcxIiBmaWxsPSIjOTNjNWZkIiBzdHJva2U9IiMxZjRlNzkiIHN0cm9rZS13aWR0aD0iMSIgcng9IjMiLz4KPHRleHQgeD0iMjc2LjAiIHk9IjI2Ny40Mjg1NzE0Mjg1NzE0NCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxMCIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj4xPC90ZXh0Pgo8dGV4dCB4PSIyNzYuMCIgeT0iMjkwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjEwIiBmaWxsPSIjNWM1ODUyIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPjUwPC90ZXh0Pgo8cmVjdCB4PSIzMTAuMCIgeT0iMjczLjQyODU3MTQyODU3MTQ0IiB3aWR0aD0iNTIuMCIgaGVpZ2h0PSIyLjU3MTQyODU3MTQyODU3MSIgZmlsbD0iIzkzYzVmZCIgc3Ryb2tlPSIjMWY0ZTc5IiBzdHJva2Utd2lkdGg9IjEiIHJ4PSIzIi8+Cjx0ZXh0IHg9IjMzNi4wIiB5PSIyNjcuNDI4NTcxNDI4NTcxNDQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+MTwvdGV4dD4KPHRleHQgeD0iMzM2LjAiIHk9IjI5MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzVjNTg1MiIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj4xMDA8L3RleHQ+CjxyZWN0IHg9IjM3MC4wIiB5PSIyNjguMjg1NzE0Mjg1NzE0MyIgd2lkdGg9IjUyLjAiIGhlaWdodD0iNy43MTQyODU3MTQyODU3MTQiIGZpbGw9IiM5M2M1ZmQiIHN0cm9rZT0iIzFmNGU3OSIgc3Ryb2tlLXdpZHRoPSIxIiByeD0iMyIvPgo8dGV4dCB4PSIzOTYuMCIgeT0iMjYyLjI4NTcxNDI4NTcxNDMiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+MzwvdGV4dD4KPHRleHQgeD0iMzk2LjAiIHk9IjI5MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzVjNTg1MiIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj4xNTA8L3RleHQ+CjxyZWN0IHg9IjQzMC4wIiB5PSIyMjQuNTcxNDI4NTcxNDI4NTgiIHdpZHRoPSI1Mi4wIiBoZWlnaHQ9IjUxLjQyODU3MTQyODU3MTQyIiBmaWxsPSIjYjQ1MzA5IiBzdHJva2U9IiNiNDUzMDkiIHN0cm9rZS13aWR0aD0iMSIgcng9IjMiLz4KPHRleHQgeD0iNDU2LjAiIHk9IjIxOC41NzE0Mjg1NzE0Mjg1OCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxMCIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj4yMDwvdGV4dD4KPHRleHQgeD0iNDU2LjAiIHk9IjI5MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzVjNTg1MiIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj4yMDA8L3RleHQ+CjxyZWN0IHg9IjQ5MC4wIiB5PSIyMTEuNzE0Mjg1NzE0Mjg1NzIiIHdpZHRoPSI1Mi4wIiBoZWlnaHQ9IjY0LjI4NTcxNDI4NTcxNDI5IiBmaWxsPSIjYjQ1MzA5IiBzdHJva2U9IiNiNDUzMDkiIHN0cm9rZS13aWR0aD0iMSIgcng9IjMiLz4KPHRleHQgeD0iNTE2LjAiIHk9IjIwNS43MTQyODU3MTQyODU3MiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxMCIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj4yNTwvdGV4dD4KPHRleHQgeD0iNTE2LjAiIHk9IjI5MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzVjNTg1MiIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj4yNTA8L3RleHQ+CjxyZWN0IHg9IjU1MC4wIiB5PSIyMjQuNTcxNDI4NTcxNDI4NTgiIHdpZHRoPSI1Mi4wIiBoZWlnaHQ9IjUxLjQyODU3MTQyODU3MTQyIiBmaWxsPSIjYjQ1MzA5IiBzdHJva2U9IiNiNDUzMDkiIHN0cm9rZS13aWR0aD0iMSIgcng9IjMiLz4KPHRleHQgeD0iNTc2LjAiIHk9IjIxOC41NzE0Mjg1NzE0Mjg1OCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxMCIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj4yMDwvdGV4dD4KPHRleHQgeD0iNTc2LjAiIHk9IjI5MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzVjNTg1MiIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj4zMDA8L3RleHQ+CjxyZWN0IHg9IjYxMC4wIiB5PSIxODYuMCIgd2lkdGg9IjUyLjAiIGhlaWdodD0iOTAuMCIgZmlsbD0iI2I0NTMwOSIgc3Ryb2tlPSIjOWIyYzJjIiBzdHJva2Utd2lkdGg9IjEiIHJ4PSIzIi8+Cjx0ZXh0IHg9IjYzNi4wIiB5PSIxODAuMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxMCIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj4zNTwvdGV4dD4KPHRleHQgeD0iNjM2LjAiIHk9IjI5MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzVjNTg1MiIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj4zNTA8L3RleHQ+CjxyZWN0IHg9IjY3MC4wIiB5PSIxODYuMCIgd2lkdGg9IjUyLjAiIGhlaWdodD0iOTAuMCIgZmlsbD0iI2I0NTMwOSIgc3Ryb2tlPSIjOWIyYzJjIiBzdHJva2Utd2lkdGg9IjEiIHJ4PSIzIi8+Cjx0ZXh0IHg9IjY5Ni4wIiB5PSIxODAuMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxMCIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj4zNTwvdGV4dD4KPHRleHQgeD0iNjk2LjAiIHk9IjI5MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzVjNTg1MiIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj40MDA8L3RleHQ+Cjx0ZXh0IHg9IjQwMC4wIiB5PSIyOTYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiM1YzU4NTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+TjwvdGV4dD4KPHRleHQgeD0iMTYiIHk9IjMzMCIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMmY2YjQ1IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPlh1IGjGsOG7m25nIGNoaSBwaMOtIChsxrDhu6N0IHRow6BuaCBjw7RuZyk8L3RleHQ+Cjx0ZXh0IHg9IjE2IiB5PSIzNTIiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj4tIFRo4budaSBnaWFuIHRydW5nIGLDrG5oIHTEg25nIHRoZW8gTiwgZ2nhuqNtIHRoZW8gRDwvdGV4dD4KPHRleHQgeD0iMTYiIHk9IjM3MCIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEyIiBmaWxsPSIjMWMxYjE5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPi0gVOG7lW5nIHF1w6NuZyDEkcaw4budbmcgY2jDsyB0xINuZyB0aGVvIEQ7IGLDo28gaMOyYSBn4bqnbiDEkWnhu4NtIGfDo3k8L3RleHQ+Cjx0ZXh0IHg9IjE2IiB5PSIzODgiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzVjNTg1MiIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5T4buRIGxp4buHdSB0aGVvIGLhuqNuIHRo4bqjby4gW0RtaW4sIERtYXhdIMSR4bqneSDEkeG7pyBjxaluZyDhu58gQuG6o25nIDMgc2F1IMSR4buDIHNvIGPhuqFuaCBIZXJkU2ltLjwvdGV4dD4KPC9zdmc+"/></figure>
+<h2 id="ket-qua-herdsim-dung-de-doi-chieu">Ket qua HerdSim dung de doi chieu</h2>
+<p>Voi co so <code>strombom_multi</code> tren xuat phat compact, du lieu claim cho D_min = 2 tai N trong <code>{5, 10}</code> va D_min = 1 tu N = 25 den 400. D_max = 35 la tran luoi da thu trong moi o Giai doan 1 vi khong thay cap overcrowding. No khong phai diem sup phia tren da do.</p>
+<p>Doi bo cuc khoi tao khong doi D_min co so tai N trong <code>{50, 100, 200}</code>, nhung doi chi phi ro ret. Kubo gan khop co so compact, trong khi Kubo tren wide va FAT tren dan lon thuong khong dat R = 0.90 tai bat ky D nao trong luoi. Day la ket qua chuyen giao HerdSim, khong phai ket qua parity voi ban thao hoac NetLogo.</p>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Phat hien ban thao</th>
+<th>Ket qua HerdSim theo giao thuc cua no</th>
+<th>Trang thai</th>
+</tr></thead><tbody>
+<tr>
+<td>Mot cho du den khoang N = 100 roi sup</td>
+<td>Mot cho dat R &gt;= 0.90 den N = 400 tren co so compact</td>
+<td>Khong tai hien</td>
+</tr>
+<tr>
+<td>D_min tang len 20 den 35 khi N &gt;= 200</td>
+<td>D_min co so van la 1</td>
+<td>Khong tai hien</td>
+</tr>
+<tr>
+<td>D cao co the gay overcrowding cho dan nho</td>
+<td>Khong co cap overcrowding co so den D = 35</td>
+<td>Khong tai hien</td>
+</tr>
+<tr>
+<td>Thoi gian giam theo D; quang duong bao hoa</td>
+<td>Thoi gian co so gan phang; tong duong cho tang theo D</td>
+<td>Hinh dang do khac</td>
+</tr>
+<tr>
+<td>Spread du doan that bai</td>
+<td>Chua co phan tich doi ung co kiem soat o muc claim</td>
+<td>Chua kiem parity</td>
+</tr>
+<tr>
+<td>Mot bo dieu khien, khong bat dinh D_min</td>
+<td>Ba bo dieu khien HerdSim, bon bo cuc, va bootstrap</td>
+<td>Bang chung HerdSim bo sung</td>
+</tr>
+</tbody></table></div>
+<figure><img alt="Cac phan tich ban thao khong duoc chay lai." src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3ODAiIGhlaWdodD0iNDMwIiB2aWV3Qm94PSIwIDAgNzgwIDQzMCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJwaGFuIHRpY2ggdGhlbSBiYW4gdGhhbyI+CjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSI3ODAiIGhlaWdodD0iNDMwIiBmaWxsPSIjZjdmNmYyIi8+Cjx0ZXh0IHg9IjE2IiB5PSIyNCIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMWMxYjE5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPlBow6JuIHTDrWNoIHRow6ptIGLhuqNuIHRo4bqjbyAyMDI1IChC4bqjbmcgVklJSSDEkeG6v24gWCk8L3RleHQ+Cjx0ZXh0IHg9IjE2IiB5PSI0OCIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMWY0ZTc5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPsSQ4buZIHRy4bqjaSBzbyB24bubaSB0aMOgbmggY8O0bmcgKFNwZWFybWFuIHRyw6puIDExMCDDtCk8L3RleHQ+Cjx0ZXh0IHg9IjE2IiB5PSI3NCIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjExIiBmaWxsPSIjMWMxYjE5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPlNfYmFyIHZzIFNSPC90ZXh0Pgo8cmVjdCB4PSIyMDAiIHk9IjYyIiB3aWR0aD0iMjgwIiBoZWlnaHQ9IjIwIiBmaWxsPSIjZWZlY2U1IiBzdHJva2U9IiNiYmIzYTUiIHN0cm9rZS13aWR0aD0iMSIgcng9IjQiLz4KPHJlY3QgeD0iMjgzLjcyIiB5PSI2MiIgd2lkdGg9IjE5Ni4yOCIgaGVpZ2h0PSIyMCIgZmlsbD0iI2ZjYTVhNSIgc3Ryb2tlPSIjOWIyYzJjIiBzdHJva2Utd2lkdGg9IjEiIHJ4PSI0Ii8+Cjx0ZXh0IHg9IjUwMCIgeT0iNzYiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzliMmMyYyIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5yaG8gPSAtMC43MDE8L3RleHQ+Cjx0ZXh0IHg9IjYwMCIgeT0iNzYiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzVjNTg1MiIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj7Dgm0gbeG6oW5oPC90ZXh0Pgo8dGV4dCB4PSIxNiIgeT0iMTEwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+U19iYXIgKiBOIHZzIFNSPC90ZXh0Pgo8cmVjdCB4PSIyMDAiIHk9Ijk4IiB3aWR0aD0iMjgwIiBoZWlnaHQ9IjIwIiBmaWxsPSIjZWZlY2U1IiBzdHJva2U9IiNiYmIzYTUiIHN0cm9rZS13aWR0aD0iMSIgcng9IjQiLz4KPHJlY3QgeD0iMjQ4LjE2MDAwMDAwMDAwMDAzIiB5PSI5OCIgd2lkdGg9IjIzMS44Mzk5OTk5OTk5OTk5NyIgaGVpZ2h0PSIyMCIgZmlsbD0iI2ZjYTVhNSIgc3Ryb2tlPSIjOWIyYzJjIiBzdHJva2Utd2lkdGg9IjEiIHJ4PSI0Ii8+Cjx0ZXh0IHg9IjUwMCIgeT0iMTEyIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiM5YjJjMmMiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+cmhvID0gLTAuODI4PC90ZXh0Pgo8dGV4dCB4PSI2MDAiIHk9IjExMiIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjExIiBmaWxsPSIjNWM1ODUyIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPlThu5UgaOG7o3AgdOG7kXQgbmjhuqV0PC90ZXh0Pgo8dGV4dCB4PSIxNiIgeT0iMTQ2IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+U19iYXIgKiBzcXJ0KE4pPC90ZXh0Pgo8cmVjdCB4PSIyMDAiIHk9IjEzNCIgd2lkdGg9IjI4MCIgaGVpZ2h0PSIyMCIgZmlsbD0iI2VmZWNlNSIgc3Ryb2tlPSIjYmJiM2E1IiBzdHJva2Utd2lkdGg9IjEiIHJ4PSI0Ii8+CjxyZWN0IHg9IjI1MC42OCIgeT0iMTM0IiB3aWR0aD0iMjI5LjMyIiBoZWlnaHQ9IjIwIiBmaWxsPSIjZmNhNWE1IiBzdHJva2U9IiM5YjJjMmMiIHN0cm9rZS13aWR0aD0iMSIgcng9IjQiLz4KPHRleHQgeD0iNTAwIiB5PSIxNDgiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzliMmMyYyIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5yaG8gPSAtMC44MTk8L3RleHQ+Cjx0ZXh0IHg9IjYwMCIgeT0iMTQ4IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiM1YzU4NTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+R+G6p24gbmjhuqV0IG5ow6w8L3RleHQ+Cjx0ZXh0IHg9IjE2IiB5PSIxNzUiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzdiMWZhMiIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5UaOG6pXQgYuG6oWkgdGhlbyBt4bupYyBraeG7g20gc2/DoXQgKMO9IELhuqNuZyBWSUlJKTwvdGV4dD4KPHJlY3QgeD0iMTYiIHk9IjE4NiIgd2lkdGg9IjI1NCIgaGVpZ2h0PSIyNCIgZmlsbD0iIzdiMWZhMiIgcng9IjQiLz4KPHRleHQgeD0iMjQiIHk9IjIwMiIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjZmZmIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPkzDoXQgY+G6r3Q8L3RleHQ+CjxyZWN0IHg9IjI3NiIgeT0iMTg2IiB3aWR0aD0iODQiIGhlaWdodD0iMjQiIGZpbGw9IiM3YjFmYTIiIHJ4PSI0Ii8+Cjx0ZXh0IHg9IjI4NCIgeT0iMjAyIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiNmZmYiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+U+G7kTwvdGV4dD4KPHJlY3QgeD0iMzY2IiB5PSIxODYiIHdpZHRoPSIyNzQiIGhlaWdodD0iMjQiIGZpbGw9IiM3YjFmYTIiIHJ4PSI0Ii8+Cjx0ZXh0IHg9IjM3NCIgeT0iMjAyIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiNmZmYiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+UGjhuqduIGzhu5tuIGThu6tuZyDhu588L3RleHQ+CjxyZWN0IHg9IjE2IiB5PSIyMTQiIHdpZHRoPSIyNTQiIGhlaWdodD0iMjIiIGZpbGw9IiNmZmYiIHN0cm9rZT0iI2JiYjNhNSIgc3Ryb2tlLXdpZHRoPSIxIiByeD0iMyIvPgo8dGV4dCB4PSIyMiIgeT0iMjI5IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+U19iYXIgJmd0OyAyNSAobeG6pXQga2nhu4NtIHNvw6F0KTwvdGV4dD4KPHJlY3QgeD0iMjc2IiB5PSIyMTQiIHdpZHRoPSI4NCIgaGVpZ2h0PSIyMiIgZmlsbD0iI2ZmZiIgc3Ryb2tlPSIjYmJiM2E1IiBzdHJva2Utd2lkdGg9IjEiIHJ4PSIzIi8+Cjx0ZXh0IHg9IjI4MiIgeT0iMjI5IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+MiwxNjE8L3RleHQ+CjxyZWN0IHg9IjM2NiIgeT0iMjE0IiB3aWR0aD0iMjc0IiBoZWlnaHQ9IjIyIiBmaWxsPSIjZmZmIiBzdHJva2U9IiNiYmIzYTUiIHN0cm9rZS13aWR0aD0iMSIgcng9IjMiLz4KPHRleHQgeD0iMzcyIiB5PSIyMjkiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5Hb20gOTclPC90ZXh0Pgo8cmVjdCB4PSIxNiIgeT0iMjM4IiB3aWR0aD0iMjU0IiBoZWlnaHQ9IjIyIiBmaWxsPSIjZWZlY2U1IiBzdHJva2U9IiNiYmIzYTUiIHN0cm9rZS13aWR0aD0iMSIgcng9IjMiLz4KPHRleHQgeD0iMjIiIHk9IjI1MyIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEwIiBmaWxsPSIjMWMxYjE5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPlNfYmFyICZsdDs9IDI1IChjw7JuIGtp4buDbSBzb8OhdCk8L3RleHQ+CjxyZWN0IHg9IjI3NiIgeT0iMjM4IiB3aWR0aD0iODQiIGhlaWdodD0iMjIiIGZpbGw9IiNlZmVjZTUiIHN0cm9rZT0iI2JiYjNhNSIgc3Ryb2tlLXdpZHRoPSIxIiByeD0iMyIvPgo8dGV4dCB4PSIyODIiIHk9IjI1MyIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEwIiBmaWxsPSIjMWMxYjE5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPjkyODwvdGV4dD4KPHJlY3QgeD0iMzY2IiB5PSIyMzgiIHdpZHRoPSIyNzQiIGhlaWdodD0iMjIiIGZpbGw9IiNlZmVjZTUiIHN0cm9rZT0iI2JiYjNhNSIgc3Ryb2tlLXdpZHRoPSIxIiByeD0iMyIvPgo8dGV4dCB4PSIzNzIiIHk9IjI1MyIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEwIiBmaWxsPSIjMWMxYjE5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPkdvbSA3NCU7IGdp4buvIDklOyB0aG/DoXQgMTglPC90ZXh0Pgo8cmVjdCB4PSIxNiIgeT0iMjYyIiB3aWR0aD0iMjU0IiBoZWlnaHQ9IjIyIiBmaWxsPSIjZmZmIiBzdHJva2U9IiNiYmIzYTUiIHN0cm9rZS13aWR0aD0iMSIgcng9IjMiLz4KPHRleHQgeD0iMjIiIHk9IjI3NyIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEwIiBmaWxsPSIjMWMxYjE5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPk3hu41pIHRo4bqldCBi4bqhaTwvdGV4dD4KPHJlY3QgeD0iMjc2IiB5PSIyNjIiIHdpZHRoPSI4NCIgaGVpZ2h0PSIyMiIgZmlsbD0iI2ZmZiIgc3Ryb2tlPSIjYmJiM2E1IiBzdHJva2Utd2lkdGg9IjEiIHJ4PSIzIi8+Cjx0ZXh0IHg9IjI4MiIgeT0iMjc3IiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+MywwODk8L3RleHQ+CjxyZWN0IHg9IjM2NiIgeT0iMjYyIiB3aWR0aD0iMjc0IiBoZWlnaHQ9IjIyIiBmaWxsPSIjZmZmIiBzdHJva2U9IiNiYmIzYTUiIHN0cm9rZS13aWR0aD0iMSIgcng9IjMiLz4KPHRleHQgeD0iMzcyIiB5PSIyNzciIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5Hb20gOTAlPC90ZXh0Pgo8dGV4dCB4PSIxNiIgeT0iMzAwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiNiNDUzMDkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+xJDhu5kgbmjhuqF5OiBnaeG6o20gUnJlcCBj4burdSAzLjAgeHXhu5FuZyAyLjUgKELhuqNuZyBJWCk8L3RleHQ+Cjx0ZXh0IHg9IjE2IiB5PSIzMjIiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzVjNTg1MiIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5DZWxsICAgICAgICAgIFRyxrDhu5tjICAgICBTYXU8L3RleHQ+Cjx0ZXh0IHg9IjE2IiB5PSIzNDAiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5EPTYsIE49NDAwPC90ZXh0Pgo8dGV4dCB4PSIxNjAiIHk9IjM0MCIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjOWIyYzJjIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPjAlPC90ZXh0Pgo8dGV4dCB4PSIyMzAiIHk9IjM0MCIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEyIiBmaWxsPSIjNWM1ODUyIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPi0mZ3Q7PC90ZXh0Pgo8dGV4dCB4PSIyNjAiIHk9IjM0MCIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMmY2YjQ1IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPjkyJTwvdGV4dD4KPHRleHQgeD0iMTYiIHk9IjM2MiIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjEyIiBmaWxsPSIjMWMxYjE5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPkQ9MywgTj0yNTA8L3RleHQ+Cjx0ZXh0IHg9IjE2MCIgeT0iMzYyIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiM5YjJjMmMiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+NSU8L3RleHQ+Cjx0ZXh0IHg9IjIzMCIgeT0iMzYyIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM1YzU4NTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+LSZndDs8L3RleHQ+Cjx0ZXh0IHg9IjI2MCIgeT0iMzYyIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMyZjZiNDUiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+MTAwJTwvdGV4dD4KPHRleHQgeD0iNDAwIiB5PSIzMDAiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzJmNmI0NSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5HcmFkaWVudCBt4bqtdCDEkeG7mSBzbyB24bubaSBHQ00gdGjhuq10IChSUTM7IH44MCB0cmnhu4d1IHFzOyBC4bqjbmcgWCk8L3RleHQ+Cjx0ZXh0IHg9IjQwMCIgeT0iMzIyIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiMxYzFiMTkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+LSBOICZndDs9IDEwMDogc2FpIGfDs2MgdHJ1bmcgYsOsbmggfjE4IMSR4bq/biAyMiDEkeG7mTwvdGV4dD4KPHRleHQgeD0iNDAwIiB5PSIzNDIiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj4tIMSQw7puZyBzZWN0b3IgdGjGsOG7nW5nICZndDs9IDY1JTsgxJHDum5nIGhv4bq3YyBr4buBICZndDs9IDg3JTwvdGV4dD4KPHRleHQgeD0iNDAwIiB5PSIzNjIiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzFjMWIxOSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj4tIFThu4cgaMahbiDhu58gTiBy4bqldCBuaOG7jyBob+G6t2MgcuG6pXQgbOG7m24gKHRoxrBhIC8gZ2nhu5tpIGjhuqFuIHThuqdtIG5ow6xuKTwvdGV4dD4KPHRleHQgeD0iMTYiIHk9IjQxOCIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjExIiBmaWxsPSIjNWM1ODUyIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPsSQw6J5IGzDoCBwaMOhdCBoaeG7h24gYuG6o24gdGjhuqNvLiBIZXJkU2ltIGtow7RuZyBjaOG6oXkgbOG6oWkgY8OhYyBwaMOibiB0w61jaCBOZXRMb2dvIG7DoHkuPC90ZXh0Pgo8L3N2Zz4="/></figure>
+<h2 id="vi-sao-ket-qua-co-the-khac">Vi sao ket qua co the khac</h2>
+<p>Khac biet co the den tu pha giu va qua cong, cuu rai luc dau, cho xuat phat o goc, hinh hoc vung giu, va chi tiet bo dieu khien cua ban thao. HerdSim dung duong lua noi bo ngan hon voi cho da o sau dan. Day chi la dien giai. Khong co thi nghiem thay tung thanh phan de tach mot nguyen nhan.</p>
+<p>Vi vay, &quot;khong tai hien&quot; nghia la ket qua khong xuat hien duoi giao thuc HerdSim khac. No khong chung minh ket qua ban thao sai.</p>
+<h2 id="da-chay-va-chua-chay-lai">Da chay va chua chay lai</h2>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Muc</th>
+<th>Trang thai</th>
+</tr></thead><tbody>
+<tr>
+<td>Du lieu claim HerdSim Giai doan 1, 2, va 4</td>
+<td>Da chay va dung cho ket luan hien tai</td>
+</tr>
+<tr>
+<td>Thi nghiem 11,000 lan cua ban thao 2025</td>
+<td>Khong chay lai</td>
+</tr>
+<tr>
+<td>Cac o nhay cam cua ban thao</td>
+<td>Khong chay lai</td>
+</tr>
+<tr>
+<td>Phan tich density gradient cua ban thao</td>
+<td>Khong chay lai</td>
+</tr>
+<tr>
+<td>Bo phan loai va tuong quan spread cua ban thao</td>
+<td>Khong chay lai</td>
+</tr>
+<tr>
+<td>Mo hinh ban thao nhu mot twin di kem</td>
+<td>Khong, khong co trong <code>twins.json</code></td>
+</tr>
+<tr>
+<td>Thay giao thuc co kiem soat giua ban thao va HerdSim</td>
+<td>Chua chay</td>
+</tr>
+</tbody></table></div>
+<h2 id="trich-dan-va-nguon-goc">Trich dan va nguon goc</h2>
+<p>Nguon ban thao chinh:</p>
+<p><em>Collective Nudging that Scales. How many dogs do I need to herd sheep?</em> Ban thao, khoang 2025, dong tac gia tam. Ban trong kho: <a href="../../../docs/papers/sheep-scaling_paper2025.pdf">PDF</a>.</p>
+<p>Tai lieu ho tro dien giai:</p>
+<ul>
+<li><a href="../notes/sheep-scaling_paper2025.md">Ghi chu tham chieu ban thao</a></li>
+<li><a href="../../results/summary/SUMMARY_REPORT.html">Bao cao tong hop tieng Anh</a></li>
+<li><a href="../../results/summary/SUMMARY_REPORT_vi.html">Bao cao tong hop tieng Viet</a></li>
+<li><a href="validation_and_netlogo_vi.html">Ranh gioi xac thuc va NetLogo</a></li>
+</ul>
+</main>
+</div>
+<footer><p>Nguon Markdown: <code>draft_comparison_vi.md</code>. Hinh anh duoc nhung de doc ngoai tuyen.</p></footer>
+</body>
+</html>

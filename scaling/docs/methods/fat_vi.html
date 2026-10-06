@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang='vi'>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>FAT: nham ca the xa nhat</title>
+<meta name='description' content='Tai lieu HerdSim de doc va dieu huong.'>
+<style>
+:root{--ink:#111827;--mut:#6b7280;--line:#e5e7eb;--acc:#2563eb;--bg:#f9fafb}
+*{box-sizing:border-box}body{margin:0;font:16px/1.65 -apple-system,'Segoe UI',Inter,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+header{background:linear-gradient(120deg,#1e3a8a,#0f766e);color:#fff;padding:48px 24px}
+header .in,main{max-width:1000px;margin:auto}header h1{margin:0 0 8px;font-size:2rem}header p{margin:0;opacity:.9;max-width:46rem}
+.chrome{max-width:1280px;margin:auto;padding:12px 24px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.chrome a{color:var(--acc);text-decoration:none}.chrome a:hover,.chrome a:focus{text-decoration:underline}
+.crumbs,.page-nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.sep{color:var(--mut)}
+.layout{display:grid;grid-template-columns:230px 1fr;gap:32px;max-width:1280px;margin:0 auto;padding:24px}
+nav{position:sticky;top:16px;align-self:start;font-size:.88rem;max-height:calc(100vh - 32px);overflow:auto}
+nav a{display:block;padding:5px 10px;color:var(--mut);text-decoration:none;border-left:2px solid var(--line)}
+nav a:hover,nav a:focus{color:var(--acc);border-color:var(--acc)}
+main{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 40px 40px;min-width:0}
+h2{margin-top:2.2em;padding-bottom:6px;border-bottom:2px solid var(--line);scroll-margin-top:16px}
+h2:first-child{margin-top:1.2em}
+h3{margin-top:1.6em;color:#1e3a8a}
+h4{margin:1.35em 0 .55em;font-size:1.02rem;font-weight:700;color:#334155}
+blockquote{margin:1em 0;padding:14px 18px;border-left:4px solid #0f766e;background:#f0fdfa;border-radius:0 8px 8px 0;color:#134e4a;font-size:1.05rem;font-weight:600;line-height:1.55}
+blockquote p{margin:0}
+code{background:#eef2ff;border-radius:4px;padding:1px 5px;font-size:.88em;word-break:break-word}
+a{color:var(--acc)}
+figure{margin:24px 0;text-align:center}figure img{max-width:100%;border:1px solid var(--line);border-radius:8px;background:#fff}
+figcaption{font-size:.88rem;color:var(--mut);margin-top:6px;text-align:left}
+table{border-collapse:collapse;width:100%;font-size:.9rem;margin:8px 0}
+.table-wrap{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+/* First col hugs content (short IDs); badges with nowrap still expand as needed. */
+th:first-child,td:first-child{width:1%;white-space:nowrap;min-width:3.25rem}
+/* Phase/package-style third column needs room on RQ tables. */
+th:nth-child(3),td:nth-child(3){min-width:10.5rem}
+th{background:#f3f4f6}caption{caption-side:bottom;font-size:.85rem;color:var(--mut);padding:6px;text-align:left}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.78rem;font-weight:600;white-space:nowrap}
+.REJECTED,.BI_BAC_BO,.NOT_REPRODUCED,.KHONG_TAI_HIEN{background:#fee2e2;color:#991b1b}
+.SUPPORTED,.DUOC_UNG_HO,.OK,.DUNG,.READY,.SAN_DUNG,.D_MIN_1{background:#dcfce7;color:#166534}
+.INCONCLUSIVE,.EVALUATED,.KHONG_RO_RANG,.DA_DANH_GIA,.WEAK,.YEU,.UNVERIFIED,.CHUA_XAC_NHAN,.PARTIAL,.MOT_PHAN,.COST_ONLY,.CHI_CHI_PHI{background:#fef3c7;color:#92400e}
+.SKIPPED,.UNEVALUATED,.BO_QUA,.CHUA_DANH_GIA,.NOT_RUN,.CHUA_CHAY,.WASTE,.LANG_PHI{background:#ffedd5;color:#9a3412}
+.NEEDS_RUN,.CAN_CHAY,.STALE,.LOI_THOI{background:#ffedd5;color:#9a3412}
+.kpi-note{background:#eff6ff;border-left:4px solid #2563eb;padding:10px 14px;margin:12px 0;border-radius:0 8px 8px 0;font-size:.95rem}
+ul{padding-left:1.2em}li{margin:6px 0}
+footer{max-width:1280px;margin:0 auto 32px;padding:0 24px;color:var(--mut);font-size:.85rem}
+.missing{border:1px solid #b91c1c;background:#fef2f2;color:#991b1b;padding:10px;border-radius:6px}
+pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8px}pre code{background:transparent;padding:0;color:inherit}
+@media(max-width:900px){.layout{grid-template-columns:1fr}nav{display:none}main{padding:8px 18px 30px}header{padding:32px 18px}header h1{font-size:1.55rem}.chrome{padding:10px 18px}}
+</style>
+</head>
+<body>
+<div class='chrome'><div class='crumbs'><a href="../INDEX_vi.html">Trang chu</a><span class="sep">/</span><span>Methods</span><span class="sep">/</span><span>FAT: nham ca the xa nhat</span></div><div class='page-nav'><a rel="prev" href="kubo_vi.html">Truoc</a><span class="sep">|</span><a href="fat.html">English</a></div></div>
+<header><div class='in'><h1>FAT: nham ca the xa nhat</h1><p>Tai lieu HerdSim de doc va dieu huong.</p></div></header>
+<div class='layout'>
+<nav><a href="#cam-hung-tu-cong-bo">Cam hung tu cong bo</a><a href="#hien-thuc-herdsim-chinh-xac">Hien thuc HerdSim chinh xac</a><a href="#thiet-lap-scalingv2">Thiet lap `scaling_v2`</a><a href="#ket-qua-hoan-tat-da-quan-sat">Ket qua hoan tat da quan sat</a><a href="#hinh-da-co-lien-quan">Hinh da co lien quan</a><a href="#gioi-han-va-dieu-khong-khang-dinh">Gioi han va dieu khong khang dinh</a></nav>
+<main>
+<h2 id="cam-hung-tu-cong-bo">Cam hung tu cong bo</h2>
+<p>FAT duoc truyen cam hung boi quy tac chan dan voi camera cuc bo trong Tsunoda va cong su (2018): tac dong len ca the xa nhat trong tap ma nguoi chan nhin thay, khong can toa do toan dan.</p>
+<p>HerdSim khong hien thuc day du mo hinh camera, xu ly sai so vi tri, dong luc cuu, luat dieu huong, hay hieu chinh thi nghiem cua bai bao. Vi vay phan cong bo chi la cam hung cho cach chon muc tieu, khong phai khang dinh tai tao toan bo mo hinh.</p>
+<p>Tai lieu: Y. Tsunoda va cong su, &quot;Analysis of local-camera-based shepherding navigation,&quot; Advanced Robotics 32(23), 2018. DOI: <code>10.1080/01691864.2018.1539410</code>.</p>
+<h2 id="hien-thuc-herdsim-chinh-xac">Hien thuc HerdSim chinh xac</h2>
+<p>Bundle <code>fat</code> ket hop:</p>
+<ul>
+<li><code>sheep_model=strombom</code>;</li>
+<li><code>dog_controller=fat</code>;</li>
+<li>mac dinh hai cho khi khong co ghi de thi nghiem.</li>
+</ul>
+<p>Cuu dung quy tac an co, tao dan, day, va dich chuyen co dinh cua Strombom trong HerdSim. Bo dieu khien cho khong co chuyen Collect/Drive va khong kiem tra ket dinh toan dan.</p>
+<p>Voi moi cho dang hoat dong trong moi tick:</p>
+<ol>
+<li>Doc quan sat cua cho sau cac bo loc che do quan sat va cam bien.</li>
+<li>Neu khong thay cuu, de cho dung yen.</li>
+<li>Chon con cuu quan sat duoc xa chinh con cho nhat.</li>
+<li>Dat dich cach <code>r_a</code> sau con cuu tren tia di tu dich qua cuu.</li>
+<li>Di ve dich do voi <code>shepherd_speed</code> va nhieu goc Strombom.</li>
+<li>Dung neu co cuu trong view dang dung gan hon <code>shepherd_stop_multiple * r_a</code>.</li>
+</ol>
+<p>Moi cho chon doc lap. FAT khong co luc day giua cho, dam phan gan muc tieu, hay khoang cach doi hinh ro rang. &quot;Xa nhat&quot; la xa con cho nhat, khac Collect Strombom (xa tam dan nhat) va Kubo (xa dich nhat).</p>
+<p>Bang chung hien thuc:</p>
+<ul>
+<li><a href="../../../core/methods.py"><code>../../../core/methods.py</code></a></li>
+<li><a href="../../../plugins/dogs/fat.py"><code>../../../plugins/dogs/fat.py</code></a></li>
+<li><a href="../../../plugins/sheep/strombom.py"><code>../../../plugins/sheep/strombom.py</code></a></li>
+<li><a href="../../../methods/strombom/heuristics.py"><code>../../../methods/strombom/heuristics.py</code></a></li>
+<li><a href="../../../methods/strombom/config.py"><code>../../../methods/strombom/config.py</code></a></li>
+</ul>
+<h2 id="thiet-lap-scalingv2">Thiet lap <code>scaling_v2</code></h2>
+<p>FAT la phuong phap chuyen giao Giai doan 4 tren cung nhiem vu va luoi voi Kubo va co so.</p>
+<ul>
+<li>Ban do kich thuoc: compact tren toan luoi kich thuoc va so cho.</li>
+<li>Ban do cau truc: bon bo cuc tai <code>N = {50, 100, 200}</code>.</li>
+<li>Quan sat: global.</li>
+<li>Giao tiep: bo dieu khien FAT khong them phoi hop.</li>
+<li>Han: <code>T0 = 10000</code>.</li>
+<li>Nguong tin cay: <code>R &gt;= 0.90</code>.</li>
+<li>Phan tang: 30 seed scout, sau do 100 seed claim trong cua so da chon.</li>
+</ul>
+<p>Thiet lap global rat quan trong. Du y tuong chon muc tieu den tu cam bien cuc bo, cac Giai doan 1, 2, va 4 hoan tat cho moi cho FAT thay toan dan. Cac ket qua nay khong kiem tra gioi han thong tin camera cuc bo. Thi nghiem che do quan sat duoc lap ke hoach cho Giai doan 5 nhung chua chay.</p>
+<p>Bang chung cau hinh:</p>
+<ul>
+<li><a href="../../configs/canonical_grid.yaml"><code>../../configs/canonical_grid.yaml</code></a></li>
+<li><a href="../../configs/protocols/phase4_fat_size_claim.yaml"><code>../../configs/protocols/phase4_fat_size_claim.yaml</code></a></li>
+<li><a href="../../configs/protocols/phase4_fat_structure_claim.yaml"><code>../../configs/protocols/phase4_fat_structure_claim.yaml</code></a></li>
+</ul>
+<h2 id="ket-qua-hoan-tat-da-quan-sat">Ket qua hoan tat da quan sat</h2>
+<h3 id="ban-do-kich-thuoc-compact">Ban do kich thuoc compact</h3>
+<ul>
+<li><code>D_min = 1</code> tai <code>N = 5</code> va <code>N = 10</code>.</li>
+<li>Voi moi <code>N &gt;= 25</code>, khong so cho nao den 35 dat <code>R &gt;= 0.90</code>.</li>
+<li>Cac o nay la hard failure: <code>D_min</code> va <code>D_max</code> khong xac dinh, khong phai 0 va cung khong phai 35.</li>
+<li>Do tin cay tot nhat theo kich thuoc voi <code>N = 50</code> den 400 khoang 0.40 den 0.53.</li>
+<li>Khoang nua cac lan chay kich thuoc FAT that bai. Bao cao tong hop gan khoang 39% toan bo trial cho oscillation va 7% cho stuck.</li>
+</ul>
+<h3 id="cau-truc-ban-dau">Cau truc ban dau</h3>
+<p>FAT khong dat 90% trong bat ky o cau truc nao tai <code>N = 50, 100, 200</code>.</p>
+<ul>
+<li>Compact co <code>R</code> tot nhat: 0.47, 0.40, 0.47 voi <code>N = 50, 100, 200</code>.</li>
+<li>Split co <code>R</code> tot nhat: 0.50, 0.47, 0.40.</li>
+<li><code>outlier_rich</code> co <code>R</code> tot nhat: 0.10, 0.00, 0.00.</li>
+<li>Wide co <code>R</code> tot nhat: 0.00 o ca ba kich thuoc.</li>
+</ul>
+<p>Bao cao tong hop cung ghi nhan lien he am manh giua nhiu huong FAT va thanh cong tren merge kich thuoc, voi Pearson <code>r</code> khoang <code>-0.87</code>. Day la quan sat, khong chung minh nhiu la nguyen nhan that bai.</p>
+<p>Bang chung:</p>
+<ul>
+<li><a href="../../results/phase4/fat_size/claim/packages/a/frontier.csv"><code>../../results/phase4/fat_size/claim/packages/a/frontier.csv</code></a></li>
+<li><a href="../../results/phase4/fat_size/claim/merged_trials.csv"><code>../../results/phase4/fat_size/claim/merged_trials.csv</code></a></li>
+<li><a href="../../results/phase4/fat_structure/claim/merged_trials.csv"><code>../../results/phase4/fat_structure/claim/merged_trials.csv</code></a></li>
+<li><a href="../../results/phase4/package_d/structure/frontier_by_method_layout.csv"><code>../../results/phase4/package_d/structure/frontier_by_method_layout.csv</code></a></li>
+</ul>
+<h2 id="hinh-da-co-lien-quan">Hinh da co lien quan</h2>
+<ul>
+<li><a href="../../results/phase4/guides/assets/figures/f1_reliability_heatmaps.png">Heatmap compact cua ba phuong phap</a></li>
+<li><a href="../../results/phase4/guides/assets/figures/f5_layout_reliability_curves.png">Duong do tin cay theo bo cuc</a></li>
+<li><a href="../../results/phase4/guides/assets/figures/f6_failure_modes.png">So sanh kieu that bai</a></li>
+<li><a href="../../results/summary/figures/f7_interference.png">Nhiu huong theo so cho</a></li>
+</ul>
+<h2 id="gioi-han-va-dieu-khong-khang-dinh">Gioi han va dieu khong khang dinh</h2>
+<ul>
+<li>Day la bo dieu khien FAT toi gian cua HerdSim tren cuu Strombom, khong phai mo hinh day du cua Tsunoda va cong su.</li>
+<li>Ket qua hoan tat dung quan sat global. Chung khong do che khuat camera, dieu khien chi co goc, sai so vi tri, hay phuc hoi khi mat dau vet.</li>
+<li>Hard failure nghia la khong so cho da thu nao dat thanh 90% truoc <code>T0</code>. No khong chung minh FAT khong the hoat dong voi <code>D</code> lon hon, timeout khac, hay nhiem vu khac.</li>
+<li>Tang so cho khong cuu duoc dan lon tren luoi nay. Quan sat do khong tach duoc co che nhan qua.</li>
+<li>Tuong quan nhiu khong phai phep thu nhan qua co kiem soat.</li>
+<li>FAT khong co twin NetLogo trong registry: <a href="../../../integrations/netlogo/twins.json"><code>../../../integrations/netlogo/twins.json</code></a>.</li>
+<li>Ket qua khong chung minh hieu nang ngoai dong va khong tai tao ket qua dinh luong cua bai bao 2018.</li>
+</ul>
+</main>
+</div>
+<footer><p>Nguon Markdown: <code>fat_vi.md</code>. Hinh anh duoc nhung de doc ngoai tuyen.</p></footer>
+</body>
+</html>

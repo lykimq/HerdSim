@@ -2,12 +2,14 @@
 
 Tools and results for the shepherding scaling experiments.
 
+Reader documentation: [English index](docs/INDEX.md) | [Vietnamese index](docs/INDEX_vi.md).
+
 ## Directory structure
 
-- `configs/`: Section 8 canonical grid defaults and protocol YAMLs (`protocols/`).
-- `docs/`: Protocol specification (`main_scaling_plan.md`), progress tracker (`progress_tracker.md`), and discussion notes (`discuss/`).
+- `configs/`: Canonical grid defaults and protocol YAMLs (`protocols/`).
+- `docs/`: Focused plan, methods, setup, credibility, status, and discussion documents.
 - `results/`: Simulation outputs organized by phase (`phase1`, `phase2`, `phase4`).
-- `scripts/`: CLI runners (`run_grid.py`, `plan_claim_cells.py`, `analyse.py`).
+- `scripts/`: CLI runners used by `make -C scaling` (`campaign.py`, `run_grid.py`, `plan_claim_cells.py`, `plan_t1_cells.py`, `run_factor_sweep.py`, `analyse.py`).
 - `services/scaling/`: Multiprocess simulation runner and manifest ledger.
 
 ## Quickstart
@@ -23,3 +25,12 @@ make -C scaling help
 ```
 
 Simulation data is stored in `scaling/results/`. To resume an interrupted run, re-run the same command; completed trials recorded in `manifest.jsonl` are skipped automatically.
+
+## Main documents
+
+- Plan: [docs/main_scaling_plan.md](docs/main_scaling_plan.md)
+- Methods: [docs/methods/README.md](docs/methods/README.md)
+- Setup and run reference: [docs/setup/README.md](docs/setup/README.md)
+- Results: [results/summary/SUMMARY_REPORT.md](results/summary/SUMMARY_REPORT.md)
+- Data appendices: [results/summary/data/README.md](results/summary/data/README.md)
+- Credibility and comparison: [docs/credibility/README.md](docs/credibility/README.md)

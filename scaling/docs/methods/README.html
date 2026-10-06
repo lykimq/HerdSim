@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang='en'>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Methods used in `scaling_v2`</title>
+<meta name='description' content='Reader-facing HerdSim documentation and evidence.'>
+<style>
+:root{--ink:#111827;--mut:#6b7280;--line:#e5e7eb;--acc:#2563eb;--bg:#f9fafb}
+*{box-sizing:border-box}body{margin:0;font:16px/1.65 -apple-system,'Segoe UI',Inter,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+header{background:linear-gradient(120deg,#1e3a8a,#0f766e);color:#fff;padding:48px 24px}
+header .in,main{max-width:1000px;margin:auto}header h1{margin:0 0 8px;font-size:2rem}header p{margin:0;opacity:.9;max-width:46rem}
+.chrome{max-width:1280px;margin:auto;padding:12px 24px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.chrome a{color:var(--acc);text-decoration:none}.chrome a:hover,.chrome a:focus{text-decoration:underline}
+.crumbs,.page-nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.sep{color:var(--mut)}
+.layout{display:grid;grid-template-columns:230px 1fr;gap:32px;max-width:1280px;margin:0 auto;padding:24px}
+nav{position:sticky;top:16px;align-self:start;font-size:.88rem;max-height:calc(100vh - 32px);overflow:auto}
+nav a{display:block;padding:5px 10px;color:var(--mut);text-decoration:none;border-left:2px solid var(--line)}
+nav a:hover,nav a:focus{color:var(--acc);border-color:var(--acc)}
+main{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 40px 40px;min-width:0}
+h2{margin-top:2.2em;padding-bottom:6px;border-bottom:2px solid var(--line);scroll-margin-top:16px}
+h2:first-child{margin-top:1.2em}
+h3{margin-top:1.6em;color:#1e3a8a}
+h4{margin:1.35em 0 .55em;font-size:1.02rem;font-weight:700;color:#334155}
+blockquote{margin:1em 0;padding:14px 18px;border-left:4px solid #0f766e;background:#f0fdfa;border-radius:0 8px 8px 0;color:#134e4a;font-size:1.05rem;font-weight:600;line-height:1.55}
+blockquote p{margin:0}
+code{background:#eef2ff;border-radius:4px;padding:1px 5px;font-size:.88em;word-break:break-word}
+a{color:var(--acc)}
+figure{margin:24px 0;text-align:center}figure img{max-width:100%;border:1px solid var(--line);border-radius:8px;background:#fff}
+figcaption{font-size:.88rem;color:var(--mut);margin-top:6px;text-align:left}
+table{border-collapse:collapse;width:100%;font-size:.9rem;margin:8px 0}
+.table-wrap{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+/* First col hugs content (short IDs); badges with nowrap still expand as needed. */
+th:first-child,td:first-child{width:1%;white-space:nowrap;min-width:3.25rem}
+/* Phase/package-style third column needs room on RQ tables. */
+th:nth-child(3),td:nth-child(3){min-width:10.5rem}
+th{background:#f3f4f6}caption{caption-side:bottom;font-size:.85rem;color:var(--mut);padding:6px;text-align:left}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.78rem;font-weight:600;white-space:nowrap}
+.REJECTED,.BI_BAC_BO,.NOT_REPRODUCED,.KHONG_TAI_HIEN{background:#fee2e2;color:#991b1b}
+.SUPPORTED,.DUOC_UNG_HO,.OK,.DUNG,.READY,.SAN_DUNG,.D_MIN_1{background:#dcfce7;color:#166534}
+.INCONCLUSIVE,.EVALUATED,.KHONG_RO_RANG,.DA_DANH_GIA,.WEAK,.YEU,.UNVERIFIED,.CHUA_XAC_NHAN,.PARTIAL,.MOT_PHAN,.COST_ONLY,.CHI_CHI_PHI{background:#fef3c7;color:#92400e}
+.SKIPPED,.UNEVALUATED,.BO_QUA,.CHUA_DANH_GIA,.NOT_RUN,.CHUA_CHAY,.WASTE,.LANG_PHI{background:#ffedd5;color:#9a3412}
+.NEEDS_RUN,.CAN_CHAY,.STALE,.LOI_THOI{background:#ffedd5;color:#9a3412}
+.kpi-note{background:#eff6ff;border-left:4px solid #2563eb;padding:10px 14px;margin:12px 0;border-radius:0 8px 8px 0;font-size:.95rem}
+ul{padding-left:1.2em}li{margin:6px 0}
+footer{max-width:1280px;margin:0 auto 32px;padding:0 24px;color:var(--mut);font-size:.85rem}
+.missing{border:1px solid #b91c1c;background:#fef2f2;color:#991b1b;padding:10px;border-radius:6px}
+pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8px}pre code{background:transparent;padding:0;color:inherit}
+@media(max-width:900px){.layout{grid-template-columns:1fr}nav{display:none}main{padding:8px 18px 30px}header{padding:32px 18px}header h1{font-size:1.55rem}.chrome{padding:10px 18px}}
+</style>
+</head>
+<body>
+<div class='chrome'><div class='crumbs'><a href="../INDEX.html">Home</a><span class="sep">/</span><span>Methods</span><span class="sep">/</span><span>Methods used in `scaling_v2`</span></div><div class='page-nav'><a rel="next" href="strombom.html">Next</a><span class="sep">|</span><a href="README_vi.html">Tieng Viet</a></div></div>
+<header><div class='in'><h1>Methods used in `scaling_v2`</h1><p>Reader-facing HerdSim documentation and evidence.</p></div></header>
+<div class='layout'>
+<nav><a href="#guides">Guides</a><a href="#shared-scalingv2-setup">Shared `scaling_v2` setup</a><a href="#completed-evidence">Completed evidence</a><a href="#shared-limits">Shared limits</a></nav>
+<main>
+<p>This directory explains the three controller families evaluated in the completed scaling study. Each guide keeps four things separate:</p>
+<ol>
+<li>the published idea that inspired the method;</li>
+<li>the exact controller and sheep model implemented in HerdSim;</li>
+<li>the frozen <code>scaling_v2</code> experiment setup;</li>
+<li>the completed results observed under that setup.</li>
+</ol>
+<p>That separation matters. The study compares simulated controllers on HerdSim&#x27;s <code>drive_to_goal</code> task. It is not a reproduction of every experiment or numerical result in the cited papers.</p>
+<h2 id="guides">Guides</h2>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Method guide</th>
+<th>Published basis</th>
+<th>HerdSim method used by <code>scaling_v2</code></th>
+</tr></thead><tbody>
+<tr>
+<td><a href="strombom.html">Strombom Collect/Drive</a></td>
+<td>Strombom et al. (2014)</td>
+<td><code>strombom_multi</code>, not the single-shepherd <code>strombom</code> preset</td>
+</tr>
+<tr>
+<td><a href="kubo.html">Kubo force model</a></td>
+<td>Kubo et al. (2022)</td>
+<td><code>kubo</code></td>
+</tr>
+<tr>
+<td><a href="fat.html">FAT</a></td>
+<td>Farthest visible agent idea from Tsunoda et al. (2018)</td>
+<td><code>fat</code>, with Strombom sheep</td>
+</tr>
+</tbody></table></div>
+<p>Vietnamese versions are available in <a href="README_vi.html">README_vi.md</a>, <a href="strombom_vi.html">strombom_vi.md</a>, <a href="kubo_vi.html">kubo_vi.md</a>, and <a href="fat_vi.html">fat_vi.md</a>.</p>
+<h2 id="shared-scalingv2-setup">Shared <code>scaling_v2</code> setup</h2>
+<p>All completed method comparisons use the same operational task and frontier definitions:</p>
+<ul>
+<li>task: place every sheep inside a goal disk before <code>T0 = 10000</code> ticks;</li>
+<li>arena: 500 by 500 continuous world units;</li>
+<li>flock center: <code>(250, 250)</code>;</li>
+<li>goal center: <code>(370, 250)</code>;</li>
+<li>goal radius: <code>15 * sqrt(N / 50)</code>;</li>
+<li>sheep counts: <code>{5, 10, 25, 50, 75, 100, 150, 200, 300, 400}</code> for size maps;</li>
+<li>dog counts: <code>{1, 2, 3, 4, 6, 10, 15, 20, 25, 35}</code>;</li>
+<li>structure counts: <code>N</code> in <code>{50, 100, 200}</code>;</li>
+<li>layouts: <code>compact</code>, <code>wide</code>, <code>split</code>, and <code>outlier_rich</code>;</li>
+<li>reliability: <code>R</code>, the fraction of independent seeds that succeed by <code>T0</code>;</li>
+<li>frontier: <code>D_min</code>, the smallest tested dog count with <code>R &gt;= 0.90</code>;</li>
+<li>staging: 30 scout seeds across the full grid, then 100 claim seeds in selected windows, with the documented 200-seed exception for Kubo <code>outlier_rich</code>, <code>N = 200</code>.</li>
+</ul>
+<p>The claim merge replaces scout rows on reseeded cells and retains scout rows elsewhere. A reported <code>D_max = 35</code> with no overcrowding is only the top of the tested dog grid, not a measured failure threshold.</p>
+<p>Frozen configuration: <a href="../../configs/canonical_grid.yaml"><code>../../configs/canonical_grid.yaml</code></a>.</p>
+<h2 id="completed-evidence">Completed evidence</h2>
+<p>The completed claim-grade comparisons are:</p>
+<ul>
+<li>baseline size and structure: <code>strombom_multi</code>, Phases 1 and 2;</li>
+<li>transfer size and structure: <code>kubo</code> and <code>fat</code>, Phase 4.</li>
+</ul>
+<p>The main evidence is in:</p>
+<ul>
+<li><a href="../../results/phase1/claim/"><code>../../results/phase1/claim/</code></a></li>
+<li><a href="../../results/phase2/claim/"><code>../../results/phase2/claim/</code></a></li>
+<li><a href="../../results/phase4/"><code>../../results/phase4/</code></a></li>
+<li><a href="../../results/summary/SUMMARY_REPORT.html"><code>../../results/summary/SUMMARY_REPORT.md</code></a></li>
+</ul>
+<p>Use the method guides for interpretation, but cite measured CSV files for numerical claims.</p>
+<h2 id="shared-limits">Shared limits</h2>
+<ul>
+<li>Results apply to one simulated task, one frozen geometry, one timeout, and one primary reliability threshold.</li>
+<li>Tick counts are not physically comparable between Kubo and Strombom-family methods because Kubo integrates velocity using <code>dt = 0.05</code>, while Strombom-family methods use fixed displacement per tick.</li>
+<li>The NetLogo registry contains twins for <code>strombom_multi</code> and <code>kubo</code>, but the completed report does not claim tick-for-tick parity or a published quantitative parity score.</li>
+<li>FAT has no registered NetLogo twin.</li>
+<li>No completed result establishes field performance, biological realism, or universal scaling laws.</li>
+</ul>
+</main>
+</div>
+<footer><p>Markdown source: <code>README.md</code>. Images are embedded for portable reading.</p></footer>
+</body>
+</html>

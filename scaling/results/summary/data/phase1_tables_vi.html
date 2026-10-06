@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang='vi'>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Bang du lieu Giai doan 1</title>
+<meta name='description' content='Tai lieu HerdSim de doc va dieu huong.'>
+<style>
+:root{--ink:#111827;--mut:#6b7280;--line:#e5e7eb;--acc:#2563eb;--bg:#f9fafb}
+*{box-sizing:border-box}body{margin:0;font:16px/1.65 -apple-system,'Segoe UI',Inter,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+header{background:linear-gradient(120deg,#1e3a8a,#0f766e);color:#fff;padding:48px 24px}
+header .in,main{max-width:1000px;margin:auto}header h1{margin:0 0 8px;font-size:2rem}header p{margin:0;opacity:.9;max-width:46rem}
+.chrome{max-width:1280px;margin:auto;padding:12px 24px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.chrome a{color:var(--acc);text-decoration:none}.chrome a:hover,.chrome a:focus{text-decoration:underline}
+.crumbs,.page-nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.sep{color:var(--mut)}
+.layout{display:grid;grid-template-columns:230px 1fr;gap:32px;max-width:1280px;margin:0 auto;padding:24px}
+nav{position:sticky;top:16px;align-self:start;font-size:.88rem;max-height:calc(100vh - 32px);overflow:auto}
+nav a{display:block;padding:5px 10px;color:var(--mut);text-decoration:none;border-left:2px solid var(--line)}
+nav a:hover,nav a:focus{color:var(--acc);border-color:var(--acc)}
+main{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 40px 40px;min-width:0}
+h2{margin-top:2.2em;padding-bottom:6px;border-bottom:2px solid var(--line);scroll-margin-top:16px}
+h2:first-child{margin-top:1.2em}
+h3{margin-top:1.6em;color:#1e3a8a}
+h4{margin:1.35em 0 .55em;font-size:1.02rem;font-weight:700;color:#334155}
+blockquote{margin:1em 0;padding:14px 18px;border-left:4px solid #0f766e;background:#f0fdfa;border-radius:0 8px 8px 0;color:#134e4a;font-size:1.05rem;font-weight:600;line-height:1.55}
+blockquote p{margin:0}
+code{background:#eef2ff;border-radius:4px;padding:1px 5px;font-size:.88em;word-break:break-word}
+a{color:var(--acc)}
+figure{margin:24px 0;text-align:center}figure img{max-width:100%;border:1px solid var(--line);border-radius:8px;background:#fff}
+figcaption{font-size:.88rem;color:var(--mut);margin-top:6px;text-align:left}
+table{border-collapse:collapse;width:100%;font-size:.9rem;margin:8px 0}
+.table-wrap{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+/* First col hugs content (short IDs); badges with nowrap still expand as needed. */
+th:first-child,td:first-child{width:1%;white-space:nowrap;min-width:3.25rem}
+/* Phase/package-style third column needs room on RQ tables. */
+th:nth-child(3),td:nth-child(3){min-width:10.5rem}
+th{background:#f3f4f6}caption{caption-side:bottom;font-size:.85rem;color:var(--mut);padding:6px;text-align:left}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.78rem;font-weight:600;white-space:nowrap}
+.REJECTED,.BI_BAC_BO,.NOT_REPRODUCED,.KHONG_TAI_HIEN{background:#fee2e2;color:#991b1b}
+.SUPPORTED,.DUOC_UNG_HO,.OK,.DUNG,.READY,.SAN_DUNG,.D_MIN_1{background:#dcfce7;color:#166534}
+.INCONCLUSIVE,.EVALUATED,.KHONG_RO_RANG,.DA_DANH_GIA,.WEAK,.YEU,.UNVERIFIED,.CHUA_XAC_NHAN,.PARTIAL,.MOT_PHAN,.COST_ONLY,.CHI_CHI_PHI{background:#fef3c7;color:#92400e}
+.SKIPPED,.UNEVALUATED,.BO_QUA,.CHUA_DANH_GIA,.NOT_RUN,.CHUA_CHAY,.WASTE,.LANG_PHI{background:#ffedd5;color:#9a3412}
+.NEEDS_RUN,.CAN_CHAY,.STALE,.LOI_THOI{background:#ffedd5;color:#9a3412}
+.kpi-note{background:#eff6ff;border-left:4px solid #2563eb;padding:10px 14px;margin:12px 0;border-radius:0 8px 8px 0;font-size:.95rem}
+ul{padding-left:1.2em}li{margin:6px 0}
+footer{max-width:1280px;margin:0 auto 32px;padding:0 24px;color:var(--mut);font-size:.85rem}
+.missing{border:1px solid #b91c1c;background:#fef2f2;color:#991b1b;padding:10px;border-radius:6px}
+pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8px}pre code{background:transparent;padding:0;color:inherit}
+@media(max-width:900px){.layout{grid-template-columns:1fr}nav{display:none}main{padding:8px 18px 30px}header{padding:32px 18px}header h1{font-size:1.55rem}.chrome{padding:10px 18px}}
+</style>
+</head>
+<body>
+<div class='chrome'><div class='crumbs'><a href="../../../docs/INDEX_vi.html">Trang chu</a><span class="sep">/</span><span>Data</span><span class="sep">/</span><span>Bang du lieu Giai doan 1</span></div><div class='page-nav'><a rel="prev" href="run_ledger_vi.html">Truoc</a><span class="sep">|</span><a rel="next" href="phase2_tables_vi.html">Sau</a><span class="sep">|</span><a href="phase1_tables.html">English</a></div></div>
+<header><div class='in'><h1>Bang du lieu Giai doan 1</h1><p>Tai lieu HerdSim de doc va dieu huong.</p></div></header>
+<div class='layout'>
+<nav><a href="#bien-theo-kich-thuoc-dan">Bien theo kich thuoc dan</a><a href="#khoang-bootstrap-dmin-day-du">Khoang bootstrap D_min day du</a><a href="#so-luong-che-do">So luong che do</a><a href="#bang-chung-mo-hinh-scaling">Bang chung mo hinh scaling</a><a href="#luoc-do-cua-cac-bang-mergedtrials">Luoc do cua cac bang merged_trials</a><a href="#trial-merge-claim">Trial merge claim</a><a href="#nguon-truc-tiep">Nguon truc tiep</a></nav>
+<main>
+<p>Tat ca bang ket qua khoa hoc trong phu luc nay dung merge claim. Du lieu scout chi de lap ke hoach va duoc liet ke rieng trong so cai chay.</p>
+<h2 id="bien-theo-kich-thuoc-dan">Bien theo kich thuoc dan</h2>
+<p>Source: <a href="../../phase1/claim/packages/a/frontier.csv"><code>phase1/claim/packages/a/frontier.csv</code></a>.</p>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>initial_layout</th>
+<th>n_sheep</th>
+<th>d_min</th>
+<th>d_overcrowd</th>
+<th>d_max</th>
+<th>b_star_d</th>
+<th>b_star_t</th>
+<th>b_star_effort</th>
+<th>hard_failure</th>
+</tr></thead><tbody>
+<tr>
+<td>compact</td>
+<td>5</td>
+<td>2</td>
+<td></td>
+<td>35</td>
+<td>2</td>
+<td>10000.0</td>
+<td>335.0757209570848</td>
+<td>False</td>
+</tr>
+<tr>
+<td>compact</td>
+<td>10</td>
+<td>2</td>
+<td></td>
+<td>35</td>
+<td>2</td>
+<td>10000.0</td>
+<td>328.75622089181064</td>
+<td>False</td>
+</tr>
+<tr>
+<td>compact</td>
+<td>25</td>
+<td>1</td>
+<td></td>
+<td>35</td>
+<td>1</td>
+<td>10000.0</td>
+<td>163.4999999999999</td>
+<td>False</td>
+</tr>
+<tr>
+<td>compact</td>
+<td>50</td>
+<td>1</td>
+<td></td>
+<td>35</td>
+<td>1</td>
+<td>10000.0</td>
+<td>157.49999999999977</td>
+<td>False</td>
+</tr>
+<tr>
+<td>compact</td>
+<td>75</td>
+<td>1</td>
+<td></td>
+<td>35</td>
+<td>1</td>
+<td>10000.0</td>
+<td>155.8911078292099</td>
+<td>False</td>
+</tr>
+<tr>
+<td>compact</td>
+<td>100</td>
+<td>1</td>
+<td></td>
+<td>35</td>
+<td>1</td>
+<td>10000.0</td>
+<td>161.35167363755858</td>
+<td>False</td>
+</tr>
+<tr>
+<td>compact</td>
+<td>150</td>
+<td>1</td>
+<td></td>
+<td>35</td>
+<td>1</td>
+<td>10000.0</td>
+<td>153.02725443107565</td>
+<td>False</td>
+</tr>
+<tr>
+<td>compact</td>
+<td>200</td>
+<td>1</td>
+<td></td>
+<td>35</td>
+<td>1</td>
+<td>10000.0</td>
+<td>144.17124164542776</td>
+<td>False</td>
+</tr>
+<tr>
+<td>compact</td>
+<td>300</td>
+<td>1</td>
+<td></td>
+<td>35</td>
+<td>1</td>
+<td>10000.0</td>
+<td>130.81134639802144</td>
+<td>False</td>
+</tr>
+<tr>
+<td>compact</td>
+<td>400</td>
+<td>1</td>
+<td></td>
+<td>35</td>
+<td>1</td>
+<td>10000.0</td>
+<td>119.83311309692806</td>
+<td>False</td>
+</tr>
+</tbody></table></div>
+<p><code>D_max = 35</code> la tran cua luoi da thu vi <code>D_overcrowd</code> trong. Day khong phai bien that bai tren da quan sat.</p>
+<h2 id="khoang-bootstrap-dmin-day-du">Khoang bootstrap D_min day du</h2>
+<p>Source: <a href="../../phase1/claim/packages/a/dmin_bootstrap.csv"><code>phase1/claim/packages/a/dmin_bootstrap.csv</code></a>.</p>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>initial_layout</th>
+<th>n_sheep</th>
+<th>d_min</th>
+<th>d_min_ci_low</th>
+<th>d_min_ci_high</th>
+<th>n_boot</th>
+<th>n_seeds_ref</th>
+<th>n_boot_defined</th>
+</tr></thead><tbody>
+<tr>
+<td>compact</td>
+<td>5</td>
+<td>2</td>
+<td>2</td>
+<td>2</td>
+<td>1000</td>
+<td>100</td>
+<td>1000</td>
+</tr>
+<tr>
+<td>compact</td>
+<td>10</td>
+<td>2</td>
+<td>2</td>
+<td>2</td>
+<td>1000</td>
+<td>100</td>
+<td>1000</td>
+</tr>
+<tr>
+<td>compact</td>
+<td>25</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1000</td>
+<td>100</td>
+<td>1000</td>
+</tr>
+<tr>
+<td>compact</td>
+<td>50</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1000</td>
+<td>100</td>
+<td>1000</td>
+</tr>
+<tr>
+<td>compact</td>
+<td>75</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1000</td>
+<td>100</td>
+<td>1000</td>
+</tr>
+<tr>
+<td>compact</td>
+<td>100</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1000</td>
+<td>100</td>
+<td>1000</td>
+</tr>
+<tr>
+<td>compact</td>
+<td>150</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1000</td>
+<td>100</td>
+<td>1000</td>
+</tr>
+<tr>
+<td>compact</td>
+<td>200</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1000</td>
+<td>100</td>
+<td>1000</td>
+</tr>
+<tr>
+<td>compact</td>
+<td>300</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1000</td>
+<td>100</td>
+<td>1000</td>
+</tr>
+<tr>
+<td>compact</td>
+<td>400</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1000</td>
+<td>100</td>
+<td>1000</td>
+</tr>
+</tbody></table></div>
+<h2 id="so-luong-che-do">So luong che do</h2>
+<p>Source: <a href="../../phase1/claim/packages/a/regimes.csv"><code>phase1/claim/packages/a/regimes.csv</code></a>.</p>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Che do</th>
+<th>So o</th>
+</tr></thead><tbody>
+<tr>
+<td>efficient_operation</td>
+<td>10</td>
+</tr>
+<tr>
+<td>under_resourced_failure</td>
+<td>2</td>
+</tr>
+<tr>
+<td>wasteful_overspend</td>
+<td>88</td>
+</tr>
+</tbody></table></div>
+<h2 id="bang-chung-mo-hinh-scaling">Bang chung mo hinh scaling</h2>
+<p>Cross-validation source: <a href="../../phase1/claim/packages/f/scaling_cv.csv"><code>phase1/claim/packages/f/scaling_cv.csv</code></a>.</p>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>constant</th>
+<th>linear</th>
+<th>power</th>
+<th>piecewise</th>
+</tr></thead><tbody>
+<tr>
+<td>0.4444444444444445</td>
+<td>0.4434280392420368</td>
+<td>0.24698127485541224</td>
+<td>0.1317615691736825</td>
+</tr>
+</tbody></table></div>
+<p>Fit source: <a href="../../phase1/claim/packages/f/scaling_fits.csv"><code>phase1/claim/packages/f/scaling_fits.csv</code></a>.</p>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>model</th>
+<th>rmse</th>
+<th>aic</th>
+<th>bic</th>
+<th>params</th>
+</tr></thead><tbody>
+<tr>
+<td>constant</td>
+<td>0.4</td>
+<td>-16.3258146374206</td>
+<td>-16.023229544426552</td>
+<td>{&quot;c&quot;: 1.2}</td>
+</tr>
+<tr>
+<td>linear</td>
+<td>0.34811575966952635</td>
+<td>-17.104404235766783</td>
+<td>-16.499234049778693</td>
+<td>{&quot;a&quot;: 1.4058156229784944, &quot;b&quot;: -0.0015651378173269586}</td>
+</tr>
+<tr>
+<td>power</td>
+<td>0.19957997128601312</td>
+<td>-28.230805287709877</td>
+<td>-27.625635101721784</td>
+<td>{&quot;A&quot;: 2.7282498520863614, &quot;alpha&quot;: -0.2067095373892277, &quot;log_log_slope&quot;: -0.16464473304683952}</td>
+</tr>
+<tr>
+<td>piecewise</td>
+<td>5.438959822042073e-16</td>
+<td>-266.3102111592855</td>
+<td>-264.79728569431524</td>
+<td>{&quot;break_n&quot;: 10.0, &quot;a1&quot;: 1.9999999999999987, &quot;b1&quot;: 1.5888218580782547e-16, &quot;a2&quot;: 0.9999999999999996, &quot;b2&quot;: -7.054072800592629e-19}</td>
+</tr>
+</tbody></table></div>
+<h2 id="luoc-do-cua-cac-bang-mergedtrials">Luoc do cua cac bang merged_trials</h2>
+<p>Moi dong la mot lan mo phong voi mot seed. Ten cot thuc te duoc bao cao trong tung muc du lieu; cac nhom sau giai thich y nghia.</p>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Nhom</th>
+<th>Cot va y nghia</th>
+</tr></thead><tbody>
+<tr>
+<td>Danh tinh va thiet ke</td>
+<td>method, scenario, preset, seed, sheep_model, dog_controller, obs_mode, n_sheep, n_shepherds, initial_layout, time_limit</td>
+</tr>
+<tr>
+<td>Ket qua va chi phi</td>
+<td>success, total_ticks, time_to_goal, shepherd_path, first_success_tick, control_efficiency</td>
+</tr>
+<tr>
+<td>Trang thai cuoi</td>
+<td>final_gcm_goal, final_success_rate, final_sheep_in_goal, final_min_separation</td>
+</tr>
+<tr>
+<td>Tom tat theo thoi gian</td>
+<td>mean_<em>, min_</em>, max_<em>, auc_</em> for recorded flock and dog metrics</td>
+</tr>
+<tr>
+<td>Chan doan that bai</td>
+<td>failure_mode, failure_label, failure_hints</td>
+</tr>
+<tr>
+<td>Cau hinh</td>
+<td>resolved_config, the serialized effective trial configuration</td>
+</tr>
+</tbody></table></div>
+<h2 id="trial-merge-claim">Trial merge claim</h2>
+<p>Nguon day du: <a href="../../phase1/claim/merged_trials.csv"><code>phase1/claim/merged_trials.csv</code></a>. Bang lon khong duoc chep lai. Cac thong ke duoi day duoc tinh truc tiep tu CSV.</p>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Thuoc tinh</th>
+<th>Gia tri</th>
+</tr></thead><tbody>
+<tr>
+<td>So dong</td>
+<td>4,540</td>
+</tr>
+<tr>
+<td>So cot</td>
+<td>61</td>
+</tr>
+<tr>
+<td>So o thiet ke</td>
+<td>100</td>
+</tr>
+<tr>
+<td>Phuong phap</td>
+<td>strombom_multi</td>
+</tr>
+<tr>
+<td>Bo cuc</td>
+<td>compact</td>
+</tr>
+<tr>
+<td>Cac gia tri N</td>
+<td>5, 10, 25, 50, 75, 100, 150, 200, 300, 400</td>
+</tr>
+<tr>
+<td>Cac gia tri D</td>
+<td>1, 2, 3, 4, 6, 10, 15, 20, 25, 35</td>
+</tr>
+<tr>
+<td>Khoang seed</td>
+<td>2026 to 2125</td>
+</tr>
+</tbody></table></div>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Thuoc tinh</th>
+<th>Gia tri</th>
+</tr></thead><tbody>
+<tr>
+<td>Thanh cong</td>
+<td>4,371</td>
+</tr>
+<tr>
+<td>That bai</td>
+<td>169</td>
+</tr>
+<tr>
+<td>R toan bo</td>
+<td>0.963</td>
+</tr>
+<tr>
+<td>Trung vi tick, ca thanh cong</td>
+<td>182</td>
+</tr>
+<tr>
+<td>P90 tick, ca thanh cong</td>
+<td>195</td>
+</tr>
+<tr>
+<td>Trung vi quang duong, ca thanh cong</td>
+<td>502.335</td>
+</tr>
+<tr>
+<td>Nhan that bai</td>
+<td>oscillation: 111, stuck: 58</td>
+</tr>
+</tbody></table></div>
+<p>Quy tac chon dong dai dien: sap xep tu dien theo <code>method</code>, <code>initial_layout</code>, <code>n_sheep</code>, <code>n_shepherds</code>, <code>seed</code>, sau do lay 5 vi tri cach deu, gom hai dau. Quy tac nay trung lap duoc va khong chon theo ket qua.</p>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>method</th>
+<th>layout</th>
+<th>N</th>
+<th>D</th>
+<th>seed</th>
+<th>success</th>
+<th>ticks</th>
+<th>path</th>
+<th>failure_mode</th>
+</tr></thead><tbody>
+<tr>
+<td>strombom_multi</td>
+<td>compact</td>
+<td>5</td>
+<td>1</td>
+<td>2026</td>
+<td>False</td>
+<td>10000</td>
+<td>2,718</td>
+<td>oscillation</td>
+</tr>
+<tr>
+<td>strombom_multi</td>
+<td>compact</td>
+<td>25</td>
+<td>2</td>
+<td>2041</td>
+<td>True</td>
+<td>180</td>
+<td>331.006</td>
+<td>none</td>
+</tr>
+<tr>
+<td>strombom_multi</td>
+<td>compact</td>
+<td>75</td>
+<td>20</td>
+<td>2046</td>
+<td>True</td>
+<td>183</td>
+<td>2,975.227</td>
+<td>none</td>
+</tr>
+<tr>
+<td>strombom_multi</td>
+<td>compact</td>
+<td>200</td>
+<td>2</td>
+<td>2110</td>
+<td>True</td>
+<td>179</td>
+<td>269.961</td>
+<td>none</td>
+</tr>
+<tr>
+<td>strombom_multi</td>
+<td>compact</td>
+<td>400</td>
+<td>35</td>
+<td>2055</td>
+<td>True</td>
+<td>164</td>
+<td>3,955.479</td>
+<td>none</td>
+</tr>
+</tbody></table></div>
+<h2 id="nguon-truc-tiep">Nguon truc tiep</h2>
+<ul>
+<li><a href="../../phase1/claim/packages/a/frontier.csv"><code>phase1/claim/packages/a/frontier.csv</code></a></li>
+<li><a href="../../phase1/claim/packages/a/reliability.csv"><code>phase1/claim/packages/a/reliability.csv</code></a></li>
+<li><a href="../../phase1/claim/packages/a/dmin_bootstrap.csv"><code>phase1/claim/packages/a/dmin_bootstrap.csv</code></a></li>
+<li><a href="../../phase1/claim/packages/a/regimes.csv"><code>phase1/claim/packages/a/regimes.csv</code></a></li>
+<li><a href="../../phase1/claim/packages/f/scaling_cv.csv"><code>phase1/claim/packages/f/scaling_cv.csv</code></a></li>
+<li><a href="../../phase1/claim/packages/f/scaling_fits.csv"><code>phase1/claim/packages/f/scaling_fits.csv</code></a></li>
+<li><a href="../../phase1/claim/merged_trials.csv"><code>phase1/claim/merged_trials.csv</code></a></li>
+<li><a href="../../phase1/claim/provenance.json"><code>phase1/claim/provenance.json</code></a></li>
+<li><a href="../../phase1/claim/status.json"><code>phase1/claim/status.json</code></a></li>
+</ul>
+</main>
+</div>
+<footer><p>Nguon Markdown: <code>phase1_tables_vi.md</code>. Hinh anh duoc nhung de doc ngoai tuyen.</p></footer>
+</body>
+</html>

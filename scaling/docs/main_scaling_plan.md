@@ -1,326 +1,276 @@
-# Collective Herdability Under Shepherding
+# Collective Herdability Under Shepherding: Main Scaling Plan
 
-Protocol `scaling_v2`. Why / what: [herdsim_research_program.md](herdsim_research_program.md). Status: [progress_tracker.md](progress_tracker.md). Run strategy: [experiment_run_strategy.md](experiment_run_strategy.md). Report form: [REPORT_TEMPLATE.md](templates/REPORT_TEMPLATE.md). Draft reference: [sheep-scaling_paper2025.md](notes/sheep-scaling_paper2025.md).
+Protocol: `scaling_v2`.
 
-| Abbreviation | Meaning |
-|--------------|---------|
-| *method* | Dog algorithm |
-| *R* / *theta* | Success rate; reliability threshold |
-| *I_dir* | Shepherd interference index |
-| *C* | Shepherd coverage of peripheral sheep |
-| `B*` | Best (D, T) at target R with least path |
-| *AUROC* | Ranking quality for early warning |
-| *GCM* | Flock centre of mass |
-| *S_bar* | Variance of distances to the centroid |
+This document is the scientific plan. It defines the research objective, phase dependencies, research questions, claim criteria, evidence grades, budgets, decision gates, and study boundaries. It does not duplicate setup rationale, controller explanations, implementation ownership, glossary entries, or run commands.
 
-## Work map
+Canonical supporting documents:
 
-| Phase | Focus | RQ | Package | Done when |
-|-------|-------|----|---------|-----------|
-| 0 | Freeze protocol | S8 | all | Section 8 matches `canonical_grid.yaml` |
-| 1 | Size map | RQ2 | A | Merged R(N, D); D_min, D_overcrowd, D_max, B*; regimes |
-| 2 | Structure at fixed N | RQ1 | B | D_min(N, X0) on {50, 100, 200}; predictor comparison |
-| 3 | Mechanism | RQ3 | C | Within-N rank tests on contrast cells |
-| 4 | Other methods | RQ4 | D | Transfer table for the three required methods, including structure |
-| 5 | Information vs dogs | RQ5 | E | D_min(N, I) on {100, 200} |
-| 6 | Scaling fits | RQ6 | F | Leave-one-N-out RMSE for power, piecewise, and per-layout curves |
-| 7 | Early warning | RQ7 | G | Held-out AUROC and lead time on failure trials |
+- [Research program](herdsim_research_program.md)
+- [Setup and reference index](setup/README.md)
+- [Experiment setup](setup/experiment_setup.md)
+- [Parameter reference](setup/parameter_reference.md)
+- [Glossary](setup/glossary.md)
+- [Method guides](methods/README.md)
+- [Credibility and comparison](credibility/README.md)
+- [Run strategy](experiment_run_strategy.md)
+- [Run guide](setup/run_guide.md)
+- [Progress tracker](progress_tracker.md)
+- [Data appendices](../results/summary/data/README.md)
 
-Smallest publishable unit: RQ1 + RQ2 + RQ3 + S8. RQ4 repeats the size map and the structure contrast. RQ5 and RQ7 come after that.
+## 1. Research objective
 
-## How we measure
+The program asks how much external control is needed to guide a collective reliably as flock size and initial structure change, which processes explain that demand, and which patterns transfer across shepherding methods.
 
-```text
-R(m, tau, N, D, T, X0, I) = P(success | locked seeds)
-```
+The primary control-demand quantity is the viable shepherd range around `D_min` and any observed overcrowding boundary under a fixed task, reliability threshold, time budget, layout, method, and information condition. `D_min` is not an intrinsic property of a flock.
 
-Herdable at theta when R >= theta. Default theta = 0.90. Also report 0.50 and 0.70.
+The smallest publishable unit is RQ1, RQ2, RQ3, and the frozen protocol. RQ4 repeats both the size map and structure contrast for the required transfer methods. RQ5 and RQ7 are follow-on studies. RQ6 uses completed frontier maps and must not determine the grid retrospectively.
 
-| Kind | Symbol | Meaning |
-|------|--------|---------|
-| Input | D | Shepherd count |
-| Input | T | Time limit (ticks) |
-| Outcome | S | Success (binary): every sheep inside the goal disk |
-| Outcome | t_s | Time to success |
-| Outcome | E | Total shepherd path length (`shepherd_path`) |
-| Context | N | Flock size |
-| Context | m | Method |
-| Context | X0 | Initial layout family |
-| Context | I | Information condition |
+## 2. Work map and dependencies
 
-### Arena
+| Phase | Research role | RQ | Package | Depends on | Planning completion condition |
+|---|---|---|---|---|---|
+| 0 | Freeze shared protocol | S8 | all | none | Canonical YAML and scientific plan agree |
+| 1 | Baseline size and regime map | RQ2 | A | Phase 0 | Merged baseline frontiers, regimes, and conditional T1 decision |
+| 2 | Structure at fixed N | RQ1 | B | Phase 1 scout and claim-window rules | Merged layout frontiers and predictor comparison |
+| 3 | Mechanism contrasts | RQ3 | C | Matching efficient and overcrowding cells from Phases 1 or 2 | Prespecified within-N tests, or an explicit undefined status |
+| 4 | Transfer across methods | RQ4 | D | Phases 1 and 2 design fixed | Size and structure maps for all required methods |
+| 5 | Information substitution | RQ5 | E | Stable method baseline and staged-run pipeline | Observation, range, and communication ladder frontiers |
+| 6 | Scaling fits | RQ6 | F | Claim-grade frontier maps | Leave-one-N-out comparison of candidate curves |
+| 7 | Early warning | RQ7 | G | Claim trajectories with required timeseries | Held-out AUROC and lead-time evaluation |
 
-Scaling runs use a 500 by 500 field. The flock starts at the center `(250, 250)`. The goal center is `(370, 250)`, so the drive length is 120 at every N. Goal radius is `15 * sqrt(N/50)` (15 at N = 50, about 42 at N = 400). Sheep start outside the goal and inside the field. The app's 150-field corner goal is unchanged.
+Dependency rules:
 
-Success is every sheep inside that disk. Strombom's collect switch `r_a * N^(2/3)` is wider than this goal (about 27 vs 15 at N = 50, about 109 vs 42 at N = 400). The pen is not opened up to that switch. A Strombom failure on this task is not read as a packing failure.
+1. Phase 0 precedes every scientific run.
+2. Phases 1, 2, and 4 use scout maps before claim reseeding.
+3. Phase 3 is analysis of collected contrast cells. It is undefined if the required regimes do not exist.
+4. Phase 4 structure claims wait for structure maps from every required method.
+5. Phase 5 is three separate ladders, not a Cartesian product.
+6. Phase 6 is fitted only after frontiers exist.
+7. Phase 7 requires stored claim-grade timeseries and whole-N holdout.
 
-### Collective state and mechanism metrics
+## 3. Shared planning contract
 
-| Variable | Definition | Source |
-|----------|------------|--------|
-| Cohesion | Mean distance of sheep to the GCM | `plugins/metrics/cohesion.py` |
-| Fragmentation | Largest connected-component fraction, radius 5 | `plugins/metrics/fragmentation.py` |
-| Outlier count | Sheep beyond `r_a * N^(2/3)` | `plugins/metrics/outlier_count.py` |
-| Spread | Variance of distances to the centroid | `plugins/metrics/mean_spread.py` |
-| Extent | RMS distance to the centroid | `plugins/metrics/extent.py` |
-| Perimeter | Convex-hull perimeter of sheep | `plugins/metrics/perimeter.py` |
-| Hull area | Convex-hull area of sheep | `plugins/metrics/hull_area.py` |
-| Flock density | N / hull area (0 if area is degenerate) | `plugins/metrics/flock_density.py` |
-| Aspect ratio | PCA major/minor axis ratio (1 = round) | `plugins/metrics/aspect_ratio.py` |
+The machine-readable values are in [`canonical_grid.yaml`](../configs/canonical_grid.yaml). Parameter meanings and rationale are in [parameter reference](setup/parameter_reference.md) and [experiment setup](setup/experiment_setup.md).
 
-| Metric | Definition |
-|--------|------------|
-| I_dir(t) | `1 - \|\|sum u_hat\|\| / M_active` for shepherds with speed above 1e-6. 0 = aligned, 1 = conflict. If none move, I_dir = 0. Uses realised velocities. |
-| C(t) | Fraction of peripheral sheep (distance to GCM above the median) inside the trial's influence radius. That radius is `sensing_range` when set, otherwise the method `r_s`. Missing radius yields NaN. |
+The plan locks these constraints:
 
-### Frontiers and regimes
+- Task: `drive_to_goal`, with success only when every sheep reaches the goal by the deadline.
+- Primary reliability threshold: `theta = 0.90`; also report 0.50 and 0.70.
+- Baseline method: `strombom_multi`.
+- Required transfer set: `strombom_multi`, `kubo`, and `fat`.
+- Recommended, non-minimum transfer method: `communication_free`.
+- Flock-size grid: `{5, 10, 25, 50, 75, 100, 150, 200, 300, 400}`.
+- Shepherd-count grid: `{1, 2, 3, 4, 6, 10, 15, 20, 25, 35}`.
+- Layouts: `compact`, `wide`, `split`, and `outlier_rich`.
+- Structure sizes: `{50, 100, 200}`.
+- Information sizes: `{100, 200}`.
+- Deadlines: `T0 = 10000`; conditional `T1 = 20000`.
+- Locked seed list from master seed 2026.
+- Scout depth: 30 seeds per selected cell.
+- Claim depth: normally 100 seeds per selected cell.
+- Bootstrap: 1000 seed resamples.
 
-| Quantity | Definition |
-|----------|------------|
-| D_min | Smallest D with R >= theta |
-| D_overcrowd | Smallest D > D_min such that this grid D and the next grid D both have R < theta |
-| D_max | Largest D with R >= theta that is still below D_overcrowd. If that run does not exist, the largest tested D that still meets theta (a grid ceiling) |
-| B* | (D, T) with R >= theta and minimum median path. Ties: smaller D, then faster median t_s |
+Effects in dog count are measured in local grid steps. The study cannot resolve a difference smaller than one local step of the tested D grid.
 
-| Regime | Rule |
-|--------|------|
-| Under-resourced failure | R < theta and D is below D_overcrowd |
-| Efficient operation | R >= theta and median path is below the wasteful bar |
-| Wasteful overspend | R >= theta and median path >= 20% above B* (also report 10% and 30%) |
-| Overcrowding collapse | R < theta for D >= D_overcrowd |
-| Hard failure | No tested D reaches R >= theta |
+### Frontier and regime rules
 
-Effects are in grid steps. The dog-count gap equals the local spacing of `{1, 2, 3, 4, 6, 10, 15, 20, 25, 35}`.
+Let `R(m, tau, N, D, T, X0, I)` be success probability over locked seeds.
 
-### Claim-grade map
+| Quantity | Planning definition |
+|---|---|
+| `D_min` | Smallest tested D with `R >= theta` |
+| `D_overcrowd` | Smallest D after `D_min` for which that D and the next tested D are both below theta |
+| `D_max` | Largest reliable D below `D_overcrowd`; without overcrowding, the largest tested reliable D, which may only be a grid ceiling |
+| `B*` | Reliable `(D, T)` with minimum median shepherd path; ties use smaller D, then faster median success time |
+| Hard failure | No tested D reaches theta |
+| Under-resourced failure | `R < theta` below `D_overcrowd` |
+| Efficient operation | `R >= theta` and median path is below the wasteful threshold |
+| Wasteful overspend | `R >= theta` and median path is at least 20 percent above `B*`; also report 10 and 30 percent |
+| Overcrowding collapse | `R < theta` at or above `D_overcrowd` |
 
-Operator narrative (verbs, artifacts, why we stage): [experiment_run_strategy.md](experiment_run_strategy.md).
+A `D_max` at 35 with no `D_overcrowd` is a tested-grid ceiling, not a measured collapse point.
 
-Scout: 30 seeds on every frozen (N, D) cell.
+## 4. Evidence grades and planned budgets
 
-Then, per (method, layout, N), reseed at 100 seeds:
+| Grade | Purpose | Planned depth | Permitted claim use |
+|---|---|---:|---|
+| SMOKE or Pilot | Check paths, metrics, host, and resume behavior | Small diagnostic grid, normally 5 seeds | None |
+| SCOUT | Map the broad grid and select precision windows | 30 seeds | Planning and diagnostics only |
+| CLAIM | Estimate selected frontiers and claim quantities | Normally 100 seeds | Yes, after provenance and run documentation checks |
+| T1 | Test the longer deadline on detected overcrowding cells | 100 seeds | Yes, only when the trigger exists |
 
-- Reliability window: scout D_min, plus the previous and next grid D.
-- Overcrowding window, only if two consecutive D after that candidate are below theta: those two D and the last D still at or above theta.
-- If no D meets theta: the two largest D.
+For each method, layout, and N, claim planning selects:
 
-Merge: a cell with claim seeds is analysed at those 100 only. Other cells stay at 30. Scout rows are not stacked on claim rows.
+1. Scout `D_min`, plus the previous and next tested D.
+2. When two consecutive D values establish a candidate overcrowding onset, those two values and the last reliable D.
+3. If no D reaches theta, the two largest tested D values.
 
-Bootstrap: 1,000 resamples of seeds within each D. A resample with no D_min stays in the sample as above the largest tested D. The 2.5 and 97.5 percentiles use rank order and are grid D values, or "above grid" when that tail is censored.
+Claim rows replace scout rows for reseeded cells. They are never stacked with scout rows from the same cell. Unselected cells retain scout depth. Bootstrap resamples seeds within D; undefined `D_min` draws remain right-censored above the tested grid. If a `D_min` interval spans more than one D-grid step, raise that window to 200 seeds before using it for a structure claim.
 
-If the interval on D_min covers more than one grid step, raise that window to 200 seeds before the structure claim.
+### Planned estimates
 
-At R = 0.90 and n = 100 the interval on R is about +/-0.06. That is an interval on R.
+These figures are budget estimates, not executed counts:
 
-### Trial totals
+| Campaign | Scout estimate | Claim estimate | Planning note |
+|---|---:|---:|---|
+| One size map | About 3000 | Up to about 6000 | Claim estimate assumes up to six D values per N |
+| One structure contrast | About 3600 | Up to about 7200 | Three N values, four layouts, full scout D grid |
+| Baseline core | About 20000 total | Included | Size, conditional T1, and structure, rounded for planning |
+| Each required transfer method | Repeat size and structure budgets | Recompute after scout | Claim windows depend on that method's scout |
 
-Planning figures. Recompute after the scout. One size map: 100 cells at 30, plus up to 6 D per N at 100, about 3,000 + 6,000 simulations. One structure contrast (3 N x 4 layouts x 10 D): about 3,600 + 7,200. T1: 100 seeds at 20,000 ticks on the D that define D_overcrowd. Core (baseline size + T1 + structure) is on the order of 20,000 simulations. Each required transfer method repeats the size map and the structure contrast. The structure row of the transfer table waits for those runs. `communication_free` is recommended and is outside the minimum set (`strombom_multi`, `kubo`, `fat`).
+Actual work must be read from status and provenance artifacts, not inferred from these estimates.
 
-These trials support claim-grade D_min and regimes for the baseline, a structure contrast at three sizes, and mechanism tests on cells already collected. They do not support a method-general law from the baseline alone, a universal law for other tasks or real farms, or a dog-count gap smaller than one grid step.
+## 5. Research questions and planned tests
 
-## How we run each RQ
+### RQ1: Structure
 
-### RQ1 Structure (Package B, Phase 2)
+Does `D_min` change across initial layouts at fixed N?
 
-Does the same N have a different D_min under a different X0?
+Use N in `{50, 100, 200}`, all four layouts, and the full D grid. Compare `D_min` in grid steps. Compare an `(N, D)` model against a model that also uses layout and state measured only in the first 100 ticks. Hold out whole N values. Full-trial summaries are not predictors.
 
-N in {50, 100, 200}. Layouts: compact, wide, split, outlier_rich. Full D grid. Compare D_min in grid steps. The regression compares (N, D) with (N, D plus layout and the first 100 ticks), holding out whole N. Supported when the state model has lower out-of-sample negative log-likelihood. Full-trial means are not predictors.
+### RQ2: Size and operating regimes
 
-### RQ2 Size (Package A, Phase 1)
+How do the reliable shepherd frontier and operating regimes change with N?
 
-R(N, D) at T0 on the frozen grids, baseline method, compact layout. Label regimes. T1 on the overcrowding D values.
+Map `R(N, D)` at T0 for the baseline method and compact layout. Estimate frontiers and regime labels under the shared rules. Run T1 only for cells selected by an observed scout or claim overcrowding trigger.
 
-### RQ3 Mechanism (Package C, Phase 3)
+### RQ3: Mechanism
 
-Compare efficient and overcrowding cells at the same N. One median per (N, D) cell. Rank tests, Holm across hypotheses.
+Which prespecified mechanism signatures distinguish efficient and overcrowding cells at the same N?
 
-| Hypothesis | Signature |
-|------------|-----------|
-| Interference | Higher median I_dir in overcrowding cells |
+Use one median per `(N, D)` cell, rank tests, and Holm correction across hypotheses.
+
+| Hypothesis | Required signature |
+|---|---|
+| Interference | Higher median `I_dir` in overcrowding cells |
 | Induced fragmentation | Lower largest-component fraction in overcrowding cells |
-| Coverage saturation | Among reliable cells, median coverage stays above 0.5, the range across D is under 0.1, and median path rises. A near-zero curve is not saturation |
-| Redundant effort | Higher median path while reliability does not gain |
+| Coverage saturation | Among reliable cells, median coverage remains above 0.5, its range across D is below 0.1, and median path rises; a near-zero curve is not saturation |
+| Redundant effort | Higher median path without a reliability gain |
 
-No new grid. If a method has no overcrowding label, this contrast is undefined for it.
+No new grid is introduced for RQ3. If a method has no overcrowding label, the mechanism contrast is undefined for that method.
 
-### RQ4 Generality (Package D, Phase 4)
+### RQ4: Generality across methods
 
-Required: `strombom_multi`, `kubo`, `fat`. Recommended: `communication_free`.
+Which frontier, regime, and structure patterns transfer across the three required methods?
 
-| Property | shared | shifted | absent |
-|----------|--------|---------|--------|
-| D_min | equal grid D | different grid D | one side has no D_min |
-| Overcrowding | present on both, D/N within 1.5x | present at a wider gap | not on both |
-| I_dir | r(I_dir, success) < -0.3 on both | the sign pattern differs in magnitude | not significant |
-| Coverage saturation | the saturation rule holds on both | it holds on one | it holds on neither |
+Repeat the size map and structure contrast for `kubo` and `fat`, then compare them with `strombom_multi`.
 
-State-dependent D_min is filled only when each method has the structure contrast.
+| Property | Shared | Shifted | Absent |
+|---|---|---|---|
+| `D_min` | Same tested D | Different tested D | One side has no `D_min` |
+| Overcrowding | Present on both and D/N is within a factor of 1.5 | Present on both with a wider gap | Not present on both |
+| `I_dir` | `r(I_dir, success) < -0.3` on both | Sign pattern agrees but magnitude differs | Required significant pattern is missing |
+| Coverage saturation | Saturation rule holds on both | Holds on one | Holds on neither |
 
-### RQ5 Information (Package E, Phase 5)
+The state-dependent transfer row is filled only when every compared method has the required structure runs.
 
-N in {100, 200}. Ladders: obs `bearing_only`, `local_positions`, `global`; range `0.5, 1, 1.5, 2` times the method `r_s` (65 for Strombom); comm `none`, `neighbour_broadcast`, `global_shared`.
+### RQ5: Information versus shepherd count
 
-On `strombom_multi`: `none` uses each dog's own observation; `neighbour_broadcast` adds dogs inside that dog's sensing radius; `global_shared` uses the union of sensed sheep, not true positions from the simulator. Report the ladder as what this controller consumes.
+Can richer observation, sensing range, or communication lower `D_min` at fixed reliability?
 
-C5a: one step lowers D_min by at least one grid step. C5b: the second step saves fewer dogs than the first.
+Use N in `{100, 200}`. Test the observation ladder `bearing_only`, `local_positions`, `global`; range multipliers `0.5, 1, 1.5, 2` times method `r_s`; and communication ladder `none`, `neighbour_broadcast`, `global_shared`. For `strombom_multi`, shared information is the union of sensed sheep, not privileged simulator truth.
 
-### RQ6 Fits (Package F, Phase 6)
+### RQ6: Scaling fits
 
-Candidates: constant, linear, power law `A * N^alpha` fit in dog-count units, and a two-piece linear model. Choice is leave-one-N-out RMSE. C6a: power law loses to the piecewise model or to separate curves per layout on that RMSE. C6b: in a stated N and X0 band, the slope of log D on log N is below 1.
+Which planned curve best predicts held-out N, and is a single power law adequate?
 
-### RQ7 Early warning (Package G, Phase 7)
+Compare constant, linear, power `A * N^alpha`, and two-piece linear candidates in dog-count units. Select by leave-one-N-out RMSE. Report any log slope only within an explicit N and layout band.
 
-At ticks 1,000, 1,200, ..., 8,000, features use only `(t - 200, t]`. The label is failure within the next 500 ticks, and only when t + 500 is still inside T0. The state model and the (N, D) logistic are fit on other N. Lead time is the gap from the first crossing of the training threshold until failure, and it may exceed 500. The fraction with lead time >= 500 uses every failure trial. C7a: held-out state AUROC above the (N, D) baseline. C7b: that fraction is at least 30%.
+### RQ7: Early warning
 
-## Claims
+Can recent state predict a later failure better than N and D alone?
+
+At ticks 1000 through 8000 in steps of 200, use features only from `(t - 200, t]`. Label failure within the next 500 ticks only where the horizon remains inside T0. Train on other N values. Lead time is measured from first crossing of the training threshold to failure and may exceed 500 ticks.
+
+## 6. Claim support criteria
+
+Verdicts are `UNEVALUATED`, `SUPPORTED`, `REJECTED`, or `INCONCLUSIVE`. A conditional analysis that cannot run because its trigger is absent is marked `SKIPPED` in run status and explained in the tracker. Verdicts may be assigned only from claim-grade evidence.
 
 | Claim | RQ | Supported when |
-|-------|----|----------------|
-| C1a | RQ1 | For at least one N, D_min differs by at least one D-grid step across X0 at theta 0.90 |
-| C1b | RQ1 | State model has lower out-of-sample negative log-likelihood than (N, D), leave-one-N-out |
-| C2a | RQ2 | Baseline method shows overcrowding at theta 0.90 for at least one N |
-| C2b | RQ2 | Some D above D_overcrowd still has R < theta at T = 20,000 |
-| C3 | RQ3 | Overcrowding cells differ from efficient cells on I_dir and/or fragmentation at the same N (rank p < 0.05, Holm) |
-| C4 | RQ4 | D_min or overcrowding is shared across the three required methods. The structure row needs the structure runs |
-| C5a | RQ5 | One ladder step lowers D_min by at least one grid step at N in {100, 200} |
-| C5b | RQ5 | The second step saves fewer dogs than the first |
-| C6a | RQ6 | Power law has higher leave-one-N-out RMSE than piecewise or per-layout curves |
-| C6b | RQ6 | Slope of log D_min on log N is below 1 in a stated N and X0 band |
-| C7a | RQ7 | Held-out state AUROC above the (N, D) baseline |
-| C7b | RQ7 | Lead time >= 500 ticks on at least 30% of failure trials |
+|---|---|---|
+| C1a | RQ1 | For at least one N, `D_min` differs by at least one D-grid step across layouts at theta 0.90 |
+| C1b | RQ1 | The state model has lower leave-one-N-out negative log-likelihood than the `(N, D)` model |
+| C2a | RQ2 | The baseline method has `D_overcrowd` at theta 0.90 for at least one N |
+| C2b | RQ2 | At least one D above `D_overcrowd` remains below theta at T = 20000 |
+| C3 | RQ3 | At fixed N, overcrowding and efficient cells differ in `I_dir` and/or fragmentation with rank `p < 0.05` after Holm correction |
+| C4 | RQ4 | `D_min` or overcrowding is shared across the three required methods; the structure row additionally requires all structure runs |
+| C5a | RQ5 | One ladder step lowers `D_min` by at least one D-grid step at N in `{100, 200}` |
+| C5b | RQ5 | The second ladder step saves fewer dogs than the first |
+| C6a | RQ6 | Power has higher leave-one-N-out RMSE than piecewise or per-layout curves |
+| C6b | RQ6 | The slope of log `D_min` on log N is below 1 in a stated N and layout band |
+| C7a | RQ7 | Held-out state AUROC exceeds the held-out `(N, D)` baseline |
+| C7b | RQ7 | At least 30 percent of failure trials have lead time of at least 500 ticks |
 
-Verdicts: UNEVALUATED / SUPPORTED / REJECTED / INCONCLUSIVE. The tracker holds them. Fill only at CLAIM grade.
+These criteria support statements inside the tested protocol only. They do not support a universal law, an untested task, field performance, or a dog-count gap below one grid step.
 
-## Protocol freeze (Section 8)
+## 7. Execution status, not scientific results
 
-Machine-readable: [../configs/canonical_grid.yaml](../configs/canonical_grid.yaml). Subsets: [../configs/protocols/](../configs/protocols/).
+This section records whether planned work ran. It does not state effect sizes, frontier values, or scientific interpretations. The [progress tracker](progress_tracker.md) owns current run and verdict status. The [run ledger](../results/summary/data/run_ledger.md) owns executed counts and provenance.
 
-| Item | Value |
-|------|-------|
-| Task | `drive_to_goal` |
-| Field | 500 by 500, flock at center, goal center `(370, 250)` |
-| Goal radius | `15 * sqrt(N/50)` |
-| Theta | 0.90 (also report 0.50, 0.70) |
-| Baseline | `strombom_multi` |
-| Required transfer | `strombom_multi`, `kubo`, `fat` |
-| N | {5, 10, 25, 50, 75, 100, 150, 200, 300, 400} |
-| D | {1, 2, 3, 4, 6, 10, 15, 20, 25, 35} |
-| X0 | compact, wide, split, outlier_rich |
-| Structure N | {50, 100, 200} |
-| Information N | {100, 200} |
-| T0 / T1 | 10,000 / 20,000 |
-| Scout / claim seeds | 30 / 100 |
-| Master seed | 2026 |
-| Bootstrap | 1,000 |
-| Predictor window | first 100 ticks |
-| RQ7 k / w / eval | 500 / 200 / 1,000..8,000 step 200 |
-| Wasteful bar | 20% (report 10% and 30%) |
+Status as recorded on 2026-10-06:
 
-### Why these values
+| Phase | Run status | Executed-count note |
+|---|---|---|
+| 0 | DONE | Protocol frozen |
+| 1 | DONE; conditional T1 SKIPPED | Scout 3000 rows; claim reseed 2200 rows; T1 not run because its trigger selected zero cells |
+| 2 | DONE | Scout 3600 rows; claim reseed 2400 rows |
+| 3 | SKIPPED | Conditional mechanism analysis had no eligible overcrowding contrast |
+| 4 | DONE for required Kubo and FAT size and structure campaigns | Exact scout, claim, and merge counts are in the run ledger |
+| 5 | TODO | No completed information-ladder campaign is claimed |
+| 6 | DONE for the planned baseline fit package | Analysis status only |
+| 7 | TODO | Early-warning analysis has not run |
 
-**Radius 15 at N = 50.** This is the app's goal at the default flock. Packed radius there is about 8. Radius 8 would jam. Radius 30 would be a pasture and would lower D_min because the target got easier.
+The words `DONE`, `SKIPPED`, and `TODO` describe execution status only. A completed phase can yield a rejected or inconclusive claim. A skipped conditional phase means its prespecified trigger was absent, not that a scientific outcome was observed at the unrun condition.
 
-**`sqrt(N/50)`.** Area per sheep stays constant. A fixed radius jams by N = 400 (packed radius about 23). Strombom's switch `2 * N^(2/3)` belongs to one controller and would make large N easier for every method.
+## 8. Future decision gates
 
-**Drive 120.** At speed 1 a straight crossing takes 120 ticks. At N = 400 the near edge of the goal is 78 from the flock: outside a compact start and past one wide sigma. Length 80 sits inside the wide cloud. Length 200 puts the far edge of the goal on the wall of a 500 field.
+| Gate | Evidence checked | Decision |
+|---|---|---|
+| G1 Protocol consistency | Canonical YAML, resolved protocol, and plan | Stop if frozen values disagree; version any deliberate protocol change |
+| G2 Scout quality | Completion, reliability map, and provenance | Stop and repair a broken map before claim planning |
+| G3 Claim-window precision | Bootstrap interval for `D_min` | Raise selected windows to 200 seeds when the interval spans more than one D-grid step |
+| G4 T1 trigger | Two consecutive post-frontier D values below theta | Run T1 only on selected overcrowding cells; otherwise record `SKIPPED` |
+| G5 Mechanism eligibility | Efficient and overcrowding cells at the same N | Run RQ3 only where the matched contrast exists |
+| G6 Transfer completeness | Size and structure maps for all required methods | Do not fill the full structure-transfer claim before all maps exist |
+| G7 Structure extension | Three-size structure claim map | Add N = 300 and 400 mainly if all four layouts remain at the `D_min` floor; otherwise the extension is optional |
+| G8 Information campaign | Stable baseline and separate ladder protocol | Run observation, range, and communication as separate staged campaigns |
+| G9 Early warning | Claim-grade timeseries and both outcome classes | Do not report AUROC or lead time without held-out eligible data |
+| G10 Intended velocity E1 | Claim-grade evidence of wall-driven `I_dir` spikes | Keep E1 unbuilt unless that diagnostic need is demonstrated |
+| G11 External parity | Matched cross-engine protocol and prespecified tolerances | Make no numerical NetLogo parity claim until the credibility requirements are met |
 
-**Field 500, goal at `(370, 250)`.** Half-width 250 covers a wide 3-sigma draw (180) with margin about 70, and the N = 400 outlier reach (about 174). A 150 field cannot. A 400 field leaves about 20 on the wide draw. A 1000 field adds empty space. The goal is on the midline so the vertical margins match. The field is square so split clusters on a circle are not pushed into a short side.
+## 9. Scope and threats
 
-**N floor 5.** Below that there is no collective: no sheep-sheep interaction at N = 1, an 80/20 split is a different factor at N = 2 to 4, and periphery-by-median is almost everyone. N = 5 and 10 keep the small-flock regime. The floor is not 20.
+| Threat or boundary | Planning response |
+|---|---|
+| One simulated task | Limit conclusions to `drive_to_goal`; a second task is later work |
+| Method dependence | Require RQ4 before making method-general statements |
+| Layout and state confounding | Use matched N and prespecified layout contrasts |
+| Discrete D grid | Express effects in local grid steps and preserve censoring above the grid |
+| Soft reliability frontier | Use locked seeds, claim windows, bootstrap intervals, and the 200-seed precision gate |
+| Conditional analyses | Mark absent-trigger work as undefined or skipped, never as a measured null at an unrun condition |
+| Time conventions across methods | Avoid direct physical interpretation of raw tick counts across controller families |
+| Strombom collect switch wider than the goal | Do not interpret its failure as a packing failure |
+| Simulated controllers | Make no field, farm, or biological-validity claim |
+| NetLogo twins and 2025 draft | Treat them as separate evidence layers; follow the credibility documents |
+| Grid ceiling | Do not interpret D = 35 as a physical upper limit |
+| Selective precision | Preserve cell grade after merges and never stack scout and claim rows |
 
-**N points.** Ten sizes, tighter around 100, where one dog stops being enough in the draft. 75 and 150 locate that change. 300 and 400 give the large-N slope more than one step. 250 and 350 are omitted because each extra N is a full dog sweep. A step of 50 from 50 to 400 is more sizes than a two-piece fit uses.
+The application default arena, sheep models, and dog force laws are outside this protocol's modification scope. Detailed boundaries and validation limits are in [credibility and comparison](credibility/README.md).
 
-**D points.** Steps of 1 from 1 to 4, where D_min usually sits. Wider after that, because the question is whether a large increase helps or hurts, and a 2-dog gap is smaller than the high-D step. The cap is 35 because that is where a few shepherds ends. Every integer to 35 would make the scout about 10,500 trials instead of 3,000.
+## 10. Source precedence and document ownership
 
-**Theta 0.90.** Reliable band, the same cut as the draft. 0.50 is reported and is not the bar for D_min. 0.99 at 100 seeds would mark stable cells as short.
+When sources differ, use this order:
 
-**T0 = 10,000.** About 80 straight crossings, so timeout means loss of control. The scenario default 3,000 would mix slow successes into failures. T1 = 20,000 is only for overcrowding cells.
+1. [`canonical_grid.yaml`](../configs/canonical_grid.yaml) defines frozen machine-readable `scaling_v2` defaults.
+2. A resolved YAML in [`configs/protocols/`](../configs/protocols/) defines a campaign subset.
+3. A run's copied `protocol.yaml`, `provenance.json`, `manifest.jsonl`, and `status.json` define what actually executed.
+4. This plan defines research questions, dependencies, claim criteria, evidence grades, budgets, gates, and scope.
+5. [Setup documents](setup/README.md) define parameter rationale, glossary, implementation caps, and operational reference.
+6. [Method guides](methods/README.md) define controller interpretation and method-specific limits.
+7. [Credibility documents](credibility/README.md) define comparison and validation boundaries.
+8. [Run strategy](experiment_run_strategy.md) and [run guide](setup/run_guide.md) define staging intent and commands.
+9. [Progress tracker](progress_tracker.md) defines current code, run, and claim status.
+10. [Data appendices](../results/summary/data/README.md) and their direct artifacts define executed counts and reported evidence.
 
-**Seeds 30 and 100.** At R = 0.90 the standard error is about 0.055 at 30 (enough to separate a broken cell from a solid one) and about 0.03 at 100. Ten seeds flip the window. 200 is the raise when the D_min interval covers more than one grid step. The seed base 2026 is a fixed integer so the two stages share a list.
-
-**Bootstrap 1,000.** The interval resamples seeds already run. 1,000 puts about 25 draws in each 2.5% tail. 100 leaves two or three.
-
-**Layouts.** Spread 30. Compact sigma 9 matches the packed radius at N = 50. Wide sigma 60 is a clear cohesion gap that still fits; sigma 120 would leave the field. Split uses 2 clusters below N = 12 (three clusters of five sheep are not subflocks) and gaps of at least 10. Outliers are 20% (50% would be a second flock; 5% is not one sheep at N = 5).
-
-**Fragmentation radius 5.** Neighbors in a compact flock sit near 2 to 4, so radius 5 joins them. Split gaps are at least 10, so radius 5 leaves them apart. Radius 2 would split a slightly loose compact flock. Radius 15 would bridge the split.
-
-**Coverage radius.** The distance at which sheep react to a dog (`r_s = 65` for Strombom, or `sensing_range` when that factor is set). Radius 2 is sheep-sheep repulsion.
-
-**Outlier threshold `r_a * N^(2/3)`.** Same distance the collect/drive switch uses. A fixed 15 would mean a different fraction of the flock at N = 5 and at N = 400.
-
-**I_dir cutoff 1e-6.** Numerical dust. A cutoff of 0.1 would drop dogs that are still steering.
-
-**Wasteful 20%.** 10% sits in the noise of path length. 50% would only mark extreme overspend. 10% and 30% are reported beside 20%.
-
-**Predictor window 100.** Shorter than the 120-tick drive, so a straight success is not inside the features. The first 200 ticks would include easy arrivals.
-
-**Early warning.** Eval starts at 1,000 because tick 0 is the layout. It stops at 8,000 so that 8,000 + 500 is still before timeout. Step 200 matches the feature window. Window 200 is longer than one burst and shorter than the 500-tick horizon. A horizon of 100 is less than one drive. A horizon of 2,000 is a fifth of the trial.
-
-**Information ladder.** Relative steps so another method's base range uses the same rungs. Four rungs support a first step and a second step. Claim N is 100 and 200. N = 50 is skipped when D_min is already 1.
-
-**Structure N {50, 100, 200}.** On the Phase 1 compact map these sizes already have D_min at the floor (1 dog), so the draft steep band is not assumed. They are large enough for split clusters and outliers to be real flocks (split uses three clusters only for N >= 12; outlier_rich at about 20% needs more than a handful of sheep). Compact is the reference. Wide, split, and outlier_rich are the contrasts. A higher D_min on another layout is the structure effect. Do not put N in {5, 10} on the structure claim: below N = 12 split is only two clusters, and Phase 1 already covers the tiny-flock regime where compact needs two dogs. N = 25 adds little versus 50 once the compact floor is known. N = 75 and 150 densify a size transition that is already flat here. Run the three-size map first. Add N = 300 and 400 only after that claim map exists, and mainly when all four layouts still sit on D_min = 1; if C1a already has a grid-step gap, large N is optional.
-
-**Claim window.** One cell is not enough: 30 seeds can place the crossing on the wrong D. The whole grid at 100 seeds spends the draft's budget on interiors that do not move D_min. Overcrowding needs two consecutive D below theta: one dip can be noise, and requiring the rest of the grid to stay down would miss a collapse that later recovers.
-
-**Transfer of D_min.** Shared means the same grid D. "Within 2 dogs" is smaller than the high-D step.
-
-**Leave-one-N-out.** Holding out random trials keeps other seeds of the same size in training.
-
-### Layout contract
-
-| Layout | Definition | Gate |
-|--------|------------|------|
-| compact | Gaussian, sigma = 0.3 x spread | Lower cohesion distance than wide |
-| wide | Gaussian, sigma = 2.0 x spread | Higher cohesion distance than compact |
-| split | 2 clusters below N = 12, else 3, gap >= 2 x measurement radius | Lower fragmentation index than compact |
-| outlier_rich | Core about 80%, outliers about 20% beyond `r_a * N^(2/3)` | Higher outlier count than compact |
-
-Points that would leave the field or land in the goal are redrawn. They are not moved onto the boundary.
-
-### Caps
-
-| Cap | Role | Location |
-|-----|------|----------|
-| I1 | Grid runner, resume, provenance | `scaling/services/scaling/runner.py` |
-| I2 | Frontiers, claim windows, bootstrap | `analysis/scaling/frontier.py` |
-| I3 | Regimes | `analysis/scaling/regimes.py` |
-| I4 | Mean-spread, extent, perimeter, hull area, density, aspect | `plugins/metrics/mean_spread.py`, `extent.py`, `perimeter.py`, `hull_area.py`, `flock_density.py`, `aspect_ratio.py` |
-| I5 | X0 generators | `core/x0_generators.py` |
-| I6 | State vs (N, D) | `analysis/scaling/predictors.py` |
-| I7 | I_dir, coverage | `plugins/metrics/shepherd_interference.py`, `shepherd_coverage.py` |
-| I8 | Mechanism tests | `analysis/scaling/mechanism.py` |
-| I9 | Transfer table | `analysis/scaling/transfer.py` |
-| I10 | Factor sweeps | `scaling/scripts/run_factor_sweep.py`, `analysis/scaling/substitution.py` |
-| I11 | Fits | `analysis/scaling/fits.py` |
-| I12 | Early warning | `analysis/scaling/early_warning.py` |
-| I13 | Canonical config, export | `scaling/configs/canonical_grid.yaml`, `analysis/scaling/export.py` |
-| I14 | Parquet timeseries | runner write path |
-
-### Paths
-
-```text
-analysis/scaling/          # packages A-G
-scaling/services/scaling/  # runner
-scaling/configs/           # canonical_grid.yaml + protocols/
-scaling/scripts/           # campaign, run_grid, plan_claim_cells, plan_t1_cells,
-                           # run_factor_sweep, analyse
-scaling/results/phase{k}/{protocol}/
-```
-
-CLI: `make -C scaling help` or `uv run scaling/scripts/campaign.py help`.
-Campaigns: Phase 1 size/claim/T1, Phase 2 structure, Phase 4 transfer
-(`TRANSFER_METHOD=kubo|fat`), Phase 5 obs/range/communication.
-
-### Do not modify, and E1
-
-Leave the app's default 150 field and radius-15 goal. Leave sheep models and dog force laws. E1 (intended velocities) is unbuilt until a claim-grade map shows I_dir spikes only at walls.
-
-### Threats
-
-| Threat | What we do |
-|--------|------------|
-| Single task | RQ4 changes method. A second task is optional after RQ1-RQ3 |
-| Strombom switch wider than the goal | Stated in the arena section. Not treated as packing |
-| Discrete ticks, sheep speed 1 | Report both. Results are at this resolution |
-| Simulated methods | Claims stay inside the simulation |
-| Soft frontier | If the D_min interval covers more than one grid step, raise the window to 200 seeds |
+Results never redefine the frozen plan. If a planning estimate differs from a run artifact, retain the estimate as a plan and report the artifact as executed. If a copied run protocol differs from generic prose, the copied protocol and provenance control interpretation of that run.

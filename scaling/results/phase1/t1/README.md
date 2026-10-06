@@ -60,7 +60,7 @@ Single method and layout. Structure or transfer maps might still show overcrowdi
 
 - Tracker step 6 SKIPPED
 - Continue with Phase 2 structure when that campaign is next
-- Research plan: [../../summary/RESEARCH_PLAN.html](../../summary/RESEARCH_PLAN.html)
+- Main scaling plan: [../../../docs/main_scaling_plan.html](../../../docs/main_scaling_plan.html)
 
 ## Files in this folder
 

@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang='vi'>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Huong dan chay</title>
+<meta name='description' content='Tai lieu HerdSim de doc va dieu huong.'>
+<style>
+:root{--ink:#111827;--mut:#6b7280;--line:#e5e7eb;--acc:#2563eb;--bg:#f9fafb}
+*{box-sizing:border-box}body{margin:0;font:16px/1.65 -apple-system,'Segoe UI',Inter,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+header{background:linear-gradient(120deg,#1e3a8a,#0f766e);color:#fff;padding:48px 24px}
+header .in,main{max-width:1000px;margin:auto}header h1{margin:0 0 8px;font-size:2rem}header p{margin:0;opacity:.9;max-width:46rem}
+.chrome{max-width:1280px;margin:auto;padding:12px 24px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.chrome a{color:var(--acc);text-decoration:none}.chrome a:hover,.chrome a:focus{text-decoration:underline}
+.crumbs,.page-nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.sep{color:var(--mut)}
+.layout{display:grid;grid-template-columns:230px 1fr;gap:32px;max-width:1280px;margin:0 auto;padding:24px}
+nav{position:sticky;top:16px;align-self:start;font-size:.88rem;max-height:calc(100vh - 32px);overflow:auto}
+nav a{display:block;padding:5px 10px;color:var(--mut);text-decoration:none;border-left:2px solid var(--line)}
+nav a:hover,nav a:focus{color:var(--acc);border-color:var(--acc)}
+main{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 40px 40px;min-width:0}
+h2{margin-top:2.2em;padding-bottom:6px;border-bottom:2px solid var(--line);scroll-margin-top:16px}
+h2:first-child{margin-top:1.2em}
+h3{margin-top:1.6em;color:#1e3a8a}
+h4{margin:1.35em 0 .55em;font-size:1.02rem;font-weight:700;color:#334155}
+blockquote{margin:1em 0;padding:14px 18px;border-left:4px solid #0f766e;background:#f0fdfa;border-radius:0 8px 8px 0;color:#134e4a;font-size:1.05rem;font-weight:600;line-height:1.55}
+blockquote p{margin:0}
+code{background:#eef2ff;border-radius:4px;padding:1px 5px;font-size:.88em;word-break:break-word}
+a{color:var(--acc)}
+figure{margin:24px 0;text-align:center}figure img{max-width:100%;border:1px solid var(--line);border-radius:8px;background:#fff}
+figcaption{font-size:.88rem;color:var(--mut);margin-top:6px;text-align:left}
+table{border-collapse:collapse;width:100%;font-size:.9rem;margin:8px 0}
+.table-wrap{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+/* First col hugs content (short IDs); badges with nowrap still expand as needed. */
+th:first-child,td:first-child{width:1%;white-space:nowrap;min-width:3.25rem}
+/* Phase/package-style third column needs room on RQ tables. */
+th:nth-child(3),td:nth-child(3){min-width:10.5rem}
+th{background:#f3f4f6}caption{caption-side:bottom;font-size:.85rem;color:var(--mut);padding:6px;text-align:left}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.78rem;font-weight:600;white-space:nowrap}
+.REJECTED,.BI_BAC_BO,.NOT_REPRODUCED,.KHONG_TAI_HIEN{background:#fee2e2;color:#991b1b}
+.SUPPORTED,.DUOC_UNG_HO,.OK,.DUNG,.READY,.SAN_DUNG,.D_MIN_1{background:#dcfce7;color:#166534}
+.INCONCLUSIVE,.EVALUATED,.KHONG_RO_RANG,.DA_DANH_GIA,.WEAK,.YEU,.UNVERIFIED,.CHUA_XAC_NHAN,.PARTIAL,.MOT_PHAN,.COST_ONLY,.CHI_CHI_PHI{background:#fef3c7;color:#92400e}
+.SKIPPED,.UNEVALUATED,.BO_QUA,.CHUA_DANH_GIA,.NOT_RUN,.CHUA_CHAY,.WASTE,.LANG_PHI{background:#ffedd5;color:#9a3412}
+.NEEDS_RUN,.CAN_CHAY,.STALE,.LOI_THOI{background:#ffedd5;color:#9a3412}
+.kpi-note{background:#eff6ff;border-left:4px solid #2563eb;padding:10px 14px;margin:12px 0;border-radius:0 8px 8px 0;font-size:.95rem}
+ul{padding-left:1.2em}li{margin:6px 0}
+footer{max-width:1280px;margin:0 auto 32px;padding:0 24px;color:var(--mut);font-size:.85rem}
+.missing{border:1px solid #b91c1c;background:#fef2f2;color:#991b1b;padding:10px;border-radius:6px}
+pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8px}pre code{background:transparent;padding:0;color:inherit}
+@media(max-width:900px){.layout{grid-template-columns:1fr}nav{display:none}main{padding:8px 18px 30px}header{padding:32px 18px}header h1{font-size:1.55rem}.chrome{padding:10px 18px}}
+</style>
+</head>
+<body>
+<div class='chrome'><div class='crumbs'><a href="../INDEX_vi.html">Trang chu</a><span class="sep">/</span><span>Setup</span><span class="sep">/</span><span>Huong dan chay</span></div><div class='page-nav'><a rel="prev" href="glossary_vi.html">Truoc</a><span class="sep">|</span><a href="run_guide.html">English</a></div></div>
+<header><div class='in'><h1>Huong dan chay</h1><p>Tai lieu HerdSim de doc va dieu huong.</p></div></header>
+<div class='layout'>
+<nav><a href="#xem-help-va-test">Xem help va test</a><a href="#phase-1-baseline-size">Phase 1: baseline size</a><a href="#phase-2-structure">Phase 2: structure</a><a href="#phase-4-transfer-controller">Phase 4: transfer controller</a><a href="#phase-5-information-ladder">Phase 5: information ladder</a><a href="#lenh-campaign-truc-tiep">Lenh campaign truc tiep</a><a href="#resume">Resume</a><a href="#phan-tich-trial-co-san">Phan tich trial co san</a><a href="#dau-ra">Dau ra</a><a href="#provenance-va-cach-doc">Provenance va cach doc</a></nav>
+<main>
+<p>Chay lenh tu <code>/home/gwen/HerdSim</code>. Makefile dat <code>PYTHONPATH</code> va goi <code>scaling/scripts/campaign.py</code>.</p>
+<h2 id="xem-help-va-test">Xem help va test</h2>
+<pre><code class="language-bash">make -C scaling help
+uv run scaling/scripts/campaign.py help
+make -C scaling scaling-test</code></pre>
+<p>Target correctness chay:</p>
+<pre><code class="language-bash">uv run pytest tests/backend/correctness/test_scaling_stack.py -q</code></pre>
+<p>So worker mac dinh la 18 cho host ghi trong <code>scaling/Makefile</code>. Tren may nho hon, override nhu <code>WORKERS=4</code>.</p>
+<h2 id="phase-1-baseline-size">Phase 1: baseline size</h2>
+<pre><code class="language-bash">make -C scaling scaling-pilot
+make -C scaling scaling-scout
+make -C scaling scaling-claim-plan
+make -C scaling scaling-claim-reseed
+make -C scaling scaling-analyse PROTOCOL=phase1_claim PACKAGE=A
+make -C scaling scaling-t1-plan
+make -C scaling scaling-t1</code></pre>
+<p>Chay theo thu tu nay. Pilot la smoke check. Scout map luoi day du. Claim plan ghi cell selection nhung khong chay simulation. Claim reseed chay cac cell va tao merged claim data. T1 chi chay neu planner thay overcrowding.</p>
+<p>Baseline da hoan thanh khong co overcrowding cell, nen Phase 1 T1 khong chay. Khong chay T1 chi de lap thu muc neu planner khong co cell.</p>
+<h2 id="phase-2-structure">Phase 2: structure</h2>
+<pre><code class="language-bash">make -C scaling scaling-pilot-state
+make -C scaling scaling-phase2-scout
+make -C scaling scaling-phase2-claim-plan
+make -C scaling scaling-phase2-claim-reseed
+make -C scaling scaling-analyse PROTOCOL=phase2_claim PACKAGE=B</code></pre>
+<p>Moi layout va N co cua so frontier rieng.</p>
+<h2 id="phase-4-transfer-controller">Phase 4: transfer controller</h2>
+<p>Chay size va structure rieng cho Kubo:</p>
+<pre><code class="language-bash">make -C scaling scaling-transfer-size-scout TRANSFER_METHOD=kubo
+make -C scaling scaling-transfer-size-claim-plan TRANSFER_METHOD=kubo
+make -C scaling scaling-transfer-size-claim-reseed TRANSFER_METHOD=kubo
+make -C scaling scaling-transfer-structure-scout TRANSFER_METHOD=kubo
+make -C scaling scaling-transfer-structure-claim-plan TRANSFER_METHOD=kubo
+make -C scaling scaling-transfer-structure-claim-reseed TRANSFER_METHOD=kubo</code></pre>
+<p>Lap lai voi <code>TRANSFER_METHOD=fat</code>. Package D chi tong hop sau khi du map bat buoc.</p>
+<h2 id="phase-5-information-ladder">Phase 5: information ladder</h2>
+<p>Observation:</p>
+<pre><code class="language-bash">make -C scaling scaling-factor-sweep
+make -C scaling scaling-phase5-obs-claim-plan
+make -C scaling scaling-phase5-obs-claim-reseed</code></pre>
+<p>Sensing range:</p>
+<pre><code class="language-bash">make -C scaling scaling-phase5-range-scout
+make -C scaling scaling-phase5-range-claim-plan
+make -C scaling scaling-phase5-range-claim-reseed</code></pre>
+<p>Communication:</p>
+<pre><code class="language-bash">make -C scaling scaling-phase5-comm-scout
+make -C scaling scaling-phase5-comm-claim-plan
+make -C scaling scaling-phase5-comm-claim-reseed</code></pre>
+<p>Ba ladder la campaign rieng, khong phai Cartesian product.</p>
+<h2 id="lenh-campaign-truc-tiep">Lenh campaign truc tiep</h2>
+<p>Dang chung:</p>
+<pre><code class="language-bash">uv run scaling/scripts/campaign.py VERB --protocol PROTOCOL_ID [OPTIONS]</code></pre>
+<p>Verb gom <code>run</code>, <code>claim-plan</code>, <code>claim-reseed</code>, <code>t1-plan</code>, <code>t1</code>, va <code>analyse</code>. Protocol ID duoc resolve trong <code>scaling/configs/protocols/</code>.</p>
+<pre><code class="language-bash">uv run scaling/scripts/campaign.py run --protocol phase1_scout --workers 8
+uv run scaling/scripts/campaign.py claim-plan --protocol phase1_claim
+uv run scaling/scripts/campaign.py claim-reseed --protocol phase1_claim --workers 8
+uv run scaling/scripts/campaign.py analyse --protocol phase1_claim --package A</code></pre>
+<p>Option gom <code>--output</code>, <code>--workers</code>, <code>--upstream-trials</code>, <code>--no-analyse</code>, <code>--package</code>, <code>--trials</code>, <code>--methods</code>, <code>--layouts</code>, <code>--n</code>, <code>--d</code>, <code>--seeds</code>, <code>--max-ticks</code>, <code>--no-timeseries</code>, va <code>--no-resume</code>.</p>
+<p>Make variable map toi filter:</p>
+<pre><code class="language-bash">make -C scaling scaling-scout WORKERS=4 SCALING_N=100 SCALING_D=1 SCALING_SEEDS=2
+make -C scaling scaling-analyse PROTOCOL=phase1_claim PACKAGE=F \
+  TRIALS=scaling/results/phase1/claim/merged_trials.csv</code></pre>
+<p>Filter va seed override dung cho chan doan. Run da filter khong phai campaign dong bang day du va khong duoc trinh bay nhu campaign day du.</p>
+<h2 id="resume">Resume</h2>
+<p>Resume bat mac dinh. Chay lai cung lenh voi cung output directory. Runner doc <code>manifest.jsonl</code> va bo trial key co <code>status=ok</code>. Key gom N, D, seed, layout, method, va factor observation, range, communication neu co.</p>
+<pre><code class="language-bash">make -C scaling scaling-scout</code></pre>
+<p>Kiem tra <code>status.json</code> truoc va sau resume. File ghi so planned, done, pending tai luc bat dau, running, va timestamp. Tranh <code>--no-resume</code> tru khi co chu y chay moi, vi option nay tat skip key da xong.</p>
+<h2 id="phan-tich-trial-co-san">Phan tich trial co san</h2>
+<pre><code class="language-bash">make -C scaling scaling-analyse \
+  PROTOCOL=phase1_claim \
+  PACKAGE=A \
+  TRIALS=scaling/results/phase1/claim/merged_trials.csv</code></pre>
+<p><code>TRIALS</code> va <code>OUT</code> la Make variable tuy chon. Neu analyse truc tiep khong co protocol, can ca <code>--trials</code> va <code>--output</code>.</p>
+<p>Package:</p>
+<ul>
+<li>A: baseline size frontier va reliability.</li>
+<li>B: structure.</li>
+<li>C: mechanism.</li>
+<li>D: transfer.</li>
+<li>E: information substitution.</li>
+<li>F: scaling fit.</li>
+<li>G: early warning.</li>
+</ul>
+<p>Package C, F, G chu yeu phan tich data da thu. G can timeseries. Scout protocol thuong dat <code>store_timeseries: false</code> de giam disk I/O; claim protocol dat true cho boundary trajectory.</p>
+<h2 id="dau-ra">Dau ra</h2>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Artifact</th>
+<th>Y nghia</th>
+</tr></thead><tbody>
+<tr>
+<td><code>protocol.yaml</code></td>
+<td>Recipe da resolve</td>
+</tr>
+<tr>
+<td><code>provenance.json</code></td>
+<td>Protocol stamp, seed list, code va host metadata, metric ID, timestamp</td>
+</tr>
+<tr>
+<td><code>manifest.jsonl</code></td>
+<td>Resume ledger voi <code>status=ok</code></td>
+</tr>
+<tr>
+<td><code>status.json</code></td>
+<td>So planned, done va timestamp</td>
+</tr>
+<tr>
+<td><code>trials.csv</code></td>
+<td>Mot row moi simulation</td>
+</tr>
+<tr>
+<td><code>boundary_cells.csv</code></td>
+<td>Cell do claim planner chon</td>
+</tr>
+<tr>
+<td><code>merged_trials.csv</code></td>
+<td>Claim row thay scout row tai cell gieo lai</td>
+</tr>
+<tr>
+<td><code>timeseries/*.parquet</code></td>
+<td>Trajectory moi trial neu bat</td>
+</tr>
+<tr>
+<td><code>packages/</code></td>
+<td>Bang va hinh export</td>
+</tr>
+<tr>
+<td><code>README.md</code></td>
+<td>Ghi chu run va link</td>
+</tr>
+</tbody></table></div>
+<p>Path thuong gap:</p>
+<pre><code class="language-text">scaling/results/phase1/pilot/
+scaling/results/phase1/scout/
+scaling/results/phase1/claim/
+scaling/results/phase1/t1/
+scaling/results/phase2/{pilot_state,scout,claim}/
+scaling/results/phase4/{kubo,fat}_{size,structure}/{scout,claim}/
+scaling/results/phase5/</code></pre>
+<h2 id="provenance-va-cach-doc">Provenance va cach doc</h2>
+<p>Truoc khi trich ket qua:</p>
+<ol>
+<li>Xac nhan <code>status.json</code> da hoan thanh.</li>
+<li>Xac nhan <code>protocol.yaml</code> co dung protocol, grade, factor, seed count.</li>
+<li>Giu <code>provenance.json</code> va <code>manifest.jsonl</code>.</li>
+<li>Dung <code>merged_trials.csv</code> cho claim, khong tu noi CSV.</li>
+<li>Xac nhan bao cao ghi grade CLAIM.</li>
+<li>Doc D = 35 la grid ceiling khi D_overcrowd trong.</li>
+<li>Ghi ro phase co dieu kien bi skip va trigger cua no.</li>
+</ol>
+<p>Hinh SCOUT chi dung lap ke hoach, khong duoc nang thanh verdict. Thu muc protocol la don vi provenance; recipe va record may-doc cua no uu tien hon vi du tong quat trong van ban.</p>
+</main>
+</div>
+<footer><p>Nguon Markdown: <code>run_guide_vi.md</code>. Hinh anh duoc nhung de doc ngoai tuyen.</p></footer>
+</body>
+</html>

@@ -2,7 +2,7 @@
 
 Question in plain terms: on a tight (compact) start with the baseline dog rule, how many dogs do we need as the flock gets larger?
 
-Baseline method: `strombom_multi`. Protocol: `scaling_v2`. Cross-phase context: [../summary/RESEARCH_PLAN.html](../summary/RESEARCH_PLAN.html) and [../summary/SUMMARY_REPORT.html](../summary/SUMMARY_REPORT.html).
+Baseline method: `strombom_multi`. Protocol: `scaling_v2`. Cross-phase context: [main scaling plan](../../docs/main_scaling_plan.html) and [results summary](../summary/SUMMARY_REPORT.html).
 
 ## Folders
 
@@ -61,6 +61,8 @@ Cited in [claim/README.md](claim/README.md) and packages under `claim/packages/`
 
 ## Cross-phase
 
-- Research plan: [../summary/RESEARCH_PLAN.html](../summary/RESEARCH_PLAN.html)
+- Main scaling plan: [../../docs/main_scaling_plan.html](../../docs/main_scaling_plan.html)
 - Results summary: [../summary/SUMMARY_REPORT.html](../summary/SUMMARY_REPORT.html)
+- Documentation: [index](../../docs/INDEX.html), [methods](../../docs/methods/README.html), [setup](../../docs/setup/README.html), [credibility](../../docs/credibility/README.html)
+- Data appendices: [Phase 1 tables](../summary/data/phase1_tables.html), [run ledger](../summary/data/run_ledger.html)
 - Tracker: [../../docs/progress_tracker.md](../../docs/progress_tracker.md)

@@ -8,8 +8,8 @@ Platform in that work: NetLogo 7.0.3 ABM (not HerdSim).
 
 This note is a **reference summary** of what that draft did (methods, experiment, results). It is not a substitute for the PDF. Use it when comparing HerdSim scaling protocol choices to prior work.
 
-HerdSim program: [herdsim_research_program.md](herdsim_research_program.md)
-HerdSim how: [main_scaling_plan.md](main_scaling_plan.md)
+HerdSim program: [herdsim_research_program.md](../herdsim_research_program.md)
+HerdSim plan: [main_scaling_plan.md](../main_scaling_plan.md)
 
 ---
 

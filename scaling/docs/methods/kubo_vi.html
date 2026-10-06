@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang='vi'>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Chan dan dua tren luc Kubo</title>
+<meta name='description' content='Tai lieu HerdSim de doc va dieu huong.'>
+<style>
+:root{--ink:#111827;--mut:#6b7280;--line:#e5e7eb;--acc:#2563eb;--bg:#f9fafb}
+*{box-sizing:border-box}body{margin:0;font:16px/1.65 -apple-system,'Segoe UI',Inter,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+header{background:linear-gradient(120deg,#1e3a8a,#0f766e);color:#fff;padding:48px 24px}
+header .in,main{max-width:1000px;margin:auto}header h1{margin:0 0 8px;font-size:2rem}header p{margin:0;opacity:.9;max-width:46rem}
+.chrome{max-width:1280px;margin:auto;padding:12px 24px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.chrome a{color:var(--acc);text-decoration:none}.chrome a:hover,.chrome a:focus{text-decoration:underline}
+.crumbs,.page-nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.sep{color:var(--mut)}
+.layout{display:grid;grid-template-columns:230px 1fr;gap:32px;max-width:1280px;margin:0 auto;padding:24px}
+nav{position:sticky;top:16px;align-self:start;font-size:.88rem;max-height:calc(100vh - 32px);overflow:auto}
+nav a{display:block;padding:5px 10px;color:var(--mut);text-decoration:none;border-left:2px solid var(--line)}
+nav a:hover,nav a:focus{color:var(--acc);border-color:var(--acc)}
+main{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 40px 40px;min-width:0}
+h2{margin-top:2.2em;padding-bottom:6px;border-bottom:2px solid var(--line);scroll-margin-top:16px}
+h2:first-child{margin-top:1.2em}
+h3{margin-top:1.6em;color:#1e3a8a}
+h4{margin:1.35em 0 .55em;font-size:1.02rem;font-weight:700;color:#334155}
+blockquote{margin:1em 0;padding:14px 18px;border-left:4px solid #0f766e;background:#f0fdfa;border-radius:0 8px 8px 0;color:#134e4a;font-size:1.05rem;font-weight:600;line-height:1.55}
+blockquote p{margin:0}
+code{background:#eef2ff;border-radius:4px;padding:1px 5px;font-size:.88em;word-break:break-word}
+a{color:var(--acc)}
+figure{margin:24px 0;text-align:center}figure img{max-width:100%;border:1px solid var(--line);border-radius:8px;background:#fff}
+figcaption{font-size:.88rem;color:var(--mut);margin-top:6px;text-align:left}
+table{border-collapse:collapse;width:100%;font-size:.9rem;margin:8px 0}
+.table-wrap{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+/* First col hugs content (short IDs); badges with nowrap still expand as needed. */
+th:first-child,td:first-child{width:1%;white-space:nowrap;min-width:3.25rem}
+/* Phase/package-style third column needs room on RQ tables. */
+th:nth-child(3),td:nth-child(3){min-width:10.5rem}
+th{background:#f3f4f6}caption{caption-side:bottom;font-size:.85rem;color:var(--mut);padding:6px;text-align:left}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.78rem;font-weight:600;white-space:nowrap}
+.REJECTED,.BI_BAC_BO,.NOT_REPRODUCED,.KHONG_TAI_HIEN{background:#fee2e2;color:#991b1b}
+.SUPPORTED,.DUOC_UNG_HO,.OK,.DUNG,.READY,.SAN_DUNG,.D_MIN_1{background:#dcfce7;color:#166534}
+.INCONCLUSIVE,.EVALUATED,.KHONG_RO_RANG,.DA_DANH_GIA,.WEAK,.YEU,.UNVERIFIED,.CHUA_XAC_NHAN,.PARTIAL,.MOT_PHAN,.COST_ONLY,.CHI_CHI_PHI{background:#fef3c7;color:#92400e}
+.SKIPPED,.UNEVALUATED,.BO_QUA,.CHUA_DANH_GIA,.NOT_RUN,.CHUA_CHAY,.WASTE,.LANG_PHI{background:#ffedd5;color:#9a3412}
+.NEEDS_RUN,.CAN_CHAY,.STALE,.LOI_THOI{background:#ffedd5;color:#9a3412}
+.kpi-note{background:#eff6ff;border-left:4px solid #2563eb;padding:10px 14px;margin:12px 0;border-radius:0 8px 8px 0;font-size:.95rem}
+ul{padding-left:1.2em}li{margin:6px 0}
+footer{max-width:1280px;margin:0 auto 32px;padding:0 24px;color:var(--mut);font-size:.85rem}
+.missing{border:1px solid #b91c1c;background:#fef2f2;color:#991b1b;padding:10px;border-radius:6px}
+pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8px}pre code{background:transparent;padding:0;color:inherit}
+@media(max-width:900px){.layout{grid-template-columns:1fr}nav{display:none}main{padding:8px 18px 30px}header{padding:32px 18px}header h1{font-size:1.55rem}.chrome{padding:10px 18px}}
+</style>
+</head>
+<body>
+<div class='chrome'><div class='crumbs'><a href="../INDEX_vi.html">Trang chu</a><span class="sep">/</span><span>Methods</span><span class="sep">/</span><span>Chan dan dua tren luc Kubo</span></div><div class='page-nav'><a rel="prev" href="strombom_vi.html">Truoc</a><span class="sep">|</span><a rel="next" href="fat_vi.html">Sau</a><span class="sep">|</span><a href="kubo.html">English</a></div></div>
+<header><div class='in'><h1>Chan dan dua tren luc Kubo</h1><p>Tai lieu HerdSim de doc va dieu huong.</p></div></header>
+<div class='layout'>
+<nav><a href="#cam-hung-tu-cong-bo">Cam hung tu cong bo</a><a href="#hien-thuc-herdsim-chinh-xac">Hien thuc HerdSim chinh xac</a><a href="#thiet-lap-scalingv2">Thiet lap `scaling_v2`</a><a href="#ket-qua-hoan-tat-da-quan-sat">Ket qua hoan tat da quan sat</a><a href="#hinh-da-co-lien-quan">Hinh da co lien quan</a><a href="#gioi-han-va-dieu-khong-khang-dinh">Gioi han va dieu khong khang dinh</a></nav>
+<main>
+<h2 id="cam-hung-tu-cong-bo">Cam hung tu cong bo</h2>
+<p>Kubo va cong su (2022) mo hinh hoa cuu va nhieu cho bang tong luc lien tuc, khong dung chuyen Collect/Drive roi rac. Cuu ket hop luc day lang gieng, can huong van toc, ket dinh, va day khoi cho. Moi cho nham con cuu trong tam xa dich nhat, trong khi luc day khoi muc tieu, day khoi dich, va day giua cac cho tao chuyen dong. Luc day giua cho co the xoe doi hinh o sau dan.</p>
+<p>Tai lieu: M. Kubo, M. Tashiro, H. Sato, va cong su, &quot;Herd guidance by multiple sheepdog agents with repulsive force,&quot; Artificial Life and Robotics 27, 416-427, 2022. DOI: <code>10.1007/s10015-021-00726-7</code>.</p>
+<h2 id="hien-thuc-herdsim-chinh-xac">Hien thuc HerdSim chinh xac</h2>
+<p>Bundle <code>kubo</code> ket hop:</p>
+<ul>
+<li><code>sheep_model=kubo</code>;</li>
+<li><code>dog_controller=kubo_forces</code>;</li>
+<li>mac dinh 40 cuu va 4 cho khi khong co ghi de thi nghiem.</li>
+</ul>
+<p>Phuong phap nay khong dung cuu Strombom va khong co trang thai Collect/Drive.</p>
+<h3 id="buoc-luc-cua-cuu">Buoc luc cua cuu</h3>
+<p>Voi moi con cuu, HerdSim tim cuu va cho trong <code>radius = 60</code>. Hien thuc tinh:</p>
+<ul>
+<li>trung binh luc day cuu nghich dao binh phuong;</li>
+<li>trung binh huong van toc don vi cua lang gieng dang chay;</li>
+<li>trung binh luc hut don vi ve cuu lang gieng;</li>
+<li>trung binh luc day khoi cho nghich dao lap phuong.</li>
+</ul>
+<p>Van toc co trong so dung <code>K_s1..K_s4 = 10, 0.5, 2, 5000</code>. Do lon bi chan tai <code>sheep_speed_max = 5</code>, va vi tri tang <code>dt * velocity</code> voi <code>dt = 0.05</code>.</p>
+<h3 id="buoc-luc-cua-cho">Buoc luc cua cho</h3>
+<p>Voi moi cho dang hoat dong co quan sat khong rong:</p>
+<ol>
+<li>Tao trang thai cuc bo bi gioi han boi quan sat.</li>
+<li>Giu cuu trong <code>radius</code>.</li>
+<li>Chon con trong tam xa dich nhat.</li>
+<li>Ket hop luc hut ve muc tieu, day nghich dao lap phuong khoi muc tieu, day khoi dich, va day nghich dao lap phuong khoi cho khac trong tam.</li>
+<li>Dung <code>K_f1..K_f4 = 10, 200, 8, 3000</code>.</li>
+<li>Chan toc do tai <code>dog_speed_max = 10</code> va tang vi tri <code>dt * velocity</code>.</li>
+</ol>
+<p>Neu quan sat khong co cuu, bo dieu khien de cho dung yen trong tick do. Cuu cap nhat truoc cho trong buoc mo phong. HerdSim con ap dung dich cua scenario, hanh vi bien san, he so dap ung va ket dinh tung ca the, cung pipeline quan sat quanh cac luc nay.</p>
+<p>Bang chung hien thuc:</p>
+<ul>
+<li><a href="../../../core/methods.py"><code>../../../core/methods.py</code></a></li>
+<li><a href="../../../methods/kubo/config.py"><code>../../../methods/kubo/config.py</code></a></li>
+<li><a href="../../../methods/kubo/forces.py"><code>../../../methods/kubo/forces.py</code></a></li>
+<li><a href="../../../plugins/sheep/kubo.py"><code>../../../plugins/sheep/kubo.py</code></a></li>
+<li><a href="../../../plugins/dogs/kubo_forces.py"><code>../../../plugins/dogs/kubo_forces.py</code></a></li>
+</ul>
+<h2 id="thiet-lap-scalingv2">Thiet lap <code>scaling_v2</code></h2>
+<p>Kubo la phuong phap chuyen giao Giai doan 4, duoc so sanh voi co so <code>strombom_multi</code> tren cung hinh hoc nhiem vu.</p>
+<ul>
+<li>Ban do kich thuoc: compact tren toan luoi <code>N</code> va <code>D</code>.</li>
+<li>Ban do cau truc: bon bo cuc tai <code>N = {50, 100, 200}</code>.</li>
+<li>Quan sat: global.</li>
+<li>Han: <code>T0 = 10000</code>.</li>
+<li>Nguong tin cay: <code>R &gt;= 0.90</code>.</li>
+<li>Phan tang: 30 seed scout, sau do 100 seed claim trong cua so da chon.</li>
+<li>Do chinh xac bo sung: <code>outlier_rich</code>, <code>N = 200</code>, <code>D</code> trong <code>{1, 2, 3, 4, 6, 10, 15, 20, 25}</code> duoc tang len 200 seed. <code>D = 35</code> giu 30 seed scout.</li>
+</ul>
+<p>Thi nghiem ghi de so ca the mac dinh theo tung o <code>(N, D)</code>. Cac gain luc Kubo khong duoc tinh chinh lai theo kich thuoc hay bo cuc.</p>
+<p>Bang chung cau hinh:</p>
+<ul>
+<li><a href="../../configs/canonical_grid.yaml"><code>../../configs/canonical_grid.yaml</code></a></li>
+<li><a href="../../configs/protocols/phase4_kubo_size_claim.yaml"><code>../../configs/protocols/phase4_kubo_size_claim.yaml</code></a></li>
+<li><a href="../../configs/protocols/phase4_kubo_structure_claim.yaml"><code>../../configs/protocols/phase4_kubo_structure_claim.yaml</code></a></li>
+</ul>
+<h2 id="ket-qua-hoan-tat-da-quan-sat">Ket qua hoan tat da quan sat</h2>
+<h3 id="ban-do-kich-thuoc-compact">Ban do kich thuoc compact</h3>
+<ul>
+<li><code>D_min = 3</code> tai <code>N = 5</code>.</li>
+<li><code>D_min = 1</code> tai moi kich thuoc da thu tu <code>N = 10</code> den 400.</li>
+<li><code>D_max = 35</code> la tran luoi trong moi o kich thuoc.</li>
+<li>Khong quan sat thay overcrowding.</li>
+<li>Thanh cong toan merge kich thuoc Kubo la 0.991, va moi that bai duoc ghi la timeout.</li>
+</ul>
+<p>Vi vay Kubo chia se bien compact voi co so tai <code>N &gt;= 25</code>, nhung khong chia se moi ket qua dan nho.</p>
+<h3 id="cau-truc-ban-dau">Cau truc ban dau</h3>
+<ul>
+<li>Compact va split: <code>D_min = 1</code> tai <code>N = 50, 100, 200</code>.</li>
+<li><code>outlier_rich</code>: <code>D_min = 1</code> tai <code>N = 50, 100</code>.</li>
+<li><code>outlier_rich</code>, <code>N = 200</code>: uoc luong diem <code>D_min = 20</code>.</li>
+<li>Wide: hard failure o ca ba kich thuoc. Do tin cay tot nhat tren luoi cho khoang 0.47 den 0.54, duoi 0.90.</li>
+</ul>
+<p>Voi <code>outlier_rich</code>, <code>N = 200</code>, cac o 200 seed cho <code>R = 0.935</code> tai <code>D = 20</code> va <code>R = 0.910</code> tai <code>D = 25</code>. Khoang bootstrap cua <code>D_min</code> la <code>[2, 20]</code> vi vai muc cho thap nam gan nguong. Uoc luong diem phai luon duoc bao cung khoang rong nay.</p>
+<p>Bang chung:</p>
+<ul>
+<li><a href="../../results/phase4/kubo_size/claim/packages/a/frontier.csv"><code>../../results/phase4/kubo_size/claim/packages/a/frontier.csv</code></a></li>
+<li><a href="../../results/phase4/kubo_structure/claim/packages/b/frontier_by_layout.csv"><code>../../results/phase4/kubo_structure/claim/packages/b/frontier_by_layout.csv</code></a></li>
+<li><a href="../../results/phase4/kubo_structure/claim/merged_dmin_bootstrap.csv"><code>../../results/phase4/kubo_structure/claim/merged_dmin_bootstrap.csv</code></a></li>
+<li><a href="../../results/phase4/kubo_structure/claim/outlier_rich_n200_window.json"><code>../../results/phase4/kubo_structure/claim/outlier_rich_n200_window.json</code></a></li>
+<li><a href="../../results/phase4/package_d/structure/frontier_by_method_layout.csv"><code>../../results/phase4/package_d/structure/frontier_by_method_layout.csv</code></a></li>
+</ul>
+<h2 id="hinh-da-co-lien-quan">Hinh da co lien quan</h2>
+<ul>
+<li><a href="../../results/phase4/guides/assets/figures/f1_reliability_heatmaps.png">Heatmap compact cua ba phuong phap</a></li>
+<li><a href="../../results/phase4/guides/assets/figures/f5_layout_reliability_curves.png">Duong do tin cay theo bo cuc</a></li>
+<li><a href="../../results/phase4/guides/assets/figures/f6_failure_modes.png">So sanh kieu that bai</a></li>
+<li><a href="../../results/phase4/guides/assets/figures/f9_kubo_outlier_rich_n200.png">Kubo <code>outlier_rich</code>, <code>N = 200</code></a></li>
+</ul>
+<h2 id="gioi-han-va-dieu-khong-khang-dinh">Gioi han va dieu khong khang dinh</h2>
+<ul>
+<li>Cung <code>D_min</code> tren compact khong co nghia la chuyen giao toan bo. Kubo khong dat 90% trong moi o wide va dich manh tai <code>outlier_rich</code>, <code>N = 200</code>.</li>
+<li>Khoang bootstrap <code>[2, 20]</code> lam bien <code>D_min = 20</code> bat dinh ve phia thap.</li>
+<li>Hard failure tren wide nghia la khong <code>D &lt;= 35</code> nao dat nguong. No khong chung minh them cho luon lam Kubo te hon.</li>
+<li>Tick Kubo khong so sanh vat ly truc tiep voi tick ho Strombom vi Kubo dung tich phan <code>dt</code>.</li>
+<li>San co bien, hinh hoc sinh, dia dich, va so ca the cua HerdSim la lua chon nghien cuu, khong phai khang dinh ve thiet lap chinh xac cua bai bao.</li>
+<li>Twin NetLogo Kubo co trong registry, nhung bao cao scaling hoan tat khong co ket qua parity dinh luong. Registry: <a href="../../../integrations/netlogo/twins.json"><code>../../../integrations/netlogo/twins.json</code></a>.</li>
+<li>Ket qua khong tai tao cac bang so cua bai bao va khong chung minh hieu nang ngoai nhiem vu mo phong nay.</li>
+</ul>
+</main>
+</div>
+<footer><p>Nguon Markdown: <code>kubo_vi.md</code>. Hinh anh duoc nhung de doc ngoai tuyen.</p></footer>
+</body>
+</html>
