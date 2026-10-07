@@ -3,8 +3,8 @@
 <head>
 <meta charset='utf-8'>
 <meta name='viewport' content='width=device-width,initial-scale=1'>
-<title>So cai cac lan chay</title>
-<meta name='description' content='Tai lieu HerdSim de doc va dieu huong.'>
+<title>Nhật ký chạy</title>
+<meta name='description' content='Tài liệu HerdSim để đọc và điều hướng.'>
 <style>
 :root{--ink:#111827;--mut:#6b7280;--line:#e5e7eb;--acc:#2563eb;--bg:#f9fafb}
 *{box-sizing:border-box}body{margin:0;font:16px/1.65 -apple-system,'Segoe UI',Inter,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
@@ -51,31 +51,31 @@ pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8p
 </style>
 </head>
 <body>
-<div class='chrome'><div class='crumbs'><a href="../../../docs/INDEX_vi.html">Trang chu</a><span class="sep">/</span><span>Data</span><span class="sep">/</span><span>So cai cac lan chay</span></div><div class='page-nav'><a rel="prev" href="README_vi.html">Truoc</a><span class="sep">|</span><a rel="next" href="phase1_tables_vi.html">Sau</a><span class="sep">|</span><a href="run_ledger.html">English</a></div></div>
-<header><div class='in'><h1>So cai cac lan chay</h1><p>Tai lieu HerdSim de doc va dieu huong.</p></div></header>
+<div class='chrome'><div class='crumbs'><a href="../../../docs/INDEX_vi.html">Trang chủ</a><span class="sep">/</span><span>Data</span><span class="sep">/</span><span>Nhật ký chạy</span></div><div class='page-nav'><a rel="prev" href="README_vi.html">Trước</a><span class="sep">|</span><a rel="next" href="phase1_tables_vi.html">Sau</a><span class="sep">|</span><a href="run_ledger.html">English</a></div></div>
+<header><div class='in'><h1>Nhật ký chạy</h1><p>Tài liệu HerdSim để đọc và điều hướng.</p></div></header>
 <div class='layout'>
-<nav><a href="#kiem-ke-claim-merge">Kiem ke claim merge</a></nav>
+<nav><a href="#kiem-ke-ban-hop-nhat-claim">Kiểm kê bản hợp nhất claim</a></nav>
 <main>
-<p>So cai nay giu cap chay va provenance. Scout lap ban do luoi rong va chon cua so. Claim cung cap bang chung chinh xac dung cho phat bieu khoa hoc. Pilot kiem tra pipeline. Claim merge chi thay dong scout tai o co gieo lai claim, vi vay merge co the chua ca hai cap.</p>
+<p>Nhật ký này giữ cấp chạy và provenance. Khảo sát lập bản đồ lưới rộng và chọn cửa sổ. Claim cung cấp bằng chứng chính xác dùng cho phát biểu khoa học. Thử nhanh kiểm tra đường ống. Bản hợp nhất claim chỉ thay dòng khảo sát tại ô có gieo lại claim, vì vậy bản hợp nhất có thể chứa cả hai cấp.</p>
 <div class="table-wrap"><table>
 <thead><tr>
-<th>Giai doan</th>
-<th>Cap</th>
-<th>Protocol</th>
-<th>Da chay</th>
-<th>Dong trial</th>
-<th>Hoan tat</th>
+<th>Giai đoạn</th>
+<th>Cấp chạy</th>
+<th>Giao thức</th>
+<th>Đã chạy</th>
+<th>Dòng thử</th>
+<th>Hoàn tất</th>
 <th>Seed</th>
-<th>Tao luc</th>
-<th>Xong luc</th>
+<th>Tạo lúc</th>
+<th>Xong lúc</th>
 <th>Git hash</th>
-<th>Protocol hash</th>
-<th>Status</th>
+<th>Hash giao thức</th>
+<th>Trạng thái</th>
 <th>Provenance</th>
 </tr></thead><tbody>
 <tr>
-<td>Phase 1</td>
-<td>Pilot</td>
+<td>Giai đoạn 1</td>
+<td>Thử nhanh</td>
 <td>phase1_pilot</td>
 <td>150</td>
 <td>150</td>
@@ -85,12 +85,12 @@ pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8p
 <td>2026-09-22T10:46:24.380687+00:00</td>
 <td>51fbe27db730d838a7662b419c201564c2ab1e74</td>
 <td>54dfb46837e3971a</td>
-<td><a href="../../phase1/pilot/status.json">status</a></td>
+<td><a href="../../phase1/pilot/status.json">trạng thái</a></td>
 <td><a href="../../phase1/pilot/provenance.json">provenance</a></td>
 </tr>
 <tr>
-<td>Phase 1</td>
-<td>Scout</td>
+<td>Giai đoạn 1</td>
+<td>Khảo sát</td>
 <td>phase1_scout</td>
 <td>3,000</td>
 <td>3,000</td>
@@ -100,11 +100,11 @@ pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8p
 <td>2026-09-22T12:02:57.403625+00:00</td>
 <td>51fbe27db730d838a7662b419c201564c2ab1e74</td>
 <td>54dfb46837e3971a</td>
-<td><a href="../../phase1/scout/status.json">status</a></td>
+<td><a href="../../phase1/scout/status.json">trạng thái</a></td>
 <td><a href="../../phase1/scout/provenance.json">provenance</a></td>
 </tr>
 <tr>
-<td>Phase 1</td>
+<td>Giai đoạn 1</td>
 <td>Claim</td>
 <td>phase1_claim</td>
 <td>2,200</td>
@@ -115,12 +115,12 @@ pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8p
 <td>2026-09-22T13:05:23.371208+00:00</td>
 <td>4c3016735814a3d3ee13aae96cb4ae10b4ec5b23</td>
 <td>54dfb46837e3971a</td>
-<td><a href="../../phase1/claim/status.json">status</a></td>
+<td><a href="../../phase1/claim/status.json">trạng thái</a></td>
 <td><a href="../../phase1/claim/provenance.json">provenance</a></td>
 </tr>
 <tr>
-<td>Phase 2</td>
-<td>Pilot state</td>
+<td>Giai đoạn 2</td>
+<td>Thử nhanh trạng thái</td>
 <td>phase2_pilot_state</td>
 <td>600</td>
 <td>600</td>
@@ -130,12 +130,12 @@ pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8p
 <td>2026-09-25T09:25:27.943145+00:00</td>
 <td>efb7ef7c1ebd8783cd51169d7a42284e88148556</td>
 <td>54dfb46837e3971a</td>
-<td><a href="../../phase2/pilot_state/status.json">status</a></td>
+<td><a href="../../phase2/pilot_state/status.json">trạng thái</a></td>
 <td><a href="../../phase2/pilot_state/provenance.json">provenance</a></td>
 </tr>
 <tr>
-<td>Phase 2</td>
-<td>Scout</td>
+<td>Giai đoạn 2</td>
+<td>Khảo sát</td>
 <td>phase2_scout</td>
 <td>3,600</td>
 <td>3,600</td>
@@ -145,11 +145,11 @@ pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8p
 <td>2026-09-25T12:39:33.897222+00:00</td>
 <td>efb7ef7c1ebd8783cd51169d7a42284e88148556</td>
 <td>54dfb46837e3971a</td>
-<td><a href="../../phase2/scout/status.json">status</a></td>
+<td><a href="../../phase2/scout/status.json">trạng thái</a></td>
 <td><a href="../../phase2/scout/provenance.json">provenance</a></td>
 </tr>
 <tr>
-<td>Phase 2</td>
+<td>Giai đoạn 2</td>
 <td>Claim</td>
 <td>phase2_claim</td>
 <td>2,400</td>
@@ -160,12 +160,12 @@ pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8p
 <td>2026-09-25T15:39:37.520012+00:00</td>
 <td>efb7ef7c1ebd8783cd51169d7a42284e88148556</td>
 <td>54dfb46837e3971a</td>
-<td><a href="../../phase2/claim/status.json">status</a></td>
+<td><a href="../../phase2/claim/status.json">trạng thái</a></td>
 <td><a href="../../phase2/claim/provenance.json">provenance</a></td>
 </tr>
 <tr>
-<td>Phase 4 Kubo size</td>
-<td>Scout</td>
+<td>Giai đoạn 4 Kubo kích thước</td>
+<td>Khảo sát</td>
 <td>phase4_kubo_size_scout</td>
 <td>3,000</td>
 <td>3,000</td>
@@ -175,11 +175,11 @@ pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8p
 <td>2026-09-25T21:43:57.328992+00:00</td>
 <td>efb7ef7c1ebd8783cd51169d7a42284e88148556</td>
 <td>54dfb46837e3971a</td>
-<td><a href="../../phase4/kubo_size/scout/status.json">status</a></td>
+<td><a href="../../phase4/kubo_size/scout/status.json">trạng thái</a></td>
 <td><a href="../../phase4/kubo_size/scout/provenance.json">provenance</a></td>
 </tr>
 <tr>
-<td>Phase 4 Kubo size</td>
+<td>Giai đoạn 4 Kubo kích thước</td>
 <td>Claim</td>
 <td>phase4_kubo_size_claim</td>
 <td>2,100</td>
@@ -190,12 +190,12 @@ pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8p
 <td>2026-09-26T02:12:52.864254+00:00</td>
 <td>efb7ef7c1ebd8783cd51169d7a42284e88148556</td>
 <td>54dfb46837e3971a</td>
-<td><a href="../../phase4/kubo_size/claim/status.json">status</a></td>
+<td><a href="../../phase4/kubo_size/claim/status.json">trạng thái</a></td>
 <td><a href="../../phase4/kubo_size/claim/provenance.json">provenance</a></td>
 </tr>
 <tr>
-<td>Phase 4 FAT size</td>
-<td>Scout</td>
+<td>Giai đoạn 4 FAT kích thước</td>
+<td>Khảo sát</td>
 <td>phase4_fat_size_scout</td>
 <td>3,000</td>
 <td>3,000</td>
@@ -205,11 +205,11 @@ pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8p
 <td>2026-10-03T20:25:40.538234+00:00</td>
 <td>efb7ef7c1ebd8783cd51169d7a42284e88148556</td>
 <td>54dfb46837e3971a</td>
-<td><a href="../../phase4/fat_size/scout/status.json">status</a></td>
+<td><a href="../../phase4/fat_size/scout/status.json">trạng thái</a></td>
 <td><a href="../../phase4/fat_size/scout/provenance.json">provenance</a></td>
 </tr>
 <tr>
-<td>Phase 4 FAT size</td>
+<td>Giai đoạn 4 FAT kích thước</td>
 <td>Claim</td>
 <td>phase4_fat_size_claim</td>
 <td>2,000</td>
@@ -220,12 +220,12 @@ pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8p
 <td>2026-10-04T10:51:08.828735+00:00</td>
 <td>efb7ef7c1ebd8783cd51169d7a42284e88148556</td>
 <td>54dfb46837e3971a</td>
-<td><a href="../../phase4/fat_size/claim/status.json">status</a></td>
+<td><a href="../../phase4/fat_size/claim/status.json">trạng thái</a></td>
 <td><a href="../../phase4/fat_size/claim/provenance.json">provenance</a></td>
 </tr>
 <tr>
-<td>Phase 4 Kubo structure</td>
-<td>Scout</td>
+<td>Giai đoạn 4 Kubo cấu trúc</td>
+<td>Khảo sát</td>
 <td>phase4_kubo_structure_scout</td>
 <td>3,600</td>
 <td>3,600</td>
@@ -235,11 +235,11 @@ pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8p
 <td>2026-09-26T18:52:38.009530+00:00</td>
 <td>efb7ef7c1ebd8783cd51169d7a42284e88148556</td>
 <td>54dfb46837e3971a</td>
-<td><a href="../../phase4/kubo_structure/scout/status.json">status</a></td>
+<td><a href="../../phase4/kubo_structure/scout/status.json">trạng thái</a></td>
 <td><a href="../../phase4/kubo_structure/scout/provenance.json">provenance</a></td>
 </tr>
 <tr>
-<td>Phase 4 Kubo structure</td>
+<td>Giai đoạn 4 Kubo cấu trúc</td>
 <td>Claim</td>
 <td>phase4_kubo_structure_claim</td>
 <td>4,000</td>
@@ -250,12 +250,12 @@ pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8p
 <td>2026-10-06T10:54:32.147528+00:00</td>
 <td>1d78058133020a61317cf4116abf0a76e687bd8d</td>
 <td>54dfb46837e3971a</td>
-<td><a href="../../phase4/kubo_structure/claim/status.json">status</a></td>
+<td><a href="../../phase4/kubo_structure/claim/status.json">trạng thái</a></td>
 <td><a href="../../phase4/kubo_structure/claim/provenance.json">provenance</a></td>
 </tr>
 <tr>
-<td>Phase 4 FAT structure</td>
-<td>Scout</td>
+<td>Giai đoạn 4 FAT cấu trúc</td>
+<td>Khảo sát</td>
 <td>phase4_fat_structure_scout</td>
 <td>3,600</td>
 <td>3,600</td>
@@ -265,11 +265,11 @@ pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8p
 <td>2026-10-01T05:38:50.471701+00:00</td>
 <td>efb7ef7c1ebd8783cd51169d7a42284e88148556</td>
 <td>54dfb46837e3971a</td>
-<td><a href="../../phase4/fat_structure/scout/status.json">status</a></td>
+<td><a href="../../phase4/fat_structure/scout/status.json">trạng thái</a></td>
 <td><a href="../../phase4/fat_structure/scout/provenance.json">provenance</a></td>
 </tr>
 <tr>
-<td>Phase 4 FAT structure</td>
+<td>Giai đoạn 4 FAT cấu trúc</td>
 <td>Claim</td>
 <td>phase4_fat_structure_claim</td>
 <td>2,400</td>
@@ -280,59 +280,59 @@ pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8p
 <td>2026-10-02T05:16:28.360197+00:00</td>
 <td>efb7ef7c1ebd8783cd51169d7a42284e88148556</td>
 <td>54dfb46837e3971a</td>
-<td><a href="../../phase4/fat_structure/claim/status.json">status</a></td>
+<td><a href="../../phase4/fat_structure/claim/status.json">trạng thái</a></td>
 <td><a href="../../phase4/fat_structure/claim/provenance.json">provenance</a></td>
 </tr>
 </tbody></table></div>
-<p>Status claim Kubo structure ghi 4,000 dong hoan thanh du truong <code>n_planned</code> ban dau la 600. Lien ket status va provenance duoc giu nguyen; bang chung merge hien tai duoc tom tat o duoi.</p>
-<p>Protocol hash hien co: 54dfb46837e3971a</p>
-<h2 id="kiem-ke-claim-merge">Kiem ke claim merge</h2>
-<p>Gia tri SHA256 nhan dien chinh xac byte CSV tho khi tao phu luc.</p>
+<p>Tệp trạng thái claim cấu trúc Kubo ghi 4,000 dòng hoàn thành dù trường <code>n_planned</code> ban đầu là 600. Liên kết trạng thái và provenance được giữ nguyên; bằng chứng hợp nhất hiện tại được tóm tắt ở dưới.</p>
+<p>Hash giao thức hiện có: 54dfb46837e3971a</p>
+<h2 id="kiem-ke-ban-hop-nhat-claim">Kiểm kê bản hợp nhất claim</h2>
+<p>Giá trị SHA256 nhận diện chính xác byte CSV thô khi tạo phụ lục.</p>
 <div class="table-wrap"><table>
 <thead><tr>
-<th>Claim merge</th>
-<th>So dong</th>
-<th>So cot</th>
+<th>Hợp nhất claim</th>
+<th>Số dòng</th>
+<th>Số cột</th>
 <th>SHA256</th>
-<th>Nguon day du</th>
+<th>Nguồn đầy đủ</th>
 </tr></thead><tbody>
 <tr>
-<td>Phase 1 baseline size</td>
+<td>Giai đoạn 1 kích thước cơ sở</td>
 <td>4,540</td>
 <td>61</td>
 <td>c10690a3587f2593df51fb7465684a93897dba983b53ccb17b4d4f39953b08bf</td>
 <td><a href="../../phase1/claim/merged_trials.csv"><code>phase1/claim/merged_trials.csv</code></a></td>
 </tr>
 <tr>
-<td>Phase 2 baseline structure</td>
+<td>Giai đoạn 2 cấu trúc cơ sở</td>
 <td>5,280</td>
 <td>77</td>
 <td>53e0b2a60e0f4df774972fde2f82c85bc4043906d28fe3829f922662582b4aa2</td>
 <td><a href="../../phase2/claim/merged_trials.csv"><code>phase2/claim/merged_trials.csv</code></a></td>
 </tr>
 <tr>
-<td>Phase 4 Kubo size</td>
+<td>Giai đoạn 4 Kubo kích thước</td>
 <td>4,470</td>
 <td>77</td>
 <td>7e431040a84c2e62efdcf0e12b6d3d5c9c1f696c63a1dff61ceb039aaa5ba515</td>
 <td><a href="../../phase4/kubo_size/claim/merged_trials.csv"><code>phase4/kubo_size/claim/merged_trials.csv</code></a></td>
 </tr>
 <tr>
-<td>Phase 4 FAT size</td>
+<td>Giai đoạn 4 FAT kích thước</td>
 <td>4,400</td>
 <td>77</td>
 <td>2240163250b56a8aea7745e68bebc4c125d022a57e03612c2554acb2fa30b80e</td>
 <td><a href="../../phase4/fat_size/claim/merged_trials.csv"><code>phase4/fat_size/claim/merged_trials.csv</code></a></td>
 </tr>
 <tr>
-<td>Phase 4 Kubo structure</td>
+<td>Giai đoạn 4 Kubo cấu trúc</td>
 <td>6,670</td>
 <td>77</td>
 <td>1e9eb9dfadc7e82545e92cabdd52d6f68885f3b34024a780b2a989d3dfcb9003</td>
 <td><a href="../../phase4/kubo_structure/claim/merged_trials.csv"><code>phase4/kubo_structure/claim/merged_trials.csv</code></a></td>
 </tr>
 <tr>
-<td>Phase 4 FAT structure</td>
+<td>Giai đoạn 4 FAT cấu trúc</td>
 <td>5,280</td>
 <td>77</td>
 <td>ef851fe3a271b3f60a95f35f1d7d77cc34db4739ab6d1e4a7cb907d73cca90b7</td>
@@ -341,6 +341,6 @@ pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8p
 </tbody></table></div>
 </main>
 </div>
-<footer><p>Nguon Markdown: <code>run_ledger_vi.md</code>. Hinh anh duoc nhung de doc ngoai tuyen.</p></footer>
+<footer><p>Nguồn Markdown: <code>run_ledger_vi.md</code>. Hình ảnh được nhúng để đọc ngoại tuyến.</p></footer>
 </body>
 </html>

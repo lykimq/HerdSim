@@ -1,65 +1,73 @@
-# Bang thuat ngu
+# Bảng thuật ngữ
 
-| Thuat ngu | Dinh nghia |
+![Tick đo thời gian; đường đi đo quãng đường của chó.](../../results/summary/figures/schematics/vi/metrics_tick_path.svg)
+
+![Độ tin cậy R là tỷ lệ các seed độc lập.](../../results/summary/figures/schematics/vi/metrics_reliability.svg)
+
+![I_dir: hướng thẳng hàng so với hướng xung đột.](../../results/summary/figures/schematics/vi/metrics_idir.svg)
+
+![Nhãn biên trên đường cong R(D).](../../results/summary/figures/schematics/vi/design_frontier.svg)
+
+| Thuật ngữ | Định nghĩa |
 |---|---|
-| B* | `(D, T)` tin cay co median tong path cua cho nho nhat; hoa thi D nho hon, roi finish nhanh hon |
-| C, coverage | Ti le cuu peripheral nam trong influence radius |
-| cell | Mot to hop co dinh cua method, layout, N, D, va information factor, lap qua cac seed |
-| CLAIM | Grade chinh xac, thuong 100 seed tai cell da lap ke hoach |
-| cohesion | Trung binh khoang cach cuu toi GCM |
-| D | So cho hoac shepherd |
-| luoi D | `{1, 2, 3, 4, 6, 10, 15, 20, 25, 35}` |
-| D_max | D tin cay cuoi truoc overcrowding, hoac tran luoi khi chua thay collapse |
-| D_min | D nho nhat co R dat theta |
-| D_overcrowd | Phan tu dau cua hai D lien tiep sau D_min deu duoi theta |
-| efficient | Cell tin cay co median path duoi wasteful threshold |
-| extent | RMS distance cua cuu toi centroid |
-| finish time, `t_s` | Tick dau tien moi cuu nam trong dich |
-| fragmentation | Largest connected component radius 5 chia N |
-| GCM | Tam khoi hinh hoc cua dan |
-| grade | Cap evidence: SMOKE, SCOUT, CLAIM, hoac T1 co dieu kien |
-| grid ceiling | D = 35, gia tri lon nhat da thu; khong phai gioi han vat ly |
-| hard failure | Khong D nao tren luoi dat theta |
-| hull area | Dien tich convex hull cua cuu |
-| I | Information condition |
-| `I_dir` | Xung dot huong cua cho dang di; 0 cung huong, 1 triet tieu |
-| layout, X0 | Bo tri ban dau: compact, wide, split, outlier-rich |
-| m, method | Controller cua cho |
-| manifest | `manifest.jsonl`, ledger dung de bo qua trial key da xong khi resume |
-| mean spread | Diem spread export cho layout va prediction |
-| merged trials | Row claim tai cell gieo lai cong row scout tai cell con lai |
-| N | So cuu |
-| luoi N | `{5, 10, 25, 50, 75, 100, 150, 200, 300, 400}` |
-| overcrowding collapse | Cell khong tin cay tai hoac sau D_overcrowd |
-| path, `shepherd_path` | Tong Euclidean travel cua moi cho |
-| path moi cho | Tong path chia D |
-| perimeter | Chu vi convex hull |
-| Pilot, SMOKE | Kiem tra pipeline nho, khong dung cho claim |
-| protocol | Recipe da resolve cho factor, seed, grade, output, va canonical setting |
-| provenance | Record may-doc cua protocol, seed, code state, host, metric, timestamp |
-| R | Ti le seed thanh cong truoc deadline |
-| regime | under-resourced, efficient, wasteful, overcrowding, hoac hard failure |
-| SCOUT | Map rong 30 seed chi dung lap ke hoach va chan doan |
-| seed | Mot lan lap ngau nhien doc lap; danh sach goc bat dau tu 2026 |
-| success | Moi cuu vao dia dich truoc deadline |
-| T0 | Deadline chinh 10,000 tick |
-| T1 | Deadline 20,000 tick chi cho overcrowding |
-| theta | Nguong reliability 0.90; sensitivity 0.50 va 0.70 |
-| tick | Mot update roi rac, khong phai giay dong ho |
-| timeseries | Lich su Parquet theo trial cho trajectory va early warning |
-| under-resourced | R duoi theta truoc working band |
-| wasteful | Cell tin cay co median path vuot B* theo tolerance |
-| X0 | Ho layout ban dau |
+| B* | Cặp `(D, T)` tin cậy có trung vị tổng đường đi của chó nhỏ nhất; hòa thì ưu tiên D nhỏ hơn, rồi thời gian thành công trung vị nhanh hơn |
+| C, độ phủ | Tỷ lệ cừu ngoại vi nằm trong bán kính ảnh hưởng của lần thử |
+| ô (cell) | Một tổ hợp cố định của phương pháp, bố cục, N, D, và mọi nhân tố thông tin, lặp qua các seed |
+| CLAIM | Cấp độ chính xác, thường 100 seed tại các ô đã lập kế hoạch; đủ điều kiện cho claim sau khi có tài liệu |
+| độ kết dính (cohesion) | Trung bình khoảng cách từ cừu tới tâm khối của đàn |
+| D | Số chó hoặc người chăn |
+| lưới D | Các giá trị đã thử `{1, 2, 3, 4, 6, 10, 15, 20, 25, 35}` |
+| D_max | D tin cậy cuối trước quá tải, hoặc trần lưới đã thử khi chưa quan sát sụp đổ |
+| D_min | D nhỏ nhất đã thử có độ tin cậy đạt theta |
+| D_overcrowd | Phần tử đầu của hai giá trị lưới liên tiếp sau D_min đều dưới theta |
+| vận hành hiệu quả | Ô tin cậy có trung vị đường đi dưới ngưỡng lãng phí |
+| extent | Căn bậc hai trung bình bình phương khoảng cách cừu tới tâm |
+| thời gian kết thúc, `t_s` | Tick đầu tiên mà mọi cừu nằm trong đích |
+| phân mảnh | Thành phần liên thông lớn nhất (bán kính 5) chia cho N |
+| GCM | Tâm khối hình học của đàn |
+| cấp độ (grade) | Mức bằng chứng: SMOKE, SCOUT, CLAIM, hoặc T1 có điều kiện |
+| trần lưới | Giá trị lớn nhất đã thử, D = 35; không phải giới hạn vật lý |
+| thất bại cứng | Không D nào trên lưới đã thử đạt theta |
+| diện tích bao lồi | Diện tích bao lồi của đàn cừu |
+| I | Điều kiện thông tin, ví dụ quan sát, tầm cảm biến, hoặc giao tiếp |
+| `I_dir` | Xung đột hướng giữa các chó đang chuyển động; không là cùng hướng, một là triệt tiêu hoàn toàn |
+| bố cục, X0 | Sắp xếp cừu ban đầu: compact, wide, split, hoặc outlier_rich |
+| m, phương pháp | Bộ điều khiển của chó |
+| manifest | `manifest.jsonl`, nhật ký chỉ thêm dùng để bỏ qua khóa lần thử đã xong khi tiếp tục |
+| mean spread | Điểm trải đàn được xuất cho phân tích bố cục và dự báo |
+| lần thử đã hợp nhất | Các dòng claim tại ô gieo lại cộng các dòng scout tại mọi ô còn lại |
+| N | Số cừu |
+| lưới N | Các kích thước đã thử `{5, 10, 25, 50, 75, 100, 150, 200, 300, 400}` |
+| sụp đổ quá tải | Ô không tin cậy tại hoặc sau D_overcrowd sau một dải tin cậy |
+| đường đi, `shepherd_path` | Tổng quãng đường Euclidean cộng dồn trên mọi chó |
+| đường đi mỗi chó | Tổng đường đi chia cho D |
+| chu vi | Chu vi bao lồi của đàn cừu |
+| Pilot, SMOKE | Kiểm tra đường ống nhỏ, không phải bằng chứng cho claim |
+| giao thức | Công thức đã resolve định nghĩa nhân tố, seed, cấp độ, đầu ra, và thiết lập chuẩn kế thừa |
+| nguồn gốc (provenance) | Bản ghi máy đọc về giao thức, danh sách seed, trạng thái mã, máy chủ, chỉ số, và dấu thời gian |
+| R | Tỷ lệ seed độc lập trong một ô thành công trước hạn |
+| chế độ (regime) | Phân loại thiếu nguồn lực, hiệu quả, lãng phí, quá tải, hoặc thất bại cứng |
+| SCOUT | Bản đồ rộng 30 seed dùng để lập kế hoạch và chẩn đoán, không dùng cho kết luận claim |
+| seed | Lần lặp ngẫu nhiên độc lập; danh sách gốc bắt đầu từ seed chủ 2026 |
+| thành công | Mọi cừu nằm trong đĩa đích trước hạn |
+| T0 | Hạn chính, 10.000 tick |
+| T1 | Hạn dài có điều kiện, 20.000 tick, chỉ cho ô quá tải |
+| theta | Ngưỡng độ tin cậy, mặc định 0,90; 0,50 và 0,70 là độ nhạy |
+| tick | Một bước cập nhật mô phỏng rời rạc, không phải giây đồng hồ tường |
+| chuỗi thời gian | Lịch sử Parquet theo lần thử dùng cho phân tích quỹ đạo và cảnh báo sớm |
+| thất bại thiếu nguồn lực | R dưới theta trước một dải tin cậy hoặc quá tải |
+| chi tiêu lãng phí | Ô tin cậy có trung vị đường đi vượt B* theo dung sai đã cấu hình |
+| X0 | Họ bố cục ban đầu |
 
-## Failure label
+## Nhãn thất bại
 
-Trial that bai co the nhan label phan tich `stacking`, `split`, `scatter`, `oscillation`, `stuck`, hoac `timeout`. Label heuristic nay khong thay doi success nhi phan.
+Các lần thử thất bại có thể nhận nhãn chỉ dùng cho phân tích: `stacking`, `split`, `scatter`, `oscillation`, `stuck`, hoặc `timeout`. Các nhãn này mô tả chế độ thất bại heuristic và không thay đổi quy tắc thành công nhị phân.
 
-## Ten controller
+## Tên bộ điều khiển
 
-| Ten | Mo ta ngan |
+| Tên | Mô tả ngắn |
 |---|---|
-| `strombom_multi` | Baseline collect/drive nhieu cho co phoi hop |
-| `kubo` | Controller force cuc bo co sensing va tich phan |
-| `fat` | Cuu Strombom va target xa tung cho nhat |
-| `communication_free` | Controller transfer khuyen nghi, ngoai tap bat buoc ba method |
+| `strombom_multi` | Cơ sở thu thập-và-đẩy nhiều chó có phối hợp |
+| `kubo` | Bộ điều khiển cừu và chó dựa trên lực cục bộ, có cảm biến và tích phân |
+| `fat` | Cừu Strombom với chọn mục tiêu xa chó nhất độc lập |
+| `communication_free` | Bộ điều khiển chuyển giao khuyến nghị, ngoài tập ba phương pháp bắt buộc |

@@ -1,75 +1,75 @@
-# Muc luc tai lieu scaling
+# Mục lục tài liệu scaling
 
-Day la ban do doc chinh cho `scaling_v2`. Moi tai lieu co mot trach nhiem ro rang. Cac tai lieu danh cho nguoi doc co cap tieng Anh va tieng Viet.
+Đây là bản đồ đọc chính cho `scaling_v2`. Mỗi tài liệu có một trách nhiệm chính. Bản tiếng Anh và tiếng Việt đi theo cặp khi tài liệu dành cho người đọc.
 
-## Bat dau tai day
+## Bắt đầu tại đây
 
-| Nhu cau | Tai lieu chinh |
+| Nhu cầu | Tài liệu chuẩn |
 |---|---|
-| Hieu nghien cuu duoc lap ke hoach nhu the nao | [Ke hoach scaling chinh](main_scaling_plan_vi.md) |
-| Hieu cac controller | [Muc luc phuong phap](methods/README_vi.md) |
-| Hieu tham so va thiet lap mo phong | [Thiet lap va tham chieu](setup/README_vi.md) |
-| Chay, tiep tuc, hoac phan tich campaign | [Huong dan chay](setup/run_guide_vi.md) |
-| Doc ket qua da hoan thanh | [Bao cao ket qua](../results/summary/SUMMARY_REPORT_vi.md) |
-| Xem bang bang chung de doc | [Phu luc du lieu](../results/summary/data/README_vi.md) |
-| So sanh voi ban thao 2025 va NetLogo | [Do tin cay va so sanh](credibility/README_vi.md) |
-| Kiem tra trang thai hien tai | [Progress tracker](progress_tracker.md) |
+| Hiểu kế hoạch đã được lập | [Kế hoạch scaling chính](main_scaling_plan_vi.md) |
+| Hiểu các bộ điều khiển | [Mục lục phương pháp](methods/README_vi.md) |
+| Hiểu tham số và thiết lập mô phỏng | [Thiết lập và tham chiếu](setup/README_vi.md) |
+| Chạy, tiếp tục, hoặc phân tích một chiến dịch | [Hướng dẫn chạy](setup/run_guide_vi.md) |
+| Đọc kết quả đã hoàn thành | [Báo cáo kết quả](../results/summary/SUMMARY_REPORT_vi.md) |
+| Xem bảng bằng chứng dễ đọc | [Phụ lục dữ liệu](../results/summary/data/README_vi.md) |
+| So sánh với bản thảo 2025 và NetLogo | [Độ tin cậy và so sánh](credibility/README_vi.md) |
+| Kiểm tra trạng thái triển khai và kết luận claim | [Theo dõi tiến độ](progress_tracker.md) |
 
-English index: [INDEX.md](INDEX.md).
+Mục lục tiếng Anh: [INDEX.md](INDEX.md).
 
-## Trach nhiem cua tung nhom tai lieu
+## Trách nhiệm của từng nhóm tài liệu
 
-| Nhom | Chiu trach nhiem | Khong chiu trach nhiem |
+| Lĩnh vực | Chịu trách nhiệm | Không chịu trách nhiệm |
 |---|---|---|
-| Ke hoach | Cau hoi nghien cuu, phu thuoc, tieu chi claim, ngan sach, cong quyet dinh | Ket qua so da chay |
-| Phuong phap | Nen tang cong bo, implementation HerdSim, thiet lap va gioi han tung method | Verdict tong hop |
-| Thiet lap | Tham so, ly do, dinh nghia, staging, lenh, output, provenance | Dien giai khoa hoc |
-| Ket qua | Quan sat Giai doan 1, 2, 4, do bat dinh, gioi han | Ly do protocol hoac huong dan method |
-| Do tin cay | So sanh draft, pham vi NetLogo, validation, cac dieu khong claim | Claim parity moi |
-| Phu luc du lieu | Bang sinh tu nguon, run ledger, schema, lien ket bang chung | Dien giai nhap tay |
-| Tracker | Trang thai implementation, run, va verdict | Giai thich on dinh cho nguoi doc |
+| Kế hoạch | Câu hỏi nghiên cứu, phụ thuộc, tiêu chí claim, ngân sách, cổng quyết định | Kết quả số đã thực thi |
+| Phương pháp | Nền tảng đã công bố, triển khai HerdSim, thiết lập và giới hạn riêng từng phương pháp | Kết luận tổng hợp qua các giai đoạn |
+| Thiết lập | Tham số, lý do, định nghĩa, phân tầng, lệnh, đầu ra, nguồn gốc | Diễn giải khoa học |
+| Kết quả | Quan sát Giai đoạn 1, 2 và 4 đã hoàn thành, độ bất định, giới hạn | Lý do giao thức hay hướng dẫn phương pháp |
+| Độ tin cậy | So sánh bản thảo, phạm vi NetLogo, bằng chứng xác minh, điều không claim | Kết luận ngang hàng mới giữa các nền |
+| Phụ lục dữ liệu | Bảng sinh từ nguồn, nhật ký chạy, schema, liên kết bằng chứng trực tiếp | Diễn giải nhập tay |
+| Theo dõi | Trạng thái triển khai, chạy, và kết luận hiện tại | Văn kể giải thích ổn định |
 
-## Lo trinh doc
+## Lộ trình đọc
 
-### Doc lan dau
+### Đọc lần đầu
 
-1. [Ke hoach scaling chinh](main_scaling_plan_vi.md)
-2. [Thiet lap thi nghiem](setup/experiment_setup_vi.md)
-3. [Muc luc phuong phap](methods/README_vi.md)
-4. [Bao cao ket qua](../results/summary/SUMMARY_REPORT_vi.md)
-5. [Do tin cay va so sanh](credibility/README_vi.md)
+1. [Kế hoạch scaling chính](main_scaling_plan_vi.md)
+2. [Thiết lập thí nghiệm](setup/experiment_setup_vi.md)
+3. [Mục lục phương pháp](methods/README_vi.md)
+4. [Báo cáo kết quả](../results/summary/SUMMARY_REPORT_vi.md)
+5. [Độ tin cậy và so sánh](credibility/README_vi.md)
 
-### Tai tao hoac audit mot ket qua
+### Tái tạo hoặc đối chiếu một kết quả
 
-1. [Huong dan chay](setup/run_guide_vi.md)
-2. [Run ledger](../results/summary/data/run_ledger_vi.md)
-3. [Cac bang theo giai doan](../results/summary/data/README_vi.md)
-4. Cac tep `protocol.yaml`, `provenance.json`, `manifest.jsonl`, `status.json`, va CSV duoc lien ket
+1. [Hướng dẫn chạy](setup/run_guide_vi.md)
+2. [Nhật ký chạy](../results/summary/data/run_ledger_vi.md)
+3. [Bảng dữ liệu theo giai đoạn](../results/summary/data/README_vi.md)
+4. Các tệp `protocol.yaml`, `provenance.json`, `manifest.jsonl`, `status.json`, và các artifact CSV được liên kết
 
-### Tra mot thuat ngu hoac gia tri
+### Tra một thuật ngữ hoặc giá trị
 
-- [Bang thuat ngu](setup/glossary_vi.md)
-- [Tham chieu tham so](setup/parameter_reference_vi.md)
-- [Thiet lap va ly do](setup/experiment_setup_vi.md)
+- [Bảng thuật ngữ](setup/glossary_vi.md)
+- [Tham chiếu tham số](setup/parameter_reference_vi.md)
+- [Thiết lập thí nghiệm và lý do](setup/experiment_setup_vi.md)
 
-## Phuong phap
+## Phương pháp
 
 - [Strombom Collect/Drive](methods/strombom_vi.md)
-- [Mo hinh luc Kubo](methods/kubo_vi.md)
+- [Mô hình lực Kubo](methods/kubo_vi.md)
 - [FAT](methods/fat_vi.md)
 
-## Ket qua va bang chung
+## Kết quả và bằng chứng
 
-- [Ket qua tong hop](../results/summary/SUMMARY_REPORT_vi.md)
-- [Bang Giai doan 1](../results/summary/data/phase1_tables_vi.md)
-- [Bang Giai doan 2](../results/summary/data/phase2_tables_vi.md)
-- [Bang Giai doan 4](../results/summary/data/phase4_tables_vi.md)
-- [Thu muc Giai doan 1](../results/phase1/)
-- [Thu muc Giai doan 2](../results/phase2/)
-- [Thu muc Giai doan 4](../results/phase4/)
+- [Kết quả tổng hợp qua các giai đoạn](../results/summary/SUMMARY_REPORT_vi.md)
+- [Bảng Giai đoạn 1 dễ đọc](../results/summary/data/phase1_tables_vi.md)
+- [Bảng Giai đoạn 2 dễ đọc](../results/summary/data/phase2_tables_vi.md)
+- [Bảng Giai đoạn 4 dễ đọc](../results/summary/data/phase4_tables_vi.md)
+- [Thư mục chạy Giai đoạn 1](../results/phase1/)
+- [Thư mục chạy Giai đoạn 2](../results/phase2/)
+- [Thư mục chạy Giai đoạn 4](../results/phase4/)
 
-## Ghi chu ho tro va lich su
+## Ghi chú hỗ trợ và lịch sử
 
-Cac tep trong [`discuss/`](discuss/) la ghi chu thao luan ngan theo giai doan. Cac tep trong [`notes/`](notes/) luu related work va tai lieu tham chieu cua ban thao 2025. Chung van la bang chung huu ich, nhung cac tai lieu tap trung o tren la nguon chinh cho nguoi doc.
+Các tệp trong [`discuss/`](discuss/) là ghi chú thảo luận ngắn theo giai đoạn. Các tệp trong [`notes/`](notes/) lưu công việc liên quan và tài liệu tham chiếu của bản thảo 2025. Chúng vẫn là bằng chứng hữu ích, nhưng các tài liệu tập trung ở trên mới là nguồn chính được duy trì cho người đọc.
 
-Cac duong dan `results/summary/RESEARCH_PLAN*` duoc giu lam trang tuong thich. Chung tro den bo tai lieu moi va khong phai nguon protocol hoac ket qua thu hai.
+Các đường dẫn `results/summary/RESEARCH_PLAN*` cũ là trang tương thích. Chúng trỏ đến bộ tài liệu đã tổ chức lại này và không nên trở thành nguồn thứ hai cho văn bản giao thức hay kết quả.

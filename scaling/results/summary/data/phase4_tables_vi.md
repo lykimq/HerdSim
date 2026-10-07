@@ -1,10 +1,10 @@
-# Bang du lieu Giai doan 4
+# Bảng dữ liệu Giai đoạn 4
 
-Ket luan ve controller dung claim merge. Luoi scout van chi la bang chung lap ke hoach. Bang Package D so sanh ket qua controller cap claim.
+Kết luận về bộ điều khiển dùng bản hợp nhất claim. Lưới khảo sát vẫn chỉ là bằng chứng lập kế hoạch. Bảng Package D so sánh kết quả bộ điều khiển cấp claim.
 
-## Bien kich thuoc voi bo cuc compact
+## Biên kích thước với bố cục compact
 
-Kubo source: [`phase4/kubo_size/claim/packages/a/frontier.csv`](../../phase4/kubo_size/claim/packages/a/frontier.csv).
+Nguồn Kubo: [`phase4/kubo_size/claim/packages/a/frontier.csv`](../../phase4/kubo_size/claim/packages/a/frontier.csv).
 
 | initial_layout | n_sheep | d_min | d_overcrowd | d_max | b_star_d | hard_failure |
 |---|---|---|---|---|---|---|
@@ -19,7 +19,7 @@ Kubo source: [`phase4/kubo_size/claim/packages/a/frontier.csv`](../../phase4/kub
 | compact | 300 | 1 |  | 35 | 1 | False |
 | compact | 400 | 1 |  | 35 | 1 | False |
 
-FAT source: [`phase4/fat_size/claim/packages/a/frontier.csv`](../../phase4/fat_size/claim/packages/a/frontier.csv).
+Nguồn FAT: [`phase4/fat_size/claim/packages/a/frontier.csv`](../../phase4/fat_size/claim/packages/a/frontier.csv).
 
 | initial_layout | n_sheep | d_min | d_overcrowd | d_max | b_star_d | hard_failure |
 |---|---|---|---|---|---|---|
@@ -34,11 +34,11 @@ FAT source: [`phase4/fat_size/claim/packages/a/frontier.csv`](../../phase4/fat_s
 | compact | 300 |  |  |  |  | True |
 | compact | 400 |  |  |  |  | True |
 
-Cac truong bien trong voi `hard_failure = True` nghia la khong D nao dat R = 0.90. Chung khong phai uoc luong gioi han tren.
+Các trường biên trống với `hard_failure = True` nghĩa là không D nào đạt R = 0.90. Chúng không phải ước lượng giới hạn trên.
 
-## Khoang bootstrap D_min kich thuoc day du
+## Khoảng bootstrap D_min kích thước đầy đủ
 
-Kubo source: [`phase4/kubo_size/claim/packages/a/dmin_bootstrap.csv`](../../phase4/kubo_size/claim/packages/a/dmin_bootstrap.csv).
+Nguồn Kubo: [`phase4/kubo_size/claim/packages/a/dmin_bootstrap.csv`](../../phase4/kubo_size/claim/packages/a/dmin_bootstrap.csv).
 
 | initial_layout | n_sheep | d_min | d_min_ci_low | d_min_ci_high | n_boot | n_seeds_ref | n_boot_defined |
 |---|---|---|---|---|---|---|---|
@@ -53,7 +53,7 @@ Kubo source: [`phase4/kubo_size/claim/packages/a/dmin_bootstrap.csv`](../../phas
 | compact | 300 | 1 | 1 | 1 | 1000 | 100 | 1000 |
 | compact | 400 | 1 | 1 | 1 | 1000 | 100 | 1000 |
 
-FAT source: [`phase4/fat_size/claim/packages/a/dmin_bootstrap.csv`](../../phase4/fat_size/claim/packages/a/dmin_bootstrap.csv).
+Nguồn FAT: [`phase4/fat_size/claim/packages/a/dmin_bootstrap.csv`](../../phase4/fat_size/claim/packages/a/dmin_bootstrap.csv).
 
 | initial_layout | n_sheep | d_min | d_min_ci_low | d_min_ci_high | d_min_ci_low_above_grid | d_min_ci_high_above_grid | n_boot | n_seeds_ref | n_boot_defined |
 |---|---|---|---|---|---|---|---|---|---|
@@ -68,9 +68,9 @@ FAT source: [`phase4/fat_size/claim/packages/a/dmin_bootstrap.csv`](../../phase4
 | compact | 300 |  |  |  | True | True | 1000 | 100 | 0 |
 | compact | 400 |  |  |  | True | True | 1000 | 100 | 0 |
 
-## Bien day du theo controller va bo cuc
+## Biên đầy đủ theo bộ điều khiển và bố cục
 
-Source: [`phase4/package_d/structure/frontier_by_method_layout.csv`](../../phase4/package_d/structure/frontier_by_method_layout.csv).
+Nguồn: [`phase4/package_d/structure/frontier_by_method_layout.csv`](../../phase4/package_d/structure/frontier_by_method_layout.csv).
 
 | method | initial_layout | n_sheep | d_min | d_overcrowd | d_max | b_star_d | hard_failure |
 |---|---|---|---|---|---|---|---|
@@ -111,34 +111,34 @@ Source: [`phase4/package_d/structure/frontier_by_method_layout.csv`](../../phase
 | strombom_multi | wide | 100 | 1.0 |  | 35.0 | 2.0 | False |
 | strombom_multi | wide | 200 | 1.0 |  | 35.0 | 2.0 | False |
 
-## Kubo outlier-rich, N = 200
+## Kubo outlier_rich, N = 200
 
-Source: [`phase4/kubo_structure/claim/outlier_rich_n200_window.json`](../../phase4/kubo_structure/claim/outlier_rich_n200_window.json).
+Nguồn: [`phase4/kubo_structure/claim/outlier_rich_n200_window.json`](../../phase4/kubo_structure/claim/outlier_rich_n200_window.json).
 
-| D | Seeds | R | R >= 0.90 |
+| D | Seed | R | R >= 0.90 |
 |---|---|---|---|
-| 1 | 200 | 0.745 | no |
-| 2 | 200 | 0.855 | no |
-| 3 | 200 | 0.835 | no |
-| 4 | 200 | 0.86 | no |
-| 6 | 200 | 0.89 | no |
-| 10 | 200 | 0.875 | no |
-| 15 | 200 | 0.855 | no |
-| 20 | 200 | 0.935 | yes |
-| 25 | 200 | 0.91 | yes |
-| 35 | 30 | 0.967 | yes |
+| 1 | 200 | 0.745 | không |
+| 2 | 200 | 0.855 | không |
+| 3 | 200 | 0.835 | không |
+| 4 | 200 | 0.86 | không |
+| 6 | 200 | 0.89 | không |
+| 10 | 200 | 0.875 | không |
+| 15 | 200 | 0.855 | không |
+| 20 | 200 | 0.935 | có |
+| 25 | 200 | 0.91 | có |
+| 35 | 30 | 0.967 | có |
 
-D_min diem: 20. Khoang bootstrap: [2, 20]. Gia tri D = 35 co 30 seed scout vi o nay khong duoc gieo lai claim; cac gia tri D = 1 den 25 o tren co 200 seed claim.
+D_min điểm: 20. Khoảng bootstrap: [2, 20]. Giá trị D = 35 có 30 seed khảo sát vì ô này không được gieo lại claim; các giá trị D = 1 đến 25 ở trên có 200 seed claim.
 
-## Bang chung transfer kich thuoc day du
+## Bằng chứng chuyển giao kích thước đầy đủ
 
-Summary source: [`phase4/package_d/size/transfer_summary.csv`](../../phase4/package_d/size/transfer_summary.csv).
+Nguồn tóm tắt: [`phase4/package_d/size/transfer_summary.csv`](../../phase4/package_d/size/transfer_summary.csv).
 
 | n_rows | n_shared | n_shifted | n_absent |
 |---|---|---|---|
 | 44 | 8 | 7 | 29 |
 
-Detailed source: [`phase4/package_d/size/transfer_table.csv`](../../phase4/package_d/size/transfer_table.csv).
+Nguồn chi tiết: [`phase4/package_d/size/transfer_table.csv`](../../phase4/package_d/size/transfer_table.csv).
 
 | feature | n_sheep | baseline | method | baseline_value | method_value | transfer_label |
 |---|---|---|---|---|---|---|
@@ -187,45 +187,45 @@ Detailed source: [`phase4/package_d/size/transfer_table.csv`](../../phase4/packa
 | i_dir_signature |  | strombom_multi | fat | 0.261464147747486 | -0.8678074971276444 | shifted |
 | coverage_saturation |  | strombom_multi | fat | True |  | shifted |
 
-## Luoc do cua cac bang merged_trials
+## Lược đồ của các bảng merged_trials
 
-Moi dong la mot lan mo phong voi mot seed. Ten cot thuc te duoc bao cao trong tung muc du lieu; cac nhom sau giai thich y nghia.
+Mỗi dòng là một lần mô phỏng với một seed. Tên cột thực tế được báo cáo trong từng mục dữ liệu; các nhóm sau giải thích ý nghĩa.
 
-| Nhom | Cot va y nghia |
+| Nhóm | Cột và ý nghĩa |
 |---|---|
-| Danh tinh va thiet ke | method, scenario, preset, seed, sheep_model, dog_controller, obs_mode, n_sheep, n_shepherds, initial_layout, time_limit |
-| Ket qua va chi phi | success, total_ticks, time_to_goal, shepherd_path, first_success_tick, control_efficiency |
-| Trang thai cuoi | final_gcm_goal, final_success_rate, final_sheep_in_goal, final_min_separation |
-| Tom tat theo thoi gian | mean_*, min_*, max_*, auc_* for recorded flock and dog metrics |
-| Chan doan that bai | failure_mode, failure_label, failure_hints |
-| Cau hinh | resolved_config, the serialized effective trial configuration |
+| Danh tính và thiết kế | method, scenario, preset, seed, sheep_model, dog_controller, obs_mode, n_sheep, n_shepherds, initial_layout, time_limit |
+| Kết quả và chi phí | success, total_ticks, time_to_goal, shepherd_path, first_success_tick, control_efficiency |
+| Trạng thái cuối | final_gcm_goal, final_success_rate, final_sheep_in_goal, final_min_separation |
+| Tóm tắt theo thời gian | mean_*, min_*, max_*, auc_* for recorded flock and dog metrics |
+| Chẩn đoán thất bại | failure_mode, failure_label, failure_hints |
+| Cấu hình | resolved_config, the serialized effective trial configuration |
 
-## Claim merge: Phase 4 Kubo size
+## Hợp nhất claim: Giai đoạn 4 Kubo kích thước
 
-Nguon day du: [`phase4/kubo_size/claim/merged_trials.csv`](../../phase4/kubo_size/claim/merged_trials.csv). Bang lon khong duoc chep lai. Cac thong ke duoi day duoc tinh truc tiep tu CSV.
+Nguồn đầy đủ: [`phase4/kubo_size/claim/merged_trials.csv`](../../phase4/kubo_size/claim/merged_trials.csv). Bảng lớn không được chép lại. Các thống kê dưới đây được tính trực tiếp từ CSV.
 
-| Thuoc tinh | Gia tri |
+| Thuộc tính | Giá trị |
 |---|---|
-| So dong | 4,470 |
-| So cot | 77 |
-| So o thiet ke | 100 |
-| Phuong phap | kubo |
-| Bo cuc | compact |
-| Cac gia tri N | 5, 10, 25, 50, 75, 100, 150, 200, 300, 400 |
-| Cac gia tri D | 1, 2, 3, 4, 6, 10, 15, 20, 25, 35 |
-| Khoang seed | 2026 to 2125 |
+| Số dòng | 4,470 |
+| Số cột | 77 |
+| Số ô thiết kế | 100 |
+| Phương pháp | kubo |
+| Bố cục | compact |
+| Các giá trị N | 5, 10, 25, 50, 75, 100, 150, 200, 300, 400 |
+| Các giá trị D | 1, 2, 3, 4, 6, 10, 15, 20, 25, 35 |
+| Khoảng seed | 2026 đến 2125 |
 
-| Thuoc tinh | Gia tri |
+| Thuộc tính | Giá trị |
 |---|---|
-| Thanh cong | 4,428 |
-| That bai | 42 |
-| R toan bo | 0.991 |
-| Trung vi tick, ca thanh cong | 826 |
-| P90 tick, ca thanh cong | 1,785.3 |
-| Trung vi quang duong, ca thanh cong | 291.202 |
-| Nhan that bai | timeout: 42 |
+| Thành công | 4,428 |
+| Thất bại | 42 |
+| R toàn bộ | 0.991 |
+| Trung vị tick, các thành công | 826 |
+| P90 tick, các thành công | 1,785.3 |
+| Trung vị quãng đường, các thành công | 291.202 |
+| Nhãn thất bại | timeout: 42 |
 
-Quy tac chon dong dai dien: sap xep tu dien theo `method`, `initial_layout`, `n_sheep`, `n_shepherds`, `seed`, sau do lay 5 vi tri cach deu, gom hai dau. Quy tac nay trung lap duoc va khong chon theo ket qua.
+Quy tắc chọn dòng đại diện: sắp xếp từ điển theo `method`, `initial_layout`, `n_sheep`, `n_shepherds`, `seed`, sau đó lấy 5 vị trí cách đều, gồm hai đầu. Quy tắc này trung lập và không chọn theo kết quả.
 
 | method | layout | N | D | seed | success | ticks | path | failure_mode |
 |---|---|---|---|---|---|---|---|---|
@@ -235,32 +235,32 @@ Quy tac chon dong dai dien: sap xep tu dien theo `method`, `initial_layout`, `n_
 | kubo | compact | 200 | 3 | 2028 | True | 699 | 233.401 | none |
 | kubo | compact | 400 | 35 | 2055 | True | 558 | 2,427.984 | none |
 
-## Claim merge: Phase 4 FAT size
+## Hợp nhất claim: Giai đoạn 4 FAT kích thước
 
-Nguon day du: [`phase4/fat_size/claim/merged_trials.csv`](../../phase4/fat_size/claim/merged_trials.csv). Bang lon khong duoc chep lai. Cac thong ke duoi day duoc tinh truc tiep tu CSV.
+Nguồn đầy đủ: [`phase4/fat_size/claim/merged_trials.csv`](../../phase4/fat_size/claim/merged_trials.csv). Bảng lớn không được chép lại. Các thống kê dưới đây được tính trực tiếp từ CSV.
 
-| Thuoc tinh | Gia tri |
+| Thuộc tính | Giá trị |
 |---|---|
-| So dong | 4,400 |
-| So cot | 77 |
-| So o thiet ke | 100 |
-| Phuong phap | fat |
-| Bo cuc | compact |
-| Cac gia tri N | 5, 10, 25, 50, 75, 100, 150, 200, 300, 400 |
-| Cac gia tri D | 1, 2, 3, 4, 6, 10, 15, 20, 25, 35 |
-| Khoang seed | 2026 to 2125 |
+| Số dòng | 4,400 |
+| Số cột | 77 |
+| Số ô thiết kế | 100 |
+| Phương pháp | fat |
+| Bố cục | compact |
+| Các giá trị N | 5, 10, 25, 50, 75, 100, 150, 200, 300, 400 |
+| Các giá trị D | 1, 2, 3, 4, 6, 10, 15, 20, 25, 35 |
+| Khoảng seed | 2026 đến 2125 |
 
-| Thuoc tinh | Gia tri |
+| Thuộc tính | Giá trị |
 |---|---|
-| Thanh cong | 2,194 |
-| That bai | 2,206 |
-| R toan bo | 0.499 |
-| Trung vi tick, ca thanh cong | 232 |
-| P90 tick, ca thanh cong | 2,371.8 |
-| Trung vi quang duong, ca thanh cong | 3,183 |
-| Nhan that bai | oscillation: 1707, stuck: 295, timeout: 204 |
+| Thành công | 2,194 |
+| Thất bại | 2,206 |
+| R toàn bộ | 0.499 |
+| Trung vị tick, các thành công | 232 |
+| P90 tick, các thành công | 2,371.8 |
+| Trung vị quãng đường, các thành công | 3,183 |
+| Nhãn thất bại | oscillation: 1707, stuck: 295, timeout: 204 |
 
-Quy tac chon dong dai dien: sap xep tu dien theo `method`, `initial_layout`, `n_sheep`, `n_shepherds`, `seed`, sau do lay 5 vi tri cach deu, gom hai dau. Quy tac nay trung lap duoc va khong chon theo ket qua.
+Quy tắc chọn dòng đại diện: sắp xếp từ điển theo `method`, `initial_layout`, `n_sheep`, `n_shepherds`, `seed`, sau đó lấy 5 vị trí cách đều, gồm hai đầu. Quy tắc này trung lập và không chọn theo kết quả.
 
 | method | layout | N | D | seed | success | ticks | path | failure_mode |
 |---|---|---|---|---|---|---|---|---|
@@ -270,32 +270,32 @@ Quy tac chon dong dai dien: sap xep tu dien theo `method`, `initial_layout`, `n_
 | fat | compact | 200 | 20 | 2035 | False | 10000 | 285,885 | oscillation |
 | fat | compact | 400 | 35 | 2125 | True | 262 | 5,652 | none |
 
-## Claim merge: Phase 4 Kubo structure
+## Hợp nhất claim: Giai đoạn 4 Kubo cấu trúc
 
-Nguon day du: [`phase4/kubo_structure/claim/merged_trials.csv`](../../phase4/kubo_structure/claim/merged_trials.csv). Bang lon khong duoc chep lai. Cac thong ke duoi day duoc tinh truc tiep tu CSV.
+Nguồn đầy đủ: [`phase4/kubo_structure/claim/merged_trials.csv`](../../phase4/kubo_structure/claim/merged_trials.csv). Bảng lớn không được chép lại. Các thống kê dưới đây được tính trực tiếp từ CSV.
 
-| Thuoc tinh | Gia tri |
+| Thuộc tính | Giá trị |
 |---|---|
-| So dong | 6,670 |
-| So cot | 77 |
-| So o thiet ke | 120 |
-| Phuong phap | kubo |
-| Bo cuc | compact, outlier_rich, split, wide |
-| Cac gia tri N | 50, 100, 200 |
-| Cac gia tri D | 1, 2, 3, 4, 6, 10, 15, 20, 25, 35 |
-| Khoang seed | 2026 to 2225 |
+| Số dòng | 6,670 |
+| Số cột | 77 |
+| Số ô thiết kế | 120 |
+| Phương pháp | kubo |
+| Bố cục | compact, outlier_rich, split, wide |
+| Các giá trị N | 50, 100, 200 |
+| Các giá trị D | 1, 2, 3, 4, 6, 10, 15, 20, 25, 35 |
+| Khoảng seed | 2026 đến 2225 |
 
-| Thuoc tinh | Gia tri |
+| Thuộc tính | Giá trị |
 |---|---|
-| Thanh cong | 5,679 |
-| That bai | 991 |
-| R toan bo | 0.851 |
-| Trung vi tick, ca thanh cong | 1,093 |
-| P90 tick, ca thanh cong | 3,193.2 |
-| Trung vi quang duong, ca thanh cong | 916.136 |
-| Nhan that bai | scatter: 320, stuck: 13, timeout: 658 |
+| Thành công | 5,679 |
+| Thất bại | 991 |
+| R toàn bộ | 0.851 |
+| Trung vị tick, các thành công | 1,093 |
+| P90 tick, các thành công | 3,193.2 |
+| Trung vị quãng đường, các thành công | 916.136 |
+| Nhãn thất bại | scatter: 320, stuck: 13, timeout: 658 |
 
-Quy tac chon dong dai dien: sap xep tu dien theo `method`, `initial_layout`, `n_sheep`, `n_shepherds`, `seed`, sau do lay 5 vi tri cach deu, gom hai dau. Quy tac nay trung lap duoc va khong chon theo ket qua.
+Quy tắc chọn dòng đại diện: sắp xếp từ điển theo `method`, `initial_layout`, `n_sheep`, `n_shepherds`, `seed`, sau đó lấy 5 vị trí cách đều, gồm hai đầu. Quy tắc này trung lập và không chọn theo kết quả.
 
 | method | layout | N | D | seed | success | ticks | path | failure_mode |
 |---|---|---|---|---|---|---|---|---|
@@ -305,32 +305,32 @@ Quy tac chon dong dai dien: sap xep tu dien theo `method`, `initial_layout`, `n_
 | kubo | split | 200 | 1 | 2118 | True | 990 | 109.823 | none |
 | kubo | wide | 200 | 35 | 2125 | False | 10000 | 24,723.948 | timeout |
 
-## Claim merge: Phase 4 FAT structure
+## Hợp nhất claim: Giai đoạn 4 FAT cấu trúc
 
-Nguon day du: [`phase4/fat_structure/claim/merged_trials.csv`](../../phase4/fat_structure/claim/merged_trials.csv). Bang lon khong duoc chep lai. Cac thong ke duoi day duoc tinh truc tiep tu CSV.
+Nguồn đầy đủ: [`phase4/fat_structure/claim/merged_trials.csv`](../../phase4/fat_structure/claim/merged_trials.csv). Bảng lớn không được chép lại. Các thống kê dưới đây được tính trực tiếp từ CSV.
 
-| Thuoc tinh | Gia tri |
+| Thuộc tính | Giá trị |
 |---|---|
-| So dong | 5,280 |
-| So cot | 77 |
-| So o thiet ke | 120 |
-| Phuong phap | fat |
-| Bo cuc | compact, outlier_rich, split, wide |
-| Cac gia tri N | 50, 100, 200 |
-| Cac gia tri D | 1, 2, 3, 4, 6, 10, 15, 20, 25, 35 |
-| Khoang seed | 2026 to 2125 |
+| Số dòng | 5,280 |
+| Số cột | 77 |
+| Số ô thiết kế | 120 |
+| Phương pháp | fat |
+| Bố cục | compact, outlier_rich, split, wide |
+| Các giá trị N | 50, 100, 200 |
+| Các giá trị D | 1, 2, 3, 4, 6, 10, 15, 20, 25, 35 |
+| Khoảng seed | 2026 đến 2125 |
 
-| Thuoc tinh | Gia tri |
+| Thuộc tính | Giá trị |
 |---|---|
-| Thanh cong | 906 |
-| That bai | 4,374 |
-| R toan bo | 0.172 |
-| Trung vi tick, ca thanh cong | 215 |
-| P90 tick, ca thanh cong | 243 |
-| Trung vi quang duong, ca thanh cong | 3,211.5 |
-| Nhan that bai | oscillation: 2014, scatter: 474, split: 1298, stuck: 286, timeout: 302 |
+| Thành công | 906 |
+| Thất bại | 4,374 |
+| R toàn bộ | 0.172 |
+| Trung vị tick, các thành công | 215 |
+| P90 tick, các thành công | 243 |
+| Trung vị quãng đường, các thành công | 3,211.5 |
+| Nhãn thất bại | oscillation: 2014, scatter: 474, split: 1298, stuck: 286, timeout: 302 |
 
-Quy tac chon dong dai dien: sap xep tu dien theo `method`, `initial_layout`, `n_sheep`, `n_shepherds`, `seed`, sau do lay 5 vi tri cach deu, gom hai dau. Quy tac nay trung lap duoc va khong chon theo ket qua.
+Quy tắc chọn dòng đại diện: sắp xếp từ điển theo `method`, `initial_layout`, `n_sheep`, `n_shepherds`, `seed`, sau đó lấy 5 vị trí cách đều, gồm hai đầu. Quy tắc này trung lập và không chọn theo kết quả.
 
 | method | layout | N | D | seed | success | ticks | path | failure_mode |
 |---|---|---|---|---|---|---|---|---|
@@ -340,7 +340,7 @@ Quy tac chon dong dai dien: sap xep tu dien theo `method`, `initial_layout`, `n_
 | fat | split | 200 | 35 | 2125 | False | 10000 | 501,004.5 | oscillation |
 | fat | wide | 200 | 35 | 2125 | False | 10000 | 524,968.5 | split |
 
-## Nguon truc tiep
+## Nguồn trực tiếp
 
 * [`phase4/kubo_size/claim/packages/a/frontier.csv`](../../phase4/kubo_size/claim/packages/a/frontier.csv)
 * [`phase4/fat_size/claim/packages/a/frontier.csv`](../../phase4/fat_size/claim/packages/a/frontier.csv)

@@ -3,8 +3,8 @@
 <head>
 <meta charset='utf-8'>
 <meta name='viewport' content='width=device-width,initial-scale=1'>
-<title>Kha nang chan dat tap the: Ke hoach scaling chinh</title>
-<meta name='description' content='Tai lieu HerdSim de doc va dieu huong.'>
+<title>Khả năng chăn dắt tập thể dưới shepherding: Kế hoạch scaling chính</title>
+<meta name='description' content='Tài liệu HerdSim để đọc và điều hướng.'>
 <style>
 :root{--ink:#111827;--mut:#6b7280;--line:#e5e7eb;--acc:#2563eb;--bg:#f9fafb}
 *{box-sizing:border-box}body{margin:0;font:16px/1.65 -apple-system,'Segoe UI',Inter,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
@@ -51,592 +51,592 @@ pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8p
 </style>
 </head>
 <body>
-<div class='chrome'><div class='crumbs'><a href="INDEX_vi.html">Trang chu</a><span class="sep">/</span><span>Docs</span><span class="sep">/</span><span>Kha nang chan dat tap the: Ke hoach scaling chinh</span></div><div class='page-nav'><a rel="prev" href="INDEX_vi.html">Truoc</a><span class="sep">|</span><a href="main_scaling_plan.html">English</a></div></div>
-<header><div class='in'><h1>Kha nang chan dat tap the: Ke hoach scaling chinh</h1><p>Tai lieu HerdSim de doc va dieu huong.</p></div></header>
+<div class='chrome'><div class='crumbs'><a href="INDEX_vi.html">Trang chủ</a><span class="sep">/</span><span>Docs</span><span class="sep">/</span><span>Khả năng chăn dắt tập thể dưới shepherding: Kế hoạch scaling chính</span></div><div class='page-nav'><a rel="prev" href="INDEX_vi.html">Trước</a><span class="sep">|</span><a href="main_scaling_plan.html">English</a></div></div>
+<header><div class='in'><h1>Khả năng chăn dắt tập thể dưới shepherding: Kế hoạch scaling chính</h1><p>Tài liệu HerdSim để đọc và điều hướng.</p></div></header>
 <div class='layout'>
-<nav><a href="#1-muc-tieu-nghien-cuu">1. Muc tieu nghien cuu</a><a href="#2-ban-do-cong-viec-va-quan-he-phu-thuoc">2. Ban do cong viec va quan he phu thuoc</a><a href="#3-hop-dong-ke-hoach-chung">3. Hop dong ke hoach chung</a><a href="#4-cap-bang-chung-va-ngan-sach-du-kien">4. Cap bang chung va ngan sach du kien</a><a href="#5-cau-hoi-nghien-cuu-va-phep-thu-du-kien">5. Cau hoi nghien cuu va phep thu du kien</a><a href="#6-tieu-chi-ho-tro-claim">6. Tieu chi ho tro claim</a><a href="#7-trang-thai-thuc-thi-khong-phai-ket-qua-khoa-hoc">7. Trang thai thuc thi, khong phai ket qua khoa hoc</a><a href="#8-cong-quyet-dinh-tuong-lai">8. Cong quyet dinh tuong lai</a><a href="#9-pham-vi-va-nguy-co">9. Pham vi va nguy co</a><a href="#10-thu-tu-uu-tien-nguon-va-quyen-so-huu-tai-lieu">10. Thu tu uu tien nguon va quyen so huu tai lieu</a></nav>
+<nav><a href="#1-muc-tieu-nghien-cuu">1. Mục tiêu nghiên cứu</a><a href="#2-ban-do-cong-viec-va-phu-thuoc">2. Bản đồ công việc và phụ thuộc</a><a href="#3-hop-dong-ke-hoach-chung">3. Hợp đồng kế hoạch chung</a><a href="#4-cap-bang-chung-va-ngan-sach-du-kien">4. Cấp bằng chứng và ngân sách dự kiến</a><a href="#5-cau-hoi-nghien-cuu-va-phep-thu-du-kien">5. Câu hỏi nghiên cứu và phép thử dự kiến</a><a href="#6-tieu-chi-ho-tro-claim">6. Tiêu chí hỗ trợ claim</a><a href="#7-trang-thai-thuc-thi-khong-phai-ket-qua-khoa-hoc">7. Trạng thái thực thi, không phải kết quả khoa học</a><a href="#8-cong-quyet-dinh-tuong-lai">8. Cổng quyết định tương lai</a><a href="#9-pham-vi-va-nguy-co">9. Phạm vi và nguy cơ</a><a href="#10-thu-tu-uu-tien-nguon-va-quyen-so-huu-tai-lieu">10. Thứ tự ưu tiên nguồn và quyền sở hữu tài liệu</a></nav>
 <main>
-<p>Giao thuc: <code>scaling_v2</code>.</p>
-<p>Tai lieu nay la ke hoach khoa hoc. Tai lieu dinh nghia muc tieu nghien cuu, quan he phu thuoc giua cac phase, cau hoi nghien cuu, tieu chi claim, cap bang chung, ngan sach, cong quyet dinh, va gioi han nghien cuu. Tai lieu khong lap lai ly do thiet lap, giai thich bo dieu khien, quyen so huu trien khai, muc tu vung, hay lenh chay.</p>
-<p>Tai lieu canonical ho tro:</p>
+<p>Giao thức: <code>scaling_v2</code>.</p>
+<p>Tài liệu này là kế hoạch khoa học. Nó định nghĩa mục tiêu nghiên cứu, phụ thuộc giữa các giai đoạn, câu hỏi nghiên cứu, tiêu chí claim, cấp bằng chứng, ngân sách, cổng quyết định, và giới hạn nghiên cứu. Nó không lặp lại lý do thiết lập, giải thích bộ điều khiển, quyền sở hữu triển khai, mục từ vựng, hay lệnh chạy.</p>
+<p>Tài liệu chuẩn hỗ trợ:</p>
 <ul>
-<li><a href="herdsim_research_program.md">Chuong trinh nghien cuu</a></li>
-<li><a href="setup/README_vi.html">Muc luc thiet lap va tham chieu</a></li>
-<li><a href="setup/experiment_setup_vi.html">Thiet lap thi nghiem</a></li>
-<li><a href="setup/parameter_reference_vi.html">Tham chieu tham so</a></li>
-<li><a href="setup/glossary_vi.html">Bang thuat ngu</a></li>
-<li><a href="methods/README_vi.html">Huong dan method</a></li>
-<li><a href="credibility/README_vi.html">Do tin cay va so sanh</a></li>
-<li><a href="experiment_run_strategy.md">Chien luoc chay</a></li>
-<li><a href="setup/run_guide_vi.html">Huong dan chay</a></li>
-<li><a href="progress_tracker.md">Tracker tien do</a></li>
-<li><a href="../results/summary/data/README_vi.html">Phu luc du lieu</a></li>
+<li><a href="herdsim_research_program.md">Chương trình nghiên cứu</a></li>
+<li><a href="setup/README_vi.html">Mục lục thiết lập và tham chiếu</a></li>
+<li><a href="setup/experiment_setup_vi.html">Thiết lập thí nghiệm</a></li>
+<li><a href="setup/parameter_reference_vi.html">Tham chiếu tham số</a></li>
+<li><a href="setup/glossary_vi.html">Bảng thuật ngữ</a></li>
+<li><a href="methods/README_vi.html">Hướng dẫn phương pháp</a></li>
+<li><a href="credibility/README_vi.html">Độ tin cậy và so sánh</a></li>
+<li><a href="experiment_run_strategy.md">Chiến lược chạy</a></li>
+<li><a href="setup/run_guide_vi.html">Hướng dẫn chạy</a></li>
+<li><a href="progress_tracker.md">Theo dõi tiến độ</a></li>
+<li><a href="../results/summary/data/README_vi.html">Phụ lục dữ liệu</a></li>
 </ul>
-<h2 id="1-muc-tieu-nghien-cuu">1. Muc tieu nghien cuu</h2>
-<p>Chuong trinh hoi can bao nhieu kiem soat ben ngoai de dan mot tap the mot cach dang tin cay khi kich thuoc dan va cau truc ban dau thay doi, nhung qua trinh nao giai thich nhu cau do, va nhung mau nao chuyen giao giua cac method chan dat.</p>
-<p>Dai luong chinh cua nhu cau kiem soat la mien so shepherd kha dung quanh <code>D_min</code> va bien overcrowding neu quan sat duoc, trong mot nhiem vu, nguong tin cay, ngan sach thoi gian, bo cuc, method, va dieu kien thong tin co dinh. <code>D_min</code> khong phai thuoc tinh noi tai cua mot dan.</p>
-<p>Don vi cong bo nho nhat la RQ1, RQ2, RQ3, va giao thuc dong bang. RQ4 lap lai ca ban do kich thuoc va doi sanh cau truc cho cac method transfer bat buoc. RQ5 va RQ7 la nghien cuu tiep theo. RQ6 dung cac ban do bien da hoan tat va khong duoc quyet dinh luoi theo du lieu sau khi chay.</p>
-<h2 id="2-ban-do-cong-viec-va-quan-he-phu-thuoc">2. Ban do cong viec va quan he phu thuoc</h2>
+<h2 id="1-muc-tieu-nghien-cuu">1. Mục tiêu nghiên cứu</h2>
+<p>Chương trình hỏi cần bao nhiêu kiểm soát bên ngoài để dẫn một tập thể một cách đáng tin cậy khi kích thước đàn và cấu trúc ban đầu thay đổi, những quá trình nào giải thích nhu cầu đó, và những mẫu nào chuyển giao giữa các phương pháp chăn dắt.</p>
+<p>Đại lượng chính của nhu cầu kiểm soát là miền số người chăn khả dụng quanh <code>D_min</code> và biên quá tải nếu quan sát được, dưới một nhiệm vụ, ngưỡng độ tin cậy, ngân sách thời gian, bố cục, phương pháp, và điều kiện thông tin cố định. <code>D_min</code> không phải thuộc tính nội tại của một đàn.</p>
+<p>Đơn vị công bố nhỏ nhất là RQ1, RQ2, RQ3, và giao thức đóng băng. RQ4 lặp lại cả bản đồ kích thước và đối sánh cấu trúc cho các phương pháp chuyển giao bắt buộc. RQ5 và RQ7 là nghiên cứu tiếp theo. RQ6 dùng các bản đồ biên đã hoàn tất và không được quyết định lưới theo dữ liệu sau khi chạy.</p>
+<h2 id="2-ban-do-cong-viec-va-phu-thuoc">2. Bản đồ công việc và phụ thuộc</h2>
 <div class="table-wrap"><table>
 <thead><tr>
-<th>Phase</th>
-<th>Vai tro nghien cuu</th>
+<th>Giai đoạn</th>
+<th>Vai trò nghiên cứu</th>
 <th>RQ</th>
-<th>Package</th>
-<th>Phu thuoc</th>
-<th>Dieu kien hoan tat trong ke hoach</th>
+<th>Gói</th>
+<th>Phụ thuộc</th>
+<th>Điều kiện hoàn tất trong kế hoạch</th>
 </tr></thead><tbody>
 <tr>
 <td>0</td>
-<td>Dong bang giao thuc chung</td>
+<td>Đóng băng giao thức chung</td>
 <td>S8</td>
 <td>all</td>
-<td>Khong</td>
-<td>YAML canonical va ke hoach khoa hoc thong nhat</td>
+<td>không</td>
+<td>YAML chuẩn và kế hoạch khoa học thống nhất</td>
 </tr>
 <tr>
 <td>1</td>
-<td>Ban do kich thuoc va regime baseline</td>
+<td>Bản đồ kích thước và chế độ cơ sở</td>
 <td>RQ2</td>
 <td>A</td>
-<td>Phase 0</td>
-<td>Bien baseline da merge, regime, va quyet dinh T1 co dieu kien</td>
+<td>Giai đoạn 0</td>
+<td>Biên cơ sở đã hợp nhất, chế độ, và quyết định T1 có điều kiện</td>
 </tr>
 <tr>
 <td>2</td>
-<td>Cau truc tai N co dinh</td>
+<td>Cấu trúc tại N cố định</td>
 <td>RQ1</td>
 <td>B</td>
-<td>Quy tac scout va cua so claim cua Phase 1</td>
-<td>Bien theo bo cuc da merge va so sanh predictor</td>
+<td>Quy tắc scout và cửa sổ claim của Giai đoạn 1</td>
+<td>Biên theo bố cục đã hợp nhất và so sánh bộ dự báo</td>
 </tr>
 <tr>
 <td>3</td>
-<td>Doi sanh co che</td>
+<td>Đối sánh cơ chế</td>
 <td>RQ3</td>
 <td>C</td>
-<td>Cell efficient va overcrowding phu hop tu Phase 1 hoac 2</td>
-<td>Kiem dinh trong cung N da dinh truoc, hoac trang thai undefined ro rang</td>
+<td>Ô hiệu quả và quá tải khớp từ Giai đoạn 1 hoặc 2</td>
+<td>Kiểm định trong cùng N đã định trước, hoặc trạng thái undefined rõ ràng</td>
 </tr>
 <tr>
 <td>4</td>
-<td>Transfer giua cac method</td>
+<td>Chuyển giao giữa các phương pháp</td>
 <td>RQ4</td>
 <td>D</td>
-<td>Thiet ke Phase 1 va 2 da co dinh</td>
-<td>Ban do kich thuoc va cau truc cho moi method bat buoc</td>
+<td>Thiết kế Giai đoạn 1 và 2 đã cố định</td>
+<td>Bản đồ kích thước và cấu trúc cho mọi phương pháp bắt buộc</td>
 </tr>
 <tr>
 <td>5</td>
-<td>Thay the thong tin</td>
+<td>Thay thế thông tin</td>
 <td>RQ5</td>
 <td>E</td>
-<td>Baseline method on dinh va pipeline phan tang</td>
-<td>Bien cua cac ladder observation, range, va communication</td>
+<td>Cơ sở phương pháp ổn định và đường ống chạy phân tầng</td>
+<td>Biên của các thang quan sát, tầm, và giao tiếp</td>
 </tr>
 <tr>
 <td>6</td>
-<td>Fit scaling</td>
+<td>Khớp scaling</td>
 <td>RQ6</td>
 <td>F</td>
-<td>Ban do bien cap CLAIM</td>
-<td>So sanh curve bang leave-one-N-out</td>
+<td>Bản đồ biên cấp CLAIM</td>
+<td>So sánh đường cong bằng leave-one-N-out</td>
 </tr>
 <tr>
 <td>7</td>
-<td>Canh bao som</td>
+<td>Cảnh báo sớm</td>
 <td>RQ7</td>
 <td>G</td>
-<td>Trajectory cap CLAIM co timeseries can thiet</td>
-<td>Danh gia AUROC va lead time tren tap holdout</td>
+<td>Quỹ đạo cấp CLAIM có chuỗi thời gian cần thiết</td>
+<td>Đánh giá AUROC và thời gian dẫn trên tập holdout</td>
 </tr>
 </tbody></table></div>
-<p>Quy tac phu thuoc:</p>
+<p>Quy tắc phụ thuộc:</p>
 <ol>
-<li>Phase 0 dung truoc moi run khoa hoc.</li>
-<li>Phase 1, 2, va 4 dung ban do scout truoc khi reseed claim.</li>
-<li>Phase 3 la phan tich cac cell doi sanh da thu thap. Phase nay undefined neu regime can thiet khong ton tai.</li>
-<li>Claim cau truc cua Phase 4 doi ban do cau truc tu moi method bat buoc.</li>
-<li>Phase 5 gom ba ladder rieng, khong phai tich Descartes.</li>
-<li>Phase 6 chi fit sau khi co bien.</li>
-<li>Phase 7 can timeseries cap CLAIM va holdout toan bo N.</li>
+<li>Giai đoạn 0 đứng trước mọi lần chạy khoa học.</li>
+<li>Giai đoạn 1, 2, và 4 dùng bản đồ scout trước khi gieo lại claim.</li>
+<li>Giai đoạn 3 là phân tích các ô đối sánh đã thu. Giai đoạn này undefined nếu các chế độ cần thiết không tồn tại.</li>
+<li>Claim cấu trúc của Giai đoạn 4 chờ bản đồ cấu trúc từ mọi phương pháp bắt buộc.</li>
+<li>Giai đoạn 5 gồm ba thang riêng, không phải tích Descartes.</li>
+<li>Giai đoạn 6 chỉ khớp sau khi có biên.</li>
+<li>Giai đoạn 7 cần chuỗi thời gian cấp CLAIM và holdout toàn bộ N.</li>
 </ol>
-<h2 id="3-hop-dong-ke-hoach-chung">3. Hop dong ke hoach chung</h2>
-<p>Gia tri may-doc nam trong <a href="../configs/canonical_grid.yaml"><code>canonical_grid.yaml</code></a>. Y nghia va ly do cua tham so nam trong <a href="setup/parameter_reference_vi.html">tham chieu tham so</a> va <a href="setup/experiment_setup_vi.html">thiet lap thi nghiem</a>.</p>
-<p>Ke hoach khoa cac rang buoc sau:</p>
+<h2 id="3-hop-dong-ke-hoach-chung">3. Hợp đồng kế hoạch chung</h2>
+<p>Giá trị máy đọc nằm trong <a href="../configs/canonical_grid.yaml"><code>canonical_grid.yaml</code></a>. Ý nghĩa và lý do của tham số nằm trong <a href="setup/parameter_reference_vi.html">tham chiếu tham số</a> và <a href="setup/experiment_setup_vi.html">thiết lập thí nghiệm</a>.</p>
+<p>Kế hoạch khóa các ràng buộc sau:</p>
 <ul>
-<li>Nhiem vu: <code>drive_to_goal</code>, chi thanh cong khi moi sheep den dich truoc deadline.</li>
-<li>Nguong tin cay chinh: <code>theta = 0.90</code>; cung bao cao 0.50 va 0.70.</li>
-<li>Method baseline: <code>strombom_multi</code>.</li>
-<li>Tap transfer bat buoc: <code>strombom_multi</code>, <code>kubo</code>, va <code>fat</code>.</li>
-<li>Method transfer khuyen nghi nhung khong nam trong tap toi thieu: <code>communication_free</code>.</li>
-<li>Luoi kich thuoc dan: <code>{5, 10, 25, 50, 75, 100, 150, 200, 300, 400}</code>.</li>
-<li>Luoi so shepherd: <code>{1, 2, 3, 4, 6, 10, 15, 20, 25, 35}</code>.</li>
-<li>Bo cuc: <code>compact</code>, <code>wide</code>, <code>split</code>, va <code>outlier_rich</code>.</li>
-<li>Kich thuoc cau truc: <code>{50, 100, 200}</code>.</li>
-<li>Kich thuoc thong tin: <code>{100, 200}</code>.</li>
-<li>Deadline: <code>T0 = 10000</code>; <code>T1 = 20000</code> co dieu kien.</li>
-<li>Danh sach seed khoa tu master seed 2026.</li>
-<li>Do sau scout: 30 seed moi cell duoc chon.</li>
-<li>Do sau claim: thong thuong 100 seed moi cell duoc chon.</li>
-<li>Bootstrap: 1000 lan resample seed.</li>
+<li>Nhiệm vụ: <code>drive_to_goal</code>, chỉ thành công khi mọi cừu đến đích trước hạn.</li>
+<li>Ngưỡng độ tin cậy chính: <code>theta = 0.90</code>; cũng báo cáo 0,50 và 0,70.</li>
+<li>Phương pháp cơ sở: <code>strombom_multi</code>.</li>
+<li>Tập chuyển giao bắt buộc: <code>strombom_multi</code>, <code>kubo</code>, và <code>fat</code>.</li>
+<li>Phương pháp chuyển giao khuyến nghị nhưng không nằm trong tập tối thiểu: <code>communication_free</code>.</li>
+<li>Lưới kích thước đàn: <code>{5, 10, 25, 50, 75, 100, 150, 200, 300, 400}</code>.</li>
+<li>Lưới số người chăn: <code>{1, 2, 3, 4, 6, 10, 15, 20, 25, 35}</code>.</li>
+<li>Bố cục: <code>compact</code>, <code>wide</code>, <code>split</code>, và <code>outlier_rich</code>.</li>
+<li>Kích thước cấu trúc: <code>{50, 100, 200}</code>.</li>
+<li>Kích thước thông tin: <code>{100, 200}</code>.</li>
+<li>Hạn: <code>T0 = 10000</code>; <code>T1 = 20000</code> có điều kiện.</li>
+<li>Danh sách seed khóa từ seed chủ 2026.</li>
+<li>Độ sâu scout: 30 seed mỗi ô được chọn.</li>
+<li>Độ sâu claim: thông thường 100 seed mỗi ô được chọn.</li>
+<li>Bootstrap: 1000 lần lấy mẫu lại seed.</li>
 </ul>
-<p>Hieu ung theo so dog duoc do bang buoc cuc bo cua luoi. Nghien cuu khong phan giai duoc chenh lech nho hon mot buoc cuc bo cua luoi D da thu.</p>
-<h3 id="quy-tac-bien-va-regime">Quy tac bien va regime</h3>
-<p>Dat <code>R(m, tau, N, D, T, X0, I)</code> la xac suat thanh cong tren cac seed da khoa.</p>
+<p>Hiệu ứng theo số chó được đo bằng bước cục bộ của lưới. Nghiên cứu không phân giải được chênh lệch nhỏ hơn một bước cục bộ của lưới D đã thử.</p>
+<h3 id="quy-tac-bien-va-che-do">Quy tắc biên và chế độ</h3>
+<p>Đặt <code>R(m, tau, N, D, T, X0, I)</code> là xác suất thành công trên các seed đã khóa.</p>
 <div class="table-wrap"><table>
 <thead><tr>
-<th>Dai luong</th>
-<th>Dinh nghia ke hoach</th>
+<th>Đại lượng</th>
+<th>Định nghĩa kế hoạch</th>
 </tr></thead><tbody>
 <tr>
 <td><code>D_min</code></td>
-<td>D nho nhat da thu voi <code>R &gt;= theta</code></td>
+<td>D nhỏ nhất đã thử với <code>R &gt;= theta</code></td>
 </tr>
 <tr>
 <td><code>D_overcrowd</code></td>
-<td>D nho nhat sau <code>D_min</code> ma D do va D ke tiep trong luoi deu thap hon theta</td>
+<td>D nhỏ nhất sau <code>D_min</code> mà D đó và D kế tiếp trong lưới đều thấp hơn theta</td>
 </tr>
 <tr>
 <td><code>D_max</code></td>
-<td>D tin cay lon nhat duoi <code>D_overcrowd</code>; khi khong co overcrowding, la D tin cay lon nhat da thu va co the chi la tran luoi</td>
+<td>D tin cậy lớn nhất dưới <code>D_overcrowd</code>; khi không có quá tải, là D tin cậy lớn nhất đã thử và có thể chỉ là trần lưới</td>
 </tr>
 <tr>
 <td><code>B*</code></td>
-<td><code>(D, T)</code> tin cay co trung vi duong di shepherd nho nhat; neu bang nhau, chon D nho hon roi thoi gian thanh cong nhanh hon</td>
+<td><code>(D, T)</code> tin cậy có trung vị đường đi người chăn nhỏ nhất; nếu bằng nhau, chọn D nhỏ hơn rồi thời gian thành công trung vị nhanh hơn</td>
 </tr>
 <tr>
-<td>Hard failure</td>
-<td>Khong co D da thu nao dat theta</td>
+<td>Thất bại cứng</td>
+<td>Không có D đã thử nào đạt theta</td>
 </tr>
 <tr>
-<td>Under-resourced failure</td>
-<td><code>R &lt; theta</code> duoi <code>D_overcrowd</code></td>
+<td>Thất bại thiếu nguồn lực</td>
+<td><code>R &lt; theta</code> dưới <code>D_overcrowd</code></td>
 </tr>
 <tr>
-<td>Efficient operation</td>
-<td><code>R &gt;= theta</code> va trung vi duong di duoi nguong wasteful</td>
+<td>Vận hành hiệu quả</td>
+<td><code>R &gt;= theta</code> và trung vị đường đi dưới ngưỡng lãng phí</td>
 </tr>
 <tr>
-<td>Wasteful overspend</td>
-<td><code>R &gt;= theta</code> va trung vi duong di cao hon <code>B*</code> it nhat 20 phan tram; cung bao cao 10 va 30 phan tram</td>
+<td>Chi tiêu lãng phí</td>
+<td><code>R &gt;= theta</code> và trung vị đường đi cao hơn <code>B*</code> ít nhất 20 phần trăm; cũng báo cáo 10 và 30 phần trăm</td>
 </tr>
 <tr>
-<td>Overcrowding collapse</td>
-<td><code>R &lt; theta</code> tai hoac tren <code>D_overcrowd</code></td>
+<td>Sụp đổ quá tải</td>
+<td><code>R &lt; theta</code> tại hoặc trên <code>D_overcrowd</code></td>
 </tr>
 </tbody></table></div>
-<p><code>D_max</code> bang 35 khi khong co <code>D_overcrowd</code> la tran luoi da thu, khong phai diem collapse da do.</p>
-<h2 id="4-cap-bang-chung-va-ngan-sach-du-kien">4. Cap bang chung va ngan sach du kien</h2>
+<p>Một <code>D_max</code> bằng 35 khi không có <code>D_overcrowd</code> là trần lưới đã thử, không phải điểm sụp đổ đã đo.</p>
+<h2 id="4-cap-bang-chung-va-ngan-sach-du-kien">4. Cấp bằng chứng và ngân sách dự kiến</h2>
 <div class="table-wrap"><table>
 <thead><tr>
-<th>Cap</th>
-<th>Muc dich</th>
-<th>Do sau du kien</th>
-<th>Duoc dung cho claim</th>
+<th>Cấp độ</th>
+<th>Mục đích</th>
+<th>Độ sâu dự kiến</th>
+<th>Được dùng cho claim</th>
 </tr></thead><tbody>
 <tr>
-<td>SMOKE hoac Pilot</td>
-<td>Kiem tra path, metric, host, va resume</td>
-<td>Luoi chan doan nho, thong thuong 5 seed</td>
-<td>Khong</td>
+<td>SMOKE hoặc Pilot</td>
+<td>Kiểm tra đường dẫn, chỉ số, máy chủ, và hành vi tiếp tục</td>
+<td>Lưới chẩn đoán nhỏ, thông thường 5 seed</td>
+<td>Không</td>
 </tr>
 <tr>
 <td>SCOUT</td>
-<td>Lap ban do rong va chon cua so chinh xac</td>
+<td>Lập bản đồ rộng và chọn cửa sổ chính xác</td>
 <td>30 seed</td>
-<td>Chi lap ke hoach va chan doan</td>
+<td>Chỉ lập kế hoạch và chẩn đoán</td>
 </tr>
 <tr>
 <td>CLAIM</td>
-<td>Uoc luong bien da chon va dai luong claim</td>
-<td>Thong thuong 100 seed</td>
-<td>Co, sau khi kiem tra provenance va tai lieu run</td>
+<td>Ước lượng biên đã chọn và đại lượng claim</td>
+<td>Thông thường 100 seed</td>
+<td>Có, sau khi kiểm tra nguồn gốc và tài liệu chạy</td>
 </tr>
 <tr>
 <td>T1</td>
-<td>Thu deadline dai hon tren cell overcrowding da phat hien</td>
+<td>Thử hạn dài hơn trên ô quá tải đã phát hiện</td>
 <td>100 seed</td>
-<td>Co, chi khi trigger ton tai</td>
+<td>Có, chỉ khi điều kiện kích hoạt tồn tại</td>
 </tr>
 </tbody></table></div>
-<p>Voi moi method, bo cuc, va N, ke hoach claim chon:</p>
+<p>Với mỗi phương pháp, bố cục, và N, kế hoạch claim chọn:</p>
 <ol>
-<li><code>D_min</code> tu scout, cung D truoc va sau trong luoi.</li>
-<li>Khi hai gia tri D lien tiep xac lap mot onset overcrowding ung vien, chon hai gia tri do va D tin cay cuoi.</li>
-<li>Neu khong D nao dat theta, chon hai gia tri D lon nhat da thu.</li>
+<li><code>D_min</code> từ scout, cùng D trước và sau trong lưới.</li>
+<li>Khi hai giá trị D liên tiếp xác lập một khởi phát quá tải ứng viên, chọn hai giá trị đó và D tin cậy cuối.</li>
+<li>Nếu không D nào đạt theta, chọn hai giá trị D lớn nhất đã thử.</li>
 </ol>
-<p>Dong claim thay dong scout trong cell da reseed. Khong bao gio cong chong dong scout va claim cua cung cell. Cell khong duoc chon giu do sau scout. Bootstrap resample seed trong moi D; lan lay mau khong co <code>D_min</code> van bi censor ben phai tren luoi da thu. Neu khoang <code>D_min</code> trai qua hon mot buoc luoi D, nang cua so do len 200 seed truoc khi dung cho claim cau truc.</p>
-<h3 id="uoc-luong-theo-ke-hoach">Uoc luong theo ke hoach</h3>
-<p>Nhung so nay la uoc luong ngan sach, khong phai so da thuc thi:</p>
+<p>Dòng claim thay dòng scout trong ô đã gieo lại. Không bao giờ chồng dòng scout và claim của cùng ô. Ô không được chọn giữ độ sâu scout. Bootstrap lấy mẫu lại seed trong mỗi D; lần lấy mẫu không có <code>D_min</code> vẫn bị kiểm duyệt phải trên lưới đã thử. Nếu khoảng <code>D_min</code> trải hơn một bước lưới D, nâng cửa sổ đó lên 200 seed trước khi dùng cho claim cấu trúc.</p>
+<h3 id="uoc-luong-theo-ke-hoach">Ước lượng theo kế hoạch</h3>
+<p>Những số này là ước lượng ngân sách, không phải số đã thực thi:</p>
 <div class="table-wrap"><table>
 <thead><tr>
-<th>Campaign</th>
-<th>Uoc luong scout</th>
-<th>Uoc luong claim</th>
-<th>Ghi chu ke hoach</th>
+<th>Chiến dịch</th>
+<th>Ước lượng scout</th>
+<th>Ước lượng claim</th>
+<th>Ghi chú kế hoạch</th>
 </tr></thead><tbody>
 <tr>
-<td>Mot ban do kich thuoc</td>
-<td>Khoang 3000</td>
-<td>Toi da khoang 6000</td>
-<td>Uoc luong claim gia dinh toi da sau gia tri D moi N</td>
+<td>Một bản đồ kích thước</td>
+<td>Khoảng 3000</td>
+<td>Tối đa khoảng 6000</td>
+<td>Ước lượng claim giả định tối đa sáu giá trị D mỗi N</td>
 </tr>
 <tr>
-<td>Mot doi sanh cau truc</td>
-<td>Khoang 3600</td>
-<td>Toi da khoang 7200</td>
-<td>Ba N, bon bo cuc, toan bo luoi D cho scout</td>
+<td>Một đối sánh cấu trúc</td>
+<td>Khoảng 3600</td>
+<td>Tối đa khoảng 7200</td>
+<td>Ba N, bốn bố cục, toàn bộ lưới D cho scout</td>
 </tr>
 <tr>
-<td>Core baseline</td>
-<td>Khoang 20000 tong cong</td>
-<td>Da tinh ben trong</td>
-<td>Kich thuoc, T1 co dieu kien, va cau truc, lam tron de lap ke hoach</td>
+<td>Lõi cơ sở</td>
+<td>Khoảng 20000 tổng cộng</td>
+<td>Đã gồm bên trong</td>
+<td>Kích thước, T1 có điều kiện, và cấu trúc, làm tròn để lập kế hoạch</td>
 </tr>
 <tr>
-<td>Moi method transfer bat buoc</td>
-<td>Lap lai ngan sach kich thuoc va cau truc</td>
-<td>Tinh lai sau scout</td>
-<td>Cua so claim phu thuoc scout cua method do</td>
+<td>Mỗi phương pháp chuyển giao bắt buộc</td>
+<td>Lặp lại ngân sách kích thước và cấu trúc</td>
+<td>Tính lại sau scout</td>
+<td>Cửa sổ claim phụ thuộc scout của phương pháp đó</td>
 </tr>
 </tbody></table></div>
-<p>Cong viec thuc te phai doc tu artifact status va provenance, khong suy ra tu cac uoc luong nay.</p>
-<h2 id="5-cau-hoi-nghien-cuu-va-phep-thu-du-kien">5. Cau hoi nghien cuu va phep thu du kien</h2>
-<h3 id="rq1-cau-truc">RQ1: Cau truc</h3>
-<p><code>D_min</code> co thay doi giua cac bo cuc ban dau tai N co dinh khong?</p>
-<p>Dung N trong <code>{50, 100, 200}</code>, ca bon bo cuc, va toan bo luoi D. So sanh <code>D_min</code> theo buoc luoi. So sanh model <code>(N, D)</code> voi model dung them bo cuc va state chi do trong 100 tick dau. Holdout toan bo N. Khong dung thong ke toan trial lam predictor.</p>
-<h3 id="rq2-kich-thuoc-va-regime-van-hanh">RQ2: Kich thuoc va regime van hanh</h3>
-<p>Bien shepherd tin cay va regime van hanh thay doi theo N nhu the nao?</p>
-<p>Lap ban do <code>R(N, D)</code> tai T0 cho method baseline va bo cuc compact. Uoc luong bien va nhan regime theo quy tac chung. Chi chay T1 cho cell duoc chon boi trigger overcrowding quan sat tu scout hoac claim.</p>
-<h3 id="rq3-co-che">RQ3: Co che</h3>
-<p>Chu ky co che nao da dinh truoc phan biet cell efficient va overcrowding tai cung N?</p>
-<p>Dung mot trung vi moi cell <code>(N, D)</code>, kiem dinh rank, va hieu chinh Holm tren cac gia thuyet.</p>
+<p>Công việc thực tế phải đọc từ artifact trạng thái và nguồn gốc, không suy ra từ các ước lượng này.</p>
+<h2 id="5-cau-hoi-nghien-cuu-va-phep-thu-du-kien">5. Câu hỏi nghiên cứu và phép thử dự kiến</h2>
+<h3 id="rq1-cau-truc">RQ1: Cấu trúc</h3>
+<p><code>D_min</code> có thay đổi giữa các bố cục ban đầu tại N cố định không?</p>
+<p>Dùng N trong <code>{50, 100, 200}</code>, cả bốn bố cục, và toàn bộ lưới D. So sánh <code>D_min</code> theo bước lưới. So sánh mô hình <code>(N, D)</code> với mô hình dùng thêm bố cục và trạng thái chỉ đo trong 100 tick đầu. Holdout toàn bộ N. Không dùng thống kê toàn lần thử làm bộ dự báo.</p>
+<h3 id="rq2-kich-thuoc-va-che-do-van-hanh">RQ2: Kích thước và chế độ vận hành</h3>
+<p>Biên người chăn tin cậy và chế độ vận hành thay đổi theo N như thế nào?</p>
+<p>Lập bản đồ <code>R(N, D)</code> tại T0 cho phương pháp cơ sở và bố cục compact. Ước lượng biên và nhãn chế độ theo quy tắc chung. Chỉ chạy T1 cho ô được chọn bởi điều kiện kích hoạt quá tải quan sát từ scout hoặc claim.</p>
+<h3 id="rq3-co-che">RQ3: Cơ chế</h3>
+<p>Những chữ ký cơ chế nào đã định trước phân biệt ô hiệu quả và quá tải tại cùng N?</p>
+<p>Dùng một trung vị mỗi ô <code>(N, D)</code>, kiểm định hạng, và hiệu chỉnh Holm trên các giả thuyết.</p>
 <div class="table-wrap"><table>
 <thead><tr>
-<th>Gia thuyet</th>
-<th>Chu ky bat buoc</th>
+<th>Giả thuyết</th>
+<th>Chữ ký bắt buộc</th>
 </tr></thead><tbody>
 <tr>
-<td>Interference</td>
-<td>Trung vi <code>I_dir</code> cao hon trong cell overcrowding</td>
+<td>Nhiễu (interference)</td>
+<td>Trung vị <code>I_dir</code> cao hơn trong ô quá tải</td>
 </tr>
 <tr>
-<td>Induced fragmentation</td>
-<td>Ti le thanh phan lien thong lon nhat thap hon trong cell overcrowding</td>
+<td>Phân mảnh cảm ứng</td>
+<td>Tỷ lệ thành phần lớn nhất thấp hơn trong ô quá tải</td>
 </tr>
 <tr>
-<td>Coverage saturation</td>
-<td>Trong cell tin cay, trung vi coverage tren 0.5, mien theo D duoi 0.1, va trung vi path tang; curve gan 0 khong phai saturation</td>
+<td>Bảo hòa độ phủ</td>
+<td>Trong ô tin cậy, trung vị độ phủ trên 0,5, miền theo D dưới 0,1, và trung vị đường đi tăng; đường cong gần không không phải bảo hòa</td>
 </tr>
 <tr>
-<td>Redundant effort</td>
-<td>Trung vi path cao hon ma reliability khong tang</td>
+<td>Nỗ lực dư thừa</td>
+<td>Trung vị đường đi cao hơn mà độ tin cậy không tăng</td>
 </tr>
 </tbody></table></div>
-<p>RQ3 khong them luoi moi. Neu mot method khong co nhan overcrowding, doi sanh co che undefined cho method do.</p>
-<h3 id="rq4-tinh-tong-quat-giua-cac-method">RQ4: Tinh tong quat giua cac method</h3>
-<p>Nhung mau bien, regime, va cau truc nao chuyen giao giua ba method bat buoc?</p>
-<p>Lap lai ban do kich thuoc va doi sanh cau truc cho <code>kubo</code> va <code>fat</code>, roi so sanh voi <code>strombom_multi</code>.</p>
+<p>RQ3 không thêm lưới mới. Nếu một phương pháp không có nhãn quá tải, đối sánh cơ chế undefined cho phương pháp đó.</p>
+<h3 id="rq4-tinh-tong-quat-giua-cac-phuong-phap">RQ4: Tính tổng quát giữa các phương pháp</h3>
+<p>Những mẫu biên, chế độ, và cấu trúc nào chuyển giao giữa ba phương pháp bắt buộc?</p>
+<p>Lặp lại bản đồ kích thước và đối sánh cấu trúc cho <code>kubo</code> và <code>fat</code>, rồi so sánh với <code>strombom_multi</code>.</p>
 <div class="table-wrap"><table>
 <thead><tr>
-<th>Thuoc tinh</th>
-<th>Shared</th>
-<th>Shifted</th>
-<th>Absent</th>
+<th>Thuộc tính</th>
+<th>Chung (shared)</th>
+<th>Dịch (shifted)</th>
+<th>Vắng (absent)</th>
 </tr></thead><tbody>
 <tr>
 <td><code>D_min</code></td>
-<td>Cung D da thu</td>
-<td>D da thu khac</td>
-<td>Mot ben khong co <code>D_min</code></td>
+<td>Cùng D đã thử</td>
+<td>D đã thử khác</td>
+<td>Một bên không có <code>D_min</code></td>
 </tr>
 <tr>
-<td>Overcrowding</td>
-<td>Co o ca hai va D/N trong he so 1.5</td>
-<td>Co o ca hai voi khoang cach lon hon</td>
-<td>Khong co o ca hai</td>
+<td>Quá tải</td>
+<td>Có ở cả hai và D/N trong hệ số 1,5</td>
+<td>Có ở cả hai với khoảng cách lớn hơn</td>
+<td>Không có ở cả hai</td>
 </tr>
 <tr>
 <td><code>I_dir</code></td>
-<td><code>r(I_dir, success) &lt; -0.3</code> o ca hai</td>
-<td>Mau dau cung huong nhung do lon khac</td>
-<td>Thieu mau co y nghia bat buoc</td>
+<td><code>r(I_dir, success) &lt; -0.3</code> ở cả hai</td>
+<td>Mẫu dấu cùng hướng nhưng độ lớn khác</td>
+<td>Thiếu mẫu có ý nghĩa bắt buộc</td>
 </tr>
 <tr>
-<td>Coverage saturation</td>
-<td>Quy tac saturation dung o ca hai</td>
-<td>Dung o mot ben</td>
-<td>Khong dung o ca hai</td>
+<td>Bảo hòa độ phủ</td>
+<td>Quy tắc bảo hòa đúng ở cả hai</td>
+<td>Đúng ở một bên</td>
+<td>Không đúng ở cả hai</td>
 </tr>
 </tbody></table></div>
-<p>Chi dien dong transfer phu thuoc state khi moi method duoc so sanh co run cau truc bat buoc.</p>
-<h3 id="rq5-thong-tin-so-voi-so-shepherd">RQ5: Thong tin so voi so shepherd</h3>
-<p>Observation, sensing range, hoac communication phong phu hon co lam giam <code>D_min</code> tai reliability co dinh khong?</p>
-<p>Dung N trong <code>{100, 200}</code>. Thu ladder observation <code>bearing_only</code>, <code>local_positions</code>, <code>global</code>; he so range <code>0.5, 1, 1.5, 2</code> lan <code>r_s</code> cua method; va ladder communication <code>none</code>, <code>neighbour_broadcast</code>, <code>global_shared</code>. Voi <code>strombom_multi</code>, thong tin chia se la hop cua sheep duoc cam nhan, khong phai ground truth uu tien tu simulator.</p>
-<h3 id="rq6-fit-scaling">RQ6: Fit scaling</h3>
-<p>Curve du kien nao du doan N holdout tot nhat, va mot power law duy nhat co du khong?</p>
-<p>So sanh cac ung vien constant, linear, power <code>A * N^alpha</code>, va two-piece linear theo don vi so dog. Chon bang RMSE leave-one-N-out. Chi bao cao log slope trong mot mien N va bo cuc duoc noi ro.</p>
-<h3 id="rq7-canh-bao-som">RQ7: Canh bao som</h3>
-<p>State gan day co du doan failure sau nay tot hon chi N va D khong?</p>
-<p>Tai tick 1000 den 8000, buoc 200, chi dung feature tu <code>(t - 200, t]</code>. Gan nhan failure trong 500 tick tiep theo chi khi horizon van nam trong T0. Train tren cac N khac. Lead time duoc do tu lan vuot nguong training dau den failure va co the lon hon 500 tick.</p>
-<h2 id="6-tieu-chi-ho-tro-claim">6. Tieu chi ho tro claim</h2>
-<p>Verdict la <code>UNEVALUATED</code>, <code>SUPPORTED</code>, <code>REJECTED</code>, hoac <code>INCONCLUSIVE</code>. Mot phan tich co dieu kien khong the chay vi trigger vang mat duoc danh dau <code>SKIPPED</code> trong trang thai run va giai thich trong tracker. Chi duoc gan verdict tu bang chung cap CLAIM.</p>
+<p>Chỉ điền dòng chuyển giao phụ thuộc trạng thái khi mọi phương pháp được so sánh có lần chạy cấu trúc bắt buộc.</p>
+<h3 id="rq5-thong-tin-so-voi-so-nguoi-chan">RQ5: Thông tin so với số người chăn</h3>
+<p>Quan sát, tầm cảm biến, hoặc giao tiếp phong phú hơn có làm giảm <code>D_min</code> tại độ tin cậy cố định không?</p>
+<p>Dùng N trong <code>{100, 200}</code>. Thử thang quan sát <code>bearing_only</code>, <code>local_positions</code>, <code>global</code>; hệ số tầm <code>0.5, 1, 1.5, 2</code> lần <code>r_s</code> của phương pháp; và thang giao tiếp <code>none</code>, <code>neighbour_broadcast</code>, <code>global_shared</code>. Với <code>strombom_multi</code>, thông tin chia sẻ là hợp các cừu được cảm nhận, không phải chân lý giả lập đặc quyền.</p>
+<h3 id="rq6-khop-scaling">RQ6: Khớp scaling</h3>
+<p>Đường cong dự kiến nào dự báo N holdout tốt nhất, và một quy luật lũy thừa duy nhất có đủ không?</p>
+<p>So sánh các ứng viên hằng, tuyến tính, lũy thừa <code>A * N^alpha</code>, và tuyến tính hai đoạn theo đơn vị số chó. Chọn bằng RMSE leave-one-N-out. Chỉ báo cáo độ dốc log trong một miền N và bố cục được nói rõ.</p>
+<h3 id="rq7-canh-bao-som">RQ7: Cảnh báo sớm</h3>
+<p>Trạng thái gần đây có dự báo thất bại sau này tốt hơn chỉ N và D không?</p>
+<p>Tại tick 1000 đến 8000, bước 200, chỉ dùng đặc trưng từ <code>(t - 200, t]</code>. Gán nhãn thất bại trong 500 tick tiếp theo chỉ khi chân trời vẫn nằm trong T0. Huấn luyện trên các N khác. Thời gian dẫn được đo từ lần vượt ngưỡng huấn luyện đầu đến thất bại và có thể lớn hơn 500 tick.</p>
+<h2 id="6-tieu-chi-ho-tro-claim">6. Tiêu chí hỗ trợ claim</h2>
+<p>Kết luận là <code>UNEVALUATED</code>, <code>SUPPORTED</code>, <code>REJECTED</code>, hoặc <code>INCONCLUSIVE</code>. Một phân tích có điều kiện không thể chạy vì điều kiện kích hoạt vắng mặt được đánh dấu <code>SKIPPED</code> trong trạng thái chạy và giải thích trong bộ theo dõi. Chỉ được gán kết luận từ bằng chứng cấp CLAIM.</p>
 <div class="table-wrap"><table>
 <thead><tr>
 <th>Claim</th>
 <th>RQ</th>
-<th>Duoc ho tro khi</th>
+<th>Được hỗ trợ khi</th>
 </tr></thead><tbody>
 <tr>
 <td>C1a</td>
 <td>RQ1</td>
-<td>Voi it nhat mot N, <code>D_min</code> khac it nhat mot buoc luoi D giua cac bo cuc tai theta 0.90</td>
+<td>Với ít nhất một N, <code>D_min</code> khác ít nhất một bước lưới D giữa các bố cục tại theta 0,90</td>
 </tr>
 <tr>
 <td>C1b</td>
 <td>RQ1</td>
-<td>Model state co negative log-likelihood leave-one-N-out thap hon model <code>(N, D)</code></td>
+<td>Mô hình trạng thái có negative log-likelihood leave-one-N-out thấp hơn mô hình <code>(N, D)</code></td>
 </tr>
 <tr>
 <td>C2a</td>
 <td>RQ2</td>
-<td>Method baseline co <code>D_overcrowd</code> tai theta 0.90 cho it nhat mot N</td>
+<td>Phương pháp cơ sở có <code>D_overcrowd</code> tại theta 0,90 cho ít nhất một N</td>
 </tr>
 <tr>
 <td>C2b</td>
 <td>RQ2</td>
-<td>It nhat mot D tren <code>D_overcrowd</code> van duoi theta tai T = 20000</td>
+<td>Ít nhất một D trên <code>D_overcrowd</code> vẫn dưới theta tại T = 20000</td>
 </tr>
 <tr>
 <td>C3</td>
 <td>RQ3</td>
-<td>Tai N co dinh, cell overcrowding va efficient khac nhau ve <code>I_dir</code> va/hoac fragmentation voi rank <code>p &lt; 0.05</code> sau hieu chinh Holm</td>
+<td>Tại N cố định, ô quá tải và hiệu quả khác nhau về <code>I_dir</code> và/hoặc phân mảnh với hạng <code>p &lt; 0.05</code> sau hiệu chỉnh Holm</td>
 </tr>
 <tr>
 <td>C4</td>
 <td>RQ4</td>
-<td><code>D_min</code> hoac overcrowding shared tren ba method bat buoc; dong cau truc can them tat ca run cau truc</td>
+<td><code>D_min</code> hoặc quá tải chung trên ba phương pháp bắt buộc; dòng cấu trúc cần thêm mọi lần chạy cấu trúc</td>
 </tr>
 <tr>
 <td>C5a</td>
 <td>RQ5</td>
-<td>Mot buoc ladder lam giam <code>D_min</code> it nhat mot buoc luoi D tai N trong <code>{100, 200}</code></td>
+<td>Một bước thang làm giảm <code>D_min</code> ít nhất một bước lưới D tại N trong <code>{100, 200}</code></td>
 </tr>
 <tr>
 <td>C5b</td>
 <td>RQ5</td>
-<td>Buoc ladder thu hai tiet kiem it dog hon buoc dau</td>
+<td>Bước thang thứ hai tiết kiệm ít chó hơn bước đầu</td>
 </tr>
 <tr>
 <td>C6a</td>
 <td>RQ6</td>
-<td>Power co RMSE leave-one-N-out cao hon piecewise hoac curve rieng theo bo cuc</td>
+<td>Lũy thừa có RMSE leave-one-N-out cao hơn piecewise hoặc đường cong riêng theo bố cục</td>
 </tr>
 <tr>
 <td>C6b</td>
 <td>RQ6</td>
-<td>Slope cua log <code>D_min</code> theo log N duoi 1 trong mien N va bo cuc da neu</td>
+<td>Độ dốc của log <code>D_min</code> theo log N dưới 1 trong miền N và bố cục đã nêu</td>
 </tr>
 <tr>
 <td>C7a</td>
 <td>RQ7</td>
-<td>AUROC state holdout cao hon baseline <code>(N, D)</code> holdout</td>
+<td>AUROC trạng thái holdout cao hơn cơ sở <code>(N, D)</code> holdout</td>
 </tr>
 <tr>
 <td>C7b</td>
 <td>RQ7</td>
-<td>It nhat 30 phan tram trial failure co lead time it nhat 500 tick</td>
+<td>Ít nhất 30 phần trăm lần thử thất bại có thời gian dẫn ít nhất 500 tick</td>
 </tr>
 </tbody></table></div>
-<p>Nhung tieu chi nay chi ho tro phat bieu trong giao thuc da thu. Chung khong ho tro quy luat pho quat, nhiem vu chua thu, hieu qua ngoai thuc dia, hay chenh lech so dog duoi mot buoc luoi.</p>
-<h2 id="7-trang-thai-thuc-thi-khong-phai-ket-qua-khoa-hoc">7. Trang thai thuc thi, khong phai ket qua khoa hoc</h2>
-<p>Muc nay ghi cong viec du kien da chay hay chua. Muc nay khong neu effect size, gia tri bien, hay dien giai khoa hoc. <a href="progress_tracker.md">Tracker tien do</a> quan ly trang thai run va verdict hien tai. <a href="../results/summary/data/run_ledger_vi.html">Run ledger</a> quan ly so da thuc thi va provenance.</p>
-<p>Trang thai duoc ghi vao ngay 2026-10-06:</p>
+<p>Những tiêu chí này chỉ hỗ trợ phát biểu trong giao thức đã thử. Chúng không hỗ trợ quy luật phổ quát, nhiệm vụ chưa thử, hiệu quả ngoài thực địa, hay chênh lệch số chó dưới một bước lưới.</p>
+<h2 id="7-trang-thai-thuc-thi-khong-phai-ket-qua-khoa-hoc">7. Trạng thái thực thi, không phải kết quả khoa học</h2>
+<p>Mục này ghi công việc dự kiến đã chạy hay chưa. Mục này không nêu cỡ hiệu ứng, giá trị biên, hay diễn giải khoa học. <a href="progress_tracker.md">Theo dõi tiến độ</a> quản lý trạng thái chạy và kết luận hiện tại. <a href="../results/summary/data/run_ledger_vi.html">Nhật ký chạy</a> quản lý số đã thực thi và nguồn gốc.</p>
+<p>Trạng thái được ghi vào ngày 2026-10-06:</p>
 <div class="table-wrap"><table>
 <thead><tr>
-<th>Phase</th>
-<th>Trang thai run</th>
-<th>Ghi chu so da thuc thi</th>
+<th>Giai đoạn</th>
+<th>Trạng thái chạy</th>
+<th>Ghi chú số đã thực thi</th>
 </tr></thead><tbody>
 <tr>
 <td>0</td>
 <td>DONE</td>
-<td>Giao thuc da dong bang</td>
+<td>Giao thức đã đóng băng</td>
 </tr>
 <tr>
 <td>1</td>
-<td>DONE; T1 co dieu kien SKIPPED</td>
-<td>Scout 3000 dong; claim reseed 2200 dong; T1 khong chay vi trigger chon zero cell</td>
+<td>DONE; T1 có điều kiện SKIPPED</td>
+<td>Scout 3000 dòng; gieo lại claim 2200 dòng; T1 không chạy vì điều kiện kích hoạt chọn zero ô</td>
 </tr>
 <tr>
 <td>2</td>
 <td>DONE</td>
-<td>Scout 3600 dong; claim reseed 2400 dong</td>
+<td>Scout 3600 dòng; gieo lại claim 2400 dòng</td>
 </tr>
 <tr>
 <td>3</td>
 <td><span class="badge SKIPPED">SKIPPED</span></td>
-<td>Phan tich co che co dieu kien khong co doi sanh overcrowding du dieu kien</td>
+<td>Phân tích cơ chế có điều kiện không có đối sánh quá tải đủ điều kiện</td>
 </tr>
 <tr>
 <td>4</td>
-<td>DONE cho campaign kich thuoc va cau truc bat buoc cua Kubo va FAT</td>
-<td>So scout, claim, va merge chinh xac nam trong run ledger</td>
+<td>DONE cho chiến dịch kích thước và cấu trúc bắt buộc của Kubo và FAT</td>
+<td>Số scout, claim, và hợp nhất chính xác nằm trong nhật ký chạy</td>
 </tr>
 <tr>
 <td>5</td>
 <td>TODO</td>
-<td>Khong claim campaign information-ladder da hoan tat</td>
+<td>Không claim chiến dịch thang thông tin đã hoàn tất</td>
 </tr>
 <tr>
 <td>6</td>
-<td>DONE cho package fit baseline da du kien</td>
-<td>Chi la trang thai phan tich</td>
+<td>DONE cho gói khớp cơ sở đã dự kiến</td>
+<td>Chỉ là trạng thái phân tích</td>
 </tr>
 <tr>
 <td>7</td>
 <td>TODO</td>
-<td>Phan tich canh bao som chua chay</td>
+<td>Phân tích cảnh báo sớm chưa chạy</td>
 </tr>
 </tbody></table></div>
-<p><code>DONE</code>, <code>SKIPPED</code>, va <code>TODO</code> chi mo ta trang thai thuc thi. Phase hoan tat co the cho claim bi reject hoac inconclusive. Phase co dieu kien bi skip co nghia trigger dinh truoc vang mat, khong co nghia da quan sat mot ket qua khoa hoc tai dieu kien khong chay.</p>
-<h2 id="8-cong-quyet-dinh-tuong-lai">8. Cong quyet dinh tuong lai</h2>
+<p>Các từ <code>DONE</code>, <code>SKIPPED</code>, và <code>TODO</code> chỉ mô tả trạng thái thực thi. Một giai đoạn hoàn tất có thể cho claim bị từ chối hoặc không kết luận. Một giai đoạn có điều kiện bị bỏ qua nghĩa là điều kiện kích hoạt định trước vắng mặt, không nghĩa đã quan sát một kết quả khoa học tại điều kiện không chạy.</p>
+<h2 id="8-cong-quyet-dinh-tuong-lai">8. Cổng quyết định tương lai</h2>
 <div class="table-wrap"><table>
 <thead><tr>
-<th>Cong</th>
-<th>Bang chung kiem tra</th>
-<th>Quyet dinh</th>
+<th>Cổng</th>
+<th>Bằng chứng kiểm tra</th>
+<th>Quyết định</th>
 </tr></thead><tbody>
 <tr>
-<td>G1 Tinh nhat quan giao thuc</td>
-<td>YAML canonical, protocol da resolve, va ke hoach</td>
-<td>Dung neu gia tri dong bang khac nhau; tao version cho thay doi giao thuc co chu dich</td>
+<td>G1 Tính nhất quán giao thức</td>
+<td>YAML chuẩn, giao thức đã resolve, và kế hoạch</td>
+<td>Dừng nếu giá trị đóng băng khác nhau; tạo phiên bản cho thay đổi giao thức có chủ đích</td>
 </tr>
 <tr>
-<td>G2 Chat luong scout</td>
-<td>Hoan tat, ban do reliability, va provenance</td>
-<td>Dung va sua ban do hong truoc khi lap ke hoach claim</td>
+<td>G2 Chất lượng scout</td>
+<td>Hoàn tất, bản đồ độ tin cậy, và nguồn gốc</td>
+<td>Dừng và sửa bản đồ hỏng trước khi lập kế hoạch claim</td>
 </tr>
 <tr>
-<td>G3 Do chinh xac cua so claim</td>
-<td>Khoang bootstrap cua <code>D_min</code></td>
-<td>Nang cua so da chon len 200 seed khi khoang trai qua hon mot buoc luoi D</td>
+<td>G3 Độ chính xác cửa sổ claim</td>
+<td>Khoảng bootstrap của <code>D_min</code></td>
+<td>Nâng cửa sổ đã chọn lên 200 seed khi khoảng trải hơn một bước lưới D</td>
 </tr>
 <tr>
-<td>G4 Trigger T1</td>
-<td>Hai D lien tiep sau bien duoi theta</td>
-<td>Chi chay T1 tren cell overcrowding da chon; neu khong, ghi <code>SKIPPED</code></td>
+<td>G4 Điều kiện kích hoạt T1</td>
+<td>Hai D liên tiếp sau biên dưới theta</td>
+<td>Chỉ chạy T1 trên ô quá tải đã chọn; nếu không, ghi <code>SKIPPED</code></td>
 </tr>
 <tr>
-<td>G5 Dieu kien co che</td>
-<td>Cell efficient va overcrowding tai cung N</td>
-<td>Chi chay RQ3 noi doi sanh matched ton tai</td>
+<td>G5 Điều kiện cơ chế</td>
+<td>Ô hiệu quả và quá tải tại cùng N</td>
+<td>Chỉ chạy RQ3 nơi đối sánh khớp tồn tại</td>
 </tr>
 <tr>
-<td>G6 Day du transfer</td>
-<td>Ban do kich thuoc va cau truc cho moi method bat buoc</td>
-<td>Khong dien claim transfer cau truc day du truoc khi moi ban do ton tai</td>
+<td>G6 Đầy đủ chuyển giao</td>
+<td>Bản đồ kích thước và cấu trúc cho mọi phương pháp bắt buộc</td>
+<td>Không điền claim chuyển giao cấu trúc đầy đủ trước khi mọi bản đồ tồn tại</td>
 </tr>
 <tr>
-<td>G7 Mo rong cau truc</td>
-<td>Ban do claim cau truc ba kich thuoc</td>
-<td>Them N = 300 va 400 chu yeu neu ca bon bo cuc van o san <code>D_min</code>; neu khong, mo rong la tuy chon</td>
+<td>G7 Mở rộng cấu trúc</td>
+<td>Bản đồ claim cấu trúc ba kích thước</td>
+<td>Thêm N = 300 và 400 chủ yếu nếu cả bốn bố cục vẫn ở sàn <code>D_min</code>; nếu không, mở rộng là tùy chọn</td>
 </tr>
 <tr>
-<td>G8 Campaign thong tin</td>
-<td>Baseline on dinh va protocol ladder rieng</td>
-<td>Chay observation, range, va communication thanh cac campaign phan tang rieng</td>
+<td>G8 Chiến dịch thông tin</td>
+<td>Cơ sở ổn định và giao thức thang riêng</td>
+<td>Chạy quan sát, tầm, và giao tiếp thành các chiến dịch phân tầng riêng</td>
 </tr>
 <tr>
-<td>G9 Canh bao som</td>
-<td>Timeseries cap CLAIM va ca hai lop outcome</td>
-<td>Khong bao cao AUROC hoac lead time neu khong co du lieu holdout du dieu kien</td>
+<td>G9 Cảnh báo sớm</td>
+<td>Chuỗi thời gian cấp CLAIM và cả hai lớp kết cục</td>
+<td>Không báo cáo AUROC hoặc thời gian dẫn nếu không có dữ liệu holdout đủ điều kiện</td>
 </tr>
 <tr>
-<td>G10 Intended velocity E1</td>
-<td>Bang chung cap CLAIM ve spike <code>I_dir</code> do wall</td>
-<td>Giu E1 chua xay dung tru khi nhu cau chan doan duoc chung minh</td>
+<td>G10 Vận tốc dự định E1</td>
+<td>Bằng chứng cấp CLAIM về đỉnh <code>I_dir</code> do tường</td>
+<td>Giữ E1 chưa xây trừ khi nhu cầu chẩn đoán được chứng minh</td>
 </tr>
 <tr>
-<td>G11 Parity ben ngoai</td>
-<td>Giao thuc matched giua engine va tolerance dinh truoc</td>
-<td>Khong claim parity NetLogo dinh luong truoc khi dat yeu cau credibility</td>
+<td>G11 Parity bên ngoài</td>
+<td>Giao thức khớp giữa engine và dung sai định trước</td>
+<td>Không claim parity NetLogo định lượng trước khi đạt yêu cầu độ tin cậy</td>
 </tr>
 </tbody></table></div>
-<h2 id="9-pham-vi-va-nguy-co">9. Pham vi va nguy co</h2>
+<h2 id="9-pham-vi-va-nguy-co">9. Phạm vi và nguy cơ</h2>
 <div class="table-wrap"><table>
 <thead><tr>
-<th>Nguy co hoac gioi han</th>
-<th>Phan hoi trong ke hoach</th>
+<th>Nguy cơ hoặc giới hạn</th>
+<th>Phản hồi trong kế hoạch</th>
 </tr></thead><tbody>
 <tr>
-<td>Mot nhiem vu mo phong</td>
-<td>Gioi han ket luan trong <code>drive_to_goal</code>; nhiem vu thu hai la cong viec sau</td>
+<td>Một nhiệm vụ mô phỏng</td>
+<td>Giới hạn kết luận trong <code>drive_to_goal</code>; nhiệm vụ thứ hai là công việc sau</td>
 </tr>
 <tr>
-<td>Phu thuoc method</td>
-<td>Yeu cau RQ4 truoc phat bieu tong quat cho method</td>
+<td>Phụ thuộc phương pháp</td>
+<td>Yêu cầu RQ4 trước phát biểu tổng quát cho phương pháp</td>
 </tr>
 <tr>
-<td>Confounding bo cuc va state</td>
-<td>Dung N matched va doi sanh bo cuc dinh truoc</td>
+<td>Gây nhiễu bố cục và trạng thái</td>
+<td>Dùng N khớp và đối sánh bố cục định trước</td>
 </tr>
 <tr>
-<td>Luoi D roi rac</td>
-<td>Bieu dien hieu ung theo buoc luoi cuc bo va giu censor tren luoi</td>
+<td>Lưới D rời rạc</td>
+<td>Biểu diễn hiệu ứng theo bước lưới cục bộ và giữ kiểm duyệt trên lưới</td>
 </tr>
 <tr>
-<td>Bien reliability mem</td>
-<td>Dung seed khoa, cua so claim, khoang bootstrap, va cong chinh xac 200 seed</td>
+<td>Biên độ tin cậy mềm</td>
+<td>Dùng seed khóa, cửa sổ claim, khoảng bootstrap, và cổng chính xác 200 seed</td>
 </tr>
 <tr>
-<td>Phan tich co dieu kien</td>
-<td>Danh dau cong viec thieu trigger la undefined hoac skipped, khong coi la null do duoc tai dieu kien khong chay</td>
+<td>Phân tích có điều kiện</td>
+<td>Đánh dấu công việc thiếu điều kiện kích hoạt là undefined hoặc skipped, không coi là null đo được tại điều kiện không chạy</td>
 </tr>
 <tr>
-<td>Quy uoc thoi gian giua method</td>
-<td>Tranh dien giai vat ly truc tiep cua tick tho giua cac ho controller</td>
+<td>Quy ước thời gian giữa phương pháp</td>
+<td>Tránh diễn giải vật lý trực tiếp của tick thô giữa các họ bộ điều khiển</td>
 </tr>
 <tr>
-<td>Collect switch Strombom rong hon dich</td>
-<td>Khong dien giai failure cua no la packing failure</td>
+<td>Công tắc thu thập Strombom rộng hơn đích</td>
+<td>Không diễn giải thất bại của nó là thất bại xếp chặt</td>
 </tr>
 <tr>
-<td>Bo dieu khien mo phong</td>
-<td>Khong claim ngoai thuc dia, nong trai, hay gia tri sinh hoc</td>
+<td>Bộ điều khiển mô phỏng</td>
+<td>Không claim ngoài thực địa, nông trại, hay giá trị sinh học</td>
 </tr>
 <tr>
-<td>Twin NetLogo va ban nhap 2025</td>
-<td>Coi la lop bang chung rieng; theo tai lieu credibility</td>
+<td>Twin NetLogo và bản thảo 2025</td>
+<td>Coi là lớp bằng chứng riêng; theo tài liệu độ tin cậy</td>
 </tr>
 <tr>
-<td>Tran luoi</td>
-<td>Khong dien giai D = 35 la gioi han vat ly</td>
+<td>Trần lưới</td>
+<td>Không diễn giải D = 35 là giới hạn vật lý</td>
 </tr>
 <tr>
-<td>Do chinh xac chon loc</td>
-<td>Giu cap cua cell sau merge va khong cong chong dong scout va claim</td>
+<td>Độ chính xác chọn lọc</td>
+<td>Giữ cấp của ô sau hợp nhất và không chồng dòng scout và claim</td>
 </tr>
 </tbody></table></div>
-<p>San mac dinh cua ung dung, sheep model, va dog force law nam ngoai pham vi sua doi cua giao thuc nay. Gioi han chi tiet va bien validation nam trong <a href="credibility/README_vi.html">do tin cay va so sanh</a>.</p>
-<h2 id="10-thu-tu-uu-tien-nguon-va-quyen-so-huu-tai-lieu">10. Thu tu uu tien nguon va quyen so huu tai lieu</h2>
-<p>Khi cac nguon khac nhau, dung thu tu sau:</p>
+<p>Sân mặc định của ứng dụng, mô hình cừu, và luật lực chó nằm ngoài phạm vi sửa đổi của giao thức này. Giới hạn chi tiết và biên xác minh nằm trong <a href="credibility/README_vi.html">độ tin cậy và so sánh</a>.</p>
+<h2 id="10-thu-tu-uu-tien-nguon-va-quyen-so-huu-tai-lieu">10. Thứ tự ưu tiên nguồn và quyền sở hữu tài liệu</h2>
+<p>Khi các nguồn khác nhau, dùng thứ tự sau:</p>
 <ol>
-<li><a href="../configs/canonical_grid.yaml"><code>canonical_grid.yaml</code></a> dinh nghia mac dinh may-doc dong bang cua <code>scaling_v2</code>.</li>
-<li>YAML da resolve trong <a href="../configs/protocols/"><code>configs/protocols/</code></a> dinh nghia subset cua mot campaign.</li>
-<li><code>protocol.yaml</code>, <code>provenance.json</code>, <code>manifest.jsonl</code>, va <code>status.json</code> da copy cua run dinh nghia dieu da thuc thi.</li>
-<li>Ke hoach nay dinh nghia cau hoi nghien cuu, quan he phu thuoc, tieu chi claim, cap bang chung, ngan sach, cong, va pham vi.</li>
-<li><a href="setup/README_vi.html">Tai lieu thiet lap</a> dinh nghia ly do tham so, glossary, cap trien khai, va tham chieu van hanh.</li>
-<li><a href="methods/README_vi.html">Huong dan method</a> dinh nghia dien giai bo dieu khien va gioi han rieng cua method.</li>
-<li><a href="credibility/README_vi.html">Tai lieu credibility</a> dinh nghia bien so sanh va validation.</li>
-<li><a href="experiment_run_strategy.md">Chien luoc chay</a> va <a href="setup/run_guide_vi.html">huong dan chay</a> dinh nghia muc dich phan tang va lenh.</li>
-<li><a href="progress_tracker.md">Tracker tien do</a> dinh nghia trang thai code, run, va claim hien tai.</li>
-<li><a href="../results/summary/data/README_vi.html">Phu luc du lieu</a> va artifact truc tiep dinh nghia so da thuc thi va bang chung da bao cao.</li>
+<li><a href="../configs/canonical_grid.yaml"><code>canonical_grid.yaml</code></a> định nghĩa mặc định máy đọc đóng băng của <code>scaling_v2</code>.</li>
+<li>YAML đã resolve trong <a href="../configs/protocols/"><code>configs/protocols/</code></a> định nghĩa tập con của một chiến dịch.</li>
+<li><code>protocol.yaml</code>, <code>provenance.json</code>, <code>manifest.jsonl</code>, và <code>status.json</code> đã sao chép của lần chạy định nghĩa điều đã thực thi.</li>
+<li>Kế hoạch này định nghĩa câu hỏi nghiên cứu, phụ thuộc, tiêu chí claim, cấp bằng chứng, ngân sách, cổng, và phạm vi.</li>
+<li><a href="setup/README_vi.html">Tài liệu thiết lập</a> định nghĩa lý do tham số, bảng thuật ngữ, lớp triển khai, và tham chiếu vận hành.</li>
+<li><a href="methods/README_vi.html">Hướng dẫn phương pháp</a> định nghĩa diễn giải bộ điều khiển và giới hạn riêng của phương pháp.</li>
+<li><a href="credibility/README_vi.html">Tài liệu độ tin cậy</a> định nghĩa biên so sánh và xác minh.</li>
+<li><a href="experiment_run_strategy.md">Chiến lược chạy</a> và <a href="setup/run_guide_vi.html">hướng dẫn chạy</a> định nghĩa ý định phân tầng và lệnh.</li>
+<li><a href="progress_tracker.md">Theo dõi tiến độ</a> định nghĩa trạng thái mã, chạy, và claim hiện tại.</li>
+<li><a href="../results/summary/data/README_vi.html">Phụ lục dữ liệu</a> và artifact trực tiếp định nghĩa số đã thực thi và bằng chứng đã báo cáo.</li>
 </ol>
-<p>Ket qua khong bao gio dinh nghia lai ke hoach dong bang. Neu uoc luong ke hoach khac artifact run, giu uoc luong la ke hoach va bao cao artifact la da thuc thi. Neu protocol da copy cua run khac van ban tong quat, protocol da copy va provenance chi phoi dien giai run do.</p>
+<p>Kết quả không bao giờ định nghĩa lại kế hoạch đóng băng. Nếu ước lượng kế hoạch khác artifact lần chạy, giữ ước lượng là kế hoạch và báo cáo artifact là đã thực thi. Nếu giao thức đã sao chép của lần chạy khác văn bản tổng quát, giao thức đã sao chép và nguồn gốc chi phối diễn giải lần chạy đó.</p>
 </main>
 </div>
-<footer><p>Nguon Markdown: <code>main_scaling_plan_vi.md</code>. Hinh anh duoc nhung de doc ngoai tuyen.</p></footer>
+<footer><p>Nguồn Markdown: <code>main_scaling_plan_vi.md</code>. Hình ảnh được nhúng để đọc ngoại tuyến.</p></footer>
 </body>
 </html>

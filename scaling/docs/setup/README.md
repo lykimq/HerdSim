@@ -34,17 +34,49 @@ If a copied protocol and a planning document disagree about a completed run, use
 
 ## Schematics
 
-The existing setup schematics are reused here:
+Full set also embedded in context in [experiment setup](experiment_setup.md). Gallery below keeps every setup schematic in one place.
 
-- [Arena overview](../../results/summary/figures/schematics/en/arena_overview.svg)
-- [Compact arena](../../results/summary/figures/schematics/en/arena_compact.svg)
-- [Goal-radius rule](../../results/summary/figures/schematics/en/goal_radius.svg)
-- [Four layouts](../../results/summary/figures/schematics/en/four_layouts.svg)
-- [Staging pipeline](../../results/summary/figures/schematics/en/pipeline.svg)
-- [One cell and its seeds](../../results/summary/figures/schematics/en/one_cell_seeds.svg)
-- [Scout grid](../../results/summary/figures/schematics/en/scout_grid.svg)
-- [Claim window](../../results/summary/figures/schematics/en/claim_window.svg)
-- [Regimes](../../results/summary/figures/schematics/en/regimes.svg)
+![Arena overview](../../results/summary/figures/schematics/en/arena_overview.svg)
+
+![Compact arena](../../results/summary/figures/schematics/en/arena_compact.svg)
+
+![Goal-radius rule](../../results/summary/figures/schematics/en/goal_radius.svg)
+
+![Field, drive, timeout](../../results/summary/figures/schematics/en/design_timeout.svg)
+
+![N and D grids](../../results/summary/figures/schematics/en/design_nd_grids.svg)
+
+![Theta defines D_min](../../results/summary/figures/schematics/en/design_theta.svg)
+
+![Four layouts](../../results/summary/figures/schematics/en/four_layouts.svg)
+
+![strombom_multi](../../results/summary/figures/schematics/en/alg_strombom_multi.svg)
+
+![Kubo](../../results/summary/figures/schematics/en/alg_kubo.svg)
+
+![FAT](../../results/summary/figures/schematics/en/alg_fat.svg)
+
+![Farthest meaning by controller](../../results/summary/figures/schematics/en/alg_farthest_compare.svg)
+
+![Waste / D_max / D_overcrowd example](../../results/summary/figures/schematics/en/overcrowd_example.svg)
+
+![Frontier labels](../../results/summary/figures/schematics/en/design_frontier.svg)
+
+![Regimes](../../results/summary/figures/schematics/en/regimes.svg)
+
+![Failure labels](../../results/summary/figures/schematics/en/design_failures.svg)
+
+![Staging pipeline](../../results/summary/figures/schematics/en/pipeline.svg)
+
+![One cell and its seeds](../../results/summary/figures/schematics/en/one_cell_seeds.svg)
+
+![Scout grid](../../results/summary/figures/schematics/en/scout_grid.svg)
+
+![Claim window](../../results/summary/figures/schematics/en/claim_window.svg)
+
+![Bootstrap idea](../../results/summary/figures/schematics/en/design_bootstrap.svg)
+
+![Phase roadmap](../../results/summary/figures/schematics/en/phase_roadmap.svg)
 
 ## Scope
 

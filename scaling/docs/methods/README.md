@@ -19,6 +19,10 @@ That separation matters. The study compares simulated controllers on HerdSim's `
 
 Vietnamese versions are available in [README_vi.md](README_vi.md), [strombom_vi.md](strombom_vi.md), [kubo_vi.md](kubo_vi.md), and [fat_vi.md](fat_vi.md).
 
+![What "farthest" means for each controller.](../../results/summary/figures/schematics/en/alg_farthest_compare.svg)
+
+*Strombom Collect: farthest from the flock centre. Kubo: farthest from the goal. FAT: farthest from the dog.*
+
 ## Shared `scaling_v2` setup
 
 All completed method comparisons use the same operational task and frontier definitions:

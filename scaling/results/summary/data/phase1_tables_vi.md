@@ -1,10 +1,10 @@
-# Bang du lieu Giai doan 1
+# Bảng dữ liệu Giai đoạn 1
 
-Tat ca bang ket qua khoa hoc trong phu luc nay dung merge claim. Du lieu scout chi de lap ke hoach va duoc liet ke rieng trong so cai chay.
+Tất cả bảng kết quả khoa học trong phụ lục này dùng bản hợp nhất claim. Dữ liệu khảo sát chỉ để lập kế hoạch và được liệt kê riêng trong nhật ký chạy.
 
-## Bien theo kich thuoc dan
+## Biên theo kích thước đàn
 
-Source: [`phase1/claim/packages/a/frontier.csv`](../../phase1/claim/packages/a/frontier.csv).
+Nguồn: [`phase1/claim/packages/a/frontier.csv`](../../phase1/claim/packages/a/frontier.csv).
 
 | initial_layout | n_sheep | d_min | d_overcrowd | d_max | b_star_d | b_star_t | b_star_effort | hard_failure |
 |---|---|---|---|---|---|---|---|---|
@@ -19,11 +19,11 @@ Source: [`phase1/claim/packages/a/frontier.csv`](../../phase1/claim/packages/a/f
 | compact | 300 | 1 |  | 35 | 1 | 10000.0 | 130.81134639802144 | False |
 | compact | 400 | 1 |  | 35 | 1 | 10000.0 | 119.83311309692806 | False |
 
-`D_max = 35` la tran cua luoi da thu vi `D_overcrowd` trong. Day khong phai bien that bai tren da quan sat.
+`D_max = 35` là trần lưới đã thử vì `D_overcrowd` trống. Đây không phải biên thất bại trên đã quan sát.
 
-## Khoang bootstrap D_min day du
+## Khoảng bootstrap D_min đầy đủ
 
-Source: [`phase1/claim/packages/a/dmin_bootstrap.csv`](../../phase1/claim/packages/a/dmin_bootstrap.csv).
+Nguồn: [`phase1/claim/packages/a/dmin_bootstrap.csv`](../../phase1/claim/packages/a/dmin_bootstrap.csv).
 
 | initial_layout | n_sheep | d_min | d_min_ci_low | d_min_ci_high | n_boot | n_seeds_ref | n_boot_defined |
 |---|---|---|---|---|---|---|---|
@@ -38,25 +38,25 @@ Source: [`phase1/claim/packages/a/dmin_bootstrap.csv`](../../phase1/claim/packag
 | compact | 300 | 1 | 1 | 1 | 1000 | 100 | 1000 |
 | compact | 400 | 1 | 1 | 1 | 1000 | 100 | 1000 |
 
-## So luong che do
+## Số lượng chế độ
 
-Source: [`phase1/claim/packages/a/regimes.csv`](../../phase1/claim/packages/a/regimes.csv).
+Nguồn: [`phase1/claim/packages/a/regimes.csv`](../../phase1/claim/packages/a/regimes.csv).
 
-| Che do | So o |
+| Chế độ | Số ô |
 |---|---|
 | efficient_operation | 10 |
 | under_resourced_failure | 2 |
 | wasteful_overspend | 88 |
 
-## Bang chung mo hinh scaling
+## Bằng chứng mô hình scaling
 
-Cross-validation source: [`phase1/claim/packages/f/scaling_cv.csv`](../../phase1/claim/packages/f/scaling_cv.csv).
+Nguồn kiểm định chéo: [`phase1/claim/packages/f/scaling_cv.csv`](../../phase1/claim/packages/f/scaling_cv.csv).
 
 | constant | linear | power | piecewise |
 |---|---|---|---|
 | 0.4444444444444445 | 0.4434280392420368 | 0.24698127485541224 | 0.1317615691736825 |
 
-Fit source: [`phase1/claim/packages/f/scaling_fits.csv`](../../phase1/claim/packages/f/scaling_fits.csv).
+Nguồn khớp mô hình: [`phase1/claim/packages/f/scaling_fits.csv`](../../phase1/claim/packages/f/scaling_fits.csv).
 
 | model | rmse | aic | bic | params |
 |---|---|---|---|---|
@@ -65,45 +65,45 @@ Fit source: [`phase1/claim/packages/f/scaling_fits.csv`](../../phase1/claim/pack
 | power | 0.19957997128601312 | -28.230805287709877 | -27.625635101721784 | {"A": 2.7282498520863614, "alpha": -0.2067095373892277, "log_log_slope": -0.16464473304683952} |
 | piecewise | 5.438959822042073e-16 | -266.3102111592855 | -264.79728569431524 | {"break_n": 10.0, "a1": 1.9999999999999987, "b1": 1.5888218580782547e-16, "a2": 0.9999999999999996, "b2": -7.054072800592629e-19} |
 
-## Luoc do cua cac bang merged_trials
+## Lược đồ của các bảng merged_trials
 
-Moi dong la mot lan mo phong voi mot seed. Ten cot thuc te duoc bao cao trong tung muc du lieu; cac nhom sau giai thich y nghia.
+Mỗi dòng là một lần mô phỏng với một seed. Tên cột thực tế được báo cáo trong từng mục dữ liệu; các nhóm sau giải thích ý nghĩa.
 
-| Nhom | Cot va y nghia |
+| Nhóm | Cột và ý nghĩa |
 |---|---|
-| Danh tinh va thiet ke | method, scenario, preset, seed, sheep_model, dog_controller, obs_mode, n_sheep, n_shepherds, initial_layout, time_limit |
-| Ket qua va chi phi | success, total_ticks, time_to_goal, shepherd_path, first_success_tick, control_efficiency |
-| Trang thai cuoi | final_gcm_goal, final_success_rate, final_sheep_in_goal, final_min_separation |
-| Tom tat theo thoi gian | mean_*, min_*, max_*, auc_* for recorded flock and dog metrics |
-| Chan doan that bai | failure_mode, failure_label, failure_hints |
-| Cau hinh | resolved_config, the serialized effective trial configuration |
+| Danh tính và thiết kế | method, scenario, preset, seed, sheep_model, dog_controller, obs_mode, n_sheep, n_shepherds, initial_layout, time_limit |
+| Kết quả và chi phí | success, total_ticks, time_to_goal, shepherd_path, first_success_tick, control_efficiency |
+| Trạng thái cuối | final_gcm_goal, final_success_rate, final_sheep_in_goal, final_min_separation |
+| Tóm tắt theo thời gian | mean_*, min_*, max_*, auc_* for recorded flock and dog metrics |
+| Chẩn đoán thất bại | failure_mode, failure_label, failure_hints |
+| Cấu hình | resolved_config, the serialized effective trial configuration |
 
-## Trial merge claim
+## Thử nghiệm hợp nhất claim
 
-Nguon day du: [`phase1/claim/merged_trials.csv`](../../phase1/claim/merged_trials.csv). Bang lon khong duoc chep lai. Cac thong ke duoi day duoc tinh truc tiep tu CSV.
+Nguồn đầy đủ: [`phase1/claim/merged_trials.csv`](../../phase1/claim/merged_trials.csv). Bảng lớn không được chép lại. Các thống kê dưới đây được tính trực tiếp từ CSV.
 
-| Thuoc tinh | Gia tri |
+| Thuộc tính | Giá trị |
 |---|---|
-| So dong | 4,540 |
-| So cot | 61 |
-| So o thiet ke | 100 |
-| Phuong phap | strombom_multi |
-| Bo cuc | compact |
-| Cac gia tri N | 5, 10, 25, 50, 75, 100, 150, 200, 300, 400 |
-| Cac gia tri D | 1, 2, 3, 4, 6, 10, 15, 20, 25, 35 |
-| Khoang seed | 2026 to 2125 |
+| Số dòng | 4,540 |
+| Số cột | 61 |
+| Số ô thiết kế | 100 |
+| Phương pháp | strombom_multi |
+| Bố cục | compact |
+| Các giá trị N | 5, 10, 25, 50, 75, 100, 150, 200, 300, 400 |
+| Các giá trị D | 1, 2, 3, 4, 6, 10, 15, 20, 25, 35 |
+| Khoảng seed | 2026 đến 2125 |
 
-| Thuoc tinh | Gia tri |
+| Thuộc tính | Giá trị |
 |---|---|
-| Thanh cong | 4,371 |
-| That bai | 169 |
-| R toan bo | 0.963 |
-| Trung vi tick, ca thanh cong | 182 |
-| P90 tick, ca thanh cong | 195 |
-| Trung vi quang duong, ca thanh cong | 502.335 |
-| Nhan that bai | oscillation: 111, stuck: 58 |
+| Thành công | 4,371 |
+| Thất bại | 169 |
+| R toàn bộ | 0.963 |
+| Trung vị tick, các thành công | 182 |
+| P90 tick, các thành công | 195 |
+| Trung vị quãng đường, các thành công | 502.335 |
+| Nhãn thất bại | oscillation: 111, stuck: 58 |
 
-Quy tac chon dong dai dien: sap xep tu dien theo `method`, `initial_layout`, `n_sheep`, `n_shepherds`, `seed`, sau do lay 5 vi tri cach deu, gom hai dau. Quy tac nay trung lap duoc va khong chon theo ket qua.
+Quy tắc chọn dòng đại diện: sắp xếp từ điển theo `method`, `initial_layout`, `n_sheep`, `n_shepherds`, `seed`, sau đó lấy 5 vị trí cách đều, gồm hai đầu. Quy tắc này trung lập và không chọn theo kết quả.
 
 | method | layout | N | D | seed | success | ticks | path | failure_mode |
 |---|---|---|---|---|---|---|---|---|
@@ -113,7 +113,7 @@ Quy tac chon dong dai dien: sap xep tu dien theo `method`, `initial_layout`, `n_
 | strombom_multi | compact | 200 | 2 | 2110 | True | 179 | 269.961 | none |
 | strombom_multi | compact | 400 | 35 | 2055 | True | 164 | 3,955.479 | none |
 
-## Nguon truc tiep
+## Nguồn trực tiếp
 
 * [`phase1/claim/packages/a/frontier.csv`](../../phase1/claim/packages/a/frontier.csv)
 * [`phase1/claim/packages/a/reliability.csv`](../../phase1/claim/packages/a/reliability.csv)

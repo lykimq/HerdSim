@@ -1,5 +1,13 @@
 # Glossary
 
+![Ticks measure time; path measures dog travel.](../../results/summary/figures/schematics/en/metrics_tick_path.svg)
+
+![Reliability R is a fraction of independent seeds.](../../results/summary/figures/schematics/en/metrics_reliability.svg)
+
+![I_dir: aligned headings versus conflicting headings.](../../results/summary/figures/schematics/en/metrics_idir.svg)
+
+![Frontier labels on an R(D) curve.](../../results/summary/figures/schematics/en/design_frontier.svg)
+
 | Term | Definition |
 |---|---|
 | B* | Reliable `(D, T)` with the least median total shepherd path; ties favor smaller D, then faster median success |

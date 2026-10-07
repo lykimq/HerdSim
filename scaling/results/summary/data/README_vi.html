@@ -3,8 +3,8 @@
 <head>
 <meta charset='utf-8'>
 <meta name='viewport' content='width=device-width,initial-scale=1'>
-<title>Phu luc du lieu</title>
-<meta name='description' content='Tai lieu HerdSim de doc va dieu huong.'>
+<title>Phụ lục dữ liệu</title>
+<meta name='description' content='Tài liệu HerdSim để đọc và điều hướng.'>
 <style>
 :root{--ink:#111827;--mut:#6b7280;--line:#e5e7eb;--acc:#2563eb;--bg:#f9fafb}
 *{box-sizing:border-box}body{margin:0;font:16px/1.65 -apple-system,'Segoe UI',Inter,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
@@ -51,27 +51,27 @@ pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8p
 </style>
 </head>
 <body>
-<div class='chrome'><div class='crumbs'><a href="../../../docs/INDEX_vi.html">Trang chu</a><span class="sep">/</span><span>Data</span><span class="sep">/</span><span>Phu luc du lieu</span></div><div class='page-nav'><a rel="next" href="run_ledger_vi.html">Sau</a><span class="sep">|</span><a href="README.html">English</a></div></div>
-<header><div class='in'><h1>Phu luc du lieu</h1><p>Tai lieu HerdSim de doc va dieu huong.</p></div></header>
+<div class='chrome'><div class='crumbs'><a href="../../../docs/INDEX_vi.html">Trang chủ</a><span class="sep">/</span><span>Data</span><span class="sep">/</span><span>Phụ lục dữ liệu</span></div><div class='page-nav'><a rel="next" href="run_ledger_vi.html">Sau</a><span class="sep">|</span><a href="README.html">English</a></div></div>
+<header><div class='in'><h1>Phụ lục dữ liệu</h1><p>Tài liệu HerdSim để đọc và điều hướng.</p></div></header>
 <div class='layout'>
-<nav><a href="#cach-doc">Cach doc</a><a href="#quy-uoc-bang-chung">Quy uoc bang chung</a><a href="#tai-tao">Tai tao</a></nav>
+<nav><a href="#cach-doc">Cách đọc</a><a href="#quy-uoc-bang-chung">Quy ước bằng chứng</a><a href="#tai-tao">Tái tạo</a></nav>
 <main>
-<p>Thu muc nay la muc luc tai tao duoc cho bang chung cua Giai doan 1, 2 va 4. Cac bang duoc tao truc tiep tu CSV, JSON, status va provenance chinh tac. Khong co so nao duoc nhap tay.</p>
-<h2 id="cach-doc">Cach doc</h2>
+<p>Thư mục này là mục lục tái tạo được cho bằng chứng của Giai đoạn 1, 2 và 4. Các bảng được tạo trực tiếp từ CSV, JSON, tệp trạng thái và provenance chuẩn. Không có số nào được nhập tay.</p>
+<h2 id="cach-doc">Cách đọc</h2>
 <ul>
-<li><a href="run_ledger_vi.html">So cai chay</a>: cap pilot, scout, claim; so dong; hash protocol; lien ket provenance.</li>
-<li><a href="phase1_tables_vi.html">Bang Giai doan 1</a>: bien kich thuoc, che do, fit scaling va tom tat merge.</li>
-<li><a href="phase2_tables_vi.html">Bang Giai doan 2</a>: bien theo bo cuc, chi phi mot cho, predictor va tom tat merge.</li>
-<li><a href="phase4_tables_vi.html">Bang Giai doan 4</a>: transfer Kubo va FAT, hard failure, cua so Kubo kho va tom tat merge.</li>
-<li><a href="README.html">English index</a>.</li>
+<li><a href="run_ledger_vi.html">Nhật ký chạy</a>: cấp thử nhanh, khảo sát, claim; số dòng; hash giao thức; liên kết provenance.</li>
+<li><a href="phase1_tables_vi.html">Bảng Giai đoạn 1</a>: biên kích thước, chế độ, khớp scaling và tóm tắt hợp nhất.</li>
+<li><a href="phase2_tables_vi.html">Bảng Giai đoạn 2</a>: biên theo bố cục, chi phí một chó, so sánh bộ dự đoán và tóm tắt hợp nhất.</li>
+<li><a href="phase4_tables_vi.html">Bảng Giai đoạn 4</a>: chuyển giao Kubo và FAT, thất bại cứng, cửa sổ Kubo khó và tóm tắt hợp nhất.</li>
+<li><a href="README.html">Mục lục tiếng Anh</a>.</li>
 </ul>
-<h2 id="quy-uoc-bang-chung">Quy uoc bang chung</h2>
-<p>Scout la ban do 30 seed dung de chon cua so. Claim la bang chung chinh xac, thuong 100 seed, va la cap dung cho ket luan. Merge claim thay dong scout tai cac o da gieo lai claim va giu scout tai cac o con lai. Vi vay moi ket luan phai giu ro cap cua tung o.</p>
-<p><code>D_max = 35</code> voi <code>D_overcrowd</code> trong chi co nghia la thanh cong van dat nguong tai dinh luoi da thu. Neu <code>hard_failure = True</code>, khong D nao trong luoi dat R = 0.90, nen khong duoc dien mot <code>D_max</code> gia.</p>
-<h2 id="tai-tao">Tai tao</h2>
-<p>Chay <code>python3 build_tables.py</code> trong thu muc nay. Chay <code>python3 build_tables.py --check</code> de xac nhan cac tep da tao trung khop voi nguon hien tai. Script chi ghi 10 tep Markdown trong thu muc nay.</p>
+<h2 id="quy-uoc-bang-chung">Quy ước bằng chứng</h2>
+<p>Khảo sát là bản đồ 30 seed dùng để chọn cửa sổ. Claim là bằng chứng chính xác, thường 100 seed, và là cấp dùng cho kết luận. Bản hợp nhất claim thay dòng khảo sát tại các ô đã gieo lại claim và giữ khảo sát tại các ô còn lại. Vì vậy mọi kết luận phải giữ rõ cấp của từng ô.</p>
+<p><code>D_max = 35</code> với <code>D_overcrowd</code> trống chỉ có nghĩa là thành công vẫn đạt ngưỡng tại đỉnh lưới đã thử. Nếu <code>hard_failure = True</code>, không D nào trong lưới đạt R = 0.90, nên không được điền một <code>D_max</code> giả.</p>
+<h2 id="tai-tao">Tái tạo</h2>
+<p>Chạy <code>python3 build_tables.py</code> trong thư mục này. Chạy <code>python3 build_tables.py --check</code> để xác nhận các tệp đã tạo trùng khớp với nguồn hiện tại. Script chỉ ghi 10 tệp Markdown trong thư mục này.</p>
 </main>
 </div>
-<footer><p>Nguon Markdown: <code>README_vi.md</code>. Hinh anh duoc nhung de doc ngoai tuyen.</p></footer>
+<footer><p>Nguồn Markdown: <code>README_vi.md</code>. Hình ảnh được nhúng để đọc ngoại tuyến.</p></footer>
 </body>
 </html>

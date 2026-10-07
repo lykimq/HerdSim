@@ -3,8 +3,8 @@
 <head>
 <meta charset='utf-8'>
 <meta name='viewport' content='width=device-width,initial-scale=1'>
-<title>Tham chieu tham so</title>
-<meta name='description' content='Tai lieu HerdSim de doc va dieu huong.'>
+<title>Tham chiếu tham số</title>
+<meta name='description' content='Tài liệu HerdSim để đọc và điều hướng.'>
 <style>
 :root{--ink:#111827;--mut:#6b7280;--line:#e5e7eb;--acc:#2563eb;--bg:#f9fafb}
 *{box-sizing:border-box}body{margin:0;font:16px/1.65 -apple-system,'Segoe UI',Inter,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
@@ -51,481 +51,481 @@ pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8p
 </style>
 </head>
 <body>
-<div class='chrome'><div class='crumbs'><a href="../INDEX_vi.html">Trang chu</a><span class="sep">/</span><span>Setup</span><span class="sep">/</span><span>Tham chieu tham so</span></div><div class='page-nav'><a rel="prev" href="experiment_setup_vi.html">Truoc</a><span class="sep">|</span><a rel="next" href="glossary_vi.html">Sau</a><span class="sep">|</span><a href="parameter_reference.html">English</a></div></div>
-<header><div class='in'><h1>Tham chieu tham so</h1><p>Tai lieu HerdSim de doc va dieu huong.</p></div></header>
+<div class='chrome'><div class='crumbs'><a href="../INDEX_vi.html">Trang chủ</a><span class="sep">/</span><span>Setup</span><span class="sep">/</span><span>Tham chiếu tham số</span></div><div class='page-nav'><a rel="prev" href="experiment_setup_vi.html">Trước</a><span class="sep">|</span><a rel="next" href="glossary_vi.html">Sau</a><span class="sep">|</span><a href="parameter_reference.html">English</a></div></div>
+<header><div class='in'><h1>Tham chiếu tham số</h1><p>Tài liệu HerdSim để đọc và điều hướng.</p></div></header>
 <div class='layout'>
-<nav><a href="#protocol-cot-loi">Protocol cot loi</a><a href="#layout">Layout</a><a href="#strombommulti">`strombom_multi`</a><a href="#kubo">`kubo`</a><a href="#fat">`fat`</a><a href="#information-ladder">Information ladder</a><a href="#field-cua-protocol-recipe">Field cua protocol recipe</a><a href="#outcome-va-state-metric">Outcome va state metric</a><a href="#reliability-frontier-regime">Reliability, frontier, regime</a><a href="#prediction-va-early-warning">Prediction va early warning</a></nav>
+<nav><a href="#giao-thuc-cot-loi">Giao thức cốt lõi</a><a href="#tham-so-bo-cuc">Tham số bố cục</a><a href="#strombommulti">`strombom_multi`</a><a href="#kubo">`kubo`</a><a href="#fat">`fat`</a><a href="#thang-thong-tin">Thang thông tin</a><a href="#truong-cong-thuc-giao-thuc">Trường công thức giao thức</a><a href="#ket-qua-va-chi-so-trang-thai">Kết quả và chỉ số trạng thái</a><a href="#do-tin-cay-bien-va-che-do">Độ tin cậy, biên, và chế độ</a><a href="#du-bao-va-canh-bao-som">Dự báo và cảnh báo sớm</a></nav>
 <main>
-<p>Gia tri o day den tu <a href="../../configs/canonical_grid.yaml"><code>scaling/configs/canonical_grid.yaml</code></a> hoac mac dinh controller trong cac module cau hinh duoc lien ket. Protocol YAML co the chon tap con nhung khong duoc ngam dinh nghia lai canonical protocol.</p>
-<h2 id="protocol-cot-loi">Protocol cot loi</h2>
+<p>Giá trị trên trang này được đóng băng bởi <a href="../../configs/canonical_grid.yaml"><code>scaling/configs/canonical_grid.yaml</code></a> hoặc là mặc định bộ điều khiển ghi trong các mô-đun cấu hình được liên kết. YAML giao thức có thể chọn tập con nhưng không được định nghĩa lại ngầm giao thức chuẩn.</p>
+<h2 id="giao-thuc-cot-loi">Giao thức cốt lõi</h2>
 <div class="table-wrap"><table>
 <thead><tr>
-<th>Tham so</th>
-<th>Gia tri</th>
-<th>Y nghia va ly do</th>
+<th>Tham số</th>
+<th>Giá trị đóng băng</th>
+<th>Ý nghĩa và lý do</th>
 </tr></thead><tbody>
 <tr>
 <td><code>protocol_id</code></td>
 <td><code>scaling_v2</code></td>
-<td>ID provenance cua bo quy tac khoa</td>
+<td>Định danh nguồn gốc ổn định cho quy tắc đã khóa</td>
 </tr>
 <tr>
 <td><code>frozen_on</code></td>
 <td><code>2026-09-22</code></td>
-<td>Ngay dong bang</td>
+<td>Ngày đóng băng ghi bởi YAML chuẩn</td>
 </tr>
 <tr>
 <td><code>task</code></td>
 <td><code>drive_to_goal</code></td>
-<td>Moi cuu vao dia dich truoc deadline</td>
+<td>Mọi cừu phải vào đĩa đích trước hạn</td>
 </tr>
 <tr>
 <td><code>world_width</code>, <code>world_height</code></td>
 <td>500, 500</td>
-<td>San vuong du cho wide va outlier-rich</td>
+<td>Sân vuông đủ lớn cho điểm xuất phát wide và outlier_rich</td>
 </tr>
 <tr>
-<td>tam dan</td>
+<td>tâm đàn</td>
 <td><code>(250, 250)</code></td>
-<td>Tam san</td>
+<td>Tâm sân</td>
 </tr>
 <tr>
 <td><code>goal_center</code></td>
 <td><code>(370, 250)</code></td>
-<td>Cach tam dan 120 theo phuong ngang</td>
+<td>Điểm đường giữa cách đàn 120 đơn vị về bên phải</td>
 </tr>
 <tr>
 <td><code>drive_length</code></td>
 <td>120</td>
-<td>Quang duong task co dinh</td>
+<td>Khoảng cách nhiệm vụ tâm-đến-tâm cố định</td>
 </tr>
 <tr>
 <td><code>goal_radius_at_n50</code></td>
 <td>15</td>
-<td>Ban kinh dich tai N = 50</td>
+<td>Đích quy mô ứng dụng tại N = 50</td>
 </tr>
 <tr>
-<td>ban kinh dich</td>
+<td>bán kính đích</td>
 <td><code>15 * sqrt(N/50)</code></td>
-<td>Giu dien tich dich tren moi cuu khong doi</td>
+<td>Giữ diện tích đích trên mỗi cừu không đổi</td>
 </tr>
 <tr>
 <td><code>initial_spread</code></td>
 <td>30</td>
-<td>Scale co so cho layout</td>
+<td>Thang cơ sở dùng bởi mọi bộ sinh bố cục</td>
 </tr>
 <tr>
 <td><code>measurement_radius</code></td>
 <td>5</td>
-<td>Ban kinh lien thong cua fragmentation</td>
+<td>Bán kính liên thông cho phân mảnh</td>
 </tr>
 <tr>
 <td><code>reliability_theta</code></td>
 <td>0.90</td>
-<td>Nguong tin cay chinh</td>
+<td>Ngưỡng dải tin cậy chính</td>
 </tr>
 <tr>
 <td><code>reliability_sensitivity</code></td>
 <td>0.50, 0.70</td>
-<td>Nguong bao cao them, khong phai bar D_min</td>
+<td>Ngưỡng báo cáo thêm, không phải thanh D_min</td>
 </tr>
 <tr>
 <td><code>baseline_method</code></td>
 <td><code>strombom_multi</code></td>
-<td>Controller baseline</td>
+<td>Bộ điều khiển thu thập-và-đẩy cơ sở</td>
 </tr>
 <tr>
 <td><code>transfer_methods</code></td>
 <td>baseline, <code>kubo</code>, <code>fat</code>, <code>communication_free</code></td>
-<td>Danh sach transfer day du</td>
+<td>Danh sách chuyển giao đầy đủ theo kế hoạch</td>
 </tr>
 <tr>
 <td><code>required_transfer_methods</code></td>
 <td>baseline, <code>kubo</code>, <code>fat</code></td>
-<td>Tap claim toi thieu</td>
+<td>Tập claim chuyển giao tối thiểu</td>
 </tr>
 <tr>
 <td><code>flock_sizes</code></td>
 <td>5, 10, 25, 50, 75, 100, 150, 200, 300, 400</td>
-<td>Luoi N</td>
+<td>Lưới N đóng băng</td>
 </tr>
 <tr>
 <td><code>shepherd_counts</code></td>
 <td>1, 2, 3, 4, 6, 10, 15, 20, 25, 35</td>
-<td>Luoi D</td>
+<td>Lưới D đóng băng</td>
 </tr>
 <tr>
 <td><code>structure_flock_sizes</code></td>
 <td>50, 100, 200</td>
-<td>N cho structure</td>
+<td>Giá trị N cho Giai đoạn 2 và cấu trúc chuyển giao</td>
 </tr>
 <tr>
 <td><code>rq5_flock_sizes</code></td>
 <td>100, 200</td>
-<td>N cho information</td>
+<td>Kích thước claim thang thông tin</td>
 </tr>
 <tr>
 <td><code>x0_families</code></td>
 <td>compact, wide, split, outlier_rich</td>
-<td>Factor layout</td>
+<td>Nhân tố bố cục ban đầu</td>
 </tr>
 <tr>
 <td><code>time_limit_t0</code></td>
-<td>10,000</td>
-<td>Deadline chinh</td>
+<td>10.000</td>
+<td>Hạn chính, khoảng 80 lần cắt thẳng 120 đơn vị ở tốc độ 1</td>
 </tr>
 <tr>
 <td><code>time_limit_t1</code></td>
-<td>20,000</td>
-<td>Deadline dai chi cho overcrowding</td>
+<td>20.000</td>
+<td>Hạn dài chỉ cho ô quá tải</td>
 </tr>
 <tr>
 <td><code>scout_seeds</code></td>
 <td>30</td>
-<td>Do sau map rong</td>
+<td>Độ sâu bản đồ rộng</td>
 </tr>
 <tr>
 <td><code>claim_grade_seeds</code></td>
 <td>100</td>
-<td>Do sau cua so claim</td>
+<td>Độ sâu cửa sổ claim</td>
 </tr>
 <tr>
 <td><code>master_seed</code></td>
 <td>2026</td>
-<td>Goc danh sach seed co dinh</td>
+<td>Gốc cho danh sách seed xác định dùng chung</td>
 </tr>
 <tr>
 <td><code>bootstrap_resamples</code></td>
-<td>1,000</td>
-<td>So lan resample seed</td>
+<td>1.000</td>
+<td>Số lần lấy mẫu lại seed cho bất định biên</td>
 </tr>
 <tr>
 <td><code>predictor_window_ticks</code></td>
 <td>100</td>
-<td>Cua so feature dau trial</td>
+<td>Cửa sổ đặc trưng trạng thái đầu, ngắn hơn một lần đẩy thẳng</td>
 </tr>
 <tr>
 <td><code>wasteful_effort_tolerance</code></td>
 <td>0.20</td>
-<td>Bar path du thua mac dinh</td>
+<td>Thanh đường đi dư mặc định</td>
 </tr>
 <tr>
 <td><code>wasteful_effort_sensitivity</code></td>
 <td>0.10, 0.30</td>
-<td>Bar sensitivity</td>
+<td>Thanh độ nhạy được báo cáo</td>
 </tr>
 </tbody></table></div>
-<p>Tai R = 0.90, 30 seed co standard error khoang 0.055 va 100 seed khoang 0.03. Interval xap xi cua R tai 100 seed la cong tru 0.06. Day la uncertainty cua R, khong truc tiep la uncertainty cua D_min.</p>
-<h2 id="layout">Layout</h2>
+<p>Tại R = 0,90, 30 seed có sai số chuẩn khoảng 0,055 và 100 seed khoảng 0,03. Khoảng R xấp xỉ tại 100 seed là cộng trừ 0,06. Đây là bất định của R, không trực tiếp của D_min.</p>
+<h2 id="tham-so-bo-cuc">Tham số bố cục</h2>
 <div class="table-wrap"><table>
 <thead><tr>
-<th>Tham so</th>
-<th>Gia tri</th>
-<th>Y nghia</th>
+<th>Tham số</th>
+<th>Giá trị</th>
+<th>Ý nghĩa</th>
 </tr></thead><tbody>
 <tr>
-<td>compact sigma</td>
+<td>sigma compact</td>
 <td>9</td>
 <td><code>0.3 * initial_spread</code></td>
 </tr>
 <tr>
-<td>wide sigma</td>
+<td>sigma wide</td>
 <td>60</td>
 <td><code>2.0 * initial_spread</code></td>
 </tr>
 <tr>
-<td>so split cluster</td>
-<td>2 neu N &lt; 12, nguoc lai 3</td>
-<td>Tranh nhom ba qua nho</td>
+<td>số cụm split</td>
+<td>2 dưới N = 12, ngược lại 3</td>
+<td>Tránh nhóm ba quá nhỏ</td>
 </tr>
 <tr>
-<td>split gap toi thieu</td>
+<td>khe split tối thiểu</td>
 <td>10</td>
 <td><code>2 * measurement_radius</code></td>
 </tr>
 <tr>
-<td>outlier core</td>
-<td>khoang 80 phan tram</td>
-<td>Dan chinh</td>
+<td>lõi outlier</td>
+<td>khoảng 80 phần trăm</td>
+<td>Đàn chính</td>
 </tr>
 <tr>
 <td>outlier</td>
-<td>khoang 20 phan tram</td>
-<td>Ngoai <code>r_a * N^(2/3)</code></td>
+<td>khoảng 20 phần trăm</td>
+<td>Rút ngoài <code>r_a * N^(2/3)</code></td>
 </tr>
 </tbody></table></div>
-<p>Diem ngoai san hoac trong dich duoc draw lai.</p>
+<p>Điểm không hợp lệ ngoài sân hoặc trong đích được rút lại.</p>
 <h2 id="strombommulti"><code>strombom_multi</code></h2>
 <div class="table-wrap"><table>
 <thead><tr>
-<th>Tham so</th>
-<th>Gia tri</th>
-<th>Y nghia</th>
+<th>Tham số</th>
+<th>Giá trị</th>
+<th>Ý nghĩa</th>
 </tr></thead><tbody>
 <tr>
 <td><code>r_a</code></td>
 <td>2</td>
-<td>Do dai tuong tac cuu, cung dung trong collect threshold</td>
+<td>Độ dài tương tác cừu dùng trong tính xếp và ngưỡng thu thập</td>
 </tr>
 <tr>
 <td><code>r_s</code></td>
 <td>65</td>
-<td>Khoang cach cuu phan ung voi cho; base sensing range</td>
+<td>Khoảng cách cừu phản ứng với người chăn; tầm cảm biến cơ sở</td>
 </tr>
 <tr>
 <td><code>sheep_speed</code></td>
 <td>1.0</td>
-<td>Dich chuyen cuu moi tick</td>
+<td>Dịch chuyển cừu mỗi tick</td>
 </tr>
 <tr>
 <td><code>shepherd_speed</code></td>
 <td>1.5</td>
-<td>Dich chuyen cho moi tick</td>
+<td>Dịch chuyển người chăn mỗi tick</td>
 </tr>
 <tr>
 <td><code>noise_strength</code></td>
 <td>0.3</td>
-<td>Do manh angular process noise</td>
+<td>Độ mạnh nhiễu quá trình góc trong chuyển động cừu</td>
 </tr>
 <tr>
 <td><code>inertia</code></td>
 <td>0.5</td>
-<td>Trong so huong truoc cua cuu</td>
+<td>Trọng số hướng trước trong chuyển động cừu</td>
 </tr>
 <tr>
-<td>collect threshold</td>
+<td>ngưỡng thu thập</td>
 <td><code>r_a * N^(2/3)</code></td>
-<td>Ban kinh chuyen collect sang drive</td>
+<td>Bán kính dùng để chuyển giữa thu thập và đẩy</td>
 </tr>
 </tbody></table></div>
-<p>Coverage radius la <code>sensing_range</code> neu factor da set, neu khong la <code>r_s</code> cua method. No khong phai sheep-sheep repulsion distance.</p>
+<p>Bán kính độ phủ là <code>sensing_range</code> khi nhân tố thông tin đặt nó, nếu không là <code>r_s</code> của phương pháp. Nó không phải khoảng cách đẩy cừu-cừu.</p>
 <h2 id="kubo"><code>kubo</code></h2>
 <div class="table-wrap"><table>
 <thead><tr>
-<th>Tham so</th>
-<th>Gia tri</th>
-<th>Y nghia</th>
+<th>Tham số</th>
+<th>Giá trị</th>
+<th>Ý nghĩa</th>
 </tr></thead><tbody>
 <tr>
 <td><code>radius</code></td>
 <td>60</td>
-<td>Local sensing radius</td>
+<td>Bán kính cảm biến cục bộ</td>
 </tr>
 <tr>
 <td><code>K_s1</code></td>
 <td>10</td>
-<td>Sheep-sheep repulsion gain</td>
+<td>Hệ số đẩy cừu-cừu</td>
 </tr>
 <tr>
 <td><code>K_s2</code></td>
 <td>0.5</td>
-<td>Alignment gain cua cuu</td>
+<td>Hệ số căn chỉnh vận tốc cừu</td>
 </tr>
 <tr>
 <td><code>K_s3</code></td>
 <td>2</td>
-<td>Cohesion gain cua cuu</td>
+<td>Hệ số kết dính cừu</td>
 </tr>
 <tr>
 <td><code>K_s4</code></td>
 <td>5000</td>
-<td>Sheep-dog repulsion gain</td>
+<td>Đẩy cừu khỏi chó</td>
 </tr>
 <tr>
 <td><code>K_f1</code></td>
 <td>10</td>
-<td>Cho hut ve target sheep</td>
+<td>Hút chó tới cừu mục tiêu</td>
 </tr>
 <tr>
 <td><code>K_f2</code></td>
 <td>200</td>
-<td>Cho day khoi target sheep</td>
+<td>Đẩy chó khỏi cừu mục tiêu</td>
 </tr>
 <tr>
 <td><code>K_f3</code></td>
 <td>8</td>
-<td>Cho day khoi goal</td>
+<td>Đẩy chó khỏi đích</td>
 </tr>
 <tr>
 <td><code>K_f4</code></td>
 <td>3000</td>
-<td>Dog-dog repulsion gain</td>
+<td>Đẩy chó-chó</td>
 </tr>
 <tr>
 <td><code>dt</code></td>
 <td>0.05</td>
-<td>Buoc tich phan force</td>
+<td>Bước thời gian tích phân lực</td>
 </tr>
 <tr>
 <td><code>sheep_speed_max</code></td>
 <td>5</td>
-<td>Speed clamp cua cuu</td>
+<td>Kẹp tốc độ cừu</td>
 </tr>
 <tr>
 <td><code>dog_speed_max</code></td>
 <td>10</td>
-<td>Speed clamp cua cho</td>
+<td>Kẹp tốc độ chó</td>
 </tr>
 </tbody></table></div>
 <h2 id="fat"><code>fat</code></h2>
-<p>FAT dung tham so cuu Strombom. Moi cho chon con cuu quan sat xa no nhat va dung cach <code>r_a</code> phia sau con cuu theo huong ra xa dich. Phase 1, 2, 4 dung observation <code>global</code>.</p>
-<h2 id="information-ladder">Information ladder</h2>
+<p>FAT dùng tham số cừu Strombom ở trên. Luật chó chọn cừu quan sát được xa chó đó nhất và lấy vị trí đứng cách <code>r_a</code> phía sau theo hướng ra xa đích. Quan sát là <code>global</code> trong Giai đoạn 1, 2, và 4.</p>
+<h2 id="thang-thong-tin">Thang thông tin</h2>
 <div class="table-wrap"><table>
 <thead><tr>
-<th>Factor</th>
-<th>Gia tri</th>
-<th>Y nghia</th>
+<th>Nhân tố</th>
+<th>Giá trị</th>
+<th>Ý nghĩa</th>
 </tr></thead><tbody>
 <tr>
 <td><code>obs_mode</code></td>
 <td><code>bearing_only</code>, <code>local_positions</code>, <code>global</code></td>
-<td>Muc thong tin quan sat tang dan</td>
+<td>Nội dung quan sát tăng dần</td>
 </tr>
 <tr>
 <td><code>sensing_range</code></td>
 <td>32.5, 65, 97.5, 130</td>
-<td>0.5, 1, 1.5, 2 lan <code>r_s</code></td>
+<td>0,5, 1, 1,5, và 2 lần <code>r_s</code> Strombom</td>
 </tr>
 <tr>
 <td><code>communication</code></td>
 <td><code>none</code>, <code>neighbour_broadcast</code>, <code>global_shared</code></td>
-<td>Rieng, hop neighbor, hoac hop toan cuc cua cuu da sense</td>
+<td>Quan sát riêng, hợp láng giềng, hoặc hợp cảm nhận chia sẻ toàn cục</td>
 </tr>
 </tbody></table></div>
-<p>Voi <code>strombom_multi</code>, <code>global_shared</code> dung hop cua cuu da sense, khong dung true position dac quyen tu simulator. Scout Phase 5 dung D trong <code>{1, 2, 3, 4, 6, 10}</code> vi saving mot buoc co the xuat hien o vung D thap.</p>
-<h2 id="field-cua-protocol-recipe">Field cua protocol recipe</h2>
+<p>Với <code>strombom_multi</code>, <code>global_shared</code> dùng hợp các cừu đã cảm nhận, không phải chân lý giả lập đặc quyền. Giao thức scout Giai đoạn 5 dùng D trong <code>{1, 2, 3, 4, 6, 10}</code> vì dải D thấp là nơi tiết kiệm một bước có thể xuất hiện.</p>
+<h2 id="truong-cong-thuc-giao-thuc">Trường công thức giao thức</h2>
 <div class="table-wrap"><table>
 <thead><tr>
-<th>Field</th>
-<th>Y nghia</th>
+<th>Trường</th>
+<th>Ý nghĩa</th>
 </tr></thead><tbody>
 <tr>
 <td><code>protocol_id</code></td>
-<td>ID resolve trong <code>scaling/configs/protocols/</code> va ghi vao output</td>
+<td>Định danh resolve dưới <code>scaling/configs/protocols/</code> và đóng dấu vào đầu ra</td>
 </tr>
 <tr>
 <td><code>phase</code></td>
-<td>So phase nghien cuu</td>
+<td>Số giai đoạn nghiên cứu</td>
 </tr>
 <tr>
 <td><code>grade</code></td>
-<td>Grade SMOKE, SCOUT, hoac CLAIM</td>
+<td>Cấp bằng chứng SMOKE, SCOUT, hoặc CLAIM</td>
 </tr>
 <tr>
 <td><code>canonical</code></td>
-<td>Path toi mac dinh dong bang</td>
+<td>Đường dẫn tới mặc định đóng băng</td>
 </tr>
 <tr>
 <td><code>extends</code></td>
-<td>Parent YAML duoc ke thua</td>
+<td>YAML giao thức cha được kế thừa</td>
 </tr>
 <tr>
 <td><code>output</code></td>
-<td>Dich trong <code>scaling/results/</code></td>
+<td>Đích dưới <code>scaling/results/</code></td>
 </tr>
 <tr>
-<td><code>methods</code> hoac <code>method</code></td>
-<td>Danh sach controller hoac controller cua factor run</td>
+<td><code>methods</code> hoặc <code>method</code></td>
+<td>Danh sách bộ điều khiển hoặc bộ điều khiển của lần chạy nhân tố</td>
 </tr>
 <tr>
 <td><code>layouts</code></td>
-<td>Tap con layout</td>
+<td>Tập con bố cục ban đầu</td>
 </tr>
 <tr>
 <td><code>flock_sizes</code></td>
-<td>Tap con N</td>
+<td>Tập con N</td>
 </tr>
 <tr>
 <td><code>shepherd_counts</code></td>
-<td>Tap con D</td>
+<td>Tập con D</td>
 </tr>
 <tr>
 <td><code>seeds</code></td>
-<td>So seed moi cell da chon</td>
+<td>Số seed lần thử mỗi ô đã chọn</td>
 </tr>
 <tr>
 <td><code>seed_mode</code></td>
-<td>Y nghia stage nhu scout hoac claim</td>
+<td>Ngữ nghĩa giai đoạn như scout hoặc claim</td>
 </tr>
 <tr>
 <td><code>runner</code></td>
-<td>Execution path grid hoac factor</td>
+<td>Đường thực thi lưới hoặc nhân tố</td>
 </tr>
 <tr>
 <td><code>upstream_protocol</code></td>
-<td>Protocol scout hoac claim dung de lap ke hoach</td>
+<td>Giao thức scout hoặc claim dùng để lập kế hoạch ô sau</td>
 </tr>
 <tr>
 <td><code>store_timeseries</code></td>
-<td>Co ghi Parquet history moi trial hay khong</td>
+<td>Có ghi lịch sử Parquet theo lần thử hay không</td>
 </tr>
 <tr>
 <td><code>packages</code></td>
-<td>Package phan tich export sau run</td>
+<td>Gói phân tích xuất sau lần chạy</td>
 </tr>
 <tr>
 <td><code>obs_modes</code>, <code>sensing_ranges</code>, <code>communications</code></td>
-<td>Gia tri cua mot information ladder</td>
+<td>Giá trị cho một thang thông tin</td>
 </tr>
 </tbody></table></div>
-<p><code>canonical</code> import mac dinh; <code>extends</code> ke thua recipe day du. <code>protocol.yaml</code> da resolve duoc copy vao result directory de co the kiem tra ca gia tri ke thua.</p>
-<h2 id="outcome-va-state-metric">Outcome va state metric</h2>
+<p><code>canonical</code> nhập mặc định; <code>extends</code> kế thừa công thức cha đầy đủ. Trong cả hai trường hợp, <code>protocol.yaml</code> đã resolve được sao chép vào thư mục kết quả để giá trị kế thừa vẫn kiểm tra được.</p>
+<h2 id="ket-qua-va-chi-so-trang-thai">Kết quả và chỉ số trạng thái</h2>
 <div class="table-wrap"><table>
 <thead><tr>
-<th>Dai luong</th>
-<th>Dinh nghia</th>
+<th>Đại lượng</th>
+<th>Định nghĩa</th>
 </tr></thead><tbody>
 <tr>
-<td>success</td>
-<td>Moi cuu vao dich truoc deadline</td>
+<td>thành công</td>
+<td>Chỉ báo nhị phân mọi cừu vào đích trước hạn</td>
 </tr>
 <tr>
-<td><code>t_s</code></td>
-<td>Tick dau tien dat success</td>
+<td><code>t_s</code> hoặc thời gian kết thúc</td>
+<td>Tick đầu tiên đạt thành công</td>
 </tr>
 <tr>
 <td><code>shepherd_path</code></td>
-<td>Tong Euclidean step length cua moi cho</td>
+<td>Tổng độ dài bước Euclidean của mọi chó, theo đơn vị sân</td>
 </tr>
 <tr>
-<td>path moi cho</td>
+<td>đường đi mỗi chó</td>
 <td><code>shepherd_path / D</code></td>
 </tr>
 <tr>
-<td>cohesion</td>
-<td>Trung binh khoang cach cuu toi GCM</td>
+<td>độ kết dính</td>
+<td>Trung bình khoảng cách cừu tới tâm khối đàn</td>
 </tr>
 <tr>
-<td>fragmentation</td>
-<td>Largest connected component chia N, radius 5</td>
+<td>phân mảnh</td>
+<td>Kích thước thành phần liên thông lớn nhất chia N, bán kính 5</td>
 </tr>
 <tr>
-<td>outlier count</td>
-<td>So cuu ngoai <code>r_a * N^(2/3)</code></td>
+<td>số outlier</td>
+<td>Cừu ngoài <code>r_a * N^(2/3)</code></td>
 </tr>
 <tr>
-<td>spread</td>
-<td>Variance cua khoang cach toi centroid</td>
+<td>trải (spread)</td>
+<td>Phương sai khoảng cách cừu tới tâm</td>
 </tr>
 <tr>
 <td>extent</td>
-<td>RMS distance toi centroid</td>
+<td>Căn bậc hai trung bình bình phương khoảng cách tới tâm</td>
 </tr>
 <tr>
-<td>perimeter</td>
-<td>Chu vi convex hull</td>
+<td>chu vi</td>
+<td>Chu vi bao lồi</td>
 </tr>
 <tr>
-<td>hull area</td>
-<td>Dien tich convex hull</td>
+<td>diện tích bao</td>
+<td>Diện tích bao lồi</td>
 </tr>
 <tr>
-<td>flock density</td>
-<td>N chia hull area; 0 neu area suy bien</td>
+<td>mật độ đàn</td>
+<td>N chia diện tích bao; không nếu diện tích suy biến</td>
 </tr>
 <tr>
-<td>aspect ratio</td>
-<td>Ti so PCA major/minor; 1 la tron</td>
+<td>tỷ lệ khung hình</td>
+<td>Tỷ số trục chính/trục phụ PCA; một là tròn</td>
 </tr>
 <tr>
 <td><code>I_dir</code></td>
@@ -533,65 +533,65 @@ pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8p
 <td></td>
 <td>sum unit_velocity</td>
 <td></td>
-<td>/ M_active<code>, voi speed tren </code>1e-6`</td>
+<td>/ M_active<code> cho chó nhanh hơn </code>1e-6`</td>
 </tr>
 <tr>
-<td>coverage C</td>
-<td>Ti le cuu ngoai median GCM distance nam trong influence radius</td>
+<td>độ phủ C</td>
+<td>Tỷ lệ cừu ngoại vi (trên trung vị khoảng cách GCM) nằm trong bán kính ảnh hưởng</td>
 </tr>
 </tbody></table></div>
-<p>Neu khong cho nao di chuyen, <code>I_dir = 0</code>. Metric dung realized velocity, gom ca anh huong constraint. Khong co coverage radius thi gia tri la NaN.</p>
-<h2 id="reliability-frontier-regime">Reliability, frontier, regime</h2>
-<p><code>R(m, tau, N, D, T, X0, I)</code> la xac suat success uoc luong tren seed khoa, voi method m, protocol tau, N, D, deadline T, layout X0, va information I.</p>
+<p>Nếu không chó nào chuyển động, <code>I_dir = 0</code>. Chỉ số dùng vận tốc thực hiện, nên ràng buộc như phản xạ tường được gồm. Thiếu bán kính độ phủ cho NaN.</p>
+<h2 id="do-tin-cay-bien-va-che-do">Độ tin cậy, biên, và chế độ</h2>
+<p><code>R(m, tau, N, D, T, X0, I)</code> là xác suất thành công ước lượng trên seed đã khóa cho phương pháp m, giao thức tau, kích thước đàn N, số người chăn D, hạn T, bố cục X0, và điều kiện thông tin I.</p>
 <div class="table-wrap"><table>
 <thead><tr>
-<th>Dai luong</th>
-<th>Dinh nghia</th>
+<th>Đại lượng</th>
+<th>Định nghĩa</th>
 </tr></thead><tbody>
 <tr>
 <td>D_min</td>
-<td>D nho nhat da thu co R &gt;= theta</td>
+<td>D nhỏ nhất đã thử có R ít nhất theta</td>
 </tr>
 <tr>
 <td>D_overcrowd</td>
-<td>D dau tien sau D_min ma no va D luoi ke tiep deu co R &lt; theta</td>
+<td>D đầu sau D_min mà D đó và D lưới kế tiếp đều dưới theta</td>
 </tr>
 <tr>
 <td>D_max</td>
-<td>D tin cay lon nhat truoc overcrowding; neu khong co collapse thi la D tin cay lon nhat da thu</td>
+<td>D tin cậy lớn nhất dưới D_overcrowd; khi không có quá tải, D tin cậy lớn nhất đã thử, có thể chỉ là trần lưới</td>
 </tr>
 <tr>
 <td>B*</td>
-<td><code>(D, T)</code> tin cay co median path nho nhat; hoa thi chon D nho, roi finish nhanh</td>
+<td><code>(D, T)</code> tin cậy có trung vị đường đi nhỏ nhất; hòa thì D nhỏ hơn, rồi thời gian kết thúc trung vị nhanh hơn</td>
 </tr>
 <tr>
-<td>hard failure</td>
-<td>Khong D nao dat theta; frontier de trong</td>
+<td>thất bại cứng</td>
+<td>Không D đã thử nào đạt theta; giá trị biên để trống</td>
 </tr>
 <tr>
-<td>under-resourced</td>
-<td>R duoi theta truoc D_overcrowd</td>
+<td>thất bại thiếu nguồn lực</td>
+<td>R dưới theta trước D_overcrowd</td>
 </tr>
 <tr>
-<td>efficient</td>
-<td>R dat theta va path duoi wasteful bar</td>
+<td>vận hành hiệu quả</td>
+<td>R ít nhất theta và đường đi dưới thanh lãng phí</td>
 </tr>
 <tr>
-<td>wasteful</td>
-<td>Tin cay nhung median path cao hon B* it nhat 20 phan tram; cung bao cao 10 va 30</td>
+<td>chi tiêu lãng phí</td>
+<td>Tin cậy nhưng trung vị đường đi cao hơn B* ít nhất 20 phần trăm; cũng báo cáo 10 và 30 phần trăm</td>
 </tr>
 <tr>
-<td>overcrowding collapse</td>
-<td>R duoi theta tai hoac sau D_overcrowd</td>
+<td>sụp đổ quá tải</td>
+<td>R dưới theta tại hoặc sau D_overcrowd</td>
 </tr>
 </tbody></table></div>
-<p>Effect frontier tinh theo buoc cuc bo cua luoi D. D_max = 35 va D_overcrowd trong nghia la chua thay collapse den tran da thu, khong co nghia collapse bat dau tai 35.</p>
-<p>Bootstrap resample seed trong moi D 1,000 lan. Mau khong co D_min van duoc giu nhu right-censored tren D lon nhat. Percentile 2.5 va 97.5 la gia tri luoi hoac <code>above grid</code>.</p>
-<h2 id="prediction-va-early-warning">Prediction va early warning</h2>
-<p>RQ7 dung horizon <code>k = 500</code>, feature window <code>w = 200</code>, va tick danh gia 1,000 den 8,000, buoc 200. Feature chi dung <code>(t - 200, t]</code>; label la failure trong 500 tick tiep theo khi horizon van nam trong T0.</p>
-<p>State model va N,D model hold out toan bo N. Candidate fit gom constant, linear, power <code>A * N^alpha</code>, va two-piece linear. Chon bang leave-one-N-out RMSE.</p>
+<p>Hiệu ứng biên đo bằng bước cục bộ của lưới D. D_max bằng 35 với D_overcrowd trống nghĩa là chưa quan sát sụp đổ tới trần đã thử. Nó không nghĩa sụp đổ bắt đầu tại 35.</p>
+<p>Bootstrap lấy mẫu lại seed trong mỗi D 1.000 lần. Lần lấy mẫu không có D_min vẫn bị kiểm duyệt phải trên D lớn nhất đã thử. Phân vị 2,5 và 97,5 là giá trị lưới hoặc <code>above grid</code>.</p>
+<h2 id="du-bao-va-canh-bao-som">Dự báo và cảnh báo sớm</h2>
+<p>RQ7 dùng chân trời <code>k = 500</code>, cửa sổ đặc trưng <code>w = 200</code>, và tick đánh giá từ 1.000 đến 8.000 bước 200. Đặc trưng chỉ dùng <code>(t - 200, t]</code>; nhãn là thất bại trong 500 tick tiếp theo, chỉ khi chân trời còn trong T0. Đánh giá bắt đầu sau tạm thời bố cục ban đầu và kết thúc đủ sớm để giữ chân trời.</p>
+<p>Mô hình trạng thái và N,D giữ nguyên cả giá trị N khi holdout. Ứng viên khớp scaling là hằng, tuyến tính, lũy thừa <code>A * N^alpha</code>, và tuyến tính hai đoạn. Chọn bằng RMSE leave-one-N-out.</p>
 </main>
 </div>
-<footer><p>Nguon Markdown: <code>parameter_reference_vi.md</code>. Hinh anh duoc nhung de doc ngoai tuyen.</p></footer>
+<footer><p>Nguồn Markdown: <code>parameter_reference_vi.md</code>. Hình ảnh được nhúng để đọc ngoại tuyến.</p></footer>
 </body>
 </html>

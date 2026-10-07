@@ -8,6 +8,8 @@ HerdSim does not implement that paper's complete camera model, positional-error 
 
 Reference: Y. Tsunoda et al., "Analysis of local-camera-based shepherding navigation," Advanced Robotics 32(23), 2018. DOI: `10.1080/01691864.2018.1539410`.
 
+![FAT farthest-from-dog targeting.](../../results/summary/figures/schematics/en/alg_fat.svg)
+
 ## Exact HerdSim implementation
 
 The `fat` method bundle combines:
@@ -67,6 +69,14 @@ Configuration evidence:
 - Best reliability by size for `N = 50` through 400 was about 0.40 to 0.53.
 - About half of FAT size trials failed. The summary attributes about 39% of all trials to oscillation failures and 7% to stuck failures.
 
+![Three-method compact reliability heatmaps.](../../results/phase4/guides/assets/figures/f1_reliability_heatmaps.png)
+
+*R(N, D) surfaces on compact starts. FAT clears the threshold only at N = 5 and 10; from N = 25 upward no cell reaches 0.90.*
+
+![Failure-mode comparison.](../../results/summary/figures/f6_failure_modes.png)
+
+*FAT failures are mostly oscillation or stuck, unlike Kubo (timeout) and baseline (far fewer failures).*
+
 ### Starting structure
 
 FAT did not reach 90% reliability in any structure cell at `N = 50, 100, 200`.
@@ -76,7 +86,15 @@ FAT did not reach 90% reliability in any structure cell at `N = 50, 100, 200`.
 - `outlier_rich` best `R`: 0.10, 0.00, 0.00.
 - Wide best `R`: 0.00 at all three sizes.
 
+![Reliability curves by starting layout.](../../results/summary/figures/f5_layout_reliability_curves.png)
+
+*R against D at N = 200. FAT never reaches 0.90 on any tested layout.*
+
 The completed summary also reports a strong negative association between FAT trial interference and success on the size merge, with Pearson `r` about `-0.87`. This is observational. It does not establish interference as the cause of failure.
+
+![Directional interference by dog count.](../../results/summary/figures/f7_interference.png)
+
+*Interference index against D. The negative association with FAT success is observational on the size merge, not a controlled causal test.*
 
 Evidence:
 
@@ -84,13 +102,6 @@ Evidence:
 - [`../../results/phase4/fat_size/claim/merged_trials.csv`](../../results/phase4/fat_size/claim/merged_trials.csv)
 - [`../../results/phase4/fat_structure/claim/merged_trials.csv`](../../results/phase4/fat_structure/claim/merged_trials.csv)
 - [`../../results/phase4/package_d/structure/frontier_by_method_layout.csv`](../../results/phase4/package_d/structure/frontier_by_method_layout.csv)
-
-## Relevant existing figures
-
-- [Three-method compact reliability heatmaps](../../results/phase4/guides/assets/figures/f1_reliability_heatmaps.png)
-- [Reliability curves by starting layout](../../results/phase4/guides/assets/figures/f5_layout_reliability_curves.png)
-- [Failure-mode comparison](../../results/phase4/guides/assets/figures/f6_failure_modes.png)
-- [Directional interference by dog count](../../results/summary/figures/f7_interference.png)
 
 ## Limitations and non-claims
 

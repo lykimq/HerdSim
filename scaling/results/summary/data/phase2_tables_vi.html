@@ -3,8 +3,8 @@
 <head>
 <meta charset='utf-8'>
 <meta name='viewport' content='width=device-width,initial-scale=1'>
-<title>Bang du lieu Giai doan 2</title>
-<meta name='description' content='Tai lieu HerdSim de doc va dieu huong.'>
+<title>Bảng dữ liệu Giai đoạn 2</title>
+<meta name='description' content='Tài liệu HerdSim để đọc và điều hướng.'>
 <style>
 :root{--ink:#111827;--mut:#6b7280;--line:#e5e7eb;--acc:#2563eb;--bg:#f9fafb}
 *{box-sizing:border-box}body{margin:0;font:16px/1.65 -apple-system,'Segoe UI',Inter,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
@@ -51,14 +51,14 @@ pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8p
 </style>
 </head>
 <body>
-<div class='chrome'><div class='crumbs'><a href="../../../docs/INDEX_vi.html">Trang chu</a><span class="sep">/</span><span>Data</span><span class="sep">/</span><span>Bang du lieu Giai doan 2</span></div><div class='page-nav'><a rel="prev" href="phase1_tables_vi.html">Truoc</a><span class="sep">|</span><a rel="next" href="phase4_tables_vi.html">Sau</a><span class="sep">|</span><a href="phase2_tables.html">English</a></div></div>
-<header><div class='in'><h1>Bang du lieu Giai doan 2</h1><p>Tai lieu HerdSim de doc va dieu huong.</p></div></header>
+<div class='chrome'><div class='crumbs'><a href="../../../docs/INDEX_vi.html">Trang chủ</a><span class="sep">/</span><span>Data</span><span class="sep">/</span><span>Bảng dữ liệu Giai đoạn 2</span></div><div class='page-nav'><a rel="prev" href="phase1_tables_vi.html">Trước</a><span class="sep">|</span><a rel="next" href="phase4_tables_vi.html">Sau</a><span class="sep">|</span><a href="phase2_tables.html">English</a></div></div>
+<header><div class='in'><h1>Bảng dữ liệu Giai đoạn 2</h1><p>Tài liệu HerdSim để đọc và điều hướng.</p></div></header>
 <div class='layout'>
-<nav><a href="#bien-day-du-theo-bo-cuc">Bien day du theo bo cuc</a><a href="#khoang-bootstrap-dmin-day-du">Khoang bootstrap D_min day du</a><a href="#chi-phi-mot-cho-theo-bo-cuc">Chi phi mot cho theo bo cuc</a><a href="#so-sanh-predictor">So sanh predictor</a><a href="#luoc-do-cua-cac-bang-mergedtrials">Luoc do cua cac bang merged_trials</a><a href="#trial-merge-claim">Trial merge claim</a><a href="#nguon-truc-tiep">Nguon truc tiep</a></nav>
+<nav><a href="#bien-day-du-theo-bo-cuc">Biên đầy đủ theo bố cục</a><a href="#khoang-bootstrap-dmin-day-du">Khoảng bootstrap D_min đầy đủ</a><a href="#chi-phi-mot-cho-theo-bo-cuc">Chi phí một chó theo bố cục</a><a href="#so-sanh-bo-du-doan">So sánh bộ dự đoán</a><a href="#luoc-do-cua-cac-bang-mergedtrials">Lược đồ của các bảng merged_trials</a><a href="#thu-nghiem-hop-nhat-claim">Thử nghiệm hợp nhất claim</a><a href="#nguon-truc-tiep">Nguồn trực tiếp</a></nav>
 <main>
-<p>Bang ket qua dung bang chung claim. Bang chung scout chon cua so chinh xac va khong duoc doc nhu uoc luong cuoi.</p>
-<h2 id="bien-day-du-theo-bo-cuc">Bien day du theo bo cuc</h2>
-<p>Source: <a href="../../phase2/claim/packages/b/frontier_by_layout.csv"><code>phase2/claim/packages/b/frontier_by_layout.csv</code></a>.</p>
+<p>Bảng kết quả dùng bằng chứng claim. Bằng chứng khảo sát chọn cửa sổ chính xác và không được đọc như ước lượng cuối.</p>
+<h2 id="bien-day-du-theo-bo-cuc">Biên đầy đủ theo bố cục</h2>
+<p>Nguồn: <a href="../../phase2/claim/packages/b/frontier_by_layout.csv"><code>phase2/claim/packages/b/frontier_by_layout.csv</code></a>.</p>
 <div class="table-wrap"><table>
 <thead><tr>
 <th>initial_layout</th>
@@ -204,9 +204,9 @@ pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8p
 <td>False</td>
 </tr>
 </tbody></table></div>
-<p>Moi bo cuc va N co <code>D_min = 1</code>, <code>D_max = 35</code> tai tran luoi, va khong co overcrowding. Bo cuc wide co <code>B_star_D = 2</code> du mot cho da dat do tin cay.</p>
-<h2 id="khoang-bootstrap-dmin-day-du">Khoang bootstrap D_min day du</h2>
-<p>Source: <a href="../../phase2/claim/merged_dmin_bootstrap.csv"><code>phase2/claim/merged_dmin_bootstrap.csv</code></a>.</p>
+<p>Mỗi bố cục và N có <code>D_min = 1</code>, <code>D_max = 35</code> tại trần lưới, và không có quá tải. Bố cục <code>wide</code> có <code>B_star_D = 2</code> dù một chó đã đạt độ tin cậy.</p>
+<h2 id="khoang-bootstrap-dmin-day-du">Khoảng bootstrap D_min đầy đủ</h2>
+<p>Nguồn: <a href="../../phase2/claim/merged_dmin_bootstrap.csv"><code>phase2/claim/merged_dmin_bootstrap.csv</code></a>.</p>
 <div class="table-wrap"><table>
 <thead><tr>
 <th>method</th>
@@ -352,17 +352,17 @@ pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8p
 <td>1000</td>
 </tr>
 </tbody></table></div>
-<h2 id="chi-phi-mot-cho-theo-bo-cuc">Chi phi mot cho theo bo cuc</h2>
-<p>Tinh tu tat ca dong D = 1 cua claim merge. Trung vi chi dung trial thanh cong.</p>
+<h2 id="chi-phi-mot-cho-theo-bo-cuc">Chi phí một chó theo bố cục</h2>
+<p>Tính từ tất cả dòng D = 1 của bản hợp nhất claim. Trung vị chỉ dùng lần thử thành công.</p>
 <div class="table-wrap"><table>
 <thead><tr>
-<th>Bo cuc</th>
+<th>Bố cục</th>
 <th>N</th>
-<th>Thanh cong</th>
+<th>Thành công</th>
 <th>Seed</th>
 <th>R</th>
-<th>Trung vi tick</th>
-<th>Trung vi path</th>
+<th>Trung vị tick</th>
+<th>Trung vị path</th>
 </tr></thead><tbody>
 <tr>
 <td>compact</td>
@@ -473,8 +473,8 @@ pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8p
 <td>5,213.019</td>
 </tr>
 </tbody></table></div>
-<h2 id="so-sanh-predictor">So sanh predictor</h2>
-<p>Source: <a href="../../phase2/claim/packages/b/predictor_comparison.csv"><code>phase2/claim/packages/b/predictor_comparison.csv</code></a>. Bang nay duoc giu lam bang chung, nhung claim predictor trang thai khong ket luan vi D_min baseline khong thay doi.</p>
+<h2 id="so-sanh-bo-du-doan">So sánh bộ dự đoán</h2>
+<p>Nguồn: <a href="../../phase2/claim/packages/b/predictor_comparison.csv"><code>phase2/claim/packages/b/predictor_comparison.csv</code></a>. Bảng này được giữ làm bằng chứng, nhưng claim bộ dự đoán trạng thái không kết luận vì D_min cơ sở không thay đổi.</p>
 <div class="table-wrap"><table>
 <thead><tr>
 <th>n_folds</th>
@@ -493,113 +493,113 @@ pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8p
 <td>need at least two flock sizes and both outcomes</td>
 </tr>
 </tbody></table></div>
-<h2 id="luoc-do-cua-cac-bang-mergedtrials">Luoc do cua cac bang merged_trials</h2>
-<p>Moi dong la mot lan mo phong voi mot seed. Ten cot thuc te duoc bao cao trong tung muc du lieu; cac nhom sau giai thich y nghia.</p>
+<h2 id="luoc-do-cua-cac-bang-mergedtrials">Lược đồ của các bảng merged_trials</h2>
+<p>Mỗi dòng là một lần mô phỏng với một seed. Tên cột thực tế được báo cáo trong từng mục dữ liệu; các nhóm sau giải thích ý nghĩa.</p>
 <div class="table-wrap"><table>
 <thead><tr>
-<th>Nhom</th>
-<th>Cot va y nghia</th>
+<th>Nhóm</th>
+<th>Cột và ý nghĩa</th>
 </tr></thead><tbody>
 <tr>
-<td>Danh tinh va thiet ke</td>
+<td>Danh tính và thiết kế</td>
 <td>method, scenario, preset, seed, sheep_model, dog_controller, obs_mode, n_sheep, n_shepherds, initial_layout, time_limit</td>
 </tr>
 <tr>
-<td>Ket qua va chi phi</td>
+<td>Kết quả và chi phí</td>
 <td>success, total_ticks, time_to_goal, shepherd_path, first_success_tick, control_efficiency</td>
 </tr>
 <tr>
-<td>Trang thai cuoi</td>
+<td>Trạng thái cuối</td>
 <td>final_gcm_goal, final_success_rate, final_sheep_in_goal, final_min_separation</td>
 </tr>
 <tr>
-<td>Tom tat theo thoi gian</td>
+<td>Tóm tắt theo thời gian</td>
 <td>mean_<em>, min_</em>, max_<em>, auc_</em> for recorded flock and dog metrics</td>
 </tr>
 <tr>
-<td>Chan doan that bai</td>
+<td>Chẩn đoán thất bại</td>
 <td>failure_mode, failure_label, failure_hints</td>
 </tr>
 <tr>
-<td>Cau hinh</td>
+<td>Cấu hình</td>
 <td>resolved_config, the serialized effective trial configuration</td>
 </tr>
 </tbody></table></div>
-<h2 id="trial-merge-claim">Trial merge claim</h2>
-<p>Nguon day du: <a href="../../phase2/claim/merged_trials.csv"><code>phase2/claim/merged_trials.csv</code></a>. Bang lon khong duoc chep lai. Cac thong ke duoi day duoc tinh truc tiep tu CSV.</p>
+<h2 id="thu-nghiem-hop-nhat-claim">Thử nghiệm hợp nhất claim</h2>
+<p>Nguồn đầy đủ: <a href="../../phase2/claim/merged_trials.csv"><code>phase2/claim/merged_trials.csv</code></a>. Bảng lớn không được chép lại. Các thống kê dưới đây được tính trực tiếp từ CSV.</p>
 <div class="table-wrap"><table>
 <thead><tr>
-<th>Thuoc tinh</th>
-<th>Gia tri</th>
+<th>Thuộc tính</th>
+<th>Giá trị</th>
 </tr></thead><tbody>
 <tr>
-<td>So dong</td>
+<td>Số dòng</td>
 <td>5,280</td>
 </tr>
 <tr>
-<td>So cot</td>
+<td>Số cột</td>
 <td>77</td>
 </tr>
 <tr>
-<td>So o thiet ke</td>
+<td>Số ô thiết kế</td>
 <td>120</td>
 </tr>
 <tr>
-<td>Phuong phap</td>
+<td>Phương pháp</td>
 <td>strombom_multi</td>
 </tr>
 <tr>
-<td>Bo cuc</td>
+<td>Bố cục</td>
 <td>compact, outlier_rich, split, wide</td>
 </tr>
 <tr>
-<td>Cac gia tri N</td>
+<td>Các giá trị N</td>
 <td>50, 100, 200</td>
 </tr>
 <tr>
-<td>Cac gia tri D</td>
+<td>Các giá trị D</td>
 <td>1, 2, 3, 4, 6, 10, 15, 20, 25, 35</td>
 </tr>
 <tr>
-<td>Khoang seed</td>
-<td>2026 to 2125</td>
+<td>Khoảng seed</td>
+<td>2026 đến 2125</td>
 </tr>
 </tbody></table></div>
 <div class="table-wrap"><table>
 <thead><tr>
-<th>Thuoc tinh</th>
-<th>Gia tri</th>
+<th>Thuộc tính</th>
+<th>Giá trị</th>
 </tr></thead><tbody>
 <tr>
-<td>Thanh cong</td>
+<td>Thành công</td>
 <td>5,280</td>
 </tr>
 <tr>
-<td>That bai</td>
+<td>Thất bại</td>
 <td>0</td>
 </tr>
 <tr>
-<td>R toan bo</td>
+<td>R toàn bộ</td>
 <td>1</td>
 </tr>
 <tr>
-<td>Trung vi tick, ca thanh cong</td>
+<td>Trung vị tick, các thành công</td>
 <td>197</td>
 </tr>
 <tr>
-<td>P90 tick, ca thanh cong</td>
+<td>P90 tick, các thành công</td>
 <td>1,313</td>
 </tr>
 <tr>
-<td>Trung vi quang duong, ca thanh cong</td>
+<td>Trung vị quãng đường, các thành công</td>
 <td>1,802.569</td>
 </tr>
 <tr>
-<td>Nhan that bai</td>
-<td>none</td>
+<td>Nhãn thất bại</td>
+<td>không có</td>
 </tr>
 </tbody></table></div>
-<p>Quy tac chon dong dai dien: sap xep tu dien theo <code>method</code>, <code>initial_layout</code>, <code>n_sheep</code>, <code>n_shepherds</code>, <code>seed</code>, sau do lay 5 vi tri cach deu, gom hai dau. Quy tac nay trung lap duoc va khong chon theo ket qua.</p>
+<p>Quy tắc chọn dòng đại diện: sắp xếp từ điển theo <code>method</code>, <code>initial_layout</code>, <code>n_sheep</code>, <code>n_shepherds</code>, <code>seed</code>, sau đó lấy 5 vị trí cách đều, gồm hai đầu. Quy tắc này trung lập và không chọn theo kết quả.</p>
 <div class="table-wrap"><table>
 <thead><tr>
 <th>method</th>
@@ -668,7 +668,7 @@ pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8p
 <td>none</td>
 </tr>
 </tbody></table></div>
-<h2 id="nguon-truc-tiep">Nguon truc tiep</h2>
+<h2 id="nguon-truc-tiep">Nguồn trực tiếp</h2>
 <ul>
 <li><a href="../../phase2/claim/packages/b/frontier_by_layout.csv"><code>phase2/claim/packages/b/frontier_by_layout.csv</code></a></li>
 <li><a href="../../phase2/claim/packages/b/predictor_comparison.csv"><code>phase2/claim/packages/b/predictor_comparison.csv</code></a></li>
@@ -679,6 +679,6 @@ pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8p
 </ul>
 </main>
 </div>
-<footer><p>Nguon Markdown: <code>phase2_tables_vi.md</code>. Hinh anh duoc nhung de doc ngoai tuyen.</p></footer>
+<footer><p>Nguồn Markdown: <code>phase2_tables_vi.md</code>. Hình ảnh được nhúng để đọc ngoại tuyến.</p></footer>
 </body>
 </html>

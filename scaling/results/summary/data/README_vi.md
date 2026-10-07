@@ -1,21 +1,21 @@
-# Phu luc du lieu
+# Phụ lục dữ liệu
 
-Thu muc nay la muc luc tai tao duoc cho bang chung cua Giai doan 1, 2 va 4. Cac bang duoc tao truc tiep tu CSV, JSON, status va provenance chinh tac. Khong co so nao duoc nhap tay.
+Thư mục này là mục lục tái tạo được cho bằng chứng của Giai đoạn 1, 2 và 4. Các bảng được tạo trực tiếp từ CSV, JSON, tệp trạng thái và provenance chuẩn. Không có số nào được nhập tay.
 
-## Cach doc
+## Cách đọc
 
-* [So cai chay](run_ledger_vi.md): cap pilot, scout, claim; so dong; hash protocol; lien ket provenance.
-* [Bang Giai doan 1](phase1_tables_vi.md): bien kich thuoc, che do, fit scaling va tom tat merge.
-* [Bang Giai doan 2](phase2_tables_vi.md): bien theo bo cuc, chi phi mot cho, predictor va tom tat merge.
-* [Bang Giai doan 4](phase4_tables_vi.md): transfer Kubo va FAT, hard failure, cua so Kubo kho va tom tat merge.
-* [English index](README.md).
+* [Nhật ký chạy](run_ledger_vi.md): cấp thử nhanh, khảo sát, claim; số dòng; hash giao thức; liên kết provenance.
+* [Bảng Giai đoạn 1](phase1_tables_vi.md): biên kích thước, chế độ, khớp scaling và tóm tắt hợp nhất.
+* [Bảng Giai đoạn 2](phase2_tables_vi.md): biên theo bố cục, chi phí một chó, so sánh bộ dự đoán và tóm tắt hợp nhất.
+* [Bảng Giai đoạn 4](phase4_tables_vi.md): chuyển giao Kubo và FAT, thất bại cứng, cửa sổ Kubo khó và tóm tắt hợp nhất.
+* [Mục lục tiếng Anh](README.md).
 
-## Quy uoc bang chung
+## Quy ước bằng chứng
 
-Scout la ban do 30 seed dung de chon cua so. Claim la bang chung chinh xac, thuong 100 seed, va la cap dung cho ket luan. Merge claim thay dong scout tai cac o da gieo lai claim va giu scout tai cac o con lai. Vi vay moi ket luan phai giu ro cap cua tung o.
+Khảo sát là bản đồ 30 seed dùng để chọn cửa sổ. Claim là bằng chứng chính xác, thường 100 seed, và là cấp dùng cho kết luận. Bản hợp nhất claim thay dòng khảo sát tại các ô đã gieo lại claim và giữ khảo sát tại các ô còn lại. Vì vậy mọi kết luận phải giữ rõ cấp của từng ô.
 
-`D_max = 35` voi `D_overcrowd` trong chi co nghia la thanh cong van dat nguong tai dinh luoi da thu. Neu `hard_failure = True`, khong D nao trong luoi dat R = 0.90, nen khong duoc dien mot `D_max` gia.
+`D_max = 35` với `D_overcrowd` trống chỉ có nghĩa là thành công vẫn đạt ngưỡng tại đỉnh lưới đã thử. Nếu `hard_failure = True`, không D nào trong lưới đạt R = 0.90, nên không được điền một `D_max` giả.
 
-## Tai tao
+## Tái tạo
 
-Chay `python3 build_tables.py` trong thu muc nay. Chay `python3 build_tables.py --check` de xac nhan cac tep da tao trung khop voi nguon hien tai. Script chi ghi 10 tep Markdown trong thu muc nay.
+Chạy `python3 build_tables.py` trong thư mục này. Chạy `python3 build_tables.py --check` để xác nhận các tệp đã tạo trùng khớp với nguồn hiện tại. Script chỉ ghi 10 tệp Markdown trong thư mục này.

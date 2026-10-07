@@ -4,6 +4,12 @@
 
 This report contains only empirical results from completed Phases **1**, **2**, and **4** of `scaling_v2`.
 
+![Phases covered in this report.](figures/schematics/en/phase_roadmap.svg)
+
+*Phases with claim-grade numbers here: 1, 2, and 4. Setup and method diagrams live in the linked docs below.*
+
+![Five main results from Phases 1, 2, and 4.](figures/schematics/en/summary_at_a_glance.svg)
+
 | Question | Completed evidence |
 |---|---|
 | As flock size grows, how many dogs are needed? | Phase 1, baseline `strombom_multi` on `compact` starts |
@@ -115,6 +121,10 @@ Observed baseline D_min has only two levels: 2 for N in {5, 10}, and 1 for N >= 
 
 Evidence: `../phase2/claim/README.md` and `../phase2/claim/packages/b/`.
 
+![Four starting layouts.](figures/schematics/en/four_layouts.svg)
+
+*Structure contrast holds N fixed and changes only the start shape.*
+
 D_min = 1 for all 12 layout by N cells, and every bootstrap interval has width zero. At D = 1, every cell has R = 1.00. D_max = 35 is the grid ceiling in every cell, with no D_overcrowd.
 
 ![Figure 5. Median total path at D = 1 by layout.](figures/f4_layout_cost.png)
@@ -152,6 +162,10 @@ For wide starts, B* = 2 at N = 50, 100, and 200. Median total path falls from 2,
 ## 4. Phase 4: controller transfer
 
 Evidence: `../phase4/README.md`, `../phase4/kubo_structure/claim/README.md`, `../phase4/package_d/`, and `../phase4/kubo_structure/claim/outlier_rich_n200_window.json`.
+
+![Transfer idea across methods.](figures/schematics/en/transfer_sketch.svg)
+
+*Same grids and layouts; label each frontier feature shared, shifted, or absent.*
 
 ### Compact size map
 
@@ -240,6 +254,10 @@ Package D size labels are 8 shared, 7 shifted, and 29 absent. The absent count i
 *Figure 10. Source: `mean_i_dir` in claim `merged_trials.csv` files.*
 
 ## 5. Synthesis and claim snapshot
+
+![Claims scorecard from progress tracker and claim packages.](figures/schematics/en/claims_scorecard.svg)
+
+*Verdict colours match the table below. Live verdicts: `../../docs/progress_tracker.md`.*
 
 | Claim | Verdict | Evidence | Reading |
 |---|---|---|---|

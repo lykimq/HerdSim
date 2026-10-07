@@ -1,107 +1,107 @@
-# Doi chieu ban thao 2025 va HerdSim
+# Đối chiếu bản thảo 2025 và HerdSim
 
-## Trang thai doi chieu
+## Trạng thái đối chiếu
 
-Ban thao 2025, *Collective Nudging that Scales. How many dogs do I need to herd sheep?*, bao cao mot nghien cuu NetLogo 7.0.3. HerdSim `scaling_v2` la mot nghien cuu mo phong Python rieng. Hai nghien cuu chia se cau hoi rong, luoi so cho, han 10,000 tick, va nguong tin cay 90%. Chung khong chia se cung nhiem vu, san, khoi tao, bo dieu khien, hoac dinh nghia bien.
+Bản thảo 2025, *Collective Nudging that Scales. How many dogs do I need to herd sheep?*, báo cáo một nghiên cứu NetLogo 7.0.3. HerdSim `scaling_v2` là một nghiên cứu mô phỏng Python riêng. Hai nghiên cứu chia sẻ câu hỏi rộng, lưới số chó, hạn 10,000 tick, và ngưỡng tin cậy 90%. Chúng không chia sẻ cùng nhiệm vụ, sân, khởi tạo, bộ điều khiển, hoặc định nghĩa biên.
 
-Ban thao khong duoc chay lai trong HerdSim hoac NetLogo trong chuong trinh hien tai. Gia tri ban thao ben duoi duoc chep tu PDF va ghi chu trong kho. Gia tri HerdSim den tu du lieu tang claim. Day la doi chieu ket qua giua hai giao thuc, khong phai kiem tra tai lap.
+Bản thảo không được chạy lại trong HerdSim hoặc NetLogo trong chương trình hiện tại. Giá trị bản thảo bên dưới được chép từ PDF và ghi chú trong kho. Giá trị HerdSim đến từ dữ liệu tầng claim. Đây là đối chiếu kết quả giữa hai giao thức, không phải kiểm tra tái lập.
 
-![Ban thao gom, giu, ra cong so voi HerdSim lua vao dich.](../../results/summary/figures/schematics/vi/draft_vs_herdsim.svg)
+![Bản thảo gom, giữ, ra cổng so với HerdSim lùa vào đích.](../../results/summary/figures/schematics/vi/draft_vs_herdsim.svg)
 
-## Doi chieu giao thuc
+## Đối chiếu giao thức
 
-| Muc | Ban thao 2025 | HerdSim `scaling_v2` |
+| Mục | Bản thảo 2025 | HerdSim `scaling_v2` |
 |---|---|---|
-| Dong co | NetLogo 7.0.3 tren luoi patch | HerdSim trong khong gian lien tuc voi tick roi rac |
-| Nhiem vu | Gom, giu 800 tick, roi dua qua cong | `drive_to_goal`, moi cuu nam trong dia dich |
-| Thanh cong | Moi cuu qua cong truoc 10,000 tick | Ti le trong dia dich dat 1.0 truoc T0 = 10,000 |
-| San | 101 x 71 patch, vung giu o tam, cong tren tuong phai | San 500 x 500, dan tai (250, 250), dich tai (370, 250) |
-| Vung giu hoac dich | `rc = clamp(2.5 * sqrt(N), 23, 27)` | Ban kinh `15 * sqrt(N/50)` |
-| Khoi tao cuu | Rai ngau nhien, co dem voi tuong va cho | Cac ho `compact`, `wide`, `split`, va `outlier_rich` duoc kiem soat |
-| Khoi tao cho | Luoi tai goc tren trai | Sau dan, doi dien dich, lech 50 voi nhieu `+/-5` |
-| Bo dieu khien | Mot ho NetLogo gom, lua, va tuan tra | Co so `strombom_multi`; chuyen giao `kubo` va `fat` |
-| Luoi D | `{1, 2, 3, 4, 6, 10, 15, 20, 25, 35}` | Giong |
-| Luoi N | `{5, 10, 25, 50, 100, 150, 200, 250, 300, 350, 400}` | `{5, 10, 25, 50, 75, 100, 150, 200, 300, 400}` |
-| Lay mau | 100 lan moi o, tong 11,000 | Scout 30 moi o; claim thuong gieo lai 100 tren cua so da chon |
-| Seed | Seed goc khong neu trong ghi chu | Seed goc 2026; seed thu nghiem `2026 + i` |
-| Tin cay | SR >= 90% | R >= theta, voi theta = 0.90 cho bien claim |
-| D_min | D nho nhat co SR >= 90% | D da thu nho nhat co R >= theta |
-| D_overcrowd | D dau tien tren D_min noi SR bat dau giam | Dau cua hai D lien tiep duoi theta sau D_min |
-| D_max | D dau tien tren D_min co SR < 90%, neu khong thi tran | D tin cay lon nhat truoc D_overcrowd; neu khong thi tran luoi 35 |
-| Bat dinh | Khong bao cao khoang nhi thuc hoac bootstrap D_min | 1,000 bootstrap seed cho D_min |
-| Cau truc | Do rai phat sinh, tom tat bang `S_bar` | Bo cuc khoi tao kiem soat, cohesion, fragmentation, va mean spread |
-| Chi so | Thanh cong, tick, pha, spread, path, va cuu lac | Thanh cong, tick, path, cohesion, fragmentation, spread, interference, va nhan that bai |
+| Động cơ | NetLogo 7.0.3 trên lưới patch | HerdSim trong không gian liên tục với tick rời rạc |
+| Nhiệm vụ | Gom, giữ 800 tick, rồi đưa qua cổng | `drive_to_goal`, mọi cừu nằm trong đĩa đích |
+| Thành công | Mọi cừu qua cổng trước 10,000 tick | Tỉ lệ trong đĩa đích đạt 1.0 trước T0 = 10,000 |
+| Sân | 101 x 71 patch, vùng giữ ở tâm, cổng trên tường phải | Sân 500 x 500, đàn tại (250, 250), đích tại (370, 250) |
+| Vùng giữ hoặc đích | `rc = clamp(2.5 * sqrt(N), 23, 27)` | Bán kính `15 * sqrt(N/50)` |
+| Khởi tạo cừu | Rải ngẫu nhiên, có đệm với tường và chó | Các họ `compact`, `wide`, `split`, và `outlier_rich` được kiểm soát |
+| Khởi tạo chó | Lưới tại góc trên trái | Sau đàn, đối diện đích, lệch 50 với nhiễu `+/-5` |
+| Bộ điều khiển | Một họ NetLogo gom, lùa, và tuần tra | Cơ sở `strombom_multi`; chuyển giao `kubo` và `fat` |
+| Lưới D | `{1, 2, 3, 4, 6, 10, 15, 20, 25, 35}` | Giống |
+| Lưới N | `{5, 10, 25, 50, 100, 150, 200, 250, 300, 350, 400}` | `{5, 10, 25, 50, 75, 100, 150, 200, 300, 400}` |
+| Lấy mẫu | 100 lần mỗi ô, tổng 11,000 | Scout 30 mỗi ô; claim thường gieo lại 100 trên cửa sổ đã chọn |
+| Seed | Seed gốc không nêu trong ghi chú | Seed gốc 2026; seed thử nghiệm `2026 + i` |
+| Tin cậy | SR >= 90% | R >= theta, với theta = 0.90 cho biên claim |
+| D_min | D nhỏ nhất có SR >= 90% | D đã thử nhỏ nhất có R >= theta |
+| D_overcrowd | D đầu tiên trên D_min nơi SR bắt đầu giảm | Đầu của hai D liên tiếp dưới theta sau D_min |
+| D_max | D đầu tiên trên D_min có SR < 90%, nếu không thì trần | D tin cậy lớn nhất trước D_overcrowd; nếu không thì trần lưới 35 |
+| Bất định | Không báo cáo khoảng nhị thức hoặc bootstrap D_min | 1,000 bootstrap seed cho D_min |
+| Cấu trúc | Độ rải phát sinh, tóm tắt bằng `S_bar` | Bố cục khởi tạo kiểm soát, cohesion, fragmentation, và mean spread |
+| Chỉ số | Thành công, tick, pha, spread, path, và cừu lạc | Thành công, tick, path, cohesion, fragmentation, spread, interference, và nhãn thất bại |
 
-![Cac pha nhiem vu ban thao duoc bao cao.](../../results/summary/figures/schematics/vi/draft_task_phases.svg)
+![Các pha nhiệm vụ bản thảo được báo cáo.](../../results/summary/figures/schematics/vi/draft_task_phases.svg)
 
-## Ket qua ban thao duoc bao cao
+## Kết quả bản thảo được báo cáo
 
-Tai SR >= 90%, Bang A3 cua ban thao bao cao:
+Tại SR >= 90%, Bảng A3 của bản thảo báo cáo:
 
-| N | D_min ban thao | D_max ban thao | SR toi da |
+| N | D_min bản thảo | D_max bản thảo | SR tối đa |
 |---|---:|---:|---:|
-| 5 | 1 | chua dat | 100% |
+| 5 | 1 | chưa đạt | 100% |
 | 10 | 1 | 15 | 100% |
 | 25 | 1 | 25 | 100% |
 | 50 | 1 | 25 | 100% |
-| 100 | 1 | chua dat | 100% |
-| 150 | 3 | chua dat | 99% |
+| 100 | 1 | chưa đạt | 100% |
+| 150 | 3 | chưa đạt | 99% |
 | 200 | 20 | 35 | 94% |
-| 250 | 25 | chua dat | 93% |
-| 300 | 20 | chua dat | 93% |
-| 350 | 35 | chua dat | 91% |
-| 400 | 35 | chua dat | 91% |
+| 250 | 25 | chưa đạt | 93% |
+| 300 | 20 | chưa đạt | 93% |
+| 350 | 35 | chưa đạt | 91% |
+| 400 | 35 | chưa đạt | 91% |
 
-"Chua dat" nghia la bien that bai phia tren chua duoc tim thay tai D = 35. Day la gia tri ban thao bao cao, khong phai ket qua duoc tao lai boi kho nay.
+"Chưa đạt" nghĩa là biên thất bại phía trên chưa được tìm thấy tại D = 35. Đây là giá trị bản thảo báo cáo, không phải kết quả được tạo lại bởi kho này.
 
-Ban thao cung bao cao lien he am giua mean spread va thanh cong, gom Spearman rho = -0.701 cho `S_bar` voi SR va rho = -0.828 cho `S_bar * N` voi SR tren 110 tong hop dieu kien. Phan tich nhay cam va density gradient khong duoc chay lai o day.
+Bản thảo cũng báo cáo liên hệ âm giữa mean spread và thành công, gồm Spearman rho = -0.701 cho `S_bar` với SR và rho = -0.828 cho `S_bar * N` với SR trên 110 tổng hợp điều kiện. Phân tích nhạy cảm và density gradient không được chạy lại ở đây.
 
-![Tom tat truc quan chep tu Bang A3 cua ban thao.](../../results/summary/figures/schematics/vi/draft_main_results.svg)
+![Tóm tắt trực quan chép từ Bảng A3 của bản thảo.](../../results/summary/figures/schematics/vi/draft_main_results.svg)
 
-## Ket qua HerdSim dung de doi chieu
+## Kết quả HerdSim dùng để đối chiếu
 
-Voi co so `strombom_multi` tren xuat phat compact, du lieu claim cho D_min = 2 tai N trong `{5, 10}` va D_min = 1 tu N = 25 den 400. D_max = 35 la tran luoi da thu trong moi o Giai doan 1 vi khong thay cap overcrowding. No khong phai diem sup phia tren da do.
+Với cơ sở `strombom_multi` trên xuất phát compact, dữ liệu claim cho D_min = 2 tại N trong `{5, 10}` và D_min = 1 từ N = 25 đến 400. D_max = 35 là trần lưới đã thử trong mọi ô Giai đoạn 1 vì không thấy cặp overcrowding. Nó không phải điểm sụp phía trên đã đo.
 
-Doi bo cuc khoi tao khong doi D_min co so tai N trong `{50, 100, 200}`, nhung doi chi phi ro ret. Kubo gan khop co so compact, trong khi Kubo tren wide va FAT tren dan lon thuong khong dat R = 0.90 tai bat ky D nao trong luoi. Day la ket qua chuyen giao HerdSim, khong phai ket qua parity voi ban thao hoac NetLogo.
+Đổi bố cục khởi tạo không đổi D_min cơ sở tại N trong `{50, 100, 200}`, nhưng đổi chi phí rõ rệt. Kubo gần khớp cơ sở compact, trong khi Kubo trên wide và FAT trên đàn lớn thường không đạt R = 0.90 tại bất kỳ D nào trong lưới. Đây là kết quả chuyển giao HerdSim, không phải kết quả parity với bản thảo hoặc NetLogo.
 
-| Phat hien ban thao | Ket qua HerdSim theo giao thuc cua no | Trang thai |
+| Phát hiện bản thảo | Kết quả HerdSim theo giao thức của nó | Trạng thái |
 |---|---|---|
-| Mot cho du den khoang N = 100 roi sup | Mot cho dat R >= 0.90 den N = 400 tren co so compact | Khong tai hien |
-| D_min tang len 20 den 35 khi N >= 200 | D_min co so van la 1 | Khong tai hien |
-| D cao co the gay overcrowding cho dan nho | Khong co cap overcrowding co so den D = 35 | Khong tai hien |
-| Thoi gian giam theo D; quang duong bao hoa | Thoi gian co so gan phang; tong duong cho tang theo D | Hinh dang do khac |
-| Spread du doan that bai | Chua co phan tich doi ung co kiem soat o muc claim | Chua kiem parity |
-| Mot bo dieu khien, khong bat dinh D_min | Ba bo dieu khien HerdSim, bon bo cuc, va bootstrap | Bang chung HerdSim bo sung |
+| Một chó đủ đến khoảng N = 100 rồi sụp | Một chó đạt R >= 0.90 đến N = 400 trên cơ sở compact | Không tái hiện |
+| D_min tăng lên 20 đến 35 khi N >= 200 | D_min cơ sở vẫn là 1 | Không tái hiện |
+| D cao có thể gây overcrowding cho đàn nhỏ | Không có cặp overcrowding cơ sở đến D = 35 | Không tái hiện |
+| Thời gian giảm theo D; quãng đường bão hòa | Thời gian cơ sở gần phẳng; tổng đường chó tăng theo D | Hình dạng đo khác |
+| Spread dự đoán thất bại | Chưa có phân tích đối ứng có kiểm soát ở mức claim | Chưa kiểm parity |
+| Một bộ điều khiển, không bất định D_min | Ba bộ điều khiển HerdSim, bốn bố cục, và bootstrap | Bằng chứng HerdSim bổ sung |
 
-![Cac phan tich ban thao khong duoc chay lai.](../../results/summary/figures/schematics/vi/draft_extra_analyses.svg)
+![Các phân tích bản thảo không được chạy lại.](../../results/summary/figures/schematics/vi/draft_extra_analyses.svg)
 
-## Vi sao ket qua co the khac
+## Vì sao kết quả có thể khác
 
-Khac biet co the den tu pha giu va qua cong, cuu rai luc dau, cho xuat phat o goc, hinh hoc vung giu, va chi tiet bo dieu khien cua ban thao. HerdSim dung duong lua noi bo ngan hon voi cho da o sau dan. Day chi la dien giai. Khong co thi nghiem thay tung thanh phan de tach mot nguyen nhan.
+Khác biệt có thể đến từ pha giữ và qua cổng, cừu rải lúc đầu, chó xuất phát ở góc, hình học vùng giữ, và chi tiết bộ điều khiển của bản thảo. HerdSim dùng đường lùa nội bộ ngắn hơn với chó đã ở sau đàn. Đây chỉ là diễn giải. Không có thí nghiệm thay từng thành phần để tách một nguyên nhân.
 
-Vi vay, "khong tai hien" nghia la ket qua khong xuat hien duoi giao thuc HerdSim khac. No khong chung minh ket qua ban thao sai.
+Vì vậy, "không tái hiện" nghĩa là kết quả không xuất hiện dưới giao thức HerdSim khác. Nó không chứng minh kết quả bản thảo sai.
 
-## Da chay va chua chay lai
+## Đã chạy và chưa chạy lại
 
-| Muc | Trang thai |
+| Mục | Trạng thái |
 |---|---|
-| Du lieu claim HerdSim Giai doan 1, 2, va 4 | Da chay va dung cho ket luan hien tai |
-| Thi nghiem 11,000 lan cua ban thao 2025 | Khong chay lai |
-| Cac o nhay cam cua ban thao | Khong chay lai |
-| Phan tich density gradient cua ban thao | Khong chay lai |
-| Bo phan loai va tuong quan spread cua ban thao | Khong chay lai |
-| Mo hinh ban thao nhu mot twin di kem | Khong, khong co trong `twins.json` |
-| Thay giao thuc co kiem soat giua ban thao va HerdSim | Chua chay |
+| Dữ liệu claim HerdSim Giai đoạn 1, 2, và 4 | Đã chạy và dùng cho kết luận hiện tại |
+| Thí nghiệm 11,000 lần của bản thảo 2025 | Không chạy lại |
+| Các ô nhạy cảm của bản thảo | Không chạy lại |
+| Phân tích density gradient của bản thảo | Không chạy lại |
+| Bộ phân loại và tương quan spread của bản thảo | Không chạy lại |
+| Mô hình bản thảo như một twin đi kèm | Không, không có trong `twins.json` |
+| Thay giao thức có kiểm soát giữa bản thảo và HerdSim | Chưa chạy |
 
-## Trich dan va nguon goc
+## Trích dẫn và nguồn gốc
 
-Nguon ban thao chinh:
+Nguồn bản thảo chính:
 
-*Collective Nudging that Scales. How many dogs do I need to herd sheep?* Ban thao, khoang 2025, dong tac gia tam. Ban trong kho: [PDF](../../../docs/papers/sheep-scaling_paper2025.pdf).
+*Collective Nudging that Scales. How many dogs do I need to herd sheep?* Bản thảo, khoảng 2025, đồng tác giả tạm. Bản trong kho: [PDF](../../../docs/papers/sheep-scaling_paper2025.pdf).
 
-Tai lieu ho tro dien giai:
+Tài liệu hỗ trợ diễn giải:
 
-- [Ghi chu tham chieu ban thao](../notes/sheep-scaling_paper2025.md)
-- [Bao cao tong hop tieng Anh](../../results/summary/SUMMARY_REPORT.md)
-- [Bao cao tong hop tieng Viet](../../results/summary/SUMMARY_REPORT_vi.md)
-- [Ranh gioi xac thuc va NetLogo](validation_and_netlogo_vi.md)
+- [Ghi chú tham chiếu bản thảo](../notes/sheep-scaling_paper2025.md)
+- [Báo cáo tổng hợp tiếng Anh](../../results/summary/SUMMARY_REPORT.md)
+- [Báo cáo tổng hợp tiếng Việt](../../results/summary/SUMMARY_REPORT_vi.md)
+- [Ranh giới xác thực và NetLogo](validation_and_netlogo_vi.md)

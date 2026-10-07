@@ -512,12 +512,12 @@ def wrap(
     is_vi = lang == "vi"
     home = DOCS_ROOT / ("INDEX_vi.html" if is_vi else "INDEX.html")
     labels = {
-        "home": "Trang chu" if is_vi else "Home",
-        "previous": "Truoc" if is_vi else "Previous",
+        "home": "Trang chủ" if is_vi else "Home",
+        "previous": "Trước" if is_vi else "Previous",
         "next": "Sau" if is_vi else "Next",
-        "source": "Nguon Markdown" if is_vi else "Markdown source",
+        "source": "Nguồn Markdown" if is_vi else "Markdown source",
         "portable": (
-            "Hinh anh duoc nhung de doc ngoai tuyen."
+            "Hình ảnh được nhúng để đọc ngoại tuyến."
             if is_vi
             else "Images are embedded for portable reading."
         ),
@@ -541,7 +541,7 @@ def wrap(
         )
     page_links.append(
         f'<a href="{html.escape(relative_link(output, language_output), quote=True)}">'
-        f'{"English" if is_vi else "Tieng Viet"}</a>'
+        f'{"English" if is_vi else "Tiếng Việt"}</a>'
     )
     page_nav = '<span class="sep">|</span>'.join(page_links)
     return f"""<!doctype html>
@@ -598,7 +598,7 @@ def build(
     other_lang = "en" if lang == "vi" else "vi"
     language_output = localized_path(base, other_lang, ".html")
     subtitle = (
-        "Tai lieu HerdSim de doc va dieu huong."
+        "Tài liệu HerdSim để đọc và điều hướng."
         if lang == "vi"
         else "Reader-facing HerdSim documentation and evidence."
     )

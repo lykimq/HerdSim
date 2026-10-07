@@ -3,8 +3,8 @@
 <head>
 <meta charset='utf-8'>
 <meta name='viewport' content='width=device-width,initial-scale=1'>
-<title>Cac phuong phap trong `scaling_v2`</title>
-<meta name='description' content='Tai lieu HerdSim de doc va dieu huong.'>
+<title>Các phương pháp trong `scaling_v2`</title>
+<meta name='description' content='Tài liệu HerdSim để đọc và điều hướng.'>
 <style>
 :root{--ink:#111827;--mut:#6b7280;--line:#e5e7eb;--acc:#2563eb;--bg:#f9fafb}
 *{box-sizing:border-box}body{margin:0;font:16px/1.65 -apple-system,'Segoe UI',Inter,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
@@ -51,85 +51,86 @@ pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8p
 </style>
 </head>
 <body>
-<div class='chrome'><div class='crumbs'><a href="../INDEX_vi.html">Trang chu</a><span class="sep">/</span><span>Methods</span><span class="sep">/</span><span>Cac phuong phap trong `scaling_v2`</span></div><div class='page-nav'><a rel="next" href="strombom_vi.html">Sau</a><span class="sep">|</span><a href="README.html">English</a></div></div>
-<header><div class='in'><h1>Cac phuong phap trong `scaling_v2`</h1><p>Tai lieu HerdSim de doc va dieu huong.</p></div></header>
+<div class='chrome'><div class='crumbs'><a href="../INDEX_vi.html">Trang chủ</a><span class="sep">/</span><span>Methods</span><span class="sep">/</span><span>Các phương pháp trong `scaling_v2`</span></div><div class='page-nav'><a rel="next" href="strombom_vi.html">Sau</a><span class="sep">|</span><a href="README.html">English</a></div></div>
+<header><div class='in'><h1>Các phương pháp trong `scaling_v2`</h1><p>Tài liệu HerdSim để đọc và điều hướng.</p></div></header>
 <div class='layout'>
-<nav><a href="#huong-dan">Huong dan</a><a href="#thiet-lap-chung-cua-scalingv2">Thiet lap chung cua `scaling_v2`</a><a href="#bang-chung-hoan-tat">Bang chung hoan tat</a><a href="#gioi-han-chung">Gioi han chung</a></nav>
+<nav><a href="#huong-dan">Hướng dẫn</a><a href="#thiet-lap-chung-cua-scalingv2">Thiết lập chung của `scaling_v2`</a><a href="#bang-chung-hoan-tat">Bằng chứng hoàn tất</a><a href="#gioi-han-chung">Giới hạn chung</a></nav>
 <main>
-<p>Thu muc nay giai thich ba ho bo dieu khien da duoc danh gia trong nghien cuu scaling hoan tat. Moi huong dan tach ro bon lop:</p>
+<p>Thư mục này giải thích ba họ bộ điều khiển đã được đánh giá trong nghiên cứu scaling đã hoàn tất. Mỗi hướng dẫn tách rõ bốn lớp:</p>
 <ol>
-<li>y tuong da cong bo truyen cam hung cho phuong phap;</li>
-<li>bo dieu khien va mo hinh cuu chinh xac trong HerdSim;</li>
-<li>thiet lap thi nghiem dong bang <code>scaling_v2</code>;</li>
-<li>ket qua da quan sat tu cac lan chay hoan tat.</li>
+<li>ý tưởng đã công bố truyền cảm hứng cho phương pháp;</li>
+<li>bộ điều khiển và mô hình cừu chính xác trong HerdSim;</li>
+<li>thiết lập thí nghiệm đóng băng <code>scaling_v2</code>;</li>
+<li>kết quả đã quan sát từ các lần chạy hoàn tất.</li>
 </ol>
-<p>Viec tach cac lop nay la can thiet. Nghien cuu so sanh cac bo dieu khien mo phong tren nhiem vu <code>drive_to_goal</code> cua HerdSim. Nghien cuu khong tai tao toan bo thi nghiem hay ket qua dinh luong cua cac bai bao duoc trich.</p>
-<h2 id="huong-dan">Huong dan</h2>
+<p>Việc tách các lớp này là cần thiết. Nghiên cứu so sánh các bộ điều khiển mô phỏng trên nhiệm vụ <code>drive_to_goal</code> của HerdSim. Nghiên cứu không tái tạo toàn bộ thí nghiệm hay kết quả định lượng của các bài báo được trích.</p>
+<h2 id="huong-dan">Hướng dẫn</h2>
 <div class="table-wrap"><table>
 <thead><tr>
-<th>Huong dan</th>
-<th>Co so cong bo</th>
-<th>Phuong phap HerdSim trong <code>scaling_v2</code></th>
+<th>Hướng dẫn</th>
+<th>Cơ sở công bố</th>
+<th>Phương pháp HerdSim trong <code>scaling_v2</code></th>
 </tr></thead><tbody>
 <tr>
 <td><a href="strombom_vi.html">Strombom Collect/Drive</a></td>
-<td>Strombom va cong su (2014)</td>
-<td><code>strombom_multi</code>, khong phai preset mot nguoi chan <code>strombom</code></td>
+<td>Strombom và cộng sự (2014)</td>
+<td><code>strombom_multi</code>, không phải preset một người chăn <code>strombom</code></td>
 </tr>
 <tr>
-<td><a href="kubo_vi.html">Mo hinh luc Kubo</a></td>
-<td>Kubo va cong su (2022)</td>
+<td><a href="kubo_vi.html">Mô hình lực Kubo</a></td>
+<td>Kubo và cộng sự (2022)</td>
 <td><code>kubo</code></td>
 </tr>
 <tr>
 <td><a href="fat_vi.html">FAT</a></td>
-<td>Y tuong ca the nhin thay xa nhat cua Tsunoda va cong su (2018)</td>
-<td><code>fat</code>, dung cuu Strombom</td>
+<td>Ý tưởng cá thể nhìn thấy xa nhất của Tsunoda và cộng sự (2018)</td>
+<td><code>fat</code>, dùng cừu Strombom</td>
 </tr>
 </tbody></table></div>
-<p>Ban tieng Anh: <a href="README.html">README.md</a>, <a href="strombom.html">strombom.md</a>, <a href="kubo.html">kubo.md</a>, va <a href="fat.html">fat.md</a>.</p>
-<h2 id="thiet-lap-chung-cua-scalingv2">Thiet lap chung cua <code>scaling_v2</code></h2>
-<p>Tat ca so sanh hoan tat dung cung nhiem vu va dinh nghia bien:</p>
+<p>Bản tiếng Anh: <a href="README.html">README.md</a>, <a href="strombom.html">strombom.md</a>, <a href="kubo.html">kubo.md</a>, và <a href="fat.html">fat.md</a>.</p>
+<figure><img alt="Ý nghĩa của &quot;xa nhất&quot; với từng bộ điều khiển." src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3MjAiIGhlaWdodD0iMjgwIiB2aWV3Qm94PSIwIDAgNzIwIDI4MCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJzbyBzYW5oIHkgbmdoaWEgeGEgbmhhdCI+CjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSI3MjAiIGhlaWdodD0iMjgwIiBmaWxsPSIjZjdmNmYyIi8+Cjx0ZXh0IHg9IjE2IiB5PSIyNCIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMWMxYjE5IiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPsOdIG5naMSpYSAmcXVvdDt4YSBuaOG6pXQmcXVvdDsg4bufIG3hu5dpIGLhu5kgxJFp4buBdSBraGnhu4NuPC90ZXh0Pgo8ZGVmcz4KICA8bWFya2VyIGlkPSJzMTMiIG1hcmtlcldpZHRoPSI4IiBtYXJrZXJIZWlnaHQ9IjgiIHJlZlg9IjYiIHJlZlk9IjMiIG9yaWVudD0iYXV0byI+CiAgICA8cGF0aCBkPSJNMCwwIEw2LDMgTDAsNiBaIiBmaWxsPSIjNWI0YTJmIi8+CiAgPC9tYXJrZXI+CiAgPG1hcmtlciBpZD0iczEzcCIgbWFya2VyV2lkdGg9IjgiIG1hcmtlckhlaWdodD0iOCIgcmVmWD0iNiIgcmVmWT0iMyIgb3JpZW50PSJhdXRvIj4KICAgIDxwYXRoIGQ9Ik0wLDAgTDYsMyBMMCw2IFoiIGZpbGw9IiM3YjFmYTIiLz4KICA8L21hcmtlcj4KICA8bWFya2VyIGlkPSJzMTNkIiBtYXJrZXJXaWR0aD0iOCIgbWFya2VySGVpZ2h0PSI4IiByZWZYPSI2IiByZWZZPSIzIiBvcmllbnQ9ImF1dG8iPgogICAgPHBhdGggZD0iTTAsMCBMNiwzIEwwLDYgWiIgZmlsbD0iIzFmNGU3OSIvPgogIDwvbWFya2VyPgogIDxtYXJrZXIgaWQ9InMxM3IiIG1hcmtlcldpZHRoPSI4IiBtYXJrZXJIZWlnaHQ9IjgiIHJlZlg9IjYiIHJlZlk9IjMiIG9yaWVudD0iYXV0byI+CiAgICA8cGF0aCBkPSJNMCwwIEw2LDMgTDAsNiBaIiBmaWxsPSIjOWIyYzJjIi8+CiAgPC9tYXJrZXI+CjwvZGVmcz4KPHJlY3QgeD0iMzAiIHk9IjQ0IiB3aWR0aD0iMjEwIiBoZWlnaHQ9IjE5MCIgZmlsbD0iI2ZmZiIgc3Ryb2tlPSIjMWY0ZTc5IiBzdHJva2Utd2lkdGg9IjIiIHJ4PSI4Ii8+Cjx0ZXh0IHg9IjEzNS4wIiB5PSI2OCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzFmNGU3OSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5zdHJvbWJvbV9tdWx0aSBHb208L3RleHQ+CjxjaXJjbGUgY3g9IjExNS4wMDYyMzc5NjE0MzQzIiBjeT0iMTUzLjI3NDgzMzc1MzYyMTk1IiByPSIyLjAiIGZpbGw9IiMzZDZiM2EiLz4KPGNpcmNsZSBjeD0iMTE3LjUzMzcyNTQ1NDE4MTciIGN5PSIxMzcuNTMxMTk4OTk2MTY1NiIgcj0iMi4wIiBmaWxsPSIjM2Q2YjNhIi8+CjxjaXJjbGUgY3g9IjEyMy40ODE1MzU5MTAzOTU1NCIgY3k9IjE0NS42NzQwNzAxMzQ5MDg1IiByPSIyLjAiIGZpbGw9IiMzZDZiM2EiLz4KPGNpcmNsZSBjeD0iMTA3LjAxMTA1OTEyMTcwODUzIiBjeT0iMTQ2LjU1OTIxODk1OTE2OTc4IiByPSIyLjAiIGZpbGw9IiMzZDZiM2EiLz4KPGNpcmNsZSBjeD0iMTI1LjI3MzI3NTI1OTk3MDIzIiBjeT0iMTM3LjQ1NDI0NTAyNTg3MjA0IiByPSIyLjAiIGZpbGw9IiMzZDZiM2EiLz4KPGNpcmNsZSBjeD0iMTIwLjc1NTY3MjEzNDA2NDA3IiBjeT0iMTQ4LjQ4NzU5Nzg0NzQ4NDkiIHI9IjIuMCIgZmlsbD0iIzNkNmIzYSIvPgo8Y2lyY2xlIGN4PSIxMDguNjUxNDgwMTI2NTc0NTEiIGN5PSIxMzYuMTAyNjcxNjQ2MDAyMDUiIHI9IjIuMCIgZmlsbD0iIzNkNmIzYSIvPgo8Y2lyY2xlIGN4PSIxMzAuNjQ5NjEyMTYxMTczNiIgY3k9IjE0My40ODc0OTk2MjQ5NTAzNyIgcj0iMi4wIiBmaWxsPSIjM2Q2YjNhIi8+CjxjaXJjbGUgY3g9IjExNS4zNTEyMTg0NTYyNTk2OSIgY3k9IjE0OC4wNjE2NTQ5NDYwMzkyIiByPSIyLjAiIGZpbGw9IiMzZDZiM2EiLz4KPGNpcmNsZSBjeD0iMTIwLjQ2NDgxNjE2MzI0Nzc1IiBjeT0iMTMwLjQwNTc0MDE0NzQ4OSIgcj0iMi4wIiBmaWxsPSIjM2Q2YjNhIi8+CjxjaXJjbGUgY3g9IjEyMCIgY3k9IjE0NCIgcj0iMyIgZmlsbD0iI2ZmZiIgc3Ryb2tlPSIjMWY0ZTc5IiBzdHJva2Utd2lkdGg9IjEuMiIvPgo8dGV4dCB4PSIxMjUiIHk9IjEzOSIgdGV4dC1hbmNob3I9InN0YXJ0IiBmb250LXNpemU9IjgiIGZpbGw9IiMxZjRlNzkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+R0NNPC90ZXh0Pgo8Y2lyY2xlIGN4PSIxNDgiIGN5PSIxMTYiIHI9IjMiIGZpbGw9IiM5YjJjMmMiLz4KPHJlY3QgeD0iODIuMCIgeT0iMTY2LjAiIHdpZHRoPSI2IiBoZWlnaHQ9IjYiIHJ4PSIxIiBmaWxsPSIjMWY0ZTc5Ii8+CjxsaW5lIHgxPSI4NSIgeTE9IjE2OSIgeDI9IjE0OCIgeTI9IjExNiIgc3Ryb2tlPSIjMWY0ZTc5IiBzdHJva2Utd2lkdGg9IjEuMSIgbWFya2VyLWVuZD0idXJsKCNzMTNkKSIvPgo8dGV4dCB4PSIxMzUuMCIgeT0iMjAyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjEwIiBmaWxsPSIjNWM1ODUyIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPnhhIG5o4bqldCBzbyB24bubaSBHQ008L3RleHQ+Cjx0ZXh0IHg9IjEzNS4wIiB5PSIyMTYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiM1YzU4NTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+KGPDoSB0aOG7gyBs4bqhYyB2cyB0w6JtIMSRw6BuKTwvdGV4dD4KPHJlY3QgeD0iMjYwIiB5PSI0NCIgd2lkdGg9IjIxMCIgaGVpZ2h0PSIxOTAiIGZpbGw9IiNmZmYiIHN0cm9rZT0iIzdiMWZhMiIgc3Ryb2tlLXdpZHRoPSIyIiByeD0iOCIvPgo8dGV4dCB4PSIzNjUuMCIgeT0iNjgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiM3YjFmYTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+a3VibzwvdGV4dD4KPGNpcmNsZSBjeD0iMzM0LjE2MDEyMDA1NDM5Mjg1IiBjeT0iMTQ1LjkxOTIzMjEwOTYxNDIiIHI9IjIuMCIgZmlsbD0iIzNkNmIzYSIvPgo8Y2lyY2xlIGN4PSIzNTcuNjA3MDM3NTMwODQ5NTQiIGN5PSIxMzYuMTExMzMyMzAxNzcxODUiIHI9IjIuMCIgZmlsbD0iIzNkNmIzYSIvPgo8Y2lyY2xlIGN4PSIzNTAuNDQ3NjE5MTg0MDg5NiIgY3k9IjE1MC43ODkzNDczNzUxMzE4OCIgcj0iMi4wIiBmaWxsPSIjM2Q2YjNhIi8+CjxjaXJjbGUgY3g9IjM0Ny4xMzQ1NTE3NjUwMDk5IiBjeT0iMTQxLjYyNzcyMjI2ODk3OTA2IiByPSIyLjAiIGZpbGw9IiMzZDZiM2EiLz4KPGNpcmNsZSBjeD0iMzYzLjMyNzQ4MTA5MTUzNjMiIGN5PSIxNDQuMzM1NzUwNTcyOTY1MDgiIHI9IjIuMCIgZmlsbD0iIzNkNmIzYSIvPgo8Y2lyY2xlIGN4PSIzNDIuOTQwMDE0NzQ5NDg1NSIgY3k9IjE0OS4xODkwMTk4NzM0ODczNSIgcj0iMi4wIiBmaWxsPSIjM2Q2YjNhIi8+CjxjaXJjbGUgY3g9IjM1MC42MTMyNTYwMTI4MTYzIiBjeT0iMTM5LjQ5NjczNTQ5NjQ0ODgyIiByPSIyLjAiIGZpbGw9IiMzZDZiM2EiLz4KPGNpcmNsZSBjeD0iMzU4LjYwOTM4MDg0MDY1OTEiIGN5PSIxNTQuMDkyODIxMTM2MzcxMjciIHI9IjIuMCIgZmlsbD0iIzNkNmIzYSIvPgo8Y2lyY2xlIGN4PSIzMzkuNTQ3NzY0NTgwMTA0MyIgY3k9IjE0Mi4xOTExNjYzNDY4NTI3NSIgcj0iMi4wIiBmaWxsPSIjM2Q2YjNhIi8+CjxjaXJjbGUgY3g9IjM1NS43MTIwODEwMjE1MjYxIiBjeT0iMTQxLjA3ODEwNDE1NTIzNDk3IiByPSIyLjAiIGZpbGw9IiMzZDZiM2EiLz4KPGNpcmNsZSBjeD0iNDQyIiBjeT0iMTQ0IiByPSI3IiBmaWxsPSIjY2ZlMGYwIiBzdHJva2U9IiMxZjRlNzkiIHN0cm9rZS13aWR0aD0iMS4yIi8+Cjx0ZXh0IHg9IjQ0MiIgeT0iMTMyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjgiIGZpbGw9IiMxZjRlNzkiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+xJHDrWNoPC90ZXh0Pgo8Y2lyY2xlIGN4PSIzMjAiIGN5PSIxNDkiIHI9IjMiIGZpbGw9IiM5YjJjMmMiLz4KPHJlY3QgeD0iMzA3LjAiIHk9IjEyMS4wIiB3aWR0aD0iNiIgaGVpZ2h0PSI2IiByeD0iMSIgZmlsbD0iIzFmNGU3OSIvPgo8bGluZSB4MT0iMzEwIiB5MT0iMTI0IiB4Mj0iMzIwIiB5Mj0iMTQ5IiBzdHJva2U9IiM3YjFmYTIiIHN0cm9rZS13aWR0aD0iMS4xIiBtYXJrZXItZW5kPSJ1cmwoI3MxM3ApIi8+Cjx0ZXh0IHg9IjM2NS4wIiB5PSIyMDIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiM1YzU4NTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+eGEgbmjhuqV0IHNvIHbhu5tpIMSRw61jaDwvdGV4dD4KPHRleHQgeD0iMzY1LjAiIHk9IjIxNiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzVjNTg1MiIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj4odHJvbmcgdOG6p20gY+G6o20pPC90ZXh0Pgo8cmVjdCB4PSI0OTAiIHk9IjQ0IiB3aWR0aD0iMjEwIiBoZWlnaHQ9IjE5MCIgZmlsbD0iI2ZmZiIgc3Ryb2tlPSIjOWIyYzJjIiBzdHJva2Utd2lkdGg9IjIiIHJ4PSI4Ii8+Cjx0ZXh0IHg9IjU5NS4wIiB5PSI2OCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzliMmMyYyIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5mYXQ8L3RleHQ+CjxjaXJjbGUgY3g9IjU3NS42NDIzNzU4NjA5MDkzIiBjeT0iMTM5LjcxMTQ1MjUyNjU4ODQiIHI9IjIuMCIgZmlsbD0iIzNkNmIzYSIvPgo8Y2lyY2xlIGN4PSI1OTUuODkyODE1NTQxNjE5MyIgY3k9IjE0NS41NzE1NjEwODA3ODgyOSIgcj0iMi4wIiBmaWxsPSIjM2Q2YjNhIi8+CjxjaXJjbGUgY3g9IjU3MC4yODA5NDEzMDA3NTY3IiBjeT0iMTQ5Ljk4MjY4OTcyMTY0NTIyIiByPSIyLjAiIGZpbGw9IiMzZDZiM2EiLz4KPGNpcmNsZSBjeD0iNTgxLjYwMDUzMTM3MjEzMTIiIGN5PSIxMzcuMzM3NDgwMTExNTc3MTIiIHI9IjIuMCIgZmlsbD0iIzNkNmIzYSIvPgo8Y2lyY2xlIGN4PSI1ODIuMDYwNTQ2MTQ3Njg2OSIgY3k9IjE0Ni45MTQxNjc2NDU2MDIzIiByPSIyLjAiIGZpbGw9IiMzZDZiM2EiLz4KPGNpcmNsZSBjeD0iNTY3LjIxMjE3MzA2NDEzMTEiIGN5PSIxNDAuNzkxNDAzNjc1MTE4NyIgcj0iMi4wIiBmaWxsPSIjM2Q2YjNhIi8+CjxjaXJjbGUgY3g9IjU4OC4zODE0ODgxMDYzNDA2IiBjeT0iMTQwLjUwOTYzNzkwNTY5NzgyIiByPSIyLjAiIGZpbGw9IiMzZDZiM2EiLz4KPGNpcmNsZSBjeD0iNTc4LjA1ODIyNTQyNTA4OTYiIGN5PSIxNDguMjIyMTk1MzAyMjEyOSIgcj0iMi4wIiBmaWxsPSIjM2Q2YjNhIi8+CjxjaXJjbGUgY3g9IjU3NC42OTcwNjA0MjQ0MDEzIiBjeT0iMTMyLjM3NjczNzM4NTk2MzU0IiByPSIyLjAiIGZpbGw9IiMzZDZiM2EiLz4KPGNpcmNsZSBjeD0iNTg5LjU2NjEyNDMwODk5MDciIGN5PSIxNDguMDEwOTc3MzAxODg4MTUiIHI9IjIuMCIgZmlsbD0iIzNkNmIzYSIvPgo8Y2lyY2xlIGN4PSI2NzIiIGN5PSIxNDQiIHI9IjciIGZpbGw9IiNjZmUwZjAiIHN0cm9rZT0iIzFmNGU3OSIgc3Ryb2tlLXdpZHRoPSIxLjIiLz4KPHRleHQgeD0iNjcyIiB5PSIxMzIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iOCIgZmlsbD0iIzFmNGU3OSIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj7EkcOtY2g8L3RleHQ+CjxyZWN0IHg9IjUzNy4wIiB5PSIxNjEuMCIgd2lkdGg9IjYiIGhlaWdodD0iNiIgcng9IjEiIGZpbGw9IiMxZjRlNzkiLz4KPGNpcmNsZSBjeD0iNjA1IiBjeT0iMTE5IiByPSIzIiBmaWxsPSIjOWIyYzJjIi8+CjxsaW5lIHgxPSI1NDAiIHkxPSIxNjQiIHgyPSI2MDUiIHkyPSIxMTkiIHN0cm9rZT0iIzliMmMyYyIgc3Ryb2tlLXdpZHRoPSIxLjEiIG1hcmtlci1lbmQ9InVybCgjczEzcikiLz4KPHRleHQgeD0iNTM2IiB5PSIxODIiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSI4IiBmaWxsPSIjOWIyYzJjIiBmb250LWZhbWlseT0iU2Vnb2UgVUksTm90byBTYW5zLHNhbnMtc2VyaWYiPmNow7M8L3RleHQ+Cjx0ZXh0IHg9IjU5NS4wIiB5PSIyMDIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiM1YzU4NTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+eGEgbmjhuqV0IHNvIHbhu5tpIGNow7M8L3RleHQ+Cjx0ZXh0IHg9IjU5NS4wIiB5PSIyMTYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiM1YzU4NTIiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxOb3RvIFNhbnMsc2Fucy1zZXJpZiI+KHRyb25nIHThuq1wIHF1YW4gc8OhdCk8L3RleHQ+Cjx0ZXh0IHg9IjE2IiB5PSIyNjgiIHRleHQtYW5jaG9yPSJzdGFydCIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzVjNTg1MiIgZm9udC1mYW1pbHk9IlNlZ29lIFVJLE5vdG8gU2FucyxzYW5zLXNlcmlmIj5Dw7luZyBjaOG7rywgYmEgxJHDrWNoIGtow6FjIG5oYXUuIMSQw7MgbMOgIGzDvSBkbyBr4bq/dCBxdeG6oyBjaHV54buDbiBnaWFvIGPDsyB0aOG7gyBs4buHY2guPC90ZXh0Pgo8L3N2Zz4="/><figcaption>Strombom Collect: xa nhất so với tâm đàn. Kubo: xa nhất so với đích. FAT: xa nhất so với chó.</figcaption></figure>
+<h2 id="thiet-lap-chung-cua-scalingv2">Thiết lập chung của <code>scaling_v2</code></h2>
+<p>Tất cả so sánh hoàn tất dùng cùng nhiệm vụ và định nghĩa biên:</p>
 <ul>
-<li>nhiem vu: dua moi con cuu vao dia dich truoc <code>T0 = 10000</code> tick;</li>
-<li>san: 500 x 500 don vi khong gian lien tuc;</li>
-<li>tam dan: <code>(250, 250)</code>;</li>
-<li>tam dich: <code>(370, 250)</code>;</li>
-<li>ban kinh dich: <code>15 * sqrt(N / 50)</code>;</li>
-<li>so cuu cho ban do kich thuoc: <code>{5, 10, 25, 50, 75, 100, 150, 200, 300, 400}</code>;</li>
-<li>so cho: <code>{1, 2, 3, 4, 6, 10, 15, 20, 25, 35}</code>;</li>
-<li>so cuu cho ban do cau truc: <code>N</code> trong <code>{50, 100, 200}</code>;</li>
-<li>bo cuc: <code>compact</code>, <code>wide</code>, <code>split</code>, va <code>outlier_rich</code>;</li>
-<li>do tin cay: <code>R</code>, ty le seed doc lap thanh cong truoc <code>T0</code>;</li>
-<li>bien: <code>D_min</code>, so cho nho nhat da thu co <code>R &gt;= 0.90</code>;</li>
-<li>phan tang: 30 seed scout tren toan luoi, sau do 100 seed claim trong cua so da chon, voi ngoai le 200 seed cho Kubo <code>outlier_rich</code>, <code>N = 200</code>.</li>
+<li>nhiệm vụ: đưa mọi con cừu vào đĩa đích trước <code>T0 = 10000</code> tick;</li>
+<li>sân: 500 x 500 đơn vị không gian liên tục;</li>
+<li>tâm đàn: <code>(250, 250)</code>;</li>
+<li>tâm đích: <code>(370, 250)</code>;</li>
+<li>bán kính đích: <code>15 * sqrt(N / 50)</code>;</li>
+<li>số cừu cho bản đồ kích thước: <code>{5, 10, 25, 50, 75, 100, 150, 200, 300, 400}</code>;</li>
+<li>số chó: <code>{1, 2, 3, 4, 6, 10, 15, 20, 25, 35}</code>;</li>
+<li>số cừu cho bản đồ cấu trúc: <code>N</code> trong <code>{50, 100, 200}</code>;</li>
+<li>bố cục: <code>compact</code>, <code>wide</code>, <code>split</code>, và <code>outlier_rich</code>;</li>
+<li>độ tin cậy: <code>R</code>, tỷ lệ seed độc lập thành công trước <code>T0</code>;</li>
+<li>biên: <code>D_min</code>, số chó nhỏ nhất đã thử có <code>R &gt;= 0.90</code>;</li>
+<li>phân tầng: 30 seed scout trên toàn lưới, sau đó 100 seed claim trong cửa sổ đã chọn, với ngoại lệ 200 seed cho Kubo <code>outlier_rich</code>, <code>N = 200</code>.</li>
 </ul>
-<p>Ban merge claim thay cac dong scout tai o duoc chay lai va giu dong scout o cac o con lai. <code>D_max = 35</code> khi khong co overcrowding chi la dinh luoi da thu, khong phai nguong that bai da do.</p>
-<p>Cau hinh dong bang: <a href="../../configs/canonical_grid.yaml"><code>../../configs/canonical_grid.yaml</code></a>.</p>
-<h2 id="bang-chung-hoan-tat">Bang chung hoan tat</h2>
-<p>So sanh dat cap claim gom:</p>
+<p>Bản merge claim thay các dòng scout tại ô được chạy lại và giữ dòng scout ở các ô còn lại. <code>D_max = 35</code> khi không có overcrowding chỉ là đỉnh lưới đã thử, không phải ngưỡng thất bại đã đo.</p>
+<p>Cấu hình đóng băng: <a href="../../configs/canonical_grid.yaml"><code>../../configs/canonical_grid.yaml</code></a>.</p>
+<h2 id="bang-chung-hoan-tat">Bằng chứng hoàn tất</h2>
+<p>So sánh đạt cấp claim gồm:</p>
 <ul>
-<li>kich thuoc va cau truc co so: <code>strombom_multi</code>, Giai doan 1 va 2;</li>
-<li>kich thuoc va cau truc chuyen giao: <code>kubo</code> va <code>fat</code>, Giai doan 4.</li>
+<li>kích thước và cấu trúc cơ sở: <code>strombom_multi</code>, Giai đoạn 1 và 2;</li>
+<li>kích thước và cấu trúc chuyển giao: <code>kubo</code> và <code>fat</code>, Giai đoạn 4.</li>
 </ul>
-<p>Bang chung chinh:</p>
+<p>Bằng chứng chính:</p>
 <ul>
 <li><a href="../../results/phase1/claim/"><code>../../results/phase1/claim/</code></a></li>
 <li><a href="../../results/phase2/claim/"><code>../../results/phase2/claim/</code></a></li>
 <li><a href="../../results/phase4/"><code>../../results/phase4/</code></a></li>
 <li><a href="../../results/summary/SUMMARY_REPORT_vi.html"><code>../../results/summary/SUMMARY_REPORT_vi.md</code></a></li>
 </ul>
-<p>Huong dan phuong phap giup dien giai, nhung ket luan dinh luong nen trich CSV da do.</p>
-<h2 id="gioi-han-chung">Gioi han chung</h2>
+<p>Hướng dẫn phương pháp giúp diễn giải, nhưng kết luận định lượng nên trích CSV đã đo.</p>
+<h2 id="gioi-han-chung">Giới hạn chung</h2>
 <ul>
-<li>Ket qua chi ap dung cho mot nhiem vu mo phong, mot hinh hoc dong bang, mot timeout, va mot nguong tin cay chinh.</li>
-<li>Khong nen so sanh vat ly so tick giua Kubo va ho Strombom. Kubo tich phan van toc voi <code>dt = 0.05</code>, con ho Strombom dich chuyen co dinh moi tick.</li>
-<li>Registry NetLogo co twin cho <code>strombom_multi</code> va <code>kubo</code>, nhung bao cao hoan tat khong khang dinh parity tung tick hay diem parity dinh luong da cong bo.</li>
-<li>FAT khong co twin NetLogo trong registry.</li>
-<li>Khong co ket qua hoan tat nao chung minh hieu nang ngoai dong, do trung thuc sinh hoc, hay quy luat scaling pho quat.</li>
+<li>Kết quả chỉ áp dụng cho một nhiệm vụ mô phỏng, một hình học đóng băng, một timeout, và một ngưỡng tin cậy chính.</li>
+<li>Không nên so sánh vật lý số tick giữa Kubo và họ Strombom. Kubo tích phân vận tốc với <code>dt = 0.05</code>, còn họ Strombom dịch chuyển cố định mỗi tick.</li>
+<li>Registry NetLogo có twin cho <code>strombom_multi</code> và <code>kubo</code>, nhưng báo cáo hoàn tất không khẳng định parity từng tick hay điểm parity định lượng đã công bố.</li>
+<li>FAT không có twin NetLogo trong registry.</li>
+<li>Không có kết quả hoàn tất nào chứng minh hiệu năng ngoài đồng, độ trung thực sinh học, hay quy luật scaling phổ quát.</li>
 </ul>
 </main>
 </div>
-<footer><p>Nguon Markdown: <code>README_vi.md</code>. Hinh anh duoc nhung de doc ngoai tuyen.</p></footer>
+<footer><p>Nguồn Markdown: <code>README_vi.md</code>. Hình ảnh được nhúng để đọc ngoại tuyến.</p></footer>
 </body>
 </html>

@@ -1,35 +1,37 @@
-# FAT: nham ca the xa nhat
+# FAT: nhắm cá thể xa nhất
 
-## Cam hung tu cong bo
+## Cảm hứng từ công bố
 
-FAT duoc truyen cam hung boi quy tac chan dan voi camera cuc bo trong Tsunoda va cong su (2018): tac dong len ca the xa nhat trong tap ma nguoi chan nhin thay, khong can toa do toan dan.
+FAT được truyền cảm hứng bởi quy tắc chăn đàn với camera cục bộ trong Tsunoda và cộng sự (2018): tác động lên cá thể xa nhất trong tập mà người chăn nhìn thấy, không cần tọa độ toàn đàn.
 
-HerdSim khong hien thuc day du mo hinh camera, xu ly sai so vi tri, dong luc cuu, luat dieu huong, hay hieu chinh thi nghiem cua bai bao. Vi vay phan cong bo chi la cam hung cho cach chon muc tieu, khong phai khang dinh tai tao toan bo mo hinh.
+HerdSim không hiện thực đầy đủ mô hình camera, xử lý sai số vị trí, động lực cừu, luật điều hướng, hay hiệu chỉnh thí nghiệm của bài báo. Vì vậy phần công bố chỉ là cảm hứng cho cách chọn mục tiêu, không phải khẳng định tái tạo toàn bộ mô hình.
 
-Tai lieu: Y. Tsunoda va cong su, "Analysis of local-camera-based shepherding navigation," Advanced Robotics 32(23), 2018. DOI: `10.1080/01691864.2018.1539410`.
+Tài liệu: Y. Tsunoda và cộng sự, "Analysis of local-camera-based shepherding navigation," Advanced Robotics 32(23), 2018. DOI: `10.1080/01691864.2018.1539410`.
 
-## Hien thuc HerdSim chinh xac
+![FAT nhắm cá thể xa nhất so với chó.](../../results/summary/figures/schematics/vi/alg_fat.svg)
 
-Bundle `fat` ket hop:
+## Hiện thực HerdSim chính xác
+
+Bundle `fat` kết hợp:
 
 - `sheep_model=strombom`;
 - `dog_controller=fat`;
-- mac dinh hai cho khi khong co ghi de thi nghiem.
+- mặc định hai chó khi không có ghi đè thí nghiệm.
 
-Cuu dung quy tac an co, tao dan, day, va dich chuyen co dinh cua Strombom trong HerdSim. Bo dieu khien cho khong co chuyen Collect/Drive va khong kiem tra ket dinh toan dan.
+Cừu dùng quy tắc ăn cỏ, tạo đàn, đẩy, và dịch chuyển cố định của Strombom trong HerdSim. Bộ điều khiển chó không có chuyển Collect/Drive và không kiểm tra kết dính toàn đàn.
 
-Voi moi cho dang hoat dong trong moi tick:
+Với mỗi chó đang hoạt động trong mỗi tick:
 
-1. Doc quan sat cua cho sau cac bo loc che do quan sat va cam bien.
-2. Neu khong thay cuu, de cho dung yen.
-3. Chon con cuu quan sat duoc xa chinh con cho nhat.
-4. Dat dich cach `r_a` sau con cuu tren tia di tu dich qua cuu.
-5. Di ve dich do voi `shepherd_speed` va nhieu goc Strombom.
-6. Dung neu co cuu trong view dang dung gan hon `shepherd_stop_multiple * r_a`.
+1. Đọc quan sát của chó sau các bộ lọc chế độ quan sát và cảm biến.
+2. Nếu không thấy cừu, để chó đứng yên.
+3. Chọn con cừu quan sát được xa chính con chó nhất.
+4. Đặt đích cách `r_a` sau con cừu trên tia đi từ đích qua cừu.
+5. Đi về đích đó với `shepherd_speed` và nhiễu góc Strombom.
+6. Dừng nếu có cừu trong view đang dùng gần hơn `shepherd_stop_multiple * r_a`.
 
-Moi cho chon doc lap. FAT khong co luc day giua cho, dam phan gan muc tieu, hay khoang cach doi hinh ro rang. "Xa nhat" la xa con cho nhat, khac Collect Strombom (xa tam dan nhat) va Kubo (xa dich nhat).
+Mỗi chó chọn độc lập. FAT không có lực đẩy giữa chó, đàm phán gán mục tiêu, hay khoảng cách đội hình rõ ràng. "Xa nhất" là xa con chó nhất, khác Collect Strombom (xa tâm đàn nhất) và Kubo (xa đích nhất).
 
-Bang chung hien thuc:
+Bằng chứng hiện thực:
 
 - [`../../../core/methods.py`](../../../core/methods.py)
 - [`../../../plugins/dogs/fat.py`](../../../plugins/dogs/fat.py)
@@ -37,67 +39,76 @@ Bang chung hien thuc:
 - [`../../../methods/strombom/heuristics.py`](../../../methods/strombom/heuristics.py)
 - [`../../../methods/strombom/config.py`](../../../methods/strombom/config.py)
 
-## Thiet lap `scaling_v2`
+## Thiết lập `scaling_v2`
 
-FAT la phuong phap chuyen giao Giai doan 4 tren cung nhiem vu va luoi voi Kubo va co so.
+FAT là phương pháp chuyển giao Giai đoạn 4 trên cùng nhiệm vụ và lưới với Kubo và cơ sở.
 
-- Ban do kich thuoc: compact tren toan luoi kich thuoc va so cho.
-- Ban do cau truc: bon bo cuc tai `N = {50, 100, 200}`.
-- Quan sat: global.
-- Giao tiep: bo dieu khien FAT khong them phoi hop.
-- Han: `T0 = 10000`.
-- Nguong tin cay: `R >= 0.90`.
-- Phan tang: 30 seed scout, sau do 100 seed claim trong cua so da chon.
+- Bản đồ kích thước: compact trên toàn lưới kích thước và số chó.
+- Bản đồ cấu trúc: bốn bố cục tại `N = {50, 100, 200}`.
+- Quan sát: global.
+- Giao tiếp: bộ điều khiển FAT không thêm phối hợp.
+- Hạn: `T0 = 10000`.
+- Ngưỡng tin cậy: `R >= 0.90`.
+- Phân tầng: 30 seed scout, sau đó 100 seed claim trong cửa sổ đã chọn.
 
-Thiet lap global rat quan trong. Du y tuong chon muc tieu den tu cam bien cuc bo, cac Giai doan 1, 2, va 4 hoan tat cho moi cho FAT thay toan dan. Cac ket qua nay khong kiem tra gioi han thong tin camera cuc bo. Thi nghiem che do quan sat duoc lap ke hoach cho Giai doan 5 nhung chua chay.
+Thiết lập global rất quan trọng. Dù ý tưởng chọn mục tiêu đến từ cảm biến cục bộ, các Giai đoạn 1, 2, và 4 hoàn tất cho mỗi chó FAT thấy toàn đàn. Các kết quả này không kiểm tra giới hạn thông tin camera cục bộ. Thí nghiệm chế độ quan sát được lập kế hoạch cho Giai đoạn 5 nhưng chưa chạy.
 
-Bang chung cau hinh:
+Bằng chứng cấu hình:
 
 - [`../../configs/canonical_grid.yaml`](../../configs/canonical_grid.yaml)
 - [`../../configs/protocols/phase4_fat_size_claim.yaml`](../../configs/protocols/phase4_fat_size_claim.yaml)
 - [`../../configs/protocols/phase4_fat_structure_claim.yaml`](../../configs/protocols/phase4_fat_structure_claim.yaml)
 
-## Ket qua hoan tat da quan sat
+## Kết quả hoàn tất đã quan sát
 
-### Ban do kich thuoc compact
+### Bản đồ kích thước compact
 
-- `D_min = 1` tai `N = 5` va `N = 10`.
-- Voi moi `N >= 25`, khong so cho nao den 35 dat `R >= 0.90`.
-- Cac o nay la hard failure: `D_min` va `D_max` khong xac dinh, khong phai 0 va cung khong phai 35.
-- Do tin cay tot nhat theo kich thuoc voi `N = 50` den 400 khoang 0.40 den 0.53.
-- Khoang nua cac lan chay kich thuoc FAT that bai. Bao cao tong hop gan khoang 39% toan bo trial cho oscillation va 7% cho stuck.
+- `D_min = 1` tại `N = 5` và `N = 10`.
+- Với mọi `N >= 25`, không số chó nào đến 35 đạt `R >= 0.90`.
+- Các ô này là thất bại cứng: `D_min` và `D_max` không xác định, không phải 0 và cũng không phải 35.
+- Độ tin cậy tốt nhất theo kích thước với `N = 50` đến 400 khoảng 0.40 đến 0.53.
+- Khoảng nửa các lần chạy kích thước FAT thất bại. Báo cáo tổng hợp gán khoảng 39% toàn bộ trial cho oscillation và 7% cho stuck.
 
-### Cau truc ban dau
+![Heatmap compact của ba phương pháp.](../../results/phase4/guides/assets/figures/f1_reliability_heatmaps.png)
 
-FAT khong dat 90% trong bat ky o cau truc nao tai `N = 50, 100, 200`.
+*Bề mặt R(N, D) trên compact. FAT chỉ đạt ngưỡng ở N = 5 và 10; từ N = 25 trở lên không ô nào đạt 0.90.*
 
-- Compact co `R` tot nhat: 0.47, 0.40, 0.47 voi `N = 50, 100, 200`.
-- Split co `R` tot nhat: 0.50, 0.47, 0.40.
-- `outlier_rich` co `R` tot nhat: 0.10, 0.00, 0.00.
-- Wide co `R` tot nhat: 0.00 o ca ba kich thuoc.
+![So sánh kiểu thất bại.](../../results/summary/figures/f6_failure_modes_vi.png)
 
-Bao cao tong hop cung ghi nhan lien he am manh giua nhiu huong FAT va thanh cong tren merge kich thuoc, voi Pearson `r` khoang `-0.87`. Day la quan sat, khong chung minh nhiu la nguyen nhan that bai.
+*FAT thất bại chủ yếu bằng oscillation hoặc stuck, khác Kubo (timeout) và cơ sở (ít thất bại hơn nhiều).*
 
-Bang chung:
+### Cấu trúc ban đầu
+
+FAT không đạt 90% trong bất kỳ ô cấu trúc nào tại `N = 50, 100, 200`.
+
+- Compact có `R` tốt nhất: 0.47, 0.40, 0.47 với `N = 50, 100, 200`.
+- Split có `R` tốt nhất: 0.50, 0.47, 0.40.
+- `outlier_rich` có `R` tốt nhất: 0.10, 0.00, 0.00.
+- Wide có `R` tốt nhất: 0.00 ở cả ba kích thước.
+
+![Đường độ tin cậy theo bố cục.](../../results/summary/figures/f5_layout_reliability_curves_vi.png)
+
+*R theo D tại N = 200. FAT không đạt 0.90 ở bất kỳ bố cục nào trên lưới đã thử.*
+
+Báo cáo tổng hợp cũng ghi nhận liên hệ âm mạnh giữa nhiễu hướng FAT và thành công trên merge kích thước, với Pearson `r` khoảng `-0.87`. Đây là quan sát, không chứng minh nhiễu là nguyên nhân thất bại.
+
+![Nhiễu hướng theo số chó.](../../results/summary/figures/f7_interference_vi.png)
+
+*Chỉ số nhiễu hướng theo D. Liên hệ âm với thành công FAT là quan sát trên merge kích thước, không phải phép thử nhân quả.*
+
+Bằng chứng:
 
 - [`../../results/phase4/fat_size/claim/packages/a/frontier.csv`](../../results/phase4/fat_size/claim/packages/a/frontier.csv)
 - [`../../results/phase4/fat_size/claim/merged_trials.csv`](../../results/phase4/fat_size/claim/merged_trials.csv)
 - [`../../results/phase4/fat_structure/claim/merged_trials.csv`](../../results/phase4/fat_structure/claim/merged_trials.csv)
 - [`../../results/phase4/package_d/structure/frontier_by_method_layout.csv`](../../results/phase4/package_d/structure/frontier_by_method_layout.csv)
 
-## Hinh da co lien quan
+## Giới hạn và điều không khẳng định
 
-- [Heatmap compact cua ba phuong phap](../../results/phase4/guides/assets/figures/f1_reliability_heatmaps.png)
-- [Duong do tin cay theo bo cuc](../../results/phase4/guides/assets/figures/f5_layout_reliability_curves.png)
-- [So sanh kieu that bai](../../results/phase4/guides/assets/figures/f6_failure_modes.png)
-- [Nhiu huong theo so cho](../../results/summary/figures/f7_interference.png)
-
-## Gioi han va dieu khong khang dinh
-
-- Day la bo dieu khien FAT toi gian cua HerdSim tren cuu Strombom, khong phai mo hinh day du cua Tsunoda va cong su.
-- Ket qua hoan tat dung quan sat global. Chung khong do che khuat camera, dieu khien chi co goc, sai so vi tri, hay phuc hoi khi mat dau vet.
-- Hard failure nghia la khong so cho da thu nao dat thanh 90% truoc `T0`. No khong chung minh FAT khong the hoat dong voi `D` lon hon, timeout khac, hay nhiem vu khac.
-- Tang so cho khong cuu duoc dan lon tren luoi nay. Quan sat do khong tach duoc co che nhan qua.
-- Tuong quan nhiu khong phai phep thu nhan qua co kiem soat.
-- FAT khong co twin NetLogo trong registry: [`../../../integrations/netlogo/twins.json`](../../../integrations/netlogo/twins.json).
-- Ket qua khong chung minh hieu nang ngoai dong va khong tai tao ket qua dinh luong cua bai bao 2018.
+- Đây là bộ điều khiển FAT tối giản của HerdSim trên cừu Strombom, không phải mô hình đầy đủ của Tsunoda và cộng sự.
+- Kết quả hoàn tất dùng quan sát global. Chúng không đo che khuất camera, điều khiển chỉ có góc, sai số vị trí, hay phục hồi khi mất dấu vết.
+- Thất bại cứng nghĩa là không số chó đã thử nào đạt thanh 90% trước `T0`. Nó không chứng minh FAT không thể hoạt động với `D` lớn hơn, timeout khác, hay nhiệm vụ khác.
+- Tăng số chó không cứu được đàn lớn trên lưới này. Quan sát đó không tách được cơ chế nhân quả.
+- Tương quan nhiễu không phải phép thử nhân quả có kiểm soát.
+- FAT không có twin NetLogo trong registry: [`../../../integrations/netlogo/twins.json`](../../../integrations/netlogo/twins.json).
+- Kết quả không chứng minh hiệu năng ngoài đồng và không tái tạo kết quả định lượng của bài báo 2018.

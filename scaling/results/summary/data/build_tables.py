@@ -205,24 +205,28 @@ def merged_summary(relative: str, vi: bool) -> str:
         for row in rows
         if not truth(row.get("success"))
     )
+    none_label = "không có" if vi else "none"
     dimensions = [
-        ("Rows" if not vi else "So dong", len(rows)),
-        ("Columns" if not vi else "So cot", len(columns)),
-        ("Design cells" if not vi else "So o thiet ke", len(cells)),
-        ("Methods" if not vi else "Phuong phap", sorted_unique(rows, "method")),
-        ("Layouts" if not vi else "Bo cuc", sorted_unique(rows, "initial_layout")),
-        ("N values" if not vi else "Cac gia tri N", sorted_unique(rows, "n_sheep")),
-        ("D values" if not vi else "Cac gia tri D", sorted_unique(rows, "n_shepherds")),
-        ("Seed range" if not vi else "Khoang seed", seed_range(rows)),
+        ("Rows" if not vi else "Số dòng", len(rows)),
+        ("Columns" if not vi else "Số cột", len(columns)),
+        ("Design cells" if not vi else "Số ô thiết kế", len(cells)),
+        ("Methods" if not vi else "Phương pháp", sorted_unique(rows, "method")),
+        ("Layouts" if not vi else "Bố cục", sorted_unique(rows, "initial_layout")),
+        ("N values" if not vi else "Các giá trị N", sorted_unique(rows, "n_sheep")),
+        ("D values" if not vi else "Các giá trị D", sorted_unique(rows, "n_shepherds")),
+        ("Seed range" if not vi else "Khoảng seed", seed_range(rows, vi)),
     ]
     aggregates = [
-        ("Successes" if not vi else "Thanh cong", len(successes)),
-        ("Failures" if not vi else "That bai", len(rows) - len(successes)),
-        ("Overall R" if not vi else "R toan bo", len(successes) / len(rows) if rows else None),
-        ("Median ticks, successes" if not vi else "Trung vi tick, ca thanh cong", statistics.median(ticks) if ticks else None),
-        ("P90 ticks, successes" if not vi else "P90 tick, ca thanh cong", quantile(ticks, 0.9)),
-        ("Median path, successes" if not vi else "Trung vi quang duong, ca thanh cong", statistics.median(paths) if paths else None),
-        ("Failure modes" if not vi else "Nhan that bai", ", ".join(f"{key}: {value}" for key, value in sorted(failures.items())) or "none"),
+        ("Successes" if not vi else "Thành công", len(successes)),
+        ("Failures" if not vi else "Thất bại", len(rows) - len(successes)),
+        ("Overall R" if not vi else "R toàn bộ", len(successes) / len(rows) if rows else None),
+        ("Median ticks, successes" if not vi else "Trung vị tick, các thành công", statistics.median(ticks) if ticks else None),
+        ("P90 ticks, successes" if not vi else "P90 tick, các thành công", quantile(ticks, 0.9)),
+        ("Median path, successes" if not vi else "Trung vị quãng đường, các thành công", statistics.median(paths) if paths else None),
+        (
+            "Failure modes" if not vi else "Nhãn thất bại",
+            ", ".join(f"{key}: {value}" for key, value in sorted(failures.items())) or none_label,
+        ),
     ]
     sample = representative_rows(rows)
     sample_rows = [
@@ -241,15 +245,15 @@ def merged_summary(relative: str, vi: bool) -> str:
     ]
     if vi:
         intro = (
-            f"Nguon day du: {linked_source(relative)}. Bang lon khong duoc chep lai. "
-            "Cac thong ke duoi day duoc tinh truc tiep tu CSV."
+            f"Nguồn đầy đủ: {linked_source(relative)}. Bảng lớn không được chép lại. "
+            "Các thống kê dưới đây được tính trực tiếp từ CSV."
         )
         selection = (
-            "Quy tac chon dong dai dien: sap xep tu dien theo `method`, `initial_layout`, "
-            "`n_sheep`, `n_shepherds`, `seed`, sau do lay 5 vi tri cach deu, gom hai dau. "
-            "Quy tac nay trung lap duoc va khong chon theo ket qua."
+            "Quy tắc chọn dòng đại diện: sắp xếp từ điển theo `method`, `initial_layout`, "
+            "`n_sheep`, `n_shepherds`, `seed`, sau đó lấy 5 vị trí cách đều, gồm hai đầu. "
+            "Quy tắc này trung lập và không chọn theo kết quả."
         )
-        labels = ("Thuoc tinh", "Gia tri")
+        labels = ("Thuộc tính", "Giá trị")
         sample_headers = ("method", "layout", "N", "D", "seed", "success", "ticks", "path", "failure_mode")
     else:
         intro = (
@@ -274,7 +278,7 @@ def merged_summary(relative: str, vi: bool) -> str:
     )
 
 
-def seed_range(rows: Sequence[dict[str, str]]) -> str:
+def seed_range(rows: Sequence[dict[str, str]], vi: bool = False) -> str:
     seeds = sorted(
         int(value)
         for row in rows
@@ -282,24 +286,57 @@ def seed_range(rows: Sequence[dict[str, str]]) -> str:
     )
     if not seeds:
         return ""
-    return f"{seeds[0]} to {seeds[-1]}"
+    connector = " đến " if vi else " to "
+    return f"{seeds[0]}{connector}{seeds[-1]}"
+
+
+def is_vietnamese_output(name: str) -> bool:
+    return name.endswith("_vi.md")
+
+
+def output_encoding(name: str) -> str:
+    return "utf-8" if is_vietnamese_output(name) else "ascii"
+
+
+def source_caption(vi: bool, kind: str = "") -> str:
+    if not vi:
+        labels = {
+            "": "Source",
+            "cv": "Cross-validation source",
+            "fit": "Fit source",
+            "kubo": "Kubo source",
+            "fat": "FAT source",
+            "summary": "Summary source",
+            "detail": "Detailed source",
+        }
+    else:
+        labels = {
+            "": "Nguồn",
+            "cv": "Nguồn kiểm định chéo",
+            "fit": "Nguồn khớp mô hình",
+            "kubo": "Nguồn Kubo",
+            "fat": "Nguồn FAT",
+            "summary": "Nguồn tóm tắt",
+            "detail": "Nguồn chi tiết",
+        }
+    return labels[kind]
 
 
 def schema_section(vi: bool) -> str:
     if vi:
-        title = "## Luoc do cua cac bang merged_trials"
+        title = "## Lược đồ của các bảng merged_trials"
         text = (
-            "Moi dong la mot lan mo phong voi mot seed. Ten cot thuc te duoc bao cao "
-            "trong tung muc du lieu; cac nhom sau giai thich y nghia."
+            "Mỗi dòng là một lần mô phỏng với một seed. Tên cột thực tế được báo cáo "
+            "trong từng mục dữ liệu; các nhóm sau giải thích ý nghĩa."
         )
-        headers = ("Nhom", "Cot va y nghia")
+        headers = ("Nhóm", "Cột và ý nghĩa")
         rows = (
-            ("Danh tinh va thiet ke", SCHEMA_GROUPS[0][1]),
-            ("Ket qua va chi phi", SCHEMA_GROUPS[1][1]),
-            ("Trang thai cuoi", SCHEMA_GROUPS[2][1]),
-            ("Tom tat theo thoi gian", SCHEMA_GROUPS[3][1]),
-            ("Chan doan that bai", SCHEMA_GROUPS[4][1]),
-            ("Cau hinh", SCHEMA_GROUPS[5][1]),
+            ("Danh tính và thiết kế", SCHEMA_GROUPS[0][1]),
+            ("Kết quả và chi phí", SCHEMA_GROUPS[1][1]),
+            ("Trạng thái cuối", SCHEMA_GROUPS[2][1]),
+            ("Tóm tắt theo thời gian", SCHEMA_GROUPS[3][1]),
+            ("Chẩn đoán thất bại", SCHEMA_GROUPS[4][1]),
+            ("Cấu hình", SCHEMA_GROUPS[5][1]),
         )
     else:
         title = "## Schema for merged_trials tables"
@@ -328,20 +365,20 @@ def phase1(vi: bool) -> str:
     regime_counts = Counter(row.get("regime", "") for row in regimes)
     if not regime_counts:
         regime_counts = Counter(row.get("regime_label", "") for row in regimes)
-    title = "# Phase 1 data tables" if not vi else "# Bang du lieu Giai doan 1"
+    title = "# Phase 1 data tables" if not vi else "# Bảng dữ liệu Giai đoạn 1"
     grade = (
         "All scientific result tables in this appendix use the claim merge. Scout data are "
         "planning evidence only and are listed separately in the run ledger."
         if not vi
-        else "Tat ca bang ket qua khoa hoc trong phu luc nay dung merge claim. Du lieu scout "
-        "chi de lap ke hoach va duoc liet ke rieng trong so cai chay."
+        else "Tất cả bảng kết quả khoa học trong phụ lục này dùng bản hợp nhất claim. Dữ liệu khảo sát "
+        "chỉ để lập kế hoạch và được liệt kê riêng trong nhật ký chạy."
     )
     frontier_note = (
         "`D_max = 35` is the tested-grid ceiling because `D_overcrowd` is empty. It is not "
         "an observed upper failure boundary."
         if not vi
-        else "`D_max = 35` la tran cua luoi da thu vi `D_overcrowd` trong. Day khong phai "
-        "bien that bai tren da quan sat."
+        else "`D_max = 35` là trần lưới đã thử vì `D_overcrowd` trống. Đây không phải "
+        "biên thất bại trên đã quan sát."
     )
     regime_rows = sorted((key or "blank", value) for key, value in regime_counts.items())
     cv = complete_csv_table(cv_path)
@@ -349,28 +386,28 @@ def phase1(vi: bool) -> str:
     sections = [
         title,
         grade,
-        "## Frontier by flock size" if not vi else "## Bien theo kich thuoc dan",
-        f"Source: {linked_source(frontier_path)}.",
+        "## Frontier by flock size" if not vi else "## Biên theo kích thước đàn",
+        f"{source_caption(vi)}: {linked_source(frontier_path)}.",
         complete_csv_table(frontier_path),
         frontier_note,
-        "## Complete D_min bootstrap intervals" if not vi else "## Khoang bootstrap D_min day du",
-        f"Source: {linked_source(bootstrap_path)}.",
+        "## Complete D_min bootstrap intervals" if not vi else "## Khoảng bootstrap D_min đầy đủ",
+        f"{source_caption(vi)}: {linked_source(bootstrap_path)}.",
         complete_csv_table(
             bootstrap_path,
             ("initial_layout", "n_sheep", "d_min", "d_min_ci_low", "d_min_ci_high", "n_boot", "n_seeds_ref", "n_boot_defined"),
         ),
-        "## Regime counts" if not vi else "## So luong che do",
-        f"Source: {linked_source(regimes_path)}.",
-        table(("Regime", "Cells") if not vi else ("Che do", "So o"), regime_rows),
-        "## Scaling model evidence" if not vi else "## Bang chung mo hinh scaling",
-        f"Cross-validation source: {linked_source(cv_path)}.",
+        "## Regime counts" if not vi else "## Số lượng chế độ",
+        f"{source_caption(vi)}: {linked_source(regimes_path)}.",
+        table(("Regime", "Cells") if not vi else ("Chế độ", "Số ô"), regime_rows),
+        "## Scaling model evidence" if not vi else "## Bằng chứng mô hình scaling",
+        f"{source_caption(vi, 'cv')}: {linked_source(cv_path)}.",
         cv,
-        f"Fit source: {linked_source(fits_path)}.",
+        f"{source_caption(vi, 'fit')}: {linked_source(fits_path)}.",
         fits,
         schema_section(vi),
-        "## Claim merged trials" if not vi else "## Trial merge claim",
+        "## Claim merged trials" if not vi else "## Thử nghiệm hợp nhất claim",
         merged_summary("phase1/claim/merged_trials.csv", vi),
-        "## Direct sources" if not vi else "## Nguon truc tiep",
+        "## Direct sources" if not vi else "## Nguồn trực tiếp",
         source_list(
             (
                 frontier_path,
@@ -416,7 +453,7 @@ def phase2_cost_table(vi: bool) -> str:
     headers = (
         ("Layout", "N", "Successes", "Seeds", "R", "Median ticks", "Median path")
         if not vi
-        else ("Bo cuc", "N", "Thanh cong", "Seed", "R", "Trung vi tick", "Trung vi path")
+        else ("Bố cục", "N", "Thành công", "Seed", "R", "Trung vị tick", "Trung vị path")
     )
     return table(headers, output)
 
@@ -425,55 +462,55 @@ def phase2(vi: bool) -> str:
     frontier_path = "phase2/claim/packages/b/frontier_by_layout.csv"
     bootstrap_path = "phase2/claim/merged_dmin_bootstrap.csv"
     predictor_path = "phase2/claim/packages/b/predictor_comparison.csv"
-    title = "# Phase 2 data tables" if not vi else "# Bang du lieu Giai doan 2"
+    title = "# Phase 2 data tables" if not vi else "# Bảng dữ liệu Giai đoạn 2"
     grade = (
         "Claim evidence is used for results. Scout evidence selected the precision windows "
         "and must not be read as the final estimate."
         if not vi
-        else "Bang ket qua dung bang chung claim. Bang chung scout chon cua so chinh xac "
-        "va khong duoc doc nhu uoc luong cuoi."
+        else "Bảng kết quả dùng bằng chứng claim. Bằng chứng khảo sát chọn cửa sổ chính xác "
+        "và không được đọc như ước lượng cuối."
     )
     note = (
         "Every layout and N has `D_min = 1`, `D_max = 35` at the grid ceiling, and no "
         "overcrowding. Wide layouts have `B_star_D = 2` even though one dog is reliable."
         if not vi
-        else "Moi bo cuc va N co `D_min = 1`, `D_max = 35` tai tran luoi, va khong co "
-        "overcrowding. Bo cuc wide co `B_star_D = 2` du mot cho da dat do tin cay."
+        else "Mỗi bố cục và N có `D_min = 1`, `D_max = 35` tại trần lưới, và không có "
+        "quá tải. Bố cục `wide` có `B_star_D = 2` dù một chó đã đạt độ tin cậy."
     )
     sections = [
         title,
         grade,
-        "## Complete layout frontier" if not vi else "## Bien day du theo bo cuc",
-        f"Source: {linked_source(frontier_path)}.",
+        "## Complete layout frontier" if not vi else "## Biên đầy đủ theo bố cục",
+        f"{source_caption(vi)}: {linked_source(frontier_path)}.",
         complete_csv_table(frontier_path),
         note,
-        "## Complete D_min bootstrap intervals" if not vi else "## Khoang bootstrap D_min day du",
-        f"Source: {linked_source(bootstrap_path)}.",
+        "## Complete D_min bootstrap intervals" if not vi else "## Khoảng bootstrap D_min đầy đủ",
+        f"{source_caption(vi)}: {linked_source(bootstrap_path)}.",
         complete_csv_table(
             bootstrap_path,
             ("method", "initial_layout", "n_sheep", "d_min", "d_min_ci_low", "d_min_ci_high", "n_boot", "n_seeds_ref", "n_boot_defined"),
         ),
-        "## One-dog cost by layout" if not vi else "## Chi phi mot cho theo bo cuc",
+        "## One-dog cost by layout" if not vi else "## Chi phí một chó theo bố cục",
         (
             "Computed from all D = 1 claim-merge rows. Medians use successful trials only."
             if not vi
-            else "Tinh tu tat ca dong D = 1 cua claim merge. Trung vi chi dung trial thanh cong."
+            else "Tính từ tất cả dòng D = 1 của bản hợp nhất claim. Trung vị chỉ dùng lần thử thành công."
         ),
         phase2_cost_table(vi),
-        "## Predictor comparison" if not vi else "## So sanh predictor",
-        f"Source: {linked_source(predictor_path)}. "
+        "## Predictor comparison" if not vi else "## So sánh bộ dự đoán",
+        f"{source_caption(vi)}: {linked_source(predictor_path)}. "
         + (
             "This table is retained as evidence, but the state-predictor claim is inconclusive "
             "because the baseline D_min did not shift."
             if not vi
-            else "Bang nay duoc giu lam bang chung, nhung claim predictor trang thai khong "
-            "ket luan vi D_min baseline khong thay doi."
+            else "Bảng này được giữ làm bằng chứng, nhưng claim bộ dự đoán trạng thái không "
+            "kết luận vì D_min cơ sở không thay đổi."
         ),
         complete_csv_table(predictor_path),
         schema_section(vi),
-        "## Claim merged trials" if not vi else "## Trial merge claim",
+        "## Claim merged trials" if not vi else "## Thử nghiệm hợp nhất claim",
         merged_summary("phase2/claim/merged_trials.csv", vi),
-        "## Direct sources" if not vi else "## Nguon truc tiep",
+        "## Direct sources" if not vi else "## Nguồn trực tiếp",
         source_list(
             (
                 frontier_path,
@@ -506,18 +543,23 @@ def phase4(vi: bool) -> str:
     window_path = "phase4/kubo_structure/claim/outlier_rich_n200_window.json"
     window = read_json(window_path)
     window_rows = [
-        (int(dog_count), values["n"], values["R"], values["R"] >= 0.9)
+        (
+            int(dog_count),
+            values["n"],
+            values["R"],
+            ("có" if values["R"] >= 0.9 else "không") if vi else (values["R"] >= 0.9),
+        )
         for dog_count, values in sorted(
             window["claim_seeds_by_D"].items(), key=lambda item: int(item[0])
         )
     ]
-    title = "# Phase 4 data tables" if not vi else "# Bang du lieu Giai doan 4"
+    title = "# Phase 4 data tables" if not vi else "# Bảng dữ liệu Giai đoạn 4"
     grade = (
         "Controller conclusions use claim merges. Scout grids remain planning evidence. "
         "The Package D tables compare claim-grade controller results."
         if not vi
-        else "Ket luan ve controller dung claim merge. Luoi scout van chi la bang chung "
-        "lap ke hoach. Bang Package D so sanh ket qua controller cap claim."
+        else "Kết luận về bộ điều khiển dùng bản hợp nhất claim. Lưới khảo sát vẫn chỉ là bằng chứng "
+        "lập kế hoạch. Bảng Package D so sánh kết quả bộ điều khiển cấp claim."
     )
     structure_columns = (
         "method",
@@ -532,25 +574,25 @@ def phase4(vi: bool) -> str:
     sections = [
         title,
         grade,
-        "## Compact-start size frontiers" if not vi else "## Bien kich thuoc voi bo cuc compact",
-        f"Kubo source: {linked_source(kubo_frontier)}.",
+        "## Compact-start size frontiers" if not vi else "## Biên kích thước với bố cục compact",
+        f"{source_caption(vi, 'kubo')}: {linked_source(kubo_frontier)}.",
         compact_frontier(kubo_frontier),
-        f"FAT source: {linked_source(fat_frontier)}.",
+        f"{source_caption(vi, 'fat')}: {linked_source(fat_frontier)}.",
         compact_frontier(fat_frontier),
         (
             "Blank frontier fields with `hard_failure = True` mean no tested D reached R = 0.90. "
             "They are not an upper-bound estimate."
             if not vi
-            else "Cac truong bien trong voi `hard_failure = True` nghia la khong D nao dat "
-            "R = 0.90. Chung khong phai uoc luong gioi han tren."
+            else "Các trường biên trống với `hard_failure = True` nghĩa là không D nào đạt "
+            "R = 0.90. Chúng không phải ước lượng giới hạn trên."
         ),
-        "## Complete size D_min bootstrap intervals" if not vi else "## Khoang bootstrap D_min kich thuoc day du",
-        f"Kubo source: {linked_source(kubo_bootstrap)}.",
+        "## Complete size D_min bootstrap intervals" if not vi else "## Khoảng bootstrap D_min kích thước đầy đủ",
+        f"{source_caption(vi, 'kubo')}: {linked_source(kubo_bootstrap)}.",
         complete_csv_table(
             kubo_bootstrap,
             ("initial_layout", "n_sheep", "d_min", "d_min_ci_low", "d_min_ci_high", "n_boot", "n_seeds_ref", "n_boot_defined"),
         ),
-        f"FAT source: {linked_source(fat_bootstrap)}.",
+        f"{source_caption(vi, 'fat')}: {linked_source(fat_bootstrap)}.",
         complete_csv_table(
             fat_bootstrap,
             (
@@ -566,13 +608,13 @@ def phase4(vi: bool) -> str:
                 "n_boot_defined",
             ),
         ),
-        "## Complete controller and layout frontier" if not vi else "## Bien day du theo controller va bo cuc",
-        f"Source: {linked_source(structure_frontier)}.",
+        "## Complete controller and layout frontier" if not vi else "## Biên đầy đủ theo bộ điều khiển và bố cục",
+        f"{source_caption(vi)}: {linked_source(structure_frontier)}.",
         complete_csv_table(structure_frontier, structure_columns),
-        "## Kubo outlier-rich, N = 200" if not vi else "## Kubo outlier-rich, N = 200",
-        f"Source: {linked_source(window_path)}.",
+        "## Kubo outlier-rich, N = 200" if not vi else "## Kubo outlier_rich, N = 200",
+        f"{source_caption(vi)}: {linked_source(window_path)}.",
         table(
-            ("D", "Seeds", "R", "R >= 0.90"),
+            ("D", "Seeds", "R", "R >= 0.90") if not vi else ("D", "Seed", "R", "R >= 0.90"),
             window_rows,
         ),
         (
@@ -581,24 +623,28 @@ def phase4(vi: bool) -> str:
             "The D = 35 value has 30 scout seeds because that cell was not claim-reseeded; "
             "the D = 1 through 25 values shown above have 200 claim seeds."
             if not vi
-            else f"D_min diem: {fmt(window['d_min'])}. Khoang bootstrap: "
+            else f"D_min điểm: {fmt(window['d_min'])}. Khoảng bootstrap: "
             f"[{fmt(window['d_min_ci'][0])}, {fmt(window['d_min_ci'][1])}]. "
-            "Gia tri D = 35 co 30 seed scout vi o nay khong duoc gieo lai claim; "
-            "cac gia tri D = 1 den 25 o tren co 200 seed claim."
+            "Giá trị D = 35 có 30 seed khảo sát vì ô này không được gieo lại claim; "
+            "các giá trị D = 1 đến 25 ở trên có 200 seed claim."
         ),
-        "## Complete size-transfer evidence" if not vi else "## Bang chung transfer kich thuoc day du",
-        f"Summary source: {linked_source(transfer_summary)}.",
+        "## Complete size-transfer evidence" if not vi else "## Bằng chứng chuyển giao kích thước đầy đủ",
+        f"{source_caption(vi, 'summary')}: {linked_source(transfer_summary)}.",
         complete_csv_table(transfer_summary),
-        f"Detailed source: {linked_source(transfer_table)}.",
+        f"{source_caption(vi, 'detail')}: {linked_source(transfer_table)}.",
         complete_csv_table(transfer_table),
         schema_section(vi),
     ]
     for label, relative in MERGED[2:]:
-        heading = f"## {label} claim merge" if not vi else f"## Claim merge: {label}"
+        heading = (
+            f"## {label} claim merge"
+            if not vi
+            else f"## Hợp nhất claim: {label.replace('Phase', 'Giai đoạn').replace('baseline size', 'kích thước cơ sở').replace('baseline structure', 'cấu trúc cơ sở').replace(' structure', ' cấu trúc').replace(' size', ' kích thước')}"
+        )
         sections.extend((heading, merged_summary(relative, vi)))
     sections.extend(
         (
-            "## Direct sources" if not vi else "## Nguon truc tiep",
+            "## Direct sources" if not vi else "## Nguồn trực tiếp",
             source_list(
                 (
                     kubo_frontier,
@@ -625,6 +671,26 @@ def source_list(paths: Sequence[str]) -> str:
     return "\n".join(f"* {linked_source(path)}" for path in paths)
 
 
+def localize_run_label(text: str, vi: bool) -> str:
+    if not vi:
+        return text
+    mapping = {
+        "Phase 1": "Giai đoạn 1",
+        "Phase 2": "Giai đoạn 2",
+        "Phase 4 Kubo size": "Giai đoạn 4 Kubo kích thước",
+        "Phase 4 FAT size": "Giai đoạn 4 FAT kích thước",
+        "Phase 4 Kubo structure": "Giai đoạn 4 Kubo cấu trúc",
+        "Phase 4 FAT structure": "Giai đoạn 4 FAT cấu trúc",
+        "Phase 1 baseline size": "Giai đoạn 1 kích thước cơ sở",
+        "Phase 2 baseline structure": "Giai đoạn 2 cấu trúc cơ sở",
+        "Pilot": "Thử nhanh",
+        "Pilot state": "Thử nhanh trạng thái",
+        "Scout": "Khảo sát",
+        "Claim": "Claim",
+    }
+    return mapping.get(text, text)
+
+
 def run_ledger(vi: bool) -> str:
     rows = []
     protocol_hashes: set[str] = set()
@@ -638,8 +704,8 @@ def run_ledger(vi: bool) -> str:
             protocol_hashes.add(protocol_hash)
         rows.append(
             (
-                phase,
-                grade,
+                localize_run_label(phase, vi),
+                localize_run_label(grade, vi),
                 status.get("protocol_id", ""),
                 status.get("n_done", ""),
                 status.get("n_rows_trials_csv", ""),
@@ -649,7 +715,7 @@ def run_ledger(vi: bool) -> str:
                 status.get("finished_at", ""),
                 provenance.get("git_hash", ""),
                 protocol_hash,
-                f"[status]({rel_link(status_path)})",
+                f"[trạng thái]({rel_link(status_path)})" if vi else f"[status]({rel_link(status_path)})",
                 f"[provenance]({rel_link(provenance_path)})",
             )
         )
@@ -658,45 +724,45 @@ def run_ledger(vi: bool) -> str:
         columns, data = read_csv(relative)
         merged_rows.append(
             (
-                label,
+                localize_run_label(label, vi),
                 len(data),
                 len(columns),
                 file_sha256(source(relative)),
                 linked_source(relative),
             )
         )
-    title = "# Run ledger" if not vi else "# So cai cac lan chay"
+    title = "# Run ledger" if not vi else "# Nhật ký chạy"
     intro = (
         "This ledger preserves execution grade and provenance. Scout runs map the broad grid "
         "and select windows. Claim runs provide the precision evidence used for scientific "
         "statements. Pilot runs are pipeline checks. A claim merge replaces scout rows only "
         "where claim reseeding exists, so a merge can legitimately contain both grades."
         if not vi
-        else "So cai nay giu cap chay va provenance. Scout lap ban do luoi rong va chon cua so. "
-        "Claim cung cap bang chung chinh xac dung cho phat bieu khoa hoc. Pilot kiem tra pipeline. "
-        "Claim merge chi thay dong scout tai o co gieo lai claim, vi vay merge co the chua ca hai cap."
+        else "Nhật ký này giữ cấp chạy và provenance. Khảo sát lập bản đồ lưới rộng và chọn cửa sổ. "
+        "Claim cung cấp bằng chứng chính xác dùng cho phát biểu khoa học. Thử nhanh kiểm tra đường ống. "
+        "Bản hợp nhất claim chỉ thay dòng khảo sát tại ô có gieo lại claim, vì vậy bản hợp nhất có thể chứa cả hai cấp."
     )
     caveat = (
         "The Kubo structure claim status records 4,000 completed rows although its original "
         "`n_planned` field is 600. The status and provenance links are retained verbatim; the "
         "current merged evidence is summarized below."
         if not vi
-        else "Status claim Kubo structure ghi 4,000 dong hoan thanh du truong `n_planned` ban dau "
-        "la 600. Lien ket status va provenance duoc giu nguyen; bang chung merge hien tai duoc "
-        "tom tat o duoi."
+        else "Tệp trạng thái claim cấu trúc Kubo ghi 4,000 dòng hoàn thành dù trường `n_planned` ban đầu "
+        "là 600. Liên kết trạng thái và provenance được giữ nguyên; bằng chứng hợp nhất hiện tại được "
+        "tóm tắt ở dưới."
     )
     headers = (
         ("Phase", "Grade", "Protocol", "Done", "Trial rows", "Complete", "Seeds", "Created", "Finished", "Git hash", "Protocol hash", "Status", "Provenance")
         if not vi
-        else ("Giai doan", "Cap", "Protocol", "Da chay", "Dong trial", "Hoan tat", "Seed", "Tao luc", "Xong luc", "Git hash", "Protocol hash", "Status", "Provenance")
+        else ("Giai đoạn", "Cấp chạy", "Giao thức", "Đã chạy", "Dòng thử", "Hoàn tất", "Seed", "Tạo lúc", "Xong lúc", "Git hash", "Hash giao thức", "Trạng thái", "Provenance")
     )
     merged_headers = (
         ("Claim merge", "Rows", "Columns", "SHA256", "Full source")
         if not vi
-        else ("Claim merge", "So dong", "So cot", "SHA256", "Nguon day du")
+        else ("Hợp nhất claim", "Số dòng", "Số cột", "SHA256", "Nguồn đầy đủ")
     )
     protocol_text = (
-        "Protocol hashes present: " if not vi else "Protocol hash hien co: "
+        "Protocol hashes present: " if not vi else "Hash giao thức hiện có: "
     ) + ", ".join(sorted(protocol_hashes))
     return "\n\n".join(
         (
@@ -705,11 +771,11 @@ def run_ledger(vi: bool) -> str:
             table(headers, rows),
             caveat,
             protocol_text,
-            "## Claim merge inventory" if not vi else "## Kiem ke claim merge",
+            "## Claim merge inventory" if not vi else "## Kiểm kê bản hợp nhất claim",
             (
                 "SHA256 values identify the exact raw CSV bytes used at generation time."
                 if not vi
-                else "Gia tri SHA256 nhan dien chinh xac byte CSV tho khi tao phu luc."
+                else "Giá trị SHA256 nhận diện chính xác byte CSV thô khi tạo phụ lục."
             ),
             table(merged_headers, merged_rows),
         )
@@ -718,27 +784,27 @@ def run_ledger(vi: bool) -> str:
 
 def readme(vi: bool) -> str:
     if vi:
-        return """# Phu luc du lieu
+        return """# Phụ lục dữ liệu
 
-Thu muc nay la muc luc tai tao duoc cho bang chung cua Giai doan 1, 2 va 4. Cac bang duoc tao truc tiep tu CSV, JSON, status va provenance chinh tac. Khong co so nao duoc nhap tay.
+Thư mục này là mục lục tái tạo được cho bằng chứng của Giai đoạn 1, 2 và 4. Các bảng được tạo trực tiếp từ CSV, JSON, tệp trạng thái và provenance chuẩn. Không có số nào được nhập tay.
 
-## Cach doc
+## Cách đọc
 
-* [So cai chay](run_ledger_vi.md): cap pilot, scout, claim; so dong; hash protocol; lien ket provenance.
-* [Bang Giai doan 1](phase1_tables_vi.md): bien kich thuoc, che do, fit scaling va tom tat merge.
-* [Bang Giai doan 2](phase2_tables_vi.md): bien theo bo cuc, chi phi mot cho, predictor va tom tat merge.
-* [Bang Giai doan 4](phase4_tables_vi.md): transfer Kubo va FAT, hard failure, cua so Kubo kho va tom tat merge.
-* [English index](README.md).
+* [Nhật ký chạy](run_ledger_vi.md): cấp thử nhanh, khảo sát, claim; số dòng; hash giao thức; liên kết provenance.
+* [Bảng Giai đoạn 1](phase1_tables_vi.md): biên kích thước, chế độ, khớp scaling và tóm tắt hợp nhất.
+* [Bảng Giai đoạn 2](phase2_tables_vi.md): biên theo bố cục, chi phí một chó, so sánh bộ dự đoán và tóm tắt hợp nhất.
+* [Bảng Giai đoạn 4](phase4_tables_vi.md): chuyển giao Kubo và FAT, thất bại cứng, cửa sổ Kubo khó và tóm tắt hợp nhất.
+* [Mục lục tiếng Anh](README.md).
 
-## Quy uoc bang chung
+## Quy ước bằng chứng
 
-Scout la ban do 30 seed dung de chon cua so. Claim la bang chung chinh xac, thuong 100 seed, va la cap dung cho ket luan. Merge claim thay dong scout tai cac o da gieo lai claim va giu scout tai cac o con lai. Vi vay moi ket luan phai giu ro cap cua tung o.
+Khảo sát là bản đồ 30 seed dùng để chọn cửa sổ. Claim là bằng chứng chính xác, thường 100 seed, và là cấp dùng cho kết luận. Bản hợp nhất claim thay dòng khảo sát tại các ô đã gieo lại claim và giữ khảo sát tại các ô còn lại. Vì vậy mọi kết luận phải giữ rõ cấp của từng ô.
 
-`D_max = 35` voi `D_overcrowd` trong chi co nghia la thanh cong van dat nguong tai dinh luoi da thu. Neu `hard_failure = True`, khong D nao trong luoi dat R = 0.90, nen khong duoc dien mot `D_max` gia.
+`D_max = 35` với `D_overcrowd` trống chỉ có nghĩa là thành công vẫn đạt ngưỡng tại đỉnh lưới đã thử. Nếu `hard_failure = True`, không D nào trong lưới đạt R = 0.90, nên không được điền một `D_max` giả.
 
-## Tai tao
+## Tái tạo
 
-Chay `python3 build_tables.py` trong thu muc nay. Chay `python3 build_tables.py --check` de xac nhan cac tep da tao trung khop voi nguon hien tai. Script chi ghi 10 tep Markdown trong thu muc nay.
+Chạy `python3 build_tables.py` trong thư mục này. Chạy `python3 build_tables.py --check` để xác nhận các tệp đã tạo trùng khớp với nguồn hiện tại. Script chỉ ghi 10 tệp Markdown trong thư mục này.
 """
     return """# Data appendices
 
@@ -783,10 +849,11 @@ def validate(outputs: dict[str, str]) -> None:
     if set(outputs) != set(OUTPUT_NAMES):
         raise ValueError("Generated output set does not match OUTPUT_NAMES")
     for name, text in outputs.items():
+        encoding = output_encoding(name)
         try:
-            text.encode("ascii")
+            text.encode(encoding)
         except UnicodeEncodeError as error:
-            raise ValueError(f"{name} contains non-ASCII text") from error
+            raise ValueError(f"{name} is not valid {encoding.upper()} text") from error
         for dash in ("\u2012", "\u2013", "\u2014", "\u2212"):
             if dash in text:
                 raise ValueError(f"{name} contains a prohibited Unicode dash")
@@ -811,7 +878,7 @@ def main() -> int:
             name
             for name, content in outputs.items()
             if not (DATA_DIR / name).exists()
-            or (DATA_DIR / name).read_text(encoding="ascii") != content
+            or (DATA_DIR / name).read_text(encoding=output_encoding(name)) != content
         ]
         if stale:
             print("Stale generated files: " + ", ".join(stale), file=sys.stderr)
@@ -819,7 +886,7 @@ def main() -> int:
         print(f"Verified {len(outputs)} generated Markdown files.")
         return 0
     for name, content in outputs.items():
-        (DATA_DIR / name).write_text(content, encoding="ascii", newline="\n")
+        (DATA_DIR / name).write_text(content, encoding=output_encoding(name), newline="\n")
     print(f"Wrote {len(outputs)} generated Markdown files.")
     return 0
 

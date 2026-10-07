@@ -1,170 +1,170 @@
-# Tham chieu tham so
+# Tham chiếu tham số
 
-Gia tri o day den tu [`scaling/configs/canonical_grid.yaml`](../../configs/canonical_grid.yaml) hoac mac dinh controller trong cac module cau hinh duoc lien ket. Protocol YAML co the chon tap con nhung khong duoc ngam dinh nghia lai canonical protocol.
+Giá trị trên trang này được đóng băng bởi [`scaling/configs/canonical_grid.yaml`](../../configs/canonical_grid.yaml) hoặc là mặc định bộ điều khiển ghi trong các mô-đun cấu hình được liên kết. YAML giao thức có thể chọn tập con nhưng không được định nghĩa lại ngầm giao thức chuẩn.
 
-## Protocol cot loi
+## Giao thức cốt lõi
 
-| Tham so | Gia tri | Y nghia va ly do |
+| Tham số | Giá trị đóng băng | Ý nghĩa và lý do |
 |---|---|---|
-| `protocol_id` | `scaling_v2` | ID provenance cua bo quy tac khoa |
-| `frozen_on` | `2026-09-22` | Ngay dong bang |
-| `task` | `drive_to_goal` | Moi cuu vao dia dich truoc deadline |
-| `world_width`, `world_height` | 500, 500 | San vuong du cho wide va outlier-rich |
-| tam dan | `(250, 250)` | Tam san |
-| `goal_center` | `(370, 250)` | Cach tam dan 120 theo phuong ngang |
-| `drive_length` | 120 | Quang duong task co dinh |
-| `goal_radius_at_n50` | 15 | Ban kinh dich tai N = 50 |
-| ban kinh dich | `15 * sqrt(N/50)` | Giu dien tich dich tren moi cuu khong doi |
-| `initial_spread` | 30 | Scale co so cho layout |
-| `measurement_radius` | 5 | Ban kinh lien thong cua fragmentation |
-| `reliability_theta` | 0.90 | Nguong tin cay chinh |
-| `reliability_sensitivity` | 0.50, 0.70 | Nguong bao cao them, khong phai bar D_min |
-| `baseline_method` | `strombom_multi` | Controller baseline |
-| `transfer_methods` | baseline, `kubo`, `fat`, `communication_free` | Danh sach transfer day du |
-| `required_transfer_methods` | baseline, `kubo`, `fat` | Tap claim toi thieu |
-| `flock_sizes` | 5, 10, 25, 50, 75, 100, 150, 200, 300, 400 | Luoi N |
-| `shepherd_counts` | 1, 2, 3, 4, 6, 10, 15, 20, 25, 35 | Luoi D |
-| `structure_flock_sizes` | 50, 100, 200 | N cho structure |
-| `rq5_flock_sizes` | 100, 200 | N cho information |
-| `x0_families` | compact, wide, split, outlier_rich | Factor layout |
-| `time_limit_t0` | 10,000 | Deadline chinh |
-| `time_limit_t1` | 20,000 | Deadline dai chi cho overcrowding |
-| `scout_seeds` | 30 | Do sau map rong |
-| `claim_grade_seeds` | 100 | Do sau cua so claim |
-| `master_seed` | 2026 | Goc danh sach seed co dinh |
-| `bootstrap_resamples` | 1,000 | So lan resample seed |
-| `predictor_window_ticks` | 100 | Cua so feature dau trial |
-| `wasteful_effort_tolerance` | 0.20 | Bar path du thua mac dinh |
-| `wasteful_effort_sensitivity` | 0.10, 0.30 | Bar sensitivity |
+| `protocol_id` | `scaling_v2` | Định danh nguồn gốc ổn định cho quy tắc đã khóa |
+| `frozen_on` | `2026-09-22` | Ngày đóng băng ghi bởi YAML chuẩn |
+| `task` | `drive_to_goal` | Mọi cừu phải vào đĩa đích trước hạn |
+| `world_width`, `world_height` | 500, 500 | Sân vuông đủ lớn cho điểm xuất phát wide và outlier_rich |
+| tâm đàn | `(250, 250)` | Tâm sân |
+| `goal_center` | `(370, 250)` | Điểm đường giữa cách đàn 120 đơn vị về bên phải |
+| `drive_length` | 120 | Khoảng cách nhiệm vụ tâm-đến-tâm cố định |
+| `goal_radius_at_n50` | 15 | Đích quy mô ứng dụng tại N = 50 |
+| bán kính đích | `15 * sqrt(N/50)` | Giữ diện tích đích trên mỗi cừu không đổi |
+| `initial_spread` | 30 | Thang cơ sở dùng bởi mọi bộ sinh bố cục |
+| `measurement_radius` | 5 | Bán kính liên thông cho phân mảnh |
+| `reliability_theta` | 0.90 | Ngưỡng dải tin cậy chính |
+| `reliability_sensitivity` | 0.50, 0.70 | Ngưỡng báo cáo thêm, không phải thanh D_min |
+| `baseline_method` | `strombom_multi` | Bộ điều khiển thu thập-và-đẩy cơ sở |
+| `transfer_methods` | baseline, `kubo`, `fat`, `communication_free` | Danh sách chuyển giao đầy đủ theo kế hoạch |
+| `required_transfer_methods` | baseline, `kubo`, `fat` | Tập claim chuyển giao tối thiểu |
+| `flock_sizes` | 5, 10, 25, 50, 75, 100, 150, 200, 300, 400 | Lưới N đóng băng |
+| `shepherd_counts` | 1, 2, 3, 4, 6, 10, 15, 20, 25, 35 | Lưới D đóng băng |
+| `structure_flock_sizes` | 50, 100, 200 | Giá trị N cho Giai đoạn 2 và cấu trúc chuyển giao |
+| `rq5_flock_sizes` | 100, 200 | Kích thước claim thang thông tin |
+| `x0_families` | compact, wide, split, outlier_rich | Nhân tố bố cục ban đầu |
+| `time_limit_t0` | 10.000 | Hạn chính, khoảng 80 lần cắt thẳng 120 đơn vị ở tốc độ 1 |
+| `time_limit_t1` | 20.000 | Hạn dài chỉ cho ô quá tải |
+| `scout_seeds` | 30 | Độ sâu bản đồ rộng |
+| `claim_grade_seeds` | 100 | Độ sâu cửa sổ claim |
+| `master_seed` | 2026 | Gốc cho danh sách seed xác định dùng chung |
+| `bootstrap_resamples` | 1.000 | Số lần lấy mẫu lại seed cho bất định biên |
+| `predictor_window_ticks` | 100 | Cửa sổ đặc trưng trạng thái đầu, ngắn hơn một lần đẩy thẳng |
+| `wasteful_effort_tolerance` | 0.20 | Thanh đường đi dư mặc định |
+| `wasteful_effort_sensitivity` | 0.10, 0.30 | Thanh độ nhạy được báo cáo |
 
-Tai R = 0.90, 30 seed co standard error khoang 0.055 va 100 seed khoang 0.03. Interval xap xi cua R tai 100 seed la cong tru 0.06. Day la uncertainty cua R, khong truc tiep la uncertainty cua D_min.
+Tại R = 0,90, 30 seed có sai số chuẩn khoảng 0,055 và 100 seed khoảng 0,03. Khoảng R xấp xỉ tại 100 seed là cộng trừ 0,06. Đây là bất định của R, không trực tiếp của D_min.
 
-## Layout
+## Tham số bố cục
 
-| Tham so | Gia tri | Y nghia |
+| Tham số | Giá trị | Ý nghĩa |
 |---|---:|---|
-| compact sigma | 9 | `0.3 * initial_spread` |
-| wide sigma | 60 | `2.0 * initial_spread` |
-| so split cluster | 2 neu N < 12, nguoc lai 3 | Tranh nhom ba qua nho |
-| split gap toi thieu | 10 | `2 * measurement_radius` |
-| outlier core | khoang 80 phan tram | Dan chinh |
-| outlier | khoang 20 phan tram | Ngoai `r_a * N^(2/3)` |
+| sigma compact | 9 | `0.3 * initial_spread` |
+| sigma wide | 60 | `2.0 * initial_spread` |
+| số cụm split | 2 dưới N = 12, ngược lại 3 | Tránh nhóm ba quá nhỏ |
+| khe split tối thiểu | 10 | `2 * measurement_radius` |
+| lõi outlier | khoảng 80 phần trăm | Đàn chính |
+| outlier | khoảng 20 phần trăm | Rút ngoài `r_a * N^(2/3)` |
 
-Diem ngoai san hoac trong dich duoc draw lai.
+Điểm không hợp lệ ngoài sân hoặc trong đích được rút lại.
 
 ## `strombom_multi`
 
-| Tham so | Gia tri | Y nghia |
+| Tham số | Giá trị | Ý nghĩa |
 |---|---:|---|
-| `r_a` | 2 | Do dai tuong tac cuu, cung dung trong collect threshold |
-| `r_s` | 65 | Khoang cach cuu phan ung voi cho; base sensing range |
-| `sheep_speed` | 1.0 | Dich chuyen cuu moi tick |
-| `shepherd_speed` | 1.5 | Dich chuyen cho moi tick |
-| `noise_strength` | 0.3 | Do manh angular process noise |
-| `inertia` | 0.5 | Trong so huong truoc cua cuu |
-| collect threshold | `r_a * N^(2/3)` | Ban kinh chuyen collect sang drive |
+| `r_a` | 2 | Độ dài tương tác cừu dùng trong tính xếp và ngưỡng thu thập |
+| `r_s` | 65 | Khoảng cách cừu phản ứng với người chăn; tầm cảm biến cơ sở |
+| `sheep_speed` | 1.0 | Dịch chuyển cừu mỗi tick |
+| `shepherd_speed` | 1.5 | Dịch chuyển người chăn mỗi tick |
+| `noise_strength` | 0.3 | Độ mạnh nhiễu quá trình góc trong chuyển động cừu |
+| `inertia` | 0.5 | Trọng số hướng trước trong chuyển động cừu |
+| ngưỡng thu thập | `r_a * N^(2/3)` | Bán kính dùng để chuyển giữa thu thập và đẩy |
 
-Coverage radius la `sensing_range` neu factor da set, neu khong la `r_s` cua method. No khong phai sheep-sheep repulsion distance.
+Bán kính độ phủ là `sensing_range` khi nhân tố thông tin đặt nó, nếu không là `r_s` của phương pháp. Nó không phải khoảng cách đẩy cừu-cừu.
 
 ## `kubo`
 
-| Tham so | Gia tri | Y nghia |
+| Tham số | Giá trị | Ý nghĩa |
 |---|---:|---|
-| `radius` | 60 | Local sensing radius |
-| `K_s1` | 10 | Sheep-sheep repulsion gain |
-| `K_s2` | 0.5 | Alignment gain cua cuu |
-| `K_s3` | 2 | Cohesion gain cua cuu |
-| `K_s4` | 5000 | Sheep-dog repulsion gain |
-| `K_f1` | 10 | Cho hut ve target sheep |
-| `K_f2` | 200 | Cho day khoi target sheep |
-| `K_f3` | 8 | Cho day khoi goal |
-| `K_f4` | 3000 | Dog-dog repulsion gain |
-| `dt` | 0.05 | Buoc tich phan force |
-| `sheep_speed_max` | 5 | Speed clamp cua cuu |
-| `dog_speed_max` | 10 | Speed clamp cua cho |
+| `radius` | 60 | Bán kính cảm biến cục bộ |
+| `K_s1` | 10 | Hệ số đẩy cừu-cừu |
+| `K_s2` | 0.5 | Hệ số căn chỉnh vận tốc cừu |
+| `K_s3` | 2 | Hệ số kết dính cừu |
+| `K_s4` | 5000 | Đẩy cừu khỏi chó |
+| `K_f1` | 10 | Hút chó tới cừu mục tiêu |
+| `K_f2` | 200 | Đẩy chó khỏi cừu mục tiêu |
+| `K_f3` | 8 | Đẩy chó khỏi đích |
+| `K_f4` | 3000 | Đẩy chó-chó |
+| `dt` | 0.05 | Bước thời gian tích phân lực |
+| `sheep_speed_max` | 5 | Kẹp tốc độ cừu |
+| `dog_speed_max` | 10 | Kẹp tốc độ chó |
 
 ## `fat`
 
-FAT dung tham so cuu Strombom. Moi cho chon con cuu quan sat xa no nhat va dung cach `r_a` phia sau con cuu theo huong ra xa dich. Phase 1, 2, 4 dung observation `global`.
+FAT dùng tham số cừu Strombom ở trên. Luật chó chọn cừu quan sát được xa chó đó nhất và lấy vị trí đứng cách `r_a` phía sau theo hướng ra xa đích. Quan sát là `global` trong Giai đoạn 1, 2, và 4.
 
-## Information ladder
+## Thang thông tin
 
-| Factor | Gia tri | Y nghia |
+| Nhân tố | Giá trị | Ý nghĩa |
 |---|---|---|
-| `obs_mode` | `bearing_only`, `local_positions`, `global` | Muc thong tin quan sat tang dan |
-| `sensing_range` | 32.5, 65, 97.5, 130 | 0.5, 1, 1.5, 2 lan `r_s` |
-| `communication` | `none`, `neighbour_broadcast`, `global_shared` | Rieng, hop neighbor, hoac hop toan cuc cua cuu da sense |
+| `obs_mode` | `bearing_only`, `local_positions`, `global` | Nội dung quan sát tăng dần |
+| `sensing_range` | 32.5, 65, 97.5, 130 | 0,5, 1, 1,5, và 2 lần `r_s` Strombom |
+| `communication` | `none`, `neighbour_broadcast`, `global_shared` | Quan sát riêng, hợp láng giềng, hoặc hợp cảm nhận chia sẻ toàn cục |
 
-Voi `strombom_multi`, `global_shared` dung hop cua cuu da sense, khong dung true position dac quyen tu simulator. Scout Phase 5 dung D trong `{1, 2, 3, 4, 6, 10}` vi saving mot buoc co the xuat hien o vung D thap.
+Với `strombom_multi`, `global_shared` dùng hợp các cừu đã cảm nhận, không phải chân lý giả lập đặc quyền. Giao thức scout Giai đoạn 5 dùng D trong `{1, 2, 3, 4, 6, 10}` vì dải D thấp là nơi tiết kiệm một bước có thể xuất hiện.
 
-## Field cua protocol recipe
+## Trường công thức giao thức
 
-| Field | Y nghia |
+| Trường | Ý nghĩa |
 |---|---|
-| `protocol_id` | ID resolve trong `scaling/configs/protocols/` va ghi vao output |
-| `phase` | So phase nghien cuu |
-| `grade` | Grade SMOKE, SCOUT, hoac CLAIM |
-| `canonical` | Path toi mac dinh dong bang |
-| `extends` | Parent YAML duoc ke thua |
-| `output` | Dich trong `scaling/results/` |
-| `methods` hoac `method` | Danh sach controller hoac controller cua factor run |
-| `layouts` | Tap con layout |
-| `flock_sizes` | Tap con N |
-| `shepherd_counts` | Tap con D |
-| `seeds` | So seed moi cell da chon |
-| `seed_mode` | Y nghia stage nhu scout hoac claim |
-| `runner` | Execution path grid hoac factor |
-| `upstream_protocol` | Protocol scout hoac claim dung de lap ke hoach |
-| `store_timeseries` | Co ghi Parquet history moi trial hay khong |
-| `packages` | Package phan tich export sau run |
-| `obs_modes`, `sensing_ranges`, `communications` | Gia tri cua mot information ladder |
+| `protocol_id` | Định danh resolve dưới `scaling/configs/protocols/` và đóng dấu vào đầu ra |
+| `phase` | Số giai đoạn nghiên cứu |
+| `grade` | Cấp bằng chứng SMOKE, SCOUT, hoặc CLAIM |
+| `canonical` | Đường dẫn tới mặc định đóng băng |
+| `extends` | YAML giao thức cha được kế thừa |
+| `output` | Đích dưới `scaling/results/` |
+| `methods` hoặc `method` | Danh sách bộ điều khiển hoặc bộ điều khiển của lần chạy nhân tố |
+| `layouts` | Tập con bố cục ban đầu |
+| `flock_sizes` | Tập con N |
+| `shepherd_counts` | Tập con D |
+| `seeds` | Số seed lần thử mỗi ô đã chọn |
+| `seed_mode` | Ngữ nghĩa giai đoạn như scout hoặc claim |
+| `runner` | Đường thực thi lưới hoặc nhân tố |
+| `upstream_protocol` | Giao thức scout hoặc claim dùng để lập kế hoạch ô sau |
+| `store_timeseries` | Có ghi lịch sử Parquet theo lần thử hay không |
+| `packages` | Gói phân tích xuất sau lần chạy |
+| `obs_modes`, `sensing_ranges`, `communications` | Giá trị cho một thang thông tin |
 
-`canonical` import mac dinh; `extends` ke thua recipe day du. `protocol.yaml` da resolve duoc copy vao result directory de co the kiem tra ca gia tri ke thua.
+`canonical` nhập mặc định; `extends` kế thừa công thức cha đầy đủ. Trong cả hai trường hợp, `protocol.yaml` đã resolve được sao chép vào thư mục kết quả để giá trị kế thừa vẫn kiểm tra được.
 
-## Outcome va state metric
+## Kết quả và chỉ số trạng thái
 
-| Dai luong | Dinh nghia |
+| Đại lượng | Định nghĩa |
 |---|---|
-| success | Moi cuu vao dich truoc deadline |
-| `t_s` | Tick dau tien dat success |
-| `shepherd_path` | Tong Euclidean step length cua moi cho |
-| path moi cho | `shepherd_path / D` |
-| cohesion | Trung binh khoang cach cuu toi GCM |
-| fragmentation | Largest connected component chia N, radius 5 |
-| outlier count | So cuu ngoai `r_a * N^(2/3)` |
-| spread | Variance cua khoang cach toi centroid |
-| extent | RMS distance toi centroid |
-| perimeter | Chu vi convex hull |
-| hull area | Dien tich convex hull |
-| flock density | N chia hull area; 0 neu area suy bien |
-| aspect ratio | Ti so PCA major/minor; 1 la tron |
-| `I_dir` | `1 - ||sum unit_velocity|| / M_active`, voi speed tren `1e-6` |
-| coverage C | Ti le cuu ngoai median GCM distance nam trong influence radius |
+| thành công | Chỉ báo nhị phân mọi cừu vào đích trước hạn |
+| `t_s` hoặc thời gian kết thúc | Tick đầu tiên đạt thành công |
+| `shepherd_path` | Tổng độ dài bước Euclidean của mọi chó, theo đơn vị sân |
+| đường đi mỗi chó | `shepherd_path / D` |
+| độ kết dính | Trung bình khoảng cách cừu tới tâm khối đàn |
+| phân mảnh | Kích thước thành phần liên thông lớn nhất chia N, bán kính 5 |
+| số outlier | Cừu ngoài `r_a * N^(2/3)` |
+| trải (spread) | Phương sai khoảng cách cừu tới tâm |
+| extent | Căn bậc hai trung bình bình phương khoảng cách tới tâm |
+| chu vi | Chu vi bao lồi |
+| diện tích bao | Diện tích bao lồi |
+| mật độ đàn | N chia diện tích bao; không nếu diện tích suy biến |
+| tỷ lệ khung hình | Tỷ số trục chính/trục phụ PCA; một là tròn |
+| `I_dir` | `1 - ||sum unit_velocity|| / M_active` cho chó nhanh hơn `1e-6` |
+| độ phủ C | Tỷ lệ cừu ngoại vi (trên trung vị khoảng cách GCM) nằm trong bán kính ảnh hưởng |
 
-Neu khong cho nao di chuyen, `I_dir = 0`. Metric dung realized velocity, gom ca anh huong constraint. Khong co coverage radius thi gia tri la NaN.
+Nếu không chó nào chuyển động, `I_dir = 0`. Chỉ số dùng vận tốc thực hiện, nên ràng buộc như phản xạ tường được gồm. Thiếu bán kính độ phủ cho NaN.
 
-## Reliability, frontier, regime
+## Độ tin cậy, biên, và chế độ
 
-`R(m, tau, N, D, T, X0, I)` la xac suat success uoc luong tren seed khoa, voi method m, protocol tau, N, D, deadline T, layout X0, va information I.
+`R(m, tau, N, D, T, X0, I)` là xác suất thành công ước lượng trên seed đã khóa cho phương pháp m, giao thức tau, kích thước đàn N, số người chăn D, hạn T, bố cục X0, và điều kiện thông tin I.
 
-| Dai luong | Dinh nghia |
+| Đại lượng | Định nghĩa |
 |---|---|
-| D_min | D nho nhat da thu co R >= theta |
-| D_overcrowd | D dau tien sau D_min ma no va D luoi ke tiep deu co R < theta |
-| D_max | D tin cay lon nhat truoc overcrowding; neu khong co collapse thi la D tin cay lon nhat da thu |
-| B* | `(D, T)` tin cay co median path nho nhat; hoa thi chon D nho, roi finish nhanh |
-| hard failure | Khong D nao dat theta; frontier de trong |
-| under-resourced | R duoi theta truoc D_overcrowd |
-| efficient | R dat theta va path duoi wasteful bar |
-| wasteful | Tin cay nhung median path cao hon B* it nhat 20 phan tram; cung bao cao 10 va 30 |
-| overcrowding collapse | R duoi theta tai hoac sau D_overcrowd |
+| D_min | D nhỏ nhất đã thử có R ít nhất theta |
+| D_overcrowd | D đầu sau D_min mà D đó và D lưới kế tiếp đều dưới theta |
+| D_max | D tin cậy lớn nhất dưới D_overcrowd; khi không có quá tải, D tin cậy lớn nhất đã thử, có thể chỉ là trần lưới |
+| B* | `(D, T)` tin cậy có trung vị đường đi nhỏ nhất; hòa thì D nhỏ hơn, rồi thời gian kết thúc trung vị nhanh hơn |
+| thất bại cứng | Không D đã thử nào đạt theta; giá trị biên để trống |
+| thất bại thiếu nguồn lực | R dưới theta trước D_overcrowd |
+| vận hành hiệu quả | R ít nhất theta và đường đi dưới thanh lãng phí |
+| chi tiêu lãng phí | Tin cậy nhưng trung vị đường đi cao hơn B* ít nhất 20 phần trăm; cũng báo cáo 10 và 30 phần trăm |
+| sụp đổ quá tải | R dưới theta tại hoặc sau D_overcrowd |
 
-Effect frontier tinh theo buoc cuc bo cua luoi D. D_max = 35 va D_overcrowd trong nghia la chua thay collapse den tran da thu, khong co nghia collapse bat dau tai 35.
+Hiệu ứng biên đo bằng bước cục bộ của lưới D. D_max bằng 35 với D_overcrowd trống nghĩa là chưa quan sát sụp đổ tới trần đã thử. Nó không nghĩa sụp đổ bắt đầu tại 35.
 
-Bootstrap resample seed trong moi D 1,000 lan. Mau khong co D_min van duoc giu nhu right-censored tren D lon nhat. Percentile 2.5 va 97.5 la gia tri luoi hoac `above grid`.
+Bootstrap lấy mẫu lại seed trong mỗi D 1.000 lần. Lần lấy mẫu không có D_min vẫn bị kiểm duyệt phải trên D lớn nhất đã thử. Phân vị 2,5 và 97,5 là giá trị lưới hoặc `above grid`.
 
-## Prediction va early warning
+## Dự báo và cảnh báo sớm
 
-RQ7 dung horizon `k = 500`, feature window `w = 200`, va tick danh gia 1,000 den 8,000, buoc 200. Feature chi dung `(t - 200, t]`; label la failure trong 500 tick tiep theo khi horizon van nam trong T0.
+RQ7 dùng chân trời `k = 500`, cửa sổ đặc trưng `w = 200`, và tick đánh giá từ 1.000 đến 8.000 bước 200. Đặc trưng chỉ dùng `(t - 200, t]`; nhãn là thất bại trong 500 tick tiếp theo, chỉ khi chân trời còn trong T0. Đánh giá bắt đầu sau tạm thời bố cục ban đầu và kết thúc đủ sớm để giữ chân trời.
 
-State model va N,D model hold out toan bo N. Candidate fit gom constant, linear, power `A * N^alpha`, va two-piece linear. Chon bang leave-one-N-out RMSE.
+Mô hình trạng thái và N,D giữ nguyên cả giá trị N khi holdout. Ứng viên khớp scaling là hằng, tuyến tính, lũy thừa `A * N^alpha`, và tuyến tính hai đoạn. Chọn bằng RMSE leave-one-N-out.

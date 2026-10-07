@@ -1,20 +1,20 @@
-# Tai lieu nghien cuu scaling
+# Tài liệu nghiên cứu scaling
 
-Trang tuong thich nay giu duong dan ke hoach nghien cuu cu con hop le. Ke hoach, thiet lap, phuong phap, ket qua, ghi chu do tin cay, va bang du lieu duoc bao tri tai cac vi tri chinh tac.
+Trang tương thích này giữ đường dẫn kế hoạch nghiên cứu cũ còn hợp lệ. Kế hoạch, thiết lập, phương pháp, kết quả, ghi chú độ tin cậy, và bảng dữ liệu được bảo trì tại các vị trí chính tắc.
 
-## Tai lieu chinh tac
+## Tài liệu chính tắc
 
-- [Ke hoach nghien cuu chinh](../../docs/main_scaling_plan_vi.md): cau hoi khoa hoc, giai doan, dependency, tieu chi claim, ngan sach, va cong quyet dinh.
-- [Thiet lap thi nghiem va tham chieu van hanh](../../docs/setup/README_vi.md): nhiem vu dong bang, tham so, thuat ngu, phan tang, va huong dan chay.
-- [Huong dan phuong phap](../../docs/methods/README_vi.md): trien khai va cach dien giai Strombom, Kubo, va FAT.
-- [Bao cao ket qua thuc nghiem](SUMMARY_REPORT_vi.md): ket qua Giai doan 1, 2, va 4, anh chup claim, bat dinh, va gioi han.
-- [Do tin cay va doi chieu](../../docs/credibility/README_vi.md): doi chieu ban thao 2025, pham vi NetLogo, bang chung xac thuc, va ranh gioi ket luan.
-- [Phu luc du lieu tao tu dong](data/README_vi.md): so cai chay va cac bang Giai doan 1, 2, va 4 co the tai tao cung duong dan nguon.
+- [Kế hoạch nghiên cứu chính](../../docs/main_scaling_plan_vi.md): câu hỏi khoa học, giai đoạn, phụ thuộc, tiêu chí claim, ngân sách, và cổng quyết định.
+- [Thiết lập thí nghiệm và tham chiếu vận hành](../../docs/setup/README_vi.md): nhiệm vụ đóng băng, tham số, thuật ngữ, phân tầng, và hướng dẫn chạy.
+- [Hướng dẫn phương pháp](../../docs/methods/README_vi.md): triển khai và cách diễn giải Strombom, Kubo, và FAT.
+- [Báo cáo kết quả thực nghiệm](SUMMARY_REPORT_vi.md): kết quả Giai đoạn 1, 2, và 4, ảnh chụp claim, bất định, và giới hạn.
+- [Độ tin cậy và đối chiếu](../../docs/credibility/README_vi.md): đối chiếu bản thảo 2025, phạm vi NetLogo, bằng chứng xác thực, và ranh giới kết luận.
+- [Phụ lục dữ liệu tạo tự động](data/README_vi.md): sổ cái chạy và các bảng Giai đoạn 1, 2, và 4 có thể tái tạo cùng đường dẫn nguồn.
 
-## Tinh trang hien tai
+## Tình trạng hiện tại
 
-Giai doan 1, 2, va 4 da hoan tat o cap claim. Giai doan 3 va kiem tra chan troi dai C2b bi bo qua vi co so khong tao o overcrowding. Giai doan 5 va 7 chua chay.
+Giai đoạn 1, 2, và 4 đã hoàn tất ở cấp claim. Giai đoạn 3 và kiểm tra chân trời dài C2b bị bỏ qua vì cơ sở không tạo ô overcrowding. Giai đoạn 5 và 7 chưa chạy.
 
-Mac dinh dong bang may-doc nam trong [`../../configs/canonical_grid.yaml`](../../configs/canonical_grid.yaml). Voi campaign da hoan tat, `protocol.yaml` da sao chep va cac artifact provenance ghi dung recipe da chay.
+Mặc định đóng băng dạng máy đọc được nằm trong [`../../configs/canonical_grid.yaml`](../../configs/canonical_grid.yaml). Với chiến dịch đã hoàn tất, `protocol.yaml` đã sao chép và các hiện vật provenance ghi đúng công thức đã chạy.
 
-Trang tuong thich tieng Anh: [RESEARCH_PLAN.md](RESEARCH_PLAN.md).
+Trang tương thích tiếng Anh: [RESEARCH_PLAN.md](RESEARCH_PLAN.md).

@@ -6,6 +6,8 @@ Kubo et al. (2022) model sheep and multiple dogs through continuous force sums r
 
 Reference: M. Kubo, M. Tashiro, H. Sato, et al., "Herd guidance by multiple sheepdog agents with repulsive force," Artificial Life and Robotics 27, 416-427, 2022. DOI: `10.1007/s10015-021-00726-7`.
 
+![kubo force-based herding.](../../results/summary/figures/schematics/en/alg_kubo.svg)
+
 ## Exact HerdSim implementation
 
 The `kubo` method bundle combines:
@@ -78,7 +80,15 @@ Configuration evidence:
 - No overcrowding was observed.
 - Overall success in the Kubo size merge was 0.991, and all recorded failures were timeouts.
 
+![Three-method compact reliability heatmaps.](../../results/phase4/guides/assets/figures/f1_reliability_heatmaps.png)
+
+*R(N, D) surfaces on compact starts. Kubo tracks baseline at large N; differences show at small flocks and in the harder layouts below.*
+
 Kubo therefore shared the baseline compact frontier for `N >= 25`, but not every small-flock result.
+
+![Failure-mode comparison.](../../results/summary/figures/f6_failure_modes.png)
+
+*How size-map trials end. Kubo failures are mostly timeouts; FAT failures are mostly oscillation or stuck.*
 
 ### Starting structure
 
@@ -87,7 +97,15 @@ Kubo therefore shared the baseline compact frontier for `N >= 25`, but not every
 - `outlier_rich`, `N = 200`: point estimate `D_min = 20`.
 - Wide: hard failure at all three sizes. The best reliability over tested dog counts was about 0.47 to 0.54, below 0.90.
 
+![Reliability curves by starting layout.](../../results/summary/figures/f5_layout_reliability_curves.png)
+
+*R against D at N = 200 by layout. Kubo wide never reaches 0.90; outlier_rich needs many more dogs.*
+
 For `outlier_rich`, `N = 200`, the 200-seed cells gave `R = 0.935` at `D = 20` and `R = 0.910` at `D = 25`. The bootstrap interval for `D_min` was `[2, 20]` because several lower dog counts lay near the threshold. The point estimate should always be reported with that wide interval.
+
+![Kubo outlier_rich, N = 200.](../../results/summary/figures/f9_kubo_outlier_rich_n200.png)
+
+*R(D) with Wilson 95% intervals. Point D_min = 20 clears the threshold, but bootstrap [2, 20] shows the lower boundary is uncertain.*
 
 Evidence:
 
@@ -96,13 +114,6 @@ Evidence:
 - [`../../results/phase4/kubo_structure/claim/merged_dmin_bootstrap.csv`](../../results/phase4/kubo_structure/claim/merged_dmin_bootstrap.csv)
 - [`../../results/phase4/kubo_structure/claim/outlier_rich_n200_window.json`](../../results/phase4/kubo_structure/claim/outlier_rich_n200_window.json)
 - [`../../results/phase4/package_d/structure/frontier_by_method_layout.csv`](../../results/phase4/package_d/structure/frontier_by_method_layout.csv)
-
-## Relevant existing figures
-
-- [Three-method compact reliability heatmaps](../../results/phase4/guides/assets/figures/f1_reliability_heatmaps.png)
-- [Reliability curves by starting layout](../../results/phase4/guides/assets/figures/f5_layout_reliability_curves.png)
-- [Failure-mode comparison](../../results/phase4/guides/assets/figures/f6_failure_modes.png)
-- [Kubo `outlier_rich`, `N = 200`](../../results/phase4/guides/assets/figures/f9_kubo_outlier_rich_n200.png)
 
 ## Limitations and non-claims
 

@@ -14,6 +14,8 @@ If any sheep is farther than `f(N)` from the global center of mass, the flock is
 
 Reference: D. Strombom et al., "Solving the shepherding problem: heuristics for herding autonomous, interacting agents," Journal of The Royal Society Interface 11(100), 2014. DOI: `10.1098/rsif.2014.0719`.
 
+![strombom_multi gather / drive.](../../results/summary/figures/schematics/en/alg_strombom_multi.svg)
+
 ## Exact HerdSim implementation
 
 HerdSim separates sheep dynamics from the dog controller.
@@ -91,7 +93,21 @@ At the 90% reliability threshold:
 - no overcrowding was observed;
 - `D_max = 35` is the grid ceiling for every size, not a measured collapse.
 
-The Phase 1 claim merge contains 4,540 rows and has overall `R = 0.963`. Its 169 failures are concentrated mainly at one dog for the two smallest flocks. Median completion time across the merge is 183 ticks. For `N >= 25`, median path per dog is about 148 world units.
+![Compact reliability heatmap.](../../results/phase1/guides/assets/figures/reliability_heatmap.png)
+
+*Each cell is R(N, D) on the Phase 1 claim merge (compact). Darker cells are below the 0.90 threshold.*
+
+The Phase 1 claim merge contains 4,540 rows and has overall `R = 0.963`. Its 169 failures are concentrated mainly at one dog for the two smallest flocks.
+
+![D_min against flock size.](../../results/phase1/guides/assets/figures/f2_dmin_vs_n.png)
+
+*Baseline D_min by N, with the 2025 draft shown only for contrast. Two observed levels: 2 at N = 5 and 10; 1 from N = 25 upward.*
+
+Median completion time across the merge is 183 ticks. For `N >= 25`, median path per dog is about 148 world units.
+
+![Cost against dog count.](../../results/phase1/guides/assets/figures/f3_cost_vs_d.png)
+
+*Median total path against D on the compact size map. Extra dogs after D_min mostly add path waste; they do not produce reliability collapse inside the tested grid.*
 
 ### Starting structure
 
@@ -101,20 +117,20 @@ At `N = 50, 100, 200`, all four layouts have `D_min = 1`, with bootstrap width z
 - `outlier_rich`, `N = 200` took a median 1,228 ticks and path 1,647 at one dog;
 - on wide starts, the minimum-path reliable choice `B*` was two dogs for all three tested sizes.
 
+![Layout cost comparison.](../../results/phase2/guides/assets/figures/f4_layout_cost.png)
+
+*Median total path at D = 1 by layout. Wide and outlier_rich cost far more than compact even though one dog still reaches R = 1.00.*
+
+![Wide-layout path at one and two dogs.](../../results/phase2/guides/assets/figures/f10_wide_bstar_path.png)
+
+*On wide starts, two dogs cut median path relative to one dog at N = 50, 100, and 200, so B* = 2 even though D_min stays 1.*
+
 Evidence:
 
 - [`../../results/phase1/claim/packages/a/frontier.csv`](../../results/phase1/claim/packages/a/frontier.csv)
 - [`../../results/phase1/claim/merged_trials.csv`](../../results/phase1/claim/merged_trials.csv)
 - [`../../results/phase2/claim/packages/b/frontier_by_layout.csv`](../../results/phase2/claim/packages/b/frontier_by_layout.csv)
 - [`../../results/phase2/claim/merged_trials.csv`](../../results/phase2/claim/merged_trials.csv)
-
-## Relevant existing figures
-
-- [Compact reliability heatmap](../../results/phase1/guides/assets/figures/reliability_heatmap.png)
-- [`D_min` against flock size](../../results/phase1/guides/assets/figures/f2_dmin_vs_n.png)
-- [Cost against dog count](../../results/phase1/guides/assets/figures/f3_cost_vs_d.png)
-- [Layout cost comparison](../../results/phase2/guides/assets/figures/f4_layout_cost.png)
-- [Wide-layout path at one and two dogs](../../results/phase2/guides/assets/figures/f10_wide_bstar_path.png)
 
 ## Limitations and non-claims
 

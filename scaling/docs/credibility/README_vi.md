@@ -1,49 +1,49 @@
-# Do tin cay va doi chieu
+# Độ tin cậy và đối chiếu
 
-Thu muc nay tach bon doi tuong khong duoc xem la tuong duong:
+Thư mục này tách bốn đối tượng không được xem là tương đương:
 
-1. **Ban thao 2025** la mot nghien cuu NetLogo dang ban thao, voi nhiem vu gom, giu, va dua dan qua cong.
-2. **NetLogo** la mot nen tang mo phong dua tren tac tu chung.
-3. Cac **twin NetLogo** di kem la mo hinh desktop doi ung cho mot so phuong phap HerdSim.
-4. **Chong ket luan HerdSim** gom giao thuc `scaling_v2` dong bang, cac tang chay, bootstrap, va du lieu xuat dung cho ket luan hien tai.
+1. **Bản thảo 2025** là một nghiên cứu NetLogo đang bản thảo, với nhiệm vụ gom, giữ, và đưa đàn qua cổng.
+2. **NetLogo** là một nền tảng mô phỏng dựa trên tác tử chung.
+3. Các **twin NetLogo** đi kèm là mô hình desktop đối ứng cho một số phương pháp HerdSim.
+4. **Chồng kết luận HerdSim** gồm giao thức `scaling_v2` đóng băng, các tầng chạy, bootstrap, và dữ liệu xuất dùng cho kết luận hiện tại.
 
-Mo hinh cua ban thao khong phai twin. No khong duoc chay lai trong kho nay. Mot muc twin chi cho biet co mo hinh doi ung co the mo. No khong chung minh parity dinh luong voi HerdSim.
+Mô hình của bản thảo không phải twin. Nó không được chạy lại trong kho này. Một mục twin chỉ cho biết có mô hình đối ứng có thể mở. Nó không chứng minh parity định lượng với HerdSim.
 
-## Tai lieu
+## Tài liệu
 
-- [Doi chieu ban thao](draft_comparison_vi.md): doi chieu giao thuc va ket qua giua ban thao 2025 va HerdSim.
-- [Xac thuc, NetLogo, va ranh gioi ket luan](validation_and_netlogo_vi.md): muc do bang chung, pham vi twin, kiem thu, va parity con thieu.
-- [Ban tieng Anh](README.md)
+- [Đối chiếu bản thảo](draft_comparison_vi.md): đối chiếu giao thức và kết quả giữa bản thảo 2025 và HerdSim.
+- [Xác thực, NetLogo, và ranh giới kết luận](validation_and_netlogo_vi.md): mức độ bằng chứng, phạm vi twin, kiểm thử, và parity còn thiếu.
+- [Bản tiếng Anh](README.md)
 
-## Muc do bang chung
+## Mức độ bằng chứng
 
-| Muc | Bang chung hien co | Cach doc cho phep |
+| Mức | Bằng chứng hiện có | Cách đọc cho phép |
 |---|---|---|
-| Muc ket luan | Giao thuc dong bang, seed tang claim, CSV hop nhat, bootstrap, va provenance | Ho tro ket qua HerdSim da neu trong nhiem vu va luoi da thu |
-| Bang chung trien khai | Kiem thu tinh xac dinh, cong thuc, cau hinh, API, duong dan, va launcher | Ho tro hanh vi ma nguon va cong cu |
-| Kiem tra hanh vi | Co the cau hinh va quan sat mot twin NetLogo | Chi ho tro doi chieu dinh tinh |
-| Ket qua ben ngoai duoc bao cao | PDF ban thao va ghi chu trong kho tom tat nghien cuu khac | Co the trich la ket qua ban thao, khong phai bang chung chay lai |
-| Con thieu | Bang thu nghiem ghep cap hai dong co va tieu chi parity dinh luong | Khong co ket luan parity so hoc NetLogo voi HerdSim |
+| Mức kết luận | Giao thức đóng băng, seed tầng claim, CSV hợp nhất, bootstrap, và provenance | Hỗ trợ kết quả HerdSim đã nêu trong nhiệm vụ và lưới đã thử |
+| Bằng chứng triển khai | Kiểm thử tính xác định, công thức, cấu hình, API, đường dẫn, và launcher | Hỗ trợ hành vi mã nguồn và công cụ |
+| Kiểm tra hành vi | Có thể cấu hình và quan sát một twin NetLogo | Chỉ hỗ trợ đối chiếu định tính |
+| Kết quả bên ngoài được báo cáo | PDF bản thảo và ghi chú trong kho tóm tắt nghiên cứu khác | Có thể trích là kết quả bản thảo, không phải bằng chứng chạy lại |
+| Còn thiếu | Bảng thử nghiệm ghép cặp hai động cơ và tiêu chí parity định lượng | Không có kết luận parity số học NetLogo với HerdSim |
 
-![Nhiem vu ban thao 2025 va HerdSim khac nhau.](../../results/summary/figures/schematics/vi/draft_vs_herdsim.svg)
+![Nhiệm vụ bản thảo 2025 và HerdSim khác nhau.](../../results/summary/figures/schematics/vi/draft_vs_herdsim.svg)
 
-![NetLogo la nen tang, HerdSim la chong thi nghiem.](../../results/summary/figures/schematics/vi/netlogo_vs_herdsim.svg)
+![NetLogo là nền tảng, HerdSim là chồng thí nghiệm.](../../results/summary/figures/schematics/vi/netlogo_vs_herdsim.svg)
 
-![Bon lop lap luan tin cay cua HerdSim.](../../results/summary/figures/schematics/vi/trust_herdsim.svg)
+![Bốn lớp lập luận tin cậy của HerdSim.](../../results/summary/figures/schematics/vi/trust_herdsim.svg)
 
-## Ranh gioi ngan
+## Ranh giới ngắn
 
-HerdSim co the ket luan ve ket qua mo phong lap lai duoc theo giao thuc dong bang va mo ta y tuong bo dieu khien dua tren bai bao. HerdSim khong the ket luan tuong duong NetLogo theo tung tick, parity twin dinh luong da cong bo, twin NetLogo cho `fat`, hoac ban thao 2025 da duoc chay lai.
+HerdSim có thể kết luận về kết quả mô phỏng lặp lại được theo giao thức đóng băng và mô tả ý tưởng bộ điều khiển dựa trên bài báo. HerdSim không thể kết luận tương đương NetLogo theo từng tick, parity twin định lượng đã công bố, twin NetLogo cho `fat`, hoặc bản thảo 2025 đã được chạy lại.
 
-## Nguon
+## Nguồn
 
-- [Bao cao ket qua tieng Anh](../../results/summary/SUMMARY_REPORT.md), cho so sanh thuc nghiem
-- [Bao cao ket qua tieng Viet](../../results/summary/SUMMARY_REPORT_vi.md), cho so sanh thuc nghiem
-- [Ghi chu ban thao 2025](../notes/sheep-scaling_paper2025.md)
-- [Ghi chu nghien cuu lien quan](../notes/related_work.md)
-- [Danh ba twin NetLogo](../../../integrations/netlogo/twins.json)
-- [Huong dan NetLogo](../../../platform/docs/guide/netlogo.md)
-- [Huong dan Compare](../../../platform/docs/guide/compare.md)
-- [Huong dan Experiments](../../../platform/docs/guide/experiments.md)
-- [Kiem thu API NetLogo](../../../tests/backend/api/test_netlogo_api.py)
-- [Kiem thu cau noi NetLogo](../../../tests/backend/test_netlogo.py)
+- [Báo cáo kết quả tiếng Anh](../../results/summary/SUMMARY_REPORT.md), cho so sánh thực nghiệm
+- [Báo cáo kết quả tiếng Việt](../../results/summary/SUMMARY_REPORT_vi.md), cho so sánh thực nghiệm
+- [Ghi chú bản thảo 2025](../notes/sheep-scaling_paper2025.md)
+- [Ghi chú nghiên cứu liên quan](../notes/related_work.md)
+- [Danh bạ twin NetLogo](../../../integrations/netlogo/twins.json)
+- [Hướng dẫn NetLogo](../../../platform/docs/guide/netlogo.md)
+- [Hướng dẫn Compare](../../../platform/docs/guide/compare.md)
+- [Hướng dẫn Experiments](../../../platform/docs/guide/experiments.md)
+- [Kiểm thử API NetLogo](../../../tests/backend/api/test_netlogo_api.py)
+- [Kiểm thử cầu nối NetLogo](../../../tests/backend/test_netlogo.py)

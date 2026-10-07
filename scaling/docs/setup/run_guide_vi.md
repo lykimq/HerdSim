@@ -1,8 +1,8 @@
-# Huong dan chay
+# Hướng dẫn chạy
 
-Chay lenh tu `/home/gwen/HerdSim`. Makefile dat `PYTHONPATH` va goi `scaling/scripts/campaign.py`.
+Chạy lệnh từ `/home/gwen/HerdSim`. Makefile đặt `PYTHONPATH` và gọi `scaling/scripts/campaign.py`.
 
-## Xem help va test
+## Kiểm tra và thử
 
 ```bash
 make -C scaling help
@@ -10,15 +10,15 @@ uv run scaling/scripts/campaign.py help
 make -C scaling scaling-test
 ```
 
-Target correctness chay:
+Mục tiêu đúng đắn chạy:
 
 ```bash
 uv run pytest tests/backend/correctness/test_scaling_stack.py -q
 ```
 
-So worker mac dinh la 18 cho host ghi trong `scaling/Makefile`. Tren may nho hon, override nhu `WORKERS=4`.
+Số worker mặc định là 18 cho máy chủ được ghi trong `scaling/Makefile`. Trên máy nhỏ hơn, ghi đè ví dụ `WORKERS=4`.
 
-## Phase 1: baseline size
+## Giai đoạn 1: kích thước cơ sở
 
 ```bash
 make -C scaling scaling-pilot
@@ -30,11 +30,11 @@ make -C scaling scaling-t1-plan
 make -C scaling scaling-t1
 ```
 
-Chay theo thu tu nay. Pilot la smoke check. Scout map luoi day du. Claim plan ghi cell selection nhung khong chay simulation. Claim reseed chay cac cell va tao merged claim data. T1 chi chay neu planner thay overcrowding.
+Dùng đúng thứ tự này. Pilot là kiểm tra khói. Scout lập bản đồ toàn lưới. Lập kế hoạch claim ghi lựa chọn ô nhưng không chạy mô phỏng. Gieo lại claim thực thi các ô đó và tạo tập dữ liệu claim đã hợp nhất. Lập kế hoạch và thực thi T1 chỉ có điều kiện khi phát hiện quá tải.
 
-Baseline da hoan thanh khong co overcrowding cell, nen Phase 1 T1 khong chay. Khong chay T1 chi de lap thu muc neu planner khong co cell.
+Bản đồ cơ sở đã hoàn thành không có ô quá tải, nên T1 Giai đoạn 1 không được chạy. Không chạy T1 chỉ để lấp thư mục trừ khi bộ lập kế hoạch của giao thức chỉ ra các ô.
 
-## Phase 2: structure
+## Giai đoạn 2: cấu trúc ban đầu
 
 ```bash
 make -C scaling scaling-pilot-state
@@ -44,11 +44,11 @@ make -C scaling scaling-phase2-claim-reseed
 make -C scaling scaling-analyse PROTOCOL=phase2_claim PACKAGE=B
 ```
 
-Moi layout va N co cua so frontier rieng.
+Mỗi bố cục và N nhận cửa sổ biên riêng.
 
-## Phase 4: transfer controller
+## Giai đoạn 4: bộ điều khiển chuyển giao
 
-Chay size va structure rieng cho Kubo:
+Chạy chiến dịch kích thước và cấu trúc riêng cho Kubo và FAT:
 
 ```bash
 make -C scaling scaling-transfer-size-scout TRANSFER_METHOD=kubo
@@ -59,11 +59,11 @@ make -C scaling scaling-transfer-structure-claim-plan TRANSFER_METHOD=kubo
 make -C scaling scaling-transfer-structure-claim-reseed TRANSFER_METHOD=kubo
 ```
 
-Lap lai voi `TRANSFER_METHOD=fat`. Package D chi tong hop sau khi du map bat buoc.
+Lặp lại với `TRANSFER_METHOD=fat`. Gói D được tổng hợp chung sau khi các bản đồ bắt buộc đã có.
 
-## Phase 5: information ladder
+## Giai đoạn 5: thang thông tin
 
-Observation:
+Quan sát:
 
 ```bash
 make -C scaling scaling-factor-sweep
@@ -71,7 +71,7 @@ make -C scaling scaling-phase5-obs-claim-plan
 make -C scaling scaling-phase5-obs-claim-reseed
 ```
 
-Sensing range:
+Tầm cảm biến:
 
 ```bash
 make -C scaling scaling-phase5-range-scout
@@ -79,7 +79,7 @@ make -C scaling scaling-phase5-range-claim-plan
 make -C scaling scaling-phase5-range-claim-reseed
 ```
 
-Communication:
+Giao tiếp:
 
 ```bash
 make -C scaling scaling-phase5-comm-scout
@@ -87,17 +87,19 @@ make -C scaling scaling-phase5-comm-claim-plan
 make -C scaling scaling-phase5-comm-claim-reseed
 ```
 
-Ba ladder la campaign rieng, khong phai Cartesian product.
+Các thang này là chiến dịch riêng, không phải tích Descartes.
 
-## Lenh campaign truc tiep
+## Lệnh chiến dịch trực tiếp
 
-Dang chung:
+Dạng chung:
 
 ```bash
 uv run scaling/scripts/campaign.py VERB --protocol PROTOCOL_ID [OPTIONS]
 ```
 
-Verb gom `run`, `claim-plan`, `claim-reseed`, `t1-plan`, `t1`, va `analyse`. Protocol ID duoc resolve trong `scaling/configs/protocols/`.
+Các động từ là `run`, `claim-plan`, `claim-reseed`, `t1-plan`, `t1`, và `analyse`. Định danh giao thức được resolve dưới `scaling/configs/protocols/`.
+
+Ví dụ:
 
 ```bash
 uv run scaling/scripts/campaign.py run --protocol phase1_scout --workers 8
@@ -106,9 +108,9 @@ uv run scaling/scripts/campaign.py claim-reseed --protocol phase1_claim --worker
 uv run scaling/scripts/campaign.py analyse --protocol phase1_claim --package A
 ```
 
-Option gom `--output`, `--workers`, `--upstream-trials`, `--no-analyse`, `--package`, `--trials`, `--methods`, `--layouts`, `--n`, `--d`, `--seeds`, `--max-ticks`, `--no-timeseries`, va `--no-resume`.
+Các tùy chọn hữu ích gồm `--output`, `--workers`, `--upstream-trials`, `--no-analyse`, `--package`, `--trials`, `--methods`, `--layouts`, `--n`, `--d`, `--seeds`, `--max-ticks`, `--no-timeseries`, và `--no-resume`.
 
-Make variable map toi filter:
+Biến Make ánh xạ tới các bộ lọc phổ biến:
 
 ```bash
 make -C scaling scaling-scout WORKERS=4 SCALING_N=100 SCALING_D=1 SCALING_SEEDS=2
@@ -116,19 +118,19 @@ make -C scaling scaling-analyse PROTOCOL=phase1_claim PACKAGE=F \
   TRIALS=scaling/results/phase1/claim/merged_trials.csv
 ```
 
-Filter va seed override dung cho chan doan. Run da filter khong phai campaign dong bang day du va khong duoc trinh bay nhu campaign day du.
+Bộ lọc và ghi đè seed hữu ích cho chẩn đoán. Một lần chạy đã lọc không phải chiến dịch đóng băng đầy đủ và không được trình bày như vậy.
 
-## Resume
+## Tiếp tục
 
-Resume bat mac dinh. Chay lai cung lenh voi cung output directory. Runner doc `manifest.jsonl` va bo trial key co `status=ok`. Key gom N, D, seed, layout, method, va factor observation, range, communication neu co.
+Tiếp tục được bật mặc định. Chạy lại cùng lệnh trên cùng thư mục đầu ra. Bộ chạy đọc `manifest.jsonl` và bỏ qua khóa lần thử có `status=ok`. Khóa lần thử gồm N, D, seed, bố cục, phương pháp, và mọi nhân tố quan sát, tầm, hoặc giao tiếp.
 
 ```bash
 make -C scaling scaling-scout
 ```
 
-Kiem tra `status.json` truoc va sau resume. File ghi so planned, done, pending tai luc bat dau, running, va timestamp. Tranh `--no-resume` tru khi co chu y chay moi, vi option nay tat skip key da xong.
+Kiểm tra `status.json` trước và sau khi tiếp tục. Tệp ghi các trường đã lập kế hoạch, đã hoàn thành, đang chờ lúc bắt đầu, đang chạy, và dấu thời gian. Tránh `--no-resume` trừ khi cần thực thi mới có chủ đích, vì tùy chọn này tắt việc bỏ qua khóa đã xong.
 
-## Phan tich trial co san
+## Phân tích lần thử có sẵn
 
 ```bash
 make -C scaling scaling-analyse \
@@ -137,36 +139,38 @@ make -C scaling scaling-analyse \
   TRIALS=scaling/results/phase1/claim/merged_trials.csv
 ```
 
-`TRIALS` va `OUT` la Make variable tuy chon. Neu analyse truc tiep khong co protocol, can ca `--trials` va `--output`.
+`TRIALS` và `OUT` là biến Make tùy chọn. Với một giao thức, chọn đầu vào mặc định theo cách nối chiến dịch. Phân tích trực tiếp không có giao thức cần cả `--trials` và `--output`.
 
-Package:
+Các gói tương ứng kế hoạch:
 
-- A: baseline size frontier va reliability.
-- B: structure.
-- C: mechanism.
-- D: transfer.
-- E: information substitution.
-- F: scaling fit.
-- G: early warning.
+- A: biên kích thước cơ sở và độ tin cậy.
+- B: cấu trúc.
+- C: cơ chế.
+- D: chuyển giao.
+- E: thay thế thông tin.
+- F: khớp scaling.
+- G: cảnh báo sớm.
 
-Package C, F, G chu yeu phan tich data da thu. G can timeseries. Scout protocol thuong dat `store_timeseries: false` de giam disk I/O; claim protocol dat true cho boundary trajectory.
+Gói C, F, và G chủ yếu phân tích dữ liệu đã thu. G cần chuỗi thời gian đã lưu. Giao thức scout thường đặt `store_timeseries: false` để giảm I/O đĩa; giao thức claim đặt true cho quỹ đạo biên.
 
-## Dau ra
+## Đầu ra
 
-| Artifact | Y nghia |
+Thư mục đầu ra của một giao thức thường chứa:
+
+| Artifact | Ý nghĩa |
 |---|---|
-| `protocol.yaml` | Recipe da resolve |
-| `provenance.json` | Protocol stamp, seed list, code va host metadata, metric ID, timestamp |
-| `manifest.jsonl` | Resume ledger voi `status=ok` |
-| `status.json` | So planned, done va timestamp |
-| `trials.csv` | Mot row moi simulation |
-| `boundary_cells.csv` | Cell do claim planner chon |
-| `merged_trials.csv` | Claim row thay scout row tai cell gieo lai |
-| `timeseries/*.parquet` | Trajectory moi trial neu bat |
-| `packages/` | Bang va hinh export |
-| `README.md` | Ghi chu run va link |
+| `protocol.yaml` | Công thức đã resolve được sao chép cho lần chạy |
+| `provenance.json` | Dấu giao thức, danh sách seed, siêu dữ liệu mã và máy chủ, định danh chỉ số, và dấu thời gian |
+| `manifest.jsonl` | Nhật ký tiếp tục; khóa lần thử thành công có `status=ok` |
+| `status.json` | Số đã lập kế hoạch và đã hoàn thành kèm dấu thời gian chạy |
+| `trials.csv` | Một dòng mỗi mô phỏng |
+| `boundary_cells.csv` | Lựa chọn lập kế hoạch claim, khi áp dụng |
+| `merged_trials.csv` | Dòng claim thay dòng scout tại ô gieo lại |
+| `timeseries/*.parquet` | Quỹ đạo theo lần thử khi được bật |
+| `packages/` | Bảng và hình đã xuất |
+| `README.md` | Ghi chú chạy cho người và liên kết |
 
-Path thuong gap:
+Vị trí điển hình:
 
 ```text
 scaling/results/phase1/pilot/
@@ -178,16 +182,16 @@ scaling/results/phase4/{kubo,fat}_{size,structure}/{scout,claim}/
 scaling/results/phase5/
 ```
 
-## Provenance va cach doc
+## Nguồn gốc và cách đọc
 
-Truoc khi trich ket qua:
+Trước khi trích một kết quả:
 
-1. Xac nhan `status.json` da hoan thanh.
-2. Xac nhan `protocol.yaml` co dung protocol, grade, factor, seed count.
-3. Giu `provenance.json` va `manifest.jsonl`.
-4. Dung `merged_trials.csv` cho claim, khong tu noi CSV.
-5. Xac nhan bao cao ghi grade CLAIM.
-6. Doc D = 35 la grid ceiling khi D_overcrowd trong.
-7. Ghi ro phase co dieu kien bi skip va trigger cua no.
+1. Xác nhận `status.json` báo hoàn thành.
+2. Xác nhận `protocol.yaml` đã sao chép có đúng giao thức, cấp độ, nhân tố, và số seed kỳ vọng.
+3. Giữ `provenance.json` và `manifest.jsonl`.
+4. Dùng `merged_trials.csv` cho phân tích claim, không nối tay.
+5. Xác nhận báo cáo ghi bằng chứng cấp CLAIM.
+6. Coi D = 35 là trần lưới khi D_overcrowd trống.
+7. Ghi rõ giai đoạn có điều kiện bị bỏ qua, gồm cả điều kiện kích hoạt.
 
-Hinh SCOUT chi dung lap ke hoach, khong duoc nang thanh verdict. Thu muc protocol la don vi provenance; recipe va record may-doc cua no uu tien hon vi du tong quat trong van ban.
+Hình scout có thể hướng dẫn lập kế hoạch nhưng không nâng được một claim. Thư mục giao thức là đơn vị nguồn gốc: công thức đã resolve và bản ghi máy của nó ưu tiên hơn ví dụ tổng quát trong văn bản.
