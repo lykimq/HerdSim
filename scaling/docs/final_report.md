@@ -50,33 +50,35 @@
 
 > When a few shepherds guide a larger flock, how much control do we actually need as the flock gets bigger or more spread out?
 
-That is the same basic problem as the draft sheep-scaling paper (dog count vs flock size, and whether spread helps explain difficulty). This report keeps that problem, but tries to be more careful:
+If the flock gets bigger, or starts more spread out, do you need more dogs?
 
-- say clearly what "how much control" means,
-- separate size from shape / state,
-- ask why a pattern shows up, not only that it does,
-- check whether it still shows up under a different herding method.
+That is the same basic problem as an earlier 2025 draft paper on sheep scaling. This report keeps that problem, but tries to be more careful:
 
-We are not starting from a claimed universal scaling law. We start from questions we can actually run.
+- say clearly what "how much control" means (not just a vibe),
+- separate flock *size* from flock *shape* at the start,
+- ask *why* a pattern shows up, not only that it does,
+- check whether the pattern still appears under a different herding method.
 
-HerdSim is the experimental platform for that program: a few dogs (or shepherds) guide a larger flock to a goal under conditions you can control and repeat. For this study it is a model system for measuring control demand, not an attempt to copy real farms in full.
+We are not assuming there is one universal scaling law. We start from questions we can actually run in simulation.
 
-Herding is a good fit because control is indirect:
+**HerdSim** is the platform we use for that. A few dogs guide a larger flock to a goal, under settings you can fix and repeat. For this study it is a model system for measuring *control demand* (how much dog effort you need for reliable success). It is not meant to copy a real farm in full.
+
+Herding is a good test case because control is *indirect*:
 
 > A small number of external controllers tries to steer a larger group whose members are not commanded one by one.
 
-The point of the platform is fairness and comparison. You can pick a method setup (how the sheep move plus how the dogs decide), put it in a scenario, fix a random seed, and measure what happens with shared metrics. That way you can see when herding works, when it fails, and how methods compare when flock size, sensing, and other settings are held fair.
+The platform is built for fair comparison. You pick a method (how sheep move and how dogs decide), put it in a scenario, fix a random seed, and score runs with the same metrics. Then you can see when herding works, when it fails, and how methods compare when size and other settings are held equal.
 
-HerdSim has 2 goals on one shared engine:
+HerdSim has two roles on one engine:
 
-a. **Simulation + frontend**: interactive UI - Simulate, Compare, Experiments, NetLogo, Guide.
-b. **Scaling**: CLI protocols that answer the scaling/control-demand research questions.
+a. **Simulation + frontend**: interactive UI (Simulate, Compare, Experiments, NetLogo, Guide).
+b. **Scaling**: command-line protocols that answer the control-demand research questions.
 
 ### Methods
 
-A method is a ready-made sheep plus dog package with paper-style defaults.
+A **method** is a ready-made package: a sheep model plus a dog controller, with paper-style defaults.
 
-Here are the methods currently in the platform:
+Methods currently in the platform:
 
 - `strombom`: Strombom 2014, 50 sheep, 1 shepherd
 - `strombom_multi`: Strombom Multi-Dog, 50 sheep, 3 dogs
@@ -90,65 +92,77 @@ Here are the methods currently in the platform:
 - `kubo`: Kubo 2022, 40 sheep, 4 dogs
 - `flocking_dog`: Flocking Dog 2024, 14 sheep, 1 dog
 
-This study focuses on three methods: `strombom_multi` (baseline), `kubo`, and `fat`.
-Controller detail and results are in [Methods and results](#6-methods-and-results).
+This study focuses on three of them: `strombom_multi` (our baseline), `kubo`, and `fat`.
+Full controller detail and results: [Methods and results](#6-methods-and-results).
 
 #### Why these three methods
 
-The frozen plan locks a baseline and a minimum transfer set for RQ4 (repeat size and structure maps under more than one herding method, then compare):
+The plan freezes one baseline and two other methods so we can ask: "If we change only the dog rules, does the size/structure story stay the same?" That is research question RQ4.
 
-| Method | Role in the plan | What it is in HerdSim (documented contrast) |
-|--------|------------------|-----------------------------------------------|
-| `strombom_multi` | Baseline | Multi-dog Collect/Drive on Strombom sheep (coordinated gather then drive) |
-| `kubo` | Required transfer | Continuous force model; no Collect/Drive switch; dogs press the sensed sheep farthest from the goal |
-| `fat` | Required transfer | Farthest-from-self targeting on Strombom sheep; no Collect/Drive switch; no dog-dog spacing |
+| Method | Role | Description |
+|--------|------|-------------------|
+| `strombom_multi` | Baseline | Dogs gather stragglers (Collect), then push the flock toward the goal (Drive) |
+| `kubo` | Required comparison | Continuous "force" rules; no Collect/Drive switch; each dog pushes the sheep farthest from the goal (among those it senses) |
+| `fat` | Required comparison | Each dog chases the sheep farthest from *itself*; no Collect/Drive switch; dogs do not space themselves apart |
 
-Reason for that set: RQ4 needs controller change on one frozen task (`drive_to_goal`), not three near-copies of Collect/Drive. The three entries above are the locked minimum claim set. `communication_free` is the recommended next transfer method, outside that minimum. Other catalogue presets are available in the platform but are not part of the current transfer claim unless a later decision adds them.
+We need different *kinds* of controllers on the **same** task (`drive_to_goal`), not three tiny variants of Collect/Drive. Those three are the locked minimum set for claims. `communication_free` is recommended next, but outside that minimum. Other presets exist in the UI; they are not part of the current claim set unless we add them later.
 
-What a shared vs broken pattern means: if the same `D_min` / regime story appears in all three, the pattern is not only a baseline quirk; if it fails for Kubo or FAT, that bounds how far we can generalise. That is the RQ4 meaning, not a claim that these three exhaust all herding methods.
+If all three methods show the same pattern (for example the same smallest reliable dog count), that pattern is more likely a real feature of the task, not a quirk of one controller. If Kubo or FAT breaks the pattern, we learn how far we can generalise. That is what RQ4 is for. It does *not* mean these three methods cover every herding idea in the world.
 
 #### Method tracks: transfer vs draft
 
-Two different experiment purposes, same broad control-demand question:
+We pursue the same broad question ("how much control as size and spread change?") in two different ways:
 
-| Track | What the plan changes | Why that track exists | Linked RQs |
-|-------|----------------------|------------------------|------------|
-| Same-protocol transfer (`strombom_multi`, `kubo`, `fat`; next: `communication_free`) | Dog/sheep rules only; task and grids stay frozen | Answer RQ4: which patterns survive a controller change | RQ1 to RQ4 now; RQ5 to RQ7 follow-on |
-| Draft-style method / protocol (HerdSim port) | Task, arena, starts, and often the controller family (collect, hold, gate) | Credibility / task sensitivity: the 2025 draft used a different hard task; planned as a HerdSim rerun, not done yet | Same central question; not a substitute for RQ4 |
+| Track | What we change | Why | Linked RQs |
+|-------|----------------|-----|------------|
+| Same-task transfer (`strombom_multi`, `kubo`, `fat`; next: `communication_free`) | Only dog/sheep rules; task and grids stay fixed | See which patterns survive a controller change (RQ4) | RQ1 to RQ4 now; RQ5 to RQ7 later |
+| Draft-style method in HerdSim (planned) | Task, arena, starts, and often the controller family (collect, hold, gate) | The 2025 draft used a collect-hold-gate task; planned as a HerdSim port to ask the same RQs there | Same central question; not a substitute for RQ4 |
 
-The draft method is therefore under [Prior draft paper](#2-prior-draft-paper), not a fourth row in the required transfer set. Choosing `drive_to_goal` as the main task is the frozen HerdSim protocol choice for fair method comparison. It is not a claim that the draft task is wrong, and "easy compact floor" is a measured outcome under that protocol, not the reason the task was chosen.
+The draft track lives under [Prior draft paper](#2-prior-draft-paper). It is not a fourth transfer method beside Kubo and FAT.
+
+We use `drive_to_goal` as the main task because that is the frozen HerdSim protocol for fair method comparison. That choice does *not* say the draft task is wrong. When we later say the compact baseline looks "easy" (often one dog is enough), that is a measured outcome, not the reason we picked the task.
 
 #### Does this answer the central question?
 
-"How much control" here means the viable shepherd range (`D_min`, waste vs overcrowding / `D_max`) under a frozen reliability bar and deadline. RQ2 / RQ6 cover size; RQ1 structure; RQ3 mechanism when overcrowding contrasts exist; RQ4 method transfer; RQ5 and RQ7 follow-on.
+Here, "how much control" means the useful dog range under fixed rules:
 
-The program answers by bounding the question inside this protocol: where dog need is stable, where cost rises without `D_min` rising, where transfer fails, and later whether information or early state can substitute for dogs. Completed findings and per-RQ answers are in [Findings synthesis](#7-findings-synthesis) and [Answers to research questions](#8-answers-to-research-questions). This study does not claim a universal farm law, that the draft's rising `D_min` is wrong on its own task, or that every method needs one dog within D <= 35.
+- **`D_min`**: smallest dog count that still succeeds often enough (at least 90% of runs),
+- what happens if you add more dogs: useful, wasteful walking, or real overcrowding collapse,
+- all under a fixed time limit.
+
+Which RQ covers which piece: size is RQ2 (and curve fits in RQ6); start shape is RQ1; "why" is RQ3 when we have overcrowding contrasts; method transfer is RQ4; information and early warning are RQ5 and RQ7.
+
+The program answers by *bounding* the question inside this protocol: where dog need stays low, where cost rises without needing more dogs, where transfer fails, and later whether better sensing can replace dogs. Completed findings: [Findings synthesis](#7-findings-synthesis). Per-question answers: [Answers to research questions](#8-answers-to-research-questions).
+
+This study does **not** claim a universal farm law, that the draft's rising dog counts are wrong on the draft's own task, or that every method needs only one dog for D up to 35.
 
 ---
 
 ## 2. Prior draft paper
 
-The 2025 draft paper "Collective Nudging that Scales".
+The 2025 draft is titled "Collective Nudging that Scales". It asked a simple question: how many dogs do I need to herd sheep?
 
-- Question: How many dogs do I need to herd sheep?
+It was run in **NetLogo** (not HerdSim). The important differences from our main study:
+
+- **Task**: gather the flock, hold it for 800 ticks, then push it out through a gate (not our open-field `drive_to_goal`).
+- **Success**: every sheep through the gate by 10,000 ticks.
+- **Arena**: patch grid 101 x 71, with a central hold zone and a gate on the right wall.
+- **Starts**: sheep scattered at random; dogs start in a top-left grid.
+- **Controller**: one NetLogo collect / drive / patrol family.
+- **Same idea of reliability**: succeed in at least 90% of runs; `D_min` is the smallest dog count that hits that bar.
+- **Grids**: dog counts up to 35; flock sizes up to 400 (details in the list below).
+
+Full setup notes:
+
 - NetLogo: 7.0.3 on a patch grid.
-- Task: Collect, hold for 800 ticks, then exit through a gate.
-- Success: All sheep pass through the gate by 10,000 ticks.
-- Arena: 101 x 71 patches, central containment zone, right-wall gate.
-- Containment or goal: `rc = clamp (2.5 * sqrt (N), 23, 27)`
-- Sheep start: Random scatter with wall and dog buffers.
-- Dog start: Top-left corner grid.
-- Control scope: One NetLogo collect, drive, and patrol family.
+- Containment radius: `rc = clamp (2.5 * sqrt (N), 23, 27)`.
 - D grid: `{1, 2, 3, 4, 6, 10, 15, 20, 25, 35}`.
 - N grid: `{5, 10, 25, 50, 100, 150, 200, 250, 300, 350, 400}`.
-- Sampling: 100 runs in every cell, 11,000 total.
-- Seed definition: Master seed not stated in the note.
-- Reliability: SR >= 90%.
-- D_min: Smallest D with SR >= 90%.
-- D_overcrowd: First D above D_min where SR starts decreasing.
-- D_max: First D above D_min with SR >= 90%, otherwise ceiling.
-- Structure: Emergent spread summarized by `S_bar`.
-- Metrics: Success, ticks, phase, spread, path and lost sheep.
+- Sampling: 100 runs in every cell (11,000 total).
+- Seed: master seed not stated in the note.
+- `D_overcrowd` / `D_max`: draft definitions differ slightly from ours (see comparison figures later).
+- Structure: emergent spread summarized by `S_bar`.
+- Metrics: success, ticks, phase, spread, path, lost sheep.
 
 ![2025 draft task phases.](../results/summary/figures/schematics/en/draft_task_phases.svg)
 
@@ -160,7 +174,9 @@ The 2025 draft paper "Collective Nudging that Scales".
 
 ### Result of the paper
 
-At SR >= 90%, draft Table A3 reports:
+For small flocks one dog often worked; for large flocks the draft needed many more dogs (tens of dogs at N around 200 to 400).
+
+At success rate (SR) >= 90%, draft Table A3 reports:
 
 | N   | D_min | D_max     | Maximum SR |
 |-----|-------|-----------|------------|
@@ -176,9 +192,9 @@ At SR >= 90%, draft Table A3 reports:
 | 350 | 35    | not reach | 91%        |
 | 400 | 35    | not reach | 91%        |
 
-Here "not reach" means the upper failure boundary was not found by D = 35.
+Here "not reach" means they never found an upper failure point before D = 35.
 
-It also reports a negative association between mean spread and success, including Spearman `rho = -0.701` for `S_bar` against SR and `rho = -0.828` for `S_bar * N` against SR over 110 condition aggregates.
+The draft also found that more spread tended to go with worse success (Spearman `rho = -0.701` for mean spread `S_bar` vs SR, and `rho = -0.828` for `S_bar * N` vs SR, over 110 condition aggregates).
 
 ![2025 draft main results sketch.](../results/summary/figures/schematics/en/draft_main_results.svg)
 
@@ -186,95 +202,110 @@ It also reports a negative association between mean spread and success, includin
 
 ### If we rerun a draft-style method
 
-The draft method was not rerun here. The planned rerun is in HerdSim: bring the draft collect / hold / gate task and controller family into HerdSim (not a NetLogo rerun). The point is to ask the same control-demand questions on that task, together with the planned RQs, not to treat the draft as one more controller on `drive_to_goal`.
+We did **not** rerun the draft in this campaign. The plan is to port that collect / hold / gate task (and its controller family) into **HerdSim**, not to rerun NetLogo.
 
-| Question the draft rerun would ask | Planned RQ it answers with |
-|------------------------------------|----------------------------|
-| As flock size grows on the collect-hold-gate task, how does the viable dog range change (`D_min`, and whether more dogs help, plateau, or hurt)? | RQ2 (size and regimes), and RQ6 once frontiers exist |
-| At fixed N on that task, does start shape or hold-phase state change how many dogs we need? | RQ1 (structure), using draft-style state such as spread / `S_bar` where relevant |
-| If overcrowding cells appear, which mechanisms separate efficient from overcrowding runs? | RQ3 (mechanism), only when those contrasts exist |
-| On a frozen draft-style task, which patterns still hold when we change only the controller? | RQ4 (transfer), after the draft task is frozen first |
-| On that task, can richer information lower `D_min` at fixed reliability? | RQ5 (information ladders) |
-| On that task, can recent state warn of failure better than N and D alone? | RQ7 (early warning) |
+The aim is to ask the same research questions on that collect-hold-gate task, alongside the questions already asked on `drive_to_goal`. It is not equivalent to adding one more dog rule on the current task.
 
-Together: the planned RQs stay the program's questions; the HerdSim draft-style rerun asks them again under that task and method. Track placement: [Method tracks: transfer vs draft](#method-tracks-transfer-vs-draft).
+| Question the HerdSim draft rerun would ask | Planned RQ |
+|--------------------------------------------------|--------------------------|
+| As flock size grows on collect-hold-gate, how many dogs do you need, and do extra dogs help, plateau, or hurt? | RQ2 (size and regimes); RQ6 after we have frontiers |
+| At the same flock size, does start shape or hold-phase state change how many dogs you need? | RQ1 (structure), using draft-style state such as spread / `S_bar` where useful |
+| If too many dogs start to hurt success, what mechanisms separate "good" cells from overcrowded ones? | RQ3 (mechanism), only if those contrasts appear |
+| On a frozen draft-style task, which patterns still hold when we change only the controller? | RQ4 (transfer), after that task is frozen first |
+| On that task, can better sensing or communication reduce the dog count at the same reliability? | RQ5 |
+| On that task, can recent flock state warn of failure better than knowing only N and D? | RQ7 |
+
+The planned RQs stay the program's questions; the draft-style HerdSim run asks them again under that task. Track placement: [Method tracks: transfer vs draft](#method-tracks-transfer-vs-draft).
 
 ---
 
 ## 3. Research questions
 
-The program asks how much external control is needed to guide a collective reliably as flock size and initial structure change, which processes explain that demand, and which patterns transfer across shepherding methods.
+The program asks how many dogs are needed for reliable herding as the flock gets bigger or more spread out, why that demand appears, and whether the answer depends on which herding method you use.
 
-For each core question below: what we want to know, how we study it, and what kinds of answers would count. We are not locking in a preferred outcome ahead of time.
+For each core question below: what we want to know, how we study it, and what kinds of answers would count. We do not lock in a preferred outcome ahead of time.
 
 ### What we want from the program
 
-After the core runs, we should be able to say something concrete about how control need changes with group size, whether shape / state matters beyond size, which processes drive the pattern, and what looks shared across methods versus method-specific. A simple predictive rule would be useful; strong method dependence would also be useful, because it bounds how far we can generalise. Relative to a single-method scaling study, that means defining control demand in a reusable way, separating size from structure, testing mechanisms instead of stopping at correlation, and checking which features survive a method change.
+After the core runs, we should be able to say something concrete about:
+
+- how dog need changes as the group grows,
+- whether start shape matters beyond size,
+- which processes seem to drive the pattern,
+- what looks shared across methods versus method-specific.
+
+A simple predictive rule would be useful. Strong method dependence would also be useful: that still bounds how far results can be generalised. Relative to a single-method scaling study, the program defines control demand in a reusable way, separates size from structure, tests mechanisms instead of stopping at correlation, and checks which features survive a method change.
 
 ### Core questions
 
-#### Size and operating regimes (RQ2, with fits in RQ6)
+#### Size and operating regimes (RQ2, with curve fits in RQ6)
 
-**Question.** As flock size grows, how does the viable shepherd range change: the minimum needed for reliable herding, and the point where adding more stops helping or starts hurting? RQ6 asks which planned curve best predicts held-out N, and whether a single power law is adequate.
+**Question.** As flock size grows, how does the useful dog range change: the minimum needed for reliable herding, and whether adding more still helps, mostly wastes path, or starts to hurt?
 
-**Approach.** Freeze the protocol. Vary `N`, keep other settings as fixed as we can. For each `N`, find the smallest `D` that hits the reliability target, and note whether larger `D` still helps, plateaus, or hurts. Only fit scaling models once we have real frontiers.
+RQ6 is the follow-on modeling step: once we have those minimums (`D_min` vs N), which simple curve best predicts a held-out flock size, and is one power law enough?
 
-**Possible results.** Linear, sublinear, or superlinear growth; different behaviour in different size bands; saturation or thresholds; or nothing simple. We also care about operating regimes (too few / efficient / wasteful / overcrowding).
+**Approach.** Freeze the protocol. Change flock size `N`, keep other settings fixed. For each `N`, find the smallest dog count `D` that hits the reliability target, and check whether larger `D` still helps, plateaus, or hurts. Only fit curves after those frontiers exist.
+
+**Possible results.** Dog need may grow smoothly, grow in steps, stay flat, or look messy. We also label operating regimes: too few dogs, efficient, wasteful (success but lots of walking), or overcrowding (success falls when D is high).
 
 #### Structure (RQ1)
 
-**Question.** At the same flock size, does flock shape/state (spread, fragmentation, outliers, etc.) change how much control we need? In the claim form: does `D_min` change across initial layout at fixed N?
+**Question.** At the same flock size, does start shape (spread, split, outliers) change how many dogs are needed?
 
-**Approach.** Hold `N` fixed in matched comparisons. Change initial structure on purpose. Measure a few structural properties and see how much of the leftover variation size alone cannot explain.
+In claim form: does `D_min` change across initial layouts at fixed N?
 
-**Possible results.** Size is almost enough; one or a few structure measures pick up the rest; or different properties matter at different sizes.
+**Approach.** Hold `N` fixed. Change only the starting layout on purpose. Measure a few shape properties and see how much leftover difficulty size alone cannot explain.
+
+**Possible results.** Size may be almost enough; a few structure measures may explain the rest; or different properties may matter at different sizes.
 
 #### Mechanism (RQ3)
 
-**Question.** Why does that pattern appear (for example interference, coverage limits, fragmentation)? Which prespecified mechanism signatures distinguish efficient and overcrowding cells at the same N?
+**Question.** Why does the pattern appear (for example dog interference, flock splitting, coverage limits)?
 
-**Approach.** Candidates include spatial demand, fragmentation, controller interference, redundant control, and local instability. Log run-level quantities tied to those ideas, see which track control demand, and intervene when we can. Correlation by itself is not treated as causation.
+In claim form: which prechosen signatures separate efficient cells from overcrowding cells at the same N?
+
+**Approach.** Candidates include spatial demand, fragmentation, dog interference, redundant control, and local instability. We log quantities tied to those ideas and compare. Correlation alone is not treated as proof of cause.
 
 **Possible results.** One main mechanism; several mechanisms in different regimes; or a pattern that does not reduce to one clean story.
 
 #### Generality across methods (RQ4)
 
-**Question.** Which frontier, regime, and structure patterns transfer across the three required methods?
+**Question.** If we switch herding method, which parts of the pattern stay the same?
 
-**Approach.** Rerun the core size and structure experiments under more than one method. Compare scaling shape and regime labels, not only raw success rates. Mark what looks shared vs method-specific.
+**Approach.** Rerun the core size and structure maps under `strombom_multi`, `kubo`, and `fat`. Compare frontiers and regime labels, not only raw success rates. Mark what is shared vs method-specific.
 
-**Possible results.** Fully method-specific scaling; same shape with different magnitude; or same shape with method-dependent thresholds and slopes. Strong method dependence would limit how far we can talk about "scaling" apart from the controller.
+**Possible results.** Fully method-specific; same shape with different magnitude; or same shape with different thresholds. Strong method dependence limits how far we can talk about "scaling" apart from the controller.
 
 ### Follow-on questions
 
-These sit after the core four. They should not rewrite the first scientific question.
+These come after the core four. They should not rewrite the first scientific question.
 
-| Topic | ID | Question in brief |
-|-------|----|-------------------|
-| Information vs shepherds | RQ5 | Can richer observation, sensing range, or communication lower `D_min` at fixed reliability? |
-| Early warning | RQ7 | Can recent state predict a later failure better than N and D alone? |
-| Time as a resource | protocol `T0`/`T1` | How does a tighter or looser time limit change control demand? |
-| Collapse beyond D = 35 | RQ2 upper band (extension) | Does reliability fall for D > 35, or only path waste continue? See [Future work: measuring collapse beyond D = 35](#future-work-measuring-collapse-beyond-d--35). |
+| Topic | ID | Question |
+|-------|----|----------------|
+| Information vs shepherds | RQ5 | Can better sensing or communication reduce the dog count at the same reliability? |
+| Early warning | RQ7 | Can recent flock state warn of failure better than knowing only N and D? |
+| Time as a resource | protocol `T0`/`T1` | Does a tighter or looser deadline change how many dogs you need? |
+| Collapse beyond D = 35 | RQ2 upper band (extension) | If we allow more than 35 dogs, does success eventually fall, or only path waste keep rising? See [Future work](#future-work-measuring-collapse-beyond-d--35). |
 | Other systems | later | Do similar patterns appear outside sheep-herding simulations? |
 
-RQ6 (scaling fits) stays with the size question above: fit curves only after claim-grade frontiers exist. Operating regimes (too few / efficient / wasteful / overcrowding) belong with the size question, not a separate RQ.
+RQ6 (curve fitting) stays with the size question: fit only after solid frontiers exist. Regimes (too few / efficient / wasteful / overcrowding) also belong with size, not as a separate RQ.
 
 ### Scope
 
 **In scope for the core program**
 
-- collective size and structure
-- external control demand and viable shepherd range
+- flock size and start structure
+- how much external control you need for reliable success
 - scaling relationships and mechanisms
-- generality across control methods
-- reproducible protocol
+- whether results transfer across control methods
+- a reproducible protocol
 
 **Not primary goals**
 
-- finding the single best herding algorithm
-- reproducing every detail of real livestock behaviour
+- finding the single "best" herding algorithm
+- copying every detail of real livestock
 - optimizing one controller architecture
-- claiming results for every collective system out of the gate
+- claiming results for every collective system at once
 - shipping a real-time failure-prediction product
 
 Those can wait until the core scaling questions are clearer. Only claim what the evidence supports.
@@ -282,6 +313,15 @@ Those can wait until the core scaling questions are clearer. Only claim what the
 ---
 
 ## 4. Shared protocol
+
+| Term | Meaning |
+|------|---------|
+| `N` | Number of sheep |
+| `D` | Number of dogs |
+| `R` | Success rate: fraction of repeated runs that finish in time |
+| `theta` | Reliability bar (here 0.90: succeed in at least 90% of runs) |
+| `D_min` | Smallest tested D with `R >= theta` |
+| Compact start | Sheep begin in a tight clump |
 
 ### Core protocol
 
@@ -315,21 +355,19 @@ Those can wait until the core scaling questions are clearer. Only claim what the
 
 #### Some reasons for the setup
 
-These are the locked protocol reasons (field size, goal, grids, layouts), not post-hoc stories from the results.
+These reasons were locked in the plan (field, goal, grids, layouts). They are not stories made up after seeing the results.
 
 ##### Field
 
-The square 500 field accommodates a wide three-sigma draw with reach 180 and the approximate N = 400 outlier reach of 174 while leaving about 70 units of margin.
+We use a 500 by 500 square so wide and outlier-rich starts still fit with room to spare. A much smaller field (150) cannot hold those starts. A 400 field is tight on the wide start. A 1000 field mostly adds empty space.
 
-A 150 field cannot contain those starts, a 400 field leaves only about 20 units on the wide draw, and a 1000 field adds unused space.
-
-The midline goal keeps vertical margin equal.
+The goal sits on the horizontal midline so top and bottom margins stay equal.
 
 ![Field and arena overview.](../results/summary/figures/schematics/en/arena_overview.svg)
 
 *500 by 500 field, flock centre, midline goal, and margin for wide starts.*
 
-The 120-unit drive is outside the compact start and past one wide sigma even at the large goal; 80 would sit inside the wide cloud, while 200 would put the far goal edge on the wall.
+The flock must travel 120 units from centre to goal. That is far enough that a tight start is not already "in" the goal, but not so far that the goal sits against the far wall.
 
 ![Compact drive geometry.](../results/summary/figures/schematics/en/arena_compact.svg)
 
@@ -337,9 +375,7 @@ The 120-unit drive is outside the compact start and past one wide sigma even at 
 
 ##### Radius
 
-At N=50 the radius is 15, matching the application goal and exceeding the approximate packed radius of 8. A radius of 8 risks jamming and 30 makes the target much easier. Square-root scaling keeps goal area per sheep constant.
-
-A fixed radius would jam large flocks. The Strombom collect switch `r_a * N^(2/3)` is controller-specific and is not used as the goal radius.
+At N = 50 the goal radius is 15: big enough that sheep are not jammed into a tiny disk, but not so big that the task becomes trivial. We grow the radius with `sqrt(N)` so goal *area per sheep* stays roughly constant. A fixed radius would squeeze large flocks. We do **not** reuse the Strombom Collect radius as the goal size (that Collect rule is controller-specific).
 
 ![Goal radius scaling.](../results/summary/figures/schematics/en/goal_radius.svg)
 
@@ -347,9 +383,9 @@ A fixed radius would jam large flocks. The Strombom collect switch `r_a * N^(2/3
 
 ##### Flock-size and dog-count grid
 
-Why these N values: N=5 is the floor because smaller groups do not support the same collective quantities. The grid is denser near 100, includes 300 and 400 for large-N behavior, and omits 250 and 350 because every extra N requires a complete dog-count sweep.
+**Why these flock sizes (N):** N = 5 is the smallest size where the same collective measures still make sense. We sample more densely around N = 100, include 300 and 400 for large flocks, and skip 250 and 350 because each extra N needs a full sweep over dog counts.
 
-Why these D values: unit steps cover the likely low-D frontier; larger steps test whether large additions help or hurt. The cap of 35 matches the program's "few shepherds" scope (central question). It is a tested-grid ceiling for that scope, not a physical or farm limit, and not a claim that overcrowding cannot appear above 35 ([Future work: measuring collapse beyond D = 35](#future-work-measuring-collapse-beyond-d--35)).
+**Why these dog counts (D):** fine steps at low D (where the minimum usually sits), then larger jumps to see whether "many more dogs" help or hurt. The top of the list is 35 because the central question is about a *few* shepherds. That is a grid ceiling for this study, not a physical farm limit, and not proof that overcrowding cannot appear above 35 ([Future work](#future-work-measuring-collapse-beyond-d--35)).
 
 ![Frozen N and D grids.](../results/summary/figures/schematics/en/design_nd_grids.svg)
 
@@ -373,19 +409,18 @@ Information experiments use `rq5_flock_sizes`. N=50 is omitted because a D_min a
 
 ### Initial layouts
 
-| Layout         | Construction                                                                           | Validation gate                                      |
-|----------------|----------------------------------------------------------------------------------------|------------------------------------------------------|
-| `compact`      | Gaussian with sigma `0.3 * initial_spread = 9`                                         | Lower cohesion distance than `wide`                  |
-| `wide`         | Gaussian with sigma `2.0 * initial_spread = 60`                                        | Higher cohesion distance than `compact`              |
-| `split`        | Two clusters below N=12, otherwise three; gap at least `2 * measurement_radius = 10` | Lower largest-component fraction than `compact`      |
-| `outlier_rich` | Core about 80%; about 20% beyond `r_a * N^(2/3)`                                       | Higher outlier count than `compact`                  |
+We hold flock size fixed and change only how sheep are placed at the start:
 
-- Compact sigma 9 approximates a packed N = 50 flock.
-- Wide sigma 60 creates a clear cohesion contrast while fitting the field. A sigma of 120 would not fit.
-- Split avoids 3 implausibly tiny subflocks below N=12.
-- 20% outliers creates a real minority without becoming a second flock. Points outside the field or inside the goal are redrawn, not clipped to a boundary.
+| Layout | Picture | How we build it |
+|--------|---------------|-------------------------|
+| `compact` | Tight clump | Narrow Gaussian (sigma 9) |
+| `wide` | Very spread out | Wide Gaussian (sigma 60) |
+| `split` | Two or three separate clumps | Gaps of at least 10 units |
+| `outlier_rich` | Main flock plus far stragglers | About 80% core, 20% far outliers |
 
-The measurement radius is 5. It links compact neighbors normally separated by about 2 to 4 units, but does not bridge split gaps of at least 10.
+Checks: compact should look tighter than wide; split should look more broken than compact; outlier_rich should show more outliers than compact. Points that land outside the field or inside the goal are redrawn (not stuck on the wall).
+
+A connectivity radius of 5 links nearby compact neighbors but does not bridge the split gaps.
 
 ![Four initial layouts.](../results/summary/figures/schematics/en/four_layouts.svg)
 
@@ -393,23 +428,32 @@ The measurement radius is 5. It links compact neighbors normally separated by ab
 
 ### Frontier, regimes, and failure labels
 
-Control demand is how much external control is needed for a chosen reliability. The primary measure is the viable shepherd range around `D_min` and overcrowding. `D_min` is not a universal property of a flock: it depends on task, time limit, information, success rule, and other fixed settings.
+**Control demand** means: how many dogs do you need so that herding succeeds often enough? We measure that mainly with the useful dog range around `D_min`, and with whether too many dogs start to hurt.
 
-Dog counts come from the frozen `shepherd_counts` grid (not every integer).
+`D_min` is not a property of sheep in nature. It depends on the task, time limit, sensing, success rule, and other frozen settings.
 
-Let `R(m, tau, N, D, T, X0, I)` be the probability of success estimated over locked seeds for method `m`, protocol `tau`, flock size `N`, shepherd count `D`, deadline `T`, layout `X0`, and information condition `I`.
+We only test the dog counts on the frozen list (not every integer).
 
-- `D_min`: Smallest tested D with `R >= theta`.
-- `D_overcrowd`: Smallest D after `D_min` for which that D and the next tested D are both below theta.
-- `D_max`: Largest reliable D below `D_overcrowd`; without overcrowding, the largest tested reliable D, which can only be a grid ceiling.
-- `B*`: Reliable `(D, T)` with minimum median shepherd path; ties use smaller D, then faster median success time.
-- Hard failure: No tested D reaches theta.
-- Under-resourced failure: `R < theta` below `D_overcrowd`.
-- Efficient operation: `R >= theta` and median path is below the wasteful threshold.
-- Wasteful overspend: `R >= theta` and median path is at least 20% above `B*`; also report 10% and 30%.
-- Overcrowding collapse: `R < theta` at or above `D_overcrowd`.
+Success rate `R` is estimated over locked random seeds for a given method, protocol, N, D, time limit, start layout, and information setting.
 
-Waste: R stays at or above theta while path grows. Overcrowding: after a reliable band, R falls below theta for two consecutive tested D. Without overcrowding, reported `D_max` at the grid top is a ceiling only (empirical meaning: [Upper frontier status](#upper-frontier-status)).
+| Label | Meaning |
+|-------|----------------|
+| `D_min` | Smallest tested dog count with `R >= 0.90` |
+| `D_overcrowd` | After a good band, the first place where two steps in a row fall below 0.90 |
+| `D_max` | Largest still-reliable D before overcrowding; if there is no overcrowding, this is just the top of the tested list (a ceiling) |
+| `B*` | Among reliable choices, the one with the shortest median dog walking distance (ties: fewer dogs, then faster finish) |
+| Hard failure | No tested D reaches 0.90 |
+| Under-resourced | Too few dogs; `R` below 0.90 |
+| Efficient | Reliable and path is not much above `B*` |
+| Wasteful | Reliable, but dogs walk a lot more than at `B*` (default: 20% more path; we also report 10% and 30%) |
+| Overcrowding | After a reliable band, success falls again when D is high |
+
+**Waste vs overcrowding:**
+
+- **Waste:** still succeed often, but extra dogs mostly walk more.
+- **Overcrowding:** after a good winning band, success falls under 90% again for two steps in a row.
+
+If there is no overcrowding, a reported `D_max = 35` only means "still OK at the largest D we tested," not "collapse begins at 35." Detail: [Upper frontier status](#upper-frontier-status).
 
 ![Waste versus overcrowding.](../results/summary/figures/schematics/en/overcrowd_example.svg)
 
@@ -444,7 +488,9 @@ Failure labels:
 
 ## 5. Campaign design
 
-Claim-grade maps need precise success rates near frontiers (`D_min`, overcrowding). Running every cell at 100 seeds wastes budget: interior cells that always succeed or always fail teach little at that depth. The staged pipeline spends cheap seeds everywhere, learns which cells matter, then spends expensive seeds only on those cells. The same pattern applies to size, structure, transfer, and information ladders. One flat 100-seed full grid would buy little extra science on obvious cells and burn the budget before later phases.
+We need accurate success rates near the important edges (where `D_min` sits, and where overcrowding might start). Running *every* cell at 100 random seeds would waste budget: cells that always succeed or always fail teach little at that depth.
+
+So we use a staged pipeline: cheap seeds everywhere first (scout), learn which cells matter, then spend expensive seeds only there (claim). The same idea is used for size, structure, transfer, and later information ladders.
 
 ![Phase roadmap.](../results/summary/figures/schematics/en/phase_roadmap.svg)
 
@@ -491,17 +537,30 @@ Stop after scout if the map is broken, the grid must change, or the bootstrap in
 
 ### Claim windows and merge
 
-For each method, layout, and N (or each factor level in a ladder), the claim planner selects:
+After the scout map, we only reseed the cells that matter:
 
-- Reliability window: scout `D_min`, plus the previous and next grid `D`.
-- Overcrowding window (only if two consecutive `D` after that candidate stay below theta): those two `D` and the last `D` still at or above theta.
-- If no `D` reaches theta: the two largest tested `D`.
+- Around the scout's `D_min`: that D, plus the previous and next dog counts on the list.
+- If overcrowding seems to start (two steps in a row below 0.90): those two D values and the last still-reliable D.
+- If nothing reaches 0.90: the two largest D values we tested.
 
-On a cell that received claim seeds, analysis uses those claim rows only. Other cells keep scout rows. Scout and claim rows are not stacked on the same cell. If the bootstrap CI on `D_min` spans more than one grid step, raise that window to 200 seeds before the structure claim.
+For a cell that got claim seeds, we use only those claim rows in the analysis. Other cells keep their scout rows. We never mix scout and claim rows in the same cell. If the bootstrap interval on `D_min` is wider than one dog-count step, that window is raised to 200 seeds before a structure claim (next subsection).
 
-![Bootstrap on D_min.](../results/summary/figures/schematics/en/design_bootstrap.svg)
+### Bootstrap on `D_min` (analysis, then maybe more seeds)
 
-Bootstrap resamples the locked seed list within each D (1,000 resamples). For each resample, recompute success rates and the resulting D_min on the tested grid. The reported interval is the spread of those resampled D_min values. If that interval spans more than one grid step, raise the claim window to 200 seeds before using the cell in a structure claim. Undefined D_min draws (no D reaches theta) stay right-censored above the tested grid.
+Bootstrap is not a campaign phase and not 1,000 new simulations. After scout/claim rows are locked, we reshuffle those existing seeds with replacement 1,000 times, recompute `D_min` each time, and take the 2.5% and 97.5% percentiles as the interval. If a resample never clears theta, that draw stays right-censored above the tested grid. Width zero means every resample gave the same `D_min`.
+
+The rule that follows is separate from the bootstrap itself:
+
+1. Run bootstrap on the locked claim (or scout) seeds.
+2. If the interval spans more than one dog-count step on the frozen D grid, raise that claim window to 200 real simulation seeds.
+3. Bootstrap again on the new seed bag.
+4. Report the point `D_min` with the new interval. More seeds can shrink noise, but they do not guarantee a one-step cliff: soft edges stay soft.
+
+Worked case (Phase 4 Kubo): `outlier_rich`, `N=200` hit a wide interval, so those D cells were raised to 200 seeds. After the deeper bag, the point estimate is still `D_min=20` and the bootstrap interval is still `[2, 20]`. Details under [`kubo`](#kubo).
+
+![Bootstrap on D_min, then raise to 200 seeds when the interval is wide.](../results/summary/figures/schematics/en/design_bootstrap.svg)
+
+*Top: resample locked seeds (analysis only). Bottom: wide interval triggers new sims at 200 seeds, then bootstrap again; the interval can remain wide.*
 
 ### How each phase uses the pipeline
 
@@ -561,13 +620,17 @@ Planned Phase 5 scout sizes (for later fill-in): observation 1080 (done); range 
 
 ## 6. Methods and results
 
-Shared grids, reliability, deadlines, and staging are defined once in [Shared protocol](#4-shared-protocol) and [Campaign design](#5-campaign-design). This section covers controller detail, method-specific run notes, and results. Each method keeps its own controller schematic and result plots (no shared three-panel repeats here).
+The shared rules (field, grids, 90% bar, scout/claim staging) are defined once in [Shared protocol](#4-shared-protocol) and [Campaign design](#5-campaign-design). This section covers each controller, then its results, with a short **Meaning** under each figure.
 
-"Farthest" differs by controller: Strombom Collect uses farthest from the flock centre; Kubo uses farthest from the goal among in-range sheep; FAT uses farthest from the dog among observed sheep.
+"Farthest" differs by controller:
+
+- **Strombom Collect:** sheep farthest from the *flock centre*
+- **Kubo:** sheep farthest from the *goal* (among those the dog can sense)
+- **FAT:** sheep farthest from the *dog itself*
 
 ### `strombom_multi`
 
-`strombom_multi` is a coordinated collect-and-drive controller. Its collect switch is `r_a * N^(2/3)`. This switch is wider than the goal, so a Strombom failure is not interpreted as a packing failure.
+Dogs first gather stragglers (Collect), then push the whole flock toward the goal (Drive). They switch using a radius that grows with flock size (`r_a * N^(2/3)`). That Collect radius is wider than the goal disk, so a Strombom failure is not read as sheep failing to pack into the goal.
 
 ![strombom_multi collect and drive.](../results/summary/figures/schematics/en/alg_strombom_multi.svg)
 
@@ -721,7 +784,7 @@ Bootstrap width on every baseline D_min above is zero. Artefacts: Phase 1 claim 
 
 ### `kubo`
 
-`kubo` uses continuous force terms, local sensing, `dt` integration, and speed clamps. It has no collect-and-drive switch. Dogs press the sensed sheep farthest from the goal, and dog-dog repulsion spreads them.
+There is no Collect/Drive switch. Sheep and dogs move under continuous forces (push, align, pull) with local sensing and speed limits. Each dog focuses on the sheep farthest from the goal among those it can sense. Dogs also push each other apart so they do not stack on one spot.
 
 ![Kubo force-based control.](../results/summary/figures/schematics/en/alg_kubo.svg)
 
@@ -843,13 +906,13 @@ Meaning: compact and split stay above theta across D at all three N. Wide stays 
 
 Meaning: where R is already high at D = 1 (compact / split), cost is the secondary contrast. Wide and large `outlier_rich` are the expensive or unreliable starts; for wide, cost at D = 1 is not a success story because those cells never reach theta at any tested D.
 
-For `outlier_rich`, `N=200`, the 200-seed cells gave `R=0.935` at `D=20` and `R=0.910` at `D=25`. The bootstrap interval for `D_min` is `[2, 20]`: several D below 20 have R near theta, so resamples can pull the estimate downward even when the full-depth point estimate is 20. Report `D_min = 20` with `[2, 20]`.
+For `outlier_rich`, `N=200`, the shared raise-to-200 rule applied ([Bootstrap on D_min](#bootstrap-on-d_min-analysis-then-maybe-more-seeds)): those D cells were reseeded at 200 simulation seeds, then bootstrap was run again on that deeper bag. The 200-seed cells gave `R=0.935` at `D=20` and `R=0.910` at `D=25`. The bootstrap interval for `D_min` is still `[2, 20]`: several D below 20 have R near theta, so resamples can pull the estimate downward even when the full-depth point estimate is 20. Report `D_min = 20` with `[2, 20]`. Deeper seeding did not collapse the soft edge to a one-step cliff.
 
 ![Kubo outlier_rich, N = 200.](../results/summary/figures/f9_kubo_outlier_rich_n200.png)
 
-*R(D) with Wilson 95% intervals. Point D_min = 20 clears theta; the bootstrap lower edge remains uncertain.*
+*R(D) with Wilson 95% intervals. Point D_min = 20 clears theta; after 200 seeds the bootstrap lower edge remains [2, 20].*
 
-Meaning: R climbs through the teens and first clears 0.90 at D = 20 (R = 0.935), then stays above at D = 25 (0.910) and D = 35 (0.967 at scout depth 30). Several lower D sit near the bar, which is why the bootstrap interval is wide. Treat `D_min = 20` as a point estimate with that uncertainty, not a sharp cliff.
+Meaning: R climbs through the teens and first clears 0.90 at D = 20 (R = 0.935), then stays above at D = 25 (0.910) and D = 35 (0.967 at scout depth 30). Several lower D sit near the bar, which is why the bootstrap interval stays wide even at 200 seeds. Treat `D_min = 20` as a point estimate with that uncertainty, not a sharp cliff.
 
 **Limitations and non-claims**
 
@@ -861,7 +924,7 @@ Meaning: R climbs through the teens and first clears 0.90 at D = 20 (R = 0.935),
 
 ### `fat`
 
-`fat` retains the Strombom sheep model. Each dog independently selects the observed sheep farthest from itself and stands off behind that sheep toward the goal.
+Sheep still use the Strombom sheep model, but dogs have a simpler rule. Each dog looks at the sheep it can see, picks the one farthest from itself, and stands behind that sheep toward the goal. Dogs do not switch Collect/Drive, and they do not actively space themselves apart.
 
 ![FAT farthest-agent targeting.](../results/summary/figures/schematics/en/alg_fat.svg)
 
@@ -983,27 +1046,27 @@ Meaning: FAT mean I_dir is much higher than baseline or Kubo on the size maps (a
 
 ## 7. Findings synthesis
 
-Claim-grade evidence below covers Phases 1, 2, and 4 (baseline size and structure; Kubo and FAT size and structure). Phase 5 is in progress and not claimed here. Phases 3 and 7 are not claimed (Phase 3 skipped for lack of overcrowding contrast; Phase 7 not run).
+What we can claim so far comes from Phases 1, 2, and 4: baseline size and structure, plus Kubo and FAT size and structure. Phase 5 (information) is in progress and not claimed here. Phase 3 (mechanism) was skipped because we never saw overcrowding on the baseline. Phase 7 (early warning) has not been run.
 
 ### At a glance
 
 ![Five main results at a glance.](../results/summary/figures/schematics/en/summary_at_a_glance.svg)
 
 | Verdict | Finding | Key numbers |
-|---------|---------|-------------|
-| Lower frontier (`D_min`) | On baseline `strombom_multi` with compact starts, flocks from 25 to 400 sheep succeed reliably with one dog. | N=5 and N=10 need `D_min=2`. At one dog, R is about 0.07 and 0.24 for those two sizes. |
-| Upper frontier (more dogs) | Extra dogs waste path; no overcrowding on the baseline compact map (`D_max=35` = grid ceiling). Detail: [Upper frontier status](#upper-frontier-status). | 88 of 100 cells wasteful; 0 overcrowding. Typical finish about 183 ticks; path per dog about 148 for N >= 25. |
-| Structure is cost, not `D_min` | Baseline start shape changes time and path, but not `D_min`, at N in `{50, 100, 200}`. | Wide starts take about 11x to 20x more time and 19x to 36x more path than compact at 1 dog. For wide, `B*=2`. |
-| Partial transfer | Kubo and FAT do not transfer evenly from baseline. | Kubo roughly matches baseline on compact starts but hard-fails wide (best R about 0.47 to 0.54). FAT reaches R >= 0.90 only for N <= 10. |
-| Draft not reproduced | The steep rise in dog need reported by the 2025 draft does not appear on this compact baseline map. | Draft: about 20 to 35 dogs for large N. Here: one dog finishes N=400 with typical finish near 168 to 183 ticks. |
+|----------|----------------|-------------|
+| Lower frontier (`D_min`) | On the baseline with a tight start, one dog is enough from 25 to 400 sheep. | Tiny flocks N = 5 and 10 need 2 dogs. At one dog their success rates are only about 0.07 and 0.24. |
+| Upper frontier (more dogs) | Adding dogs past the minimum does not break success on that map; it mostly adds walking. `D_max = 35` is "top of our list," not a measured collapse. | 88 of 100 cells are wasteful; 0 overcrowding. Typical finish about 183 ticks; path per dog about 148 for N >= 25. |
+| Structure is cost, not dog count | Messy starts make the run slower and longer, but still succeed with one dog on the baseline. | Wide starts take about 11x to 20x more time and 19x to 36x more path than compact at 1 dog. For wide, the cheapest reliable choice is 2 dogs (`B* = 2`). |
+| Partial transfer | Kubo and FAT do not copy the baseline story everywhere. | Kubo looks like baseline on tight starts, but fails on wide starts (best R about 0.47 to 0.54). FAT hits 90% only for N <= 10. |
+| Draft not reproduced | The draft's "large flocks need many dogs" pattern does not show up on this compact baseline map. | Draft: about 20 to 35 dogs for large N. Here: one dog finishes N = 400 in roughly 168 to 183 ticks. |
 
 ### Contrast with the 2025 draft
 
 ![Draft versus this HerdSim protocol.](../results/summary/figures/schematics/en/draft_vs_herdsim.svg)
 
-*Same broad question and 90% bar; different task, arena, and controller family. Not a matched replication.*
+*Same broad question and 90% bar; different task, arena, and controller family. This is a contrast, not a matched replication.*
 
-Compact-start `D_min` at theta 0.90:
+Smallest reliable dog count (`D_min`) on compact starts at the 90% bar:
 
 | N | Baseline (`strombom_multi`) | Kubo | FAT | 2025 draft |
 |---:|---:|---:|---:|---:|
@@ -1017,11 +1080,11 @@ Compact-start `D_min` at theta 0.90:
 | 300 | 1 | 1 | none <= 35 | 20 |
 | 400 | 1 | 1 | none <= 35 | 35 |
 
-`none <= 35` means no tested dog count reached R >= 0.90. On this protocol, the draft's large-N rise in required dogs does not appear on the baseline compact size map.
+`none <= 35` means: no dog count we tested reached 90% success. On *this* protocol, the draft's "large N needs many dogs" story does not appear on the baseline compact size map.
 
 ### Baseline cost and regimes
 
-Headline numbers are in [At a glance](#at-a-glance). Per-method reliability, cost, frontier, and regime plots are in [Methods and results](#6-methods-and-results). The figure below is the cross-method frontier contrast only:
+Headline numbers are in [At a glance](#at-a-glance). Per-method plots are in [Methods and results](#6-methods-and-results). The figure below only compares frontiers across methods (and the draft):
 
 ![D_min against N, with 2025 draft contrast.](../results/summary/figures/f2_dmin_vs_n.png)
 
@@ -1029,61 +1092,61 @@ Headline numbers are in [At a glance](#at-a-glance). Per-method reliability, cos
 
 ### Upper frontier status
 
-RQ2 asks whether larger D still helps, plateaus, or starts to hurt (regime definitions: [Frontier, regimes, and failure labels](#frontier-regimes-and-failure-labels)). Inside the frozen grid through D = 35:
+RQ2 also asks: if you *already* have enough dogs, does adding more still help, do nothing useful, or start to hurt? (Definitions: [Frontier, regimes, and failure labels](#frontier-regimes-and-failure-labels).) Inside our list through D = 35:
 
-| Method | Compact size: `D_min` | `D_overcrowd` | `D_max` meaning | Does adding more dogs hurt reliability? |
-|--------|----------------------:|--------------:|-----------------|-----------------------------------------|
-| `strombom_multi` | 2 at N=5,10; else 1 | none | 35 = tested-grid ceiling | No: R stays high; extra dogs mainly add path (waste). |
-| `kubo` | 3 at N=5; else 1 | none | 35 = tested-grid ceiling | No on compact. Structure differs (wide hard-fails; large outlier_rich shifts). |
-| `fat` | 1 only for N=5,10; undefined for N>=25 | none | undefined when hard failure | Not overcrowding: large-N cells never reach theta at any tested D. |
+| Method | Compact `D_min` | Overcrowding? | What `D_max` means here | Do extra dogs hurt success? |
+|--------|----------------:|---------------|-------------------------|-----------------------------|
+| `strombom_multi` | 2 at N=5,10; else 1 | no | 35 = top of tested list | No: success stays high; extra dogs mainly walk more (waste) |
+| `kubo` | 3 at N=5; else 1 | no | 35 = top of tested list | No on compact. Structure is different (wide fails; large outlier_rich needs many dogs) |
+| `fat` | 1 only for N=5,10; undefined for N>=25 | no | undefined when nothing reaches 90% | Not an overcrowding story: large N never reaches 90% at any tested D |
 
-`D_max = 35` means still reliable at the largest tested D, not that collapse begins at 35. Headline counts are in [At a glance](#at-a-glance). Claim verdicts C2a / C2b and RQ3 status are in [Answers to research questions](#8-answers-to-research-questions) and [Claims](#11-claims).
+So `D_max = 35` means "still OK at the largest D we tried," **not** "collapse begins at 35." Claim codes C2a / C2b and RQ3 status: [Answers to research questions](#8-answers-to-research-questions) and [Claims](#11-claims).
 
 ### Future work: measuring collapse beyond D = 35
 
-Not run. Extend the RQ2 upper band past the few-shepherd cap to find a measured `D_overcrowd` / `D_max` if one exists (the protocol capped D at 35 on purpose; this does not rule out overcrowding for all D).
+Not run. This extension would allow more than 35 dogs and test whether success eventually falls (a real upper collapse), or whether path waste keeps rising without collapse.
 
-| Question | Why it matters | How it would be answered |
-|----------|----------------|--------------------------|
-| Does R fall below theta for some D > 35 after a reliable band? | Turns ceiling into a real `D_overcrowd` / measured `D_max` | Extend `shepherd_counts` past 35 on selected N; same theta and T0 |
-| If R stays high as D grows, does path waste keep rising without collapse? | Waste-only upper band outside the few-shepherd range | Same extended D sweep; report path and regimes |
-| Does T1 rescue high-D cells that fail at T0? | Separates slow success from true overcrowding | T1 only on candidate overcrowding cells |
-| Do efficient vs overcrowding cells differ in interference or fragmentation? | Unlocks RQ3 | Matched within-N tests (Package C) |
-| Does the upper story transfer across methods? | RQ4 for the upper band | Repeat under `kubo` / `fat` (later `communication_free`) |
+| Question | Why it matters | How we would run it |
+|----------------|------------|---------------------|
+| After a good band, does success fall for some D > 35? | Turns "ceiling" into a measured collapse point | Extend the dog-count list past 35 on selected N |
+| If success stays high, does path waste keep rising? | Shows a waste-only upper band even with many dogs | Same extended sweep; report path and regimes |
+| Does a longer deadline (T1) rescue high-D failures at T0? | Separates "too slow" from "true overcrowding" | T1 only on candidate overcrowding cells |
+| Do efficient and overcrowding cells differ in interference or splitting? | Unlocks RQ3 | Matched tests at the same N |
+| Does that upper story transfer across methods? | RQ4 for the upper band | Repeat under Kubo / FAT (later `communication_free`) |
 
-Without raising the D cap, a draft-style harder task could create overcrowding inside D <= 35 ([If we rerun a draft-style method](#if-we-rerun-a-draft-style-method)). Status: not scheduled; no claim-grade D > 35 cells here.
+Another path without raising the dog cap: port the draft-style harder task and see whether overcrowding appears inside D <= 35 ([If we rerun a draft-style method](#if-we-rerun-a-draft-style-method)). Status: not scheduled; no claim-grade D > 35 cells in this report.
 
 ---
 
 ## 8. Answers to research questions
 
-This section answers each RQ in one place. Detail and figures stay in the method and claims sections; claims criteria are in [Claims](#11-claims).
+One table for all research questions. Details and figures stay in the method sections; formal claim codes are in [Claims](#11-claims).
 
-| RQ | Question (short) | Status | Answer in this study |
-|----|------------------|--------|----------------------|
-| RQ1 | Does `D_min` change across initial layout at fixed N? | Answered (baseline) | No on baseline: `D_min=1` for all four layouts at N in `{50, 100, 200}`. Structure changes cost (time and path), not the minimum reliable dog count. C1a rejected; C1b inconclusive. |
-| RQ2 | How do the reliable frontier and regimes change with N? | Answered inside D <= 35 (baseline; transfer partial) | Lower: `D_min=1` for N>=25 on baseline compact. Upper: waste, not overcrowding; `D_max=35` is a grid ceiling ([Upper frontier status](#upper-frontier-status)). Collapse for D > 35 not tested ([Future work](#future-work-measuring-collapse-beyond-d--35)). C2a rejected; C2b skipped. |
-| RQ3 | Which mechanisms distinguish efficient vs overcrowding cells? | Not answerable yet | No overcrowding cells on the baseline size map, so the prespecified contrast is undefined. C3 inconclusive. |
-| RQ4 | Which patterns transfer across `strombom_multi`, `kubo`, `fat`? | Answered (partial) | Compact `D_min` for N>=25 is shared by Strombom and Kubo, not by FAT. Wide and large outlier-rich starts break transfer for Kubo; FAT fails the 90% bar on structure cells. C4 supported only partially. |
-| RQ5 | Can richer information lower `D_min` at fixed reliability? | Not yet | Observation / range / communication ladders are not claim-complete. C5a/C5b unevaluated. |
-| RQ6 | Which curve predicts held-out N; is one power law enough? | Weak answer | Piecewise (two-level) RMSE beats power law, but only because observed `D_min` is almost flat ({2,1}). Not evidence for a rich scaling law. C6a evaluated weak; C6b unevaluated. |
-| RQ7 | Can recent state warn of failure better than N and D? | Not yet | Package G not run. C7a/C7b unevaluated. |
+| RQ | Question | Status | Answer in this study |
+|----|----------------|--------|-------------------|
+| RQ1 | At the same flock size, does start shape change how many dogs you need? | Answered on baseline | No for dog count: all four layouts still need only 1 dog at N = 50, 100, 200. Shape changes time and walking, not `D_min`. (C1a rejected; C1b inconclusive.) |
+| RQ2 | As N grows, how does the useful dog range change? | Answered inside D <= 35 | Lower: from N = 25 up, baseline compact needs 1 dog. Upper: extra dogs waste path; no overcrowding; `D_max = 35` is a list ceiling ([Upper frontier](#upper-frontier-status)). We did not test D > 35 ([Future work](#future-work-measuring-collapse-beyond-d--35)). |
+| RQ3 | Why do efficient vs overcrowding cells differ? | Not answerable yet | We never saw overcrowding on the baseline size map, so the planned contrast does not exist. |
+| RQ4 | Do the patterns transfer to Kubo and FAT? | Partial | On tight starts, Strombom and Kubo share `D_min = 1` for N >= 25; FAT does not. Wide starts break Kubo; FAT fails the 90% bar on structure cells. |
+| RQ5 | Can better information reduce dog count? | Not yet | Observation / range / communication ladders are not claim-complete. |
+| RQ6 | Which curve predicts held-out N? | Weak | A two-level step fits best, only because `D_min` is almost flat ({2, then 1}). Not a rich scaling law. |
+| RQ7 | Can recent state warn of failure better than N and D? | Not yet | Early-warning package not run. |
 
-Unanswered RQ5 to RQ7 and a draft-style task rerun would tighten the same bounds; they do not change the program's purpose ([Does this answer the central question?](#does-this-answer-the-central-question)).
+RQ5 to RQ7 and a draft-style HerdSim rerun would tighten the same story; they do not change what the program is for ([central question](#does-this-answer-the-central-question)).
 
 ---
 
 ## 9. Cross-method transfer
 
-Same grids and layouts; label each frontier feature shared, shifted, or absent relative to the baseline.
+Same grids and layouts. For each feature we ask: does it look like the baseline, shift, or disappear?
 
 ### Compact size map
 
-| Case | Empirical meaning |
-|------|-------------------|
-| Shared | Strombom and Kubo both reach `D_min=1` for N >= 25 (Kubo needs 3 at N=5, then 1 from N=10). |
-| Absent (FAT) | For every tested N >= 25, FAT has no D <= 35 with R >= 0.90 (`D_min` / `D_max` undefined). Best R by size is about 0.40 to 0.53. |
-| Ceiling, not collapse | Strombom and Kubo: no overcrowding on compact starts; `D_max=35` is the grid ceiling ([Upper frontier status](#upper-frontier-status)). |
+| Case | What we see |
+|------|-------------|
+| Shared | Strombom and Kubo both need only 1 dog for N >= 25 (Kubo needs 3 at N = 5, then 1 from N = 10). |
+| Absent (FAT) | For every N >= 25, FAT never reaches 90% success with any D <= 35. Best R is about 0.40 to 0.53. |
+| Ceiling, not collapse | Strombom and Kubo: no overcrowding on compact starts; `D_max = 35` is the list ceiling ([Upper frontier](#upper-frontier-status)). |
 
 ### Structure map (`D_min` at theta 0.90)
 
@@ -1102,30 +1165,32 @@ Same grids and layouts; label each frontier feature shared, shifted, or absent r
 | wide | 100 | 1 | none (best R = 0.54) | none (best R = 0.00) |
 | wide | 200 | 1 | none (best R = 0.47) | none (best R = 0.00) |
 
-`none` means no D <= 35 reaches R = 0.90.
+`none` means no dog count up to 35 reached 90% success.
 
-Meaning: compact `D_min` sharing does not imply full transfer. Wide and large outlier-rich starts expose method dependence; FAT clears no structure cell at these sizes. Kubo `outlier_rich`, N=200 detail (point `D_min=20`, bootstrap `[2, 20]`) is under [`kubo`](#kubo).
+Meaning: sharing `D_min = 1` on compact starts does **not** mean full transfer. Wide starts and large outlier-rich starts show method dependence. FAT clears no structure cell at these sizes. Kubo `outlier_rich`, N = 200 detail (point `D_min = 20`, bootstrap `[2, 20]`) is under [`kubo`](#kubo).
 
 ![Transfer sketch.](../results/summary/figures/schematics/en/transfer_sketch.svg)
 
 ![Cross-method layout reliability curves.](../results/summary/figures/f5_layout_reliability_curves.png)
 
-*Side-by-side R(D) at N = 200 across methods and layouts. Per-method structure plots are in each method section above.*
+*Side-by-side success curves at N = 200 across methods and layouts. Per-method structure plots are in each method section above.*
 
 ---
 
 ## 10. Scaling fits
 
-Leave-one-N-out RMSE on the baseline compact frontier (`D_min` levels only 2 for N in `{5, 10}` and 1 for N >= 25):
+After we have `D_min` for each flock size, RQ6 asks which simple formula best predicts a left-out N.
 
-| Model | Leave-one-N-out RMSE | Meaning |
-|-------|---------------------:|---------|
-| Constant | 0.44 | One flat `D_min` |
+On the baseline compact map, `D_min` is almost only two values: 2 for N = 5 and 10, and 1 for everything larger. Error below is leave-one-N-out RMSE (lower is better):
+
+| Model | RMSE | Meaning |
+|-------|-----:|---------------|
+| Constant | 0.44 | Pretend one flat dog count |
 | Linear | 0.44 | Straight line in N |
-| Power law | 0.25 | Smooth log-log curve |
-| Piecewise | 0.13 | Two levels with a break near N=10 |
+| Power law | 0.25 | Smooth curve on log-log axes |
+| Piecewise | 0.13 | Two levels with a break near N = 10 |
 
-The piecewise model wins because it encodes the observed step, not because a rich growth law was measured. C6b (log-log slope below 1 on a stated growth band) cannot be tested here: there is no growing `D_min` band to fit. These fits are not a claim of a universal scaling law.
+The piecewise model wins because it matches that step, not because we measured a rich growth law. We cannot test "slope below 1 on a growth band" (C6b): there is no rising `D_min` band to fit. These fits are not a universal scaling law.
 
 ![Leave-one-N-out RMSE by model.](../results/summary/figures/f8_scaling_rmse.svg)
 
@@ -1133,7 +1198,13 @@ The piecewise model wins because it encodes the observed step, not because a ric
 
 ## 11. Claims
 
-Verdicts use claim-grade evidence only. Criteria: supported when the stated condition holds inside this protocol; otherwise rejected, inconclusive, skipped (trigger absent), or unevaluated.
+Verdicts use claim-grade evidence only. Labels:
+
+- **SUPPORTED**: the stated condition holds inside this protocol
+- **REJECTED**: we looked and it does not hold
+- **INCONCLUSIVE**: we cannot decide (often the needed contrast is missing)
+- **SKIPPED**: the trigger to run the test never appeared
+- **UNEVALUATED**: not run yet
 
 ![Claims scorecard.](../results/summary/figures/schematics/en/claims_scorecard.svg)
 
@@ -1154,63 +1225,62 @@ Verdicts use claim-grade evidence only. Criteria: supported when the stated cond
 | C7a | RQ7 | UNEVALUATED | Early-warning analysis not run. |
 | C7b | RQ7 | UNEVALUATED | Early-warning analysis not run. |
 
-These criteria support statements inside the tested protocol only. They do not support a universal law, an untested task, field performance, or a dog-count gap below one grid step.
+These checks only support statements inside the tested protocol. They do not support a universal law, an untested task, real-farm performance, or a dog-count difference smaller than one step on our D list.
 
 ---
 
 ## 12. Limits and threats
 
-| Threat or boundary | Response in this report |
-|--------------------|-------------------------|
-| One simulated task | Conclusions limited to `drive_to_goal` under the frozen protocol. |
-| Method dependence | RQ4 before method-general statements; transfer is partial. |
-| Layout and state confounding | Matched N and prespecified layouts; baseline `D_min` did not move. |
-| Discrete D grid | Effects in local grid steps; unresolved below one step. |
-| Soft reliability frontier | Locked seeds, claim windows, bootstrap; raise to 200 seeds when the interval spans more than one step. |
-| Conditional analyses | Absent-trigger work is skipped or inconclusive, not a measured null at an unrun condition. |
-| Time across methods | Avoid treating Kubo ticks as physically comparable to Strombom-family ticks. |
-| Collect switch wider than the goal | Do not read Strombom failure as packing failure. |
-| Simulated controllers | No field, farm, or biological-validity claim. |
-| Grid ceiling | `D_max=35` is a tested-grid ceiling, not a measured collapse ([Upper frontier status](#upper-frontier-status); [Future work](#future-work-measuring-collapse-beyond-d--35)). |
-| Ceiling effect on easy compact | R near 1.00 at D=1 on many baseline cells limits visible dog-count scaling. |
-| Split layout | Behaves like compact in completed analysis; generator separation still needs confirmation. |
-| Observational interference | FAT `I_dir` association is not a controlled causal test. |
+Limits of what this report can say:
+
+| Limit | How we treat it |
+|-------|-----------------|
+| One simulated task | Results are for `drive_to_goal` under the frozen protocol only. |
+| Method dependence | We check transfer (RQ4) before general claims; transfer is only partial. |
+| Start shape can confuse size | We match N and use fixed layouts; on baseline, `D_min` did not move with layout. |
+| Discrete dog-count list | We cannot resolve effects finer than one step on that list. |
+| Soft reliability edges | Locked seeds, claim windows, bootstrap; raise to 200 seeds when uncertainty is wide. |
+| Conditional analyses | If the trigger never appears, we mark skipped/inconclusive (not "proven null"). |
+| Time across methods | Do not treat Kubo ticks as the same physical time as Strombom-family ticks. |
+| Collect switch wider than the goal | Do not read a Strombom failure as "sheep could not pack into the goal." |
+| Simulated controllers | No farm or biology validity claim. |
+| Grid ceiling | `D_max = 35` is the top of our list, not a measured collapse ([Upper frontier](#upper-frontier-status); [Future work](#future-work-measuring-collapse-beyond-d--35)). |
+| Easy compact map | Many baseline cells succeed at D = 1 with R near 1.00, so rising dog-count laws are hard to see. |
+| Split layout | Behaves like compact so far; the generator's separation still needs a hard check. |
+| Interference correlation | FAT `I_dir` link to failure is observational, not a controlled cause test. |
 
 ---
 
 ## 13. Information ladders
 
-Status: not claim-complete. Observation scout is done; observation claim was running when this section was written. Range and communication scout/claim are not finished. Do not treat any Phase 5 figure as a claim verdict yet.
+Status: **not claim-complete**. Observation scout is done; observation claim was still running when this section was written. Range and communication ladders are not finished. Do not treat Phase 5 figures as final claims yet.
 
-- `obs_mode`: `bearing_only`, `local_positions`, `global` - Increasing observation content.
-- `sensing_range`: 32.5, 65, 97.5, 130 - 0.5, 1.5, and 2 times Strombom `r_s`.
-- `communication`: `none`, `neighbour_broadcast`, `global_shared` - Own observation, neighbour union, or globally shared sensed union.
+RQ5 asks whether better sensing can replace some dogs while keeping the same reliability. We test three separate ladders (not every combination at once):
 
-For `strombom_multi`, `global_shared` means each dog may act on the union of sheep that any communicating dog currently senses. It is still filtered by sensing range and observation mode. It is not a free look at the full simulator state: sheep outside every dog's sensor remain unseen.
+- **Observation content:** bearing only → local positions → global view
+- **Sensing range:** about 0.5×, 1×, 1.5×, 2× Strombom's usual sense radius
+- **Communication:** no sharing → share with neighbors → share the union of what any dog senses
 
-Phase 5 scout protocols use D in `{1, 2, 3, 4, 6, 10}` because this low-D band is where a one-step saving can appear.
+For `strombom_multi`, "global shared" still only includes sheep that *some* dog currently senses. It is not a free look at the whole simulator. Sheep outside every sensor stay unseen.
+
+Scout runs for Phase 5 use low dog counts `{1, 2, 3, 4, 6, 10}` because that is where saving even one dog would show up.
 
 ---
 
 ## 14. Outcomes and state metrics
 
-- Success: Binary indicator that all sheep enter the goal by the deadline.
-- `t_s` or finish time: First tick at which success is met.
-- `shepherd_path`: Sum of Euclidean step lengths of all dogs, in arena units.
-- Path per dog: `shepherd_path/D`
-- Cohesion: Mean sheep distance to the flock centre of mass.
-- Fragmentation: Largest connected-component size divided by N, using radius 5.
-- Outlier count: Sheep beyond `r_a * N^(2/3)`.
-- Spread: Variance of sheep distances to the centroid.
-- Extent: Root-mean-square distance to the centroid.
-- Perimeter: Convex-hull perimeter.
-- Hull area: Convex-hull area.
-- Flock density: N divided by hull area; zero for degenerate area.
-- Aspect ratio: Fit a 2D principal-component ellipse to sheep positions. The ratio of the major-axis length to the minor-axis length is 1 for a round flock and larger when the flock is elongated.
-- `I_dir`: Directional interference among dogs. Take each active dog with speed above `1e-6`, form its unit velocity, sum those units, and set `I_dir = 1 - ||sum|| / M_active`. Near 0 means dogs move in a common direction; near 1 means headings cancel (pushing against each other).
-- Coverage C: Fraction of peripheral sheep, those above median GCM distance, within the influence radius.
+What we record on each run:
 
-If no dog moves, `I_dir = 0`. It uses realized velocities, so constraints such as wall reflections are included. Missing coverage radius produces NaN.
+- **Success:** did every sheep reach the goal in time? (yes/no)
+- **Finish time (`t_s`):** first tick when that happens
+- **Dog path:** total distance all dogs walked; also path per dog
+- **Cohesion:** how tightly sheep sit around the flock centre
+- **Fragmentation:** size of the largest connected sheep group, divided by N
+- **Outliers / spread / extent / hull size / density / aspect ratio:** other shape summaries of the flock
+- **`I_dir` (interference):** near 0 if dogs move the same way; near 1 if their headings cancel (push against each other)
+- **Coverage:** fraction of outer sheep that sit within dog influence range
+
+Technical notes: if no dog moves, `I_dir = 0`. Velocities include wall effects. Missing coverage radius yields NaN.
 
 ![Tick and path cost metrics.](../results/summary/figures/schematics/en/metrics_tick_path.svg)
 
@@ -1222,11 +1292,11 @@ If no dog moves, `I_dir = 0`. It uses realized velocities, so constraints such a
 
 ## 15. Prediction and early warning
 
-Status: not run. No AUROC or lead-time claim yet.
+Status: **not run**. No accuracy or lead-time numbers yet.
 
-RQ7 uses horizon `k=500`, feature window `w=200`, and evaluation ticks 1000 through 8000 in steps of 200. Features use only `(t - 200, t]`.
+RQ7 asks whether recent flock and dog state can warn that a run is about to fail, better than a baseline that knows only flock size and dog count.
 
-At each evaluation tick t, the predictor may use only flock and dog state from the open window `(t - w, t]` with `w = 200`. It must not peek at future ticks. The label is whether a failure occurs within the next `k = 500` ticks. Evaluation sweeps t from 1000 to 8000 in steps of 200 so early transient and late timeout regimes are both sampled. The planned test is whether these recent-state features beat a baseline that knows only N and D (held-out AUROC and lead time). Package G has not been run yet, so no AUROC or lead-time numbers are claimed here.
+Planned setup: at time t, use only the last 200 ticks of state (no peeking into the future). Ask whether a failure happens in the next 500 ticks. Sweep many times t during the run. Compare against a simple baseline that knows only N and D. Package G has not been run, so nothing is claimed here.
 
 ---
 
