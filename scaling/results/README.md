@@ -1,8 +1,8 @@
 # Experiment results
 
-This folder holds the simulation outputs for the scaling study. Each phase answers a different question about how many dogs are enough when the flock grows, when sheep start in a different shape, or when we swap the dog rule (controller).
+This folder holds simulation run outputs for the scaling study. Each phase answers a different question about how many dogs are enough when the flock grows, when sheep start in a different shape, or when we swap the dog rule (controller).
 
-For the documentation map, see the [English index](../docs/INDEX.md) or [Vietnamese index](../docs/INDEX_vi.md). For completed findings, see [summary/SUMMARY_REPORT.html](summary/SUMMARY_REPORT.html) or [SUMMARY_REPORT.md](summary/SUMMARY_REPORT.md).
+Completed narrative: [final report](../docs/final_report.md) ([HTML](../docs/final_report.html)). Plan and status: [main scaling plan](../docs/main_scaling_plan.md), [progress tracker](../docs/progress_tracker.md). Figures for the report live under [`../docs/figures/`](../docs/figures/).
 
 ## Layout
 
@@ -13,13 +13,11 @@ scaling/results/
     scout/                 # 3,000 trials (cheap full map: 10 N x 10 D x 30 seeds)
     claim/                 # 2,200 trials (careful 100-seed windows on D_min edges)
     t1/                    # Longer deadline plan (skipped: no overcrowding cells)
-    guides/                # HTML reports and figures
 
   phase2/                  # Start shape: compact, wide, split, outlier_rich
     pilot_state/           # 600 trials (smoke check)
     scout/                 # 3,600 trials (3 N x 4 layouts x 10 D x 30 seeds)
     claim/                 # 2,400 trials (careful 100-seed windows)
-    guides/                # HTML reports and layout figures
 
   phase4/                  # Other dog rules: kubo and fat vs baseline
     kubo_size/             # Kubo size map (scout + claim)
@@ -27,10 +25,9 @@ scaling/results/
     fat_size/              # FAT size map (scout + claim)
     fat_structure/         # FAT start-shape map (scout + claim)
     package_d/             # Side-by-side transfer tables (size + structure)
-    guides/                # HTML reports and comparison figures
                            # Current: Kubo outlier_rich N=200 has D_min=20 (200 seeds)
 
-  summary/                 # Cross-phase results, readable data appendices, and HTML builds
+  phase5/                  # Information ladders: observation, range, communication
 ```
 
 ## What sits in a protocol folder
@@ -43,20 +40,5 @@ scaling/results/
 | `status.json` | Progress and whether the run finished |
 | `trials.csv` | One row per simulation (claim folders also have `merged_trials.csv`) |
 | `timeseries/` | Per-trial trajectory files (`.parquet`). Usually not kept in Git |
-| `packages/` | Auto tables and figures from analysis (Package A, B, F, ...) |
+| `packages/` | Auto tables from analysis (Package A, B, F, ...); figures live under `docs/figures/packages/` |
 | `README.md` | Short human note: status, key numbers, links |
-
-## Reports
-
-| Report | Path |
-|--------|------|
-| Cross-phase results (Phases 1, 2, 4) | [summary/SUMMARY_REPORT.html](summary/SUMMARY_REPORT.html) / [`.md`](summary/SUMMARY_REPORT.md) |
-| Same in Vietnamese | [summary/SUMMARY_REPORT_vi.html](summary/SUMMARY_REPORT_vi.html) / [`.md`](summary/SUMMARY_REPORT_vi.md) |
-| Scientific plan | [`../docs/main_scaling_plan.md`](../docs/main_scaling_plan.md) |
-| Methods | [`../docs/methods/README.md`](../docs/methods/README.md) |
-| Setup and run reference | [`../docs/setup/README.md`](../docs/setup/README.md) |
-| Data appendices | [`summary/data/README.md`](summary/data/README.md) |
-| Credibility and comparison | [`../docs/credibility/README.md`](../docs/credibility/README.md) |
-| Former research-plan path | [summary/RESEARCH_PLAN.html](summary/RESEARCH_PLAN.html) compatibility page |
-
-Each phase also has its own browser reports under `phase{k}/guides/REPORT_en.html` and `REPORT_vi.html` (shared `assets/`).

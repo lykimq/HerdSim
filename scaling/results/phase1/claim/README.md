@@ -55,14 +55,6 @@ Note: elapsed covers the resumed run that completed the remaining trials, not a 
 - Bootstrap: `d_min_ci_low` == `d_min_ci_high` for all N at 100 seeds
 - Package F (auto): best_model=piecewise; prefers_piecewise_or_state=True (degenerate two-level fit {2, 1} with break at N=10)
 
-## Figures
-
-From `packages/*/figures/` and `../guides/assets/figures/`:
-
-- [x] Reliability heatmap R(N, D)
-- [x] Frontier D_min(N)
-- [x] Regime counts
-
 ## Interpretation
 
 The careful map confirms the scout story: one dog is enough for N>=25 on a compact start under T0; N=5 and N=10 need at least 2 dogs. High dog counts are wasteful rather than overcrowded, so C2a is rejected on this size map (and T1 has no overcrowding cells to run). Scaling fits lean piecewise (Package F); treat C6a as evaluated but weak (not a real scaling law).
@@ -87,9 +79,8 @@ CLAIM grade. Aligned with `scaling/docs/progress_tracker.md`:
 ## Next
 
 - Tracker steps 4-5 DONE; step 6 T1 SKIPPED; step 17 Package G DONE
-- Reader guides: `../guides/REPORT_en.html`, `../guides/REPORT_vi.html`
-- Main scaling plan: [../../../docs/main_scaling_plan.html](../../../docs/main_scaling_plan.html)
-- Results summary: [../../summary/SUMMARY_REPORT.html](../../summary/SUMMARY_REPORT.html)
+- Final report: [../../../docs/final_report.md](../../../docs/final_report.md)
+- Main scaling plan: [../../../docs/main_scaling_plan.md](../../../docs/main_scaling_plan.md)
 
 ## Files in this folder
 
@@ -101,7 +92,7 @@ CLAIM grade. Aligned with `scaling/docs/progress_tracker.md`:
 | `status.json` | Run progress | `n_planned`, `n_done`, `complete`, `elapsed_seconds`, start/update times |
 | `manifest.jsonl` | Resume ledger | One JSON line per cell; `status=ok` rows are skipped on re-run |
 | `trials.csv` | Trial-level results | One row per seed: N, D, layout, success, ticks, path/effort metrics, failure tags, etc. |
-| `packages/` | Analysis exports | Auto tables/figures from `scaling-analyse` (Package A/B/F/...); see `packages/*/README.md` |
+| `packages/` | Analysis exports | Auto tables from `scaling-analyse` (figures under `docs/figures/packages/`) (Package A/B/F/...); see `packages/*/README.md` |
 
 | `boundary_cells.csv` | Claim window plan | Cells selected for 100-seed reseed (`n_sheep`, `n_shepherds`, role, scout reliability) |
 | `boundary_plan.json` | Plan metadata | How the boundary list was produced (theta, source scout, counts) |
@@ -119,7 +110,6 @@ CLAIM grade. Aligned with `scaling/docs/progress_tracker.md`:
 | `packages/a/frontier.csv` | D_min / D_overcrowd / D_max |
 | `packages/a/regimes.csv` | Regime labels per cell |
 | `packages/a/dmin_bootstrap.csv` | Bootstrap copy used by the package |
-| `packages/a/figures/` | Heatmap, frontier, regime plots |
 | `packages/f/` | Package F leave-one-N fits (`README.md`, RMSE tables) |
 
 ## Links

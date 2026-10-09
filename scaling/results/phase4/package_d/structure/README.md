@@ -9,4 +9,4 @@ Artefacts:
 - transfer_compact / transfer_split / transfer_outlier_rich / transfer_wide: transfer_*.csv
 - Method trial tables: strombom_multi_trials.csv, kubo_trials.csv, fat_trials.csv
 
-Interpretation: `../../README.md`, `../../../docs/discuss/phase4.md`, summary section 5.
+Interpretation: `../../README.md`, `../../../docs/final_report.md` (RQ4 / transfer sections).

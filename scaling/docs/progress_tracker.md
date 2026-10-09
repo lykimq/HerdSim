@@ -3,15 +3,14 @@
 Role: status (1 = code, 2 = experiment runs, then Claims)
 Why / what: [herdsim_research_program.md](herdsim_research_program.md)
 How: [main_scaling_plan.md](main_scaling_plan.md)
-Run strategy (pilot / scout / plan / reseed): [experiment_run_strategy.md](experiment_run_strategy.md)
-Report form: [REPORT_TEMPLATE.md](templates/REPORT_TEMPLATE.md)
+Findings: [final_report.md](final_report.md) ([HTML](final_report.html))
 Help: `make -C scaling help` (wraps `scaling/scripts/campaign.py`)
 
 Protocol: `scaling_v2`
 Host: `gwen` (Intel Core Ultra 7 165H, 22 threads, 61 GiB RAM)
 Workers: prefer `WORKERS=16` on AC (leave headroom; not all 22). Cap at 18 if the machine stays cool.
 CPU: set governor to `performance` before long campaigns (see below).
-Results: summary data in `scaling/results/` (trials, packages, guides) is kept in git; timeseries parquet files are ignored via `.gitignore`.
+Results: run data in `scaling/results/` (trials, packages) is kept in git; timeseries parquet files are ignored via `.gitignore`. Figures live under `scaling/docs/figures/`.
 
 How to read this file:
 - Section 1 = is the code ready?

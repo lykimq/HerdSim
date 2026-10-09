@@ -57,17 +57,6 @@ Evidence package export. Interpretation belongs in the protocol `README.md`.
 | efficient_operation | 10 |
 | under_resourced_failure | 2 |
 
-## Figures
-
-- heatmap: `figures/reliability_heatmap.png`
-  ![heatmap](figures/reliability_heatmap.png)
-
-- frontier: `figures/frontier_dmin.png`
-  ![frontier](figures/frontier_dmin.png)
-
-- regimes: `figures/regime_counts.png`
-  ![regimes](figures/regime_counts.png)
-
 ## Artefacts
 
 - trials.csv
@@ -76,5 +65,5 @@ Evidence package export. Interpretation belongs in the protocol `README.md`.
 - regimes.csv
 - dmin_bootstrap.csv
 - provenance.json
-- figures/
+- figures/ (moved to docs)
 

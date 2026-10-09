@@ -35,4 +35,4 @@ Scout Package B (`packages/b/frontier_by_layout.csv`) is a 30-seed sketch only. 
 
 - Claim (authoritative frontiers): `../claim/README.md`
 - Phase note: `../../README.md`
-- Guides: `../../guides/REPORT_en.html`
+- Final report: `../../../docs/final_report.md`

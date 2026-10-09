@@ -2,7 +2,7 @@
 
 Question in plain terms: can richer observation, sensing range, or communication lower the fewest-dogs answer at fixed reliability?
 
-Baseline method: `strombom_multi`. Layout: compact. Protocol: `scaling_v2`. Cross-phase context: [main scaling plan](../../docs/main_scaling_plan.html) and [results summary](../summary/SUMMARY_REPORT.html).
+Baseline method: `strombom_multi`. Layout: compact. Protocol: `scaling_v2`. Cross-phase context: [main scaling plan](../../docs/main_scaling_plan.md).
 
 Three separate ladders (not a Cartesian product). Host: gwen. Workers: 18. CPU governor: performance.
 
@@ -79,7 +79,7 @@ Cited in claim-folder READMEs and Package E under each `*_claim/packages/e/`:
 
 ## Cross-phase
 
-- Main scaling plan: [../../docs/main_scaling_plan.html](../../docs/main_scaling_plan.html)
-- Results summary: [../summary/SUMMARY_REPORT.html](../summary/SUMMARY_REPORT.html)
+- Final report: [../../docs/final_report.md](../../docs/final_report.md)
+- Main scaling plan: [../../docs/main_scaling_plan.md](../../docs/main_scaling_plan.md)
 - Tracker: [../../docs/progress_tracker.md](../../docs/progress_tracker.md)
-- Run guide: [../../docs/setup/run_guide.html](../../docs/setup/run_guide.html)
+- Commands: `make -C scaling help`

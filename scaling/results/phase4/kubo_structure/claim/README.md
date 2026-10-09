@@ -68,5 +68,4 @@ Scout-only Package B under `../scout/packages/b/` is not the claim answer for ou
 - Phase note: `../../README.md`
 - Package B: `packages/b/`
 - Package D structure: `../../package_d/structure/`
-- Guides: `../../guides/REPORT_en.html`, `../../guides/REPORT_vi.html`
-- Summary: `../../../summary/SUMMARY_REPORT.html`
+- Final report: `../../../docs/final_report.md`

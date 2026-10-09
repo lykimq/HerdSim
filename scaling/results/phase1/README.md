@@ -2,7 +2,7 @@
 
 Question in plain terms: on a tight (compact) start with the baseline dog rule, how many dogs do we need as the flock gets larger?
 
-Baseline method: `strombom_multi`. Protocol: `scaling_v2`. Cross-phase context: [main scaling plan](../../docs/main_scaling_plan.html) and [results summary](../summary/SUMMARY_REPORT.html).
+Baseline method: `strombom_multi`. Protocol: `scaling_v2`. Cross-phase context: [main scaling plan](../../docs/main_scaling_plan.md).
 
 ## Folders
 
@@ -12,7 +12,6 @@ Baseline method: `strombom_multi`. Protocol: `scaling_v2`. Cross-phase context: 
 | [scout/](scout/) | SCOUT | Cheap full N x D map (3,000 trials) |
 | [claim/](claim/) | CLAIM | Careful reseed near the fewest-dogs edge (2,200 trials; merge 4,540) |
 | [t1/](t1/) | plan only | Longer deadline for overcrowding (0 cells; no sims) |
-| [guides/](guides/) | reader | `REPORT_en.html`, `REPORT_vi.html`, shared `assets/` |
 
 ## Runtime
 
@@ -35,7 +34,6 @@ Sum of each protocol `status.json` `elapsed_seconds`:
 | `scout/` | SCOUT protocol folder (see `scout/README.md`) |
 | `claim/` | CLAIM protocol folder + merge + packages (see `claim/README.md`) |
 | `t1/` | T1 overcrowding plan only (see `t1/README.md`) |
-| `guides/` | Reader HTML: `REPORT_en.html`, `REPORT_vi.html`, shared `assets/` |
 
 ### Common files inside each protocol folder
 
@@ -61,8 +59,6 @@ Cited in [claim/README.md](claim/README.md) and packages under `claim/packages/`
 
 ## Cross-phase
 
-- Main scaling plan: [../../docs/main_scaling_plan.html](../../docs/main_scaling_plan.html)
-- Results summary: [../summary/SUMMARY_REPORT.html](../summary/SUMMARY_REPORT.html)
-- Documentation: [index](../../docs/INDEX.html), [methods](../../docs/methods/README.html), [setup](../../docs/setup/README.html), [credibility](../../docs/credibility/README.html)
-- Data appendices: [Phase 1 tables](../summary/data/phase1_tables.html), [run ledger](../summary/data/run_ledger.html)
+- Final report: [../../docs/final_report.md](../../docs/final_report.md)
+- Main scaling plan: [../../docs/main_scaling_plan.md](../../docs/main_scaling_plan.md)
 - Tracker: [../../docs/progress_tracker.md](../../docs/progress_tracker.md)

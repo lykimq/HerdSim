@@ -59,10 +59,6 @@ From `packages/e/substitution_curves_obs.csv` and `substitution_summary_obs.csv`
 - Package E summary: n_compared = 2; median_delta_dmin = 0; supports_substitution = False; supports_diminishing_returns = False
 - Qualitative note: moving from bearing_only (no frontier) to local_positions establishes reliability at one dog, but that is not a one-grid-step lowering of two defined `D_min` values
 
-## Figures
-
-Package E tables only (no separate figure export required for C5).
-
 ## Interpretation
 
 On compact Strombom starts at N in {100, 200}, bearing-only sensing cannot reach the 90% bar on the tested D band. Local positions already sit on the `D_min` = 1 floor; global observation does not reduce dog count further. Information quality matters for whether a frontier exists, but richer observation does not buy fewer dogs once local sensing works.
@@ -104,4 +100,4 @@ CLAIM grade. Aligned with `scaling/docs/progress_tracker.md`:
 
 - Package E: `packages/e/README.md`
 - Upstream scout: `../factor_sweep/`
-- Main scaling plan: [../../../docs/main_scaling_plan.html](../../../docs/main_scaling_plan.html)
+- Main scaling plan: [../../../docs/main_scaling_plan.md](../../../docs/main_scaling_plan.md)

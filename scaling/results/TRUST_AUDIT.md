@@ -10,7 +10,7 @@ Date: 2026-10-09. Host: gwen. Protocol hash: `54dfb46837e3971a` on all audited p
 4. Phase 5 obs pause/resume repair (orphan manifest keys without CSV rows).
 5. Package E / F / G claim rows vs tracker.
 6. Run ledger rebuild to include Phase 5.
-7. SUMMARY_REPORT scope sync for Phases 5 and 7.
+7. Final report scope sync for Phases 5 and 7.
 8. `make -C scaling scaling-test` (20 passed after resume-key contract test).
 9. Offline CLI/code audit (no phase re-runs): seed list = `master_seed + i`; manifest/trials join on resume identity; grid / factor / claim boundary expansion vs completed rows.
 
@@ -56,7 +56,7 @@ Full Phase 1/2/4/5 grids were not regenerated. Spot counts, hashes, merges, and 
 ## Follow-ups completed
 
 - Runner now flushes `trials.csv` after each finished cell (`scaling/services/scaling/runner.py`).
-- SUMMARY_REPORT (EN/VI) includes Phase 5 and Phase 7 narrative plus updated claim snapshot.
+- Final report includes Phase 5 and Phase 7 narrative plus updated claim snapshot.
 - Resume-key contract covered by `test_resume_keys_omit_unset_info_factors`.
 
 ## Optional follow-up (not done)

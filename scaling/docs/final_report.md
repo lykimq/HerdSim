@@ -164,7 +164,7 @@ Full setup notes:
 - Structure: emergent spread summarized by `S_bar`.
 - Metrics: success, ticks, phase, spread, path, lost sheep.
 
-![2025 draft task phases.](../results/summary/figures/schematics/en/draft_task_phases.svg)
+![2025 draft task phases.](figures/schematics/draft_task_phases.svg)
 
 *Draft task: collect, hold, then exit through a gate (NetLogo patch arena).*
 
@@ -192,7 +192,7 @@ Here "not reach" means they never found an upper failure point before D = 35.
 
 The draft also found that more spread tended to go with worse success (Spearman `rho = -0.701` for mean spread `S_bar` vs SR, and `rho = -0.828` for `S_bar * N` vs SR, over 110 condition aggregates).
 
-![2025 draft main results sketch.](../results/summary/figures/schematics/en/draft_main_results.svg)
+![2025 draft main results sketch.](figures/schematics/draft_main_results.svg)
 
 *Draft Table A3 pattern: D_min stays low at small N, then rises sharply for large flocks.*
 
@@ -480,13 +480,13 @@ We use a 500 by 500 square so wide and outlier-rich starts still fit with room t
 
 The goal sits on the horizontal midline so top and bottom margins stay equal.
 
-![Field and arena overview.](../results/summary/figures/schematics/en/arena_overview.svg)
+![Field and arena overview.](figures/schematics/arena_overview.svg)
 
 *500 by 500 field, flock centre, midline goal, and margin for wide starts.*
 
 The flock must travel 120 units from centre to goal. That is far enough that a tight start is not already "in" the goal, but not so far that the goal sits against the far wall.
 
-![Compact drive geometry.](../results/summary/figures/schematics/en/arena_compact.svg)
+![Compact drive geometry.](figures/schematics/arena_compact.svg)
 
 *Centre-to-goal drive of 120 units on the midline.*
 
@@ -494,7 +494,7 @@ The flock must travel 120 units from centre to goal. That is far enough that a t
 
 At N = 50 the goal radius is 15: big enough that sheep are not jammed into a tiny disk, but not so big that the task becomes trivial. We grow the radius with `sqrt(N)` so goal *area per sheep* stays roughly constant. A fixed radius would squeeze large flocks. We do **not** reuse the Strombom Collect radius as the goal size (that Collect rule is controller-specific).
 
-![Goal radius scaling.](../results/summary/figures/schematics/en/goal_radius.svg)
+![Goal radius scaling.](figures/schematics/goal_radius.svg)
 
 *Goal radius `15 * sqrt(N/50)` keeps goal area per sheep roughly constant.*
 
@@ -504,11 +504,11 @@ At N = 50 the goal radius is 15: big enough that sheep are not jammed into a tin
 
 **Why these dog counts (D):** fine steps at low D (where the minimum usually sits), then larger jumps to see whether "many more dogs" help or hurt. The top of the list is 35 because the central question is about a *few* shepherds. That is a grid ceiling for this study, not a physical farm limit, and not proof that overcrowding cannot appear above 35 ([Future work](#future-work-measuring-collapse-beyond-d--35)).
 
-![Frozen N and D grids.](../results/summary/figures/schematics/en/design_nd_grids.svg)
+![Frozen N and D grids.](figures/schematics/design_nd_grids.svg)
 
 *N denser near 100; D unit steps at low counts, then larger steps up to 35.*
 
-![Reliability threshold theta.](../results/summary/figures/schematics/en/design_theta.svg)
+![Reliability threshold theta.](figures/schematics/design_theta.svg)
 
 *Primary bar: R >= 0.90. Sensitivity thresholds 0.50 and 0.70 are reported but do not define D_min.*
 
@@ -535,7 +535,7 @@ Checks: compact should look tighter than wide; split should look more broken tha
 
 A connectivity radius of 5 links nearby compact neighbors but does not bridge the split gaps.
 
-![Four initial layouts.](../results/summary/figures/schematics/en/four_layouts.svg)
+![Four initial layouts.](figures/schematics/four_layouts.svg)
 
 *Compact, wide, split, and outlier_rich at the same N.*
 
@@ -594,15 +594,15 @@ Draft wording for comparison: [Prior draft paper](#2-prior-draft-paper).
 
 If there is no overcrowding, a reported `D_max = 35` only means "still OK at the largest D we tested," not "collapse begins at 35."
 
-![Waste versus overcrowding.](../results/summary/figures/schematics/en/overcrowd_example.svg)
+![Waste versus overcrowding.](figures/schematics/overcrowd_example.svg)
 
 *Waste: R stays at or above theta while path grows. Overcrowding: after a reliable band, R falls below theta for two consecutive tested D.*
 
-![Frontier quantities.](../results/summary/figures/schematics/en/design_frontier.svg)
+![Frontier quantities.](figures/schematics/design_frontier.svg)
 
 *Point markers: `D_min`, `B*`, `D_overcrowd`, `D_max`, and theta. Regime bands are in the next figure.*
 
-![Regimes along D at fixed N.](../results/summary/figures/schematics/en/regimes.svg)
+![Regimes along D at fixed N.](figures/schematics/regimes.svg)
 
 *Colored bands only: under-resourced, efficient, wasteful, overcrowding (frontier markers stay above).*
 
@@ -615,11 +615,11 @@ Failure labels:
 - Stuck: GCM barely moves to goal.
 - Timeout: still unfinished at T0.
 
-![Failure-label families.](../results/summary/figures/schematics/en/design_failures.svg)
+![Failure-label families.](figures/schematics/design_failures.svg)
 
 *How failed trials are labelled from flock and dog state (stacking, split, scatter, oscillation, stuck).*
 
-![Timeout as a failure label.](../results/summary/figures/schematics/en/design_timeout.svg)
+![Timeout as a failure label.](figures/schematics/design_timeout.svg)
 
 *Timeout: the run is still unfinished at T0; other labels can appear on early failure too.*
 
@@ -696,7 +696,7 @@ Every simulation campaign uses the same cycle: pilot, scout, claim plan, claim r
 
 Stop after scout if the map is broken, the grid must change, or the bootstrap interval is too wide. Fix the protocol, then continue.
 
-![Full RQ2 pipeline cycle with real trial counts.](../results/summary/figures/schematics/en/pipeline_cycle_rq2.svg)
+![Full RQ2 pipeline cycle with real trial counts.](figures/schematics/pipeline_cycle_rq2.svg)
 
 *RQ2 worked example: smoke 150, scout 3,000, claim plan 22 cells, claim 2,200, merge 4,540 rows, then reuse or skip later RQs.*
 
@@ -721,7 +721,7 @@ Stop after scout if the map is broken, the grid must change, or the bootstrap in
 
 On RQ2 that selected **22 cells**: for N = 5 and 10, D in `{1, 2, 3}`; for each of the eight larger N, D in `{1, 2}`.
 
-![RQ2 claim windows on the dog list.](../results/summary/figures/schematics/en/claim_window_rq2_example.svg)
+![RQ2 claim windows on the dog list.](figures/schematics/claim_window_rq2_example.svg)
 
 *Blue cells are claim-reseeded at 100 seeds. Grey cells keep scout depth 30. Whole plan: 22 cells.*
 
@@ -729,7 +729,7 @@ On RQ2 that selected **22 cells**: for N = 5 and 10, D in `{1, 2, 3}`; for each 
 
 **5. Merge and analyse.** One grade per cell: claim rows replace scout rows on the 22 window cells; the other 78 cells keep their 30 scout seeds. Merged table: `22 x 100 + 78 x 30 = 4,540` rows. Frontiers, regimes, and figures for RQ2 come from this merge, not from scout alone.
 
-![One cell and seed depth.](../results/summary/figures/schematics/en/one_cell_seeds.svg)
+![One cell and seed depth.](figures/schematics/one_cell_seeds.svg)
 
 *A single (N, D) cell: scout depth versus claim depth.*
 
@@ -752,7 +752,7 @@ On RQ2 that selected **22 cells**: for N = 5 and 10, D in `{1, 2, 3}`; for each 
 4. Sort the 1,000 `D_min*` values. The 2.5% and 97.5% percentiles are the bootstrap interval. Width zero means every resample agreed.
 5. Decision: if the interval spans more than one dog-count step, raise that window to 200 **real** seeds, then bootstrap again. Soft edges can stay wide even after that.
 
-![Bootstrap on D_min: locked seeds, resamples, interval, and wide-interval trigger.](../results/summary/figures/schematics/en/design_bootstrap.svg)
+![Bootstrap on D_min: locked seeds, resamples, interval, and wide-interval trigger.](figures/schematics/design_bootstrap.svg)
 
 *Five-step bootstrap on locked seeds. Worked numbers: Kubo outlier_rich N=200, point D_min=20, interval [2, 20].*
 
@@ -829,7 +829,7 @@ The shared rules (field, grids, 90% bar, scout/claim staging) are defined once i
 
 Dogs first gather stragglers (Collect), then push the whole flock toward the goal (Drive). They switch using a radius that grows with flock size (`r_a * N^(2/3)`). That Collect radius is wider than the goal disk, so a Strombom failure is not read as sheep failing to pack into the goal.
 
-![strombom_multi collect and drive.](../results/summary/figures/schematics/en/alg_strombom_multi.svg)
+![strombom_multi collect and drive.](figures/schematics/alg_strombom_multi.svg)
 
 *Multi-dog Collect assigns outliers; Drive places dogs on an arc behind the flock toward the goal.*
 
@@ -907,31 +907,31 @@ At the 90% reliability threshold:
 - `D_min = 1` for every tested `N` from 25 through 400;
 - no overcrowding; `D_max=35` is the grid ceiling (meaning: [Upper frontier status](#upper-frontier-status)).
 
-![`strombom_multi` compact reliability heatmap.](../results/phase1/claim/packages/a/figures/reliability_heatmap.png)
+![`strombom_multi` compact reliability heatmap.](figures/packages/phase1/claim/a/reliability_heatmap.png)
 
 *Success-rate surface R(N, D) for `strombom_multi` on compact starts only.*
 
 Meaning: almost the whole N by D surface is at or near R = 1.00. The clear low-R band is only N = 5 and N = 10 at D = 1 (R about 0.07 and 0.24). Once D >= 2, every tested size clears theta. That is why the size story here is a floor, not a rising dog-count curve.
 
-![`strombom_multi` frontier D_min(N).](../results/phase1/claim/packages/a/figures/frontier_dmin.png)
+![`strombom_multi` frontier D_min(N).](figures/packages/phase1/claim/a/frontier_dmin.png)
 
 *`D_min` (and ceiling `D_max`) on the compact size map. No overcrowding curve appears.*
 
 Meaning: `D_min` steps from 2 down to 1 at N = 25 and stays at 1 through N = 400. `D_max` sits on the top of the grid (35) for every N because no overcrowding pair appears. The plot is a lower frontier plus a ceiling label, not a measured upper collapse.
 
-![`strombom_multi` cost against D.](../results/phase1/claim/packages/a/figures/cost_vs_d.png)
+![`strombom_multi` cost against D.](figures/packages/phase1/claim/a/cost_vs_d.png)
 
 *Finish time stays roughly flat once runs succeed; total path grows with D.*
 
 Meaning: median finish time is about 183 ticks (p90 about 198) and does not fall much as D grows. Total shepherd path rises with D; for N >= 25, median path per dog is about 148. Extra dogs therefore buy little time and mainly add walking: the waste pattern.
 
-![`strombom_multi` size-map outcomes.](../results/phase1/claim/packages/a/figures/failure_modes.png)
+![`strombom_multi` size-map outcomes.](figures/packages/phase1/claim/a/failure_modes.png)
 
 *How trials end on the compact size claim merge (4,540 rows).*
 
 Meaning: overall success is about 0.963 (169 failures). Failures concentrate at the two under-resourced cells: oscillation (111) and stuck (58), mainly N = 5 / N = 10 at D = 1. Successful cells dominate the rest of the map.
 
-![`strombom_multi` regime counts.](../results/phase1/claim/packages/a/figures/regime_counts.png)
+![`strombom_multi` regime counts.](figures/packages/phase1/claim/a/regime_counts.png)
 
 *Regime labels on the 100 size-by-dog cells.*
 
@@ -945,19 +945,19 @@ At `N=50, 100, 200`, all four layouts have `D_min=1`, with bootstrap width zero.
 - `outlier_rich`, `N=200` took a median 1,228 ticks and path 1,647 at 1 dog;
 - on wide starts, the minimum-path reliable choice `B*` was 2 dogs for all 3 tested sizes.
 
-![`strombom_multi` layout cost at D = 1.](../results/phase2/claim/packages/b/figures/layout_cost_d1.png)
+![`strombom_multi` layout cost at D = 1.](figures/packages/phase2/claim/b/layout_cost_d1.png)
 
 *Median total path by layout at one dog. Wide and large outlier_rich starts dominate cost.*
 
 Meaning: compact and split sit near each other (split is not a hard contrast in these medians). Wide is the expensive start (path about 2,900 to 5,200). `outlier_rich` grows sharply with N (path about 209 at N = 50 to about 1,647 at N = 200). Structure here is a cost factor, not a `D_min` factor.
 
-![`strombom_multi` R vs D by layout at N = 50, 100, 200.](../results/phase2/claim/packages/b/figures/layout_reliability_by_n.png)
+![`strombom_multi` R vs D by layout at N = 50, 100, 200.](figures/packages/phase2/claim/b/layout_reliability_by_n.png)
 
 *Success rate R(D) for each layout at the three structure sizes. Markers and a small vertical dodge separate stacked curves; true values are still R = 1.00 where noted.*
 
 Meaning: at N = 50, 100, and 200, all four layouts (compact, split, outlier_rich, wide) have `D_min = 1` and R = 1.00 already at D = 1, and stay at or above theta through D = 35. On the raw values the four curves coincide, which is why an undodged plot looked like a single line. Layout does not open a reliability gap on the baseline at any of these sizes; the structure effect is delayed finish and longer path, not failure to hit 90%.
 
-![Wide starts: path at D = 1 versus D = 2.](../results/summary/figures/f10_wide_bstar_path.png)
+![Wide starts: path at D = 1 versus D = 2.](figures/f10_wide_bstar_path.png)
 
 *On wide starts, `B*` = 2: the second dog cuts median path while staying reliable.*
 
@@ -990,7 +990,7 @@ Here "not reach" means no overcrowding appeared before D = 35, so `D_max` is onl
 
 There is no Collect/Drive switch. Sheep and dogs move under continuous forces (push, align, pull) with local sensing and speed limits. Each dog focuses on the sheep farthest from the goal among those it can sense. Dogs also push each other apart so they do not stack on one spot.
 
-![Kubo force-based control.](../results/summary/figures/schematics/en/alg_kubo.svg)
+![Kubo force-based control.](figures/schematics/alg_kubo.svg)
 
 *Continuous forces; each dog presses the in-range sheep farthest from the goal, with dog-dog repulsion spreading the team.*
 
@@ -1061,31 +1061,31 @@ The experiment overrides the preset counts with each tested `(N, D)` cell. It do
 - no overcrowding; `D_max=35` is the grid ceiling ([Upper frontier status](#upper-frontier-status))
 - Overall success in the Kubo size claim merge was 0.991 (4428 successes and 42 failures in 4470 rows). Every failure has `failure_mode = timeout`; no oscillation or stuck labels appear in that merge.
 
-![`kubo` compact reliability heatmap.](../results/phase4/kubo_size/claim/packages/a/figures/reliability_heatmap.png)
+![`kubo` compact reliability heatmap.](figures/packages/phase4/kubo_size/claim/a/reliability_heatmap.png)
 
 *Success-rate surface R(N, D) for `kubo` on compact starts only.*
 
 Meaning: like the baseline, most of the compact surface is high R. The weak corner is small N at low D (N = 5 needs D_min = 3; at D = 1 and D = 2, R is about 0.77 and 0.71 before clearing at higher D). From N = 10 upward the map is already reliable at D = 1.
 
-![`kubo` frontier D_min(N).](../results/phase4/kubo_size/claim/packages/a/figures/frontier_dmin.png)
+![`kubo` frontier D_min(N).](figures/packages/phase4/kubo_size/claim/a/frontier_dmin.png)
 
 *`D_min(N)` on compact starts; `D_max` at the grid top where no overcrowding appears.*
 
 Meaning: after N = 5 (`D_min = 3`), the frontier sits at 1 through N = 400. No overcrowding curve is drawn: `D_max = 35` is the tested-grid ceiling for every size cell. Compact-size transfer with the baseline is shared on that lower frontier for N >= 10.
 
-![`kubo` cost against D.](../results/phase4/kubo_size/claim/packages/a/figures/cost_vs_d.png)
+![`kubo` cost against D.](figures/packages/phase4/kubo_size/claim/a/cost_vs_d.png)
 
 *Finish time and path against dog count on the Kubo compact size map.*
 
 Meaning: once cells are reliable, adding dogs does not create an overcrowding collapse on this map. Path still tends to grow with D while finish time stays in a successful band, matching the waste pattern used for the baseline upper frontier (Kubo ticks are not physically comparable to Strombom-family ticks).
 
-![`kubo` size-map outcomes.](../results/phase4/kubo_size/claim/packages/a/figures/failure_modes.png)
+![`kubo` size-map outcomes.](figures/packages/phase4/kubo_size/claim/a/failure_modes.png)
 
 *How trials end on the Kubo compact size claim merge (4,470 rows).*
 
 Meaning: 42 failures, all labelled timeout; no oscillation or stuck labels in that merge. Overall success is about 0.991. Failures are rare and time-budget limited, not oscillation-dominated as on FAT.
 
-![`kubo` regime counts.](../results/phase4/kubo_size/claim/packages/a/figures/regime_counts.png)
+![`kubo` regime counts.](figures/packages/phase4/kubo_size/claim/a/regime_counts.png)
 
 *Regime labels on the 100 Kubo size-by-dog cells.*
 
@@ -1098,13 +1098,13 @@ Meaning: 87 wasteful overspend, 11 efficient, 2 under-resourced, 0 overcrowding.
 - `outlier_rich`, `N=200`: point estimate `D_min=20`.
 - Wide: hard failure at all 3 sizes. Best reliability over tested dog counts is about 0.47 to 0.54, below 0.90. Failures are mainly timeout or scatter: the flock stays too spread for the local-force dogs to finish by T0. Adding dogs raises R toward about 0.5 but does not cross the 0.90 bar inside D <= 35, so the label is hard failure, not overcrowding.
 
-![`kubo` R vs D by layout at N = 50, 100, 200.](../results/phase4/kubo_structure/claim/packages/b/figures/layout_reliability_by_n.png)
+![`kubo` R vs D by layout at N = 50, 100, 200.](figures/packages/phase4/kubo_structure/claim/b/layout_reliability_by_n.png)
 
 *Success rate R(D) for each layout at the three structure sizes.*
 
 Meaning: compact and split stay above theta across D at all three N. Wide stays in a mid band (best R about 0.47 to 0.54) and never clears 0.90 at N = 50, 100, or 200, so transfer fails on spread-out starts. `outlier_rich` stays at `D_min = 1` for N = 50 and 100, then only clears theta at high D when N = 200 (see next figures). Compact `D_min` sharing with the baseline therefore does not extend to every layout.
 
-![`kubo` layout cost at D = 1.](../results/phase4/kubo_structure/claim/packages/b/figures/layout_cost_d1.png)
+![`kubo` layout cost at D = 1.](figures/packages/phase4/kubo_structure/claim/b/layout_cost_d1.png)
 
 *Median path (and related cost) by layout at one dog.*
 
@@ -1112,7 +1112,7 @@ Meaning: where R is already high at D = 1 (compact / split), cost is the seconda
 
 For `outlier_rich`, `N=200`, the shared raise-to-200 rule applied ([Bootstrap on D_min](#bootstrap-on-d_min-analysis-then-maybe-more-seeds)): those D cells were reseeded at 200 simulation seeds, then bootstrap was run again on that deeper bag. The 200-seed cells gave `R=0.935` at `D=20` and `R=0.910` at `D=25`. The bootstrap interval for `D_min` is still `[2, 20]`: several D below 20 have R near theta, so resamples can pull the estimate downward even when the full-depth point estimate is 20. Report `D_min = 20` with `[2, 20]`. Deeper seeding did not collapse the soft edge to a one-step cliff.
 
-![Kubo outlier_rich, N = 200.](../results/summary/figures/f9_kubo_outlier_rich_n200.png)
+![Kubo outlier_rich, N = 200.](figures/f9_kubo_outlier_rich_n200.png)
 
 *R(D) with Wilson 95% intervals. Point D_min = 20 clears theta; after 200 seeds the bootstrap lower edge remains [2, 20].*
 
@@ -1130,7 +1130,7 @@ Meaning: R climbs through the teens and first clears 0.90 at D = 20 (R = 0.935),
 
 Sheep still use the Strombom sheep model, but dogs have a simpler rule. Each dog looks at the sheep it can see, picks the one farthest from itself, and stands behind that sheep toward the goal. Dogs do not switch Collect/Drive, and they do not actively space themselves apart.
 
-![FAT farthest-agent targeting.](../results/summary/figures/schematics/en/alg_fat.svg)
+![FAT farthest-agent targeting.](figures/schematics/alg_fat.svg)
 
 *Each dog independently presses the observed sheep farthest from itself; no Collect/Drive switch and no dog-dog spacing rule.*
 
@@ -1179,31 +1179,31 @@ The global observation setting is important. Although the target-selection idea 
 - Best reliability by size for `N=50` through 400 was about 0.40 to 0.53.
 - About half of FAT size trials failed. The summary attributes about 39% of all trials to oscillation failures and 7% to stuck failures.
 
-![`fat` compact reliability heatmap.](../results/phase4/fat_size/claim/packages/a/figures/reliability_heatmap.png)
+![`fat` compact reliability heatmap.](figures/packages/phase4/fat_size/claim/a/reliability_heatmap.png)
 
 *Success-rate surface R(N, D) for `fat` on compact starts only.*
 
 Meaning: only the smallest flocks show a high-R band (N = 5 and N = 10 reach theta at D = 1). For N >= 25 the surface stays below 0.90 across the whole D grid; best R by size for N = 50 through 400 is about 0.40 to 0.53, with some cells as low as about 0.17. Adding dogs does not paint a reliable band on this compact map.
 
-![`fat` frontier D_min(N).](../results/phase4/fat_size/claim/packages/a/figures/frontier_dmin.png)
+![`fat` frontier D_min(N).](figures/packages/phase4/fat_size/claim/a/frontier_dmin.png)
 
 *Where no D reaches theta, `D_min` is undefined (hard failure), not zero.*
 
 Meaning: `D_min = 1` only at N = 5 and N = 10. For every larger N the frontier is empty (hard failure): there is no `D_min` and no `D_max` to plot as a collapse. That is the opposite of the baseline/Kubo compact floor.
 
-![`fat` cost against D.](../results/phase4/fat_size/claim/packages/a/figures/cost_vs_d.png)
+![`fat` cost against D.](figures/packages/phase4/fat_size/claim/a/cost_vs_d.png)
 
 *Finish time and path against dog count on the FAT compact size map.*
 
 Meaning: cost curves on hard-failure sizes are not an efficiency story. Many runs never succeed, so path and time describe failed or mixed cells rather than a wasteful reliable band. Do not read rising path here as the same "waste after D_min" pattern used for Strombom and Kubo.
 
-![`fat` size-map outcomes.](../results/phase4/fat_size/claim/packages/a/figures/failure_modes.png)
+![`fat` size-map outcomes.](figures/packages/phase4/fat_size/claim/a/failure_modes.png)
 
 *How trials end on the FAT compact size claim merge (4,400 rows).*
 
 Meaning: 2,206 failures (about half of trials). Labels are mostly oscillation (1,707; about 39% of all trials), then stuck (295; about 7%), then timeout (204). Failure mode is not "ran out of time only"; oscillation dominates.
 
-![`fat` regime counts.](../results/phase4/fat_size/claim/packages/a/figures/regime_counts.png)
+![`fat` regime counts.](figures/packages/phase4/fat_size/claim/a/regime_counts.png)
 
 *Regime labels on the 100 FAT size-by-dog cells.*
 
@@ -1218,13 +1218,13 @@ FAT did not reach 90% reliability in any structure cell at `N=50, 100, 200`.
 - `outlier_rich` best `R`: 0.10, 0.00, 0.00.
 - Wide best `R`: 0.00 at all three sizes.
 
-![`fat` R vs D by layout at N = 50, 100, 200.](../results/phase4/fat_structure/claim/packages/b/figures/layout_reliability_by_n.png)
+![`fat` R vs D by layout at N = 50, 100, 200.](figures/packages/phase4/fat_structure/claim/b/layout_reliability_by_n.png)
 
 *Success rate R(D) for each layout at the three structure sizes.*
 
 Meaning: at N = 50, 100, and 200, every layout stays below theta for all tested D. Compact/split best R is about 0.40 to 0.50; `outlier_rich` and wide stay near 0 (especially at larger N). Structure does not rescue FAT here; the size-map hard failure continues across starts and sizes.
 
-![`fat` layout cost at D = 1.](../results/phase4/fat_structure/claim/packages/b/figures/layout_cost_d1.png)
+![`fat` layout cost at D = 1.](figures/packages/phase4/fat_structure/claim/b/layout_cost_d1.png)
 
 *Path (and related cost) by layout at one dog.*
 
@@ -1232,7 +1232,7 @@ Meaning: with R far below theta, these costs are mainly failed or unreliable run
 
 The completed summary also reports a strong negative association between FAT trial interference and success on the size merge, with Pearson `r` about `-0.87`. This is observational. It does not establish interference as the cause of failure.
 
-![`fat` interference against D.](../results/phase4/fat_size/claim/packages/a/figures/interference_vs_d.png)
+![`fat` interference against D.](figures/packages/phase4/fat_size/claim/a/interference_vs_d.png)
 
 *Median mean I_dir on the FAT compact size map. Pearson r(I_dir, success) on that merge is about -0.87 (observational only).*
 
@@ -1252,7 +1252,7 @@ Meaning: FAT mean I_dir is much higher than baseline or Kubo on the size maps (a
 
 ### At a glance
 
-![Five main results at a glance.](../results/summary/figures/schematics/en/summary_at_a_glance.svg)
+![Five main results at a glance.](figures/schematics/summary_at_a_glance.svg)
 
 | Verdict | Finding | Key numbers |
 |----------|----------------|-------------|
@@ -1266,7 +1266,7 @@ Meaning: FAT mean I_dir is much higher than baseline or Kubo on the size maps (a
 
 ### Contrast with the 2025 draft
 
-![Draft versus this HerdSim protocol.](../results/summary/figures/schematics/en/draft_vs_herdsim.svg)
+![Draft versus this HerdSim protocol.](figures/schematics/draft_vs_herdsim.svg)
 
 *Same broad question and 90% bar; different task, arena, and controller family. This is a contrast, not a matched replication.*
 
@@ -1290,7 +1290,7 @@ Smallest reliable dog count (`D_min`) on compact starts at the 90% bar:
 
 Headline numbers are in [At a glance](#at-a-glance). Per-method plots are in [Methods and results](#7-methods-and-results). The figure below only compares frontiers across methods (and the draft):
 
-![D_min against N, with 2025 draft contrast.](../results/summary/figures/f2_dmin_vs_n.png)
+![D_min against N, with 2025 draft contrast.](figures/f2_dmin_vs_n.png)
 
 *Baseline and Kubo stay near one dog for large compact flocks; the draft rises sharply. FAT has no D_min for N >= 25.*
 
@@ -1357,9 +1357,9 @@ Same grids and layouts. For each feature we ask: does it look like the baseline,
 
 Meaning: sharing `D_min = 1` on compact starts does **not** mean full transfer. Wide starts and large outlier-rich starts show method dependence. FAT clears no structure cell at these sizes. Kubo `outlier_rich`, N = 200 detail (point `D_min = 20`, bootstrap `[2, 20]`) is under [`kubo`](#kubo).
 
-![Transfer sketch.](../results/summary/figures/schematics/en/transfer_sketch.svg)
+![Transfer sketch.](figures/schematics/transfer_sketch.svg)
 
-![Cross-method layout reliability curves.](../results/summary/figures/f5_layout_reliability_curves.png)
+![Cross-method layout reliability curves.](figures/f5_layout_reliability_curves.png)
 
 *Side-by-side success curves at N = 200 across methods and layouts. Per-method structure plots are in each method section above.*
 
@@ -1380,7 +1380,7 @@ On the baseline compact map, `D_min` is almost only two values: 2 for N = 5 and 
 
 The piecewise model wins because it matches that step, not because we measured a rich growth law. We cannot test "slope below 1 on a growth band" (C6b): there is no rising `D_min` band to fit. These fits are not a universal scaling law.
 
-![Leave-one-N-out RMSE by model.](../results/summary/figures/f8_scaling_rmse.svg)
+![Leave-one-N-out RMSE by model.](figures/f8_scaling_rmse.svg)
 
 ---
 
@@ -1395,7 +1395,7 @@ Verdicts use claim-grade evidence only. Labels:
 
 Recorded verdicts match the [progress tracker](progress_tracker.md). Weight notes for C5 and C7 are in sections 13 and 15.
 
-![Claims scorecard.](../results/summary/figures/schematics/en/claims_scorecard.svg)
+![Claims scorecard.](figures/schematics/claims_scorecard.svg)
 
 *Visual summary of claim verdicts. Detail in the table below.*
 
@@ -1464,7 +1464,7 @@ All three ladders use `strombom_multi`, compact starts, N = 100 and 200, and the
 
 Tracker verdicts: C5a REJECTED, C5b INCONCLUSIVE. Three of the four comparisons did not test the intended factor (details below).
 
-![RQ5 information ladders.](../results/summary/figures/f11_phase5_ladders.png)
+![RQ5 information ladders.](figures/f11_phase5_ladders.png)
 
 *A: success by observation mode. B: median dog path at N = 200 for four sensing ranges (curves coincide). C: success at N = 200 by communication mode.*
 
@@ -1503,11 +1503,11 @@ What we record on each run:
 
 Technical notes: if no dog moves, `I_dir = 0`. Velocities include wall effects. Missing coverage radius yields NaN.
 
-![Tick and path cost metrics.](../results/summary/figures/schematics/en/metrics_tick_path.svg)
+![Tick and path cost metrics.](figures/schematics/metrics_tick_path.svg)
 
-![Reliability R.](../results/summary/figures/schematics/en/metrics_reliability.svg)
+![Reliability R.](figures/schematics/metrics_reliability.svg)
 
-![Interference I_dir.](../results/summary/figures/schematics/en/metrics_idir.svg)
+![Interference I_dir.](figures/schematics/metrics_idir.svg)
 
 ---
 
@@ -1528,7 +1528,7 @@ RQ7 asks whether recent flock and dog state can warn that a run is about to fail
 
 So C7a is INCONCLUSIVE and C7b is REJECTED.
 
-![Early warning: run end times versus the check window.](../results/summary/figures/f12_early_warning_timing.png)
+![Early warning: run end times versus the check window.](figures/f12_early_warning_timing.png)
 
 *Successful runs finish around 180 ticks; failures run to the 10,000-tick deadline. The shaded band is where warning checks happen.*
 

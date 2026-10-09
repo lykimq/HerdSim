@@ -37,10 +37,6 @@ No simulation runtime. Planner only; no `status.json` with `elapsed_seconds` for
 - No overcrowding window on compact + strombom_multi at theta=0.90 in the claim merge.
 - Message from planner: "No overcrowding cells found; T1 has nothing to run (C2a may be false)"
 
-## Figures
-
-None (no Package A/C run).
-
 ## Interpretation
 
 The size map does not show two consecutive sub-theta dog counts after `D_min`, so the T1 overcrowding protocol has no cells. That is evidence against overcrowding on this method/layout/task, not a pipeline failure.
@@ -60,7 +56,7 @@ Single method and layout. Structure or transfer maps might still show overcrowdi
 
 - Tracker step 6 SKIPPED
 - Continue with Phase 2 structure when that campaign is next
-- Main scaling plan: [../../../docs/main_scaling_plan.html](../../../docs/main_scaling_plan.html)
+- Main scaling plan: [../../../docs/main_scaling_plan.md](../../../docs/main_scaling_plan.md)
 
 ## Files in this folder
 

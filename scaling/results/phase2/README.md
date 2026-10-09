@@ -2,7 +2,7 @@
 
 Question in plain terms: if flock size is fixed, does a different sheep layout at the start change how many dogs we need?
 
-Baseline method: `strombom_multi`. Layouts: compact, wide, split, outlier_rich. Protocol: `scaling_v2`. Cross-phase context: [main scaling plan](../../docs/main_scaling_plan.html) and [results summary](../summary/SUMMARY_REPORT.html).
+Baseline method: `strombom_multi`. Layouts: compact, wide, split, outlier_rich. Protocol: `scaling_v2`. Cross-phase context: [main scaling plan](../../docs/main_scaling_plan.md).
 
 ## Folders
 
@@ -11,7 +11,6 @@ Baseline method: `strombom_multi`. Layouts: compact, wide, split, outlier_rich. 
 | [pilot_state/](pilot_state/) | SMOKE | Layout / metrics smoke (600 trials) |
 | [scout/](scout/) | SCOUT | Cheap 3 N x 4 layouts x D map (3,600 trials) |
 | [claim/](claim/) | CLAIM | Careful reseed near edges (2,400 trials; merge 5,280) |
-| [guides/](guides/) | reader | `REPORT_en.html`, `REPORT_vi.html`, shared `assets/` |
 
 ## Runtime
 
@@ -32,7 +31,6 @@ Sum of each protocol `status.json` `elapsed_seconds`:
 | `pilot_state/` | SMOKE protocol folder (see `pilot_state/README.md`) |
 | `scout/` | SCOUT protocol folder (see `scout/README.md`) |
 | `claim/` | CLAIM protocol folder + merge + Package B (see `claim/README.md`) |
-| `guides/` | Reader HTML: `REPORT_en.html`, `REPORT_vi.html`, shared `assets/` (`figures/`, `layouts/`) |
 
 ### Common files inside each protocol folder
 
@@ -58,8 +56,6 @@ Cited in [claim/README.md](claim/README.md) and `claim/packages/b/`:
 
 ## Cross-phase
 
-- Main scaling plan: [../../docs/main_scaling_plan.html](../../docs/main_scaling_plan.html)
-- Results summary: [../summary/SUMMARY_REPORT.html](../summary/SUMMARY_REPORT.html)
-- Documentation: [index](../../docs/INDEX.html), [methods](../../docs/methods/README.html), [setup](../../docs/setup/README.html), [credibility](../../docs/credibility/README.html)
-- Data appendices: [Phase 2 tables](../summary/data/phase2_tables.html), [run ledger](../summary/data/run_ledger.html)
+- Final report: [../../docs/final_report.md](../../docs/final_report.md)
+- Main scaling plan: [../../docs/main_scaling_plan.md](../../docs/main_scaling_plan.md)
 - Tracker: [../../docs/progress_tracker.md](../../docs/progress_tracker.md)

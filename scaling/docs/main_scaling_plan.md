@@ -7,16 +7,9 @@ This document is the scientific plan. It defines the research objective, phase d
 Canonical supporting documents:
 
 - [Research program](herdsim_research_program.md)
-- [Setup and reference index](setup/README.md)
-- [Experiment setup](setup/experiment_setup.md)
-- [Parameter reference](setup/parameter_reference.md)
-- [Glossary](setup/glossary.md)
-- [Method guides](methods/README.md)
-- [Credibility and comparison](credibility/README.md)
-- [Run strategy](experiment_run_strategy.md)
-- [Run guide](setup/run_guide.md)
+- [Final report](final_report.md) ([HTML](final_report.html)) (completed findings, protocol detail, methods, and evidence)
 - [Progress tracker](progress_tracker.md)
-- [Data appendices](../results/summary/data/README.md)
+- [`canonical_grid.yaml`](../configs/canonical_grid.yaml)
 
 ## 1. Research objective
 
@@ -51,7 +44,7 @@ Dependency rules:
 
 ## 3. Shared planning contract
 
-The machine-readable values are in [`canonical_grid.yaml`](../configs/canonical_grid.yaml). Parameter meanings and rationale are in [parameter reference](setup/parameter_reference.md) and [experiment setup](setup/experiment_setup.md).
+The machine-readable values are in [`canonical_grid.yaml`](../configs/canonical_grid.yaml). Parameter meanings, rationale, and method detail for readers are in the [final report](final_report.md).
 
 The plan locks these constraints:
 
@@ -206,7 +199,7 @@ These criteria support statements inside the tested protocol only. They do not s
 
 ## 7. Execution status, not scientific results
 
-This section records whether planned work ran. It does not state effect sizes, frontier values, or scientific interpretations. The [progress tracker](progress_tracker.md) owns current run and verdict status. The [run ledger](../results/summary/data/run_ledger.md) owns executed counts and provenance.
+This section records whether planned work ran. It does not state effect sizes, frontier values, or scientific interpretations. The [progress tracker](progress_tracker.md) owns current run and verdict status. Executed counts and provenance live in each run's `status.json` and `provenance.json` under `results/`.
 
 Status as recorded on 2026-10-06:
 
@@ -216,7 +209,7 @@ Status as recorded on 2026-10-06:
 | 1 | DONE; conditional T1 SKIPPED | Scout 3000 rows; claim reseed 2200 rows; T1 not run because its trigger selected zero cells |
 | 2 | DONE | Scout 3600 rows; claim reseed 2400 rows |
 | 3 | SKIPPED | Conditional mechanism analysis had no eligible overcrowding contrast |
-| 4 | DONE for required Kubo and FAT size and structure campaigns | Exact scout, claim, and merge counts are in the run ledger |
+| 4 | DONE for required Kubo and FAT size and structure campaigns | Exact scout, claim, and merge counts are in each campaign `status.json` |
 | 5 | DONE | Observation, range, and communication scout+claim campaigns complete; C5a/C5b recorded in the tracker |
 | 6 | DONE for the planned baseline fit package | Analysis status only |
 | 7 | DONE | Package G on Phase 1 claim timeseries; C7a/C7b recorded in the tracker |
@@ -252,11 +245,11 @@ The words `DONE`, `SKIPPED`, and `TODO` describe execution status only. A comple
 | Time conventions across methods | Avoid direct physical interpretation of raw tick counts across controller families |
 | Strombom collect switch wider than the goal | Do not interpret its failure as a packing failure |
 | Simulated controllers | Make no field, farm, or biological-validity claim |
-| NetLogo twins and 2025 draft | Treat them as separate evidence layers; follow the credibility documents |
+| NetLogo twins and 2025 draft | Treat them as separate evidence layers; follow the final report limits and draft sections |
 | Grid ceiling | Do not interpret D = 35 as a physical upper limit |
 | Selective precision | Preserve cell grade after merges and never stack scout and claim rows |
 
-The application default arena, sheep models, and dog force laws are outside this protocol's modification scope. Detailed boundaries and validation limits are in [credibility and comparison](credibility/README.md).
+The application default arena, sheep models, and dog force laws are outside this protocol's modification scope. Detailed boundaries and validation limits are in the [final report](final_report.md).
 
 ## 10. Source precedence and document ownership
 
@@ -266,11 +259,8 @@ When sources differ, use this order:
 2. A resolved YAML in [`configs/protocols/`](../configs/protocols/) defines a campaign subset.
 3. A run's copied `protocol.yaml`, `provenance.json`, `manifest.jsonl`, and `status.json` define what actually executed.
 4. This plan defines research questions, dependencies, claim criteria, evidence grades, budgets, gates, and scope.
-5. [Setup documents](setup/README.md) define parameter rationale, glossary, implementation caps, and operational reference.
-6. [Method guides](methods/README.md) define controller interpretation and method-specific limits.
-7. [Credibility documents](credibility/README.md) define comparison and validation boundaries.
-8. [Run strategy](experiment_run_strategy.md) and [run guide](setup/run_guide.md) define staging intent and commands.
-9. [Progress tracker](progress_tracker.md) defines current code, run, and claim status.
-10. [Data appendices](../results/summary/data/README.md) and their direct artifacts define executed counts and reported evidence.
+5. [Final report](final_report.md) is the reader narrative for protocol detail, methods, findings, claims, and limits.
+6. [Progress tracker](progress_tracker.md) defines current code, run, and claim status. Commands: `make -C scaling help`.
+7. Package CSVs and each run's `status.json` / `provenance.json` under `results/` define executed counts and reported evidence.
 
 Results never redefine the frozen plan. If a planning estimate differs from a run artifact, retain the estimate as a plan and report the artifact as executed. If a copied run protocol differs from generic prose, the copied protocol and provenance control interpretation of that run.

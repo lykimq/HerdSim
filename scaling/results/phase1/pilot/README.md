@@ -51,14 +51,6 @@ From `status.json` (`elapsed_seconds`):
 - Regimes: wasteful_overspend 23, efficient_operation 5, under_resourced_failure 2
 - Surprises: none for smoke; ticks mostly short (median 185, p90 201); a few oscillation/stuck failures
 
-## Figures
-
-From `packages/*/figures/`:
-
-- [x] Reliability heatmap R(N, D)
-- [x] Frontier D_min(N)
-- [x] Regime counts
-
 ## Interpretation
 
 The pipeline and Package A behave as expected on a compact low-D band. Failures sit where one dog is too few for a tiny flock. High success and no overcrowding here do not predict the full freeze grid; scout adds larger N/D and more seeds.
@@ -75,7 +67,7 @@ CLAIM grade only. Skipped for SMOKE.
 
 - Phase 1 scout (`../scout/`), then claim (`../claim/`)
 - Phase index: `../README.md`
-- Main scaling plan: [../../../docs/main_scaling_plan.html](../../../docs/main_scaling_plan.html)
+- Main scaling plan: [../../../docs/main_scaling_plan.md](../../../docs/main_scaling_plan.md)
 
 ## Files in this folder
 
@@ -87,7 +79,7 @@ CLAIM grade only. Skipped for SMOKE.
 | `status.json` | Run progress | `n_planned`, `n_done`, `complete`, `elapsed_seconds`, start/update times |
 | `manifest.jsonl` | Resume ledger | One JSON line per cell; `status=ok` rows are skipped on re-run |
 | `trials.csv` | Trial-level results | One row per seed: N, D, layout, success, ticks, path/effort metrics, failure tags, etc. |
-| `packages/` | Analysis exports | Auto tables/figures from `scaling-analyse` (Package A/B/F/...); see `packages/*/README.md` |
+| `packages/` | Analysis exports | Auto tables from `scaling-analyse` (figures under `docs/figures/packages/`) (Package A/B/F/...); see `packages/*/README.md` |
 | `timeseries/` | (not retained) | Parquet trajectories were removed after analysis to save disk; CSV/packages remain |
 
 Package A lives under `packages/a/` (`reliability.csv`, `frontier.csv`, `regimes.csv`, `figures/`).

@@ -55,14 +55,6 @@ From `status.json` (`elapsed_seconds`):
 - Bootstrap: `d_min_ci_low` == `d_min_ci_high` for all layout x N at 100 seeds
 - Predictor (Package B auto): prefers_state=False; NLL comparison not informative when `D_min` is flat
 
-## Figures
-
-From `packages/*/figures/` and `../guides/assets/figures/`:
-
-- [x] Frontier D_min by layout
-- [x] Cost / reliability contrasts used in summary guides
-- [x] Wide B* path figure (`../guides/assets/figures/f10_wide_bstar_path.png`)
-
 ## Interpretation
 
 Start shape changes work (walking and time), not dog count, on this baseline controller and T0. Wide and outlier_rich starts stretch path length and time by an order of magnitude, but a single dog still clears theta=0.90. That rejects C1a (layout-driven `D_min` shift) under the frozen protocol. C1b stays inconclusive: with no `D_min` movement, state predictors have nothing extra to explain.
@@ -84,9 +76,8 @@ CLAIM grade. Aligned with `scaling/docs/progress_tracker.md`:
 
 - Tracker steps 7-8 DONE
 - Optional: verify split X0 at t=0; transfer maps in Phase 4 for C4
-- Reader guides: `../guides/REPORT_en.html`, `../guides/REPORT_vi.html`
-- Main scaling plan: [../../../docs/main_scaling_plan.html](../../../docs/main_scaling_plan.html)
-- Results summary: [../../summary/SUMMARY_REPORT.html](../../summary/SUMMARY_REPORT.html)
+- Final report: [../../../docs/final_report.md](../../../docs/final_report.md)
+- Main scaling plan: [../../../docs/main_scaling_plan.md](../../../docs/main_scaling_plan.md)
 
 ## Files in this folder
 
@@ -104,7 +95,7 @@ CLAIM grade. Aligned with `scaling/docs/progress_tracker.md`:
 | `dmin_bootstrap.csv` | Bootstrap on claim trials | D_min and CI by layout x N |
 | `merged_dmin_bootstrap.csv` | Bootstrap on merge | Same schema on the merge |
 | `packages/b/` | Package B export | Structure evidence package |
-| `timeseries/` | (not retained) | Parquet removed; figures kept under `../guides/assets/` |
+| `timeseries/` | (not retained) | Parquet removed |
 
 ### `packages/b/` detail
 
@@ -118,6 +109,6 @@ CLAIM grade. Aligned with `scaling/docs/progress_tracker.md`:
 ## Links
 
 - Package B: `packages/b/README.md`
-- Discussion: `../../../docs/discuss/phase2.md`
+- Final report: `../../../docs/final_report.md`
 - `merged_trials.csv`, `status.json`, `provenance.json`, `protocol.yaml`, `boundary_cells.csv`
 - Phase index: `../README.md`

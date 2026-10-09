@@ -53,14 +53,6 @@ From `status.json` (`elapsed_seconds`):
 - Bootstrap: `d_min_ci_low` == `d_min_ci_high` for every N (no multi-step CI)
 - Package F (auto): best_model=piecewise by leave-one-N RMSE; prefers_piecewise_or_state=True (SCOUT only; not for Claims)
 
-## Figures
-
-From `packages/*/figures/`:
-
-- [x] Reliability heatmap R(N, D)
-- [x] Frontier D_min(N)
-- [x] Regime counts
-
 ## Interpretation
 
 On a compact start, one dog is enough for N>=25 under T0; tiny flocks need at least 2 dogs. High dog counts mostly look wasteful (more walking) rather than overcrowded (success drops). Claim windows should sit around the fewest-dogs edge.
@@ -77,7 +69,7 @@ CLAIM grade only. Skipped for SCOUT.
 
 - Claim plan + reseed in `../claim/`
 - Phase index: `../README.md`
-- Main scaling plan: [../../../docs/main_scaling_plan.html](../../../docs/main_scaling_plan.html)
+- Main scaling plan: [../../../docs/main_scaling_plan.md](../../../docs/main_scaling_plan.md)
 
 ## Files in this folder
 
@@ -89,7 +81,7 @@ CLAIM grade only. Skipped for SCOUT.
 | `status.json` | Run progress | `n_planned`, `n_done`, `complete`, `elapsed_seconds`, start/update times |
 | `manifest.jsonl` | Resume ledger | One JSON line per cell; `status=ok` rows are skipped on re-run |
 | `trials.csv` | Trial-level results | One row per seed: N, D, layout, success, ticks, path/effort metrics, failure tags, etc. |
-| `packages/` | Analysis exports | Auto tables/figures from `scaling-analyse` (Package A/B/F/...); see `packages/*/README.md` |
+| `packages/` | Analysis exports | Auto tables from `scaling-analyse` (figures under `docs/figures/packages/`) (Package A/B/F/...); see `packages/*/README.md` |
 | `timeseries/` | (not retained) | Parquet trajectories were removed after analysis to save disk; CSV/packages remain |
 
 Packages: `packages/a/` (size map), `packages/f/` (scaling-fit diagnostics on scout frontiers).

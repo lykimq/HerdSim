@@ -6,7 +6,7 @@ Question in plain terms: do the same fewest-dogs answers show up with other dog 
 
 Claim-grade size and structure maps for `kubo` and `fat`, compared to baseline `strombom_multi`. Size map: Kubo shares `D_min` = 1 with the baseline for N >= 25; FAT hard-fails for N >= 25. Structure map: Kubo matches on compact and split; hard-fails on wide; outlier_rich N=200 shifts to `D_min` = 20 (200 seeds on D in {1,2,3,4,6,10,15,20,25}; bootstrap [2, 20]). FAT hard-fails on every structure cell. C4 supported only in part.
 
-Cross-phase context: [main scaling plan](../../docs/main_scaling_plan.html) and [results summary](../summary/SUMMARY_REPORT.html).
+Cross-phase context: [main scaling plan](../../docs/main_scaling_plan.md).
 
 ## Intent
 
@@ -80,16 +80,6 @@ Kubo outlier_rich N=200 rates: D1 0.745, D2 0.855, D3 0.835, D4 0.860, D6 0.890,
 
 We label each comparison **shared** (same answer), **shifted** (different dog count), or **absent** (one side never reaches 90% success).
 
-## Figures
-
-From `guides/assets/figures/`:
-
-- [x] Reliability heatmaps (f1)
-- [x] Layout reliability curves (f5)
-- [x] Failure modes (f6)
-- [x] Kubo outlier_rich N=200 (f9)
-- [x] Transfer sketch
-
 ## Interpretation
 
 Transfer is not automatic. Kubo shares the compact size frontier for mid/large N, but structure breaks generality: wide never clears the 90% bar, and large outlier_rich needs more dogs (`D_min` = 20). FAT does not transfer under `obs_mode=global` for N >= 25. Size-only transfer would overstate C4; the structure map is the binding contrast.
@@ -109,7 +99,7 @@ CLAIM grade. Aligned with `scaling/docs/progress_tracker.md`:
 ## Next
 
 - Tracker steps 11-13 DONE; Phase 5 still TODO
-- Reader guides: `guides/REPORT_en.html`, `guides/REPORT_vi.html`
+- Final report: [../../docs/final_report.md](../../docs/final_report.md)
 
 ## Files and folders
 
@@ -121,7 +111,6 @@ CLAIM grade. Aligned with `scaling/docs/progress_tracker.md`:
 | `fat_size/` | FAT size scout + claim |
 | `fat_structure/` | FAT structure scout + claim |
 | `package_d/` | Package D transfer tables (`size/`, `structure/`) |
-| `guides/` | Reader HTML + `assets/figures/`, `assets/layouts/` |
 
 ### Inside each `{method}_{size|structure}/{scout|claim}/` folder
 
@@ -161,9 +150,7 @@ CLAIM grade. Aligned with `scaling/docs/progress_tracker.md`:
 - Package D size: `package_d/size/README.md`
 - Package D structure: `package_d/structure/` (`frontier_by_method_layout.csv`, `transfer_*.csv`)
 - Per-method Package A/B: `{kubo,fat}_{size,structure}/claim/packages/`
-- Discussion: `../../docs/discuss/phase4.md`
 - Window snapshot: `kubo_structure/claim/outlier_rich_n200_window.json`
-- Main scaling plan: [../../docs/main_scaling_plan.html](../../docs/main_scaling_plan.html)
-- Results summary: [../summary/SUMMARY_REPORT.html](../summary/SUMMARY_REPORT.html)
-- Documentation: [index](../../docs/INDEX.html), [methods](../../docs/methods/README.html), [setup](../../docs/setup/README.html), [credibility](../../docs/credibility/README.html)
-- Data appendices: [Phase 4 tables](../summary/data/phase4_tables.html), [run ledger](../summary/data/run_ledger.html)
+- Final report: [../../docs/final_report.md](../../docs/final_report.md)
+- Main scaling plan: [../../docs/main_scaling_plan.md](../../docs/main_scaling_plan.md)
+- Tracker: [../../docs/progress_tracker.md](../../docs/progress_tracker.md)
