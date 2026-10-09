@@ -340,6 +340,111 @@ Quy tắc chọn dòng đại diện: sắp xếp từ điển theo `method`, `i
 | fat | split | 200 | 35 | 2125 | False | 10000 | 501,004.5 | oscillation |
 | fat | wide | 200 | 35 | 2125 | False | 10000 | 524,968.5 | split |
 
+## Hợp nhất claim: Giai đoạn 5 observation
+
+Nguồn đầy đủ: [`phase5/obs_claim/merged_trials.csv`](../../phase5/obs_claim/merged_trials.csv). Bảng lớn không được chép lại. Các thống kê dưới đây được tính trực tiếp từ CSV.
+
+| Thuộc tính | Giá trị |
+|---|---|
+| Số dòng | 1,920 |
+| Số cột | 77 |
+| Số ô thiết kế | 12 |
+| Phương pháp | strombom_multi |
+| Bố cục | compact |
+| Các giá trị N | 100, 200 |
+| Các giá trị D | 1, 2, 3, 4, 6, 10 |
+| Khoảng seed | 2026 đến 2125 |
+
+| Thuộc tính | Giá trị |
+|---|---|
+| Thành công | 1,280 |
+| Thất bại | 640 |
+| R toàn bộ | 0.667 |
+| Trung vị tick, các thành công | 189 |
+| P90 tick, các thành công | 203 |
+| Trung vị quãng đường, các thành công | 294.917 |
+| Nhãn thất bại | oscillation: 640 |
+
+Quy tắc chọn dòng đại diện: sắp xếp từ điển theo `method`, `initial_layout`, `n_sheep`, `n_shepherds`, `seed`, sau đó lấy 5 vị trí cách đều, gồm hai đầu. Quy tắc này trung lập và không chọn theo kết quả.
+
+| method | layout | N | D | seed | success | ticks | path | failure_mode |
+|---|---|---|---|---|---|---|---|---|
+| strombom_multi | compact | 100 | 1 | 2026 | False | 10000 | 0 | oscillation |
+| strombom_multi | compact | 100 | 3 | 2032 | True | 193 | 456.715 | none |
+| strombom_multi | compact | 200 | 1 | 2026 | False | 10000 | 0 | oscillation |
+| strombom_multi | compact | 200 | 3 | 2032 | True | 181 | 404.507 | none |
+| strombom_multi | compact | 200 | 10 | 2125 | False | 10000 | 0 | oscillation |
+
+## Hợp nhất claim: Giai đoạn 5 range
+
+Nguồn đầy đủ: [`phase5/range_claim/merged_trials.csv`](../../phase5/range_claim/merged_trials.csv). Bảng lớn không được chép lại. Các thống kê dưới đây được tính trực tiếp từ CSV.
+
+| Thuộc tính | Giá trị |
+|---|---|
+| Số dòng | 2,560 |
+| Số cột | 78 |
+| Số ô thiết kế | 12 |
+| Phương pháp | strombom_multi |
+| Bố cục | compact |
+| Các giá trị N | 100, 200 |
+| Các giá trị D | 1, 2, 3, 4, 6, 10 |
+| Khoảng seed | 2026 đến 2125 |
+
+| Thuộc tính | Giá trị |
+|---|---|
+| Thành công | 2,560 |
+| Thất bại | 0 |
+| R toàn bộ | 1 |
+| Trung vị tick, các thành công | 189 |
+| P90 tick, các thành công | 203 |
+| Trung vị quãng đường, các thành công | 295.197 |
+| Nhãn thất bại | không có |
+
+Quy tắc chọn dòng đại diện: sắp xếp từ điển theo `method`, `initial_layout`, `n_sheep`, `n_shepherds`, `seed`, sau đó lấy 5 vị trí cách đều, gồm hai đầu. Quy tắc này trung lập và không chọn theo kết quả.
+
+| method | layout | N | D | seed | success | ticks | path | failure_mode |
+|---|---|---|---|---|---|---|---|---|
+| strombom_multi | compact | 100 | 1 | 2026 | True | 205 | 163.226 | none |
+| strombom_multi | compact | 100 | 2 | 2086 | True | 195 | 300.579 | none |
+| strombom_multi | compact | 200 | 1 | 2026 | True | 191 | 147.115 | none |
+| strombom_multi | compact | 200 | 2 | 2085 | True | 183 | 270.683 | none |
+| strombom_multi | compact | 200 | 10 | 2055 | True | 182 | 1,341.797 | none |
+
+## Hợp nhất claim: Giai đoạn 5 communication
+
+Nguồn đầy đủ: [`phase5/comm_claim/merged_trials.csv`](../../phase5/comm_claim/merged_trials.csv). Bảng lớn không được chép lại. Các thống kê dưới đây được tính trực tiếp từ CSV.
+
+| Thuộc tính | Giá trị |
+|---|---|
+| Số dòng | 1,920 |
+| Số cột | 78 |
+| Số ô thiết kế | 12 |
+| Phương pháp | strombom_multi |
+| Bố cục | compact |
+| Các giá trị N | 100, 200 |
+| Các giá trị D | 1, 2, 3, 4, 6, 10 |
+| Khoảng seed | 2026 đến 2125 |
+
+| Thuộc tính | Giá trị |
+|---|---|
+| Thành công | 1,860 |
+| Thất bại | 60 |
+| R toàn bộ | 0.969 |
+| Trung vị tick, các thành công | 186 |
+| P90 tick, các thành công | 204 |
+| Trung vị quãng đường, các thành công | 277.558 |
+| Nhãn thất bại | oscillation: 60 |
+
+Quy tắc chọn dòng đại diện: sắp xếp từ điển theo `method`, `initial_layout`, `n_sheep`, `n_shepherds`, `seed`, sau đó lấy 5 vị trí cách đều, gồm hai đầu. Quy tắc này trung lập và không chọn theo kết quả.
+
+| method | layout | N | D | seed | success | ticks | path | failure_mode |
+|---|---|---|---|---|---|---|---|---|
+| strombom_multi | compact | 100 | 1 | 2026 | True | 205 | 163.226 | none |
+| strombom_multi | compact | 100 | 2 | 2086 | True | 189 | 286.598 | none |
+| strombom_multi | compact | 200 | 1 | 2026 | True | 191 | 147.115 | none |
+| strombom_multi | compact | 200 | 2 | 2085 | True | 183 | 270.683 | none |
+| strombom_multi | compact | 200 | 10 | 2055 | False | 10000 | 10,643.92 | oscillation |
+
 ## Nguồn trực tiếp
 
 * [`phase4/kubo_size/claim/packages/a/frontier.csv`](../../phase4/kubo_size/claim/packages/a/frontier.csv)

@@ -79,12 +79,14 @@ CLAIM grade. Aligned with `scaling/docs/progress_tracker.md`:
 |-------|---------|----------|
 | C2a | REJECTED | `packages/a/`: 0 overcrowding cells / no `D_overcrowd` at theta=0.90 |
 | C2b | SKIPPED | needs T1; no overcrowding cells |
-| C6a | EVALUATED (weak) | `packages/f/`: piecewise preferred, but only levels {2, 1} |
+| C6a | SUPPORTED | `packages/f/scaling_cv.csv`: leave-one-N RMSE power 0.247 > piecewise 0.132 |
+| C6b | SUPPORTED | compact N in {25..400}: D_min=1 flat (slope 0 < 1); `scaling_fits.csv` power log_log_slope = -0.165 |
+| C7a | INCONCLUSIVE | `packages/g/`: held-out state and (N, D) AUROC are null; folds empty; `beats_nd_baseline=False` |
+| C7b | REJECTED | `packages/g/early_warning_summary.csv`: frac_lead_ge_500 = 0.083 (< 0.30); 14/169 failures have lead time |
 
 ## Next
 
-- Tracker steps 4-5 DONE; step 6 T1 SKIPPED
-- Structure map: Phase 2
+- Tracker steps 4-5 DONE; step 6 T1 SKIPPED; step 17 Package G DONE
 - Reader guides: `../guides/REPORT_en.html`, `../guides/REPORT_vi.html`
 - Main scaling plan: [../../../docs/main_scaling_plan.html](../../../docs/main_scaling_plan.html)
 - Results summary: [../../summary/SUMMARY_REPORT.html](../../summary/SUMMARY_REPORT.html)

@@ -2,11 +2,11 @@
 
 ## 1. Phạm vi và tình trạng
 
-Báo cáo này chỉ gồm kết quả thực nghiệm của các Giai đoạn **1**, **2**, và **4** đã hoàn tất trong `scaling_v2`.
+Phần tường thuật chi tiết vẫn lấy trọng tâm Giai đoạn **1**, **2**, và **4**. Giai đoạn **5** và **7** đã hoàn tất trên tracker và nhật ký chạy; Package E / G được liên kết dưới đây.
 
 ![Các giai đoạn có trong báo cáo này.](figures/schematics/vi/phase_roadmap.svg)
 
-*Các giai đoạn có số liệu cấp claim ở đây: 1, 2 và 4. Sơ đồ thiết lập và phương pháp nằm trong các tài liệu liên kết bên dưới.*
+*Hình chi tiết bên dưới: Giai đoạn 1, 2 và 4. Giai đoạn 5 (thang thông tin) và 7 (cảnh báo sớm) đã xong; xem thư mục phase và [nhật ký chạy](data/run_ledger_vi.md).*
 
 ![Năm kết quả chính từ Giai đoạn 1, 2 và 4.](figures/schematics/vi/summary_at_a_glance.svg)
 
@@ -15,6 +15,8 @@ Báo cáo này chỉ gồm kết quả thực nghiệm của các Giai đoạn *
 | Đàn lớn hơn thì cần bao nhiêu chó? | Giai đoạn 1, cơ sở `strombom_multi` trên xuất phát `compact` |
 | Cấu trúc xuất phát có đổi câu trả lời không? | Giai đoạn 2, cơ sở trên bốn bố cục |
 | Kết quả có chuyển sang luật chó khác không? | Giai đoạn 4, bản đồ kích thước và cấu trúc của `kubo` và `fat` |
+| Thông tin phong phú hơn có hạ được D_min không? | Giai đoạn 5 obs/range/comm (C5a bác bỏ; C5b chưa kết luận) |
+| Cảnh báo sớm từ trạng thái gần đây? | Giai đoạn 7 Package G (C7a chưa kết luận; C7b bác bỏ) |
 
 | Đánh giá | Phát hiện | Số chính |
 |---|---|---|
@@ -23,6 +25,8 @@ Báo cáo này chỉ gồm kết quả thực nghiệm của các Giai đoạn *
 | Không tái hiện | Đường tăng mạnh về số chó cần trong bản thảo 2025 không xuất hiện ở đây. | Bản thảo báo khoảng 20 đến 35 chó với N >= 200. Ở đây một chó xong N = 400 trong trung vị 168 tick. |
 | Chỉ đổi chi phí | Bố cục xuất phát trên cơ sở đổi thời gian và đường đi, nhưng không đổi D_min. | Xuất phát wide tốn khoảng 11x đến 20x thời gian và 19x đến 36x đường so với compact. Tại N = 200, `outlier_rich` đạt khoảng 6x thời gian và 11x đường. |
 | Chuyển giao một phần | Kubo và FAT không chuyển đều từ cơ sở. | Kubo gần khớp cơ sở trên compact nhưng chỉ đạt R = 0.47 đến 0.54 trên wide. FAT chỉ đạt R >= 0.90 với N <= 10. |
+| Thông tin không mua thêm chó | Khi quan sát local/global đã chạy được, range hoặc communication phong phú hơn không hạ D_min. | Giai đoạn 5: bearing_only thất bại cứng; các bước còn lại D_min = 1 |
+| Cảnh báo sớm yếu | Lead-time và AUROC giữ lại không vượt ngưỡng C7 trên mẫu thất bại này. | frac_lead_ge_500 = 0.083; fold AUROC rỗng |
 
 | Giai đoạn | Câu hỏi | Phương pháp | Bố cục | Thử nhanh | Khảo sát | Kết luận |
 |---|---|---|---|---:|---:|---:|
@@ -32,9 +36,12 @@ Báo cáo này chỉ gồm kết quả thực nghiệm của các Giai đoạn *
 | 4a | Chuyển giao: kích thước | fat | compact | không có | 3,000 | 2,000 |
 | 4b | Chuyển giao: cấu trúc | kubo | 4 bố cục | không có | 3,600 | 4,000 |
 | 4b | Chuyển giao: cấu trúc | fat | 4 bố cục | không có | 3,600 | 2,400 |
-|  | **Tổng mô phỏng** |  |  |  |  | **35,650** |
+| 5a | Thông tin: quan sát | strombom_multi | compact | không có | 1,080 | 1,200 |
+| 5b | Thông tin: phạm vi | strombom_multi | compact | không có | 1,440 | 1,600 |
+| 5c | Thông tin: giao tiếp | strombom_multi | compact | không có | 1,080 | 1,200 |
+|  | **Tổng mô phỏng** |  |  |  |  | **43,250** |
 
-Bản hợp nhất claim có 30,670 dòng. Các tầng thử nhanh, khảo sát và claim đã chạy có 35,650 dòng; ô được gieo lại bỏ dòng khảo sát khỏi bản hợp nhất claim. Claim cấu trúc Kubo có 4,000 dòng, gồm 200 seed tại `outlier_rich`, N = 200 với D trong {1, 2, 3, 4, 6, 10, 15, 20, 25}. Xem [nhật ký chạy](data/run_ledger_vi.md).
+Bản hợp nhất claim có 37,070 dòng (Giai đoạn 1, 2, 4 và 5). Các tầng thử nhanh, khảo sát và claim đã chạy có 43,250 dòng; ô được gieo lại bỏ dòng khảo sát khỏi bản hợp nhất claim. Claim cấu trúc Kubo có 4,000 dòng, gồm 200 seed tại `outlier_rich`, N = 200 với D trong {1, 2, 3, 4, 6, 10, 15, 20, 25}. Xem [nhật ký chạy](data/run_ledger_vi.md). Giai đoạn 5: `../phase5/`. Package G (Giai đoạn 7): `../phase1/claim/packages/g/`.
 
 Tài liệu chuẩn:
 
@@ -253,7 +260,35 @@ Nhãn Package D kích thước gồm 8 chia sẻ, 7 dịch, và 29 vắng. Số 
 
 *Hình 10. Nguồn: `mean_i_dir` trong các tệp `merged_trials.csv` claim.*
 
-## 5. Tổng hợp và ảnh chụp claim
+## 5. Giai đoạn 5: thang thông tin
+
+Bằng chứng: `../phase5/README.md` và Package E trong `../phase5/{obs,range,comm}_claim/packages/e/`.
+
+Ba thang riêng trên cơ sở `strombom_multi`, xuất phát compact, N trong {100, 200}, dải D thấp {1, 2, 3, 4, 6, 10}.
+
+| Thang | Khảo sát | Claim | Mẫu cấp claim |
+|---|---:|---:|---|
+| Quan sát (bearing / local / global) | 1,080 | 1,200 | `bearing_only` thất bại cứng; `local_positions` và `global` có D_min = 1 |
+| Phạm vi cảm biến (0.5x đến 2x r_s) | 1,440 | 1,600 | D_min = 1 tại mọi tầm đã thử |
+| Giao tiếp (none / neighbour / global_shared) | 1,080 | 1,200 | D_min = 1 tại mọi chế độ giao tiếp |
+
+Cách đọc: chất lượng thông tin có thể quyết định biên có tồn tại hay không (bearing-only không đạt theta), nhưng khi cảm biến local đã chạy được, quan sát / tầm / giao tiếp phong phú hơn không mua thêm ít chó trên bản đồ này. C5a bị bác bỏ; C5b chưa kết luận (không có bước đầu tiết kiệm chó để đo giảm dần).
+
+## 6. Giai đoạn 7: cảnh báo sớm
+
+Bằng chứng: `../phase1/claim/packages/g/` (Package G trên timeseries claim Giai đoạn 1).
+
+| Đại lượng | Giá trị |
+|---|---:|
+| Trial cửa sổ claim có timeseries | 2,200 |
+| Thất bại | 169 |
+| AUROC trạng thái (trung bình giữ lại) | null |
+| AUROC (N, D) (trung bình giữ lại) | null |
+| frac_lead_ge_500 | 0.083 |
+
+C7a chưa kết luận (AUROC không tính được; fold rỗng). C7b bị bác bỏ (cần ít nhất 30% thất bại có lead time >= 500 tick). Thất bại tập trung ở N nhỏ với một chó, nên holdout theo N bị hạn chế.
+
+## 7. Tổng hợp và ảnh chụp claim
 
 ![Bảng điểm claim từ tracker và các gói claim.](figures/schematics/vi/claims_scorecard.svg)
 
@@ -261,34 +296,36 @@ Nhãn Package D kích thước gồm 8 chia sẻ, 7 dịch, và 29 vắng. Số 
 
 | Claim | Phán quyết | Bằng chứng | Cách đọc |
 |---|---|---|---|
-| C1a | BỊ BÁC BỎ | Giai đoạn 2 Package B: D_min = 1 cho bốn bố cục tại N = 50, 100, 200; bootstrap rộng 0 | Chỉ cho cơ sở; cấu trúc Kubo có dịch |
-| C1b | KHÔNG RÕ | Không có dịch D_min trên cơ sở; Package B báo likelihood NaN | Chi phí vẫn phụ thuộc mạnh vào bố cục |
+| C1a | BỊ BÁC BỎ | Giai đoạn 2 Package B: D_min = 1 cho bốn bố cục tại N = 50, 100, 200 | Chỉ cho cơ sở; cấu trúc Kubo có dịch |
+| C1b | KHÔNG RÕ | Không có dịch D_min trên cơ sở | Chi phí vẫn phụ thuộc mạnh vào bố cục |
 | C2a | BỊ BÁC BỎ | Giai đoạn 1 Package A: 0 ô overcrowding tại theta = 0.90 | Giai đoạn 4 cũng không có |
 | C2b | BỎ QUA | Không có ô overcrowding để chạy T = 20,000 | Không chạy T1 |
-| C3 | KHÔNG RÕ | Đối chiếu cơ chế cơ sở cần overcrowding | Có ô đối chiếu Kubo nhưng Package C chưa hoàn tất |
-| C4 | ĐƯỢC ỦNG HỘ, một phần | Strombom và Kubo chia sẻ D_min compact với N >= 25; FAT vắng; Kubo wide vắng; Kubo `outlier_rich`, N = 200 dịch | Chuyển giao phụ thuộc điều kiện |
-| C6a | ĐÃ ĐÁNH GIÁ, yếu | RMSE từng mảnh 0.13 so với lũy thừa 0.25 | Fit chỉ dùng hai mức quan sát {2, 1}; không phải quy luật scaling |
-| C5a/b, C6b, C7a/b | CHƯA ĐÁNH GIÁ | Giai đoạn 5 và 7 chưa chạy; C6b không có dải tăng trưởng đã nêu | Không có kết luận kết quả |
+| C3 | KHÔNG RÕ | Đối chiếu cơ chế cơ sở cần overcrowding | Trigger vắng dưới freeze |
+| C4 | ĐƯỢC ỦNG HỘ, một phần | Strombom/Kubo chia sẻ D_min compact N >= 25; FAT vắng; Kubo wide vắng; outlier_rich N=200 dịch | Chuyển giao có điều kiện |
+| C5a | BỊ BÁC BỎ | Giai đoạn 5 Package E: không bước nào hạ D_min đã định nghĩa một bước lưới | Bearing thất bại cứng; bước khác D_min = 1 |
+| C5b | KHÔNG RÕ | Giai đoạn 5: median_first_step_delta = 0 | Không có tiết kiệm chó để đo giảm dần |
+| C6a | ĐƯỢC ỦNG HỘ | Package F: RMSE leave-one-N power 0.247 > piecewise 0.132 | Power kém hơn piecewise; chỉ mức {2, 1} |
+| C6b | ĐƯỢC ỦNG HỘ | Compact N trong {25..400}: D_min = 1 phẳng (độ dốc 0 < 1) | Không phải luật tăng mạnh trên dải này |
+| C7a | KHÔNG RÕ | Package G: AUROC null; fold rỗng | Không chứng minh state thắng (N, D) |
+| C7b | BỊ BÁC BỎ | Package G: frac_lead_ge_500 = 0.083 | Dưới ngưỡng 30% |
 
-## 6. Bất định, giới hạn, và giai đoạn chưa chạy
+## 8. Bất định, giới hạn, và phần bỏ qua
 
 | Tình trạng | Chủ đề | Giới hạn hiện tại |
 |---|---|---|
-| Hiệu ứng trần | Độ tin cậy cơ sở | R = 1.00 tại D = 1 trên gần mọi ô cơ sở, nên khó thấy scaling |
-| Trần lưới | D_max = 35 | Chưa đo điểm sụp trên; hành vi trên 35 chưa biết |
-| Thất bại cứng | FAT và Kubo wide | D_min và D_max trống nghĩa là không D đã thử nào đạt 0.90, không phải đã tìm thấy biên trên |
-| Khoảng rộng | Kubo `outlier_rich`, N = 200 | Ước điểm D_min = 20 tại 200 seed, R = 0.935, nhưng bootstrap là [2, 20] |
-| Fit yếu | C6a | Hai mức D_min quan sát không hỗ trợ quy luật scaling chung |
-| Chỉ quan sát | I_dir | r khoảng -0.87 không chứng minh interference gây thất bại |
-| Hành vi bộ sinh chưa xác minh | Bố cục `split` | Chi phí và D_min khớp compact; vẫn cần xác nhận tách cụm tại t = 0 |
-| Một nhiệm vụ mô phỏng | Giá trị bên ngoài | Kết quả không chứng minh hiệu năng ngoài đồng, độ trung thực sinh học, hay quy tắc nông trại chung |
-| Lưới D rời rạc | Độ phân giải | Không phân giải được khác biệt nhỏ hơn các bước số chó đã thử |
+| Hiệu ứng trần | Độ tin cậy cơ sở | R = 1.00 tại D = 1 trên gần mọi ô cơ sở |
+| Trần lưới | D_max = 35 | Chưa đo điểm sụp trên |
+| Thất bại cứng | FAT và Kubo wide | Không D đã thử nào đạt 0.90 |
+| Khoảng rộng | Kubo `outlier_rich`, N = 200 | Bootstrap [2, 20] dù điểm D_min = 20 |
+| Tín hiệu tăng trưởng yếu | C6a/C6b | Chỉ hai mức D_min; dải N giữa/lớn phẳng |
+| Chỉ quan sát | I_dir | r khoảng -0.87 không chứng minh nguyên nhân |
+| Thất bại thưa | C7 | N nhỏ hạn chế fold AUROC và lead-time |
+| Một nhiệm vụ mô phỏng | Giá trị bên ngoài | Không chứng minh hiệu năng ngoài đồng |
+| Lưới D rời rạc | Độ phân giải | Không phân giải khác biệt nhỏ hơn một bước lưới |
 
-Giai đoạn chưa chạy:
+Phần bỏ qua hoặc ngoài phạm vi:
 
-- Giai đoạn 3 và C2b bị bỏ qua vì cơ sở có 0 ô overcrowding.
-- Giai đoạn 5 về cảm biến, tầm, và giao tiếp chưa chạy.
-- Giai đoạn 7 và Package G về cảnh báo sớm chưa chạy.
-- Bản thảo 2025 không được chạy lại, và parity định lượng với NetLogo chưa được xác lập.
+- Giai đoạn 3 và C2b bị bỏ vì cơ sở có 0 ô overcrowding.
+- Bản thảo 2025 không được chạy lại; parity định lượng NetLogo chưa xác lập.
 
-Nội dung thiết lập, phương pháp, bản thảo, NetLogo, provenance, và thuật ngữ đã bỏ khỏi báo cáo này nằm trong các tài liệu chuẩn liên kết ở mục 1. Các bảng thực nghiệm tạo tự động và đường dẫn nguồn nằm trong [data/README_vi.md](data/README_vi.md).
+Tài liệu thiết lập, phương pháp, bản thảo, NetLogo, provenance, và thuật ngữ: xem mục 1. Bảng dữ liệu: [data/README_vi.md](data/README_vi.md). Audit tin cậy: [`../TRUST_AUDIT.md`](../TRUST_AUDIT.md).

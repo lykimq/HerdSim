@@ -1,0 +1,6 @@
+{
+  "substitution_curves_obs": "/home/gwen/HerdSim/scaling/results/phase5/obs_claim/packages/e/packages/e/substitution_curves_obs.csv",
+  "substitution_summary_obs": "/home/gwen/HerdSim/scaling/results/phase5/obs_claim/packages/e/packages/e/substitution_summary_obs.csv",
+  "provenance": "/home/gwen/HerdSim/scaling/results/phase5/obs_claim/packages/e/packages/e/provenance.json",
+  "report": "/home/gwen/HerdSim/scaling/results/phase5/obs_claim/packages/e/packages/e/README.md"
+}

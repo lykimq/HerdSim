@@ -160,7 +160,7 @@ Dòng claim thay dòng scout tại ô gieo lại. Chúng không được chồng
 
 ![S20. Ý tưởng bootstrap cho khoảng D_min.](../../results/summary/figures/schematics/vi/design_bootstrap.svg)
 
-*Gieo lại seed trong mỗi D (1.000 lần); phân vị 2,5% và 97,5% tạo khoảng.*
+*Tren: gieo lai seed da khoa trong moi D (1.000 lan); phan vi 2,5% va 97,5% tao khoang. Duoi: neu khoang rong hon mot buoc luoi, nang claim len 200 seed roi bootstrap lai.*
 
 Ước lượng lập kế hoạch Giai đoạn 1 khoảng 3.000 lần thử scout cộng tới khoảng 6.000 lần thử claim. Một đối sánh cấu trúc khoảng 3.600 scout cộng 7.200 claim. Đây là số lập kế hoạch và phải tính lại sau khi chọn scout.
 

@@ -46,6 +46,12 @@ RUNS = (
     ("Phase 4 Kubo structure", "Claim", "phase4/kubo_structure/claim"),
     ("Phase 4 FAT structure", "Scout", "phase4/fat_structure/scout"),
     ("Phase 4 FAT structure", "Claim", "phase4/fat_structure/claim"),
+    ("Phase 5 obs", "Scout", "phase5/factor_sweep"),
+    ("Phase 5 obs", "Claim", "phase5/obs_claim"),
+    ("Phase 5 range", "Scout", "phase5/range_scout"),
+    ("Phase 5 range", "Claim", "phase5/range_claim"),
+    ("Phase 5 comm", "Scout", "phase5/comm_scout"),
+    ("Phase 5 comm", "Claim", "phase5/comm_claim"),
 )
 
 MERGED = (
@@ -55,6 +61,9 @@ MERGED = (
     ("Phase 4 FAT size", "phase4/fat_size/claim/merged_trials.csv"),
     ("Phase 4 Kubo structure", "phase4/kubo_structure/claim/merged_trials.csv"),
     ("Phase 4 FAT structure", "phase4/fat_structure/claim/merged_trials.csv"),
+    ("Phase 5 observation", "phase5/obs_claim/merged_trials.csv"),
+    ("Phase 5 range", "phase5/range_claim/merged_trials.csv"),
+    ("Phase 5 communication", "phase5/comm_claim/merged_trials.csv"),
 )
 
 SCHEMA_GROUPS = (
@@ -681,8 +690,13 @@ def localize_run_label(text: str, vi: bool) -> str:
         "Phase 4 FAT size": "Giai đoạn 4 FAT kích thước",
         "Phase 4 Kubo structure": "Giai đoạn 4 Kubo cấu trúc",
         "Phase 4 FAT structure": "Giai đoạn 4 FAT cấu trúc",
+        "Phase 5 obs": "Giai doan 5 quan sat",
+        "Phase 5 range": "Giai doan 5 pham vi",
+        "Phase 5 comm": "Giai doan 5 giao tiep",
         "Phase 1 baseline size": "Giai đoạn 1 kích thước cơ sở",
         "Phase 2 baseline structure": "Giai đoạn 2 cấu trúc cơ sở",
+        "Phase 5 observation": "Giai doan 5 quan sat",
+        "Phase 5 communication": "Giai doan 5 giao tiep",
         "Pilot": "Thử nhanh",
         "Pilot state": "Thử nhanh trạng thái",
         "Scout": "Khảo sát",
@@ -786,7 +800,7 @@ def readme(vi: bool) -> str:
     if vi:
         return """# Phụ lục dữ liệu
 
-Thư mục này là mục lục tái tạo được cho bằng chứng của Giai đoạn 1, 2 và 4. Các bảng được tạo trực tiếp từ CSV, JSON, tệp trạng thái và provenance chuẩn. Không có số nào được nhập tay.
+Thư mục này là mục lục tái tạo được cho bằng chứng của Giai đoạn 1, 2, 4 và 5. Các bảng được tạo trực tiếp từ CSV, JSON, tệp trạng thái và provenance chuẩn. Không có số nào được nhập tay.
 
 ## Cách đọc
 
@@ -794,6 +808,7 @@ Thư mục này là mục lục tái tạo được cho bằng chứng của Gia
 * [Bảng Giai đoạn 1](phase1_tables_vi.md): biên kích thước, chế độ, khớp scaling và tóm tắt hợp nhất.
 * [Bảng Giai đoạn 2](phase2_tables_vi.md): biên theo bố cục, chi phí một chó, so sánh bộ dự đoán và tóm tắt hợp nhất.
 * [Bảng Giai đoạn 4](phase4_tables_vi.md): chuyển giao Kubo và FAT, thất bại cứng, cửa sổ Kubo khó và tóm tắt hợp nhất.
+* Nhật ký Giai đoạn 5: các chiến dịch quan sát / phạm vi / giao tiếp nằm trong [nhật ký chạy](run_ledger_vi.md); Package E trong `phase5/*/packages/e/`.
 * [Mục lục tiếng Anh](README.md).
 
 ## Quy ước bằng chứng
@@ -808,7 +823,7 @@ Chạy `python3 build_tables.py` trong thư mục này. Chạy `python3 build_ta
 """
     return """# Data appendices
 
-This directory is the reproducible index for Phase 1, Phase 2, and Phase 4 evidence. Tables are generated directly from canonical CSV, JSON, status, and provenance artifacts. No reported number is entered by hand.
+This directory is the reproducible index for Phase 1, Phase 2, Phase 4, and Phase 5 evidence. Tables are generated directly from canonical CSV, JSON, status, and provenance artifacts. No reported number is entered by hand.
 
 ## Contents
 
@@ -816,6 +831,7 @@ This directory is the reproducible index for Phase 1, Phase 2, and Phase 4 evide
 * [Phase 1 tables](phase1_tables.md): size frontiers, regimes, scaling fits, and merge summaries.
 * [Phase 2 tables](phase2_tables.md): layout frontiers, one-dog costs, predictors, and merge summaries.
 * [Phase 4 tables](phase4_tables.md): Kubo and FAT transfer, hard failures, the difficult Kubo window, and merge summaries.
+* Phase 5 observation / range / communication campaigns are listed in the [run ledger](run_ledger.md); Package E tables live under `phase5/*/packages/e/`.
 * [Vietnamese index](README_vi.md).
 
 ## Evidence convention

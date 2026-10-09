@@ -1,0 +1,16 @@
+{
+  "protocol_id": "phase5_range_scout",
+  "n_planned": 1440,
+  "n_done": 1440,
+  "n_pending_at_start": 1440,
+  "complete": true,
+  "running": false,
+  "started_at": "2026-10-08T09:42:12.716529+00:00",
+  "updated_at": "2026-10-08T10:07:08.006047+00:00",
+  "elapsed_seconds": 1495.289518,
+  "trials_csv": "trials.csv",
+  "manifest_jsonl": "manifest.jsonl",
+  "finished_at": "2026-10-08T10:07:08.006047+00:00",
+  "n_rows_trials_csv": 1440,
+  "store_timeseries": false
+}

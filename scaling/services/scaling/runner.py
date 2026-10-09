@@ -469,6 +469,11 @@ def run_scaling_grid(
 
     n_done_so_far = len(done)
 
+    def _flush_trials_csv() -> None:
+        # Keep trials.csv aligned with manifest after each finished cell so a
+        # mid-run kill cannot leave ok manifest rows without CSV evidence.
+        pd.DataFrame(rows).to_csv(trials_path, index=False)
+
     def _consume(payload: dict[str, Any]) -> None:
         nonlocal n_done_so_far
         cell: ScalingCell = payload["cell"]
@@ -498,6 +503,7 @@ def run_scaling_grid(
         if cell.communication is not None:
             man["communication"] = cell.communication
         _append_manifest(out, man)
+        _flush_trials_csv()
         n_done_so_far += 1
         # Progress clock only: same cells, seeds, and resume keys as before.
         write_status(
@@ -509,7 +515,10 @@ def run_scaling_grid(
             started_at=started_at,
             updated_at=now,
             running=True,
-            extra={"store_timeseries": bool(store_timeseries)},
+            extra={
+                "store_timeseries": bool(store_timeseries),
+                "n_rows_trials_csv": int(len(rows)),
+            },
         )
 
     if pending:

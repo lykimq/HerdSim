@@ -71,10 +71,10 @@ When finished or on battery, you can switch back to `powersave` the same way.
 | 11 | Phase 4 size (kubo then fat) | SCOUT then CLAIM | `make -C scaling scaling-transfer-size-scout TRANSFER_METHOD=kubo WORKERS=16` then claim-reseed; repeat `fat` | `scaling/results/phase4/` | DONE |
 | 12 | Phase 4 structure (kubo then fat) | SCOUT then CLAIM | `make -C scaling scaling-transfer-structure-scout TRANSFER_METHOD=kubo WORKERS=16` then claim-reseed; repeat `fat` | `scaling/results/phase4/` | DONE |
 | 13 | Phase 4 transfer table | CLAIM | `make -C scaling scaling-analyse PACKAGE=D TRIALS=... --trials-by-method ...` | packages/d | DONE |
-| 14 | Phase 5 obs scout/claim | SCOUT then CLAIM | `make -C scaling scaling-factor-sweep WORKERS=16` then `scaling-phase5-obs-claim-reseed` | `scaling/results/phase5/` | TODO |
-| 15 | Phase 5 range | SCOUT then CLAIM | `scaling-phase5-range-scout WORKERS=16` then `scaling-phase5-range-claim-reseed` | `scaling/results/phase5/` | TODO |
-| 16 | Phase 5 communication | SCOUT then CLAIM | `scaling-phase5-comm-scout WORKERS=16` then `scaling-phase5-comm-claim-reseed` | `scaling/results/phase5/` | TODO |
-| 17 | Phase 7 early warning | CLAIM | `make -C scaling scaling-analyse PACKAGE=G TRIALS=results/phase1/claim/merged_trials.csv OUT=results/phase1/claim/packages/g` | Package G | TODO (unblocked: steps 4-8 complete) |
+| 14 | Phase 5 obs scout/claim | SCOUT then CLAIM | `make -C scaling scaling-factor-sweep WORKERS=18` then `scaling-phase5-obs-claim-reseed` | `scaling/results/phase5/` | DONE |
+| 15 | Phase 5 range | SCOUT then CLAIM | `scaling-phase5-range-scout WORKERS=18` then `scaling-phase5-range-claim-reseed` | `scaling/results/phase5/` | DONE |
+| 16 | Phase 5 communication | SCOUT then CLAIM | `scaling-phase5-comm-scout WORKERS=18` then `scaling-phase5-comm-claim-reseed` | `scaling/results/phase5/` | DONE |
+| 17 | Phase 7 early warning | CLAIM | `make -C scaling scaling-analyse PACKAGE=G TRIALS=results/phase1/claim/merged_trials.csv OUT=results/phase1/claim/packages/g` | Package G | DONE |
 
 After step 2, if the bootstrap interval on D_min covers more than one grid step, raise that window to 200 seeds before the structure claim.
 
@@ -97,9 +97,9 @@ Criteria: [main_scaling_plan.md](main_scaling_plan.md). Update after a claim-gra
 | C2b | SKIPPED | Phase 1: No overcrowding cells to extend to T=20,000 |
 | C3 | INCONCLUSIVE | Phase 1: Mechanism contrast undefined without overcrowding cells |
 | C4 | SUPPORTED (partial) | Phase 4 Package D: size map shared for N>=25 (Strombom/Kubo); Kubo wide has no D_min; Kubo outlier_rich N=200 shifts to D_min=20 at 200 seeds (bootstrap [2, 20]; no overcrowding); FAT absent for N>=25 |
-| C5a | UNEVALUATED | Phase 5 TODO |
-| C5b | UNEVALUATED | Phase 5 TODO |
-| C6a | EVALUATED | Phase 1/6 Package F: Leave-one-N-out scaling fits generated |
-| C6b | UNEVALUATED | |
-| C7a | UNEVALUATED | Phase 7 TODO |
-| C7b | UNEVALUATED | Phase 7 TODO |
+| C5a | REJECTED | Phase 5 Package E: no ladder step lowers a defined D_min by a grid step at N in {100, 200} (obs: bearing hard-fails; local/global D_min=1; range and comm flat D_min=1) |
+| C5b | INCONCLUSIVE | Phase 5 Package E: no first-step dog saving to test diminishing returns (median_first_step_delta=0 on all ladders) |
+| C6a | SUPPORTED | Phase 1/6 Package F: leave-one-N RMSE power 0.247 > piecewise 0.132 (power worse than piecewise) |
+| C6b | SUPPORTED | Phase 1/6 Package F: on compact N in {25..400}, D_min=1 flat so log-log slope = 0 (< 1); power fit log_log_slope = -0.165 |
+| C7a | INCONCLUSIVE | Phase 7 Package G: held-out state and (N, D) AUROC null; folds empty; beats_nd_baseline=False |
+| C7b | REJECTED | Phase 7 Package G: frac_lead_ge_500=0.083 (<0.30); 14/169 failures have measured lead time |

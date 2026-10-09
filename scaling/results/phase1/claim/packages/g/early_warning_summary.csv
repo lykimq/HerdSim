@@ -1,0 +1,2 @@
+n_trials,n_failures,median_auroc,mean_auroc,median_lead_time,n_with_lead_time,frac_lead_ge_500
+2200,169,,,9288.5,14,0.08284023668639054

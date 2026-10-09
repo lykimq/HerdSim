@@ -160,7 +160,7 @@ Claim rows replace scout rows for reseeded cells. They are not stacked. Unselect
 
 ![S20. Bootstrap idea for D_min intervals.](../../results/summary/figures/schematics/en/design_bootstrap.svg)
 
-*Resample seeds within each D (1,000 times); 2.5% and 97.5% percentiles form the interval.*
+*Top: resample locked seeds within each D (1,000 times); 2.5% and 97.5% percentiles form the interval. Bottom: if the interval spans more than one grid step, raise claim depth to 200 seeds and bootstrap again.*
 
 A Phase 1 planning estimate is about 3,000 scout trials plus up to about 6,000 claim trials. A structure contrast is about 3,600 scout plus 7,200 claim trials. These are planning figures and must be recomputed after scout selection.
 

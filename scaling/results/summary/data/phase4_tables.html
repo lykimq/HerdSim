@@ -54,7 +54,7 @@ pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8p
 <div class='chrome'><div class='crumbs'><a href="../../../docs/INDEX.html">Home</a><span class="sep">/</span><span>Data</span><span class="sep">/</span><span>Phase 4 data tables</span></div><div class='page-nav'><a rel="prev" href="phase2_tables.html">Previous</a><span class="sep">|</span><a href="phase4_tables_vi.html">Tiếng Việt</a></div></div>
 <header><div class='in'><h1>Phase 4 data tables</h1><p>Reader-facing HerdSim documentation and evidence.</p></div></header>
 <div class='layout'>
-<nav><a href="#compact-start-size-frontiers">Compact-start size frontiers</a><a href="#complete-size-dmin-bootstrap-intervals">Complete size D_min bootstrap intervals</a><a href="#complete-controller-and-layout-frontier">Complete controller and layout frontier</a><a href="#kubo-outlier-rich-n-200">Kubo outlier-rich, N = 200</a><a href="#complete-size-transfer-evidence">Complete size-transfer evidence</a><a href="#schema-for-mergedtrials-tables">Schema for merged_trials tables</a><a href="#phase-4-kubo-size-claim-merge">Phase 4 Kubo size claim merge</a><a href="#phase-4-fat-size-claim-merge">Phase 4 FAT size claim merge</a><a href="#phase-4-kubo-structure-claim-merge">Phase 4 Kubo structure claim merge</a><a href="#phase-4-fat-structure-claim-merge">Phase 4 FAT structure claim merge</a><a href="#direct-sources">Direct sources</a></nav>
+<nav><a href="#compact-start-size-frontiers">Compact-start size frontiers</a><a href="#complete-size-dmin-bootstrap-intervals">Complete size D_min bootstrap intervals</a><a href="#complete-controller-and-layout-frontier">Complete controller and layout frontier</a><a href="#kubo-outlier-rich-n-200">Kubo outlier-rich, N = 200</a><a href="#complete-size-transfer-evidence">Complete size-transfer evidence</a><a href="#schema-for-mergedtrials-tables">Schema for merged_trials tables</a><a href="#phase-4-kubo-size-claim-merge">Phase 4 Kubo size claim merge</a><a href="#phase-4-fat-size-claim-merge">Phase 4 FAT size claim merge</a><a href="#phase-4-kubo-structure-claim-merge">Phase 4 Kubo structure claim merge</a><a href="#phase-4-fat-structure-claim-merge">Phase 4 FAT structure claim merge</a><a href="#phase-5-observation-claim-merge">Phase 5 observation claim merge</a><a href="#phase-5-range-claim-merge">Phase 5 range claim merge</a><a href="#phase-5-communication-claim-merge">Phase 5 communication claim merge</a><a href="#direct-sources">Direct sources</a></nav>
 <main>
 <p>Controller conclusions use claim merges. Scout grids remain planning evidence. The Package D tables compare claim-grade controller results.</p>
 <h2 id="compact-start-size-frontiers">Compact-start size frontiers</h2>
@@ -1983,6 +1983,435 @@ pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8p
 <td>10000</td>
 <td>524,968.5</td>
 <td>split</td>
+</tr>
+</tbody></table></div>
+<h2 id="phase-5-observation-claim-merge">Phase 5 observation claim merge</h2>
+<p>Full source: <a href="../../phase5/obs_claim/merged_trials.csv"><code>phase5/obs_claim/merged_trials.csv</code></a>. The large table is not reproduced. The summaries below are computed directly from the CSV.</p>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Property</th>
+<th>Value</th>
+</tr></thead><tbody>
+<tr>
+<td>Rows</td>
+<td>1,920</td>
+</tr>
+<tr>
+<td>Columns</td>
+<td>77</td>
+</tr>
+<tr>
+<td>Design cells</td>
+<td>12</td>
+</tr>
+<tr>
+<td>Methods</td>
+<td>strombom_multi</td>
+</tr>
+<tr>
+<td>Layouts</td>
+<td>compact</td>
+</tr>
+<tr>
+<td>N values</td>
+<td>100, 200</td>
+</tr>
+<tr>
+<td>D values</td>
+<td>1, 2, 3, 4, 6, 10</td>
+</tr>
+<tr>
+<td>Seed range</td>
+<td>2026 to 2125</td>
+</tr>
+</tbody></table></div>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Property</th>
+<th>Value</th>
+</tr></thead><tbody>
+<tr>
+<td>Successes</td>
+<td>1,280</td>
+</tr>
+<tr>
+<td>Failures</td>
+<td>640</td>
+</tr>
+<tr>
+<td>Overall R</td>
+<td>0.667</td>
+</tr>
+<tr>
+<td>Median ticks, successes</td>
+<td>189</td>
+</tr>
+<tr>
+<td>P90 ticks, successes</td>
+<td>203</td>
+</tr>
+<tr>
+<td>Median path, successes</td>
+<td>294.917</td>
+</tr>
+<tr>
+<td>Failure modes</td>
+<td>oscillation: 640</td>
+</tr>
+</tbody></table></div>
+<p>Representative-row rule: sort lexicographically by <code>method</code>, <code>initial_layout</code>, <code>n_sheep</code>, <code>n_shepherds</code>, and <code>seed</code>, then take 5 evenly spaced positions including both endpoints. This reproducible rule does not select on outcome.</p>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>method</th>
+<th>layout</th>
+<th>N</th>
+<th>D</th>
+<th>seed</th>
+<th>success</th>
+<th>ticks</th>
+<th>path</th>
+<th>failure_mode</th>
+</tr></thead><tbody>
+<tr>
+<td>strombom_multi</td>
+<td>compact</td>
+<td>100</td>
+<td>1</td>
+<td>2026</td>
+<td>False</td>
+<td>10000</td>
+<td>0</td>
+<td>oscillation</td>
+</tr>
+<tr>
+<td>strombom_multi</td>
+<td>compact</td>
+<td>100</td>
+<td>3</td>
+<td>2032</td>
+<td>True</td>
+<td>193</td>
+<td>456.715</td>
+<td>none</td>
+</tr>
+<tr>
+<td>strombom_multi</td>
+<td>compact</td>
+<td>200</td>
+<td>1</td>
+<td>2026</td>
+<td>False</td>
+<td>10000</td>
+<td>0</td>
+<td>oscillation</td>
+</tr>
+<tr>
+<td>strombom_multi</td>
+<td>compact</td>
+<td>200</td>
+<td>3</td>
+<td>2032</td>
+<td>True</td>
+<td>181</td>
+<td>404.507</td>
+<td>none</td>
+</tr>
+<tr>
+<td>strombom_multi</td>
+<td>compact</td>
+<td>200</td>
+<td>10</td>
+<td>2125</td>
+<td>False</td>
+<td>10000</td>
+<td>0</td>
+<td>oscillation</td>
+</tr>
+</tbody></table></div>
+<h2 id="phase-5-range-claim-merge">Phase 5 range claim merge</h2>
+<p>Full source: <a href="../../phase5/range_claim/merged_trials.csv"><code>phase5/range_claim/merged_trials.csv</code></a>. The large table is not reproduced. The summaries below are computed directly from the CSV.</p>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Property</th>
+<th>Value</th>
+</tr></thead><tbody>
+<tr>
+<td>Rows</td>
+<td>2,560</td>
+</tr>
+<tr>
+<td>Columns</td>
+<td>78</td>
+</tr>
+<tr>
+<td>Design cells</td>
+<td>12</td>
+</tr>
+<tr>
+<td>Methods</td>
+<td>strombom_multi</td>
+</tr>
+<tr>
+<td>Layouts</td>
+<td>compact</td>
+</tr>
+<tr>
+<td>N values</td>
+<td>100, 200</td>
+</tr>
+<tr>
+<td>D values</td>
+<td>1, 2, 3, 4, 6, 10</td>
+</tr>
+<tr>
+<td>Seed range</td>
+<td>2026 to 2125</td>
+</tr>
+</tbody></table></div>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Property</th>
+<th>Value</th>
+</tr></thead><tbody>
+<tr>
+<td>Successes</td>
+<td>2,560</td>
+</tr>
+<tr>
+<td>Failures</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Overall R</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Median ticks, successes</td>
+<td>189</td>
+</tr>
+<tr>
+<td>P90 ticks, successes</td>
+<td>203</td>
+</tr>
+<tr>
+<td>Median path, successes</td>
+<td>295.197</td>
+</tr>
+<tr>
+<td>Failure modes</td>
+<td>none</td>
+</tr>
+</tbody></table></div>
+<p>Representative-row rule: sort lexicographically by <code>method</code>, <code>initial_layout</code>, <code>n_sheep</code>, <code>n_shepherds</code>, and <code>seed</code>, then take 5 evenly spaced positions including both endpoints. This reproducible rule does not select on outcome.</p>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>method</th>
+<th>layout</th>
+<th>N</th>
+<th>D</th>
+<th>seed</th>
+<th>success</th>
+<th>ticks</th>
+<th>path</th>
+<th>failure_mode</th>
+</tr></thead><tbody>
+<tr>
+<td>strombom_multi</td>
+<td>compact</td>
+<td>100</td>
+<td>1</td>
+<td>2026</td>
+<td>True</td>
+<td>205</td>
+<td>163.226</td>
+<td>none</td>
+</tr>
+<tr>
+<td>strombom_multi</td>
+<td>compact</td>
+<td>100</td>
+<td>2</td>
+<td>2086</td>
+<td>True</td>
+<td>195</td>
+<td>300.579</td>
+<td>none</td>
+</tr>
+<tr>
+<td>strombom_multi</td>
+<td>compact</td>
+<td>200</td>
+<td>1</td>
+<td>2026</td>
+<td>True</td>
+<td>191</td>
+<td>147.115</td>
+<td>none</td>
+</tr>
+<tr>
+<td>strombom_multi</td>
+<td>compact</td>
+<td>200</td>
+<td>2</td>
+<td>2085</td>
+<td>True</td>
+<td>183</td>
+<td>270.683</td>
+<td>none</td>
+</tr>
+<tr>
+<td>strombom_multi</td>
+<td>compact</td>
+<td>200</td>
+<td>10</td>
+<td>2055</td>
+<td>True</td>
+<td>182</td>
+<td>1,341.797</td>
+<td>none</td>
+</tr>
+</tbody></table></div>
+<h2 id="phase-5-communication-claim-merge">Phase 5 communication claim merge</h2>
+<p>Full source: <a href="../../phase5/comm_claim/merged_trials.csv"><code>phase5/comm_claim/merged_trials.csv</code></a>. The large table is not reproduced. The summaries below are computed directly from the CSV.</p>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Property</th>
+<th>Value</th>
+</tr></thead><tbody>
+<tr>
+<td>Rows</td>
+<td>1,920</td>
+</tr>
+<tr>
+<td>Columns</td>
+<td>78</td>
+</tr>
+<tr>
+<td>Design cells</td>
+<td>12</td>
+</tr>
+<tr>
+<td>Methods</td>
+<td>strombom_multi</td>
+</tr>
+<tr>
+<td>Layouts</td>
+<td>compact</td>
+</tr>
+<tr>
+<td>N values</td>
+<td>100, 200</td>
+</tr>
+<tr>
+<td>D values</td>
+<td>1, 2, 3, 4, 6, 10</td>
+</tr>
+<tr>
+<td>Seed range</td>
+<td>2026 to 2125</td>
+</tr>
+</tbody></table></div>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Property</th>
+<th>Value</th>
+</tr></thead><tbody>
+<tr>
+<td>Successes</td>
+<td>1,860</td>
+</tr>
+<tr>
+<td>Failures</td>
+<td>60</td>
+</tr>
+<tr>
+<td>Overall R</td>
+<td>0.969</td>
+</tr>
+<tr>
+<td>Median ticks, successes</td>
+<td>186</td>
+</tr>
+<tr>
+<td>P90 ticks, successes</td>
+<td>204</td>
+</tr>
+<tr>
+<td>Median path, successes</td>
+<td>277.558</td>
+</tr>
+<tr>
+<td>Failure modes</td>
+<td>oscillation: 60</td>
+</tr>
+</tbody></table></div>
+<p>Representative-row rule: sort lexicographically by <code>method</code>, <code>initial_layout</code>, <code>n_sheep</code>, <code>n_shepherds</code>, and <code>seed</code>, then take 5 evenly spaced positions including both endpoints. This reproducible rule does not select on outcome.</p>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>method</th>
+<th>layout</th>
+<th>N</th>
+<th>D</th>
+<th>seed</th>
+<th>success</th>
+<th>ticks</th>
+<th>path</th>
+<th>failure_mode</th>
+</tr></thead><tbody>
+<tr>
+<td>strombom_multi</td>
+<td>compact</td>
+<td>100</td>
+<td>1</td>
+<td>2026</td>
+<td>True</td>
+<td>205</td>
+<td>163.226</td>
+<td>none</td>
+</tr>
+<tr>
+<td>strombom_multi</td>
+<td>compact</td>
+<td>100</td>
+<td>2</td>
+<td>2086</td>
+<td>True</td>
+<td>189</td>
+<td>286.598</td>
+<td>none</td>
+</tr>
+<tr>
+<td>strombom_multi</td>
+<td>compact</td>
+<td>200</td>
+<td>1</td>
+<td>2026</td>
+<td>True</td>
+<td>191</td>
+<td>147.115</td>
+<td>none</td>
+</tr>
+<tr>
+<td>strombom_multi</td>
+<td>compact</td>
+<td>200</td>
+<td>2</td>
+<td>2085</td>
+<td>True</td>
+<td>183</td>
+<td>270.683</td>
+<td>none</td>
+</tr>
+<tr>
+<td>strombom_multi</td>
+<td>compact</td>
+<td>200</td>
+<td>10</td>
+<td>2055</td>
+<td>False</td>
+<td>10000</td>
+<td>10,643.92</td>
+<td>oscillation</td>
 </tr>
 </tbody></table></div>
 <h2 id="direct-sources">Direct sources</h2>

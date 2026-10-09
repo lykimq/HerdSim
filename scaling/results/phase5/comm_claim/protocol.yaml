@@ -1,0 +1,29 @@
+protocol_id: phase5_comm_claim
+phase: 5
+grade: CLAIM
+output: scaling/results/phase5/comm_claim
+canonical: scaling/configs/canonical_grid.yaml
+method: strombom_multi
+runner: factor
+layouts:
+- compact
+flock_sizes:
+- 100
+- 200
+shepherd_counts:
+- 1
+- 2
+- 3
+- 4
+- 6
+- 10
+seeds: 100
+seed_mode: claim
+communications:
+- none
+- neighbour_broadcast
+- global_shared
+store_timeseries: false
+packages:
+- E
+upstream_protocol: phase5_comm_scout

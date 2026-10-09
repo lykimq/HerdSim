@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="740" height="310" viewBox="0 0 740 310" role="img" aria-label="bootstrap D_min">
-<rect x="0" y="0" width="740" height="310" fill="#f7f6f2"/>
-<text x="16" y="22" text-anchor="start" font-size="14" font-weight="700" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Bootstrap on D_min: resample seeds, not new simulations</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="740" height="455" viewBox="0 0 740 455" role="img" aria-label="bootstrap D_min and raise-to-200 workflow">
+<rect x="0" y="0" width="740" height="455" fill="#f7f6f2"/>
+<text x="16" y="22" text-anchor="start" font-size="14" font-weight="700" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Bootstrap on D_min: analysis on locked seeds, not 1,000 new sims</text>
 <rect x="16" y="40" width="220" height="220" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="8"/>
 <text x="28" y="62" text-anchor="start" font-size="12" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">1. Observed seeds per D</text>
 <text x="50" y="84" text-anchor="middle" font-size="11" font-weight="700" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">D=1</text>
@@ -107,5 +107,26 @@
 <line x1="545" y1="222" x2="545" y2="230" stroke="#b45309" stroke-width="2"/>
 <line x1="685" y1="222" x2="685" y2="230" stroke="#b45309" stroke-width="2"/>
 <text x="617" y="248" text-anchor="middle" font-size="11" font-weight="700" fill="#b45309" font-family="Segoe UI,Noto Sans,sans-serif">2.5% to 97.5%</text>
-<text x="16" y="298" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Why: finite seeds make D_min noisy. Width zero means every resample gave the same D_min.</text>
+<text x="16" y="292" text-anchor="start" font-size="13" font-weight="700" fill="#5b4a2f" font-family="Segoe UI,Noto Sans,sans-serif">When the interval is wider than one D-grid step</text>
+<rect x="16" y="304" width="162" height="88" fill="#fff" stroke="#b45309" stroke-width="1.5" rx="8"/>
+<text x="26" y="326" text-anchor="start" font-size="12" font-weight="700" fill="#b45309" font-family="Segoe UI,Noto Sans,sans-serif">A. Bootstrap</text>
+<text x="26" y="348" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">reshuffle existing</text>
+<text x="26" y="366" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">seeds only</text>
+<rect x="198" y="304" width="162" height="88" fill="#fff" stroke="#b45309" stroke-width="1.5" rx="8"/>
+<text x="208" y="326" text-anchor="start" font-size="12" font-weight="700" fill="#b45309" font-family="Segoe UI,Noto Sans,sans-serif">B. Wide CI?</text>
+<text x="208" y="348" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">span &gt; 1 grid step</text>
+<text x="208" y="366" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">raise claim to 200</text>
+<rect x="380" y="304" width="162" height="88" fill="#fff" stroke="#1f4e79" stroke-width="1.5" rx="8"/>
+<text x="390" y="326" text-anchor="start" font-size="12" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">C. New sims</text>
+<text x="390" y="348" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">run more trials</text>
+<text x="390" y="366" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">then bootstrap again</text>
+<rect x="562" y="304" width="162" height="88" fill="#fff" stroke="#2f6b45" stroke-width="1.5" rx="8"/>
+<text x="572" y="326" text-anchor="start" font-size="12" font-weight="700" fill="#2f6b45" font-family="Segoe UI,Noto Sans,sans-serif">D. Still wide OK</text>
+<text x="572" y="348" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">more seeds help,</text>
+<text x="572" y="366" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">need not pin a cliff</text>
+<text x="178" y="348" text-anchor="middle" font-size="20" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">→</text>
+<text x="360" y="348" text-anchor="middle" font-size="20" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">→</text>
+<text x="542" y="348" text-anchor="middle" font-size="20" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">→</text>
+<text x="16" y="420" text-anchor="start" font-size="11" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">Example: Kubo outlier_rich, N=200 -&gt; 200 seeds, point D_min=20, interval still [2, 20].</text>
+<text x="16" y="439" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Width zero: every resample gave the same D_min. Raising seeds is new simulation; bootstrap itself is not.</text>
 </svg>

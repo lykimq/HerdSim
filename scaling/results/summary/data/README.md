@@ -1,6 +1,6 @@
 # Data appendices
 
-This directory is the reproducible index for Phase 1, Phase 2, and Phase 4 evidence. Tables are generated directly from canonical CSV, JSON, status, and provenance artifacts. No reported number is entered by hand.
+This directory is the reproducible index for Phase 1, Phase 2, Phase 4, and Phase 5 evidence. Tables are generated directly from canonical CSV, JSON, status, and provenance artifacts. No reported number is entered by hand.
 
 ## Contents
 
@@ -8,6 +8,7 @@ This directory is the reproducible index for Phase 1, Phase 2, and Phase 4 evide
 * [Phase 1 tables](phase1_tables.md): size frontiers, regimes, scaling fits, and merge summaries.
 * [Phase 2 tables](phase2_tables.md): layout frontiers, one-dog costs, predictors, and merge summaries.
 * [Phase 4 tables](phase4_tables.md): Kubo and FAT transfer, hard failures, the difficult Kubo window, and merge summaries.
+* Phase 5 observation / range / communication campaigns are listed in the [run ledger](run_ledger.md); Package E tables live under `phase5/*/packages/e/`.
 * [Vietnamese index](README_vi.md).
 
 ## Evidence convention

@@ -1,0 +1,7 @@
+{
+  "early_warning_summary": "/home/gwen/HerdSim/scaling/results/phase1/claim/packages/g/packages/g/early_warning_summary.csv",
+  "early_warning_campaign": "/home/gwen/HerdSim/scaling/results/phase1/claim/packages/g/packages/g/early_warning_campaign.csv",
+  "early_warning_folds": "/home/gwen/HerdSim/scaling/results/phase1/claim/packages/g/packages/g/early_warning_folds.csv",
+  "provenance": "/home/gwen/HerdSim/scaling/results/phase1/claim/packages/g/packages/g/provenance.json",
+  "report": "/home/gwen/HerdSim/scaling/results/phase1/claim/packages/g/packages/g/README.md"
+}

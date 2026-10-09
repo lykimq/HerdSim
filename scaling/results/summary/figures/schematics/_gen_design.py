@@ -525,7 +525,7 @@ def theta_bar(lang: str) -> str:
 
 def bootstrap_dmin(lang: str) -> str:
     if lang == "en":
-        title = "Bootstrap on D_min: resample seeds, not new simulations"
+        title = "Bootstrap on D_min: analysis on locked seeds, not 1,000 new sims"
         p1 = "1. Observed seeds per D"
         p2 = "2. Resample within each D"
         p3 = "3. Interval from percentiles"
@@ -535,23 +535,38 @@ def bootstrap_dmin(lang: str) -> str:
         resample_foot = "1,000 resamples -> 1,000 D_min*"
         hist_sub = "count of D_min*"
         interval = "2.5% to 97.5%"
-        foot = "Why: finite seeds make D_min noisy. Width zero means every resample gave the same D_min."
-        aria = "bootstrap D_min"
+        row2_title = "When the interval is wider than one D-grid step"
+        s1t, s1a, s1b = "A. Bootstrap", "reshuffle existing", "seeds only"
+        s2t, s2a, s2b = "B. Wide CI?", "span > 1 grid step", "raise claim to 200"
+        s3t, s3a, s3b = "C. New sims", "run more trials", "then bootstrap again"
+        s4t, s4a, s4b = "D. Still wide OK", "more seeds help,", "need not pin a cliff"
+        ex = "Example: Kubo outlier_rich, N=200 -> 200 seeds, point D_min=20, interval still [2, 20]."
+        foot = "Width zero: every resample gave the same D_min. Raising seeds is new simulation; bootstrap itself is not."
+        aria = "bootstrap D_min and raise-to-200 workflow"
     else:
-        title = "Bootstrap trên D_min: lấy mẫu lại hạt giống, không chạy mô phỏng mới"
-        p1 = "1. Hạt giống quan sát theo D"
-        p2 = "2. Lấy mẫu lại trong mỗi D"
-        p3 = "3. Khoảng từ phân vị"
+        title = "Bootstrap tren D_min: phan tich hat giong da co, khong 1,000 sim moi"
+        p1 = "1. Hat giong quan sat theo D"
+        p2 = "2. Lay mau lai trong moi D"
+        p3 = "3. Khoang tu phan vi"
         r_labels = [("D=1", "R=0.50", ORANGE), ("D=2", "R=0.88", ORANGE), ("D=3", "R=1.00", BLUE)]
-        ok, fail = "thành công", "thất bại"
+        ok, fail = "thanh cong", "that bai"
         resample_note = "... x 1,000"
-        resample_foot = "1,000 lần -> 1,000 D_min*"
-        hist_sub = "số lần ra D_min*"
-        interval = "2.5% đến 97.5%"
-        foot = "Vì sao: mẫu hữu hạn làm D_min nhiễu. Độ rộng 0: mọi lần lấy mẫu cho cùng D_min."
-        aria = "bootstrap D_min"
+        resample_foot = "1,000 lan -> 1,000 D_min*"
+        hist_sub = "so lan ra D_min*"
+        interval = "2.5% den 97.5%"
+        row2_title = "Khi khoang rong hon mot buoc luoi D"
+        s1t, s1a, s1b = "A. Bootstrap", "xao hat giong", "da co"
+        s2t, s2a, s2b = "B. CI rong?", "span > 1 buoc", "nang claim 200"
+        s3t, s3a, s3b = "C. Sim moi", "chay them trial", "roi bootstrap lai"
+        s4t, s4a, s4b = "D. Van rong OK", "them seed giup,", "khong bat buoc vach dung"
+        ex = "Vi du: Kubo outlier_rich, N=200 -> 200 seed, diem D_min=20, khoang van [2, 20]."
+        foot = (
+            "Do rong 0: moi lan lay mau cho cung D_min. "
+            "Nang seed la sim moi; ban than bootstrap khong phai."
+        )
+        aria = "bootstrap D_min va quy trinh nang 200 seed"
 
-    w, h = 740, 310
+    w, h = 740, 455
     parts = [
         f'<?xml version="1.0" encoding="UTF-8"?>',
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" '
@@ -608,19 +623,39 @@ def bootstrap_dmin(lang: str) -> str:
         rect(510, 40, 214, 220, "#fff", STROKE, 1, rx=8),
         text(522, 62, p3, size=12, weight=700, fill=GREEN),
         text(617, 82, hist_sub, size=10, fill=MUTED, anchor="middle"),
-        # bars sit on a baseline; leave clear space above for subtitle only
         rect(545, 160, 30, 40, "#bbf7d0", GREEN, 1, rx=2),
         rect(600, 95, 30, 105, "#bbf7d0", GREEN, 1, rx=2),
         rect(655, 145, 30, 55, "#bbf7d0", GREEN, 1, rx=2),
         text(560, 216, "1", size=11, fill=MUTED, anchor="middle"),
         text(615, 216, "2", size=11, fill=MUTED, anchor="middle"),
         text(670, 216, "3", size=11, fill=MUTED, anchor="middle"),
-        # percentile bracket under the axis labels
         line(545, 230, 685, 230, stroke=ORANGE, sw=2.5),
         line(545, 222, 545, 230, stroke=ORANGE, sw=2),
         line(685, 222, 685, 230, stroke=ORANGE, sw=2),
         text(617, 248, interval, size=11, weight=700, fill=ORANGE, anchor="middle"),
-        text(16, h - 12, foot, size=11, fill=MUTED),
+        # row 2: decision workflow after a wide interval
+        text(16, 292, row2_title, size=13, weight=700, fill=ACCENT),
+    ]
+
+    steps = [
+        (16, ORANGE, s1t, s1a, s1b),
+        (198, ORANGE, s2t, s2a, s2b),
+        (380, BLUE, s3t, s3a, s3b),
+        (562, GREEN, s4t, s4a, s4b),
+    ]
+    for x, col, t, a, b in steps:
+        parts += [
+            rect(x, 304, 162, 88, "#fff", col, 1.5, rx=8),
+            text(x + 10, 326, t, size=12, weight=700, fill=col),
+            text(x + 10, 348, a, size=11, fill=MUTED),
+            text(x + 10, 366, b, size=11, fill=MUTED),
+        ]
+    for ax in (178, 360, 542):
+        parts.append(text(ax, 348, "→", size=20, fill=MUTED, anchor="middle"))
+
+    parts += [
+        text(16, 420, ex, size=11, weight=700, fill=BLUE),
+        text(16, h - 16, foot, size=11, fill=MUTED),
         "</svg>",
     ]
     return "\n".join(parts)

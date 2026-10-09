@@ -2,11 +2,11 @@
 
 ## 1. Scope and status
 
-This report contains only empirical results from completed Phases **1**, **2**, and **4** of `scaling_v2`.
+This report's detailed narrative still centers Phases **1**, **2**, and **4**. Phases **5** and **7** are complete in the tracker and run ledger; their claim-grade Package E / G notes are linked below and should be folded into a later full rewrite of this summary.
 
 ![Phases covered in this report.](figures/schematics/en/phase_roadmap.svg)
 
-*Phases with claim-grade numbers here: 1, 2, and 4. Setup and method diagrams live in the linked docs below.*
+*Detailed figures below: Phases 1, 2, and 4. Phase 5 (information ladders) and Phase 7 (early warning) are done; see phase folders and the [run ledger](data/run_ledger.md).*
 
 ![Five main results from Phases 1, 2, and 4.](figures/schematics/en/summary_at_a_glance.svg)
 
@@ -15,6 +15,8 @@ This report contains only empirical results from completed Phases **1**, **2**, 
 | As flock size grows, how many dogs are needed? | Phase 1, baseline `strombom_multi` on `compact` starts |
 | Does starting structure change that answer? | Phase 2, baseline across four layouts |
 | Do the findings transfer to other dog rules? | Phase 4, `kubo` and `fat` size and structure maps |
+| Can richer info lower D_min? | Phase 5 obs/range/comm ladders (C5a rejected; C5b inconclusive) |
+| Early warning from recent state? | Phase 7 Package G (C7a inconclusive; C7b rejected) |
 
 | Verdict | Finding | Key numbers |
 |---|---|---|
@@ -23,6 +25,8 @@ This report contains only empirical results from completed Phases **1**, **2**, 
 | Not reproduced | The steep rise in dog need reported by the 2025 draft does not appear here. | The draft reported about 20 to 35 dogs for N >= 200. Here one dog finishes N = 400 in a typical 168 ticks. |
 | Cost only | Baseline start shape changes time and path, but not D_min. | Wide starts take about 11x to 20x more time and 19x to 36x more path than compact starts. At N = 200, `outlier_rich` reaches about 6x time and 11x path. |
 | Partial transfer | Kubo and FAT do not transfer evenly from baseline. | Kubo roughly matches baseline on compact starts but reaches only R = 0.47 to 0.54 on wide starts. FAT reaches R >= 0.90 only for N <= 10. |
+| Info does not buy dogs | Once local/global observation works, richer range or communication does not lower D_min. | Phase 5: bearing_only hard-fails; other ladder steps stay at D_min = 1 |
+| Weak early warning | State lead-time and held-out AUROC did not clear C7 bars on this failure pattern. | frac_lead_ge_500 = 0.083; AUROC folds empty |
 
 | Phase | Question | Method | Layout | Pilot | Scout | Claim |
 |---|---|---|---|---:|---:|---:|
@@ -32,9 +36,12 @@ This report contains only empirical results from completed Phases **1**, **2**, 
 | 4a | Transfer: size | fat | compact | n/a | 3,000 | 2,000 |
 | 4b | Transfer: structure | kubo | 4 layouts | n/a | 3,600 | 4,000 |
 | 4b | Transfer: structure | fat | 4 layouts | n/a | 3,600 | 2,400 |
-|  | **Total simulations** |  |  |  |  | **35,650** |
+| 5a | Info: observation | strombom_multi | compact | n/a | 1,080 | 1,200 |
+| 5b | Info: range | strombom_multi | compact | n/a | 1,440 | 1,600 |
+| 5c | Info: communication | strombom_multi | compact | n/a | 1,080 | 1,200 |
+|  | **Total simulations** |  |  |  |  | **43,250** |
 
-The claim merges contain 30,670 rows. The executed pilot, scout, and claim stages contain 35,650 rows; reseeded cells drop their scout rows from the claim merge. Kubo structure claim has 4,000 rows, including 200 seeds at `outlier_rich`, N = 200 for D in {1, 2, 3, 4, 6, 10, 15, 20, 25}. See the [run ledger](data/run_ledger.md).
+The claim merges contain 37,070 rows (Phases 1, 2, 4, and 5). The executed pilot, scout, and claim stages contain 43,250 rows; reseeded cells drop their scout rows from the claim merge. Kubo structure claim has 4,000 rows, including 200 seeds at `outlier_rich`, N = 200 for D in {1, 2, 3, 4, 6, 10, 15, 20, 25}. See the [run ledger](data/run_ledger.md). Phase 5 notes: `../phase5/`. Phase 7 Package G: `../phase1/claim/packages/g/`.
 
 Canonical background:
 
@@ -253,7 +260,35 @@ Package D size labels are 8 shared, 7 shifted, and 29 absent. The absent count i
 
 *Figure 10. Source: `mean_i_dir` in claim `merged_trials.csv` files.*
 
-## 5. Synthesis and claim snapshot
+## 5. Phase 5: information ladders
+
+Evidence: `../phase5/README.md` and Package E under `../phase5/{obs,range,comm}_claim/packages/e/`.
+
+Three separate ladders on baseline `strombom_multi`, compact starts, N in {100, 200}, low D band {1, 2, 3, 4, 6, 10}.
+
+| Ladder | Scout | Claim | Claim-grade pattern |
+|---|---:|---:|---|
+| Observation (bearing / local / global) | 1,080 | 1,200 | `bearing_only` hard-fails; `local_positions` and `global` have D_min = 1 |
+| Sensing range (0.5x to 2x r_s) | 1,440 | 1,600 | D_min = 1 at every tested range |
+| Communication (none / neighbour / global_shared) | 1,080 | 1,200 | D_min = 1 at every communication mode |
+
+Reading: information quality can gate whether a frontier exists (bearing-only never reaches theta), but once local sensing works, richer observation, range, or communication does not buy fewer dogs on this map. C5a rejected; C5b inconclusive (no first-step dog saving to diminish).
+
+## 6. Phase 7: early warning
+
+Evidence: `../phase1/claim/packages/g/` (Package G on Phase 1 claim timeseries).
+
+| Quantity | Value |
+|---|---:|
+| Claim-window trials with timeseries | 2,200 |
+| Failures | 169 |
+| State AUROC (held-out mean) | null |
+| (N, D) AUROC (held-out mean) | null |
+| frac_lead_ge_500 | 0.083 |
+
+C7a inconclusive (AUROC not scored; empty folds). C7b rejected (need at least 30% of failures with lead time >= 500 ticks). Failures concentrate at tiny N with one dog, which limits whole-N holdout.
+
+## 7. Synthesis and claim snapshot
 
 ![Claims scorecard from progress tracker and claim packages.](figures/schematics/en/claims_scorecard.svg)
 
@@ -265,12 +300,16 @@ Package D size labels are 8 shared, 7 shifted, and 29 absent. The absent count i
 | C1b | INCONCLUSIVE | No baseline D_min shift; Package B reports NaN likelihoods | Cost still depends strongly on layout |
 | C2a | REJECTED | Phase 1 Package A: 0 overcrowding cells at theta = 0.90 | None in Phase 4 either |
 | C2b | SKIPPED | No overcrowding cell for T = 20,000 | No T1 run |
-| C3 | INCONCLUSIVE | Baseline mechanism contrast requires overcrowding | Kubo contrast cells exist but Package C was not completed |
+| C3 | INCONCLUSIVE | Baseline mechanism contrast requires overcrowding | Trigger absent under the freeze |
 | C4 | SUPPORTED, partial | Strombom and Kubo share compact D_min for N >= 25; FAT is absent; Kubo wide is absent; Kubo `outlier_rich`, N = 200 shifts | Controller transfer is conditional |
-| C6a | EVALUATED, weak | Piecewise RMSE 0.13 versus power-law RMSE 0.25 | The fit uses only observed levels {2, 1}; it is not a scaling law |
-| C5a/b, C6b, C7a/b | UNEVALUATED | Phases 5 and 7 not run; C6b has no stated growth band | No result claim |
+| C5a | REJECTED | Phase 5 Package E: no ladder step lowers a defined D_min by a grid step | Bearing hard-fails; other steps stay at D_min = 1 |
+| C5b | INCONCLUSIVE | Phase 5 Package E: median_first_step_delta = 0 | No dog saving to test diminishing returns |
+| C6a | SUPPORTED | Package F: leave-one-N RMSE power 0.247 > piecewise 0.132 | Power is worse than piecewise; levels only {2, 1} |
+| C6b | SUPPORTED | Compact N in {25..400}: D_min = 1 flat (slope 0 < 1) | Not a steep growth law on this band |
+| C7a | INCONCLUSIVE | Package G: held-out AUROC null; folds empty | Cannot show state beats (N, D) |
+| C7b | REJECTED | Package G: frac_lead_ge_500 = 0.083 | Below the 30% bar |
 
-## 6. Uncertainty, limits, and phases not run
+## 8. Uncertainty, limits, and skipped work
 
 | Status | Topic | Current limit |
 |---|---|---|
@@ -278,17 +317,16 @@ Package D size labels are 8 shared, 7 shifted, and 29 absent. The absent count i
 | Grid ceiling | D_max = 35 | No upper collapse was measured; behavior above 35 is unknown |
 | Hard failure | FAT and Kubo wide | Empty D_min and D_max mean no tested D reaches 0.90, not that an upper frontier was found |
 | Wide interval | Kubo `outlier_rich`, N = 200 | Point D_min = 20 at 200 seeds, R = 0.935, but bootstrap is [2, 20] |
-| Weak fit | C6a | Two observed D_min levels do not support a general scaling law |
+| Weak growth signal | C6a/C6b | Two observed D_min levels; flat mid/large-N band |
 | Observational only | I_dir | r about -0.87 does not establish interference as a cause |
+| Sparse failures | C7 | Tiny-N failures limit AUROC folds and lead-time coverage |
 | Unverified generator behavior | `split` layout | Cost and D_min match compact; separation at t = 0 still needs confirmation |
 | One simulated task | External validity | Results do not establish field performance, biological realism, or a universal farm rule |
 | Discrete D grid | Resolution | Differences finer than the tested dog-count steps are unresolved |
 
-Phases not run:
+Skipped or out of scope:
 
 - Phase 3 and C2b were skipped because baseline produced zero overcrowding cells.
-- Phase 5 sensing, range, and communication experiments were not run.
-- Phase 7 early-warning Package G was not run.
 - The 2025 draft was not rerun, and quantitative NetLogo parity was not established.
 
-For the removed setup, method, draft, NetLogo, provenance, and glossary material, use the canonical documents linked in section 1. Generated empirical tables and their source paths are indexed in [data/README.md](data/README.md).
+For setup, method, draft, NetLogo, provenance, and glossary material, use the canonical documents linked in section 1. Generated empirical tables and their source paths are indexed in [data/README.md](data/README.md). Trust audit: [`../TRUST_AUDIT.md`](../TRUST_AUDIT.md).

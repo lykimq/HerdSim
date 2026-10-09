@@ -340,6 +340,111 @@ Representative-row rule: sort lexicographically by `method`, `initial_layout`, `
 | fat | split | 200 | 35 | 2125 | False | 10000 | 501,004.5 | oscillation |
 | fat | wide | 200 | 35 | 2125 | False | 10000 | 524,968.5 | split |
 
+## Phase 5 observation claim merge
+
+Full source: [`phase5/obs_claim/merged_trials.csv`](../../phase5/obs_claim/merged_trials.csv). The large table is not reproduced. The summaries below are computed directly from the CSV.
+
+| Property | Value |
+|---|---|
+| Rows | 1,920 |
+| Columns | 77 |
+| Design cells | 12 |
+| Methods | strombom_multi |
+| Layouts | compact |
+| N values | 100, 200 |
+| D values | 1, 2, 3, 4, 6, 10 |
+| Seed range | 2026 to 2125 |
+
+| Property | Value |
+|---|---|
+| Successes | 1,280 |
+| Failures | 640 |
+| Overall R | 0.667 |
+| Median ticks, successes | 189 |
+| P90 ticks, successes | 203 |
+| Median path, successes | 294.917 |
+| Failure modes | oscillation: 640 |
+
+Representative-row rule: sort lexicographically by `method`, `initial_layout`, `n_sheep`, `n_shepherds`, and `seed`, then take 5 evenly spaced positions including both endpoints. This reproducible rule does not select on outcome.
+
+| method | layout | N | D | seed | success | ticks | path | failure_mode |
+|---|---|---|---|---|---|---|---|---|
+| strombom_multi | compact | 100 | 1 | 2026 | False | 10000 | 0 | oscillation |
+| strombom_multi | compact | 100 | 3 | 2032 | True | 193 | 456.715 | none |
+| strombom_multi | compact | 200 | 1 | 2026 | False | 10000 | 0 | oscillation |
+| strombom_multi | compact | 200 | 3 | 2032 | True | 181 | 404.507 | none |
+| strombom_multi | compact | 200 | 10 | 2125 | False | 10000 | 0 | oscillation |
+
+## Phase 5 range claim merge
+
+Full source: [`phase5/range_claim/merged_trials.csv`](../../phase5/range_claim/merged_trials.csv). The large table is not reproduced. The summaries below are computed directly from the CSV.
+
+| Property | Value |
+|---|---|
+| Rows | 2,560 |
+| Columns | 78 |
+| Design cells | 12 |
+| Methods | strombom_multi |
+| Layouts | compact |
+| N values | 100, 200 |
+| D values | 1, 2, 3, 4, 6, 10 |
+| Seed range | 2026 to 2125 |
+
+| Property | Value |
+|---|---|
+| Successes | 2,560 |
+| Failures | 0 |
+| Overall R | 1 |
+| Median ticks, successes | 189 |
+| P90 ticks, successes | 203 |
+| Median path, successes | 295.197 |
+| Failure modes | none |
+
+Representative-row rule: sort lexicographically by `method`, `initial_layout`, `n_sheep`, `n_shepherds`, and `seed`, then take 5 evenly spaced positions including both endpoints. This reproducible rule does not select on outcome.
+
+| method | layout | N | D | seed | success | ticks | path | failure_mode |
+|---|---|---|---|---|---|---|---|---|
+| strombom_multi | compact | 100 | 1 | 2026 | True | 205 | 163.226 | none |
+| strombom_multi | compact | 100 | 2 | 2086 | True | 195 | 300.579 | none |
+| strombom_multi | compact | 200 | 1 | 2026 | True | 191 | 147.115 | none |
+| strombom_multi | compact | 200 | 2 | 2085 | True | 183 | 270.683 | none |
+| strombom_multi | compact | 200 | 10 | 2055 | True | 182 | 1,341.797 | none |
+
+## Phase 5 communication claim merge
+
+Full source: [`phase5/comm_claim/merged_trials.csv`](../../phase5/comm_claim/merged_trials.csv). The large table is not reproduced. The summaries below are computed directly from the CSV.
+
+| Property | Value |
+|---|---|
+| Rows | 1,920 |
+| Columns | 78 |
+| Design cells | 12 |
+| Methods | strombom_multi |
+| Layouts | compact |
+| N values | 100, 200 |
+| D values | 1, 2, 3, 4, 6, 10 |
+| Seed range | 2026 to 2125 |
+
+| Property | Value |
+|---|---|
+| Successes | 1,860 |
+| Failures | 60 |
+| Overall R | 0.969 |
+| Median ticks, successes | 186 |
+| P90 ticks, successes | 204 |
+| Median path, successes | 277.558 |
+| Failure modes | oscillation: 60 |
+
+Representative-row rule: sort lexicographically by `method`, `initial_layout`, `n_sheep`, `n_shepherds`, and `seed`, then take 5 evenly spaced positions including both endpoints. This reproducible rule does not select on outcome.
+
+| method | layout | N | D | seed | success | ticks | path | failure_mode |
+|---|---|---|---|---|---|---|---|---|
+| strombom_multi | compact | 100 | 1 | 2026 | True | 205 | 163.226 | none |
+| strombom_multi | compact | 100 | 2 | 2086 | True | 189 | 286.598 | none |
+| strombom_multi | compact | 200 | 1 | 2026 | True | 191 | 147.115 | none |
+| strombom_multi | compact | 200 | 2 | 2085 | True | 183 | 270.683 | none |
+| strombom_multi | compact | 200 | 10 | 2055 | False | 10000 | 10,643.92 | oscillation |
+
 ## Direct sources
 
 * [`phase4/kubo_size/claim/packages/a/frontier.csv`](../../phase4/kubo_size/claim/packages/a/frontier.csv)

@@ -1,6 +1,6 @@
 # Phụ lục dữ liệu
 
-Thư mục này là mục lục tái tạo được cho bằng chứng của Giai đoạn 1, 2 và 4. Các bảng được tạo trực tiếp từ CSV, JSON, tệp trạng thái và provenance chuẩn. Không có số nào được nhập tay.
+Thư mục này là mục lục tái tạo được cho bằng chứng của Giai đoạn 1, 2, 4 và 5. Các bảng được tạo trực tiếp từ CSV, JSON, tệp trạng thái và provenance chuẩn. Không có số nào được nhập tay.
 
 ## Cách đọc
 
@@ -8,6 +8,7 @@ Thư mục này là mục lục tái tạo được cho bằng chứng của Gia
 * [Bảng Giai đoạn 1](phase1_tables_vi.md): biên kích thước, chế độ, khớp scaling và tóm tắt hợp nhất.
 * [Bảng Giai đoạn 2](phase2_tables_vi.md): biên theo bố cục, chi phí một chó, so sánh bộ dự đoán và tóm tắt hợp nhất.
 * [Bảng Giai đoạn 4](phase4_tables_vi.md): chuyển giao Kubo và FAT, thất bại cứng, cửa sổ Kubo khó và tóm tắt hợp nhất.
+* Nhật ký Giai đoạn 5: các chiến dịch quan sát / phạm vi / giao tiếp nằm trong [nhật ký chạy](run_ledger_vi.md); Package E trong `phase5/*/packages/e/`.
 * [Mục lục tiếng Anh](README.md).
 
 ## Quy ước bằng chứng

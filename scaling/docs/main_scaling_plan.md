@@ -217,9 +217,9 @@ Status as recorded on 2026-10-06:
 | 2 | DONE | Scout 3600 rows; claim reseed 2400 rows |
 | 3 | SKIPPED | Conditional mechanism analysis had no eligible overcrowding contrast |
 | 4 | DONE for required Kubo and FAT size and structure campaigns | Exact scout, claim, and merge counts are in the run ledger |
-| 5 | TODO | No completed information-ladder campaign is claimed |
+| 5 | DONE | Observation, range, and communication scout+claim campaigns complete; C5a/C5b recorded in the tracker |
 | 6 | DONE for the planned baseline fit package | Analysis status only |
-| 7 | TODO | Early-warning analysis has not run |
+| 7 | DONE | Package G on Phase 1 claim timeseries; C7a/C7b recorded in the tracker |
 
 The words `DONE`, `SKIPPED`, and `TODO` describe execution status only. A completed phase can yield a rejected or inconclusive claim. A skipped conditional phase means its prespecified trigger was absent, not that a scientific outcome was observed at the unrun condition.
 

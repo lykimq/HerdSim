@@ -1,0 +1,13 @@
+method,initial_layout,obs_mode,n_sheep,n_shepherds,reliability,role
+strombom_multi,compact,bearing_only,100,6,0.0,hard_failure_top
+strombom_multi,compact,bearing_only,100,10,0.0,hard_failure_top
+strombom_multi,compact,bearing_only,200,6,0.0,hard_failure_top
+strombom_multi,compact,bearing_only,200,10,0.0,hard_failure_top
+strombom_multi,compact,global,100,1,1.0,reliability
+strombom_multi,compact,global,100,2,1.0,reliability
+strombom_multi,compact,global,200,1,1.0,reliability
+strombom_multi,compact,global,200,2,1.0,reliability
+strombom_multi,compact,local_positions,100,1,1.0,reliability
+strombom_multi,compact,local_positions,100,2,1.0,reliability
+strombom_multi,compact,local_positions,200,1,1.0,reliability
+strombom_multi,compact,local_positions,200,2,1.0,reliability
