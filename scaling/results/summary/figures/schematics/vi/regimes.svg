@@ -1,22 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="640" height="300" viewBox="0 0 640 300" role="img" aria-label="Che do">
-  <rect width="100%" height="100%" fill="#f7f6f2"/>
-  <text x="16" y="24" font-size="14" font-weight="700" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Chế độ theo số chó tại số cừu cố định (khái niệm)</text>
-  <line x1="70" y1="240" x2="600" y2="240" stroke="#5c5852"/>
-  <line x1="70" y1="240" x2="70" y2="50" stroke="#5c5852"/>
-  <text x="335" y="270" text-anchor="middle" font-size="12" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">số chó →</text>
-  <text x="24" y="150" text-anchor="middle" font-size="12" fill="#5c5852" transform="rotate(-90 24 150)" font-family="Segoe UI,Noto Sans,sans-serif">R</text>
-  <text x="60" y="55" text-anchor="end" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">1,0</text>
-  <text x="60" y="100" text-anchor="end" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">0,9</text>
-  <line x1="70" y1="100" x2="600" y2="100" stroke="#1f4e79" stroke-dasharray="4 3"/>
-  <text x="605" y="104" font-size="10" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">ngưỡng</text>
-  <path d="M90,220 C130,210 150,200 170,110 C190,70 220,60 280,55 C400,50 520,52 580,55"
-        fill="none" stroke="#2f6b45" stroke-width="3"/>
-  <rect x="80" y="50" width="70" height="190" fill="#9b2c2c" opacity="0.12"/>
-  <rect x="150" y="50" width="80" height="190" fill="#2f6b45" opacity="0.12"/>
-  <rect x="230" y="50" width="350" height="190" fill="#1f4e79" opacity="0.08"/>
-  <text x="115" y="290" text-anchor="middle" font-size="11" fill="#9b2c2c" font-family="Segoe UI,Noto Sans,sans-serif">thiếu</text>
-  <text x="190" y="290" text-anchor="middle" font-size="11" fill="#2f6b45" font-family="Segoe UI,Noto Sans,sans-serif">hiệu quả</text>
-  <text x="400" y="290" text-anchor="middle" font-size="11" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">lãng phí (vẫn thắng)</text>
-  <text x="16" y="42" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Giai đoạn 1: R lên ngưỡng rồi giữ cao. Không sụp quá tải ở nhiều chó trên bố cục gọn + Strombom.</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="310" viewBox="0 0 720 310" role="img" aria-label="che do theo D">
+<rect x="0" y="0" width="720" height="310" fill="#f7f6f2"/>
+<text x="16" y="24" text-anchor="start" font-size="14" font-weight="700" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Che do theo D o N co dinh (dai mau)</text>
+<rect x="70" y="48" width="560" height="190" fill="#fff" stroke="#bbb3a5" stroke-width="1"/>
+<rect x="70.0" y="48" width="100.8" height="190" fill="#9b2c2c" opacity="0.12"/>
+<text x="120.4" y="254" text-anchor="middle" font-size="11" font-weight="700" fill="#9b2c2c" font-family="Segoe UI,Noto Sans,sans-serif">thieu cho</text>
+<rect x="170.8" y="48" width="89.6" height="190" fill="#2f6b45" opacity="0.12"/>
+<text x="215.60000000000002" y="254" text-anchor="middle" font-size="11" font-weight="700" fill="#2f6b45" font-family="Segoe UI,Noto Sans,sans-serif">hieu qua</text>
+<rect x="260.4" y="48" width="212.8" height="190" fill="#1f4e79" opacity="0.12"/>
+<text x="366.79999999999995" y="254" text-anchor="middle" font-size="11" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">lang phi</text>
+<rect x="473.2" y="48" width="156.8" height="190" fill="#7b1fa2" opacity="0.12"/>
+<text x="551.6" y="254" text-anchor="middle" font-size="11" font-weight="700" fill="#7b1fa2" font-family="Segoe UI,Noto Sans,sans-serif">qua tai</text>
+<line x1="70" y1="67.0" x2="630" y2="67.0" stroke="#b45309" stroke-width="1.2" stroke-dasharray="4 3"/>
+<text x="636" y="71.0" text-anchor="start" font-size="10" fill="#b45309" font-family="Segoe UI,Noto Sans,sans-serif">theta = 0.90</text>
+<polyline points="92.4,171.5 137.2,133.5 193.2,70.8 238.0,55.6 305.2,51.8 378.0,53.7 450.8,55.6 518.0,89.8 585.2,120.2" fill="none" stroke="#2f6b45" stroke-width="3"/>
+<text x="42" y="143.0" text-anchor="middle" font-size="12" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">R</text>
+<text x="350.0" y="274" text-anchor="middle" font-size="12" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">D (cho)</text>
+<text x="16" y="282" text-anchor="start" font-size="11" fill="#7b1fa2" font-family="Segoe UI,Noto Sans,sans-serif">Co the tut sau dai tot (thuong khong co tren co so compact).</text>
+<text x="16" y="298" text-anchor="start" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Chi dai mau. Diem bien (D_min, B*, D_overcrowd, D_max) o design_frontier.svg.</text>
 </svg>

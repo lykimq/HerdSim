@@ -19,4 +19,4 @@ Scout is the 30-seed broad map used to choose precision windows. Claim is the pr
 
 ## Rebuild
 
-Run `python3 build_tables.py` in this directory. Run `python3 build_tables.py --check` to verify that generated files match current sources. The script writes only the 10 Markdown files in this directory.
+Tables in this directory are frozen artifacts from the completed campaign. Regenerators were removed; edit the Markdown files directly if a correction is needed.

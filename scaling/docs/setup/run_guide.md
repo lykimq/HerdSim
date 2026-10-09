@@ -25,7 +25,6 @@ make -C scaling scaling-pilot
 make -C scaling scaling-scout
 make -C scaling scaling-claim-plan
 make -C scaling scaling-claim-reseed
-make -C scaling scaling-analyse PROTOCOL=phase1_claim PACKAGE=A
 make -C scaling scaling-t1-plan
 make -C scaling scaling-t1
 ```
@@ -41,7 +40,6 @@ make -C scaling scaling-pilot-state
 make -C scaling scaling-phase2-scout
 make -C scaling scaling-phase2-claim-plan
 make -C scaling scaling-phase2-claim-reseed
-make -C scaling scaling-analyse PROTOCOL=phase2_claim PACKAGE=B
 ```
 
 Each layout and N receives its own frontier window.
@@ -97,7 +95,7 @@ The general form is:
 uv run scaling/scripts/campaign.py VERB --protocol PROTOCOL_ID [OPTIONS]
 ```
 
-Verbs are `run`, `claim-plan`, `claim-reseed`, `t1-plan`, `t1`, and `analyse`. A protocol identifier resolves under `scaling/configs/protocols/`.
+Verbs are `run`, `claim-plan`, `claim-reseed`, `t1-plan`, and `t1`. A protocol identifier resolves under `scaling/configs/protocols/`.
 
 Examples:
 
@@ -105,17 +103,14 @@ Examples:
 uv run scaling/scripts/campaign.py run --protocol phase1_scout --workers 8
 uv run scaling/scripts/campaign.py claim-plan --protocol phase1_claim
 uv run scaling/scripts/campaign.py claim-reseed --protocol phase1_claim --workers 8
-uv run scaling/scripts/campaign.py analyse --protocol phase1_claim --package A
 ```
 
-Useful options include `--output`, `--workers`, `--upstream-trials`, `--no-analyse`, `--package`, `--trials`, `--methods`, `--layouts`, `--n`, `--d`, `--seeds`, `--max-ticks`, `--no-timeseries`, and `--no-resume`.
+Useful options include `--output`, `--workers`, `--upstream-trials`, `--methods`, `--layouts`, `--n`, `--d`, `--seeds`, `--max-ticks`, `--no-timeseries`, and `--no-resume`.
 
 Make variables map to the common filters:
 
 ```bash
 make -C scaling scaling-scout WORKERS=4 SCALING_N=100 SCALING_D=1 SCALING_SEEDS=2
-make -C scaling scaling-analyse PROTOCOL=phase1_claim PACKAGE=F \
-  TRIALS=scaling/results/phase1/claim/merged_trials.csv
 ```
 
 Filters and seed overrides are useful for diagnostics. A filtered run is not the complete frozen campaign and must not be presented as one.
@@ -129,29 +124,6 @@ make -C scaling scaling-scout
 ```
 
 Inspect `status.json` before and after resuming. It records planned, completed, pending-at-start, running, and timestamp fields. Avoid `--no-resume` unless a deliberate fresh execution is required, because it disables completed-key skipping.
-
-## Analyse existing trials
-
-```bash
-make -C scaling scaling-analyse \
-  PROTOCOL=phase1_claim \
-  PACKAGE=A \
-  TRIALS=scaling/results/phase1/claim/merged_trials.csv
-```
-
-`TRIALS` and `OUT` are optional Make variables. With a protocol, default input selection follows campaign wiring. Direct analysis without a protocol requires both `--trials` and `--output`.
-
-Packages correspond to the plan:
-
-- A: baseline size frontiers and reliability.
-- B: structure.
-- C: mechanism.
-- D: transfer.
-- E: information substitution.
-- F: scaling fits.
-- G: early warning.
-
-Packages C, F, and G mainly analyse collected data. G requires stored timeseries. Scout protocols normally set `store_timeseries: false` to reduce disk I/O; claim protocols set it to true for boundary trajectories.
 
 ## Outputs
 

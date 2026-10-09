@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="560" viewBox="0 0 920 560" role="img" aria-label="RQ2 claim window selection example">
+<rect x="0" y="0" width="920" height="560" fill="#f7f6f2"/>
+<text x="20" y="28" text-anchor="start" font-size="16" font-weight="700" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Claim window from the RQ2 scout map (real cells)</text>
+<text x="20" y="48" text-anchor="start" font-size="12" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">After scout, only the blue cells are reseeded at 100 seeds. Grey cells stay at scout depth (30).</text>
+<text x="20" y="70" text-anchor="start" font-size="13" font-weight="700" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">N = 5</text>
+<text x="20" y="88" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Scout: R(D=1) about 0.03; R(D at least 2) = 1.00. So D_min = 2.</text>
+<rect x="20" y="100" width="82" height="52" fill="#e8f1f8" stroke="#1f4e79" stroke-width="2" rx="6"/>
+<text x="61.0" y="122" text-anchor="middle" font-size="12" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">D=1</text>
+<text x="61.0" y="140" text-anchor="middle" font-size="10" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">CLAIM 100</text>
+<rect x="110" y="100" width="82" height="52" fill="#e8f1f8" stroke="#1f4e79" stroke-width="2" rx="6"/>
+<text x="151.0" y="122" text-anchor="middle" font-size="12" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">D=2</text>
+<text x="151.0" y="140" text-anchor="middle" font-size="10" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">CLAIM 100</text>
+<rect x="200" y="100" width="82" height="52" fill="#e8f1f8" stroke="#1f4e79" stroke-width="2" rx="6"/>
+<text x="241.0" y="122" text-anchor="middle" font-size="12" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">D=3</text>
+<text x="241.0" y="140" text-anchor="middle" font-size="10" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">CLAIM 100</text>
+<rect x="290" y="100" width="82" height="52" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="331.0" y="122" text-anchor="middle" font-size="12" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">D=4</text>
+<text x="331.0" y="140" text-anchor="middle" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">scout 30</text>
+<rect x="380" y="100" width="82" height="52" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="421.0" y="122" text-anchor="middle" font-size="12" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">D=6</text>
+<text x="421.0" y="140" text-anchor="middle" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">scout 30</text>
+<rect x="470" y="100" width="82" height="52" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="511.0" y="122" text-anchor="middle" font-size="12" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">D=10</text>
+<text x="511.0" y="140" text-anchor="middle" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">scout 30</text>
+<rect x="560" y="100" width="82" height="52" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="601.0" y="122" text-anchor="middle" font-size="12" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">D=15</text>
+<text x="601.0" y="140" text-anchor="middle" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">scout 30</text>
+<rect x="650" y="100" width="82" height="52" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="691.0" y="122" text-anchor="middle" font-size="12" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">D=20</text>
+<text x="691.0" y="140" text-anchor="middle" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">scout 30</text>
+<rect x="740" y="100" width="82" height="52" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="781.0" y="122" text-anchor="middle" font-size="12" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">D=25</text>
+<text x="781.0" y="140" text-anchor="middle" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">scout 30</text>
+<rect x="830" y="100" width="82" height="52" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="871.0" y="122" text-anchor="middle" font-size="12" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">D=35</text>
+<text x="871.0" y="140" text-anchor="middle" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">scout 30</text>
+<text x="20" y="170" text-anchor="start" font-size="11" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Window: D_min and neighbors on the list so D = {1, 2, 3} (3 cells).</text>
+<text x="20" y="196" text-anchor="start" font-size="13" font-weight="700" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">N = 10</text>
+<text x="20" y="214" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Scout: R(D=1) about 0.27; R(D at least 2) = 1.00. So D_min = 2 (same window shape as N = 5).</text>
+<rect x="20" y="226" width="82" height="52" fill="#e8f1f8" stroke="#1f4e79" stroke-width="2" rx="6"/>
+<text x="61.0" y="248" text-anchor="middle" font-size="12" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">D=1</text>
+<text x="61.0" y="266" text-anchor="middle" font-size="10" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">CLAIM 100</text>
+<rect x="110" y="226" width="82" height="52" fill="#e8f1f8" stroke="#1f4e79" stroke-width="2" rx="6"/>
+<text x="151.0" y="248" text-anchor="middle" font-size="12" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">D=2</text>
+<text x="151.0" y="266" text-anchor="middle" font-size="10" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">CLAIM 100</text>
+<rect x="200" y="226" width="82" height="52" fill="#e8f1f8" stroke="#1f4e79" stroke-width="2" rx="6"/>
+<text x="241.0" y="248" text-anchor="middle" font-size="12" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">D=3</text>
+<text x="241.0" y="266" text-anchor="middle" font-size="10" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">CLAIM 100</text>
+<rect x="290" y="226" width="82" height="52" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="331.0" y="248" text-anchor="middle" font-size="12" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">D=4</text>
+<text x="331.0" y="266" text-anchor="middle" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">scout 30</text>
+<rect x="380" y="226" width="82" height="52" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="421.0" y="248" text-anchor="middle" font-size="12" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">D=6</text>
+<text x="421.0" y="266" text-anchor="middle" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">scout 30</text>
+<rect x="470" y="226" width="82" height="52" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="511.0" y="248" text-anchor="middle" font-size="12" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">D=10</text>
+<text x="511.0" y="266" text-anchor="middle" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">scout 30</text>
+<rect x="560" y="226" width="82" height="52" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="601.0" y="248" text-anchor="middle" font-size="12" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">D=15</text>
+<text x="601.0" y="266" text-anchor="middle" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">scout 30</text>
+<rect x="650" y="226" width="82" height="52" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="691.0" y="248" text-anchor="middle" font-size="12" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">D=20</text>
+<text x="691.0" y="266" text-anchor="middle" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">scout 30</text>
+<rect x="740" y="226" width="82" height="52" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="781.0" y="248" text-anchor="middle" font-size="12" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">D=25</text>
+<text x="781.0" y="266" text-anchor="middle" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">scout 30</text>
+<rect x="830" y="226" width="82" height="52" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="871.0" y="248" text-anchor="middle" font-size="12" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">D=35</text>
+<text x="871.0" y="266" text-anchor="middle" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">scout 30</text>
+<text x="20" y="296" text-anchor="start" font-size="11" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Window: D = {1, 2, 3} (3 cells).</text>
+<text x="20" y="322" text-anchor="start" font-size="13" font-weight="700" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">N = 100 (same pattern for every N from 25 to 400)</text>
+<text x="20" y="340" text-anchor="start" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Scout: R(D=1) = 1.00. So D_min = 1 (no previous neighbor on the list).</text>
+<rect x="20" y="352" width="82" height="52" fill="#e8f1f8" stroke="#1f4e79" stroke-width="2" rx="6"/>
+<text x="61.0" y="374" text-anchor="middle" font-size="12" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">D=1</text>
+<text x="61.0" y="392" text-anchor="middle" font-size="10" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">CLAIM 100</text>
+<rect x="110" y="352" width="82" height="52" fill="#e8f1f8" stroke="#1f4e79" stroke-width="2" rx="6"/>
+<text x="151.0" y="374" text-anchor="middle" font-size="12" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">D=2</text>
+<text x="151.0" y="392" text-anchor="middle" font-size="10" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">CLAIM 100</text>
+<rect x="200" y="352" width="82" height="52" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="241.0" y="374" text-anchor="middle" font-size="12" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">D=3</text>
+<text x="241.0" y="392" text-anchor="middle" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">scout 30</text>
+<rect x="290" y="352" width="82" height="52" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="331.0" y="374" text-anchor="middle" font-size="12" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">D=4</text>
+<text x="331.0" y="392" text-anchor="middle" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">scout 30</text>
+<rect x="380" y="352" width="82" height="52" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="421.0" y="374" text-anchor="middle" font-size="12" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">D=6</text>
+<text x="421.0" y="392" text-anchor="middle" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">scout 30</text>
+<rect x="470" y="352" width="82" height="52" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="511.0" y="374" text-anchor="middle" font-size="12" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">D=10</text>
+<text x="511.0" y="392" text-anchor="middle" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">scout 30</text>
+<rect x="560" y="352" width="82" height="52" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="601.0" y="374" text-anchor="middle" font-size="12" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">D=15</text>
+<text x="601.0" y="392" text-anchor="middle" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">scout 30</text>
+<rect x="650" y="352" width="82" height="52" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="691.0" y="374" text-anchor="middle" font-size="12" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">D=20</text>
+<text x="691.0" y="392" text-anchor="middle" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">scout 30</text>
+<rect x="740" y="352" width="82" height="52" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="781.0" y="374" text-anchor="middle" font-size="12" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">D=25</text>
+<text x="781.0" y="392" text-anchor="middle" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">scout 30</text>
+<rect x="830" y="352" width="82" height="52" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="871.0" y="374" text-anchor="middle" font-size="12" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">D=35</text>
+<text x="871.0" y="392" text-anchor="middle" font-size="10" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">scout 30</text>
+<text x="20" y="422" text-anchor="start" font-size="11" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Window: D_min and next so D = {1, 2} (2 cells).</text>
+<rect x="20" y="444" width="880" height="92" fill="#fff" stroke="#bbb3a5" stroke-width="1.5" rx="8"/>
+<text x="36" y="468" text-anchor="start" font-size="13" font-weight="700" fill="#1f4e79" font-family="Segoe UI,Noto Sans,sans-serif">Whole RQ2 claim plan</text>
+<text x="36" y="488" text-anchor="start" font-size="12" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">N=5 and N=10: 3 cells each. N=25..400 (8 sizes): 2 cells each. Total = 3+3+8x2 = 22 cells.</text>
+<text x="36" y="506" text-anchor="start" font-size="12" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Claim trials = 22 x 100 = 2,200. Merge = 22 claim cells + 78 scout-only cells = 4,540 rows.</text>
+<text x="36" y="524" text-anchor="start" font-size="12" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">No overcrowding pair appeared, so T1 (T=20,000) was skipped and D_max=35 stays a list ceiling.</text>
+</svg>

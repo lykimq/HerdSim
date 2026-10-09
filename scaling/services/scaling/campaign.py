@@ -17,7 +17,6 @@ from services.scaling.layout import (
     PROTOCOLS_DIR,
     REPO_ROOT,
     load_protocol_spec,
-    package_output_dir,
     resolve_protocol_output,
 )
 
@@ -102,33 +101,6 @@ def _run(cmd: list[str]) -> None:
     subprocess.run(cmd, check=True, cwd=REPO_ROOT)
 
 
-def _analyse_packages(
-    trials: Path,
-    output_dir: Path,
-    packages: Sequence[str],
-    *,
-    skip: bool,
-) -> None:
-    if skip or not packages:
-        return
-    for package in packages:
-        letter = str(package).strip()
-        out = package_output_dir(output_dir, letter)
-        _run(
-            _script_cmd(
-                "analyse.py",
-                [
-                    "--package",
-                    letter.upper(),
-                    "--trials",
-                    str(trials),
-                    "--output",
-                    str(out),
-                ],
-            )
-        )
-
-
 def _override_flags(args: argparse.Namespace, *, kind: str) -> list[str]:
     flags: list[str] = []
     if kind == "factor":
@@ -172,7 +144,6 @@ def run_campaign(args: argparse.Namespace) -> None:
         else resolve_protocol_output(spec)
     )
     output.mkdir(parents=True, exist_ok=True)
-    packages = list(spec.get("packages") or [])
     workers = str(int(args.workers))
 
     if verb == "run":
@@ -196,8 +167,6 @@ def run_campaign(args: argparse.Namespace) -> None:
             ],
         )
         _run(cmd)
-        trials = output / "trials.csv"
-        _analyse_packages(trials, output, packages, skip=args.no_analyse)
         return
 
     if verb in ("claim-plan", "claim-reseed"):
@@ -226,10 +195,6 @@ def run_campaign(args: argparse.Namespace) -> None:
             if args.no_resume:
                 cmd.append("--no-resume")
         _run(cmd)
-        if verb == "claim-reseed":
-            merged = output / "merged_trials.csv"
-            trials = merged if merged.is_file() else output / "trials.csv"
-            _analyse_packages(trials, output, packages, skip=args.no_analyse)
         return
 
     if verb in ("t1-plan", "t1"):
@@ -258,24 +223,6 @@ def run_campaign(args: argparse.Namespace) -> None:
             if args.no_resume:
                 cmd.append("--no-resume")
         _run(cmd)
-        if verb == "t1":
-            _analyse_packages(
-                output / "trials.csv", output, packages, skip=args.no_analyse
-            )
-        return
-
-    if verb == "analyse":
-        if args.trials is not None:
-            trials = Path(args.trials)
-            if not trials.is_absolute():
-                trials = (REPO_ROOT / trials).resolve()
-        else:
-            trials = output / "trials.csv"
-            merged = output / "merged_trials.csv"
-            if merged.is_file():
-                trials = merged
-        package = args.package or (packages[0] if packages else "A")
-        _analyse_packages(trials, output, [package], skip=False)
         return
 
     raise SystemExit(f"Unknown verb: {verb}")
@@ -293,7 +240,6 @@ def build_parser() -> argparse.ArgumentParser:
             "claim-reseed",
             "t1-plan",
             "t1",
-            "analyse",
             "help",
         ),
         help="Campaign action",
@@ -311,13 +257,6 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Override upstream trials.csv for claim/T1",
     )
-    parser.add_argument(
-        "--no-analyse",
-        action="store_true",
-        help="Skip Package A-G export after a run",
-    )
-    parser.add_argument("--package", default=None, help="For analyse verb")
-    parser.add_argument("--trials", type=Path, default=None, help="For analyse verb")
     parser.add_argument("--methods", nargs="+", default=None)
     parser.add_argument("--layouts", nargs="+", default=None)
     parser.add_argument("--n", nargs="+", type=int, default=None)
@@ -337,10 +276,9 @@ def print_help() -> None:
 Verbs:
   run            Scout/smoke grid or factor sweep (from protocol)
   claim-plan     Write claim windows from upstream scout (no trials)
-  claim-reseed   100-seed reseed on those windows; analyse packages
+  claim-reseed   100-seed reseed on those windows
   t1-plan        Write overcrowding cells from upstream trials
-  t1             Run T1 at time_limit_t1; analyse packages
-  analyse        Re-export one package for a trials.csv
+  t1             Run T1 at time_limit_t1
 
 Protocol id resolves under scaling/configs/protocols/<id>.yaml.
 Claim/T1 YAMLs set upstream_protocol (and optional upstream_trials).
@@ -356,10 +294,6 @@ def main(argv: Sequence[str] | None = None) -> None:
     if args.verb == "help":
         print_help()
         return
-    if not args.protocol and args.verb != "analyse":
+    if not args.protocol:
         parser.error("--protocol is required")
-    if args.verb == "analyse" and not args.protocol and not args.trials:
-        parser.error("analyse needs --protocol and/or --trials")
-    if args.verb == "analyse" and args.protocol is None and args.output is None:
-        parser.error("analyse without --protocol needs --output")
     run_campaign(args)

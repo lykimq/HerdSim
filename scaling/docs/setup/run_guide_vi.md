@@ -25,7 +25,6 @@ make -C scaling scaling-pilot
 make -C scaling scaling-scout
 make -C scaling scaling-claim-plan
 make -C scaling scaling-claim-reseed
-make -C scaling scaling-analyse PROTOCOL=phase1_claim PACKAGE=A
 make -C scaling scaling-t1-plan
 make -C scaling scaling-t1
 ```
@@ -41,7 +40,6 @@ make -C scaling scaling-pilot-state
 make -C scaling scaling-phase2-scout
 make -C scaling scaling-phase2-claim-plan
 make -C scaling scaling-phase2-claim-reseed
-make -C scaling scaling-analyse PROTOCOL=phase2_claim PACKAGE=B
 ```
 
 Mỗi bố cục và N nhận cửa sổ biên riêng.
@@ -97,7 +95,7 @@ Dạng chung:
 uv run scaling/scripts/campaign.py VERB --protocol PROTOCOL_ID [OPTIONS]
 ```
 
-Các động từ là `run`, `claim-plan`, `claim-reseed`, `t1-plan`, `t1`, và `analyse`. Định danh giao thức được resolve dưới `scaling/configs/protocols/`.
+Các động từ là `run`, `claim-plan`, `claim-reseed`, `t1-plan`, và `t1`. Định danh giao thức được resolve dưới `scaling/configs/protocols/`.
 
 Ví dụ:
 
@@ -105,17 +103,14 @@ Ví dụ:
 uv run scaling/scripts/campaign.py run --protocol phase1_scout --workers 8
 uv run scaling/scripts/campaign.py claim-plan --protocol phase1_claim
 uv run scaling/scripts/campaign.py claim-reseed --protocol phase1_claim --workers 8
-uv run scaling/scripts/campaign.py analyse --protocol phase1_claim --package A
 ```
 
-Các tùy chọn hữu ích gồm `--output`, `--workers`, `--upstream-trials`, `--no-analyse`, `--package`, `--trials`, `--methods`, `--layouts`, `--n`, `--d`, `--seeds`, `--max-ticks`, `--no-timeseries`, và `--no-resume`.
+Các tùy chọn hữu ích gồm `--output`, `--workers`, `--upstream-trials`, `--methods`, `--layouts`, `--n`, `--d`, `--seeds`, `--max-ticks`, `--no-timeseries`, và `--no-resume`.
 
 Biến Make ánh xạ tới các bộ lọc phổ biến:
 
 ```bash
 make -C scaling scaling-scout WORKERS=4 SCALING_N=100 SCALING_D=1 SCALING_SEEDS=2
-make -C scaling scaling-analyse PROTOCOL=phase1_claim PACKAGE=F \
-  TRIALS=scaling/results/phase1/claim/merged_trials.csv
 ```
 
 Bộ lọc và ghi đè seed hữu ích cho chẩn đoán. Một lần chạy đã lọc không phải chiến dịch đóng băng đầy đủ và không được trình bày như vậy.
@@ -129,29 +124,6 @@ make -C scaling scaling-scout
 ```
 
 Kiểm tra `status.json` trước và sau khi tiếp tục. Tệp ghi các trường đã lập kế hoạch, đã hoàn thành, đang chờ lúc bắt đầu, đang chạy, và dấu thời gian. Tránh `--no-resume` trừ khi cần thực thi mới có chủ đích, vì tùy chọn này tắt việc bỏ qua khóa đã xong.
-
-## Phân tích lần thử có sẵn
-
-```bash
-make -C scaling scaling-analyse \
-  PROTOCOL=phase1_claim \
-  PACKAGE=A \
-  TRIALS=scaling/results/phase1/claim/merged_trials.csv
-```
-
-`TRIALS` và `OUT` là biến Make tùy chọn. Với một giao thức, chọn đầu vào mặc định theo cách nối chiến dịch. Phân tích trực tiếp không có giao thức cần cả `--trials` và `--output`.
-
-Các gói tương ứng kế hoạch:
-
-- A: biên kích thước cơ sở và độ tin cậy.
-- B: cấu trúc.
-- C: cơ chế.
-- D: chuyển giao.
-- E: thay thế thông tin.
-- F: khớp scaling.
-- G: cảnh báo sớm.
-
-Gói C, F, và G chủ yếu phân tích dữ liệu đã thu. G cần chuỗi thời gian đã lưu. Giao thức scout thường đặt `store_timeseries: false` để giảm I/O đĩa; giao thức claim đặt true cho quỹ đạo biên.
 
 ## Đầu ra
 

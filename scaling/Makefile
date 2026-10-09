@@ -2,7 +2,7 @@
 # scaling/scripts/campaign.py (services.scaling.campaign).
 # From repo root: make -C scaling help
 
-.PHONY: help scaling-help scaling-test scaling-analyse \
+.PHONY: help scaling-help scaling-test \
 	scaling-pilot scaling-scout scaling-claim-plan scaling-claim-reseed \
 	scaling-t1-plan scaling-t1 \
 	scaling-pilot-state scaling-phase2-scout \
@@ -25,11 +25,7 @@ export PYTHONPATH := $(ROOT):$(ROOT)/platform:$(ROOT)/scaling$(if $(PYTHONPATH),
 # Default pool size for this host (Ultra 7 165H, 16c/22t). Override down on
 # smaller machines: make scaling-scout WORKERS=4
 WORKERS ?= 18
-PACKAGE ?= A
 TRANSFER_METHOD ?= kubo
-PROTOCOL ?=
-TRIALS ?=
-OUT ?=
 SCALING_MAX_TICKS ?=
 SCALING_METHOD ?=
 SCALING_LAYOUT ?=
@@ -58,18 +54,12 @@ help scaling-help:
 	@echo "  scaling-pilot-state | scaling-phase2-scout | scaling-phase2-claim-*"
 	@echo "  scaling-transfer-*-scout|claim-*   TRANSFER_METHOD=kubo|fat"
 	@echo "  scaling-factor-sweep | scaling-phase5-*-scout|claim-*"
-	@echo "  scaling-analyse PROTOCOL=... PACKAGE=A [TRIALS=...]"
 	@echo "Default WORKERS=$(WORKERS) on this Makefile (override as needed)."
 	@echo "Example: make scaling-scout"
 	@echo "         make scaling-transfer-size-scout TRANSFER_METHOD=fat WORKERS=16"
 
 scaling-test:
 	cd $(ROOT) && $(UV) run pytest tests/backend/correctness/test_scaling_stack.py -q
-
-scaling-analyse:
-	$(CAMPAIGN) analyse --protocol $(PROTOCOL) --package $(PACKAGE) \
-		$(if $(TRIALS),--trials $(TRIALS),) \
-		$(if $(OUT),--output $(OUT),)
 
 scaling-pilot:
 	$(CAMPAIGN) run --protocol phase1_pilot $(CAMPAIGN_FLAGS)

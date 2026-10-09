@@ -9,7 +9,7 @@ Reader documentation: [English index](docs/INDEX.md) | [Vietnamese index](docs/I
 - `configs/`: Canonical grid defaults and protocol YAMLs (`protocols/`).
 - `docs/`: Focused plan, methods, setup, credibility, status, and discussion documents.
 - `results/`: Simulation outputs organized by phase (`phase1`, `phase2`, `phase4`).
-- `scripts/`: CLI runners used by `make -C scaling` (`campaign.py`, `run_grid.py`, `plan_claim_cells.py`, `plan_t1_cells.py`, `run_factor_sweep.py`, `analyse.py`).
+- `scripts/`: CLI runners used by `make -C scaling` (`campaign.py`, `run_grid.py`, `plan_claim_cells.py`, `plan_t1_cells.py`, `run_factor_sweep.py`).
 - `services/scaling/`: Multiprocess simulation runner and manifest ledger.
 
 ## Quickstart

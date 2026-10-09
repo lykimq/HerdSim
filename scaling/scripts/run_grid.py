@@ -11,7 +11,6 @@ from services.scaling.layout import (
     PROTOCOLS_DIR,
     copy_protocol_spec,
     load_protocol_spec,
-    package_output_dir,
     protocol_path_for_spec,
     resolve_protocol_output,
 )
@@ -156,12 +155,6 @@ def main() -> None:
         resume=not args.no_resume,
     )
     print(f"Wrote {len(trials)} trial rows to {output / 'trials.csv'}")
-    packages = list((spec or {}).get("packages") or [])
-    if packages:
-        print(
-            "Suggested analyse paths: "
-            + ", ".join(str(package_output_dir(output, p)) for p in packages)
-        )
 
 
 if __name__ == "__main__":

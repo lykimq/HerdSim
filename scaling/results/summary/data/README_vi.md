@@ -19,4 +19,4 @@ Khảo sát là bản đồ 30 seed dùng để chọn cửa sổ. Claim là b�
 
 ## Tái tạo
 
-Chạy `python3 build_tables.py` trong thư mục này. Chạy `python3 build_tables.py --check` để xác nhận các tệp đã tạo trùng khớp với nguồn hiện tại. Script chỉ ghi 10 tệp Markdown trong thư mục này.
+Các bảng trong thư mục này là artifact đóng băng từ chiến dịch đã chạy. Bộ tạo lại đã gỡ; sửa Markdown trực tiếp nếu cần chỉnh.

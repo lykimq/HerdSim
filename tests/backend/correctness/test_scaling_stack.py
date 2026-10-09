@@ -13,7 +13,13 @@ from services.scaling.campaign import (
     runner_kind,
 )
 from services.scaling.layout import PROTOCOLS_DIR, load_protocol_spec
-from services.scaling.runner import load_canonical_protocol, resolve_cell_max_ticks
+from services.scaling.runner import (
+    ScalingCell,
+    _cell_key,
+    expand_scaling_grid,
+    load_canonical_protocol,
+    resolve_cell_max_ticks,
+)
 
 from analysis.scaling.early_warning import (
     default_eval_ticks,
@@ -494,6 +500,36 @@ def test_canonical_protocol_loads():
     assert protocol["world_width"] == 500.0
     assert 10000 == protocol["time_limit_t0"]
     assert 20000 == protocol["time_limit_t1"]
+
+
+def test_resume_keys_omit_unset_info_factors():
+    """Grid cells leave obs/range/comm unset on the resume key; factor cells do not."""
+    protocol = load_canonical_protocol()
+    cells = expand_scaling_grid(
+        protocol,
+        methods=["strombom_multi"],
+        layouts=["compact"],
+        n_values=[50],
+        d_values=[1],
+        n_seeds=1,
+        seed_mode="scout",
+    )
+    assert len(cells) == 1
+    assert cells[0].obs_mode is None
+    assert _cell_key(cells[0]) == "N50_D1_Lcompact_S2026_Mstrombom_multi"
+
+    factored = ScalingCell(
+        n_sheep=100,
+        n_shepherds=6,
+        seed=2026,
+        method="strombom_multi",
+        obs_mode="bearing_only",
+        sensing_range=32.5,
+    )
+    assert (
+        _cell_key(factored)
+        == "N100_D6_Lcompact_S2026_Mstrombom_multi_Obearing_only_R32.5"
+    )
 
 
 def test_protocol_extends_and_campaign_specs():

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="300" viewBox="0 0 680 300" role="img" aria-label="RQ3 mechanism toy">
+<rect x="0" y="0" width="680" height="300" fill="#f7f6f2"/>
+<text x="16" y="24" text-anchor="start" font-size="14" font-weight="700" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Toy: mechanism contrast (RQ3)</text>
+<text x="16" y="44" text-anchor="start" font-size="11" font-weight="400" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">At the same N, compare an efficient cell with an overcrowding cell.</text>
+<rect x="40" y="70" width="280" height="180" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="180" y="95" text-anchor="middle" font-size="12" font-weight="700" fill="#2f6b45" font-family="Segoe UI,Noto Sans,sans-serif">Efficient (toy)</text>
+<circle cx="130" cy="160" r="5" fill="#5c5852"/>
+<circle cx="150" cy="164" r="5" fill="#5c5852"/>
+<circle cx="140" cy="150" r="5" fill="#5c5852"/>
+<circle cx="148" cy="152" r="5" fill="#5c5852"/>
+<circle cx="132" cy="168" r="5" fill="#5c5852"/>
+<circle cx="100" cy="200" r="6" fill="#2f6b45"/>
+<circle cx="180" cy="205" r="6" fill="#2f6b45"/>
+<circle cx="220" cy="175" r="6" fill="#2f6b45"/>
+<text x="180" y="235" text-anchor="middle" font-size="11" font-weight="400" fill="#2f6b45" font-family="Segoe UI,Noto Sans,sans-serif">low interference</text>
+<rect x="360" y="70" width="280" height="180" fill="#fff" stroke="#bbb3a5" stroke-width="1" rx="6"/>
+<text x="500" y="95" text-anchor="middle" font-size="12" font-weight="700" fill="#9b2c2c" font-family="Segoe UI,Noto Sans,sans-serif">Overcrowding (toy)</text>
+<circle cx="470" cy="160" r="5" fill="#5c5852"/>
+<circle cx="490" cy="164" r="5" fill="#5c5852"/>
+<circle cx="480" cy="150" r="5" fill="#5c5852"/>
+<circle cx="488" cy="152" r="5" fill="#5c5852"/>
+<circle cx="472" cy="168" r="5" fill="#5c5852"/>
+<circle cx="500" cy="200" r="6" fill="#9b2c2c"/>
+<circle cx="508" cy="194" r="6" fill="#9b2c2c"/>
+<circle cx="492" cy="206" r="6" fill="#9b2c2c"/>
+<circle cx="514" cy="204" r="6" fill="#9b2c2c"/>
+<text x="500" y="235" text-anchor="middle" font-size="11" font-weight="400" fill="#9b2c2c" font-family="Segoe UI,Noto Sans,sans-serif">high interference / split</text>
+<text x="16" y="280" text-anchor="start" font-size="11" font-weight="400" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Ask which logged signatures separate the two cells. Correlation alone is not cause.</text>
+</svg>

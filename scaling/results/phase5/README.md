@@ -57,7 +57,6 @@ Cited in claim-folder READMEs and Package E under each `*_claim/packages/e/`:
 |------|---------|
 | `README.md` | Phase index (this file) |
 | `run_all_ladders.sh` | Sequential scout then claim for all three ladders |
-| `run_all_ladders.log` | Orchestrator stdout/stderr |
 | `factor_sweep/` | Observation SCOUT |
 | `obs_claim/` | Observation CLAIM |
 | `range_scout/` | Range SCOUT |

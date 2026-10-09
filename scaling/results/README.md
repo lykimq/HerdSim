@@ -59,6 +59,4 @@ scaling/results/
 | Credibility and comparison | [`../docs/credibility/README.md`](../docs/credibility/README.md) |
 | Former research-plan path | [summary/RESEARCH_PLAN.html](summary/RESEARCH_PLAN.html) compatibility page |
 
-Rebuild the HTML from the markdown with `python3 summary/_rebuild_html.py`.
-
 Each phase also has its own browser reports under `phase{k}/guides/REPORT_en.html` and `REPORT_vi.html` (shared `assets/`).

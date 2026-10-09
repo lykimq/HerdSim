@@ -108,7 +108,13 @@ def scaling_group_cols(frame: pd.DataFrame) -> list[str]:
 
 
 def _cell_key(cell: ScalingCell) -> str:
-    """Stable resume / timeseries stem. Includes info factors when set."""
+    """Stable resume / timeseries stem. Includes info factors when set.
+
+    Only ScalingCell fields participate. Grid scouts usually leave obs_mode,
+    sensing_range, and communication unset, so their keys omit O*/R*/C* even
+    when the resolved trial config still records default obs_mode (e.g. global)
+    in trials.csv. Claim and factor cells set those fields intentionally.
+    """
     key = f"N{cell.n_sheep}_D{cell.n_shepherds}_L{cell.initial_layout}_S{cell.seed}_M{cell.method}"
     extras: list[str] = []
     if cell.obs_mode is not None:

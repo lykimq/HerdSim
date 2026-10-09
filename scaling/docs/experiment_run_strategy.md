@@ -39,7 +39,6 @@ Record the grade on every run report ([REPORT_TEMPLATE.md](templates/REPORT_TEMP
 | Scout | Full (or factor) grid at scout depth | `scaling-scout`, `scaling-phase2-scout`, ...|
 | Claim plan | **No** new sims; write which cells to reseed | `scaling-claim-plan` |
 | Claim reseed | Run planned cells at claim depth; merge | `scaling-claim-reseed` |
-| Analyse | Build packages / figures from trials CSV | `scaling-analyse PACKAGE=...` |
 | T1 | Claim-depth runs at `time_limit_t1` (20,000) on overcrowding cells | `scaling-t1` |
 
 Help: `make -C scaling help` (wraps `scaling/scripts/campaign.py`).
@@ -54,7 +53,6 @@ Example paths are Phase 1; other phases mirror under `scaling/results/phase{k}/â
 | Scout | `phase1/scout/trials.csv`, timeseries if enabled | Reliability map; input to claim plan and early diagnostics |
 | Claim plan | `phase1/claim/boundary_cells.csv` | Exact `(N, D[, layout, ...])` list for reseed |
 | Claim reseed | `phase1/claim/trials.csv`, **`merged_trials.csv`** | Claim-grade frontiers, regimes, Packages A/C/F/G inputs |
-| Analyse | `packages/{a,c,...}/` figures and tables | README.md and Claims table |
 | T1 | `phase1/t1/` | Overcrowding under the long time budget |
 
 Merge rule (also in the main plan): on a cell that received claim seeds, analysis uses those claim rows only. Other cells keep scout rows. Scout and claim rows are not stacked on the same cell.

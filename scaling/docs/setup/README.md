@@ -6,7 +6,7 @@ This directory is the operator reference for protocol `scaling_v2`. It explains 
 
 1. [Experiment setup](experiment_setup.md): task, arena, layouts, staging, rationale, implementation caps, and study boundaries.
 2. [Parameter reference](parameter_reference.md): frozen values, controller defaults, metrics, frontiers, and analysis settings.
-3. [Run guide](run_guide.md): test, run, resume, plan, reseed, T1, analyse, outputs, and provenance.
+3. [Run guide](run_guide.md): test, run, resume, plan, reseed, T1, outputs, and provenance.
 4. [Glossary](glossary.md): symbols and operational definitions.
 
 Vietnamese versions:

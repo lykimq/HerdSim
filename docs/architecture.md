@@ -126,8 +126,8 @@ section is the engineering shape.
 | `scaling/services/scaling/runner.py` | Expand grid, run trials, resume via `manifest.jsonl`, write timeseries |
 | `scaling/services/scaling/layout.py` | Path conventions (`phase{k}/{slug}/`, cell keys, package dirs) |
 | `analysis/scaling/` | Frontier, regimes, export, plots, plus modules for later packages |
-| `scaling/scripts/` | `run_grid.py`, `run_factor_sweep.py`, `analyse.py` |
-| `scaling/Makefile` | `scaling-pilot`, `scaling-scout`, `scaling-pilot-state`, `scaling-factor-sweep`, `scaling-analyse` |
+| `scaling/scripts/` | `campaign.py`, `run_grid.py`, `run_factor_sweep.py`, `plan_claim_cells.py`, `plan_t1_cells.py` |
+| `scaling/Makefile` | `scaling-pilot`, `scaling-scout`, `scaling-pilot-state`, `scaling-factor-sweep`, claim/transfer/phase5 targets |
 | `scaling/results/phase{k}/{slug}/` | `protocol.yaml`, provenance, `trials.csv`, `timeseries/`, `packages/{a-g}/`, optional `REPORT.md` |
 
 Operator entry: `make -C scaling help` (or `make scaling-help`). Layout
