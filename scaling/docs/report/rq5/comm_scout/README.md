@@ -1,46 +1,70 @@
-# Protocol note: `phase5_comm_scout`
+# phase5_comm_scout
 
-## Summary
+## Purpose
 
-Communication scout finished: 1080/1080 trials. Modes none / neighbour_broadcast / global_shared at N in {100, 200} and D in {1, 2, 3, 4, 6, 10}, 30 seeds, compact `strombom_multi`. Package E written. Planning only.
-
-## Intent
-
-- RQ: RQ5
-- Focus: Communication ladder (scout)
-- Claims touched: none (SCOUT)
-- Grade: SCOUT
+SCOUT communication ladder. Used to plan communication claim windows. Not claim-grade by itself.
 
 ## Setup
 
-- Protocol: `scaling_v2`
-- Method(s): strombom_multi
-- Layout(s) X0: compact
-- N grid: {100, 200}
-- D grid: {1, 2, 3, 4, 6, 10}
+- Protocol: `scaling_v2` (`phase5_comm_scout`)
+- Depends on: none for running. Starts the communication ladder. Writes `trials.csv`.
+- Method: `strombom_multi`
+- Layout: compact
+- N: {100, 200}
+- D: {1, 2, 3, 4, 6, 10}
 - Seeds: 30
 - Communications: none, neighbour_broadcast, global_shared
+- Package export: E
 - Command: `make -C scaling scaling-phase5-comm-scout WORKERS=18`
-- Output: `rq5/ (package) / live tree phase5/comm_scout/`
-- Host: gwen; WORKERS=18 / performance
 
 ## Completeness
 
-- Planned / done: 1080 / 1080
-- `status.json` complete? yes
+1,080 / 1,080 trials (`status.json` complete).
 
 ## Runtime
 
-| Field | Value |
-|-------|-------|
-| Elapsed | 4,726 s (1h 18m 46s) |
-| Started (UTC) | 2026-10-08T10:37:51Z |
-| Updated (UTC) | 2026-10-08T11:56:38Z |
+Started:  8 Oct 2026, 10:37 UTC
+Finished: 8 Oct 2026, 11:56 UTC
+Total:    1h 18m
+
+## Results
+
+Scout map for planning only. Claim-grade frontiers live in `../comm_claim/`.
+
+## Files in this folder
+
+### Dependencies
+
+```mermaid
+flowchart LR
+  proto["protocol.yaml"] -->|"run"| trials["trials.csv"]
+  trials --> status["status.json / manifest.jsonl"]
+  trials --> pkgs["packages/e/"]
+```
+
+```
+.
+|-- manifest.jsonl
+|-- protocol.yaml
+|-- status.json
+|-- trials.csv
+`-- packages/
+    `-- e/
+```
+
+**Config**
+- `protocol.yaml`: Run settings (method, layouts, N/D grid, seeds, grade).
+
+**Auto-generated (run)**
+- `manifest.jsonl`: Per-cell progress log; enables resume without re-running ok cells.
+- `status.json`: Planned vs done counts, complete flag, start/finish, elapsed.
+- `trials.csv`: One row per seed (success, ticks, path/effort, layout, N, D, ...).
+
+**Auto-generated (analysis packages)**
+- `packages/e/`: Package E (substitution / ladder tables).
+
+Trajectory parquet written during the run is not retained here.
 
 ## Limits
 
-SCOUT only. Not for Claims.
-
-## Next
-
-- Claim reseed in `../comm_claim/`
+SCOUT (30 seeds). Not for claims.

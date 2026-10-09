@@ -1,11 +1,29 @@
-# Package B: phase2_scout
+# Package B (scout)
 
-Auto-generated evidence package. Interpretation belongs in the protocol `README.md`.
+This folder is **auto-generated** by the analysis package export (from the parent stage's `trials.csv` or `merged_trials.csv` after the stage make run). Do not edit these files by hand.
 
-RQ1 state vs size: compare d_min across initial_layout.
-Predictor prefers_state=False nd_nll=nan state_nll=nan
+Layout contrast tables for the RQ1 scout map: fewest dogs and path cost by `initial_layout` x N, plus a state vs (N, D) predictor comparison.
 
-Artefacts:
-- frontier_by_layout: frontier_by_layout.csv
-- predictor_comparison: predictor_comparison.csv
+## Artefacts
 
+```
+.
+|-- artefacts.json
+|-- frontier_by_layout.csv
+`-- predictor_comparison.csv
+```
+
+**Auto-generated (analysis)**
+- `artefacts.json`: Index of paths written by the analysis package export.
+- `frontier_by_layout.csv`: Fewest dogs / overcrowding / B* by layout x N.
+- `predictor_comparison.csv`: Leave-one-N NLL for early-state vs (N, D) predictors; prefers_state flag.
+
+## Numbers
+
+`D_min = 1` for all four layouts at N in {50, 100, 200}. Wide and outlier_rich raise B* effort (wide B*_d often 2). Predictor: `prefers_state=False` (NLL comparison not informative when outcomes do not vary enough).
+
+Predictor summary fields in `predictor_comparison.csv` (C1b):
+
+- `nd_nll`: leave-one-N negative log-likelihood of a logistic model that uses only `(N, D)`.
+- `state_nll`: same CV NLL when early flock/dog state (and layout) is added.
+- `prefers_state`: true when `state_nll` is lower than `nd_nll` (early state predicts success better than `(N, D)` alone).

@@ -1,20 +1,29 @@
-# Package B: phase4_kubo_structure_claim
+# Package B (kubo structure claim)
 
-Auto tables and figures for this package. Read `../../README.md` for interpretation.
+This folder is **auto-generated** by the analysis package export (from the parent stage's `trials.csv` or `merged_trials.csv` after the stage make run). Do not edit these files by hand.
 
-Current frontiers (`frontier_by_layout.csv`):
+Layout contrast tables for the Kubo structure claim merge: fewest dogs and path cost by `initial_layout` x N.
 
-| Layout | N | D_min | hard_failure |
-|--------|--:|------:|:------------:|
-| compact / split | 50,100,200 | 1 | no |
-| outlier_rich | 50,100 | 1 | no |
-| outlier_rich | 200 | 20 | no |
-| wide | 50,100,200 | none | yes |
+## Artefacts
 
-Outlier_rich N=200 detail: `../../outlier_rich_n200_window.json` (200 seeds on D in {1,2,3,4,6,10,15,20,25}; bootstrap [2, 20]; no overcrowding).
+```
+.
+|-- artefacts.json
+|-- frontier_by_layout.csv
+`-- predictor_comparison.csv
+```
 
-Predictor prefers_state=True nd_nll=0.42182883865301374 state_nll=0.3462265531932712
+**Auto-generated (analysis)**
+- `artefacts.json`: Index of paths written by the analysis package export.
+- `frontier_by_layout.csv`: Fewest dogs / overcrowding / B* by layout x N.
+- `predictor_comparison.csv`: Leave-one-N NLL for early-state vs (N, D) predictors; prefers_state flag.
 
-Artefacts:
-- frontier_by_layout: frontier_by_layout.csv
-- predictor_comparison: predictor_comparison.csv
+## Numbers
+
+Compact/split `D_min` = 1 at N in {50, 100, 200}. Outlier_rich N=200: `D_min` = 20. Wide: hard failure on all three N.
+
+Predictor summary fields in `predictor_comparison.csv` (C1b):
+
+- `nd_nll`: leave-one-N negative log-likelihood of a logistic model that uses only `(N, D)`.
+- `state_nll`: same CV NLL when early flock/dog state (and layout) is added.
+- `prefers_state`: true when `state_nll` is lower than `nd_nll` (early state predicts success better than `(N, D)` alone).

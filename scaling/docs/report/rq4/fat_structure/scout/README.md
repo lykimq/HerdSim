@@ -1,34 +1,34 @@
-# phase2_pilot_state
+# phase4_fat_structure_scout
 
 ## Purpose
 
-SMOKE check for the RQ1 start-shape path: four layouts and state metrics on a reduced grid. Pipeline check only. Not for claims.
+SCOUT FAT four-layout structure map. Used to plan claim windows. Not claim-grade by itself.
 
 ## Setup
 
-- Protocol: `scaling_v2` (`phase2_pilot_state`)
-- Depends on: none for running. Starts the RQ1 chain.
-- Method: `strombom_multi`
+- Protocol: `scaling_v2` (`phase4_fat_structure_scout`)
+- Depends on: none for running. Starts the FAT structure chain. Writes `trials.csv`.
+- Method: `fat`
 - Layouts: compact, wide, split, outlier_rich
-- N: {5, 10, 25, 50, 100}
-- D: {1, 2, 3, 4, 6, 10}
-- Seeds: 5
+- N: {50, 100, 200}
+- D: {1, 2, 3, 4, 6, 10, 15, 20, 25, 35}
+- Seeds: 30
 - Package export: B
-- Command: `make -C scaling scaling-pilot-state WORKERS=16`
+- Command: `make -C scaling scaling-transfer-structure-scout TRANSFER_METHOD=fat WORKERS=16`
 
 ## Completeness
 
-600 / 600 trials (`status.json` complete).
+3,600 / 3,600 trials (`status.json` complete).
 
 ## Runtime
 
-Started:  25 Sep 2026, 09:18 UTC
-Finished: 25 Sep 2026, 09:25 UTC
-Total:    7m
+Started:  29 Sep 2026, 19:38 UTC
+Finished: 1 Oct 2026, 05:38 UTC
+Total:    1d 10h 0m
 
 ## Results
 
-Smoke-only. Package B shows layout contrasts on this reduced grid; do not update claims from this folder.
+Scout structure map on FAT. Claim-grade frontiers live in the claim folder.
 
 ## Files in this folder
 
@@ -66,4 +66,4 @@ Trajectory parquet written during the run is not retained here.
 
 ## Limits
 
-SMOKE (5 seeds). Not for claims.
+SCOUT (30 seeds). Not for claims.

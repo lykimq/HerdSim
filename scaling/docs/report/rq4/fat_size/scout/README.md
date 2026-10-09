@@ -1,22 +1,20 @@
-# phase1_scout
+# phase4_fat_size_scout
 
 ## Purpose
 
-SCOUT full size map on compact starts. Used to pick claim reseed windows. Not claim-grade by itself.
+SCOUT FAT compact size map. Used to plan claim windows. Not claim-grade by itself.
 
 ## Setup
 
-- Protocol: `scaling_v2` (`phase1_scout`)
-- Depends on: none required for running (pilot is smoke only). Writes `trials.csv`.
-- Method: `strombom_multi`
+- Protocol: `scaling_v2` (`phase4_fat_size_scout`)
+- Depends on: none for running. Starts the FAT size chain. Writes `trials.csv`.
+- Method: `fat`
 - Layout: compact
 - N: {5, 10, 25, 50, 75, 100, 150, 200, 300, 400}
 - D: {1, 2, 3, 4, 6, 10, 15, 20, 25, 35}
 - Seeds: 30
-- Theta: 0.90
-- T0: 10000
-- Package export: A
-- Command: `make -C scaling scaling-scout WORKERS=16`
+- Package export: A, F
+- Command: `make -C scaling scaling-transfer-size-scout TRANSFER_METHOD=fat WORKERS=16`
 
 ## Completeness
 
@@ -24,16 +22,13 @@ SCOUT full size map on compact starts. Used to pick claim reseed windows. Not cl
 
 ## Runtime
 
-Started:  22 Sep 2026, 10:50 UTC
-Finished: 22 Sep 2026, 12:02 UTC
-Total:    1h 12m
+Started:  2 Oct 2026, 05:19 UTC
+Finished: 3 Oct 2026, 20:25 UTC
+Total:    1d 15h 6m
 
 ## Results
 
-- Overall success 0.983; R=1.0 for all N>=25; lower only at N=5 (0.903) and N=10 (0.927) from D=1 under-resourcing
-- `D_min` = 2 for N in {5, 10}; `D_min` = 1 for N >= 25; `d_max` = 35; no `D_overcrowd`
-- Regimes: wasteful_overspend 88, efficient_operation 10, under_resourced_failure 2
-- Bootstrap: `d_min_ci_low` == `d_min_ci_high` for every N
+Scout size map on compact FAT. Claim-grade frontiers live in the claim folder.
 
 ## Files in this folder
 
@@ -43,7 +38,7 @@ Total:    1h 12m
 flowchart LR
   proto["protocol.yaml"] -->|"run"| trials["trials.csv"]
   trials --> status["status.json / manifest.jsonl"]
-  trials --> pkgs["packages/a/"]
+  trials --> pkgs["packages/a+f/"]
 ```
 
 ```
@@ -53,7 +48,8 @@ flowchart LR
 |-- status.json
 |-- trials.csv
 `-- packages/
-    `-- a/
+    |-- a/
+    `-- f/
 ```
 
 **Config**
@@ -66,6 +62,7 @@ flowchart LR
 
 **Auto-generated (analysis packages)**
 - `packages/a/`: Package A (size-map tables).
+- `packages/f/`: Package F (scaling-fit tables).
 
 Trajectory parquet written during the run is not retained here.
 
