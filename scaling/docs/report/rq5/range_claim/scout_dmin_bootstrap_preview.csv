@@ -1,0 +1,9 @@
+method,initial_layout,obs_mode,sensing_range,n_sheep,d_min,d_min_ci_low,d_min_ci_high,d_min_ci_low_above_grid,d_min_ci_high_above_grid,n_boot,n_seeds_ref,n_boot_defined
+strombom_multi,compact,global,32.5,100,1,1,1,False,False,1000,30,1000
+strombom_multi,compact,global,32.5,200,1,1,1,False,False,1000,30,1000
+strombom_multi,compact,global,65.0,100,1,1,1,False,False,1000,30,1000
+strombom_multi,compact,global,65.0,200,1,1,1,False,False,1000,30,1000
+strombom_multi,compact,global,97.5,100,1,1,1,False,False,1000,30,1000
+strombom_multi,compact,global,97.5,200,1,1,1,False,False,1000,30,1000
+strombom_multi,compact,global,130.0,100,1,1,1,False,False,1000,30,1000
+strombom_multi,compact,global,130.0,200,1,1,1,False,False,1000,30,1000

@@ -1,0 +1,6 @@
+{
+  "transfer_table": "scaling/results/phase4/package_d/size/transfer_table.csv",
+  "transfer_summary": "scaling/results/phase4/package_d/size/transfer_summary.csv",
+  "provenance": "scaling/results/phase4/package_d/size/provenance.json",
+  "report": "scaling/results/phase4/package_d/size/README.md"
+}

@@ -1,0 +1,30 @@
+protocol_id: phase2_pilot_state
+phase: 2
+grade: SMOKE
+output: scaling/results/phase2/pilot_state
+canonical: scaling/configs/canonical_grid.yaml
+methods:
+- strombom_multi
+layouts:
+- compact
+- wide
+- split
+- outlier_rich
+flock_sizes:
+- 5
+- 10
+- 25
+- 50
+- 100
+shepherd_counts:
+- 1
+- 2
+- 3
+- 4
+- 6
+- 10
+seeds: 5
+seed_mode: scout
+store_timeseries: true
+packages:
+- B

@@ -1,0 +1,16 @@
+{
+  "protocol_id": "phase2_scout",
+  "n_planned": 3600,
+  "n_done": 3600,
+  "n_pending_at_start": 3600,
+  "complete": true,
+  "running": false,
+  "started_at": "2026-09-25T09:25:40.621088+00:00",
+  "updated_at": "2026-09-25T12:39:33.897222+00:00",
+  "elapsed_seconds": 11633.276134,
+  "trials_csv": "trials.csv",
+  "manifest_jsonl": "manifest.jsonl",
+  "finished_at": "2026-09-25T12:39:33.897222+00:00",
+  "n_rows_trials_csv": 3600,
+  "store_timeseries": true
+}

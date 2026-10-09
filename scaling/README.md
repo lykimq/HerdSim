@@ -3,6 +3,7 @@
 Tools and results for the shepherding scaling experiments.
 
 Reader entry point: [docs/final_report.md](docs/final_report.md) ([HTML](docs/final_report.html)).
+Emailable short package: [docs/report/short_report.html](docs/report/short_report.html) (self-contained folder under `docs/report/`).
 
 ## Directory structure
 
@@ -29,6 +30,7 @@ Simulation data is stored in `scaling/results/`. To resume an interrupted run, r
 ## Main documents
 
 - Final report: [docs/final_report.md](docs/final_report.md) ([HTML](docs/final_report.html))
+- Short report package (emailable): [docs/report/short_report.html](docs/report/short_report.html)
 - Plan: [docs/main_scaling_plan.md](docs/main_scaling_plan.md)
 - Research program: [docs/herdsim_research_program.md](docs/herdsim_research_program.md)
 - Progress tracker: [docs/progress_tracker.md](docs/progress_tracker.md)

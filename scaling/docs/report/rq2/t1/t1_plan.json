@@ -1,0 +1,11 @@
+{
+  "n_t1_cells": 0,
+  "group_cols": [
+    "method",
+    "initial_layout",
+    "obs_mode"
+  ],
+  "theta": 0.9,
+  "source_trials": "/home/gwen/HerdSim/scaling/results/phase1/claim/merged_trials.csv",
+  "max_ticks": 20000
+}

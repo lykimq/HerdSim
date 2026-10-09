@@ -1,0 +1,45 @@
+# Phase-2 structure scout (RQ1).
+# Grade: SCOUT. Full D grid on structure sizes and all four X0 families.
+#
+# Why N={50,100,200} first (not smaller, not 300/400 yet):
+# - Large enough: split uses 3 clusters for N>=12; outlier_rich ~20% is a
+#   real rim, not one or two sheep. Below that, layout definitions change.
+# - Same size floor as Phase 1 compact: D_min=1 at these N, so a higher D on
+#   another layout is structure, not "larger N needs more dogs".
+# - Three sizes support C1a ("at least one N") and C1b leave-one-N-out.
+# - On the frozen Section 8 N grid; do not invent off-grid sizes.
+#
+# Why not N in {5,10,25} for this scout/claim:
+# - N=5,10: split is only 2 clusters; tiny-flock regime (Phase 1 already
+#   needs D_min=2 there on compact). Smoke may use them; claim must not.
+# - N=25: past the split rule but thin for outliers; compact floor already
+#   known; adds a full D sweep for little structure information vs N=50.
+# - N=75,150: size-transition density from Phase 1; compact is already flat.
+#
+# Do not add N=300 or 400 in this YAML yet. After the claim map for
+# {50,100,200} exists: if all four layouts sit on D_min=1 at those sizes,
+# consider extending; if C1a already has a gap, large N is optional.
+#
+# Why full D grid: claim windows sit on the same dog grid as the size map.
+# Why strombom_multi only: RQ1 baseline; kubo/fat are Phase 4.
+# Why all four layouts: layout contract; compact is the reference rerun.
+
+protocol_id: phase2_scout
+phase: 2
+grade: SCOUT
+output: scaling/results/phase2/scout
+canonical: scaling/configs/canonical_grid.yaml
+
+methods:
+  - strombom_multi
+layouts:
+  - compact
+  - wide
+  - split
+  - outlier_rich
+flock_sizes: [50, 100, 200]
+shepherd_counts: [1, 2, 3, 4, 6, 10, 15, 20, 25, 35]
+seeds: 30
+seed_mode: scout
+store_timeseries: true
+packages: [B]

@@ -1,0 +1,10 @@
+{
+  "n_boundary_cells": 22,
+  "group_cols": [
+    "method",
+    "initial_layout",
+    "obs_mode"
+  ],
+  "theta": 0.9,
+  "scout_trials": "/home/gwen/HerdSim/scaling/results/phase1/scout/trials.csv"
+}

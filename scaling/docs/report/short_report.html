@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang='en'>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>HerdSim scaling study: short report</title>
+<meta name='description' content='Short, self-contained report of the HerdSim scaling simulation study.'>
+<style>
+
+:root{--ink:#111827;--mut:#6b7280;--line:#e5e7eb;--acc:#2563eb;--bg:#f9fafb}
+*{box-sizing:border-box}body{margin:0;font:16px/1.65 -apple-system,'Segoe UI',Inter,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+header{background:linear-gradient(120deg,#1e3a8a,#0f766e);color:#fff;padding:48px 24px}
+header .in,main{max-width:1000px;margin:auto}header h1{margin:0 0 8px;font-size:2rem}header p{margin:0;opacity:.9;max-width:46rem}
+.chrome{max-width:1280px;margin:auto;padding:12px 24px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.chrome a{color:var(--acc);text-decoration:none}.chrome a:hover,.chrome a:focus{text-decoration:underline}
+.crumbs,.page-nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.sep{color:var(--mut)}
+.layout{display:grid;grid-template-columns:230px 1fr;gap:32px;max-width:1280px;margin:0 auto;padding:24px}
+nav{position:sticky;top:16px;align-self:start;font-size:.88rem;max-height:calc(100vh - 32px);overflow:auto}
+nav a{display:block;padding:5px 10px;color:var(--mut);text-decoration:none;border-left:2px solid var(--line)}
+nav a:hover,nav a:focus{color:var(--acc);border-color:var(--acc)}
+main{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 40px 40px;min-width:0}
+h2{margin-top:2.2em;padding-bottom:6px;border-bottom:2px solid var(--line);scroll-margin-top:16px}
+h2:first-child{margin-top:1.2em}
+h3{margin-top:1.6em;color:#1e3a8a}
+h4{margin:1.35em 0 .55em;font-size:1.02rem;font-weight:700;color:#334155}
+blockquote{margin:1em 0;padding:14px 18px;border-left:4px solid #0f766e;background:#f0fdfa;border-radius:0 8px 8px 0;color:#134e4a;font-size:1.05rem;font-weight:600;line-height:1.55}
+blockquote p{margin:0}
+code{background:#eef2ff;border-radius:4px;padding:1px 5px;font-size:.88em;word-break:break-word}
+a{color:var(--acc)}
+figure{margin:24px 0;text-align:center}figure img{max-width:100%;border:1px solid var(--line);border-radius:8px;background:#fff}
+figcaption{font-size:.88rem;color:var(--mut);margin-top:6px;text-align:left}
+table{border-collapse:collapse;width:100%;font-size:.9rem;margin:8px 0}
+.table-wrap{overflow-x:auto;margin:8px 0}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+/* First col hugs content (short IDs); badges with nowrap still expand as needed. */
+th:first-child,td:first-child{width:1%;white-space:nowrap;min-width:3.25rem}
+/* Phase/package-style third column needs room on RQ tables. */
+th:nth-child(3),td:nth-child(3){min-width:10.5rem}
+th{background:#f3f4f6}caption{caption-side:bottom;font-size:.85rem;color:var(--mut);padding:6px;text-align:left}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.78rem;font-weight:600;white-space:nowrap}
+.REJECTED,.BI_BAC_BO,.NOT_REPRODUCED,.KHONG_TAI_HIEN{background:#fee2e2;color:#991b1b}
+.SUPPORTED,.DUOC_UNG_HO,.OK,.DUNG,.READY,.SAN_DUNG,.D_MIN_1{background:#dcfce7;color:#166534}
+.INCONCLUSIVE,.EVALUATED,.KHONG_RO_RANG,.DA_DANH_GIA,.WEAK,.YEU,.UNVERIFIED,.CHUA_XAC_NHAN,.PARTIAL,.MOT_PHAN,.COST_ONLY,.CHI_CHI_PHI{background:#fef3c7;color:#92400e}
+.SKIPPED,.UNEVALUATED,.BO_QUA,.CHUA_DANH_GIA,.NOT_RUN,.CHUA_CHAY,.WASTE,.LANG_PHI{background:#ffedd5;color:#9a3412}
+.NEEDS_RUN,.CAN_CHAY,.STALE,.LOI_THOI{background:#ffedd5;color:#9a3412}
+.kpi-note{background:#eff6ff;border-left:4px solid #2563eb;padding:10px 14px;margin:12px 0;border-radius:0 8px 8px 0;font-size:.95rem}
+ul{padding-left:1.2em}li{margin:6px 0}
+footer{max-width:1280px;margin:0 auto 32px;padding:0 24px;color:var(--mut);font-size:.85rem}
+.missing{border:1px solid #b91c1c;background:#fef2f2;color:#991b1b;padding:10px;border-radius:6px}
+pre{overflow:auto;background:#111827;color:#f9fafb;padding:14px;border-radius:8px}pre code{background:transparent;padding:0;color:inherit}
+@media(max-width:900px){.layout{grid-template-columns:1fr}nav{display:none}main{padding:8px 18px 30px}header{padding:32px 18px}header h1{font-size:1.55rem}.chrome{padding:10px 18px}}
+
+table.layout-cost tr.layout-compact td{background:#eff6ff}
+table.layout-cost tr.layout-split td{background:#f0fdf4}
+table.layout-cost tr.layout-outlier_rich td{background:#fff7ed}
+table.layout-cost tr.layout-wide td{background:#fef2f2}
+table.layout-cost tr.layout-compact td:first-child,
+table.layout-cost tr.layout-split td:first-child,
+table.layout-cost tr.layout-outlier_rich td:first-child,
+table.layout-cost tr.layout-wide td:first-child{font-weight:600}
+
+</style>
+</head>
+<body>
+<header><div class='in'><h1>HerdSim scaling study: short report</h1><p>What we asked, how we ran it, what the simulations showed, and what we plan next.</p></div></header>
+<div class='layout'>
+<nav>
+<a href="#what-this-is-about">What this is about</a>
+<a href="#what-we-asked">What we asked</a>
+<a href="#how-we-studied-it">How we studied it</a>
+<a href="#what-we-found">What we found</a>
+<a href="#what-we-did-not-settle-limits">What we did not settle / limits</a>
+<a href="#what-we-plan-next">What we plan next</a>
+<a href="#evidence-in-this-package">Evidence in this package</a>
+</nav>
+<main>
+<h2 id="what-this-is-about">What this is about</h2>
+<p>When a few dogs guide a larger flock, how much control do you actually need as the flock gets bigger, or starts more spread out?</p>
+<p>That is the question this study tries to answer carefully. We do not assume there is one universal scaling law. We ask questions we can run in simulation, fix the rules so comparisons stay fair, and only claim what the runs support.</p>
+<p><strong>HerdSim</strong> is the platform we used. A few dogs guide sheep to a goal under settings we can lock and repeat. For this study it is a model system for measuring <em>control demand</em> (how many dogs, or how much dog work, is enough), not a copy of a real farm.</p>
+<p>Control here is indirect: we cannot steer every sheep by hand. The dogs only push through local reactions. So "how much control" is something we can measure as size and starting shape change.</p>
+<p>This package is meant to be readable on its own. The short report tells the story. Folders under <code>rq1/</code> through <code>rq7/</code> and <code>protocol/</code> hold the setup files, trial tables, and notes if you want to check a number.</p>
+<hr>
+<h2 id="what-we-asked">What we asked</h2>
+<p>After the core runs, we wanted concrete answers about:</p>
+<ul>
+<li>whether start shape matters beyond size,</li>
+<li>how dog need changes as the group grows,</li>
+<li>which processes seem to drive the pattern,</li>
+<li>what looks shared across herding methods versus method-specific.</li>
+</ul>
+<h3 id="core-questions">Core questions</h3>
+<p><strong>RQ1 (structure).</strong> At the same flock size, does start shape (spread, split, outliers) change how many dogs are needed? Run on the baseline method only.</p>
+<p><strong>RQ2 (size and regimes).</strong> As flock size grows, how does the useful dog range change: the minimum for reliable herding, and whether adding more still helps, mostly wastes walking, or starts to hurt?</p>
+<p><strong>RQ3 (mechanism).</strong> Why does the pattern appear (for example dog interference, flock splitting, coverage limits)? Analysis only, when we have matched efficient and overcrowding cells at the same size.</p>
+<p><strong>RQ4 (generality).</strong> If we switch herding method, which parts of the pattern stay the same? Repeat size and structure maps for Kubo and FAT beside the baseline.</p>
+<h3 id="follow-on-questions">Follow-on questions</h3>
+<p><strong>RQ5 (information).</strong> Can better sensing or communication reduce the dog count at the same reliability?</p>
+<p><strong>RQ6 (scaling fits).</strong> Once we have minimum dog counts vs flock size, which simple curve best predicts a held-out size, and is one power law enough?</p>
+<p><strong>RQ7 (early warning).</strong> Can recent flock state warn of failure better than knowing only N and D?</p>
+<p>We are not trying to pick the "best" herding algorithm, copy every detail of real livestock, or ship a farm product. Only claim what the evidence supports.</p>
+<hr>
+<h2 id="how-we-studied-it">How we studied it</h2>
+<h3 id="shared-rules">Shared rules</h3>
+<p>Every scientific run uses the same frozen protocol (<code>scaling_v2</code>):</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Piece</th><th>Setting</th></tr></thead>
+<tbody>
+<tr><td>Task</td><td>Drive every sheep into a goal disk before the deadline (<code>drive_to_goal</code>)</td></tr>
+<tr><td>Field</td><td>500 by 500; flock centre (250, 250); goal (370, 250); drive length 120</td></tr>
+<tr><td>Goal radius</td><td><code>15 * sqrt(N/50)</code> so area per sheep stays roughly constant</td></tr>
+<tr><td>Reliability bar</td><td>succeed in at least 90% of repeats (<code>theta = 0.90</code>); we also report 0.50 and 0.70, but they do not define the minimum</td></tr>
+<tr><td>Flock sizes <code>N</code></td><td><code>{5, 10, 25, 50, 75, 100, 150, 200, 300, 400}</code></td></tr>
+<tr><td>Dog counts <code>D</code></td><td><code>{1, 2, 3, 4, 6, 10, 15, 20, 25, 35}</code></td></tr>
+<tr><td>Start layouts</td><td>compact, wide, split, outlier_rich</td></tr>
+<tr><td>Main deadline</td><td>T0 = 10,000 ticks; a longer T1 = 20,000 only if overcrowding cells appear</td></tr>
+<tr><td>Seeds</td><td>smoke 5; scout 30; claim 100 (200 on soft edges); master seed 2026</td></tr>
+</tbody></table></div>
+<p><code>D_min</code> means the smallest tested dog count that clears the 90% bar. It is not a property of sheep in nature; it depends on this task and these locks.</p>
+<p>Machine-readable defaults sit in <a href="protocol/canonical_grid.yaml"><code>protocol/canonical_grid.yaml</code></a>. Campaign YAML subsets sit in <a href="protocol/protocols/"><code>protocol/protocols/</code></a>.</p>
+<h3 id="why-three-methods">Why three methods</h3>
+<p>We need different <em>kinds</em> of dog rules on the same task, not three tiny variants of the same idea:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Method</th><th>Role</th><th>Plain description</th></tr></thead>
+<tbody>
+<tr><td><code>strombom_multi</code></td><td>Baseline</td><td>Dogs gather stragglers (Collect), then push the flock to the goal (Drive)</td></tr>
+<tr><td><code>kubo</code></td><td>Transfer</td><td>Continuous force rules; each dog pushes the sensed sheep farthest from the goal</td></tr>
+<tr><td><code>fat</code></td><td>Transfer</td><td>Each dog chases the sheep farthest from itself; dogs do not space themselves apart</td></tr>
+</tbody></table></div>
+<p>If all three show the same pattern, that pattern is more likely about the task. If Kubo or FAT breaks it, we learn how far we can generalise. That is what RQ4 is for. It does not mean these three cover every herding idea in the world.</p>
+<h3 id="why-smoke-scout-then-claim">Why smoke, scout, then claim</h3>
+<p>We need accurate success rates near the important edges (where the minimum sits, and where overcrowding might start). Running every cell at 100 seeds would waste budget on cells that always succeed or always fail.</p>
+<p>So each simulation campaign stages the work:</p>
+<ol>
+<li><strong>Smoke (5 seeds):</strong> pipeline check on a small grid.</li>
+<li><strong>Scout (30 seeds):</strong> cheap map of the full scientific grid so we can see where reliability lives.</li>
+<li><strong>Claim (100 seeds, or 200 on soft edges):</strong> reseed only the window cells that matter.</li>
+</ol>
+<p>Scout covers the whole map; claim covers a small window. Claims use claim-grade merges, not scout alone.</p>
+<h3 id="how-many-trials-we-ran">How many trials we ran</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>RQ</th><th>What</th><th>SMOKE</th><th>SCOUT</th><th>CLAIM</th><th>Total</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>RQ1</td><td>Structure map (baseline, 4 layouts)</td><td>600</td><td>3,600</td><td>2,400</td><td>6,600</td><td>DONE</td></tr>
+<tr><td>RQ2</td><td>Size map (baseline, compact)</td><td>150</td><td>3,000</td><td>2,200</td><td>5,350</td><td>DONE</td></tr>
+<tr><td>RQ3</td><td>Mechanism contrast</td><td>0</td><td>0</td><td>0</td><td>0</td><td>SKIPPED</td></tr>
+<tr><td>RQ4</td><td>Kubo then FAT size + structure</td><td>0</td><td>13,200</td><td>10,500</td><td>23,700</td><td>DONE</td></tr>
+<tr><td>RQ5</td><td>Observation, range, communication ladders</td><td>0</td><td>3,600</td><td>4,000</td><td>7,600</td><td>DONE</td></tr>
+<tr><td>RQ6</td><td>Curve fits on claim frontiers</td><td>0</td><td>0</td><td>0</td><td>0</td><td>DONE (analyse)</td></tr>
+<tr><td>RQ7</td><td>Early warning on claim trajectories</td><td>0</td><td>0</td><td>0</td><td>0</td><td>DONE (analyse)</td></tr>
+<tr><td><strong>All</strong></td><td></td><td><strong>750</strong></td><td><strong>23,400</strong></td><td><strong>19,100</strong></td><td><strong>43,250</strong></td><td></td></tr>
+</tbody></table></div>
+<p>RQ2's longer-deadline T1 was also planned and skipped (0 overcrowding cells). Claim merges hold 37,070 rows (fewer than total sims because a reseeded cell drops its scout rows from the merge). Integrity checks are in <a href="TRUST_AUDIT.md"><code>TRUST_AUDIT.md</code></a>.</p>
+<p>Commands used (from the HerdSim repo root; re-running needs that codebase, not only this folder):</p>
+<pre><code># RQ2 size map
+make -C scaling scaling-pilot WORKERS=16
+make -C scaling scaling-scout WORKERS=16
+make -C scaling scaling-claim-reseed WORKERS=16
+
+# RQ1 structure map
+make -C scaling scaling-phase2-scout WORKERS=16
+make -C scaling scaling-phase2-claim-reseed WORKERS=16
+
+# RQ4 transfer (kubo, then fat)
+make -C scaling scaling-transfer-size-scout TRANSFER_METHOD=kubo WORKERS=16
+make -C scaling scaling-transfer-size-claim-reseed TRANSFER_METHOD=kubo WORKERS=16
+make -C scaling scaling-transfer-structure-scout TRANSFER_METHOD=kubo WORKERS=16
+make -C scaling scaling-transfer-structure-claim-reseed TRANSFER_METHOD=kubo WORKERS=16
+# repeat with TRANSFER_METHOD=fat
+
+# RQ5 ladders
+bash scaling/results/phase5/run_all_ladders.sh   # WORKERS=18</code></pre>
+<p>Exact grids, seeds, and run notes for each campaign sit under the matching <code>rq*/</code> folder.</p>
+<hr>
+<h2 id="what-we-found">What we found</h2>
+<h3 id="rq1-does-start-shape-change-dog-need">RQ1: does start shape change dog need?</h3>
+<p><strong>Status:</strong> Answered on the baseline (<code>strombom_multi</code>). Kubo and FAT structure maps are under RQ4.</p>
+<p>At N = 50, 100, and 200, all four start layouts have <code>D_min = 1</code>. Start shape does not change how many dogs you need for the 90% bar on the baseline.</p>
+<p>It does change cost. Wide and large outlier-rich starts take much longer and more walking than compact. Split looks a lot like compact. Because <code>D_min</code> never moved across layouts, we could not test whether early flock-state measures predict difficulty better than knowing only N and D.</p>
+<p>One-dog cost by layout (median over successful trials; success rate 1.00 at D = 1 for every cell):</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Layout</th><th>N</th><th>Median ticks</th><th>Median path</th></tr></thead>
+<tbody>
+<tr><td>compact</td><td>50</td><td>195</td><td>158</td></tr>
+<tr><td>compact</td><td>100</td><td>204</td><td>161</td></tr>
+<tr><td>compact</td><td>200</td><td>191</td><td>144</td></tr>
+<tr><td>split</td><td>50</td><td>195</td><td>158</td></tr>
+<tr><td>split</td><td>100</td><td>205</td><td>162</td></tr>
+<tr><td>split</td><td>200</td><td>193</td><td>144</td></tr>
+<tr><td>outlier_rich</td><td>50</td><td>224</td><td>209</td></tr>
+<tr><td>outlier_rich</td><td>100</td><td>501</td><td>554</td></tr>
+<tr><td>outlier_rich</td><td>200</td><td>1,228</td><td>1,647</td></tr>
+<tr><td>wide</td><td>50</td><td>2,139</td><td>2,925</td></tr>
+<tr><td>wide</td><td>100</td><td>3,074</td><td>4,319</td></tr>
+<tr><td>wide</td><td>200</td><td>3,870</td><td>5,213</td></tr>
+</tbody></table></div>
+<p>Wide versus compact at one dog: about 11x to 20x more time and about 19x to 36x more path. On wide starts, the cheapest reliable choice is two dogs (<code>B* = 2</code>): the second dog cuts path while staying reliable.</p>
+<figure><img src="figures/f4_layout_cost.png" alt="Layout cost on the baseline structure map."><figcaption>Layout cost on the baseline structure map.</figcaption></figure>
+<p><em>Wide and large outlier-rich starts cost much more time and path at one dog; D_min stays 1.</em></p>
+<p>More detail: <a href="rq1/"><code>rq1/</code></a>.</p>
+<h3 id="rq2-how-does-dog-need-change-with-flock-size">RQ2: how does dog need change with flock size?</h3>
+<p><strong>Status:</strong> Answered on the baseline (<code>strombom_multi</code>, compact) inside the tested dog list through D = 35.</p>
+<p>The useful lower end is small and almost flat. At one dog, N = 5 and 10 fail the 90% bar (success about 0.07 and 0.24). From N = 25 upward, one dog is enough. Adding dogs past the minimum does not break success on that map; it mostly adds walking (88 of 100 cells labeled wasteful; 0 overcrowding).</p>
+<p>Baseline compact frontier at the 90% bar:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>N</th><th>D_min</th><th>D_max</th><th>Maximum SR</th></tr></thead>
+<tbody>
+<tr><td>5</td><td>2</td><td>not reach</td><td>100%</td></tr>
+<tr><td>10</td><td>2</td><td>not reach</td><td>100%</td></tr>
+<tr><td>25</td><td>1</td><td>not reach</td><td>100%</td></tr>
+<tr><td>50</td><td>1</td><td>not reach</td><td>100%</td></tr>
+<tr><td>75</td><td>1</td><td>not reach</td><td>100%</td></tr>
+<tr><td>100</td><td>1</td><td>not reach</td><td>100%</td></tr>
+<tr><td>150</td><td>1</td><td>not reach</td><td>100%</td></tr>
+<tr><td>200</td><td>1</td><td>not reach</td><td>100%</td></tr>
+<tr><td>300</td><td>1</td><td>not reach</td><td>100%</td></tr>
+<tr><td>400</td><td>1</td><td>not reach</td><td>100%</td></tr>
+</tbody></table></div>
+<p>Here "not reach" means no overcrowding appeared before D = 35, so <code>D_max</code> is only the top of our tested list, not a measured collapse. Bootstrap width on every <code>D_min</code> above is zero.</p>
+<figure><img src="figures/f1_reliability_heatmaps.png" alt="Reliability heatmaps across methods."><figcaption>Reliability heatmaps across methods.</figcaption></figure>
+<p><em>Success-rate surfaces. Baseline and Kubo show a reliable band on compact starts; FAT does not for larger N.</em></p>
+<figure><img src="figures/f3_cost_vs_d.png" alt="Cost against dog count on the baseline size map."><figcaption>Cost against dog count on the baseline size map.</figcaption></figure>
+<p><em>Extra dogs mainly raise path after the minimum; success stays high (waste, not overcrowding).</em></p>
+<p>More detail: <a href="rq2/"><code>rq2/</code></a>.</p>
+<h3 id="rq3-what-mechanism-drives-the-pattern">RQ3: what mechanism drives the pattern?</h3>
+<p><strong>Status:</strong> Not answerable yet. SKIPPED as a contrast.</p>
+<p>The plan was to compare efficient cells with overcrowding cells at the same N. We never saw overcrowding on the baseline size map inside D <= 35, so that contrast does not exist. Correlation candidates (interference, splitting, and related logs) were not tested against a real upper failure band.</p>
+<p>Unlocking RQ3 needs either a measured collapse (for example D > 35, or a harder draft-style task) or another protocol where overcrowding appears. See <a href="#what-we-plan-next">What we plan next</a>. Note: <a href="rq3/"><code>rq3/</code></a>.</p>
+<h3 id="rq4-do-the-patterns-transfer-across-methods">RQ4: do the patterns transfer across methods?</h3>
+<p><strong>Status:</strong> Partial.</p>
+<p>On tight (compact) starts, Strombom and Kubo share a low <code>D_min</code> floor for larger flocks. FAT does not copy that story.</p>
+<p>Compact <code>D_min</code> at the 90% bar:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>N</th><th>Baseline (<code>strombom_multi</code>)</th><th>Kubo</th><th>FAT</th></tr></thead>
+<tbody>
+<tr><td>5</td><td>2</td><td>3</td><td>1</td></tr>
+<tr><td>10</td><td>2</td><td>1</td><td>1</td></tr>
+<tr><td>25</td><td>1</td><td>1</td><td>not reach</td></tr>
+<tr><td>50</td><td>1</td><td>1</td><td>not reach</td></tr>
+<tr><td>100</td><td>1</td><td>1</td><td>not reach</td></tr>
+<tr><td>150</td><td>1</td><td>1</td><td>not reach</td></tr>
+<tr><td>200</td><td>1</td><td>1</td><td>not reach</td></tr>
+<tr><td>300</td><td>1</td><td>1</td><td>not reach</td></tr>
+<tr><td>400</td><td>1</td><td>1</td><td>not reach</td></tr>
+</tbody></table></div>
+<p>Structure breaks transfer further. Shared compact floors do not imply shared structure behavior.</p>
+<p>Structure-map <code>D_min</code> at the 90% bar (N in <code>{50, 100, 200}</code>):</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Layout</th><th>N</th><th>Baseline</th><th>Kubo</th><th>FAT</th></tr></thead>
+<tbody>
+<tr><td>compact</td><td>50</td><td>1</td><td>1</td><td>not reach</td></tr>
+<tr><td>compact</td><td>100</td><td>1</td><td>1</td><td>not reach</td></tr>
+<tr><td>compact</td><td>200</td><td>1</td><td>1</td><td>not reach</td></tr>
+<tr><td>split</td><td>50</td><td>1</td><td>1</td><td>not reach</td></tr>
+<tr><td>split</td><td>100</td><td>1</td><td>1</td><td>not reach</td></tr>
+<tr><td>split</td><td>200</td><td>1</td><td>1</td><td>not reach</td></tr>
+<tr><td>outlier_rich</td><td>50</td><td>1</td><td>1</td><td>not reach</td></tr>
+<tr><td>outlier_rich</td><td>100</td><td>1</td><td>1</td><td>not reach</td></tr>
+<tr><td>outlier_rich</td><td>200</td><td>1</td><td>20</td><td>not reach</td></tr>
+<tr><td>wide</td><td>50</td><td>1</td><td>not reach</td><td>not reach</td></tr>
+<tr><td>wide</td><td>100</td><td>1</td><td>not reach</td><td>not reach</td></tr>
+<tr><td>wide</td><td>200</td><td>1</td><td>not reach</td><td>not reach</td></tr>
+</tbody></table></div>
+<p>On Kubo wide, best success is about 0.47 to 0.54. FAT clears no structure cell at these sizes. Kubo <code>outlier_rich</code> at N = 200 is a point estimate <code>D_min = 20</code> with a wide bootstrap interval <code>[2, 20]</code>.</p>
+<figure><img src="figures/f2_dmin_vs_n.png" alt="D_min against N, including a 2025 draft contrast."><figcaption>D_min against N, including a 2025 draft contrast.</figcaption></figure>
+<p><em>Baseline and Kubo stay near one dog for large compact flocks. FAT has no D_min for N >= 25. A 2025 NetLogo draft on a harder collect-hold-gate task rose sharply; that draft was not rerun here.</em></p>
+<figure><img src="figures/f5_layout_reliability_curves.png" alt="Layout reliability across methods."><figcaption>Layout reliability across methods.</figcaption></figure>
+<p><em>At N = 200, compact and split look shared for Strombom and Kubo; wide and large outlier-rich do not.</em></p>
+<figure><img src="figures/f9_kubo_outlier_rich_n200.png" alt="Kubo outlier_rich at N = 200."><figcaption>Kubo outlier_rich at N = 200.</figcaption></figure>
+<p><em>Soft edge: point D_min = 20 after 200 seeds; bootstrap still wide.</em></p>
+<p>That is enough to reject "the same story everywhere," but not enough to say which patterns are shared across a broader method set. More detail: <a href="rq4/"><code>rq4/</code></a>.</p>
+<h3 id="rq5-can-better-information-replace-dogs">RQ5: can better information replace dogs?</h3>
+<p><strong>Status:</strong> Narrow answer.</p>
+<p>On compact N = 100 and 200, local sensing (radius 65) works as well as a full global view: both have <code>D_min = 1</code>. Whether <em>better</em> information can <em>reduce</em> dog count cannot be judged here: working setups are already at one dog, and bearing-only, range, and communication each had a setup problem that blocked a fair ladder test (bearing-only froze the dogs; range runs used global observation so range did not change what dogs saw; communication under global view stacked shared lists).</p>
+<figure><img src="figures/f11_phase5_ladders.png" alt="RQ5 information ladders."><figcaption>RQ5 information ladders.</figcaption></figure>
+<p><em>Local matches global. Other ladder steps did not cleanly test the intended factor.</em></p>
+<p>More detail: <a href="rq5/"><code>rq5/</code></a>.</p>
+<h3 id="rq6-which-curve-fits-d-min-vs-n">RQ6: which curve fits D_min vs N?</h3>
+<p><strong>Status:</strong> Weak, but the planned fit package ran.</p>
+<p>On the baseline compact map, <code>D_min</code> is almost only two values: 2 for N = 5 and 10, and 1 for everything larger. Leave-one-N-out RMSE (lower is better):</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Model</th><th>RMSE</th></tr></thead>
+<tbody>
+<tr><td>Constant</td><td>0.44</td></tr>
+<tr><td>Linear</td><td>0.44</td></tr>
+<tr><td>Power law</td><td>0.25</td></tr>
+<tr><td>Piecewise</td><td>0.13</td></tr>
+</tbody></table></div>
+<p>Piecewise wins because it matches that step, not because we measured a rich growth law. These fits are not a universal scaling law.</p>
+<figure><img src="figures/f8_scaling_rmse.svg" alt="Leave-one-N-out RMSE by model."><figcaption>Leave-one-N-out RMSE by model.</figcaption></figure>
+<p>More detail: <a href="rq6/"><code>rq6/</code></a>.</p>
+<h3 id="rq7-can-state-warn-of-failure-early">RQ7: can state warn of failure early?</h3>
+<p><strong>Status:</strong> Not answerable on this data.</p>
+<p>By the first check at tick 1,000, almost every successful RQ2 size-map run has already finished (median success about 183 ticks). Failures are almost all tiny flocks with one dog that run to the deadline. There is no late window left to warn before success or failure settles. Held-out AUROC folds were empty. Only 14 of 169 failures had a measured lead time of at least 500 ticks (about 8.3%; the bar was 30%).</p>
+<figure><img src="figures/f12_early_warning_timing.png" alt="Early warning timing."><figcaption>Early warning timing.</figcaption></figure>
+<p><em>Successful runs finish early; the shaded warning checks start after most successes are already done.</em></p>
+<p>More detail: <a href="rq7/"><code>rq7/</code></a>.</p>
+<h3 id="claims-scorecard">Claims scorecard</h3>
+<p>Verdicts use claim-grade evidence only.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Claim</th><th>RQ</th><th>Verdict</th><th>Meaning in plain words</th></tr></thead>
+<tbody>
+<tr><td>C1a</td><td>RQ1</td><td>REJECTED</td><td>Layout did not move <code>D_min</code> on the baseline</td></tr>
+<tr><td>C1b</td><td>RQ1</td><td>INCONCLUSIVE</td><td>No <code>D_min</code> shift, so state-vs-(N, D) predictor test could not run</td></tr>
+<tr><td>C2a</td><td>RQ2</td><td>REJECTED</td><td>No overcrowding on the baseline size map</td></tr>
+<tr><td>C2b</td><td>RQ2</td><td>SKIPPED</td><td>No overcrowding cell to extend to T = 20,000</td></tr>
+<tr><td>C3</td><td>RQ3</td><td>INCONCLUSIVE</td><td>Mechanism contrast undefined without overcrowding</td></tr>
+<tr><td>C4</td><td>RQ4</td><td>SUPPORTED (partial)</td><td>Compact size shared for Strombom/Kubo (N >= 25); FAT and several structure cases break transfer</td></tr>
+<tr><td>C5a</td><td>RQ5</td><td>REJECTED</td><td>No ladder step lowered a defined <code>D_min</code> (weakly tested)</td></tr>
+<tr><td>C5b</td><td>RQ5</td><td>INCONCLUSIVE</td><td>No first-step dog saving to compare</td></tr>
+<tr><td>C6a</td><td>RQ6</td><td>SUPPORTED</td><td>Power law worse than piecewise on leave-one-N RMSE</td></tr>
+<tr><td>C6b</td><td>RQ6</td><td>SUPPORTED</td><td>Flat <code>D_min = 1</code> on compact N in {25..400}, so log-log slope 0</td></tr>
+<tr><td>C7a</td><td>RQ7</td><td>INCONCLUSIVE</td><td>Held-out AUROC could not be computed</td></tr>
+<tr><td>C7b</td><td>RQ7</td><td>REJECTED</td><td>Too few failures with lead time >= 500 ticks</td></tr>
+</tbody></table></div>
+<p>These checks only support statements inside the tested protocol. They do not support a universal law, an untested task, or real-farm performance.</p>
+<hr>
+<h2 id="what-we-did-not-settle-limits">What we did not settle / limits</h2>
+<ul>
+<li><strong>One task.</strong> Results are for <code>drive_to_goal</code> under this frozen protocol only.</li>
+<li><strong>Grid ceiling.</strong> <code>D_max = 35</code> means "still OK at the largest D we tried," not "collapse begins at 35."</li>
+<li><strong>No overcrowding on the baseline size map.</strong> That is why RQ3 did not run and T1 was skipped.</li>
+<li><strong>Transfer is only partial.</strong> Compact size floors for Strombom and Kubo do not extend to FAT, Kubo-wide, or large Kubo outlier-rich.</li>
+<li><strong>Easy compact map.</strong> Many baseline cells succeed at D = 1 with success near 1.00, so rising dog-count laws, information savings, and early-warning overlap are hard to see.</li>
+<li><strong>RQ5 setup problems.</strong> Bearing-only, range-under-global, and communication list stacking limited what those ladders could test.</li>
+<li><strong>RQ7 timing.</strong> Warning checks start after almost every success has finished.</li>
+<li><strong>Simulated controllers.</strong> No farm or biology validity claim.</li>
+<li><strong>Discrete dog list.</strong> We cannot resolve effects finer than one step on that list.</li>
+<li><strong>Time across methods.</strong> Do not treat Kubo ticks as the same physical time as Strombom-family ticks.</li>
+</ul>
+<p>A 2025 NetLogo draft on a collect-hold-gate task needed many dogs for large flocks. We did not rerun that draft. On <em>this</em> compact <code>drive_to_goal</code> map, the draft's "large N needs many dogs" story does not appear for the baseline or Kubo.</p>
+<hr>
+<h2 id="what-we-plan-next">What we plan next</h2>
+<p>None of the items below have been run as claim-grade work in this package. They are intentions.</p>
+<h3 id="measure-an-upper-collapse-or-a-harder-task">Measure an upper collapse (or a harder task)</h3>
+<p>We still do not know whether success eventually falls for D > 35, or whether path waste keeps rising without collapse. That matters because it turns the current list ceiling into a measured upper story, and it is what unlocks RQ3 (efficient vs overcrowding at the same N).</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Question</th><th>Why it matters</th><th>How we would run it</th></tr></thead>
+<tbody>
+<tr><td>After a good band, does success fall for some D > 35?</td><td>Measured collapse instead of a ceiling</td><td>Extend the dog-count list past 35 on selected N</td></tr>
+<tr><td>If success stays high, does path waste keep rising?</td><td>Waste-only upper band</td><td>Same extended sweep; report path and regimes</td></tr>
+<tr><td>Does a longer deadline rescue high-D failures at T0?</td><td>Separates "too slow" from true overcrowding</td><td>T1 only on candidate overcrowding cells</td></tr>
+<tr><td>Do efficient and overcrowding cells differ in interference or splitting?</td><td>Unlocks RQ3</td><td>Matched tests at the same N</td></tr>
+<tr><td>Does that upper story transfer across methods?</td><td>RQ4 on the upper band</td><td>Repeat under Kubo / FAT (later <code>communication_free</code>)</td></tr>
+</tbody></table></div>
+<p>Another path without raising the dog cap: port the draft-style collect-hold-gate task into HerdSim and see whether overcrowding appears inside D <= 35. Not scheduled yet.</p>
+<h3 id="finish-rq4-more-cleanly">Finish RQ4 more cleanly</h3>
+<ol>
+<li>Run the planned next transfer method, <code>communication_free</code>, on the same size and structure maps.</li>
+<li>Tighten or clearly mark soft edges (especially Kubo <code>outlier_rich</code> at N = 200, bootstrap <code>[2, 20]</code>).</li>
+<li>Ask why FAT and Kubo-wide fail under this protocol, then retry a fairer FAT setup if needed (for example local sensing as the method intends), still on the frozen grids.</li>
+<li>Once an upper collapse exists, repeat the size/structure transfer check on that upper band.</li>
+</ol>
+<h3 id="fairer-follow-ups-for-rq5-and-rq7">Fairer follow-ups for RQ5 and RQ7</h3>
+<ul>
+<li>RQ5: pair sensing range with local observation, merge shared lists by sheep identity, use a bearing-aware controller, and preferably a layout or method where more than one dog is needed.</li>
+<li>RQ7: need failures and successes overlapping in time (harder layout or method, or earlier check times).</li>
+</ul>
+<hr>
+<h2 id="evidence-in-this-package">Evidence in this package</h2>
+<p>After this short report, you can dig into:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Path</th><th>What it holds</th></tr></thead>
+<tbody>
+<tr><td><a href="protocol/"><code>protocol/</code></a></td><td>Frozen <code>canonical_grid.yaml</code> and campaign YAML subsets</td></tr>
+<tr><td><a href="rq1/"><code>rq1/</code></a></td><td>Structure campaign (setup, trials, Package B)</td></tr>
+<tr><td><a href="rq2/"><code>rq2/</code></a></td><td>Size campaign (setup, trials, Package A); T1 note</td></tr>
+<tr><td><a href="rq3/"><code>rq3/</code></a></td><td>SKIPPED note only</td></tr>
+<tr><td><a href="rq4/"><code>rq4/</code></a></td><td>Kubo/FAT size and structure maps; Package D</td></tr>
+<tr><td><a href="rq5/"><code>rq5/</code></a></td><td>Information ladders and Package E</td></tr>
+<tr><td><a href="rq6/"><code>rq6/</code></a></td><td>Scaling-fit tables (Package F)</td></tr>
+<tr><td><a href="rq7/"><code>rq7/</code></a></td><td>Early-warning summary tables (Package G)</td></tr>
+<tr><td><a href="TRUST_AUDIT.md"><code>TRUST_AUDIT.md</code></a></td><td>Count and protocol-hash integrity checks</td></tr>
+<tr><td><a href="figures/"><code>figures/</code></a></td><td>Plots used in this report</td></tr>
+</tbody></table></div>
+<p>Each <code>rq*/</code> folder has a README that explains what the files mean. Trajectory parquet files are not included (they are large; RQ7 keeps summary tables only).</p>
+</main>
+</div>
+<footer>Self-contained package under <code>docs/report/</code>. Evidence folders: <code>rq1/</code> through <code>rq7/</code>, <code>protocol/</code>, <code>TRUST_AUDIT.md</code>.</footer>
+</body>
+</html>

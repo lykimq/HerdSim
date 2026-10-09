@@ -1,0 +1,33 @@
+protocol_id: phase2_claim
+phase: 2
+grade: CLAIM
+output: scaling/results/phase2/claim
+canonical: scaling/configs/canonical_grid.yaml
+methods:
+- strombom_multi
+layouts:
+- compact
+- wide
+- split
+- outlier_rich
+flock_sizes:
+- 50
+- 100
+- 200
+shepherd_counts:
+- 1
+- 2
+- 3
+- 4
+- 6
+- 10
+- 15
+- 20
+- 25
+- 35
+seeds: 100
+seed_mode: claim
+store_timeseries: true
+packages:
+- B
+upstream_protocol: phase2_scout

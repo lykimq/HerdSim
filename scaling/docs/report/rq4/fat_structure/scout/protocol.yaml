@@ -1,0 +1,32 @@
+protocol_id: phase4_fat_structure_scout
+phase: 4
+grade: SCOUT
+output: scaling/results/phase4/fat_structure/scout
+canonical: scaling/configs/canonical_grid.yaml
+methods:
+- fat
+layouts:
+- compact
+- wide
+- split
+- outlier_rich
+flock_sizes:
+- 50
+- 100
+- 200
+shepherd_counts:
+- 1
+- 2
+- 3
+- 4
+- 6
+- 10
+- 15
+- 20
+- 25
+- 35
+seeds: 30
+seed_mode: scout
+store_timeseries: false
+packages:
+- B

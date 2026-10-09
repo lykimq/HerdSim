@@ -1,0 +1,11 @@
+method,initial_layout,obs_mode,n_sheep,d_min,d_min_ci_low,d_min_ci_high,d_min_ci_low_above_grid,d_min_ci_high_above_grid,n_boot,n_seeds_ref,n_boot_defined
+fat,compact,global,5,1.0,1.0,1.0,False,False,1000,100,1000
+fat,compact,global,10,1.0,1.0,1.0,False,False,1000,100,1000
+fat,compact,global,25,,2.0,,False,True,1000,100,130
+fat,compact,global,50,,,,True,True,1000,100,0
+fat,compact,global,75,,,,True,True,1000,100,0
+fat,compact,global,100,,,,True,True,1000,100,0
+fat,compact,global,150,,,,True,True,1000,100,0
+fat,compact,global,200,,,,True,True,1000,100,0
+fat,compact,global,300,,,,True,True,1000,100,0
+fat,compact,global,400,,,,True,True,1000,100,0

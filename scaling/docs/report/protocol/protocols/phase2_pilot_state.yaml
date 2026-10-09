@@ -1,0 +1,32 @@
+# Phase-2 state pilot (all X0 families).
+# Grade: SMOKE. Uses the scaling arena from the canonical protocol.
+#
+# Why this subset: prove the four X0 generators and that Package B runs.
+# Not a claim for C1a or C1b.
+#
+# Why N includes 5,10,25 here but not in phase2_scout claim sizes:
+# smoke must stress small flocks and the N<12 split rule (2 clusters).
+# Structure claim uses N in {50,100,200} only (see phase2_scout.yaml).
+# Why reduced D {1..10}: low-D band where D_min usually sits; smoke cost.
+# Why 5 seeds: enough to exercise aggregation, not a frontier estimate.
+
+protocol_id: phase2_pilot_state
+phase: 2
+grade: SMOKE
+output: scaling/results/phase2/pilot_state
+canonical: scaling/configs/canonical_grid.yaml
+
+methods:
+  - strombom_multi
+layouts:
+  - compact
+  - wide
+  - split
+  - outlier_rich
+flock_sizes: [5, 10, 25, 50, 100]
+# Same smoke sizes as the phase-1 pilot, including the structure size N=50.
+shepherd_counts: [1, 2, 3, 4, 6, 10]
+seeds: 5
+seed_mode: scout
+store_timeseries: true
+packages: [B]

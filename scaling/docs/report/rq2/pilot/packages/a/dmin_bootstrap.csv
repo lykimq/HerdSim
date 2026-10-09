@@ -1,0 +1,6 @@
+initial_layout,n_sheep,d_min,d_min_ci_low,d_min_ci_high,d_min_ci_low_above_grid,d_min_ci_high_above_grid,n_boot,n_seeds_ref,n_boot_defined
+compact,5,2,2,2,False,False,1000,5,1000
+compact,10,2,2,2,False,False,1000,5,1000
+compact,25,1,1,1,False,False,1000,5,1000
+compact,50,1,1,1,False,False,1000,5,1000
+compact,100,1,1,1,False,False,1000,5,1000

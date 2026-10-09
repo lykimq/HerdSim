@@ -1,0 +1,16 @@
+{
+  "protocol_id": "phase4_fat_structure_claim",
+  "n_planned": 2400,
+  "n_done": 2400,
+  "n_pending_at_start": 2400,
+  "complete": true,
+  "running": false,
+  "started_at": "2026-10-01T05:38:59.061734+00:00",
+  "updated_at": "2026-10-02T05:16:28.360197+00:00",
+  "elapsed_seconds": 85049.298463,
+  "trials_csv": "trials.csv",
+  "manifest_jsonl": "manifest.jsonl",
+  "finished_at": "2026-10-02T05:16:28.360197+00:00",
+  "n_rows_trials_csv": 2400,
+  "store_timeseries": true
+}

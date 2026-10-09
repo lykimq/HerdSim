@@ -1,0 +1,11 @@
+# Phase-4 size claim windows for kubo (RQ4).
+
+extends: phase1_claim.yaml
+protocol_id: phase4_kubo_size_claim
+phase: 4
+output: scaling/results/phase4/kubo_size/claim
+methods:
+  - kubo
+upstream_protocol: phase4_kubo_size_scout
+# Package D needs baseline+kubo+fat together; build after all methods finish.
+packages: [A, F]
