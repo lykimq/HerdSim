@@ -70,7 +70,7 @@ When finished or on battery, you can switch back to `powersave` the same way.
 | 11 | Phase 4 size (kubo then fat) | SCOUT then CLAIM | `make -C scaling scaling-transfer-size-scout TRANSFER_METHOD=kubo WORKERS=16` then claim-reseed; repeat `fat` | `scaling/results/phase4/` | DONE |
 | 12 | Phase 4 structure (kubo then fat) | SCOUT then CLAIM | `make -C scaling scaling-transfer-structure-scout TRANSFER_METHOD=kubo WORKERS=16` then claim-reseed; repeat `fat` | `scaling/results/phase4/` | DONE |
 | 13 | Phase 4 transfer table | CLAIM | `make -C scaling scaling-analyse PACKAGE=D TRIALS=... --trials-by-method ...` | packages/d | DONE |
-| 14 | Phase 5 obs scout/claim | SCOUT then CLAIM | `make -C scaling scaling-factor-sweep WORKERS=18` then `scaling-phase5-obs-claim-reseed` | `scaling/results/phase5/` | NOT RUN YET |
+| 14 | Phase 5 obs scout/claim | SCOUT then CLAIM | `make -C scaling scaling-factor-sweep WORKERS=18` then `scaling-phase5-obs-claim-reseed` | `scaling/results/phase5/` | INTERRUPTED (obs scout 141/1080) |
 | 15 | Phase 5 range | SCOUT then CLAIM | `scaling-phase5-range-scout WORKERS=18` then `scaling-phase5-range-claim-reseed` | `scaling/results/phase5/` | NOT RUN YET |
 | 16 | Phase 5 communication | SCOUT then CLAIM | `scaling-phase5-comm-scout WORKERS=18` then `scaling-phase5-comm-claim-reseed` | `scaling/results/phase5/` | NOT RUN YET |
 | 17 | Phase 7 early warning | CLAIM | `make -C scaling scaling-analyse PACKAGE=G TRIALS=results/phase1/claim/merged_trials.csv OUT=results/phase1/claim/packages/g` | Package G | DONE |

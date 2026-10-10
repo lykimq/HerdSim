@@ -34,3 +34,4 @@ Simulation data is stored in `scaling/results/`. To resume an interrupted run, r
 - Plan: [docs/main_scaling_plan.md](docs/main_scaling_plan.md)
 - Research program: [docs/herdsim_research_program.md](docs/herdsim_research_program.md)
 - Progress tracker: [docs/progress_tracker.md](docs/progress_tracker.md)
+- Scaling code map (CLI / RQ file guide): [../docs/codes/map_codes.html](../docs/codes/map_codes.html)

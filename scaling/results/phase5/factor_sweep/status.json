@@ -1,0 +1,17 @@
+{
+  "protocol_id": "phase5_factor_sweep",
+  "n_planned": 1080,
+  "n_done": 141,
+  "n_pending_at_start": 1080,
+  "complete": false,
+  "running": false,
+  "started_at": "2026-10-10T09:22:49.962166+00:00",
+  "updated_at": "2026-10-10T10:38:43.102147+00:00",
+  "elapsed_seconds": 4553.139981,
+  "trials_csv": "trials.csv",
+  "manifest_jsonl": "manifest.jsonl",
+  "store_timeseries": false,
+  "n_rows_trials_csv": 141,
+  "interrupted_at": "2026-10-10T10:38:43.102147+00:00",
+  "interrupt_note": "Stopped manually for repo purpose-split planning; resume via same make target (manifest skips ok cells)."
+}

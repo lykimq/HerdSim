@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HerdSim scaling code map</title>
+<style>
+  :root {
+    --bg: #f7f4ef;
+    --panel: #fffdf9;
+    --ink: #1c1917;
+    --muted: #57534e;
+    --line: #d6d3d1;
+    --accent: #0f766e;
+    --accent-soft: #ccfbf1;
+    --warn: #b45309;
+    --skip: #7c3aed;
+    --code: #1e293b;
+    --code-bg: #f1efe8;
+    --nav: #1c1917;
+    --nav-ink: #fafaf9;
+    --rq1: #0369a1;
+    --rq2: #15803d;
+    --rq3: #7c3aed;
+    --rq4: #b45309;
+    --rq5: #be123c;
+    --rq6: #0f766e;
+    --rq7: #4338ca;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font: 15px/1.55 "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .chrome {
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+    padding: 10px 18px; background: var(--nav); color: var(--nav-ink);
+    font-size: 0.85rem;
+  }
+  .chrome a { color: #99f6e4; }
+  .layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 0;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  nav {
+    position: sticky; top: 0; align-self: start;
+    height: 100vh; overflow: auto;
+    padding: 20px 14px 40px;
+    border-right: 1px solid var(--line);
+    background: var(--panel);
+  }
+  nav h2 { margin: 0 0 12px; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  nav a {
+    display: block; padding: 5px 8px; border-radius: 6px;
+    color: var(--ink); font-size: 0.9rem;
+  }
+  nav a:hover { background: var(--accent-soft); text-decoration: none; }
+  nav .sub { padding-left: 14px; font-size: 0.84rem; color: var(--muted); }
+  main { padding: 28px 28px 80px; }
+  header h1 { margin: 0 0 8px; font-size: 1.85rem; letter-spacing: -0.02em; }
+  header p { margin: 0 0 22px; color: var(--muted); max-width: 70ch; }
+  section {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 20px 22px 24px;
+    margin: 0 0 18px;
+  }
+  section h2 { margin: 0 0 10px; font-size: 1.25rem; }
+  section h3 { margin: 18px 0 8px; font-size: 1.05rem; }
+  section h4 { margin: 14px 0 6px; font-size: 0.95rem; color: var(--muted); }
+  .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 999px;
+    font-size: 0.72rem; font-weight: 650; letter-spacing: 0.02em;
+  }
+  .DONE { background: #dcfce7; color: #166534; }
+  .SKIPPED, .NOT_RUN { background: #ede9fe; color: #5b21b6; }
+  .PARTIAL { background: #ffedd5; color: #9a3412; }
+  .WEAK { background: #fef3c7; color: #92400e; }
+  pre, code, .tree, .mono {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  code {
+    background: var(--code-bg); padding: 1px 5px; border-radius: 4px;
+    font-size: 0.88em; color: var(--code);
+  }
+  pre {
+    background: #1c1917; color: #f5f5f4; padding: 14px 16px;
+    border-radius: 10px; overflow: auto; font-size: 0.8rem; line-height: 1.45;
+  }
+  .tree {
+    background: var(--code-bg); border: 1px solid var(--line);
+    border-radius: 10px; padding: 14px 16px; overflow: auto;
+    font-size: 0.78rem; line-height: 1.4; white-space: pre;
+  }
+  table {
+    width: 100%; border-collapse: collapse; font-size: 0.9rem;
+  }
+  th, td {
+    border-bottom: 1px solid var(--line); text-align: left;
+    padding: 8px 8px; vertical-align: top;
+  }
+  th { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+  .flow {
+    display: grid; gap: 8px; margin: 12px 0;
+  }
+  .flow-row {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  }
+  .node {
+    border: 1px solid var(--line); background: #fff;
+    border-radius: 8px; padding: 8px 10px; min-width: 120px;
+    box-shadow: 0 1px 0 rgba(28,25,23,0.04);
+  }
+  .node strong { display: block; font-size: 0.82rem; }
+  .node span { display: block; color: var(--muted); font-size: 0.75rem; }
+  .arrow { color: var(--muted); font-weight: 700; }
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-soft);
+    padding: 10px 12px; border-radius: 0 8px 8px 0;
+    margin: 12px 0; font-size: 0.92rem;
+  }
+  .grid2 {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  }
+  @media (max-width: 980px) {
+    .layout { grid-template-columns: 1fr; }
+    nav { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+    .grid2 { grid-template-columns: 1fr; }
+  }
+  .rq-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+  .rq1 .rq-dot { background: var(--rq1); }
+  .rq2 .rq-dot { background: var(--rq2); }
+  .rq3 .rq-dot { background: var(--rq3); }
+  .rq4 .rq-dot { background: var(--rq4); }
+  .rq5 .rq-dot { background: var(--rq5); }
+  .rq6 .rq-dot { background: var(--rq6); }
+  .rq7 .rq-dot { background: var(--rq7); }
+  ul.tight { margin: 6px 0; padding-left: 18px; }
+  ul.tight li { margin: 2px 0; }
+  .path { font-size: 0.84rem; }
+  svg.diagram { width: 100%; max-width: 920px; height: auto; display: block; margin: 10px 0 4px; }
+</style>
+</head>
+<body>
+<div class="chrome">
+  <strong>HerdSim</strong>
+  <span>Scaling code map</span>
+  <a href="../architecture.md">architecture.md</a>
+  <a href="../../scaling/docs/final_report.md">final report</a>
+  <a href="../../scaling/docs/progress_tracker.md">progress tracker</a>
+  <a href="../../scaling/README.md">scaling README</a>
+</div>
+<div class="layout">
+<nav>
+  <h2>Contents</h2>
+  <a href="#overview">1. Overview</a>
+  <a href="#tree">2. Code tree</a>
+  <a href="#pipeline">3. CLI pipeline</a>
+  <a href="#tick">4. One simulation tick</a>
+  <a href="#phase-rq">5. Phase to RQ map</a>
+  <a href="#rq2" class="rq2"><span class="rq-dot"></span>RQ2 size</a>
+  <a href="#rq1" class="rq1 sub"><span class="rq-dot"></span>RQ1 structure</a>
+  <a href="#rq3" class="rq3 sub"><span class="rq-dot"></span>RQ3 mechanism</a>
+  <a href="#rq4" class="rq4 sub"><span class="rq-dot"></span>RQ4 transfer</a>
+  <a href="#rq5" class="rq5 sub"><span class="rq-dot"></span>RQ5 information</a>
+  <a href="#rq6" class="rq6 sub"><span class="rq-dot"></span>RQ6 fits</a>
+  <a href="#rq7" class="rq7 sub"><span class="rq-dot"></span>RQ7 early warning</a>
+  <a href="#packages">6. Analysis packages</a>
+  <a href="#shared-core">7. Shared sim core</a>
+  <a href="#how-to-trace">8. How to trace a run</a>
+</nav>
+<main>
+<header>
+  <h1>Scaling CLI code map</h1>
+  <p>
+    Guide to the codebase behind the HerdSim scaling campaigns: where the CLI lives,
+    which files and functions each research question uses, and how a protocol YAML
+    becomes trials, merges, and analysis packages.
+  </p>
+</header>
+
+<section id="overview">
+  <h2>1. Overview</h2>
+  <p>
+    Scaling experiments are <strong>not</strong> a separate simulator. They reuse the same
+    <code>SimulationRunner</code> stack as the interactive UI and benchmarks. The scaling
+    layer only orchestrates grids of cells (N, D, layout, seed, optional info factors),
+    writes ledgers, and runs analysis packages on the resulting CSVs.
+  </p>
+  <div class="callout">
+    Entry points: <code>make -C scaling &lt;target&gt;</code> wraps
+    <code>scaling/scripts/campaign.py</code>, which loads a protocol YAML under
+    <code>scaling/configs/protocols/</code> and dispatches to a runner script.
+  </div>
+  <div class="grid2">
+    <div>
+      <h4>What scaling owns</h4>
+      <ul class="tight">
+        <li>Protocol YAMLs and canonical grid</li>
+        <li>Multiprocess grid / factor runners</li>
+        <li>Claim / T1 window planners</li>
+        <li>Manifest resume ledger + trials.csv</li>
+        <li>Analysis exports under <code>analysis/scaling/</code></li>
+      </ul>
+    </div>
+    <div>
+      <h4>What it borrows from core</h4>
+      <ul class="tight">
+        <li><code>core/simulation_runner.py</code></li>
+        <li><code>core/methods.py</code> method bundles</li>
+        <li>Sheep / dog / observation plugins</li>
+        <li><code>drive_to_goal</code> scenario</li>
+        <li>Metrics registries</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="tree">
+  <h2>2. Related code tree</h2>
+  <p>Folders that matter for the scaling CLI (not the full monorepo).</p>
+  <div class="tree">HerdSim/
+|-- scaling/                         # campaign area
+|   |-- Makefile                     # make -C scaling ...
+|   |-- configs/
+|   |   |-- canonical_grid.yaml      # frozen N, D, theta, seeds, arena
+|   |   `-- protocols/               # one YAML per campaign stage
+|   |-- scripts/
+|   |   |-- campaign.py              # thin CLI -&gt; services.scaling.campaign
+|   |   |-- run_grid.py              # N x D x layout x seed grids
+|   |   |-- run_factor_sweep.py      # obs / range / comm ladders (RQ5)
+|   |   |-- plan_claim_cells.py      # claim windows from scout
+|   |   `-- plan_t1_cells.py         # T1 overcrowding cells
+|   |-- services/scaling/
+|   |   |-- campaign.py              # verb dispatcher (run / claim / t1)
+|   |   |-- layout.py                # protocol load, output paths, packages
+|   |   `-- runner.py                # ScalingCell, expand, _run_cell, resume
+|   |-- results/phase{1,2,4,5}/      # trials, manifests, merges
+|   `-- docs/                        # reports + tracker
+|-- analysis/scaling/                # Package A-G logic on trials CSVs
+|   |-- frontier.py                  # D_min, windows, bootstrap, merge
+|   |-- regimes.py                   # efficient / waste / overcrowding labels
+|   |-- export.py                    # Package A + dossier writer
+|   |-- predictors.py                # RQ1 state vs (N,D)
+|   |-- mechanism.py                 # RQ3 overcrowding contrasts
+|   |-- transfer.py                  # RQ4 transfer tables
+|   |-- substitution.py              # RQ5 ladders
+|   |-- fits.py                      # RQ6 scaling curves
+|   |-- early_warning.py             # RQ7
+|   `-- provenance.py
+|-- core/                            # shared engine
+|   |-- simulation_runner.py         # tick loop used by every trial
+|   |-- methods.py                   # strombom_multi / kubo / fat bundles
+|   |-- observation_models.py        # global / local / bearing_only
+|   |-- experiment_config.py         # resolve_experiment_config
+|   `-- experimental_factors.py
+|-- plugins/
+|   |-- dogs/collect_drive_multi.py  # baseline multi-dog controller
+|   |-- dogs/kubo_forces.py
+|   |-- dogs/fat.py
+|   |-- sheep/strombom.py
+|   |-- sheep/kubo.py
+|   `-- scenarios/drive_to_goal.py
+`-- methods/{strombom_multi,kubo,fat}/  # method defaults / metadata
+</div>
+</section>
+
+<section id="pipeline">
+  <h2>3. CLI pipeline graph</h2>
+  <p>How a make target becomes trial rows.</p>
+  <svg class="diagram" viewBox="0 0 900 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="CLI pipeline">
+    <defs>
+      <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+        <path d="M0,0 L6,3 L0,6 Z" fill="#57534e"/>
+      </marker>
+    </defs>
+    <rect x="10" y="70" width="120" height="56" rx="8" fill="#fff" stroke="#d6d3d1"/>
+    <text x="70" y="94" text-anchor="middle" font-size="12" font-family="IBM Plex Sans,sans-serif">Makefile</text>
+    <text x="70" y="112" text-anchor="middle" font-size="10" fill="#57534e" font-family="IBM Plex Mono,monospace">make -C scaling</text>
+
+    <line x1="130" y1="98" x2="170" y2="98" stroke="#57534e" marker-end="url(#arr)"/>
+
+    <rect x="170" y="70" width="140" height="56" rx="8" fill="#fff" stroke="#d6d3d1"/>
+    <text x="240" y="94" text-anchor="middle" font-size="12" font-family="IBM Plex Sans,sans-serif">campaign.py</text>
+    <text x="240" y="112" text-anchor="middle" font-size="10" fill="#57534e" font-family="IBM Plex Mono,monospace">verb + protocol</text>
+
+    <line x1="310" y1="98" x2="350" y2="98" stroke="#57534e" marker-end="url(#arr)"/>
+
+    <rect x="350" y="70" width="150" height="56" rx="8" fill="#ccfbf1" stroke="#0f766e"/>
+    <text x="425" y="94" text-anchor="middle" font-size="12" font-family="IBM Plex Sans,sans-serif">protocol YAML</text>
+    <text x="425" y="112" text-anchor="middle" font-size="10" fill="#0f766e" font-family="IBM Plex Mono,monospace">configs/protocols/</text>
+
+    <line x1="500" y1="98" x2="540" y2="98" stroke="#57534e" marker-end="url(#arr)"/>
+
+    <rect x="540" y="20" width="150" height="48" rx="8" fill="#fff" stroke="#d6d3d1"/>
+    <text x="615" y="40" text-anchor="middle" font-size="11" font-family="IBM Plex Sans,sans-serif">run_grid.py</text>
+    <text x="615" y="56" text-anchor="middle" font-size="10" fill="#57534e" font-family="IBM Plex Mono,monospace">grid scouts</text>
+
+    <rect x="540" y="78" width="150" height="48" rx="8" fill="#fff" stroke="#d6d3d1"/>
+    <text x="615" y="98" text-anchor="middle" font-size="11" font-family="IBM Plex Sans,sans-serif">run_factor_sweep.py</text>
+    <text x="615" y="114" text-anchor="middle" font-size="10" fill="#57534e" font-family="IBM Plex Mono,monospace">RQ5 ladders</text>
+
+    <rect x="540" y="136" width="150" height="48" rx="8" fill="#fff" stroke="#d6d3d1"/>
+    <text x="615" y="156" text-anchor="middle" font-size="11" font-family="IBM Plex Sans,sans-serif">plan_claim / plan_t1</text>
+    <text x="615" y="172" text-anchor="middle" font-size="10" fill="#57534e" font-family="IBM Plex Mono,monospace">windows then reseed</text>
+
+    <line x1="690" y1="44" x2="730" y2="90" stroke="#57534e" marker-end="url(#arr)"/>
+    <line x1="690" y1="102" x2="730" y2="102" stroke="#57534e" marker-end="url(#arr)"/>
+    <line x1="690" y1="160" x2="730" y2="114" stroke="#57534e" marker-end="url(#arr)"/>
+
+    <rect x="730" y="70" width="150" height="56" rx="8" fill="#fff" stroke="#d6d3d1"/>
+    <text x="805" y="94" text-anchor="middle" font-size="12" font-family="IBM Plex Sans,sans-serif">runner.py</text>
+    <text x="805" y="112" text-anchor="middle" font-size="10" fill="#57534e" font-family="IBM Plex Mono,monospace">_run_cell pool</text>
+  </svg>
+  <h3>Campaign verbs</h3>
+  <table>
+    <thead><tr><th>Verb</th><th>Script</th><th>When used</th></tr></thead>
+    <tbody>
+      <tr><td><code>run</code></td><td><code>run_grid.py</code> or <code>run_factor_sweep.py</code></td><td>Smoke / scout (and any non-claim stage)</td></tr>
+      <tr><td><code>claim-plan</code></td><td><code>plan_claim_cells.py --plan-only</code></td><td>Write <code>boundary_cells.csv</code> from scout</td></tr>
+      <tr><td><code>claim-reseed</code></td><td><code>plan_claim_cells.py</code> then grid reseed</td><td>100-seed claim windows + merge</td></tr>
+      <tr><td><code>t1-plan</code> / <code>t1</code></td><td><code>plan_t1_cells.py</code></td><td>Overcrowding cells at T1 (RQ2); skipped if none</td></tr>
+    </tbody>
+  </table>
+  <p class="path">Dispatcher: <code>scaling/services/scaling/campaign.py</code> functions <code>run_campaign</code>, <code>runner_kind</code>, <code>resolve_upstream_trials</code>.</p>
+</section>
+
+<section id="tick">
+  <h2>4. One simulation tick (every trial)</h2>
+  <p>
+    Every scaling cell ends in <code>runner._run_cell</code>, which builds a config via
+    <code>resolve_experiment_config</code> and steps <code>SimulationRunner</code> until success or timeout.
+  </p>
+  <div class="flow">
+    <div class="flow-row">
+      <div class="node"><strong>_run_cell</strong><span>services/scaling/runner.py</span></div>
+      <span class="arrow">-&gt;</span>
+      <div class="node"><strong>get_method</strong><span>core/methods.py</span></div>
+      <span class="arrow">-&gt;</span>
+      <div class="node"><strong>resolve_experiment_config</strong><span>core/experiment_config.py</span></div>
+      <span class="arrow">-&gt;</span>
+      <div class="node"><strong>SimulationRunner</strong><span>core/simulation_runner.py</span></div>
+    </div>
+  </div>
+  <pre>state(t)
+  -&gt; environment updates / failure factors
+  -&gt; sheep_dynamics.step
+  -&gt; observation_model.observe_all
+  -&gt; (optional) communication messages
+  -&gt; dog_controller.step(observations)
+  -&gt; robot constraints / walls
+  -&gt; metrics + history recorder</pre>
+  <p>
+    Resume identity is <code>_cell_key(ScalingCell)</code> stored in <code>manifest.jsonl</code>.
+    Completed <code>status=ok</code> keys are skipped on re-run.
+  </p>
+</section>
+
+<section id="phase-rq">
+  <h2>5. Phase folder to research question</h2>
+  <p>
+    Folder names under <code>scaling/results/</code> still use phase numbers. Report docs rename them to RQs.
+  </p>
+  <table>
+    <thead>
+      <tr><th>Results folder</th><th>RQ</th><th>Question</th><th>Status</th><th>Primary method</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>phase1/</code></td><td>RQ2</td><td>Size map: how D_min changes with N</td><td><span class="badge DONE">DONE</span></td><td><code>strombom_multi</code></td></tr>
+      <tr><td><code>phase2/</code></td><td>RQ1</td><td>Structure: does start layout move D_min?</td><td><span class="badge DONE">DONE</span></td><td><code>strombom_multi</code></td></tr>
+      <tr><td>(analyse only)</td><td>RQ3</td><td>Mechanism of overcrowding</td><td><span class="badge SKIPPED">SKIPPED</span></td><td>needs RQ2 overcrowding cells</td></tr>
+      <tr><td><code>phase4/</code></td><td>RQ4</td><td>Transfer across kubo / fat</td><td><span class="badge PARTIAL">PARTIAL</span></td><td><code>kubo</code>, <code>fat</code></td></tr>
+      <tr><td><code>phase5/</code></td><td>RQ5</td><td>Information ladders</td><td><span class="badge NOT_RUN">NOT RUN YET</span></td><td><code>strombom_multi</code> + factors</td></tr>
+      <tr><td>(analyse on RQ2)</td><td>RQ6</td><td>Scaling curve fits</td><td><span class="badge DONE">DONE</span></td><td>Package F on phase1 claim</td></tr>
+      <tr><td>(analyse on RQ2)</td><td>RQ7</td><td>Early warning</td><td><span class="badge WEAK">RUN / weak</span></td><td>Package G on phase1 timeseries</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="rq2" class="rq2">
+  <h2><span class="rq-dot"></span>RQ2: size map (phase1)</h2>
+  <p><strong>Question:</strong> On compact starts with the baseline controller, how does useful dog count change with flock size?</p>
+  <h3>Protocols</h3>
+  <ul class="tight">
+    <li><code>phase1_pilot.yaml</code> smoke</li>
+    <li><code>phase1_scout.yaml</code> full N x D x 30 seeds</li>
+    <li><code>phase1_claim.yaml</code> claim windows (upstream: scout)</li>
+    <li><code>phase1_t1.yaml</code> longer deadline on overcrowding (skipped: none found)</li>
+  </ul>
+  <h3>Make targets</h3>
+  <pre>make -C scaling scaling-pilot
+make -C scaling scaling-scout
+make -C scaling scaling-claim-plan
+make -C scaling scaling-claim-reseed
+# optional: scaling-t1-plan / scaling-t1</pre>
+  <h3>Code path</h3>
+  <table>
+    <thead><tr><th>Layer</th><th>File</th><th>Functions / symbols</th></tr></thead>
+    <tbody>
+      <tr><td>CLI</td><td><code>services/scaling/campaign.py</code></td><td><code>run_campaign</code> verb <code>run</code> / <code>claim-*</code></td></tr>
+      <tr><td>Grid</td><td><code>scripts/run_grid.py</code></td><td>expands N/D/layout/seed from protocol</td></tr>
+      <tr><td>Runner</td><td><code>services/scaling/runner.py</code></td><td><code>expand_scaling_grid</code>, <code>run_scaling_grid</code>, <code>_run_cell</code>, <code>_cell_key</code></td></tr>
+      <tr><td>Claim plan</td><td><code>scripts/plan_claim_cells.py</code> + <code>analysis/scaling/frontier.py</code></td><td><code>select_claim_windows</code>, <code>merge_scout_and_claim</code></td></tr>
+      <tr><td>Method</td><td><code>core/methods.py</code></td><td><code>strombom_multi</code> -&gt; sheep <code>strombom</code>, dog <code>collect_drive_multi</code></td></tr>
+      <tr><td>Controller</td><td><code>plugins/dogs/collect_drive_multi.py</code></td><td><code>CollectDriveMultiController.step</code>, <code>_sheep_for_dog</code></td></tr>
+      <tr><td>Heuristics</td><td><code>methods/strombom/heuristics.py</code></td><td><code>shepherd_step_toward</code>, <code>compute_threshold</code></td></tr>
+      <tr><td>Analysis</td><td><code>analysis/scaling/{frontier,regimes,export}.py</code></td><td>Package A: <code>extract_frontier</code>, <code>label_regimes</code>, <code>export_package_a</code></td></tr>
+    </tbody>
+  </table>
+  <p>Outputs: <code>scaling/results/phase1/{pilot,scout,claim}/</code>. Report mirror: <code>scaling/docs/report/rq2/</code>.</p>
+</section>
+
+<section id="rq1" class="rq1">
+  <h2><span class="rq-dot"></span>RQ1: structure map (phase2)</h2>
+  <p><strong>Question:</strong> At fixed N, does start layout change D_min / cost?</p>
+  <h3>Protocols</h3>
+  <ul class="tight">
+    <li><code>phase2_pilot_state.yaml</code></li>
+    <li><code>phase2_scout.yaml</code> four layouts x {50,100,200} x D</li>
+    <li><code>phase2_claim.yaml</code></li>
+  </ul>
+  <h3>Make targets</h3>
+  <pre>make -C scaling scaling-pilot-state
+make -C scaling scaling-phase2-scout
+make -C scaling scaling-phase2-claim-plan
+make -C scaling scaling-phase2-claim-reseed</pre>
+  <h3>Extra code vs RQ2</h3>
+  <table>
+    <thead><tr><th>File</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><code>core/x0_generators.py</code></td><td>Layouts: compact, wide, split, outlier_rich</td></tr>
+      <tr><td><code>analysis/scaling/predictors.py</code></td><td>Package B: <code>compare_state_vs_nd_predictors</code> (C1b)</td></tr>
+      <tr><td><code>analysis/scaling/export.py</code></td><td><code>export_package_dossier</code> for Package B tables</td></tr>
+    </tbody>
+  </table>
+  <p>Same baseline method/controller stack as RQ2. Results: <code>scaling/results/phase2/</code>. Report: <code>rq1/</code>.</p>
+</section>
+
+<section id="rq3" class="rq3">
+  <h2><span class="rq-dot"></span>RQ3: mechanism (analyse only)</h2>
+  <p><strong>Question:</strong> Why overcrowding appears (interference, split, coverage).</p>
+  <p><span class="badge SKIPPED">SKIPPED</span> because RQ2 found no overcrowding cells inside D &lt;= 35.</p>
+  <table>
+    <thead><tr><th>File</th><th>Functions</th></tr></thead>
+    <tbody>
+      <tr><td><code>analysis/scaling/mechanism.py</code></td><td><code>evaluate_overcrowding_mechanisms</code>, <code>evaluate_temporal_order</code></td></tr>
+      <tr><td><code>analysis/scaling/frontier.py</code></td><td>needs matched efficient vs overcrowding cells at same N</td></tr>
+    </tbody>
+  </table>
+  <p>No new sims. Would read RQ2 claim merge. Report note: <code>scaling/docs/report/rq3/</code>.</p>
+</section>
+
+<section id="rq4" class="rq4">
+  <h2><span class="rq-dot"></span>RQ4: transfer (phase4)</h2>
+  <p><strong>Question:</strong> Do size/structure patterns hold under other controllers?</p>
+  <h3>Protocols</h3>
+  <ul class="tight">
+    <li><code>phase4_kubo_size_{scout,claim}.yaml</code>, <code>phase4_kubo_structure_{scout,claim}.yaml</code></li>
+    <li><code>phase4_fat_size_{scout,claim}.yaml</code>, <code>phase4_fat_structure_{scout,claim}.yaml</code></li>
+  </ul>
+  <h3>Make targets</h3>
+  <pre>make -C scaling scaling-transfer-size-scout TRANSFER_METHOD=kubo
+make -C scaling scaling-transfer-size-claim-reseed TRANSFER_METHOD=kubo
+make -C scaling scaling-transfer-structure-scout TRANSFER_METHOD=kubo
+make -C scaling scaling-transfer-structure-claim-reseed TRANSFER_METHOD=kubo
+# repeat TRANSFER_METHOD=fat</pre>
+  <h3>Method wiring</h3>
+  <table>
+    <thead><tr><th>Method id</th><th>Sheep plugin</th><th>Dog plugin</th><th>Defaults</th></tr></thead>
+    <tbody>
+      <tr><td><code>kubo</code></td><td><code>plugins/sheep/kubo.py</code></td><td><code>plugins/dogs/kubo_forces.py</code></td><td><code>methods/kubo/</code></td></tr>
+      <tr><td><code>fat</code></td><td><code>plugins/sheep/strombom.py</code></td><td><code>plugins/dogs/fat.py</code></td><td><code>methods/fat/</code></td></tr>
+      <tr><td>baseline ref</td><td>strombom</td><td>collect_drive_multi</td><td>from RQ2 / RQ1 merges</td></tr>
+    </tbody>
+  </table>
+  <h3>Analysis</h3>
+  <ul class="tight">
+    <li><code>analysis/scaling/transfer.py</code> - <code>build_transfer_table</code> (Package D)</li>
+    <li>Per-method Package A/B/F exports via <code>export_package_a</code> / dossier</li>
+  </ul>
+  <p>Results: <code>scaling/results/phase4/</code>. Report: <code>rq4/</code>.</p>
+</section>
+
+<section id="rq5" class="rq5">
+  <h2><span class="rq-dot"></span>RQ5: information ladders (phase5)</h2>
+  <p><strong>Question:</strong> Can richer observation, range, or communication lower D_min?</p>
+  <p><span class="badge NOT_RUN">NOT RUN YET</span> Prior trees removed after obs/comm bugs. Protocols remain.</p>
+  <h3>Protocols</h3>
+  <ul class="tight">
+    <li>Obs: <code>phase5_factor_sweep.yaml</code>, <code>phase5_obs_claim.yaml</code></li>
+    <li>Range: <code>phase5_range_scout.yaml</code>, <code>phase5_range_claim.yaml</code> (pins <code>local_positions</code>)</li>
+    <li>Comm: <code>phase5_comm_scout.yaml</code>, <code>phase5_comm_claim.yaml</code> (pins <code>local_positions</code>)</li>
+  </ul>
+  <h3>Make / script</h3>
+  <pre>make -C scaling scaling-factor-sweep
+make -C scaling scaling-phase5-*-scout|claim-*
+# or: WORKERS=18 bash scaling/results/phase5/run_all_ladders.sh</pre>
+  <h3>Code path (factor path)</h3>
+  <table>
+    <thead><tr><th>File</th><th>Functions / notes</th></tr></thead>
+    <tbody>
+      <tr><td><code>scripts/run_factor_sweep.py</code></td><td>Builds product of obs/range/comm factors into <code>ScalingCell</code>s</td></tr>
+      <tr><td><code>services/scaling/runner.py</code></td><td>If range/comm set without obs_mode -&gt; default <code>local_positions</code></td></tr>
+      <tr><td><code>core/observation_models.py</code></td><td><code>GlobalObservation</code>, <code>LocalPositionsObservation</code>, <code>BearingOnlyObservation</code></td></tr>
+      <tr><td><code>plugins/dogs/collect_drive_multi.py</code></td><td><code>_sheep_for_dog</code>, <code>_union_sheep_positions</code> (comm)</td></tr>
+      <tr><td><code>analysis/scaling/substitution.py</code></td><td><code>substitution_curves</code>, range/comm helpers (Package E)</td></tr>
+    </tbody>
+  </table>
+  <div class="callout">
+    Important shared fixes for a fair RQ5 rerun live in observation proxies
+    (<code>_bearing_proxy_distance</code>), sheep-index union for communication, and
+    pairing range/comm with <code>local_positions</code>.
+  </div>
+</section>
+
+<section id="rq6" class="rq6">
+  <h2><span class="rq-dot"></span>RQ6: scaling fits (analyse)</h2>
+  <p><strong>Question:</strong> Which simple curve best predicts held-out N for D_min?</p>
+  <p>No new sims. Reads RQ2 / phase1 claim frontier.</p>
+  <table>
+    <thead><tr><th>File</th><th>Functions</th></tr></thead>
+    <tbody>
+      <tr><td><code>analysis/scaling/frontier.py</code></td><td><code>extract_frontier</code> from merged trials</td></tr>
+      <tr><td><code>analysis/scaling/fits.py</code></td><td><code>fit_scaling_models</code> (constant / linear / power / piecewise)</td></tr>
+      <tr><td><code>analysis/scaling/export.py</code></td><td>Package F dossier CSVs</td></tr>
+    </tbody>
+  </table>
+  <p>Inputs: <code>phase1/claim/merged_trials.csv</code>. Report: <code>rq6/</code>.</p>
+</section>
+
+<section id="rq7" class="rq7">
+  <h2><span class="rq-dot"></span>RQ7: early warning (analyse)</h2>
+  <p><strong>Question:</strong> Can recent flock/dog state warn of failure better than (N, D)?</p>
+  <p>No new sims. Needs claim timeseries from RQ2 size claim.</p>
+  <table>
+    <thead><tr><th>File</th><th>Functions</th></tr></thead>
+    <tbody>
+      <tr><td><code>analysis/scaling/early_warning.py</code></td><td><code>evaluate_early_warning</code>, <code>evaluate_early_warning_campaign</code></td></tr>
+      <tr><td><code>services/scaling/runner.py</code></td><td>optional parquet writes when <code>store_timeseries</code></td></tr>
+      <tr><td><code>analysis/scaling/export.py</code></td><td>Package G dossier</td></tr>
+    </tbody>
+  </table>
+  <p>Report: <code>rq7/</code>. Timing of successes vs check window makes this weakly testable on the current map.</p>
+</section>
+
+<section id="packages">
+  <h2>6. Analysis packages A-G</h2>
+  <table>
+    <thead><tr><th>Pkg</th><th>RQ</th><th>Module</th><th>Main entry</th><th>Typical output</th></tr></thead>
+    <tbody>
+      <tr><td>A</td><td>RQ2 / size maps</td><td><code>export.py</code> + frontier/regimes</td><td><code>export_package_a</code></td><td>reliability, frontier, regimes, figures</td></tr>
+      <tr><td>B</td><td>RQ1 structure</td><td><code>predictors.py</code></td><td><code>compare_state_vs_nd_predictors</code></td><td>layout frontiers, predictor NLL</td></tr>
+      <tr><td>C</td><td>RQ3</td><td><code>mechanism.py</code></td><td><code>evaluate_overcrowding_mechanisms</code></td><td>skipped without overcrowding</td></tr>
+      <tr><td>D</td><td>RQ4</td><td><code>transfer.py</code></td><td><code>build_transfer_table</code></td><td><code>package_d/size|structure</code></td></tr>
+      <tr><td>E</td><td>RQ5</td><td><code>substitution.py</code></td><td><code>substitution_curves*</code></td><td>ladder curves / summary</td></tr>
+      <tr><td>F</td><td>RQ6</td><td><code>fits.py</code></td><td><code>fit_scaling_models</code></td><td>scaling_fits, CV RMSE</td></tr>
+      <tr><td>G</td><td>RQ7</td><td><code>early_warning.py</code></td><td><code>evaluate_early_warning_campaign</code></td><td>summary / folds / lead time</td></tr>
+    </tbody>
+  </table>
+  <p class="callout">
+    Tracker mentions <code>make ... scaling-analyse PACKAGE=...</code>. Package logic lives in
+    <code>analysis/scaling/</code>; exports are written beside claim folders under
+    <code>packages/{a-g}/</code>. Confirm the current analyse CLI/target in the Makefile before
+    relying on that make alias (it may be documented from a prior workflow).
+  </p>
+</section>
+
+<section id="shared-core">
+  <h2>7. Shared simulation core (all RQs that run trials)</h2>
+  <div class="grid2">
+    <div>
+      <h4>Always on the path</h4>
+      <ul class="tight">
+        <li><code>core/simulation_runner.py</code> - <code>SimulationRunner.step</code></li>
+        <li><code>core/experiment_config.py</code> - <code>resolve_experiment_config</code></li>
+        <li><code>core/methods.py</code> - <code>get_method</code></li>
+        <li><code>core/plugin_registry.py</code> - registries</li>
+        <li><code>plugins/scenarios/drive_to_goal.py</code></li>
+        <li><code>plugins/metrics/*</code> via <code>metric_registry.get_all()</code></li>
+        <li><code>analysis/failure_taxonomy.py</code> - failure labels on trial rows</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Observation / info factors</h4>
+      <ul class="tight">
+        <li><code>core/observation.py</code> - <code>ShepherdObservation</code></li>
+        <li><code>core/observation_models.py</code> - global / local / bearing</li>
+        <li><code>core/experimental_factors.py</code> - factor validation</li>
+        <li>Comm merge in <code>collect_drive_multi._union_sheep_positions</code></li>
+      </ul>
+      <h4>Provenance</h4>
+      <ul class="tight">
+        <li><code>analysis/scaling/provenance.py</code> - stamps in packages</li>
+        <li>Protocol hash locked against <code>canonical_grid.yaml</code></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="how-to-trace">
+  <h2>8. How to trace one research question</h2>
+  <ol>
+    <li>Find the RQ in the phase table above and open its protocol YAML under <code>scaling/configs/protocols/</code>.</li>
+    <li>Note <code>runner</code> (grid vs factor), <code>output</code>, <code>upstream_protocol</code>, and grids.</li>
+    <li>Follow the matching make target in <code>scaling/Makefile</code> into <code>campaign.py</code>.</li>
+    <li>For sims: land in <code>runner._run_cell</code> -&gt; method bundle -&gt; sheep/dog plugins.</li>
+    <li>For analysis: land in <code>analysis/scaling/</code> package module and the claim folder <code>packages/</code>.</li>
+    <li>Cross-check the human narrative under <code>scaling/docs/report/rq*/</code> and the tracker.</li>
+  </ol>
+  <pre># Example: RQ2 scout
+make -C scaling scaling-scout WORKERS=16
+# protocol: scaling/configs/protocols/phase1_scout.yaml
+# code: campaign.run -&gt; run_grid.main -&gt; run_scaling_grid -&gt; _run_cell
+# out:   scaling/results/phase1/scout/trials.csv</pre>
+  <p>
+    Related docs: <a href="../architecture.md">docs/architecture.md</a> (engine design),
+    <a href="../../scaling/docs/main_scaling_plan.md">main_scaling_plan.md</a> (claims),
+    <a href="../../scaling/docs/progress_tracker.md">progress_tracker.md</a> (run status).
+  </p>
+</section>
+
+</main>
+</div>
+</body>
+</html>
