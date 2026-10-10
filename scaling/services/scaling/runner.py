@@ -223,6 +223,11 @@ def _run_cell(cell: ScalingCell) -> dict[str, Any]:
     }
     if cell.obs_mode is not None:
         algorithm_params["obs_mode"] = cell.obs_mode
+    elif cell.sensing_range is not None or cell.communication is not None:
+        # Range and communication only change what dogs see under local sensing.
+        # Default global observation would ignore sensing_range and make sharing
+        # a no-op once sheep lists are de-duplicated.
+        algorithm_params["obs_mode"] = "local_positions"
     if cell.sensing_range is not None:
         algorithm_params["sensing_range"] = cell.sensing_range
     if cell.communication is not None:

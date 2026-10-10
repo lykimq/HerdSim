@@ -66,6 +66,45 @@ def test_bearing_only_hides_metric_distances():
     assert obs.n_sheep_seen == 2
     assert obs.distances_to_sheep is None
     assert obs.bearings_to_sheep is not None
+    # Proxies must sit beyond the Collect/Drive stop radius (3*r_a), not at unit depth.
+    dists = np.linalg.norm(obs.sheep_positions - obs.self_position, axis=1)
+    assert np.allclose(dists, 20.0)
+    assert float(np.min(dists)) >= 3.0 * 2.0
+
+
+def test_bearing_only_dogs_can_move():
+    from core.simulation_runner import SimulationRunner
+    from plugins.metrics.registry import metric_registry
+
+    scenario = DriveToGoalScenario()
+    config = resolve_experiment_config(
+        scenario=scenario,
+        method="strombom_multi",
+        preset="paper",
+        num_sheep=25,
+        num_shepherds=1,
+        algorithm_params={
+            "obs_mode": "bearing_only",
+            "sensing_range": 65.0,
+            "max_ticks": 50,
+            "noise_strength": 0.0,
+        },
+    )
+    runner = SimulationRunner(
+        scenario=scenario,
+        metrics=metric_registry.get_all(),
+        config=config,
+        seed=7,
+        method="strombom_multi",
+    )
+    runner.initialize()
+    moved = False
+    for _ in range(20):
+        state, _metrics, _status = runner.step()
+        if float(np.linalg.norm(state.shepherd_velocities[0])) > 1e-6:
+            moved = True
+            break
+    assert moved, "bearing_only must not freeze dogs via the 3*r_a stop rule"
 
 
 def test_noisy_bearing_changes_angles():

@@ -99,12 +99,12 @@ Scout covers the whole map; claim covers a small window. Claims use claim-grade 
 | RQ2 | Size map (baseline, compact) | 150 | 3,000 | 2,200 | 5,350 | DONE |
 | RQ3 | Mechanism contrast | 0 | 0 | 0 | 0 | SKIPPED |
 | RQ4 | Kubo then FAT size + structure | 0 | 13,200 | 10,500 | 23,700 | DONE |
-| RQ5 | Observation, range, communication ladders | 0 | 3,600 | 4,000 | 7,600 | DONE |
+| RQ5 | Observation, range, communication ladders | 0 | 0 | 0 | 0 | NOT RUN YET |
 | RQ6 | Curve fits on claim frontiers | 0 | 0 | 0 | 0 | DONE (analyse) |
 | RQ7 | Early warning on claim trajectories | 0 | 0 | 0 | 0 | DONE (analyse) |
-| **All** | | **750** | **23,400** | **19,100** | **43,250** | |
+| **All** | | **750** | **19,800** | **15,100** | **35,650** | |
 
-RQ2's longer-deadline T1 was also planned and skipped (0 overcrowding cells). Claim merges hold 37,070 rows (fewer than total sims because a reseeded cell drops its scout rows from the merge). Integrity checks are in [`TRUST_AUDIT.md`](TRUST_AUDIT.md).
+RQ2's longer-deadline T1 was also planned and skipped (0 overcrowding cells). RQ5 is not run yet (prior Phase 5 trees removed after obs/comm bugs). Claim merges hold 30,670 rows (fewer than total sims because a reseeded cell drops its scout rows from the merge). Integrity checks are in [`TRUST_AUDIT.md`](TRUST_AUDIT.md).
 
 Commands used (from the HerdSim repo root; re-running needs that codebase, not only this folder):
 
@@ -125,8 +125,8 @@ make -C scaling scaling-transfer-structure-scout TRANSFER_METHOD=kubo WORKERS=16
 make -C scaling scaling-transfer-structure-claim-reseed TRANSFER_METHOD=kubo WORKERS=16
 # repeat with TRANSFER_METHOD=fat
 
-# RQ5 ladders
-bash scaling/results/phase5/run_all_ladders.sh   # WORKERS=18
+# RQ5 ladders (not run yet; planned)
+# WORKERS=18 bash scaling/results/phase5/run_all_ladders.sh
 ```
 
 Exact grids, seeds, and run notes for each campaign sit under the matching `rq*/` folder.
@@ -266,13 +266,9 @@ That is enough to reject "the same story everywhere," but not enough to say whic
 
 ### RQ5: can better information replace dogs?
 
-**Status:** Narrow answer.
+**Status:** Not run yet.
 
-On compact N = 100 and 200, local sensing (radius 65) works as well as a full global view: both have `D_min = 1`. Whether *better* information can *reduce* dog count cannot be judged here: working setups are already at one dog, and bearing-only, range, and communication each had a setup problem that blocked a fair ladder test (bearing-only froze the dogs; range runs used global observation so range did not change what dogs saw; communication under global view stacked shared lists).
-
-![RQ5 information ladders.](figures/f11_phase5_ladders.png)
-
-*Local matches global. Other ladder steps did not cleanly test the intended factor.*
+No claim-grade observation, range, or communication ladder results are published. Prior Phase 5 trees were removed after shared sim bugs (bearing-only freeze, range under global observation, communication list stacking). Protocols remain for a clean rerun.
 
 More detail: [`rq5/`](rq5/).
 
@@ -319,8 +315,8 @@ Verdicts use claim-grade evidence only.
 | C2b | RQ2 | SKIPPED | No overcrowding cell to extend to T = 20,000 |
 | C3 | RQ3 | INCONCLUSIVE | Mechanism contrast undefined without overcrowding |
 | C4 | RQ4 | SUPPORTED (partial) | Compact size shared for Strombom/Kubo (N >= 25); FAT and several structure cases break transfer |
-| C5a | RQ5 | REJECTED | No ladder step lowered a defined `D_min` (weakly tested) |
-| C5b | RQ5 | INCONCLUSIVE | No first-step dog saving to compare |
+| C5a | RQ5 | NOT RUN | Information ladders not rerun yet |
+| C5b | RQ5 | NOT RUN | Information ladders not rerun yet |
 | C6a | RQ6 | SUPPORTED | Power law worse than piecewise on leave-one-N RMSE |
 | C6b | RQ6 | SUPPORTED | Flat `D_min = 1` on compact N in {25..400}, so log-log slope 0 |
 | C7a | RQ7 | INCONCLUSIVE | Held-out AUROC could not be computed |
@@ -337,7 +333,7 @@ These checks only support statements inside the tested protocol. They do not sup
 - **No overcrowding on the baseline size map.** That is why RQ3 did not run and T1 was skipped.
 - **Transfer is only partial.** Compact size floors for Strombom and Kubo do not extend to FAT, Kubo-wide, or large Kubo outlier-rich.
 - **Easy compact map.** Many baseline cells succeed at D = 1 with success near 1.00, so rising dog-count laws, information savings, and early-warning overlap are hard to see.
-- **RQ5 setup problems.** Bearing-only, range-under-global, and communication list stacking limited what those ladders could test.
+- **RQ5 not run yet.** Prior Phase 5 trees were removed after obs/comm bugs; no claim-grade RQ5 evidence is published.
 - **RQ7 timing.** Warning checks start after almost every success has finished.
 - **Simulated controllers.** No farm or biology validity claim.
 - **Discrete dog list.** We cannot resolve effects finer than one step on that list.
@@ -374,7 +370,7 @@ Another path without raising the dog cap: port the draft-style collect-hold-gate
 
 ### Fairer follow-ups for RQ5 and RQ7
 
-- RQ5: pair sensing range with local observation, merge shared lists by sheep identity, use a bearing-aware controller, and preferably a layout or method where more than one dog is needed.
+- RQ5: rerun the three ladders after the shared obs/comm fixes (`local_positions` for range and communication; bearing proxies beyond the stop radius; sheep-index union for sharing). Prefer a layout or method where more than one dog is needed.
 - RQ7: need failures and successes overlapping in time (harder layout or method, or earlier check times).
 
 ---
@@ -390,7 +386,7 @@ After this short report, you can dig into:
 | [`rq2/`](rq2/) | Size campaign (setup, trials, Package A); T1 note |
 | [`rq3/`](rq3/) | SKIPPED note only |
 | [`rq4/`](rq4/) | Kubo/FAT size and structure maps; Package D |
-| [`rq5/`](rq5/) | Information ladders and Package E |
+| [`rq5/`](rq5/) | NOT RUN YET note only (no trials) |
 | [`rq6/`](rq6/) | Scaling-fit tables (Package F) |
 | [`rq7/`](rq7/) | Early-warning summary tables (Package G) |
 | [`TRUST_AUDIT.md`](TRUST_AUDIT.md) | Count and protocol-hash integrity checks |

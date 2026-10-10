@@ -64,7 +64,9 @@ class CollectDriveController(BaseDogController):
             cfg = dict(config)
             if "dog_speed" in cfg and "shepherd_speed" not in cfg:
                 cfg["shepherd_speed"] = cfg["dog_speed"]
-            velocities[i] = compute_shepherd_velocity(local, cfg, i)
+            velocities[i] = compute_shepherd_velocity(
+                local, cfg, i, proximity_sheep=state.sheep_positions
+            )
             modes.append("collect" if should_collect(local, cfg) else "drive")
             lines.extend(strombom_assignment_lines(local, cfg)[:1])
 

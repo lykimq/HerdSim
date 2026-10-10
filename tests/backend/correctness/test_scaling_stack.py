@@ -556,8 +556,15 @@ def test_protocol_extends_and_campaign_specs():
 
     range_scout = load_protocol_spec(PROTOCOLS_DIR / "phase5_range_scout.yaml")
     assert range_scout["sensing_ranges"] == [32.5, 65.0, 97.5, 130.0]
-    assert "obs_modes" not in range_scout
+    assert range_scout["obs_modes"] == ["local_positions"]
     assert runner_kind(range_scout) == "factor"
+    comm_scout = load_protocol_spec(PROTOCOLS_DIR / "phase5_comm_scout.yaml")
+    assert comm_scout["obs_modes"] == ["local_positions"]
+    assert comm_scout["communications"] == [
+        "none",
+        "neighbour_broadcast",
+        "global_shared",
+    ]
     assert runner_kind(load_protocol_spec(PROTOCOLS_DIR / "phase1_scout.yaml")) == "grid"
     assert find_protocol_path("phase1_scout").name == "phase1_scout.yaml"
 
@@ -779,3 +786,80 @@ def test_collect_drive_multi_uses_each_dogs_observation():
     shared_state = ctrl.step(state, none_obs, cfg)
     assert np.linalg.norm(shared_state.shepherd_velocities[1]) > 0
     assert shared_state.metadata["herding_mode"] == "drive"
+
+
+def test_collect_drive_multi_global_shared_unions_by_index():
+    from core.observation import ShepherdObservation
+    from plugins.dogs.collect_drive_multi import _sheep_for_dog, _union_sheep_positions
+
+    dogs = np.array([[0.0, 0.0], [10.0, 0.0]], dtype=float)
+    sheep_a = np.array([[1.0, 0.0], [2.0, 0.0]], dtype=float)
+    sheep_b = np.array([[2.0, 0.0], [3.0, 0.0]], dtype=float)
+    state = make_state(
+        np.array([[1.0, 0.0], [2.0, 0.0], [3.0, 0.0]], dtype=float),
+        dogs,
+        world=make_world(),
+        seed=0,
+    )
+
+    def _obs(index: int, positions: np.ndarray, indices: np.ndarray) -> ShepherdObservation:
+        positions = np.asarray(positions, dtype=float).reshape(-1, 2)
+        other = 1 - index
+        return ShepherdObservation(
+            shepherd_index=index,
+            self_position=dogs[index],
+            self_velocity=np.zeros(2),
+            goal_center=np.array([15.0, 15.0]),
+            sheep_positions=positions,
+            sheep_velocities=np.zeros_like(positions),
+            sheep_indices=np.asarray(indices, dtype=int),
+            other_shepherd_positions=dogs[other : other + 1],
+            other_shepherd_indices=np.array([other]),
+        )
+
+    observations = [
+        _obs(0, sheep_a, np.array([0, 1])),
+        _obs(1, sheep_b, np.array([1, 2])),
+    ]
+    unioned = _union_sheep_positions(observations)
+    assert unioned.shape == (3, 2)
+
+    shared = _sheep_for_dog(
+        0, observations, state, {"communication": "global_shared", "sensing_range": 65.0}
+    )
+    assert shared.shape == (3, 2)
+
+    # Overlapping full views must not inflate N to D*N.
+    both_full = [
+        _obs(0, sheep_a, np.array([0, 1])),
+        _obs(1, sheep_a, np.array([0, 1])),
+    ]
+    assert _union_sheep_positions(both_full).shape == (2, 2)
+
+
+def test_run_cell_defaults_local_positions_for_range_and_comm():
+    from services.scaling.runner import ScalingCell, _run_cell
+
+    range_out = _run_cell(
+        ScalingCell(
+            n_sheep=10,
+            n_shepherds=1,
+            seed=2026,
+            sensing_range=32.5,
+            max_ticks=5,
+        )
+    )
+    assert range_out["row"]["obs_mode"] == "local_positions"
+    assert float(range_out["row"]["sensing_range"]) == 32.5
+
+    comm_out = _run_cell(
+        ScalingCell(
+            n_sheep=10,
+            n_shepherds=2,
+            seed=2027,
+            communication="neighbour_broadcast",
+            max_ticks=5,
+        )
+    )
+    assert comm_out["row"]["obs_mode"] == "local_positions"
+    assert comm_out["row"]["communication"] == "neighbour_broadcast"

@@ -98,7 +98,7 @@ CLAIM grade. Aligned with `scaling/docs/progress_tracker.md`:
 
 ## Next
 
-- Tracker steps 11-13 DONE; Phase 5 still TODO
+- Tracker steps 11-13 DONE; Phase 5 / RQ5 NOT RUN YET (prior broken ladders removed)
 - Final report: [../../docs/final_report.md](../../docs/final_report.md)
 
 ## Files and folders

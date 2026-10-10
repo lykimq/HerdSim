@@ -1,8 +1,0 @@
-{
-  "substitution_curves_obs": "/home/gwen/HerdSim/scaling/results/phase5/range_claim/packages/e/packages/e/substitution_curves_obs.csv",
-  "substitution_summary_obs": "/home/gwen/HerdSim/scaling/results/phase5/range_claim/packages/e/packages/e/substitution_summary_obs.csv",
-  "substitution_curves_range": "/home/gwen/HerdSim/scaling/results/phase5/range_claim/packages/e/packages/e/substitution_curves_range.csv",
-  "substitution_summary_range": "/home/gwen/HerdSim/scaling/results/phase5/range_claim/packages/e/packages/e/substitution_summary_range.csv",
-  "provenance": "/home/gwen/HerdSim/scaling/results/phase5/range_claim/packages/e/packages/e/provenance.json",
-  "report": "/home/gwen/HerdSim/scaling/results/phase5/range_claim/packages/e/packages/e/README.md"
-}

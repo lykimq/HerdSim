@@ -401,7 +401,7 @@ On Kubo wide, best R is about 0.47 to 0.54. FAT clears no structure cell at thes
 
 ### RQ5 and RQ7: follow-ons
 
-**RQ5 (information vs shepherds):** Narrow answer. On compact N = 100 and 200, local sensing (radius 65) works as well as a full global view: both have `D_min = 1`. Whether *better* information can *reduce* dog count cannot be judged here: the baseline is already at one dog, and bearing-only, range, and communication each had a setup problem that blocked a fair ladder test.
+**RQ5 (information vs shepherds):** Not run yet. Prior ladder runs were removed after shared observation and communication bugs; no claim-grade RQ5 evidence is published here.
 
 **RQ7 (early warning):** Not answerable on this data. By the first check at tick 1,000, almost every successful RQ2 size-map run has already finished, so there is no late window left to warn before success or failure settles.
 
@@ -413,7 +413,7 @@ On Kubo wide, best R is about 0.47 to 0.54. FAT clears no structure cell at thes
 | RQ2 | Answered inside D <= 35 | Lower: `D_min` is 2 then 1; upper: waste, no overcrowding; `D_max = 35` is a list ceiling. |
 | RQ3 | Not answerable yet | No overcrowding cells, so the efficient-vs-overcrowding contrast never appears. |
 | RQ4 | Partial | Compact: Strombom and Kubo share a low floor; FAT and wide/structure cases break transfer. |
-| RQ5 | Narrow | Local equals global at `D_min = 1`; saving dogs with more information was not fairly tested. |
+| RQ5 | Not run yet | Information ladders await a clean rerun after obs/comm fixes. |
 | RQ6 | Weak | Best fit is a two-level step because `D_min` is almost flat. |
 | RQ7 | Not answerable on this data | First warning check is after almost every success has already finished. |
 
@@ -574,7 +574,7 @@ Draft wording for comparison: [Prior draft paper](#2-prior-draft-paper).
 - The draft marks overcrowding as soon as success *goes down a bit*, even if it is still above 90%. We wait until success is actually below 90%.
 - One bad dog count is not enough. With fewer seeds (scout uses 30), or with big jumps in the dog list, one cell can look bad by chance and then look fine again at the next D. We need two bad counts in a row before we say overcrowding has started.
 - Later steps depend on this label. We only run the longer deadline (T1), reseed claim cells, and open RQ3 when overcrowding is confirmed. One bad cell would not trigger those.
-- Example: in RQ5, N = 200 with D = 10 under communication failed once at scout depth. That is one dip, so we do *not* call it overcrowding ([Information ladders](#13-information-ladders)).
+- Example: a single noisy fail at one D that recovers at the next D is a dip, not overcrowding.
 
 **HerdSim `D_max`:** the largest tested D that is still reliable before `D_overcrowd`. If no overcrowding appears, `D_max` is the top of the tested dog list (here 35): a ceiling, not a measured collapse.
 
@@ -649,7 +649,7 @@ Two tables below: what is shared by every simulation campaign, then what each RQ
 | Claim windows | around scout `D_min` (that D and neighbors); if overcrowding, the two failing D plus last reliable D; if hard fail, the two largest tested D |
 | Merge rule | one grade per cell: claim rows replace scout rows on reseeded cells; other cells keep scout; never mix scout and claim seeds in the same cell |
 | Bootstrap | 1,000 resamples of locked seeds for the `D_min` interval; raise soft edges to 200 real seeds when the interval is wider than one D step |
-| Trial totals | 43,250 simulations run; 37,070 rows in claim merges (reseeded cells drop their scout rows) |
+| Trial totals | 35,650 simulations run; 30,670 rows in claim merges (reseeded cells drop their scout rows; RQ5 not included) |
 
 #### Per-RQ design and trials
 
@@ -661,12 +661,12 @@ Trials = cells x seeds (and x layouts or ladder factors when used). Claim column
 | RQ2 | `strombom_multi` | compact x smoke N x smoke D x 5 seeds | compact x full N x full D x 30 | 22 window cells x 100; T1 skipped | 150 | 3,000 | 2,200 | 5,350 | DONE |
 | RQ3 | (analyse) | (none) | (none) | no new sims; needs overcrowding contrast | 0 | 0 | 0 | 0 | SKIPPED |
 | RQ4 | `kubo`, then `fat` | (none) | per method: size = compact x full N x full D x 30; structure = 4 layouts x `{50,100,200}` x full D x 30 | size windows 21 / 20 cells x 100; structure 24 cells x 100 (`kubo` structure also 9 cells x 200) | 0 | 13,200 | 10,500 | 23,700 | DONE |
-| RQ5 | `strombom_multi` | (none) | compact x `{100,200}` x `{1,2,3,4,6,10}` x ladder factors x 30 | ladder windows x 100 (12 / 16 / 12 cells) | 0 | 3,600 | 4,000 | 7,600 | DONE |
+| RQ5 | `strombom_multi` | (none) | planned: compact x `{100,200}` x `{1,2,3,4,6,10}` x ladder factors x 30 | planned claim windows | 0 | 0 | 0 | 0 | NOT RUN YET |
 | RQ6 | (analyse) | (none) | (none) | no new sims; fits on claim frontiers | 0 | 0 | 0 | 0 | DONE |
 | RQ7 | (analyse) | (none) | (none) | no new sims; earlier claim timeseries | 0 | 0 | 0 | 0 | DONE |
-| **All** | | | | | **750** | **23,400** | **19,100** | **43,250** | |
+| **All** | | | | | **750** | **19,800** | **15,100** | **35,650** | |
 
-Smoke N / D are the shared smoke grid above. Scout builds the cheap map; claim reseeds only window cells; merge follows the shared merge rule. RQ3 was skipped (no overcrowding). RQ6 and RQ7 reuse earlier merges.
+Smoke N / D are the shared smoke grid above. Scout builds the cheap map; claim reseeds only window cells; merge follows the shared merge rule. RQ3 was skipped (no overcrowding). RQ5 is not run yet. RQ6 and RQ7 reuse earlier merges.
 
 ### Why we run it this way
 
@@ -675,8 +675,8 @@ We need accurate success rates near the important edges (where `D_min` sits, and
 So each simulation campaign uses the same staged idea:
 
 1. **SMOKE (5 seeds):** pipeline check on the fixed smoke grid N = `{5, 10, 25, 50, 100}`, D = `{1, 2, 3, 4, 6, 10}` (RQ2: compact only = 150 trials; RQ1: all 4 layouts = 600 trials).
-2. **SCOUT (30 seeds):** map the planned scientific grid cheaply so we can see where reliability lives (23,400 trials).
-3. **CLAIM (100 seeds, or 200 on soft edges):** reseed only the window cells that matter (19,100 trials).
+2. **SCOUT (30 seeds):** map the planned scientific grid cheaply so we can see where reliability lives (19,800 trials in published runs; RQ5 not included).
+3. **CLAIM (100 seeds, or 200 on soft edges):** reseed only the window cells that matter (15,100 trials in published runs; RQ5 not included).
 
 That is why scout trials outnumber claim trials even though claim is deeper per cell: scout covers the whole map; claim covers a small window. The same staging is used for size, structure, transfer, and the information ladders. Grades and steps are defined next.
 
@@ -776,7 +776,7 @@ RQ-specific notes:
 - RQ1 (structure): structure scout and claim only; no new size grid.
 - RQ3: skipped for the baseline because RQ2 found no overcrowding cells to contrast.
 - RQ4: size then structure, once per transfer method (`kubo`, then `fat`).
-- RQ5: observation scout/claim first, then range, then communication; low-D band as in [Information ladders](#13-information-ladders).
+- RQ5: planned (observation, then range, then communication); not run yet. See [Information ladders](#13-information-ladders).
 - RQ6 and RQ7: no new simulation campaigns; they consume earlier merges (and timeseries for RQ7).
 
 ### Trial counts by run
@@ -801,17 +801,12 @@ Counts are completed simulation trials from each protocol folder (`status.json`,
 | RQ4 | FAT size claim | CLAIM | compact | windows | windows | (none) | 100 | 20 | 20 x 100 | 2,000 | DONE |
 | RQ4 | FAT structure scout | SCOUT | all 4 | `{50,100,200}` | full D (10) | (none) | 30 | 120 | 4 x 3 x 10 x 30 | 3,600 | DONE |
 | RQ4 | FAT structure claim | CLAIM | all 4 | windows | windows | (none) | 100 | 24 | 24 x 100 | 2,400 | DONE |
-| RQ5 | Observation scout | SCOUT | compact | `{100,200}` | `{1,2,3,4,6,10}` | 3 obs modes | 30 | 36 | 2 x 6 x 3 x 30 | 1,080 | DONE |
-| RQ5 | Observation claim | CLAIM | compact | windows | windows | obs modes in window | 100 | 12 | 12 x 100 | 1,200 | DONE |
-| RQ5 | Range scout | SCOUT | compact | `{100,200}` | `{1,2,3,4,6,10}` | 4 sensing ranges | 30 | 48 | 2 x 6 x 4 x 30 | 1,440 | DONE |
-| RQ5 | Range claim | CLAIM | compact | windows | windows | ranges in window | 100 | 16 | 16 x 100 | 1,600 | DONE |
-| RQ5 | Communication scout | SCOUT | compact | `{100,200}` | `{1,2,3,4,6,10}` | 3 comm modes | 30 | 36 | 2 x 6 x 3 x 30 | 1,080 | DONE |
-| RQ5 | Communication claim | CLAIM | compact | windows | windows | comm modes in window | 100 | 12 | 12 x 100 | 1,200 | DONE |
+| RQ5 | Observation / range / communication ladders | (planned) | compact | `{100,200}` | `{1,2,3,4,6,10}` | obs / range / comm factors | 30 then 100 | (n/a) | planned only | 0 | NOT RUN YET |
 | RQ6 | Scaling fits | (analyse) | (none) | (none) | (none) | Package F | (n/a) | 0 | no new sims | 0 | DONE |
 | RQ7 | Early warning | (analyse) | (none) | (none) | (none) | Package G | (n/a) | 0 | no new sims | 0 | DONE |
-| | **Total simulations** | | | | | | | | | **43,250** | |
+| | **Total simulations** | | | | | | | | | **35,650** | |
 
-Obs modes: `bearing_only`, `local_positions`, `global`. Sensing ranges: `{32.5, 65, 97.5, 130}`. Communication modes: `none`, `neighbour_broadcast`, `global_shared`. The claim merges used for analysis hold 37,070 rows (fewer than the total because a reseeded cell drops its scout rows from the merge). Integrity notes: [`TRUST_AUDIT.md`](../results/TRUST_AUDIT.md).
+RQ5 protocols remain under `scaling/configs/protocols/phase5_*.yaml` but no claim-grade trials are published. The claim merges used for analysis hold 30,670 rows (fewer than the total because a reseeded cell drops its scout rows from the merge). Integrity notes: [`TRUST_AUDIT.md`](report/TRUST_AUDIT.md).
 
 ---
 
@@ -1167,7 +1162,7 @@ Each dog makes this choice independently. FAT has no dog-dog repulsion, assignme
 
 FAT is an RQ4 transfer method on the [shared protocol](#5-shared-protocol) size and structure maps (global observation, staged scout/claim). No coordination is added by the FAT controller.
 
-The global observation setting is important. Although the target-selection idea is motivated by local sensing, completed RQ2, RQ1, and RQ4 runs gave each FAT dog the full flock view. Those results do not test the local-camera information limit. RQ5 information ladders were run on the baseline only, not on FAT ([Information ladders](#13-information-ladders)).
+The global observation setting is important. Although the target-selection idea is motivated by local sensing, completed RQ2, RQ1, and RQ4 runs gave each FAT dog the full flock view. Those results do not test the local-camera information limit. RQ5 information ladders are not run yet ([Information ladders](#13-information-ladders)).
 
 **Results**
 
@@ -1261,7 +1256,7 @@ Meaning: FAT mean I_dir is much higher than baseline or Kubo on the size maps (a
 | Structure is cost, not dog count | Messy starts make the run slower and longer, but still succeed with one dog on the baseline. | Wide starts take about 11x to 20x more time and 19x to 36x more path than compact at 1 dog. For wide, the cheapest reliable choice is 2 dogs (`B* = 2`). |
 | Partial transfer | Kubo and FAT do not copy the baseline story everywhere. | Kubo looks like baseline on tight starts, but fails on wide starts (best R about 0.47 to 0.54). FAT hits 90% only for N <= 10. |
 | Draft not reproduced | The draft's "large flocks need many dogs" pattern does not show up on this compact baseline map. | Draft: about 20 to 35 dogs for large N. Here: one dog finishes N = 400 in roughly 168 to 183 ticks. |
-| Information (RQ5) | Local sensing (radius 65) works as well as a full view on compact N = 100 and 200. Other ladder steps did not test what they were meant to. | Local and global both have `D_min = 1`. Details in [section 13](#13-information-ladders). |
+| Information (RQ5) | Not run yet. | No claim-grade ladder results after prior Phase 5 trees were removed. Details in [section 13](#13-information-ladders). |
 | Early warning (RQ7) | Not testable on this RQ2 size-map data. | At tick 1,000 (first check), almost every successful run has already finished. Details in [section 15](#15-prediction-and-early-warning). |
 
 ### Contrast with the 2025 draft
@@ -1306,7 +1301,7 @@ RQ2 also asks: if you *already* have enough dogs, does adding more still help, d
 
 So `D_max = 35` means "still OK at the largest D we tried," **not** "collapse begins at 35." Claim codes C2a / C2b and RQ3 status: [Answers from the runs](#4-answers-from-the-runs) and [Claims](#11-claims).
 
-The only place in the program where success fell as dogs were added is in the RQ5 communication ladder (scout-grade N = 200, D = 10 under sharing). That is not counted as overcrowding; see [Information ladders](#13-information-ladders).
+No published claim-grade map in this report shows overcrowding inside D <= 35. RQ5 ladders are not run yet, so they do not contribute an upper-band example here.
 
 ### Future work: measuring collapse beyond D = 35
 
@@ -1393,7 +1388,7 @@ Verdicts use claim-grade evidence only. Labels:
 - **INCONCLUSIVE**: we cannot decide (often the needed contrast is missing)
 - **SKIPPED**: the trigger to run the test never appeared
 
-Recorded verdicts match the [progress tracker](progress_tracker.md). Weight notes for C5 and C7 are in sections 13 and 15.
+Recorded verdicts match the [progress tracker](progress_tracker.md). C5 is not run yet (section 13). Weight notes for C7 are in section 15.
 
 ![Claims scorecard.](figures/schematics/claims_scorecard.svg)
 
@@ -1407,8 +1402,8 @@ Recorded verdicts match the [progress tracker](progress_tracker.md). Weight note
 | C2b | RQ2 | SKIPPED | No overcrowding cell to extend to T=20,000. |
 | C3 | RQ3 | INCONCLUSIVE | Baseline mechanism contrast undefined without overcrowding cells. |
 | C4 | RQ4 | SUPPORTED (partial) | Strombom and Kubo share compact `D_min` for N >= 25; FAT absent for N >= 25; Kubo wide absent; Kubo `outlier_rich`, N=200 shifts to point `D_min=20` with bootstrap `[2, 20]`. |
-| C5a | RQ5 | REJECTED | Package E: no ladder step lowers a defined `D_min`; local/global both at 1; range and communication flat at 1; bearing-only hard-fails. Better read as weakly tested ([section 13](#13-information-ladders)). |
-| C5b | RQ5 | INCONCLUSIVE | No first-step dog saving to compare (`median_first_step_delta = 0` on every ladder). |
+| C5a | RQ5 | NOT RUN | Information ladders not rerun yet after obs/comm fixes; prior Phase 5 trees removed ([section 13](#13-information-ladders)). |
+| C5b | RQ5 | NOT RUN | Same as C5a: no claim-grade ladder package is published. |
 | C6a | RQ6 | SUPPORTED | Leave-one-N-out RMSE: power 0.247 > piecewise 0.132; only two observed `D_min` levels. |
 | C6b | RQ6 | SUPPORTED | Compact N in `{25..400}`: `D_min = 1` flat, so log-log slope = 0 (< 1). |
 | C7a | RQ7 | INCONCLUSIVE | Package G: held-out AUROC could not be computed (folds empty). Untestable on this data ([section 15](#15-prediction-and-early-warning)). |
@@ -1434,57 +1429,35 @@ Limits of what this report can say:
 | Collect switch wider than the goal | Do not read a Strombom failure as "sheep could not pack into the goal." |
 | Simulated controllers | No farm or biology validity claim. |
 | Grid ceiling | `D_max = 35` is the top of our list, not a measured collapse ([Upper frontier](#upper-frontier-status); [Future work](#future-work-measuring-collapse-beyond-d--35)). |
-| Easy compact map | Many baseline cells succeed at D = 1 with R near 1.00, so rising dog-count laws are hard to see. It also left little room for information to save dogs (RQ5) and few overlapping success/failure times for early warning (RQ7). |
+| Easy compact map | Many baseline cells succeed at D = 1 with R near 1.00, so rising dog-count laws are hard to see. It also leaves little room for information to save dogs once RQ5 runs, and few overlapping success/failure times for early warning (RQ7). |
 | Split layout | Behaves like compact so far; the generator's separation still needs a hard check. |
 | Interference correlation | FAT `I_dir` link to failure is observational, not a controlled cause test. |
-| RQ5 setup | Bearing-only froze dogs; range settings had no effect under global observation; communication duplicated sheep lists. See [Information ladders](#13-information-ladders). |
+| RQ5 not run yet | Prior Phase 5 trees were removed after obs/comm bugs; no claim-grade RQ5 evidence is published. See [Information ladders](#13-information-ladders). |
 | RQ7 timing | Warning checks start after almost every successful run has finished. See [Prediction and early warning](#15-prediction-and-early-warning). |
 
 ---
 
 ## 13. Information ladders
 
-Status: **all six runs complete** (three scouts, three claims; 7,600 trials). Results below answer RQ5 only in a narrow way.
+Status: **not run yet**. No claim-grade RQ5 results are published in this report.
 
-RQ5 asks whether better sensing can replace dogs while keeping the same reliability. We test three separate ladders (not every combination at once):
+RQ5 asks whether better sensing can replace dogs while keeping the same reliability. The planned design uses three separate ladders (not every combination at once):
 
 - **Observation content:** bearing only → local positions → global view
-- **Sensing range:** 32.5, 65, 97.5, 130 (0.5x to 2x Strombom's `r_s` of 65)
-- **Communication:** none → neighbour broadcast → global shared
+- **Sensing range:** 32.5, 65, 97.5, 130 (0.5x to 2x Strombom's `r_s` of 65), under `local_positions`
+- **Communication:** none → neighbour broadcast → global shared, under `local_positions`
 
 All three ladders use `strombom_multi`, compact starts, N = 100 and 200, and the low dog band `{1, 2, 3, 4, 6, 10}`. Scout uses 30 seeds per cell; claim reseeds windows at 100 seeds.
 
-### What the runs recorded
+Prior Phase 5 scout/claim trees were removed after shared sim bugs invalidated those runs (bearing-only freeze via unit-depth proxies, range under global observation, communication list stacking without de-duplication). Those artifacts are not evidence. Tracker verdicts: C5a NOT RUN, C5b NOT RUN.
 
-| Ladder | N = 100 | N = 200 | Package E summary |
-|--------|---------|---------|-------------------|
-| Observation | bearing only: hard failure; local: `D_min = 1`; global: `D_min = 1` | same | No defined `D_min` was lowered |
-| Range | `D_min = 1` at all four ranges | same | `median_delta_dmin = 0` |
-| Communication | `D_min = 1` for none, neighbour, and global sharing | same | `median_delta_dmin = 0` |
+Protocols remain under `scaling/configs/protocols/phase5_*.yaml`. Rerun:
 
-Tracker verdicts: C5a REJECTED, C5b INCONCLUSIVE. Three of the four comparisons did not test the intended factor (details below).
+```bash
+WORKERS=18 bash scaling/results/phase5/run_all_ladders.sh
+```
 
-![RQ5 information ladders.](figures/f11_phase5_ladders.png)
-
-*A: success by observation mode. B: median dog path at N = 200 for four sensing ranges (curves coincide). C: success at N = 200 by communication mode.*
-
-### Local positions vs global view
-
-This comparison is clean. With dogs limited to sheep within 65 units, results match a full flock view: R = 1.00 in every cell, `D_min = 1` at both sizes, and median path within about 1%. On tight starts at these sizes, a local view costs nothing. It does not speak to wide or outlier-rich starts.
-
-### Bearing-only, range, and communication caveats
-
-- **Bearing-only:** all 640 claim-merge trials have dog path 0 (dogs never moved). Bearing-only input places synthetic sheep one unit away, so the Collect/Drive stop rule (`3 * r_a = 6`) always fires. This tests controller incompatibility, not information quality.
-- **Sensing range:** range runs used default global observation, so range did not change what dogs saw; matched cells are identical across the four ranges.
-- **Communication:** also under global observation. Sharing still changed behaviour (shorter paths at some D; all 30 scout runs failed at N = 200, D = 10 under sharing while `none` succeeded). Likely cause: shared sheep lists are stacked without de-duplication, so the controller can treat D copies of the flock. That D = 10 cell is scout-grade and a single-step drop, not overcrowding.
-
-### What RQ5 does and does not tell us
-
-- It shows local sensing matches global view on compact N = 100 and 200.
-- It cannot show that better information saves dogs: the working configurations are already at `D_min = 1`, and the other steps had setup problems.
-- C5a follows the written rule but is better read as weakly tested.
-
-A fairer RQ5 rerun would pair range with `local_positions`, merge shared lists by sheep identity, use a bearing-aware controller, and preferably a layout or method where more than one dog is needed.
+Folder note: [`report/rq5/`](report/rq5/).
 
 ---
 
@@ -1562,6 +1535,7 @@ make -C scaling scaling-transfer-size-claim-reseed TRANSFER_METHOD=fat WORKERS=1
 make -C scaling scaling-transfer-structure-scout TRANSFER_METHOD=fat WORKERS=16
 make -C scaling scaling-transfer-structure-claim-reseed TRANSFER_METHOD=fat WORKERS=16
 
-# RQ5: observation, range, and communication ladders (scout then claim)
-bash scaling/results/phase5/run_all_ladders.sh   # WORKERS=18
+# RQ5: observation, range, and communication ladders (not run yet; planned)
+# WORKERS=18 bash scaling/results/phase5/run_all_ladders.sh
 ```
+

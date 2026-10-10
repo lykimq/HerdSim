@@ -106,14 +106,15 @@ def main() -> None:
     seeds = [master + i for i in range(int(n_seeds))]
 
     # Obs ladder alone when no range/comm axes are set. A range or comm scout
-    # omits obs_modes so the product does not explode.
+    # pins local_positions so sensing_range and sharing actually change the view
+    # (global would ignore range; shared global lists are a no-op after union).
     has_range = sensing_ranges is not None
     has_comm = communications is not None
     if has_range or has_comm:
         if args.obs_modes or "obs_modes" in spec:
             obs_list = list(obs_modes)
         else:
-            obs_list = [None]
+            obs_list = ["local_positions"]
     else:
         obs_list = list(obs_modes)
     range_list = list(sensing_ranges) if sensing_ranges else [None]

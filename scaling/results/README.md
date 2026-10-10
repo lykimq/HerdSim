@@ -27,7 +27,7 @@ scaling/results/
     package_d/             # Side-by-side transfer tables (size + structure)
                            # Current: Kubo outlier_rich N=200 has D_min=20 (200 seeds)
 
-  phase5/                  # Information ladders: observation, range, communication
+  phase5/                  # RQ5 information ladders: NOT RUN YET (runner script only)
 ```
 
 ## What sits in a protocol folder

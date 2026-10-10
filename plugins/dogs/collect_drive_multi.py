@@ -27,6 +27,29 @@ def _sensing_radius(config: dict[str, Any]) -> float:
     return float(config.get("r_s", 65.0))
 
 
+def _union_sheep_positions(obs_list: list[ShepherdObservation]) -> np.ndarray:
+    """Unique sheep by index across observations (true set union, not a stack)."""
+    by_sheep: dict[int, np.ndarray] = {}
+    for obs in obs_list:
+        if not obs.n_sheep_seen:
+            continue
+        indices = np.asarray(obs.sheep_indices, dtype=int).reshape(-1)
+        positions = np.asarray(obs.sheep_positions, dtype=float).reshape(-1, 2)
+        if indices.shape[0] != positions.shape[0]:
+            raise ValueError(
+                "Observation sheep_indices and sheep_positions length mismatch "
+                f"({indices.shape[0]} vs {positions.shape[0]})."
+            )
+        for sheep_id, pos in zip(indices, positions):
+            key = int(sheep_id)
+            if key not in by_sheep:
+                by_sheep[key] = pos
+    if not by_sheep:
+        return np.zeros((0, 2))
+    order = sorted(by_sheep)
+    return np.vstack([by_sheep[k] for k in order])
+
+
 def _sheep_for_dog(
     dog_index: int,
     observations: list[ShepherdObservation],
@@ -36,21 +59,15 @@ def _sheep_for_dog(
     """Sheep positions this dog may use under the communication rule.
 
     none: this dog's observation only.
-    neighbour_broadcast: own observation plus dogs inside the sensing radius.
+    neighbour_broadcast: union of own observation and dogs inside the sensing radius.
     global_shared: union of sheep the dogs actually sensed, not true positions.
     """
     by_idx = {int(o.shepherd_index): o for o in observations}
     own = by_idx.get(dog_index)
     comm = str(config.get("communication", "none"))
 
-    def _stack(obs_list: list[ShepherdObservation]) -> np.ndarray:
-        parts = [o.sheep_positions for o in obs_list if o.n_sheep_seen]
-        if not parts:
-            return np.zeros((0, 2))
-        return np.vstack(parts)
-
     if comm == "global_shared":
-        return _stack(list(observations))
+        return _union_sheep_positions(list(observations))
     if comm == "neighbour_broadcast":
         if own is None:
             selected: list[ShepherdObservation] = []
@@ -63,7 +80,7 @@ def _sheep_for_dog(
                 continue
             if float(np.linalg.norm(obs.self_position - origin)) <= radius:
                 selected.append(obs)
-        return _stack(selected)
+        return _union_sheep_positions(selected)
     if own is None or own.n_sheep_seen == 0:
         return np.zeros((0, 2))
     return np.asarray(own.sheep_positions, dtype=float)
@@ -132,7 +149,13 @@ class CollectDriveMultiController(BaseDogController):
                 spacing = 4.0 * float(config.get("r_a", 2.0))
                 angle = (2 * np.pi * i) / m
                 spaced = base + spacing * np.array([np.cos(angle), np.sin(angle)])
-                velocities[i] = shepherd_step_toward(drive_state, config, i, spaced)
+                velocities[i] = shepherd_step_toward(
+                    drive_state,
+                    config,
+                    i,
+                    spaced,
+                    proximity_sheep=state.sheep_positions,
+                )
                 lines.append(
                     {
                         "from": state.shepherd_positions[i].tolist(),
@@ -155,7 +178,13 @@ class CollectDriveMultiController(BaseDogController):
                 tn = np.linalg.norm(tangential)
                 if tn > 1e-10:
                     target = target + (tangential / tn) * (lateral_step * (i - (m - 1) / 2.0))
-                velocities[i] = shepherd_step_toward(drive_state, config, i, target)
+                velocities[i] = shepherd_step_toward(
+                    drive_state,
+                    config,
+                    i,
+                    target,
+                    proximity_sheep=state.sheep_positions,
+                )
                 lines.append(
                     {
                         "from": state.shepherd_positions[i].tolist(),

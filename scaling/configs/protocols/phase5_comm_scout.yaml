@@ -1,6 +1,6 @@
 # Phase-5 communication scout (RQ5).
 # Grade: SCOUT. none / neighbour_broadcast / global_shared on the baseline
-# method. No obs_modes so the ladder is communication only.
+# method under local_positions so sharing can add sheep another dog sensed.
 
 protocol_id: phase5_comm_scout
 phase: 5
@@ -16,6 +16,8 @@ flock_sizes: [100, 200]
 shepherd_counts: [1, 2, 3, 4, 6, 10]
 seeds: 30
 seed_mode: scout
+obs_modes:
+  - local_positions
 communications:
   - none
   - neighbour_broadcast

@@ -99,7 +99,9 @@ class VFormationController(BaseDogController):
                 if not state.shepherd_active[i]:
                     continue
                 target = targets[i]
-                velocities[i] = shepherd_step_toward(local, config, i, target)
+                velocities[i] = shepherd_step_toward(
+                    local, config, i, target, proximity_sheep=state.sheep_positions
+                )
                 lines.append(
                     {
                         "from": state.shepherd_positions[i].tolist(),
@@ -126,7 +128,9 @@ class VFormationController(BaseDogController):
                 tn = float(np.linalg.norm(tangential))
                 if tn > 1e-10:
                     target = target + (tangential / tn) * (4.0 * (i - (m - 1) / 2.0))
-                velocities[i] = shepherd_step_toward(local, config, i, target)
+                velocities[i] = shepherd_step_toward(
+                    local, config, i, target, proximity_sheep=state.sheep_positions
+                )
                 lines.append(
                     {
                         "from": state.shepherd_positions[i].tolist(),

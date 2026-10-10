@@ -110,6 +110,29 @@ class LocalPositionsObservation(BaseObservationModel):
         )
 
 
+def _bearing_proxy_distance(state: SimulationState, shepherd_index: int, config: dict[str, Any]) -> float:
+    """Cartesian depth for direction-only sheep proxies.
+
+    Controllers (Collect/Drive stop, FAT, etc.) treat sheep_positions as metric
+    points. Placing proxies on the unit circle makes every sheep look closer than
+    the Strombom stop radius (3*r_a), so dogs never move. Use the sensing range,
+    and never place proxies inside the stop radius.
+    """
+    radius = _sensing_range(state, shepherd_index, config)
+    stop_multiple = float(config.get("shepherd_stop_multiple", 3.0))
+    r_a = float(config.get("r_a", 2.0))
+    return max(float(radius), stop_multiple * r_a + r_a)
+
+
+def _positions_from_bearings(
+    origin: np.ndarray,
+    bearings: np.ndarray,
+    proxy_distance: float,
+) -> np.ndarray:
+    unit = np.stack([np.cos(bearings), np.sin(bearings)], axis=1)
+    return origin + unit * float(proxy_distance)
+
+
 class BearingOnlyObservation(BaseObservationModel):
     @property
     def id(self) -> str:
@@ -119,12 +142,13 @@ class BearingOnlyObservation(BaseObservationModel):
         self, state: SimulationState, shepherd_index: int, config: dict[str, Any]
     ) -> ShepherdObservation:
         local = LocalPositionsObservation().observe(state, shepherd_index, config)
-        # Drop metric distances; keep bearings and unit directions as positions
-        # relative to the shepherd (distance-free directional cues).
-        if local.n_sheep_seen:
-            bearings = local.bearings_to_sheep
-            unit = np.stack([np.cos(bearings), np.sin(bearings)], axis=1)
-            local.sheep_positions = local.self_position + unit
+        # Drop metric distances; keep bearings. Controllers that need Cartesian
+        # points get fixed-depth proxies along those bearings (not unit depth).
+        if local.n_sheep_seen and local.bearings_to_sheep is not None:
+            proxy = _bearing_proxy_distance(state, shepherd_index, config)
+            local.sheep_positions = _positions_from_bearings(
+                local.self_position, local.bearings_to_sheep, proxy
+            )
             local.distances_to_sheep = None
         local.mode = "bearing_only"
         return local
@@ -144,8 +168,10 @@ class NoisyBearingObservation(BaseObservationModel):
             noise = state.rng.normal(0.0, sigma, size=obs.bearings_to_sheep.shape)
             bearings = obs.bearings_to_sheep + noise
             obs.bearings_to_sheep = bearings
-            unit = np.stack([np.cos(bearings), np.sin(bearings)], axis=1)
-            obs.sheep_positions = obs.self_position + unit
+            proxy = _bearing_proxy_distance(state, shepherd_index, config)
+            obs.sheep_positions = _positions_from_bearings(
+                obs.self_position, bearings, proxy
+            )
         obs.mode = "noisy_bearing"
         return obs
 

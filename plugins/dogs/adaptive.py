@@ -107,7 +107,9 @@ class AdaptiveController(BaseDogController):
                 speed = float(config.get("shepherd_speed", 1.5))
                 velocities[i] = move_toward(state.shepherd_positions[i], target, speed)
             else:
-                velocities[i] = shepherd_step_toward(local, config, i, target)
+                velocities[i] = shepherd_step_toward(
+                    local, config, i, target, proximity_sheep=state.sheep_positions
+                )
             lines.append(
                 {
                     "from": state.shepherd_positions[i].tolist(),

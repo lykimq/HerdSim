@@ -93,7 +93,9 @@ class ObstacleAwareDriveController(BaseDogController):
                         "mode": "drive",
                     }
                 )
-            velocities[i] = shepherd_step_toward(local, config, i, target)
+            velocities[i] = shepherd_step_toward(
+                local, config, i, target, proximity_sheep=state.sheep_positions
+            )
 
         velocities = apply_dog_speeds(velocities, state, config)
         metadata = dict(state.metadata)

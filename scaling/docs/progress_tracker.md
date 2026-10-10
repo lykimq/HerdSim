@@ -26,7 +26,7 @@ How to read this file:
 | 2 | RQ1 | B | DONE | smoke, structure scout, structure claim | nothing |
 | 3 | RQ3 | C | DONE | Package C (within-N tests) | needs Phase 1-2 data |
 | 4 | RQ4 | D | DONE | Package D; kubo/fat size and structure scout+claim YAMLs | nothing |
-| 5 | RQ5 | E | DONE | obs/range/comm scout and claim protocols | nothing |
+| 5 | RQ5 | E | DONE | obs/range/comm scout and claim protocols | fair rerun after obs/comm fixes |
 | 6 | RQ6 | F | DONE | Package F (leave-one-N-out RMSE) | needs frontiers |
 | 7 | RQ7 | G | DONE | Package G (causal window, lead time) | needs timeseries |
 
@@ -70,9 +70,9 @@ When finished or on battery, you can switch back to `powersave` the same way.
 | 11 | Phase 4 size (kubo then fat) | SCOUT then CLAIM | `make -C scaling scaling-transfer-size-scout TRANSFER_METHOD=kubo WORKERS=16` then claim-reseed; repeat `fat` | `scaling/results/phase4/` | DONE |
 | 12 | Phase 4 structure (kubo then fat) | SCOUT then CLAIM | `make -C scaling scaling-transfer-structure-scout TRANSFER_METHOD=kubo WORKERS=16` then claim-reseed; repeat `fat` | `scaling/results/phase4/` | DONE |
 | 13 | Phase 4 transfer table | CLAIM | `make -C scaling scaling-analyse PACKAGE=D TRIALS=... --trials-by-method ...` | packages/d | DONE |
-| 14 | Phase 5 obs scout/claim | SCOUT then CLAIM | `make -C scaling scaling-factor-sweep WORKERS=18` then `scaling-phase5-obs-claim-reseed` | `scaling/results/phase5/` | DONE |
-| 15 | Phase 5 range | SCOUT then CLAIM | `scaling-phase5-range-scout WORKERS=18` then `scaling-phase5-range-claim-reseed` | `scaling/results/phase5/` | DONE |
-| 16 | Phase 5 communication | SCOUT then CLAIM | `scaling-phase5-comm-scout WORKERS=18` then `scaling-phase5-comm-claim-reseed` | `scaling/results/phase5/` | DONE |
+| 14 | Phase 5 obs scout/claim | SCOUT then CLAIM | `make -C scaling scaling-factor-sweep WORKERS=18` then `scaling-phase5-obs-claim-reseed` | `scaling/results/phase5/` | NOT RUN YET |
+| 15 | Phase 5 range | SCOUT then CLAIM | `scaling-phase5-range-scout WORKERS=18` then `scaling-phase5-range-claim-reseed` | `scaling/results/phase5/` | NOT RUN YET |
+| 16 | Phase 5 communication | SCOUT then CLAIM | `scaling-phase5-comm-scout WORKERS=18` then `scaling-phase5-comm-claim-reseed` | `scaling/results/phase5/` | NOT RUN YET |
 | 17 | Phase 7 early warning | CLAIM | `make -C scaling scaling-analyse PACKAGE=G TRIALS=results/phase1/claim/merged_trials.csv OUT=results/phase1/claim/packages/g` | Package G | DONE |
 
 After step 2, if the bootstrap interval on D_min covers more than one grid step, raise that window to 200 seeds before the structure claim.
@@ -80,8 +80,8 @@ After step 2, if the bootstrap interval on D_min covers more than one grid step,
 ### After every run
 
 1. Check `status.json` and `manifest.jsonl`.
-2. Write `README.md` from the template into the protocol folder.
-3. Set the checklist Status (`TODO` / `RUNNING` / `DONE` / `SKIPPED`).
+2. Write a short `README.md` into the protocol folder (purpose, completeness, key numbers).
+3. Set the checklist Status (`TODO` / `RUNNING` / `DONE` / `SKIPPED` / `NOT RUN YET`).
 4. If the grade is CLAIM, update Claims.
 
 ## Claims
@@ -96,8 +96,8 @@ Criteria: [main_scaling_plan.md](main_scaling_plan.md). Update after a claim-gra
 | C2b | SKIPPED | Phase 1: No overcrowding cells to extend to T=20,000 |
 | C3 | INCONCLUSIVE | Phase 1: Mechanism contrast undefined without overcrowding cells |
 | C4 | SUPPORTED (partial) | Phase 4 Package D: size map shared for N>=25 (Strombom/Kubo); Kubo wide has no D_min; Kubo outlier_rich N=200 shifts to D_min=20 at 200 seeds (bootstrap [2, 20]; no overcrowding); FAT absent for N>=25 |
-| C5a | REJECTED | Phase 5 Package E: no ladder step lowers a defined D_min by a grid step at N in {100, 200} (obs: bearing hard-fails; local/global D_min=1; range and comm flat D_min=1) |
-| C5b | INCONCLUSIVE | Phase 5 Package E: no first-step dog saving to test diminishing returns (median_first_step_delta=0 on all ladders) |
+| C5a | NOT RUN | Phase 5 ladders not rerun yet after obs/comm sim fixes; prior broken runs removed |
+| C5b | NOT RUN | Phase 5 ladders not rerun yet after obs/comm sim fixes; prior broken runs removed |
 | C6a | SUPPORTED | Phase 1/6 Package F: leave-one-N RMSE power 0.247 > piecewise 0.132 (power worse than piecewise) |
 | C6b | SUPPORTED | Phase 1/6 Package F: on compact N in {25..400}, D_min=1 flat so log-log slope = 0 (< 1); power fit log_log_slope = -0.165 |
 | C7a | INCONCLUSIVE | Phase 7 Package G: held-out state and (N, D) AUROC null; folds empty; beats_nd_baseline=False |

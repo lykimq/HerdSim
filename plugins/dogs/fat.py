@@ -59,12 +59,18 @@ class FatController(BaseDogController):
             if obs.n_sheep_seen == 0:
                 continue
             local = view_from_observation(state, obs)
-            # Farthest from dog among observed sheep.
+            # Farthest from dog among observed sheep. Bearing-only proxies sit at
+            # equal depth, so fall back to farthest from the goal among proxies.
             dists = np.linalg.norm(obs.sheep_positions - obs.self_position, axis=1)
-            far_idx = int(np.argmax(dists))
+            if float(np.ptp(dists)) < 1e-9:
+                far_idx = int(np.argmax(np.linalg.norm(obs.sheep_positions - goal, axis=1)))
+            else:
+                far_idx = int(np.argmax(dists))
             sheep_pos = obs.sheep_positions[far_idx]
             target = position_behind_target(sheep_pos, goal, offset)
-            velocities[i] = shepherd_step_toward(local, config, i, target)
+            velocities[i] = shepherd_step_toward(
+                local, config, i, target, proximity_sheep=state.sheep_positions
+            )
             lines.append(
                 {
                     "from": state.shepherd_positions[i].tolist(),

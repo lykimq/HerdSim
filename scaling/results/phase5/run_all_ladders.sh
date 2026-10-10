@@ -44,4 +44,4 @@ run_step "comm claim-plan" make -C scaling scaling-phase5-comm-claim-plan
 run_step "comm claim-reseed" make -C scaling scaling-phase5-comm-claim-reseed "WORKERS=${WORKERS}"
 
 log "Phase 5 all ladders complete"
-log "Next: write per-protocol README.md from docs/templates/REPORT_TEMPLATE.md; update progress_tracker.md steps 14-16 and claims C5a/C5b"
+log "Next: write per-protocol README.md; update progress_tracker.md steps 14-16 and claims C5a/C5b"

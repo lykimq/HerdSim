@@ -1,7 +1,0 @@
-n_sheep,obs_mode,info_level,d_min,hard_failure
-100,bearing_only,0,,True
-100,local_positions,1,1.0,False
-100,global,2,1.0,False
-200,bearing_only,0,,True
-200,local_positions,1,1.0,False
-200,global,2,1.0,False

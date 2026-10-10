@@ -145,12 +145,12 @@ table.layout-cost tr.layout-wide td:first-child{font-weight:600}
 <tr><td>RQ2</td><td>Size map (baseline, compact)</td><td>150</td><td>3,000</td><td>2,200</td><td>5,350</td><td>DONE</td></tr>
 <tr><td>RQ3</td><td>Mechanism contrast</td><td>0</td><td>0</td><td>0</td><td>0</td><td>SKIPPED</td></tr>
 <tr><td>RQ4</td><td>Kubo then FAT size + structure</td><td>0</td><td>13,200</td><td>10,500</td><td>23,700</td><td>DONE</td></tr>
-<tr><td>RQ5</td><td>Observation, range, communication ladders</td><td>0</td><td>3,600</td><td>4,000</td><td>7,600</td><td>DONE</td></tr>
+<tr><td>RQ5</td><td>Observation, range, communication ladders</td><td>0</td><td>0</td><td>0</td><td>0</td><td>NOT RUN YET</td></tr>
 <tr><td>RQ6</td><td>Curve fits on claim frontiers</td><td>0</td><td>0</td><td>0</td><td>0</td><td>DONE (analyse)</td></tr>
 <tr><td>RQ7</td><td>Early warning on claim trajectories</td><td>0</td><td>0</td><td>0</td><td>0</td><td>DONE (analyse)</td></tr>
-<tr><td><strong>All</strong></td><td></td><td><strong>750</strong></td><td><strong>23,400</strong></td><td><strong>19,100</strong></td><td><strong>43,250</strong></td><td></td></tr>
+<tr><td><strong>All</strong></td><td></td><td><strong>750</strong></td><td><strong>19,800</strong></td><td><strong>15,100</strong></td><td><strong>35,650</strong></td><td></td></tr>
 </tbody></table></div>
-<p>RQ2's longer-deadline T1 was also planned and skipped (0 overcrowding cells). Claim merges hold 37,070 rows (fewer than total sims because a reseeded cell drops its scout rows from the merge). Integrity checks are in <a href="TRUST_AUDIT.md"><code>TRUST_AUDIT.md</code></a>.</p>
+<p>RQ2's longer-deadline T1 was also planned and skipped (0 overcrowding cells). RQ5 is not run yet (prior Phase 5 trees removed after obs/comm bugs). Claim merges hold 30,670 rows (fewer than total sims because a reseeded cell drops its scout rows from the merge). Integrity checks are in <a href="TRUST_AUDIT.md"><code>TRUST_AUDIT.md</code></a>.</p>
 <p>Commands used (from the HerdSim repo root; re-running needs that codebase, not only this folder):</p>
 <pre><code># RQ2 size map
 make -C scaling scaling-pilot WORKERS=16
@@ -168,8 +168,8 @@ make -C scaling scaling-transfer-structure-scout TRANSFER_METHOD=kubo WORKERS=16
 make -C scaling scaling-transfer-structure-claim-reseed TRANSFER_METHOD=kubo WORKERS=16
 # repeat with TRANSFER_METHOD=fat
 
-# RQ5 ladders
-bash scaling/results/phase5/run_all_ladders.sh   # WORKERS=18</code></pre>
+# RQ5 ladders (not run yet; planned)
+# WORKERS=18 bash scaling/results/phase5/run_all_ladders.sh</code></pre>
 <p>Exact grids, seeds, and run notes for each campaign sit under the matching <code>rq*/</code> folder.</p>
 <hr>
 <h2 id="what-we-found">What we found</h2>
@@ -270,10 +270,8 @@ bash scaling/results/phase5/run_all_ladders.sh   # WORKERS=18</code></pre>
 <p><em>Soft edge: point D_min = 20 after 200 seeds; bootstrap still wide.</em></p>
 <p>That is enough to reject "the same story everywhere," but not enough to say which patterns are shared across a broader method set. More detail: <a href="rq4/"><code>rq4/</code></a>.</p>
 <h3 id="rq5-can-better-information-replace-dogs">RQ5: can better information replace dogs?</h3>
-<p><strong>Status:</strong> Narrow answer.</p>
-<p>On compact N = 100 and 200, local sensing (radius 65) works as well as a full global view: both have <code>D_min = 1</code>. Whether <em>better</em> information can <em>reduce</em> dog count cannot be judged here: working setups are already at one dog, and bearing-only, range, and communication each had a setup problem that blocked a fair ladder test (bearing-only froze the dogs; range runs used global observation so range did not change what dogs saw; communication under global view stacked shared lists).</p>
-<figure><img src="figures/f11_phase5_ladders.png" alt="RQ5 information ladders."><figcaption>RQ5 information ladders.</figcaption></figure>
-<p><em>Local matches global. Other ladder steps did not cleanly test the intended factor.</em></p>
+<p><strong>Status:</strong> Not run yet.</p>
+<p>No claim-grade observation, range, or communication ladder results are published. Prior Phase 5 trees were removed after shared sim bugs (bearing-only freeze, range under global observation, communication list stacking). Protocols remain for a clean rerun.</p>
 <p>More detail: <a href="rq5/"><code>rq5/</code></a>.</p>
 <h3 id="rq6-which-curve-fits-d-min-vs-n">RQ6: which curve fits D_min vs N?</h3>
 <p><strong>Status:</strong> Weak, but the planned fit package ran.</p>
@@ -306,8 +304,8 @@ bash scaling/results/phase5/run_all_ladders.sh   # WORKERS=18</code></pre>
 <tr><td>C2b</td><td>RQ2</td><td>SKIPPED</td><td>No overcrowding cell to extend to T = 20,000</td></tr>
 <tr><td>C3</td><td>RQ3</td><td>INCONCLUSIVE</td><td>Mechanism contrast undefined without overcrowding</td></tr>
 <tr><td>C4</td><td>RQ4</td><td>SUPPORTED (partial)</td><td>Compact size shared for Strombom/Kubo (N >= 25); FAT and several structure cases break transfer</td></tr>
-<tr><td>C5a</td><td>RQ5</td><td>REJECTED</td><td>No ladder step lowered a defined <code>D_min</code> (weakly tested)</td></tr>
-<tr><td>C5b</td><td>RQ5</td><td>INCONCLUSIVE</td><td>No first-step dog saving to compare</td></tr>
+<tr><td>C5a</td><td>RQ5</td><td>NOT RUN</td><td>Information ladders not rerun yet</td></tr>
+<tr><td>C5b</td><td>RQ5</td><td>NOT RUN</td><td>Information ladders not rerun yet</td></tr>
 <tr><td>C6a</td><td>RQ6</td><td>SUPPORTED</td><td>Power law worse than piecewise on leave-one-N RMSE</td></tr>
 <tr><td>C6b</td><td>RQ6</td><td>SUPPORTED</td><td>Flat <code>D_min = 1</code> on compact N in {25..400}, so log-log slope 0</td></tr>
 <tr><td>C7a</td><td>RQ7</td><td>INCONCLUSIVE</td><td>Held-out AUROC could not be computed</td></tr>
@@ -322,7 +320,7 @@ bash scaling/results/phase5/run_all_ladders.sh   # WORKERS=18</code></pre>
 <li><strong>No overcrowding on the baseline size map.</strong> That is why RQ3 did not run and T1 was skipped.</li>
 <li><strong>Transfer is only partial.</strong> Compact size floors for Strombom and Kubo do not extend to FAT, Kubo-wide, or large Kubo outlier-rich.</li>
 <li><strong>Easy compact map.</strong> Many baseline cells succeed at D = 1 with success near 1.00, so rising dog-count laws, information savings, and early-warning overlap are hard to see.</li>
-<li><strong>RQ5 setup problems.</strong> Bearing-only, range-under-global, and communication list stacking limited what those ladders could test.</li>
+<li><strong>RQ5 not run yet.</strong> Prior Phase 5 trees were removed after obs/comm bugs; no claim-grade RQ5 evidence is published.</li>
 <li><strong>RQ7 timing.</strong> Warning checks start after almost every success has finished.</li>
 <li><strong>Simulated controllers.</strong> No farm or biology validity claim.</li>
 <li><strong>Discrete dog list.</strong> We cannot resolve effects finer than one step on that list.</li>
@@ -353,7 +351,7 @@ bash scaling/results/phase5/run_all_ladders.sh   # WORKERS=18</code></pre>
 </ol>
 <h3 id="fairer-follow-ups-for-rq5-and-rq7">Fairer follow-ups for RQ5 and RQ7</h3>
 <ul>
-<li>RQ5: pair sensing range with local observation, merge shared lists by sheep identity, use a bearing-aware controller, and preferably a layout or method where more than one dog is needed.</li>
+<li>RQ5: rerun the three ladders after the shared obs/comm fixes (<code>local_positions</code> for range and communication; bearing proxies beyond the stop radius; sheep-index union for sharing). Prefer a layout or method where more than one dog is needed.</li>
 <li>RQ7: need failures and successes overlapping in time (harder layout or method, or earlier check times).</li>
 </ul>
 <hr>
@@ -367,7 +365,7 @@ bash scaling/results/phase5/run_all_ladders.sh   # WORKERS=18</code></pre>
 <tr><td><a href="rq2/"><code>rq2/</code></a></td><td>Size campaign (setup, trials, Package A); T1 note</td></tr>
 <tr><td><a href="rq3/"><code>rq3/</code></a></td><td>SKIPPED note only</td></tr>
 <tr><td><a href="rq4/"><code>rq4/</code></a></td><td>Kubo/FAT size and structure maps; Package D</td></tr>
-<tr><td><a href="rq5/"><code>rq5/</code></a></td><td>Information ladders and Package E</td></tr>
+<tr><td><a href="rq5/"><code>rq5/</code></a></td><td>NOT RUN YET note only</td></tr>
 <tr><td><a href="rq6/"><code>rq6/</code></a></td><td>Scaling-fit tables (Package F)</td></tr>
 <tr><td><a href="rq7/"><code>rq7/</code></a></td><td>Early-warning summary tables (Package G)</td></tr>
 <tr><td><a href="TRUST_AUDIT.md"><code>TRUST_AUDIT.md</code></a></td><td>Count and protocol-hash integrity checks</td></tr>

@@ -1,7 +1,0 @@
-n_sheep,communication,info_level,d_min,hard_failure
-100,none,0,1,False
-100,neighbour_broadcast,1,1,False
-100,global_shared,2,1,False
-200,none,0,1,False
-200,neighbour_broadcast,1,1,False
-200,global_shared,2,1,False

@@ -62,17 +62,28 @@ def drive_target(state: SimulationState, config: dict[str, Any]) -> np.ndarray:
 
 
 def shepherd_step_toward(
-    state: SimulationState, config: dict[str, Any], shepherd_idx: int, target: np.ndarray
+    state: SimulationState,
+    config: dict[str, Any],
+    shepherd_idx: int,
+    target: np.ndarray,
+    *,
+    proximity_sheep: np.ndarray | None = None,
 ) -> np.ndarray:
-    """Velocity toward target with paper 3*r_a stop and angular noise."""
+    """Velocity toward target with paper 3*r_a stop and angular noise.
+
+    Planning may use an observation-limited view as `state`. The stop radius is a
+    body-proximity rule: pass true world sheep as `proximity_sheep` when `state`
+    holds observed or bearing-proxy positions.
+    """
     speed = float(config.get("shepherd_speed", 1.5))
     shepherd_pos = state.shepherd_positions[shepherd_idx]
-    min_sheep_dist = float(np.min(np.linalg.norm(state.sheep_positions - shepherd_pos, axis=1)))
+    sheep = state.sheep_positions if proximity_sheep is None else proximity_sheep
     stop_multiple = float(config.get("shepherd_stop_multiple", 3.0))
     stop_radius = stop_multiple * float(config.get("r_a", 2.0))
-
-    if min_sheep_dist < stop_radius:
-        return np.zeros(2)
+    if sheep.shape[0] > 0:
+        min_sheep_dist = float(np.min(np.linalg.norm(sheep - shepherd_pos, axis=1)))
+        if min_sheep_dist < stop_radius:
+            return np.zeros(2)
 
     base = move_toward(shepherd_pos, target, speed)
     noise = compute_noise(state.rng, float(config.get("noise_strength", 0.3)))
@@ -82,14 +93,20 @@ def shepherd_step_toward(
 
 
 def compute_shepherd_velocity(
-    state: SimulationState, config: dict[str, Any], shepherd_idx: int = 0
+    state: SimulationState,
+    config: dict[str, Any],
+    shepherd_idx: int = 0,
+    *,
+    proximity_sheep: np.ndarray | None = None,
 ) -> np.ndarray:
     """Collect/Drive velocity with 3*r_a stop and paper angular noise."""
     if should_collect(state, config):
         target = collect_target(state, config)
     else:
         target = drive_target(state, config)
-    return shepherd_step_toward(state, config, shepherd_idx, target)
+    return shepherd_step_toward(
+        state, config, shepherd_idx, target, proximity_sheep=proximity_sheep
+    )
 
 
 def strombom_assignment_line(
