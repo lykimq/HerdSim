@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "herdsim"
 version = "0.1.0"
-description = "A factor-based platform for investigating multi-agent shepherding and herdability"
+description = "Scaling CLI and analysis for multi-agent shepherding research questions"
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.11"
@@ -13,12 +13,7 @@ dependencies = [
     "numpy>=1.26",
     "pandas>=2.1",
     "scipy>=1.11",
-    "fastapi>=0.104",
-    "uvicorn[standard]>=0.24",
-    "websockets>=12.0",
-    "pydantic>=2.5",
     "matplotlib>=3.8",
-    "python-multipart>=0.0.9",
     "pyyaml>=6.0",
     "pyarrow>=14.0",
 ]
@@ -26,27 +21,21 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest>=7.4",
-    "pytest-asyncio>=0.23",
-    "httpx>=0.25",
     "ruff>=0.1",
     "basedpyright>=1.18",
 ]
 
-# Shared packages live at the repo root. Goal-owned packages are mapped from
-# platform/ and scaling/ so imports stay api / services.experiments / services.scaling.
+# Shared engine at repo root; scaling services mapped for services.scaling imports.
 [tool.setuptools]
 packages = [
     "analysis",
     "analysis.scaling",
-    "api",
-    "api.routers",
     "core",
     "core.agents",
     "methods",
     "methods.flocking_dog",
     "methods.heterogeneous",
     "methods.kubo",
-    "methods.netlogo",
     "methods.obstacle_aware",
     "methods.strombom",
     "methods.strombom_multi",
@@ -58,14 +47,11 @@ packages = [
     "plugins.scenarios",
     "plugins.sheep",
     "services.scaling",
-    "services.experiments",
     "services.shared",
 ]
 
 [tool.setuptools.package-dir]
-"api" = "platform/api"
 "services.scaling" = "scaling/services/scaling"
-"services.experiments" = "platform/services/experiments"
 "services.shared" = "services/shared"
 
 [tool.ruff]
@@ -77,18 +63,14 @@ select = ["E", "F", "I", "W", "UP"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests/backend"]
-asyncio_mode = "auto"
-pythonpath = [".", "platform", "scaling"]
+pythonpath = [".", "scaling"]
 markers = [
     "stress: heavy / long runs; use make test-stress",
 ]
 
-# Match pytest pythonpath so Pylance/Pyright resolve the split services
-# namespace (services.shared, services.experiments, services.scaling).
 [tool.pyright]
 pythonVersion = "3.11"
-extraPaths = [".", "platform", "scaling"]
+extraPaths = [".", "scaling"]
 venvPath = "."
 venv = ".venv"
-# Match Makefile --level error: do not fail the CLI on warnings.
 failOnWarnings = false

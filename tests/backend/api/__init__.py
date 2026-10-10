@@ -1,1 +1,0 @@
-# Thin API smoke tests.

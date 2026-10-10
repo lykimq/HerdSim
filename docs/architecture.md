@@ -1,42 +1,18 @@
-# HerdSim Architecture and Design
+# HerdSim Architecture (scaling-cli)
 
-HerdSim is a factor-based platform for simulating and analyzing multi-agent shepherding. The engine separates sheep dynamics, shepherd observation, and dog control so experiments can vary information, heterogeneity, environment, and controller architecture independently.
+This branch is the **scaling research** tree: CLI protocols, results, and analysis.
+The platform GUI is intentionally absent (see `main`).
+
+HerdSim's engine separates sheep dynamics, shepherd observation, and dog control so
+experiments can vary information, heterogeneity, environment, and controller
+architecture independently.
 
 ## Design requirements
 
 - **Modularity.** Sheep models, dog controllers, observation modes, scenarios, and metrics plug in without rewriting the runner.
-- **Reproducibility.** Discrete deterministic ticks with seeded random number generation (RNG).
+- **Reproducibility.** Discrete deterministic ticks with seeded RNG.
 - **Factorial experiments.** Herdability and sensing studies are first-class factor grids.
-- **Separation of concerns.** Backend owns state and logic. Frontend owns rendering.
-
-## High-level data flow
-
-```mermaid
-flowchart LR
-  client([Client])
-  apiHTTP["FastAPI REST"]
-  apiWS["FastAPI WebSocket"]
-  sessions["Session Manager"]
-  runner["Simulation Engine"]
-  factors["Experimental Factors"]
-  sheep["Sheep Dynamics"]
-  obs["Observation Model"]
-  dogs["Dog Controller"]
-  metrics["Metrics"]
-  out(["Frame Data and Metrics"])
-
-  client --> apiHTTP
-  client --> apiWS
-  apiHTTP --> sessions
-  apiWS --> sessions
-  sessions --> runner
-  factors --> runner
-  runner --> sheep
-  runner --> obs
-  obs --> dogs
-  runner --> metrics
-  runner --> out
-```
+- **Purpose split.** This branch owns RQ campaigns. Interactive UI lives on `main`.
 
 ## Tick lifecycle
 
@@ -52,6 +28,22 @@ state(t)
   -> metrics(state(t+1))
 ```
 
+## High-level data flow (CLI)
+
+```mermaid
+flowchart LR
+  proto["Protocol YAML"]
+  camp["campaign / run_grid / factor_sweep"]
+  runner["Scaling runner"]
+  engine["SimulationRunner"]
+  out["trials.csv + manifest + packages"]
+
+  proto --> camp
+  camp --> runner
+  runner --> engine
+  runner --> out
+```
+
 ## Experimental factors
 
 Defined in `core/experimental_factors.py`:
@@ -62,7 +54,8 @@ Defined in `core/experimental_factors.py`:
 - Environment: world keys, `goal_mode`
 - Model: `sheep_model`, `dog_controller`, scenario, preset
 
-Named methods in `core/methods.py` are factor bundles (for example `strombom` equals Strombom sheep plus Collect/Drive).
+Named methods in `core/methods.py` are factor bundles (for example `strombom`
+equals Strombom sheep plus Collect/Drive).
 
 ## Plugin interfaces
 
@@ -72,7 +65,8 @@ Named methods in `core/methods.py` are factor bundles (for example `strombom` eq
 - Registries in `core/plugin_registry.py`
 - Named methods (catalog) in `core/methods.py`
 
-New sheep models, dog controllers, and observation modes register in `core/plugin_registry.py`. Scenarios and metrics register in their package registries. Named methods are factor bundles in `core/methods.py` with package metadata under `methods/<id>/`.
+Scenarios and metrics register in their package registries. Method packages live
+under `methods/<id>/`.
 
 ## Config composition
 
@@ -81,98 +75,62 @@ New sheep models, dog controllers, and observation modes register in `core/plugi
 1. shared world defaults
 2. sheep and dog defaults
 3. method paper params
-4. scenario overlay (`paper`/`custom`: world keys; `scenario`: full overlay)
+4. scenario overlay
 5. explicit algorithm_params / world_overrides / agent counts
 
-## Implementation layout
-
-HerdSim is one repo with a shared engine and two goal trees:
+## Implementation layout (this branch)
 
 ```mermaid
 flowchart TB
-  subgraph goals [ ]
-    direction LR
-    plat["Goal 1 · platform/<br/>Simulate + UI<br/>make -C platform"]
-    scale["Goal 2 · scaling/<br/>RQ protocols<br/>make -C scaling"]
-  end
-
+  scale["scaling/<br/>RQ protocols<br/>make -C scaling"]
   engine["Shared engine<br/>core · plugins · methods · services/shared · analysis"]
-
-  plat -.->|imports / runs| engine
-  scale -.->|imports / runs| engine
+  scale -->|imports / runs| engine
 ```
 
-- **Shared:** `core/`, `plugins/`, `methods/`, `integrations/`, `services/shared/`, `analysis/` (failure taxonomy plus `analysis/scaling/` packages A-G)
-- **Goal 1 (`platform/`):** `api/`, `frontend/`, UI Experiments engine (`services/experiments/`), Guide docs (`docs/guide/`), `Makefile`, `scripts/dev.sh`
-- **Goal 2 (`scaling/`):** protocol runner (`services.scaling`), `configs/`, `scripts/`, science docs (`docs/`), `results/`, `Makefile`
-- **Cross-cutting docs:** `docs/architecture.md`, `docs/papers/`
-- **Tests:** `tests/` (backend pytest + frontend node tests)
+| Area | Path | Role |
+|------|------|------|
+| Engine | `core/`, `plugins/`, `methods/` | Tick loop and method bundles |
+| Shared helpers | `services/shared/`, `analysis/` | Trial aggregates, failure labels, RQ analysis |
+| Campaigns | `scaling/` | Protocols, runner, docs, results |
+| Docs | `docs/` | Architecture + CLI/RQ code map |
+| Tests | `tests/backend/` | Engine correctness + scaling stack |
 
-Python imports keep the historical package names (`api`, `services.experiments`, `services.scaling`, `analysis.scaling`). The `services` package is a namespace split across `services/shared/`, `platform/services/`, and `scaling/services/`.
+Python import names: `services.scaling`, `services.shared`, `analysis.scaling`.
+The `services` package is a namespace split across `services/shared/` and
+`scaling/services/scaling/`.
 
 ## Scaling stack
 
-Separate from the Experiments **UI** tab: a CLI protocol layer for the
-scaling research program (Size / Structure / Mechanism / Generality,
-then follow-ons). Science and status live under `scaling/docs/`. This
-section is the engineering shape.
-
-### What exists now
-
 | Piece | Role |
 |-------|------|
-| `scaling/configs/canonical_grid.yaml` | Frozen protocol defaults (task, theta, N/D grids, T0/T1, seeds, methods) |
-| `scaling/configs/protocols/*.yaml` | Per-run subsets (pilot, scout, state, factor sweep) with WHY comments |
-| `scaling/services/scaling/runner.py` | Expand grid, run trials, resume via `manifest.jsonl`, write timeseries |
-| `scaling/services/scaling/layout.py` | Path conventions (`phase{k}/{slug}/`, cell keys, package dirs) |
-| `analysis/scaling/` | Frontier, regimes, export, plots, plus modules for later packages |
-| `scaling/scripts/` | `campaign.py`, `run_grid.py`, `run_factor_sweep.py`, `plan_claim_cells.py`, `plan_t1_cells.py` |
-| `scaling/Makefile` | `scaling-pilot`, `scaling-scout`, `scaling-pilot-state`, `scaling-factor-sweep`, claim/transfer/phase5 targets |
-| `scaling/results/phase{k}/{slug}/` | `protocol.yaml`, provenance, `trials.csv`, `timeseries/`, `packages/{a-g}/`, optional `REPORT.md` |
+| `scaling/configs/canonical_grid.yaml` | Frozen protocol defaults |
+| `scaling/configs/protocols/*.yaml` | Per-run protocol specs |
+| `scaling/services/scaling/runner.py` | Grid expand, trials, resume via `manifest.jsonl` |
+| `scaling/services/scaling/layout.py` | Path conventions and status helpers |
+| `analysis/scaling/` | Frontier, regimes, export, plots, RQ packages |
+| `scaling/scripts/` | `campaign.py`, `run_grid.py`, `run_factor_sweep.py`, planners |
+| `scaling/Makefile` | Campaign Make aliases |
+| `scaling/results/phase{k}/{slug}/` | `protocol.yaml`, provenance, `trials.csv`, packages |
 
-Operator entry: `make -C scaling help` (or `make scaling-help`). Layout
-detail: [scaling/results/README.md](../scaling/results/README.md).
+Operator entry: `make scaling-help` or `make -C scaling help`.
 
-### Target design (after the scaling plan is finished)
+### Research phases (summary)
 
-The research plan drives a phase sequence. When the program is complete, the same
-layout should support claim-grade work end to end, not only smoke/scout runs:
+| Focus | RQs | Package |
+|-------|-----|---------|
+| Herdability maps | RQ2 (+ data for RQ6) | A |
+| Structure beyond N | RQ1 | B |
+| Overcrowding mechanism | RQ3 | C |
+| Cross-method transfer | RQ4 | D |
+| Information vs shepherds | RQ5 | E |
+| Scaling fits | RQ6 | F |
+| Early warning | RQ7 | G |
 
-| Phase focus | Formal research questions (RQs) | Evidence package | Engineering outcome |
-|-------------|---------------------------------|------------------|---------------------|
-| Protocol freeze | S8 | all | Locked `canonical_grid.yaml` plus provenance on every protocol |
-| Herdability maps | RQ2 (plus data for RQ6) | A | Reliability maps, D_min frontier, regimes, figures |
-| Structure beyond N | RQ1 | B | All four X0 layouts; state vs (N, D) predictors |
-| Overcrowding mechanism | RQ3 | C | I_dir / coverage timeseries plus mechanism tests |
-| Cross-method transfer | RQ4 | D | Same grids on transfer methods; transfer table |
-| Information vs shepherds | RQ5 | E | Factor sweeps; substitution curves |
-| Scaling fits | RQ6 | F | Model comparison on real (non-flat) frontiers |
-| Early warning | RQ7 | G | Lead-time / AUROC from failure trajectories |
+Science docs: `scaling/docs/` (plan, tracker, final report).
+Code map: [docs/codes/map_codes.html](codes/map_codes.html).
 
-Caps I1 to I14 in the plan are the capability checklist (grid runner, frontier,
-regimes, X0 generators, predictors, interference/coverage, mechanism tests,
-transfer, substitution, scaling fits, early warning, dossier export, timeseries).
-Several Caps are already built and unit-tested. Claim-grade use follows the
-protocol waves in the progress tracker.
+## Relation to `main`
 
-### Where to read the science
-
-- Program framing: [scaling/docs/herdsim_research_program.md](../scaling/docs/herdsim_research_program.md)
-- Detailed plan (RQs, claims, Caps, protocol): [scaling/docs/main_scaling_plan.md](../scaling/docs/main_scaling_plan.md)
-- Status, hardware, ordered run plan: [scaling/docs/progress_tracker.md](../scaling/docs/progress_tracker.md)
-
-Do not treat the Experiments UI exports as a substitute for this protocol stack.
-UI batch studies stay in the browser. Scaling protocols write under `scaling/results/`
-and are meant to stay with the repo.
-
-## HTTP API (methods)
-
-Discovery and UI payloads use **method** wording:
-
-- `GET /api/methods` lists named methods (from `core/methods.py`, with package metadata from `methods/<id>/info.json` where present)
-- Related routes under `/api/methods/...` (for example models meta used by Experiments)
-
-There is no `/api/algorithms` route. Prefer `method` / `methods` in new API fields and clients.
-
-Scaling protocols are CLI/Makefile driven today. They wrap the same
-simulation runner and methods, not a separate HTTP surface.
+`main` keeps the platform GUI and the same engine. This branch drops GUI code so
+RQ work has a smaller tree. Merge engine changes from `main` into `scaling-cli`
+regularly; keep RQ-only commits off `main` until you intentionally port them.

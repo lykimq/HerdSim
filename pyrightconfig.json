@@ -2,6 +2,6 @@
   "pythonVersion": "3.11",
   "venvPath": ".",
   "venv": ".venv",
-  "extraPaths": [".", "platform", "scaling"],
+  "extraPaths": [".", "scaling"],
   "failOnWarnings": false
 }

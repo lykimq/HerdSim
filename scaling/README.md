@@ -1,6 +1,8 @@
 # Scaling protocols
 
-Tools and results for the shepherding scaling experiments.
+Primary surface of the **scaling-cli** branch: tools and results for the
+shepherding scaling research questions. Platform GUI code is not in this tree
+(see `main`).
 
 Reader entry point: [docs/final_report.md](docs/final_report.md) ([HTML](docs/final_report.html)).
 Emailable short package: [docs/report/short_report.html](docs/report/short_report.html) (self-contained folder under `docs/report/`).

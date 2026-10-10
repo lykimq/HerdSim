@@ -1,7 +1,7 @@
 """Force components for Kubo 2022 multi-dog herding.
 
-Faithful Python port of the MATLAB force terms in
-integrations/matlab/Force-Based-Sheep-Herding-Algorithm/src/main.m.
+Faithful Python port of the MATLAB Force-Based-Sheep-Herding-Algorithm force terms
+(reference sources live on the main branch under integrations/).
 """
 
 from __future__ import annotations

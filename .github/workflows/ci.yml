@@ -1,13 +1,13 @@
 name: CI/CD Pipeline
 
-# Cheap gates only: unit/short tests, typecheck, frontend build.
-# Do not run stress sims, scaling campaigns, or long experiment grids here.
+# Cheap gates for the scaling-cli branch: engine + scaling stack tests, lint, typecheck.
+# Do not run stress sims or long campaign grids here.
 
 on:
   push:
-    branches: [ main, master, dev ]
+    branches: [ main, master, dev, scaling-cli ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main, master, scaling-cli ]
 
 jobs:
   backend-tests:
@@ -37,18 +37,3 @@ jobs:
         run: uv sync --extra dev
       - name: Typecheck Python
         run: make typecheck
-
-  frontend-build:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-      - name: Install & build frontend
-        run: |
-          cd platform/frontend
-          npm ci
-          npm run build
