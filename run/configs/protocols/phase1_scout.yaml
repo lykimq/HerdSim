@@ -1,0 +1,24 @@
+# Phase-1 scout. Full frozen N and D, compact layout, baseline method.
+# Grade: SCOUT. Resume-safe via manifest.jsonl.
+#
+# Why this grid: claim windows are chosen from this map. A subset that drops
+# N=5, 10, 300, 400 or D=25, 35 cannot support D_min on the freeze.
+# 10 N x 10 D x 30 seeds = 3,000 trials.
+
+protocol_id: phase1_scout
+phase: 1
+grade: SCOUT
+output: results/phase1/scout
+canonical: run/configs/canonical_grid.yaml
+
+methods:
+  - strombom_multi
+layouts:
+  - compact
+  # Structure stays fixed so this map is size and D only.
+flock_sizes: [5, 10, 25, 50, 75, 100, 150, 200, 300, 400]
+shepherd_counts: [1, 2, 3, 4, 6, 10, 15, 20, 25, 35]
+seeds: 30
+seed_mode: scout
+store_timeseries: true
+packages: [A, F]

@@ -25,7 +25,7 @@ dev = [
     "basedpyright>=1.18",
 ]
 
-# Shared engine at repo root; scaling services mapped for services.scaling imports.
+# Import names stay stable; folders are purpose-split under sim/ and run/.
 [tool.setuptools]
 packages = [
     "analysis",
@@ -46,13 +46,29 @@ packages = [
     "plugins.metrics",
     "plugins.scenarios",
     "plugins.sheep",
+    "run",
+    "run.packaging",
     "services.scaling",
-    "services.shared",
 ]
 
 [tool.setuptools.package-dir]
-"services.scaling" = "scaling/services/scaling"
-"services.shared" = "services/shared"
+"core" = "sim/core"
+"core.agents" = "sim/core/agents"
+"methods" = "sim/methods"
+"methods.flocking_dog" = "sim/methods/flocking_dog"
+"methods.heterogeneous" = "sim/methods/heterogeneous"
+"methods.kubo" = "sim/methods/kubo"
+"methods.obstacle_aware" = "sim/methods/obstacle_aware"
+"methods.strombom" = "sim/methods/strombom"
+"methods.strombom_multi" = "sim/methods/strombom_multi"
+"methods.strombom_noise" = "sim/methods/strombom_noise"
+"methods.v_formation" = "sim/methods/v_formation"
+"plugins" = "sim/plugins"
+"plugins.dogs" = "sim/plugins/dogs"
+"plugins.metrics" = "sim/plugins/metrics"
+"plugins.scenarios" = "sim/plugins/scenarios"
+"plugins.sheep" = "sim/plugins/sheep"
+"services.scaling" = "run/services/scaling"
 
 [tool.ruff]
 line-length = 100
@@ -63,14 +79,14 @@ select = ["E", "F", "I", "W", "UP"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests/backend"]
-pythonpath = [".", "scaling"]
+pythonpath = ["."]
 markers = [
     "stress: heavy / long runs; use make test-stress",
 ]
 
 [tool.pyright]
 pythonVersion = "3.11"
-extraPaths = [".", "scaling"]
+extraPaths = [".", "sim"]
 venvPath = "."
 venv = ".venv"
 failOnWarnings = false

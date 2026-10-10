@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from analysis.failure_taxonomy import (
+from run.packaging.failure_taxonomy import (
     FAILURE_NONE,
     FAILURE_OSCILLATION,
     FAILURE_SCATTER,

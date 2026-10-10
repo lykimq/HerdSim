@@ -1,0 +1,28 @@
+# Phase-1 smoke pilot (compact layout, reduced grid).
+# Grade: SMOKE. Not claim-grade.
+#
+# Why this subset: prove the pipeline (run, trials, Package A, figures)
+# on the scaling arena without a full freeze. World, goal radius, and goal
+# center come from canonical_grid.yaml inside the runner.
+
+protocol_id: phase1_pilot
+phase: 1
+grade: SMOKE
+output: results/phase1/pilot
+canonical: run/configs/canonical_grid.yaml
+
+methods:
+  - strombom_multi
+  # Baseline only: smoke does not pay for transfer methods.
+layouts:
+  - compact
+  # Reference X0. If compact already fails the pipeline, the run is not a layout result.
+flock_sizes: [5, 10, 25, 50, 100]
+# Floor of the freeze through the size edge, without 75 and 150..400.
+shepherd_counts: [1, 2, 3, 4, 6, 10]
+# Low-D band where D_min usually sits. Omits 15..35.
+seeds: 5
+# Enough repeats to exercise aggregation. Not a frontier estimate.
+seed_mode: scout
+store_timeseries: true
+packages: [A]

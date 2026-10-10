@@ -1,5 +1,5 @@
 # Code maps (scaling-cli)
 
-- [map_codes.html](map_codes.html): Scaling CLI and research-question code map (trees, pipeline graphs, per-RQ files and functions).
+- [map_codes.html](map_codes.html): Scaling CLI and research-question code map.
 
-This branch has no platform GUI sources. For Simulate / Compare / Experiments UI code, use `main`.
+Purpose folders: `sim/` (engine), `run/` (campaigns), `analysis/` (post-run), `results/` (data), `docs/` (including frozen `docs/report/`).

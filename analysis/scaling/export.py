@@ -18,8 +18,8 @@ from analysis.scaling.plots import (
     save_regime_counts,
     save_reliability_heatmap,
 )
-from analysis.scaling.provenance import build_provenance_stamp, write_provenance
 from analysis.scaling.regimes import label_regimes
+from run.packaging.provenance import build_provenance_stamp, write_provenance
 
 
 def _write_df(df: pd.DataFrame, path: Path) -> None:

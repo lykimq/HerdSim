@@ -1,0 +1,31 @@
+# Phase-5 information scout (RQ5).
+# Grade: SCOUT. Observation ladder on the baseline method.
+#
+# Claim sizes are {100, 200}: the size edge and the steep band. N=50 is omitted
+# because a D_min of 1 cannot fall by a grid step. Seeds are the scout depth
+# (30). Range and communication ladders are separate campaigns; range steps are
+# 0.5, 1, 1.5, 2 times r_s (65 for Strombom), not a base of 50.
+
+protocol_id: phase5_factor_sweep
+phase: 5
+grade: SCOUT
+output: results/phase5/factor_sweep
+canonical: run/configs/canonical_grid.yaml
+
+method: strombom_multi
+runner: factor
+layouts:
+  - compact
+flock_sizes: [100, 200]
+shepherd_counts: [1, 2, 3, 4, 6, 10]
+# Low-D band, where a one-step saving can appear. High D stays on the size map.
+seeds: 30
+seed_mode: scout
+obs_modes:
+  - bearing_only
+  - local_positions
+  - global
+# sensing_ranges and communications live in phase5_range_scout.yaml and
+# phase5_comm_scout.yaml so each ladder is one campaign, not a product.
+store_timeseries: false
+packages: [E]

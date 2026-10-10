@@ -17,10 +17,10 @@ from analysis.scaling.mechanism import (
     evaluate_temporal_order,
 )
 from analysis.scaling.predictors import compare_state_vs_nd_predictors
-from analysis.scaling.provenance import build_provenance_stamp
 from analysis.scaling.regimes import label_regimes
 from analysis.scaling.substitution import substitution_curves
 from analysis.scaling.transfer import build_transfer_table
+from run.packaging.provenance import build_provenance_stamp
 
 __all__ = [
     "build_provenance_stamp",
