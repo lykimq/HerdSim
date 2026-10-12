@@ -5,12 +5,6 @@ factor. Dog decisions live under plugins.dogs; this package only updates sheep
 positions and velocities.
 """
 
-from plugins.sheep.jadhav import JadhavSheepDynamics
-from plugins.sheep.kubo import KuboSheepDynamics
-from plugins.sheep.strombom import StrombomSheepDynamics
+from .base import BaseSheepDynamics
 
-__all__ = [
-    "StrombomSheepDynamics",
-    "KuboSheepDynamics",
-    "JadhavSheepDynamics",
-]
+__all__ = ["BaseSheepDynamics"]

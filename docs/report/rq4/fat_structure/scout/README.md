@@ -14,7 +14,7 @@ SCOUT FAT four-layout structure map. Used to plan claim windows. Not claim-grade
 - D: {1, 2, 3, 4, 6, 10, 15, 20, 25, 35}
 - Seeds: 30
 - Package export: B
-- Command: `make -C scaling scaling-transfer-structure-scout TRANSFER_METHOD=fat WORKERS=16`
+- Command: `uv run cli/campaign.py run --protocol phase4_fat_structure_scout` --workers 16
 
 ## Completeness
 

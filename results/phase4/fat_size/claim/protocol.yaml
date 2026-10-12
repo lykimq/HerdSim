@@ -1,8 +1,8 @@
 protocol_id: phase4_fat_size_claim
 phase: 4
 grade: CLAIM
-output: scaling/results/phase4/fat_size/claim
-canonical: scaling/configs/canonical_grid.yaml
+output: results/phase4/fat_size/claim
+canonical: protocols/configs/canonical_grid.yaml
 methods:
 - fat
 layouts:

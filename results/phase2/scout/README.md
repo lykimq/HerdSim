@@ -20,7 +20,7 @@ Cheap start-shape map: 3,600 trials across N in {50,100,200}, four layouts, and 
 - Seeds: 30
 - Theta: 0.90 (90% success bar)
 - T0: 10000
-- Output: `scaling/results/phase2/scout/`
+- Output: `results/phase2/scout/`
 
 ## Completeness
 

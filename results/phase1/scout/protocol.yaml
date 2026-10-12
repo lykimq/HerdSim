@@ -1,8 +1,8 @@
 protocol_id: phase1_scout
 phase: 1
 grade: SCOUT
-output: scaling/results/phase1/scout
-canonical: scaling/configs/canonical_grid.yaml
+output: results/phase1/scout
+canonical: protocols/configs/canonical_grid.yaml
 methods:
 - strombom_multi
 layouts:

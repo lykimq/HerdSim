@@ -15,8 +15,8 @@ T1 asks: if more dogs start to hurt at the usual deadline, does that still hold 
 
 - Protocol: `scaling_v2`
 - Upstream: `phase1_claim` `merged_trials.csv`
-- Command: `make -C scaling scaling-t1 WORKERS=16`
-- Output: `scaling/results/phase1/t1/`
+- Command: `uv run cli/campaign.py t1 --protocol phase1_t1` --workers 16
+- Output: `results/phase1/t1/`
 - Host: gwen; governor performance
 - Theta: 0.90 (90% success bar)
 - Max ticks: 20000

@@ -4,11 +4,11 @@ Role: status (1 = code, 2 = experiment runs, then Claims)
 Why / what: [herdsim_research_program.md](herdsim_research_program.md)
 How: [main_scaling_plan.md](main_scaling_plan.md)
 Findings: [final_report.md](final_report.md) ([HTML](final_report.html))
-Help: `make -C run help` (wraps `run/scripts/campaign.py`)
+Help: `uv run cli/campaign.py help`
 
 Protocol: `scaling_v2`
 Host: `gwen` (Intel Core Ultra 7 165H, 22 threads, 61 GiB RAM)
-Workers: prefer `WORKERS=16` on AC (leave headroom; not all 22). Cap at 18 if the machine stays cool.
+Workers: prefer `--workers 16` on AC (leave headroom; not all 22). Cap at 18 if the machine stays cool.
 CPU: set governor to `performance` before long campaigns (see below).
 Results: run data in `results/` (trials, packages) is kept in git; timeseries parquet files are ignored via `.gitignore`. Figures live under `docs/figures/`.
 
@@ -42,8 +42,8 @@ All Section 2 experiment steps can run with the current code. No campaign YAML i
 
 ## 2. Experiment runs
 
-Default from repo root: `WORKERS=16` on this host (AC). Transfer examples use
-`TRANSFER_METHOD=kubo` (repeat with `fat`).
+Default from repo root: `--workers 16` on this host (AC). Transfer examples use
+`phase4_kubo_*` protocols (repeat with `phase4_fat_*`).
 
 Before a long scout or claim (once per boot, as root or with sudo):
 
@@ -56,24 +56,24 @@ When finished or on battery, you can switch back to `powersave` the same way.
 
 | # | Step | Grade | Command | Output | Status |
 |---|------|-------|---------|--------|--------|
-| 0 | Sanity tests | n/a | `make -C run scaling-test` | pytest | DONE |
-| 1 | Phase 1 smoke | SMOKE | `make -C run scaling-pilot WORKERS=16` | `results/phase1/pilot/` | DONE |
-| 2 | Phase 1 scout | SCOUT | `make -C run scaling-scout WORKERS=16` | `results/phase1/scout/` | DONE |
-| 3 | Plan claim windows | n/a | `make -C run scaling-claim-plan` | `results/phase1/claim/boundary_cells.csv` | DONE |
-| 4 | Phase 1 claim reseed | CLAIM | `make -C run scaling-claim-reseed WORKERS=16` | `results/phase1/claim/` | DONE |
-| 5 | Analyse Package A and F on the merge | CLAIM | `make -C run scaling-analyse PACKAGE=A TRIALS=results/phase1/claim/merged_trials.csv OUT=results/phase1/claim/packages/a` | packages | DONE |
-| 6 | Phase 1 T1 | CLAIM | `make -C run scaling-t1 WORKERS=16` | `results/phase1/t1/` | SKIPPED (0 overcrowding cells) |
-| 7 | Phase 2 structure scout | SCOUT | `make -C run scaling-phase2-scout WORKERS=16` | `results/phase2/scout/` | DONE |
-| 8 | Phase 2 claim | CLAIM | `make -C run scaling-phase2-claim-reseed WORKERS=16` | `results/phase2/claim/` | DONE |
-| 9 | Phase 3 mechanism | CLAIM | `make -C run scaling-analyse PACKAGE=C TRIALS=results/phase1/claim/merged_trials.csv OUT=results/phase1/claim/packages/c` | Package C | SKIPPED (0 overcrowding cells in Phase 1) |
-| 10 | Phase 6 fits | CLAIM | `make -C run scaling-analyse PACKAGE=F TRIALS=results/phase1/claim/merged_trials.csv OUT=results/phase1/claim/packages/f` | Package F | DONE |
-| 11 | Phase 4 size (kubo then fat) | SCOUT then CLAIM | `make -C run scaling-transfer-size-scout TRANSFER_METHOD=kubo WORKERS=16` then claim-reseed; repeat `fat` | `results/phase4/` | DONE |
-| 12 | Phase 4 structure (kubo then fat) | SCOUT then CLAIM | `make -C run scaling-transfer-structure-scout TRANSFER_METHOD=kubo WORKERS=16` then claim-reseed; repeat `fat` | `results/phase4/` | DONE |
-| 13 | Phase 4 transfer table | CLAIM | `make -C run scaling-analyse PACKAGE=D TRIALS=... --trials-by-method ...` | packages/d | DONE |
-| 14 | Phase 5 obs scout/claim | SCOUT then CLAIM | `make -C run scaling-factor-sweep WORKERS=18` then `scaling-phase5-obs-claim-reseed` | `results/phase5/` | INTERRUPTED (obs scout 141/1080) |
-| 15 | Phase 5 range | SCOUT then CLAIM | `scaling-phase5-range-scout WORKERS=18` then `scaling-phase5-range-claim-reseed` | `results/phase5/` | NOT RUN YET |
-| 16 | Phase 5 communication | SCOUT then CLAIM | `scaling-phase5-comm-scout WORKERS=18` then `scaling-phase5-comm-claim-reseed` | `results/phase5/` | NOT RUN YET |
-| 17 | Phase 7 early warning | CLAIM | `make -C run scaling-analyse PACKAGE=G TRIALS=results/phase1/claim/merged_trials.csv OUT=results/phase1/claim/packages/g` | Package G | DONE |
+| 0 | Sanity tests | n/a | `make test` | pytest | DONE |
+| 1 | Phase 1 smoke | SMOKE | `uv run cli/campaign.py run --protocol phase1_pilot` --workers 16 | `results/phase1/pilot/` | DONE |
+| 2 | Phase 1 scout | SCOUT | `uv run cli/campaign.py run --protocol phase1_scout` --workers 16 | `results/phase1/scout/` | DONE |
+| 3 | Plan claim windows | n/a | `uv run cli/campaign.py claim-plan --protocol phase1_claim` | `results/phase1/claim/boundary_cells.csv` | DONE |
+| 4 | Phase 1 claim reseed | CLAIM | `uv run cli/campaign.py claim-reseed --protocol phase1_claim` --workers 16 | `results/phase1/claim/` | DONE |
+| 5 | Analyse Package A and F on the merge | CLAIM | `analysis` Package A on `results/phase1/claim/merged_trials.csv` | packages | DONE |
+| 6 | Phase 1 T1 | CLAIM | `uv run cli/campaign.py t1 --protocol phase1_t1` --workers 16 | `results/phase1/t1/` | SKIPPED (0 overcrowding cells) |
+| 7 | Phase 2 structure scout | SCOUT | `uv run cli/campaign.py run --protocol phase2_scout` --workers 16 | `results/phase2/scout/` | DONE |
+| 8 | Phase 2 claim | CLAIM | `uv run cli/campaign.py claim-reseed --protocol phase2_claim` --workers 16 | `results/phase2/claim/` | DONE |
+| 9 | Phase 3 mechanism | CLAIM | `analysis` Package C on `results/phase1/claim/merged_trials.csv` | Package C | SKIPPED (0 overcrowding cells in Phase 1) |
+| 10 | Phase 6 fits | CLAIM | `analysis` Package F on `results/phase1/claim/merged_trials.csv` | Package F | DONE |
+| 11 | Phase 4 size (kubo then fat) | SCOUT then CLAIM | `uv run cli/campaign.py run --protocol phase4_kubo_size_scout` --workers 16 then claim-reseed; repeat `fat` | `results/phase4/` | DONE |
+| 12 | Phase 4 structure (kubo then fat) | SCOUT then CLAIM | `uv run cli/campaign.py run --protocol phase4_kubo_structure_scout` --workers 16 then claim-reseed; repeat `fat` | `results/phase4/` | DONE |
+| 13 | Phase 4 transfer table | CLAIM | `analysis` Package D with `--trials-by-method` | packages/d | DONE |
+| 14 | Phase 5 obs scout/claim | SCOUT then CLAIM | `uv run cli/campaign.py run --protocol phase5_factor_sweep` --workers 18 then `uv run cli/campaign.py claim-reseed --protocol phase5_obs_claim` | `results/phase5/` | INTERRUPTED (obs scout 141/1080) |
+| 15 | Phase 5 range | SCOUT then CLAIM | `uv run cli/campaign.py run --protocol phase5_range_scout` --workers 18 then `claim-reseed --protocol phase5_range_claim` | `results/phase5/` | NOT RUN YET |
+| 16 | Phase 5 communication | SCOUT then CLAIM | `uv run cli/campaign.py run --protocol phase5_comm_scout` --workers 18 then `claim-reseed --protocol phase5_comm_claim` | `results/phase5/` | NOT RUN YET |
+| 17 | Phase 7 early warning | CLAIM | `analysis` Package G on `results/phase1/claim/merged_trials.csv` | Package G | DONE |
 
 After step 2, if the bootstrap interval on D_min covers more than one grid step, raise that window to 200 seeds before the structure claim.
 

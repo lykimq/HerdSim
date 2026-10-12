@@ -11,7 +11,6 @@ from dataclasses import dataclass
 import numpy as np
 from scipy.spatial import ConvexHull, QhullError
 
-
 _EPS = 1e-12
 
 

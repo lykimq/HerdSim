@@ -155,10 +155,10 @@
 <div class="chrome">
   <strong>HerdSim</strong>
   <span>Scaling code map</span>
-  <a href="../architecture.md">architecture.md</a>
-  <a href="../../scaling/docs/final_report.md">final report</a>
-  <a href="../../scaling/docs/progress_tracker.md">progress tracker</a>
-  <a href="../../scaling/README.md">scaling README</a>
+  <a href="architecture.md">architecture.md</a>
+  <a href="../science/final_report.md">final report</a>
+  <a href="../science/progress_tracker.md">progress tracker</a>
+  <a href="../../README.md">README</a>
 </div>
 <div class="layout">
 <nav>
@@ -198,9 +198,10 @@
     writes ledgers, and runs analysis packages on the resulting CSVs.
   </p>
   <div class="callout">
-    Entry points: <code>make -C scaling &lt;target&gt;</code> wraps
-    <code>scaling/scripts/campaign.py</code>, which loads a protocol YAML under
-    <code>scaling/configs/protocols/</code> and dispatches to a runner script.
+    Entry point: <code>uv run cli/campaign.py &lt;verb&gt; --protocol &lt;id&gt;</code>.
+    Protocol YAMLs live under <code>protocols/configs/protocols/</code>.
+    The CLI dispatches to <code>cli/run_grid.py</code>, <code>cli/run_factor_sweep.py</code>,
+    or the claim/T1 planners.
   </div>
   <div class="grid2">
     <div>
@@ -210,7 +211,7 @@
         <li>Multiprocess grid / factor runners</li>
         <li>Claim / T1 window planners</li>
         <li>Manifest resume ledger + trials.csv</li>
-        <li>Analysis exports under <code>analysis/scaling/</code></li>
+        <li>Analysis exports under <code>analysis/</code></li>
       </ul>
     </div>
     <div>
@@ -230,54 +231,34 @@
   <h2>2. Related code tree</h2>
   <p>Folders that matter for the scaling CLI (not the full monorepo).</p>
   <div class="tree">HerdSim/
-|-- scaling/                         # campaign area
-|   |-- Makefile                     # make -C scaling ...
+|-- sim/                             # tick engine (core, plugins, methods)
+|-- protocols/
 |   |-- configs/
-|   |   |-- canonical_grid.yaml      # frozen N, D, theta, seeds, arena
+|   |   |-- canonical_grid.yaml
 |   |   `-- protocols/               # one YAML per campaign stage
-|   |-- scripts/
-|   |   |-- campaign.py              # thin CLI -&gt; services.scaling.campaign
-|   |   |-- run_grid.py              # N x D x layout x seed grids
-|   |   |-- run_factor_sweep.py      # obs / range / comm ladders (RQ5)
-|   |   |-- plan_claim_cells.py      # claim windows from scout
-|   |   `-- plan_t1_cells.py         # T1 overcrowding cells
-|   |-- services/scaling/
-|   |   |-- campaign.py              # verb dispatcher (run / claim / t1)
-|   |   |-- layout.py                # protocol load, output paths, packages
-|   |   `-- runner.py                # ScalingCell, expand, _run_cell, resume
-|   |-- results/phase{1,2,4,5}/      # trials, manifests, merges
-|   `-- docs/                        # reports + tracker
-|-- analysis/scaling/                # Package A-G logic on trials CSVs
-|   |-- frontier.py                  # D_min, windows, bootstrap, merge
-|   |-- regimes.py                   # efficient / waste / overcrowding labels
-|   |-- export.py                    # Package A + dossier writer
-|   |-- predictors.py                # RQ1 state vs (N,D)
-|   |-- mechanism.py                 # RQ3 overcrowding contrasts
-|   |-- transfer.py                  # RQ4 transfer tables
-|   |-- substitution.py              # RQ5 ladders
-|   |-- fits.py                      # RQ6 scaling curves
-|   |-- early_warning.py             # RQ7
-|   `-- provenance.py
-|-- core/                            # shared engine
-|   |-- simulation_runner.py         # tick loop used by every trial
-|   |-- methods.py                   # strombom_multi / kubo / fat bundles
-|   |-- observation_models.py        # global / local / bearing_only
-|   |-- experiment_config.py         # resolve_experiment_config
-|   `-- experimental_factors.py
-|-- plugins/
-|   |-- dogs/collect_drive_multi.py  # baseline multi-dog controller
-|   |-- dogs/kubo_forces.py
-|   |-- dogs/fat.py
-|   |-- sheep/strombom.py
-|   |-- sheep/kubo.py
-|   `-- scenarios/drive_to_goal.py
-`-- methods/{strombom_multi,kubo,fat}/  # method defaults / metadata
-</div>
+|   `-- packaging/                   # failure labels, aggregates, provenance
+|-- cli/
+|   |-- campaign.py                  # campaign CLI (verbs: run / claim / t1)
+|   |-- run_grid.py
+|   |-- run_factor_sweep.py
+|   |-- plan_claim_cells.py
+|   `-- plan_t1_cells.py
+|-- services/
+|   |-- layout.py                    # protocol load, output paths, packages
+|   `-- runner.py                    # ScalingCell, expand, _run_cell, resume
+|-- analysis/                        # Package A-G on trials CSVs
+|-- results/phase{1,2,4,5}/          # trials, manifests, merges
+|-- docs/
+|   |-- science/
+|   |-- codes/                       # architecture + this map
+|   |-- figures/
+|   `-- report/                      # published RQ package
+`-- tests/{sim,services,protocols,analysis}/</div>
 </section>
 
 <section id="pipeline">
   <h2>3. CLI pipeline graph</h2>
-  <p>How a make target becomes trial rows.</p>
+  <p>How a campaign verb becomes trial rows.</p>
   <svg class="diagram" viewBox="0 0 900 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="CLI pipeline">
     <defs>
       <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
@@ -285,8 +266,8 @@
       </marker>
     </defs>
     <rect x="10" y="70" width="120" height="56" rx="8" fill="#fff" stroke="#d6d3d1"/>
-    <text x="70" y="94" text-anchor="middle" font-size="12" font-family="IBM Plex Sans,sans-serif">Makefile</text>
-    <text x="70" y="112" text-anchor="middle" font-size="10" fill="#57534e" font-family="IBM Plex Mono,monospace">make -C scaling</text>
+    <text x="70" y="94" text-anchor="middle" font-size="12" font-family="IBM Plex Sans,sans-serif">CLI entry</text>
+    <text x="70" y="112" text-anchor="middle" font-size="10" fill="#57534e" font-family="IBM Plex Mono,monospace">uv run cli/campaign.py</text>
 
     <line x1="130" y1="98" x2="170" y2="98" stroke="#57534e" marker-end="url(#arr)"/>
 
@@ -332,7 +313,7 @@
       <tr><td><code>t1-plan</code> / <code>t1</code></td><td><code>plan_t1_cells.py</code></td><td>Overcrowding cells at T1 (RQ2); skipped if none</td></tr>
     </tbody>
   </table>
-  <p class="path">Dispatcher: <code>scaling/services/scaling/campaign.py</code> functions <code>run_campaign</code>, <code>runner_kind</code>, <code>resolve_upstream_trials</code>.</p>
+  <p class="path">Dispatcher: <code>cli/campaign.py</code> (<code>run_campaign</code>); protocol helpers in <code>services/layout.py</code> (<code>runner_kind</code>, <code>resolve_upstream_trials</code>).</p>
 </section>
 
 <section id="tick">
@@ -343,11 +324,11 @@
   </p>
   <div class="flow">
     <div class="flow-row">
-      <div class="node"><strong>_run_cell</strong><span>services/scaling/runner.py</span></div>
+      <div class="node"><strong>_run_cell</strong><span>services/runner.py</span></div>
       <span class="arrow">-&gt;</span>
       <div class="node"><strong>get_method</strong><span>core/methods.py</span></div>
       <span class="arrow">-&gt;</span>
-      <div class="node"><strong>resolve_experiment_config</strong><span>core/experiment_config.py</span></div>
+      <div class="node"><strong>resolve_experiment_config</strong><span>core/config/experiment.py</span></div>
       <span class="arrow">-&gt;</span>
       <div class="node"><strong>SimulationRunner</strong><span>core/simulation_runner.py</span></div>
     </div>
@@ -355,7 +336,7 @@
   <pre>state(t)
   -&gt; environment updates / failure factors
   -&gt; sheep_dynamics.step
-  -&gt; observation_model.observe_all
+  -&gt; observation.observe_all
   -&gt; (optional) communication messages
   -&gt; dog_controller.step(observations)
   -&gt; robot constraints / walls
@@ -369,7 +350,7 @@
 <section id="phase-rq">
   <h2>5. Phase folder to research question</h2>
   <p>
-    Folder names under <code>scaling/results/</code> still use phase numbers. Report docs rename them to RQs.
+    Folder names under <code>results/</code> still use phase numbers. Report docs rename them to RQs.
   </p>
   <table>
     <thead>
@@ -397,27 +378,27 @@
     <li><code>phase1_claim.yaml</code> claim windows (upstream: scout)</li>
     <li><code>phase1_t1.yaml</code> longer deadline on overcrowding (skipped: none found)</li>
   </ul>
-  <h3>Make targets</h3>
-  <pre>make -C scaling scaling-pilot
-make -C scaling scaling-scout
-make -C scaling scaling-claim-plan
-make -C scaling scaling-claim-reseed
-# optional: scaling-t1-plan / scaling-t1</pre>
+  <h3>Campaign commands</h3>
+  <pre>uv run cli/campaign.py run --protocol phase1_pilot
+uv run cli/campaign.py run --protocol phase1_scout
+uv run cli/campaign.py claim-plan --protocol phase1_claim
+uv run cli/campaign.py claim-reseed --protocol phase1_claim
+# optional: t1-plan / t1 --protocol phase1_t1</pre>
   <h3>Code path</h3>
   <table>
     <thead><tr><th>Layer</th><th>File</th><th>Functions / symbols</th></tr></thead>
     <tbody>
-      <tr><td>CLI</td><td><code>services/scaling/campaign.py</code></td><td><code>run_campaign</code> verb <code>run</code> / <code>claim-*</code></td></tr>
-      <tr><td>Grid</td><td><code>scripts/run_grid.py</code></td><td>expands N/D/layout/seed from protocol</td></tr>
-      <tr><td>Runner</td><td><code>services/scaling/runner.py</code></td><td><code>expand_scaling_grid</code>, <code>run_scaling_grid</code>, <code>_run_cell</code>, <code>_cell_key</code></td></tr>
-      <tr><td>Claim plan</td><td><code>scripts/plan_claim_cells.py</code> + <code>analysis/scaling/frontier.py</code></td><td><code>select_claim_windows</code>, <code>merge_scout_and_claim</code></td></tr>
+      <tr><td>CLI</td><td><code>cli/campaign.py</code></td><td>verbs <code>run</code> / <code>claim-*</code> / <code>t1</code></td></tr>
+      <tr><td>Grid</td><td><code>cli/run_grid.py</code></td><td>expands N/D/layout/seed from protocol</td></tr>
+      <tr><td>Runner</td><td><code>services/runner.py</code></td><td><code>expand_scaling_grid</code>, <code>run_scaling_grid</code>, <code>_run_cell</code>, <code>_cell_key</code></td></tr>
+      <tr><td>Claim plan</td><td><code>cli/plan_claim_cells.py</code> + <code>analysis/frontier.py</code></td><td><code>select_claim_windows</code>, <code>merge_scout_and_claim</code></td></tr>
       <tr><td>Method</td><td><code>core/methods.py</code></td><td><code>strombom_multi</code> -&gt; sheep <code>strombom</code>, dog <code>collect_drive_multi</code></td></tr>
       <tr><td>Controller</td><td><code>plugins/dogs/collect_drive_multi.py</code></td><td><code>CollectDriveMultiController.step</code>, <code>_sheep_for_dog</code></td></tr>
       <tr><td>Heuristics</td><td><code>methods/strombom/heuristics.py</code></td><td><code>shepherd_step_toward</code>, <code>compute_threshold</code></td></tr>
-      <tr><td>Analysis</td><td><code>analysis/scaling/{frontier,regimes,export}.py</code></td><td>Package A: <code>extract_frontier</code>, <code>label_regimes</code>, <code>export_package_a</code></td></tr>
+      <tr><td>Analysis</td><td><code>analysis/{frontier,regimes,export}.py</code></td><td>Package A: <code>extract_frontier</code>, <code>label_regimes</code>, <code>export_package_a</code></td></tr>
     </tbody>
   </table>
-  <p>Outputs: <code>scaling/results/phase1/{pilot,scout,claim}/</code>. Report mirror: <code>scaling/docs/report/rq2/</code>.</p>
+  <p>Outputs: <code>results/phase1/{pilot,scout,claim}/</code>. Report mirror: <code>docs/report/rq2/</code>.</p>
 </section>
 
 <section id="rq1" class="rq1">
@@ -429,21 +410,21 @@ make -C scaling scaling-claim-reseed
     <li><code>phase2_scout.yaml</code> four layouts x {50,100,200} x D</li>
     <li><code>phase2_claim.yaml</code></li>
   </ul>
-  <h3>Make targets</h3>
-  <pre>make -C scaling scaling-pilot-state
-make -C scaling scaling-phase2-scout
-make -C scaling scaling-phase2-claim-plan
-make -C scaling scaling-phase2-claim-reseed</pre>
+  <h3>Campaign commands</h3>
+  <pre>uv run cli/campaign.py run --protocol phase2_pilot_state
+uv run cli/campaign.py run --protocol phase2_scout
+uv run cli/campaign.py claim-plan --protocol phase2_claim
+uv run cli/campaign.py claim-reseed --protocol phase2_claim</pre>
   <h3>Extra code vs RQ2</h3>
   <table>
     <thead><tr><th>File</th><th>Role</th></tr></thead>
     <tbody>
-      <tr><td><code>core/x0_generators.py</code></td><td>Layouts: compact, wide, split, outlier_rich</td></tr>
-      <tr><td><code>analysis/scaling/predictors.py</code></td><td>Package B: <code>compare_state_vs_nd_predictors</code> (C1b)</td></tr>
-      <tr><td><code>analysis/scaling/export.py</code></td><td><code>export_package_dossier</code> for Package B tables</td></tr>
+      <tr><td><code>core/world/layouts.py</code></td><td>Layouts: compact, wide, split, outlier_rich</td></tr>
+      <tr><td><code>analysis/predictors.py</code></td><td>Package B: <code>compare_state_vs_nd_predictors</code> (C1b)</td></tr>
+      <tr><td><code>analysis/export.py</code></td><td><code>export_package_dossier</code> for Package B tables</td></tr>
     </tbody>
   </table>
-  <p>Same baseline method/controller stack as RQ2. Results: <code>scaling/results/phase2/</code>. Report: <code>rq1/</code>.</p>
+  <p>Same baseline method/controller stack as RQ2. Results: <code>results/phase2/</code>. Report: <code>rq1/</code>.</p>
 </section>
 
 <section id="rq3" class="rq3">
@@ -453,11 +434,11 @@ make -C scaling scaling-phase2-claim-reseed</pre>
   <table>
     <thead><tr><th>File</th><th>Functions</th></tr></thead>
     <tbody>
-      <tr><td><code>analysis/scaling/mechanism.py</code></td><td><code>evaluate_overcrowding_mechanisms</code>, <code>evaluate_temporal_order</code></td></tr>
-      <tr><td><code>analysis/scaling/frontier.py</code></td><td>needs matched efficient vs overcrowding cells at same N</td></tr>
+      <tr><td><code>analysis/mechanism.py</code></td><td><code>evaluate_overcrowding_mechanisms</code>, <code>evaluate_temporal_order</code></td></tr>
+      <tr><td><code>analysis/frontier.py</code></td><td>needs matched efficient vs overcrowding cells at same N</td></tr>
     </tbody>
   </table>
-  <p>No new sims. Would read RQ2 claim merge. Report note: <code>scaling/docs/report/rq3/</code>.</p>
+  <p>No new sims. Would read RQ2 claim merge. Report note: <code>docs/report/rq3/</code>.</p>
 </section>
 
 <section id="rq4" class="rq4">
@@ -468,12 +449,12 @@ make -C scaling scaling-phase2-claim-reseed</pre>
     <li><code>phase4_kubo_size_{scout,claim}.yaml</code>, <code>phase4_kubo_structure_{scout,claim}.yaml</code></li>
     <li><code>phase4_fat_size_{scout,claim}.yaml</code>, <code>phase4_fat_structure_{scout,claim}.yaml</code></li>
   </ul>
-  <h3>Make targets</h3>
-  <pre>make -C scaling scaling-transfer-size-scout TRANSFER_METHOD=kubo
-make -C scaling scaling-transfer-size-claim-reseed TRANSFER_METHOD=kubo
-make -C scaling scaling-transfer-structure-scout TRANSFER_METHOD=kubo
-make -C scaling scaling-transfer-structure-claim-reseed TRANSFER_METHOD=kubo
-# repeat TRANSFER_METHOD=fat</pre>
+  <h3>Campaign commands</h3>
+  <pre>uv run cli/campaign.py run --protocol phase4_kubo_size_scout
+uv run cli/campaign.py claim-reseed --protocol phase4_kubo_size_claim
+uv run cli/campaign.py run --protocol phase4_kubo_structure_scout
+uv run cli/campaign.py claim-reseed --protocol phase4_kubo_structure_claim
+# then the same four verbs with phase4_fat_*</pre>
   <h3>Method wiring</h3>
   <table>
     <thead><tr><th>Method id</th><th>Sheep plugin</th><th>Dog plugin</th><th>Defaults</th></tr></thead>
@@ -485,10 +466,10 @@ make -C scaling scaling-transfer-structure-claim-reseed TRANSFER_METHOD=kubo
   </table>
   <h3>Analysis</h3>
   <ul class="tight">
-    <li><code>analysis/scaling/transfer.py</code> - <code>build_transfer_table</code> (Package D)</li>
+    <li><code>analysis/transfer.py</code> - <code>build_transfer_table</code> (Package D)</li>
     <li>Per-method Package A/B/F exports via <code>export_package_a</code> / dossier</li>
   </ul>
-  <p>Results: <code>scaling/results/phase4/</code>. Report: <code>rq4/</code>.</p>
+  <p>Results: <code>results/phase4/</code>. Report: <code>rq4/</code>.</p>
 </section>
 
 <section id="rq5" class="rq5">
@@ -501,19 +482,23 @@ make -C scaling scaling-transfer-structure-claim-reseed TRANSFER_METHOD=kubo
     <li>Range: <code>phase5_range_scout.yaml</code>, <code>phase5_range_claim.yaml</code> (pins <code>local_positions</code>)</li>
     <li>Comm: <code>phase5_comm_scout.yaml</code>, <code>phase5_comm_claim.yaml</code> (pins <code>local_positions</code>)</li>
   </ul>
-  <h3>Make / script</h3>
-  <pre>make -C scaling scaling-factor-sweep
-make -C scaling scaling-phase5-*-scout|claim-*
-# or: WORKERS=18 bash scaling/results/phase5/run_all_ladders.sh</pre>
+  <h3>Campaign commands</h3>
+  <pre>uv run cli/campaign.py run --protocol phase5_factor_sweep
+uv run cli/campaign.py claim-reseed --protocol phase5_obs_claim
+uv run cli/campaign.py run --protocol phase5_range_scout
+uv run cli/campaign.py claim-reseed --protocol phase5_range_claim
+uv run cli/campaign.py run --protocol phase5_comm_scout
+uv run cli/campaign.py claim-reseed --protocol phase5_comm_claim
+# or: WORKERS=18 bash results/phase5/run_all_ladders.sh</pre>
   <h3>Code path (factor path)</h3>
   <table>
     <thead><tr><th>File</th><th>Functions / notes</th></tr></thead>
     <tbody>
-      <tr><td><code>scripts/run_factor_sweep.py</code></td><td>Builds product of obs/range/comm factors into <code>ScalingCell</code>s</td></tr>
-      <tr><td><code>services/scaling/runner.py</code></td><td>If range/comm set without obs_mode -&gt; default <code>local_positions</code></td></tr>
-      <tr><td><code>core/observation_models.py</code></td><td><code>GlobalObservation</code>, <code>LocalPositionsObservation</code>, <code>BearingOnlyObservation</code></td></tr>
+      <tr><td><code>cli/run_factor_sweep.py</code></td><td>Builds product of obs/range/comm factors into <code>ScalingCell</code>s</td></tr>
+      <tr><td><code>services/runner.py</code></td><td>If range/comm set without obs_mode -&gt; default <code>local_positions</code></td></tr>
+      <tr><td><code>core/observation.py</code></td><td><code>GlobalObservation</code>, <code>LocalPositionsObservation</code>, <code>BearingOnlyObservation</code></td></tr>
       <tr><td><code>plugins/dogs/collect_drive_multi.py</code></td><td><code>_sheep_for_dog</code>, <code>_union_sheep_positions</code> (comm)</td></tr>
-      <tr><td><code>analysis/scaling/substitution.py</code></td><td><code>substitution_curves</code>, range/comm helpers (Package E)</td></tr>
+      <tr><td><code>analysis/substitution.py</code></td><td><code>substitution_curves</code>, range/comm helpers (Package E)</td></tr>
     </tbody>
   </table>
   <div class="callout">
@@ -530,9 +515,9 @@ make -C scaling scaling-phase5-*-scout|claim-*
   <table>
     <thead><tr><th>File</th><th>Functions</th></tr></thead>
     <tbody>
-      <tr><td><code>analysis/scaling/frontier.py</code></td><td><code>extract_frontier</code> from merged trials</td></tr>
-      <tr><td><code>analysis/scaling/fits.py</code></td><td><code>fit_scaling_models</code> (constant / linear / power / piecewise)</td></tr>
-      <tr><td><code>analysis/scaling/export.py</code></td><td>Package F dossier CSVs</td></tr>
+      <tr><td><code>analysis/frontier.py</code></td><td><code>extract_frontier</code> from merged trials</td></tr>
+      <tr><td><code>analysis/fits.py</code></td><td><code>fit_scaling_models</code> (constant / linear / power / piecewise)</td></tr>
+      <tr><td><code>analysis/export.py</code></td><td>Package F dossier CSVs</td></tr>
     </tbody>
   </table>
   <p>Inputs: <code>phase1/claim/merged_trials.csv</code>. Report: <code>rq6/</code>.</p>
@@ -545,9 +530,9 @@ make -C scaling scaling-phase5-*-scout|claim-*
   <table>
     <thead><tr><th>File</th><th>Functions</th></tr></thead>
     <tbody>
-      <tr><td><code>analysis/scaling/early_warning.py</code></td><td><code>evaluate_early_warning</code>, <code>evaluate_early_warning_campaign</code></td></tr>
-      <tr><td><code>services/scaling/runner.py</code></td><td>optional parquet writes when <code>store_timeseries</code></td></tr>
-      <tr><td><code>analysis/scaling/export.py</code></td><td>Package G dossier</td></tr>
+      <tr><td><code>analysis/early_warning.py</code></td><td><code>evaluate_early_warning</code>, <code>evaluate_early_warning_campaign</code></td></tr>
+      <tr><td><code>services/runner.py</code></td><td>optional parquet writes when <code>store_timeseries</code></td></tr>
+      <tr><td><code>analysis/export.py</code></td><td>Package G dossier</td></tr>
     </tbody>
   </table>
   <p>Report: <code>rq7/</code>. Timing of successes vs check window makes this weakly testable on the current map.</p>
@@ -568,10 +553,8 @@ make -C scaling scaling-phase5-*-scout|claim-*
     </tbody>
   </table>
   <p class="callout">
-    Tracker mentions <code>make ... scaling-analyse PACKAGE=...</code>. Package logic lives in
-    <code>analysis/scaling/</code>; exports are written beside claim folders under
-    <code>packages/{a-g}/</code>. Confirm the current analyse CLI/target in the Makefile before
-    relying on that make alias (it may be documented from a prior workflow).
+    Analysis packages are Python exports under <code>analysis/</code> (Package A-G).
+    Outputs land beside claim folders under <code>packages/{a-g}/</code>.
   </p>
 </section>
 
@@ -582,25 +565,25 @@ make -C scaling scaling-phase5-*-scout|claim-*
       <h4>Always on the path</h4>
       <ul class="tight">
         <li><code>core/simulation_runner.py</code> - <code>SimulationRunner.step</code></li>
-        <li><code>core/experiment_config.py</code> - <code>resolve_experiment_config</code></li>
+        <li><code>core/config/experiment.py</code> - <code>resolve_experiment_config</code></li>
         <li><code>core/methods.py</code> - <code>get_method</code></li>
         <li><code>core/plugin_registry.py</code> - registries</li>
         <li><code>plugins/scenarios/drive_to_goal.py</code></li>
         <li><code>plugins/metrics/*</code> via <code>metric_registry.get_all()</code></li>
-        <li><code>analysis/failure_taxonomy.py</code> - failure labels on trial rows</li>
+        <li><code>protocols/packaging/failure_taxonomy.py</code> - failure labels on trial rows</li>
       </ul>
     </div>
     <div>
       <h4>Observation / info factors</h4>
       <ul class="tight">
         <li><code>core/observation.py</code> - <code>ShepherdObservation</code></li>
-        <li><code>core/observation_models.py</code> - global / local / bearing</li>
-        <li><code>core/experimental_factors.py</code> - factor validation</li>
+        <li><code>core/observation.py</code> - global / local / bearing</li>
+        <li><code>core/config/factors.py</code> - factor validation</li>
         <li>Comm merge in <code>collect_drive_multi._union_sheep_positions</code></li>
       </ul>
       <h4>Provenance</h4>
       <ul class="tight">
-        <li><code>analysis/scaling/provenance.py</code> - stamps in packages</li>
+        <li><code>protocols/packaging/provenance.py</code> - stamps in packages</li>
         <li>Protocol hash locked against <code>canonical_grid.yaml</code></li>
       </ul>
     </div>
@@ -610,22 +593,22 @@ make -C scaling scaling-phase5-*-scout|claim-*
 <section id="how-to-trace">
   <h2>8. How to trace one research question</h2>
   <ol>
-    <li>Find the RQ in the phase table above and open its protocol YAML under <code>scaling/configs/protocols/</code>.</li>
+    <li>Find the RQ in the phase table above and open its protocol YAML under <code>protocols/configs/protocols/</code>.</li>
     <li>Note <code>runner</code> (grid vs factor), <code>output</code>, <code>upstream_protocol</code>, and grids.</li>
-    <li>Follow the matching make target in <code>scaling/Makefile</code> into <code>campaign.py</code>.</li>
+    <li>Run the matching <code>uv run cli/campaign.py</code> verb for that protocol.</li>
     <li>For sims: land in <code>runner._run_cell</code> -&gt; method bundle -&gt; sheep/dog plugins.</li>
-    <li>For analysis: land in <code>analysis/scaling/</code> package module and the claim folder <code>packages/</code>.</li>
-    <li>Cross-check the human narrative under <code>scaling/docs/report/rq*/</code> and the tracker.</li>
+    <li>For analysis: land in <code>analysis/</code> package module and the claim folder <code>packages/</code>.</li>
+    <li>Cross-check the human narrative under <code>docs/report/rq*/</code> and the tracker.</li>
   </ol>
   <pre># Example: RQ2 scout
-make -C scaling scaling-scout WORKERS=16
-# protocol: scaling/configs/protocols/phase1_scout.yaml
-# code: campaign.run -&gt; run_grid.main -&gt; run_scaling_grid -&gt; _run_cell
-# out:   scaling/results/phase1/scout/trials.csv</pre>
+uv run cli/campaign.py run --protocol phase1_scout --workers 16
+# protocol: protocols/configs/protocols/phase1_scout.yaml
+# code: cli/campaign.py -&gt; cli/run_grid.py -&gt; services.runner -&gt; _run_cell
+# out:   results/phase1/scout/trials.csv</pre>
   <p>
-    Related docs: <a href="../architecture.md">docs/architecture.md</a> (engine design),
-    <a href="../../scaling/docs/main_scaling_plan.md">main_scaling_plan.md</a> (claims),
-    <a href="../../scaling/docs/progress_tracker.md">progress_tracker.md</a> (run status).
+    Related docs: <a href="architecture.md">docs/codes/architecture.md</a> (engine design),
+    <a href="../science/main_scaling_plan.md">main_scaling_plan.md</a> (claims),
+    <a href="../science/progress_tracker.md">progress_tracker.md</a> (run status).
   </p>
 </section>
 

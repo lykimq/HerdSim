@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import numpy as np
-
-from core.base_metric import BaseMetric
 from core.simulation_state import SimulationState
+
+from .base import BaseMetric
 
 
 def largest_component_fraction(positions: np.ndarray, radius: float) -> float:

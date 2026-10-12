@@ -22,8 +22,8 @@ Careful reseed finished: 2400 claim trials on 24 reliability-window cells; the m
 - Seeds (scout / claim): 30 scout elsewhere / 100 on window cells
 - T0 (and T1 if used): 10000 (T0 only)
 - Theta: 0.90 (90% success bar)
-- Command: `make -C scaling scaling-phase2-claim-reseed WORKERS=16`
-- Output: `scaling/results/phase2/claim/`
+- Command: `uv run cli/campaign.py claim-reseed --protocol phase2_claim` --workers 16
+- Output: `results/phase2/claim/`
 - Host: gwen (Ultra 7 165H, 61 GiB)
 - WORKERS / CPU governor: 16 / performance
 
@@ -65,7 +65,7 @@ Baseline method only (`strombom_multi`). Split looks cost-similar to compact; co
 
 ## Claims update
 
-CLAIM grade. Aligned with `scaling/docs/progress_tracker.md`:
+CLAIM grade. Aligned with `docs/science/progress_tracker.md`:
 
 | Claim | Verdict | Evidence |
 |-------|---------|----------|

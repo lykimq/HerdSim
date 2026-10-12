@@ -5,8 +5,8 @@ from __future__ import annotations
 from typing import Any
 
 import pandas as pd
+from plugins.metrics.base import BaseMetric
 
-from core.base_metric import BaseMetric
 from core.simulation_state import SimulationState
 
 

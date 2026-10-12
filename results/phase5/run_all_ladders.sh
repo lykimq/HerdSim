@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Sequential Phase 5 ladders: observation, range, communication.
 # Matches campaign layout under results/phase5/{stage}/.
-# Resume-safe: re-run this script; each make target skips ok manifest rows.
+# Resume-safe: re-run this script; each campaign skips ok manifest rows.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -29,19 +29,19 @@ run_step() {
 log "Phase 5 all ladders begin (WORKERS=${WORKERS}, cwd=${ROOT})"
 
 # 1. Observation ladder
-run_step "obs scout" make -C run scaling-factor-sweep "WORKERS=${WORKERS}"
-run_step "obs claim-plan" make -C run scaling-phase5-obs-claim-plan
-run_step "obs claim-reseed" make -C run scaling-phase5-obs-claim-reseed "WORKERS=${WORKERS}"
+run_step "obs scout" uv run cli/campaign.py run --protocol phase5_factor_sweep --workers "${WORKERS}"
+run_step "obs claim-plan" uv run cli/campaign.py claim-plan --protocol phase5_obs_claim
+run_step "obs claim-reseed" uv run cli/campaign.py claim-reseed --protocol phase5_obs_claim --workers "${WORKERS}"
 
 # 2. Range ladder
-run_step "range scout" make -C run scaling-phase5-range-scout "WORKERS=${WORKERS}"
-run_step "range claim-plan" make -C run scaling-phase5-range-claim-plan
-run_step "range claim-reseed" make -C run scaling-phase5-range-claim-reseed "WORKERS=${WORKERS}"
+run_step "range scout" uv run cli/campaign.py run --protocol phase5_range_scout --workers "${WORKERS}"
+run_step "range claim-plan" uv run cli/campaign.py claim-plan --protocol phase5_range_claim
+run_step "range claim-reseed" uv run cli/campaign.py claim-reseed --protocol phase5_range_claim --workers "${WORKERS}"
 
 # 3. Communication ladder
-run_step "comm scout" make -C run scaling-phase5-comm-scout "WORKERS=${WORKERS}"
-run_step "comm claim-plan" make -C run scaling-phase5-comm-claim-plan
-run_step "comm claim-reseed" make -C run scaling-phase5-comm-claim-reseed "WORKERS=${WORKERS}"
+run_step "comm scout" uv run cli/campaign.py run --protocol phase5_comm_scout --workers "${WORKERS}"
+run_step "comm claim-plan" uv run cli/campaign.py claim-plan --protocol phase5_comm_claim
+run_step "comm claim-reseed" uv run cli/campaign.py claim-reseed --protocol phase5_comm_claim --workers "${WORKERS}"
 
 log "Phase 5 all ladders complete"
 log "Next: write per-protocol README.md; update docs/science/progress_tracker.md steps 14-16 and claims C5a/C5b"

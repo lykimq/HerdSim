@@ -1,8 +1,8 @@
 protocol_id: phase2_pilot_state
 phase: 2
 grade: SMOKE
-output: scaling/results/phase2/pilot_state
-canonical: scaling/configs/canonical_grid.yaml
+output: results/phase2/pilot_state
+canonical: protocols/configs/canonical_grid.yaml
 methods:
 - strombom_multi
 layouts:

@@ -22,8 +22,8 @@ Careful reseed finished (resumed from 73/2200 after an earlier abort). 2200 clai
 - Seeds (scout / claim): 30 scout elsewhere / 100 on window cells
 - T0 (and T1 if used): 10000 (T0 only)
 - Theta: 0.90 (90% success bar)
-- Command: `make -C scaling scaling-claim-reseed WORKERS=16` (resume)
-- Output: `scaling/results/phase1/claim/`
+- Command: `uv run cli/campaign.py claim-reseed --protocol phase1_claim` --workers 16 (resume)
+- Output: `results/phase1/claim/`
 - Host: gwen (Ultra 7 165H, 61 GiB)
 - WORKERS / CPU governor: 16 / performance
 
@@ -65,7 +65,7 @@ Single method, single layout. No overcrowding window, so no T1 overcrowding camp
 
 ## Claims update
 
-CLAIM grade. Aligned with `scaling/docs/progress_tracker.md`:
+CLAIM grade. Aligned with `docs/science/progress_tracker.md`:
 
 | Claim | Verdict | Evidence |
 |-------|---------|----------|

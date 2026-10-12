@@ -14,7 +14,7 @@ SMOKE check for the RQ1 start-shape path: four layouts and state metrics on a re
 - D: {1, 2, 3, 4, 6, 10}
 - Seeds: 5
 - Package export: B
-- Command: `make -C scaling scaling-pilot-state WORKERS=16`
+- Command: `uv run cli/campaign.py run --protocol phase2_pilot_state` --workers 16
 
 ## Completeness
 

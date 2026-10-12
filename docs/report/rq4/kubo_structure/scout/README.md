@@ -17,7 +17,7 @@ SCOUT Kubo structure map across four layouts. Used to plan claim reseed windows.
 - T0: 10000
 - obs_mode: global
 - Package export: B
-- Command: `make -C scaling scaling-transfer-structure-scout TRANSFER_METHOD=kubo WORKERS=16`
+- Command: `uv run cli/campaign.py run --protocol phase4_kubo_structure_scout` --workers 16
 
 ## Completeness
 

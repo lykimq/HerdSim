@@ -3,5 +3,23 @@
   "venvPath": ".",
   "venv": ".venv",
   "extraPaths": [".", "sim"],
-  "failOnWarnings": false
+  "failOnWarnings": false,
+  "executionEnvironments": [
+    {
+      "root": "analysis",
+      "extraPaths": [".", "sim"],
+      "reportExplicitAny": "none",
+      "reportAny": "none",
+      "reportUnknownMemberType": "none",
+      "reportUnknownVariableType": "none",
+      "reportUnknownArgumentType": "none",
+      "reportUnknownParameterType": "none",
+      "reportUnknownLambdaType": "none",
+      "reportUnnecessaryIsInstance": "none"
+    },
+    {
+      "root": ".",
+      "extraPaths": [".", "sim"]
+    }
+  ]
 }

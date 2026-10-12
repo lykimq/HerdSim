@@ -13,8 +13,11 @@ from __future__ import annotations
 from typing import Any
 
 import numpy as np
+from core.simulation_state import SimulationState
+from methods.strombom.config import STROMBOM_DEFAULTS
 
-from core.agents.sheep import (
+from .base import BaseSheepDynamics
+from .helpers import (
     compose_strombom_heading,
     compute_attraction,
     compute_local_centroid_knn,
@@ -23,9 +26,6 @@ from core.agents.sheep import (
     compute_repulsion_from_shepherds,
     unit_vector,
 )
-from core.sheep_dynamics import BaseSheepDynamics
-from core.simulation_state import SimulationState
-from methods.strombom.config import STROMBOM_DEFAULTS
 
 
 class StrombomSheepDynamics(BaseSheepDynamics):

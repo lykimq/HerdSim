@@ -6,5 +6,5 @@
     "obs_mode"
   ],
   "theta": 0.9,
-  "scout_trials": "/home/gwen/HerdSim/scaling/results/phase1/scout/trials.csv"
+  "scout_trials": "/home/gwen/HerdSim/results/phase1/scout/trials.csv"
 }

@@ -3,7 +3,7 @@
 Mapped from the MATLAB reference implementation
 (PatrickHup/Force-Based-Sheep-Herding-Algorithm) and Kubo et al. 2022.
 
-World / layout keys are shared (see core.shared_defaults); this module declares
+World / layout keys live in core.world.defaults; this module declares
 paper agent counts and Kubo-specific behavior only.
 """
 

@@ -1,16 +1,16 @@
 name: CI/CD Pipeline
 
-# Cheap gates for the scaling-cli branch: engine + scaling stack tests, lint, typecheck.
+# Cheap gates for the scaling-cli branch: tests, lint, typecheck.
 # Do not run stress sims or long campaign grids here.
 
 on:
   push:
-    branches: [ main, master, dev, scaling-cli ]
+    branches: [ main, scaling-cli ]
   pull_request:
-    branches: [ main, master, scaling-cli ]
+    branches: [ main, scaling-cli ]
 
 jobs:
-  backend-tests:
+  tests:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -21,8 +21,8 @@ jobs:
           python-version: "3.12"
       - name: Sync Python deps
         run: uv sync --extra dev
-      - name: Run cheap backend suite
-        run: make test-ci
+      - name: Run test suite
+        run: make test
 
   python-typecheck:
     runs-on: ubuntu-latest

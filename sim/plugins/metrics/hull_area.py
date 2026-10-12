@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from core.base_metric import BaseMetric
 from core.simulation_state import SimulationState
-from plugins.metrics.hull_geometry import hull_geometry
+
+from .base import BaseMetric
+from .hull_geometry import hull_geometry
 
 
 class HullAreaMetric(BaseMetric):

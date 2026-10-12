@@ -20,9 +20,9 @@ CLAIM reseed on reliability-window cells for RQ1 start shape. Measures fewest do
 - T0: 10000
 - Package export: B (on `merged_trials.csv`)
 - Commands (run in this order):
-  1. Plan: `make -C scaling scaling-phase2-claim-plan`
+  1. Plan: `uv run cli/campaign.py claim-plan --protocol phase2_claim`
      Must run after this method's scout. Chooses scout cells near the reliability edge and writes `boundary_cells.csv` / `boundary_plan.json` (no claim sims yet).
-  2. Reseed: `make -C scaling scaling-phase2-claim-reseed WORKERS=16`
+  2. Reseed: `uv run cli/campaign.py claim-reseed --protocol phase2_claim` --workers 16
      Runs the claim sims (100 seeds) on those planned cells.
 
 ## Completeness

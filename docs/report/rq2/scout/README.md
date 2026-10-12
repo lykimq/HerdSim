@@ -16,7 +16,7 @@ SCOUT full size map on compact starts. Used to pick claim reseed windows. Not cl
 - Theta: 0.90
 - T0: 10000
 - Package export: A
-- Command: `make -C scaling scaling-scout WORKERS=16`
+- Command: `uv run cli/campaign.py run --protocol phase1_scout` --workers 16
 
 ## Completeness
 

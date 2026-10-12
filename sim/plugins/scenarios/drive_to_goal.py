@@ -5,10 +5,10 @@ from __future__ import annotations
 from typing import Any
 
 import numpy as np
-
-from core.base_scenario import BaseScenario
 from core.simulation_state import SimulationState
 from core.world import GoalZone, World
+
+from .base import BaseScenario
 
 
 class DriveToGoalScenario(BaseScenario):
@@ -24,10 +24,7 @@ class DriveToGoalScenario(BaseScenario):
 
     @property
     def description(self) -> str:
-        return (
-            "Herd all sheep into a circular goal zone near the field origin "
-            "(corner). Grid lines are display-only world-unit markers."
-        )
+        return "Herd all sheep into a circular goal zone near the field origin (corner)."
 
     @property
     def default_config(self) -> dict[str, Any]:
@@ -61,7 +58,7 @@ class DriveToGoalScenario(BaseScenario):
     def initial_positions(
         self, config: dict[str, Any], rng: np.random.Generator
     ) -> tuple[np.ndarray, np.ndarray]:
-        from core.x0_generators import generate_initial_positions, normalize_layout
+        from core.world.layouts import generate_initial_positions, normalize_layout
 
         n_sheep = config.get("n_sheep", 50)
         n_shepherds = config.get("n_shepherds", 1)

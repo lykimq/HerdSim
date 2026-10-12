@@ -10,7 +10,7 @@ That is the question this study tries to answer carefully. We do not assume ther
 
 Control here is indirect: we cannot steer every sheep by hand. The dogs only push through local reactions. So "how much control" is something we can measure as size and starting shape change.
 
-This package is meant to be readable on its own. The short report tells the story. Folders under `rq1/` through `rq7/` and `protocol/` hold the setup files, trial tables, and notes if you want to check a number.
+This package is meant to be readable on its own. The short report tells the story. Folders under `rq1/` through `rq7/` hold the setup files, trial tables, and notes if you want to check a number.
 
 ---
 
@@ -65,7 +65,7 @@ Every scientific run uses the same frozen protocol (`scaling_v2`):
 
 `D_min` means the smallest tested dog count that clears the 90% bar. It is not a property of sheep in nature; it depends on this task and these locks.
 
-Machine-readable defaults sit in [`protocol/canonical_grid.yaml`](protocol/canonical_grid.yaml). Campaign YAML subsets sit in [`protocol/protocols/`](protocol/protocols/).
+Machine-readable defaults sit in [`protocols/configs/canonical_grid.yaml`](../../protocols/configs/canonical_grid.yaml). Campaign YAMLs sit in [`protocols/configs/protocols/`](../../protocols/configs/protocols/).
 
 ### Why three methods
 
@@ -110,23 +110,23 @@ Commands used (from the HerdSim repo root; re-running needs that codebase, not o
 
 ```bash
 # RQ2 size map
-make -C scaling scaling-pilot WORKERS=16
-make -C scaling scaling-scout WORKERS=16
-make -C scaling scaling-claim-reseed WORKERS=16
+uv run cli/campaign.py run --protocol phase1_pilot --workers 16
+uv run cli/campaign.py run --protocol phase1_scout --workers 16
+uv run cli/campaign.py claim-reseed --protocol phase1_claim --workers 16
 
 # RQ1 structure map
-make -C scaling scaling-phase2-scout WORKERS=16
-make -C scaling scaling-phase2-claim-reseed WORKERS=16
+uv run cli/campaign.py run --protocol phase2_scout --workers 16
+uv run cli/campaign.py claim-reseed --protocol phase2_claim --workers 16
 
 # RQ4 transfer (kubo, then fat)
-make -C scaling scaling-transfer-size-scout TRANSFER_METHOD=kubo WORKERS=16
-make -C scaling scaling-transfer-size-claim-reseed TRANSFER_METHOD=kubo WORKERS=16
-make -C scaling scaling-transfer-structure-scout TRANSFER_METHOD=kubo WORKERS=16
-make -C scaling scaling-transfer-structure-claim-reseed TRANSFER_METHOD=kubo WORKERS=16
-# repeat with TRANSFER_METHOD=fat
+uv run cli/campaign.py run --protocol phase4_kubo_size_scout --workers 16
+uv run cli/campaign.py claim-reseed --protocol phase4_kubo_size_claim --workers 16
+uv run cli/campaign.py run --protocol phase4_kubo_structure_scout --workers 16
+uv run cli/campaign.py claim-reseed --protocol phase4_kubo_structure_claim --workers 16
+# then fat: phase4_fat_size_scout / phase4_fat_size_claim / phase4_fat_structure_*
 
 # RQ5 ladders (not run yet; planned)
-# WORKERS=18 bash scaling/results/phase5/run_all_ladders.sh
+# WORKERS=18 bash results/phase5/run_all_ladders.sh
 ```
 
 Exact grids, seeds, and run notes for each campaign sit under the matching `rq*/` folder.
@@ -162,7 +162,7 @@ One-dog cost by layout (median over successful trials; success rate 1.00 at D = 
 
 Wide versus compact at one dog: about 11x to 20x more time and about 19x to 36x more path. On wide starts, the cheapest reliable choice is two dogs (`B* = 2`): the second dog cuts path while staying reliable.
 
-![Layout cost on the baseline structure map.](figures/f4_layout_cost.png)
+![Layout cost on the baseline structure map.](../figures/f4_layout_cost.png)
 
 *Wide and large outlier-rich starts cost much more time and path at one dog; D_min stays 1.*
 
@@ -191,11 +191,11 @@ Baseline compact frontier at the 90% bar:
 
 Here "not reach" means no overcrowding appeared before D = 35, so `D_max` is only the top of our tested list, not a measured collapse. Bootstrap width on every `D_min` above is zero.
 
-![Reliability heatmaps across methods.](figures/f1_reliability_heatmaps.png)
+![Reliability heatmaps across methods.](../figures/f1_reliability_heatmaps.png)
 
 *Success-rate surfaces. Baseline and Kubo show a reliable band on compact starts; FAT does not for larger N.*
 
-![Cost against dog count on the baseline size map.](figures/f3_cost_vs_d.png)
+![Cost against dog count on the baseline size map.](../figures/f3_cost_vs_d.png)
 
 *Extra dogs mainly raise path after the minimum; success stays high (waste, not overcrowding).*
 
@@ -250,15 +250,15 @@ Structure-map `D_min` at the 90% bar (N in `{50, 100, 200}`):
 
 On Kubo wide, best success is about 0.47 to 0.54. FAT clears no structure cell at these sizes. Kubo `outlier_rich` at N = 200 is a point estimate `D_min = 20` with a wide bootstrap interval `[2, 20]`.
 
-![D_min against N, including a 2025 draft contrast.](figures/f2_dmin_vs_n.png)
+![D_min against N, including a 2025 draft contrast.](../figures/f2_dmin_vs_n.png)
 
 *Baseline and Kubo stay near one dog for large compact flocks. FAT has no D_min for N >= 25. A 2025 NetLogo draft on a harder collect-hold-gate task rose sharply; that draft was not rerun here.*
 
-![Layout reliability across methods.](figures/f5_layout_reliability_curves.png)
+![Layout reliability across methods.](../figures/f5_layout_reliability_curves.png)
 
 *At N = 200, compact and split look shared for Strombom and Kubo; wide and large outlier-rich do not.*
 
-![Kubo outlier_rich at N = 200.](figures/f9_kubo_outlier_rich_n200.png)
+![Kubo outlier_rich at N = 200.](../figures/f9_kubo_outlier_rich_n200.png)
 
 *Soft edge: point D_min = 20 after 200 seeds; bootstrap still wide.*
 
@@ -287,7 +287,7 @@ On the baseline compact map, `D_min` is almost only two values: 2 for N = 5 and 
 
 Piecewise wins because it matches that step, not because we measured a rich growth law. These fits are not a universal scaling law.
 
-![Leave-one-N-out RMSE by model.](figures/f8_scaling_rmse.svg)
+![Leave-one-N-out RMSE by model.](../figures/f8_scaling_rmse.svg)
 
 More detail: [`rq6/`](rq6/).
 
@@ -297,7 +297,7 @@ More detail: [`rq6/`](rq6/).
 
 By the first check at tick 1,000, almost every successful RQ2 size-map run has already finished (median success about 183 ticks). Failures are almost all tiny flocks with one dog that run to the deadline. There is no late window left to warn before success or failure settles. Held-out AUROC folds were empty. Only 14 of 169 failures had a measured lead time of at least 500 ticks (about 8.3%; the bar was 30%).
 
-![Early warning timing.](figures/f12_early_warning_timing.png)
+![Early warning timing.](../figures/f12_early_warning_timing.png)
 
 *Successful runs finish early; the shaded warning checks start after most successes are already done.*
 
@@ -381,7 +381,6 @@ After this short report, you can dig into:
 
 | Path | What it holds |
 |------|----------------|
-| [`protocol/`](protocol/) | Frozen `canonical_grid.yaml` and campaign YAML subsets |
 | [`rq1/`](rq1/) | Structure campaign (setup, trials, Package B) |
 | [`rq2/`](rq2/) | Size campaign (setup, trials, Package A); T1 note |
 | [`rq3/`](rq3/) | SKIPPED note only |
@@ -390,6 +389,6 @@ After this short report, you can dig into:
 | [`rq6/`](rq6/) | Scaling-fit tables (Package F) |
 | [`rq7/`](rq7/) | Early-warning summary tables (Package G) |
 | [`TRUST_AUDIT.md`](TRUST_AUDIT.md) | Count and protocol-hash integrity checks |
-| [`figures/`](figures/) | Plots used in this report |
+| [`docs/figures/`](../figures/) | Plots used in this report |
 
 Each `rq*/` folder has a README that explains what the files mean. Trajectory parquet files are not included (they are large; RQ7 keeps summary tables only).

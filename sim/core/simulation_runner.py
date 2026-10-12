@@ -7,6 +7,10 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
+from plugins.dogs.base import BaseDogController
+from plugins.metrics.base import BaseMetric
+from plugins.scenarios.base import BaseScenario
+from plugins.sheep.base import BaseSheepDynamics
 
 from core.agent_attributes import (
     apply_environment_updates,
@@ -14,9 +18,6 @@ from core.agent_attributes import (
     apply_robot_constraints,
     init_agent_attributes,
 )
-from core.base_metric import BaseMetric
-from core.base_scenario import BaseScenario
-from core.dog_controller import BaseDogController
 from core.history_recorder import HistoryRecorder
 from core.observation import BaseObservationModel
 from core.plugin_registry import (
@@ -24,7 +25,6 @@ from core.plugin_registry import (
     observation_registry,
     sheep_dynamics_registry,
 )
-from core.sheep_dynamics import BaseSheepDynamics
 from core.simulation_state import SimulationState
 
 

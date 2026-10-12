@@ -3,7 +3,7 @@
 Reference: Strombom et al., J. Royal Soc. Interface, 2014, Table 1.
 Parameter names follow the paper's notation where practical.
 
-World / layout keys are shared (see core.shared_defaults); this module declares
+World / layout keys live in core.world.defaults; this module declares
 paper agent counts and Strombom-specific behavior only.
 """
 

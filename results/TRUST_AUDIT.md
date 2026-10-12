@@ -9,20 +9,20 @@ Date: 2026-10-09. Host: gwen. Protocol hash: `54dfb46837e3971a` on all audited p
 3. Claim merge depth math for Phase 1/2/4 claim folders (recompute `merge_scout_and_claim`).
 4. Package F / G claim rows vs tracker.
 5. Run ledger rebuild for Phases 1/2/4.
-6. `make -C run scaling-test` (passed after resume-key contract test).
+6. `make test` (passed after resume-key contract test).
 7. Offline CLI/code audit (no phase re-runs): seed list = `master_seed + i`; manifest/trials join on resume identity; grid / factor / claim boundary expansion vs completed rows.
 
 ## Integrity result
 
 Audited Phase 1/2/4 folders: OK (status/trials/manifest match when complete; protocol hash locked; claim merges recompute to stored row counts; seeds match formula).
 
-`make -C run scaling-test`: passed.
+`make test`: passed.
 
 Known caveats retained:
 
 - Phase 4 Kubo structure claim `n_planned` in status is 600 while completed claim rows are 4,000 (documented in the run ledger).
 - Same folder: protocol `seeds: 100`, but 9 `outlier_rich` N=200 cells were intentionally oversampled to 200 seeds (22 cells x 100 + 9 cells x 200 = 4,000). Boundary CSV has 31 cells; a naive re-expand at 100 seeds yields 3,100. Existing trials and merge depths are consistent; re-seeding would need the 200-seed oversample recorded per cell.
-- Resume keys for grid scouts omit `O*` / `R*` / `C*` when those `ScalingCell` fields were unset, while `trials.csv` may still store resolved config `obs_mode` (usually `global`). Analysis and D_min use CSV columns, not key strings. Documented on `_cell_key` in `run/services/scaling/runner.py`.
+- Resume keys for grid scouts omit `O*` / `R*` / `C*` when those `ScalingCell` fields were unset, while `trials.csv` may still store resolved config `obs_mode` (usually `global`). Analysis and D_min use CSV columns, not key strings. Documented on `_cell_key` in `services/runner.py`.
 
 ## Phase 5 / RQ5
 

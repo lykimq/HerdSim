@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from core.base_scenario import BaseScenario
+from .base import BaseScenario
 
 
 class ScenarioRegistry:
@@ -43,22 +43,9 @@ scenario_registry = ScenarioRegistry()
 
 def _auto_register():
     """Import built-in scenarios to trigger registration."""
-    from plugins.scenarios.containment import ContainmentScenario
-    from plugins.scenarios.drive_to_goal import DriveToGoalScenario
-    from plugins.scenarios.narrow_gate import NarrowGateScenario
-    from plugins.scenarios.obstacle_course import ObstacleCourseScenario
-    from plugins.scenarios.split_flock import SplitFlockScenario
-    from plugins.scenarios.wide_field import WideFieldScenario
+    from .drive_to_goal import DriveToGoalScenario
 
-    for cls in [
-        DriveToGoalScenario,
-        ContainmentScenario,
-        ObstacleCourseScenario,
-        SplitFlockScenario,
-        NarrowGateScenario,
-        WideFieldScenario,
-    ]:
-        scenario_registry.register(cls())
+    scenario_registry.register(DriveToGoalScenario())
 
 
 _auto_register()

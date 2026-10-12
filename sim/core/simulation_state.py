@@ -7,7 +7,7 @@ from typing import Any
 
 import numpy as np
 
-from core.world import World
+from core.world.arena import World
 
 
 @dataclass
@@ -29,21 +29,11 @@ class SimulationState:
     world: World
     rng: np.random.Generator
     metadata: dict[str, Any] = field(default_factory=dict)
-    sheep_response: np.ndarray = field(
-        default_factory=lambda: np.ones(0, dtype=float)
-    )
-    sheep_cohesion: np.ndarray = field(
-        default_factory=lambda: np.ones(0, dtype=float)
-    )
-    shepherd_speed_scale: np.ndarray = field(
-        default_factory=lambda: np.ones(0, dtype=float)
-    )
-    shepherd_sensing_scale: np.ndarray = field(
-        default_factory=lambda: np.ones(0, dtype=float)
-    )
-    shepherd_active: np.ndarray = field(
-        default_factory=lambda: np.ones(0, dtype=bool)
-    )
+    sheep_response: np.ndarray = field(default_factory=lambda: np.ones(0, dtype=float))
+    sheep_cohesion: np.ndarray = field(default_factory=lambda: np.ones(0, dtype=float))
+    shepherd_speed_scale: np.ndarray = field(default_factory=lambda: np.ones(0, dtype=float))
+    shepherd_sensing_scale: np.ndarray = field(default_factory=lambda: np.ones(0, dtype=float))
+    shepherd_active: np.ndarray = field(default_factory=lambda: np.ones(0, dtype=bool))
 
     def __post_init__(self) -> None:
         n = int(self.sheep_positions.shape[0])
@@ -59,15 +49,11 @@ class SimulationState:
         if int(self.shepherd_speed_scale.shape[0]) != m:
             self.shepherd_speed_scale = np.ones(m, dtype=float)
         else:
-            self.shepherd_speed_scale = np.asarray(
-                self.shepherd_speed_scale, dtype=float
-            )
+            self.shepherd_speed_scale = np.asarray(self.shepherd_speed_scale, dtype=float)
         if int(self.shepherd_sensing_scale.shape[0]) != m:
             self.shepherd_sensing_scale = np.ones(m, dtype=float)
         else:
-            self.shepherd_sensing_scale = np.asarray(
-                self.shepherd_sensing_scale, dtype=float
-            )
+            self.shepherd_sensing_scale = np.asarray(self.shepherd_sensing_scale, dtype=float)
         if int(self.shepherd_active.shape[0]) != m:
             self.shepherd_active = np.ones(m, dtype=bool)
         else:

@@ -1,9 +1,9 @@
 """Sheep in Goal metric: count of sheep inside the goal zone."""
 
 import numpy as np
-
-from core.base_metric import BaseMetric
 from core.simulation_state import SimulationState
+
+from .base import BaseMetric
 
 
 class SheepInGoalMetric(BaseMetric):

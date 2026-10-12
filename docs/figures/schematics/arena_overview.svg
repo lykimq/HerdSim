@@ -14,5 +14,5 @@
   <text x="220" y="126" font-size="12" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Blue square: dog (schematic; dogs are not part of X0)</text>
   <text x="220" y="148" font-size="12" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Success: every sheep inside the goal disk before T0</text>
   <text x="220" y="170" font-size="12" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Layout only changes how sheep are placed at tick 0</text>
-  <text x="220" y="192" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Drawn with core/x0_generators.py · spread=30 · seed=2026 · N=50</text>
+  <text x="220" y="192" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Drawn with core/world/layouts.py · spread=30 · seed=2026 · N=50</text>
 </svg>

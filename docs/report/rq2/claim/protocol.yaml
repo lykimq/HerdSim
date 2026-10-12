@@ -1,8 +1,8 @@
 protocol_id: phase1_claim
 phase: 1
 grade: CLAIM
-output: scaling/results/phase1/claim
-canonical: scaling/configs/canonical_grid.yaml
+output: results/phase1/claim
+canonical: protocols/configs/canonical_grid.yaml
 methods:
 - strombom_multi
 layouts:

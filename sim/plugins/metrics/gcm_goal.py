@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import numpy as np
-
-from core.agents.goal import resolve_goal_center
-from core.base_metric import BaseMetric
 from core.simulation_state import SimulationState
+from core.world.goal import resolve_goal_center
+
+from .base import BaseMetric
 
 
 class GcmGoalMetric(BaseMetric):

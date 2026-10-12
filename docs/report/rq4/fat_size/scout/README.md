@@ -14,7 +14,7 @@ SCOUT FAT compact size map. Used to plan claim windows. Not claim-grade by itsel
 - D: {1, 2, 3, 4, 6, 10, 15, 20, 25, 35}
 - Seeds: 30
 - Package export: A, F
-- Command: `make -C scaling scaling-transfer-size-scout TRANSFER_METHOD=fat WORKERS=16`
+- Command: `uv run cli/campaign.py run --protocol phase4_fat_size_scout` --workers 16
 
 ## Completeness
 

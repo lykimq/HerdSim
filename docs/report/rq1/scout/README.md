@@ -16,7 +16,7 @@ SCOUT map of start-shape reliability: three flock sizes, four layouts, and the d
 - Theta: 0.90
 - T0: 10000
 - Package export: B
-- Command: `make -C scaling scaling-phase2-scout WORKERS=16`
+- Command: `uv run cli/campaign.py run --protocol phase2_scout` --workers 16
 
 ## Completeness
 

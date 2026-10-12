@@ -16,7 +16,7 @@ Smoke check for the Phase 2 start-shape path (layouts and state metrics). 600 tr
 - Protocol: `scaling_v2`
 - Method(s): strombom_multi
 - Layout(s) X0: compact, split, outlier_rich, wide (reduced smoke grid)
-- Output: `scaling/results/phase2/pilot_state/`
+- Output: `results/phase2/pilot_state/`
 
 ## Completeness
 

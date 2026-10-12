@@ -22,8 +22,8 @@ Smoke check for the Phase 1 size map. 150 trials finished on host `gwen` with WO
 - Seeds (scout / claim): 5 (scout mode)
 - T0 (and T1 if used): 10000 (T0 only)
 - Theta: 0.90 (90% success bar)
-- Command: `make -C scaling scaling-pilot WORKERS=16`
-- Output: `scaling/results/phase1/pilot/`
+- Command: `uv run cli/campaign.py run --protocol phase1_pilot` --workers 16
+- Output: `results/phase1/pilot/`
 - Host: gwen (Ultra 7 165H, 61 GiB)
 - WORKERS / CPU governor: 16 / performance
 

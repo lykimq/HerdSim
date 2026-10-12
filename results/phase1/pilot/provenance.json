@@ -1,7 +1,7 @@
 {
   "protocol_id": "phase1_pilot",
-  "created_at": "2026-09-22T10:45:41.207068+00:00",
-  "git_hash": "51fbe27db730d838a7662b419c201564c2ab1e74",
+  "created_at": "2026-10-12T09:58:01.173912+00:00",
+  "git_hash": "012cab996457169a04b555b19b1b5fce9d5cfc4e",
   "protocol": {
     "protocol_id": "scaling_v2",
     "frozen_on": "2026-09-22",
@@ -98,24 +98,24 @@
   },
   "protocol_hash": "54dfb46837e3971a",
   "seed_list": [
-    2026,
-    2027,
-    2028,
-    2029,
-    2030
+    2026
   ],
-  "n_seeds": 5,
+  "n_seeds": 1,
   "metric_ids": [
     "cohesion",
     "mean_spread",
     "extent",
+    "perimeter",
+    "hull_area",
+    "flock_density",
+    "aspect_ratio",
     "fragmentation",
     "outlier_count",
     "i_dir",
     "coverage"
   ],
   "extra": {
-    "n_cells": 150,
-    "n_pending": 150
+    "n_cells": 1,
+    "n_pending": 0
   }
 }

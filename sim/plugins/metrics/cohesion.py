@@ -1,7 +1,8 @@
 """Flock Cohesion metric: mean distance of sheep to flock centroid (GCM radius)."""
 
-from core.base_metric import BaseMetric
 from core.simulation_state import SimulationState
+
+from .base import BaseMetric
 
 
 class CohesionMetric(BaseMetric):

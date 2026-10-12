@@ -12,11 +12,10 @@ from __future__ import annotations
 from typing import Any
 
 import numpy as np
-
-from core.agents.goal import resolve_goal_center
-from core.agents.sheep import compute_noise, unit_vector
-from core.agents.shepherd import move_toward, position_behind_target
 from core.simulation_state import SimulationState
+from core.world.goal import resolve_goal_center
+from plugins.dogs.helpers import move_toward, position_behind_target
+from plugins.sheep.helpers import compute_noise, unit_vector
 
 
 def compute_threshold(n_sheep: int, r_a: float) -> float:

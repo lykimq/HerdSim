@@ -16,7 +16,7 @@ SMOKE check for the RQ2 size map. Confirms the run, resume files, and Package A 
 - Theta: 0.90
 - T0: 10000
 - Package export: A
-- Command: `make -C scaling scaling-pilot WORKERS=16`
+- Command: `uv run cli/campaign.py run --protocol phase1_pilot` --workers 16
 
 ## Completeness
 

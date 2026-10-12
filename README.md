@@ -1,58 +1,53 @@
 # HerdSim (scaling-cli)
 
-This branch is for **scaling research questions** only: protocol campaigns, trial results, and post-run analysis packages.
+HerdSim is a multi-agent shepherding simulator for studying how much external control a flock needs as size, initial structure, method, and information conditions change. Dogs (shepherds) drive sheep to a goal under fixed protocols; the main control-demand quantity is the viable shepherd range around `D_min` (and any overcrowding boundary) at a reliability threshold.
 
-The interactive platform GUI lives on **`main`**. Do not expect `platform/` or a web UI here.
-
-Report package prose under `docs/report/` is kept as published (do not rewrite those files casually).
-
-## Purpose layout
+## Project structure
 
 ```text
-sim/          RUN: tick engine (core, plugins, methods)
-run/          RUN: campaigns, protocols, end-of-trial packaging
-analysis/     AFTER: frontiers, plots, package export (no tick loop)
-results/      DATA: trials.csv, manifests, packages
-docs/         DOCS: architecture, science, codes, report package
-tests/        Engine + campaign + analysis tests
+HerdSim/
+|-- sim/                 Tick engine
+|   |-- core/            Runner, state, observation, config, world
+|   |-- plugins/         Sheep, dogs, scenarios, metrics
+|   `-- methods/         Paper math (strombom, kubo)
+|-- protocols/           Protocol definition (configs + packaging)
+|   |-- configs/         Canonical grid + protocol YAMLs
+|   `-- packaging/       End-of-trial rows for trials.csv
+|-- cli/                 Campaign entry scripts
+|-- services/            Campaign engine (layout, resume, cell runner)
+|-- analysis/            Post-run packages (frontiers, fits, export)
+`-- tests/
+    |-- sim/             Engine / plugin tests
+    |-- services/        Campaign / protocol-load tests
+    |-- protocols/       Packaging tests
+    `-- analysis/        Package A-G tests
 ```
 
-Dependency rule: `analysis` must not import `SimulationRunner`. `run` may use `sim` and `run/packaging` only.
+Dependency rule: `analysis` must not import `SimulationRunner`. Campaign code may use `sim` and `protocols.packaging`.
 
-## Getting started
+## Setup
 
 ```bash
 make install
-make scaling-help
-make test-ci
 ```
 
-## Common commands
+## Tests
 
 ```bash
-make -C run help
-make -C run scaling-test
-make -C run scaling-scout WORKERS=18
-# Resume: re-run the same target; completed cells in manifest.jsonl are skipped.
+make test
 ```
 
-Phase 5 ladders:
+## Run campaigns
 
 ```bash
-make -C run scaling-factor-sweep WORKERS=18
-WORKERS=18 bash results/phase5/run_all_ladders.sh
+make help
+uv run cli/campaign.py help
+uv run cli/campaign.py run --protocol phase1_scout --workers 18
+uv run cli/campaign.py claim-plan --protocol phase1_claim
+uv run cli/campaign.py claim-reseed --protocol phase1_claim --workers 18
+uv run cli/campaign.py run --protocol phase5_factor_sweep --workers 18
 ```
 
-## Documents
+Verbs: `run`, `claim-plan`, `claim-reseed`, `t1-plan`, `t1`. Protocol ids live under `protocols/configs/protocols/`. Resume an interrupted run by repeating the same command; finished cells in `manifest.jsonl` are skipped.
 
-- Science: [docs/science/final_report.md](docs/science/final_report.md), [progress_tracker.md](docs/science/progress_tracker.md)
-- Architecture: [docs/architecture.md](docs/architecture.md)
-- CLI / RQ map: [docs/codes/map_codes.html](docs/codes/map_codes.html)
-- Published report package: [docs/report/](docs/report/) (contents frozen for this tree)
-
-## Branch policy
-
-| Branch | Purpose |
-|--------|---------|
-| `main` | Platform GUI + shared engine |
-| `scaling-cli` | RQ campaigns + analysis (this tree) |
+Protocol map by phase/RQ: [protocols/README.md](protocols/README.md). Engine detail: [sim/README.md](sim/README.md).

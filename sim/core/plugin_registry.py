@@ -5,9 +5,10 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import Any, Generic, Protocol, TypeVar
 
-from core.dog_controller import BaseDogController
+from plugins.dogs.base import BaseDogController
+from plugins.sheep.base import BaseSheepDynamics
+
 from core.observation import BaseObservationModel
-from core.sheep_dynamics import BaseSheepDynamics
 
 
 class _PluginLike(Protocol):
@@ -55,39 +56,30 @@ observation_registry: PluginRegistry[BaseObservationModel] = PluginRegistry("obs
 
 
 def _register_builtins() -> None:
-    from core.observation_models import (
+    from plugins.dogs.collect_drive import CollectDriveController
+    from plugins.dogs.collect_drive_multi import CollectDriveMultiController
+    from plugins.dogs.communication_free import CommunicationFreeController
+    from plugins.dogs.fat import FatController
+    from plugins.dogs.kubo_forces import KuboDogController
+    from plugins.sheep.kubo import KuboSheepDynamics
+    from plugins.sheep.strombom import StrombomSheepDynamics
+
+    from core.observation import (
         BearingOnlyObservation,
         GlobalObservation,
         IntermittentObservation,
         LocalPositionsObservation,
         NoisyBearingObservation,
     )
-    from plugins.dogs.adaptive import AdaptiveController
-    from plugins.dogs.collect_drive import CollectDriveController
-    from plugins.dogs.collect_drive_multi import CollectDriveMultiController
-    from plugins.dogs.communication_free import CommunicationFreeController
-    from plugins.dogs.fat import FatController
-    from plugins.dogs.kubo_forces import KuboDogController
-    from plugins.dogs.obstacle_aware_drive import ObstacleAwareDriveController
-    from plugins.dogs.policy_file import PolicyFileController
-    from plugins.dogs.v_formation import VFormationController
-    from plugins.sheep.jadhav import JadhavSheepDynamics
-    from plugins.sheep.kubo import KuboSheepDynamics
-    from plugins.sheep.strombom import StrombomSheepDynamics
 
     sheep_dynamics_registry.register("strombom", StrombomSheepDynamics)
     sheep_dynamics_registry.register("kubo", KuboSheepDynamics)
-    sheep_dynamics_registry.register("jadhav", JadhavSheepDynamics)
 
     dog_controller_registry.register("collect_drive", CollectDriveController)
     dog_controller_registry.register("collect_drive_multi", CollectDriveMultiController)
     dog_controller_registry.register("kubo_forces", KuboDogController)
-    dog_controller_registry.register("v_formation", VFormationController)
-    dog_controller_registry.register("obstacle_aware_drive", ObstacleAwareDriveController)
     dog_controller_registry.register("fat", FatController)
     dog_controller_registry.register("communication_free", CommunicationFreeController)
-    dog_controller_registry.register("adaptive", AdaptiveController)
-    dog_controller_registry.register("policy_file", PolicyFileController)
 
     observation_registry.register("global", GlobalObservation)
     observation_registry.register("local_positions", LocalPositionsObservation)

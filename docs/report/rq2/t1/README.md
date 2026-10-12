@@ -13,9 +13,9 @@ T1 asks whether overcrowding at the usual deadline still holds when the clock is
 - Theta: 0.90
 - Max ticks: 20000
 - Commands (run in this order):
-  1. Plan: `make -C scaling scaling-t1-plan`
+  1. Plan: `uv run cli/campaign.py t1-plan --protocol phase1_t1`
      Chooses overcrowding cells from the claim merge into `t1_cells.csv` (may be empty; no T1 sims yet).
-  2. Run: `make -C scaling scaling-t1 WORKERS=16`
+  2. Run: `uv run cli/campaign.py t1 --protocol phase1_t1` --workers 16
      Reseeds those cells at the longer deadline T = 20000.
 
 ## Completeness

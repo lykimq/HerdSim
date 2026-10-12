@@ -1,9 +1,9 @@
 """Outlier Count metric: number of sheep beyond threshold from centroid."""
 
 import numpy as np
-
-from core.base_metric import BaseMetric
 from core.simulation_state import SimulationState
+
+from .base import BaseMetric
 
 
 class OutlierCountMetric(BaseMetric):

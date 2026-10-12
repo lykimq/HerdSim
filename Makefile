@@ -1,37 +1,27 @@
-# HerdSim scaling-cli: RQ campaigns on the shared simulation engine.
-# Layout: sim/ (engine) | run/ (campaigns) | analysis/ (post-run) | docs/ | results/
+# HerdSim scaling-cli: install, tests, lint. Campaigns: cli/campaign.py
 
-.PHONY: help install test test-ci test-stress lint format typecheck check clean \
-	scaling-help scaling-test scaling-pilot scaling-pilot-state scaling-analyse \
-	scaling-scout scaling-claim-plan scaling-claim-reseed scaling-t1-plan scaling-t1 \
-	scaling-factor-sweep
+.PHONY: help install test lint format typecheck check clean
 
 UV ?= uv
-# Repo root only. Do not add run/ here: run/packaging would shadow PyPI packaging.
+# Repo root only. Do not add protocols/ here: packaging name clashes are avoided
+# by using the protocols.packaging package path.
 export PYTHONPATH := $(CURDIR)$(if $(PYTHONPATH),:$(PYTHONPATH),)
 
 help:
-	@echo "HerdSim (scaling-cli): RQ protocols + shared engine"
+	@echo "HerdSim (scaling-cli)"
 	@echo ""
-	@echo "  sim/        Tick engine (core, plugins, methods)"
-	@echo "  run/        Campaigns, protocols, packaging -> make -C run help"
-	@echo "  analysis/   Post-run frontiers, plots, package export"
-	@echo "  results/    Trial data and packages"
-	@echo "  docs/       Architecture, science, report (report contents frozen)"
+	@echo "  make install | test | lint | format | typecheck | check | clean"
 	@echo ""
-	@echo "Common targets:"
-	@echo "  make install | test | test-ci | lint | format | typecheck | check"
-	@echo "  make scaling-help | scaling-test | scaling-pilot | scaling-scout | ..."
-	@echo "  Full campaign list: make -C run help"
+	@echo "Campaigns:"
+	@echo "  uv run cli/campaign.py help"
+	@echo "  uv run cli/campaign.py run --protocol phase1_scout --workers 18"
+	@echo "  Protocol ids: protocols/configs/protocols/  (see protocols/README.md)"
 
 install:
 	$(UV) sync --extra dev
 
-test test-ci:
-	$(UV) run pytest tests/backend -q -m "not stress"
-
-test-stress:
-	$(UV) run pytest tests/backend -q -m stress
+test:
+	$(UV) run pytest tests -q
 
 lint:
 	$(UV) run ruff check .
@@ -42,17 +32,9 @@ format:
 typecheck:
 	$(UV) run basedpyright
 
-check: lint typecheck test-ci
+check: lint typecheck test
 
 clean:
 	find . -type d -name __pycache__ -prune -exec rm -rf {} +
 	find . -type d -name .pytest_cache -prune -exec rm -rf {} +
 	find . -type d -name .ruff_cache -prune -exec rm -rf {} +
-
-scaling-help:
-	@$(MAKE) -C run help
-
-scaling-test scaling-pilot scaling-pilot-state scaling-analyse scaling-scout \
-	scaling-claim-plan scaling-claim-reseed scaling-t1-plan scaling-t1 \
-	scaling-factor-sweep:
-	@$(MAKE) -C run $@

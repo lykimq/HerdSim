@@ -26,8 +26,8 @@ Cross-phase context: [main scaling plan](../../docs/main_scaling_plan.md).
 - Seeds (scout / claim): 30 scout / 100 claim; Kubo outlier_rich N=200 uses 200 seeds on D in {1,2,3,4,6,10,15,20,25}
 - T0: 10000
 - Theta: 0.90 (90% success bar)
-- Commands: `make -C scaling scaling-transfer-size-*` and `scaling-transfer-structure-*` with `TRANSFER_METHOD=kubo` then `fat`
-- Output: `scaling/results/phase4/`
+- Commands: `uv run cli/campaign.py` with `phase4_{kubo,fat}_{size,structure}_{scout,claim}`
+- Output: `results/phase4/`
 - Host: gwen (Ultra 7 165H, 61 GiB)
 
 ## Completeness
@@ -90,7 +90,7 @@ Kubo outlier_rich N=200 D_min bootstrap stays wide ([2, 20]) because several D <
 
 ## Claims update
 
-CLAIM grade. Aligned with `scaling/docs/progress_tracker.md`:
+CLAIM grade. Aligned with `docs/science/progress_tracker.md`:
 
 | Claim | Verdict | Evidence |
 |-------|---------|----------|

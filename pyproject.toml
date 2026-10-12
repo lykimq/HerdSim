@@ -23,52 +23,42 @@ dev = [
     "pytest>=7.4",
     "ruff>=0.1",
     "basedpyright>=1.18",
+    "pandas-stubs>=2.1",
+    "scipy-stubs>=1.11",
 ]
 
-# Import names stay stable; folders are purpose-split under sim/ and run/.
+# Import names stay stable (core / plugins.* / methods.*); folders under sim/ are purpose-split.
 [tool.setuptools]
 packages = [
     "analysis",
-    "analysis.scaling",
     "core",
-    "core.agents",
+    "core.config",
+    "core.world",
     "methods",
-    "methods.flocking_dog",
-    "methods.heterogeneous",
     "methods.kubo",
-    "methods.obstacle_aware",
     "methods.strombom",
-    "methods.strombom_multi",
-    "methods.strombom_noise",
-    "methods.v_formation",
     "plugins",
     "plugins.dogs",
     "plugins.metrics",
     "plugins.scenarios",
     "plugins.sheep",
-    "run",
-    "run.packaging",
-    "services.scaling",
+    "protocols",
+    "protocols.packaging",
+    "services",
 ]
 
 [tool.setuptools.package-dir]
 "core" = "sim/core"
-"core.agents" = "sim/core/agents"
+"core.config" = "sim/core/config"
+"core.world" = "sim/core/world"
 "methods" = "sim/methods"
-"methods.flocking_dog" = "sim/methods/flocking_dog"
-"methods.heterogeneous" = "sim/methods/heterogeneous"
 "methods.kubo" = "sim/methods/kubo"
-"methods.obstacle_aware" = "sim/methods/obstacle_aware"
 "methods.strombom" = "sim/methods/strombom"
-"methods.strombom_multi" = "sim/methods/strombom_multi"
-"methods.strombom_noise" = "sim/methods/strombom_noise"
-"methods.v_formation" = "sim/methods/v_formation"
 "plugins" = "sim/plugins"
 "plugins.dogs" = "sim/plugins/dogs"
 "plugins.metrics" = "sim/plugins/metrics"
 "plugins.scenarios" = "sim/plugins/scenarios"
 "plugins.sheep" = "sim/plugins/sheep"
-"services.scaling" = "run/services/scaling"
 
 [tool.ruff]
 line-length = 100
@@ -78,10 +68,10 @@ target-version = "py311"
 select = ["E", "F", "I", "W", "UP"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests/backend"]
+testpaths = ["tests"]
 pythonpath = ["."]
 markers = [
-    "stress: heavy / long runs; use make test-stress",
+    "stress: heavier / longer runs (included in make test)",
 ]
 
 [tool.pyright]
@@ -90,3 +80,20 @@ extraPaths = [".", "sim"]
 venvPath = "."
 venv = ".venv"
 failOnWarnings = false
+
+# Pandas-heavy analysis: keep real errors, mute cascading unknown/Any noise.
+[[tool.pyright.executionEnvironments]]
+root = "analysis"
+extraPaths = [".", "sim"]
+reportExplicitAny = "none"
+reportAny = "none"
+reportUnknownMemberType = "none"
+reportUnknownVariableType = "none"
+reportUnknownArgumentType = "none"
+reportUnknownParameterType = "none"
+reportUnknownLambdaType = "none"
+reportUnnecessaryIsInstance = "none"
+
+[[tool.pyright.executionEnvironments]]
+root = "."
+extraPaths = [".", "sim"]

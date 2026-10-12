@@ -11,11 +11,11 @@ from __future__ import annotations
 from typing import Any
 
 import numpy as np
-
-from core.sheep_dynamics import BaseSheepDynamics
 from core.simulation_state import SimulationState
 from methods.kubo.config import KUBO_DEFAULTS
 from methods.kubo.forces import clamp_speed, sheep_force_components
+
+from .base import BaseSheepDynamics
 
 
 class KuboSheepDynamics(BaseSheepDynamics):

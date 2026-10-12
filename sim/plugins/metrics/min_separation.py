@@ -1,10 +1,10 @@
 """Minimum Separation metric: closest pair of sheep distance (safety)."""
 
 import numpy as np
+from core.simulation_state import SimulationState
 from scipy.spatial.distance import pdist
 
-from core.base_metric import BaseMetric
-from core.simulation_state import SimulationState
+from .base import BaseMetric
 
 
 class MinSeparationMetric(BaseMetric):

@@ -21,7 +21,7 @@ Kubo structure claim (4 layouts x N in {50,100,200}). Claim trials: 4,000 rows. 
 - Theta: 0.90
 - T0: 10000
 - obs_mode: global
-- Output: `scaling/results/phase4/kubo_structure/claim/`
+- Output: `results/phase4/kubo_structure/claim/`
 
 ## Completeness
 

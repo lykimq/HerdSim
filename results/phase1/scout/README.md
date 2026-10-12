@@ -22,8 +22,8 @@ Cheap full size map finished: 3000/3000 trials. Packages A and F written. On com
 - Seeds (scout / claim): 30 (scout)
 - T0 (and T1 if used): 10000 (T0 only)
 - Theta: 0.90 (90% success bar)
-- Command: `make -C scaling scaling-scout WORKERS=16`
-- Output: `scaling/results/phase1/scout/`
+- Command: `uv run cli/campaign.py run --protocol phase1_scout` --workers 16
+- Output: `results/phase1/scout/`
 - Host: gwen (Ultra 7 165H, 61 GiB)
 - WORKERS / CPU governor: 16 / performance
 

@@ -6,6 +6,6 @@
     "obs_mode"
   ],
   "theta": 0.9,
-  "source_trials": "/home/gwen/HerdSim/scaling/results/phase1/claim/merged_trials.csv",
+  "source_trials": "/home/gwen/HerdSim/results/phase1/claim/merged_trials.csv",
   "max_ticks": 20000
 }

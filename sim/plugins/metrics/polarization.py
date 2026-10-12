@@ -1,9 +1,9 @@
 """Flock Polarisation metric: alignment of sheep headings."""
 
 import numpy as np
-
-from core.base_metric import BaseMetric
 from core.simulation_state import SimulationState
+
+from .base import BaseMetric
 
 
 class PolarizationMetric(BaseMetric):

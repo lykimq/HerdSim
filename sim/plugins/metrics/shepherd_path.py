@@ -1,9 +1,9 @@
 """Shepherd Path Length metric: cumulative distance traveled by shepherds."""
 
 import numpy as np
-
-from core.base_metric import BaseMetric
 from core.simulation_state import SimulationState
+
+from .base import BaseMetric
 
 
 class ShepherdPathMetric(BaseMetric):

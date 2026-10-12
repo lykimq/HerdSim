@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from core.base_metric import BaseMetric
+from .base import BaseMetric
 
 
 class MetricRegistry:
@@ -43,24 +43,24 @@ metric_registry = MetricRegistry()
 
 
 def _auto_register():
-    from plugins.metrics.aspect_ratio import AspectRatioMetric
-    from plugins.metrics.cohesion import CohesionMetric
-    from plugins.metrics.extent import ExtentMetric
-    from plugins.metrics.flock_density import FlockDensityMetric
-    from plugins.metrics.fragmentation import FragmentationMetric
-    from plugins.metrics.gcm_goal import GcmGoalMetric
-    from plugins.metrics.hull_area import HullAreaMetric
-    from plugins.metrics.mean_spread import MeanSpreadMetric
-    from plugins.metrics.min_separation import MinSeparationMetric
-    from plugins.metrics.outlier_count import OutlierCountMetric
-    from plugins.metrics.perimeter import PerimeterMetric
-    from plugins.metrics.polarization import PolarizationMetric
-    from plugins.metrics.sheep_in_goal import SheepInGoalMetric
-    from plugins.metrics.shepherd_coverage import ShepherdCoverageMetric
-    from plugins.metrics.shepherd_interference import ShepherdInterferenceMetric
-    from plugins.metrics.shepherd_path import ShepherdPathMetric
-    from plugins.metrics.success_rate import SuccessRateMetric
-    from plugins.metrics.time_to_goal import TimeToGoalMetric
+    from .aspect_ratio import AspectRatioMetric
+    from .cohesion import CohesionMetric
+    from .extent import ExtentMetric
+    from .flock_density import FlockDensityMetric
+    from .fragmentation import FragmentationMetric
+    from .gcm_goal import GcmGoalMetric
+    from .hull_area import HullAreaMetric
+    from .mean_spread import MeanSpreadMetric
+    from .min_separation import MinSeparationMetric
+    from .outlier_count import OutlierCountMetric
+    from .perimeter import PerimeterMetric
+    from .polarization import PolarizationMetric
+    from .sheep_in_goal import SheepInGoalMetric
+    from .shepherd_coverage import ShepherdCoverageMetric
+    from .shepherd_interference import ShepherdInterferenceMetric
+    from .shepherd_path import ShepherdPathMetric
+    from .success_rate import SuccessRateMetric
+    from .time_to_goal import TimeToGoalMetric
 
     for cls in [
         CohesionMetric,

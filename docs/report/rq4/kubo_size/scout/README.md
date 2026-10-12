@@ -14,7 +14,7 @@ SCOUT Kubo compact size map. Used to plan claim windows. Not claim-grade by itse
 - D: {1, 2, 3, 4, 6, 10, 15, 20, 25, 35}
 - Seeds: 30
 - Package export: A, D, F
-- Command: `make -C scaling scaling-transfer-size-scout TRANSFER_METHOD=kubo WORKERS=16`
+- Command: `uv run cli/campaign.py run --protocol phase4_kubo_size_scout` --workers 16
 
 ## Completeness
 

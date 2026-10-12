@@ -1,9 +1,9 @@
 """Time to Goal metric: tick count when success condition is first met."""
 
 import numpy as np
-
-from core.base_metric import BaseMetric
 from core.simulation_state import SimulationState
+
+from .base import BaseMetric
 
 
 class TimeToGoalMetric(BaseMetric):

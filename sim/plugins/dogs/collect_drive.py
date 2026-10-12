@@ -4,9 +4,6 @@ from __future__ import annotations
 
 from typing import Any
 
-import numpy as np
-
-from core.dog_controller import BaseDogController
 from core.observation import ShepherdObservation
 from core.simulation_state import SimulationState
 from methods.strombom.config import STROMBOM_DEFAULTS
@@ -15,7 +12,9 @@ from methods.strombom.heuristics import (
     should_collect,
     strombom_assignment_lines,
 )
-from plugins.dogs.helpers import apply_dog_speeds, empty_dog_velocities, view_from_observation
+
+from .base import BaseDogController
+from .helpers import apply_dog_speeds, empty_dog_velocities, view_from_observation
 
 
 class CollectDriveController(BaseDogController):
@@ -60,33 +59,11 @@ class CollectDriveController(BaseDogController):
             if obs.n_sheep_seen == 0:
                 continue
             local = view_from_observation(state, obs)
-            # Map dog speed aliases used by Jadhav presets.
-            cfg = dict(config)
-            if "dog_speed" in cfg and "shepherd_speed" not in cfg:
-                cfg["shepherd_speed"] = cfg["dog_speed"]
             velocities[i] = compute_shepherd_velocity(
-                local, cfg, i, proximity_sheep=state.sheep_positions
+                local, config, i, proximity_sheep=state.sheep_positions
             )
-            modes.append("collect" if should_collect(local, cfg) else "drive")
-            lines.extend(strombom_assignment_lines(local, cfg)[:1])
-
-        # Jadhav close-speed behaviour when configured.
-        if "dog_close_speed" in config and state.n_sheep:
-            r_a = float(config.get("r_a", 2.0))
-            close_speed = float(config["dog_close_speed"])
-            for i in range(state.n_shepherds):
-                if not state.shepherd_active[i]:
-                    continue
-                dog = state.shepherd_positions[i]
-                min_dist = float(np.min(np.linalg.norm(state.sheep_positions - dog, axis=1)))
-                if min_dist <= r_a:
-                    prev = state.shepherd_velocities[i]
-                    norm = np.linalg.norm(prev)
-                    if norm < 1e-10:
-                        prev = state.sheep_centroid - dog
-                        norm = np.linalg.norm(prev)
-                    if norm > 1e-10:
-                        velocities[i] = (prev / norm) * close_speed
+            modes.append("collect" if should_collect(local, config) else "drive")
+            lines.extend(strombom_assignment_lines(local, config)[:1])
 
         velocities = apply_dog_speeds(velocities, state, config)
         if modes:

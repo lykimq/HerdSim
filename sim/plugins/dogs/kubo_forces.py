@@ -4,13 +4,14 @@ from __future__ import annotations
 
 from typing import Any
 
-from core.agents.goal import resolve_goal_center
-from core.dog_controller import BaseDogController
 from core.observation import ShepherdObservation
 from core.simulation_state import SimulationState
+from core.world.goal import resolve_goal_center
 from methods.kubo.config import KUBO_DEFAULTS
 from methods.kubo.forces import clamp_speed, dog_force_components
-from plugins.dogs.helpers import apply_dog_speeds, empty_dog_velocities, view_from_observation
+
+from .base import BaseDogController
+from .helpers import apply_dog_speeds, empty_dog_velocities, view_from_observation
 
 
 class KuboDogController(BaseDogController):

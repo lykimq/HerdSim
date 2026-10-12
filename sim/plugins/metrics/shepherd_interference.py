@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import numpy as np
-
-from core.base_metric import BaseMetric
 from core.simulation_state import SimulationState
+
+from .base import BaseMetric
 
 # Shepherds slower than this are treated as stationary and excluded from I_dir.
 _STATIONARY_SPEED = 1e-6

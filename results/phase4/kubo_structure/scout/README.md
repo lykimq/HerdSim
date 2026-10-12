@@ -21,7 +21,7 @@ Cheap Kubo structure map: 3,600 trials (3 N x 4 layouts x 10 D x 30 seeds). Used
 - Theta: 0.90
 - T0: 10000
 - obs_mode: global
-- Output: `scaling/results/phase4/kubo_structure/scout/`
+- Output: `results/phase4/kubo_structure/scout/`
 
 ## Completeness
 

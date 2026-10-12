@@ -1,8 +1,8 @@
 protocol_id: phase4_fat_size_scout
 phase: 4
 grade: SCOUT
-output: scaling/results/phase4/fat_size/scout
-canonical: scaling/configs/canonical_grid.yaml
+output: results/phase4/fat_size/scout
+canonical: protocols/configs/canonical_grid.yaml
 methods:
 - fat
 layouts:

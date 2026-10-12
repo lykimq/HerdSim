@@ -260,7 +260,7 @@ When sources differ, use this order:
 3. A run's copied `protocol.yaml`, `provenance.json`, `manifest.jsonl`, and `status.json` define what actually executed.
 4. This plan defines research questions, dependencies, claim criteria, evidence grades, budgets, gates, and scope.
 5. [Final report](final_report.md) is the reader narrative for protocol detail, methods, findings, claims, and limits.
-6. [Progress tracker](progress_tracker.md) defines current code, run, and claim status. Commands: `make -C scaling help`.
+6. [Progress tracker](progress_tracker.md) defines current code, run, and claim status. Commands: `uv run cli/campaign.py help`.
 7. Package CSVs and each run's `status.json` / `provenance.json` under `results/` define executed counts and reported evidence.
 
 Results never redefine the frozen plan. If a planning estimate differs from a run artifact, retain the estimate as a plan and report the artifact as executed. If a copied run protocol differs from generic prose, the copied protocol and provenance control interpretation of that run.
