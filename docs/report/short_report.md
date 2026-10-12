@@ -10,7 +10,7 @@ That is the question this study tries to answer carefully. We do not assume ther
 
 Control here is indirect: we cannot steer every sheep by hand. The dogs only push through local reactions. So "how much control" is something we can measure as size and starting shape change.
 
-This package is meant to be readable on its own. The short report tells the story. Folders under `rq1/` through `rq7/` hold the setup files, trial tables, and notes if you want to check a number.
+This short report tells the story. Trial tables and packages live under `results/` (mapped by research question below).
 
 ---
 
@@ -166,7 +166,7 @@ Wide versus compact at one dog: about 11x to 20x more time and about 19x to 36x 
 
 *Wide and large outlier-rich starts cost much more time and path at one dog; D_min stays 1.*
 
-More detail: [`rq1/`](rq1/).
+More detail: RQ1 (`results/phase2/`).
 
 ### RQ2: how does dog need change with flock size?
 
@@ -199,7 +199,7 @@ Here "not reach" means no overcrowding appeared before D = 35, so `D_max` is onl
 
 *Extra dogs mainly raise path after the minimum; success stays high (waste, not overcrowding).*
 
-More detail: [`rq2/`](rq2/).
+More detail: RQ2 (`results/phase1/`).
 
 ### RQ3: what mechanism drives the pattern?
 
@@ -207,7 +207,7 @@ More detail: [`rq2/`](rq2/).
 
 The plan was to compare efficient cells with overcrowding cells at the same N. We never saw overcrowding on the baseline size map inside D <= 35, so that contrast does not exist. Correlation candidates (interference, splitting, and related logs) were not tested against a real upper failure band.
 
-Unlocking RQ3 needs either a measured collapse (for example D > 35, or a harder draft-style task) or another protocol where overcrowding appears. See [What we plan next](#what-we-plan-next). Note: [`rq3/`](rq3/).
+Unlocking RQ3 needs either a measured collapse (for example D > 35, or a harder draft-style task) or another protocol where overcrowding appears. See [What we plan next](#what-we-plan-next).
 
 ### RQ4: do the patterns transfer across methods?
 
@@ -262,7 +262,7 @@ On Kubo wide, best success is about 0.47 to 0.54. FAT clears no structure cell a
 
 *Soft edge: point D_min = 20 after 200 seeds; bootstrap still wide.*
 
-That is enough to reject "the same story everywhere," but not enough to say which patterns are shared across a broader method set. More detail: [`rq4/`](rq4/).
+That is enough to reject "the same story everywhere," but not enough to say which patterns are shared across a broader method set. More detail: RQ4 (`results/phase4/`).
 
 ### RQ5: can better information replace dogs?
 
@@ -270,7 +270,7 @@ That is enough to reject "the same story everywhere," but not enough to say whic
 
 No claim-grade observation, range, or communication ladder results are published. Prior Phase 5 trees were removed after shared sim bugs (bearing-only freeze, range under global observation, communication list stacking). Protocols remain for a clean rerun.
 
-More detail: [`rq5/`](rq5/).
+More detail: RQ5 (`results/phase5/`, NOT RUN YET).
 
 ### RQ6: which curve fits D_min vs N?
 
@@ -289,7 +289,7 @@ Piecewise wins because it matches that step, not because we measured a rich grow
 
 ![Leave-one-N-out RMSE by model.](../figures/f8_scaling_rmse.svg)
 
-More detail: [`rq6/`](rq6/).
+More detail: RQ6 (`results/phase1/claim/packages/f/`).
 
 ### RQ7: can state warn of failure early?
 
@@ -301,7 +301,7 @@ By the first check at tick 1,000, almost every successful RQ2 size-map run has a
 
 *Successful runs finish early; the shaded warning checks start after most successes are already done.*
 
-More detail: [`rq7/`](rq7/).
+More detail: RQ7 (`results/phase1/claim/packages/g/`).
 
 ### Claims scorecard
 
@@ -375,20 +375,16 @@ Another path without raising the dog cap: port the draft-style collect-hold-gate
 
 ---
 
-## Evidence in this package
+## Evidence
 
-After this short report, you can dig into:
+| RQ | Results path | What it holds |
+|----|--------------|---------------|
+| RQ1 | `results/phase2/` | Structure campaign; Package B |
+| RQ2 | `results/phase1/` | Size campaign; Package A; T1 plan |
+| RQ3 | (none) | SKIPPED |
+| RQ4 | `results/phase4/` | Kubo/FAT maps; Package D |
+| RQ5 | `results/phase5/` | NOT RUN YET |
+| RQ6 | `results/phase1/claim/packages/f/` | Scaling-fit tables (Package F) |
+| RQ7 | `results/phase1/claim/packages/g/` | Early-warning tables (Package G) |
 
-| Path | What it holds |
-|------|----------------|
-| [`rq1/`](rq1/) | Structure campaign (setup, trials, Package B) |
-| [`rq2/`](rq2/) | Size campaign (setup, trials, Package A); T1 note |
-| [`rq3/`](rq3/) | SKIPPED note only |
-| [`rq4/`](rq4/) | Kubo/FAT size and structure maps; Package D |
-| [`rq5/`](rq5/) | NOT RUN YET note only (no trials) |
-| [`rq6/`](rq6/) | Scaling-fit tables (Package F) |
-| [`rq7/`](rq7/) | Early-warning summary tables (Package G) |
-| [`TRUST_AUDIT.md`](TRUST_AUDIT.md) | Count and protocol-hash integrity checks |
-| [`docs/figures/`](../figures/) | Plots used in this report |
-
-Each `rq*/` folder has a README that explains what the files mean. Trajectory parquet files are not included (they are large; RQ7 keeps summary tables only).
+Integrity checks: `TRUST_AUDIT.md`. Plots: `docs/figures/`.

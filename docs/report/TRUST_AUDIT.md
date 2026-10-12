@@ -1,6 +1,6 @@
 # Trust audit (scaling_v2)
 
-Package note: this audit was written against the live tree under `results/`. In this email package the same run folders are renamed by research question (phase1 -> rq2, phase2 -> rq1, phase4 -> rq4, phase5 -> rq5). Timeseries parquet files are not included here.
+This audit was written against the live tree under `results/`. Research-question names map as phase1 -> RQ2, phase2 -> RQ1, phase4 -> RQ4, phase5 -> RQ5.
 
 
 Date: 2026-10-09. Host: gwen. Protocol hash: `54dfb46837e3971a` on all audited provenance files.

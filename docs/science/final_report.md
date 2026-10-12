@@ -1457,7 +1457,7 @@ Protocols remain under `protocols/configs/protocols/phase5_*.yaml`. Rerun:
 WORKERS=18 bash results/phase5/run_all_ladders.sh
 ```
 
-Folder note: [`../report/rq5/`](../report/rq5/).
+Planned outputs: `results/phase5/`.
 
 ---
 

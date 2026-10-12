@@ -15,7 +15,7 @@ help:
 	@echo "Campaigns:"
 	@echo "  uv run cli/campaign.py help"
 	@echo "  uv run cli/campaign.py run --protocol phase1_scout --workers 18"
-	@echo "  Protocol ids: protocols/configs/protocols/  (see protocols/README.md)"
+	@echo "  Protocol ids: protocols/configs/protocols/"
 
 install:
 	$(UV) sync --extra dev
