@@ -49,5 +49,3 @@ uv run cli/campaign.py run --protocol phase5_factor_sweep --workers 18
 ```
 
 Verbs: `run`, `claim-plan`, `claim-reseed`, `t1-plan`, `t1`. Protocol ids live under `protocols/configs/protocols/`. Resume an interrupted run by repeating the same command; finished cells in `manifest.jsonl` are skipped.
-
-Protocol map by phase/RQ: [protocols/README.md](protocols/README.md). Engine detail: [sim/README.md](sim/README.md).
