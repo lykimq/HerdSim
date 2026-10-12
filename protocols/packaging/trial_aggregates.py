@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
+import numpy as np
 import pandas as pd
 
 # Per-tick series aggregated into mean/min/max/auc trial columns.
@@ -34,17 +35,32 @@ OUTCOME_FROM_FINAL = {
 }
 
 
-def _series_stats(series: pd.Series) -> dict[str, float]:
-    values = pd.Series(pd.to_numeric(series, errors="coerce")).dropna()
+def _series_stats(series: pd.Series, ticks: pd.Series | None = None) -> dict[str, float]:
+    values = pd.Series(pd.to_numeric(series, errors="coerce"))
+    if ticks is not None:
+        tick_vals = pd.Series(pd.to_numeric(ticks, errors="coerce"))
+        mask = values.notna() & tick_vals.notna()
+        values = values.loc[mask]
+        tick_vals = tick_vals.loc[mask]
+    else:
+        values = values.dropna()
+        tick_vals = None
     if values.empty:
         return {"mean": float("nan"), "min": float("nan"), "max": float("nan"), "auc": float("nan")}
     mean_v = float(values.mean())
+    if tick_vals is not None and len(values) >= 2:
+        order = tick_vals.to_numpy().argsort()
+        t = tick_vals.to_numpy()[order].astype(float)
+        y = values.to_numpy()[order].astype(float)
+        auc_v = float(np.trapezoid(y, t)) if hasattr(np, "trapezoid") else float(np.trapz(y, t))
+    else:
+        # Single sample or no tick axis: AUC degenerates to the mean level.
+        auc_v = mean_v
     return {
         "mean": mean_v,
         "min": float(values.min()),
         "max": float(values.max()),
-        # Discrete AUC as mean over ticks (stable, comparable across run lengths).
-        "auc": mean_v,
+        "auc": auc_v,
     }
 
 
@@ -67,10 +83,11 @@ def build_trial_metric_fields(history: pd.DataFrame) -> dict[str, Any]:
         if src in history.columns:
             out[dest] = float(final[src])
 
+    ticks = pd.Series(history["tick"]) if "tick" in history.columns else None
     for metric_id in TRAJECTORY_METRICS:
         if metric_id not in history.columns:
             continue
-        stats = _series_stats(pd.Series(history[metric_id]))
+        stats = _series_stats(pd.Series(history[metric_id]), ticks=ticks)
         out[f"mean_{metric_id}"] = stats["mean"]
         out[f"min_{metric_id}"] = stats["min"]
         out[f"max_{metric_id}"] = stats["max"]

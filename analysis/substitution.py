@@ -73,13 +73,17 @@ def substitution_curves(
     for key_vals, g in df.groupby([sheep_col, info_col], dropna=False):
         n_raw, info = cast(tuple[Any, Any], key_vals)
         n = as_int(n_raw)
+        level = int(rank(info))
+        if level < 0:
+            # Unknown ladder values must not sort before richer levels.
+            continue
         front = extract_frontier(g, theta=theta)
         d_min = None if front.empty else front.iloc[0]["d_min"]
         rows.append(
             {
                 sheep_col: n,
                 info_col: info,
-                "info_level": int(rank(info)),
+                "info_level": level,
                 "d_min": d_min,
                 "hard_failure": d_min is None,
             }

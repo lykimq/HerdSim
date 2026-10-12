@@ -98,12 +98,32 @@ def _build_observation(
     )
 
 
-def _sensing_range(state: SimulationState, shepherd_index: int, config: dict[str, Any]) -> float:
+def resolve_sensing_range(
+    config: dict[str, Any],
+    *,
+    sensing_scale: float = 1.0,
+) -> float:
+    """Absolute sensing radius from config, scaled by a per-dog factor."""
     base = config.get("sensing_range")
     if base is None:
         base = config.get("r_s", config.get("radius", 65.0))
-    scale = float(state.shepherd_sensing_scale[shepherd_index])
-    return float(base) * scale
+    return float(base) * float(sensing_scale)
+
+
+def sensing_range_for_shepherd(
+    state: SimulationState,
+    shepherd_index: int,
+    config: dict[str, Any],
+) -> float:
+    """Per-dog sensing radius including ``shepherd_sensing_scale``."""
+    return resolve_sensing_range(
+        config,
+        sensing_scale=float(state.shepherd_sensing_scale[shepherd_index]),
+    )
+
+
+def _sensing_range(state: SimulationState, shepherd_index: int, config: dict[str, Any]) -> float:
+    return sensing_range_for_shepherd(state, shepherd_index, config)
 
 
 class GlobalObservation(BaseObservationModel):
@@ -257,4 +277,6 @@ __all__ = [
     "LocalPositionsObservation",
     "NoisyBearingObservation",
     "ShepherdObservation",
+    "resolve_sensing_range",
+    "sensing_range_for_shepherd",
 ]

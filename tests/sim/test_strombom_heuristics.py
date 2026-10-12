@@ -89,13 +89,22 @@ def test_shepherd_stops_within_three_ra():
     from plugins.dogs.collect_drive import CollectDriveController
 
     ctrl = CollectDriveController()
-    cfg = ctrl.default_config
+    cfg = {**ctrl.default_config, "noise_strength": 0.0}
     sheep = np.array([[50.0, 50.0], [52.0, 50.0], [50.0, 52.0]])
-    dog = np.array([[51.0, 50.5]])
-    state = make_state(sheep, dog, world=make_world(), seed=1)
-    obs = GlobalObservation().observe_all(state, cfg)
-    new_state = ctrl.step(state, obs, cfg)
-    assert np.allclose(new_state.shepherd_velocities[0], 0.0)
+    dog_near = np.array([[51.0, 50.5]])
+    near = make_state(sheep, dog_near, world=make_world(), seed=1)
+    near.shepherd_velocities[:] = [[3.0, 0.0]]
+    obs_near = GlobalObservation().observe_all(near, cfg)
+    stopped = ctrl.step(near, obs_near, cfg)
+    assert np.allclose(stopped.shepherd_velocities[0], 0.0)
+    assert np.allclose(stopped.shepherd_positions[0], near.shepherd_positions[0])
+
+    dog_far = np.array([[90.0, 50.0]])
+    far = make_state(sheep, dog_far, world=make_world(goal_center=(10.0, 10.0)), seed=1)
+    obs_far = GlobalObservation().observe_all(far, cfg)
+    moved = ctrl.step(far, obs_far, cfg)
+    assert np.linalg.norm(moved.shepherd_velocities[0]) > 0.0
+    assert not np.allclose(moved.shepherd_positions[0], far.shepherd_positions[0])
 
 
 def test_sheep_graze_when_shepherd_beyond_rs():

@@ -139,11 +139,13 @@ def compare_state_vs_nd_predictors(
     p_nd: list[float] = []
     y_st: list[float] = []
     p_st: list[float] = []
+    n_folds = 0
     for held in flocks:
         test = work.loc[work[sheep_col] == held].copy()
         train = work.loc[work[sheep_col] != held].copy()
         if train["_y"].nunique() < 2 or test.empty:
             continue
+        n_folds += 1
         y_train = train.loc[:, "_y"].to_numpy()
         y_test = test.loc[:, "_y"].to_numpy()
         x_nd_tr = _numeric_block(train, nd_cols)
@@ -170,7 +172,7 @@ def compare_state_vs_nd_predictors(
         nll_nd = _logistic_nll(np.asarray(y_nd), np.asarray(p_nd))
         nll_st = _logistic_nll(np.asarray(y_st), np.asarray(p_st))
     return {
-        "n_folds": int(len(flocks)),
+        "n_folds": int(n_folds),
         "nd_nll": nll_nd,
         "state_nll": nll_st,
         "prefers_state": bool(nll_st < nll_nd),

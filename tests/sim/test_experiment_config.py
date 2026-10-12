@@ -81,6 +81,6 @@ def test_kubo_paper_keeps_force_params_under_drive_to_goal_world():
     config = resolve_experiment_config(scenario=scen, method="kubo", preset="paper")
     assert config["K_f4"] == preset["default_config"]["K_f4"]
     assert config["dog_speed_max"] == preset["default_config"]["dog_speed_max"]
-    assert config["n_shepherds"] == 4
+    assert config["n_shepherds"] == preset["default_config"]["n_shepherds"]
     assert config["goal_center"] == scen.default_config["goal_center"]
     assert config["world_width"] == scen.default_config["world_width"]

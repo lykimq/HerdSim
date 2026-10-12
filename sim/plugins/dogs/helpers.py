@@ -66,3 +66,39 @@ def apply_dog_speeds(
 
 def empty_dog_velocities(state: SimulationState) -> np.ndarray:
     return np.zeros_like(state.shepherd_positions)
+
+
+def iter_active_observations(
+    state: SimulationState,
+    observations: list[ShepherdObservation],
+) -> list[tuple[int, ShepherdObservation]]:
+    """Active shepherds that received an observation this tick."""
+    by_idx = {o.shepherd_index: o for o in observations}
+    out: list[tuple[int, ShepherdObservation]] = []
+    for i in range(state.n_shepherds):
+        if not state.shepherd_active[i] or i not in by_idx:
+            continue
+        out.append((i, by_idx[i]))
+    return out
+
+
+def finalize_dog_step(
+    state: SimulationState,
+    velocities: np.ndarray,
+    config: dict[str, Any],
+    *,
+    metadata_updates: dict[str, Any] | None = None,
+    dt: float = 1.0,
+) -> SimulationState:
+    """Apply speed scales and write shepherd positions/velocities/metadata."""
+    scaled = apply_dog_speeds(velocities, state, config)
+    metadata = dict(state.metadata)
+    if metadata_updates:
+        metadata.update(metadata_updates)
+    if "r_a" not in metadata:
+        metadata["r_a"] = float(config.get("r_a", 2.0))
+    return state.copy_with(
+        shepherd_positions=state.shepherd_positions + float(dt) * scaled,
+        shepherd_velocities=scaled,
+        metadata=metadata,
+    )

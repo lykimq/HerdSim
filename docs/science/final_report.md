@@ -93,11 +93,7 @@ Herding fits because control is *indirect*: we cannot steer by remote-controllin
 
 The same engine also supports fair comparison: we pick a method (how sheep move and how dogs decide), put it in a scenario, fix a seed, and score runs with the same metrics, so we can see when herding works, when it fails, and how methods compare when size and other settings are held equal.
 
-HerdSim has two roles on one engine:
-
-a. **Simulation + frontend**: interactive UI (Simulate, Compare, Experiments, NetLogo, Guide).
-
-b. **Scaling**: command-line protocols that answer the control-demand research questions.
+HerdSim in this tree is the **scaling CLI** on the shared tick engine: frozen protocol YAMLs, resumable campaign runs, and post-run analysis packages A-G. Interactive frontend surfaces from earlier platform work are out of scope here.
 
 ### Methods
 
@@ -1404,7 +1400,7 @@ Recorded verdicts match the [progress tracker](progress_tracker.md). C5 is not r
 | C4 | RQ4 | SUPPORTED (partial) | Strombom and Kubo share compact `D_min` for N >= 25; FAT absent for N >= 25; Kubo wide absent; Kubo `outlier_rich`, N=200 shifts to point `D_min=20` with bootstrap `[2, 20]`. |
 | C5a | RQ5 | NOT RUN | Information ladders not rerun yet after obs/comm fixes; prior Phase 5 trees removed ([section 13](#13-information-ladders)). |
 | C5b | RQ5 | NOT RUN | Same as C5a: no claim-grade ladder package is published. |
-| C6a | RQ6 | SUPPORTED | Leave-one-N-out RMSE: power 0.247 > piecewise 0.132; only two observed `D_min` levels. |
+| C6a | RQ6 | SUPPORTED (weak) | Leave-one-N-out RMSE: power 0.247 > piecewise 0.132; only two observed `D_min` levels, so not a strong scaling law. |
 | C6b | RQ6 | SUPPORTED | Compact N in `{25..400}`: `D_min = 1` flat, so log-log slope = 0 (< 1). |
 | C7a | RQ7 | INCONCLUSIVE | Package G: held-out AUROC could not be computed (folds empty). Untestable on this data ([section 15](#15-prediction-and-early-warning)). |
 | C7b | RQ7 | REJECTED | Package G: 14 of 169 failures (8.3%) have lead time >= 500 (bar 30%). |

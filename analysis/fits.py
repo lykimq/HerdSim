@@ -52,13 +52,13 @@ def _leave_one_n_rmse(
     return float(np.sqrt(np.mean(errs)))
 
 
-def _power_predict(n_tr: np.ndarray, d_tr: np.ndarray, n_i: float) -> float | None:
-    """Power law fit by linear-space least squares."""
-    ok = (n_tr > 0) & (d_tr > 0)
-    if int(ok.sum()) < 2 or n_i <= 0:
+def _fit_power_params(n: np.ndarray, d: np.ndarray) -> tuple[float, float, float] | None:
+    """Fit D = A * N^alpha on positive rows. Returns (A, alpha, log_log_slope)."""
+    ok = (n > 0) & (d > 0)
+    if int(ok.sum()) < 2:
         return None
-    nn = n_tr[ok]
-    dd = d_tr[ok]
+    nn = n[ok]
+    dd = d[ok]
     log_alpha, log_a = np.polyfit(np.log(nn), np.log(dd), 1)
     guess = (float(np.exp(log_a)), float(log_alpha))
 
@@ -69,6 +69,17 @@ def _power_predict(n_tr: np.ndarray, d_tr: np.ndarray, n_i: float) -> float | No
         (amp, alpha), _ = curve_fit(_model, nn, dd, p0=guess, maxfev=4000)
     except (RuntimeError, ValueError):
         amp, alpha = guess
+    return float(amp), float(alpha), float(log_alpha)
+
+
+def _power_predict(n_tr: np.ndarray, d_tr: np.ndarray, n_i: float) -> float | None:
+    """Power law fit by linear-space least squares."""
+    if n_i <= 0:
+        return None
+    fitted = _fit_power_params(n_tr, d_tr)
+    if fitted is None:
+        return None
+    amp, alpha, _ = fitted
     return float(amp * (n_i**alpha))
 
 
@@ -139,8 +150,14 @@ def fit_scaling_models(
     if work.empty:
         return {"models": {}, "best": None, "n_points": 0, "state_models": {}, "cv": {}}
 
-    n = work[sheep_col].astype(float).to_numpy()
-    d = work[dmin_col].astype(float).to_numpy()
+    n_all = work[sheep_col].astype(float).to_numpy()
+    d_all = work[dmin_col].astype(float).to_numpy()
+    # Score every candidate on the same positive (N, D_min) rows so AIC/BIC match.
+    positive = (n_all > 0) & (d_all > 0)
+    if int(positive.sum()) < 1:
+        return {"models": {}, "best": None, "n_points": 0, "state_models": {}, "cv": {}}
+    n = n_all[positive]
+    d = d_all[positive]
     m = len(d)
     models: dict[str, Any] = {}
 
@@ -168,33 +185,20 @@ def fit_scaling_models(
         }
 
     # Power law D = A * N^alpha, least squares in D (same space as the other models).
-    mask = (n > 0) & (d > 0)
-    if int(mask.sum()) >= 2:
-        nn = n[mask]
-        dd = d[mask]
-        log_alpha, log_a = np.polyfit(np.log(nn), np.log(dd), 1)
-        guess = (float(np.exp(log_a)), float(log_alpha))
-
-        def _model(x: np.ndarray, amp: float, alpha: float) -> np.ndarray:
-            return amp * np.power(x, alpha)
-
-        try:
-            (amp, alpha), _ = curve_fit(_model, nn, dd, p0=guess, maxfev=4000)
-        except (RuntimeError, ValueError):
-            amp, alpha = guess
-        yhat = np.full_like(d, np.nan, dtype=float)
-        yhat[mask] = amp * np.power(nn, alpha)
-        sse = float(np.nansum((d - yhat) ** 2))
-        scored = d[mask]
+    power = _fit_power_params(n, d)
+    if power is not None:
+        amp, alpha, log_alpha = power
+        yhat = amp * np.power(n, alpha)
+        sse = float(np.sum((d - yhat) ** 2))
         models["power"] = {
             "params": {
                 "A": float(amp),
                 "alpha": float(alpha),
                 "log_log_slope": float(log_alpha),
             },
-            "rmse": _rmse(scored, yhat[mask]),
-            "aic": _aic(sse, int(mask.sum()), 2),
-            "bic": _bic(sse, int(mask.sum()), 2),
+            "rmse": _rmse(d, yhat),
+            "aic": _aic(sse, m, 2),
+            "bic": _bic(sse, m, 2),
         }
 
     piecewise = _fit_piecewise(n, d)

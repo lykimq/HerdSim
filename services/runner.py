@@ -152,6 +152,50 @@ def _load_completed(output_dir: Path) -> set[str]:
     return done
 
 
+def _trials_resume_keys(rows: list[dict[str, Any]]) -> set[str]:
+    """Resume keys present as flat ``resume_key`` columns in loaded trial rows."""
+    keys: set[str] = set()
+    for row in rows:
+        key = row.get("resume_key")
+        if key is None or (isinstance(key, float) and key != key):
+            continue
+        text = str(key).strip()
+        if text and text.lower() != "nan":
+            keys.add(text)
+    return keys
+
+
+def _dedupe_trial_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Keep the last row per resume_key; rows without a key are kept in order."""
+    by_key: dict[str, dict[str, Any]] = {}
+    no_key: list[dict[str, Any]] = []
+    order: list[str | None] = []
+    for row in rows:
+        key = row.get("resume_key")
+        if key is None or (isinstance(key, float) and key != key):
+            no_key.append(row)
+            order.append(None)
+            continue
+        text = str(key).strip()
+        if not text or text.lower() == "nan":
+            no_key.append(row)
+            order.append(None)
+            continue
+        if text not in by_key:
+            order.append(text)
+        by_key[text] = row
+    out: list[dict[str, Any]] = []
+    no_key_iter = iter(no_key)
+    for item in order:
+        if item is None:
+            out.append(next(no_key_iter))
+        else:
+            if item in by_key:
+                out.append(by_key.pop(item))
+    out.extend(by_key.values())
+    return out
+
+
 def _append_manifest(output_dir: Path, row: dict[str, Any]) -> None:
     path = _manifest_path(output_dir)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -190,7 +234,6 @@ def _trial_row_from_result(
         "time_limit": int(cell.max_ticks),
         "success": bool(result.success),
         "total_ticks": int(result.total_ticks),
-        "resolved_config": dict(config),
     }
     if cell.sensing_range is not None:
         row["sensing_range"] = float(cell.sensing_range)
@@ -200,7 +243,7 @@ def _trial_row_from_result(
     if result.success:
         row["first_success_tick"] = float(result.total_ticks)
     else:
-        row["first_success_tick"] = -1.0
+        row["first_success_tick"] = float("nan")
     failure = classify_failure(
         result.history,
         success=bool(result.success),
@@ -208,7 +251,9 @@ def _trial_row_from_result(
     )
     row["failure_mode"] = failure["failure_mode"]
     row["failure_label"] = failure["failure_label"]
-    row["failure_hints"] = list(failure.get("failure_hints") or [])
+    # Flat CSV-safe fields (nested structures become strings on resume otherwise).
+    row["failure_hints"] = json.dumps(list(failure.get("failure_hints") or []))
+    row["resolved_config"] = json.dumps(dict(config), default=str, sort_keys=True)
     return row
 
 
@@ -433,7 +478,25 @@ def run_scaling_grid(
     out = Path(output_dir)
     out.mkdir(parents=True, exist_ok=True)
     protocol = protocol or {}
-    done = _load_completed(out) if resume else set()
+    trials_path = out / "trials.csv"
+    rows: list[dict[str, Any]] = []
+    done: set[str] = set()
+    if resume:
+        done = _load_completed(out)
+        if trials_path.exists():
+            loaded = pd.read_csv(trials_path).to_dict(orient="records")
+            rows.extend({str(k): v for k, v in record.items()} for record in loaded)
+            rows = _dedupe_trial_rows(rows)
+            csv_keys = _trials_resume_keys(rows)
+            if csv_keys:
+                # Prefer CSV evidence so orphan ok manifest rows are re-run.
+                done = done.intersection(csv_keys)
+            elif not rows:
+                # Empty CSV: do not trust manifest-only oks.
+                done = set()
+        else:
+            # No trials.csv: ignore orphan manifest oks and re-run.
+            done = set()
     pending = [c for c in cells if _cell_key(c) not in done]
     n_planned = len(cells)
     n_pending_at_start = len(pending)
@@ -475,12 +538,6 @@ def run_scaling_grid(
     )
     write_provenance(out / "provenance.json", stamp)
 
-    rows: list[dict[str, Any]] = []
-    trials_path = out / "trials.csv"
-    if resume and trials_path.exists():
-        loaded = pd.read_csv(trials_path).to_dict(orient="records")
-        rows.extend({str(k): v for k, v in record.items()} for record in loaded)
-
     workers = max_workers
     if workers is None:
         cpu = os.cpu_count() or 2
@@ -489,14 +546,15 @@ def run_scaling_grid(
     n_done_so_far = len(done)
 
     def _flush_trials_csv() -> None:
-        # Keep trials.csv aligned with manifest after each finished cell so a
-        # mid-run kill cannot leave ok manifest rows without CSV evidence.
+        # Flush CSV before appending status=ok to the manifest so a mid-run kill
+        # cannot leave ok manifest rows without CSV evidence.
         pd.DataFrame(rows).to_csv(trials_path, index=False)
 
     def _consume(payload: dict[str, Any]) -> None:
         nonlocal n_done_so_far
         cell: ScalingCell = payload["cell"]
         row = dict(payload["row"])
+        row["resume_key"] = payload["key"]
         rows.append(row)
         if store_timeseries and payload.get("history") is not None:
             ts_dir = out / "timeseries"
@@ -521,8 +579,8 @@ def run_scaling_grid(
             man["sensing_range"] = cell.sensing_range
         if cell.communication is not None:
             man["communication"] = cell.communication
-        _append_manifest(out, man)
         _flush_trials_csv()
+        _append_manifest(out, man)
         n_done_so_far += 1
         # Progress clock only: same cells, seeds, and resume keys as before.
         write_status(

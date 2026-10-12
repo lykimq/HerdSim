@@ -23,7 +23,14 @@ HerdSim/
     `-- analysis/        Package A-G tests
 ```
 
-Dependency rule: `analysis` must not import `SimulationRunner`. Campaign code may use `sim` and `protocols.packaging`.
+Dependency rule: `analysis` must not import `SimulationRunner`. Campaign code may use `sim` and `protocols.packaging`. Claim/T1 planners may call frontier helpers from `analysis` for window selection.
+
+Import map (disk under `sim/`, imports without the `sim.` prefix):
+
+- `sim/core/` -> `core`
+- `sim/plugins/` -> `plugins`
+- `sim/methods/` -> `methods`
+- Protocol YAMLs: `protocols/configs/`
 
 ## Setup
 
@@ -49,3 +56,23 @@ uv run cli/campaign.py run --protocol phase5_factor_sweep --workers 18
 ```
 
 Verbs: `run`, `claim-plan`, `claim-reseed`, `t1-plan`, `t1`. Protocol ids live under `protocols/configs/protocols/`. Resume an interrupted run by repeating the same command; finished cells in `manifest.jsonl` are skipped.
+
+## Analysis packages
+
+Post-run helpers live in `analysis/` (import as `analysis`). Package A export:
+
+```bash
+uv run python -c "from analysis import export_package_a; import pandas as pd; export_package_a(pd.read_csv('results/phase1/claim/merged_trials.csv'), 'results/phase1/claim/packages/a', protocol={'protocol_id':'phase1_claim'}, protocol_id='phase1_claim')"
+```
+
+| Package | Entry | Typical input |
+|---------|-------|---------------|
+| A | `export_package_a` | merged/scout `trials.csv` |
+| B | `compare_state_vs_nd_predictors` | structure trials |
+| C | `evaluate_overcrowding_mechanisms` | regimes + trials |
+| D | `build_transfer_table` | trials by method |
+| E | `substitution_curves*` | factor-sweep trials |
+| F | `fit_scaling_models` | frontier table |
+| G | `evaluate_early_warning_campaign` | timeseries + outcomes |
+
+Outputs land under `results/.../packages/{a-g}/`.

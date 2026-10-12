@@ -19,7 +19,7 @@ from core.agent_attributes import (
     init_agent_attributes,
 )
 from core.history_recorder import HistoryRecorder
-from core.observation import BaseObservationModel
+from core.observation import BaseObservationModel, sensing_range_for_shepherd
 from core.plugin_registry import (
     dog_controller_registry,
     observation_registry,
@@ -136,8 +136,12 @@ class SimulationRunner:
                 obs.messages.append(summary)
         elif comm == "neighbour_broadcast":
             for obs in observations:
+                radius = sensing_range_for_shepherd(state, obs.shepherd_index, self.config)
+                origin = obs.self_position
                 for other in observations:
                     if other.shepherd_index == obs.shepherd_index:
+                        continue
+                    if float(np.linalg.norm(other.self_position - origin)) > radius:
                         continue
                     obs.messages.append(
                         {
@@ -157,10 +161,12 @@ class SimulationRunner:
             else np.zeros_like(state.shepherd_velocities),
         )
         # Re-integrate dog positions if constraints changed velocities.
+        # Controllers that integrate with dt (e.g. Kubo) need the same dt here.
         if not np.allclose(constrained, state.shepherd_velocities):
             delta = constrained - state.shepherd_velocities
+            dt = float(self.config.get("dt", 1.0))
             state = state.copy_with(
-                shepherd_positions=state.shepherd_positions + delta,
+                shepherd_positions=state.shepherd_positions + dt * delta,
                 shepherd_velocities=constrained,
             )
         self._prev_dog_vel = state.shepherd_velocities.copy()

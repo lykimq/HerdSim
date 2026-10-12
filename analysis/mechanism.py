@@ -42,17 +42,25 @@ def evaluate_overcrowding_mechanisms(
     coverage_col: str = "mean_coverage",
     fragmentation_col: str = "mean_fragmentation",
     effort_col: str = "shepherd_path",
+    group_cols: list[str] | None = None,
     alpha: float = 0.05,
 ) -> dict[str, Any]:
     """Compare mechanism metrics between efficient and overcrowding cells.
 
-    One median per (N, D) cell. Rank tests stay inside each N. Holm correction
-    is across the rank-test hypotheses at that N. Fragmentation is the largest
-    component fraction, so induced fragmentation is a lower value in
-    overcrowding cells. Coverage saturation is descriptive and is not a
+    One median per (group, N, D) cell. Rank tests stay inside each N. Holm
+    correction is across the rank-test hypotheses at that N. Fragmentation is
+    the largest component fraction, so induced fragmentation is a lower value
+    in overcrowding cells. Coverage saturation is descriptive and is not a
     near-zero curve.
     """
-    key = [sheep_col, dog_col]
+    groups = list(group_cols or [])
+    if not groups and "initial_layout" in trials.columns and "initial_layout" in regimes.columns:
+        if int(trials["initial_layout"].nunique(dropna=True)) > 1:
+            groups = ["initial_layout"]
+    key = groups + [sheep_col, dog_col]
+    missing = [c for c in key + ["regime"] if c not in regimes.columns]
+    if missing:
+        return {"by_n": [], "overall": {}, "correction": "holm", "note": f"missing {missing}"}
     reg = regimes.loc[:, key + ["regime"]].drop_duplicates(subset=key)
     merged = trials.merge(reg, on=key, how="left")
 
@@ -179,11 +187,13 @@ def evaluate_temporal_order(
     regime_key: str = "regime",
     rise_z: float = 1.0,
 ) -> dict[str, Any]:
-    """Test whether I_dir / fragmentation rise before failure on overcrowding trials.
+    """Test whether I_dir / fragmentation excursions precede overcrowding failure.
 
     Each item needs: timeseries (DataFrame), success (bool), optional regime.
-    For failed overcrowding trials, lead time is ticks from first sustained metric
-    rise (z-score >= rise_z vs early-window baseline) to trial end.
+    Missing ``success`` is treated as failure (include the trial). For failed
+    overcrowding trials, lead time is ticks from the first sustained excursion
+    to trial end: I_dir rise (z >= rise_z) or fragmentation drop (z <= -rise_z),
+    since fragmentation is largest-component fraction (lower = more split).
     """
     leads_i: list[int] = []
     leads_f: list[int] = []
@@ -192,7 +202,8 @@ def evaluate_temporal_order(
         ts = item.get("timeseries")
         if ts is None or getattr(ts, "empty", True):
             continue
-        if item.get(success_key, True):
+        # Missing success key counts as failure so overcrowding series are included.
+        if bool(item.get(success_key, False)):
             continue
         regime = item.get(regime_key)
         if regime is not None and regime != "overcrowding_collapse":
@@ -202,7 +213,10 @@ def evaluate_temporal_order(
         t_end = int(frame[tick_col].iloc[-1])
         early_n = max(1, len(frame) // 5)
 
-        for col, bucket in ((i_dir_col, leads_i), (fragmentation_col, leads_f)):
+        for col, bucket, lower_is_worse in (
+            (i_dir_col, leads_i, False),
+            (fragmentation_col, leads_f, True),
+        ):
             if col not in frame.columns:
                 continue
             x = frame[col].astype(float).to_numpy()
@@ -210,7 +224,7 @@ def evaluate_temporal_order(
             mu = float(np.nanmean(base))
             sd = float(np.nanstd(base)) or 1.0
             z = (x - mu) / sd
-            hits = np.where(z >= rise_z)[0]
+            hits = np.where(z <= -rise_z)[0] if lower_is_worse else np.where(z >= rise_z)[0]
             if len(hits) == 0:
                 continue
             t_rise = int(frame.loc[int(hits[0]), tick_col])

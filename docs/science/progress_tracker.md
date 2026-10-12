@@ -98,7 +98,7 @@ Criteria: [main_scaling_plan.md](main_scaling_plan.md). Update after a claim-gra
 | C4 | SUPPORTED (partial) | Phase 4 Package D: size map shared for N>=25 (Strombom/Kubo); Kubo wide has no D_min; Kubo outlier_rich N=200 shifts to D_min=20 at 200 seeds (bootstrap [2, 20]; no overcrowding); FAT absent for N>=25 |
 | C5a | NOT RUN | Phase 5 ladders not rerun yet after obs/comm sim fixes; prior broken runs removed |
 | C5b | NOT RUN | Phase 5 ladders not rerun yet after obs/comm sim fixes; prior broken runs removed |
-| C6a | SUPPORTED | Phase 1/6 Package F: leave-one-N RMSE power 0.247 > piecewise 0.132 (power worse than piecewise) |
+| C6a | SUPPORTED (weak) | Phase 1/6 Package F: leave-one-N RMSE power 0.247 > piecewise 0.132; only two observed D_min levels, so treat as evaluated but not a strong scaling law |
 | C6b | SUPPORTED | Phase 1/6 Package F: on compact N in {25..400}, D_min=1 flat so log-log slope = 0 (< 1); power fit log_log_slope = -0.165 |
 | C7a | INCONCLUSIVE | Phase 7 Package G: held-out state and (N, D) AUROC null; folds empty; beats_nd_baseline=False |
 | C7b | REJECTED | Phase 7 Package G: frac_lead_ge_500=0.083 (<0.30); 14/169 failures have measured lead time |

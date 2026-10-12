@@ -9,7 +9,7 @@ Canonical supporting documents:
 - [Research program](herdsim_research_program.md)
 - [Final report](final_report.md) ([HTML](final_report.html)) (completed findings, protocol detail, methods, and evidence)
 - [Progress tracker](progress_tracker.md)
-- [`canonical_grid.yaml`](../configs/canonical_grid.yaml)
+- [`canonical_grid.yaml`](../../protocols/configs/canonical_grid.yaml)
 
 ## 1. Research objective
 
@@ -44,7 +44,7 @@ Dependency rules:
 
 ## 3. Shared planning contract
 
-The machine-readable values are in [`canonical_grid.yaml`](../configs/canonical_grid.yaml). Parameter meanings, rationale, and method detail for readers are in the [final report](final_report.md).
+The machine-readable values are in [`canonical_grid.yaml`](../../protocols/configs/canonical_grid.yaml). Parameter meanings, rationale, and method detail for readers are in the [final report](final_report.md).
 
 The plan locks these constraints:
 
@@ -255,8 +255,8 @@ The application default arena, sheep models, and dog force laws are outside this
 
 When sources differ, use this order:
 
-1. [`canonical_grid.yaml`](../configs/canonical_grid.yaml) defines frozen machine-readable `scaling_v2` defaults.
-2. A resolved YAML in [`configs/protocols/`](../configs/protocols/) defines a campaign subset.
+1. [`canonical_grid.yaml`](../../protocols/configs/canonical_grid.yaml) defines frozen machine-readable `scaling_v2` defaults.
+2. A resolved YAML in [`protocols/configs/protocols/`](../../protocols/configs/protocols/) defines a campaign subset.
 3. A run's copied `protocol.yaml`, `provenance.json`, `manifest.jsonl`, and `status.json` define what actually executed.
 4. This plan defines research questions, dependencies, claim criteria, evidence grades, budgets, gates, and scope.
 5. [Final report](final_report.md) is the reader narrative for protocol detail, methods, findings, claims, and limits.

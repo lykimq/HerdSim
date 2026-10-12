@@ -43,7 +43,7 @@ def test_stuck_when_gcm_barely_moves():
         }
     )
     result = classify_failure(history, success=False)
-    assert result["failure_mode"] in {FAILURE_STUCK, FAILURE_TIMEOUT}
+    assert result["failure_mode"] == FAILURE_STUCK
     assert FAILURE_STUCK in result["failure_hints"]
 
 
@@ -80,14 +80,25 @@ def test_timeout_fallback():
         {
             "fragmentation": [1.0] * 10,
             "cohesion": [4.0] * 10,
-            "gcm_goal": [20.0 - i for i in range(10)],
+            "gcm_goal": [40.0 - 2.0 * i for i in range(10)],
         }
     )
     result = classify_failure(history, success=False)
-    assert result["failure_mode"] in {
-        FAILURE_TIMEOUT,
-        FAILURE_STUCK,
-        FAILURE_OSCILLATION,
-        FAILURE_SCATTER,
-        FAILURE_SPLIT,
-    }
+    assert result["failure_mode"] == FAILURE_TIMEOUT
+    assert result["failure_hints"] == [FAILURE_TIMEOUT]
+
+
+def test_stacking_when_dogs_stay_close():
+    from protocols.packaging.failure_taxonomy import FAILURE_STACKING
+
+    history = pd.DataFrame(
+        {
+            "fragmentation": [1.0] * 20,
+            "cohesion": [5.0] * 20,
+            "gcm_goal": [40.0 - i for i in range(20)],
+            "min_dog_separation": [0.5] * 20,
+        }
+    )
+    result = classify_failure(history, success=False, n_shepherds=3)
+    assert FAILURE_STACKING in result["failure_hints"]
+    assert result["failure_mode"] == FAILURE_STACKING

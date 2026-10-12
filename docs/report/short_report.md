@@ -317,7 +317,7 @@ Verdicts use claim-grade evidence only.
 | C4 | RQ4 | SUPPORTED (partial) | Compact size shared for Strombom/Kubo (N >= 25); FAT and several structure cases break transfer |
 | C5a | RQ5 | NOT RUN | Information ladders not rerun yet |
 | C5b | RQ5 | NOT RUN | Information ladders not rerun yet |
-| C6a | RQ6 | SUPPORTED | Power law worse than piecewise on leave-one-N RMSE |
+| C6a | RQ6 | SUPPORTED (weak) | Power law worse than piecewise on leave-one-N RMSE; only two D_min levels |
 | C6b | RQ6 | SUPPORTED | Flat `D_min = 1` on compact N in {25..400}, so log-log slope 0 |
 | C7a | RQ7 | INCONCLUSIVE | Held-out AUROC could not be computed |
 | C7b | RQ7 | REJECTED | Too few failures with lead time >= 500 ticks |

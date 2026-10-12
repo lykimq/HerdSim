@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 import numpy as np
-from core.observation import ShepherdObservation
+from core.observation import ShepherdObservation, resolve_sensing_range
 from core.simulation_state import SimulationState
 from core.world.goal import resolve_goal_center
 from methods.strombom.config import STROMBOM_DEFAULTS
@@ -21,9 +21,7 @@ from .helpers import apply_dog_speeds, empty_dog_velocities, position_behind_tar
 
 
 def _sensing_radius(config: dict[str, Any]) -> float:
-    if config.get("sensing_range") is not None:
-        return float(config["sensing_range"])
-    return float(config.get("r_s", 65.0))
+    return resolve_sensing_range(config)
 
 
 def _union_sheep_positions(obs_list: list[ShepherdObservation]) -> np.ndarray:

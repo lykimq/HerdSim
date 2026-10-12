@@ -22,7 +22,7 @@ def test_campaign_methods_registered():
 
 def test_strombom_multi_dogs_take_distinct_positions():
     ctrl = CollectDriveMultiController()
-    world = make_world()
+    world = make_world(goal_center=(10.0, 10.0))
     sheep = [
         [50.0, 50.0],
         [80.0, 50.0],
@@ -32,21 +32,35 @@ def test_strombom_multi_dogs_take_distinct_positions():
     ]
     dogs = [[100.0, 100.0], [110.0, 90.0], [90.0, 110.0]]
     state = make_state(sheep, dogs, world=world, seed=1)
-    obs = GlobalObservation().observe_all(state, ctrl.default_config)
-    new_state = ctrl.step(state, obs, ctrl.default_config)
+    start = state.shepherd_positions.copy()
+    cfg = {**ctrl.default_config, "noise_strength": 0.0, "shepherd_stop_multiple": 0.0}
+    obs = GlobalObservation().observe_all(state, cfg)
+    new_state = ctrl.step(state, obs, cfg)
     uniq = {tuple(np.round(p, 3)) for p in new_state.shepherd_positions}
     assert len(uniq) == 3
+    assert not np.allclose(new_state.shepherd_positions, start)
 
 
 def test_strombom_multi_stops_within_three_ra():
     ctrl = CollectDriveMultiController()
-    cfg = ctrl.default_config
+    cfg = {**ctrl.default_config, "noise_strength": 0.0}
     sheep = np.array([[50.0, 50.0], [52.0, 50.0], [50.0, 52.0]])
     dogs = np.array([[51.0, 50.5], [50.5, 51.0], [51.5, 51.5]])
     state = make_state(sheep, dogs, world=make_world(), seed=1)
+    state.shepherd_velocities[:] = [[2.0, 0.0], [0.0, 2.0], [-1.0, 1.0]]
     obs = GlobalObservation().observe_all(state, cfg)
     new_state = ctrl.step(state, obs, cfg)
     assert np.allclose(new_state.shepherd_velocities, 0.0)
+    assert np.allclose(new_state.shepherd_positions, state.shepherd_positions)
+
+    far = make_state(
+        sheep,
+        np.array([[90.0, 50.0], [92.0, 48.0], [88.0, 52.0]]),
+        world=make_world(goal_center=(10.0, 10.0)),
+        seed=1,
+    )
+    moved = ctrl.step(far, GlobalObservation().observe_all(far, cfg), cfg)
+    assert np.linalg.norm(moved.shepherd_velocities) > 0.0
 
 
 def test_strombom_multi_applies_shepherd_noise():
@@ -96,3 +110,25 @@ def test_strombom_multi_respects_collect_threshold_scale():
     obs = GlobalObservation().observe_all(state, cfg_paper)
     assert ctrl.step(state, obs, cfg_paper).metadata["herding_mode"] == "collect"
     assert ctrl.step(state, obs, cfg_scaled).metadata["herding_mode"] == "drive"
+
+
+def test_fat_and_communication_free_step_move_when_far():
+    from plugins.dogs.communication_free import CommunicationFreeController
+    from plugins.dogs.fat import FatController
+
+    sheep = np.array([[40.0, 40.0], [42.0, 40.0], [40.0, 42.0], [41.0, 41.0]])
+    dog = np.array([[90.0, 40.0], [92.0, 42.0], [88.0, 38.0]])
+    for ctrl in (FatController(), CommunicationFreeController()):
+        cfg = {**ctrl.default_config, "noise_strength": 0.0, "shepherd_stop_multiple": 0.0}
+        n_dogs = int(cfg.get("n_shepherds", 3))
+        state = make_state(
+            sheep,
+            dog[:n_dogs],
+            world=make_world(goal_center=(10.0, 10.0)),
+            seed=3,
+        )
+        start = state.shepherd_positions.copy()
+        obs = GlobalObservation().observe_all(state, cfg)
+        out = ctrl.step(state, obs, cfg)
+        assert not np.allclose(out.shepherd_positions, start)
+        assert np.linalg.norm(out.shepherd_velocities) > 0.0

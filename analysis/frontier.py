@@ -312,7 +312,8 @@ def bootstrap_d_min_ci(
             )
             continue
 
-        # Build per-D success vectors aligned on the union of seeds.
+        # Independent within-D Bernoulli bootstrap: each D resamples its own
+        # seeds (not paired across the D grid).
         by_d: dict[int, np.ndarray] = {}
         n_seeds_ref = 0
         for d_key, sub in g.groupby(dog_col):
@@ -436,11 +437,17 @@ def extract_frontier(
                 if r < theta:
                     continue
                 effort = float(pd.Series(sub.loc[:, effort_col]).median())
-                t_s = (
-                    float(pd.Series(sub.loc[:, time_col]).median())
-                    if time_col in sub.columns
-                    else float("inf")
-                )
+                if time_col in sub.columns:
+                    times = pd.to_numeric(sub.loc[:, time_col], errors="coerce").astype(float)
+                    # Failures use NaN (legacy rows may still store -1).
+                    times = times.where(times >= 0.0)
+                    t_s = (
+                        float(np.nanmedian(times.to_numpy()))
+                        if bool(times.notna().to_numpy().any())
+                        else float("inf")
+                    )
+                else:
+                    t_s = float("inf")
                 t_val = (
                     as_float(t_lim)
                     if t_lim is not None

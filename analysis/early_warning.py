@@ -7,7 +7,11 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-_LOWER_IS_RISK = {"cohesion", "coverage"}
+# Higher raw values mean more risk unless listed here (then the sign is flipped).
+# cohesion = mean distance to GCM (higher = more dispersed = more risk).
+# fragmentation = largest-component fraction (lower = more split = more risk).
+# coverage = fraction of sheep near dogs (higher = more protective).
+_LOWER_IS_RISK = {"fragmentation", "coverage"}
 
 
 def _auroc(scores: np.ndarray, labels: np.ndarray) -> float:

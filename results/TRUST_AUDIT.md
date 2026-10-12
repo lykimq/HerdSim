@@ -34,7 +34,7 @@ NOT RUN YET for claim-grade reporting. Prior Phase 5 scout/claim trees were remo
 |-------|---------|
 | C5a | NOT RUN |
 | C5b | NOT RUN |
-| C6a | SUPPORTED |
+| C6a | SUPPORTED (weak) |
 | C6b | SUPPORTED (compact N in {25..400}, slope 0 < 1) |
 | C7a | INCONCLUSIVE |
 | C7b | REJECTED |

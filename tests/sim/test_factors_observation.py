@@ -147,3 +147,45 @@ def test_failure_inactive_after_tick():
     )
     assert bool(failed.shepherd_active[0])
     assert not bool(failed.shepherd_active[1])
+
+
+def test_intermittent_observation_caches_until_frequency():
+    from core.observation import IntermittentObservation, LocalPositionsObservation
+
+    inner = LocalPositionsObservation()
+    model = IntermittentObservation(inner)
+    state = make_state(
+        [[1.0, 0.0], [0.0, 1.0], [10.0, 10.0]],
+        [[0.0, 0.0]],
+        world=make_world(),
+        seed=0,
+        tick=0,
+    )
+    cfg = {"sensing_range": 2.0, "observation_frequency": 3}
+    first = model.observe(state, 0, cfg)
+    state.tick = 1
+    state.sheep_positions[2] = [100.0, 100.0]
+    cached = model.observe(state, 0, cfg)
+    assert cached.n_sheep_seen == first.n_sheep_seen
+    state.tick = 3
+    refreshed = model.observe(state, 0, cfg)
+    assert refreshed is not cached
+
+
+def test_reduced_speed_and_blind_after_tick():
+    state = make_state(
+        [[40.0, 40.0]],
+        [[50.0, 50.0], [60.0, 60.0]],
+        world=make_world(),
+        seed=0,
+        tick=5,
+    )
+    state = init_agent_attributes(state, {"speed_scale": 1.0})
+    slowed = apply_failure_factors(
+        state, {"failure_mode": "reduced_speed_after_tick", "failure_tick": 5}
+    )
+    assert float(slowed.shepherd_speed_scale[1]) < float(state.shepherd_speed_scale[1])
+    blinded = apply_failure_factors(
+        state, {"failure_mode": "blind_after_tick", "failure_tick": 5}
+    )
+    assert float(blinded.shepherd_sensing_scale[1]) < float(state.shepherd_sensing_scale[1])

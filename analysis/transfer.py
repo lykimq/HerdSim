@@ -7,6 +7,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
+from analysis.coerce import as_int
 from analysis.frontier import extract_frontier
 
 
@@ -111,21 +112,49 @@ def _classify_flag_transfer(base: bool | None, other: bool | None) -> str:
     return "absent"
 
 
+def _default_group_cols(trials_by_method: dict[str, pd.DataFrame]) -> list[str]:
+    for df in trials_by_method.values():
+        if "initial_layout" in df.columns and int(df["initial_layout"].nunique(dropna=True)) > 1:
+            return ["initial_layout"]
+    return []
+
+
+def _frontier_lookup(
+    front: pd.DataFrame,
+    *,
+    group_cols: list[str],
+    sheep_col: str,
+) -> dict[tuple[Any, ...], pd.Series]:
+    """Map (group..., n_sheep) -> frontier row."""
+    out: dict[tuple[Any, ...], pd.Series] = {}
+    if front.empty:
+        return out
+    for _, row in front.iterrows():
+        key = tuple(row[c] for c in group_cols) + (as_int(row[sheep_col]),)
+        out[key] = row
+    return out
+
+
 def build_transfer_table(
     trials_by_method: dict[str, pd.DataFrame],
     *,
     baseline: str,
     theta: float = 0.90,
     feature: str | None = None,
+    group_cols: list[str] | None = None,
+    sheep_col: str = "n_sheep",
 ) -> pd.DataFrame:
     """Build a transfer table comparing frontier / mechanism features across methods.
 
     Labels follow the plan: shared / shifted / absent. When ``feature`` is None,
     emits rows for d_min, overcrowd, i_dir_signature, and coverage_saturation.
+    Multi-layout trials are compared within each layout when ``group_cols`` is
+    set (default: ``initial_layout`` when it has more than one level).
     """
     if baseline not in trials_by_method:
         raise KeyError(f"baseline method '{baseline}' missing from trials_by_method")
 
+    groups = list(group_cols) if group_cols is not None else _default_group_cols(trials_by_method)
     features = (
         [feature]
         if feature
@@ -138,15 +167,19 @@ def build_transfer_table(
     )
 
     fronts = {
-        m: extract_frontier(df, theta=theta).set_index("n_sheep")
+        m: extract_frontier(df, theta=theta, sheep_col=sheep_col, group_cols=groups)
         for m, df in trials_by_method.items()
+    }
+    lookups = {
+        m: _frontier_lookup(front, group_cols=groups, sheep_col=sheep_col)
+        for m, front in fronts.items()
     }
     idir_r = {m: _idir_correlation(df) for m, df in trials_by_method.items()}
     cov_flags = {m: _coverage_saturation_flag(df, theta) for m, df in trials_by_method.items()}
 
-    base = fronts[baseline]
+    base_keys = set(lookups[baseline])
     rows: list[dict[str, Any]] = []
-    for method, front in fronts.items():
+    for method in trials_by_method:
         if method == baseline:
             continue
         for feat in features:
@@ -156,6 +189,7 @@ def build_transfer_table(
                     {
                         "feature": feat,
                         "n_sheep": None,
+                        **{c: None for c in groups},
                         "baseline": baseline,
                         "method": method,
                         "baseline_value": idir_r[baseline],
@@ -170,6 +204,7 @@ def build_transfer_table(
                     {
                         "feature": feat,
                         "n_sheep": None,
+                        **{c: None for c in groups},
                         "baseline": baseline,
                         "method": method,
                         "baseline_value": cov_flags[baseline],
@@ -179,13 +214,12 @@ def build_transfer_table(
                 )
                 continue
 
-            for n in sorted(set(base.index).intersection(set(front.index))):
-                b = base.loc[n]
-                o = front.loc[n]
-                if isinstance(b, pd.DataFrame):
-                    b = b.iloc[0]
-                if isinstance(o, pd.DataFrame):
-                    o = o.iloc[0]
+            shared_keys = sorted(base_keys.intersection(lookups[method]))
+            for key in shared_keys:
+                b = lookups[baseline][key]
+                o = lookups[method][key]
+                n = key[-1]
+                group_meta = {c: key[i] for i, c in enumerate(groups)}
                 if feat == "d_min":
                     label = _classify_d_min_transfer(b.get("d_min"), o.get("d_min"))
                     bval, oval = b.get("d_min"), o.get("d_min")
@@ -201,6 +235,7 @@ def build_transfer_table(
                     {
                         "feature": feat,
                         "n_sheep": int(n),
+                        **group_meta,
                         "baseline": baseline,
                         "method": method,
                         "baseline_value": bval,

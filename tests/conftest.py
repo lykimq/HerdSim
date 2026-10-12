@@ -1,4 +1,4 @@
-"""Pytest fixtures and marker registration for backend tests."""
+"""Pytest fixtures and marker registration for HerdSim tests."""
 
 from __future__ import annotations
 

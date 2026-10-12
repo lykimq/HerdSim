@@ -198,3 +198,31 @@ def test_run_cell_defaults_local_positions_for_range_and_comm():
     )
     assert comm_out["row"]["obs_mode"] == "local_positions"
     assert comm_out["row"]["communication"] == "neighbour_broadcast"
+
+
+def test_resume_reconciles_orphan_manifest_keys(tmp_path: Path):
+    """CSV flush precedes manifest; orphan ok keys are re-run when resume_key exists."""
+    from services.runner import (
+        ScalingCell,
+        _append_manifest,
+        _cell_key,
+        run_scaling_grid,
+    )
+
+    cell = ScalingCell(n_sheep=5, n_shepherds=1, seed=2026, max_ticks=3)
+    key = _cell_key(cell)
+    # Pretend a crash wrote status=ok without a trials row.
+    _append_manifest(tmp_path, {"key": key, "status": "ok", "timestamp": "t0"})
+    assert (tmp_path / "manifest.jsonl").exists()
+    # Fresh run with resume should still execute because CSV has no resume_key evidence.
+    trials = run_scaling_grid(
+        [cell],
+        tmp_path,
+        protocol={"protocol_id": "resume_probe"},
+        protocol_id="resume_probe",
+        max_workers=1,
+        store_timeseries=False,
+        resume=True,
+    )
+    assert len(trials) == 1
+    assert str(trials.iloc[0]["resume_key"]) == key

@@ -2,6 +2,8 @@
 
 Batch research campaigns over a tick-level multi-agent shepherding simulator. Dogs drive sheep to a goal; campaigns measure control demand (`D_min` and related frontiers) under frozen protocols.
 
+Import map: code lives under `sim/` on disk, but setuptools remaps imports to `core`, `plugins`, and `methods` (no `sim.` prefix). Protocol YAMLs live under `protocols/configs/`. Analysis must not step the simulator; claim/T1 planners may still call `analysis.frontier` helpers to choose reseed windows.
+
 ## Context
 
 ```mermaid
@@ -283,7 +285,7 @@ uv run cli/campaign.py run --protocol phase1_scout --workers 16
 - Protocol YAML is the source of truth; each run freezes a resolved copy as `protocol.yaml`
 - Resume identity is `_cell_key(ScalingCell)` in `manifest.jsonl`; completed `status=ok` keys are skipped
 - Scout maps broadly; claim-plan selects windows; claim-reseed deepens seeds and merges
-- Analysis is post-hoc on CSVs/timeseries and must not step the simulation
+- Analysis is post-hoc on CSVs/timeseries and must not step the simulation (frontier helpers may be reused by claim/T1 planners)
 - Provenance stamp stores hash, seed list, and metric ids (not a second full protocol body)
 
 ## Extension points

@@ -14,7 +14,12 @@ from methods.strombom.heuristics import (
 )
 
 from .base import BaseDogController
-from .helpers import apply_dog_speeds, empty_dog_velocities, view_from_observation
+from .helpers import (
+    empty_dog_velocities,
+    finalize_dog_step,
+    iter_active_observations,
+    view_from_observation,
+)
 
 
 class CollectDriveController(BaseDogController):
@@ -47,15 +52,9 @@ class CollectDriveController(BaseDogController):
         config: dict[str, Any],
     ) -> SimulationState:
         velocities = empty_dog_velocities(state)
-        obs_by_idx = {o.shepherd_index: o for o in observations}
-        metadata = dict(state.metadata)
         modes = []
         lines = []
-
-        for i in range(state.n_shepherds):
-            if not state.shepherd_active[i] or i not in obs_by_idx:
-                continue
-            obs = obs_by_idx[i]
+        for i, obs in iter_active_observations(state, observations):
             if obs.n_sheep_seen == 0:
                 continue
             local = view_from_observation(state, obs)
@@ -65,15 +64,9 @@ class CollectDriveController(BaseDogController):
             modes.append("collect" if should_collect(local, config) else "drive")
             lines.extend(strombom_assignment_lines(local, config)[:1])
 
-        velocities = apply_dog_speeds(velocities, state, config)
+        updates: dict[str, Any] = {"r_a": float(config.get("r_a", 2.0))}
         if modes:
-            metadata["herding_mode"] = modes[0]
+            updates["herding_mode"] = modes[0]
         if lines:
-            metadata["assignment_lines"] = lines
-        metadata["r_a"] = float(config.get("r_a", metadata.get("r_a", 2.0)))
-
-        return state.copy_with(
-            shepherd_positions=state.shepherd_positions + velocities,
-            shepherd_velocities=velocities,
-            metadata=metadata,
-        )
+            updates["assignment_lines"] = lines
+        return finalize_dog_step(state, velocities, config, metadata_updates=updates)

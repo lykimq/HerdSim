@@ -221,6 +221,16 @@ def test_predictors_and_scaling_and_transfer():
     same = fit_scaling_models(pd.DataFrame(same_curve))
     assert same["prefers_piecewise_or_state"] is False
 
+    # Piecewise-friendly frontier: flat then steep, with enough distinct N for LOO.
+    piece_rows = []
+    for n, dmin in ((20, 1), (40, 1), (60, 1), (80, 8), (100, 10), (120, 12)):
+        piece_rows.append({"n_sheep": n, "d_min": dmin, "initial_layout": "compact"})
+    piece = fit_scaling_models(pd.DataFrame(piece_rows))
+    assert "piecewise" in piece["models"]
+    assert piece["cv"].get("piecewise") is not None
+    assert piece["cv"].get("power") is not None
+    assert piece["prefers_piecewise_or_state"] is True
+
     other = trials.copy()
     other["method"] = "kubo"
     # Different grid D_min: D=2 no longer clears theta.
@@ -271,6 +281,12 @@ def test_mechanism_and_substitution_and_early_warning():
         ]
     )
     assert temporal["n_failed_overcrowd"] == 1
+    assert temporal["fragmentation"]["n_with_lead"] >= 1
+    # Missing success key still counts as a failed overcrowding trial.
+    missing = evaluate_temporal_order(
+        [{"timeseries": ts, "regime": "overcrowding_collapse"}]
+    )
+    assert missing["n_failed_overcrowd"] == 1
 
     sweeps = []
     for obs, boost in (("bearing_only", 0), ("global", 1)):
@@ -405,6 +421,42 @@ def test_phase5_range_and_comm_substitution():
     assert set(comm_curves["communication"]) == set(COMM_LADDER)
     comm_summary = summarize_substitution(comm_curves)
     assert comm_summary["supports_substitution"] is True
+
+
+def test_early_warning_polarity_uses_metric_contracts():
+    """Higher cohesion / lower fragmentation must raise risk scores."""
+    from analysis.early_warning import _window_means
+
+    ticks = np.arange(0, 100, dtype=float)
+    query = np.array([50.0])
+    high_cohesion = np.column_stack([np.full(100, 30.0)])
+    low_cohesion = np.column_stack([np.full(100, 2.0)])
+    high = _window_means(ticks, high_cohesion, ["cohesion"], query, 20)
+    low = _window_means(ticks, low_cohesion, ["cohesion"], query, 20)
+    assert float(high[0]) > float(low[0])
+
+    low_frag = np.column_stack([np.full(100, 0.2)])
+    high_frag = np.column_stack([np.full(100, 0.95)])
+    risk_low = _window_means(ticks, low_frag, ["fragmentation"], query, 20)
+    risk_high = _window_means(ticks, high_frag, ["fragmentation"], query, 20)
+    assert float(risk_low[0]) > float(risk_high[0])
+
+
+def test_export_package_dossier(tmp_path: Path):
+    from analysis.export import export_package_dossier
+
+    paths = export_package_dossier(
+        "b",
+        {"summary": pd.DataFrame([{"n_sheep": 50, "prefers_state": True}])},
+        tmp_path,
+        protocol={"protocol_id": "test", "reliability_theta": 0.9},
+        protocol_id="test_b",
+        notes=["synthetic"],
+    )
+    assert paths["summary"].exists()
+    assert paths["provenance"].exists()
+    assert paths["report"].exists()
+    assert "Package b" in paths["report"].read_text()
 
 
 def test_wasteful_regime_uses_path_not_neighbor_rule():

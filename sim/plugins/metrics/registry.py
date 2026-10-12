@@ -51,6 +51,7 @@ def _auto_register():
     from .gcm_goal import GcmGoalMetric
     from .hull_area import HullAreaMetric
     from .mean_spread import MeanSpreadMetric
+    from .min_dog_separation import MinDogSeparationMetric
     from .min_separation import MinSeparationMetric
     from .outlier_count import OutlierCountMetric
     from .perimeter import PerimeterMetric
@@ -72,6 +73,7 @@ def _auto_register():
         PolarizationMetric,
         OutlierCountMetric,
         MinSeparationMetric,
+        MinDogSeparationMetric,
         FragmentationMetric,
         MeanSpreadMetric,
         ExtentMetric,
