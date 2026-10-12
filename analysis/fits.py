@@ -274,11 +274,7 @@ def fit_scaling_models(
     )
     if separate_loo is not None:
         cv["separate_curves"] = separate_loo
-    prefers = False
-    if power_loo is not None and piece_loo is not None and piece_loo < power_loo:
-        prefers = True
-    if power_loo is not None and separate_loo is not None and separate_loo < power_loo:
-        prefers = True
+    prefers = _cv_beats(piece_loo, power_loo) or _cv_beats(separate_loo, power_loo)
 
     return {
         "models": models,
@@ -289,6 +285,18 @@ def fit_scaling_models(
         "delta_aic_vs_power": delta_aic,
         "prefers_piecewise_or_state": prefers,
     }
+
+
+def _cv_beats(challenger: float | None, baseline: float | None) -> bool:
+    """True when challenger leave-one-N RMSE beats baseline by a clear margin.
+
+    Near-zero baselines count as ties so floating-point noise does not flip
+    C6a when a single power law already fits to machine precision.
+    """
+    if challenger is None or baseline is None:
+        return False
+    margin = max(1e-6, 0.01 * abs(float(baseline)))
+    return float(challenger) < float(baseline) - margin
 
 
 def _separate_curve_loo(
