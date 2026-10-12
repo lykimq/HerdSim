@@ -23,15 +23,6 @@ HerdSim/
     `-- analysis/        Package A-G tests
 ```
 
-Dependency rule: `analysis` must not import `SimulationRunner`. Campaign code may use `sim` and `protocols.packaging`. Claim/T1 planners may call frontier helpers from `analysis` for window selection.
-
-Import map (disk under `sim/`, imports without the `sim.` prefix):
-
-- `sim/core/` -> `core`
-- `sim/plugins/` -> `plugins`
-- `sim/methods/` -> `methods`
-- Protocol YAMLs: `protocols/configs/`
-
 ## Setup
 
 ```bash
