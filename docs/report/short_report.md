@@ -4,13 +4,13 @@
 
 When a few dogs guide a larger flock, how much control do you actually need as the flock gets bigger, or starts more spread out?
 
-That is the question this study tries to answer carefully. We do not assume there is one universal scaling law. We ask questions we can run in simulation, fix the rules so comparisons stay fair, and only claim what the runs support.
+We treat that as an empirical question. There is no assumed universal scaling law. The runs use locked rules so comparisons stay fair.
 
 **HerdSim** is the platform we used. A few dogs guide sheep to a goal under settings we can lock and repeat. For this study it is a model system for measuring *control demand* (how many dogs, or how much dog work, is enough), not a copy of a real farm.
 
 Control here is indirect: we cannot steer every sheep by hand. The dogs only push through local reactions. So "how much control" is something we can measure as size and starting shape change.
 
-This short report tells the story. Trial tables and packages live under `results/` (mapped by research question below).
+This short report is the findings summary.
 
 ---
 
@@ -41,7 +41,7 @@ After the core runs, we wanted concrete answers about:
 
 **RQ7 (early warning).** Can recent flock state warn of failure better than knowing only N and D?
 
-We are not trying to pick the "best" herding algorithm, copy every detail of real livestock, or ship a farm product. Only claim what the evidence supports.
+We are not trying to pick the "best" herding algorithm, copy every detail of real livestock, or ship a farm product.
 
 ---
 
@@ -64,8 +64,6 @@ Every scientific run uses the same frozen protocol (`scaling_v2`):
 | Seeds | smoke 5; scout 30; claim 100 (200 on soft edges); master seed 2026 |
 
 `D_min` means the smallest tested dog count that clears the 90% bar. It is not a property of sheep in nature; it depends on this task and these locks.
-
-Machine-readable defaults sit in [`protocols/configs/canonical_grid.yaml`](../../protocols/configs/canonical_grid.yaml). Campaign YAMLs sit in [`protocols/configs/protocols/`](../../protocols/configs/protocols/).
 
 ### Why three methods
 
@@ -104,9 +102,9 @@ Scout covers the whole map; claim covers a small window. Claims use claim-grade 
 | RQ7 | Early warning on claim trajectories | 0 | 0 | 0 | 0 | DONE (analyse) |
 | **All** | | **750** | **19,800** | **15,100** | **35,650** | |
 
-RQ2's longer-deadline T1 was also planned and skipped (0 overcrowding cells). RQ5 is not run yet (prior Phase 5 trees removed after obs/comm bugs). Claim merges hold 30,670 rows (fewer than total sims because a reseeded cell drops its scout rows from the merge).
+RQ2's longer-deadline T1 was also planned and skipped (0 overcrowding cells). RQ5 is not run yet (prior Phase 5 trees removed after obs/comm bugs). Claim merges hold 30,640 rows (fewer than total sims because a reseeded cell drops its scout rows from the merge).
 
-Commands used (from the HerdSim repo root; re-running needs that codebase, not only this folder):
+Commands used (from the HerdSim repo root):
 
 ```bash
 # RQ2 size map
@@ -128,8 +126,6 @@ uv run cli/campaign.py claim-reseed --protocol phase4_kubo_structure_claim --wor
 # RQ5 ladders (not run yet; planned)
 # WORKERS=18 bash results/phase5/run_all_ladders.sh
 ```
-
-Exact grids, seeds, and run notes for each campaign sit under the matching `rq*/` folder.
 
 ---
 
@@ -156,7 +152,7 @@ One-dog cost by layout (median over successful trials; success rate 1.00 at D = 
 | outlier_rich | 50 | 224 | 209 |
 | outlier_rich | 100 | 501 | 554 |
 | outlier_rich | 200 | 1,228 | 1,647 |
-| wide | 50 | 2,139 | 2,925 |
+| wide | 50 | 2,138 | 2,925 |
 | wide | 100 | 3,074 | 4,319 |
 | wide | 200 | 3,870 | 5,213 |
 
@@ -165,8 +161,6 @@ Wide versus compact at one dog: about 11x to 20x more time and about 19x to 36x 
 ![Layout cost on the baseline structure map.](../figures/f4_layout_cost.png)
 
 *Wide and large outlier-rich starts cost much more time and path at one dog; D_min stays 1.*
-
-More detail: RQ1 (`results/phase2/`).
 
 ### RQ2: how does dog need change with flock size?
 
@@ -199,15 +193,13 @@ Here "not reach" means no overcrowding appeared before D = 35, so `D_max` is onl
 
 *Extra dogs mainly raise path after the minimum; success stays high (waste, not overcrowding).*
 
-More detail: RQ2 (`results/phase1/`).
-
 ### RQ3: what mechanism drives the pattern?
 
 **Status:** Not answerable yet. SKIPPED as a contrast.
 
 The plan was to compare efficient cells with overcrowding cells at the same N. We never saw overcrowding on the baseline size map inside D <= 35, so that contrast does not exist. Correlation candidates (interference, splitting, and related logs) were not tested against a real upper failure band.
 
-Unlocking RQ3 needs either a measured collapse (for example D > 35, or a harder draft-style task) or another protocol where overcrowding appears. See [What we plan next](#what-we-plan-next).
+RQ3 needs either a measured collapse (for example D > 35, or a harder draft-style task) or another protocol where overcrowding appears. See [What we plan next](#what-we-plan-next).
 
 ### RQ4: do the patterns transfer across methods?
 
@@ -223,6 +215,7 @@ Compact `D_min` at the 90% bar:
 | 10 | 2 | 1 | 1 |
 | 25 | 1 | 1 | not reach |
 | 50 | 1 | 1 | not reach |
+| 75 | 1 | 1 | not reach |
 | 100 | 1 | 1 | not reach |
 | 150 | 1 | 1 | not reach |
 | 200 | 1 | 1 | not reach |
@@ -262,7 +255,7 @@ On Kubo wide, best success is about 0.47 to 0.54. FAT clears no structure cell a
 
 *Soft edge: point D_min = 20 after 200 seeds; bootstrap still wide.*
 
-That is enough to reject "the same story everywhere," but not enough to say which patterns are shared across a broader method set. More detail: RQ4 (`results/phase4/`).
+That is enough to reject "the same story everywhere," but not enough to say which patterns are shared across a broader method set.
 
 ### RQ5: can better information replace dogs?
 
@@ -270,11 +263,9 @@ That is enough to reject "the same story everywhere," but not enough to say whic
 
 No claim-grade observation, range, or communication ladder results are published. Prior Phase 5 trees were removed after shared sim bugs (bearing-only freeze, range under global observation, communication list stacking). Protocols remain for a clean rerun.
 
-More detail: RQ5 (`results/phase5/`, NOT RUN YET).
-
 ### RQ6: which curve fits D_min vs N?
 
-**Status:** Weak, but the planned fit package ran.
+**Status:** The fit package ran; the signal is weak.
 
 On the baseline compact map, `D_min` is almost only two values: 2 for N = 5 and 10, and 1 for everything larger. Leave-one-N-out RMSE (lower is better):
 
@@ -289,26 +280,22 @@ Piecewise wins because it matches that step, not because we measured a rich grow
 
 ![Leave-one-N-out RMSE by model.](../figures/f8_scaling_rmse.svg)
 
-More detail: RQ6 (`results/phase1/claim/packages/f/`).
-
 ### RQ7: can state warn of failure early?
 
 **Status:** Not answerable on this data.
 
-By the first check at tick 1,000, almost every successful RQ2 size-map run has already finished (median success about 183 ticks). Failures are almost all tiny flocks with one dog that run to the deadline. There is no late window left to warn before success or failure settles. Held-out AUROC folds were empty. Only 14 of 169 failures had a measured lead time of at least 500 ticks (about 8.3%; the bar was 30%).
+By the first check at tick 1,000, almost every successful RQ2 size-map run has already finished (median success 182 ticks). Failures are almost all tiny flocks with one dog that run to the deadline. There is no late window left to warn before success or failure settles. Held-out AUROC folds were empty. Only 14 of 169 failures had a measured lead time of at least 500 ticks (about 8.3%; the bar was 30%).
 
 ![Early warning timing.](../figures/f12_early_warning_timing.png)
 
 *Successful runs finish early; the shaded warning checks start after most successes are already done.*
 
-More detail: RQ7 (`results/phase1/claim/packages/g/`).
-
 ### Claims scorecard
 
 Verdicts use claim-grade evidence only.
 
-| Claim | RQ | Verdict | Meaning in plain words |
-|-------|----|---------|------------------------|
+| Claim | RQ | Verdict | Meaning |
+|-------|----|---------|---------|
 | C1a | RQ1 | REJECTED | Layout did not move `D_min` on the baseline |
 | C1b | RQ1 | INCONCLUSIVE | No `D_min` shift, so state-vs-(N, D) predictor test could not run |
 | C2a | RQ2 | REJECTED | No overcrowding on the baseline size map |
@@ -349,14 +336,14 @@ None of the items below have been run as claim-grade work in this package. They 
 
 ### Measure an upper collapse (or a harder task)
 
-We still do not know whether success eventually falls for D > 35, or whether path waste keeps rising without collapse. That matters because it turns the current list ceiling into a measured upper story, and it is what unlocks RQ3 (efficient vs overcrowding at the same N).
+We still do not know whether success eventually falls for D > 35, or whether path waste keeps rising without collapse. That matters because it turns the current list ceiling into a measured upper story, and it is what RQ3 needs (efficient vs overcrowding at the same N).
 
 | Question | Why it matters | How we would run it |
 |----------|----------------|---------------------|
 | After a good band, does success fall for some D > 35? | Measured collapse instead of a ceiling | Extend the dog-count list past 35 on selected N |
 | If success stays high, does path waste keep rising? | Waste-only upper band | Same extended sweep; report path and regimes |
 | Does a longer deadline rescue high-D failures at T0? | Separates "too slow" from true overcrowding | T1 only on candidate overcrowding cells |
-| Do efficient and overcrowding cells differ in interference or splitting? | Unlocks RQ3 | Matched tests at the same N |
+| Do efficient and overcrowding cells differ in interference or splitting? | Needed for RQ3 | Matched tests at the same N |
 | Does that upper story transfer across methods? | RQ4 on the upper band | Repeat under Kubo / FAT (later `communication_free`) |
 
 Another path without raising the dog cap: port the draft-style collect-hold-gate task into HerdSim and see whether overcrowding appears inside D <= 35. Not scheduled yet.
@@ -372,19 +359,3 @@ Another path without raising the dog cap: port the draft-style collect-hold-gate
 
 - RQ5: rerun the three ladders after the shared obs/comm fixes (`local_positions` for range and communication; bearing proxies beyond the stop radius; sheep-index union for sharing). Prefer a layout or method where more than one dog is needed.
 - RQ7: need failures and successes overlapping in time (harder layout or method, or earlier check times).
-
----
-
-## Evidence
-
-| RQ | Results path | What it holds |
-|----|--------------|---------------|
-| RQ1 | `results/phase2/` | Structure campaign; Package B |
-| RQ2 | `results/phase1/` | Size campaign; Package A; T1 plan |
-| RQ3 | (none) | SKIPPED |
-| RQ4 | `results/phase4/` | Kubo/FAT maps; Package D |
-| RQ5 | `results/phase5/` | NOT RUN YET |
-| RQ6 | `results/phase1/claim/packages/f/` | Scaling-fit tables (Package F) |
-| RQ7 | `results/phase1/claim/packages/g/` | Early-warning tables (Package G) |
-
-Plots: `docs/figures/`.

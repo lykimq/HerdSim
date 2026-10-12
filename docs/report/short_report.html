@@ -71,15 +71,14 @@ table.layout-cost tr.layout-wide td:first-child{font-weight:600}
 <a href="#what-we-found">What we found</a>
 <a href="#what-we-did-not-settle-limits">What we did not settle / limits</a>
 <a href="#what-we-plan-next">What we plan next</a>
-<a href="#evidence-in-this-package">Evidence in this package</a>
 </nav>
 <main>
 <h2 id="what-this-is-about">What this is about</h2>
 <p>When a few dogs guide a larger flock, how much control do you actually need as the flock gets bigger, or starts more spread out?</p>
-<p>That is the question this study tries to answer carefully. We do not assume there is one universal scaling law. We ask questions we can run in simulation, fix the rules so comparisons stay fair, and only claim what the runs support.</p>
+<p>We treat that as an empirical question. There is no assumed universal scaling law. The runs use locked rules so comparisons stay fair.</p>
 <p><strong>HerdSim</strong> is the platform we used. A few dogs guide sheep to a goal under settings we can lock and repeat. For this study it is a model system for measuring <em>control demand</em> (how many dogs, or how much dog work, is enough), not a copy of a real farm.</p>
 <p>Control here is indirect: we cannot steer every sheep by hand. The dogs only push through local reactions. So "how much control" is something we can measure as size and starting shape change.</p>
-<p>This short report tells the story. Trial tables and packages live under <code>results/</code> (mapped by research question below).</p>
+<p>This short report is the findings summary.</p>
 <hr>
 <h2 id="what-we-asked">What we asked</h2>
 <p>After the core runs, we wanted concrete answers about:</p>
@@ -98,7 +97,7 @@ table.layout-cost tr.layout-wide td:first-child{font-weight:600}
 <p><strong>RQ5 (information).</strong> Can better sensing or communication reduce the dog count at the same reliability?</p>
 <p><strong>RQ6 (scaling fits).</strong> Once we have minimum dog counts vs flock size, which simple curve best predicts a held-out size, and is one power law enough?</p>
 <p><strong>RQ7 (early warning).</strong> Can recent flock state warn of failure better than knowing only N and D?</p>
-<p>We are not trying to pick the "best" herding algorithm, copy every detail of real livestock, or ship a farm product. Only claim what the evidence supports.</p>
+<p>We are not trying to pick the "best" herding algorithm, copy every detail of real livestock, or ship a farm product.</p>
 <hr>
 <h2 id="how-we-studied-it">How we studied it</h2>
 <h3 id="shared-rules">Shared rules</h3>
@@ -117,7 +116,6 @@ table.layout-cost tr.layout-wide td:first-child{font-weight:600}
 <tr><td>Seeds</td><td>smoke 5; scout 30; claim 100 (200 on soft edges); master seed 2026</td></tr>
 </tbody></table></div>
 <p><code>D_min</code> means the smallest tested dog count that clears the 90% bar. It is not a property of sheep in nature; it depends on this task and these locks.</p>
-<p>Machine-readable defaults sit in <a href="../../protocols/configs/canonical_grid.yaml"><code>protocols/configs/canonical_grid.yaml</code></a>. Campaign YAMLs sit in <a href="../../protocols/configs/protocols/"><code>protocols/configs/protocols/</code></a>.</p>
 <h3 id="why-three-methods">Why three methods</h3>
 <p>We need different <em>kinds</em> of dog rules on the same task, not three tiny variants of the same idea:</p>
 <div class="table-wrap"><table>
@@ -150,8 +148,8 @@ table.layout-cost tr.layout-wide td:first-child{font-weight:600}
 <tr><td>RQ7</td><td>Early warning on claim trajectories</td><td>0</td><td>0</td><td>0</td><td>0</td><td>DONE (analyse)</td></tr>
 <tr><td><strong>All</strong></td><td></td><td><strong>750</strong></td><td><strong>19,800</strong></td><td><strong>15,100</strong></td><td><strong>35,650</strong></td><td></td></tr>
 </tbody></table></div>
-<p>RQ2's longer-deadline T1 was also planned and skipped (0 overcrowding cells). RQ5 is not run yet (prior Phase 5 trees removed after obs/comm bugs). Claim merges hold 30,670 rows (fewer than total sims because a reseeded cell drops its scout rows from the merge).</p>
-<p>Commands used (from the HerdSim repo root; re-running needs that codebase, not only this folder):</p>
+<p>RQ2's longer-deadline T1 was also planned and skipped (0 overcrowding cells). RQ5 is not run yet (prior Phase 5 trees removed after obs/comm bugs). Claim merges hold 30,640 rows (fewer than total sims because a reseeded cell drops its scout rows from the merge).</p>
+<p>Commands used (from the HerdSim repo root):</p>
 <pre><code># RQ2 size map
 uv run cli/campaign.py run --protocol phase1_pilot --workers 16
 uv run cli/campaign.py run --protocol phase1_scout --workers 16
@@ -170,7 +168,6 @@ uv run cli/campaign.py claim-reseed --protocol phase4_kubo_structure_claim --wor
 
 # RQ5 ladders (not run yet; planned)
 # WORKERS=18 bash results/phase5/run_all_ladders.sh</code></pre>
-<p>Exact grids, seeds, and run notes for each campaign sit under the matching <code>rq*/</code> folder.</p>
 <hr>
 <h2 id="what-we-found">What we found</h2>
 <h3 id="rq1-does-start-shape-change-dog-need">RQ1: does start shape change dog need?</h3>
@@ -190,14 +187,13 @@ uv run cli/campaign.py claim-reseed --protocol phase4_kubo_structure_claim --wor
 <tr><td>outlier_rich</td><td>50</td><td>224</td><td>209</td></tr>
 <tr><td>outlier_rich</td><td>100</td><td>501</td><td>554</td></tr>
 <tr><td>outlier_rich</td><td>200</td><td>1,228</td><td>1,647</td></tr>
-<tr><td>wide</td><td>50</td><td>2,139</td><td>2,925</td></tr>
+<tr><td>wide</td><td>50</td><td>2,138</td><td>2,925</td></tr>
 <tr><td>wide</td><td>100</td><td>3,074</td><td>4,319</td></tr>
 <tr><td>wide</td><td>200</td><td>3,870</td><td>5,213</td></tr>
 </tbody></table></div>
 <p>Wide versus compact at one dog: about 11x to 20x more time and about 19x to 36x more path. On wide starts, the cheapest reliable choice is two dogs (<code>B* = 2</code>): the second dog cuts path while staying reliable.</p>
 <figure><img src="../figures/f4_layout_cost.png" alt="Layout cost on the baseline structure map."><figcaption>Layout cost on the baseline structure map.</figcaption></figure>
 <p><em>Wide and large outlier-rich starts cost much more time and path at one dog; D_min stays 1.</em></p>
-<p>More detail: RQ1 (<code>results/phase2/</code>).</p>
 <h3 id="rq2-how-does-dog-need-change-with-flock-size">RQ2: how does dog need change with flock size?</h3>
 <p><strong>Status:</strong> Answered on the baseline (<code>strombom_multi</code>, compact) inside the tested dog list through D = 35.</p>
 <p>The useful lower end is small and almost flat. At one dog, N = 5 and 10 fail the 90% bar (success about 0.07 and 0.24). From N = 25 upward, one dog is enough. Adding dogs past the minimum does not break success on that map; it mostly adds walking (88 of 100 cells labeled wasteful; 0 overcrowding).</p>
@@ -221,11 +217,10 @@ uv run cli/campaign.py claim-reseed --protocol phase4_kubo_structure_claim --wor
 <p><em>Success-rate surfaces. Baseline and Kubo show a reliable band on compact starts; FAT does not for larger N.</em></p>
 <figure><img src="../figures/f3_cost_vs_d.png" alt="Cost against dog count on the baseline size map."><figcaption>Cost against dog count on the baseline size map.</figcaption></figure>
 <p><em>Extra dogs mainly raise path after the minimum; success stays high (waste, not overcrowding).</em></p>
-<p>More detail: RQ2 (<code>results/phase1/</code>).</p>
 <h3 id="rq3-what-mechanism-drives-the-pattern">RQ3: what mechanism drives the pattern?</h3>
 <p><strong>Status:</strong> Not answerable yet. SKIPPED as a contrast.</p>
 <p>The plan was to compare efficient cells with overcrowding cells at the same N. We never saw overcrowding on the baseline size map inside D <= 35, so that contrast does not exist. Correlation candidates (interference, splitting, and related logs) were not tested against a real upper failure band.</p>
-<p>Unlocking RQ3 needs either a measured collapse (for example D > 35, or a harder draft-style task) or another protocol where overcrowding appears. See <a href="#what-we-plan-next">What we plan next</a>.</p>
+<p>RQ3 needs either a measured collapse (for example D > 35, or a harder draft-style task) or another protocol where overcrowding appears. See <a href="#what-we-plan-next">What we plan next</a>.</p>
 <h3 id="rq4-do-the-patterns-transfer-across-methods">RQ4: do the patterns transfer across methods?</h3>
 <p><strong>Status:</strong> Partial.</p>
 <p>On tight (compact) starts, Strombom and Kubo share a low <code>D_min</code> floor for larger flocks. FAT does not copy that story.</p>
@@ -237,6 +232,7 @@ uv run cli/campaign.py claim-reseed --protocol phase4_kubo_structure_claim --wor
 <tr><td>10</td><td>2</td><td>1</td><td>1</td></tr>
 <tr><td>25</td><td>1</td><td>1</td><td>not reach</td></tr>
 <tr><td>50</td><td>1</td><td>1</td><td>not reach</td></tr>
+<tr><td>75</td><td>1</td><td>1</td><td>not reach</td></tr>
 <tr><td>100</td><td>1</td><td>1</td><td>not reach</td></tr>
 <tr><td>150</td><td>1</td><td>1</td><td>not reach</td></tr>
 <tr><td>200</td><td>1</td><td>1</td><td>not reach</td></tr>
@@ -268,13 +264,12 @@ uv run cli/campaign.py claim-reseed --protocol phase4_kubo_structure_claim --wor
 <p><em>At N = 200, compact and split look shared for Strombom and Kubo; wide and large outlier-rich do not.</em></p>
 <figure><img src="../figures/f9_kubo_outlier_rich_n200.png" alt="Kubo outlier_rich at N = 200."><figcaption>Kubo outlier_rich at N = 200.</figcaption></figure>
 <p><em>Soft edge: point D_min = 20 after 200 seeds; bootstrap still wide.</em></p>
-<p>That is enough to reject "the same story everywhere," but not enough to say which patterns are shared across a broader method set. More detail: RQ4 (<code>results/phase4/</code>).</p>
+<p>That is enough to reject "the same story everywhere," but not enough to say which patterns are shared across a broader method set.</p>
 <h3 id="rq5-can-better-information-replace-dogs">RQ5: can better information replace dogs?</h3>
 <p><strong>Status:</strong> Not run yet.</p>
 <p>No claim-grade observation, range, or communication ladder results are published. Prior Phase 5 trees were removed after shared sim bugs (bearing-only freeze, range under global observation, communication list stacking). Protocols remain for a clean rerun.</p>
-<p>More detail: RQ5 (<code>results/phase5/</code>, NOT RUN YET).</p>
 <h3 id="rq6-which-curve-fits-d-min-vs-n">RQ6: which curve fits D_min vs N?</h3>
-<p><strong>Status:</strong> Weak, but the planned fit package ran.</p>
+<p><strong>Status:</strong> The fit package ran; the signal is weak.</p>
 <p>On the baseline compact map, <code>D_min</code> is almost only two values: 2 for N = 5 and 10, and 1 for everything larger. Leave-one-N-out RMSE (lower is better):</p>
 <div class="table-wrap"><table>
 <thead><tr><th>Model</th><th>RMSE</th></tr></thead>
@@ -286,17 +281,15 @@ uv run cli/campaign.py claim-reseed --protocol phase4_kubo_structure_claim --wor
 </tbody></table></div>
 <p>Piecewise wins because it matches that step, not because we measured a rich growth law. These fits are not a universal scaling law.</p>
 <figure><img src="../figures/f8_scaling_rmse.svg" alt="Leave-one-N-out RMSE by model."><figcaption>Leave-one-N-out RMSE by model.</figcaption></figure>
-<p>More detail: RQ6 (<code>results/phase1/claim/packages/f/</code>).</p>
 <h3 id="rq7-can-state-warn-of-failure-early">RQ7: can state warn of failure early?</h3>
 <p><strong>Status:</strong> Not answerable on this data.</p>
-<p>By the first check at tick 1,000, almost every successful RQ2 size-map run has already finished (median success about 183 ticks). Failures are almost all tiny flocks with one dog that run to the deadline. There is no late window left to warn before success or failure settles. Held-out AUROC folds were empty. Only 14 of 169 failures had a measured lead time of at least 500 ticks (about 8.3%; the bar was 30%).</p>
+<p>By the first check at tick 1,000, almost every successful RQ2 size-map run has already finished (median success 182 ticks). Failures are almost all tiny flocks with one dog that run to the deadline. There is no late window left to warn before success or failure settles. Held-out AUROC folds were empty. Only 14 of 169 failures had a measured lead time of at least 500 ticks (about 8.3%; the bar was 30%).</p>
 <figure><img src="../figures/f12_early_warning_timing.png" alt="Early warning timing."><figcaption>Early warning timing.</figcaption></figure>
 <p><em>Successful runs finish early; the shaded warning checks start after most successes are already done.</em></p>
-<p>More detail: RQ7 (<code>results/phase1/claim/packages/g/</code>).</p>
 <h3 id="claims-scorecard">Claims scorecard</h3>
 <p>Verdicts use claim-grade evidence only.</p>
 <div class="table-wrap"><table>
-<thead><tr><th>Claim</th><th>RQ</th><th>Verdict</th><th>Meaning in plain words</th></tr></thead>
+<thead><tr><th>Claim</th><th>RQ</th><th>Verdict</th><th>Meaning</th></tr></thead>
 <tbody>
 <tr><td>C1a</td><td>RQ1</td><td>REJECTED</td><td>Layout did not move <code>D_min</code> on the baseline</td></tr>
 <tr><td>C1b</td><td>RQ1</td><td>INCONCLUSIVE</td><td>No <code>D_min</code> shift, so state-vs-(N, D) predictor test could not run</td></tr>
@@ -331,14 +324,14 @@ uv run cli/campaign.py claim-reseed --protocol phase4_kubo_structure_claim --wor
 <h2 id="what-we-plan-next">What we plan next</h2>
 <p>None of the items below have been run as claim-grade work in this package. They are intentions.</p>
 <h3 id="measure-an-upper-collapse-or-a-harder-task">Measure an upper collapse (or a harder task)</h3>
-<p>We still do not know whether success eventually falls for D > 35, or whether path waste keeps rising without collapse. That matters because it turns the current list ceiling into a measured upper story, and it is what unlocks RQ3 (efficient vs overcrowding at the same N).</p>
+<p>We still do not know whether success eventually falls for D > 35, or whether path waste keeps rising without collapse. That matters because it turns the current list ceiling into a measured upper story, and it is what RQ3 needs (efficient vs overcrowding at the same N).</p>
 <div class="table-wrap"><table>
 <thead><tr><th>Question</th><th>Why it matters</th><th>How we would run it</th></tr></thead>
 <tbody>
 <tr><td>After a good band, does success fall for some D > 35?</td><td>Measured collapse instead of a ceiling</td><td>Extend the dog-count list past 35 on selected N</td></tr>
 <tr><td>If success stays high, does path waste keep rising?</td><td>Waste-only upper band</td><td>Same extended sweep; report path and regimes</td></tr>
 <tr><td>Does a longer deadline rescue high-D failures at T0?</td><td>Separates "too slow" from true overcrowding</td><td>T1 only on candidate overcrowding cells</td></tr>
-<tr><td>Do efficient and overcrowding cells differ in interference or splitting?</td><td>Unlocks RQ3</td><td>Matched tests at the same N</td></tr>
+<tr><td>Do efficient and overcrowding cells differ in interference or splitting?</td><td>Needed for RQ3</td><td>Matched tests at the same N</td></tr>
 <tr><td>Does that upper story transfer across methods?</td><td>RQ4 on the upper band</td><td>Repeat under Kubo / FAT (later <code>communication_free</code>)</td></tr>
 </tbody></table></div>
 <p>Another path without raising the dog cap: port the draft-style collect-hold-gate task into HerdSim and see whether overcrowding appears inside D <= 35. Not scheduled yet.</p>
@@ -355,22 +348,8 @@ uv run cli/campaign.py claim-reseed --protocol phase4_kubo_structure_claim --wor
 <li>RQ7: need failures and successes overlapping in time (harder layout or method, or earlier check times).</li>
 </ul>
 <hr>
-<h2 id="evidence-in-this-package">Evidence</h2>
-<p>Trial data lives under <code>results/</code>:</p>
-<div class="table-wrap"><table>
-<thead><tr><th>RQ</th><th>Results path</th><th>What it holds</th></tr></thead>
-<tbody>
-<tr><td>RQ1</td><td><code>results/phase2/</code></td><td>Structure campaign; Package B</td></tr>
-<tr><td>RQ2</td><td><code>results/phase1/</code></td><td>Size campaign; Package A; T1 plan</td></tr>
-<tr><td>RQ3</td><td>(none)</td><td>SKIPPED</td></tr>
-<tr><td>RQ4</td><td><code>results/phase4/</code></td><td>Kubo/FAT maps; Package D</td></tr>
-<tr><td>RQ5</td><td><code>results/phase5/</code></td><td>NOT RUN YET</td></tr>
-<tr><td>RQ6</td><td><code>results/phase1/claim/packages/f/</code></td><td>Scaling-fit tables (Package F)</td></tr>
-<tr><td>RQ7</td><td><code>results/phase1/claim/packages/g/</code></td><td>Early-warning tables (Package G)</td></tr>
-</tbody></table></div>
-<p>Plots: <code>docs/figures/</code>.</p>
 </main>
 </div>
-<footer>Self-contained package under <code>docs/report/</code>. Evidence under <code>results/</code>; notes in <code>rq*/</code>.</footer>
+<footer>HerdSim scaling study: short report.</footer>
 </body>
 </html>
