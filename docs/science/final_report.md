@@ -802,7 +802,7 @@ Counts are completed simulation trials from each protocol folder (`status.json`,
 | RQ7 | Early warning | (analyse) | (none) | (none) | (none) | Package G | (n/a) | 0 | no new sims | 0 | DONE |
 | | **Total simulations** | | | | | | | | | **35,650** | |
 
-RQ5 protocols remain under `protocols/configs/protocols/phase5_*.yaml` but no claim-grade trials are published. The claim merges used for analysis hold 30,670 rows (fewer than the total because a reseeded cell drops its scout rows from the merge). Integrity notes: [`TRUST_AUDIT.md`](../report/TRUST_AUDIT.md).
+RQ5 protocols remain under `protocols/configs/protocols/phase5_*.yaml` but no claim-grade trials are published. The claim merges used for analysis hold 30,670 rows (fewer than the total because a reseeded cell drops its scout rows from the merge).
 
 ---
 

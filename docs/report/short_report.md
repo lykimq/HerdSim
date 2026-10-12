@@ -104,7 +104,7 @@ Scout covers the whole map; claim covers a small window. Claims use claim-grade 
 | RQ7 | Early warning on claim trajectories | 0 | 0 | 0 | 0 | DONE (analyse) |
 | **All** | | **750** | **19,800** | **15,100** | **35,650** | |
 
-RQ2's longer-deadline T1 was also planned and skipped (0 overcrowding cells). RQ5 is not run yet (prior Phase 5 trees removed after obs/comm bugs). Claim merges hold 30,670 rows (fewer than total sims because a reseeded cell drops its scout rows from the merge). Integrity checks are in [`TRUST_AUDIT.md`](TRUST_AUDIT.md).
+RQ2's longer-deadline T1 was also planned and skipped (0 overcrowding cells). RQ5 is not run yet (prior Phase 5 trees removed after obs/comm bugs). Claim merges hold 30,670 rows (fewer than total sims because a reseeded cell drops its scout rows from the merge).
 
 Commands used (from the HerdSim repo root; re-running needs that codebase, not only this folder):
 
@@ -387,4 +387,4 @@ Another path without raising the dog cap: port the draft-style collect-hold-gate
 | RQ6 | `results/phase1/claim/packages/f/` | Scaling-fit tables (Package F) |
 | RQ7 | `results/phase1/claim/packages/g/` | Early-warning tables (Package G) |
 
-Integrity checks: `TRUST_AUDIT.md`. Plots: `docs/figures/`.
+Plots: `docs/figures/`.

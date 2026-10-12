@@ -150,7 +150,7 @@ table.layout-cost tr.layout-wide td:first-child{font-weight:600}
 <tr><td>RQ7</td><td>Early warning on claim trajectories</td><td>0</td><td>0</td><td>0</td><td>0</td><td>DONE (analyse)</td></tr>
 <tr><td><strong>All</strong></td><td></td><td><strong>750</strong></td><td><strong>19,800</strong></td><td><strong>15,100</strong></td><td><strong>35,650</strong></td><td></td></tr>
 </tbody></table></div>
-<p>RQ2's longer-deadline T1 was also planned and skipped (0 overcrowding cells). RQ5 is not run yet (prior Phase 5 trees removed after obs/comm bugs). Claim merges hold 30,670 rows (fewer than total sims because a reseeded cell drops its scout rows from the merge). Integrity checks are in <a href="TRUST_AUDIT.md"><code>TRUST_AUDIT.md</code></a>.</p>
+<p>RQ2's longer-deadline T1 was also planned and skipped (0 overcrowding cells). RQ5 is not run yet (prior Phase 5 trees removed after obs/comm bugs). Claim merges hold 30,670 rows (fewer than total sims because a reseeded cell drops its scout rows from the merge).</p>
 <p>Commands used (from the HerdSim repo root; re-running needs that codebase, not only this folder):</p>
 <pre><code># RQ2 size map
 uv run cli/campaign.py run --protocol phase1_pilot --workers 16
@@ -368,9 +368,9 @@ uv run cli/campaign.py claim-reseed --protocol phase4_kubo_structure_claim --wor
 <tr><td>RQ6</td><td><code>results/phase1/claim/packages/f/</code></td><td>Scaling-fit tables (Package F)</td></tr>
 <tr><td>RQ7</td><td><code>results/phase1/claim/packages/g/</code></td><td>Early-warning tables (Package G)</td></tr>
 </tbody></table></div>
-<p>Integrity checks: <code>TRUST_AUDIT.md</code>. Plots: <code>docs/figures/</code>.</p>
+<p>Plots: <code>docs/figures/</code>.</p>
 </main>
 </div>
-<footer>Self-contained package under <code>docs/report/</code>. Evidence under <code>results/</code>; notes in <code>rq*/</code>; <code>TRUST_AUDIT.md</code>.</footer>
+<footer>Self-contained package under <code>docs/report/</code>. Evidence under <code>results/</code>; notes in <code>rq*/</code>.</footer>
 </body>
 </html>
