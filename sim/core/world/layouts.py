@@ -2,10 +2,21 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+from typing import TypedDict, Unpack
+
 import numpy as np
 
 # Canonical X0 family names from the scaling protocol.
 X0_FAMILIES = ("compact", "wide", "split", "outlier_rich")
+
+
+class _LayoutBounds(TypedDict):
+    world_width: float | None
+    world_height: float | None
+    goal_center: np.ndarray | None
+    goal_radius: float | None
+
 
 
 def normalize_layout(layout: str) -> str:
@@ -35,7 +46,7 @@ def _point_ok(
 
 
 def _draw_valid(
-    draw_one,
+    draw_one: Callable[[], object],
     *,
     world_width: float | None,
     world_height: float | None,
@@ -94,7 +105,7 @@ def generate_initial_positions(
     family = normalize_layout(layout)
     center = np.asarray(center, dtype=float).reshape(2)
     goal = None if goal_center is None else np.asarray(goal_center, dtype=float).reshape(2)
-    bounds = dict(
+    bounds = _LayoutBounds(
         world_width=world_width,
         world_height=world_height,
         goal_center=goal,
@@ -137,7 +148,7 @@ def _gaussian_cluster(
     center: np.ndarray,
     sigma: float,
     rng: np.random.Generator,
-    **bounds,
+    **bounds: Unpack[_LayoutBounds],
 ) -> np.ndarray:
     rows = [
         _draw_valid(
@@ -155,7 +166,7 @@ def _split_positions(
     rng: np.random.Generator,
     *,
     separation: float,
-    **bounds,
+    **bounds: Unpack[_LayoutBounds],
 ) -> np.ndarray:
     n_clusters = 2 if n_sheep < 12 else 3
     # Place cluster centres on a circle around the flock centre.
@@ -192,7 +203,7 @@ def _outlier_rich_positions(
     *,
     core_sigma: float,
     lost_threshold: float,
-    **bounds,
+    **bounds: Unpack[_LayoutBounds],
 ) -> np.ndarray:
     n_out = max(1, int(round(0.2 * n_sheep))) if n_sheep >= 5 else 1
     n_out = min(n_out, n_sheep - 1) if n_sheep > 1 else 0

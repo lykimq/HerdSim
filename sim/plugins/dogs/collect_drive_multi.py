@@ -35,7 +35,7 @@ def _union_sheep_positions(obs_list: list[ShepherdObservation]) -> np.ndarray:
         if indices.shape[0] != positions.shape[0]:
             raise ValueError(
                 "Observation sheep_indices and sheep_positions length mismatch "
-                f"({indices.shape[0]} vs {positions.shape[0]})."
+                + f"({indices.shape[0]} vs {positions.shape[0]})."
             )
         for sheep_id, pos in zip(indices, positions):
             key = int(sheep_id)

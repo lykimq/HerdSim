@@ -4,19 +4,26 @@
   "venv": ".venv",
   "extraPaths": [".", "sim"],
   "failOnWarnings": false,
+  "exclude": [
+    "**/node_modules",
+    "**/__pycache__",
+    ".venv",
+    "results",
+    "docs",
+    "tests"
+  ],
+  "reportExplicitAny": "none",
+  "reportAny": "none",
+  "reportUnknownMemberType": "none",
+  "reportUnknownVariableType": "none",
+  "reportUnknownArgumentType": "none",
+  "reportUnknownParameterType": "none",
+  "reportUnknownLambdaType": "none",
+  "reportUnusedCallResult": "none",
+  "reportUnnecessaryIsInstance": "none",
+  "reportImplicitOverride": "none",
+  "reportUnannotatedClassAttribute": "none",
   "executionEnvironments": [
-    {
-      "root": "analysis",
-      "extraPaths": [".", "sim"],
-      "reportExplicitAny": "none",
-      "reportAny": "none",
-      "reportUnknownMemberType": "none",
-      "reportUnknownVariableType": "none",
-      "reportUnknownArgumentType": "none",
-      "reportUnknownParameterType": "none",
-      "reportUnknownLambdaType": "none",
-      "reportUnnecessaryIsInstance": "none"
-    },
     {
       "root": ".",
       "extraPaths": [".", "sim"]

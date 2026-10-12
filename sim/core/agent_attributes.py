@@ -110,7 +110,7 @@ def apply_environment_updates(state: SimulationState, config: dict[str, Any]) ->
 
 
 def apply_robot_constraints(
-    state: SimulationState | None,
+    _state: SimulationState | None,
     desired_velocities: np.ndarray,
     config: dict[str, Any],
     prev_velocities: np.ndarray,

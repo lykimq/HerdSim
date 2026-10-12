@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "herdsim"
-version = "0.1.0"
+version = "1.0"
 description = "Scaling CLI and analysis for multi-agent shepherding research questions"
 readme = "README.md"
 license = {text = "MIT"}
@@ -74,26 +74,6 @@ markers = [
     "stress: heavier / longer runs (included in make test)",
 ]
 
+# Typecheck settings live in pyrightconfig.json (basedpyright reads that first).
 [tool.pyright]
 pythonVersion = "3.11"
-extraPaths = [".", "sim"]
-venvPath = "."
-venv = ".venv"
-failOnWarnings = false
-
-# Pandas-heavy analysis: keep real errors, mute cascading unknown/Any noise.
-[[tool.pyright.executionEnvironments]]
-root = "analysis"
-extraPaths = [".", "sim"]
-reportExplicitAny = "none"
-reportAny = "none"
-reportUnknownMemberType = "none"
-reportUnknownVariableType = "none"
-reportUnknownArgumentType = "none"
-reportUnknownParameterType = "none"
-reportUnknownLambdaType = "none"
-reportUnnecessaryIsInstance = "none"
-
-[[tool.pyright.executionEnvironments]]
-root = "."
-extraPaths = [".", "sim"]

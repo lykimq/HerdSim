@@ -52,7 +52,7 @@ def _series_stats(series: pd.Series, ticks: pd.Series | None = None) -> dict[str
         order = tick_vals.to_numpy().argsort()
         t = tick_vals.to_numpy()[order].astype(float)
         y = values.to_numpy()[order].astype(float)
-        auc_v = float(np.trapezoid(y, t)) if hasattr(np, "trapezoid") else float(np.trapz(y, t))
+        auc_v = float(np.trapezoid(y, t))
     else:
         # Single sample or no tick axis: AUC degenerates to the mean level.
         auc_v = mean_v
@@ -75,7 +75,7 @@ def control_efficiency(gcm_start: float, gcm_end: float, shepherd_path: float) -
 def build_trial_metric_fields(history: pd.DataFrame) -> dict[str, Any]:
     """Map a run history DataFrame to unambiguous trial export fields."""
     out: dict[str, Any] = {}
-    if history is None or history.empty:
+    if history.empty:
         return out
 
     final = history.iloc[-1]

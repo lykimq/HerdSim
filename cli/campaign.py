@@ -77,7 +77,7 @@ def run_campaign(args: argparse.Namespace) -> None:
         if str(spec.get("seed_mode", "scout")) == "claim":
             raise SystemExit(
                 f"Protocol {spec['protocol_id']} has seed_mode=claim; "
-                "use claim-reseed or t1, not run"
+                + "use claim-reseed or t1, not run"
             )
         kind = runner_kind(spec)
         script = "run_factor_sweep.py" if kind == "factor" else "run_grid.py"

@@ -2,6 +2,19 @@
 
 HerdSim is a multi-agent shepherding simulator for studying how much external control a flock needs as size, initial structure, method, and information conditions change. Dogs (shepherds) drive sheep to a goal under fixed protocols; the main control-demand quantity is the viable shepherd range around `D_min` (and any overcrowding boundary) at a reliability threshold.
 
+## Tech stack
+
+| Layer | Choice |
+|-------|--------|
+| Language | Python 3.11+ |
+| Numerics / data | NumPy, pandas, SciPy, PyArrow |
+| Plots | Matplotlib |
+| Protocols | YAML (PyYAML) |
+| Packaging / env | uv, setuptools |
+| Tests | pytest |
+| Lint / types | Ruff, basedpyright |
+| Campaign CLI | `cli/campaign.py` |
+
 ## Project structure
 
 ```text

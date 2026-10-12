@@ -306,7 +306,7 @@ def _run_cell(cell: ScalingCell) -> dict[str, Any]:
     runner.initialize()
     status = "running"
     while status == "running":
-        state, _, status = runner.step()
+        _, _, status = runner.step()
     final_state = runner.state
     if final_state is None:
         raise RuntimeError("scaling trial finished without a simulation state")
@@ -390,12 +390,7 @@ def _row_int(row: pd.Series, col: str) -> int:
 def _row_optional_str(row: pd.Series, col: str) -> str | None:
     if col not in row.index:
         return None
-    value: object = row.at[col]
-    if value is None or value is pd.NA:
-        return None
-    if isinstance(value, float) and value != value:
-        return None
-    text = str(value)
+    text = str(row.at[col])
     if text in {"nan", "NaT", "<NA>", "None"}:
         return None
     return text

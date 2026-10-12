@@ -135,7 +135,7 @@ def main() -> None:
                                     seed=int(seed),
                                     initial_layout=str(layout),
                                     method=method,
-                                    obs_mode=str(obs) if obs is not None else None,
+                                    obs_mode=str(obs),
                                     sensing_range=float(sense) if sense is not None else None,
                                     communication=str(comm) if comm is not None else None,
                                     max_ticks=max_ticks,

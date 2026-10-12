@@ -108,12 +108,12 @@ class ExperimentalFactors:
         if self.observation.mode not in OBSERVATION_MODES:
             raise ValueError(
                 f"Unknown observation mode '{self.observation.mode}'. "
-                f"Use one of {OBSERVATION_MODES}."
+                + f"Use one of {OBSERVATION_MODES}."
             )
         if self.observation.communication not in COMMUNICATION_MODES:
             raise ValueError(
                 f"Unknown communication '{self.observation.communication}'. "
-                f"Use one of {COMMUNICATION_MODES}."
+                + f"Use one of {COMMUNICATION_MODES}."
             )
         if int(self.observation.observation_frequency) < 1:
             raise ValueError("observation_frequency must be >= 1.")
