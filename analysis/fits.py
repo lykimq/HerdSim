@@ -30,12 +30,40 @@ def _rmse(y: np.ndarray, yhat: np.ndarray) -> float:
 
 
 def _aic(sse: float, m: int, k: int) -> float:
-    """Akaike information criterion from residual SSE (k free parameters)."""
+    """Akaike information criterion (AIC) from residual SSE (sum of squared errors).
+
+    Idea: reward a small fit error, but pay a penalty for using more free
+    parameters so a more flexible curve does not win only by over-fitting.
+
+    Here: AIC = 2*k + m*log(SSE/m), with ``m`` points and ``k`` parameters
+    (constant k=1, linear/power k=2, piecewise k=5). Lower is better.
+
+    The ``+ 1e-12`` inside the log is only a numerical floor: if SSE is exactly
+    zero (or tiny), plain log(SSE/m) would go to -inf. That can happen when a
+    flexible fit (for example piecewise on a two-level step) matches the points
+    almost perfectly. The floor keeps the log defined; it is not a modeling
+    choice and does not change rankings in ordinary cases.
+
+    Used as a secondary in-sample comparison (for example delta-AIC vs power).
+    Primary ranking for RQ6 still uses leave-one-N-out RMSE.
+    """
     return float(2 * k + m * np.log(sse / m + 1e-12))
 
 
 def _bic(sse: float, m: int, k: int) -> float:
-    """Bayesian information criterion from residual SSE (k free parameters)."""
+    """Bayesian information criterion (BIC) from residual SSE.
+
+    Same idea as AIC (fit quality minus a complexity penalty), but the
+    parameter penalty grows with log(m), so BIC is usually stricter about
+    extra parameters when there are more data points.
+
+    Here: BIC = k*log(m) + m*log(SSE/m). Lower is better.
+
+    Uses the same ``+ 1e-12`` floor inside the log as AIC, so a near-perfect
+    residual SSE cannot produce log(0).
+
+    Also secondary to leave-one-N-out RMSE for choosing the RQ6 winner.
+    """
     return float(k * np.log(max(m, 1)) + m * np.log(sse / m + 1e-12))
 
 

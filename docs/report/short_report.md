@@ -305,7 +305,7 @@ Stepping from 32.5 to 65 lowers `D_min` by 2 at N=100 and by 1 at N=200. Further
 
 **Status:** The fit package ran; the signal is weak.
 
-RQ6 asks which simple curve best describes how fewest dogs (`D_min`) change with flock size (`N`) on the baseline compact frontier. The input is the Phase 1 claim frontier: almost only two values, `D_min = 2` for N = 5 and 10, and `D_min = 1` for everything larger. Code: `analysis/fits.py` (`fit_scaling_models`).
+RQ6 asks which simple curve best describes how fewest dogs (`D_min`) change with flock size (`N`) on the baseline compact frontier. The input is the Phase 1 claim frontier: almost only two values, `D_min = 2` for N = 5 and 10, and `D_min = 1` for everything larger.
 
 #### What each candidate curve is
 
@@ -317,6 +317,17 @@ RQ6 asks which simple curve best describes how fewest dogs (`D_min`) change with
 | Piecewise | Two straight segments with a break in N | Try legal breaks; keep the split with smallest residual error |
 
 Piecewise does **not** hard-code the break. It searches for the best break automatically. On this frontier that search lands at N = 10, which matches the step from 2 dogs to 1.
+
+Fitted parameters on this Phase 1 claim frontier (`results/phase1/claim/packages/f/scaling_fits.csv`):
+
+| Model | Fitted values | Why these values |
+|-------|---------------|------------------|
+| Constant | `c = 1.2` | Mean of the ten frontier points: two 2s and eight 1s |
+| Linear | `a ~= 1.41`, `b ~= -0.0016` | Almost flat: most points are already 1, and only the two tiny-N points sit at 2, so the best single line tilts slightly down |
+| Power law | `A ~= 2.73`, `alpha ~= -0.21` | Mild decrease with N for the same reason; not a rising "larger flocks need more dogs" law |
+| Piecewise | break at N = 10; left `~= 2 + 0*N`, right `~= 1 + 0*N` | Auto-chosen break sits between the high and low levels, so each piece collapses to a flat step |
+
+So `a, b` (linear) and `A, alpha` (power) are different families' parameters, not the same quantities. They all try to summarise the same step-shaped frontier; only piecewise can match both levels closely.
 
 #### Why leave-one-N-out (not only in-sample fit)
 
