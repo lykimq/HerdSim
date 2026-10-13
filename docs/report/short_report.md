@@ -305,7 +305,9 @@ Stepping from 32.5 to 65 lowers `D_min` by 2 at N=100 and by 1 at N=200. Further
 
 **Status:** The fit package ran; the signal is weak.
 
-On the baseline compact map, `D_min` is almost only two values: 2 for N = 5 and 10, and 1 for everything larger. Leave-one-N-out RMSE (lower is better):
+On the baseline compact map, `D_min` is almost only two values: 2 for N = 5 and 10, and 1 for everything larger.
+
+Leave-one-N-out RMSE asks: if we hide one flock size, fit the curve on the rest, then predict the hidden size, how wrong are we on average? Lower is better. We do that for every N and report the root-mean-square error.
 
 | Model | RMSE |
 |-------|-----:|
@@ -314,9 +316,11 @@ On the baseline compact map, `D_min` is almost only two values: 2 for N = 5 and 
 | Power law | 0.25 |
 | Piecewise | 0.13 |
 
-Piecewise wins because it matches that step, not because we measured a rich growth law. These fits are not a universal scaling law.
+Piecewise wins here because the fit automatically places a break at N = 10 and then matches the two flat levels (2, then 1). That is a good fit to this step-shaped frontier, not evidence of a rich growth law. These fits are not a universal scaling law.
 
 ![Leave-one-N-out RMSE by model.](../figures/f8_scaling_rmse.svg)
+
+*Lower bars are better. Piecewise is lowest because the auto-chosen break at N = 10 matches the two-level D_min step.*
 
 ### RQ7: can state warn of failure early?
 

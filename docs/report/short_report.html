@@ -710,7 +710,8 @@ uv run cli/campaign.py claim-reseed --protocol phase5_comm_claim --workers 18
 <figure><img src="../figures/f15_rq5_obs_reliability.png" alt="Phase 5 observation reliability."><figcaption>bearing_only stays below the 90% bar. local_positions and global both sit at R = 1.00 across the tested D list, so those two curves overlap on the top line.</figcaption></figure>
 <h3 id="rq6-which-curve-fits-d_min-vs-n">RQ6: which curve fits D_min vs N?</h3>
 <p><strong>Status:</strong> The fit package ran; the signal is weak.</p>
-<p>On the baseline compact map, <code>D_min</code> is almost only two values: 2 for N = 5 and 10, and 1 for everything larger. Leave-one-N-out RMSE (lower is better):</p>
+<p>On the baseline compact map, <code>D_min</code> is almost only two values: 2 for N = 5 and 10, and 1 for everything larger.</p>
+<p>Leave-one-N-out RMSE asks: if we hide one flock size, fit the curve on the rest, then predict the hidden size, how wrong are we on average? Lower is better. We do that for every N and report the root-mean-square error.</p>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -737,8 +738,8 @@ uv run cli/campaign.py claim-reseed --protocol phase5_comm_claim --workers 18
 </tr>
 </tbody>
 </table></div>
-<p>Piecewise wins because it matches that step, not because we measured a rich growth law. These fits are not a universal scaling law.</p>
-<p><img alt="Leave-one-N-out RMSE by model." src="../figures/f8_scaling_rmse.svg" /></p>
+<p>Piecewise wins here because the fit automatically places a break at N = 10 and then matches the two flat levels (2, then 1). That is a good fit to this step-shaped frontier, not evidence of a rich growth law. These fits are not a universal scaling law.</p>
+<figure><img src="../figures/f8_scaling_rmse.svg" alt="Leave-one-N-out RMSE by model."><figcaption>Lower bars are better. Piecewise is lowest because the auto-chosen break at N = 10 matches the two-level D_min step.</figcaption></figure>
 <h3 id="rq7-can-state-warn-of-failure-early">RQ7: can state warn of failure early?</h3>
 <p><strong>Status:</strong> Not answerable on this data.</p>
 <p>By the first check at tick 1,000, almost every successful RQ2 size-map run has already finished (median success 182 ticks). Failures are almost all tiny flocks with one dog that run out the deadline. There is no late window left to warn before success or failure settles. Held-out AUROC folds were empty. Only 14 of 169 failures had a measured lead time of at least 500 ticks (about 8.3%; the bar was 30%).</p>

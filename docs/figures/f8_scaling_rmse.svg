@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="640" height="320" viewBox="0 0 640 320" role="img">
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="336" viewBox="0 0 640 336" role="img">
 <rect width="640" height="320" fill="#f7f6f2"/>
 <text x="16" y="28" font-size="14" font-weight="700" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">Package F: leave-one-N-out RMSE on D_min</text>
 <line x1="70" y1="48" x2="70" y2="250" stroke="#bbb3a5" stroke-width="1.5"/>
@@ -35,5 +35,6 @@
 <rect x="446.8586956521739" y="196.7528" width="77.15217391304348" height="53.2472" fill="#b45309" rx="4"/>
 <text x="485.4347826086956" y="188.7528" text-anchor="middle" font-size="13" font-weight="700" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">0.13</text>
 <text x="485.4347826086956" y="272" text-anchor="middle" font-size="12" fill="#1c1b19" font-family="Segoe UI,Noto Sans,sans-serif">piecewise</text>
-<text x="16" y="306" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Piecewise wins only by hard-coding the two-level step (break at N = 10).</text>
+<text x="16" y="306" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">Piecewise wins because the auto-chosen break at N = 10 matches the two-level D_min step.</text>
+<text x="16" y="322" font-size="11" fill="#5c5852" font-family="Segoe UI,Noto Sans,sans-serif">That is a good fit to this frontier, not evidence of a rich growth law.</text>
 </svg>
