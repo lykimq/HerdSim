@@ -1,6 +1,17 @@
-"""Post-run analysis (frontiers, plots, package export).
+"""Post-run analysis for the scaling study (Packages A-G).
 
-End-of-trial packaging used while writing trials.csv lives in ``protocols.packaging``.
+This package turns finished campaign tables (``trials.csv``, merges, trajectories)
+into scientific artefacts: frontiers, regime labels, scaling fits, transfer tables,
+information ladders, early-warning scores, plots, and package dossiers under
+``results/.../packages/``.
+
+What lives here vs elsewhere:
+- ``analysis/``: compute and export after simulations finish.
+- ``protocols.packaging``: end-of-trial row packaging while writing ``trials.csv``.
+- Hand-written protocol-folder ``README.md`` files are not produced here; only
+  auto-generated package dossiers (see ``analysis.export``).
+
+Import the public entry points from this module (or from the submodules below).
 """
 
 from analysis.early_warning import (

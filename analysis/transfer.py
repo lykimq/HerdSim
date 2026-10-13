@@ -1,4 +1,10 @@
-"""Cross-method transfer table builder (Cap I9)."""
+"""Cross-method transfer tables for RQ4 (Cap I9 / Package D).
+
+Compares frontiers (and related features) between baseline ``strombom_multi`` and
+transfer methods (Kubo, FAT, ...). Labels each feature/N cell as shared, shifted,
+or absent. Outputs feed ``package_d`` size/structure summaries and claim C4.
+Pure table building; CSV/README writing is done by callers / export helpers.
+"""
 
 from __future__ import annotations
 

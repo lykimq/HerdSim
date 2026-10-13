@@ -1,4 +1,9 @@
-"""State vs (N, D) predictor comparison for RQ1 (Cap I6)."""
+"""Compare flock-state predictors vs plain (N, D) for difficulty (RQ1 / Cap I6).
+
+Package B helper: asks whether early flock-state features predict success/failure
+better than knowing only flock size and dog count (leave-one-N style scores).
+Used when structure maps ask if layout difficulty is more than N and D alone.
+"""
 
 from __future__ import annotations
 

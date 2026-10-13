@@ -1,4 +1,8 @@
-"""Coerce pandas / object values to plain Python numbers."""
+"""Small helpers to coerce pandas / NumPy / object values to plain Python numbers.
+
+Used across frontier, fits, transfer, and substitution so CSV / DataFrame cells
+become reliable ``int`` / ``float`` without spreading type checks everywhere.
+"""
 
 from __future__ import annotations
 

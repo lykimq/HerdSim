@@ -1,4 +1,10 @@
-"""Early-warning evaluation for impending herding failure (Cap I12)."""
+"""Early-warning evaluation for impending herding failure (RQ7 / Cap I12 / Package G).
+
+Uses trajectory / state features to score whether failure can be predicted before
+the deadline, with lead-time and AUROC-style checks (C7a/C7b). Needs successes and
+failures that still overlap in time; on easy compact maps most successes finish
+before the first warning check, so the package may be inconclusive.
+"""
 
 from __future__ import annotations
 

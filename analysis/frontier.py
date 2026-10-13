@@ -1,4 +1,19 @@
-"""Frontier extraction: D_min, D_overcrowd, D_max, B*, claim windows, bootstrap (Cap I2)."""
+"""Herdability frontiers from trial tables (Package A core; Cap I2).
+
+Input: rows from ``trials.csv`` / merge tables with success by (N, D) [and optional
+layout/method groups].
+
+Computes:
+- reliability surface R(N, D)
+- fewest dogs ``D_min`` at reliability threshold theta
+- overcrowding edge ``D_overcrowd`` / ``D_max`` when present
+- cheap operating point ``B*``
+- claim / T1 window selection and scout+claim merges
+- bootstrap CI on ``D_min``
+
+Downstream: regimes, fits (RQ6), transfer (RQ4), substitution (RQ5), and Package A
+export. This module is pure analysis; it does not write files by itself.
+"""
 
 from __future__ import annotations
 

@@ -1,4 +1,10 @@
-"""Information substitution curves for RQ5 (Cap I10)."""
+"""Information substitution ladders for RQ5 (Cap I10 / Package E).
+
+Builds D_min vs observation mode, sensing range, or communication level on a
+fixed N/D grid. Summaries support claims C5a/C5b (does one ladder step lower
+D_min; does the next step save fewer dogs). Works on trial/frontier tables from
+Phase 5 protocols; does not launch campaigns itself.
+"""
 
 from __future__ import annotations
 

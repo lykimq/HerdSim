@@ -1,4 +1,9 @@
-"""Diagnostic plots for scaling protocols."""
+"""Save diagnostic figures for scaling analysis packages.
+
+Builds heatmaps (reliability), frontier curves (D_min vs N), and regime-count
+bars. Called from ``analysis.export`` when writing Package A ``figures/``.
+Returns None gracefully if matplotlib is missing or the table is empty.
+"""
 
 from __future__ import annotations
 

@@ -1,4 +1,22 @@
-"""Package dossier export for scaling protocols (Cap I13)."""
+"""Write auto-generated package dossiers under ``results/.../packages/``.
+
+This module is the exporter for analysis Packages A-G (Cap I13). It does not run
+simulations. Given trial tables and (for Package A) derived frontiers/regimes, it
+writes machine-owned files into a package folder, for example:
+
+- ``README.md``: auto-generated dossier (first line is the AUTO-GENERATED notice)
+- ``artefacts.json``: path index of what was written
+- ``provenance.json``: run stamp for the export
+- Package A also: ``trials.csv``, ``reliability.csv``, ``frontier.csv``,
+  ``regimes.csv``, ``dmin_bootstrap.csv``, and optional ``figures/*.png``
+
+Entry points:
+- ``export_package_a``: full Package A herdability map dossier
+- ``export_package_dossier``: generic CSV + README writer for Packages B-G
+
+Hand-written protocol-folder READMEs (phase/stage notes) are separate and must
+not be overwritten by these exporters.
+"""
 
 from __future__ import annotations
 

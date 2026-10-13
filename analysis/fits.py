@@ -1,4 +1,4 @@
-"""Scaling model fits for D_min(N) / D_min(N, X) (Cap I11 / RQ6).
+"""Scaling curve fits for D_min(N) (RQ6 / Cap I11 / Package F).
 
 Pipeline:
 1. Take a frontier table of (N, D_min) points (usually from Package A).
@@ -6,6 +6,10 @@ Pipeline:
 3. Score each curve with leave-one-N-out RMSE (how well it predicts a held-out flock size).
 4. Pick the lowest leave-one-N RMSE as ``best``; also report whether piecewise or
    per-layout curves beat a single power law (``prefers_piecewise_or_state``, C6a).
+
+Typical outputs written by the Package F export path: ``scaling_fits.csv``,
+``scaling_cv.csv``, ``delta_aic_vs_power.csv``. This module computes the numbers;
+file writing is separate.
 
 The fits describe this frontier only. A low piecewise RMSE on a two-level step does
 not imply a universal scaling law.
@@ -65,6 +69,23 @@ def _bic(sse: float, m: int, k: int) -> float:
     Also secondary to leave-one-N-out RMSE for choosing the RQ6 winner.
     """
     return float(k * np.log(max(m, 1)) + m * np.log(sse / m + 1e-12))
+
+
+def _pack_model(params: dict[str, Any], d: np.ndarray, yhat: np.ndarray, k: int) -> dict[str, Any]:
+    """Attach RMSE / AIC / BIC to a fitted parameter dict."""
+    sse = float(np.sum((d - yhat) ** 2))
+    m = len(d)
+    return {
+        "params": params,
+        "rmse": _rmse(d, yhat),
+        "aic": _aic(sse, m, k),
+        "bic": _bic(sse, m, k),
+    }
+
+
+def _empty_fit_result() -> dict[str, Any]:
+    """Result shape used when there are no usable frontier points."""
+    return {"models": {}, "best": None, "n_points": 0, "state_models": {}, "cv": {}}
 
 
 # Predictor used by leave-one-N CV: fit on (n_train, d_train), then predict D_min at n_i.
@@ -146,6 +167,33 @@ def _power_predict(n_tr: np.ndarray, d_tr: np.ndarray, n_i: float) -> float | No
     return float(amp * (n_i**alpha))
 
 
+def _pred_const(_n_tr: np.ndarray, d_tr: np.ndarray, _n_i: float) -> float | None:
+    """Cross-validation predictor for the constant model."""
+    return float(np.mean(d_tr))
+
+
+def _pred_linear(n_tr: np.ndarray, d_tr: np.ndarray, n_i: float) -> float | None:
+    """Cross-validation predictor for the linear model."""
+    if len(d_tr) < 2:
+        return None
+    b_, a_ = np.polyfit(n_tr, d_tr, 1)
+    return float(a_ + b_ * n_i)
+
+
+def _pred_piecewise(n_tr: np.ndarray, d_tr: np.ndarray, n_i: float) -> float | None:
+    """Cross-validation predictor for the piecewise model.
+
+    Refits the break on the training fold, then evaluates the matching segment.
+    """
+    fitted = _fit_piecewise(n_tr, d_tr)
+    if fitted is None:
+        return None
+    params = cast(dict[str, Any], fitted["params"])
+    if float(n_i) <= as_float(params["break_n"]):
+        return float(as_float(params["a1"]) + as_float(params["b1"]) * n_i)
+    return float(as_float(params["a2"]) + as_float(params["b2"]) * n_i)
+
+
 def _fit_piecewise(n: np.ndarray, d: np.ndarray) -> dict[str, Any] | None:
     """Two-segment linear fit with an automatically chosen breakpoint.
 
@@ -212,6 +260,162 @@ def _fit_piecewise(n: np.ndarray, d: np.ndarray) -> dict[str, Any] | None:
     }
 
 
+def _fit_constant_model(d: np.ndarray) -> dict[str, Any]:
+    """Constant model: one shared D_min for every N."""
+    c = float(np.mean(d))
+    yhat = np.full_like(d, c)
+    return _pack_model({"c": c}, d, yhat, k=1)
+
+
+def _fit_linear_model(n: np.ndarray, d: np.ndarray) -> dict[str, Any] | None:
+    """Linear model: D_min = a + b * N."""
+    if len(d) < 2:
+        return None
+    b, a = np.polyfit(n, d, 1)
+    yhat = a + b * n
+    return _pack_model({"a": float(a), "b": float(b)}, d, yhat, k=2)
+
+
+def _fit_power_model(n: np.ndarray, d: np.ndarray) -> dict[str, Any] | None:
+    """Power-law model: D_min = A * N^alpha."""
+    power = _fit_power_params(n, d)
+    if power is None:
+        return None
+    amp, alpha, log_alpha = power
+    yhat = amp * np.power(n, alpha)
+    return _pack_model(
+        {
+            "A": float(amp),
+            "alpha": float(alpha),
+            "log_log_slope": float(log_alpha),
+        },
+        d,
+        yhat,
+        k=2,
+    )
+
+
+def _fit_candidate_models(n: np.ndarray, d: np.ndarray) -> dict[str, Any]:
+    """Fit every candidate family that the data can support."""
+    models: dict[str, Any] = {"constant": _fit_constant_model(d)}
+    linear = _fit_linear_model(n, d)
+    if linear is not None:
+        models["linear"] = linear
+    power = _fit_power_model(n, d)
+    if power is not None:
+        models["power"] = power
+    piecewise = _fit_piecewise(n, d)
+    if piecewise is not None:
+        models["piecewise"] = piecewise
+    return models
+
+
+def _leave_one_n_cv(n: np.ndarray, d: np.ndarray, models: dict[str, Any]) -> dict[str, Any]:
+    """Leave-one-N-out RMSE for each fitted family that has a CV predictor."""
+    predictors: dict[str, PredictFn] = {
+        "constant": _pred_const,
+        "linear": _pred_linear,
+        "power": _power_predict,
+        "piecewise": _pred_piecewise,
+    }
+    cv: dict[str, Any] = {}
+    for name, fn in predictors.items():
+        if name in models:
+            cv[name] = _leave_one_n_rmse(n, d, fn)
+    return cv
+
+
+def _select_best_model(cv: dict[str, Any], models: dict[str, Any]) -> str | None:
+    """Pick the family with lowest leave-one-N RMSE; fall back to in-sample RMSE."""
+    scored = {name: rmse for name, rmse in cv.items() if rmse is not None}
+    if scored:
+        return min(scored.items(), key=lambda kv: kv[1])[0]
+    if models:
+        # Fallback only if cross-validation could not run (too few distinct N).
+        return min(models.items(), key=lambda kv: kv[1]["rmse"])[0]
+    return None
+
+
+def _prepare_frontier_points(
+    frontier: pd.DataFrame,
+    *,
+    sheep_col: str,
+    dmin_col: str,
+) -> tuple[pd.DataFrame, np.ndarray, np.ndarray] | None:
+    """Drop NA / non-positive rows and return (work, n, d), or None if empty."""
+    work = frontier.dropna(subset=[sheep_col, dmin_col]).copy()
+    if work.empty:
+        return None
+    n_all = work[sheep_col].astype(float).to_numpy()
+    d_all = work[dmin_col].astype(float).to_numpy()
+    # Score every candidate on the same positive (N, D_min) rows so AIC/BIC match.
+    positive = (n_all > 0) & (d_all > 0)
+    if int(positive.sum()) < 1:
+        return None
+    return work, n_all[positive], d_all[positive]
+
+
+def _fit_state_models(
+    work: pd.DataFrame,
+    *,
+    sheep_col: str,
+    dmin_col: str,
+    state_col: str,
+) -> dict[str, Any]:
+    """Run the same fit pipeline inside each layout / state bucket."""
+    state_models: dict[str, Any] = {}
+    if state_col not in work.columns or work[state_col].nunique(dropna=True) < 2:
+        return state_models
+    for state, sub in work.groupby(state_col, dropna=False):
+        sub_fit = fit_scaling_models(
+            sub,
+            sheep_col=sheep_col,
+            dmin_col=dmin_col,
+            state_col=None,
+        )
+        state_models[str(state)] = {
+            "best": sub_fit.get("best"),
+            "n_points": sub_fit.get("n_points"),
+            "models": {
+                k: {kk: vv for kk, vv in v.items() if kk != "yhat_ordered"}
+                for k, v in sub_fit.get("models", {}).items()
+            },
+        }
+    return state_models
+
+
+def _delta_aic_vs_power(models: dict[str, Any], best: str | None) -> dict[str, float]:
+    """Secondary comparison: AIC of each model minus AIC of power."""
+    delta_aic: dict[str, float] = {}
+    if not best or "power" not in models:
+        return delta_aic
+    for name, payload in models.items():
+        if name == "power":
+            continue
+        delta_aic[name] = float(payload["aic"] - models["power"]["aic"])
+    return delta_aic
+
+
+def _c6a_prefers_piecewise_or_state(
+    work: pd.DataFrame,
+    cv: dict[str, Any],
+    *,
+    state_col: str | None,
+    sheep_col: str,
+    dmin_col: str,
+) -> tuple[dict[str, Any], bool]:
+    """Update ``cv`` with separate-curves LOO and decide C6a preference."""
+    power_cv = cv.get("power")
+    piece_cv = cv.get("piecewise")
+    separate_cv = _separate_curve_leave_one_n_rmse(
+        work, state_col=state_col, sheep_col=sheep_col, dmin_col=dmin_col
+    )
+    if separate_cv is not None:
+        cv["separate_curves"] = separate_cv
+    prefers = _cv_beats(piece_cv, power_cv) or _cv_beats(separate_cv, power_cv)
+    return cv, prefers
+
+
 def fit_scaling_models(
     frontier: pd.DataFrame,
     *,
@@ -221,162 +425,49 @@ def fit_scaling_models(
 ) -> dict[str, Any]:
     """Fit and compare candidate scaling models to D_min(N).
 
-    Flow:
-    1. Keep positive (N, D_min) rows from ``frontier``.
-    2. Fit constant / linear / power / piecewise on the full set (in-sample metrics).
-    3. Re-score each family with leave-one-N-out RMSE via the ``_pred_*`` helpers.
-    4. Set ``best`` to the family with the lowest leave-one-N RMSE.
-    5. Optionally fit the same pipeline per layout (``state_models``) and a
-       separate-curves leave-one-N score for C6a.
+    Orchestrates focused helpers:
+    1. ``_prepare_frontier_points``: usable (N, D_min) arrays
+    2. ``_fit_candidate_models``: constant / linear / power / piecewise
+    3. ``_leave_one_n_cv`` + ``_select_best_model``: prediction ranking
+    4. ``_fit_state_models`` / ``_delta_aic_vs_power`` / ``_c6a_prefers_...``: extras
 
     Candidates: constant, linear, power-law, piecewise. When ``state_col`` is
     present with multiple levels, also fit per-state models and a pooled
     state-conditioned summary (RQ6 / C6a-C6b).
     """
-    work = frontier.dropna(subset=[sheep_col, dmin_col]).copy()
-    if work.empty:
-        return {"models": {}, "best": None, "n_points": 0, "state_models": {}, "cv": {}}
-
-    n_all = work[sheep_col].astype(float).to_numpy()
-    d_all = work[dmin_col].astype(float).to_numpy()
-    # Score every candidate on the same positive (N, D_min) rows so AIC/BIC match.
-    positive = (n_all > 0) & (d_all > 0)
-    if int(positive.sum()) < 1:
-        return {"models": {}, "best": None, "n_points": 0, "state_models": {}, "cv": {}}
-    n = n_all[positive]
-    d = d_all[positive]
-    m = len(d)
-    models: dict[str, Any] = {}
-
-    # Constant: one shared D_min for every N.
-    c = float(np.mean(d))
-    yhat = np.full_like(d, c)
-    sse = float(np.sum((d - yhat) ** 2))
-    models["constant"] = {
-        "params": {"c": c},
-        "rmse": _rmse(d, yhat),
-        "aic": _aic(sse, m, 1),
-        "bic": _bic(sse, m, 1),
-    }
-
-    # Linear: D_min = a + b * N.
-    if m >= 2:
-        b, a = np.polyfit(n, d, 1)
-        yhat = a + b * n
-        sse = float(np.sum((d - yhat) ** 2))
-        models["linear"] = {
-            "params": {"a": float(a), "b": float(b)},
-            "rmse": _rmse(d, yhat),
-            "aic": _aic(sse, m, 2),
-            "bic": _bic(sse, m, 2),
-        }
-
-    # Power law: D_min = A * N^alpha, least squares in D (same space as the others).
-    power = _fit_power_params(n, d)
-    if power is not None:
-        amp, alpha, log_alpha = power
-        yhat = amp * np.power(n, alpha)
-        sse = float(np.sum((d - yhat) ** 2))
-        models["power"] = {
-            "params": {
-                "A": float(amp),
-                "alpha": float(alpha),
-                "log_log_slope": float(log_alpha),
-            },
-            "rmse": _rmse(d, yhat),
-            "aic": _aic(sse, m, 2),
-            "bic": _bic(sse, m, 2),
-        }
-
-    piecewise = _fit_piecewise(n, d)
-    if piecewise is not None:
-        models["piecewise"] = piecewise
-
-    # CV predictors refit from scratch on each train fold (same families as above).
-    def _pred_const(_n_tr: np.ndarray, d_tr: np.ndarray, _n_i: float) -> float | None:
-        return float(np.mean(d_tr))
-
-    def _pred_linear(n_tr: np.ndarray, d_tr: np.ndarray, n_i: float) -> float | None:
-        if len(d_tr) < 2:
-            return None
-        b_, a_ = np.polyfit(n_tr, d_tr, 1)
-        return float(a_ + b_ * n_i)
-
-    def _pred_piecewise(n_tr: np.ndarray, d_tr: np.ndarray, n_i: float) -> float | None:
-        fitted = _fit_piecewise(n_tr, d_tr)
-        if fitted is None:
-            return None
-        params = cast(dict[str, Any], fitted["params"])
-        # Use the fold's own auto-chosen break when predicting the held-out N.
-        if float(n_i) <= as_float(params["break_n"]):
-            return float(as_float(params["a1"]) + as_float(params["b1"]) * n_i)
-        return float(as_float(params["a2"]) + as_float(params["b2"]) * n_i)
-
-    # Leave-one-N RMSE per family; this is the primary ranking used for ``best``.
-    cv: dict[str, Any] = {}
-    for name, fn in (
-        ("constant", _pred_const),
-        ("linear", _pred_linear),
-        ("power", _power_predict),
-        ("piecewise", _pred_piecewise),
-    ):
-        if name in models:
-            cv[name] = _leave_one_n_rmse(n, d, fn)
-
-    scored = {name: rmse for name, rmse in cv.items() if rmse is not None}
-    if scored:
-        best = min(scored.items(), key=lambda kv: kv[1])[0]
-    elif models:
-        # Fallback only if CV could not run (too few distinct N).
-        best = min(models.items(), key=lambda kv: kv[1]["rmse"])[0]
-    else:
-        best = None
-
-    # Optional: repeat the same fits inside each layout / state bucket.
-    state_models: dict[str, Any] = {}
-    if (
-        state_col is not None
-        and state_col in work.columns
-        and work[state_col].nunique(dropna=True) >= 2
-    ):
-        for state, sub in work.groupby(state_col, dropna=False):
-            sub_fit = fit_scaling_models(
-                sub,
-                sheep_col=sheep_col,
-                dmin_col=dmin_col,
-                state_col=None,
-            )
-            state_models[str(state)] = {
-                "best": sub_fit.get("best"),
-                "n_points": sub_fit.get("n_points"),
-                "models": {
-                    k: {kk: vv for kk, vv in v.items() if kk != "yhat_ordered"}
-                    for k, v in sub_fit.get("models", {}).items()
-                },
-            }
-
-    # Secondary comparison: how much better/worse each model is than power on AIC.
-    delta_aic: dict[str, float] = {}
-    if best and "power" in models:
-        for name, payload in models.items():
-            if name == "power":
-                continue
-            delta_aic[name] = float(payload["aic"] - models["power"]["aic"])
-
-    # C6a: does piecewise, or separate per-layout curves, beat one shared power law?
-    power_loo = cv.get("power")
-    piece_loo = cv.get("piecewise")
-    separate_loo = _separate_curve_loo(
-        work, state_col=state_col, sheep_col=sheep_col, dmin_col=dmin_col
+    prepared = _prepare_frontier_points(
+        frontier, sheep_col=sheep_col, dmin_col=dmin_col
     )
-    if separate_loo is not None:
-        cv["separate_curves"] = separate_loo
-    prefers = _cv_beats(piece_loo, power_loo) or _cv_beats(separate_loo, power_loo)
+    if prepared is None:
+        return _empty_fit_result()
+    work, n, d = prepared
+
+    models = _fit_candidate_models(n, d)
+    cv = _leave_one_n_cv(n, d, models)
+    best = _select_best_model(cv, models)
+
+    state_models: dict[str, Any] = {}
+    if state_col is not None:
+        state_models = _fit_state_models(
+            work,
+            sheep_col=sheep_col,
+            dmin_col=dmin_col,
+            state_col=state_col,
+        )
+
+    delta_aic = _delta_aic_vs_power(models, best)
+    cv, prefers = _c6a_prefers_piecewise_or_state(
+        work,
+        cv,
+        state_col=state_col,
+        sheep_col=sheep_col,
+        dmin_col=dmin_col,
+    )
 
     return {
         "models": models,
         "best": best,
-        "n_points": m,
+        "n_points": len(d),
         "state_models": state_models,
         "cv": cv,
         "delta_aic_vs_power": delta_aic,
@@ -396,14 +487,14 @@ def _cv_beats(challenger: float | None, baseline: float | None) -> bool:
     return float(challenger) < float(baseline) - margin
 
 
-def _separate_curve_loo(
+def _separate_curve_leave_one_n_rmse(
     work: pd.DataFrame,
     *,
     state_col: str | None,
     sheep_col: str,
     dmin_col: str,
 ) -> float | None:
-    """Leave-one-N RMSE when each layout gets its own power law.
+    """Leave-one-N-out RMSE when each layout gets its own power law.
 
     For a held-out N, train a power law inside each layout on the other sizes,
     then predict that layout's D_min at the held-out N. Used as an alternative

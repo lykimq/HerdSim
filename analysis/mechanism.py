@@ -1,4 +1,10 @@
-"""Mechanism hypothesis tests for overcrowding (Cap I8)."""
+"""Mechanism tests for overcrowding cells (RQ3 / Cap I8 / Package C).
+
+Compares efficient vs overcrowding cells at matched N (interference, splitting,
+coverage, and related logs) and checks temporal order. Only meaningful when an
+upper collapse band exists; on the current baseline size map overcrowding was
+absent, so this package often has nothing to contrast.
+"""
 
 from __future__ import annotations
 
