@@ -1,0 +1,40 @@
+# Phase-8 size scout: collect-hold-gate task (draft-style harder task).
+# Grade: SCOUT. Same N x D freeze as Phase-1 size map.
+#
+# Not runnable until scenario collect_hold_gate is registered and the runner
+# reads protocol task. Scout then claim only; no pilot protocol.
+#
+# Why this task: drive_to_goal left D_min flat and RQ3 skipped. The draft's
+# collect / hold / exit idea is the planned unlock for dog-need vs N and
+# possible overcrowding, without claiming NetLogo numerical parity.
+#
+# 10 N x 10 D x 30 seeds = 3,000 trials.
+
+protocol_id: phase8_size_scout
+phase: 8
+grade: SCOUT
+output: results/phase8/size/scout
+canonical: protocols/configs/canonical_grid.yaml
+
+# Second task track. Shared grids and theta come from canonical_grid.yaml.
+task: collect_hold_gate
+hold_ticks: 800
+# Hold center: field midpoint (same flock origin as scaling drive).
+hold_center: [250.0, 250.0]
+# Hold radius rule matches the draft: clamp(2.5 * sqrt(N), 23, 27).
+hold_radius_scale: 2.5
+hold_radius_min: 23.0
+hold_radius_max: 27.0
+# Gate opening on the right wall (x = world_width); half-width in world units.
+gate_half_width: 30.0
+
+methods:
+  - strombom_multi
+layouts:
+  - compact
+flock_sizes: [5, 10, 25, 50, 75, 100, 150, 200, 300, 400]
+shepherd_counts: [1, 2, 3, 4, 6, 10, 15, 20, 25, 35]
+seeds: 30
+seed_mode: scout
+store_timeseries: false
+packages: [A]

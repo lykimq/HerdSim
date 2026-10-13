@@ -77,7 +77,7 @@ flowchart TB
 | `fat` | strombom | fat | RQ4 transfer |
 | `communication_free` | strombom | communication_free | Local Collect/Drive without sharing |
 
-Campaign scenario: `drive_to_goal`. Registered metrics are written into each trial row.
+Campaign scenarios: `drive_to_goal` (Phases 1 to 7); planned `collect_hold_gate` (Phase 8). Registered metrics are written into each trial row.
 
 ### Plugin model
 
@@ -180,6 +180,7 @@ state(t)
 | `phase5/` | RQ5 | Information ladders | `strombom_multi` + factors |
 | (analyse on RQ2) | RQ6 | Scaling curve fits | Package F |
 | (analyse on RQ2) | RQ7 | Early warning | Package G |
+| `phase8/` | RQ2 reopen / RQ3 unlock | Collect-hold-gate size map (harder task) | `strombom_multi` |
 
 ### RQ2 size (phase1)
 
@@ -243,6 +244,51 @@ Code path: `cli/run_factor_sweep.py`, observation modes in `core/observation.py`
 
 - RQ6: `analysis/fits.py` (`fit_scaling_models`) on phase1 claim frontier
 - RQ7: `analysis/early_warning.py` on claim timeseries when stored
+
+### Phase 8 collect-hold-gate (planned)
+
+Second task track. Keep the draft idea (collect / hold 800 ticks / exit through a gate). Adapt geometry for HerdSim continuous space. Scout and claim only for the first size map. Not runnable until the pieces below exist.
+
+Scenario id: `collect_hold_gate`.
+
+Phase machine:
+
+1. Collect / drive until the flock is inside the hold disk.
+2. Hold: containment must stay true for `hold_ticks` (800) consecutive ticks; leaving resets the timer.
+3. Exit: drive through the right-wall gate; success when every sheep has crossed the gate plane by `T0 = 10000`.
+4. Failure: timeout or existing packaging failure labels.
+
+Geometry freeze (protocol keys):
+
+| Key | Value | Role |
+|-----|-------|------|
+| `hold_ticks` | 800 | Draft hold duration |
+| `hold_center` | `[250, 250]` | Field midpoint |
+| `hold_radius_*` | `clamp(2.5 * sqrt(N), 23, 27)` | Draft containment scale |
+| `gate_half_width` | 30 | Opening on `x = world_width` |
+| Arena | 500 x 500 continuous | Same scaling field as Phases 1 to 7 |
+
+Protocols: `phase8_size_scout`, `phase8_size_claim` (stubs under `protocols/configs/protocols/`). Output: `results/phase8/size/{scout,claim}/`.
+
+```bash
+uv run cli/campaign.py run --protocol phase8_size_scout --workers 18
+uv run cli/campaign.py claim-plan --protocol phase8_size_claim
+uv run cli/campaign.py claim-reseed --protocol phase8_size_claim --workers 18
+```
+
+Code to add (reuse campaign CLI, packaging, frontier, Package A, Strombom heuristics):
+
+| Piece | Path | Role |
+|-------|------|------|
+| Scenario | `sim/plugins/scenarios/collect_hold_gate.py` | Hold disk, gate, spawn, success, phase checks |
+| Registry | `sim/plugins/scenarios/registry.py` | Register beside `drive_to_goal` |
+| Runner | `services/runner.py` | Read scenario id from protocol `task` (stop hardcoding `drive_to_goal`) |
+| Dogs | Extend `collect_drive_multi` or thin `plugins/dogs/collect_hold_gate.py` | Phase-aware targets; call shared Strombom helpers |
+| Tests | `tests/sim/test_collect_hold_gate.py` | Hold radius, hold timer reset, gate success, registry |
+
+Few tests only. No parallel campaign stack, no new analysis package letter.
+
+Out of scope for the first Phase 8 campaign: structure layouts, Kubo/FAT on this task, information ladders, pilot YAML.
 
 ### Analysis packages A-G (no Package C)
 
