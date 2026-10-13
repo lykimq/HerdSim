@@ -8,7 +8,7 @@ Computes:
 - fewest dogs ``D_min`` at reliability threshold theta
 - overcrowding edge ``D_overcrowd`` / ``D_max`` when present
 - cheap operating point ``B*``
-- claim / T1 window selection and scout+claim merges
+- claim window selection and scout+claim merges
 - bootstrap CI on ``D_min``
 
 Downstream: regimes, fits (RQ6), transfer (RQ4), substitution (RQ5), and Package A
@@ -190,75 +190,6 @@ def merge_scout_and_claim(
     tagged = scout.merge(claim_keys, on=keys, how="left", indicator=True)
     kept = tagged.loc[tagged["_merge"] == "left_only"].drop(columns="_merge")
     return pd.DataFrame(pd.concat([kept, claim], ignore_index=True))
-
-
-def select_t1_windows(
-    df: pd.DataFrame,
-    *,
-    theta: float = 0.90,
-    sheep_col: str = "n_sheep",
-    dog_col: str = "n_shepherds",
-    success_col: str = "success",
-    group_cols: list[str] | None = None,
-) -> pd.DataFrame:
-    """Cells that define overcrowding: D_overcrowd and the next grid D.
-
-    Used for the T1 budget (20,000 ticks). Curves with no overcrowding yield
-    no rows.
-    """
-    groups = list(group_cols or [])
-    rates = reliability_table(
-        df,
-        sheep_col=sheep_col,
-        dog_col=dog_col,
-        success_col=success_col,
-        group_cols=groups,
-    )
-    frontier = extract_frontier(
-        df,
-        theta=theta,
-        sheep_col=sheep_col,
-        dog_col=dog_col,
-        success_col=success_col,
-        group_cols=groups,
-    )
-    columns = groups + [sheep_col, dog_col, "reliability", "role"]
-    if rates.empty or frontier.empty:
-        return pd.DataFrame(columns=columns)
-
-    keys = groups + [sheep_col]
-    front_map: dict[tuple[Any, ...], pd.Series] = {}
-    for _, fr in frontier.iterrows():
-        front_map[tuple(fr[k] for k in keys)] = fr
-
-    rows: list[dict[str, Any]] = []
-    for key_vals, g in rates.groupby(keys, dropna=False):
-        if not isinstance(key_vals, tuple):
-            key_vals = (key_vals,)
-        meta = dict(zip(keys, key_vals))
-        fr = front_map.get(key_vals)
-        if fr is None:
-            continue
-        d_over = fr.get("d_overcrowd")
-        if d_over is None or (isinstance(d_over, float) and d_over != d_over):
-            continue
-        d_over = as_int(d_over)
-        ordered = g.sort_values(dog_col)
-        ds = [as_int(v) for v in ordered[dog_col].tolist()]
-        rel = {
-            as_int(row.at[dog_col]): as_float(row.at["reliability"])
-            for _, row in ordered.iterrows()
-        }
-        if d_over not in ds:
-            continue
-        idx = ds.index(d_over)
-        chosen = [d_over]
-        if idx + 1 < len(ds):
-            chosen.append(ds[idx + 1])
-        for d in chosen:
-            role = "overcrowd_onset" if d == d_over else "overcrowd_next"
-            rows.append({**meta, dog_col: d, "reliability": rel[d], "role": role})
-    return pd.DataFrame(rows)
 
 
 def _rank_endpoint(samples: np.ndarray, q: float) -> float:

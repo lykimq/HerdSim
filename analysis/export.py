@@ -1,21 +1,23 @@
 """Write auto-generated package dossiers under ``results/.../packages/``.
 
-This module is the exporter for analysis Packages A-G (Cap I13). It does not run
-simulations. Given trial tables and (for Package A) derived frontiers/regimes, it
-writes machine-owned files into a package folder, for example:
+This module is the exporter for analysis Packages A-G except C (Cap I13). It does
+not run simulations. Given trial tables and (for Package A) derived
+frontiers/regimes, it writes machine-owned files into a package folder under
+``results/`` only, for example:
 
 - ``README.md``: auto-generated dossier (first line is the AUTO-GENERATED notice)
 - ``artefacts.json``: path index of what was written
 - ``provenance.json``: run stamp for the export
 - Package A also: ``trials.csv``, ``reliability.csv``, ``frontier.csv``,
-  ``regimes.csv``, ``dmin_bootstrap.csv``, and optional ``figures/*.png``
+  ``regimes.csv``, ``dmin_bootstrap.csv``
 
 Entry points:
 - ``export_package_a``: full Package A herdability map dossier
 - ``export_package_dossier``: generic CSV + README writer for Packages B-G
 
-Hand-written protocol-folder READMEs (phase/stage notes) are separate and must
-not be overwritten by these exporters.
+Paths under the repo but outside ``results/`` (including ``docs/report/``) are
+refused. Hand-written protocol-folder READMEs (phase/stage notes) are separate
+and must not be overwritten by these exporters.
 """
 
 from __future__ import annotations
@@ -31,14 +33,10 @@ from analysis.frontier import (
     extract_frontier,
     reliability_table,
 )
-from analysis.plots import (
-    save_frontier_curve,
-    save_regime_counts,
-    save_reliability_heatmap,
-)
 from analysis.regimes import label_regimes
 from protocols.packaging.generated_notice import markdown_banner_line, with_json_notice
 from protocols.packaging.provenance import build_provenance_stamp, write_provenance
+from services.layout import ensure_under_results
 
 
 def _write_df(df: pd.DataFrame, path: Path) -> None:
@@ -128,7 +126,7 @@ def _package_a_claim_stubs(
         )
 
     lines.append(
-        "- C2b (hard ceiling at T1): not evaluated here "
+        "- C2b (hard ceiling at extended time): not evaluated here "
         + "(needs an extended-time campaign)."
     )
 
@@ -154,7 +152,6 @@ def _package_a_claim_stubs(
 
 def _package_a_results_prose(
     trials: pd.DataFrame,
-    regimes: pd.DataFrame,
     frontier: pd.DataFrame,
 ) -> list[str]:
     """Short plain-language results block for the Package A README."""
@@ -203,66 +200,6 @@ def _package_a_results_prose(
     return lines
 
 
-def _write_package_a_figures(
-    *,
-    rates: pd.DataFrame,
-    frontier: pd.DataFrame,
-    regimes: pd.DataFrame,
-    figures_dir: Path,
-    protocol_id: str,
-) -> dict[str, Path]:
-    """Write Package A figures; skip gracefully if matplotlib missing or data empty."""
-    figures_dir.mkdir(parents=True, exist_ok=True)
-    written: dict[str, Path] = {}
-
-    if "initial_layout" in rates.columns and rates["initial_layout"].nunique() > 1:
-        for layout, sub in rates.groupby("initial_layout", dropna=False):
-            path = figures_dir / f"reliability_heatmap_{layout}.png"
-            saved = save_reliability_heatmap(
-                sub.drop(columns=["initial_layout"], errors="ignore"),
-                path,
-                title=f"R(N, D) -- {protocol_id} / {layout}",
-            )
-            if saved is not None:
-                written[f"heatmap_{layout}"] = saved
-    else:
-        plot_rates = rates.drop(columns=["initial_layout"], errors="ignore")
-        path = figures_dir / "reliability_heatmap.png"
-        saved = save_reliability_heatmap(
-            plot_rates,
-            path,
-            title=f"R(N, D) -- {protocol_id}",
-        )
-        if saved is not None:
-            written["heatmap"] = saved
-
-    group_col = (
-        "initial_layout"
-        if "initial_layout" in frontier.columns and frontier["initial_layout"].nunique() > 1
-        else None
-    )
-    frontier_path = figures_dir / "frontier_dmin.png"
-    saved = save_frontier_curve(
-        frontier.drop(columns=["rates"], errors="ignore"),
-        frontier_path,
-        title=f"Frontier -- {protocol_id}",
-        group_col=group_col,
-    )
-    if saved is not None:
-        written["frontier"] = saved
-
-    regimes_path = figures_dir / "regime_counts.png"
-    saved = save_regime_counts(
-        regimes,
-        regimes_path,
-        title=f"Regimes -- {protocol_id}",
-    )
-    if saved is not None:
-        written["regimes"] = saved
-
-    return written
-
-
 def export_package_a(
     trials: pd.DataFrame,
     output_dir: Path | str,
@@ -273,10 +210,12 @@ def export_package_a(
     seed_list: list[int] | None = None,
     group_cols: list[str] | None = None,
 ) -> dict[str, Path]:
-    """Export Package A: tables, figures, provenance, and markdown summary."""
-    out = Path(output_dir)
+    """Export Package A: tables, provenance, and markdown summary.
+
+    Writes only under ``results/...`` (or a temp path outside the repo for tests).
+    """
+    out = ensure_under_results(output_dir, label="package A export")
     out.mkdir(parents=True, exist_ok=True)
-    figures_dir = out / "figures"
     groups = list(group_cols or [])
 
     rates = reliability_table(trials, group_cols=groups)
@@ -300,16 +239,6 @@ def export_package_a(
     _write_df(front_csv, paths["frontier"])
     _write_df(regimes, paths["regimes"])
     _write_df(bootstrap, paths["dmin_bootstrap"])
-
-    figure_paths = _write_package_a_figures(
-        rates=rates,
-        frontier=frontier,
-        regimes=regimes,
-        figures_dir=figures_dir,
-        protocol_id=protocol_id,
-    )
-    for key, path in figure_paths.items():
-        paths[f"fig_{key}"] = path
 
     if seed_list is not None:
         seeds = list(seed_list)
@@ -346,7 +275,6 @@ def export_package_a(
         extra={
             "package": "A",
             "theta": theta,
-            "n_figures": len(figure_paths),
             "methods": methods,
             "layouts": layouts,
             "n_values": n_values,
@@ -382,7 +310,7 @@ def export_package_a(
         "",
         "## Results",
         "",
-        *_package_a_results_prose(trials, regimes, frontier),
+        *_package_a_results_prose(trials, frontier),
         "### Frontier table",
         "",
         _df_to_markdown_table(front_csv),
@@ -401,33 +329,16 @@ def export_package_a(
         "",
         *_package_a_claim_stubs(frontier=frontier, regimes=regimes, theta=theta),
         "",
-        "## Figures",
+        "## Files from this export",
+        "",
+        "- trials.csv",
+        "- reliability.csv",
+        "- frontier.csv",
+        "- regimes.csv",
+        "- dmin_bootstrap.csv",
+        "- provenance.json",
         "",
     ]
-    if figure_paths:
-        for key, path in figure_paths.items():
-            rel = path.name
-            lines.append(f"- {key}: `figures/{rel}`")
-            lines.append(f"  ![{key}](figures/{rel})")
-            lines.append("")
-    else:
-        lines.append("- (no figures written; check matplotlib / empty tables)")
-        lines.append("")
-
-    lines.extend(
-        [
-            "## Files from this export",
-            "",
-            "- trials.csv",
-            "- reliability.csv",
-            "- frontier.csv",
-            "- regimes.csv",
-            "- dmin_bootstrap.csv",
-            "- provenance.json",
-            "- figures/",
-            "",
-        ]
-    )
     _ = paths["report"].write_text("\n".join(lines) + "\n")
     _ = paths["artefacts"].write_text(
         json.dumps(
@@ -448,8 +359,11 @@ def export_package_dossier(
     protocol_id: str,
     notes: list[str] | None = None,
 ) -> dict[str, Path]:
-    """Generic dossier writer for packages B-G."""
-    out = Path(output_dir)
+    """Generic dossier writer for packages B-G.
+
+    Writes only under ``results/...`` (or a temp path outside the repo for tests).
+    """
+    out = ensure_under_results(output_dir, label=f"package {package} export")
     out.mkdir(parents=True, exist_ok=True)
     paths: dict[str, Path] = {}
     for name, df in artefacts.items():

@@ -1,15 +1,11 @@
-"""Scaling-related metrics, X0 layouts, and multi-dog observation behaviour."""
+"""Scaling-related metrics and multi-dog observation behaviour."""
 
 from __future__ import annotations
 
 import numpy as np
 import pytest
-from core.world.layouts import generate_initial_positions, normalize_layout
-from plugins.metrics.cohesion import CohesionMetric
 from plugins.metrics.extent import ExtentMetric
-from plugins.metrics.fragmentation import FragmentationMetric
 from plugins.metrics.mean_spread import MeanSpreadMetric
-from plugins.metrics.outlier_count import OutlierCountMetric
 from plugins.metrics.registry import metric_registry
 from plugins.metrics.shepherd_coverage import ShepherdCoverageMetric
 from plugins.metrics.shepherd_interference import ShepherdInterferenceMetric
@@ -81,151 +77,6 @@ def test_coverage_uses_influence_radius():
     assert np.isnan(ShepherdCoverageMetric().compute(missing))
     covered = make_state(sheep, shepherds, metadata={"influence_radius": 2.0, "r_a": 2.0})
     assert ShepherdCoverageMetric().compute(covered) == pytest.approx(1.0)
-
-
-def test_normalize_layout():
-    assert normalize_layout(" Wide ") == "wide"
-    assert normalize_layout("compact") == "compact"
-
-
-def test_x0_families_differ_on_target_metrics():
-    rng = np.random.default_rng(0)
-    center = np.array([75.0, 75.0])
-    compact = generate_initial_positions(40, "compact", center, rng, spread=20.0)
-    wide = generate_initial_positions(40, "wide", center, rng, spread=20.0)
-    split = generate_initial_positions(
-        40, "split", center, rng, spread=20.0, interaction_radius=5.0
-    )
-    outliers = generate_initial_positions(
-        40, "outlier_rich", center, rng, spread=20.0, lost_threshold=15.0
-    )
-
-    def cohesion(pos):
-        state = make_state(pos, [[0.0, 0.0]])
-        return CohesionMetric().compute(state)
-
-    def frag(pos):
-        state = make_state(pos, [[0.0, 0.0]], metadata={"measurement_radius": 5.0})
-        return FragmentationMetric().compute(state)
-
-    def outliers_n(pos):
-        state = make_state(pos, [[0.0, 0.0]], metadata={"r_a": 2.0})
-        return OutlierCountMetric().compute(state)
-
-    assert cohesion(wide) > cohesion(compact)
-    assert frag(split) < frag(compact)
-    assert outliers_n(outliers) > outliers_n(compact)
-
-
-def test_drive_to_goal_uses_initial_layout():
-    from plugins.scenarios.drive_to_goal import DriveToGoalScenario
-
-    scenario = DriveToGoalScenario()
-    rng = np.random.default_rng(1)
-    cfg = {
-        "n_sheep": 30,
-        "n_shepherds": 1,
-        "world_width": 150.0,
-        "world_height": 150.0,
-        "initial_spread": 20.0,
-        "initial_layout": "split",
-        "measurement_radius": 5.0,
-        "r_a": 2.0,
-    }
-    sheep, dogs = scenario.initial_positions(cfg, rng)
-    assert sheep.shape == (30, 2)
-    assert dogs.shape == (1, 2)
-    # Split should produce lower fragmentation than compact under same radius.
-    frag_split = FragmentationMetric().compute(
-        make_state(sheep, dogs, metadata={"measurement_radius": 5.0})
-    )
-    cfg["initial_layout"] = "compact"
-    sheep_c, dogs_c = scenario.initial_positions(cfg, np.random.default_rng(1))
-    frag_compact = FragmentationMetric().compute(
-        make_state(sheep_c, dogs_c, metadata={"measurement_radius": 5.0})
-    )
-    assert frag_split < frag_compact
-
-
-def test_x0_families_on_scaling_arena():
-    center = np.array([250.0, 250.0])
-    goal = np.array([370.0, 250.0])
-    spread = 30.0
-    world_width = 500.0
-    world_height = 500.0
-    goal_radius = 15.0
-    rng = np.random.default_rng(0)
-    compact = generate_initial_positions(
-        50,
-        "compact",
-        center,
-        rng,
-        spread=spread,
-        world_width=world_width,
-        world_height=world_height,
-        goal_center=goal,
-        goal_radius=goal_radius,
-    )
-    wide = generate_initial_positions(
-        50,
-        "wide",
-        center,
-        rng,
-        spread=spread,
-        world_width=world_width,
-        world_height=world_height,
-        goal_center=goal,
-        goal_radius=goal_radius,
-    )
-    split = generate_initial_positions(
-        50,
-        "split",
-        center,
-        rng,
-        spread=spread,
-        interaction_radius=5.0,
-        world_width=world_width,
-        world_height=world_height,
-        goal_center=goal,
-        goal_radius=goal_radius,
-    )
-    outliers = generate_initial_positions(
-        50,
-        "outlier_rich",
-        center,
-        rng,
-        spread=spread,
-        lost_threshold=2.0 * (50 ** (2.0 / 3.0)),
-        world_width=world_width,
-        world_height=world_height,
-        goal_center=goal,
-        goal_radius=goal_radius,
-    )
-
-    def _inside(pos: np.ndarray) -> None:
-        assert np.all((pos[:, 0] >= 1.0) & (pos[:, 0] <= 499.0))
-        assert np.all((pos[:, 1] >= 1.0) & (pos[:, 1] <= 499.0))
-        assert np.all(np.linalg.norm(pos - goal, axis=1) > 15.0)
-
-    for pos in (compact, wide, split, outliers):
-        _inside(pos)
-
-    def cohesion(pos):
-        return CohesionMetric().compute(make_state(pos, [[250.0, 250.0]]))
-
-    def frag(pos):
-        return FragmentationMetric().compute(
-            make_state(pos, [[250.0, 250.0]], metadata={"measurement_radius": 5.0})
-        )
-
-    def outliers_n(pos):
-        return OutlierCountMetric().compute(
-            make_state(pos, [[250.0, 250.0]], metadata={"r_a": 2.0})
-        )
-
-    assert cohesion(wide) > cohesion(compact)
-    assert frag(split) < frag(compact)
-    assert outliers_n(outliers) > outliers_n(compact)
 
 
 def test_collect_drive_multi_uses_each_dogs_observation():

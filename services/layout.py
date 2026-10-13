@@ -39,12 +39,35 @@ CLI_DIR = REPO_ROOT / "cli"
 _PACKAGE_LETTER_RE = re.compile(r"^[A-Ga-g]$")
 
 
+def ensure_under_results(path: Path | str, *, label: str = "path") -> Path:
+    """Require ``path`` under ``results/`` when it sits inside the repo.
+
+    Paths outside the repository (for example pytest ``tmp_path``) are allowed
+    so unit tests can write without touching ``results/``. Paths under the repo
+    but outside ``results/`` (for example ``docs/report/``) are refused.
+    """
+    resolved = Path(path).resolve()
+    results = RESULTS_ROOT.resolve()
+    repo = REPO_ROOT.resolve()
+    try:
+        _ = resolved.relative_to(results)
+        return resolved
+    except ValueError:
+        pass
+    try:
+        _ = resolved.relative_to(repo)
+    except ValueError:
+        return resolved
+    raise ValueError(f"{label} must be under {results}, got {resolved}")
+
+
 def package_output_dir(protocol_dir: Path | str, package: str) -> Path:
     """Return packages/<letter>/ under a protocol directory."""
     letter = str(package).strip().lower()
     if not _PACKAGE_LETTER_RE.match(letter):
         raise ValueError(f"package must be A-G, got {package!r}")
-    return Path(protocol_dir) / "packages" / letter
+    out = Path(protocol_dir) / "packages" / letter
+    return ensure_under_results(out, label="package output")
 
 
 def load_protocol_spec(path: Path | str) -> dict[str, Any]:
@@ -89,11 +112,14 @@ def _load_protocol_spec_resolved(
 
 
 def resolve_protocol_output(spec: dict[str, Any]) -> Path:
-    """Resolve protocol output path relative to the repo root."""
+    """Resolve protocol output path relative to the repo root.
+
+    Simulation and analysis outputs must land under ``results/``.
+    """
     out = Path(spec["output"])
     if not out.is_absolute():
         out = REPO_ROOT / out
-    return out
+    return ensure_under_results(out, label="protocol output")
 
 
 def protocol_path_for_spec(spec: dict[str, Any]) -> Path:

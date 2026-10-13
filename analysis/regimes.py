@@ -1,8 +1,8 @@
 """Label each (N, D) cell as under-resourced / efficient / wasteful / overcrowding (Cap I3).
 
 Uses the frontier at reliability theta, then classifies cells by success and cost
-(path/effort) relative to the efficient band. Feeds Package A regime tables and
-plots. Pure analysis; file writing happens in ``analysis.export``.
+(path/effort) relative to the efficient band. Feeds Package A regime tables.
+Pure analysis; file writing happens in ``analysis.export``.
 """
 
 from __future__ import annotations

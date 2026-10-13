@@ -108,7 +108,7 @@ Commands used (from the HerdSim repo root):
 
 ```bash
 # RQ2 size map
-uv run cli/campaign.py run --protocol phase1_pilot --workers 16
+# (historical) uv run cli/campaign.py run --protocol phase1_pilot --workers 16
 uv run cli/campaign.py run --protocol phase1_scout --workers 16
 uv run cli/campaign.py claim-reseed --protocol phase1_claim --workers 16
 

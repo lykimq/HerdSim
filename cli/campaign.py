@@ -77,7 +77,7 @@ def run_campaign(args: argparse.Namespace) -> None:
         if str(spec.get("seed_mode", "scout")) == "claim":
             raise SystemExit(
                 f"Protocol {spec['protocol_id']} has seed_mode=claim; "
-                + "use claim-reseed or t1, not run"
+                + "use claim-reseed, not run"
             )
         kind = runner_kind(spec)
         script = "run_factor_sweep.py" if kind == "factor" else "run_grid.py"
@@ -122,32 +122,6 @@ def run_campaign(args: argparse.Namespace) -> None:
         _run(cmd)
         return
 
-    if verb in ("t1-plan", "t1"):
-        upstream = resolve_upstream_trials(spec, override=getattr(args, "upstream_trials", None))
-        if not upstream.is_file():
-            raise SystemExit(f"Upstream trials not found: {upstream}")
-        cmd = _script_cmd(
-            "plan_t1_cells.py",
-            [
-                "--trials",
-                str(upstream),
-                "--protocol",
-                str(path),
-                "--output",
-                str(output),
-            ],
-        )
-        if verb == "t1-plan":
-            cmd.append("--plan-only")
-        else:
-            cmd.extend(["--workers", workers])
-            if args.no_timeseries:
-                cmd.append("--no-timeseries")
-            if args.no_resume:
-                cmd.append("--no-resume")
-        _run(cmd)
-        return
-
     raise SystemExit(f"Unknown verb: {verb}")
 
 
@@ -161,8 +135,6 @@ def build_parser() -> argparse.ArgumentParser:
             "run",
             "claim-plan",
             "claim-reseed",
-            "t1-plan",
-            "t1",
             "help",
         ),
         help="Campaign action",
@@ -178,7 +150,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--upstream-trials",
         type=Path,
         default=None,
-        help="Override upstream trials.csv for claim/T1",
+        help="Override upstream trials.csv for claim-reseed",
     )
     parser.add_argument("--methods", nargs="+", default=None)
     parser.add_argument("--layouts", nargs="+", default=None)
@@ -200,11 +172,9 @@ Verbs:
   run            Scout/smoke grid or factor sweep (from protocol)
   claim-plan     Write claim windows from upstream scout (no trials)
   claim-reseed   100-seed reseed on those windows
-  t1-plan        Write overcrowding cells from upstream trials
-  t1             Run T1 at time_limit_t1
 
 Protocol id resolves under protocols/configs/protocols/<id>.yaml.
-Claim/T1 YAMLs set upstream_protocol (and optional upstream_trials).
+Claim YAMLs set upstream_protocol (and optional upstream_trials).
 """
     print(text)
 
