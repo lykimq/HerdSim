@@ -305,18 +305,41 @@ Stepping from 32.5 to 65 lowers `D_min` by 2 at N=100 and by 1 at N=200. Further
 
 **Status:** The fit package ran; the signal is weak.
 
-On the baseline compact map, `D_min` is almost only two values: 2 for N = 5 and 10, and 1 for everything larger.
+RQ6 asks which simple curve best describes how fewest dogs (`D_min`) change with flock size (`N`) on the baseline compact frontier. The input is the Phase 1 claim frontier: almost only two values, `D_min = 2` for N = 5 and 10, and `D_min = 1` for everything larger. Code: `analysis/fits.py` (`fit_scaling_models`).
 
-Leave-one-N-out RMSE asks: if we hide one flock size, fit the curve on the rest, then predict the hidden size, how wrong are we on average? Lower is better. We do that for every N and report the root-mean-square error.
+#### What each candidate curve is
 
-| Model | RMSE |
-|-------|-----:|
+| Model | What it assumes | How it is fit |
+|-------|-----------------|---------------|
+| Constant | One shared dog count for every N | Mean of the observed `D_min` values |
+| Linear | A straight line `D_min = a + b * N` | Ordinary least squares |
+| Power law | Smooth scaling `D_min = A * N^alpha` | Least squares in D units (log-log guess, then refine) |
+| Piecewise | Two straight segments with a break in N | Try legal breaks; keep the split with smallest residual error |
+
+Piecewise does **not** hard-code the break. It searches for the best break automatically. On this frontier that search lands at N = 10, which matches the step from 2 dogs to 1.
+
+#### Why leave-one-N-out (not only in-sample fit)
+
+If we fit on all N and score on the same points, a flexible curve can look good just by matching the points it already saw. That does not tell us whether the curve can predict a flock size it did not use.
+
+Leave-one-N-out RMSE checks prediction:
+
+1. Hide one flock size N.
+2. Fit the curve on the remaining sizes only.
+3. Predict `D_min` for the hidden N.
+4. Compare prediction to the true frontier value.
+5. Repeat for every N; report the root-mean-square error.
+
+Lower is better. We use this score to rank the four families so the winner is the one that predicts held-out sizes best, not only the one that redraws the training points.
+
+| Model | Leave-one-N-out RMSE |
+|-------|---------------------:|
 | Constant | 0.44 |
 | Linear | 0.44 |
 | Power law | 0.25 |
 | Piecewise | 0.13 |
 
-Piecewise wins here because the fit automatically places a break at N = 10 and then matches the two flat levels (2, then 1). That is a good fit to this step-shaped frontier, not evidence of a rich growth law. These fits are not a universal scaling law.
+Piecewise wins here because the auto-chosen break at N = 10 matches the two flat levels (2, then 1). That is a good predictive fit to this step-shaped frontier, not evidence of a rich growth law. These fits are not a universal scaling law.
 
 ![Leave-one-N-out RMSE by model.](../figures/f8_scaling_rmse.svg)
 
