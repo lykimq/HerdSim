@@ -130,7 +130,6 @@ uv run cli/campaign.py run --protocol phase5_range_scout --workers 18
 uv run cli/campaign.py claim-reseed --protocol phase5_range_claim --workers 18
 uv run cli/campaign.py run --protocol phase5_comm_scout --workers 18
 uv run cli/campaign.py claim-reseed --protocol phase5_comm_claim --workers 18
-# or: WORKERS=18 bash cli/run_phase5_ladders.sh
 ```
 
 ---

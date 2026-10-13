@@ -16,7 +16,12 @@ All six stages finished (2026-10-13T08:38:30Z). Sim total about **17h 55m** (sum
 ## How we get this
 
 ```bash
-WORKERS=18 bash cli/run_phase5_ladders.sh
+uv run cli/campaign.py run --protocol phase5_factor_sweep --workers 18
+uv run cli/campaign.py claim-reseed --protocol phase5_obs_claim --workers 18
+uv run cli/campaign.py run --protocol phase5_range_scout --workers 18
+uv run cli/campaign.py claim-reseed --protocol phase5_range_claim --workers 18
+uv run cli/campaign.py run --protocol phase5_comm_scout --workers 18
+uv run cli/campaign.py claim-reseed --protocol phase5_comm_claim --workers 18
 ```
 
 | Folder | Stage | Status | Runtime |
