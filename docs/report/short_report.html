@@ -705,9 +705,9 @@ uv run cli/campaign.py claim-reseed --protocol phase5_comm_claim --workers 18
 </table></div>
 <p>Stepping from 32.5 to 65 lowers <code>D_min</code> by 2 at N=100 and by 1 at N=200. Further steps save 0 more dogs (<code>D_min</code> is already 1).</p>
 <p><strong>Communication.</strong> All three modes have <code>D_min = 1</code> and merge success 1.00 on this compact map. Sharing does not reduce dog count here, because one dog already clears the bar.</p>
-<figure><img src="../figures/f13_rq5_ladder_dmin.png" alt="Phase 5 ladder D_min."><figcaption>Fewest dogs at the 90% bar across observation, range, and communication steps. Crosses mark levels that never reach 90%.</figcaption></figure>
-<figure><img src="../figures/f14_rq5_range_reliability.png" alt="Phase 5 range reliability."><figcaption>Success vs dog count by sensing range. The short-range curves are the only ones that need D &amp;gt; 1.</figcaption></figure>
-<figure><img src="../figures/f15_rq5_obs_reliability.png" alt="Phase 5 observation reliability."><figcaption>bearing_only stays below the 90% bar; local_positions and global sit at R = 1 across the tested D list.</figcaption></figure>
+<figure><img src="../figures/f13_rq5_ladder_dmin.png" alt="Phase 5 ladder D_min."><figcaption>Fewest dogs at the 90% bar across observation, range, and communication steps. Crosses mark levels that never reach 90%. Where N = 100 and N = 200 share the same D_min, the markers sit on top of each other (for example local/global and every communication step).</figcaption></figure>
+<figure><img src="../figures/f14_rq5_range_reliability.png" alt="Phase 5 range reliability."><figcaption>Success vs dog count by sensing range. The short-range curve (32.5) is the only one that needs D &amp;gt; 1. Ranges 65, 97.5, and 130 all sit at R = 1.00 for every tested D, so those three curves overlap on the top line.</figcaption></figure>
+<figure><img src="../figures/f15_rq5_obs_reliability.png" alt="Phase 5 observation reliability."><figcaption>bearing_only stays below the 90% bar. local_positions and global both sit at R = 1.00 across the tested D list, so those two curves overlap on the top line.</figcaption></figure>
 <h3 id="rq6-which-curve-fits-d_min-vs-n">RQ6: which curve fits D_min vs N?</h3>
 <p><strong>Status:</strong> The fit package ran; the signal is weak.</p>
 <p>On the baseline compact map, <code>D_min</code> is almost only two values: 2 for N = 5 and 10, and 1 for everything larger. Leave-one-N-out RMSE (lower is better):</p>

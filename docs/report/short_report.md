@@ -291,15 +291,15 @@ Stepping from 32.5 to 65 lowers `D_min` by 2 at N=100 and by 1 at N=200. Further
 
 ![Phase 5 ladder D_min.](../figures/f13_rq5_ladder_dmin.png)
 
-*Fewest dogs at the 90% bar across observation, range, and communication steps. Crosses mark levels that never reach 90%.*
+*Fewest dogs at the 90% bar across observation, range, and communication steps. Crosses mark levels that never reach 90%. Where N = 100 and N = 200 share the same D_min, the markers sit on top of each other (for example local/global and every communication step).*
 
 ![Phase 5 range reliability.](../figures/f14_rq5_range_reliability.png)
 
-*Success vs dog count by sensing range. The short-range curves are the only ones that need D > 1.*
+*Success vs dog count by sensing range. The short-range curve (32.5) is the only one that needs D > 1. Ranges 65, 97.5, and 130 all sit at R = 1.00 for every tested D, so those three curves overlap on the top line.*
 
 ![Phase 5 observation reliability.](../figures/f15_rq5_obs_reliability.png)
 
-*bearing_only stays below the 90% bar; local_positions and global sit at R = 1 across the tested D list.*
+*bearing_only stays below the 90% bar. local_positions and global both sit at R = 1.00 across the tested D list, so those two curves overlap on the top line.*
 
 ### RQ6: which curve fits D_min vs N?
 
