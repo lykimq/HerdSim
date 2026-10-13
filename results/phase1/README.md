@@ -1,64 +1,35 @@
 # Phase 1: flock size map
 
-Question in plain terms: on a tight (compact) start with the baseline dog rule, how many dogs do we need as the flock gets larger?
+How many dogs do we need as the flock gets larger, on a compact start with `strombom_multi`?
 
-Baseline method: `strombom_multi`. Protocol: `scaling_v2`. Cross-phase context: [main scaling plan](../../docs/main_scaling_plan.md).
+We ran pilot first (N in {5, 10, 25, 50, 100}, D in {1, 2, 3, 4, 6, 10}, 5 seeds, 150 trials, 43 s), then scout (full N x D, 30 seeds, 3,000 trials, 1h 12m 39s), then claim (22 window cells at 100 seeds, 2,200 trials, merge 4,540, 57m 31s). Sim total about **2h 11m**. T1 was skipped (no overcrowding cells; no `t1/` results folder).
 
-## Folders
+Claim-grade merge success is 0.963. `D_min` = 2 for N in {5, 10}, and 1 for N >= 25. No overcrowding at theta = 0.90.
 
-| Folder | Grade | Role |
-|--------|-------|------|
-| [pilot/](pilot/) | SMOKE | Pipeline check (150 trials) |
-| [scout/](scout/) | SCOUT | Cheap full N x D map (3,000 trials) |
-| [claim/](claim/) | CLAIM | Careful reseed near the fewest-dogs edge (2,200 trials; merge 4,540) |
-| [t1/](t1/) | plan only | Longer deadline for overcrowding (0 cells; no sims) |
+- **C2a** (at theta 0.90 the baseline has overcrowding for at least one N, i.e. a `D_overcrowd`): **REJECTED**. We found none.
+- **C2b** (at least one D above `D_overcrowd` still fails at T = 20,000): **SKIPPED**. No overcrowding cells to extend.
+- **C6a** (a power law fits `D_min` vs N worse than piecewise / per-layout curves): **SUPPORTED (weak)**. Only two observed `D_min` levels.
+- **C6b** (log `D_min` vs log N has slope below 1 on a stated band): **SUPPORTED**. Flat `D_min` = 1 on compact N in {25...400}.
+- **C7a** (held-out state AUROC beats the `(N, D)` baseline): **INCONCLUSIVE**. Package G folds empty. AUROC = Area Under the ROC Curve, a 0-to-1 score for how well a model ranks likely failures vs successes (0.5 = chance, 1.0 = perfect); here it asks whether flock-state features predict failure better than knowing only `(N, D)` on held-out data.
+- **C7b** (at least 30% of failure trials have lead time >= 500 ticks): **REJECTED**. Only 8.3% meet that bar.
 
-## Runtime
+## How we get this
 
-Sum of each protocol `status.json` `elapsed_seconds`:
+- pilot: 150 trials
 
-| Protocol | Elapsed | Source |
-|----------|---------|--------|
-| pilot | 43 s (0h 0m 43s) | `pilot/status.json` |
-| scout | 4,359 s (1h 12m 39s) | `scout/status.json` |
-| claim | 3,451 s (0h 57m 31s) | `claim/status.json` (resumed completion run) |
-| t1 | n/a (plan only) | no sim grid |
-| **Phase 1 sim total** | **7,853 s (2h 10m 53s)** | sum of rows above |
+`run --protocol phase1_pilot --workers 16`
 
-## Files and folders
+- scout: 3000 trials
 
-| Path | Meaning |
-|------|---------|
-| `README.md` | Phase index (this file) |
-| `pilot/` | SMOKE protocol folder (see `pilot/README.md`) |
-| `scout/` | SCOUT protocol folder (see `scout/README.md`) |
-| `claim/` | CLAIM protocol folder + merge + packages (see `claim/README.md`) |
-| `t1/` | T1 overcrowding plan only (see `t1/README.md`) |
+`run --protocol phase1_scout --workers 16`
 
-### Common files inside each protocol folder
+- claim: 2200 trials
 
-| File | Meaning |
-|------|---------|
-| `protocol.yaml` | Frozen run config |
-| `provenance.json` | Git/host stamp |
-| `status.json` | Progress + `elapsed_seconds` |
-| `manifest.jsonl` | Resume ledger |
-| `trials.csv` | One row per trial |
-| `packages/` | Analyse exports (A/F/...) |
-| `timeseries/` | Optional parquet trajectories (kept only under `claim/` here) |
+`claim-reseed --protocol phase1_claim --workers 16`
 
-Claim-only extras: `boundary_*.csv/json`, `merged_trials.csv`, `*dmin_bootstrap.csv`.
+## Files from this run
 
-## Claim-grade takeaways
+Machine-written outputs in this folder (do not edit by hand):
 
-Cited in [claim/README.md](claim/README.md) and packages under `claim/packages/`:
-
-- Merge overall R = 0.963 (4,371 / 4,540) in `claim/merged_trials.csv` (R = share of repeats that succeed)
-- Fewest dogs (`D_min`) = 2 for N in {5, 10}; `D_min` = 1 for N >= 25; no overcrowding (`D_overcrowd`) at the 90% bar (theta = 0.90)
-- C2a REJECTED; C2b SKIPPED; C6a EVALUATED (weak) via Package F
-
-## Cross-phase
-
-- Final report: [../../docs/final_report.md](../../docs/final_report.md)
-- Main scaling plan: [../../docs/main_scaling_plan.md](../../docs/main_scaling_plan.md)
-- Tracker: [../../docs/progress_tracker.md](../../docs/progress_tracker.md)
+`protocol.yaml`, `provenance.json`, `status.json`, `manifest.jsonl`, `trials.csv`, `packages/`.
+Claim also has merge / boundary / bootstrap files and `timeseries/`.

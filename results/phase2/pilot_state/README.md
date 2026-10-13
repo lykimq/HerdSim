@@ -1,60 +1,24 @@
-# Protocol note: `phase2_pilot_state`
+# Phase 2 pilot (state)
 
-## Summary
+Smoke check for start-shape path: `strombom_multi`, layouts compact / wide / split / outlier_rich, N in {5, 10, 25, 50, 100}, D in {1, 2, 3, 4, 6, 10}, 5 seeds (600 trials). Runtime 7m 1s.
 
-Smoke check for the Phase 2 start-shape path (layouts and state metrics). 600 trials completed. Pipeline check only. Not for claims.
+## How we get this
 
-## Intent
+```bash
+uv run cli/campaign.py run --protocol phase2_pilot_state --workers 16
+```
 
-- Phase / RQ: Phase 2 / RQ1 (smoke)
-- Focus: Structure pipeline check
-- Claims touched: none (SMOKE)
-- Grade: SMOKE
+Output: `results/phase2/pilot_state/`
 
-## Setup
+Started: 2026-09-25T09:18:26Z. Finished: 2026-09-25T09:25:27Z.
 
-- Protocol: `scaling_v2`
-- Method(s): strombom_multi
-- Layout(s) X0: compact, split, outlier_rich, wide (reduced smoke grid)
-- Output: `results/phase2/pilot_state/`
+## Files from this run
 
-## Completeness
+Machine-written outputs in this folder (do not edit by hand):
 
-- Planned / done: 600 / 600 (`status.json` complete)
-
-## Runtime
-
-From `status.json` (`elapsed_seconds`):
-
-| Field | Value |
-|-------|-------|
-| Elapsed | 421 s (0h 7m 1s) |
-| Started (UTC) | 2026-09-25T09:18:26Z |
-| Updated (UTC) | 2026-09-25T09:25:27Z |
-
-## Results
-
-Smoke-only. Use `packages/b/` if present for a first look at layout contrasts; do not update Claims from this folder.
-
-## Files in this folder
-
-| Path | Meaning | Contents |
-|------|---------|----------|
-| `README.md` | This protocol note | Setup, runtime, file map |
-| `protocol.yaml` | Frozen config used for the run | Method, layouts, seeds, theta, T0 |
-| `provenance.json` | Reproducibility stamp | Protocol id, git commit, host/platform |
-| `status.json` | Run progress | Counts, `complete`, `elapsed_seconds` |
-| `manifest.jsonl` | Resume ledger | One JSON line per cell |
-| `trials.csv` | Trial-level results | One row per seed (success, ticks, shape/cost metrics) |
-| `packages/` | Analysis exports | Package B smoke export if written |
-| `timeseries/` | (not retained) | Parquet removed after analysis |
-
-## Limits
-
-SMOKE only. Not for Claims.
-
-## Links
-
-- Next: `../scout/`, then `../claim/`
-- Phase index: `../README.md`
-- Main scaling plan: [../../../docs/main_scaling_plan.md](../../../docs/main_scaling_plan.md)
+- `protocol.yaml`: frozen settings for this run (method, layouts, N/D grids, seeds, grade). Use this copy to replay or audit without depending on live YAML under `protocols/`.
+- `provenance.json`: run stamp (hash, seeds, metrics, timestamps) so later analysis can check what executed.
+- `status.json`: progress counters and wall time (`n_planned`, `n_done`, `complete`, `elapsed_seconds`).
+- `manifest.jsonl`: one JSON line per planned cell; rows already `status=ok` are skipped on resume.
+- `trials.csv`: one row per seed (N, D, layout, success, ticks, path/effort, failure tags, state metrics). Raw table everything else is built from.
+- `packages/b/`: Package B structure tables (layout frontiers and state-vs-(N, D) predictors).

@@ -4,19 +4,19 @@
 
 When a few dogs guide a larger flock, how much control do you actually need as the flock gets bigger, or starts more spread out?
 
-We treat that as an empirical question. There is no assumed universal scaling law. The runs use locked rules so comparisons stay fair.
+We treat that as something to measure, not something to assume. There is no universal scaling law baked into the setup. The runs lock the same rules so comparisons stay fair.
 
-**HerdSim** is the platform we used. A few dogs guide sheep to a goal under settings we can lock and repeat. For this study it is a model system for measuring *control demand* (how many dogs, or how much dog work, is enough), not a copy of a real farm.
+**HerdSim** is the platform for those runs. A few dogs guide sheep to a goal under settings we can freeze and repeat. Here it is a model system for *control demand* (how many dogs, or how much dog work, is enough). It is not meant as a copy of a real farm.
 
-Control here is indirect: we cannot steer every sheep by hand. The dogs only push through local reactions. So "how much control" is something we can measure as size and starting shape change.
+Control is also indirect. We cannot steer every sheep by hand; the dogs only push through local reactions. So "how much control" becomes a measurable quantity as size and starting shape change.
 
-This short report is the findings summary.
+This short report summarises what those runs showed.
 
 ---
 
 ## What we asked
 
-After the core runs, we wanted concrete answers about:
+Once the core campaigns were in place, we wanted clear answers on four fronts:
 
 - whether start shape matters beyond size,
 - how dog need changes as the group grows,
@@ -25,13 +25,13 @@ After the core runs, we wanted concrete answers about:
 
 ### Core questions
 
-**RQ1 (structure).** At the same flock size, does start shape (spread, split, outliers) change how many dogs are needed? Run on the baseline method only.
+**RQ1 (structure).** At the same flock size, does start shape (spread, split, outliers) change how many dogs are needed? We ran this on the baseline method only.
 
-**RQ2 (size and regimes).** As flock size grows, how does the useful dog range change: the minimum for reliable herding, and whether adding more still helps, mostly wastes walking, or starts to hurt?
+**RQ2 (size and regimes).** As flock size grows, how does the useful dog range change? That means the minimum for reliable herding, and whether adding more still helps, mostly wastes walking, or starts to hurt.
 
-**RQ3 (mechanism).** Why does the pattern appear (for example dog interference, flock splitting, coverage limits)? Analysis only, when we have matched efficient and overcrowding cells at the same size.
+**RQ3 (mechanism).** Why does the pattern appear (for example dog interference, flock splitting, coverage limits)? This is analysis only, and only when we can match efficient cells with overcrowding cells at the same size.
 
-**RQ4 (generality).** If we switch herding method, which parts of the pattern stay the same? Repeat size and structure maps for Kubo and FAT beside the baseline.
+**RQ4 (generality).** If we switch herding method, which parts of the pattern stay the same? We repeat size and structure maps for Kubo and FAT beside the baseline.
 
 ### Follow-on questions
 
@@ -41,7 +41,7 @@ After the core runs, we wanted concrete answers about:
 
 **RQ7 (early warning).** Can recent flock state warn of failure better than knowing only N and D?
 
-We are not trying to pick the "best" herding algorithm, copy every detail of real livestock, or ship a farm product.
+We are not trying to pick the "best" herding algorithm, reproduce every detail of real livestock, or ship a farm product.
 
 ---
 
@@ -63,11 +63,11 @@ Every scientific run uses the same frozen protocol (`scaling_v2`):
 | Main deadline | T0 = 10,000 ticks; a longer T1 = 20,000 only if overcrowding cells appear |
 | Seeds | smoke 5; scout 30; claim 100 (200 on soft edges); master seed 2026 |
 
-`D_min` means the smallest tested dog count that clears the 90% bar. It is not a property of sheep in nature; it depends on this task and these locks.
+`D_min` is the smallest tested dog count that clears the 90% bar. It is not a property of sheep in nature; it depends on this task and these locks.
 
 ### Why three methods
 
-We need different *kinds* of dog rules on the same task, not three tiny variants of the same idea:
+We wanted different *kinds* of dog rules on the same task, not three tiny variants of one idea:
 
 | Method | Role | Plain description |
 |--------|------|-------------------|
@@ -75,19 +75,19 @@ We need different *kinds* of dog rules on the same task, not three tiny variants
 | `kubo` | Transfer | Continuous force rules; each dog pushes the sensed sheep farthest from the goal |
 | `fat` | Transfer | Each dog chases the sheep farthest from itself; dogs do not space themselves apart |
 
-If all three show the same pattern, that pattern is more likely about the task. If Kubo or FAT breaks it, we learn how far we can generalise. That is what RQ4 is for. It does not mean these three cover every herding idea in the world.
+If all three show the same pattern, that pattern is more likely about the task. If Kubo or FAT breaks it, we learn how far the story travels. That is the point of RQ4. These three methods do not cover every herding idea in the world.
 
 ### Why smoke, scout, then claim
 
-We need accurate success rates near the important edges (where the minimum sits, and where overcrowding might start). Running every cell at 100 seeds would waste budget on cells that always succeed or always fail.
+We need accurate success rates near the important edges: where the minimum sits, and where overcrowding might start. Running every cell at 100 seeds would burn budget on cells that always succeed or always fail.
 
-So each simulation campaign stages the work:
+So each campaign stages the work:
 
 1. **Smoke (5 seeds):** pipeline check on a small grid.
 2. **Scout (30 seeds):** cheap map of the full scientific grid so we can see where reliability lives.
 3. **Claim (100 seeds, or 200 on soft edges):** reseed only the window cells that matter.
 
-Scout covers the whole map; claim covers a small window. Claims use claim-grade merges, not scout alone.
+Scout covers the whole map; claim covers a small window. Claims rest on claim-grade merges, not scout alone.
 
 ### How many trials we ran
 
@@ -97,12 +97,12 @@ Scout covers the whole map; claim covers a small window. Claims use claim-grade 
 | RQ2 | Size map (baseline, compact) | 150 | 3,000 | 2,200 | 5,350 | DONE |
 | RQ3 | Mechanism contrast | 0 | 0 | 0 | 0 | SKIPPED |
 | RQ4 | Kubo then FAT size + structure | 0 | 13,200 | 10,500 | 23,700 | DONE |
-| RQ5 | Observation, range, communication ladders | 0 | 0 | 0 | 0 | NOT RUN YET |
+| RQ5 | Observation, range, communication ladders | 0 | 3,600 | 4,100 | 7,700 | DONE |
 | RQ6 | Curve fits on claim frontiers | 0 | 0 | 0 | 0 | DONE (analyse) |
 | RQ7 | Early warning on claim trajectories | 0 | 0 | 0 | 0 | DONE (analyse) |
-| **All** | | **750** | **19,800** | **15,100** | **35,650** | |
+| **All** | | **750** | **23,400** | **19,200** | **43,350** | |
 
-RQ2's longer-deadline T1 was also planned and skipped (0 overcrowding cells). RQ5 is not run yet (prior Phase 5 trees removed after obs/comm bugs). Claim merges hold 30,640 rows (fewer than total sims because a reseeded cell drops its scout rows from the merge).
+RQ2's longer-deadline T1 was planned and then skipped (0 overcrowding cells). RQ5 ladders finished after the obs/comm sim fixes (obs/range/comm scout+claim). Claim merges hold about 37,110 rows (Phase 1-4 merges plus Phase 5 obs 1,920 + range 2,630 + comm 1,920; a reseeded cell drops its scout rows from that merge).
 
 Commands used (from the HerdSim repo root):
 
@@ -123,8 +123,14 @@ uv run cli/campaign.py run --protocol phase4_kubo_structure_scout --workers 16
 uv run cli/campaign.py claim-reseed --protocol phase4_kubo_structure_claim --workers 16
 # then fat: phase4_fat_size_scout / phase4_fat_size_claim / phase4_fat_structure_*
 
-# RQ5 ladders (not run yet; planned)
-# WORKERS=18 bash results/phase5/run_all_ladders.sh
+# RQ5 ladders (obs, then range, then communication)
+uv run cli/campaign.py run --protocol phase5_factor_sweep --workers 18
+uv run cli/campaign.py claim-reseed --protocol phase5_obs_claim --workers 18
+uv run cli/campaign.py run --protocol phase5_range_scout --workers 18
+uv run cli/campaign.py claim-reseed --protocol phase5_range_claim --workers 18
+uv run cli/campaign.py run --protocol phase5_comm_scout --workers 18
+uv run cli/campaign.py claim-reseed --protocol phase5_comm_claim --workers 18
+# or: WORKERS=18 bash cli/run_phase5_ladders.sh
 ```
 
 ---
@@ -133,11 +139,11 @@ uv run cli/campaign.py claim-reseed --protocol phase4_kubo_structure_claim --wor
 
 ### RQ1: does start shape change dog need?
 
-**Status:** Answered on the baseline (`strombom_multi`). Kubo and FAT structure maps are under RQ4.
+**Status:** Answered on the baseline (`strombom_multi`). Kubo and FAT structure maps sit under RQ4.
 
-At N = 50, 100, and 200, all four start layouts have `D_min = 1`. Start shape does not change how many dogs you need for the 90% bar on the baseline.
+At N = 50, 100, and 200, all four start layouts have `D_min = 1`. On the baseline, start shape does not change how many dogs you need to clear the 90% bar.
 
-It does change cost. Wide and large outlier-rich starts take much longer and more walking than compact. Split looks a lot like compact. Because `D_min` never moved across layouts, we could not test whether early flock-state measures predict difficulty better than knowing only N and D.
+It does change cost. Wide and large outlier-rich starts take much longer and walk much farther than compact. Split looks a lot like compact. Because `D_min` never moved across layouts, we could not test whether early flock-state measures predict difficulty better than knowing only N and D.
 
 One-dog cost by layout (median over successful trials; success rate 1.00 at D = 1 for every cell):
 
@@ -156,7 +162,7 @@ One-dog cost by layout (median over successful trials; success rate 1.00 at D = 
 | wide | 100 | 3,074 | 4,319 |
 | wide | 200 | 3,870 | 5,213 |
 
-Wide versus compact at one dog: about 11x to 20x more time and about 19x to 36x more path. On wide starts, the cheapest reliable choice is two dogs (`B* = 2`): the second dog cuts path while staying reliable.
+Wide versus compact at one dog: about 11x to 20x more time, and about 19x to 36x more path. On wide starts, the cheapest reliable choice is two dogs (`B* = 2`): the second dog cuts path while staying reliable.
 
 ![Layout cost on the baseline structure map.](../figures/f4_layout_cost.png)
 
@@ -197,9 +203,9 @@ Here "not reach" means no overcrowding appeared before D = 35, so `D_max` is onl
 
 **Status:** Not answerable yet. SKIPPED as a contrast.
 
-The plan was to compare efficient cells with overcrowding cells at the same N. We never saw overcrowding on the baseline size map inside D <= 35, so that contrast does not exist. Correlation candidates (interference, splitting, and related logs) were not tested against a real upper failure band.
+The plan was to compare efficient cells with overcrowding cells at the same N. We never saw overcrowding on the baseline size map inside D <= 35, so that contrast never existed. Correlation candidates (interference, splitting, and related logs) were not tested against a real upper failure band.
 
-RQ3 needs either a measured collapse (for example D > 35, or a harder draft-style task) or another protocol where overcrowding appears. See [What we plan next](#what-we-plan-next).
+RQ3 still needs either a measured collapse (for example D > 35, or a harder draft-style task) or another protocol where overcrowding appears. See [What we plan next](#what-we-plan-next).
 
 ### RQ4: do the patterns transfer across methods?
 
@@ -222,7 +228,7 @@ Compact `D_min` at the 90% bar:
 | 300 | 1 | 1 | not reach |
 | 400 | 1 | 1 | not reach |
 
-Structure breaks transfer further. Shared compact floors do not imply shared structure behavior.
+Structure breaks transfer further. A shared compact floor does not mean structure behaves the same way.
 
 Structure-map `D_min` at the 90% bar (N in `{50, 100, 200}`):
 
@@ -255,13 +261,46 @@ On Kubo wide, best success is about 0.47 to 0.54. FAT clears no structure cell a
 
 *Soft edge: point D_min = 20 after 200 seeds; bootstrap still wide.*
 
-That is enough to reject "the same story everywhere," but not enough to say which patterns are shared across a broader method set.
+That is enough to reject "the same story everywhere," but not enough to say which patterns would hold across a broader method set.
 
 ### RQ5: can better information replace dogs?
 
-**Status:** Not run yet.
+**Status:** Answered on the baseline (`strombom_multi`, compact) at N in {100, 200} after the shared obs/comm fixes.
 
-No claim-grade observation, range, or communication ladder results are published. Prior Phase 5 trees were removed after shared sim bugs (bearing-only freeze, range under global observation, communication list stacking). Protocols remain for a clean rerun.
+We ran three ladders on the same N/D grid (D in {1, 2, 3, 4, 6, 10}) with claim-grade reseeds:
+
+| Ladder | What varies | Scout | Claim | Merge rows |
+|--------|-------------|------:|------:|-----------:|
+| Observation | `obs_mode` in {bearing_only, local_positions, global} | 1,080 | 1,200 | 1,920 |
+| Sensing range | `sensing_range` in {32.5, 65, 97.5, 130} under `local_positions` | 1,440 | 1,700 | 2,630 |
+| Communication | `communication` in {none, neighbour_broadcast, global_shared} under `local_positions` | 1,080 | 1,200 | 1,920 |
+
+**Observation.** `global` and `local_positions` clear the 90% bar at `D_min = 1` for both N. `bearing_only` never reaches 90% for any tested D (merge success about 0.22). Bad observation can make the map fail hard; putting local positions back restores the one-dog floor. That is not a clean "one less dog" step (there is no finite `D_min` on bearing_only), but it shows that observation quality matters.
+
+**Sensing range (main C5 evidence).** Short range needs more dogs; stretching range further does not keep buying dogs:
+
+| sensing_range | N=100 `D_min` | N=200 `D_min` |
+|--------------:|--------------:|--------------:|
+| 32.5 | 3 | 2 |
+| 65 | 1 | 1 |
+| 97.5 | 1 | 1 |
+| 130 | 1 | 1 |
+
+Stepping from 32.5 to 65 lowers `D_min` by 2 at N=100 and by 1 at N=200. Further steps save 0 more dogs (`D_min` is already 1).
+
+**Communication.** All three modes have `D_min = 1` and merge success 1.00 on this compact map. Sharing does not reduce dog count here, because one dog already clears the bar.
+
+![Phase 5 ladder D_min.](../figures/f13_rq5_ladder_dmin.png)
+
+*Fewest dogs at the 90% bar across observation, range, and communication steps. Crosses mark levels that never reach 90%.*
+
+![Phase 5 range reliability.](../figures/f14_rq5_range_reliability.png)
+
+*Success vs dog count by sensing range. The short-range curves are the only ones that need D > 1.*
+
+![Phase 5 observation reliability.](../figures/f15_rq5_obs_reliability.png)
+
+*bearing_only stays below the 90% bar; local_positions and global sit at R = 1 across the tested D list.*
 
 ### RQ6: which curve fits D_min vs N?
 
@@ -284,7 +323,7 @@ Piecewise wins because it matches that step, not because we measured a rich grow
 
 **Status:** Not answerable on this data.
 
-By the first check at tick 1,000, almost every successful RQ2 size-map run has already finished (median success 182 ticks). Failures are almost all tiny flocks with one dog that run to the deadline. There is no late window left to warn before success or failure settles. Held-out AUROC folds were empty. Only 14 of 169 failures had a measured lead time of at least 500 ticks (about 8.3%; the bar was 30%).
+By the first check at tick 1,000, almost every successful RQ2 size-map run has already finished (median success 182 ticks). Failures are almost all tiny flocks with one dog that run out the deadline. There is no late window left to warn before success or failure settles. Held-out AUROC folds were empty. Only 14 of 169 failures had a measured lead time of at least 500 ticks (about 8.3%; the bar was 30%).
 
 ![Early warning timing.](../figures/f12_early_warning_timing.png)
 
@@ -302,8 +341,8 @@ Verdicts use claim-grade evidence only.
 | C2b | RQ2 | SKIPPED | No overcrowding cell to extend to T = 20,000 |
 | C3 | RQ3 | INCONCLUSIVE | Mechanism contrast undefined without overcrowding |
 | C4 | RQ4 | SUPPORTED (partial) | Compact size shared for Strombom/Kubo (N >= 25); FAT and several structure cases break transfer |
-| C5a | RQ5 | NOT RUN | Information ladders not rerun yet |
-| C5b | RQ5 | NOT RUN | Information ladders not rerun yet |
+| C5a | RQ5 | SUPPORTED | Range ladder: sensing_range 32.5 -> 65 lowers `D_min` by at least one grid step at N in {100, 200} |
+| C5b | RQ5 | SUPPORTED | Same ladder: first step saves 1 to 2 dogs; further range steps save 0 more |
 | C6a | RQ6 | SUPPORTED (weak) | Power law worse than piecewise on leave-one-N RMSE; only two D_min levels |
 | C6b | RQ6 | SUPPORTED | Flat `D_min = 1` on compact N in {25..400}, so log-log slope 0 |
 | C7a | RQ7 | INCONCLUSIVE | Held-out AUROC could not be computed |
@@ -319,8 +358,8 @@ These checks only support statements inside the tested protocol. They do not sup
 - **Grid ceiling.** `D_max = 35` means "still OK at the largest D we tried," not "collapse begins at 35."
 - **No overcrowding on the baseline size map.** That is why RQ3 did not run and T1 was skipped.
 - **Transfer is only partial.** Compact size floors for Strombom and Kubo do not extend to FAT, Kubo-wide, or large Kubo outlier-rich.
-- **Easy compact map.** Many baseline cells succeed at D = 1 with success near 1.00, so rising dog-count laws, information savings, and early-warning overlap are hard to see.
-- **RQ5 not run yet.** Prior Phase 5 trees were removed after obs/comm bugs; no claim-grade RQ5 evidence is published.
+- **Easy compact map.** Many baseline cells succeed at D = 1 with success near 1.00, so rising dog-count laws and early-warning overlap are hard to see. RQ5 communication could not show dog savings for the same reason.
+- **RQ5 scope.** Ladders are on compact + `strombom_multi` at N in {100, 200} only. Observation contrast is mostly "bearing_only fails" vs "local/global works," not a graded dog-count saving. Range is the clean C5a/C5b evidence.
 - **RQ7 timing.** Warning checks start after almost every success has finished.
 - **Simulated controllers.** No farm or biology validity claim.
 - **Discrete dog list.** We cannot resolve effects finer than one step on that list.
@@ -355,7 +394,7 @@ Another path without raising the dog cap: port the draft-style collect-hold-gate
 3. Ask why FAT and Kubo-wide fail under this protocol, then retry a fairer FAT setup if needed (for example local sensing as the method intends), still on the frozen grids.
 4. Once an upper collapse exists, repeat the size/structure transfer check on that upper band.
 
-### Fairer follow-ups for RQ5 and RQ7
+### Follow-ups for RQ5 and RQ7
 
-- RQ5: rerun the three ladders after the shared obs/comm fixes (`local_positions` for range and communication; bearing proxies beyond the stop radius; sheep-index union for sharing). Prefer a layout or method where more than one dog is needed.
+- RQ5: repeat the ladders on a harder layout or method where `D_min` > 1 (for example wide, or Kubo outlier_rich), so communication and finer observation steps can show dog savings beyond the compact one-dog floor.
 - RQ7: need failures and successes overlapping in time (harder layout or method, or earlier check times).

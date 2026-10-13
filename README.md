@@ -1,6 +1,6 @@
 # HerdSim (scaling-cli)
 
-HerdSim is a multi-agent shepherding simulator for studying how much external control a flock needs as size, initial structure, method, and information conditions change. Dogs (shepherds) drive sheep to a goal under fixed protocols; the main control-demand quantity is the viable shepherd range around `D_min` (and any overcrowding boundary) at a reliability threshold.
+HerdSim is a multi-agent shepherding simulator. We use it to study how much external control a flock needs as size, starting shape, dog method, and information conditions change. Dogs drive sheep to a goal under fixed protocols. The main control-demand quantity is the viable shepherd range around `D_min` (and any overcrowding boundary) at a reliability threshold.
 
 ## Tech stack
 

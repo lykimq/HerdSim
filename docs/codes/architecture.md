@@ -245,7 +245,7 @@ Analysis: `analysis/transfer.py` (`build_transfer_table`, Package D).
 
 Protocols: `phase5_factor_sweep`, `phase5_obs_claim`, `phase5_range_{scout,claim}`, `phase5_comm_{scout,claim}`.
 
-Code path: `cli/run_factor_sweep.py`, observation modes in `core/observation.py`, Package E in `analysis/substitution.py`. Ladder script: `results/phase5/run_all_ladders.sh`.
+Code path: `cli/run_factor_sweep.py`, observation modes in `core/observation.py`, Package E in `analysis/substitution.py`. Ladder script: `cli/run_phase5_ladders.sh`.
 
 ### RQ6 fits / RQ7 early warning (analyse)
 

@@ -14,6 +14,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from protocols.packaging.generated_notice import with_json_notice
+
 
 def config_hash(config: dict[str, Any]) -> str:
     """Stable SHA256 of a JSON-serialisable config dict."""
@@ -47,4 +49,5 @@ def build_provenance_stamp(
 
 def write_provenance(path: Path, stamp: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(stamp, indent=2, default=str) + "\n")
+    stamped = with_json_notice(stamp)
+    path.write_text(json.dumps(stamped, indent=2, default=str) + "\n")

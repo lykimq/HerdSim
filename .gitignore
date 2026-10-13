@@ -122,3 +122,4 @@ netlogo/models/uploads/*
 
 # --- Project: background run logs ---
 .runs/
+cli/logs/

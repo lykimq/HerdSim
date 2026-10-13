@@ -1,71 +1,42 @@
-# Protocol note: `phase4_kubo_structure_claim`
+# Phase 4 Kubo structure claim
 
-## Summary
-
-Kubo structure claim (4 layouts x N in {50,100,200}). Claim trials: 4,000 rows. Merge: 6,670 rows. Compact and split keep `D_min` = 1. Wide is hard failure. Outlier_rich N=200 has `D_min` = 20 at 200 seeds on D in {1,2,3,4,6,10,15,20,25} (bootstrap [2, 20]; no overcrowding). Snapshot: `outlier_rich_n200_window.json`.
-
-## Intent
-
-- Phase / RQ: Phase 4 / RQ4
-- Focus: Structure transfer for `kubo` vs Phase 2 baseline
-- Claims touched: C4
-- Grade: CLAIM
-
-## Setup
-
-- Protocol: `scaling_v2`
-- Method(s): kubo
-- Layout(s) X0: compact, split, outlier_rich, wide
-- N grid: {50, 100, 200}
-- Seeds: 100 on standard claim windows; 200 on outlier_rich N=200 for D in {1,2,3,4,6,10,15,20,25}; D=35 stays at 30 (scout)
-- Theta: 0.90
-- T0: 10000
-- obs_mode: global
-- Output: `results/phase4/kubo_structure/claim/`
-
-## Completeness
-
-| Field | Value |
-|-------|------:|
-| Claim trials (`trials.csv`) | 4000 |
-| Merged rows | 6670 |
-| `status.json` complete | yes |
-
-## Runtime
-
-From `status.json` (`elapsed_seconds`):
-
-| Field | Value |
-|-------|-------|
-| Elapsed | 835,308 s (9d 16h 1m 47s) |
-| Finished (UTC) | 2026-10-06T10:54:32Z |
-
-## Results
-
-From `packages/b/frontier_by_layout.csv` and `merged_dmin_bootstrap.csv`:
+Claim-grade Kubo start-shape map: layouts compact / wide / split / outlier_rich, N in {50, 100, 200}, D in {1, 2, 3, 4, 6, 10, 15, 20, 25, 35}, 100 seeds on standard windows plus 200 seeds on outlier_rich N=200 for D in {1, 2, 3, 4, 6, 10, 15, 20, 25} (4,000 claim rows). Merge: 6,670 rows. Runtime 9d 16h 1m 48s.
 
 | Layout | N | D_min | Notes |
 |--------|--:|------:|-------|
-| compact / split | 50,100,200 | 1 | shared with baseline |
-| outlier_rich | 50,100 | 1 | shared |
-| outlier_rich | 200 | 20 | 200 seeds; R(20)=0.935, R(25)=0.910; CI [2, 20] |
-| wide | 50,100,200 | none | hard failure (best R about 0.47 to 0.54) |
+| compact / split | 50, 100, 200 | 1 | shared with baseline |
+| outlier_rich | 50, 100 | 1 | shared |
+| outlier_rich | 200 | 20 | 200 seeds; bootstrap [2, 20]; no overcrowding |
+| wide | 50, 100, 200 | none | hard failure (best R about 0.47 to 0.54) |
 
-Outlier_rich N=200 rates (see `outlier_rich_n200_window.json`): D1 0.745, D2 0.855, D3 0.835, D4 0.860, D6 0.890, D10 0.875, D15 0.855, D20 0.935, D25 0.910 (n=200); D35 0.967 (n=30).
+### Claims
 
-## Limits
+- **C4** (`D_min` or overcrowding is shared across the three required methods, including structure): **SUPPORTED (partial)**. 
 
-Scout-only Package B under `../scout/packages/b/` is not the claim answer for outlier_rich N=200. Use this claim merge and `outlier_rich_n200_window.json`. Bootstrap on that D_min stays wide because several D < 20 sit near theta.
+Compact/split match baseline; wide is absent for Kubo; outlier_rich N=200 is shifted to `D_min` = 20. See also `../../package_d/structure/`.
 
-## Claims update
+## How we get this
 
-| Claim | Verdict | Evidence |
-|-------|---------|----------|
-| C4 | SUPPORTED (partial) | This merge + `../../package_d/structure/`; shifted on outlier_rich N=200; absent on wide |
+```bash
+uv run cli/campaign.py claim-plan --protocol phase4_kubo_structure_claim
+uv run cli/campaign.py claim-reseed --protocol phase4_kubo_structure_claim --workers 16
+```
 
-## Links
+Output: `results/phase4/kubo_structure/claim/`
 
-- Phase note: `../../README.md`
-- Package B: `packages/b/`
-- Package D structure: `../../package_d/structure/`
-- Final report: `../../../docs/final_report.md`
+Started: 2026-09-26T18:52:44Z. Finished: 2026-10-06T10:54:32Z.
+
+## Files from this run
+
+Machine-written outputs in this folder (do not edit by hand):
+
+- `protocol.yaml`: frozen settings for this run (method, layouts, N/D grids, seeds, grade). Use this copy to replay or audit without depending on live YAML under `protocols/`.
+- `provenance.json`: run stamp (hash, seeds, metrics, timestamps) so later analysis can check what executed.
+- `status.json`: progress counters and wall time (`n_planned`, `n_done`, `complete`, `elapsed_seconds`).
+- `manifest.jsonl`: one JSON line per planned cell; rows already `status=ok` are skipped on resume.
+- `trials.csv`: one row per seed (N, D, layout, success, ticks, path/effort, failure tags, state metrics). Raw table everything else is built from.
+- `boundary_cells.csv`, `boundary_plan.json`: which (N, D, layout) cells get denser claim reseed, and how that list was built.
+- `merged_trials.csv`: claim-grade table (dense claim windows plus scout rows for the rest). Same columns as `trials.csv`.
+- `dmin_bootstrap.csv`, `merged_dmin_bootstrap.csv`: bootstrap point `D_min` and CI on claim trials and on the merge.
+- `outlier_rich_n200_window.json`: rates by D, seed counts, point `D_min`, and bootstrap for Kubo outlier_rich N=200.
+- `packages/b/`: Package B structure tables (layout frontiers and state-vs-(N, D) predictors).

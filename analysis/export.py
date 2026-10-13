@@ -19,6 +19,7 @@ from analysis.plots import (
     save_reliability_heatmap,
 )
 from analysis.regimes import label_regimes
+from protocols.packaging.generated_notice import markdown_banner_line, with_json_notice
 from protocols.packaging.provenance import build_provenance_stamp, write_provenance
 
 
@@ -88,7 +89,7 @@ def _package_a_claim_stubs(
     regimes: pd.DataFrame,
     theta: float,
 ) -> list[str]:
-    """Auto, non-final claim hints for Package A (C2 / C6 path)."""
+    """Automatic, non-final claim hints for Package A (C2 / C6 path)."""
     lines: list[str] = []
     has_overcrowd = False
     if not regimes.empty and "regime" in regimes.columns:
@@ -98,60 +99,89 @@ def _package_a_claim_stubs(
 
     if has_overcrowd:
         lines.append(
-            f"- C2a (overcrowding at theta={theta}): candidate signal present "
-            + "(overcrowding cells or D_overcrowd). Needs claim-grade seeds / multi-method."
+            f"- C2a (overcrowding at theta={theta}): there is a candidate signal "
+            + "(overcrowding cells or D_overcrowd). Confirm with claim-grade seeds "
+            + "and, if needed, more than one method."
         )
     else:
         lines.append(
-            f"- C2a (overcrowding at theta={theta}): UNEVALUABLE on this export "
+            f"- C2a (overcrowding at theta={theta}): not evaluable on this export "
             + "(no overcrowding regime / D_overcrowd)."
         )
 
     lines.append(
-        "- C2b (hard ceiling at T1): not evaluated here (requires extended-time campaign)."
+        "- C2b (hard ceiling at T1): not evaluated here "
+        + "(needs an extended-time campaign)."
     )
 
     if frontier.empty or "d_min" not in frontier.columns:
-        lines.append("- C6 (scaling): UNEVALUABLE (empty frontier).")
+        lines.append("- C6 (scaling): not evaluable (empty frontier).")
     else:
         d_vals = frontier["d_min"].dropna()
         if d_vals.empty:
-            lines.append("- C6 (scaling): UNEVALUABLE (no D_min values).")
+            lines.append("- C6 (scaling): not evaluable (no D_min values).")
         elif d_vals.nunique() <= 1:
             lines.append(
-                "- C6 (scaling): DEGENERATE on this domain "
-                + f"(constant D_min={d_vals.iloc[0]}). Prefer harder X0 / larger N."
+                "- C6 (scaling): flat on this domain "
+                + f"(constant D_min={d_vals.iloc[0]}). A harder start or larger N "
+                + "would give the fits more to work with."
             )
         else:
             lines.append(
-                "- C6 (scaling): frontier varies with N; "
+                "- C6 (scaling): frontier changes with N; "
                 + "run Package F fits before deciding C6a/C6b."
             )
     return lines
 
 
-def _package_a_diagnostics(trials: pd.DataFrame, regimes: pd.DataFrame) -> list[str]:
-    lines: list[str] = []
-    lines.append(f"- Trial rows: {len(trials)}")
+def _package_a_results_prose(
+    trials: pd.DataFrame,
+    regimes: pd.DataFrame,
+    frontier: pd.DataFrame,
+) -> list[str]:
+    """Short plain-language results block for the Package A README."""
+    parts: list[str] = [f"{len(trials)} trials."]
     if "success" in trials.columns and len(trials):
         rate = float(pd.Series(trials["success"]).mean())
-        lines.append(f"- Overall success rate: {rate:.3f}")
-    if "failure_mode" in trials.columns:
-        top = trials["failure_mode"].value_counts().head(5)
-        if not top.empty:
-            lines.append("- Top failure_mode counts:")
-            for mode, count in top.items():
-                lines.append(f"  - {mode}: {count}")
+        n_ok = int(pd.Series(trials["success"]).sum())
+        parts.append(f"Overall success {rate:.3f} ({n_ok} succeed).")
+    if "failure_mode" in trials.columns and len(trials):
+        failed = trials.loc[~trials["success"].astype(bool), "failure_mode"]
+        if len(failed):
+            top = failed.value_counts().head(4)
+            bits = [f"{mode} {int(count)}" for mode, count in top.items()]
+            parts.append("Failures: " + ", ".join(bits) + ".")
     if "total_ticks" in trials.columns and len(trials):
         ticks = trials["total_ticks"]
-        lines.append(
-            f"- Ticks: median={ticks.median():.0f}, "
-            + f"p90={ticks.quantile(0.9):.0f}, max={ticks.max():.0f}"
+        parts.append(
+            f"Ticks: median {ticks.median():.0f}, "
+            + f"p90 {ticks.quantile(0.9):.0f}, max {ticks.max():.0f}."
         )
-    if not regimes.empty and "regime" in regimes.columns:
-        lines.append("- Regime counts:")
-        for regime, count in regimes["regime"].value_counts().items():
-            lines.append(f"  - {regime}: {count}")
+
+    lines = [" ".join(parts), ""]
+
+    if frontier.empty or "d_min" not in frontier.columns:
+        lines.append("Frontier: (empty).")
+    else:
+        d_vals = frontier["d_min"].dropna()
+        has_over = (
+            "d_overcrowd" in frontier.columns
+            and bool(frontier["d_overcrowd"].notna().to_numpy().any())
+        )
+        if d_vals.empty:
+            over_bit = "with overcrowding marks" if has_over else "no D_min values"
+            lines.append(f"Frontier: {over_bit}.")
+        elif d_vals.nunique() <= 1:
+            over_bit = "; overcrowding present" if has_over else "; no D_overcrowd"
+            lines.append(f"Frontier: D_min = {d_vals.iloc[0]} everywhere{over_bit}.")
+        else:
+            over_bit = "; overcrowding present" if has_over else "; no D_overcrowd"
+            lines.append(
+                "Frontier: D_min varies with N"
+                + over_bit
+                + " (table below)."
+            )
+    lines.append("")
     return lines
 
 
@@ -308,9 +338,17 @@ def export_package_a(
     write_provenance(paths["provenance"], stamp)
 
     lines = [
+        markdown_banner_line(),
+        "",
         f"# Package A: Herdability map ({protocol_id})",
         "",
-        "Auto tables and figures for this package. See protocol `README.md` for interpretation.",
+        "Package A is the herdability (size) map for this run: success rate R by "
+        + "(N, D), the fewest-dogs frontier (`D_min`, and overcrowding "
+        + "`D_overcrowd` if any), and regime labels (under-resourced / efficient / "
+        + "wasteful / overcrowding).",
+        "",
+        "Read the protocol-folder `README.md` for interpretation and claim "
+        + "verdicts. This file is only the export dossier.",
         "",
         "## Setup",
         "",
@@ -324,25 +362,26 @@ def export_package_a(
         f"- Trial rows: {len(trials)}",
         f"- Frontier rows: {len(frontier)}",
         "",
-        "## Diagnostics",
+        "## Results",
         "",
-        *_package_a_diagnostics(trials, regimes),
-        "",
-        "## Claim stubs (auto, not final)",
-        "",
-        *_package_a_claim_stubs(frontier=frontier, regimes=regimes, theta=theta),
-        "",
-        "## Frontier summary",
+        *_package_a_results_prose(trials, regimes, frontier),
+        "### Frontier table",
         "",
         _df_to_markdown_table(front_csv),
         "",
-        "## Regime counts",
+        "### Regime counts",
         "",
         (
             _series_counts_to_markdown(regimes["regime"].value_counts())
             if not regimes.empty and "regime" in regimes.columns
             else "_(none)_"
         ),
+        "",
+        "## Claim stubs (auto, not final)",
+        "",
+        "These are automatic hints only. They are not final claim verdicts.",
+        "",
+        *_package_a_claim_stubs(frontier=frontier, regimes=regimes, theta=theta),
         "",
         "## Figures",
         "",
@@ -359,7 +398,7 @@ def export_package_a(
 
     lines.extend(
         [
-            "## Artefacts",
+            "## Files from this export",
             "",
             "- trials.csv",
             "- reliability.csv",
@@ -373,7 +412,11 @@ def export_package_a(
     )
     _ = paths["report"].write_text("\n".join(lines) + "\n")
     _ = paths["artefacts"].write_text(
-        json.dumps({k: str(v) for k, v in paths.items()}, indent=2) + "\n"
+        json.dumps(
+            with_json_notice({k: str(v) for k, v in paths.items()}),
+            indent=2,
+        )
+        + "\n"
     )
     return paths
 
@@ -404,20 +447,34 @@ def export_package_dossier(
     write_provenance(prov, stamp)
     paths["provenance"] = prov
     report = out / "README.md"
+    note_lines = list(notes or [])
     body = [
+        markdown_banner_line(),
+        "",
         f"# Package {package}: {protocol_id}",
         "",
-        "Auto tables and figures for this package. See protocol `README.md` for interpretation.",
-        "",
-        *(notes or []),
-        "",
-        "Artefacts:",
-        *[f"- {k}: {v.name}" for k, v in paths.items() if k != "provenance"],
+        "Tables for this analysis package. Read the protocol-folder `README.md` "
+        + "for interpretation and claim verdicts. This file is only the export dossier.",
         "",
     ]
+    if note_lines:
+        body.extend(["## Notes", "", *note_lines, ""])
+    body.extend(
+        [
+            "## Files from this export",
+            "",
+            *[f"- {k}: `{v.name}`" for k, v in paths.items() if k != "provenance"],
+            "- provenance.json",
+            "",
+        ]
+    )
     _ = report.write_text("\n".join(body) + "\n")
     paths["report"] = report
     _ = (out / "artefacts.json").write_text(
-        json.dumps({k: str(v) for k, v in paths.items()}, indent=2) + "\n"
+        json.dumps(
+            with_json_notice({k: str(v) for k, v in paths.items()}),
+            indent=2,
+        )
+        + "\n"
     )
     return paths

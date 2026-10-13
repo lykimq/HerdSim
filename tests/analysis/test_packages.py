@@ -456,7 +456,11 @@ def test_export_package_dossier(tmp_path: Path):
     assert paths["summary"].exists()
     assert paths["provenance"].exists()
     assert paths["report"].exists()
-    assert "Package b" in paths["report"].read_text()
+    report = paths["report"].read_text()
+    assert report.startswith("AUTO-GENERATED:")
+    assert "Package b" in report
+    stamp = json.loads(paths["provenance"].read_text())
+    assert "_auto_generated_notice" in stamp
 
 
 def test_wasteful_regime_uses_path_not_neighbor_rule():

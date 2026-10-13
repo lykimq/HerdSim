@@ -1,64 +1,26 @@
-# Protocol note: `phase2_scout`
+# Phase 2 scout
 
-## Summary
+Cheap start-shape map for claim planning: `strombom_multi`, layouts compact / wide / split / outlier_rich, N in {50, 100, 200}, D in {1, 2, 3, 4, 6, 10, 15, 20, 25, 35}, 30 seeds (3,600 trials). Runtime 3h 13m 53s. 
 
-Cheap start-shape map: 3,600 trials across N in {50,100,200}, four layouts, and the dog-count grid. Used to plan claim windows. Not claim-grade by itself.
+Scout Package B shows `D_min` = 1 on all four layouts; cost (`B*`) rises on wide and large outlier_rich. Scout only: claim-grade numbers live in `../claim/`.
 
-## Intent
+## How we get this
 
-- Phase / RQ: Phase 2 / RQ1
-- Focus: Structure reliability map for claim windows
-- Claims touched: none (SCOUT)
-- Grade: SCOUT
+```bash
+uv run cli/campaign.py run --protocol phase2_scout --workers 16
+```
 
-## Setup
+Output: `results/phase2/scout/`
 
-- Protocol: `scaling_v2`
-- Method(s): strombom_multi
-- Layout(s) X0: compact, split, outlier_rich, wide
-- N grid: {50, 100, 200}
-- Seeds: 30
-- Theta: 0.90 (90% success bar)
-- T0: 10000
-- Output: `results/phase2/scout/`
+Started: 2026-09-25T09:25:40Z. Finished: 2026-09-25T12:39:33Z.
 
-## Completeness
+## Files from this run
 
-- Planned / done: 3,600 / 3,600 (`status.json` complete)
+Machine-written outputs in this folder (do not edit by hand):
 
-## Runtime
-
-From `status.json` (`elapsed_seconds`):
-
-| Field | Value |
-|-------|-------|
-| Elapsed | 11,633 s (3h 13m 53s) |
-| Started (UTC) | 2026-09-25T09:25:40Z |
-| Updated (UTC) | 2026-09-25T12:39:33Z |
-
-## Results
-
-Scout-grade layout map that feeds `boundary_cells.csv` in `../claim/`. Claim-grade fewest-dogs and cost numbers live in the claim merge and Package B.
-
-## Files in this folder
-
-| Path | Meaning | Contents |
-|------|---------|----------|
-| `README.md` | This protocol note | Setup, runtime, file map |
-| `protocol.yaml` | Frozen config used for the run | Method, layouts, N/D grids, seeds |
-| `provenance.json` | Reproducibility stamp | Protocol id, git commit, host/platform |
-| `status.json` | Run progress | Counts, `complete`, `elapsed_seconds` |
-| `manifest.jsonl` | Resume ledger | One JSON line per cell |
-| `trials.csv` | Trial-level results | One row per seed across layouts and D |
-| `packages/` | Analysis exports | Package B scout export (`frontier_by_layout`, predictors) |
-| `timeseries/` | (not retained) | Parquet removed after analysis |
-
-## Limits
-
-SCOUT: 30 seeds. Not for Claims.
-
-## Links
-
-- Claim stage: `../claim/`
-- Phase index: `../README.md`
-- Main scaling plan: [../../../docs/main_scaling_plan.md](../../../docs/main_scaling_plan.md)
+- `protocol.yaml`: frozen settings for this run (method, layouts, N/D grids, seeds, grade). Use this copy to replay or audit without depending on live YAML under `protocols/`.
+- `provenance.json`: run stamp (hash, seeds, metrics, timestamps) so later analysis can check what executed.
+- `status.json`: progress counters and wall time (`n_planned`, `n_done`, `complete`, `elapsed_seconds`).
+- `manifest.jsonl`: one JSON line per planned cell; rows already `status=ok` are skipped on resume.
+- `trials.csv`: one row per seed (N, D, layout, success, ticks, path/effort, failure tags, state metrics). Raw table everything else is built from.
+- `packages/b/`: Package B structure tables (layout frontiers and state-vs-(N, D) predictors).

@@ -1,44 +1,31 @@
 # Experiment results
 
-This folder holds simulation run outputs for the scaling study. Each phase answers a different question about how many dogs are enough when the flock grows, when sheep start in a different shape, or when we swap the dog rule (controller).
+Simulation outputs for the scaling study: how many dogs are enough when the flock grows, when sheep start in a different shape, when we swap the dog rule, or when we change observation, range, or communication.
 
-Completed narrative: [final report](../docs/science/final_report.md) ([HTML](../docs/science/final_report.html)). Plan and status: [main scaling plan](../docs/science/main_scaling_plan.md), [progress tracker](../docs/science/progress_tracker.md). Figures live under [`../docs/figures/`](../docs/figures/).
+| Phase | Main answer | Claims |
+|-------|-------------|--------|
+| 1 | `D_min` = 2 for tiny N, else 1; no overcrowding | C2a REJECTED; C2b SKIPPED; C6a weak SUPPORT; C6b SUPPORT; C7a INCONCLUSIVE; C7b REJECTED |
+| 2 | `D_min` = 1 on all four layouts; cost rises on wide / outlier_rich | C1a REJECTED; C1b INCONCLUSIVE |
+| 4 | Kubo shares compact mid/large N; FAT absent; Kubo wide absent; Kubo outlier_rich N=200 shifts to 20 | C4 SUPPORTED (partial) |
+| 5 | Obs/range/comm ladders complete; range step lowers `D_min`, further steps save 0 more | C5a SUPPORTED; C5b SUPPORTED |
 
-## Layout
+## How we get this
+
+```bash
+uv run cli/campaign.py run --protocol <protocol_id> --workers 16
+uv run cli/campaign.py claim-reseed --protocol <protocol_id> --workers 16
+```
 
 ```text
 results/
-  phase1/                  # Flock size: how many dogs as N grows (tight start)
-    pilot/                 # 150 trials (smoke check)
-    scout/                 # 3,000 trials (cheap full map: 10 N x 10 D x 30 seeds)
-    claim/                 # 2,200 trials (careful 100-seed windows on D_min edges)
-    t1/                    # Longer deadline plan (skipped: no overcrowding cells)
-
-  phase2/                  # Start shape: compact, wide, split, outlier_rich
-    pilot_state/           # 600 trials (smoke check)
-    scout/                 # 3,600 trials (3 N x 4 layouts x 10 D x 30 seeds)
-    claim/                 # 2,400 trials (careful 100-seed windows)
-
-  phase4/                  # Other dog rules: kubo and fat vs baseline
-    kubo_size/             # Kubo size map (scout + claim)
-    kubo_structure/        # Kubo start-shape map (scout + claim; claim 4,000 trials)
-    fat_size/              # FAT size map (scout + claim)
-    fat_structure/         # FAT start-shape map (scout + claim)
-    package_d/             # Side-by-side transfer tables (size + structure)
-                           # Current: Kubo outlier_rich N=200 has D_min=20 (200 seeds)
-
-  phase5/                  # RQ5 information ladders: NOT RUN YET (runner script only)
+  phase1/     flock size (compact + strombom_multi)
+  phase2/     start shape (four layouts)
+  phase4/     transfer (kubo / fat size + structure; package_d)
+  phase5/     information ladders (obs / range / comm)
 ```
 
-## What sits in a protocol folder
+Each protocol-folder README has that run's command, runtime, and start / finish times.
 
-| File or folder | Meaning |
-|----------------|---------|
-| `protocol.yaml` | Frozen settings for that run |
-| `provenance.json` | Git commit, host, and timestamps |
-| `manifest.jsonl` | Resume ledger: finished trials (`status=ok`) are skipped on re-run |
-| `status.json` | Progress and whether the run finished |
-| `trials.csv` | One row per simulation (claim folders also have `merged_trials.csv`) |
-| `timeseries/` | Per-trial trajectory files (`.parquet`). Usually not kept in Git |
-| `packages/` | Auto tables from analysis (Package A, B, F, ...); figures live under `docs/figures/packages/` |
-| `README.md` | Short human note: status, key numbers, links |
+## Files from this run
+
+Machine-written outputs live under each protocol folder. Typical names: `protocol.yaml`, `provenance.json`, `status.json`, `manifest.jsonl`, `trials.csv`; claim extras `boundary_*`, `merged_trials.csv`, `*dmin_bootstrap.csv`; `packages/`; `timeseries/` only when retained (Phase 1 claim has it). Each protocol README lists only what is present there.

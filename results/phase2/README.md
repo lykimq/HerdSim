@@ -1,61 +1,21 @@
 # Phase 2: start-shape map
 
-Question in plain terms: if flock size is fixed, does a different sheep layout at the start change how many dogs we need?
+If flock size is fixed, does a different sheep layout at the start change how many dogs we need?
 
-Baseline method: `strombom_multi`. Layouts: compact, wide, split, outlier_rich. Protocol: `scaling_v2`. Cross-phase context: [main scaling plan](../../docs/main_scaling_plan.md).
+Baseline is `strombom_multi`, with layouts compact / wide / split / outlier_rich. Pilot (N in {5, 10, 25, 50, 100}, D in {1, 2, 3, 4, 6, 10}, 5 seeds, 600 trials, 7m 1s), then scout (N in {50, 100, 200}, full D, 30 seeds, 3,600 trials, 3h 13m 53s), then claim (24 windows at 100 seeds, 2,400 trials, merge 5,280, 2h 59m 17s). Sim total about **6h 20m**.
 
-## Folders
+Claim-grade: `D_min` = 1 on all four layouts at every N; cost rises on wide / outlier_rich. **C1a REJECTED** (the claim was "layout changes `D_min`"; it does not). **C1b INCONCLUSIVE**.
 
-| Folder | Grade | Role |
-|--------|-------|------|
-| [pilot_state/](pilot_state/) | SMOKE | Layout / metrics smoke (600 trials) |
-| [scout/](scout/) | SCOUT | Cheap 3 N x 4 layouts x D map (3,600 trials) |
-| [claim/](claim/) | CLAIM | Careful reseed near edges (2,400 trials; merge 5,280) |
+## How we get this
 
-## Runtime
+| Folder | Grade | Command (typical) | Trials |
+|--------|-------|-------------------|-------:|
+| [pilot_state/](pilot_state/) | SMOKE | `run --protocol phase2_pilot_state --workers 16` | 600 |
+| [scout/](scout/) | SCOUT | `run --protocol phase2_scout --workers 16` | 3,600 |
+| [claim/](claim/) | CLAIM | `claim-reseed --protocol phase2_claim --workers 16` | 2,400 (merge 5,280) |
 
-Sum of each protocol `status.json` `elapsed_seconds`:
+## Files from this run
 
-| Protocol | Elapsed | Source |
-|----------|---------|--------|
-| pilot_state | 421 s (0h 7m 1s) | `pilot_state/status.json` |
-| scout | 11,633 s (3h 13m 53s) | `scout/status.json` |
-| claim | 10,757 s (2h 59m 17s) | `claim/status.json` |
-| **Phase 2 sim total** | **22,811 s (6h 20m 11s)** | sum of rows above |
+Machine-written outputs in this folder (do not edit by hand):
 
-## Files and folders
-
-| Path | Meaning |
-|------|---------|
-| `README.md` | Phase index (this file) |
-| `pilot_state/` | SMOKE protocol folder (see `pilot_state/README.md`) |
-| `scout/` | SCOUT protocol folder (see `scout/README.md`) |
-| `claim/` | CLAIM protocol folder + merge + Package B (see `claim/README.md`) |
-
-### Common files inside each protocol folder
-
-| File | Meaning |
-|------|---------|
-| `protocol.yaml` | Frozen run config |
-| `provenance.json` | Git/host stamp |
-| `status.json` | Progress + `elapsed_seconds` |
-| `manifest.jsonl` | Resume ledger |
-| `trials.csv` | One row per trial |
-| `packages/` | Analyse exports (Package B) |
-| `timeseries/` | Not retained in this phase after cleanup |
-
-Claim-only extras: `boundary_*.csv/json`, `merged_trials.csv`, `*dmin_bootstrap.csv`.
-
-## Claim-grade takeaways
-
-Cited in [claim/README.md](claim/README.md) and `claim/packages/b/`:
-
-- Fewest dogs (`D_min`) = 1 on compact, split, outlier_rich, and wide at N in {50, 100, 200}
-- Cost rises on wide and outlier_rich; on wide, the cheap good setup (`B*`) = 2 while `D_min` stays 1
-- C1a REJECTED; C1b INCONCLUSIVE
-
-## Cross-phase
-
-- Final report: [../../docs/final_report.md](../../docs/final_report.md)
-- Main scaling plan: [../../docs/main_scaling_plan.md](../../docs/main_scaling_plan.md)
-- Tracker: [../../docs/progress_tracker.md](../../docs/progress_tracker.md)
+Each protocol folder lists what is present. Common names: `protocol.yaml`, `provenance.json`, `status.json`, `manifest.jsonl`, `trials.csv`, `packages/b/`. Claim also has merge / boundary / bootstrap files.

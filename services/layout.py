@@ -26,6 +26,8 @@ from typing import Any
 
 import yaml
 
+from protocols.packaging.generated_notice import with_json_notice, yaml_banner_line
+
 # services/layout.py -> parents[1] = repo root
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PROTOCOLS_ROOT = REPO_ROOT / "protocols"
@@ -179,7 +181,8 @@ def copy_protocol_spec(spec_path: Path | str, protocol_dir: Path | str) -> Path:
     dest = Path(protocol_dir) / "protocol.yaml"
     dest.parent.mkdir(parents=True, exist_ok=True)
     resolved = load_protocol_spec(src)
-    dest.write_text(yaml.safe_dump(resolved, sort_keys=False, default_flow_style=False))
+    body = yaml.safe_dump(resolved, sort_keys=False, default_flow_style=False)
+    dest.write_text(f"{yaml_banner_line()}\n{body}")
     return dest
 
 
@@ -255,5 +258,5 @@ def write_status(
     if extra:
         payload.update(extra)
     path = out / "status.json"
-    path.write_text(json.dumps(payload, indent=2) + "\n")
+    path.write_text(json.dumps(with_json_notice(payload), indent=2) + "\n")
     return path

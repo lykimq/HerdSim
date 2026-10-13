@@ -4,12 +4,12 @@
 # Resume-safe: re-run this script; each campaign skips ok manifest rows.
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
 WORKERS="${WORKERS:-18}"
-LOG="${ROOT}/results/phase5/run_all_ladders.log"
-mkdir -p "${ROOT}/results/phase5"
+LOG="${ROOT}/cli/logs/phase5_ladders.log"
+mkdir -p "${ROOT}/results/phase5" "$(dirname "$LOG")"
 
 log() {
   printf '[%s] %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" | tee -a "$LOG"
