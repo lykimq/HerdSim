@@ -1,6 +1,6 @@
-"""Named methods as factor bundles (sheep_model x dog_controller).
+"""Named methods: a sheep_model x dog_controller pair plus default parameters.
 
-Catalog is limited to methods used by scaling campaigns (plus base Strombom).
+Catalog is limited to methods run by scaling campaigns.
 """
 
 from __future__ import annotations
@@ -19,12 +19,7 @@ def _bundle(
     dog_controller: str,
     params: dict[str, Any],
     description: str = "",
-    stubborn_fraction: float = 0.0,
-    noise_strength: float | None = None,
 ) -> dict[str, Any]:
-    flock_extra: dict[str, Any] = {"stubborn_fraction": stubborn_fraction}
-    if noise_strength is not None:
-        flock_extra["noise_strength"] = noise_strength
     return {
         "id": method_id,
         "name": name,
@@ -32,27 +27,10 @@ def _bundle(
         "sheep_model": sheep_model,
         "dog_controller": dog_controller,
         "default_config": dict(params),
-        "factors": {
-            "model": {
-                "sheep_model": sheep_model,
-                "dog_controller": dog_controller,
-                "preset": "paper",
-            },
-            "flock": flock_extra,
-            "params": dict(params),
-        },
     }
 
 
 METHODS: dict[str, dict[str, Any]] = {
-    "strombom": _bundle(
-        method_id="strombom",
-        name="Strombom 2014",
-        sheep_model="strombom",
-        dog_controller="collect_drive",
-        params=STROMBOM_DEFAULTS.copy(),
-        description="Strombom Collect/Drive with Strombom sheep.",
-    ),
     "strombom_multi": _bundle(
         method_id="strombom_multi",
         name="Strombom Multi-Dog",
@@ -77,29 +55,7 @@ METHODS: dict[str, dict[str, Any]] = {
         params={**STROMBOM_DEFAULTS, "n_shepherds": 2},
         description="Farthest-agent targeting under local observations.",
     ),
-    "communication_free": _bundle(
-        method_id="communication_free",
-        name="Communication-Free",
-        sheep_model="strombom",
-        dog_controller="communication_free",
-        params={**STROMBOM_DEFAULTS, "n_shepherds": 3},
-        description="Independent local Collect/Drive per dog.",
-    ),
 }
-
-
-def list_methods() -> list[dict[str, Any]]:
-    return [
-        {
-            "id": p["id"],
-            "name": p["name"],
-            "description": p.get("description", ""),
-            "sheep_model": p["sheep_model"],
-            "dog_controller": p["dog_controller"],
-            "default_config": dict(p["default_config"]),
-        }
-        for p in METHODS.values()
-    ]
 
 
 def get_method(method_id: str) -> dict[str, Any]:

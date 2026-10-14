@@ -8,7 +8,6 @@ Phase 5 protocols; does not launch campaigns itself.
 
 from __future__ import annotations
 
-from collections.abc import Callable
 from typing import Any, cast
 
 import pandas as pd
@@ -17,69 +16,53 @@ from analysis.coerce import as_float, as_int
 from analysis.frontier import extract_frontier
 
 # Ordinal ladders from the main plan (RQ5). Higher index = richer / farther / more shared.
-OBS_LADDER = (
-    "bearing_only",
-    "local_positions",
-    "global",
-)
+LADDERS: dict[str, tuple[str, ...]] = {
+    "obs_mode": ("bearing_only", "local_positions", "global"),
+    "communication": ("none", "neighbour_broadcast", "global_shared"),
+}
 
+# Sensing-range ladder: multiples of the method sensing radius r_s.
 RANGE_MULTIPLIERS = (0.5, 1.0, 1.5, 2.0)
-
-COMM_LADDER = (
-    "none",
-    "neighbour_broadcast",
-    "global_shared",
-)
-
-
-def information_level(obs_mode: str) -> int:
-    mode = str(obs_mode)
-    if mode in OBS_LADDER:
-        return OBS_LADDER.index(mode)
-    return -1
 
 
 def range_level(sensing_range: float, *, base_range: float) -> int:
     """Map an absolute sensing_range to the nearest plan multiplier index."""
-    if base_range <= 0:
-        return -1
     ratio = float(sensing_range) / float(base_range)
-    best_i = min(
-        range(len(RANGE_MULTIPLIERS)),
-        key=lambda i: abs(RANGE_MULTIPLIERS[i] - ratio),
-    )
-    return int(best_i)
+    return min(range(len(RANGE_MULTIPLIERS)), key=lambda i: abs(RANGE_MULTIPLIERS[i] - ratio))
 
 
-def communication_level(communication: str) -> int:
-    mode = str(communication)
-    if mode in COMM_LADDER:
-        return COMM_LADDER.index(mode)
-    return -1
+def info_level(factor: str, value: object, *, base_range: float | None = None) -> int:
+    """Ladder index of one factor value; -1 when the value is not on the ladder."""
+    if factor == "sensing_range":
+        assert base_range is not None
+        return range_level(as_float(value), base_range=base_range)
+    ladder = LADDERS[factor]
+    return ladder.index(str(value)) if str(value) in ladder else -1
 
 
 def substitution_curves(
     df: pd.DataFrame,
     *,
+    factor: str = "obs_mode",
     theta: float = 0.90,
-    info_col: str = "obs_mode",
+    base_range: float | None = None,
     sheep_col: str = "n_sheep",
-    level_fn: Callable[[object], int] | None = None,
 ) -> pd.DataFrame:
     """Compute D_min at each information level for each N.
 
+    ``factor`` is the ladder column: ``obs_mode``, ``communication``, or
+    ``sensing_range`` (then ``base_range`` must be the method sensing radius r_s).
     Supports claims about whether richer information reduces D_min at fixed R.
-    ``level_fn(value) -> int`` overrides the default obs_mode ladder ranking.
     """
-    if info_col not in df.columns:
-        return pd.DataFrame(columns=[sheep_col, info_col, "info_level", "d_min", "hard_failure"])
+    if factor == "sensing_range" and (base_range is None or float(base_range) <= 0):
+        raise ValueError("base_range must be the method sensing radius (r_s)")
+    if factor not in df.columns:
+        return pd.DataFrame(columns=[sheep_col, factor, "info_level", "d_min", "hard_failure"])
 
-    rank: Callable[[object], int] = level_fn or (lambda v: information_level(str(v)))
     rows: list[dict[str, Any]] = []
-    for key_vals, g in df.groupby([sheep_col, info_col], dropna=False):
+    for key_vals, g in df.groupby([sheep_col, factor], dropna=False):
         n_raw, info = cast(tuple[Any, Any], key_vals)
-        n = as_int(n_raw)
-        level = int(rank(info))
+        level = info_level(factor, info, base_range=base_range)
         if level < 0:
             # Unknown ladder values must not sort before richer levels.
             continue
@@ -87,8 +70,8 @@ def substitution_curves(
         d_min = None if front.empty else front.iloc[0]["d_min"]
         rows.append(
             {
-                sheep_col: n,
-                info_col: info,
+                sheep_col: as_int(n_raw),
+                factor: info,
                 "info_level": level,
                 "d_min": d_min,
                 "hard_failure": d_min is None,
@@ -97,68 +80,23 @@ def substitution_curves(
     out = pd.DataFrame(rows)
     if out.empty:
         return out
-    return out.sort_values([sheep_col, "info_level", info_col]).reset_index(drop=True)
-
-
-def substitution_curves_range(
-    df: pd.DataFrame,
-    *,
-    theta: float = 0.90,
-    range_col: str = "sensing_range",
-    base_range: float | None = None,
-    sheep_col: str = "n_sheep",
-) -> pd.DataFrame:
-    """D_min vs sensing-range ladder (multiples of the method r_s)."""
-    if base_range is None or float(base_range) <= 0:
-        raise ValueError("base_range must be the method sensing radius (r_s)")
-    return substitution_curves(
-        df,
-        theta=theta,
-        info_col=range_col,
-        sheep_col=sheep_col,
-        level_fn=lambda v: range_level(as_float(v), base_range=base_range),
-    )
-
-
-def substitution_curves_communication(
-    df: pd.DataFrame,
-    *,
-    theta: float = 0.90,
-    comm_col: str = "communication",
-    sheep_col: str = "n_sheep",
-) -> pd.DataFrame:
-    """D_min vs communication ladder."""
-    return substitution_curves(
-        df,
-        theta=theta,
-        info_col=comm_col,
-        sheep_col=sheep_col,
-        level_fn=lambda v: communication_level(str(v)),
-    )
+    return out.sort_values([sheep_col, "info_level", factor]).reset_index(drop=True)
 
 
 def summarize_substitution(curves: pd.DataFrame) -> dict[str, Any]:
     """Summarise whether D_min falls as information level rises (first/second step)."""
-    if curves.empty or bool(curves["d_min"].isna().to_numpy().all()):
-        return {
-            "n_compared": 0,
-            "median_delta_dmin": None,
-            "median_first_step_delta": None,
-            "median_second_step_delta": None,
-            "supports_substitution": False,
-            "supports_diminishing_returns": False,
-        }
     deltas = []
     first_steps = []
     second_steps = []
-    for _, g in curves.groupby("n_sheep"):
-        g = g.dropna(subset=["d_min"]).sort_values("info_level")
-        if len(g) < 2:
-            continue
-        deltas.append(float(g.iloc[-1]["d_min"]) - float(g.iloc[0]["d_min"]))
-        first_steps.append(float(g.iloc[1]["d_min"]) - float(g.iloc[0]["d_min"]))
-        if len(g) >= 3:
-            second_steps.append(float(g.iloc[2]["d_min"]) - float(g.iloc[1]["d_min"]))
+    if not curves.empty:
+        for _, g in curves.groupby("n_sheep"):
+            g = g.dropna(subset=["d_min"]).sort_values("info_level")
+            if len(g) < 2:
+                continue
+            deltas.append(float(g.iloc[-1]["d_min"]) - float(g.iloc[0]["d_min"]))
+            first_steps.append(float(g.iloc[1]["d_min"]) - float(g.iloc[0]["d_min"]))
+            if len(g) >= 3:
+                second_steps.append(float(g.iloc[2]["d_min"]) - float(g.iloc[1]["d_min"]))
     if not deltas:
         return {
             "n_compared": 0,

@@ -119,33 +119,23 @@ def select_claim_windows(
     keys = groups + [sheep_col]
     rows: list[dict[str, Any]] = []
     for key_vals, g in rates.groupby(keys, dropna=False):
-        if not isinstance(key_vals, tuple):
-            key_vals = (key_vals,)
         meta = dict(zip(keys, key_vals))
-        ordered = g.sort_values(dog_col)
-        ds = [as_int(v) for v in ordered[dog_col].tolist()]
-        rel = {
-            as_int(row.at[dog_col]): as_float(row.at["reliability"])
-            for _, row in ordered.iterrows()
-        }
-        d_min = _d_min_for_rates(pd.Series(rel).sort_index(), theta)
+        rel_series = pd.Series(
+            g["reliability"].to_numpy(), index=[as_int(d) for d in g[dog_col]]
+        ).sort_index()
+        ds = [as_int(d) for d in rel_series.index]
+        rel = {d: as_float(r) for d, r in zip(ds, rel_series)}
+        d_min = _d_min_for_rates(rel_series, theta)
         chosen: dict[int, str] = {}
         if d_min is None:
             for d in ds[-2:]:
                 chosen[d] = "hard_failure_top"
         else:
-            idx = ds.index(int(d_min))
+            idx = ds.index(d_min)
             for j in (idx - 1, idx, idx + 1):
                 if 0 <= j < len(ds):
                     chosen[ds[j]] = "reliability"
-            d_over = None
-            for i, d in enumerate(ds):
-                if d <= int(d_min) or i + 1 >= len(ds):
-                    continue
-                nxt = ds[i + 1]
-                if rel[d] < theta and rel[nxt] < theta:
-                    d_over = d
-                    break
+            d_over = _d_overcrowd_for_rates(rel_series, d_min=d_min, theta=theta)
             if d_over is not None:
                 i = ds.index(d_over)
                 for d in (d_over, ds[i + 1]):
@@ -236,27 +226,11 @@ def bootstrap_d_min_ci(
     rng = np.random.default_rng(seed)
     rows: list[dict[str, Any]] = []
     for key_vals, g in df.groupby(keys, dropna=False):
-        if not isinstance(key_vals, tuple):
-            key_vals = (key_vals,)
         meta = dict(zip(keys, key_vals))
         point = _d_min_for_rates(
             pd.Series(g.groupby(dog_col)[success_col].mean()).sort_index(),
             theta,
         )
-
-        if seed_col not in g.columns:
-            rows.append(
-                {
-                    **meta,
-                    "d_min": point,
-                    "d_min_ci_low": None,
-                    "d_min_ci_high": None,
-                    "n_boot": 0,
-                    "n_seeds_ref": None,
-                    "note": "missing seed column",
-                }
-            )
-            continue
 
         # Independent within-D Bernoulli bootstrap: each D resamples its own
         # seeds (not paired across the D grid).
@@ -270,28 +244,12 @@ def bootstrap_d_min_ci(
             by_d[as_int(d_key)] = seed_success
             n_seeds_ref = max(n_seeds_ref, len(seed_success))
 
-        if n_seeds_ref < 1 or not by_d:
-            rows.append(
-                {
-                    **meta,
-                    "d_min": point,
-                    "d_min_ci_low": None,
-                    "d_min_ci_high": None,
-                    "n_boot": 0,
-                    "n_seeds_ref": int(n_seeds_ref),
-                }
-            )
-            continue
-
         boot_dmins: list[float] = []
         ordered_d = sorted(by_d.keys())
         for _ in range(int(n_boot)):
             rates = {}
             for d in ordered_d:
                 vec = by_d[d]
-                if len(vec) == 0:
-                    rates[d] = 0.0
-                    continue
                 idx = rng.integers(0, len(vec), size=len(vec))
                 rates[d] = float(np.mean(vec[idx]))
             dmin = _d_min_for_rates(pd.Series(rates).sort_index(), theta)
@@ -356,8 +314,6 @@ def extract_frontier(
         )
 
     for key_vals, g in df.groupby(keys, dropna=False):
-        if not isinstance(key_vals, tuple):
-            key_vals = (key_vals,)
         meta = dict(zip(keys, key_vals))
         rates = pd.Series(g.groupby(dog_col)[success_col].mean()).sort_index()
         d_min = _d_min_for_rates(rates, theta)
@@ -370,15 +326,9 @@ def extract_frontier(
         if d_min is not None and effort_col in g.columns:
             candidates = []
             # Prefer (D, T) cells when time_limit varies; else one T per D.
-            if time_limit_col in g.columns:
-                cell_iter = g.groupby([dog_col, time_limit_col])
-            else:
-                cell_iter = (((d, None), sub) for d, sub in g.groupby(dog_col))
-            for key, sub in cell_iter:
-                if isinstance(key, tuple):
-                    d, t_lim = key
-                else:
-                    d, t_lim = key, None
+            has_t = time_limit_col in g.columns
+            for key, sub in g.groupby([dog_col, time_limit_col] if has_t else [dog_col]):
+                d, t_lim = key if has_t else (key[0], None)
                 r = float(pd.Series(sub.loc[:, success_col]).mean())
                 if r < theta:
                     continue
@@ -394,15 +344,7 @@ def extract_frontier(
                     )
                 else:
                     t_s = float("inf")
-                t_val = (
-                    as_float(t_lim)
-                    if t_lim is not None
-                    else (
-                        float(pd.Series(sub.loc[:, time_limit_col]).median())
-                        if time_limit_col in sub.columns
-                        else float("nan")
-                    )
-                )
+                t_val = as_float(t_lim) if t_lim is not None else float("nan")
                 candidates.append((effort, as_int(d), t_s, t_val))
             if candidates:
                 candidates.sort(key=lambda x: (x[0], x[1], x[2]))
@@ -419,7 +361,6 @@ def extract_frontier(
             "b_star_t": b_star_t,
             "b_star_effort": b_star_effort,
             "hard_failure": d_min is None,
-            "rates": {as_int(k): as_float(v) for k, v in rates.items()},
         }
         rows.append(row)
     return pd.DataFrame(rows)

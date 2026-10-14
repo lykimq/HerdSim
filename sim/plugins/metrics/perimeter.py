@@ -19,20 +19,5 @@ class PerimeterMetric(BaseMetric):
     def id(self) -> str:
         return "perimeter"
 
-    @property
-    def name(self) -> str:
-        return "Flock Perimeter"
-
-    @property
-    def description(self) -> str:
-        return (
-            "Convex-hull perimeter of sheep positions in world units. "
-            "Collinear or two-point flocks use twice the projected span."
-        )
-
-    @property
-    def unit(self) -> str:
-        return "world units"
-
     def compute(self, state: SimulationState) -> float:
         return hull_geometry(state.sheep_positions).perimeter

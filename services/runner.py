@@ -2,27 +2,25 @@
 
 from __future__ import annotations
 
+import itertools
 import json
-import os
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-import numpy as np
 import pandas as pd
-import yaml
 from core.config import resolve_experiment_config
-from core.methods import get_method
 from core.simulation_runner import RunResult, SimulationRunner
 from plugins.metrics.registry import metric_registry
+from plugins.scenarios.collect_hold_gate import hold_radius_for_n
 from plugins.scenarios.registry import scenario_registry
 
 from protocols.packaging.failure_taxonomy import classify_failure
 from protocols.packaging.provenance import build_provenance_stamp, write_provenance
-from protocols.packaging.trial_aggregates import build_trial_metric_fields
-from services.layout import CANONICAL_PROTOCOL, read_status, write_status
+from protocols.packaging.trial_aggregates import TRAJECTORY_METRICS, build_trial_metric_fields
+from services.layout import read_status, write_status
 
 
 @dataclass(frozen=True)
@@ -32,6 +30,7 @@ class ScalingCell:
     seed: int
     initial_layout: str = "compact"
     method: str = "strombom_multi"
+    scenario: str = "drive_to_goal"
     obs_mode: str | None = None
     sensing_range: float | None = None
     communication: str | None = None
@@ -43,6 +42,21 @@ class ScalingCell:
     goal_radius: float = 15.0
     initial_spread: float = 30.0
     measurement_radius: float = 5.0
+    hold_ticks: int | None = None
+    gate_half_width: float | None = None
+    hold_radius_scale: float | None = None
+    hold_radius_min: float | None = None
+    hold_radius_max: float | None = None
+
+
+# Phase 8 collect_hold_gate geometry passed through to the scenario when set.
+HOLD_FIELDS = (
+    "hold_ticks",
+    "gate_half_width",
+    "hold_radius_scale",
+    "hold_radius_min",
+    "hold_radius_max",
+)
 
 
 def goal_radius_for_n(n_sheep: int, radius_at_n50: float = 15.0) -> float:
@@ -51,7 +65,30 @@ def goal_radius_for_n(n_sheep: int, radius_at_n50: float = 15.0) -> float:
 
 
 def scaling_world_overrides(protocol: dict[str, Any], n_sheep: int) -> dict[str, Any]:
-    """Arena fields for one flock size. Interactive drive_to_goal defaults stay put."""
+    """Arena and goal fields for one flock size (drive_to_goal or collect_hold_gate)."""
+    task = str(protocol.get("task", "drive_to_goal"))
+    if task == "collect_hold_gate":
+        hold_center = protocol.get("hold_center", [250.0, 250.0])
+        return {
+            "world_width": float(protocol.get("world_width", 500.0)),
+            "world_height": float(protocol.get("world_height", 500.0)),
+            "goal_center_x": float(hold_center[0]),
+            "goal_center_y": float(hold_center[1]),
+            "goal_radius": hold_radius_for_n(
+                n_sheep,
+                scale=float(protocol.get("hold_radius_scale", 2.5)),
+                radius_min=float(protocol.get("hold_radius_min", 23.0)),
+                radius_max=float(protocol.get("hold_radius_max", 27.0)),
+            ),
+            "initial_spread": float(protocol.get("initial_spread", 30.0)),
+            "measurement_radius": float(protocol.get("measurement_radius", 5.0)),
+            "hold_ticks": int(protocol.get("hold_ticks", 800)),
+            "gate_half_width": float(protocol.get("gate_half_width", 30.0)),
+            "hold_radius_scale": float(protocol.get("hold_radius_scale", 2.5)),
+            "hold_radius_min": float(protocol.get("hold_radius_min", 23.0)),
+            "hold_radius_max": float(protocol.get("hold_radius_max", 27.0)),
+        }
+
     radius_at_n50 = float(protocol.get("goal_radius_at_n50", 15.0))
     center = protocol.get("goal_center", [370.0, 250.0])
     return {
@@ -63,35 +100,6 @@ def scaling_world_overrides(protocol: dict[str, Any], n_sheep: int) -> dict[str,
         "initial_spread": float(protocol.get("initial_spread", 30.0)),
         "measurement_radius": float(protocol.get("measurement_radius", 5.0)),
     }
-
-
-def load_canonical_protocol(path: Path | str | None = None) -> dict[str, Any]:
-    """Load frozen Section 8 protocol from YAML."""
-    if path is None:
-        path = CANONICAL_PROTOCOL
-    path = Path(path)
-    with path.open() as f:
-        return yaml.safe_load(f)
-
-
-def resolve_cell_max_ticks(
-    protocol: dict[str, Any],
-    *,
-    spec: dict[str, Any] | None = None,
-    override: int | None = None,
-) -> int:
-    """Resolve per-cell tick budget from CLI override, protocol spec, then T0."""
-    if override is not None:
-        return int(override)
-    spec = spec or {}
-    if "max_ticks" in spec:
-        return int(spec["max_ticks"])
-    budget = spec.get("time_budget")
-    if budget == "t1":
-        return int(protocol.get("time_limit_t1", 20000))
-    if budget == "t0":
-        return int(protocol.get("time_limit_t0", 10000))
-    return int(protocol.get("time_limit_t0", 10000))
 
 
 SCALING_GROUP_CANDIDATES = (
@@ -152,17 +160,18 @@ def _load_completed(output_dir: Path) -> set[str]:
     return done
 
 
+def _resume_key(row: dict[str, Any]) -> str | None:
+    """Flat ``resume_key`` of a loaded trial row; None when missing or NaN."""
+    key = row.get("resume_key")
+    if key is None or (isinstance(key, float) and key != key):
+        return None
+    text = str(key).strip()
+    return text if text and text.lower() != "nan" else None
+
+
 def _trials_resume_keys(rows: list[dict[str, Any]]) -> set[str]:
     """Resume keys present as flat ``resume_key`` columns in loaded trial rows."""
-    keys: set[str] = set()
-    for row in rows:
-        key = row.get("resume_key")
-        if key is None or (isinstance(key, float) and key != key):
-            continue
-        text = str(key).strip()
-        if text and text.lower() != "nan":
-            keys.add(text)
-    return keys
+    return {key for row in rows if (key := _resume_key(row)) is not None}
 
 
 def _dedupe_trial_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -171,13 +180,8 @@ def _dedupe_trial_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     no_key: list[dict[str, Any]] = []
     order: list[str | None] = []
     for row in rows:
-        key = row.get("resume_key")
-        if key is None or (isinstance(key, float) and key != key):
-            no_key.append(row)
-            order.append(None)
-            continue
-        text = str(key).strip()
-        if not text or text.lower() == "nan":
+        text = _resume_key(row)
+        if text is None:
             no_key.append(row)
             order.append(None)
             continue
@@ -205,10 +209,7 @@ def _append_manifest(output_dir: Path, row: dict[str, Any]) -> None:
 
 def _write_timeseries(history: pd.DataFrame, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    try:
-        history.to_parquet(path, index=False)
-    except (ImportError, ValueError):
-        history.to_csv(path.with_suffix(".csv"), index=False)
+    history.to_parquet(path, index=False)
 
 
 def _trial_row_from_result(
@@ -258,9 +259,9 @@ def _trial_row_from_result(
 
 
 def _run_cell(cell: ScalingCell) -> dict[str, Any]:
-    """Worker entry: run one trial via SimulationRunner (same stack as benchmarks)."""
-    get_method(cell.method)
-    scenario = scenario_registry.get("drive_to_goal")
+    """Worker entry: run one trial via SimulationRunner."""
+    scenario_id = str(cell.scenario or "drive_to_goal")
+    scenario = scenario_registry.get(scenario_id)
     algorithm_params: dict[str, Any] = {
         "max_ticks": cell.max_ticks,
         "initial_layout": cell.initial_layout,
@@ -278,11 +279,16 @@ def _run_cell(cell: ScalingCell) -> dict[str, Any]:
         algorithm_params["sensing_range"] = cell.sensing_range
     if cell.communication is not None:
         algorithm_params["communication"] = cell.communication
+    for name in HOLD_FIELDS:
+        value = getattr(cell, name)
+        if value is not None:
+            algorithm_params[name] = value
+    if scenario_id == "collect_hold_gate":
+        algorithm_params["hold_center"] = [cell.goal_center_x, cell.goal_center_y]
 
     config = resolve_experiment_config(
         scenario=scenario,
         method=cell.method,
-        preset="paper",
         num_sheep=cell.n_sheep,
         num_shepherds=cell.n_shepherds,
         algorithm_params=algorithm_params,
@@ -296,30 +302,15 @@ def _run_cell(cell: ScalingCell) -> dict[str, Any]:
             "max_ticks": cell.max_ticks,
         },
     )
-    runner = SimulationRunner(
+    result = SimulationRunner(
         scenario=scenario,
         metrics=metric_registry.get_all(),
         config=config,
         seed=cell.seed,
-        method=cell.method,
-    )
-    runner.initialize()
-    status = "running"
-    while status == "running":
-        _, _, status = runner.step()
-    final_state = runner.state
-    if final_state is None:
-        raise RuntimeError("scaling trial finished without a simulation state")
-    result = RunResult(
-        success=(status == "success"),
-        total_ticks=final_state.tick,
-        seed=cell.seed,
-        history=runner.recorder.to_dataframe(),
-        final_state=final_state,
-    )
+    ).run()
     row = _trial_row_from_result(
         method=cell.method,
-        scenario_id="drive_to_goal",
+        scenario_id=scenario_id,
         seed=cell.seed,
         config=config,
         result=result,
@@ -343,8 +334,15 @@ def expand_scaling_grid(
     n_seeds: int | None = None,
     seed_mode: str = "scout",
     max_ticks: int | None = None,
+    obs_modes: list[str] | None = None,
+    sensing_ranges: list[float] | None = None,
+    communications: list[str] | None = None,
 ) -> list[ScalingCell]:
-    """Expand a protocol dict into ScalingCell jobs."""
+    """Expand a protocol dict into ScalingCell jobs.
+
+    Size / structure grids leave the information axes unset (None). RQ5 factor
+    sweeps set ``obs_modes`` and optionally ``sensing_ranges`` / ``communications``.
+    """
     methods = methods or [protocol.get("baseline_method", "strombom_multi")]
     layouts = layouts or list(protocol.get("x0_families", ["compact"]))
     n_values = n_values or list(protocol.get("flock_sizes", [50]))
@@ -354,37 +352,35 @@ def expand_scaling_grid(
         n_seeds = int(protocol.get(key, 30))
     master = int(protocol.get("master_seed", 2026))
     ticks = int(protocol.get("time_limit_t0", 10000) if max_ticks is None else max_ticks)
+    scenario = str(protocol.get("task", "drive_to_goal"))
     rng_seeds = [master + i for i in range(int(n_seeds))]
     cells: list[ScalingCell] = []
-    for method in methods:
-        for layout in layouts:
-            for n in n_values:
-                arena = scaling_world_overrides(protocol, int(n))
-                for d in d_values:
-                    for seed in rng_seeds:
-                        cells.append(
-                            ScalingCell(
-                                n_sheep=int(n),
-                                n_shepherds=int(d),
-                                seed=int(seed),
-                                initial_layout=str(layout),
-                                method=str(method),
-                                max_ticks=ticks,
-                                **arena,
-                            )
-                        )
+    for method, layout, obs, sense, comm, n in itertools.product(
+        methods,
+        layouts,
+        obs_modes or [None],
+        sensing_ranges or [None],
+        communications or [None],
+        n_values,
+    ):
+        arena = scaling_world_overrides(protocol, int(n))
+        for d, seed in itertools.product(d_values, rng_seeds):
+            cells.append(
+                ScalingCell(
+                    n_sheep=int(n),
+                    n_shepherds=int(d),
+                    seed=int(seed),
+                    initial_layout=str(layout),
+                    method=str(method),
+                    scenario=scenario,
+                    obs_mode=None if obs is None else str(obs),
+                    sensing_range=None if sense is None else float(sense),
+                    communication=None if comm is None else str(comm),
+                    max_ticks=ticks,
+                    **arena,
+                )
+            )
     return cells
-
-
-def _row_int(row: pd.Series, col: str) -> int:
-    value: object = row.at[col]
-    if isinstance(value, (bool, np.bool_)):
-        return int(value)
-    if isinstance(value, (int, np.integer, float, np.floating)):
-        return int(value)
-    if isinstance(value, str):
-        return int(value)
-    raise TypeError(f"cannot coerce {type(value).__name__} to int")
 
 
 def _row_optional_str(row: pd.Series, col: str) -> str | None:
@@ -407,34 +403,38 @@ def expand_claim_cells_from_boundaries(
     protocol: dict[str, Any],
     boundaries: pd.DataFrame,
     *,
-    methods: list[str] | None = None,
-    layouts: list[str] | None = None,
     n_seeds: int | None = None,
-    max_ticks: int | None = None,
-    sheep_col: str = "n_sheep",
-    dog_col: str = "n_shepherds",
-    layout_col: str = "initial_layout",
-    method_col: str = "method",
 ) -> list[ScalingCell]:
-    """Expand claim-grade seeds on planned (N, D) window cells only."""
+    """Expand claim-grade seeds on planned (N, D) window cells only.
+
+    Boundary rows carry any group columns (method, layout, obs/range/comm) from
+    the scout; missing method / layout fall back to the protocol defaults.
+    """
     if boundaries.empty:
         return []
-    methods = methods or [protocol.get("baseline_method", "strombom_multi")]
-    default_layouts = layouts or list(protocol.get("x0_families", ["compact"]))
     if n_seeds is None:
         n_seeds = int(protocol.get("claim_grade_seeds", 100))
     master = int(protocol.get("master_seed", 2026))
-    ticks = int(protocol.get("time_limit_t0", 10000) if max_ticks is None else max_ticks)
+    ticks = int(protocol.get("time_limit_t0", 10000))
+    scenario = str(protocol.get("task", "drive_to_goal"))
     rng_seeds = [master + i for i in range(int(n_seeds))]
 
     cells: list[ScalingCell] = []
     for _, brow in boundaries.iterrows():
-        n = _row_int(brow, sheep_col)
-        d = _row_int(brow, dog_col)
-        layout_val = _row_optional_str(brow, layout_col)
-        layout_list = [layout_val] if layout_val is not None else list(default_layouts)
-        method_val = _row_optional_str(brow, method_col)
-        method_list = [method_val] if method_val is not None else list(methods)
+        n = int(brow["n_sheep"])
+        d = int(brow["n_shepherds"])
+        layout_val = _row_optional_str(brow, "initial_layout")
+        layout_list = (
+            [layout_val]
+            if layout_val is not None
+            else list(protocol.get("x0_families", ["compact"]))
+        )
+        method_val = _row_optional_str(brow, "method")
+        method_list = (
+            [method_val]
+            if method_val is not None
+            else [protocol.get("baseline_method", "strombom_multi")]
+        )
         obs = _row_optional_str(brow, "obs_mode")
         sense = _row_optional_float(brow, "sensing_range")
         comm = _row_optional_str(brow, "communication")
@@ -449,6 +449,7 @@ def expand_claim_cells_from_boundaries(
                             seed=int(seed),
                             initial_layout=str(layout),
                             method=str(method),
+                            scenario=scenario,
                             obs_mode=obs,
                             sensing_range=sense,
                             communication=comm,
@@ -463,16 +464,15 @@ def run_scaling_grid(
     cells: list[ScalingCell],
     output_dir: Path | str,
     *,
-    protocol: dict[str, Any] | None = None,
-    protocol_id: str = "scaling_grid",
-    max_workers: int | None = None,
+    protocol: dict[str, Any],
+    protocol_id: str,
+    max_workers: int = 1,
     store_timeseries: bool = True,
     resume: bool = True,
 ) -> pd.DataFrame:
     """Run an N x D x seed protocol with resumable manifest and provenance."""
     out = Path(output_dir)
     out.mkdir(parents=True, exist_ok=True)
-    protocol = protocol or {}
     trials_path = out / "trials.csv"
     rows: list[dict[str, Any]] = []
     done: set[str] = set()
@@ -516,28 +516,12 @@ def run_scaling_grid(
     stamp = build_provenance_stamp(
         protocol=protocol,
         seed_list=sorted({c.seed for c in cells}),
-        metric_ids=[
-            "cohesion",
-            "mean_spread",
-            "extent",
-            "perimeter",
-            "hull_area",
-            "flock_density",
-            "aspect_ratio",
-            "fragmentation",
-            "outlier_count",
-            "i_dir",
-            "coverage",
-        ],
+        metric_ids=list(TRAJECTORY_METRICS),
         extra={"n_cells": len(cells), "n_pending": len(pending)},
     )
     write_provenance(out / "provenance.json", stamp)
 
     workers = max_workers
-    if workers is None:
-        cpu = os.cpu_count() or 2
-        workers = max(1, cpu - 1)
-
     n_done_so_far = len(done)
 
     def _flush_trials_csv() -> None:

@@ -85,7 +85,15 @@ def _pack_model(params: dict[str, Any], d: np.ndarray, yhat: np.ndarray, k: int)
 
 def _empty_fit_result() -> dict[str, Any]:
     """Result shape used when there are no usable frontier points."""
-    return {"models": {}, "best": None, "n_points": 0, "state_models": {}, "cv": {}}
+    return {
+        "models": {},
+        "best": None,
+        "n_points": 0,
+        "state_models": {},
+        "cv": {},
+        "delta_aic_vs_power": {},
+        "prefers_piecewise_or_state": False,
+    }
 
 
 # Predictor used by leave-one-N CV: fit on (n_train, d_train), then predict D_min at n_i.
@@ -222,8 +230,6 @@ def _fit_piecewise(n: np.ndarray, d: np.ndarray) -> dict[str, Any] | None:
     for i in range(1, m - 2):
         n1, d1 = n_s[: i + 1], d_s[: i + 1]
         n2, d2 = n_s[i + 1 :], d_s[i + 1 :]
-        if len(n1) < 2 or len(n2) < 2:
-            continue
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", np.exceptions.RankWarning)
             b1, a1 = np.polyfit(n1, d1, 1)
@@ -251,13 +257,7 @@ def _fit_piecewise(n: np.ndarray, d: np.ndarray) -> dict[str, Any] | None:
     # Map ordered predictions back to the original row order for RMSE.
     yhat_full = np.empty(m)
     yhat_full[best["order"]] = best["yhat_ordered"]
-    k = 5  # break + 2 slopes + 2 intercepts
-    return {
-        "params": best["params"],
-        "rmse": _rmse(d, yhat_full),
-        "aic": _aic(best["sse"], m, k),
-        "bic": _bic(best["sse"], m, k),
-    }
+    return _pack_model(best["params"], d, yhat_full, k=5)  # break + 2 slopes + 2 intercepts
 
 
 def _fit_constant_model(d: np.ndarray) -> dict[str, Any]:
@@ -376,10 +376,7 @@ def _fit_state_models(
         state_models[str(state)] = {
             "best": sub_fit.get("best"),
             "n_points": sub_fit.get("n_points"),
-            "models": {
-                k: {kk: vv for kk, vv in v.items() if kk != "yhat_ordered"}
-                for k, v in sub_fit.get("models", {}).items()
-            },
+            "models": sub_fit.get("models", {}),
         }
     return state_models
 
@@ -435,9 +432,7 @@ def fit_scaling_models(
     present with multiple levels, also fit per-state models and a pooled
     state-conditioned summary (RQ6 / C6a-C6b).
     """
-    prepared = _prepare_frontier_points(
-        frontier, sheep_col=sheep_col, dmin_col=dmin_col
-    )
+    prepared = _prepare_frontier_points(frontier, sheep_col=sheep_col, dmin_col=dmin_col)
     if prepared is None:
         return _empty_fit_result()
     work, n, d = prepared

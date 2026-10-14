@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 import numpy as np
-from core.observation import ShepherdObservation, resolve_sensing_range
+from core.observation import ShepherdObservation, sensing_range
 from core.simulation_state import SimulationState
 from core.world.goal import resolve_goal_center
 from methods.strombom.config import STROMBOM_DEFAULTS
@@ -17,11 +17,7 @@ from methods.strombom.heuristics import (
 )
 
 from .base import BaseDogController
-from .helpers import apply_dog_speeds, empty_dog_velocities, position_behind_target
-
-
-def _sensing_radius(config: dict[str, Any]) -> float:
-    return resolve_sensing_range(config)
+from .helpers import empty_dog_velocities, finalize_dog_step, position_behind_target
 
 
 def _union_sheep_positions(obs_list: list[ShepherdObservation]) -> np.ndarray:
@@ -71,7 +67,7 @@ def _sheep_for_dog(
         else:
             selected = [own]
         origin = state.shepherd_positions[dog_index]
-        radius = _sensing_radius(config)
+        radius = sensing_range(config)
         for obs in observations:
             if int(obs.shepherd_index) == dog_index:
                 continue
@@ -87,10 +83,6 @@ class CollectDriveMultiController(BaseDogController):
     @property
     def id(self) -> str:
         return "collect_drive_multi"
-
-    @property
-    def name(self) -> str:
-        return "Collect/Drive Multi"
 
     @property
     def default_config(self) -> dict[str, Any]:
@@ -114,26 +106,33 @@ class CollectDriveMultiController(BaseDogController):
         config: dict[str, Any],
     ) -> SimulationState:
         velocities = empty_dog_velocities(state)
-        lines: list[dict[str, Any]] = []
-        mode = "drive"
-        if not observations:
-            return state.copy_with(shepherd_velocities=velocities)
-
         m = state.n_shepherds
         if m == 0:
             return state.copy_with(shepherd_velocities=velocities)
 
-        goal = resolve_goal_center(state, config)
+        phase = str(state.metadata.get("chg_phase", "collect"))
+        if phase == "exit":
+            # Drive toward the right-wall gate center (collect_hold_gate task).
+            goal = np.array(
+                [float(state.world.width), 0.5 * float(state.world.height)],
+                dtype=float,
+            )
+        else:
+            goal = resolve_goal_center(state, config)
         c_offset = collect_offset(config)
         scale = float(config.get("collect_threshold_scale", 1.0))
         any_collect = False
 
         for i in range(m):
-            if not state.shepherd_active[i]:
-                continue
             sheep_pos = _sheep_for_dog(i, observations, state, config)
             if sheep_pos.shape[0] == 0:
                 continue
+            # Sheep already past the gate are ignored for steering.
+            if phase == "exit":
+                active = sheep_pos[:, 0] < float(state.world.width)
+                if not np.any(active):
+                    continue
+                sheep_pos = sheep_pos[active]
             centroid = np.mean(sheep_pos, axis=0)
             threshold = compute_threshold(sheep_pos.shape[0], config["r_a"]) * scale
             distances = np.linalg.norm(sheep_pos - centroid, axis=1)
@@ -152,13 +151,6 @@ class CollectDriveMultiController(BaseDogController):
                     i,
                     spaced,
                     proximity_sheep=state.sheep_positions,
-                )
-                lines.append(
-                    {
-                        "from": state.shepherd_positions[i].tolist(),
-                        "to": spaced.tolist(),
-                        "mode": "drive",
-                    }
                 )
             else:
                 any_collect = True
@@ -182,24 +174,10 @@ class CollectDriveMultiController(BaseDogController):
                     target,
                     proximity_sheep=state.sheep_positions,
                 )
-                lines.append(
-                    {
-                        "from": state.shepherd_positions[i].tolist(),
-                        "to": sheep_pos[sheep_idx].tolist(),
-                        "mode": "collect",
-                        "sheep_index": sheep_idx,
-                    }
-                )
 
-        if any_collect:
-            mode = "collect"
-
-        velocities = apply_dog_speeds(velocities, state, config)
-        metadata = dict(state.metadata)
-        metadata["herding_mode"] = mode
-        metadata["assignment_lines"] = lines
-        return state.copy_with(
-            shepherd_positions=state.shepherd_positions + velocities,
-            shepherd_velocities=velocities,
-            metadata=metadata,
+        return finalize_dog_step(
+            state,
+            velocities,
+            config,
+            metadata_updates={"herding_mode": "collect" if any_collect else "drive"},
         )

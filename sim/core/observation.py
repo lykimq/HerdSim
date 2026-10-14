@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
@@ -14,21 +14,16 @@ from core.world.goal import resolve_goal_center
 
 @dataclass
 class ShepherdObservation:
-    """What one active shepherd can see on this tick."""
+    """What one shepherd can see on this tick."""
 
     shepherd_index: int
     self_position: np.ndarray
-    self_velocity: np.ndarray
     goal_center: np.ndarray | None
     sheep_positions: np.ndarray
     sheep_velocities: np.ndarray
     sheep_indices: np.ndarray
-    other_shepherd_positions: np.ndarray
-    other_shepherd_indices: np.ndarray
     bearings_to_sheep: np.ndarray | None = None
-    distances_to_sheep: np.ndarray | None = None
     mode: str = "global"
-    messages: list[dict[str, Any]] = field(default_factory=list)
 
     @property
     def n_sheep_seen(self) -> int:
@@ -55,11 +50,7 @@ class BaseObservationModel(ABC):
     def observe_all(
         self, state: SimulationState, config: dict[str, Any]
     ) -> list[ShepherdObservation]:
-        return [
-            self.observe(state, i, config)
-            for i in range(state.n_shepherds)
-            if bool(state.shepherd_active[i])
-        ]
+        return [self.observe(state, i, config) for i in range(state.n_shepherds)]
 
 
 def _goal_array(state: SimulationState, config: dict[str, Any]) -> np.ndarray | None:
@@ -74,56 +65,29 @@ def _build_observation(
     shepherd_index: int,
     *,
     sheep_mask: np.ndarray,
-    other_mask: np.ndarray,
     mode: str,
-    bearings: np.ndarray | None = None,
-    distances: np.ndarray | None = None,
+    bearings: np.ndarray,
     config: dict[str, Any],
 ) -> ShepherdObservation:
     sheep_idx = np.where(sheep_mask)[0]
-    other_idx = np.where(other_mask)[0]
     return ShepherdObservation(
         shepherd_index=shepherd_index,
         self_position=state.shepherd_positions[shepherd_index].copy(),
-        self_velocity=state.shepherd_velocities[shepherd_index].copy(),
         goal_center=_goal_array(state, config),
         sheep_positions=state.sheep_positions[sheep_idx].copy(),
         sheep_velocities=state.sheep_velocities[sheep_idx].copy(),
         sheep_indices=sheep_idx.astype(int),
-        other_shepherd_positions=state.shepherd_positions[other_idx].copy(),
-        other_shepherd_indices=other_idx.astype(int),
-        bearings_to_sheep=None if bearings is None else bearings.copy(),
-        distances_to_sheep=None if distances is None else distances.copy(),
+        bearings_to_sheep=bearings,
         mode=mode,
     )
 
 
-def resolve_sensing_range(
-    config: dict[str, Any],
-    *,
-    sensing_scale: float = 1.0,
-) -> float:
-    """Absolute sensing radius from config, scaled by a per-dog factor."""
+def sensing_range(config: dict[str, Any]) -> float:
+    """Absolute dog sensing radius: ``sensing_range`` factor, else the method r_s / radius."""
     base = config.get("sensing_range")
     if base is None:
         base = config.get("r_s", config.get("radius", 65.0))
-    return float(base) * float(sensing_scale)
-
-
-def sensing_range_for_shepherd(
-    state: SimulationState,
-    shepherd_index: int,
-    config: dict[str, Any],
-) -> float:
-    """Per-dog sensing radius including ``shepherd_sensing_scale``."""
-    return resolve_sensing_range(
-        config,
-        sensing_scale=float(state.shepherd_sensing_scale[shepherd_index]),
-    )
-
-
-def _sensing_range(state: SimulationState, shepherd_index: int, config: dict[str, Any]) -> float:
-    return sensing_range_for_shepherd(state, shepherd_index, config)
+    return float(base)
 
 
 class GlobalObservation(BaseObservationModel):
@@ -134,20 +98,13 @@ class GlobalObservation(BaseObservationModel):
     def observe(
         self, state: SimulationState, shepherd_index: int, config: dict[str, Any]
     ) -> ShepherdObservation:
-        sheep_mask = np.ones(state.n_sheep, dtype=bool)
-        other_mask = np.ones(state.n_shepherds, dtype=bool)
-        other_mask[shepherd_index] = False
         diffs = state.sheep_positions - state.shepherd_positions[shepherd_index]
-        distances = np.linalg.norm(diffs, axis=1)
-        bearings = np.arctan2(diffs[:, 1], diffs[:, 0])
         return _build_observation(
             state,
             shepherd_index,
-            sheep_mask=sheep_mask,
-            other_mask=other_mask,
+            sheep_mask=np.ones(state.n_sheep, dtype=bool),
             mode="global",
-            bearings=bearings,
-            distances=distances,
+            bearings=np.arctan2(diffs[:, 1], diffs[:, 0]),
             config=config,
         )
 
@@ -161,36 +118,29 @@ class LocalPositionsObservation(BaseObservationModel):
         self, state: SimulationState, shepherd_index: int, config: dict[str, Any]
     ) -> ShepherdObservation:
         origin = state.shepherd_positions[shepherd_index]
-        radius = _sensing_range(state, shepherd_index, config)
+        radius = sensing_range(config)
         sheep_dist = np.linalg.norm(state.sheep_positions - origin, axis=1)
         sheep_mask = sheep_dist <= radius
-        other_dist = np.linalg.norm(state.shepherd_positions - origin, axis=1)
-        other_mask = (other_dist <= radius) & (np.arange(state.n_shepherds) != shepherd_index)
         diffs = state.sheep_positions[sheep_mask] - origin
-        distances = np.linalg.norm(diffs, axis=1) if diffs.size else np.zeros(0)
         bearings = np.arctan2(diffs[:, 1], diffs[:, 0]) if diffs.size else np.zeros(0)
         return _build_observation(
             state,
             shepherd_index,
             sheep_mask=sheep_mask,
-            other_mask=other_mask,
             mode="local_positions",
             bearings=bearings,
-            distances=distances,
             config=config,
         )
 
 
-def _bearing_proxy_distance(
-    state: SimulationState, shepherd_index: int, config: dict[str, Any]
-) -> float:
+def _bearing_proxy_distance(config: dict[str, Any]) -> float:
     """Cartesian depth for direction-only sheep proxies.
 
     Controllers treat sheep_positions as metric points. Proxies on the unit
     circle look closer than the Strombom stop radius, so dogs never move.
     Use sensing range and stay outside the stop radius.
     """
-    radius = _sensing_range(state, shepherd_index, config)
+    radius = sensing_range(config)
     stop_multiple = float(config.get("shepherd_stop_multiple", 3.0))
     r_a = float(config.get("r_a", 2.0))
     return max(float(radius), stop_multiple * r_a + r_a)
@@ -215,68 +165,19 @@ class BearingOnlyObservation(BaseObservationModel):
     ) -> ShepherdObservation:
         local = LocalPositionsObservation().observe(state, shepherd_index, config)
         if local.n_sheep_seen and local.bearings_to_sheep is not None:
-            proxy = _bearing_proxy_distance(state, shepherd_index, config)
+            proxy = _bearing_proxy_distance(config)
             local.sheep_positions = _positions_from_bearings(
                 local.self_position, local.bearings_to_sheep, proxy
             )
-            local.distances_to_sheep = None
         local.mode = "bearing_only"
         return local
-
-
-class NoisyBearingObservation(BaseObservationModel):
-    @property
-    def id(self) -> str:
-        return "noisy_bearing"
-
-    def observe(
-        self, state: SimulationState, shepherd_index: int, config: dict[str, Any]
-    ) -> ShepherdObservation:
-        obs = BearingOnlyObservation().observe(state, shepherd_index, config)
-        sigma = float(config.get("noise_sigma", 0.0))
-        if sigma > 0.0 and obs.n_sheep_seen and obs.bearings_to_sheep is not None:
-            noise = state.rng.normal(0.0, sigma, size=obs.bearings_to_sheep.shape)
-            bearings = obs.bearings_to_sheep + noise
-            obs.bearings_to_sheep = bearings
-            proxy = _bearing_proxy_distance(state, shepherd_index, config)
-            obs.sheep_positions = _positions_from_bearings(obs.self_position, bearings, proxy)
-        obs.mode = "noisy_bearing"
-        return obs
-
-
-class IntermittentObservation(BaseObservationModel):
-    """Cache observations and refresh every observation_frequency ticks."""
-
-    def __init__(self, inner: BaseObservationModel | None = None) -> None:
-        self._inner = inner or GlobalObservation()
-        self._cache: dict[int, ShepherdObservation] = {}
-        self._last_tick: dict[int, int] = {}
-
-    @property
-    def id(self) -> str:
-        return "intermittent"
-
-    def observe(
-        self, state: SimulationState, shepherd_index: int, config: dict[str, Any]
-    ) -> ShepherdObservation:
-        freq = max(1, int(config.get("observation_frequency", 1)))
-        last = self._last_tick.get(shepherd_index, -(10**9))
-        if shepherd_index not in self._cache or state.tick - last >= freq:
-            obs = self._inner.observe(state, shepherd_index, config)
-            obs.mode = "intermittent"
-            self._cache[shepherd_index] = obs
-            self._last_tick[shepherd_index] = state.tick
-        return self._cache[shepherd_index]
 
 
 __all__ = [
     "BaseObservationModel",
     "BearingOnlyObservation",
     "GlobalObservation",
-    "IntermittentObservation",
     "LocalPositionsObservation",
-    "NoisyBearingObservation",
     "ShepherdObservation",
-    "resolve_sensing_range",
-    "sensing_range_for_shepherd",
+    "sensing_range",
 ]

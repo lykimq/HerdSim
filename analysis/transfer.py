@@ -17,38 +17,25 @@ from analysis.coerce import as_int
 from analysis.frontier import extract_frontier
 
 
-def _missing_grid_value(value: float | None) -> bool:
-    if value is None:
-        return True
-    try:
-        number = float(value)
-    except (TypeError, ValueError):
-        return True
-    return number != number
+def _missing(value: Any) -> bool:
+    """None or NaN (frontier columns mixing None and ints load as float NaN)."""
+    return value is None or bool(pd.isna(value))
 
 
-def _classify_d_min_transfer(
-    base_dmin: float | None,
-    other_dmin: float | None,
-) -> str:
+def _classify_d_min_transfer(base_dmin: Any, other_dmin: Any) -> str:
     """Shared only when both sides have the same grid D_min."""
-    if _missing_grid_value(base_dmin) or _missing_grid_value(other_dmin):
+    if _missing(base_dmin) or _missing(other_dmin):
         return "absent"
-    assert base_dmin is not None and other_dmin is not None
     if int(base_dmin) == int(other_dmin):
         return "shared"
     return "shifted"
 
 
-def _classify_overcrowd_transfer(
-    base_d: float | None,
-    other_d: float | None,
-    base_n: float,
-) -> str:
-    if base_d is None and other_d is None:
+def _classify_overcrowd_transfer(base_d: Any, other_d: Any, base_n: float) -> str:
+    if _missing(base_d) and _missing(other_d):
         return "absent"
-    if base_d is None or other_d is None:
-        return "absent" if base_d is None and other_d is None else "shifted"
+    if _missing(base_d) or _missing(other_d):
+        return "shifted"
     br = float(base_d) / max(float(base_n), 1.0)
     or_ = float(other_d) / max(float(base_n), 1.0)
     ratio = max(br, or_) / max(min(br, or_), 1e-9)
@@ -146,14 +133,13 @@ def build_transfer_table(
     *,
     baseline: str,
     theta: float = 0.90,
-    feature: str | None = None,
     group_cols: list[str] | None = None,
     sheep_col: str = "n_sheep",
 ) -> pd.DataFrame:
     """Build a transfer table comparing frontier / mechanism features across methods.
 
-    Labels follow the plan: shared / shifted / absent. When ``feature`` is None,
-    emits rows for d_min, overcrowd, i_dir_signature, and coverage_saturation.
+    Labels follow the plan: shared / shifted / absent. Emits rows for d_min and
+    overcrowd (per N), plus i_dir_signature and coverage_saturation (per method).
     Multi-layout trials are compared within each layout when ``group_cols`` is
     set (default: ``initial_layout`` when it has more than one level).
     """
@@ -161,17 +147,6 @@ def build_transfer_table(
         raise KeyError(f"baseline method '{baseline}' missing from trials_by_method")
 
     groups = list(group_cols) if group_cols is not None else _default_group_cols(trials_by_method)
-    features = (
-        [feature]
-        if feature
-        else [
-            "d_min",
-            "overcrowd",
-            "i_dir_signature",
-            "coverage_saturation",
-        ]
-    )
-
     fronts = {
         m: extract_frontier(df, theta=theta, sheep_col=sheep_col, group_cols=groups)
         for m, df in trials_by_method.items()
@@ -183,72 +158,64 @@ def build_transfer_table(
     idir_r = {m: _idir_correlation(df) for m, df in trials_by_method.items()}
     cov_flags = {m: _coverage_saturation_flag(df, theta) for m, df in trials_by_method.items()}
 
-    base_keys = set(lookups[baseline])
     rows: list[dict[str, Any]] = []
+
+    def add(
+        feat: str,
+        n: int | None,
+        meta: dict[str, Any],
+        method: str,
+        bval: Any,
+        oval: Any,
+        label: str,
+    ) -> None:
+        rows.append(
+            {
+                "feature": feat,
+                "n_sheep": n,
+                **meta,
+                "baseline": baseline,
+                "method": method,
+                "baseline_value": bval,
+                "method_value": oval,
+                "transfer_label": label,
+            }
+        )
+
+    no_group = {c: None for c in groups}
     for method in trials_by_method:
         if method == baseline:
             continue
-        for feat in features:
-            if feat == "i_dir_signature":
-                label = _classify_idir_transfer(idir_r[baseline], idir_r[method])
-                rows.append(
-                    {
-                        "feature": feat,
-                        "n_sheep": None,
-                        **{c: None for c in groups},
-                        "baseline": baseline,
-                        "method": method,
-                        "baseline_value": idir_r[baseline],
-                        "method_value": idir_r[method],
-                        "transfer_label": label,
-                    }
-                )
-                continue
-            if feat == "coverage_saturation":
-                label = _classify_flag_transfer(cov_flags[baseline], cov_flags[method])
-                rows.append(
-                    {
-                        "feature": feat,
-                        "n_sheep": None,
-                        **{c: None for c in groups},
-                        "baseline": baseline,
-                        "method": method,
-                        "baseline_value": cov_flags[baseline],
-                        "method_value": cov_flags[method],
-                        "transfer_label": label,
-                    }
-                )
-                continue
-
-            shared_keys = sorted(base_keys.intersection(lookups[method]))
+        shared_keys = sorted(set(lookups[baseline]).intersection(lookups[method]))
+        for feat, col in (("d_min", "d_min"), ("overcrowd", "d_overcrowd")):
             for key in shared_keys:
-                b = lookups[baseline][key]
-                o = lookups[method][key]
-                n = key[-1]
-                group_meta = {c: key[i] for i, c in enumerate(groups)}
+                bval = lookups[baseline][key].get(col)
+                oval = lookups[method][key].get(col)
+                n = int(key[-1])
                 if feat == "d_min":
-                    label = _classify_d_min_transfer(b.get("d_min"), o.get("d_min"))
-                    bval, oval = b.get("d_min"), o.get("d_min")
-                elif feat == "overcrowd":
-                    label = _classify_overcrowd_transfer(
-                        b.get("d_overcrowd"), o.get("d_overcrowd"), float(n)
-                    )
-                    bval, oval = b.get("d_overcrowd"), o.get("d_overcrowd")
+                    label = _classify_d_min_transfer(bval, oval)
                 else:
-                    label = "absent"
-                    bval = oval = None
-                rows.append(
-                    {
-                        "feature": feat,
-                        "n_sheep": int(n),
-                        **group_meta,
-                        "baseline": baseline,
-                        "method": method,
-                        "baseline_value": bval,
-                        "method_value": oval,
-                        "transfer_label": label,
-                    }
-                )
+                    label = _classify_overcrowd_transfer(bval, oval, float(n))
+                meta = {c: key[i] for i, c in enumerate(groups)}
+                add(feat, n, meta, method, bval, oval, label)
+        add(
+            "i_dir_signature",
+            None,
+            no_group,
+            method,
+            idir_r[baseline],
+            idir_r[method],
+            _classify_idir_transfer(idir_r[baseline], idir_r[method]),
+        )
+        add(
+            "coverage_saturation",
+            None,
+            no_group,
+            method,
+            cov_flags[baseline],
+            cov_flags[method],
+            _classify_flag_transfer(cov_flags[baseline], cov_flags[method]),
+        )
     return pd.DataFrame(rows)
 
 

@@ -19,6 +19,9 @@ import pandas as pd
 # coverage = fraction of sheep near dogs (higher = more protective).
 _LOWER_IS_RISK = {"fragmentation", "coverage"}
 
+# Frozen RQ7 evaluation grid (canonical rq7_eval_start/stop/step).
+DEFAULT_EVAL_TICKS = list(range(1000, 8000 + 1, 200))
+
 
 def _auroc(scores: np.ndarray, labels: np.ndarray) -> float:
     """Compute AUROC without sklearn."""
@@ -40,6 +43,7 @@ def _auroc(scores: np.ndarray, labels: np.ndarray) -> float:
 def _feature_matrix(
     ts: pd.DataFrame,
     feature_cols: list[str],
+    tick_col: str = "tick",
 ) -> tuple[np.ndarray, np.ndarray, list[str]]:
     used: list[str] = []
     cols: list[np.ndarray] = []
@@ -50,7 +54,7 @@ def _feature_matrix(
         cols.append(ts[col].astype(float).to_numpy())
     if not cols:
         return np.zeros(len(ts)), np.zeros((len(ts), 0)), []
-    ticks = ts["tick"].to_numpy() if "tick" in ts.columns else np.arange(len(ts))
+    ticks = ts[tick_col].to_numpy()
     return ticks.astype(float), np.column_stack(cols), used
 
 
@@ -110,6 +114,7 @@ def evaluate_early_warning(
     score uses only ticks in (t - window_w, t]. The label is 1 when this trial
     fails inside (t, t + horizon_k]. Lead time is the gap from the first
     opening-threshold crossing until failure and may be longer than horizon_k.
+    Per-eval-tick ``scores`` and ``labels`` are returned for campaign-level folds.
     """
     feature_cols = feature_cols or [
         c
@@ -134,12 +139,15 @@ def evaluate_early_warning(
         "failed_trial": not success,
         "horizon_k": horizon_k,
         "window_w": window_w,
+        "eval_ticks": [],
+        "scores": [],
+        "labels": [],
     }
     if timeseries.empty or tick_col not in timeseries.columns:
         return empty
 
     ts = timeseries.sort_values(tick_col).reset_index(drop=True)
-    ticks, values, used = _feature_matrix(ts, feature_cols)
+    ticks, values, used = _feature_matrix(ts, feature_cols, tick_col)
     t_end = int(ts[tick_col].iloc[-1])
     limit = int(time_limit) if time_limit is not None else t_end
     if eval_ticks is None:
@@ -175,18 +183,10 @@ def evaluate_early_warning(
         "window_w": window_w,
         "failed_trial": not success,
         "eval_ticks": valid,
+        "scores": scores.tolist(),
+        "labels": labels.tolist(),
         "time_limit": limit,
     }
-
-
-def default_eval_ticks(
-    *,
-    start: int = 1000,
-    stop: int = 8000,
-    step: int = 200,
-) -> list[int]:
-    """Frozen RQ7 evaluation grid (inclusive start, inclusive stop when aligned)."""
-    return list(range(int(start), int(stop) + 1, int(step)))
 
 
 def _fit_nd_scores(
@@ -227,7 +227,7 @@ def evaluate_early_warning_campaign(
     (N, D) model is fit on other flock sizes and applied with that training
     standardization.
     """
-    ticks = eval_ticks if eval_ticks is not None else default_eval_ticks()
+    ticks = eval_ticks if eval_ticks is not None else DEFAULT_EVAL_TICKS
     if not trial_rows:
         return {
             "n_trials": 0,
@@ -255,18 +255,7 @@ def evaluate_early_warning_campaign(
             time_limit=time_limit,
         )
         per_trial_eval.append(ev)
-        frame = ts.sort_values("tick") if "tick" in ts.columns else ts
-        tick_arr, values, used = _feature_matrix(frame.reset_index(drop=True), ev["feature_cols"])
-        valid = ev.get("eval_ticks") or []
-        scores = _window_means(tick_arr, values, used, np.asarray(valid, dtype=float), window_w)
-        t_end = int(frame["tick"].iloc[-1]) if "tick" in frame.columns and len(frame) else 0
-        limit = int(time_limit) if time_limit is not None else t_end
-        for t, score in zip(valid, scores):
-            if int(t) + int(horizon_k) > limit:
-                continue
-            label = 0
-            if not success and int(t) < t_end <= int(t) + int(horizon_k):
-                label = 1
+        for score, label in zip(ev["scores"], ev["labels"]):
             records.append(
                 {
                     n_col: int(n_sheep),

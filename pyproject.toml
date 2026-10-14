@@ -69,10 +69,5 @@ select = ["E", "F", "I", "W", "UP"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
-markers = [
-    "stress: heavier / longer runs (included in make test)",
-]
 
-# Typecheck settings live in pyrightconfig.json (basedpyright reads that first).
-[tool.pyright]
-pythonVersion = "3.11"
+# Typecheck settings live in pyrightconfig.json.

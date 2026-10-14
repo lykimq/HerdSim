@@ -17,112 +17,59 @@ from services.layout import (
     load_campaign_protocol,
     resolve_protocol_output,
     resolve_upstream_trials,
-    runner_kind,
 )
 
 
-def _script_cmd(script: str, args: Sequence[str]) -> list[str]:
-    return [sys.executable, str(CLI_DIR / script), *args]
-
-
-def _run(cmd: list[str]) -> None:
+def _run(script: str, args: Sequence[str]) -> None:
+    cmd = [sys.executable, str(CLI_DIR / script), *args]
     print("+", " ".join(cmd), flush=True)
     subprocess.run(cmd, check=True, cwd=REPO_ROOT)
 
 
-def _override_flags(args: argparse.Namespace, *, kind: str) -> list[str]:
+def _override_flags(args: argparse.Namespace) -> list[str]:
+    """Pass manual grid overrides (smoke runs) through to run_grid.py."""
     flags: list[str] = []
-    if kind == "factor":
-        if getattr(args, "methods", None) and len(args.methods) == 1:
-            flags.extend(["--method", args.methods[0]])
-        if getattr(args, "n", None):
-            flags.extend(["--n", *[str(x) for x in args.n]])
-        if getattr(args, "d", None):
-            flags.extend(["--d", *[str(x) for x in args.d]])
-        if getattr(args, "seeds", None) is not None:
-            flags.extend(["--seeds", str(args.seeds)])
-        if getattr(args, "no_resume", False):
-            flags.append("--no-resume")
-        return flags
-
-    if getattr(args, "methods", None):
-        flags.extend(["--methods", *args.methods])
-    if getattr(args, "layouts", None):
-        flags.extend(["--layouts", *args.layouts])
-    if getattr(args, "n", None):
-        flags.extend(["--n", *[str(x) for x in args.n]])
-    if getattr(args, "d", None):
-        flags.extend(["--d", *[str(x) for x in args.d]])
-    if getattr(args, "seeds", None) is not None:
+    for name in ("methods", "layouts", "n", "d"):
+        values = getattr(args, name)
+        if values:
+            flags.extend([f"--{name}", *[str(v) for v in values]])
+    if args.seeds is not None:
         flags.extend(["--seeds", str(args.seeds)])
-    if getattr(args, "max_ticks", None) is not None:
+    if args.max_ticks is not None:
         flags.extend(["--max-ticks", str(args.max_ticks)])
-    if getattr(args, "no_timeseries", False):
-        flags.append("--no-timeseries")
-    if getattr(args, "no_resume", False):
-        flags.append("--no-resume")
     return flags
 
 
 def run_campaign(args: argparse.Namespace) -> None:
-    verb = str(args.verb)
     path, spec = load_campaign_protocol(args.protocol)
     output = (
         Path(args.output).resolve() if args.output is not None else resolve_protocol_output(spec)
     )
-    output.mkdir(parents=True, exist_ok=True)
-    workers = str(int(args.workers))
+    common = ["--protocol", str(path), "--output", str(output), "--workers", str(args.workers)]
+    if args.no_timeseries:
+        common.append("--no-timeseries")
 
-    if verb == "run":
+    if args.verb == "run":
         if str(spec.get("seed_mode", "scout")) == "claim":
             raise SystemExit(
                 f"Protocol {spec['protocol_id']} has seed_mode=claim; "
                 + "use claim-reseed, not run"
             )
-        kind = runner_kind(spec)
-        script = "run_factor_sweep.py" if kind == "factor" else "run_grid.py"
-        cmd = _script_cmd(
-            script,
-            [
-                "--protocol",
-                str(path),
-                "--output",
-                str(output),
-                "--workers",
-                workers,
-                *_override_flags(args, kind=kind),
-            ],
-        )
-        _run(cmd)
+        if args.no_resume:
+            common.append("--no-resume")
+        _run("run_grid.py", [*common, *_override_flags(args)])
         return
 
-    if verb in ("claim-plan", "claim-reseed"):
-        upstream = resolve_upstream_trials(spec, override=getattr(args, "upstream_trials", None))
-        if not upstream.is_file():
-            raise SystemExit(f"Upstream trials not found: {upstream}")
-        cmd = _script_cmd(
-            "plan_claim_cells.py",
-            [
-                "--scout-trials",
-                str(upstream),
-                "--protocol",
-                str(path),
-                "--output",
-                str(output),
-            ],
-        )
-        if verb == "claim-plan":
-            cmd.append("--plan-only")
-        else:
-            cmd.extend(["--workers", workers])
-            if args.no_timeseries:
-                cmd.append("--no-timeseries")
-            if args.no_resume:
-                cmd.append("--no-resume")
-        _run(cmd)
-        return
-
-    raise SystemExit(f"Unknown verb: {verb}")
+    # claim-plan / claim-reseed
+    upstream = resolve_upstream_trials(spec, override=args.upstream_trials)
+    if not upstream.is_file():
+        raise SystemExit(f"Upstream trials not found: {upstream}")
+    cmd = ["--scout-trials", str(upstream), *common]
+    if args.verb == "claim-plan":
+        cmd.append("--plan-only")
+    elif args.no_resume:
+        cmd.append("--no-resume")
+    _run("plan_claim_cells.py", cmd)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -175,6 +122,7 @@ Verbs:
 
 Protocol id resolves under protocols/configs/protocols/<id>.yaml.
 Claim YAMLs set upstream_protocol (and optional upstream_trials).
+--methods/--layouts/--n/--d/--seeds/--max-ticks override the grid for smoke runs.
 """
     print(text)
 

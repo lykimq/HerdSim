@@ -24,10 +24,6 @@ class KuboSheepDynamics(BaseSheepDynamics):
         return "kubo"
 
     @property
-    def name(self) -> str:
-        return "Kubo Sheep"
-
-    @property
     def default_config(self) -> dict[str, Any]:
         keys = {
             "n_sheep",
@@ -49,9 +45,9 @@ class KuboSheepDynamics(BaseSheepDynamics):
         velocities = np.zeros((n, 2))
         ks1 = float(config["K_s1"])
         ks2 = float(config["K_s2"])
-        ks3 = float(config["K_s3"]) * float(config.get("cohesion_scale", 1.0))
+        ks3 = float(config["K_s3"])
         ks4 = float(config["K_s4"])
-        dogs = state.shepherd_positions[state.shepherd_active]
+        dogs = state.shepherd_positions
 
         for i in range(n):
             a_i, b_i, c_i, d_i = sheep_force_components(
@@ -61,9 +57,6 @@ class KuboSheepDynamics(BaseSheepDynamics):
                 dogs,
                 radius,
             )
-            # Scale dog repulsion by per-sheep response.
-            d_i = d_i * float(state.sheep_response[i])
-            c_i = c_i * float(state.sheep_cohesion[i])
             velocities[i] = ks1 * a_i + ks2 * b_i + ks3 * c_i + ks4 * d_i
 
         velocities = clamp_speed(velocities, float(config["sheep_speed_max"]))

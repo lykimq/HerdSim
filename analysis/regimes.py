@@ -35,7 +35,7 @@ def label_regimes(
     """Label each (group, N, D) cell with a herdability regime.
 
     Wasteful overspend: R >= theta and median effort >= (1 + tol) * efficient effort,
-    where efficient effort is median effort at D_min (or B* when available).
+    where efficient effort is the B* median effort from ``extract_frontier``.
     """
     groups = list(group_cols or [])
     rates = reliability_table(
@@ -88,21 +88,16 @@ def label_regimes(
         d_min = None if fr is None else fr.get("d_min")
         d_overcrowd = None if fr is None else fr.get("d_overcrowd")
         hard = True if fr is None else bool(fr.get("hard_failure"))
+        # Efficient effort is the B* median effort from the frontier.
         efficient_effort = None
         if fr is not None and fr.get("b_star_effort") is not None:
             efficient_effort = float(fr["b_star_effort"])
-        elif fr is not None and d_min is not None and effort_col in df.columns:
-            mask = df[sheep_col] == cell.at[sheep_col]
-            for gcol in groups:
-                mask = mask & (df[gcol] == cell.at[gcol])
-            mask = mask & (df[dog_col] == d_min)
-            if bool(mask.to_numpy().any()):
-                efficient_effort = float(df.loc[mask, effort_col].median())
 
-        if hard or d_min is None:
+        if hard:
             regime = REGIME_HARD if r < theta else REGIME_EFFICIENT
         elif r < theta:
-            if d_overcrowd is not None and d >= int(d_overcrowd):
+            # Frontier columns mixing None and ints load as float with NaN.
+            if d_overcrowd is not None and pd.notna(d_overcrowd) and d >= int(d_overcrowd):
                 regime = REGIME_OVERCROWD
             else:
                 regime = REGIME_UNDER

@@ -15,20 +15,5 @@ class HullAreaMetric(BaseMetric):
     def id(self) -> str:
         return "hull_area"
 
-    @property
-    def name(self) -> str:
-        return "Flock Hull Area"
-
-    @property
-    def description(self) -> str:
-        return (
-            "Area of the sheep convex hull in world-units squared. "
-            "Zero when fewer than three non-collinear sheep."
-        )
-
-    @property
-    def unit(self) -> str:
-        return "world units^2"
-
     def compute(self, state: SimulationState) -> float:
         return hull_geometry(state.sheep_positions).area

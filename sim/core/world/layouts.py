@@ -18,7 +18,6 @@ class _LayoutBounds(TypedDict):
     goal_radius: float | None
 
 
-
 def normalize_layout(layout: str) -> str:
     """Normalize layout name for comparison (strip + lower)."""
     return str(layout).strip().lower()

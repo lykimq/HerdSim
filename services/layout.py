@@ -3,13 +3,13 @@
 Canonical layout:
 
     results/phase{k}/{protocol_slug}/
-      protocol.yaml       # frozen subset used for this run (copied)
+      protocol.yaml       # resolved protocol YAML for this run (extends merged)
       manifest.jsonl      # resume ledger (status=ok cells)
       provenance.json     # run stamp only (hash, seeds, metrics; no git / no protocol copy)
-      status.json         # planned / done counts
+      status.json         # planned / done counts and timing
       trials.csv
-      timeseries/         # one file per cell; stem == cell key
-      packages/{a-g}/     # analysis exports (written separately, not by the runner)
+      timeseries/         # one Parquet per cell when store_timeseries; stem == cell key
+      packages/<letter>/  # analysis exports (A, D-G; written separately, not by the runner)
       README.md           # folder index and hand-written notes
 
 protocol_id in protocol.yaml must match the protocol_slug (folder name),
@@ -19,7 +19,6 @@ or the explicit id from protocols/configs/protocols/*.yaml.
 from __future__ import annotations
 
 import json
-import re
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -35,8 +34,6 @@ RESULTS_ROOT = REPO_ROOT / "results"
 PROTOCOLS_DIR = PROTOCOLS_ROOT / "configs" / "protocols"
 CANONICAL_PROTOCOL = PROTOCOLS_ROOT / "configs" / "canonical_grid.yaml"
 CLI_DIR = REPO_ROOT / "cli"
-
-_PACKAGE_LETTER_RE = re.compile(r"^[A-Ga-g]$")
 
 
 def ensure_under_results(path: Path | str, *, label: str = "path") -> Path:
@@ -61,32 +58,15 @@ def ensure_under_results(path: Path | str, *, label: str = "path") -> Path:
     raise ValueError(f"{label} must be under {results}, got {resolved}")
 
 
-def package_output_dir(protocol_dir: Path | str, package: str) -> Path:
-    """Return packages/<letter>/ under a protocol directory."""
-    letter = str(package).strip().lower()
-    if not _PACKAGE_LETTER_RE.match(letter):
-        raise ValueError(f"package must be A-G, got {package!r}")
-    out = Path(protocol_dir) / "packages" / letter
-    return ensure_under_results(out, label="package output")
-
-
-def load_protocol_spec(path: Path | str) -> dict[str, Any]:
+def load_protocol_spec(path: Path | str, *, _stack: tuple[Path, ...] = ()) -> dict[str, Any]:
     """Load a protocol YAML. Optional ``extends`` merges a parent file first.
 
     Child keys replace parent keys. ``protocol_id`` and ``output`` must end up
     set (usually on the child). Relative ``extends`` paths are resolved against
     the child file's directory.
     """
-    path = Path(path)
-    return _load_protocol_spec_resolved(path, stack=())
-
-
-def _load_protocol_spec_resolved(
-    path: Path,
-    *,
-    stack: tuple[Path, ...],
-) -> dict[str, Any]:
-    path = path.resolve()
+    path = Path(path).resolve()
+    stack = _stack
     if path in stack:
         cycle = " -> ".join(str(p) for p in stack + (path,))
         raise ValueError(f"Protocol extends cycle: {cycle}")
@@ -101,7 +81,7 @@ def _load_protocol_spec_resolved(
         parent_path = Path(str(parent_name))
         if not parent_path.is_absolute():
             parent_path = path.parent / parent_path
-        merged = _load_protocol_spec_resolved(parent_path, stack=stack + (path,))
+        merged = load_protocol_spec(parent_path, _stack=stack + (path,))
     merged.update(spec)
 
     if "protocol_id" not in merged:
@@ -122,40 +102,18 @@ def resolve_protocol_output(spec: dict[str, Any]) -> Path:
     return ensure_under_results(out, label="protocol output")
 
 
-def protocol_path_for_spec(spec: dict[str, Any]) -> Path:
-    """Canonical freeze YAML for a protocol run (default: canonical_grid.yaml)."""
-    raw = spec.get("canonical", spec.get("protocol"))
-    if raw is None:
-        return CANONICAL_PROTOCOL
-    path = Path(raw)
-    if not path.is_absolute():
-        path = REPO_ROOT / path
-    return path
-
-
 def find_protocol_path(name_or_path: str | Path) -> Path:
-    """Resolve a protocol id or path to an absolute YAML path."""
+    """Resolve a protocol id (``phase1_scout``) or YAML path to an absolute path."""
     raw = Path(name_or_path)
-    if raw.suffix.lower() in {".yaml", ".yml"}:
-        if raw.is_file():
-            return raw.resolve()
-        candidate = PROTOCOLS_DIR / raw.name
-        if candidate.is_file():
-            return candidate.resolve()
-        if not raw.is_absolute():
-            alt = (REPO_ROOT / raw).resolve()
-            if alt.is_file():
-                return alt
+    if raw.suffix == ".yaml":
+        for candidate in (raw, PROTOCOLS_DIR / raw.name):
+            if candidate.is_file():
+                return candidate.resolve()
         raise FileNotFoundError(f"Protocol YAML not found: {name_or_path}")
-
-    stem = raw.name
-    for candidate in (
-        PROTOCOLS_DIR / f"{stem}.yaml",
-        PROTOCOLS_DIR / f"{stem}.yml",
-    ):
-        if candidate.is_file():
-            return candidate.resolve()
-    raise FileNotFoundError(f"Protocol '{stem}' not found under {PROTOCOLS_DIR}")
+    candidate = PROTOCOLS_DIR / f"{raw.name}.yaml"
+    if candidate.is_file():
+        return candidate.resolve()
+    raise FileNotFoundError(f"Protocol '{raw.name}' not found under {PROTOCOLS_DIR}")
 
 
 def load_campaign_protocol(name_or_path: str | Path) -> tuple[Path, dict[str, Any]]:
@@ -163,15 +121,32 @@ def load_campaign_protocol(name_or_path: str | Path) -> tuple[Path, dict[str, An
     return path, load_protocol_spec(path)
 
 
+def load_run_protocol(
+    name_or_path: str | Path,
+) -> tuple[Path, dict[str, Any], dict[str, Any], dict[str, Any]]:
+    """Protocol YAML path, its spec, the canonical grid, and canonical overlaid by spec.
+
+    The overlaid ``effective`` dict is what cell expansion reads (task, grids,
+    hold geometry on top of the frozen canonical defaults).
+    """
+    path, spec = load_campaign_protocol(name_or_path)
+    canonical_path = Path(spec.get("canonical", CANONICAL_PROTOCOL))
+    if not canonical_path.is_absolute():
+        canonical_path = REPO_ROOT / canonical_path
+    with canonical_path.open() as f:
+        canonical: dict[str, Any] = yaml.safe_load(f)
+    return path, spec, canonical, {**canonical, **spec}
+
+
 def resolve_upstream_trials(
     spec: dict[str, Any],
     *,
     override: Path | None = None,
 ) -> Path:
-    """Trials used as the scout/source table for claim or T1.
+    """Scout trials.csv that a claim protocol plans its windows from.
 
-    Prefer ``upstream_protocol`` (and optional ``upstream_trials`` file name).
-    Default file is ``trials.csv``; Phase-1 T1 usually wants ``merged_trials.csv``.
+    Uses ``upstream_protocol`` (and optional ``upstream_trials`` file name, default
+    ``trials.csv``) unless ``override`` is given.
     """
     if override is not None:
         path = Path(override)
@@ -181,21 +156,11 @@ def resolve_upstream_trials(
 
     upstream = spec.get("upstream_protocol")
     if upstream is None:
-        raise ValueError("Claim/T1 needs upstream_protocol in the YAML or --upstream-trials")
+        raise ValueError("Claim needs upstream_protocol in the YAML or --upstream-trials")
     _, up_spec = load_campaign_protocol(str(upstream))
     up_out = resolve_protocol_output(up_spec)
     file_name = str(spec.get("upstream_trials", "trials.csv"))
     return (up_out / file_name).resolve()
-
-
-def runner_kind(spec: dict[str, Any]) -> str:
-    """Which trial runner a ``run`` verb should use."""
-    explicit = spec.get("runner")
-    if explicit in ("grid", "factor"):
-        return str(explicit)
-    if any(k in spec for k in ("sensing_ranges", "communications", "obs_modes")):
-        return "factor"
-    return "grid"
 
 
 def copy_protocol_spec(spec_path: Path | str, protocol_dir: Path | str) -> Path:
@@ -222,10 +187,6 @@ def read_status(protocol_dir: Path | str) -> dict[str, Any]:
     except (OSError, json.JSONDecodeError):
         return {}
     return data if isinstance(data, dict) else {}
-
-
-def _utc_now_iso() -> str:
-    return datetime.now(UTC).isoformat()
 
 
 def _elapsed_seconds(started_at: str | None, ended_at: str | None) -> float | None:
@@ -260,7 +221,7 @@ def write_status(
     """
     out = Path(protocol_dir)
     out.mkdir(parents=True, exist_ok=True)
-    now = _utc_now_iso()
+    now = datetime.now(UTC).isoformat()
     started = started_at or now
     updated = updated_at or now
     complete = int(n_done) >= int(n_planned) and int(n_planned) > 0

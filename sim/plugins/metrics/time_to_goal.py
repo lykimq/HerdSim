@@ -17,29 +17,12 @@ class TimeToGoalMetric(BaseMetric):
     def id(self) -> str:
         return "time_to_goal"
 
-    @property
-    def name(self) -> str:
-        return "Time to Goal"
-
-    @property
-    def description(self) -> str:
-        return (
-            "Simulation tick when all sheep are inside the goal zone, "
-            "else -1. Strict full-goal metric (discrete ticks, not wall-clock). "
-            "Scenario success may allow a partial flock; use first_success_tick "
-            "in benchmark exports for the scenario criterion."
-        )
-
-    @property
-    def unit(self) -> str:
-        return "ticks"
-
     def compute(self, state: SimulationState) -> float:
         goal = state.world.goal
         if goal is None:
             return -1.0
         # Strict full-goal completion (all sheep). Scenario success may use a
-        # lower success_fraction; see benchmark first_success_tick for that.
+        # lower success_fraction; trials.csv first_success_tick records that.
         if np.all(goal.contains(state.sheep_positions)):
             return float(state.tick)
         return -1.0

@@ -2,63 +2,19 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
-from typing import Any, Generic, Protocol, TypeVar
-
 from plugins.dogs.base import BaseDogController
 from plugins.sheep.base import BaseSheepDynamics
 
 from core.observation import BaseObservationModel
+from core.registry import Registry
 
-
-class _PluginLike(Protocol):
-    @property
-    def id(self) -> str: ...
-
-
-T = TypeVar("T", bound=_PluginLike)
-
-
-class PluginRegistry(Generic[T]):
-    """Simple id -> factory registry."""
-
-    def __init__(self, kind: str):
-        self.kind = kind
-        self._factories: dict[str, Callable[[], T]] = {}
-
-    def register(self, plugin_id: str, factory: Callable[[], T]) -> None:
-        self._factories[plugin_id] = factory
-
-    def get(self, plugin_id: str) -> T:
-        if plugin_id not in self._factories:
-            available = list(self._factories.keys())
-            raise KeyError(f"Unknown {self.kind} '{plugin_id}'. Available: {available}")
-        return self._factories[plugin_id]()
-
-    def names(self) -> list[str]:
-        return list(self._factories.keys())
-
-    def list_all(self) -> list[dict[str, Any]]:
-        items = []
-        for plugin_id in self._factories:
-            plugin = self.get(plugin_id)
-            entry: dict[str, Any] = {"id": plugin.id, "name": getattr(plugin, "name", plugin.id)}
-            defaults = getattr(plugin, "default_config", None)
-            if defaults is not None:
-                entry["default_config"] = dict(defaults)
-            items.append(entry)
-        return items
-
-
-sheep_dynamics_registry: PluginRegistry[BaseSheepDynamics] = PluginRegistry("sheep_model")
-dog_controller_registry: PluginRegistry[BaseDogController] = PluginRegistry("dog_controller")
-observation_registry: PluginRegistry[BaseObservationModel] = PluginRegistry("observation_model")
+sheep_dynamics_registry: Registry[BaseSheepDynamics] = Registry("sheep_model")
+dog_controller_registry: Registry[BaseDogController] = Registry("dog_controller")
+observation_registry: Registry[BaseObservationModel] = Registry("observation_model")
 
 
 def _register_builtins() -> None:
-    from plugins.dogs.collect_drive import CollectDriveController
     from plugins.dogs.collect_drive_multi import CollectDriveMultiController
-    from plugins.dogs.communication_free import CommunicationFreeController
     from plugins.dogs.fat import FatController
     from plugins.dogs.kubo_forces import KuboDogController
     from plugins.sheep.kubo import KuboSheepDynamics
@@ -67,25 +23,19 @@ def _register_builtins() -> None:
     from core.observation import (
         BearingOnlyObservation,
         GlobalObservation,
-        IntermittentObservation,
         LocalPositionsObservation,
-        NoisyBearingObservation,
     )
 
     sheep_dynamics_registry.register("strombom", StrombomSheepDynamics)
     sheep_dynamics_registry.register("kubo", KuboSheepDynamics)
 
-    dog_controller_registry.register("collect_drive", CollectDriveController)
     dog_controller_registry.register("collect_drive_multi", CollectDriveMultiController)
     dog_controller_registry.register("kubo_forces", KuboDogController)
     dog_controller_registry.register("fat", FatController)
-    dog_controller_registry.register("communication_free", CommunicationFreeController)
 
     observation_registry.register("global", GlobalObservation)
     observation_registry.register("local_positions", LocalPositionsObservation)
     observation_registry.register("bearing_only", BearingOnlyObservation)
-    observation_registry.register("noisy_bearing", NoisyBearingObservation)
-    observation_registry.register("intermittent", IntermittentObservation)
 
 
 _register_builtins()

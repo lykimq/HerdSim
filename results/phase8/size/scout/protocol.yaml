@@ -1,0 +1,46 @@
+# AUTO-GENERATED: do not modify. Re-run the producing command to refresh this file.
+protocol_id: phase8_size_scout
+phase: 8
+grade: SCOUT
+output: results/phase8/size/scout
+canonical: protocols/configs/canonical_grid.yaml
+task: collect_hold_gate
+hold_ticks: 800
+hold_center:
+- 250.0
+- 250.0
+hold_radius_scale: 2.5
+hold_radius_min: 23.0
+hold_radius_max: 27.0
+gate_half_width: 30.0
+methods:
+- strombom_multi
+layouts:
+- compact
+flock_sizes:
+- 5
+- 10
+- 25
+- 50
+- 75
+- 100
+- 150
+- 200
+- 300
+- 400
+shepherd_counts:
+- 1
+- 2
+- 3
+- 4
+- 6
+- 10
+- 15
+- 20
+- 25
+- 35
+seeds: 30
+seed_mode: scout
+store_timeseries: false
+packages:
+- A

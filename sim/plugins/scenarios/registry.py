@@ -1,51 +1,20 @@
-"""Auto-discovers and registers scenario plugins from the plugins.scenarios package."""
+"""Registers the built-in scenarios (task definitions)."""
 
 from __future__ import annotations
 
-from typing import Any
+from core.registry import Registry
 
 from .base import BaseScenario
 
-
-class ScenarioRegistry:
-    """Central registry for simulation scenarios."""
-
-    def __init__(self):
-        self._scenarios: dict[str, BaseScenario] = {}
-
-    def register(self, scenario: BaseScenario) -> None:
-        self._scenarios[scenario.id] = scenario
-
-    def get(self, scenario_id: str) -> BaseScenario:
-        if scenario_id not in self._scenarios:
-            available = list(self._scenarios.keys())
-            raise KeyError(f"Unknown scenario '{scenario_id}'. Available: {available}")
-        return self._scenarios[scenario_id]
-
-    def list_all(self) -> list[dict[str, Any]]:
-        return [
-            {
-                "id": s.id,
-                "name": s.name,
-                "description": s.description,
-                "default_config": s.default_config,
-            }
-            for s in self._scenarios.values()
-        ]
-
-    def names(self) -> list[str]:
-        return list(self._scenarios.keys())
+scenario_registry: Registry[BaseScenario] = Registry("scenario")
 
 
-# Singleton registry: populated at import time
-scenario_registry = ScenarioRegistry()
-
-
-def _auto_register():
-    """Import built-in scenarios to trigger registration."""
+def _auto_register() -> None:
+    from .collect_hold_gate import CollectHoldGateScenario
     from .drive_to_goal import DriveToGoalScenario
 
-    scenario_registry.register(DriveToGoalScenario())
+    scenario_registry.register("drive_to_goal", DriveToGoalScenario)
+    scenario_registry.register("collect_hold_gate", CollectHoldGateScenario)
 
 
 _auto_register()

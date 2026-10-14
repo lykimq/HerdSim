@@ -19,21 +19,6 @@ class ExtentMetric(BaseMetric):
     def id(self) -> str:
         return "extent"
 
-    @property
-    def name(self) -> str:
-        return "Flock Extent"
-
-    @property
-    def description(self) -> str:
-        return (
-            "Radius of gyration: RMS Euclidean distance of sheep to the flock "
-            "centroid (GCM), in world units."
-        )
-
-    @property
-    def unit(self) -> str:
-        return "world units"
-
     def compute(self, state: SimulationState) -> float:
         if state.n_sheep == 0:
             return 0.0

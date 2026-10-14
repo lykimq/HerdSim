@@ -13,8 +13,8 @@ from methods.strombom.heuristics import shepherd_step_toward
 
 from .base import BaseDogController
 from .helpers import (
-    apply_dog_speeds,
     empty_dog_velocities,
+    finalize_dog_step,
     position_behind_target,
     view_from_observation,
 )
@@ -26,10 +26,6 @@ class FatController(BaseDogController):
     @property
     def id(self) -> str:
         return "fat"
-
-    @property
-    def name(self) -> str:
-        return "FAT"
 
     @property
     def default_config(self) -> dict[str, Any]:
@@ -51,17 +47,13 @@ class FatController(BaseDogController):
         config: dict[str, Any],
     ) -> SimulationState:
         velocities = empty_dog_velocities(state)
-        lines = []
-        obs_by_idx = {o.shepherd_index: o for o in observations}
         goal = resolve_goal_center(state, config)
         offset = float(config.get("r_a", 2.0))
 
-        for i in range(state.n_shepherds):
-            if not state.shepherd_active[i] or i not in obs_by_idx:
-                continue
-            obs = obs_by_idx[i]
+        for obs in observations:
             if obs.n_sheep_seen == 0:
                 continue
+            i = obs.shepherd_index
             local = view_from_observation(state, obs)
             # Farthest from dog among observed sheep. Bearing-only proxies sit at
             # equal depth, so fall back to farthest from the goal among proxies.
@@ -75,23 +67,7 @@ class FatController(BaseDogController):
             velocities[i] = shepherd_step_toward(
                 local, config, i, target, proximity_sheep=state.sheep_positions
             )
-            lines.append(
-                {
-                    "from": state.shepherd_positions[i].tolist(),
-                    "to": sheep_pos.tolist(),
-                    "mode": "fat",
-                    "sheep_index": int(obs.sheep_indices[far_idx])
-                    if obs.sheep_indices.size
-                    else far_idx,
-                }
-            )
 
-        velocities = apply_dog_speeds(velocities, state, config)
-        metadata = dict(state.metadata)
-        metadata["herding_mode"] = "fat"
-        metadata["assignment_lines"] = lines
-        return state.copy_with(
-            shepherd_positions=state.shepherd_positions + velocities,
-            shepherd_velocities=velocities,
-            metadata=metadata,
+        return finalize_dog_step(
+            state, velocities, config, metadata_updates={"herding_mode": "fat"}
         )

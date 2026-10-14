@@ -1,12 +1,5 @@
-"""Experiment composition: factors and resolved run config."""
+"""Experiment composition: the resolved run config."""
 
-from core.config.experiment import resolve_experiment_config, resolve_from_factors
-from core.config.factors import ExperimentalFactors
-from core.world.defaults import WORLD_KEYS
+from core.config.experiment import COMMUNICATION_MODES, resolve_experiment_config
 
-__all__ = [
-    "ExperimentalFactors",
-    "WORLD_KEYS",
-    "resolve_experiment_config",
-    "resolve_from_factors",
-]
+__all__ = ["COMMUNICATION_MODES", "resolve_experiment_config"]

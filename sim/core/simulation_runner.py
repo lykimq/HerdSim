@@ -1,4 +1,4 @@
-"""Orchestrates the simulation tick loop for factor-based experiments."""
+"""Orchestrates the simulation tick loop for one trial."""
 
 from __future__ import annotations
 
@@ -7,19 +7,10 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
-from plugins.dogs.base import BaseDogController
 from plugins.metrics.base import BaseMetric
 from plugins.scenarios.base import BaseScenario
-from plugins.sheep.base import BaseSheepDynamics
 
-from core.agent_attributes import (
-    apply_environment_updates,
-    apply_failure_factors,
-    apply_robot_constraints,
-    init_agent_attributes,
-)
 from core.history_recorder import HistoryRecorder
-from core.observation import BaseObservationModel, sensing_range_for_shepherd
 from core.plugin_registry import (
     dog_controller_registry,
     observation_registry,
@@ -36,15 +27,13 @@ class RunResult:
     total_ticks: int
     seed: int
     history: pd.DataFrame
-    final_state: SimulationState
 
 
 class SimulationRunner:
     """Drives the simulation forward tick-by-tick.
 
     Tick order:
-      environment updates -> sheep dynamics -> observations -> dog controller
-      -> robot constraints -> obstacles/walls -> metrics
+      sheep dynamics -> observations -> dog controller -> walls -> metrics
     """
 
     def __init__(
@@ -53,27 +42,16 @@ class SimulationRunner:
         metrics: list[BaseMetric],
         config: dict[str, Any],
         seed: int = 42,
-        sheep_dynamics: BaseSheepDynamics | None = None,
-        dog_controller: BaseDogController | None = None,
-        observation_model: BaseObservationModel | None = None,
-        method: str | None = None,
     ):
         self.scenario = scenario
         self.config = config
         self.seed = seed
-        self.method = method or config.get("method")
-        self.sheep_dynamics = sheep_dynamics or sheep_dynamics_registry.get(
-            str(config.get("sheep_model", "strombom"))
-        )
-        self.dog_controller = dog_controller or dog_controller_registry.get(
-            str(config.get("dog_controller", "collect_drive"))
-        )
-        obs_mode = str(config.get("obs_mode", "global"))
-        self.observation_model = observation_model or observation_registry.get(obs_mode)
+        self.sheep_dynamics = sheep_dynamics_registry.get(config["sheep_model"])
+        self.dog_controller = dog_controller_registry.get(config["dog_controller"])
+        self.observation_model = observation_registry.get(config["obs_mode"])
         self.recorder = HistoryRecorder(metrics)
         self._state: SimulationState | None = None
         self._max_ticks = scenario.max_ticks(config)
-        self._prev_dog_vel: np.ndarray | None = None
 
     def initialize(self) -> SimulationState:
         """Set up the initial simulation state from the scenario."""
@@ -90,14 +68,8 @@ class SimulationRunner:
             "collect_threshold_scale": float(self.config.get("collect_threshold_scale", 1.0)),
             "measurement_radius": float(self.config.get("measurement_radius", 5.0)),
             "influence_radius": influence,
-            "sheep_model": self.sheep_dynamics.id,
-            "dog_controller": self.dog_controller.id,
-            "obs_mode": self.observation_model.id,
-            "scenario_id": self.scenario.id,
-            "seed": self.seed,
-            "method": self.method,
         }
-        state = SimulationState(
+        self._state = SimulationState(
             tick=0,
             sheep_positions=sheep_pos,
             sheep_velocities=np.zeros_like(sheep_pos),
@@ -107,73 +79,21 @@ class SimulationRunner:
             rng=rng,
             metadata=metadata,
         )
-        self._state = init_agent_attributes(state, self.config)
-        self._prev_dog_vel = np.zeros_like(self._state.shepherd_velocities)
         self.recorder.reset()
         self.recorder.record(self._state)
         return self._state
 
-    def step(self) -> tuple[SimulationState, dict[str, float], str]:
-        """Execute one tick. Returns (state, metrics_dict, status)."""
+    def step(self) -> tuple[SimulationState, str]:
+        """Execute one tick. Returns (state, status)."""
         if self._state is None:
             self.initialize()
         assert self._state is not None
 
-        state = apply_environment_updates(self._state, self.config)
-        state = apply_failure_factors(state, self.config)
-        state = self.sheep_dynamics.step(state, self.config)
-
+        state = self.sheep_dynamics.step(self._state, self.config)
         observations = self.observation_model.observe_all(state, self.config)
-        # Optional message passing for communication factor.
-        comm = str(self.config.get("communication", "none"))
-        if comm == "global_shared":
-            summary = {
-                "type": "flock_summary",
-                "gcm": state.sheep_centroid.tolist(),
-                "n_sheep": state.n_sheep,
-            }
-            for obs in observations:
-                obs.messages.append(summary)
-        elif comm == "neighbour_broadcast":
-            for obs in observations:
-                radius = sensing_range_for_shepherd(state, obs.shepherd_index, self.config)
-                origin = obs.self_position
-                for other in observations:
-                    if other.shepherd_index == obs.shepherd_index:
-                        continue
-                    if float(np.linalg.norm(other.self_position - origin)) > radius:
-                        continue
-                    obs.messages.append(
-                        {
-                            "from": other.shepherd_index,
-                            "position": other.self_position.tolist(),
-                            "n_sheep_seen": other.n_sheep_seen,
-                        }
-                    )
-
         state = self.dog_controller.step(state, observations, self.config)
-        constrained = apply_robot_constraints(
-            state,
-            state.shepherd_velocities,
-            self.config,
-            self._prev_dog_vel
-            if self._prev_dog_vel is not None
-            else np.zeros_like(state.shepherd_velocities),
-        )
-        # Re-integrate dog positions if constraints changed velocities.
-        # Controllers that integrate with dt (e.g. Kubo) need the same dt here.
-        if not np.allclose(constrained, state.shepherd_velocities):
-            delta = constrained - state.shepherd_velocities
-            dt = float(self.config.get("dt", 1.0))
-            state = state.copy_with(
-                shepherd_positions=state.shepherd_positions + dt * delta,
-                shepherd_velocities=constrained,
-            )
-        self._prev_dog_vel = state.shepherd_velocities.copy()
 
         state.tick += 1
-        state.sheep_positions = state.world.resolve_obstacles(state.sheep_positions)
-        state.shepherd_positions = state.world.resolve_obstacles(state.shepherd_positions)
         state.sheep_positions = state.world.reflect_positions(state.sheep_positions)
         state.shepherd_positions = state.world.reflect_positions(state.shepherd_positions)
         state.sheep_velocities = state.world.reflect_velocities(
@@ -184,20 +104,20 @@ class SimulationRunner:
         )
 
         self._state = state
-        metrics_snapshot = self.recorder.record(self._state)
+        self.recorder.record(self._state)
 
         if self.scenario.is_success(self._state, self.config):
-            return self._state, metrics_snapshot, "success"
+            return self._state, "success"
         if self._state.tick >= self._max_ticks:
-            return self._state, metrics_snapshot, "timeout"
-        return self._state, metrics_snapshot, "running"
+            return self._state, "timeout"
+        return self._state, "running"
 
     def run(self) -> RunResult:
         """Run simulation to completion (success or timeout)."""
         self.initialize()
         status = "running"
         while status == "running":
-            _, _, status = self.step()
+            _, status = self.step()
 
         assert self._state is not None
         return RunResult(
@@ -205,7 +125,6 @@ class SimulationRunner:
             total_ticks=self._state.tick,
             seed=self.seed,
             history=self.recorder.to_dataframe(),
-            final_state=self._state,
         )
 
     @property

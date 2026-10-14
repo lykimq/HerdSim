@@ -7,21 +7,11 @@ from .base import BaseMetric
 
 
 class PolarizationMetric(BaseMetric):
+    """Mean alignment of sheep velocity unit vectors (0=disordered, 1=aligned)."""
+
     @property
     def id(self) -> str:
         return "polarization"
-
-    @property
-    def name(self) -> str:
-        return "Flock Polarisation"
-
-    @property
-    def description(self) -> str:
-        return "Mean alignment of sheep velocity unit vectors (0=disordered, 1=aligned)."
-
-    @property
-    def unit(self) -> str:
-        return "0-1"
 
     def compute(self, state: SimulationState) -> float:
         if state.n_sheep == 0:

@@ -4,6 +4,9 @@ from __future__ import annotations
 
 import numpy as np
 from core.simulation_state import SimulationState
+from scipy.sparse import csr_matrix
+from scipy.sparse.csgraph import connected_components
+from scipy.spatial.distance import pdist, squareform
 
 from .base import BaseMetric
 
@@ -18,28 +21,10 @@ def largest_component_fraction(positions: np.ndarray, radius: float) -> float:
     if radius <= 0.0:
         return 1.0 / float(n)
 
-    # Union-find over pairwise distances within the experimental radius.
-    parent = np.arange(n, dtype=int)
-
-    def find(i: int) -> int:
-        while parent[i] != i:
-            parent[i] = parent[parent[i]]
-            i = parent[i]
-        return i
-
-    def union(i: int, j: int) -> None:
-        ri, rj = find(i), find(j)
-        if ri != rj:
-            parent[rj] = ri
-
-    for i in range(n):
-        for j in range(i + 1, n):
-            if np.linalg.norm(positions[i] - positions[j]) <= radius:
-                union(i, j)
-
-    roots = np.array([find(i) for i in range(n)], dtype=int)
-    _, counts = np.unique(roots, return_counts=True)
-    return float(counts.max()) / float(n)
+    # Connected components of the graph with edges where distance <= radius.
+    adjacency = squareform(pdist(positions)) <= radius
+    _, labels = connected_components(csr_matrix(adjacency), directed=False)
+    return float(np.bincount(labels).max()) / float(n)
 
 
 class FragmentationMetric(BaseMetric):
@@ -52,23 +37,6 @@ class FragmentationMetric(BaseMetric):
     @property
     def id(self) -> str:
         return "fragmentation"
-
-    @property
-    def name(self) -> str:
-        return "Flock Fragmentation"
-
-    @property
-    def description(self) -> str:
-        return (
-            "Size of the largest sheep connected component divided by N, using "
-            "edges when pairwise distance <= measurement_radius. 1.0 is one flock; "
-            "lower values mean the flock is split. Radius is experimental, not "
-            "taken from algorithm gains."
-        )
-
-    @property
-    def unit(self) -> str:
-        return "fraction"
 
     def compute(self, state: SimulationState) -> float:
         if state.n_sheep == 0:

@@ -19,21 +19,6 @@ class BaseMetric(ABC):
     def id(self) -> str:
         """Unique string identifier, e.g. 'cohesion'."""
 
-    @property
-    @abstractmethod
-    def name(self) -> str:
-        """Human-readable display name, e.g. 'Flock Cohesion'."""
-
-    @property
-    @abstractmethod
-    def description(self) -> str:
-        """One-line description shown in UI tooltips and exports."""
-
-    @property
-    def unit(self) -> str:
-        """Short unit label for UI, e.g. 'ticks', 'world units', 'fraction'."""
-        return ""
-
     @abstractmethod
     def compute(self, state: SimulationState) -> float:
         """Compute the metric value for the current simulation state.

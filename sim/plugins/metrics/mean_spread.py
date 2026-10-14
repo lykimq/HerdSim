@@ -19,21 +19,6 @@ class MeanSpreadMetric(BaseMetric):
     def id(self) -> str:
         return "mean_spread"
 
-    @property
-    def name(self) -> str:
-        return "Mean Spread"
-
-    @property
-    def description(self) -> str:
-        return (
-            "Variance of sheep Euclidean distances to the flock centroid (GCM), "
-            "in world-units squared. Lower is more compact."
-        )
-
-    @property
-    def unit(self) -> str:
-        return "world units^2"
-
     def compute(self, state: SimulationState) -> float:
         if state.n_sheep == 0:
             return 0.0

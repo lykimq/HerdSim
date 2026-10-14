@@ -20,18 +20,6 @@ class ShepherdPathMetric(BaseMetric):
     def id(self) -> str:
         return "shepherd_path"
 
-    @property
-    def name(self) -> str:
-        return "Shepherd Path Length"
-
-    @property
-    def description(self) -> str:
-        return "Cumulative Euclidean distance traveled by all shepherds, in world units."
-
-    @property
-    def unit(self) -> str:
-        return "world units"
-
     def compute(self, state: SimulationState) -> float:
         if self._prev_positions is not None:
             step_distances = np.linalg.norm(state.shepherd_positions - self._prev_positions, axis=1)

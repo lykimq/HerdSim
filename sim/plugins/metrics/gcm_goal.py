@@ -10,23 +10,11 @@ from .base import BaseMetric
 
 
 class GcmGoalMetric(BaseMetric):
+    """Euclidean distance from the flock centroid (GCM) to the goal centre, in world units."""
+
     @property
     def id(self) -> str:
         return "gcm_goal"
-
-    @property
-    def name(self) -> str:
-        return "GCM to Goal"
-
-    @property
-    def description(self) -> str:
-        return (
-            "Euclidean distance from the flock centroid (GCM) to the goal centre, in world units."
-        )
-
-    @property
-    def unit(self) -> str:
-        return "world units"
 
     def compute(self, state: SimulationState) -> float:
         if state.n_sheep == 0:

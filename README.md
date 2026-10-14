@@ -1,6 +1,6 @@
 # HerdSim (scaling-cli)
 
-HerdSim is a multi-agent shepherding simulator. We use it to study how much external control a flock needs as size, starting shape, dog method, and information conditions change. Dogs drive sheep to a goal under fixed protocols. The main control-demand quantity is the viable shepherd range around `D_min` (and any overcrowding boundary) at a reliability threshold.
+HerdSim is a multi-agent shepherding simulator. We use it to study how much external control a flock needs as size, starting shape, dog method, and information conditions change. Dogs drive sheep to a goal (Phases 1 to 7) or collect, hold, and push them out a gate (Phase 8) under fixed protocols. The main control-demand quantity is the viable shepherd range around `D_min` (and any overcrowding boundary) at a reliability threshold.
 
 ## Tech stack
 
@@ -8,7 +8,6 @@ HerdSim is a multi-agent shepherding simulator. We use it to study how much exte
 |-------|--------|
 | Language | Python 3.11+ |
 | Numerics / data | NumPy, pandas, SciPy, PyArrow |
-| Plots | Matplotlib |
 | Protocols | YAML (PyYAML) |
 | Packaging / env | uv, setuptools |
 | Tests | pytest |
@@ -30,10 +29,9 @@ HerdSim/
 |-- services/            Campaign engine (layout, resume, cell runner)
 |-- analysis/            Post-run packages (frontiers, fits, export)
 `-- tests/
-    |-- sim/             Engine / plugin tests
-    |-- services/        Campaign / protocol-load tests
-    |-- protocols/       Packaging tests
-    `-- analysis/        Package A-G tests
+    |-- sim/             Golden regression runs, Phase 8 scenario, core metrics
+    |-- services/        Protocol cell expansion and resume keys
+    `-- analysis/        Frontier / regimes / ladders / transfer on toy tables
 ```
 
 ## Setup

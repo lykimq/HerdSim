@@ -20,21 +20,6 @@ class ShepherdCoverageMetric(BaseMetric):
     def id(self) -> str:
         return "coverage"
 
-    @property
-    def name(self) -> str:
-        return "Shepherd Coverage"
-
-    @property
-    def description(self) -> str:
-        return (
-            "Fraction of peripheral sheep (distance to centroid > median) that "
-            "lie within at least one shepherd's influence radius."
-        )
-
-    @property
-    def unit(self) -> str:
-        return "fraction"
-
     def compute(self, state: SimulationState) -> float:
         if state.n_sheep == 0 or state.n_shepherds == 0:
             return 0.0

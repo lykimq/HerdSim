@@ -11,17 +11,13 @@ from methods.kubo.config import KUBO_DEFAULTS
 from methods.kubo.forces import clamp_speed, dog_force_components
 
 from .base import BaseDogController
-from .helpers import apply_dog_speeds, empty_dog_velocities, view_from_observation
+from .helpers import empty_dog_velocities, finalize_dog_step, view_from_observation
 
 
 class KuboDogController(BaseDogController):
     @property
     def id(self) -> str:
         return "kubo_forces"
-
-    @property
-    def name(self) -> str:
-        return "Kubo Forces"
 
     @property
     def default_config(self) -> dict[str, Any]:
@@ -55,14 +51,10 @@ class KuboDogController(BaseDogController):
         kf2 = float(config["K_f2"])
         kf3 = float(config["K_f3"])
         kf4 = float(config["K_f4"])
-        obs_by_idx = {o.shepherd_index: o for o in observations}
-
-        for i in range(state.n_shepherds):
-            if not state.shepherd_active[i] or i not in obs_by_idx:
-                continue
-            obs = obs_by_idx[i]
+        for obs in observations:
             if obs.n_sheep_seen == 0:
                 continue
+            i = obs.shepherd_index
             local = view_from_observation(state, obs)
             a_i, b_i, c_i, d_i = dog_force_components(
                 i,
@@ -74,11 +66,10 @@ class KuboDogController(BaseDogController):
             velocities[i] = kf1 * a_i + kf2 * b_i + kf3 * c_i + kf4 * d_i
 
         velocities = clamp_speed(velocities, float(config["dog_speed_max"]))
-        velocities = apply_dog_speeds(velocities, state, config)
-        metadata = dict(state.metadata)
-        metadata["r_a"] = float(config.get("r_a", metadata.get("r_a", 2.0)))
-        return state.copy_with(
-            shepherd_positions=state.shepherd_positions + dt * velocities,
-            shepherd_velocities=velocities,
-            metadata=metadata,
+        return finalize_dog_step(
+            state,
+            velocities,
+            config,
+            metadata_updates={"r_a": float(config.get("r_a", state.metadata.get("r_a", 2.0)))},
+            dt=dt,
         )

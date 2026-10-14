@@ -26,22 +26,6 @@ class ShepherdInterferenceMetric(BaseMetric):
     def id(self) -> str:
         return "i_dir"
 
-    @property
-    def name(self) -> str:
-        return "Shepherd Interference"
-
-    @property
-    def description(self) -> str:
-        return (
-            "Interference index I_dir = 1 - ||sum unit velocities|| / M_active "
-            "over moving shepherds (speed > 1e-6). Realised velocities; walls "
-            "may inflate the value near boundaries."
-        )
-
-    @property
-    def unit(self) -> str:
-        return "fraction"
-
     def compute(self, state: SimulationState) -> float:
         vels = np.asarray(state.shepherd_velocities, dtype=float)
         if vels.size == 0:

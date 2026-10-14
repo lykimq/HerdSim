@@ -4,15 +4,14 @@ Algorithm config modules declare only agent counts plus algorithm-specific
 behavior parameters. World / layout keys are owned by scenarios; these defaults
 are the fallback when a scenario omits a key.
 
-Composition order (see resolve_experiment_config):
-  WORLD_DEFAULTS -> algorithm.default_config -> scenario overlay
+Composition order: see ``core.config.experiment.resolve_experiment_config``.
 """
 
 from __future__ import annotations
 
 from typing import Any
 
-# Keys owned by drive_to_goal (the only campaign scenario).
+# World keys a scenario may own (drive_to_goal, collect_hold_gate).
 WORLD_KEYS = (
     "world_width",
     "world_height",

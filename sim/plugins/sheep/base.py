@@ -17,11 +17,6 @@ class BaseSheepDynamics(ABC):
         """Unique sheep-model identifier."""
 
     @property
-    @abstractmethod
-    def name(self) -> str:
-        """Human-readable name."""
-
-    @property
     def default_config(self) -> dict[str, Any]:
         """Model-specific defaults (agent counts + behaviour params)."""
         return {}

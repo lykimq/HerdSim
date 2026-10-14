@@ -1,6 +1,6 @@
 """Write auto-generated package dossiers under ``results/.../packages/``.
 
-This module is the exporter for analysis Packages A-G except C (Cap I13). It does
+This module is the exporter for analysis Packages A and D-G (Cap I13). It does
 not run simulations. Given trial tables and (for Package A) derived
 frontiers/regimes, it writes machine-owned files into a package folder under
 ``results/`` only, for example:
@@ -33,7 +33,7 @@ from analysis.frontier import (
     extract_frontier,
     reliability_table,
 )
-from analysis.regimes import label_regimes
+from analysis.regimes import REGIME_OVERCROWD, label_regimes
 from protocols.packaging.generated_notice import markdown_banner_line, with_json_notice
 from protocols.packaging.provenance import build_provenance_stamp, write_provenance
 from services.layout import ensure_under_results
@@ -44,9 +44,10 @@ def _write_df(df: pd.DataFrame, path: Path) -> None:
     df.to_csv(path, index=False)
 
 
-def _unique_sorted(series: pd.Series) -> list[Any]:
-    vals = sorted({v for v in series.dropna().tolist()})
-    return vals
+def _unique_sorted(df: pd.DataFrame, col: str) -> list[Any]:
+    if col not in df.columns:
+        return []
+    return sorted(set(df[col].dropna().tolist()))
 
 
 def _fmt_cell(value: object) -> str:
@@ -55,7 +56,7 @@ def _fmt_cell(value: object) -> str:
         return ""
     if isinstance(value, bool):
         return "yes" if value else "no"
-    if isinstance(value, int) and not isinstance(value, bool):
+    if isinstance(value, int):
         return str(value)
     if isinstance(value, float):
         if float(value).is_integer():
@@ -85,18 +86,29 @@ def _df_to_markdown_table(df: pd.DataFrame) -> str:
     return "\n".join([header, sep, *rows])
 
 
-def _series_counts_to_markdown(counts: pd.Series, *, key_name: str = "regime") -> str:
-    if counts.empty:
-        return "_(none)_"
-    frame = counts.rename("count").reset_index()
-    frame.columns = [key_name, "count"]
-    return _df_to_markdown_table(frame)
-
-
 def _fmt_list(values: list[Any]) -> str:
     if not values:
         return "(none)"
     return ", ".join(str(v) for v in values)
+
+
+def _finish_dossier(
+    out: Path,
+    paths: dict[str, Path],
+    *,
+    stamp: dict[str, Any],
+    readme_lines: list[str],
+) -> dict[str, Path]:
+    """Write provenance.json, README.md, and artefacts.json; return the full path index."""
+    paths["provenance"] = out / "provenance.json"
+    write_provenance(paths["provenance"], stamp)
+    paths["report"] = out / "README.md"
+    _ = paths["report"].write_text("\n".join(readme_lines) + "\n")
+    paths["artefacts"] = out / "artefacts.json"
+    _ = paths["artefacts"].write_text(
+        json.dumps(with_json_notice({k: str(v) for k, v in paths.items()}), indent=2) + "\n"
+    )
+    return paths
 
 
 def _package_a_claim_stubs(
@@ -109,7 +121,7 @@ def _package_a_claim_stubs(
     lines: list[str] = []
     has_overcrowd = False
     if not regimes.empty and "regime" in regimes.columns:
-        has_overcrowd = bool((regimes["regime"] == "overcrowding_collapse").to_numpy().any())
+        has_overcrowd = bool((regimes["regime"] == REGIME_OVERCROWD).to_numpy().any())
     if "d_overcrowd" in frontier.columns:
         has_overcrowd = has_overcrowd or bool(frontier["d_overcrowd"].notna().to_numpy().any())
 
@@ -179,23 +191,18 @@ def _package_a_results_prose(
         lines.append("Frontier: (empty).")
     else:
         d_vals = frontier["d_min"].dropna()
-        has_over = (
-            "d_overcrowd" in frontier.columns
-            and bool(frontier["d_overcrowd"].notna().to_numpy().any())
+        has_over = "d_overcrowd" in frontier.columns and bool(
+            frontier["d_overcrowd"].notna().to_numpy().any()
         )
+        over_bit = "; overcrowding present" if has_over else "; no D_overcrowd"
         if d_vals.empty:
-            over_bit = "with overcrowding marks" if has_over else "no D_min values"
-            lines.append(f"Frontier: {over_bit}.")
+            lines.append(
+                "Frontier: " + ("with overcrowding marks" if has_over else "no D_min values") + "."
+            )
         elif d_vals.nunique() <= 1:
-            over_bit = "; overcrowding present" if has_over else "; no D_overcrowd"
             lines.append(f"Frontier: D_min = {d_vals.iloc[0]} everywhere{over_bit}.")
         else:
-            over_bit = "; overcrowding present" if has_over else "; no D_overcrowd"
-            lines.append(
-                "Frontier: D_min varies with N"
-                + over_bit
-                + " (table below)."
-            )
+            lines.append("Frontier: D_min varies with N" + over_bit + " (table below).")
     lines.append("")
     return lines
 
@@ -207,7 +214,6 @@ def export_package_a(
     protocol: dict[str, Any],
     protocol_id: str = "package_a",
     theta: float = 0.90,
-    seed_list: list[int] | None = None,
     group_cols: list[str] | None = None,
 ) -> dict[str, Path]:
     """Export Package A: tables, provenance, and markdown summary.
@@ -218,45 +224,25 @@ def export_package_a(
     out.mkdir(parents=True, exist_ok=True)
     groups = list(group_cols or [])
 
-    rates = reliability_table(trials, group_cols=groups)
-    frontier = extract_frontier(trials, theta=theta, group_cols=groups)
-    regimes = label_regimes(trials, theta=theta, group_cols=groups)
-    bootstrap = bootstrap_d_min_ci(trials, theta=theta, group_cols=groups)
-
-    paths: dict[str, Path] = {
-        "trials": out / "trials.csv",
-        "reliability": out / "reliability.csv",
-        "frontier": out / "frontier.csv",
-        "regimes": out / "regimes.csv",
-        "dmin_bootstrap": out / "dmin_bootstrap.csv",
-        "provenance": out / "provenance.json",
-        "report": out / "README.md",
-        "artefacts": out / "artefacts.json",
+    tables = {
+        "trials": trials,
+        "reliability": reliability_table(trials, group_cols=groups),
+        "frontier": extract_frontier(trials, theta=theta, group_cols=groups),
+        "regimes": label_regimes(trials, theta=theta, group_cols=groups),
+        "dmin_bootstrap": bootstrap_d_min_ci(trials, theta=theta, group_cols=groups),
     }
-    _write_df(trials, paths["trials"])
-    _write_df(rates, paths["reliability"])
-    front_csv = frontier.drop(columns=["rates"], errors="ignore")
-    _write_df(front_csv, paths["frontier"])
-    _write_df(regimes, paths["regimes"])
-    _write_df(bootstrap, paths["dmin_bootstrap"])
+    paths: dict[str, Path] = {}
+    for name, df in tables.items():
+        paths[name] = out / f"{name}.csv"
+        _write_df(df, paths[name])
+    frontier = tables["frontier"]
+    regimes = tables["regimes"]
 
-    if seed_list is not None:
-        seeds = list(seed_list)
-    elif "seed" in trials.columns:
-        seeds = sorted(int(s) for s in trials["seed"].unique().tolist())
-    else:
-        seeds = []
-
-    methods = _unique_sorted(pd.Series(trials["method"])) if "method" in trials.columns else []
-    layouts = (
-        _unique_sorted(pd.Series(trials["initial_layout"]))
-        if "initial_layout" in trials.columns
-        else []
-    )
-    n_values = _unique_sorted(pd.Series(trials["n_sheep"])) if "n_sheep" in trials.columns else []
-    d_values = (
-        _unique_sorted(pd.Series(trials["n_shepherds"])) if "n_shepherds" in trials.columns else []
-    )
+    seeds = sorted(int(s) for s in trials["seed"].unique()) if "seed" in trials.columns else []
+    methods = _unique_sorted(trials, "method")
+    layouts = _unique_sorted(trials, "initial_layout")
+    n_values = _unique_sorted(trials, "n_sheep")
+    d_values = _unique_sorted(trials, "n_shepherds")
 
     stamp = build_provenance_stamp(
         protocol=protocol,
@@ -281,7 +267,11 @@ def export_package_a(
             "d_values": d_values,
         },
     )
-    write_provenance(paths["provenance"], stamp)
+    regime_counts = "_(none)_"
+    if not regimes.empty and "regime" in regimes.columns:
+        counts = regimes["regime"].value_counts().rename("count").reset_index()
+        counts.columns = ["regime", "count"]
+        regime_counts = _df_to_markdown_table(counts)
 
     lines = [
         markdown_banner_line(),
@@ -313,15 +303,11 @@ def export_package_a(
         *_package_a_results_prose(trials, frontier),
         "### Frontier table",
         "",
-        _df_to_markdown_table(front_csv),
+        _df_to_markdown_table(frontier),
         "",
         "### Regime counts",
         "",
-        (
-            _series_counts_to_markdown(regimes["regime"].value_counts())
-            if not regimes.empty and "regime" in regimes.columns
-            else "_(none)_"
-        ),
+        regime_counts,
         "",
         "## Claim stubs (auto, not final)",
         "",
@@ -331,23 +317,11 @@ def export_package_a(
         "",
         "## Files from this export",
         "",
-        "- trials.csv",
-        "- reliability.csv",
-        "- frontier.csv",
-        "- regimes.csv",
-        "- dmin_bootstrap.csv",
+        *[f"- {p.name}" for p in paths.values()],
         "- provenance.json",
         "",
     ]
-    _ = paths["report"].write_text("\n".join(lines) + "\n")
-    _ = paths["artefacts"].write_text(
-        json.dumps(
-            with_json_notice({k: str(v) for k, v in paths.items()}),
-            indent=2,
-        )
-        + "\n"
-    )
-    return paths
+    return _finish_dossier(out, paths, stamp=stamp, readme_lines=lines)
 
 
 def export_package_dossier(
@@ -367,20 +341,14 @@ def export_package_dossier(
     out.mkdir(parents=True, exist_ok=True)
     paths: dict[str, Path] = {}
     for name, df in artefacts.items():
-        path = out / f"{name}.csv"
-        _write_df(df, path)
-        paths[name] = path
+        paths[name] = out / f"{name}.csv"
+        _write_df(df, paths[name])
     stamp = build_provenance_stamp(
         protocol=protocol,
         seed_list=[],
         extra={"package": package, "notes": notes or []},
     )
-    prov = out / "provenance.json"
-    write_provenance(prov, stamp)
-    paths["provenance"] = prov
-    report = out / "README.md"
-    note_lines = list(notes or [])
-    body = [
+    lines = [
         markdown_banner_line(),
         "",
         f"# Package {package}: {protocol_id}",
@@ -389,24 +357,15 @@ def export_package_dossier(
         + "for interpretation and claim verdicts. This file is only the export dossier.",
         "",
     ]
-    if note_lines:
-        body.extend(["## Notes", "", *note_lines, ""])
-    body.extend(
+    if notes:
+        lines.extend(["## Notes", "", *notes, ""])
+    lines.extend(
         [
             "## Files from this export",
             "",
-            *[f"- {k}: `{v.name}`" for k, v in paths.items() if k != "provenance"],
+            *[f"- {k}: `{v.name}`" for k, v in paths.items()],
             "- provenance.json",
             "",
         ]
     )
-    _ = report.write_text("\n".join(body) + "\n")
-    paths["report"] = report
-    _ = (out / "artefacts.json").write_text(
-        json.dumps(
-            with_json_notice({k: str(v) for k, v in paths.items()}),
-            indent=2,
-        )
-        + "\n"
-    )
-    return paths
+    return _finish_dossier(out, paths, stamp=stamp, readme_lines=lines)

@@ -14,7 +14,7 @@ class BaseScenario(ABC):
     """Interface contract for simulation scenario plugins.
 
     A scenario defines WHAT the simulation setup looks like:
-    - World configuration (boundaries, goals, obstacles)
+    - World configuration (boundaries, goal, optional gate)
     - Initial agent placement
     - Success and timeout conditions
 
@@ -28,18 +28,8 @@ class BaseScenario(ABC):
         """Unique string identifier, e.g. 'drive_to_goal'."""
 
     @property
-    @abstractmethod
-    def name(self) -> str:
-        """Human-readable display name."""
-
-    @property
-    @abstractmethod
-    def description(self) -> str:
-        """One-line description of the scenario objective."""
-
-    @property
     def default_config(self) -> dict[str, Any]:
-        """Scenario-owned defaults for agents/world (used by 'scenario' preset)."""
+        """Scenario-owned defaults; world keys (``WORLD_KEYS``) feed the run config."""
         return {}
 
     @abstractmethod

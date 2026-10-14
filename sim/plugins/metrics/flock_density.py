@@ -15,21 +15,6 @@ class FlockDensityMetric(BaseMetric):
     def id(self) -> str:
         return "flock_density"
 
-    @property
-    def name(self) -> str:
-        return "Flock Density"
-
-    @property
-    def description(self) -> str:
-        return (
-            "Sheep count divided by convex-hull area (1 / world-units squared). "
-            "Zero when the hull has no area."
-        )
-
-    @property
-    def unit(self) -> str:
-        return "1 / world units^2"
-
     def compute(self, state: SimulationState) -> float:
         area = hull_geometry(state.sheep_positions).area
         return flock_density(state.n_sheep, area)

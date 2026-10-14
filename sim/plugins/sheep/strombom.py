@@ -2,10 +2,10 @@
 
 Beyond shepherd range r_s, sheep graze: usually stay still, sometimes take a
 random step. Within r_s they update heading from inertia, attraction to the
-local neighbour centre, sheep-sheep repulsion inside r_a, repulsion from active
+local neighbour centre, sheep-sheep repulsion inside r_a, repulsion from
 shepherds, and angular noise, then advance by sheep_speed (displacement per
 tick). Used by the Strombom-family methods; the dog side is a separate
-controller (typically Collect/Drive).
+controller (multi-dog Collect/Drive or FAT).
 """
 
 from __future__ import annotations
@@ -34,10 +34,6 @@ class StrombomSheepDynamics(BaseSheepDynamics):
         return "strombom"
 
     @property
-    def name(self) -> str:
-        return "Strombom Sheep"
-
-    @property
     def default_config(self) -> dict[str, Any]:
         return {
             k: v
@@ -56,28 +52,19 @@ class StrombomSheepDynamics(BaseSheepDynamics):
         r_a = float(config["r_a"])
         r_s = float(config["r_s"])
         n_neighbors = int(config.get("n_neighbors", -1))
-        c = float(config["c"]) * float(config.get("cohesion_scale", 1.0))
+        c = float(config["c"])
         ra_weight = float(config.get("ra_weight", r_a))
         rs_weight = float(config.get("rs_weight", 1.0))
         noise_str = float(config["noise_strength"])
         speed = float(config["sheep_speed"])
         inertia = float(config["inertia"])
         graze_p = float(config.get("graze_move_prob", 0.05))
-        response = state.sheep_response
-        cohesion = state.sheep_cohesion
+        dogs = state.shepherd_positions
 
         for i in range(n):
             min_shep_dist = (
-                float(
-                    np.min(
-                        np.linalg.norm(
-                            state.shepherd_positions[state.shepherd_active]
-                            - state.sheep_positions[i],
-                            axis=1,
-                        )
-                    )
-                )
-                if np.any(state.shepherd_active)
+                float(np.min(np.linalg.norm(dogs - state.sheep_positions[i], axis=1)))
+                if len(dogs)
                 else float("inf")
             )
 
@@ -89,13 +76,8 @@ class StrombomSheepDynamics(BaseSheepDynamics):
             lcm = compute_local_centroid_knn(state.sheep_positions, i, n_neighbors)
             attraction = compute_attraction(state.sheep_positions[i], lcm)
             repulsion_sheep = compute_repulsion_from_neighbours(state.sheep_positions, i, r_a)
-            active_dogs = state.shepherd_positions[state.shepherd_active]
-            repulsion_shep = compute_repulsion_from_shepherds(
-                state.sheep_positions[i], active_dogs, r_s
-            )
+            repulsion_shep = compute_repulsion_from_shepherds(state.sheep_positions[i], dogs, r_s)
             noise = compute_noise(state.rng, noise_str)
-            sheep_c = float(c) * float(cohesion[i])
-            sheep_rs = float(rs_weight) * float(response[i])
             heading = compose_strombom_heading(
                 state.sheep_velocities[i],
                 attraction,
@@ -103,9 +85,9 @@ class StrombomSheepDynamics(BaseSheepDynamics):
                 repulsion_shep,
                 noise,
                 inertia=inertia,
-                c=sheep_c,
+                c=c,
                 ra_weight=ra_weight,
-                rs_weight=sheep_rs,
+                rs_weight=rs_weight,
             )
             velocities[i] = heading * speed
 

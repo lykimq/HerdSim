@@ -1,8 +1,8 @@
 # Phase-8 size scout: collect-hold-gate task (draft-style harder task).
 # Grade: SCOUT. Same N x D freeze as Phase-1 size map.
 #
-# Not runnable until scenario collect_hold_gate is registered and the runner
-# reads protocol task. Scout then claim only; no pilot protocol.
+# Scenario collect_hold_gate; the runner reads the protocol task key.
+# Scout then claim only; no pilot protocol.
 #
 # Why this task: drive_to_goal left D_min flat and RQ3 skipped. The draft's
 # collect / hold / exit idea is the planned unlock for dog-need vs N and

@@ -11,7 +11,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-# Stable ids used in exports and UI copy.
+# Stable ids written to trials.csv (failure_mode) and used by analysis.
 FAILURE_NONE = "none"
 FAILURE_TIMEOUT = "timeout"
 FAILURE_SPLIT = "split"
@@ -100,13 +100,9 @@ def classify_failure(
             if flips >= max(6, deltas.size // 4) and progress < max(5.0, 0.15 * early):
                 hints.append(FAILURE_OSCILLATION)
 
-    dogs = int(n_shepherds) if n_shepherds is not None else 0
-    if dogs >= 2 and history is not None and not history.empty:
-        # Optional metadata column if future runs record pairwise dog distance.
-        if "min_dog_separation" in history.columns:
-            sep = _col(history, "min_dog_separation")
-            if sep is not None and float(np.nanmean(sep)) < 1.5:
-                hints.append(FAILURE_STACKING)
+    sep = _col(history, "min_dog_separation")
+    if (n_shepherds or 0) >= 2 and sep is not None and float(np.nanmean(sep)) < 1.5:
+        hints.append(FAILURE_STACKING)
 
     if not hints:
         hints.append(FAILURE_TIMEOUT)

@@ -19,24 +19,6 @@ class OutlierCountMetric(BaseMetric):
     def id(self) -> str:
         return "outlier_count"
 
-    @property
-    def name(self) -> str:
-        return "Outlier Count"
-
-    @property
-    def description(self) -> str:
-        return (
-            "Number of sheep beyond the shared threshold f(N) = r_a * N^(2/3) "
-            "(times collect_threshold_scale if set) from the flock centroid. "
-            "Same definition for all algorithms. Matches Collect / Drive switching "
-            "when that controller is used; otherwise a flock-spread score only. "
-            "Not sheep outside the goal -- use Sheep in Goal or Success Rate."
-        )
-
-    @property
-    def unit(self) -> str:
-        return "sheep"
-
     def compute(self, state: SimulationState) -> float:
         if state.n_sheep == 0:
             return 0.0

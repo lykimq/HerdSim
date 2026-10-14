@@ -18,20 +18,5 @@ class AspectRatioMetric(BaseMetric):
     def id(self) -> str:
         return "aspect_ratio"
 
-    @property
-    def name(self) -> str:
-        return "Flock Aspect Ratio"
-
-    @property
-    def description(self) -> str:
-        return (
-            "Ratio of the largest to smallest PCA axis of sheep positions. "
-            "1.0 is round; higher values mean elongation."
-        )
-
-    @property
-    def unit(self) -> str:
-        return "ratio"
-
     def compute(self, state: SimulationState) -> float:
         return aspect_ratio_of_points(state.sheep_positions)

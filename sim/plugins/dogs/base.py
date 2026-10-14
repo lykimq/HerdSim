@@ -18,11 +18,6 @@ class BaseDogController(ABC):
         """Unique dog-controller identifier."""
 
     @property
-    @abstractmethod
-    def name(self) -> str:
-        """Human-readable name."""
-
-    @property
     def default_config(self) -> dict[str, Any]:
         """Controller-specific defaults."""
         return {}
