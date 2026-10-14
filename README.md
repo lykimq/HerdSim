@@ -358,5 +358,5 @@ The full grids are big: 3,000 trials for a 10 x 10 scout. Pick `--workers` to ma
 
 ## Further reading
 
-- [docs/codes/architecture.md](docs/codes/architecture.md): how the code is put together, the plugin model, tick order, and where each phase lives in code.
+- [docs/codes/architecture.md](docs/codes/architecture.md): how the system is designed and why: the principles behind it, the trade-offs we accepted, and how it's meant to grow.
 - [docs/report/short_report.md](docs/report/short_report.md): what we asked, how, what we found, and the limits.
