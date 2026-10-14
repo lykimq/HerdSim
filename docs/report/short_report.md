@@ -4,7 +4,7 @@ This is the results write-up for the scaling study. It covers what the claim-gra
 
 It assumes you've read the [main README](../../README.md). That's where the setup lives: arena, grids, methods, how a campaign runs, what each metric means. All numbers below come from the claim merges (`merged_trials.csv`) unless a section says otherwise.
 
-## The short version
+## Summary
 
 - **One dog is enough far earlier than we expected.** On the baseline (`strombom_multi`, compact start), every flock from 25 to 400 sheep is herded reliably by a single dog. Only the tiny flocks (N = 5 and 10) need two.
 - **Extra dogs don't hurt, they just walk.** We never saw overcrowding up to 35 dogs. Every dog past the first adds path and almost nothing else. Control efficiency falls almost exactly as 1/D.
