@@ -25,7 +25,7 @@ Phases 3, 6 and 7 have no campaigns of their own. They are analysis on top of Ph
 
 C3 (mechanism) is inconclusive: with no overcrowding cells, there was nothing to contrast.
 
-For the plain-language write-up, see [docs/report/short_report.md](docs/report/short_report.md).
+For more details see [docs/report/short_report.md](docs/report/short_report.md).
 
 ## How a campaign runs
 
