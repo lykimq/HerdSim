@@ -10,7 +10,7 @@ Canonical layout:
       trials.csv
       timeseries/         # one Parquet per cell when store_timeseries; stem == cell key
       packages/<letter>/  # analysis exports (A, D-G; written separately, not by the runner)
-      README.md           # folder index and hand-written notes
+      README.md           # hand-written notes (the only file not auto-generated)
 
 protocol_id in protocol.yaml must match the protocol_slug (folder name),
 or the explicit id from protocols/configs/protocols/*.yaml.
@@ -25,7 +25,7 @@ from typing import Any
 
 import yaml
 
-from protocols.packaging.generated_notice import with_json_notice, yaml_banner_line
+from protocols.packaging.generated_notice import NOTICE_LINE, with_json_notice
 
 # services/layout.py -> parents[1] = repo root
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -173,7 +173,7 @@ def copy_protocol_spec(spec_path: Path | str, protocol_dir: Path | str) -> Path:
     dest.parent.mkdir(parents=True, exist_ok=True)
     resolved = load_protocol_spec(src)
     body = yaml.safe_dump(resolved, sort_keys=False, default_flow_style=False)
-    dest.write_text(f"{yaml_banner_line()}\n{body}")
+    dest.write_text(f"{NOTICE_LINE}\n{body}")
     return dest
 
 

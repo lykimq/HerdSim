@@ -7,13 +7,12 @@ import argparse
 import json
 from pathlib import Path
 
-import pandas as pd
-
 from analysis.frontier import (
     bootstrap_d_min_ci,
     merge_scout_and_claim,
     select_claim_windows,
 )
+from protocols.packaging.generated_notice import read_csv, with_json_notice, write_csv
 from services.layout import copy_protocol_spec, load_run_protocol, resolve_protocol_output
 from services.runner import (
     expand_claim_cells_from_boundaries,
@@ -44,7 +43,7 @@ def main() -> None:
     parser.add_argument("--no-timeseries", action="store_true")
     args = parser.parse_args()
 
-    scout = pd.read_csv(args.scout_trials)
+    scout = read_csv(args.scout_trials)
     group_cols = scaling_group_cols(scout)
     path, spec, _, effective = load_run_protocol(args.protocol)
     theta = float(effective.get("reliability_theta", 0.90))
@@ -59,26 +58,21 @@ def main() -> None:
     output: Path = args.output or resolve_protocol_output(spec)
     output.mkdir(parents=True, exist_ok=True)
 
-    boundaries.to_csv(output / "boundary_cells.csv", index=False)
+    write_csv(boundaries, output / "boundary_cells.csv")
     boot = bootstrap_d_min_ci(
         scout,
         theta=theta,
         n_boot=n_boot,
         group_cols=group_cols or None,
     )
-    boot.to_csv(output / "scout_dmin_bootstrap_preview.csv", index=False)
-    (output / "boundary_plan.json").write_text(
-        json.dumps(
-            {
-                "n_boundary_cells": int(len(boundaries)),
-                "group_cols": group_cols,
-                "theta": theta,
-                "scout_trials": str(args.scout_trials),
-            },
-            indent=2,
-        )
-        + "\n"
-    )
+    write_csv(boot, output / "scout_dmin_bootstrap_preview.csv")
+    plan = {
+        "n_boundary_cells": int(len(boundaries)),
+        "group_cols": group_cols,
+        "theta": theta,
+        "scout_trials": str(args.scout_trials),
+    }
+    (output / "boundary_plan.json").write_text(json.dumps(with_json_notice(plan), indent=2) + "\n")
     print(f"Wrote {len(boundaries)} boundary cells to {output / 'boundary_cells.csv'}")
 
     if args.plan_only:
@@ -104,16 +98,16 @@ def main() -> None:
         n_boot=n_boot,
         group_cols=group_cols or None,
     )
-    claim_boot.to_csv(output / "dmin_bootstrap.csv", index=False)
+    write_csv(claim_boot, output / "dmin_bootstrap.csv")
     merged = merge_scout_and_claim(scout, trials)
-    merged.to_csv(output / "merged_trials.csv", index=False)
+    write_csv(merged, output / "merged_trials.csv")
     merged_boot = bootstrap_d_min_ci(
         merged,
         theta=theta,
         n_boot=n_boot,
         group_cols=scaling_group_cols(merged) or None,
     )
-    merged_boot.to_csv(output / "merged_dmin_bootstrap.csv", index=False)
+    write_csv(merged_boot, output / "merged_dmin_bootstrap.csv")
     print(f"Wrote {len(trials)} claim trial rows to {output / 'trials.csv'}")
     print(f"Wrote {len(merged)} merged rows to {output / 'merged_trials.csv'}")
 

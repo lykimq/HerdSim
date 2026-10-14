@@ -2,15 +2,15 @@
   "_auto_generated_notice": "AUTO-GENERATED: do not modify. Re-run the producing command to refresh this file.",
   "protocol_id": "phase8_size_scout",
   "n_planned": 3000,
-  "n_done": 2041,
+  "n_done": 2052,
   "n_pending_at_start": 1216,
   "complete": false,
   "running": true,
   "started_at": "2026-10-13T14:43:57.120714+00:00",
-  "updated_at": "2026-10-14T12:58:59.043402+00:00",
-  "elapsed_seconds": 80101.922688,
+  "updated_at": "2026-10-14T13:14:26.269154+00:00",
+  "elapsed_seconds": 81029.14844,
   "trials_csv": "trials.csv",
   "manifest_jsonl": "manifest.jsonl",
   "store_timeseries": false,
-  "n_rows_trials_csv": 2041
+  "n_rows_trials_csv": 2052
 }

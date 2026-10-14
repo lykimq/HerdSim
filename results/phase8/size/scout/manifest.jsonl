@@ -2039,3 +2039,14 @@
 {"key": "N150_D20_Lcompact_S2038_Mstrombom_multi", "N": 150, "D": 20, "seed": 2038, "initial_layout": "compact", "method": "strombom_multi", "status": "ok", "timestamp": "2026-10-14T12:56:35.065678+00:00"}
 {"key": "N150_D25_Lcompact_S2029_Mstrombom_multi", "N": 150, "D": 25, "seed": 2029, "initial_layout": "compact", "method": "strombom_multi", "status": "ok", "timestamp": "2026-10-14T12:57:51.362966+00:00"}
 {"key": "N150_D20_Lcompact_S2053_Mstrombom_multi", "N": 150, "D": 20, "seed": 2053, "initial_layout": "compact", "method": "strombom_multi", "status": "ok", "timestamp": "2026-10-14T12:58:59.043402+00:00"}
+{"key": "N150_D25_Lcompact_S2030_Mstrombom_multi", "N": 150, "D": 25, "seed": 2030, "initial_layout": "compact", "method": "strombom_multi", "status": "ok", "timestamp": "2026-10-14T13:01:38.537887+00:00"}
+{"key": "N150_D25_Lcompact_S2027_Mstrombom_multi", "N": 150, "D": 25, "seed": 2027, "initial_layout": "compact", "method": "strombom_multi", "status": "ok", "timestamp": "2026-10-14T13:01:39.101495+00:00"}
+{"key": "N150_D20_Lcompact_S2055_Mstrombom_multi", "N": 150, "D": 20, "seed": 2055, "initial_layout": "compact", "method": "strombom_multi", "status": "ok", "timestamp": "2026-10-14T13:04:12.765261+00:00"}
+{"key": "N150_D25_Lcompact_S2035_Mstrombom_multi", "N": 150, "D": 25, "seed": 2035, "initial_layout": "compact", "method": "strombom_multi", "status": "ok", "timestamp": "2026-10-14T13:04:42.317571+00:00"}
+{"key": "N150_D25_Lcompact_S2028_Mstrombom_multi", "N": 150, "D": 25, "seed": 2028, "initial_layout": "compact", "method": "strombom_multi", "status": "ok", "timestamp": "2026-10-14T13:05:21.170040+00:00"}
+{"key": "N150_D25_Lcompact_S2031_Mstrombom_multi", "N": 150, "D": 25, "seed": 2031, "initial_layout": "compact", "method": "strombom_multi", "status": "ok", "timestamp": "2026-10-14T13:09:33.917280+00:00"}
+{"key": "N150_D25_Lcompact_S2032_Mstrombom_multi", "N": 150, "D": 25, "seed": 2032, "initial_layout": "compact", "method": "strombom_multi", "status": "ok", "timestamp": "2026-10-14T13:12:04.705853+00:00"}
+{"key": "N150_D25_Lcompact_S2037_Mstrombom_multi", "N": 150, "D": 25, "seed": 2037, "initial_layout": "compact", "method": "strombom_multi", "status": "ok", "timestamp": "2026-10-14T13:12:15.411298+00:00"}
+{"key": "N150_D25_Lcompact_S2033_Mstrombom_multi", "N": 150, "D": 25, "seed": 2033, "initial_layout": "compact", "method": "strombom_multi", "status": "ok", "timestamp": "2026-10-14T13:12:25.278220+00:00"}
+{"key": "N150_D25_Lcompact_S2034_Mstrombom_multi", "N": 150, "D": 25, "seed": 2034, "initial_layout": "compact", "method": "strombom_multi", "status": "ok", "timestamp": "2026-10-14T13:12:53.875031+00:00"}
+{"key": "N150_D25_Lcompact_S2036_Mstrombom_multi", "N": 150, "D": 25, "seed": 2036, "initial_layout": "compact", "method": "strombom_multi", "status": "ok", "timestamp": "2026-10-14T13:14:26.269154+00:00"}

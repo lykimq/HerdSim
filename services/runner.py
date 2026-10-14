@@ -18,6 +18,7 @@ from plugins.scenarios.collect_hold_gate import hold_radius_for_n
 from plugins.scenarios.registry import scenario_registry
 
 from protocols.packaging.failure_taxonomy import classify_failure
+from protocols.packaging.generated_notice import NOTICE_LINE, read_csv, write_csv
 from protocols.packaging.provenance import build_provenance_stamp, write_provenance
 from protocols.packaging.trial_aggregates import TRAJECTORY_METRICS, build_trial_metric_fields
 from services.layout import read_status, write_status
@@ -149,7 +150,7 @@ def _load_completed(output_dir: Path) -> set[str]:
     with path.open() as f:
         for line in f:
             line = line.strip()
-            if not line:
+            if not line or line.startswith("#"):
                 continue
             try:
                 row = json.loads(line)
@@ -203,7 +204,10 @@ def _dedupe_trial_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
 def _append_manifest(output_dir: Path, row: dict[str, Any]) -> None:
     path = _manifest_path(output_dir)
     path.parent.mkdir(parents=True, exist_ok=True)
+    is_new = not path.exists()
     with path.open("a") as f:
+        if is_new:
+            f.write(NOTICE_LINE + "\n")
         f.write(json.dumps(row, default=str) + "\n")
 
 
@@ -479,7 +483,7 @@ def run_scaling_grid(
     if resume:
         done = _load_completed(out)
         if trials_path.exists():
-            loaded = pd.read_csv(trials_path).to_dict(orient="records")
+            loaded = read_csv(trials_path).to_dict(orient="records")
             rows.extend({str(k): v for k, v in record.items()} for record in loaded)
             rows = _dedupe_trial_rows(rows)
             csv_keys = _trials_resume_keys(rows)
@@ -527,7 +531,7 @@ def run_scaling_grid(
     def _flush_trials_csv() -> None:
         # Flush CSV before appending status=ok to the manifest so a mid-run kill
         # cannot leave ok manifest rows without CSV evidence.
-        pd.DataFrame(rows).to_csv(trials_path, index=False)
+        write_csv(pd.DataFrame(rows), trials_path)
 
     def _consume(payload: dict[str, Any]) -> None:
         nonlocal n_done_so_far
@@ -588,7 +592,7 @@ def run_scaling_grid(
                     _consume(fut.result())
 
     trials = pd.DataFrame(rows)
-    trials.to_csv(trials_path, index=False)
+    write_csv(trials, trials_path)
     n_done = len(_load_completed(out))
     finished_at = datetime.now(UTC).isoformat()
     write_status(

@@ -35,3 +35,23 @@ def test_factor_sweep_sets_information_axes():
     assert spec["runner"] == "factor"
     assert len(cells) == 4 * 2 * 6 * 30
     assert _cell_key(cells[0]).endswith("_Olocal_positions_R32.5")
+
+
+def test_notice_line_round_trips_and_resume_skips_it(tmp_path):
+    import pandas as pd
+
+    from protocols.packaging.generated_notice import NOTICE_LINE, read_csv, write_csv
+    from services.runner import _append_manifest, _load_completed
+
+    df = pd.DataFrame({"resume_key": ["a", "b"], "success": [True, False]})
+    write_csv(df, tmp_path / "new.csv")
+    assert (tmp_path / "new.csv").read_text().splitlines()[0] == NOTICE_LINE
+    pd.testing.assert_frame_equal(read_csv(tmp_path / "new.csv"), df)
+    df.to_csv(tmp_path / "old.csv", index=False)  # pre-notice files still load
+    pd.testing.assert_frame_equal(read_csv(tmp_path / "old.csv"), df)
+
+    _append_manifest(tmp_path, {"key": "a", "status": "ok"})
+    _append_manifest(tmp_path, {"key": "b", "status": "ok"})
+    lines = (tmp_path / "manifest.jsonl").read_text().splitlines()
+    assert lines[0] == NOTICE_LINE and len(lines) == 3
+    assert _load_completed(tmp_path) == {"a", "b"}

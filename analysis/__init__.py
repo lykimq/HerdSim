@@ -8,8 +8,8 @@ information ladders, early-warning scores, and package dossiers under
 What lives here vs elsewhere:
 - ``analysis/``: compute and export after simulations finish.
 - ``protocols.packaging``: end-of-trial row packaging while writing ``trials.csv``.
-- Hand-written protocol-folder ``README.md`` files are not produced here; only
-  auto-generated package dossiers (see ``analysis.export``).
+- Hand-written protocol-folder ``README.md`` files are not produced here;
+  ``analysis.export`` writes only package CSV tables + ``provenance.json``.
 
 Entry points by package:
 - A (size / structure maps): ``export.export_package_a`` (uses ``frontier``, ``regimes``)
@@ -18,7 +18,7 @@ Entry points by package:
   ``substitution.summarize_substitution``
 - F (scaling fits, RQ6): ``fits.fit_scaling_models``
 - G (early warning, RQ7): ``early_warning.evaluate_early_warning_campaign``
-- B-G tables: ``export.export_package_dossier`` writes CSVs + README + provenance
+- D-G tables: ``export.export_package_dossier`` writes named CSVs + provenance
 
 Import from the submodules directly; this module does not re-export them, so
 importing ``analysis.frontier`` (as the claim planner does) stays light.

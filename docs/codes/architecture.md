@@ -161,6 +161,12 @@ state(t)
 
 ### Artifacts under `results/phase{k}/{slug}/`
 
+Every machine-written file starts with the AUTO-GENERATED notice
+(`protocols/packaging/generated_notice.py`): a `# AUTO-GENERATED: ...` first line
+in YAML / CSV / JSONL, a first `_auto_generated_notice` field in JSON. Read CSVs
+with `generated_notice.read_csv` (or `pd.read_csv(path, skiprows=1)`); files from
+before the notice have no such line. Parquet timeseries carry no notice.
+
 | Artifact | When written |
 |----------|--------------|
 | `protocol.yaml` | Start of run / claim (resolved freeze) |
@@ -171,7 +177,7 @@ state(t)
 | `timeseries/*.parquet` | After each cell if `store_timeseries` |
 | `boundary_cells.csv`, `boundary_plan.json`, `scout_dmin_bootstrap_preview.csv` | Claim plan / start of claim-reseed |
 | `merged_trials.csv`, `*dmin_bootstrap.csv` | End of claim-reseed |
-| `packages/{a,b,d-g}/` | Separate analysis export (not the campaign runner; B is historical) |
+| `packages/<letter>/` | Separate analysis export: CSV tables + `provenance.json` (A, D-G; B is historical) |
 | `README.md` | Handwritten notes |
 
 ## Phase and RQ code map
