@@ -2,7 +2,7 @@
 
 This is the results write-up for the scaling study. It covers what the claim-grade runs found, what each finding means, and where the evidence is thin.
 
-It assumes you've read the [main README](../../README.md). That's where the setup lives: arena, grids, methods, how a campaign runs, what each metric means. None of that is repeated here. All numbers below come from the claim merges (`merged_trials.csv`) unless a section says otherwise.
+It assumes you've read the [main README](../../README.md). That's where the setup lives: arena, grids, methods, how a campaign runs, what each metric means. All numbers below come from the claim merges (`merged_trials.csv`) unless a section says otherwise.
 
 ## The short version
 
