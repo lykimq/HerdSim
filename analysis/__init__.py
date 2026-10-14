@@ -8,8 +8,7 @@ information ladders, early-warning scores, and package dossiers under
 What lives here vs elsewhere:
 - ``analysis/``: compute and export after simulations finish.
 - ``protocols.packaging``: end-of-trial row packaging while writing ``trials.csv``.
-- Hand-written protocol-folder ``README.md`` files are not produced here;
-  ``analysis.export`` writes only package CSV tables + ``provenance.json``.
+- ``analysis.export`` writes only package CSV tables + ``provenance.json``.
 
 Entry points by package:
 - A (size / structure maps): ``export.export_package_a`` (uses ``frontier``, ``regimes``)

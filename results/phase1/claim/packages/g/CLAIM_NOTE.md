@@ -1,6 +1,6 @@
 # Package G claim note (Phase 7 / RQ7)
 
-Hand note on top of the auto `README.md`. Criteria: main scaling plan C7a / C7b.
+Hand note on the Package G tables in this folder. Criteria: main scaling plan C7a / C7b.
 
 ## Inputs
 

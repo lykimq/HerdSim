@@ -10,7 +10,6 @@ Canonical layout:
       trials.csv
       timeseries/         # one Parquet per cell when store_timeseries; stem == cell key
       packages/<letter>/  # analysis exports (A, D-G; written separately, not by the runner)
-      README.md           # hand-written notes (the only file not auto-generated)
 
 protocol_id in protocol.yaml must match the protocol_slug (folder name),
 or the explicit id from protocols/configs/protocols/*.yaml.

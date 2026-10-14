@@ -178,7 +178,6 @@ before the notice have no such line. Parquet timeseries carry no notice.
 | `boundary_cells.csv`, `boundary_plan.json`, `scout_dmin_bootstrap_preview.csv` | Claim plan / start of claim-reseed |
 | `merged_trials.csv`, `*dmin_bootstrap.csv` | End of claim-reseed |
 | `packages/<letter>/` | Separate analysis export: CSV tables + `provenance.json` (A, D-G; B is historical) |
-| `README.md` | Handwritten notes |
 
 ## Phase and RQ code map
 

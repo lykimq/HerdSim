@@ -3,8 +3,7 @@
 This module is the exporter for analysis Packages A and D-G (Cap I13). It does
 not run simulations and is not called by the campaign runner. Each export writes
 CSV tables plus ``provenance.json``; every file carries the AUTO-GENERATED
-notice. Interpretation and claim verdicts belong in the hand-written
-protocol-folder ``README.md``, not here.
+notice. Interpretation and claim verdicts are not written here.
 
 Entry points:
 - ``export_package_a``: Package A size / structure map (trials, reliability,
