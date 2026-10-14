@@ -9,8 +9,6 @@ There are two tasks:
 - **drive_to_goal** (Phases 1 to 5): push the whole flock into a goal disk.
 - **collect_hold_gate** (Phase 8): gather the flock, keep it in a hold area for a while, then push it out through a gate.
 
-This README is meant to be the one place to start. It covers what we found, how a run works, what you can configure, what gets measured, and what lands on disk. The deeper material lives in `docs/` (links at the bottom).
-
 ## Results so far
 
 | Phase | Question | Main answer | Claims |
@@ -294,10 +292,6 @@ results/phase{k}/{slug}/
 | `boundary_*`, `scout_dmin_bootstrap_preview.csv` | `claim-plan`, `claim-reseed` | Before any claim trial runs |
 | `dmin_bootstrap.csv`, `merged_*` | `claim-reseed` | End of the claim run |
 | `packages/<letter>/` | `analysis.export` | Whenever you run the analysis |
-
-Every generated file starts with an `AUTO-GENERATED` notice: a `#` line in CSV / YAML / JSONL, and a `_auto_generated_notice` field in JSON. To load a CSV, use `protocols.packaging.generated_notice.read_csv`, or `pd.read_csv(path, skiprows=1)`. Some older Phase 1 files were written before the notice existed and don't have it.
-
-Phase 8 runs in the background, so `results/phase8/size/logs/` also holds a watchdog script and its logs.
 
 ## Tech stack
 
