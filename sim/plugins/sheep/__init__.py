@@ -1,10 +1,22 @@
 """Sheep motion models (how the flock moves each tick).
 
-Plugins here implement BaseSheepDynamics and are selected by the sheep_model
-config key (set by the method). Dog decisions live under plugins.dogs; this
-package only updates sheep positions and velocities.
+Each model is a ``step(state, config) -> state`` function that updates sheep
+positions and velocities. The method's ``sheep_model`` key picks one from
+SHEEP_MODELS. Dog decisions live under plugins.dogs.
 """
 
-from .base import BaseSheepDynamics
+from __future__ import annotations
 
-__all__ = ["BaseSheepDynamics"]
+from collections.abc import Callable
+from typing import Any
+
+from core.simulation_state import SimulationState
+
+from . import kubo, strombom
+
+SheepStep = Callable[[SimulationState, dict[str, Any]], SimulationState]
+
+SHEEP_MODELS: dict[str, SheepStep] = {
+    "strombom": strombom.step,
+    "kubo": kubo.step,
+}

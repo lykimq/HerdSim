@@ -132,7 +132,7 @@ def build_transfer_table(
     trials_by_method: dict[str, pd.DataFrame],
     *,
     baseline: str,
-    theta: float = 0.90,
+    theta: float,
     group_cols: list[str] | None = None,
     sheep_col: str = "n_sheep",
 ) -> pd.DataFrame:

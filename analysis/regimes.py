@@ -24,8 +24,8 @@ REGIME_HARD = "hard_failure"
 def label_regimes(
     df: pd.DataFrame,
     *,
-    theta: float = 0.90,
-    wasteful_effort_tol: float = 0.20,
+    theta: float,
+    wasteful_effort_tol: float,
     sheep_col: str = "n_sheep",
     dog_col: str = "n_shepherds",
     success_col: str = "success",

@@ -13,8 +13,16 @@ from typing import Any
 
 import numpy as np
 from core.simulation_state import SimulationState
-from plugins.dogs.helpers import move_toward
 from plugins.sheep.helpers import compute_noise, unit_vector
+
+
+def move_toward(current_pos: np.ndarray, target_pos: np.ndarray, speed: float) -> np.ndarray:
+    """Velocity from current toward target at most `speed` (zeros if at target)."""
+    diff = target_pos - current_pos
+    dist = np.linalg.norm(diff)
+    if dist < 1e-10:
+        return np.zeros(2)
+    return (diff / dist) * min(speed, dist)
 
 
 def compute_threshold(n_sheep: int, r_a: float) -> float:
@@ -24,15 +32,11 @@ def compute_threshold(n_sheep: int, r_a: float) -> float:
 
 def collect_offset(config: dict[str, Any]) -> float:
     """Collect stand-off Pc: r_a behind the furthest agent (paper Table 1)."""
-    if "collect_offset" in config:
-        return float(config["collect_offset"])
-    return float(config.get("r_a", 2.0))
+    return float(config["r_a"])
 
 
 def drive_offset(state: SimulationState, config: dict[str, Any]) -> float:
     """Drive stand-off Pd: r_a * sqrt(N) behind the flock (paper Table 1)."""
-    if "drive_offset" in config:
-        return float(config["drive_offset"])
     return float(config["r_a"]) * (state.n_sheep**0.5)
 
 
@@ -50,18 +54,17 @@ def shepherd_step_toward(
     body-proximity rule: pass true world sheep as `proximity_sheep` when `state`
     holds observed or bearing-proxy positions.
     """
-    speed = float(config.get("shepherd_speed", 1.5))
+    speed = float(config["shepherd_speed"])
     shepherd_pos = state.shepherd_positions[shepherd_idx]
     sheep = state.sheep_positions if proximity_sheep is None else proximity_sheep
-    stop_multiple = float(config.get("shepherd_stop_multiple", 3.0))
-    stop_radius = stop_multiple * float(config.get("r_a", 2.0))
+    stop_radius = float(config["shepherd_stop_multiple"]) * float(config["r_a"])
     if sheep.shape[0] > 0:
         min_sheep_dist = float(np.min(np.linalg.norm(sheep - shepherd_pos, axis=1)))
         if min_sheep_dist < stop_radius:
             return np.zeros(2)
 
     base = move_toward(shepherd_pos, target, speed)
-    noise = compute_noise(state.rng, float(config.get("noise_strength", 0.3)))
+    noise = compute_noise(state.rng, float(config["noise_strength"]))
     direction = unit_vector(base + noise)
     step = min(speed, float(np.linalg.norm(target - shepherd_pos)))
     return direction * step

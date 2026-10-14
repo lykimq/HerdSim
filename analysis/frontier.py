@@ -92,7 +92,7 @@ def _d_max_for_rates(
 def select_claim_windows(
     df: pd.DataFrame,
     *,
-    theta: float = 0.90,
+    theta: float,
     sheep_col: str = "n_sheep",
     dog_col: str = "n_shepherds",
     success_col: str = "success",
@@ -202,9 +202,9 @@ def _grid_or_above(value: float) -> tuple[int | None, bool]:
 def bootstrap_d_min_ci(
     df: pd.DataFrame,
     *,
-    theta: float = 0.90,
-    n_boot: int = 1000,
-    seed: int = 2026,
+    theta: float,
+    n_boot: int,
+    seed: int,
     sheep_col: str = "n_sheep",
     dog_col: str = "n_shepherds",
     success_col: str = "success",
@@ -279,7 +279,7 @@ def bootstrap_d_min_ci(
 def extract_frontier(
     df: pd.DataFrame,
     *,
-    theta: float = 0.90,
+    theta: float,
     sheep_col: str = "n_sheep",
     dog_col: str = "n_shepherds",
     success_col: str = "success",

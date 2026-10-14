@@ -10,12 +10,10 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import pandas as pd
 from core.config import resolve_experiment_config
-from core.simulation_runner import RunResult, SimulationRunner
-from plugins.metrics.registry import metric_registry
-from plugins.scenarios.collect_hold_gate import hold_radius_for_n
-from plugins.scenarios.registry import scenario_registry
+from core.simulation_runner import RunResult, run_trial
 
 from protocols.packaging.failure_taxonomy import classify_failure
 from protocols.packaging.generated_notice import NOTICE_LINE, read_csv, write_csv
@@ -29,78 +27,54 @@ class ScalingCell:
     n_sheep: int
     n_shepherds: int
     seed: int
-    initial_layout: str = "compact"
-    method: str = "strombom_multi"
-    scenario: str = "drive_to_goal"
+    initial_layout: str
+    method: str
+    scenario: str
+    max_ticks: int
+    world_width: float
+    world_height: float
+    goal_center_x: float
+    goal_center_y: float
+    goal_radius: float
+    initial_spread: float
+    measurement_radius: float
+    shepherd_start_offset: float
+    shepherd_jitter: float
     obs_mode: str | None = None
     sensing_range: float | None = None
     communication: str | None = None
-    max_ticks: int = 10000
-    world_width: float = 500.0
-    world_height: float = 500.0
-    goal_center_x: float = 370.0
-    goal_center_y: float = 250.0
-    goal_radius: float = 15.0
-    initial_spread: float = 30.0
-    measurement_radius: float = 5.0
     hold_ticks: int | None = None
     gate_half_width: float | None = None
-    hold_radius_scale: float | None = None
-    hold_radius_min: float | None = None
-    hold_radius_max: float | None = None
 
 
-# Phase 8 collect_hold_gate geometry passed through to the scenario when set.
-HOLD_FIELDS = (
-    "hold_ticks",
-    "gate_half_width",
-    "hold_radius_scale",
-    "hold_radius_min",
-    "hold_radius_max",
-)
+def goal_radius_for_n(protocol: dict[str, Any], n_sheep: int) -> float:
+    """Goal disk (drive_to_goal) or hold disk (collect_hold_gate) radius for one N."""
+    if protocol["task"] == "collect_hold_gate":
+        # Draft rule: clamp(scale * sqrt(N), min, max).
+        radius = float(protocol["hold_radius_scale"]) * float(np.sqrt(n_sheep))
+        return float(np.clip(radius, protocol["hold_radius_min"], protocol["hold_radius_max"]))
+    # Same goal area per sheep as goal_radius_at_n50 gives at N=50.
+    return float(protocol["goal_radius_at_n50"]) * (float(n_sheep) / 50.0) ** 0.5
 
 
-def goal_radius_for_n(n_sheep: int, radius_at_n50: float = 15.0) -> float:
-    """Goal disk with the same area per sheep as radius_at_n50 at N=50."""
-    return float(radius_at_n50) * (float(n_sheep) / 50.0) ** 0.5
-
-
-def scaling_world_overrides(protocol: dict[str, Any], n_sheep: int) -> dict[str, Any]:
-    """Arena and goal fields for one flock size (drive_to_goal or collect_hold_gate)."""
-    task = str(protocol.get("task", "drive_to_goal"))
-    if task == "collect_hold_gate":
-        hold_center = protocol.get("hold_center", [250.0, 250.0])
-        return {
-            "world_width": float(protocol.get("world_width", 500.0)),
-            "world_height": float(protocol.get("world_height", 500.0)),
-            "goal_center_x": float(hold_center[0]),
-            "goal_center_y": float(hold_center[1]),
-            "goal_radius": hold_radius_for_n(
-                n_sheep,
-                scale=float(protocol.get("hold_radius_scale", 2.5)),
-                radius_min=float(protocol.get("hold_radius_min", 23.0)),
-                radius_max=float(protocol.get("hold_radius_max", 27.0)),
-            ),
-            "initial_spread": float(protocol.get("initial_spread", 30.0)),
-            "measurement_radius": float(protocol.get("measurement_radius", 5.0)),
-            "hold_ticks": int(protocol.get("hold_ticks", 800)),
-            "gate_half_width": float(protocol.get("gate_half_width", 30.0)),
-            "hold_radius_scale": float(protocol.get("hold_radius_scale", 2.5)),
-            "hold_radius_min": float(protocol.get("hold_radius_min", 23.0)),
-            "hold_radius_max": float(protocol.get("hold_radius_max", 27.0)),
-        }
-
-    radius_at_n50 = float(protocol.get("goal_radius_at_n50", 15.0))
-    center = protocol.get("goal_center", [370.0, 250.0])
-    return {
-        "world_width": float(protocol.get("world_width", 500.0)),
-        "world_height": float(protocol.get("world_height", 500.0)),
+def task_setup(protocol: dict[str, Any], n_sheep: int) -> dict[str, Any]:
+    """Task setup fields of ScalingCell for one flock size, read from the protocol."""
+    center = protocol["goal_center"]
+    setup: dict[str, Any] = {
+        "world_width": float(protocol["world_width"]),
+        "world_height": float(protocol["world_height"]),
         "goal_center_x": float(center[0]),
         "goal_center_y": float(center[1]),
-        "goal_radius": goal_radius_for_n(n_sheep, radius_at_n50),
-        "initial_spread": float(protocol.get("initial_spread", 30.0)),
-        "measurement_radius": float(protocol.get("measurement_radius", 5.0)),
+        "goal_radius": goal_radius_for_n(protocol, n_sheep),
+        "initial_spread": float(protocol["initial_spread"]),
+        "measurement_radius": float(protocol["measurement_radius"]),
+        "shepherd_start_offset": float(protocol["shepherd_start_offset"]),
+        "shepherd_jitter": float(protocol["shepherd_jitter"]),
     }
+    if protocol["task"] == "collect_hold_gate":
+        setup["hold_ticks"] = int(protocol["hold_ticks"])
+        setup["gate_half_width"] = float(protocol["gate_half_width"])
+    return setup
 
 
 SCALING_GROUP_CANDIDATES = (
@@ -228,11 +202,10 @@ def _trial_row_from_result(
     row: dict[str, Any] = {
         "method": method,
         "scenario": scenario_id,
-        "preset": "paper",
         "seed": seed,
-        "sheep_model": config.get("sheep_model"),
-        "dog_controller": config.get("dog_controller"),
-        "obs_mode": config.get("obs_mode"),
+        "sheep_model": config["sheep_model"],
+        "dog_controller": config["dog_controller"],
+        "obs_mode": config["obs_mode"],
         "n_sheep": config["n_sheep"],
         "n_shepherds": config["n_shepherds"],
         "initial_layout": cell.initial_layout,
@@ -252,7 +225,7 @@ def _trial_row_from_result(
     failure = classify_failure(
         result.history,
         success=bool(result.success),
-        n_shepherds=int(config.get("n_shepherds") or 0),
+        n_shepherds=int(config["n_shepherds"]),
     )
     row["failure_mode"] = failure["failure_mode"]
     row["failure_label"] = failure["failure_label"]
@@ -263,15 +236,24 @@ def _trial_row_from_result(
 
 
 def _run_cell(cell: ScalingCell) -> dict[str, Any]:
-    """Worker entry: run one trial via SimulationRunner."""
-    scenario_id = str(cell.scenario or "drive_to_goal")
-    scenario = scenario_registry.get(scenario_id)
-    algorithm_params: dict[str, Any] = {
-        "max_ticks": cell.max_ticks,
+    """Worker entry: run one trial."""
+    scenario_params: dict[str, Any] = {
+        "world_width": cell.world_width,
+        "world_height": cell.world_height,
+        "goal_center": [cell.goal_center_x, cell.goal_center_y],
+        "goal_radius": cell.goal_radius,
         "initial_layout": cell.initial_layout,
         "initial_spread": cell.initial_spread,
         "measurement_radius": cell.measurement_radius,
+        "shepherd_start_offset": cell.shepherd_start_offset,
+        "shepherd_jitter": cell.shepherd_jitter,
+        "max_ticks": cell.max_ticks,
     }
+    if cell.hold_ticks is not None:
+        scenario_params["hold_ticks"] = cell.hold_ticks
+    if cell.gate_half_width is not None:
+        scenario_params["gate_half_width"] = cell.gate_half_width
+    algorithm_params: dict[str, Any] = {}
     if cell.obs_mode is not None:
         algorithm_params["obs_mode"] = cell.obs_mode
     elif cell.sensing_range is not None or cell.communication is not None:
@@ -283,38 +265,19 @@ def _run_cell(cell: ScalingCell) -> dict[str, Any]:
         algorithm_params["sensing_range"] = cell.sensing_range
     if cell.communication is not None:
         algorithm_params["communication"] = cell.communication
-    for name in HOLD_FIELDS:
-        value = getattr(cell, name)
-        if value is not None:
-            algorithm_params[name] = value
-    if scenario_id == "collect_hold_gate":
-        algorithm_params["hold_center"] = [cell.goal_center_x, cell.goal_center_y]
 
     config = resolve_experiment_config(
-        scenario=scenario,
+        task=cell.scenario,
         method=cell.method,
         num_sheep=cell.n_sheep,
         num_shepherds=cell.n_shepherds,
+        scenario_params=scenario_params,
         algorithm_params=algorithm_params,
-        world_overrides={
-            "world_width": cell.world_width,
-            "world_height": cell.world_height,
-            "goal_center": [cell.goal_center_x, cell.goal_center_y],
-            "goal_radius": cell.goal_radius,
-            "initial_spread": cell.initial_spread,
-            "measurement_radius": cell.measurement_radius,
-            "max_ticks": cell.max_ticks,
-        },
     )
-    result = SimulationRunner(
-        scenario=scenario,
-        metrics=metric_registry.get_all(),
-        config=config,
-        seed=cell.seed,
-    ).run()
+    result = run_trial(config, cell.seed)
     row = _trial_row_from_result(
         method=cell.method,
-        scenario_id=scenario_id,
+        scenario_id=cell.scenario,
         seed=cell.seed,
         config=config,
         result=result,
@@ -347,16 +310,15 @@ def expand_scaling_grid(
     Size / structure grids leave the information axes unset (None). RQ5 factor
     sweeps set ``obs_modes`` and optionally ``sensing_ranges`` / ``communications``.
     """
-    methods = methods or [protocol.get("baseline_method", "strombom_multi")]
-    layouts = layouts or list(protocol.get("x0_families", ["compact"]))
-    n_values = n_values or list(protocol.get("flock_sizes", [50]))
-    d_values = d_values or list(protocol.get("shepherd_counts", [1, 2, 3]))
+    methods = methods or [protocol["baseline_method"]]
+    layouts = layouts or list(protocol["x0_families"])
+    n_values = n_values or list(protocol["flock_sizes"])
+    d_values = d_values or list(protocol["shepherd_counts"])
     if n_seeds is None:
-        key = "claim_grade_seeds" if seed_mode == "claim" else "scout_seeds"
-        n_seeds = int(protocol.get(key, 30))
-    master = int(protocol.get("master_seed", 2026))
-    ticks = int(protocol.get("time_limit_t0", 10000) if max_ticks is None else max_ticks)
-    scenario = str(protocol.get("task", "drive_to_goal"))
+        n_seeds = int(protocol["claim_grade_seeds" if seed_mode == "claim" else "scout_seeds"])
+    master = int(protocol["master_seed"])
+    ticks = int(protocol["time_limit_t0"] if max_ticks is None else max_ticks)
+    scenario = str(protocol["task"])
     rng_seeds = [master + i for i in range(int(n_seeds))]
     cells: list[ScalingCell] = []
     for method, layout, obs, sense, comm, n in itertools.product(
@@ -367,7 +329,7 @@ def expand_scaling_grid(
         communications or [None],
         n_values,
     ):
-        arena = scaling_world_overrides(protocol, int(n))
+        setup = task_setup(protocol, int(n))
         for d, seed in itertools.product(d_values, rng_seeds):
             cells.append(
                 ScalingCell(
@@ -381,7 +343,7 @@ def expand_scaling_grid(
                     sensing_range=None if sense is None else float(sense),
                     communication=None if comm is None else str(comm),
                     max_ticks=ticks,
-                    **arena,
+                    **setup,
                 )
             )
     return cells
@@ -417,10 +379,10 @@ def expand_claim_cells_from_boundaries(
     if boundaries.empty:
         return []
     if n_seeds is None:
-        n_seeds = int(protocol.get("claim_grade_seeds", 100))
-    master = int(protocol.get("master_seed", 2026))
-    ticks = int(protocol.get("time_limit_t0", 10000))
-    scenario = str(protocol.get("task", "drive_to_goal"))
+        n_seeds = int(protocol["claim_grade_seeds"])
+    master = int(protocol["master_seed"])
+    ticks = int(protocol["time_limit_t0"])
+    scenario = str(protocol["task"])
     rng_seeds = [master + i for i in range(int(n_seeds))]
 
     cells: list[ScalingCell] = []
@@ -428,23 +390,15 @@ def expand_claim_cells_from_boundaries(
         n = int(brow["n_sheep"])
         d = int(brow["n_shepherds"])
         layout_val = _row_optional_str(brow, "initial_layout")
-        layout_list = (
-            [layout_val]
-            if layout_val is not None
-            else list(protocol.get("x0_families", ["compact"]))
-        )
+        layout_list = [layout_val] if layout_val is not None else list(protocol["x0_families"])
         method_val = _row_optional_str(brow, "method")
-        method_list = (
-            [method_val]
-            if method_val is not None
-            else [protocol.get("baseline_method", "strombom_multi")]
-        )
+        method_list = [method_val] if method_val is not None else [protocol["baseline_method"]]
         obs = _row_optional_str(brow, "obs_mode")
         sense = _row_optional_float(brow, "sensing_range")
         comm = _row_optional_str(brow, "communication")
+        setup = task_setup(protocol, n)
         for method in method_list:
             for layout in layout_list:
-                arena = scaling_world_overrides(protocol, n)
                 for seed in rng_seeds:
                     cells.append(
                         ScalingCell(
@@ -458,7 +412,7 @@ def expand_claim_cells_from_boundaries(
                             sensing_range=sense,
                             communication=comm,
                             max_ticks=ticks,
-                            **arena,
+                            **setup,
                         )
                     )
     return cells

@@ -63,7 +63,7 @@ There is no CLI step for the analysis packages yet. You call the functions in `a
 
 A **cell** is one setting we want to test, for example "strombom_multi, compact start, 100 sheep, 3 dogs". The sim is random, so we run the same cell many times with different seeds (30 in a scout, 100 in a claim). Each of those runs is a **trial**. If 27 of a cell's 30 trials succeed, that cell's success rate R is 0.90. `D_min` and the regimes are worked out from these per-cell numbers.
 
-One trial runs `SimulationRunner` (`sim/core/simulation_runner.py`) tick by tick:
+One trial is one call to `run_trial` (`sim/core/simulation_runner.py`), which steps tick by tick:
 
 ```mermaid
 flowchart TD
@@ -105,6 +105,7 @@ Settings are layered. Later layers win:
 |---------|-------|
 | Arena | 500 x 500, reflecting walls |
 | Goal | centre (370, 250), radius 15 * sqrt(N / 50) |
+| Start | flock at the field centre; dogs 50 away on the far side from the goal, +-5 jitter |
 | Flock sizes N | 5, 10, 25, 50, 75, 100, 150, 200, 300, 400 |
 | Dog counts D | 1, 2, 3, 4, 6, 10, 15, 20, 25, 35 |
 | Structure N (Phase 2) | 50, 100, 200 |
@@ -117,7 +118,9 @@ Settings are layered. Later layers win:
 | Base sensing range | 65 |
 | Baseline method | strombom_multi |
 
-Some keys in the canonical file aren't read by any code yet (`drive_length`, `time_limit_t1`, `rq7_*`, `transfer_methods`). They are there to record what the plan says.
+Some keys in the canonical file aren't read by any code yet (`drive_length`, `time_limit_t1`, `transfer_methods`, the `*_sensitivity` lists). They are there to record what the plan says.
+
+The simulation code has no copies of these values. The runner reads every setup key from the protocol, and a missing key stops the run with a `KeyError` instead of falling back to a default. Behaviour parameters (r_a, speeds, Kubo gains) live once in `sim/methods/*/config.py`.
 
 ### Protocol keys
 
@@ -133,7 +136,7 @@ Some keys in the canonical file aren't read by any code yet (`drive_length`, `ti
 | `store_timeseries` | Keep per-tick Parquet per cell (big; needed for Package G) |
 | `packages` | Which analysis packages this run feeds |
 | `obs_modes`, `sensing_ranges`, `communications` | Phase 5 factor levels |
-| `task`, `hold_ticks`, `hold_center`, `hold_radius_*`, `gate_half_width` | Phase 8 only |
+| `task`, `hold_ticks`, `hold_radius_*`, `gate_half_width` | Phase 8 only. Phase 8 also sets `goal_center` to the hold disk centre |
 
 Here's a full protocol, the Phase 8 scout, with comments stripped:
 
@@ -145,7 +148,7 @@ output: results/phase8/size/scout
 canonical: protocols/configs/canonical_grid.yaml
 task: collect_hold_gate
 hold_ticks: 800
-hold_center: [250.0, 250.0]
+goal_center: [250.0, 250.0]  # hold disk centre
 hold_radius_scale: 2.5      # hold radius = clamp(2.5 * sqrt(N), 23, 27)
 hold_radius_min: 23.0
 hold_radius_max: 27.0
@@ -207,7 +210,7 @@ Only `strombom_multi` uses the communication setting.
 
 ### Per tick
 
-Every tick, these get recorded (`sim/plugins/metrics/`). They're kept in the per-trial timeseries when `store_timeseries` is on:
+Every tick, these get recorded (`METRICS` in `sim/plugins/metrics/__init__.py`). They're kept in the per-trial timeseries when `store_timeseries` is on:
 
 - `cohesion`: mean distance of sheep to the flock centroid
 - `gcm_goal`: centroid distance to the goal

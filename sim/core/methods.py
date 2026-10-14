@@ -36,7 +36,7 @@ METHODS: dict[str, dict[str, Any]] = {
         name="Strombom Multi-Dog",
         sheep_model="strombom",
         dog_controller="collect_drive_multi",
-        params={**STROMBOM_DEFAULTS, "n_shepherds": 3},
+        params=STROMBOM_DEFAULTS,
         description="Multi-dog Collect/Drive assignment.",
     ),
     "kubo": _bundle(
@@ -44,7 +44,7 @@ METHODS: dict[str, dict[str, Any]] = {
         name="Kubo 2022",
         sheep_model="kubo",
         dog_controller="kubo_forces",
-        params=KUBO_DEFAULTS.copy(),
+        params=KUBO_DEFAULTS,
         description="Kubo force-based sheep and dogs.",
     ),
     "fat": _bundle(
@@ -52,7 +52,7 @@ METHODS: dict[str, dict[str, Any]] = {
         name="FAT",
         sheep_model="strombom",
         dog_controller="fat",
-        params={**STROMBOM_DEFAULTS, "n_shepherds": 2},
+        params=STROMBOM_DEFAULTS,
         description="Farthest-agent targeting under local observations.",
     ),
 }

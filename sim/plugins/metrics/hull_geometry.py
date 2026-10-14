@@ -91,7 +91,7 @@ def hull_geometry(positions: np.ndarray) -> HullGeometry:
     )
 
 
-def flock_density(n_sheep: int, area: float) -> float:
+def sheep_per_area(n_sheep: int, area: float) -> float:
     """Sheep per unit hull area; 0 when area is degenerate."""
     if n_sheep <= 0 or area <= _EPS:
         return 0.0

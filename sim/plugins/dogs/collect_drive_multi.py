@@ -7,8 +7,6 @@ from typing import Any
 import numpy as np
 from core.observation import ShepherdObservation, sensing_range
 from core.simulation_state import SimulationState
-from core.world.goal import resolve_goal_center
-from methods.strombom.config import STROMBOM_DEFAULTS
 from methods.strombom.heuristics import (
     collect_offset,
     compute_threshold,
@@ -16,7 +14,6 @@ from methods.strombom.heuristics import (
     shepherd_step_toward,
 )
 
-from .base import BaseDogController
 from .helpers import empty_dog_velocities, finalize_dog_step, position_behind_target
 
 
@@ -57,7 +54,7 @@ def _sheep_for_dog(
     """
     by_idx = {int(o.shepherd_index): o for o in observations}
     own = by_idx.get(dog_index)
-    comm = str(config.get("communication", "none"))
+    comm = str(config["communication"])
 
     if comm == "global_shared":
         return _union_sheep_positions(list(observations))
@@ -79,105 +76,80 @@ def _sheep_for_dog(
     return np.asarray(own.sheep_positions, dtype=float)
 
 
-class CollectDriveMultiController(BaseDogController):
-    @property
-    def id(self) -> str:
-        return "collect_drive_multi"
+def step(
+    state: SimulationState,
+    observations: list[ShepherdObservation],
+    config: dict[str, Any],
+) -> SimulationState:
+    velocities = empty_dog_velocities(state)
+    m = state.n_shepherds
+    if m == 0:
+        return state.copy_with(shepherd_velocities=velocities)
 
-    @property
-    def default_config(self) -> dict[str, Any]:
-        cfg = {
-            k: STROMBOM_DEFAULTS[k]
-            for k in (
-                "r_a",
-                "noise_strength",
-                "shepherd_speed",
-                "shepherd_stop_multiple",
-                "collect_threshold_scale",
-            )
-        }
-        cfg["n_shepherds"] = 3
-        return cfg
+    phase = str(state.metadata.get("chg_phase", "collect"))
+    if phase == "exit":
+        # Drive toward the right-wall gate center (collect_hold_gate task).
+        goal = state.world.gate_center
+    else:
+        goal = state.world.goal.center
+    r_a = float(config["r_a"])
+    c_offset = collect_offset(config)
+    any_collect = False
 
-    def step(
-        self,
-        state: SimulationState,
-        observations: list[ShepherdObservation],
-        config: dict[str, Any],
-    ) -> SimulationState:
-        velocities = empty_dog_velocities(state)
-        m = state.n_shepherds
-        if m == 0:
-            return state.copy_with(shepherd_velocities=velocities)
-
-        phase = str(state.metadata.get("chg_phase", "collect"))
+    for i in range(m):
+        sheep_pos = _sheep_for_dog(i, observations, state, config)
+        if sheep_pos.shape[0] == 0:
+            continue
+        # Sheep already past the gate are ignored for steering.
         if phase == "exit":
-            # Drive toward the right-wall gate center (collect_hold_gate task).
-            goal = np.array(
-                [float(state.world.width), 0.5 * float(state.world.height)],
-                dtype=float,
+            active = sheep_pos[:, 0] < float(state.world.width)
+            if not np.any(active):
+                continue
+            sheep_pos = sheep_pos[active]
+        centroid = np.mean(sheep_pos, axis=0)
+        threshold = compute_threshold(sheep_pos.shape[0], r_a)
+        distances = np.linalg.norm(sheep_pos - centroid, axis=1)
+        outliers = np.where(distances > threshold)[0]
+        drive_state = state.copy_with(sheep_positions=sheep_pos)
+        d_offset = drive_offset(drive_state, config)
+
+        if len(outliers) == 0:
+            base = position_behind_target(centroid, goal, d_offset)
+            spacing = 4.0 * r_a
+            angle = (2 * np.pi * i) / m
+            spaced = base + spacing * np.array([np.cos(angle), np.sin(angle)])
+            velocities[i] = shepherd_step_toward(
+                drive_state,
+                config,
+                i,
+                spaced,
+                proximity_sheep=state.sheep_positions,
             )
         else:
-            goal = resolve_goal_center(state, config)
-        c_offset = collect_offset(config)
-        scale = float(config.get("collect_threshold_scale", 1.0))
-        any_collect = False
+            any_collect = True
+            order = outliers[np.argsort(-distances[outliers])]
+            lateral_step = 2.0 * r_a
+            sheep_idx = int(order[i % len(order)])
+            target = position_behind_target(sheep_pos[sheep_idx], centroid, c_offset)
+            tangential = np.array(
+                [
+                    -(sheep_pos[sheep_idx][1] - centroid[1]),
+                    sheep_pos[sheep_idx][0] - centroid[0],
+                ]
+            )
+            tn = np.linalg.norm(tangential)
+            if tn > 1e-10:
+                target = target + (tangential / tn) * (lateral_step * (i - (m - 1) / 2.0))
+            velocities[i] = shepherd_step_toward(
+                drive_state,
+                config,
+                i,
+                target,
+                proximity_sheep=state.sheep_positions,
+            )
 
-        for i in range(m):
-            sheep_pos = _sheep_for_dog(i, observations, state, config)
-            if sheep_pos.shape[0] == 0:
-                continue
-            # Sheep already past the gate are ignored for steering.
-            if phase == "exit":
-                active = sheep_pos[:, 0] < float(state.world.width)
-                if not np.any(active):
-                    continue
-                sheep_pos = sheep_pos[active]
-            centroid = np.mean(sheep_pos, axis=0)
-            threshold = compute_threshold(sheep_pos.shape[0], config["r_a"]) * scale
-            distances = np.linalg.norm(sheep_pos - centroid, axis=1)
-            outliers = np.where(distances > threshold)[0]
-            drive_state = state.copy_with(sheep_positions=sheep_pos)
-            d_offset = drive_offset(drive_state, config)
-
-            if len(outliers) == 0:
-                base = position_behind_target(centroid, goal, d_offset)
-                spacing = 4.0 * float(config.get("r_a", 2.0))
-                angle = (2 * np.pi * i) / m
-                spaced = base + spacing * np.array([np.cos(angle), np.sin(angle)])
-                velocities[i] = shepherd_step_toward(
-                    drive_state,
-                    config,
-                    i,
-                    spaced,
-                    proximity_sheep=state.sheep_positions,
-                )
-            else:
-                any_collect = True
-                order = outliers[np.argsort(-distances[outliers])]
-                lateral_step = 2.0 * float(config.get("r_a", 2.0))
-                sheep_idx = int(order[i % len(order)])
-                target = position_behind_target(sheep_pos[sheep_idx], centroid, c_offset)
-                tangential = np.array(
-                    [
-                        -(sheep_pos[sheep_idx][1] - centroid[1]),
-                        sheep_pos[sheep_idx][0] - centroid[0],
-                    ]
-                )
-                tn = np.linalg.norm(tangential)
-                if tn > 1e-10:
-                    target = target + (tangential / tn) * (lateral_step * (i - (m - 1) / 2.0))
-                velocities[i] = shepherd_step_toward(
-                    drive_state,
-                    config,
-                    i,
-                    target,
-                    proximity_sheep=state.sheep_positions,
-                )
-
-        return finalize_dog_step(
-            state,
-            velocities,
-            config,
-            metadata_updates={"herding_mode": "collect" if any_collect else "drive"},
-        )
+    return finalize_dog_step(
+        state,
+        velocities,
+        metadata_updates={"herding_mode": "collect" if any_collect else "drive"},
+    )

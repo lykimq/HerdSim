@@ -19,8 +19,9 @@ canonical: protocols/configs/canonical_grid.yaml
 # Second task track. Shared grids and theta come from canonical_grid.yaml.
 task: collect_hold_gate
 hold_ticks: 800
-# Hold center: field midpoint (same flock origin as scaling drive).
-hold_center: [250.0, 250.0]
+# Hold center: field midpoint (same flock origin as scaling drive). The hold
+# disk is this task's goal zone, so it replaces the canonical goal_center.
+goal_center: [250.0, 250.0]
 # Hold radius rule matches the draft: clamp(2.5 * sqrt(N), 23, 27).
 hold_radius_scale: 2.5
 hold_radius_min: 23.0

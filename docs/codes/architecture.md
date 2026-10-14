@@ -66,11 +66,19 @@ The engine runs exactly one trial: one flock, one set of dogs, one seed, until s
 
 ### Everything that varies is a plugin chosen by name
 
-Sheep behaviour, dog behaviour, what dogs can observe, the task (scenario) and every metric are separate plugins. They're registered under string ids, and a protocol picks them by name. A "method" is just a named pairing of a sheep model and a dog controller, plus their default parameters.
+Sheep behaviour, dog behaviour, what dogs can observe, the task (scenario) and every metric are separate plugins. They're listed under string ids, and a protocol picks them by name. A "method" is just a named pairing of a sheep model and a dog controller, plus their default parameters.
 
 *Why:* the research questions are about swapping one thing at a time: a different dog rule, less information, a harder task. If each of those is a plugin, a new comparison is a new YAML file rather than a code change, and the rest of the system stays the same between the two arms of the comparison.
 
-*Cost:* plugins share one flat config dict. That's easy to pass around but has no schema. A typo in a key just falls back to a default instead of failing.
+*Cost:* plugins share one flat config dict. That's easy to pass around but has no schema. A missing key stops the trial, but a misspelled extra key in a YAML is ignored.
+
+### Each setting has one source
+
+Task setup (arena, goal, start positions, time limit) comes only from the protocol. Behaviour parameters come only from the method definition. Plugins keep no fallback copies of either.
+
+*Why:* when the same number lives in several places, changing it means finding every copy, and a missed copy changes results without anyone noticing. With one source, a protocol that leaves out a setting fails at the start of the run instead of quietly picking up an old default.
+
+*Cost:* a quick experiment has to write out the full setup. The canonical grid holds the shared values, so in practice a protocol only lists what it changes.
 
 ### Dogs act on what they observe
 
@@ -148,7 +156,7 @@ The parent process owns every file. Workers get a small description of one cell,
 | Choice | What we gave up | Why it's acceptable for now |
 |--------|----------------|-----------------------------|
 | Plain Python loops over agents | Speed. A tick is roughly quadratic in flock size | Easy to read and check against the papers. Campaigns are parallel, and we're not near the limits yet |
-| Flat config dict, no schema | Typos fail silently | Keeps plugins independent. `resolved_config` in every row records what actually ran |
+| Flat config dict, no schema | A misspelled extra key is ignored | Keeps plugins independent. Missing keys fail loudly, and `resolved_config` in every row records what actually ran |
 | Rewriting the trials table after each cell | I/O grows with campaign size | Simple and crash-tolerant. Fine at the few thousand rows a campaign produces |
 | Layering is by convention, not enforced | Nothing stops a bad import | Small team, small codebase. Easy to add a check later |
 | Regression tests use tolerances | Small drifts go unnoticed | Bit-exact comparisons break across machines because the dynamics are chaotic |
@@ -158,7 +166,7 @@ The parent process owns every file. Workers get a small description of one cell,
 
 The extension points follow the plugin boundaries:
 
-- **A new dog rule or sheep model** is a new plugin plus a method entry that pairs them. Nothing else changes.
+- **A new dog rule or sheep model** is a new plugin plus a method entry that pairs them.
 - **A new task** is a new scenario. If dogs need to react to task state, the scenario exposes it through shared state, as Phase 8 does.
 - **A new measurement** is a new metric. Every later run picks it up automatically.
 - **A new experiment on existing axes** is a new protocol file, with no code change.

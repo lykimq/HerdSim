@@ -3,13 +3,11 @@
 Mapped from the MATLAB reference implementation
 (PatrickHup/Force-Based-Sheep-Herding-Algorithm) and Kubo et al. 2022.
 
-World / layout keys live in core.world.defaults; this module declares
-paper agent counts and Kubo-specific behavior only.
+Task setup (arena, goal, start, agent counts) comes from the protocol YAML;
+this module declares Kubo behavior parameters only.
 """
 
 KUBO_DEFAULTS = {
-    "n_sheep": 40,
-    "n_shepherds": 4,
     # Interaction radius (MATLAB: radius)
     "radius": 60.0,
     # Sheep gains (MATLAB: K_s1..K_s4)

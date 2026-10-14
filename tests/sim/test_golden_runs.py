@@ -16,20 +16,31 @@ import pytest
 import yaml
 
 from services.layout import CANONICAL_PROTOCOL, PROTOCOLS_DIR
-from services.runner import ScalingCell, _run_cell, scaling_world_overrides
+from services.runner import ScalingCell, _run_cell, task_setup
 
 CANONICAL = yaml.safe_load(CANONICAL_PROTOCOL.read_text())
 PHASE8 = {**CANONICAL, **yaml.safe_load((PROTOCOLS_DIR / "phase8_size_scout.yaml").read_text())}
 
 
-def _cell(n: int, d: int, *, proto=CANONICAL, ticks: int = 400, **kw) -> ScalingCell:
+def _cell(
+    n: int,
+    d: int,
+    *,
+    proto=CANONICAL,
+    ticks: int = 400,
+    method: str = "strombom_multi",
+    initial_layout: str = "compact",
+    **kw,
+) -> ScalingCell:
     return ScalingCell(
         n_sheep=n,
         n_shepherds=d,
         seed=2026 + d,
+        initial_layout=initial_layout,
+        method=method,
         max_ticks=ticks,
         scenario=str(proto["task"]),
-        **scaling_world_overrides(proto, n),
+        **task_setup(proto, n),
         **kw,
     )
 

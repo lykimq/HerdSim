@@ -46,8 +46,9 @@ def main() -> None:
     scout = read_csv(args.scout_trials)
     group_cols = scaling_group_cols(scout)
     path, spec, _, effective = load_run_protocol(args.protocol)
-    theta = float(effective.get("reliability_theta", 0.90))
-    n_boot = int(effective.get("bootstrap_resamples", 1000))
+    theta = float(effective["reliability_theta"])
+    n_boot = int(effective["bootstrap_resamples"])
+    boot_seed = int(effective["master_seed"])
 
     boundaries = select_claim_windows(
         scout,
@@ -63,6 +64,7 @@ def main() -> None:
         scout,
         theta=theta,
         n_boot=n_boot,
+        seed=boot_seed,
         group_cols=group_cols or None,
     )
     write_csv(boot, output / "scout_dmin_bootstrap_preview.csv")
@@ -96,6 +98,7 @@ def main() -> None:
         trials,
         theta=theta,
         n_boot=n_boot,
+        seed=boot_seed,
         group_cols=group_cols or None,
     )
     write_csv(claim_boot, output / "dmin_bootstrap.csv")
@@ -105,6 +108,7 @@ def main() -> None:
         merged,
         theta=theta,
         n_boot=n_boot,
+        seed=boot_seed,
         group_cols=scaling_group_cols(merged) or None,
     )
     write_csv(merged_boot, output / "merged_dmin_bootstrap.csv")

@@ -1,14 +1,17 @@
-"""X0 initial-layout generators for collective-state families (Cap I5)."""
+"""Start positions: X0 flock families (Cap I5) and dog placement."""
 
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TypedDict, Unpack
+from typing import Any, TypedDict, Unpack
 
 import numpy as np
 
 # Canonical X0 family names from the scaling protocol.
 X0_FAMILIES = ("compact", "wide", "split", "outlier_rich")
+
+# Agents start at least this far inside every wall.
+EDGE_MARGIN = 1.0
 
 
 class _LayoutBounds(TypedDict):
@@ -30,12 +33,11 @@ def _point_ok(
     world_height: float | None,
     goal_center: np.ndarray | None,
     goal_radius: float | None,
-    margin: float = 1.0,
 ) -> bool:
     if world_width is not None and world_height is not None:
         if not (
-            margin <= float(pos[0]) <= float(world_width) - margin
-            and margin <= float(pos[1]) <= float(world_height) - margin
+            EDGE_MARGIN <= float(pos[0]) <= float(world_width) - EDGE_MARGIN
+            and EDGE_MARGIN <= float(pos[1]) <= float(world_height) - EDGE_MARGIN
         ):
             return False
     if goal_center is not None and goal_radius is not None:
@@ -77,9 +79,9 @@ def generate_initial_positions(
     center: np.ndarray,
     rng: np.random.Generator,
     *,
-    spread: float = 30.0,
-    interaction_radius: float = 5.0,
-    lost_threshold: float | None = None,
+    spread: float,
+    interaction_radius: float,
+    lost_threshold: float,
     world_width: float | None = None,
     world_height: float | None = None,
     goal_center: np.ndarray | None = None,
@@ -125,16 +127,12 @@ def generate_initial_positions(
             **bounds,
         )
     elif family == "outlier_rich":
-        threshold = lost_threshold
-        if threshold is None:
-            # Match shared collect-style scale when r_a is unknown at init.
-            threshold = 2.0 * (float(n_sheep) ** (2.0 / 3.0))
         pos = _outlier_rich_positions(
             n_sheep,
             center,
             rng,
             core_sigma=0.4 * float(spread),
-            lost_threshold=float(threshold),
+            lost_threshold=float(lost_threshold),
             **bounds,
         )
     else:
@@ -218,3 +216,48 @@ def _outlier_rich_positions(
 
     outliers = np.vstack([_draw_valid(_one_outlier, **bounds) for _ in range(n_out)])
     return np.vstack([core, outliers])
+
+
+def place_flock(
+    config: dict[str, Any],
+    center: np.ndarray,
+    rng: np.random.Generator,
+    *,
+    keep_out_of_goal: bool,
+) -> np.ndarray:
+    """Sheep start for the run config's X0 family around ``center``.
+
+    ``keep_out_of_goal`` redraws sheep that land inside the goal disk.
+    """
+    n_sheep = int(config["n_sheep"])
+    return generate_initial_positions(
+        n_sheep,
+        str(config["initial_layout"]),
+        center,
+        rng,
+        spread=float(config["initial_spread"]),
+        interaction_radius=float(config["measurement_radius"]),
+        lost_threshold=float(config["r_a"]) * (float(n_sheep) ** (2.0 / 3.0)),
+        world_width=float(config["world_width"]),
+        world_height=float(config["world_height"]),
+        goal_center=np.array(config["goal_center"], dtype=float) if keep_out_of_goal else None,
+        goal_radius=float(config["goal_radius"]) if keep_out_of_goal else None,
+    )
+
+
+def place_dogs(
+    config: dict[str, Any],
+    flock_center: np.ndarray,
+    away_from: np.ndarray,
+    rng: np.random.Generator,
+) -> np.ndarray:
+    """Dogs ``shepherd_start_offset`` from the flock on the side opposite ``away_from``."""
+    away = flock_center - away_from
+    norm = float(np.linalg.norm(away))
+    direction = away / norm if norm > 1e-9 else np.array([1.0, 0.0])
+    base = flock_center + direction * float(config["shepherd_start_offset"])
+    jitter = float(config["shepherd_jitter"])
+    pos = base + rng.uniform(-jitter, jitter, size=(int(config["n_shepherds"]), 2))
+    pos[:, 0] = np.clip(pos[:, 0], EDGE_MARGIN, float(config["world_width"]) - EDGE_MARGIN)
+    pos[:, 1] = np.clip(pos[:, 1], EDGE_MARGIN, float(config["world_height"]) - EDGE_MARGIN)
+    return pos

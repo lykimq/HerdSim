@@ -44,7 +44,7 @@ def substitution_curves(
     df: pd.DataFrame,
     *,
     factor: str = "obs_mode",
-    theta: float = 0.90,
+    theta: float,
     base_range: float | None = None,
     sheep_col: str = "n_sheep",
 ) -> pd.DataFrame:

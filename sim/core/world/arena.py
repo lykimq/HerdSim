@@ -6,6 +6,9 @@ from dataclasses import dataclass
 
 import numpy as np
 
+# Exited agents park at most this far past the right wall.
+EXIT_PARK_DEPTH = 5.0
+
 
 @dataclass
 class GoalZone:
@@ -24,21 +27,21 @@ class GoalZone:
 class World:
     """Defines the physical environment for the simulation."""
 
-    width: float = 150.0
-    height: float = 150.0
-    goal: GoalZone | None = None
-    # Optional right-wall gate: agents inside the opening may leave at x >= width.
+    width: float
+    height: float
+    goal: GoalZone
+    # Optional gate centred on the right wall: agents inside the opening may
+    # leave at x >= width.
     gate_half_width: float | None = None
-    gate_center_y: float | None = None
+
+    @property
+    def gate_center(self) -> np.ndarray:
+        return np.array([float(self.width), 0.5 * float(self.height)])
 
     def _in_right_gate(self, positions: np.ndarray) -> np.ndarray:
         if self.gate_half_width is None:
             return np.zeros(len(positions), dtype=bool)
-        cy = (
-            float(self.gate_center_y)
-            if self.gate_center_y is not None
-            else 0.5 * float(self.height)
-        )
+        cy = 0.5 * float(self.height)
         return np.abs(positions[:, 1] - cy) <= float(self.gate_half_width)
 
     def reflect_positions(self, positions: np.ndarray) -> np.ndarray:
@@ -59,7 +62,7 @@ class World:
         exited = above_x & in_gate
         reflected[reflect_right, 0] = 2 * self.width - reflected[reflect_right, 0]
         if np.any(exited):
-            reflected[exited, 0] = np.minimum(reflected[exited, 0], self.width + 5.0)
+            reflected[exited, 0] = np.minimum(reflected[exited, 0], self.width + EXIT_PARK_DEPTH)
 
         # Reflect Y
         below_y = reflected[:, 1] < 0

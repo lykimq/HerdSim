@@ -47,21 +47,33 @@ def export_package_a(
     output_dir: Path | str,
     *,
     protocol: dict[str, Any],
-    theta: float = 0.90,
     group_cols: list[str] | None = None,
 ) -> dict[str, Path]:
     """Export Package A tables and provenance for one trials table.
 
+    theta, bootstrap size and seed, and the waste tolerance come from ``protocol``.
     Writes only under ``results/...`` (or a temp path outside the repo for tests).
     """
     out = ensure_under_results(output_dir, label="package A export")
     groups = list(group_cols or [])
+    theta = float(protocol["reliability_theta"])
     tables = {
         "trials": trials,
         "reliability": reliability_table(trials, group_cols=groups),
         "frontier": extract_frontier(trials, theta=theta, group_cols=groups),
-        "regimes": label_regimes(trials, theta=theta, group_cols=groups),
-        "dmin_bootstrap": bootstrap_d_min_ci(trials, theta=theta, group_cols=groups),
+        "regimes": label_regimes(
+            trials,
+            theta=theta,
+            wasteful_effort_tol=float(protocol["wasteful_effort_tolerance"]),
+            group_cols=groups,
+        ),
+        "dmin_bootstrap": bootstrap_d_min_ci(
+            trials,
+            theta=theta,
+            n_boot=int(protocol["bootstrap_resamples"]),
+            seed=int(protocol["master_seed"]),
+            group_cols=groups,
+        ),
     }
     seeds = sorted(int(s) for s in trials["seed"].unique()) if "seed" in trials.columns else []
     stamp = build_provenance_stamp(

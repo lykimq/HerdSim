@@ -3,11 +3,16 @@
 from __future__ import annotations
 
 import pandas as pd
+import yaml
 
 from analysis.frontier import bootstrap_d_min_ci, extract_frontier, select_claim_windows
 from analysis.regimes import REGIME_OVERCROWD, label_regimes
 from analysis.substitution import substitution_curves, summarize_substitution
 from analysis.transfer import build_transfer_table
+from services.layout import CANONICAL_PROTOCOL
+
+CANONICAL = yaml.safe_load(CANONICAL_PROTOCOL.read_text())
+THETA = float(CANONICAL["reliability_theta"])
 
 
 def _trials(rates: dict[tuple[int, int], float], *, seeds: int = 10, **extra) -> pd.DataFrame:
@@ -49,7 +54,7 @@ RATES = {
 
 
 def test_frontier_dmin_and_overcrowd():
-    front = extract_frontier(_trials(RATES)).set_index("n_sheep")
+    front = extract_frontier(_trials(RATES), theta=THETA).set_index("n_sheep")
     assert front.loc[50, "d_min"] == 2
     assert front.loc[50, "d_overcrowd"] == 4
     assert front.loc[50, "d_max"] == 3
@@ -59,7 +64,7 @@ def test_frontier_dmin_and_overcrowd():
 
 
 def test_claim_windows_cover_dmin_and_overcrowd():
-    win = select_claim_windows(_trials(RATES))
+    win = select_claim_windows(_trials(RATES), theta=THETA)
     roles = dict(zip(win.loc[win.n_sheep == 50, "n_shepherds"], win.loc[win.n_sheep == 50, "role"]))
     assert roles[2] == "reliability"
     assert roles[4].startswith("overcrowd")
@@ -67,7 +72,11 @@ def test_claim_windows_cover_dmin_and_overcrowd():
 
 
 def test_regimes_handle_mixed_overcrowd_column():
-    reg = label_regimes(_trials(RATES)).set_index(["n_sheep", "n_shepherds"])
+    reg = label_regimes(
+        _trials(RATES),
+        theta=THETA,
+        wasteful_effort_tol=float(CANONICAL["wasteful_effort_tolerance"]),
+    ).set_index(["n_sheep", "n_shepherds"])
     assert reg.loc[(50, 4), "regime"] == REGIME_OVERCROWD
     assert reg.loc[(50, 1), "regime"] == "under_resourced_failure"
     assert reg.loc[(100, 1), "regime"] == "under_resourced_failure"
@@ -75,17 +84,21 @@ def test_regimes_handle_mixed_overcrowd_column():
 
 
 def test_bootstrap_ci_brackets_point_estimate():
-    boot = bootstrap_d_min_ci(_trials(RATES), n_boot=200).set_index("n_sheep")
+    boot = bootstrap_d_min_ci(
+        _trials(RATES), theta=THETA, n_boot=200, seed=int(CANONICAL["master_seed"])
+    ).set_index("n_sheep")
     assert boot.loc[50, "d_min_ci_low"] <= 2 <= boot.loc[50, "d_min_ci_high"]
 
 
 def test_substitution_ladder_and_transfer():
     poor = _trials({(50, 1): 0.0, (50, 2): 1.0}, obs_mode="bearing_only")
     rich = _trials({(50, 1): 1.0, (50, 2): 1.0}, obs_mode="global")
-    curves = substitution_curves(pd.concat([poor, rich]), factor="obs_mode")
+    curves = substitution_curves(pd.concat([poor, rich]), factor="obs_mode", theta=THETA)
     assert curves["d_min"].tolist() == [2, 1]
     assert summarize_substitution(curves)["supports_substitution"]
 
-    table = build_transfer_table({"base": _trials(RATES), "other": _trials(RATES)}, baseline="base")
+    table = build_transfer_table(
+        {"base": _trials(RATES), "other": _trials(RATES)}, baseline="base", theta=THETA
+    )
     dmin = table.loc[table.feature == "d_min", "transfer_label"]
     assert set(dmin) == {"shared"}

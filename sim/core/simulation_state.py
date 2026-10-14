@@ -47,10 +47,6 @@ class SimulationState:
         diff = self.sheep_positions - self.sheep_centroid
         return np.linalg.norm(diff, axis=1)
 
-    def furthest_sheep_index(self) -> int:
-        """Index of the sheep furthest from the flock centroid."""
-        return int(np.argmax(self.distances_to_centroid()))
-
     def copy_with(self, **kwargs: Any) -> SimulationState:
         """Return a new state with selected fields replaced."""
         return replace(self, **kwargs)

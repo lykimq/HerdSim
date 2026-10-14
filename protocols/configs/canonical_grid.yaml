@@ -40,6 +40,14 @@ initial_spread: 30.0
 # Flock connectivity, not the goal diameter. Above r_a=2 so a compact flock
 # is one component, below the split gap of 10 so split clusters stay apart.
 measurement_radius: 5.0
+# Dog start: this far from the flock center, on the side away from the goal
+# (drive) or away from the gate (collect_hold_gate). 50 is outside a compact
+# flock (3 sigma = 27) and inside the Strombom sensing range r_s=65, so sheep
+# react to the dogs from tick 0. Jitter is uniform +-5 per axis so several
+# dogs do not start on one point. Every run since Phase 1 used these values;
+# they were scenario fallbacks before they were written here.
+shepherd_start_offset: 50.0
+shepherd_jitter: 5.0
 
 # Primary reliability bar for D_min and regimes. 0.90 is the reliable band
 # (same as the draft). 0.50 is a coin flip and is reported, not used for D_min.

@@ -3,14 +3,11 @@
 Reference: Strombom et al., J. Royal Soc. Interface, 2014, Table 1.
 Parameter names follow the paper's notation where practical.
 
-World / layout keys live in core.world.defaults; this module declares
-paper agent counts and Strombom-specific behavior only.
+Task setup (arena, goal, start, agent counts) comes from the protocol YAML;
+this module declares Strombom behavior parameters only.
 """
 
 STROMBOM_DEFAULTS = {
-    # Agent counts
-    "n_sheep": 50,
-    "n_shepherds": 1,
     # Sheep behaviour (paper Table 1)
     "r_a": 2.0,  # sheep-sheep repulsion distance; also weight ra
     "r_s": 65.0,  # shepherd detection distance
@@ -24,8 +21,4 @@ STROMBOM_DEFAULTS = {
     # Shepherd behaviour
     "shepherd_speed": 1.5,  # shepherd displacement ds per time step
     "shepherd_stop_multiple": 3.0,  # stop when within this * r_a of any sheep
-    # Switching threshold: f(N) = r_a * N^(2/3)
-    # Extension (not in Strombom 2014): scenarios may supply
-    # collect_threshold_scale > 1.0 to widen the threshold.
-    "collect_threshold_scale": 1.0,
 }

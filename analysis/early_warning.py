@@ -19,8 +19,20 @@ import pandas as pd
 # coverage = fraction of sheep near dogs (higher = more protective).
 _LOWER_IS_RISK = {"fragmentation", "coverage"}
 
-# Frozen RQ7 evaluation grid (canonical rq7_eval_start/stop/step).
-DEFAULT_EVAL_TICKS = list(range(1000, 8000 + 1, 200))
+
+def rq7_settings(protocol: dict[str, Any]) -> dict[str, Any]:
+    """horizon_k, window_w, and eval_ticks for the campaign scorer, from the canonical grid."""
+    return {
+        "horizon_k": int(protocol["rq7_prediction_horizon_k"]),
+        "window_w": int(protocol["rq7_feature_window_w"]),
+        "eval_ticks": list(
+            range(
+                int(protocol["rq7_eval_start"]),
+                int(protocol["rq7_eval_stop"]) + 1,
+                int(protocol["rq7_eval_step"]),
+            )
+        ),
+    }
 
 
 def _auroc(scores: np.ndarray, labels: np.ndarray) -> float:
@@ -101,8 +113,8 @@ def evaluate_early_warning(
     timeseries: pd.DataFrame,
     *,
     success: bool,
-    horizon_k: int = 500,
-    window_w: int = 200,
+    horizon_k: int,
+    window_w: int,
     feature_cols: list[str] | None = None,
     tick_col: str = "tick",
     eval_ticks: list[int] | None = None,
@@ -214,9 +226,9 @@ def _fit_nd_scores(
 def evaluate_early_warning_campaign(
     trial_rows: list[dict[str, Any]],
     *,
-    horizon_k: int = 500,
-    window_w: int = 200,
-    eval_ticks: list[int] | None = None,
+    horizon_k: int,
+    window_w: int,
+    eval_ticks: list[int],
     n_col: str = "n_sheep",
     d_col: str = "n_shepherds",
     time_limit: int | None = None,
@@ -225,9 +237,10 @@ def evaluate_early_warning_campaign(
 
     Each row is one eval tick. Features at t use only (t - window_w, t]. The
     (N, D) model is fit on other flock sizes and applied with that training
-    standardization.
+    standardization. ``rq7_settings(protocol)`` gives the frozen
+    horizon_k, window_w, and eval_ticks.
     """
-    ticks = eval_ticks if eval_ticks is not None else DEFAULT_EVAL_TICKS
+    ticks = eval_ticks
     if not trial_rows:
         return {
             "n_trials": 0,
@@ -266,7 +279,7 @@ def evaluate_early_warning_campaign(
             )
 
     meta = pd.DataFrame(records)
-    summary = summarise_early_warning(per_trial_eval)
+    summary = summarise_early_warning(per_trial_eval, min_lead=horizon_k)
     if meta.empty:
         return {
             "n_trials": len(per_trial_eval),
@@ -325,7 +338,7 @@ def evaluate_early_warning_campaign(
 def summarise_early_warning(
     results: list[dict[str, Any]],
     *,
-    min_lead: int = 500,
+    min_lead: int,
 ) -> dict[str, Any]:
     """Aggregate AUROC and lead time. Misses count in the lead-time fraction."""
     if not results:
