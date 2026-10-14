@@ -1,6 +1,6 @@
 # HerdSim (scaling-cli)
 
-HerdSim is a multi-agent shepherding simulator: a few dogs try to move a flock of sheep somewhere. We use it to answer one question. How many dogs does a flock actually need, and how does that number change when the flock gets bigger, starts in a different shape, is herded by a different dog rule, or the dogs see and share less?
+HerdSim is a multi-agent shepherding simulator where a few dogs move a flock of sheep. We use it to study how many dogs a flock needs, and how that number changes with flock size, starting shape, the dog control method, and how much the dogs can see and share.
 
 The number we care about most is `D_min`: the fewest dogs that get the job done in at least 90% of seeds (theta = 0.90). We also watch for overcrowding, where adding dogs makes things worse again.
 
@@ -57,11 +57,13 @@ Useful flags: `--protocol <id or path>`, `--workers N`, `--output DIR`, `--no-re
 
 Runs can be resumed. Each finished cell gets a line in `manifest.jsonl`, and a rerun skips anything already marked `ok`. If a long run dies, start the same command again and it picks up where it stopped.
 
-One rough edge: there is no CLI step for the analysis packages yet. You call the functions in `analysis/` yourself (see [Analysis packages](#analysis-packages)).
+There is no CLI step for the analysis packages yet. You call the functions in `analysis/` yourself (see [Analysis packages](#analysis-packages)).
 
 ## Inside one trial
 
-One trial is one (method, layout, N, D, seed) combination. It runs `SimulationRunner` (`sim/core/simulation_runner.py`) tick by tick:
+A **cell** is one setting we want to test, for example "strombom_multi, compact start, 100 sheep, 3 dogs". The sim is random, so we run the same cell many times with different seeds (30 in a scout, 100 in a claim). Each of those runs is a **trial**. If 27 of a cell's 30 trials succeed, that cell's success rate R is 0.90. `D_min` and the regimes are worked out from these per-cell numbers.
+
+One trial runs `SimulationRunner` (`sim/core/simulation_runner.py`) tick by tick:
 
 ```mermaid
 flowchart TD
@@ -178,7 +180,7 @@ A claim protocol is usually a few lines: `extends: phase8_size_scout.yaml`, `see
 |--------|-------------|---------------------|
 | `strombom_multi` | strombom | Our baseline. If any sheep is too far out (past r_a * N^(2/3)), the dogs collect: each one goes after an outlier, farthest first. Once the flock is tight, they drive from behind it, opposite the goal |
 | `kubo` | kubo | Force-based model from Kubo et al.; dogs and sheep are both moved by summed forces |
-| `fat` | strombom | Each dog pushes the farthest sheep it can see toward the goal. Simple, and it doesn't scale |
+| `fat` | strombom | Each dog pushes the farthest sheep it can see toward the goal |
 
 The paper parameters live in `sim/methods/{strombom,kubo}/`. The Strombom defaults are r_a = 2, r_s = 65, sheep speed 1 and dog speed 1.5.
 
@@ -241,7 +243,7 @@ All of these live in `analysis/frontier.py` and `analysis/regimes.py`.
 - **`D_min`**: smallest D with R >= theta.
 - **`D_overcrowd`**: first D above `D_min` where R drops below theta and stays there for 2 or more grid steps.
 - **`D_max`**: largest reliable D before overcrowding.
-- **B\***: the reliable cell with the lowest median dog path. This is the cheapest way to do the job.
+- **B\***: the reliable cell with the lowest median dog path.
 - **Bootstrap CI on `D_min`**: 95% interval, from 1,000 resamples of the seeds in each cell.
 - **Regimes**, a label for each cell:
   - `under_resourced_failure`: too few dogs.
