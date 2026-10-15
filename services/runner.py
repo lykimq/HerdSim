@@ -10,7 +10,6 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-import numpy as np
 import pandas as pd
 from core.config import resolve_experiment_config
 from core.simulation_runner import RunResult, run_trial
@@ -43,16 +42,10 @@ class ScalingCell:
     obs_mode: str | None = None
     sensing_range: float | None = None
     communication: str | None = None
-    hold_ticks: int | None = None
-    gate_half_width: float | None = None
 
 
 def goal_radius_for_n(protocol: dict[str, Any], n_sheep: int) -> float:
-    """Goal disk (drive_to_goal) or hold disk (collect_hold_gate) radius for one N."""
-    if protocol["task"] == "collect_hold_gate":
-        # Draft rule: clamp(scale * sqrt(N), min, max).
-        radius = float(protocol["hold_radius_scale"]) * float(np.sqrt(n_sheep))
-        return float(np.clip(radius, protocol["hold_radius_min"], protocol["hold_radius_max"]))
+    """Goal disk radius for one N."""
     # Same goal area per sheep as goal_radius_at_n50 gives at N=50.
     return float(protocol["goal_radius_at_n50"]) * (float(n_sheep) / 50.0) ** 0.5
 
@@ -71,9 +64,6 @@ def task_setup(protocol: dict[str, Any], n_sheep: int) -> dict[str, Any]:
         "shepherd_start_offset": float(protocol["shepherd_start_offset"]),
         "shepherd_jitter": float(protocol["shepherd_jitter"]),
     }
-    if protocol["task"] == "collect_hold_gate":
-        setup["hold_ticks"] = int(protocol["hold_ticks"])
-        setup["gate_half_width"] = float(protocol["gate_half_width"])
     return setup
 
 
@@ -249,10 +239,6 @@ def _run_cell(cell: ScalingCell) -> dict[str, Any]:
         "shepherd_jitter": cell.shepherd_jitter,
         "max_ticks": cell.max_ticks,
     }
-    if cell.hold_ticks is not None:
-        scenario_params["hold_ticks"] = cell.hold_ticks
-    if cell.gate_half_width is not None:
-        scenario_params["gate_half_width"] = cell.gate_half_width
     algorithm_params: dict[str, Any] = {}
     if cell.obs_mode is not None:
         algorithm_params["obs_mode"] = cell.obs_mode

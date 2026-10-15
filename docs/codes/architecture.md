@@ -8,7 +8,7 @@ HerdSim isn't a general-purpose simulator. It exists to run controlled experimen
 
 - **Comparisons have to be fair.** Two cells that differ only in dog count must differ only in dog count. Same arena, same parameters, same random seeds.
 - **Results have to be traceable.** Months later, you should be able to tell exactly what produced a number, even after the code and configs have moved on.
-- **Campaigns are long.** A full grid is thousands of trials, and Phase 8 runs for days. Runs get stopped, crash or need a restart, and none of that should cost finished work.
+- **Campaigns are long.** A full grid is thousands of trials and can run for days. Runs get stopped, crash or need a restart, and none of that should cost finished work.
 - **Methods and tasks keep changing.** We swap dog rules, sheep models, observation limits and tasks. That shouldn't mean rewriting the engine or the campaign code each time.
 - **Analysis keeps changing too.** We redefine thresholds, fit new models and look at new metrics long after the simulations have run.
 
@@ -136,8 +136,7 @@ flowchart LR
     T -- no --> S
 ```
 
-Sheep move first, reacting to where the dogs were. Then the dogs look, decide and move. The arena applies its boundaries last, so neither side has to handle walls. Metrics are recorded on the settled state, and the scenario decides whether the task is done. For multi-stage tasks like Phase 8, the scenario also tracks which stage the run is in, and the dogs read it from shared state.
-
+Sheep move first, reacting to where the dogs were. Then the dogs look, decide and move. The arena applies its boundaries last, so neither side has to handle walls. Metrics are recorded on the settled state, and the scenario decides whether the task is done.
 ## A campaign, conceptually
 
 ```mermaid
@@ -167,7 +166,7 @@ The parent process owns every file. Workers get a small description of one cell,
 The extension points follow the plugin boundaries:
 
 - **A new dog rule or sheep model** is a new plugin plus a method entry that pairs them.
-- **A new task** is a new scenario. If dogs need to react to task state, the scenario exposes it through shared state, as Phase 8 does.
+- **A new task** is a new scenario. If dogs need to react to task state, the scenario exposes it through shared state.
 - **A new measurement** is a new metric. Every later run picks it up automatically.
 - **A new experiment on existing axes** is a new protocol file, with no code change.
 - **A new experimental axis** (something that isn't N, D, layout, method or an information setting) is the one change that touches the campaign layer. The cell description, the resume key and the grid expansion all need to know about it.

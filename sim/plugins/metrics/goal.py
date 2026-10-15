@@ -14,11 +14,7 @@ def gcm_goal(state: SimulationState) -> float:
 
 
 def time_to_goal(state: SimulationState) -> float:
-    """Current tick when all sheep are in the goal disk, else -1.
-
-    For collect_hold_gate the goal disk is the hold disk, not task success;
-    trials.csv first_success_tick records success.
-    """
+    """Current tick when all sheep are in the goal disk, else -1."""
     if np.all(state.world.goal.contains(state.sheep_positions)):
         return float(state.tick)
     return -1.0

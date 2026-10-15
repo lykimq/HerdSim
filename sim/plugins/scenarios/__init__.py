@@ -15,7 +15,7 @@ import numpy as np
 from core.simulation_state import SimulationState
 from core.world import World
 
-from . import collect_hold_gate, drive_to_goal
+from . import drive_to_goal
 
 # Setup keys every scenario reads.
 SETUP_KEYS = (
@@ -48,11 +48,5 @@ SCENARIOS: dict[str, Scenario] = {
         create_world=drive_to_goal.create_world,
         initial_positions=drive_to_goal.initial_positions,
         is_success=drive_to_goal.is_success,
-    ),
-    "collect_hold_gate": Scenario(
-        required_keys=SETUP_KEYS + collect_hold_gate.EXTRA_KEYS,
-        create_world=collect_hold_gate.create_world,
-        initial_positions=collect_hold_gate.initial_positions,
-        is_success=collect_hold_gate.is_success,
     ),
 }

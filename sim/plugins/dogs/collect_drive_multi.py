@@ -86,12 +86,7 @@ def step(
     if m == 0:
         return state.copy_with(shepherd_velocities=velocities)
 
-    phase = str(state.metadata.get("chg_phase", "collect"))
-    if phase == "exit":
-        # Drive toward the right-wall gate center (collect_hold_gate task).
-        goal = state.world.gate_center
-    else:
-        goal = state.world.goal.center
+    goal = state.world.goal.center
     r_a = float(config["r_a"])
     c_offset = collect_offset(config)
     any_collect = False
@@ -100,12 +95,6 @@ def step(
         sheep_pos = _sheep_for_dog(i, observations, state, config)
         if sheep_pos.shape[0] == 0:
             continue
-        # Sheep already past the gate are ignored for steering.
-        if phase == "exit":
-            active = sheep_pos[:, 0] < float(state.world.width)
-            if not np.any(active):
-                continue
-            sheep_pos = sheep_pos[active]
         centroid = np.mean(sheep_pos, axis=0)
         threshold = compute_threshold(sheep_pos.shape[0], r_a)
         distances = np.linalg.norm(sheep_pos - centroid, axis=1)

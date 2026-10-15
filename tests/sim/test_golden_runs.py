@@ -15,11 +15,10 @@ from __future__ import annotations
 import pytest
 import yaml
 
-from services.layout import CANONICAL_PROTOCOL, PROTOCOLS_DIR
+from services.layout import CANONICAL_PROTOCOL
 from services.runner import ScalingCell, _run_cell, task_setup
 
 CANONICAL = yaml.safe_load(CANONICAL_PROTOCOL.read_text())
-PHASE8 = {**CANONICAL, **yaml.safe_load((PROTOCOLS_DIR / "phase8_size_scout.yaml").read_text())}
 
 
 def _cell(
@@ -104,22 +103,13 @@ GOLDEN = [
         496.97780007606013,
         0.9533333333333335,
     ),
-    (
-        _cell(20, 2, proto=PHASE8, ticks=1500),
-        False,
-        1500,
-        3.627523125294327,
-        88.88412676913025,
-        2222.290859250705,
-        0.9907061958694205,
-    ),
 ]
 
 
 @pytest.mark.parametrize(
     "cell, success, ticks, cohesion, gcm_goal, path, fragmentation",
     GOLDEN,
-    ids=["multi", "multi_wide", "kubo", "fat", "bearing_only", "global_shared", "hold_gate"],
+    ids=["multi", "multi_wide", "kubo", "fat", "bearing_only", "global_shared"],
 )
 def test_trial_matches_golden(cell, success, ticks, cohesion, gcm_goal, path, fragmentation):
     row = _run_cell(cell)["row"]

@@ -7,7 +7,7 @@ The number we care about most is `D_min`: the fewest dogs that get the job done 
 There are two tasks:
 
 - **drive_to_goal** (Phases 1 to 5): push the whole flock into a goal disk.
-- **collect_hold_gate** (Phase 8): gather the flock, keep it in a hold area for a while, then push it out through a gate.
+- **collect_hold_gate** (Phase 8): TODO
 
 ## Results so far
 
@@ -17,7 +17,7 @@ There are two tasks:
 | 2 | Starting shape (4 layouts, N = 50/100/200) | `D_min` = 1 on every layout. Wide and outlier_rich starts cost more dog travel | C1a rejected, C1b inconclusive |
 | 4 | Does it transfer to other dog rules? | Kubo matches Strombom for compact mid/large N. FAT never reaches theta for N >= 25. Kubo on wide never reaches theta. Kubo on outlier_rich at N = 200 needs 20 dogs | C4 partly supported |
 | 5 | Less information (obs mode, range, comm) | Halving sensing range costs 1 to 2 extra dogs. Past the default range, more range saves nothing | C5a, C5b supported |
-| 8 | Collect, hold, exit through a gate | Scout is running now, claim not started | - |
+| 8 | TODO | Not run | - |
 
 Phases 3, 6 and 7 have no campaigns of their own. They are analysis on top of Phase 1 data (mechanism, scaling fits, early warning).
 
@@ -70,7 +70,7 @@ flowchart TD
     I["init: seed RNG, build world,<br/>place sheep by layout"] --> S
     S["sheep step<br/>(flocking + flee from dogs)"] --> O["observation<br/>what each dog can see"]
     O --> D["dog step<br/>(method's controller)"]
-    D --> W["tick += 1<br/>walls / gate"]
+    D --> W["tick += 1<br/>walls"]
     W --> M["record metrics"]
     M --> Q1{"task done?"}
     Q1 -- yes --> OK["success"]
@@ -85,7 +85,7 @@ flowchart TD
 "Task done" means something different for each task:
 
 - `drive_to_goal`: every sheep is inside the goal disk.
-- `collect_hold_gate`: a small phase machine. First collect until every sheep is in the hold disk. Then hold for `hold_ticks` (800) ticks in a row; if a sheep leaves, it drops back to collect. Then exit, which succeeds when every sheep has gone through the gate on the right wall.
+- `collect_hold_gate`: TODO
 
 Success and timeout (T = 10,000 ticks) are the only things that stop a trial. Failure modes are worked out *after* the run, by looking at the metric history (`protocols/packaging/failure_taxonomy.py`). When more than one matches, the first in this order wins:
 
@@ -136,34 +136,27 @@ The simulation code has no copies of these values. The runner reads every setup 
 | `store_timeseries` | Keep per-tick Parquet per cell (big; needed for Package G) |
 | `packages` | Which analysis packages this run feeds |
 | `obs_modes`, `sensing_ranges`, `communications` | Phase 5 factor levels |
-| `task`, `hold_ticks`, `hold_radius_*`, `gate_half_width` | Phase 8 only. Phase 8 also sets `goal_center` to the hold disk centre |
+| Phase 8 keys | TODO |
 
-Here's a full protocol, the Phase 8 scout, with comments stripped:
+Here's a full protocol, the Phase 1 scout, with comments stripped:
 
 ```yaml
-protocol_id: phase8_size_scout
-phase: 8
+protocol_id: phase1_scout
+phase: 1
 grade: SCOUT
-output: results/phase8/size/scout
+output: results/phase1/scout
 canonical: protocols/configs/canonical_grid.yaml
-task: collect_hold_gate
-hold_ticks: 800
-goal_center: [250.0, 250.0]  # hold disk centre
-hold_radius_scale: 2.5      # hold radius = clamp(2.5 * sqrt(N), 23, 27)
-hold_radius_min: 23.0
-hold_radius_max: 27.0
-gate_half_width: 30.0
 methods: [strombom_multi]
 layouts: [compact]
 flock_sizes: [5, 10, 25, 50, 75, 100, 150, 200, 300, 400]
 shepherd_counts: [1, 2, 3, 4, 6, 10, 15, 20, 25, 35]
 seeds: 30
 seed_mode: scout
-store_timeseries: false
-packages: [A]
+store_timeseries: true
+packages: [A, F]
 ```
 
-A claim protocol is usually a few lines: `extends: phase8_size_scout.yaml`, `seeds: 100`, `seed_mode: claim`, `upstream_protocol: phase8_size_scout`.
+A claim protocol is usually a few lines: `extends: phase1_scout.yaml`, `seeds: 100`, `seed_mode: claim`, `upstream_protocol: phase1_scout`.
 
 ### Protocols we have
 
@@ -173,7 +166,7 @@ A claim protocol is usually a few lines: `extends: phase8_size_scout.yaml`, `see
 | 2 structure | `phase2_pilot_state`, `phase2_scout`, `phase2_claim` |
 | 4 transfer | `phase4_{kubo,fat}_{size,structure}_{scout,claim}` (8 files) |
 | 5 information | `phase5_factor_sweep`, `phase5_obs_claim`, `phase5_range_{scout,claim}`, `phase5_comm_{scout,claim}` |
-| 8 collect-hold-gate | `phase8_size_scout`, `phase8_size_claim` |
+| 8 collect-hold-gate | TODO |
 
 ## What you can vary
 
@@ -326,7 +319,7 @@ HerdSim/
 |-- results/             Run outputs (generated)
 |-- docs/                Architecture, report, figures
 `-- tests/
-    |-- sim/             Golden regression runs, Phase 8 scenario, core metrics
+    |-- sim/             Golden regression runs, core metrics
     |-- services/        Protocol cell expansion and resume keys
     `-- analysis/        Frontier / regimes on toy tables
 ```

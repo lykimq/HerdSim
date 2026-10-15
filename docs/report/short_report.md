@@ -23,7 +23,7 @@ It assumes you've read the [main README](../../README.md), which explains the se
 | RQ5 information | obs / range / comm ladders | 3,600 | 4,100 | done |
 | RQ3 mechanism | needs overcrowding cells | - | - | skipped |
 | RQ6 fits, RQ7 early warning | analysis on RQ2 claim data | - | - | done |
-| Phase 8 | collect-hold-gate size map | 2,062 / 3,000 | - | scout running |
+| Phase 8 | TODO | - | - | not run |
 
 In total that's about 43,000 trials for Phases 1 to 5, including 750 smoke runs. Claim reseeds only go to cells near `D_min`.
 
@@ -250,7 +250,7 @@ The claim packages only use success, ticks and path. We also looked at the other
 
 ## Next steps
 
-- Phase 8 (collect-hold-gate) is a harder task and the scout is running. If overcrowding appears within D <= 35, we can run the RQ3 contrast and recheck C2a.
+- Phase 8: TODO
 - Extend D past 35 for a few N values to check for overcrowding at higher D.
 - Rerun RQ5 and RQ7 on maps where `D_min` > 1, for example wide starts, Kubo outlier_rich or FAT.
 - Fix the split generator so the clusters start apart.
