@@ -84,15 +84,34 @@ flowchart TD
 
 ### Adaptive Execution Mechanics
 
-1. **Initial Exploration**: Each active cell is seeded with a baseline batch (`batch_seeds`, default 10).
-2. **Sequential Refinement**: Cells whose reliability classification (theta = 0.90) remains open receive additional batches up to `max_seeds` (200). Obvious successes (e.g. 10 straight successes on compact N=25) and obvious failures stop early, concentrating CPU cycles exactly where classification variance is high.
-3. **Adaptive Grid Densification**: If the assigned behavioral zone changes between two adjacent tested D values separated by more than `refine_min_gap`, the midpoint integer D is automatically injected into the curve for the next round.
-4. **Saturation Pruning**: Above a confirmed saturation point (D_sat), if additional dogs act as copies of one another (mean `dog_overlap` >= 0.90) without improving speed or reliability, further seeds are suppressed (`pruned`).
-5. **Deterministic Paired Comparisons**: Every seed i uses `master_seed + i` (default 2026 + i), ensuring that trials comparing D=2 against D=4 run on the **exact same initial flock configuration and identical stochastic noise draws**.
-6. **Robust Interrupt and Resume**: Every trial is committed to disk immediately upon completion. Runs can be safely interrupted (`SIGINT`) and resumed; locked directories prevent concurrent write collisions.
+Rather than running brute-force Monte Carlo sweeps across arbitrary grids, HerdSim implements four automated statistical mechanisms that focus computation precisely on decision boundaries:
 
-![Adaptive campaign execution mechanics](docs/figures/fig_adaptive_campaign.png)
-*Figure 4: The four core principles of HerdSim's adaptive exploration engine. (A) Sequential refinement and early stopping using exact 99% Clopper–Pearson confidence intervals: obvious failures stop at 10 seeds, obvious successes stop at 51 seeds, and ambiguous cells receive additional batches up to 200. (B) Adaptive grid densification: when adjacent dog counts cross a behavioral zone boundary (e.g., too_few to improving), the midpoint integer count is automatically injected for the next round. (C) Saturation & twin pruning: once finish times plateau at D_sat, cells where added dogs act as redundant copies (dog overlap >= 0.90) are pruned to eliminate wasted compute. (D) Deterministic paired seeds: using common random numbers (seed 2026 + i), trials across different dog counts face the exact same initial flock scatter and sheep noise, isolating the pure effect of shepherd team size.*
+#### 1. Sequential Refinement & Early Stopping (99% Clopper–Pearson CI)
+Each cell begins with a baseline batch (`batch_seeds`, default 10). If the 99% Clopper–Pearson confidence interval confirms the cell is reliable (lower CI bound >= 0.90, mathematically requiring at least 51 consecutive successes) or unreliable (upper CI bound < 0.90), evaluation halts immediately. Undecided cells receive sequential batches of 10 seeds up to `max_seeds` (200), concentrating CPU cycles where classification variance is highest.
+
+![Sequential Refinement and Early Stopping](docs/figures/fig_adaptive_1_refinement.png)
+*Figure 4: Sequential refinement and early stopping using exact 99% Clopper–Pearson confidence intervals. Obvious failures stop at 10 seeds; obvious successes stop at 51 consecutive successes; undecided cells continue receiving batches of 10 seeds up to the 200-seed cap.*
+
+#### 2. Adaptive Grid Densification (Midpoint Bisection)
+When adjacent tested dog counts D cross a behavioral zone boundary (e.g. D = 2 is `too_few` and D = 4 is `improving`) with a gap larger than `refine_min_gap` (1), the midpoint integer (D = 3) is automatically injected into the curve for the next round to pinpoint D_min without coarse guessing.
+
+![Adaptive Grid Densification](docs/figures/fig_adaptive_2_densification.png)
+*Figure 5: Adaptive grid densification. A detected zone shift between D = 2 and D = 4 triggers an automatic midpoint injection of D = 3 in Round 2, locating the exact boundary with minimal additional evaluations.*
+
+#### 3. Saturation & Twin Overlap Pruning
+Above a confirmed saturation point (D_sat), if additional dogs act as copies of one another (mean `dog_overlap` >= 0.90) without providing any finish-time speedup, further seeds for that cell are suppressed (`pruned`) to eliminate wasted compute.
+
+![Saturation and Overlap Pruning](docs/figures/fig_adaptive_3_pruning.png)
+*Figure 6: Saturation and twin overlap pruning. Once task speed plateaus at D_sat, cells exhibiting high dog overlap (>= 0.90) are flagged as pruned, eliminating wasteful evaluation of redundant copycat shepherds.*
+
+#### 4. Deterministic Paired Comparisons (Common Random Numbers)
+Every seed i evaluated across cells uses `master_seed + i` (default 2026 + i). The starting flock layout and sheep stochastic noise streams are drawn independently, guaranteeing that trials comparing D = 2 against D = 4 face the **exact same initial flock configuration and sheep stochastic decisions**, eliminating layout luck from shepherd team comparisons.
+
+![Deterministic Paired Comparisons](docs/figures/fig_adaptive_4_paired_seeds.png)
+*Figure 7: Common random numbers scheme. Seeds 2026, 2027, and 2028 generate identical initial flock geometries and sheep noise across all tested dog counts D, isolating the pure effect of the shepherd algorithm.*
+
+#### 5. Robust Interrupt and Resume
+Every trial is committed to disk immediately upon completion (`trials.jsonl` and `trials.csv`). Campaigns can be safely interrupted (`SIGINT`) and resumed seamlessly without losing progress; directory locks prevent concurrent write collisions.
 
 ---
 
@@ -103,7 +122,7 @@ A common flaw in agent-based herding simulations is fixing physical field dimens
 HerdSim enforces **scale invariance** by anchoring all spatial and temporal metrics to the **calibrated flock radius R_f(N)**: the steady-state radius of an N-sheep flock driven by a single shepherd.
 
 ![Task geometry and physical scaling](docs/figures/fig6_task_geometry.png)
-*Figure 5: Task geometry drawn to scale from simulation code. Left: Physical layout at N = 200. The goal circle, drive distance, and arena boundaries expand proportionally with R_f(N). Middle: Drive length definition. Right: Calibrated growth of flock radius R_f and goal radius R_goal across N.*
+*Figure 8: Task geometry drawn to scale from simulation code. Left: Physical layout at N = 200. The goal circle, drive distance, and arena boundaries expand proportionally with R_f(N). Middle: Drive length definition. Right: Calibrated growth of flock radius R_f and goal radius R_goal across N.*
 
 | Parameter | Mathematical Formulation | Physical Rationale |
 |---|---|---|
@@ -126,7 +145,7 @@ A trial evaluated at m = 6 requires the dog team to gather and drive the flock w
 To study the transition between collection and driving, HerdSim provides four distinct initial spatial geometries:
 
 ![The four starting flock layouts at N = 200](docs/figures/fig7_layouts.png)
-*Figure 6: The four initial flock layouts evaluated at N = 200 with D = 4 dogs (identical scale). The red dashed circle marks the analytical collection boundary f(N) = r_a · N^(2/3). Any sheep located outside this circle triggers active collection heuristics.*
+*Figure 9: The four initial flock layouts evaluated at N = 200 with D = 4 dogs (identical scale). The red dashed circle marks the analytical collection boundary f(N) = r_a · N^(2/3). Any sheep located outside this circle triggers active collection heuristics.*
 
 1. **`compact`**: Flocks sampled from a 2D Gaussian (sigma = 0.5 · R_f, truncated at 3 sigma). All sheep begin well within f(N); dogs immediately enter drive mode.
 2. **`wide`**: Flocks sampled from a broad Gaussian (sigma = 0.5 · 2 N^(2/3)). Sheep are broadly scattered, requiring substantial initial perimeter sweeping.
@@ -147,7 +166,7 @@ Dogs begin 30 units behind the flock's rear boundary, arranged in one of three e
 HerdSim implements microscopic agent physics based on validated empirical literature, extended with a coordination layer designed to prevent trivial copycat dynamics.
 
 ![Multi-dog coordination mechanisms](docs/figures/fig3_team_rule.png)
-*Figure 7: Multi-dog team coordination in strombom_multi. Left: Outlier collection assignment. D dogs are matched to the D farthest outliers via minimum-weight Euclidean matching (least total walking distance). Center: Parallel driving formation. Dogs occupy equidistant angular slots along a driving arc subtending the flock's width, maintaining angular order to avoid crossing trajectories. Right: Unit push blending. Multiple dogs near a single sheep combine their influence into a normalized unit repulsion vector.*
+*Figure 10: Multi-dog team coordination in strombom_multi. Left: Outlier collection assignment. D dogs are matched to the D farthest outliers via minimum-weight Euclidean matching (least total walking distance). Center: Parallel driving formation. Dogs occupy equidistant angular slots along a driving arc subtending the flock's width, maintaining angular order to avoid crossing trajectories. Right: Unit push blending. Multiple dogs near a single sheep combine their influence into a normalized unit repulsion vector.*
 
 ### 1. Sheep Dynamics ([Strömbom et al. 2014](https://doi.org/10.1098/rsif.2014.0419))
 Each individual sheep $i$ updates its heading vector via five additive components:
@@ -198,7 +217,7 @@ Statistical decisions are governed by [`analysis/frontier.py`](analysis/frontier
 ### Cell Behavioral Zones
 
 ![Behavioral zones and frontier classification](docs/figures/def_D_zones.png)
-*Figure 8: Partition of the dog count axis into behavioral zones determined by reliability testing (theta = 0.90) and paired bootstrap finish-time comparisons against D_best.*
+*Figure 11: Partition of the dog count axis into behavioral zones determined by reliability testing (theta = 0.90) and paired bootstrap finish-time comparisons against D_best.*
 
 
 - `too_few`: Unreliable, below D_min.
@@ -214,7 +233,7 @@ Statistical decisions are governed by [`analysis/frontier.py`](analysis/frontier
 To verify that findings reflect fundamental multi-agent dynamics rather than arbitrary parameter choices, HerdSim executed systematic sensitivity sweeps:
 
 ![Sensitivity of D_min across experimental variations](docs/figures/fig24_sensitivity.png)
-*Figure 9: Sensitivity analysis of D_min across experimental variants (N in {100, 200, 400}, wide and outlier-rich layouts at 6× drive time). Evaluates shepherd release geometry (handler post, full ring), start gap distance, goal radius, dog speed, and field-matched parameters.*
+*Figure 12: Sensitivity analysis of D_min across experimental variants (N in {100, 200, 400}, wide and outlier-rich layouts at 6× drive time). Evaluates shepherd release geometry (handler post, full ring), start gap distance, goal radius, dog speed, and field-matched parameters.*
 
 1. **Release Geometry**: Releasing dogs from a single handler post (`handler`) requires fewer dogs than an encircling ring (`ring`), because ring dogs on the goal side can inadvertently frighten sheep backward before reaching their stations.
 2. **Dog Speed**: Counter-intuitively, slower dogs (v_dog = 1.15 vs 1.5) achieve lower D_min on large flocks under strict success rules. Fast dogs tend to drive the flock forcefully through the circular goal, causing overshoots that strand trailing sheep.
