@@ -226,15 +226,36 @@ Imagine a sheep at $(0, 5)$ pursued by two flanking dogs: Dog 1 is stationed at 
 
 This allows a coordinated dog team to steer and contain a flock smoothly through flanking geometry without exerting unphysical "super-force" or triggering artificial flock disintegration.
 
-### 2. Shepherd Controllers
+### 2. Shepherd Controllers and Alternative Baselines
 
-- **`strombom_multi` (Team Coordination)**:
-  - *Outlier Mode*: When any sheep lies farther than f(N) = r_a · N^(2/3) from the flock centroid, the D farthest outliers are identified. Dogs are assigned to outliers using linear sum assignment (minimum total Euclidean travel distance). Leftover dogs assist in driving the core flock.
-  - *Drive Mode*: When the flock is cohesive, dogs form an arc behind the flock at distance r_d, spanning the angular width of the flock. Dogs are sorted by their relative angular station around the flock, guaranteeing they never cross paths while moving to their assigned driving slots.
-- **`fat` (Farthest-Agent Targeting baseline)**:
-  Uncoordinated baseline. Each dog independently targets the sheep farthest from the goal. Without assignment or repulsive spacing, dogs collapse into a tight cluster behind the same outlier, exhibiting high `dog_overlap`.
-- **`kubo` ([Kubo et al. 2022](https://doi.org/10.1088/2632-072X/ac6cb4) continuous force model)**:
-  Simulates shepherds using continuous force vectors, combining outlier targeting with inter-dog repulsion forces that encourage natural dispersion.
+To evaluate the necessity of explicit multi-agent coordination, HerdSim implements three distinct shepherd controller architectures:
+
+#### Coordinated Architecture: `strombom_multi`
+- **Outlier Mode**: When any sheep lies farther than $f(N) = r_a \cdot N^{2/3}$ from the flock centroid, the $D$ farthest outliers are identified. Dogs are assigned to distinct outliers using linear sum assignment (minimum total Euclidean travel distance). Leftover dogs assist in driving the core flock.
+- **Drive Mode**: When the flock is cohesive, dogs form an arc behind the flock at distance $r_d$, spanning the angular width of the flock. Dogs are sorted by their relative angular station around the flock, guaranteeing they never cross paths while moving to their assigned driving slots.
+
+#### Uncoordinated Baseline: `fat` (Farthest-Agent Targeting)
+Each dog independently targets the sheep farthest from the goal without communicating, negotiating target assignments, or maintaining inter-dog spacing.
+
+![Uncoordinated baseline FAT](docs/figures/fig4_fat.png)
+*Figure 12: Uncoordinated baseline FAT (Farthest-Agent Targeting). Left: Geometry of uncoordinated driving where dogs chase the single farthest sheep from the goal. Right: Without target assignment or repulsive spacing, dogs collapse into a tight cluster behind the same outlier, exhibiting high `dog_overlap` and failing to gather dispersed flocks.*
+
+#### Cross-Model Continuous Force Architecture: `kubo` ([Kubo et al. 2022](https://doi.org/10.1088/2632-072X/ac6cb4))
+To verify that scaling properties are not artifacts of the discrete Strömbom heuristic, HerdSim integrates the complete continuous potential force model of Kubo et al. (2022), encompassing both **Kubo sheep** and **Kubo dogs**:
+- **Kubo Sheep Dynamics**: Sheep velocities update continuously via four additive forces within each sheep's field of view:
+  1. *Inter-sheep repulsion* ($1/r^2$): Prevents collision and crowding.
+  2. *Velocity alignment*: Matches headings with moving neighbors.
+  3. *Inter-sheep attraction* ($-1/r$): Binds the flock together.
+  4. *Flight from dogs* ($1/r^3$): Strong short-range push directly away from shepherds.
+- **Kubo Shepherd Controller**: Unlike `strombom_multi`, Kubo dogs do not use discrete state machines or combinatorial assignment. Instead, each dog moves according to four continuous potential fields:
+  1. *Target attraction*: Pulled toward the sheep farthest from the goal.
+  2. *Target standoff* ($1/r^3$): Repelled when getting too close to that target sheep.
+  3. *Goal standoff*: Repelled away from the goal perimeter to avoid driving sheep backward out of the pen.
+  4. *Inter-dog repulsion* ($1/r^3$): Shepherds strongly repel one another, naturally fanning out along the flock boundary without explicit communication.
+- **Role in HerdSim (`dmin_kubo`)**: Evaluated on compact flocks ($N \in \{25, 50, 100\}$, $D \in \{1 \dots 10\}$), the Kubo model independently confirms $D_{\min} = 1$ on cohesive herds, validating scale invariance across fundamentally different physics.
+
+![Kubo continuous force model](docs/figures/fig5_kubo.png)
+*Figure 13: The Kubo et al. (2022) continuous force model. Left: The four force vectors acting on one sheep (repulsion, alignment, attraction, flight from dogs). Middle: The four force vectors acting on one dog (target pull, target standoff, goal avoidance, inter-dog repulsion). Right: Simulation trajectory showing how inter-dog repulsion forces shepherds to disperse along the flock perimeter.*
 
 ---
 
@@ -261,7 +282,7 @@ Statistical decisions are governed by [`analysis/frontier.py`](analysis/frontier
 ### Cell Behavioral Zones
 
 ![Behavioral zones and frontier classification](docs/figures/def_D_zones.png)
-*Figure 12: Partition of the dog count axis into behavioral zones determined by reliability testing (theta = 0.90) and paired bootstrap finish-time comparisons against D_best.*
+*Figure 14: Partition of the dog count axis into behavioral zones determined by reliability testing (theta = 0.90) and paired bootstrap finish-time comparisons against D_best.*
 
 
 - `too_few`: Unreliable, below D_min.
@@ -277,7 +298,7 @@ Statistical decisions are governed by [`analysis/frontier.py`](analysis/frontier
 To verify that findings reflect fundamental multi-agent dynamics rather than arbitrary parameter choices, HerdSim executed systematic sensitivity sweeps:
 
 ![Sensitivity of D_min across experimental variations](docs/figures/fig24_sensitivity.png)
-*Figure 13: Sensitivity analysis of D_min across experimental variants (N in {100, 200, 400}, wide and outlier-rich layouts at 6× drive time). Rows above the horizontal divider test strict success; rows below test the 99% arrival threshold (f99). The baseline rows ("strict: base (speed 1.5)" and "99%: base (speed 1.5)") use default model parameters: dog speed 1.5, arcs release, gap 30, and goal radius 1.9 R_f.*
+*Figure 15: Sensitivity analysis of D_min across experimental variants (N in {100, 200, 400}, wide and outlier-rich layouts at 6× drive time). Rows above the horizontal divider test strict success; rows below test the 99% arrival threshold (f99). The baseline rows ("strict: base (speed 1.5)" and "99%: base (speed 1.5)") use default model parameters: dog speed 1.5, arcs release, gap 30, and goal radius 1.9 R_f.*
 
 1. **Release Geometry**: Releasing dogs from a single handler post (`handler`) requires fewer dogs than an encircling ring (`ring`), because ring dogs on the goal side can inadvertently frighten sheep backward before reaching their stations.
 2. **Dog Speed (Base 1.5 vs. 1.15)**: The baseline configuration runs at dog speed $v_{\text{dog}} = 1.5$ (shown in the `strict: base (speed 1.5)` and `99%: base (speed 1.5)` rows), while the `dog speed 1.15` rows evaluate reduced dog speed. Counter-intuitively, slower dogs ($v_{\text{dog}} = 1.15$) achieve substantially lower $D_{\min}$ on large flocks under strict success rules (e.g. on outlier-rich $N = 400$, $D_{\min}$ drops from failure/"none" at base speed 1.5 to $D_{\min} = 6$ at speed 1.15). Slower dogs avoid forcefully overshooting the goal and stranding trailing sheep.
