@@ -13,7 +13,7 @@ Given unbounded time, a single shepherd can eventually collect and steer almost 
 
 HerdSim couples high-fidelity microscopic agent physics (based on the models of [Strömbom et al. 2014](https://doi.org/10.1098/rsif.2014.0419) and [Kubo et al. 2022](https://doi.org/10.1088/2632-072X/ac6cb4)) with a novel multi-dog assignment layer, rigorous scale-invariant task geometry, and an adaptive sequential statistical engine (99% Clopper–Pearson confidence testing).
 
-![Anatomy of a real simulation trial](docs/science/design_version2/figures/fig17_trial.png)
+![Anatomy of a real simulation trial](docs/figures/fig17_trial.png)
 *Figure 1: Evolution of a real simulation trial ($N = 200$ sheep, $D = 2$ dogs, wide start, seed 2026). Dogs autonomously identify distant outliers, execute parallel collection sweeps to consolidate the flock, and subsequently establish an arc formation behind the flock centroid to drive the collective into the circular goal.*
 
 ---
@@ -41,7 +41,7 @@ Across 17 executed campaign protocols encompassing **112,785 individual simulati
 
 All empirical data tables are produced directly from `results/` by [`cli/dmin_tables.py`](cli/dmin_tables.py) and summarized in [`docs/science/design_version2/results_tables.md`](docs/science/design_version2/results_tables.md).
 
-![D_min scaling against flock size N across deadlines and layouts](docs/science/design_version2/figures/fig20_dmin_vs_n.png)
+![D_min scaling against flock size N across deadlines and layouts](docs/figures/fig20_dmin_vs_n.png)
 *Figure 2: Empirical scaling of $D_{\min}$ against flock size $N$ across three normalized deadlines ($12\times$, $6\times$, and $3\times$ drive times). Circles denote strict success (100% of sheep in the goal); squares denote the 99% threshold ($f_{99}$). For cohesive flocks (compact), $D_{\min} = 1$ everywhere. For dispersed flocks, $D_{\min}$ scales sub-linearly with $N$, heavily modulated by deadline urgency.*
 
 ### 1. Compact Flocks Exhibit Invariant Scaling ($D_{\min} = 1$)
@@ -58,7 +58,7 @@ Tightening the deadline from $12\times$ to $3\times$ drive times exerts an effec
 ### 4. The Last-Sheep / Straggler Mechanism
 A crucial biological insight emerged from auditing strict success criteria (100% of sheep inside the goal circle at a single tick) against a 99% threshold ($f_{99}$):
 
-![Straggler mechanism and strict vs 99% success](docs/science/design_version2/figures/fig22_straggler.png)
+![Straggler mechanism and strict vs 99% success](docs/figures/fig22_straggler.png)
 *Figure 3: The Straggler Effect. Left: Under strict criteria (circles), success rates collapse for large $N$ under tight deadlines; under 99% criteria (squares), success remains high. Right: Time-series of a failed strict trial ($N = 100$, split, $D = 2$). 99% of the flock reaches the goal well within the deadline ($t \approx 226$ s of a 355 s limit), but 1 or 2 trailing stragglers remain outside. As the dogs attempt to retrieve the stragglers, the flock already inside drifts out, causing a technical timeout under strict criteria.*
 
 In biological and agricultural herding, a single stubborn or drifting sheep does not represent collective failure. Evaluating $f_{99}$ resolves artificial boundary censorship and exposes the true structural scaling laws of the multi-agent system.
@@ -99,7 +99,7 @@ A common flaw in agent-based herding simulations is fixing physical field dimens
 
 HerdSim enforces **scale invariance** by anchoring all spatial and temporal metrics to the **calibrated flock radius $R_f(N)$**: the steady-state radius of an $N$-sheep flock driven by a single shepherd.
 
-![Task geometry and physical scaling](docs/science/design_version2/figures/fig6_task_geometry.png)
+![Task geometry and physical scaling](docs/figures/fig6_task_geometry.png)
 *Figure 4: Task geometry drawn to scale from simulation code. Left: Physical layout at $N = 200$. The goal circle, drive distance, and arena boundaries expand proportionally with $R_f(N)$. Middle: Drive length definition. Right: Calibrated growth of flock radius $R_f$ and goal radius $R_{\text{goal}}$ across $N$.*
 
 | Parameter | Mathematical Formulation | Physical Rationale |
@@ -122,7 +122,7 @@ A trial evaluated at $m = 6$ requires the dog team to gather and drive the flock
 
 To study the transition between collection and driving, HerdSim provides four distinct initial spatial geometries:
 
-![The four starting flock layouts at N = 200](docs/science/design_version2/figures/fig7_layouts.png)
+![The four starting flock layouts at N = 200](docs/figures/fig7_layouts.png)
 *Figure 5: The four initial flock layouts evaluated at $N = 200$ (identical scale). The red dashed circle marks the analytical collection boundary $f(N) = r_a N^{2/3}$. Any sheep located outside this circle triggers active collection heuristics.*
 
 1. **`compact`**: Flocks sampled from a 2D Gaussian ($\sigma = 0.5 R_f$, truncated at $3\sigma$). All sheep begin well within $f(N)$; dogs immediately enter drive mode.
@@ -143,7 +143,7 @@ Dogs begin 30 units behind the flock's rear boundary, arranged in one of three e
 
 HerdSim implements microscopic agent physics based on validated empirical literature, extended with a coordination layer designed to prevent trivial copycat dynamics.
 
-![Multi-dog coordination mechanisms](docs/science/design_version2/figures/fig3_team_rule.png)
+![Multi-dog coordination mechanisms](docs/figures/fig3_team_rule.png)
 *Figure 6: Multi-dog team coordination in `strombom_multi`. Left: Outlier collection assignment. $D$ dogs are matched to the $D$ farthest outliers via minimum-weight Euclidean matching (least total walking distance). Center: Parallel driving formation. Dogs occupy equidistant angular slots along a driving arc subtending the flock's width, maintaining angular order to avoid crossing trajectories. Right: Unit push blending. Multiple dogs near a single sheep combine their influence into a normalized unit repulsion vector.*
 
 ### 1. Sheep Dynamics ([Strömbom et al. 2014](https://doi.org/10.1098/rsif.2014.0419))
@@ -194,10 +194,9 @@ Statistical decisions are governed by [`analysis/frontier.py`](analysis/frontier
 
 ### Cell Behavioral Zones
 
-```
-  0 -------- D_min ------------- D_sat ------- D_crowd -------- D_overcrowd -------> D
-   [ too_few ]     [ improving ]       [ saturated ]   [ crowded ]       [ collapse ]
-```
+![Behavioral zones and frontier classification](docs/figures/def_D_zones.png)
+*Figure 7: Partition of the dog count axis into behavioral zones determined by reliability testing ($\theta = 0.90$) and paired bootstrap finish-time comparisons against $D_{\text{best}}$.*
+
 
 - `too_few`: Unreliable, below $D_{\min}$.
 - `improving`: Reliable, below $D_{\text{sat}}$; adding dogs provides statistically significant speedups.
@@ -211,8 +210,8 @@ Statistical decisions are governed by [`analysis/frontier.py`](analysis/frontier
 
 To verify that findings reflect fundamental multi-agent dynamics rather than arbitrary parameter choices, HerdSim executed systematic sensitivity sweeps:
 
-![Sensitivity of D_min across experimental variations](docs/science/design_version2/figures/fig24_sensitivity.png)
-*Figure 7: Sensitivity analysis of $D_{\min}$ across experimental variants ($N \in \{100, 200, 400\}$, wide and outlier-rich layouts at $6\times$ drive time). Evaluates shepherd release geometry (handler post, full ring), start gap distance, goal radius, dog speed, and field-matched parameters.*
+![Sensitivity of D_min across experimental variations](docs/figures/fig24_sensitivity.png)
+*Figure 8: Sensitivity analysis of $D_{\min}$ across experimental variants ($N \in \{100, 200, 400\}$, wide and outlier-rich layouts at $6\times$ drive time). Evaluates shepherd release geometry (handler post, full ring), start gap distance, goal radius, dog speed, and field-matched parameters.*
 
 1. **Release Geometry**: Releasing dogs from a single handler post (`handler`) requires fewer dogs than an encircling ring (`ring`), because ring dogs on the goal side can inadvertently frighten sheep backward before reaching their stations.
 2. **Dog Speed**: Counter-intuitively, slower dogs ($v_{\text{dog}} = 1.15$ vs $1.5$) achieve lower $D_{\min}$ on large flocks under strict success rules. Fast dogs tend to drive the flock forcefully through the circular goal, causing overshoots that strand trailing sheep.
