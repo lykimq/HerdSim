@@ -135,7 +135,11 @@ HerdSim enforces **scale invariance** by anchoring all spatial and temporal metr
 ### Normalized Deadline
 
 Deadlines are specified as multiples m of the characteristic **drive time**:
-$$T_{\text{drive}} = \frac{\text{Drive Distance}}{v_{\text{sheep,max}}}$$
+
+$$
+T_{\text{drive}} = \frac{\text{Drive Distance}}{v_{\text{sheep,max}}}
+$$
+
 A trial evaluated at m = 6 requires the dog team to gather and drive the flock within 6 times the theoretical minimum travel time of the fastest sheep. A compact flock driven by an optimal shepherd completes the task in 1.45 to 1.74 × T_drive; thus m in {12, 6, 3} provides a graded, realistic scale from relaxed to urgent time pressure.
 
 ---
@@ -175,7 +179,11 @@ HerdSim implements microscopic agent physics based on validated empirical litera
 
 ### 1. Sheep Dynamics ([Strömbom et al. 2014](https://doi.org/10.1098/rsif.2014.0419))
 Each individual sheep $i$ updates its heading vector via five additive components:
-$$\mathbf{H}_i^{t+1} = (1 - \rho)\,\mathbf{v}_i^t + \rho\,\frac{\mathbf{C}_i + \mathbf{R}_i + \mathbf{S}_i + \mathbf{e}_i}{\|\mathbf{C}_i + \mathbf{R}_i + \mathbf{S}_i + \mathbf{e}_i\|}$$
+
+$$
+\mathbf{H}_i^{t+1} = (1 - \rho)\,\mathbf{v}_i^t + \rho\,\frac{\mathbf{C}_i + \mathbf{R}_i + \mathbf{S}_i + \mathbf{e}_i}{\left\lVert \mathbf{C}_i + \mathbf{R}_i + \mathbf{S}_i + \mathbf{e}_i \right\rVert}
+$$
+
 where:
 - $\mathbf{v}_i^t$ is current momentum (persistence $\rho$).
 - $\mathbf{C}_i$: Attraction toward the local center of mass of neighbors within interaction radius $r_a$.
@@ -184,7 +192,11 @@ where:
 - $\mathbf{e}_i$: Stochastic angular noise.
 
 **Push Blending**: In the original Strömbom paper, only a single dog was modeled. HerdSim resolves multi-dog repulsive scaling by summing individual dog repulsive pushes and normalizing to length 1:
-$$\mathbf{S}_i = \frac{\sum_{j \in \text{threat}} \frac{\mathbf{x}_i - \mathbf{y}_j}{\|\mathbf{x}_i - \mathbf{y}_j\|}}{\left\|\sum_{j \in \text{threat}} \frac{\mathbf{x}_i - \mathbf{y}_j}{\|\mathbf{x}_i - \mathbf{y}_j\|}\right\|}$$
+
+$$
+\mathbf{S}_i = \frac{\sum_{j \in \text{threat}} \frac{\mathbf{x}_i - \mathbf{y}_j}{\lVert \mathbf{x}_i - \mathbf{y}_j \rVert}}{\left\lVert \sum_{j \in \text{threat}} \frac{\mathbf{x}_i - \mathbf{y}_j}{\lVert \mathbf{x}_i - \mathbf{y}_j \rVert} \right\rVert}
+$$
+
 This preserves realistic biological repulsion: multiple dogs cornering a sheep apply pressure from their mean direction without generating unphysical super-velocities.
 
 ### 2. Shepherd Controllers
