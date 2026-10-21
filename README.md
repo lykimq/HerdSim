@@ -188,26 +188,43 @@ HerdSim implements microscopic agent physics based on validated empirical litera
 *Figure 11: Multi-dog team coordination in strombom_multi. Left: Outlier collection assignment. D dogs are matched to the D farthest outliers via minimum-weight Euclidean matching (least total walking distance). Center: Parallel driving formation. Dogs occupy equidistant angular slots along a driving arc subtending the flock's width, maintaining angular order to avoid crossing trajectories. Right: Unit push blending. Multiple dogs near a single sheep combine their influence into a normalized unit repulsion vector.*
 
 ### 1. Sheep Dynamics ([Strömbom et al. 2014](https://doi.org/10.1098/rsif.2014.0419))
-Each individual sheep $i$ updates its heading vector via five additive components:
+
+Derived from empirical biological observations of flocking under predation, each sheep $i$ updates its heading vector via a balance between physical momentum and four social/environmental forces:
 
 $$
 \mathbf{H}_i^{t+1} = (1 - \rho)\,\mathbf{v}_i^t + \rho\,\frac{\mathbf{C}_i + \mathbf{R}_i + \mathbf{S}_i + \mathbf{e}_i}{\left\lVert \mathbf{C}_i + \mathbf{R}_i + \mathbf{S}_i + \mathbf{e}_i \right\rVert}
 $$
 
 where:
-- $\mathbf{v}_i^t$ is current momentum (persistence $\rho$).
-- $\mathbf{C}_i$: Attraction toward the local center of mass of neighbors within interaction radius $r_a$.
-- $\mathbf{R}_i$: Short-range repulsion away from neighbors within collision distance $d_a$.
-- $\mathbf{S}_i$: Strong repulsion away from any shepherd within threat distance $r_s$.
-- $\mathbf{e}_i$: Stochastic angular noise.
+- $\mathbf{v}_i^t$: Current momentum/velocity vector of sheep $i$ (persistence weight $1 - \rho$ preserves forward inertia so sheep turn smoothly rather than instantaneously).
+- $\mathbf{C}_i$: **Cohesion** (attraction toward the local center of mass of neighbors within interaction radius $r_a$, reflecting the social urge to stay with the herd).
+- $\mathbf{R}_i$: **Repulsion** (short-range push away from neighboring sheep within collision distance $d_a$, preventing crowding and trampling).
+- $\mathbf{S}_i$: **Shepherd Escape** (strong repulsion away from dogs within threat distance $r_s$).
+- $\mathbf{e}_i$: **Noise** (stochastic angular perturbation representing natural biological motor fluctuation).
 
-**Push Blending**: In the original Strömbom paper, only a single dog was modeled. HerdSim resolves multi-dog repulsive scaling by summing individual dog repulsive pushes and normalizing to length 1:
+Dividing the summed forces by their Euclidean norm $\lVert \mathbf{C}_i + \mathbf{R}_i + \mathbf{S}_i + \mathbf{e}_i \rVert$ ensures the net vector determines **only the direction** (unit heading), while physical movement distance per tick is governed independently by top sheep speed $\delta$.
+
+#### Multi-Dog Push Blending
+
+The original Strömbom et al. (2014) model was formulated for **only a single dog**, where the threat vector was simply the unit vector pointing directly away from that dog. When scaling to multi-dog teams ($D \ge 2$), naively adding independent dog repulsions would multiply the fear force, overpowering flock cohesion and causing the flock to fracture. HerdSim resolves multi-dog repulsive scaling by blending individual dog repulsive pushes and normalizing to length 1:
 
 $$
 \mathbf{S}_i = \frac{\sum_{j \in \text{threat}} \frac{\mathbf{x}_i - \mathbf{y}_j}{\lVert \mathbf{x}_i - \mathbf{y}_j \rVert}}{\left\lVert \sum_{j \in \text{threat}} \frac{\mathbf{x}_i - \mathbf{y}_j}{\lVert \mathbf{x}_i - \mathbf{y}_j \rVert} \right\rVert}
 $$
 
-This preserves realistic biological repulsion: multiple dogs cornering a sheep apply pressure from their mean direction without generating unphysical super-velocities.
+where:
+- $\mathbf{x}_i$: 2D position vector of sheep $i$.
+- $\mathbf{y}_j$: 2D position vector of dog $j$.
+- $\frac{\mathbf{x}_i - \mathbf{y}_j}{\lVert \mathbf{x}_i - \mathbf{y}_j \rVert}$: Unit vector pointing directly away from dog $j$ toward sheep $i$ (the pure escape direction from dog $j$).
+- $\text{threat}$: Set of all dogs currently within threat range of sheep $i$ ($\lVert \mathbf{x}_i - \mathbf{y}_j \rVert \le r_s$).
+
+**Intuitive Example:**
+Imagine a sheep at $(0, 5)$ pursued by two flanking dogs: Dog 1 is stationed at $(-3, 0)$ (back-left) and Dog 2 is stationed at $(3, 0)$ (back-right). 
+- Dog 1 exerts a repulsive push diagonally forward-right.
+- Dog 2 exerts a repulsive push diagonally forward-left.
+- Summing both unit vectors causes their lateral components to cancel out while their forward components reinforce. Normalizing to unit length yields a resultant push directed straight ahead $(0, 1)$.
+
+This allows a coordinated dog team to steer and contain a flock smoothly through flanking geometry without exerting unphysical "super-force" or triggering artificial flock disintegration.
 
 ### 2. Shepherd Controllers
 
