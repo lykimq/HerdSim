@@ -1,1 +1,1 @@
-"""Strombom package: config and heuristics shared by dynamics/controllers."""
+"""Strombom et al. 2014: parameters, sheep heading and shepherd rule."""

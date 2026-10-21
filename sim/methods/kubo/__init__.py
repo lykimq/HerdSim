@@ -1,1 +1,1 @@
-"""Kubo package: config and force helpers."""
+"""Kubo et al. 2022: parameters and force terms."""

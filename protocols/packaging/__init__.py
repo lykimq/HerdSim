@@ -1,5 +1,4 @@
-"""End-of-trial packaging used while writing trials.csv (not post-run plots).
+"""Turning a finished trial into a table row, provenance, and the generated-file notice.
 
-Submodules: ``failure_taxonomy`` (failure labels), ``trial_aggregates`` (metric
-columns), ``provenance`` (run stamp), ``generated_notice`` (auto-generated banners).
+The task adds its own row columns and failure label (sim.plugins.scenarios).
 """

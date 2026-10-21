@@ -1,0 +1,10 @@
+# The slower dog (dmin_s_dogspeed.yaml) with success at 99 percent of the flock in the goal.
+# With the strict rule the slower dog needs fewer dogs than the base at large N although both
+# bring 99 percent of the flock in at the same time; this run asks whether that gap is left once
+# a straggler cannot decide a trial. Compare with dmin_f99_s_base.
+
+protocol_id: dmin_f99_s_dogspeed
+output: results/dmin_f99_s_dogspeed
+extends: dmin_s_dogspeed.yaml
+
+success_fraction: 0.99

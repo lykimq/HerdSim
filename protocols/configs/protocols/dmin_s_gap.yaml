@@ -1,0 +1,11 @@
+# Sensitivity: the distance of the first dog circle beyond the farthest sheep that can start,
+# 15, 30 (base) and 60 units. A convention with no real-world value; this checks that D_min
+# does not depend on it.
+# Same grid and deadline as dmin_s_base.yaml; only the change below differs.
+
+protocol_id: dmin_s_gap
+output: results/dmin_s_gap
+extends: dmin_s_base.yaml
+
+factors:
+  dog_start_gap: [15.0, 30.0, 60.0]

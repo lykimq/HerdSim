@@ -1,0 +1,14 @@
+# D_min with success at 99 percent of the flock in the goal, deadline 12 drive times.
+#
+# Same grid, seeds and physics as dmin_m12.yaml except for the success rule: a trial ends when 99
+# percent of the sheep are inside the goal at one tick, where dmin_m12 needs every sheep. The
+# strict rule turned out to decide many cells on the last one or two sheep (a flock can reach the
+# goal with 99 percent inside and be driven past it), so this run asks the same question with a
+# rule that a straggler cannot decide. Seed i is the same flock as in dmin_m12, so the two runs
+# compare cell by cell. dmin_f99_m6 and dmin_f99_m3 differ from this file only in the deadline.
+
+protocol_id: dmin_f99_m12
+output: results/dmin_f99_m12
+extends: dmin_m12.yaml
+
+success_fraction: 0.99

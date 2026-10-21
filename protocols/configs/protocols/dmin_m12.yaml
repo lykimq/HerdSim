@@ -1,0 +1,23 @@
+# D_min, deadline 12 drive times (the drive time is the drive length over the sheep speed).
+# The loosest of three deadlines (dmin_m12, dmin_m6, dmin_m3 differ only in it): the deadline at
+# which a start that needs collecting is slow but not hopeless for one dog.
+#
+# Strombom 2014 sheep and the multi-dog shepherd rule, point dogs, global observation, four
+# layouts, N 25 to 400 (the largest calibrated flock size; above it the flock radius is imposed
+# by the density rule, so N stops there). Drive limit is the paper rule. Reliability is the
+# canonical theta 0.90 at 99% confidence.
+#
+# The D grid reaches 24 because the hardest cells (scattered starts at N = 400) may need more
+# dogs than the pilot's 16 (dmin_pilot.yaml); a midpoint D is added where the zone changes.
+
+protocol_id: dmin_m12
+output: results/dmin_m12
+canonical: protocols/configs/canonical.yaml
+
+methods:
+  strombom_multi:
+    time_limit_drive_multiple: 12.0
+
+layouts: [compact, wide, split, outlier_rich]
+flock_sizes: [25, 50, 100, 200, 400]
+shepherd_counts: [1, 2, 3, 4, 6, 8, 12, 16, 24]

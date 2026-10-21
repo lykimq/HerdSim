@@ -21,6 +21,8 @@ jobs:
           python-version: "3.12"
       - name: Sync Python deps
         run: uv sync --extra dev
+      - name: Lint
+        run: make lint
       - name: Run test suite
         run: make test
 

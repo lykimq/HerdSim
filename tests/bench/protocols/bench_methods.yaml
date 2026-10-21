@@ -1,0 +1,25 @@
+# Bench campaign: every method completes a small compact drive through the real pipeline.
+# Generous deadlines, 5 seeds, N = 25. Checks that each method runs end to end and obeys the
+# physical bounds; it is not a comparison between methods.
+protocol_id: bench_methods
+output: results/bench_methods
+canonical: protocols/configs/canonical.yaml
+
+methods:
+  strombom_multi:
+    time_limit_drive_multiple: 10.0
+  fat:
+    time_limit_drive_multiple: 10.0
+  kubo:
+    time_limit_seconds: 500
+
+layouts: [compact]
+flock_sizes: [25]
+shepherd_counts: [1, 2]
+
+reliability_theta: 0.5
+confidence: 0.9
+batch_seeds: 5
+max_seeds: 5
+timeseries_seeds: 0
+budget_hours: 0.5

@@ -1,139 +1,119 @@
-"""Force components for Kubo 2022 multi-dog herding.
+"""Kubo et al. 2022 force terms, vectorised.
 
-Faithful Python port of the MATLAB Force-Based-Sheep-Herding-Algorithm force terms
-(reference sources live on the main branch under integrations/).
+Sheep (eqs. 2-6): u = K_s1 a + K_s2 b + K_s3 c + K_s4 d, with means over the
+sheep and dogs inside the sheep field of view:
+    a = mean (x_i - x_j) / |x_i - x_j|^2      repulsion
+    b = mean v_j / |v_j|                      alignment (previous velocities)
+    c = -mean (x_i - x_j) / |x_i - x_j|       attraction
+    d = mean (x_i - X_j) / |x_i - X_j|^3      flee from dogs
+
+Dog (eqs. 8-12): v = K_f1 A + K_f2 B + K_f3 C + K_f4 D, with T the target sheep:
+    A = -(X - T) / |X - T|                    toward the target
+    B = (X - T) / |X - T|^3                   keep off the target
+    C = (X - G) / |X - G|                     keep away from the goal
+    D = mean (X_i - X_j) / |X_i - X_j|^3      repulsion from other dogs
+
+The alignment mean b runs over the moving sheep in view only: a sheep at rest
+has no heading, so it is left out of both the sum and the count (the paper
+divides by every sheep in view). Only at tick 0, when nothing moves, does
+that matter, and then b = 0 either way.
+
+Eq. 11 is printed with a minus sign, but the text ("keep away from goal G")
+and the stability analysis (eq. 14, condition k2 > k4 in eq. 22) need the
+plus sign used here.
 """
 
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
+from scipy.spatial.distance import cdist
 
-EPS = 1e-6
-
-
-def agents_in_range(
-    pos_i: np.ndarray, positions: np.ndarray, radius: float, exclude_self: bool = True
-) -> tuple[np.ndarray, np.ndarray]:
-    """Return (positions_in_range, boolean_mask)."""
-    diffs = pos_i - positions
-    dists = np.linalg.norm(diffs, axis=1)
-    mask = dists < radius
-    if exclude_self:
-        mask &= dists > 0
-    return positions[mask], mask
+# Floor on distances and speeds before dividing, so coincident agents give a large but
+# finite force. Kept apart from vectors.EPS (1e-10), at which the 1/d^3 terms would reach 1e30.
+FLOOR = 1e-6
 
 
-def sheep_force_components(
-    index: int,
-    sheep_pos: np.ndarray,
-    sheep_vel: np.ndarray,
-    dog_pos: np.ndarray,
-    radius: float,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    """Compute sheep force terms a,b,c,d for sheep `index`.
-
-    a: sheep-sheep repulsion (1/r^2)
-    b: velocity alignment
-    c: cohesion toward neighbours
-    d: dog repulsion (1/r^3)
-    """
-    pos_i = sheep_pos[index]
-    neighbours, _ = agents_in_range(pos_i, sheep_pos, radius)
-    n_s = neighbours.shape[0]
-
-    if n_s == 0:
-        a_i = np.zeros(2)
-        b_i = np.zeros(2)
-        c_i = np.zeros(2)
-    else:
-        diff = pos_i - neighbours
-        dist = np.linalg.norm(diff, axis=1)
-        dist_safe = np.maximum(dist, EPS)
-        a_i = np.mean(diff / (dist_safe**2)[:, None], axis=0)
-        c_i = -np.mean(diff / dist_safe[:, None], axis=0)
-
-        # Alignment uses neighbour velocities matching neighbour positions.
-        neigh_mask = (np.linalg.norm(sheep_pos - pos_i, axis=1) < radius) & (
-            np.linalg.norm(sheep_pos - pos_i, axis=1) > 0
-        )
-        vel_in_range = sheep_vel[neigh_mask]
-        speeds = np.linalg.norm(vel_in_range, axis=1)
-        valid = speeds > 0
-        if np.any(valid):
-            b_i = np.mean(vel_in_range[valid] / speeds[valid, None], axis=0)
-        else:
-            b_i = np.zeros(2)
-
-    dogs, _ = agents_in_range(pos_i, dog_pos, radius, exclude_self=False)
-    if dogs.shape[0] == 0:
-        d_i = np.zeros(2)
-    else:
-        diff = pos_i - dogs
-        dist = np.maximum(np.linalg.norm(diff, axis=1), EPS)
-        d_i = np.mean(diff / (dist**3)[:, None], axis=0)
-
-    return a_i, b_i, c_i, d_i
+def _weighted_offsets(positions: np.ndarray, others: np.ndarray, weights: np.ndarray) -> np.ndarray:
+    """sum_j w_ij (x_i - y_j) for every i, as matrix products: x_i sum_j w_ij - W y."""
+    return positions * weights.sum(axis=1, keepdims=True) - weights @ others
 
 
-def target_sheep_farthest_from_goal(goal_pos: np.ndarray, sheep_in_range: np.ndarray) -> np.ndarray:
-    """Return the sheep position farthest from the goal."""
-    dists = np.linalg.norm(sheep_in_range - goal_pos, axis=1)
-    return sheep_in_range[int(np.argmax(dists))]
-
-
-def dog_force_components(
-    index: int,
-    dog_pos: np.ndarray,
-    sheep_pos: np.ndarray,
-    goal_pos: np.ndarray,
-    radius: float,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    """Compute dog force terms A,B,C,D for dog `index`.
-
-    A: attraction toward farthest-from-goal sheep in range
-    B: inverse-cube repulsion from that target sheep
-    C: repulsion from goal (or weak attraction if no sheep in range)
-    D: inverse-cube repulsion from other dogs
-    """
-    dog_i = dog_pos[index]
-    sheep_in_range, _ = agents_in_range(dog_i, sheep_pos, radius, exclude_self=False)
-
-    if sheep_in_range.shape[0] == 0:
-        a_i = np.zeros(2)
-        b_i = np.zeros(2)
-        diff_goal = goal_pos - dog_i
-        dist_goal = np.linalg.norm(diff_goal)
-        c_i = 0.1 * diff_goal / (dist_goal + EPS)
-        d_i = np.zeros(2)
-        return a_i, b_i, c_i, d_i
-
-    target = target_sheep_farthest_from_goal(goal_pos, sheep_in_range)
-    diff = dog_i - target
-    dist = np.linalg.norm(diff)
-    a_i = -diff / (dist + EPS)
-    b_i = diff / ((dist + EPS) ** 3)
-
-    diff_goal = dog_i - goal_pos
-    dist_goal = np.linalg.norm(diff_goal)
-    c_i = diff_goal / (dist_goal + EPS)
-
-    other_dogs = np.delete(dog_pos, index, axis=0)
-    dogs_in_range, _ = agents_in_range(dog_i, other_dogs, radius, exclude_self=False)
-    if dogs_in_range.shape[0] == 0:
-        d_i = np.zeros(2)
-    else:
-        diff = dog_i - dogs_in_range
-        dist = np.maximum(np.linalg.norm(diff, axis=1), EPS)
-        d_i = np.mean(diff / (dist**3)[:, None], axis=0)
-
-    return a_i, b_i, c_i, d_i
+def _per_count(total: np.ndarray, count: np.ndarray) -> np.ndarray:
+    """Divide rows by their neighbour count; rows without neighbours become zero."""
+    return np.where(count[:, None] > 0, total / np.maximum(count, 1)[:, None], 0.0)
 
 
 def clamp_speed(velocities: np.ndarray, max_speed: float) -> np.ndarray:
-    """Limit each velocity vector to max_speed."""
+    """Limit each velocity vector to ``max_speed``."""
+    speeds = np.linalg.norm(velocities, axis=1, keepdims=True)
+    return velocities * np.minimum(1.0, max_speed / np.maximum(speeds, FLOOR))
+
+
+def sheep_velocities(
+    positions: np.ndarray, velocities: np.ndarray, dogs: np.ndarray, config: dict[str, Any]
+) -> np.ndarray:
+    """Velocity of every sheep for one step, clamped to sheep_speed_max."""
+    radius = float(config["sheep_radius"])
+    dist = cdist(positions, positions)
+    neighbours = (dist < radius) & (dist > 0.0)
+    safe = np.maximum(dist, FLOOR)
+    count = neighbours.sum(axis=1)
+    a = _per_count(_weighted_offsets(positions, positions, neighbours / safe**2), count)
+    c = -_per_count(_weighted_offsets(positions, positions, neighbours / safe), count)
+
     speeds = np.linalg.norm(velocities, axis=1)
-    out = velocities.copy()
-    exceed = speeds > max_speed
-    if np.any(exceed):
-        out[exceed] = out[exceed] / speeds[exceed, None] * max_speed
-    return out
+    moving = speeds > 0.0
+    headings = np.where(moving[:, None], velocities / np.maximum(speeds, FLOOR)[:, None], 0.0)
+    aligned = neighbours & moving[None, :]
+    b = _per_count(aligned.astype(float) @ headings, aligned.sum(axis=1))
+
+    dog_dist = cdist(positions, dogs)
+    seen = dog_dist < radius
+    d = _per_count(
+        _weighted_offsets(positions, dogs, seen / np.maximum(dog_dist, FLOOR) ** 3),
+        seen.sum(axis=1),
+    )
+
+    u = (
+        float(config["K_s1"]) * a
+        + float(config["K_s2"]) * b
+        + float(config["K_s3"]) * c
+        + float(config["K_s4"]) * d
+    )
+    return clamp_speed(u, float(config["sheep_speed_max"]))
+
+
+def dog_velocity(
+    dog: np.ndarray,
+    target: np.ndarray,
+    goal: np.ndarray,
+    other_dogs: np.ndarray,
+    config: dict[str, Any],
+) -> np.ndarray:
+    """Unclamped velocity of one dog (eq. 8); ``target`` is T(k), the sheep farthest from G."""
+    to_target = dog - target
+    d_t = max(float(np.linalg.norm(to_target)), FLOOR)
+    to_goal = dog - goal
+    d_g = max(float(np.linalg.norm(to_goal)), FLOOR)
+
+    to_dogs = dog - other_dogs
+    dist = np.linalg.norm(to_dogs, axis=1)
+    near = dist < float(config["dog_repulsion_radius"])
+    repulsion = (
+        (to_dogs[near] / np.maximum(dist[near], FLOOR)[:, None] ** 3).mean(axis=0)
+        if near.any()
+        else np.zeros(2)
+    )
+    return (
+        float(config["K_f1"]) * (-to_target / d_t)
+        + float(config["K_f2"]) * (to_target / d_t**3)
+        + float(config["K_f3"]) * (to_goal / d_g)
+        + float(config["K_f4"]) * repulsion
+    )
+
+
+def reaction_radius(config: dict[str, Any]) -> float:
+    """Distance at which a sheep reacts to a dog."""
+    return float(config["sheep_radius"])

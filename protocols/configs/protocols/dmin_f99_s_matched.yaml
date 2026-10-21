@@ -1,0 +1,10 @@
+# The field-matched sheep set (dmin_s_matched.yaml) with success at 99 percent of the flock in the
+# goal. With the strict rule that set has a success ceiling near 0.9 for every D at N = 100, since
+# its smaller collect distance leaves stragglers behind; this run asks whether D_min exists once
+# a straggler cannot decide a trial.
+
+protocol_id: dmin_f99_s_matched
+output: results/dmin_f99_s_matched
+extends: dmin_s_matched.yaml
+
+success_fraction: 0.99

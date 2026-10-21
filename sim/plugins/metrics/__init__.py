@@ -1,36 +1,40 @@
-"""Per-tick metrics. Every trial records all of them; the key is the column name.
+"""Per-tick metrics that apply to every task. Every trial records all of them, plus
+its task's own metrics (``Scenario.metrics``); the key is the column name.
 
-Order is the column order of the per-tick history and its Parquet files.
+A metric is a function of a TickView, which carries the state and the run
+config, returning one float. A new metric is one function and one entry here
+(or in the task's table when it needs the task's geometry); the engine, the
+trial row and the tables pick it up by name.
 """
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 
-from core.simulation_state import SimulationState
+from . import dogs, flock
+from .view import TickView
 
-from . import dogs, flock, goal
-
-Metric = Callable[[SimulationState], float]
+Metric = Callable[[TickView], float]
 
 METRICS: dict[str, Metric] = {
     "cohesion": flock.cohesion,
-    "gcm_goal": goal.gcm_goal,
-    "time_to_goal": goal.time_to_goal,
-    "shepherd_path": dogs.shepherd_path,
-    "success_rate": goal.success_rate,
-    "sheep_in_goal": goal.sheep_in_goal,
-    "polarization": flock.polarization,
-    "outlier_count": flock.outlier_count,
-    "min_separation": flock.min_separation,
-    "min_dog_separation": dogs.min_dog_separation,
-    "fragmentation": flock.fragmentation,
-    "mean_spread": flock.mean_spread,
     "extent": flock.extent,
+    "aspect_ratio": flock.aspect_ratio,
     "perimeter": flock.perimeter,
     "hull_area": flock.hull_area,
     "flock_density": flock.flock_density,
-    "aspect_ratio": flock.aspect_ratio,
+    "fragmentation": flock.fragmentation,
+    "lost_sheep": flock.lost_sheep,
+    "min_separation": flock.min_separation,
+    "shepherd_path": dogs.shepherd_path,
+    "min_dog_separation": dogs.min_dog_separation,
+    "dog_overlap": dogs.dog_overlap,
+    "dogs_stopped": dogs.dogs_stopped,
     "i_dir": dogs.i_dir,
     "coverage": dogs.coverage,
 }
+
+
+def record(view: TickView, task_metrics: Mapping[str, Metric]) -> dict[str, float]:
+    """The task's metrics, then every generic metric, for one tick."""
+    return {name: metric(view) for name, metric in {**task_metrics, **METRICS}.items()}

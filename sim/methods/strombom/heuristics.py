@@ -1,70 +1,87 @@
-"""Strombom 2014 shepherd heuristics used by the multi-dog and FAT controllers.
+"""Strombom et al. 2014 shepherd rule.
 
-Paper rules:
-- Collect: Pc = r_a behind the furthest sheep relative to GCM
-- Drive: Pd = r_a * sqrt(N) behind the flock relative to the goal
-- If within 3*r_a of any sheep, shepherd speed is zero
-- Shepherd heading includes the same angular noise as agents
+The shepherd collects when any sheep is farther than f(N) = r_a N^(2/3) from
+the flock centre (GCM): it aims r_a behind the furthest sheep relative to the
+GCM (Pc). Otherwise it drives: it aims r_a sqrt(N) behind the flock relative
+to the goal (Pd). It walks straight at its target with the same angular noise
+as the sheep, and stops while within 3 r_a of any sheep.
+
+N is the flock size being herded (``config["n_sheep"]``, Table 1).
+
+``decide`` is the single source of this rule; the multi-dog controller calls
+it for every dog and only then adds its team layer.
 """
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
-from core.simulation_state import SimulationState
-from plugins.sheep.helpers import compute_noise, unit_vector
+
+from sim.core.vectors import behind, unit
+
+COLLECT = "collect"
+DRIVE = "drive"
 
 
-def move_toward(current_pos: np.ndarray, target_pos: np.ndarray, speed: float) -> np.ndarray:
-    """Velocity from current toward target at most `speed` (zeros if at target)."""
-    diff = target_pos - current_pos
-    dist = np.linalg.norm(diff)
-    if dist < 1e-10:
-        return np.zeros(2)
-    return (diff / dist) * min(speed, dist)
+@dataclass(frozen=True)
+class Decision:
+    mode: str  # COLLECT or DRIVE
+    target: np.ndarray  # Pc or Pd
+    centroid: np.ndarray  # GCM of the flock the dog sees
+    # Indices (into the flock passed in) of the sheep beyond f(N), farthest first;
+    # empty when driving. outliers[0] is the sheep Pc is behind.
+    outliers: np.ndarray
 
 
-def compute_threshold(n_sheep: int, r_a: float) -> float:
-    """Switching threshold f(N) = r_a * N^(2/3)."""
-    return r_a * (n_sheep ** (2.0 / 3.0))
+def collect_threshold(n_sheep: int, r_a: float) -> float:
+    """f(N) = r_a N^(2/3)."""
+    return r_a * n_sheep ** (2.0 / 3.0)
 
 
-def collect_offset(config: dict[str, Any]) -> float:
-    """Collect stand-off Pc: r_a behind the furthest agent (paper Table 1)."""
-    return float(config["r_a"])
+def radius_of(flock: np.ndarray, centroid: np.ndarray) -> float:
+    """Flock radius sqrt(2) x RMS distance to the centroid, as R_f."""
+    return float(np.sqrt(2.0 * np.mean(np.sum((flock - centroid) ** 2, axis=1))))
 
 
-def drive_offset(state: SimulationState, config: dict[str, Any]) -> float:
-    """Drive stand-off Pd: r_a * sqrt(N) behind the flock (paper Table 1)."""
-    return float(config["r_a"]) * (state.n_sheep**0.5)
+def drive_point(flock: np.ndarray, goal: np.ndarray, config: dict[str, Any]) -> np.ndarray:
+    """Pd: r_a sqrt(N) behind the centroid of ``flock`` relative to the goal (the paper rule)."""
+    offset = float(config["r_a"]) * np.sqrt(int(config["n_sheep"]))
+    return behind(flock.mean(axis=0), goal, offset)
 
 
-def shepherd_step_toward(
-    state: SimulationState,
-    config: dict[str, Any],
-    shepherd_idx: int,
+def decide(flock: np.ndarray, goal: np.ndarray, config: dict[str, Any]) -> Decision:
+    """Collect or drive, and where to stand, for one dog knowing of ``flock``."""
+    r_a = float(config["r_a"])
+    n = int(config["n_sheep"])
+    centroid = flock.mean(axis=0)
+    dists = np.linalg.norm(flock - centroid, axis=1)
+    outliers = np.flatnonzero(dists > collect_threshold(n, r_a))
+    if outliers.size:
+        outliers = outliers[np.argsort(-dists[outliers], kind="stable")]
+        return Decision(COLLECT, behind(flock[outliers[0]], centroid, r_a), centroid, outliers)
+    return Decision(DRIVE, drive_point(flock, goal, config), centroid, outliers)
+
+
+def step_toward(
+    dog: np.ndarray,
     target: np.ndarray,
-    *,
-    proximity_sheep: np.ndarray | None = None,
+    sheep: np.ndarray,
+    config: dict[str, Any],
+    noise_angle: float,
 ) -> np.ndarray:
-    """Velocity toward target with paper 3*r_a stop and angular noise.
+    """Dog velocity toward ``target``: straight line plus noise, stop near sheep.
 
-    Planning may use an observation-limited view as `state`. The stop radius is a
-    body-proximity rule: pass true world sheep as `proximity_sheep` when `state`
-    holds observed or bearing-proxy positions.
+    The shepherd always moves delta_s per time step (Table 1; p.7 "moves delta_s
+    toward" its point), with no shortening when the target is closer than
+    delta_s; only the 3 r_a stop rule keeps it off the sheep. ``sheep`` are the
+    true positions, because the stop rule is body contact, not sensing.
     """
-    speed = float(config["shepherd_speed"])
-    shepherd_pos = state.shepherd_positions[shepherd_idx]
-    sheep = state.sheep_positions if proximity_sheep is None else proximity_sheep
-    stop_radius = float(config["shepherd_stop_multiple"]) * float(config["r_a"])
-    if sheep.shape[0] > 0:
-        min_sheep_dist = float(np.min(np.linalg.norm(sheep - shepherd_pos, axis=1)))
-        if min_sheep_dist < stop_radius:
-            return np.zeros(2)
-
-    base = move_toward(shepherd_pos, target, speed)
-    noise = compute_noise(state.rng, float(config["noise_strength"]))
-    direction = unit_vector(base + noise)
-    step = min(speed, float(np.linalg.norm(target - shepherd_pos)))
-    return direction * step
+    r_a = float(config["r_a"])
+    if sheep.shape[0] and float(np.min(np.linalg.norm(sheep - dog, axis=1))) < (
+        float(config["shepherd_stop_multiple"]) * r_a
+    ):
+        return np.zeros(2)
+    noise = float(config["noise_strength"]) * np.array([np.cos(noise_angle), np.sin(noise_angle)])
+    return unit(unit(target - dog) + noise) * float(config["shepherd_speed"])

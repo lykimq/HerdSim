@@ -1,0 +1,12 @@
+# Sensitivity: dog speed 1.15 times the sheep speed instead of 1.5, the ratio of the mean
+# speeds in the field data of Jadhav et al. (dog 1.5 m/s, sheep 1.3 m/s).
+# Same grid and deadline as dmin_s_base.yaml; only the change below differs.
+
+protocol_id: dmin_s_dogspeed
+output: results/dmin_s_dogspeed
+extends: dmin_s_base.yaml
+
+methods:
+  strombom_multi:
+    time_limit_drive_multiple: 6.0
+    params: {shepherd_speed: 1.15}

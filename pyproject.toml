@@ -26,42 +26,14 @@ dev = [
     "scipy-stubs>=1.11",
 ]
 
-# Import names stay stable (core / plugins.* / methods.*); folders under sim/ are purpose-split.
-[tool.setuptools]
-packages = [
-    "analysis",
-    "core",
-    "core.config",
-    "core.world",
-    "methods",
-    "methods.kubo",
-    "methods.strombom",
-    "plugins",
-    "plugins.dogs",
-    "plugins.metrics",
-    "plugins.scenarios",
-    "plugins.sheep",
-    "protocols",
-    "protocols.packaging",
-    "services",
-]
-
-[tool.setuptools.package-dir]
-"core" = "sim/core"
-"core.config" = "sim/core/config"
-"core.world" = "sim/core/world"
-"methods" = "sim/methods"
-"methods.kubo" = "sim/methods/kubo"
-"methods.strombom" = "sim/methods/strombom"
-"plugins" = "sim/plugins"
-"plugins.dogs" = "sim/plugins/dogs"
-"plugins.metrics" = "sim/plugins/metrics"
-"plugins.scenarios" = "sim/plugins/scenarios"
-"plugins.sheep" = "sim/plugins/sheep"
+[tool.setuptools.packages.find]
+include = ["sim*", "services*", "protocols*", "analysis*"]
 
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+# Figure scripts under docs/ are not project code.
+extend-exclude = ["docs"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "W", "UP"]
@@ -69,5 +41,8 @@ select = ["E", "F", "I", "W", "UP"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+# Benchmarks are slow; `make bench` runs them, `make test` does not.
+addopts = "-m 'not bench'"
+markers = ["bench: behaviour and performance benchmarks, run with `make bench`"]
 
 # Typecheck settings live in pyrightconfig.json.

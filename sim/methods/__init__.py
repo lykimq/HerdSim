@@ -1,1 +1,1 @@
-"""Method package metadata and paper defaults."""
+"""Paper math for each method: parameters and pure functions, no engine state."""

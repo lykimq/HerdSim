@@ -1,4 +1,4 @@
-"""Unified simulation state passed between engine, plugins, and metrics."""
+"""State of one trial at one tick, passed between the engine, plugins and metrics."""
 
 from __future__ import annotations
 
@@ -7,24 +7,30 @@ from typing import Any
 
 import numpy as np
 
-from core.world.arena import World
+from sim.core.world.arena import World
 
 
 @dataclass
 class SimulationState:
-    """Snapshot of the full simulation at one tick.
+    """Positions and velocities of every agent, plus the world and the trial RNGs.
 
-    Sheep dynamics and dog controllers return an updated copy each tick.
-    Metrics read this to compute scalar values.
+    Sheep models and dog controllers return an updated copy each tick.
+    ``rng`` is the sheep's random stream and ``dog_rng`` the dogs', kept
+    apart so the sheep draw the same numbers whatever the dog count.
+    ``metadata`` holds per-trial constants the metrics need (radii), the
+    running dog path length, and what the controllers remember between
+    ticks (the dogs' last known flock centroid), so a seed replays exactly
+    from the state alone.
     """
 
     tick: int
-    sheep_positions: np.ndarray  # shape (N, 2)
-    sheep_velocities: np.ndarray  # shape (N, 2)
-    shepherd_positions: np.ndarray  # shape (M, 2)
-    shepherd_velocities: np.ndarray  # shape (M, 2)
+    sheep_positions: np.ndarray  # (N, 2)
+    sheep_velocities: np.ndarray  # (N, 2)
+    shepherd_positions: np.ndarray  # (D, 2)
+    shepherd_velocities: np.ndarray  # (D, 2)
     world: World
     rng: np.random.Generator
+    dog_rng: np.random.Generator
     metadata: dict[str, Any] = field(default_factory=dict)
 
     @property
@@ -35,18 +41,6 @@ class SimulationState:
     def n_shepherds(self) -> int:
         return self.shepherd_positions.shape[0]
 
-    @property
-    def sheep_centroid(self) -> np.ndarray:
-        """Global centre of mass (GCM) of the flock."""
-        if self.n_sheep == 0:
-            return np.zeros(2)
-        return np.mean(self.sheep_positions, axis=0)
-
-    def distances_to_centroid(self) -> np.ndarray:
-        """Euclidean distance of each sheep to the flock centroid. Shape (N,)."""
-        diff = self.sheep_positions - self.sheep_centroid
-        return np.linalg.norm(diff, axis=1)
-
     def copy_with(self, **kwargs: Any) -> SimulationState:
-        """Return a new state with selected fields replaced."""
+        """New state with the given fields replaced."""
         return replace(self, **kwargs)

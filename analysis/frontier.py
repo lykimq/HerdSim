@@ -1,366 +1,384 @@
-"""Herdability frontiers from trial tables (Package A core; Cap I2).
+"""Reliability and finish-time frontiers along each D curve.
 
-Input: rows from ``trials.csv`` / merge tables with success by (N, D) [and optional
-layout/method groups].
+A D curve is every cell of one group (method, layout, factors, N) ordered by
+dog count D. For each cell this module decides:
 
-Computes:
-- reliability surface R(N, D)
-- fewest dogs ``D_min`` at reliability threshold theta
-- overcrowding edge ``D_overcrowd`` / ``D_max`` when present
-- cheap operating point ``B*``
-- claim window selection and scout+claim merges
-- bootstrap CI on ``D_min``
+- reliability: ``reliable`` when the Clopper-Pearson interval of its success
+  rate lies at or above theta, ``unreliable`` when it lies below, else
+  ``undecided``;
+- finish time against another cell: ``faster``, ``slower``, ``same`` or
+  ``undecided``, from the bootstrap interval of the paired difference in
+  finish time (seeds are shared, so seed i of two cells starts from the same
+  flock), relative to the slower median and the equivalence ``time_margin``.
 
-Downstream: regimes, fits (RQ6), transfer (RQ4), substitution (RQ5), and Package A
-export. This module is pure analysis; it does not write files by itself.
+A cell with an errored trial is never reliable: the error is a bug, and the
+seeds it lost may be the hard ones.
+
+From those decisions, per group:
+
+- D_min: smallest reliable D (D_min_low: smallest D whose upper bound reaches theta)
+- D_overcrowd: smallest D above D_min where it and the next tested D are both
+  unreliable. "Next" is next in the grid as it stands, so an undecided cell
+  between two unreliable ones holds the value back until it is decided.
+- D_max: largest reliable D below D_overcrowd (or the largest reliable D)
+
+The finish-time values use the working range only, the reliable D from
+D_min to D_max; a reliable D above D_overcrowd is reported but not used:
+
+- D_best: smallest reliable D that is not slower than the fastest reliable D
+- D_sat: smallest reliable D that no larger reliable D is faster than. The rule
+  is global, not a step rule, so a dip followed by a drop (3: 300, 4: 299,
+  6: 200) does not stop at 3. D_sat >= D_best whenever every comparison
+  involved is decided; the largest reliable D always qualifies, so D_sat
+  exists whenever D_min does.
+- D_crowd: smallest reliable D above D_best that is slower than D_best
+
+and a zone per cell: too_few (unreliable, below D_min), improving (reliable,
+below D_sat), saturated (reliable, from D_sat up, not slower than D_best),
+crowded (reliable, from D_crowd up and slower than D_best), unreliable_dip
+(unreliable between D_min and D_overcrowd), collapse (unreliable from
+D_overcrowd up), recovered (reliable above D_overcrowd) or undecided (its
+reliability, or its comparison with D_best, is still open).
+``still_improving_at_top`` says D_sat is the top of the grid and faster than
+the reliable D below it, so the true D_sat may lie above the grid.
+
+D_best, D_sat and D_crowd carry an ``_undecided`` flag: True when a comparison
+that could still move that value was undecided. Only the cells of such
+comparisons, and cells of undecided reliability, are marked as needing
+seeds, so the adaptive run never spends seeds on a comparison that cannot
+change a value or a zone.
 """
 
 from __future__ import annotations
 
-from typing import Any
+from dataclasses import dataclass
+from typing import Any, cast
 
 import numpy as np
 import pandas as pd
+from scipy.stats import beta
 
-from analysis.coerce import as_float, as_int
+RELIABLE = "reliable"
+UNRELIABLE = "unreliable"
+UNDECIDED = "undecided"
 
+FASTER = "faster"
+SLOWER = "slower"
+SAME = "same"
 
-def reliability_table(
-    df: pd.DataFrame,
-    *,
-    sheep_col: str = "n_sheep",
-    dog_col: str = "n_shepherds",
-    success_col: str = "success",
-    group_cols: list[str] | None = None,
-) -> pd.DataFrame:
-    """Mean success rate per (group, N, D) cell."""
-    keys = list(group_cols or []) + [sheep_col, dog_col]
-    grouped = df.groupby(keys, dropna=False)[success_col].mean()
-    rates = pd.Series(grouped).reset_index(name="reliability")
-    return rates
+TOO_FEW = "too_few"
+IMPROVING = "improving"
+SATURATED = "saturated"
+CROWDED = "crowded"
+COLLAPSE = "collapse"
+UNRELIABLE_DIP = "unreliable_dip"
+RECOVERED = "recovered"
 
-
-def _d_min_for_rates(rates: pd.Series, theta: float) -> int | None:
-    for d, r in rates.items():
-        if as_float(r) >= theta:
-            return as_int(d)
-    return None
+# Group columns that hold a dog count, or nothing when the value does not exist.
+D_COLUMNS = ("d_min", "d_min_low", "d_best", "d_sat", "d_crowd", "d_overcrowd", "d_max")
 
 
-def _d_overcrowd_for_rates(
-    rates: pd.Series,
-    *,
-    d_min: int | None,
-    theta: float,
-) -> int | None:
-    """Smallest D > D_min where R stays below theta for >= 2 consecutive grid steps."""
-    if d_min is None:
-        return None
-    ds = list(rates.index)
-    below_run: list[int] = []
-    for d in ds:
-        d_i = as_int(d)
-        if d_i <= d_min:
-            continue
-        if as_float(rates.loc[d]) < theta:
-            below_run.append(d_i)
-            if len(below_run) >= 2:
-                return below_run[0]
-        else:
-            below_run = []
-    return None
+@dataclass(frozen=True)
+class Rules:
+    """Decision settings, read from the protocol's "Seeds and decisions" block.
 
+    ``min_pairs`` is the fewest shared finished seeds ``compare_times`` accepts.
+    It cannot bind between two reliable cells under theta 0.9, confidence 0.99
+    and max_seeds 200: a reliable cell has at least 51 seeds (none failed) and
+    at most 9 failures at 200 seeds, so two reliable cells share at least 42
+    finished seeds (51 without failures against 200 with its 9 failures in the
+    shared prefix; computed with clopper_pearson). It only guards
+    ad-hoc comparisons with few seeds, and protocols with max_seeds far above
+    200 or theta far below 0.9.
 
-def _d_max_for_rates(
-    rates: pd.Series,
-    *,
-    d_min: int | None,
-    d_overcrowd: int | None,
-    theta: float,
-) -> int | None:
-    if d_min is None:
-        return None
-    achieving = [as_int(d) for d, r in rates.items() if as_float(r) >= theta]
-    if not achieving:
-        return None
-    if d_overcrowd is None:
-        return max(achieving)
-    below = [d for d in achieving if d < d_overcrowd]
-    return max(below) if below else d_min
-
-
-def select_claim_windows(
-    df: pd.DataFrame,
-    *,
-    theta: float,
-    sheep_col: str = "n_sheep",
-    dog_col: str = "n_shepherds",
-    success_col: str = "success",
-    group_cols: list[str] | None = None,
-) -> pd.DataFrame:
-    """Claim-reseed D values from a scout reliability map.
-
-    Per (group, N): scout D_min and its grid neighbors; if two consecutive D
-    after that candidate are below theta, those two plus the last D still at
-    or above theta. If no D meets theta, the two largest D.
+    ``bootstrap_resamples`` sets the Monte Carlo error of the interval ends:
+    at 1000 the 99% ends are the 5th-6th order statistics and their sd is up
+    to 6% of the 5% margin (measured, n = 60), which is why the canonical
+    value is 4000.
     """
-    groups = list(group_cols or [])
-    rates = reliability_table(
-        df,
-        sheep_col=sheep_col,
-        dog_col=dog_col,
-        success_col=success_col,
-        group_cols=groups,
+
+    theta: float
+    confidence: float
+    time_margin: float
+    min_pairs: int
+    bootstrap_resamples: int
+    seed: int
+    # False: an open finish-time comparison (D_best, D_sat, D_crowd) no longer asks for seeds,
+    # only an open reliability does. D_min does not depend on those comparisons, and they cost
+    # most of the seeds of a run; the values stay in the tables, flagged undecided.
+    decide_finish_times: bool = True
+
+    @classmethod
+    def from_settings(cls, settings: dict[str, Any]) -> Rules:
+        return cls(
+            theta=float(settings["reliability_theta"]),
+            confidence=float(settings["confidence"]),
+            time_margin=float(settings["time_margin"]),
+            min_pairs=int(settings["min_pairs"]),
+            bootstrap_resamples=int(settings["bootstrap_resamples"]),
+            seed=int(settings["master_seed"]),
+            decide_finish_times=bool(settings.get("decide_finish_times", True)),
+        )
+
+
+def clopper_pearson(successes: int, trials: int, confidence: float) -> tuple[float, float]:
+    """Two-sided exact binomial interval for a success rate."""
+    alpha = 1.0 - confidence
+    low = 0.0 if successes == 0 else float(beta.ppf(alpha / 2, successes, trials - successes + 1))
+    high = (
+        1.0
+        if successes == trials
+        else float(beta.ppf(1 - alpha / 2, successes + 1, trials - successes))
     )
-    columns = groups + [sheep_col, dog_col, "reliability", "role"]
-    if rates.empty:
-        return pd.DataFrame(columns=columns)
-
-    keys = groups + [sheep_col]
-    rows: list[dict[str, Any]] = []
-    for key_vals, g in rates.groupby(keys, dropna=False):
-        meta = dict(zip(keys, key_vals))
-        rel_series = pd.Series(
-            g["reliability"].to_numpy(), index=[as_int(d) for d in g[dog_col]]
-        ).sort_index()
-        ds = [as_int(d) for d in rel_series.index]
-        rel = {d: as_float(r) for d, r in zip(ds, rel_series)}
-        d_min = _d_min_for_rates(rel_series, theta)
-        chosen: dict[int, str] = {}
-        if d_min is None:
-            for d in ds[-2:]:
-                chosen[d] = "hard_failure_top"
-        else:
-            idx = ds.index(d_min)
-            for j in (idx - 1, idx, idx + 1):
-                if 0 <= j < len(ds):
-                    chosen[ds[j]] = "reliability"
-            d_over = _d_overcrowd_for_rates(rel_series, d_min=d_min, theta=theta)
-            if d_over is not None:
-                i = ds.index(d_over)
-                for d in (d_over, ds[i + 1]):
-                    chosen[d] = "overcrowd" if d not in chosen else f"{chosen[d]}_and_overcrowd"
-                reliable = [d for d in ds if d < d_over and rel[d] >= theta]
-                if reliable:
-                    last = reliable[-1]
-                    if last in chosen:
-                        chosen[last] = f"{chosen[last]}_and_last_reliable"
-                    else:
-                        chosen[last] = "last_reliable"
-        for d, role in chosen.items():
-            rows.append({**meta, dog_col: d, "reliability": rel[d], "role": role})
-    return pd.DataFrame(rows)
+    return low, high
 
 
-def merge_scout_and_claim(
-    scout: pd.DataFrame,
-    claim: pd.DataFrame,
-    *,
-    key_cols: list[str] | None = None,
-) -> pd.DataFrame:
-    """Keep claim rows on reseeded cells and scout rows everywhere else."""
-    if claim.empty:
-        return scout.copy()
-    if scout.empty:
-        return claim.copy()
-    keys = key_cols or [
-        c
-        for c in (
-            "method",
-            "initial_layout",
-            "obs_mode",
-            "sensing_range",
-            "communication",
-            "n_sheep",
-            "n_shepherds",
-        )
-        if c in scout.columns and c in claim.columns
-    ]
-    claim_keys = claim.loc[:, keys].drop_duplicates()
-    tagged = scout.merge(claim_keys, on=keys, how="left", indicator=True)
-    kept = tagged.loc[tagged["_merge"] == "left_only"].drop(columns="_merge")
-    return pd.DataFrame(pd.concat([kept, claim], ignore_index=True))
+def reliability_status(low: float, high: float, theta: float) -> str:
+    if low >= theta:
+        return RELIABLE
+    if high < theta:
+        return UNRELIABLE
+    return UNDECIDED
 
 
-def _rank_endpoint(samples: np.ndarray, q: float) -> float:
-    """Nearest-rank percentile. Values may include +inf."""
-    ordered = np.sort(np.asarray(samples, dtype=float))
-    n = len(ordered)
-    if n == 0:
-        return float("nan")
-    idx = int(np.ceil(q * n) - 1)
-    idx = min(max(idx, 0), n - 1)
-    return float(ordered[idx])
+def compare_times(a: pd.DataFrame, b: pd.DataFrame, rules: Rules) -> str:
+    """Is cell ``a`` FASTER, SLOWER, the SAME as or UNDECIDED against cell ``b``?
 
-
-def _grid_or_above(value: float) -> tuple[int | None, bool]:
-    if not np.isfinite(value):
-        return None, True
-    return int(value), False
-
-
-def bootstrap_d_min_ci(
-    df: pd.DataFrame,
-    *,
-    theta: float,
-    n_boot: int,
-    seed: int,
-    sheep_col: str = "n_sheep",
-    dog_col: str = "n_shepherds",
-    success_col: str = "success",
-    seed_col: str = "seed",
-    group_cols: list[str] | None = None,
-) -> pd.DataFrame:
-    """Bootstrap 95% CI on D_min by resampling seeds within each (N, D) cell.
-
-    1,000 resamples. A resample with no D_min stays in the sample as above the
-    largest tested D. Endpoints are nearest-rank grid values.
+    Pairs the seeds both cells finished (seed i starts from the same flock in
+    every cell) and bootstraps the median paired difference, relative to the
+    slower median. Seeds that either cell failed drop out of the pairing.
     """
-    groups = list(group_cols or [])
-    keys = groups + [sheep_col]
-    if df.empty or success_col not in df.columns:
-        return pd.DataFrame(
-            columns=keys + ["d_min", "d_min_ci_low", "d_min_ci_high", "n_boot", "n_seeds_ref"]
-        )
+    ta = a.loc[a["success"], ["seed_index", "finish_ticks"]].set_index("seed_index")
+    tb = b.loc[b["success"], ["seed_index", "finish_ticks"]].set_index("seed_index")
+    paired = ta.join(tb, how="inner", lsuffix="_a", rsuffix="_b")
+    n = len(paired)
+    if n < rules.min_pairs:
+        return UNDECIDED
+    diff = (paired["finish_ticks_a"] - paired["finish_ticks_b"]).to_numpy(dtype=float)
+    scale = max(float(paired["finish_ticks_a"].median()), float(paired["finish_ticks_b"].median()))
+    rng = np.random.default_rng(rules.seed)
+    draws = rng.integers(0, n, size=(rules.bootstrap_resamples, n))
+    medians = np.median(diff[draws], axis=1) / scale
+    alpha = 1.0 - rules.confidence
+    low, high = (float(q) for q in np.quantile(medians, [alpha / 2, 1 - alpha / 2]))
+    m = rules.time_margin
+    if high < -m:
+        return FASTER
+    if low > m:
+        return SLOWER
+    if low >= -m and high <= m:
+        return SAME
+    return UNDECIDED
 
-    rng = np.random.default_rng(seed)
-    rows: list[dict[str, Any]] = []
-    for key_vals, g in df.groupby(keys, dropna=False):
-        meta = dict(zip(keys, key_vals))
-        point = _d_min_for_rates(
-            pd.Series(g.groupby(dog_col)[success_col].mean()).sort_index(),
-            theta,
-        )
 
-        # Independent within-D Bernoulli bootstrap: each D resamples its own
-        # seeds (not paired across the D grid).
-        by_d: dict[int, np.ndarray] = {}
-        n_seeds_ref = 0
-        for d_key, sub in g.groupby(dog_col):
-            # One success flag per seed (last wins if duplicates).
-            seed_success = (
-                pd.Series(sub.groupby(seed_col)[success_col].max()).astype(float).to_numpy()
-            )
-            by_d[as_int(d_key)] = seed_success
-            n_seeds_ref = max(n_seeds_ref, len(seed_success))
-
-        boot_dmins: list[float] = []
-        ordered_d = sorted(by_d.keys())
-        for _ in range(int(n_boot)):
-            rates = {}
-            for d in ordered_d:
-                vec = by_d[d]
-                idx = rng.integers(0, len(vec), size=len(vec))
-                rates[d] = float(np.mean(vec[idx]))
-            dmin = _d_min_for_rates(pd.Series(rates).sort_index(), theta)
-            boot_dmins.append(float(dmin) if dmin is not None else float("inf"))
-
-        samples = np.asarray(boot_dmins, dtype=float)
-        low_raw = _rank_endpoint(samples, 0.025)
-        high_raw = _rank_endpoint(samples, 0.975)
-        low, low_above = _grid_or_above(low_raw)
-        high, high_above = _grid_or_above(high_raw)
+def cell_stats(trials: pd.DataFrame, rules: Rules) -> pd.DataFrame:
+    """One row per cell: counts, success interval, reliability, time and cost medians.
+    Finish times are given in ticks and in model seconds; only the seconds compare
+    across methods (a Kubo tick is 0.05 s, a Strombom tick 1 s)."""
+    rows = []
+    for (group_key, d), g in trials.groupby(["group_key", "n_shepherds"], sort=True):
+        k, n = int(g["success"].sum()), len(g)
+        low, high = clopper_pearson(k, n, rules.confidence)
+        done = g.loc[g["success"]]
+        seconds = done["finish_seconds"].astype(float)
         rows.append(
             {
-                **meta,
-                "d_min": point,
-                "d_min_ci_low": low,
-                "d_min_ci_high": high,
-                "d_min_ci_low_above_grid": low_above,
-                "d_min_ci_high_above_grid": high_above,
-                "n_boot": int(n_boot),
-                "n_seeds_ref": int(n_seeds_ref),
-                "n_boot_defined": int(np.isfinite(samples).sum()),
+                "group_key": group_key,
+                "n_shepherds": int(cast(int, d)),
+                "n_seeds": n,
+                "n_success": k,
+                "success_rate": k / n,
+                "rate_low": low,
+                "rate_high": high,
+                "reliability": reliability_status(low, high, rules.theta),
+                "median_finish": float(done["finish_ticks"].median()) if k else float("nan"),
+                "p90_finish": float(done["finish_ticks"].quantile(0.9)) if k else float("nan"),
+                "median_finish_seconds": float(seconds.median()) if k else float("nan"),
+                "p90_finish_seconds": float(seconds.quantile(0.9)) if k else float("nan"),
+                "median_dog_ticks": float(done["dog_ticks"].median()) if k else float("nan"),
+                "median_path_per_dog": float(done["path_per_dog"].median()) if k else float("nan"),
             }
         )
     return pd.DataFrame(rows)
 
 
-def extract_frontier(
-    df: pd.DataFrame,
-    *,
-    theta: float,
-    sheep_col: str = "n_sheep",
-    dog_col: str = "n_shepherds",
-    success_col: str = "success",
-    effort_col: str = "shepherd_path",
-    time_col: str = "first_success_tick",
-    time_limit_col: str = "time_limit",
-    group_cols: list[str] | None = None,
-) -> pd.DataFrame:
-    """Extract D_min, D_overcrowd, D_max, and B* per flock size (and optional groups).
+@dataclass
+class GroupFrontier:
+    """One group's frontier. The ``_undecided`` flags say a value rests on an
+    undecided comparison and may still move once those cells get more seeds;
+    ``group_undecided`` says some cell of the group still needs seeds."""
 
-    B* is the (D, T) achieving R >= theta at minimum median effort; ties by smaller D,
-    then faster median time-to-success. When time_limit is constant, B* still records
-    that T as b_star_t.
+    group_key: str
+    d_min: int | None = None
+    d_min_low: int | None = None
+    d_best: int | None = None
+    d_sat: int | None = None
+    d_crowd: int | None = None
+    d_overcrowd: int | None = None
+    d_max: int | None = None
+    d_min_above_grid: bool = False
+    d_max_at_grid_top: bool = False
+    still_improving_at_top: bool = False
+    onset_at_last_step: bool = False
+    d_best_undecided: bool = False  # a reliable D below D_best is open against the fastest
+    d_sat_undecided: bool = False  # a reliable D above D_sat is open against D_sat
+    d_crowd_undecided: bool = False  # a reliable D above D_best, below D_crowd, is open
+    group_undecided: bool = False
+
+
+def _group(
+    cells: pd.DataFrame, trials: pd.DataFrame, rules: Rules
+) -> tuple[GroupFrontier, dict[int, str], set[int]]:
+    """Frontier, zone per D and the D values that need more seeds, for one group.
+
+    ``cells`` arrive sorted by D (cell_stats groups with sort=True).
     """
-    groups = list(group_cols or [])
-    keys = groups + [sheep_col]
-    rows: list[dict[str, Any]] = []
+    key = str(cells["group_key"].iloc[0])
+    ds = [int(d) for d in cells["n_shepherds"]]
+    status = dict(zip(ds, cells["reliability"]))
+    upper = dict(zip(ds, cells["rate_high"]))
+    finish = dict(zip(ds, cells["median_finish"]))
+    by_d = {int(cast(int, d)): g for d, g in trials.groupby("n_shepherds")}
+    out = GroupFrontier(key)
+    needs = {d for d in ds if status[d] == UNDECIDED}
+    zones: dict[int, str] = {d: UNDECIDED for d in ds}
+    verdicts: dict[tuple[int, int], str] = {}
 
-    if df.empty:
-        return pd.DataFrame(
-            columns=groups
-            + [
-                sheep_col,
-                "d_min",
-                "d_overcrowd",
-                "d_max",
-                "b_star_d",
-                "b_star_t",
-                "b_star_effort",
-                "hard_failure",
-            ]
-        )
+    def compare(a: int, b: int) -> str:
+        """Verdict of ``a`` against ``b``, bootstrapped once per ordered pair."""
+        if a == b:
+            return SAME
+        if (a, b) not in verdicts:
+            verdicts[(a, b)] = compare_times(by_d[a], by_d[b], rules)
+        return verdicts[(a, b)]
 
-    for key_vals, g in df.groupby(keys, dropna=False):
-        meta = dict(zip(keys, key_vals))
-        rates = pd.Series(g.groupby(dog_col)[success_col].mean()).sort_index()
-        d_min = _d_min_for_rates(rates, theta)
-        d_overcrowd = _d_overcrowd_for_rates(rates, d_min=d_min, theta=theta)
-        d_max = _d_max_for_rates(rates, d_min=d_min, d_overcrowd=d_overcrowd, theta=theta)
+    def still_open(verdict: str, *cells_of_pair: int) -> bool:
+        """Mark the cells of an undecided comparison as needing seeds; True if it was.
 
-        b_star_d = None
-        b_star_t = None
-        b_star_effort = None
-        if d_min is not None and effort_col in g.columns:
-            candidates = []
-            # Prefer (D, T) cells when time_limit varies; else one T per D.
-            has_t = time_limit_col in g.columns
-            for key, sub in g.groupby([dog_col, time_limit_col] if has_t else [dog_col]):
-                d, t_lim = key if has_t else (key[0], None)
-                r = float(pd.Series(sub.loc[:, success_col]).mean())
-                if r < theta:
-                    continue
-                effort = float(pd.Series(sub.loc[:, effort_col]).median())
-                if time_col in sub.columns:
-                    times = pd.to_numeric(sub.loc[:, time_col], errors="coerce").astype(float)
-                    # Failures use NaN (legacy rows may still store -1).
-                    times = times.where(times >= 0.0)
-                    t_s = (
-                        float(np.nanmedian(times.to_numpy()))
-                        if bool(times.notna().to_numpy().any())
-                        else float("inf")
-                    )
-                else:
-                    t_s = float("inf")
-                t_val = as_float(t_lim) if t_lim is not None else float("nan")
-                candidates.append((effort, as_int(d), t_s, t_val))
-            if candidates:
-                candidates.sort(key=lambda x: (x[0], x[1], x[2]))
-                b_star_effort, b_star_d, _, b_star_t = candidates[0]
-                if b_star_t != b_star_t:  # NaN
-                    b_star_t = None
+        With ``decide_finish_times`` off the comparison stays open but asks for no seeds.
+        """
+        if verdict == UNDECIDED and rules.decide_finish_times:
+            needs.update(cells_of_pair)
+        return verdict == UNDECIDED
 
-        row = {
-            **meta,
-            "d_min": d_min,
-            "d_overcrowd": d_overcrowd,
-            "d_max": d_max,
-            "b_star_d": b_star_d,
-            "b_star_t": b_star_t,
-            "b_star_effort": b_star_effort,
-            "hard_failure": d_min is None,
-        }
-        rows.append(row)
-    return pd.DataFrame(rows)
+    reliable = [d for d in ds if status[d] == RELIABLE]
+    out.d_min_low = next((d for d in ds if upper[d] >= rules.theta), None)
+    out.d_min_above_grid = not reliable and not needs
+    if not reliable:
+        for d in ds:
+            if status[d] == UNRELIABLE:
+                zones[d] = TOO_FEW
+        out.group_undecided = bool(needs)
+        return out, zones, needs
+    out.d_min = reliable[0]
+
+    # Overcrowding: two consecutive unreliable D above D_min.
+    above = [d for d in ds if d > out.d_min]
+    for a, b in zip(above, above[1:]):
+        if status[a] == UNRELIABLE and status[b] == UNRELIABLE:
+            out.d_overcrowd = a
+            break
+    working = [d for d in reliable if out.d_overcrowd is None or d < out.d_overcrowd]
+    out.d_max = working[-1]
+    out.d_max_at_grid_top = out.d_overcrowd is None and out.d_max == ds[-1]
+    out.onset_at_last_step = status[ds[-1]] == UNRELIABLE and out.d_overcrowd is None
+
+    # D_best: the first working D not slower than the fastest one. A D skipped on
+    # an undecided verdict could still take its place.
+    fastest = min(working, key=lambda d: finish[d])
+    for d in working:
+        verdict = compare(d, fastest)
+        if verdict in (SAME, FASTER):
+            out.d_best = d
+            break
+        out.d_best_undecided |= still_open(verdict, d, fastest)
+    assert out.d_best is not None  # the fastest D is the same as itself
+
+    # D_crowd: the first working D above D_best that is slower than it. Only the D
+    # below the first decided SLOWER can still move the value.
+    for d in (d for d in working if d > out.d_best):
+        verdict = compare(d, out.d_best)
+        if verdict == SLOWER:
+            out.d_crowd = d
+            break
+        out.d_crowd_undecided |= still_open(verdict, d, out.d_best)
+
+    # D_sat: the smallest working D with no faster working D above it. A D with a
+    # decided FASTER above it is below D_sat whatever its other comparisons say,
+    # so only the open comparisons of the D that is taken can still move D_sat.
+    for d in working:
+        above_d = {e: compare(e, d) for e in working if e > d}
+        if FASTER not in above_d.values():
+            out.d_sat = d
+            for e, verdict in above_d.items():
+                out.d_sat_undecided |= still_open(verdict, e, d)
+            break
+    assert out.d_sat is not None  # nothing is above the largest working D
+
+    # D_sat at the grid top after a faster step: the grid censors it.
+    out.still_improving_at_top = (
+        out.d_max_at_grid_top and len(working) > 1 and out.d_sat == working[-1]
+    )
+
+    # Every working D above D_best is compared with it: slower is crowded (and then
+    # at or above D_crowd, the first slower one), open is undecided.
+    for d in working:
+        against_best = compare(d, out.d_best) if d > out.d_best else SAME
+        if against_best == SLOWER:
+            zones[d] = CROWDED
+        elif still_open(against_best, d, out.d_best):
+            zones[d] = UNDECIDED
+        elif d < out.d_sat:
+            zones[d] = IMPROVING
+        else:
+            zones[d] = SATURATED
+    for d in ds:
+        if status[d] == RELIABLE and d not in working:
+            zones[d] = RECOVERED
+        elif status[d] == UNRELIABLE:
+            if d < out.d_min:
+                zones[d] = TOO_FEW
+            elif out.d_overcrowd is not None and d >= out.d_overcrowd:
+                zones[d] = COLLAPSE
+            else:
+                zones[d] = UNRELIABLE_DIP
+    out.group_undecided = bool(needs)
+    return out, zones, needs
+
+
+@dataclass
+class Frontier:
+    cells: pd.DataFrame  # cell_stats plus n_errors, zone and needs_seeds
+    groups: pd.DataFrame  # one GroupFrontier per row
+
+
+def frontier(trials: pd.DataFrame, rules: Rules, errors: dict[str, int] | None = None) -> Frontier:
+    """Cells and groups of every D curve in ``trials``. ``errors`` counts the trials
+    that raised per cell key (``<group_key>|D=<d>``, as the store names them); it
+    becomes the n_errors column, 0 for cells it does not list, and a reliable cell
+    with errors is set to undecided. A cell with only errored trials has no rows
+    and so no cell row at all."""
+    stats = cell_stats(trials, rules)
+    counts = errors or {}
+    stats["n_errors"] = [
+        counts.get(f"{key}|D={d}", 0)
+        for key, d in zip(stats["group_key"].astype(str), stats["n_shepherds"].astype(int))
+    ]
+    stats.loc[(stats["n_errors"] > 0) & (stats["reliability"] == RELIABLE), "reliability"] = (
+        UNDECIDED
+    )
+    group_rows = []
+    zone: dict[tuple[str, int], str] = {}
+    needs: set[tuple[str, int]] = set()
+    for key, cells in stats.groupby("group_key", sort=True):
+        result, zones, undecided = _group(cells, trials.loc[trials["group_key"] == key], rules)
+        group_rows.append(vars(result))
+        zone.update({(str(key), d): z for d, z in zones.items()})
+        needs.update((str(key), d) for d in undecided)
+    cell_ids = list(zip(stats["group_key"].astype(str), stats["n_shepherds"].astype(int)))
+    stats["zone"] = [zone[c] for c in cell_ids]
+    stats["needs_seeds"] = [c in needs for c in cell_ids]
+    groups = pd.DataFrame(group_rows)
+    # Nullable ints, so a column reads 3, not 3.0, whether or not some group lacks the value.
+    groups[list(D_COLUMNS)] = groups[list(D_COLUMNS)].astype("Int64")
+    return Frontier(cells=stats, groups=groups)

@@ -1,141 +1,63 @@
-"""Campaign CLI for scaling protocols.
+"""HerdSim campaigns.
 
-Each protocol YAML remains the source of truth for output path, packages, and grid.
+    uv run cli/campaign.py run       --protocol <id or yaml> [--output DIR] [--workers N]
+    uv run cli/campaign.py plan      --protocol <id or yaml>
+    uv run cli/campaign.py calibrate --protocol <id or yaml> [--workers N]
+    uv run cli/campaign.py status    --protocol <id or yaml> [--output DIR]
+
+run        the adaptive campaign; resumes an existing folder
+plan       print what a run would do (curves, cells, first round, folder); runs nothing
+calibrate  print the flock radius R_f(N) per method without running a campaign
+status     print the folder's status.json
+
+Run `make test` and `make bench` before a campaign session.
 """
 
 from __future__ import annotations
 
-import argparse
-import subprocess
-import sys
-from collections.abc import Sequence
-from pathlib import Path
+import os
 
-from services.layout import (
-    CLI_DIR,
-    REPO_ROOT,
-    load_campaign_protocol,
-    resolve_protocol_output,
-    resolve_upstream_trials,
-)
+# One BLAS thread per process: the campaign already runs one trial per core.
+# Must be set before NumPy is imported.
+for _var in ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS"):
+    os.environ[_var] = "1"
 
+import argparse  # noqa: E402
+import sys  # noqa: E402
+from pathlib import Path  # noqa: E402
 
-def _run(script: str, args: Sequence[str]) -> None:
-    cmd = [sys.executable, str(CLI_DIR / script), *args]
-    print("+", " ".join(cmd), flush=True)
-    subprocess.run(cmd, check=True, cwd=REPO_ROOT)
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-
-def _override_flags(args: argparse.Namespace) -> list[str]:
-    """Pass manual grid overrides (smoke runs) through to run_grid.py."""
-    flags: list[str] = []
-    for name in ("methods", "layouts", "n", "d"):
-        values = getattr(args, name)
-        if values:
-            flags.extend([f"--{name}", *[str(v) for v in values]])
-    if args.seeds is not None:
-        flags.extend(["--seeds", str(args.seeds)])
-    if args.max_ticks is not None:
-        flags.extend(["--max-ticks", str(args.max_ticks)])
-    return flags
+from services.adaptive import run_campaign  # noqa: E402
+from services.calibration import calibrate  # noqa: E402
+from services.cells import describe  # noqa: E402
+from services.protocol import load_protocol  # noqa: E402
+from services.store import CampaignStore, progress  # noqa: E402
 
 
-def run_campaign(args: argparse.Namespace) -> None:
-    path, spec = load_campaign_protocol(args.protocol)
-    output = (
-        Path(args.output).resolve() if args.output is not None else resolve_protocol_output(spec)
-    )
-    common = ["--protocol", str(path), "--output", str(output), "--workers", str(args.workers)]
-    if args.no_timeseries:
-        common.append("--no-timeseries")
-
-    if args.verb == "run":
-        if str(spec.get("seed_mode", "scout")) == "claim":
-            raise SystemExit(
-                f"Protocol {spec['protocol_id']} has seed_mode=claim; "
-                + "use claim-reseed, not run"
-            )
-        if args.no_resume:
-            common.append("--no-resume")
-        _run("run_grid.py", [*common, *_override_flags(args)])
-        return
-
-    # claim-plan / claim-reseed
-    upstream = resolve_upstream_trials(spec, override=args.upstream_trials)
-    if not upstream.is_file():
-        raise SystemExit(f"Upstream trials not found: {upstream}")
-    cmd = ["--scout-trials", str(upstream), *common]
-    if args.verb == "claim-plan":
-        cmd.append("--plan-only")
-    elif args.no_resume:
-        cmd.append("--no-resume")
-    _run("plan_claim_cells.py", cmd)
-
-
-def build_parser() -> argparse.ArgumentParser:
+def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Run a scaling campaign from a protocol YAML",
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
+    parser.add_argument("verb", choices=("run", "calibrate", "plan", "status"))
+    parser.add_argument("--protocol", required=True, help="protocol id or path to a YAML file")
     parser.add_argument(
-        "verb",
-        choices=(
-            "run",
-            "claim-plan",
-            "claim-reseed",
-            "help",
-        ),
-        help="Campaign action",
+        "--output", type=Path, default=None, help="results folder (default: protocol output)"
     )
-    parser.add_argument(
-        "--protocol",
-        default=None,
-        help="Protocol id (phase1_scout) or path to YAML",
-    )
-    parser.add_argument("--output", type=Path, default=None)
-    parser.add_argument("--workers", type=int, default=1)
-    parser.add_argument(
-        "--upstream-trials",
-        type=Path,
-        default=None,
-        help="Override upstream trials.csv for claim-reseed",
-    )
-    parser.add_argument("--methods", nargs="+", default=None)
-    parser.add_argument("--layouts", nargs="+", default=None)
-    parser.add_argument("--n", nargs="+", type=int, default=None)
-    parser.add_argument("--d", nargs="+", type=int, default=None)
-    parser.add_argument("--seeds", type=int, default=None)
-    parser.add_argument("--max-ticks", type=int, default=None)
-    parser.add_argument("--no-timeseries", action="store_true")
-    parser.add_argument("--no-resume", action="store_true")
-    return parser
+    parser.add_argument("--workers", type=int, default=os.cpu_count() or 1)
+    args = parser.parse_args()
 
-
-def print_help() -> None:
-    text = """HerdSim scaling campaigns
-
-  uv run cli/campaign.py <verb> --protocol <id> [options]
-
-Verbs:
-  run            Scout/smoke grid or factor sweep (from protocol)
-  claim-plan     Write claim windows from upstream scout (no trials)
-  claim-reseed   100-seed reseed on those windows
-
-Protocol id resolves under protocols/configs/protocols/<id>.yaml.
-Claim YAMLs set upstream_protocol (and optional upstream_trials).
---methods/--layouts/--n/--d/--seeds/--max-ticks override the grid for smoke runs.
-"""
-    print(text)
-
-
-def main(argv: Sequence[str] | None = None) -> None:
-    parser = build_parser()
-    args = parser.parse_args(list(argv) if argv is not None else None)
-    if args.verb == "help":
-        print_help()
-        return
-    if not args.protocol:
-        parser.error("--protocol is required")
-    run_campaign(args)
+    protocol = load_protocol(args.protocol, output=args.output)
+    if args.verb == "run":
+        run_campaign(protocol, args.workers)
+    elif args.verb == "plan":
+        print(describe(protocol))
+    elif args.verb == "calibrate":
+        for method, table in calibrate(protocol, args.workers).items():
+            for n, radius in sorted(table.items()):
+                print(f"{method:16s} N={n:5d}  R_f={radius:7.2f}")
+    else:
+        print(progress(CampaignStore(protocol.output)))
 
 
 if __name__ == "__main__":

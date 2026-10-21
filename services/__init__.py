@@ -1,1 +1,1 @@
-"""Campaign engine: layout, resume, and cell runner."""
+"""Campaign layer: protocol loading, cells, calibration, the adaptive run, the results store."""

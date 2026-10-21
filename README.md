@@ -1,358 +1,306 @@
-# HerdSim (scaling-cli)
+# HerdSim
 
-HerdSim is a multi-agent shepherding simulator where a few dogs move a flock of sheep. We use it to study how many dogs a flock needs, and how that number changes with flock size, starting shape, the dog control method, and how much the dogs can see and share.
+HerdSim is a multi-agent shepherding simulator: a few dogs move a flock of sheep into a goal. It is used to measure `D_min`, the fewest dogs that finish the task reliably within a deadline, and how it depends on the flock size N, the start layout of the flock, the deadline and the dog rule.
 
-The number we care about most is `D_min`: the fewest dogs that get the job done in at least 90% of seeds (theta = 0.90). We also watch for overcrowding, where adding dogs makes things worse again.
+Reliable means the success rate is decided to be at least theta = 0.90. The same rules also give the dog count past which extra dogs stop making the task faster (`D_sat`) and counts where it gets slower or fails again (`D_crowd`, `D_overcrowd`), which are kept as side output. By default (`decide_finish_times: false`) seeds are spent only to decide `D_min`, and a side-output value whose comparison is still open is flagged undecided.
 
-There are two tasks:
+Status: the code, tests and bench are built, and the planned protocols have been run (16 protocols, no trial errors); `dmin_fat` is not written yet. The research plan and its settings are in `docs/science/design_version2/plan_dmin.md` when that folder is present locally.
 
-- **drive_to_goal** (Phases 1 to 5): push the whole flock into a goal disk.
-- **collect_hold_gate** (Phase 8): TODO
+## Quick start
 
-## Results so far
+```bash
+make install     # uv sync --extra dev
+make check       # ruff + basedpyright + tests
+make bench       # miniature real campaigns read for sense, about 1 minute; run before a campaign session
 
-| Phase | Question | Main answer | Claims |
-|-------|----------|-------------|--------|
-| 1 | Flock size (compact, strombom_multi) | `D_min` = 2 for N <= 10, else 1. No overcrowding anywhere on the grid | C2a rejected, C2b skipped, C6a weak support, C6b support, C7a inconclusive, C7b rejected |
-| 2 | Starting shape (4 layouts, N = 50/100/200) | `D_min` = 1 on every layout. Wide and outlier_rich starts cost more dog travel | C1a rejected, C1b inconclusive |
-| 4 | Does it transfer to other dog rules? | Kubo matches Strombom for compact mid/large N. FAT never reaches theta for N >= 25. Kubo on wide never reaches theta. Kubo on outlier_rich at N = 200 needs 20 dogs | C4 partly supported |
-| 5 | Less information (obs mode, range, comm) | Halving sensing range costs 1 to 2 extra dogs. Past the default range, more range saves nothing | C5a, C5b supported |
-| 8 | TODO | Not run | - |
-
-Phases 3, 6 and 7 have no campaigns of their own. They are analysis on top of Phase 1 data (mechanism, scaling fits, early warning).
-
-C3 (mechanism) is inconclusive: with no overcrowding cells, there was nothing to contrast.
-
-For more details see [docs/report/short_report.md](docs/report/short_report.md).
+uv run cli/campaign.py plan   --protocol dmin_m6                          # what a run would do; runs nothing
+uv run cli/campaign.py run    --protocol dmin_pilot --workers 16
+uv run cli/campaign.py status --protocol dmin_pilot
+uv run cli/dmin_report.py     --protocol dmin_pilot --folder results/dmin_pilot --multiples 3 6 12
+```
 
 ## How a campaign runs
 
-Each experiment is a **protocol**, a YAML file in `protocols/configs/protocols/`. A protocol gets run in two passes. The first is a cheap **scout** over the full grid. The second is a **claim** pass, which spends far more seeds, but only on the cells near the answer.
+A **protocol** is one YAML file in `protocols/configs/protocols/`. It names the methods, layouts, flock sizes N and dog counts D. Every combination of method, layout and N is a **D curve** (a group). A curve at one D is a **cell**, and one seed of a cell is a **trial**.
+
+`campaign.py run` runs one protocol into one folder, in rounds:
 
 ```mermaid
 flowchart TD
-    G["canonical_grid.yaml<br/>(shared defaults)"] --> P["protocol YAML<br/>e.g. phase1_scout"]
-    P --> RUN["campaign.py run<br/>full N x D grid, 30 seeds"]
-    RUN --> ST["results/.../scout/trials.csv"]
-    ST --> PLAN["campaign.py claim-plan<br/>pick windows around D_min"]
-    PLAN --> BC["boundary_cells.csv"]
-    BC --> RESEED["campaign.py claim-reseed<br/>100 seeds on those windows only"]
-    RESEED --> MT["merged_trials.csv<br/>+ D_min bootstrap CI"]
-    MT --> PKG["analysis packages A, D-G<br/>(run by hand from analysis/)"]
-    PKG --> TR["claim verdicts"]
+    P["protocol YAML + canonical.yaml"] --> CAL["calibrate R_f(N) per method"]
+    CAL --> R["round: plan trials"]
+    R --> W["worker pool runs trials,<br/>parent appends each row"]
+    W --> F["frontier rules per D curve:<br/>reliability, finish-time comparisons,<br/>D_min ... D_max, zones"]
+    F --> Q{"any cell still undecided<br/>and under max_seeds?"}
+    Q -- yes --> R
+    Q -- no --> S["stop: tables and status.json"]
 ```
 
-What `claim-plan` picks for each (layout, N): the scout `D_min` and the grid steps on either side of it. If it sees overcrowding, it also takes the two failing D values plus the last good one. If no D reaches theta at all, it takes the two largest D. Claim rows then replace scout rows on those cells in `merged_trials.csv`.
+Each round:
 
-The CLI is `cli/campaign.py`. It is a thin wrapper that calls `cli/run_grid.py` or `cli/plan_claim_cells.py` as a subprocess.
+1. A cell with fewer than one batch of seeds (`batch_seeds`, 10) is filled up to one batch.
+2. A cell whose reliability, or a finish-time comparison that can still change one of its curve's values, is undecided gets seeds up to the end of its next batch, up to `max_seeds` (200).
+3. Where the zone changes between two neighbouring D more than `refine_min_gap` (1) apart, the D halfway between is added to the curve.
 
-| Verb | What it does |
-|------|--------------|
-| `run` | Scout, smoke or factor sweep. Refuses protocols with `seed_mode: claim` |
-| `claim-plan` | Reads the upstream scout `trials.csv` and writes the claim windows. Runs no trials |
-| `claim-reseed` | Same planning step, then runs claim seeds on the windows and merges |
-| `help` | Usage |
+Above a confirmed saturation (`D_sat` decided and the next reliable D the same speed), a cell gets no more seeds when its dogs were copies of each other: mean `dog_overlap` at least `prune_overlap` (0.9), and the cell neither slower nor unreliable. These cells are marked `pruned` in `frontier_cells.csv`.
 
-Useful flags: `--protocol <id or path>`, `--workers N`, `--output DIR`, `--no-resume`, `--no-timeseries`, `--upstream-trials PATH`. For a quick smoke run you can override the grid with `--methods`, `--layouts`, `--n`, `--d`, `--seeds` and `--max-ticks`.
+The run stops when no cell needs seeds, or after `budget_hours` (72) of this run. Seed i of every cell is `master_seed + i` (2026 + i), so cells are compared on the same start flocks.
 
-Runs can be resumed. Each finished cell gets a line in `manifest.jsonl`, and a rerun skips anything already marked `ok`. If a long run dies, start the same command again and it picks up where it stopped.
+Stopping and resuming are safe. A trial is saved as soon as it finishes, and a rerun of the same command continues from the folder. A second run on the same folder is refused while the first holds its lock. A folder written with different physics (any setting that changes a trial) or by another protocol is refused too; use a new `--output`.
 
-There is no CLI step for the analysis packages yet. You call the functions in `analysis/` yourself (see [Analysis packages](#analysis-packages)).
+A trial that raises an exception is logged in `errors.jsonl`, and its cell gets no more seeds and is never marked reliable. A deterministic simulation that raises has a bug, so the fix is in the code.
+
+### Calibration
+
+Lengths in a task scale with the flock radius `R_f(N)`: the radius of the flock while one dog drives it. At the start of a run each method is calibrated at every flock size of the protocol, and the result is saved in `calibration.json`. Calibration fails when the radius has not settled or depends on the start size. For Strombom sheep it holds up to N = 400, so N stops there. `campaign.py calibrate` prints the table without running a campaign.
+
+### Deadline
+
+A method's time limit is one of:
+
+| Key | Meaning |
+|-----|---------|
+| `time_limit_ticks` | a fixed number of ticks |
+| `time_limit_seconds` | model seconds, converted with the method's dt |
+| `time_limit_drive_multiple` | m times the drive time, the drive length over the top sheep speed, so it grows with N and asks the same of every flock size |
+
+A trial succeeds when `success_fraction` of the sheep are inside the goal (1, every sheep, by default; 0.99 lets one or two stragglers go). It stops only on success or at its limit; a failure runs to the deadline. `cli/dmin_report.py` reads the trials of a run at tighter deadlines, since a trial that finishes inside a tighter deadline also succeeds under it.
 
 ## Inside one trial
 
-A **cell** is one setting we want to test, for example "strombom_multi, compact start, 100 sheep, 3 dogs". The sim is random, so we run the same cell many times with different seeds (30 in a scout, 100 in a claim). Each of those runs is a **trial**. If 27 of a cell's 30 trials succeed, that cell's success rate R is 0.90. `D_min` and the regimes are worked out from these per-cell numbers.
-
-One trial is one call to `run_trial` (`sim/core/simulation_runner.py`), which steps tick by tick:
+One trial runs tick by tick until success or the time limit:
 
 ```mermaid
 flowchart TD
-    I["init: seed RNG, build world,<br/>place sheep by layout"] --> S
-    S["sheep step<br/>(flocking + flee from dogs)"] --> O["observation<br/>what each dog can see"]
-    O --> D["dog step<br/>(method's controller)"]
-    D --> W["tick += 1<br/>walls"]
-    W --> M["record metrics"]
-    M --> Q1{"task done?"}
-    Q1 -- yes --> OK["success"]
-    Q1 -- no --> Q2{"tick >= T?"}
-    Q2 -- yes --> TO["timeout"]
-    Q2 -- no --> S
-    OK --> F["package row:<br/>aggregates + failure label"]
-    TO --> F
-    F --> CSV["one row in trials.csv"]
+    I["place flock and dogs by the task;<br/>three random streams from the seed"] --> S
+    S["sheep move"] --> D["dogs decide and move"]
+    D --> M["record metrics"]
+    M --> Q{"task done?"}
+    Q -- yes --> OK["success"]
+    Q -- no --> T{"time limit?"}
+    T -- yes --> TO["timeout"]
+    T -- no --> S
 ```
 
-"Task done" means something different for each task:
+The layout, the sheep noise and the dog noise each draw from their own random stream, so a seed gives the same start flock and the same sheep draws at every D. Every dog knows the position of every sheep and of every other dog. There is no boundary: agents may leave the field rectangle, which only places the start, as in the Strombom and Kubo papers. The failure label of a failed trial is worked out after the run from its metric history (see [Failure labels](#failure-labels)).
 
-- `drive_to_goal`: every sheep is inside the goal disk.
-- `collect_hold_gate`: TODO
+## What the frontier rules decide
 
-Success and timeout (T = 10,000 ticks) are the only things that stop a trial. Failure modes are worked out *after* the run, by looking at the metric history (`protocols/packaging/failure_taxonomy.py`). When more than one matches, the first in this order wins:
+All of this is in `analysis/frontier.py`.
 
-`stacking` (dogs piled on each other) > `split` (flock broke apart) > `scatter` (flock spread out) > `oscillation` (back and forth, no progress) > `stuck` (no progress) > `timeout` (none of the above). Successful runs get `none`.
+A cell is **reliable** when the two-sided 99% Clopper-Pearson interval of its success rate lies at or above theta (0.90), **unreliable** when it lies below, and **undecided** otherwise. At least 51 straight successes are needed for reliable. Two cells are compared on finish time by a paired bootstrap (4000 resamples) of the median per-seed difference, relative to the slower median: **faster**, **slower**, **same** (within 5%) or **undecided**.
+
+Per D curve:
+
+| Value | Meaning |
+|-------|---------|
+| `D_min` | smallest reliable D (`D_min_low`: smallest D whose upper bound reaches theta) |
+| `D_overcrowd` | smallest D above `D_min` where it and the next tested D are both unreliable |
+| `D_max` | largest reliable D below `D_overcrowd`, or the largest reliable D |
+| `D_best` | smallest reliable D not slower than the fastest reliable D |
+| `D_sat` | smallest reliable D that no larger reliable D is faster than |
+| `D_crowd` | smallest reliable D above `D_best` that is slower than `D_best` |
+
+`D_best`, `D_sat` and `D_crowd` use only the reliable D from `D_min` to `D_max`. Each of them has an `_undecided` flag, set when an open comparison could still move it. `d_min_above_grid` means no D on the grid is reliable, `d_max_at_grid_top` means the top of the grid is still reliable, and `still_improving_at_top` means `D_sat` is the top of the grid, so the real value may lie above it.
+
+Zone of each cell:
+
+| Zone | Cell |
+|------|------|
+| `too_few` | unreliable, below `D_min` |
+| `improving` | reliable, below `D_sat` |
+| `saturated` | reliable, from `D_sat` up, not slower than `D_best` |
+| `crowded` | reliable and slower than `D_best` |
+| `unreliable_dip` | unreliable, between `D_min` and `D_overcrowd` |
+| `collapse` | unreliable, from `D_overcrowd` up |
+| `recovered` | reliable again above `D_overcrowd` |
+| `undecided` | reliability, or the comparison with `D_best`, still open |
 
 ## Configuration
 
-Settings are layered. Later layers win:
+Settings are layered; later layers win:
 
-1. `protocols/configs/canonical_grid.yaml`: shared defaults, frozen on 2026-09-22 as `scaling_v2`.
-2. The protocol YAML. It can `extends:` another protocol; a claim usually extends its scout.
-3. CLI overrides (smoke runs only).
+1. `protocols/configs/canonical.yaml`: shared defaults, each with a short comment.
+2. The protocol YAML, which may `extends:` another protocol (a child key replaces the parent's whole value).
+3. `--output` on the command line.
 
-### Canonical values that matter
-
-| Setting | Value |
-|---------|-------|
-| Arena | 500 x 500, reflecting walls |
-| Goal | centre (370, 250), radius 15 * sqrt(N / 50) |
-| Start | flock at the field centre; dogs 50 away on the far side from the goal, +-5 jitter |
-| Flock sizes N | 5, 10, 25, 50, 75, 100, 150, 200, 300, 400 |
-| Dog counts D | 1, 2, 3, 4, 6, 10, 15, 20, 25, 35 |
-| Structure N (Phase 2) | 50, 100, 200 |
-| Info-ladder N (Phase 5) | 100, 200 |
-| Layouts | compact, wide, split, outlier_rich |
-| Reliability theta | 0.90 (sensitivity at 0.5 and 0.7) |
-| Time limit T | 10,000 ticks |
-| Seeds | 30 scout, 100 claim. Seed i = 2026 + i |
-| Bootstrap resamples | 1,000 |
-| Base sensing range | 65 |
-| Baseline method | strombom_multi |
-
-Some keys in the canonical file aren't read by any code yet (`drive_length`, `time_limit_t1`, `transfer_methods`, the `*_sensitivity` lists). They are there to record what the plan says.
-
-The simulation code has no copies of these values. The runner reads every setup key from the protocol, and a missing key stops the run with a `KeyError` instead of falling back to a default. Behaviour parameters (r_a, speeds, Kubo gains) live once in `sim/methods/*/config.py`.
+Method parameters (r_a, speeds, Kubo gains) live once in `sim/methods/*/config.py`. A protocol overrides them per method under `params`.
 
 ### Protocol keys
 
 | Key | Meaning |
 |-----|---------|
-| `protocol_id`, `phase`, `grade` | Name, phase number, SMOKE / SCOUT / CLAIM |
-| `output` | Results folder, e.g. `results/phase1/scout`. Must be under `results/` |
-| `canonical`, `extends` | Where defaults come from |
-| `methods` | Dog methods to run (`method` + `runner: factor` for Phase 5 sweeps) |
-| `layouts`, `flock_sizes`, `shepherd_counts` | The grid |
-| `seeds`, `seed_mode` | Seeds per cell; `scout` or `claim` |
-| `upstream_protocol`, `upstream_trials` | Claim only: which scout to plan from |
-| `store_timeseries` | Keep per-tick Parquet per cell (big; needed for Package G) |
-| `packages` | Which analysis packages this run feeds |
-| `obs_modes`, `sensing_ranges`, `communications` | Phase 5 factor levels |
-| Phase 8 keys | TODO |
+| `protocol_id` | name; also recorded in the folder, which then belongs to this protocol |
+| `output` | results folder, under `results/` when inside the repo |
+| `canonical` | path of the canonical file |
+| `extends` | optional parent protocol |
+| `methods` | per method: one time limit key (see [Deadline](#deadline)) and optional `params` |
+| `layouts`, `flock_sizes`, `shepherd_counts` | the grid |
+| `factors` | optional; each key's list of levels makes its own D curves |
+| any canonical key | overrides that value for the whole protocol |
 
-Here's a full protocol, the Phase 1 scout, with comments stripped:
+A factor is a canonical setting. A method parameter cannot be a factor, because the flock radius is calibrated once per method without factors, so every level would run on the radius of the default flock; run each level as its own protocol. Whole-protocol settings (`task`, `master_seed`, the `calibration_*` keys, `settled_tolerance`, `start_agreement`) and the strategy keys that only steer the adaptive run (`reliability_theta`, `confidence`, `batch_seeds`, `max_seeds`, `time_margin`, `min_pairs`, `bootstrap_resamples`, `timeseries_seeds`, `budget_hours`, `refine_min_gap`, `prune_overlap`, `decide_finish_times`) cannot be swept either. Unknown keys and bad grids fail when the protocol loads.
 
-```yaml
-protocol_id: phase1_scout
-phase: 1
-grade: SCOUT
-output: results/phase1/scout
-canonical: protocols/configs/canonical_grid.yaml
-methods: [strombom_multi]
-layouts: [compact]
-flock_sizes: [5, 10, 25, 50, 75, 100, 150, 200, 300, 400]
-shepherd_counts: [1, 2, 3, 4, 6, 10, 15, 20, 25, 35]
-seeds: 30
-seed_mode: scout
-store_timeseries: true
-packages: [A, F]
-```
+The scattered layouts are sized by the collect distance r_a N^(2/3), so a protocol that changes `r_a` of a Strombom method must set `separation_scale` to the same value, and the loader refuses it otherwise. The field-matched sheep set of `dmin_s_matched` (r_a 1, noise 0.1, reaction distance 75) does this.
 
-A claim protocol is usually a few lines: `extends: phase1_scout.yaml`, `seeds: 100`, `seed_mode: claim`, `upstream_protocol: phase1_scout`.
+### Protocols
 
-### Protocols we have
+| Protocol | Purpose |
+|----------|---------|
+| `dmin_pilot` | one run at 12 drive times, 10 seeds per cell, read at tighter deadlines to choose the main deadlines and grid |
+| `dmin_m12`, `dmin_m6`, `dmin_m3` | the D_min table for `strombom_multi` at 12, 6 and 3 drive times; they differ only in the deadline |
+| `dmin_kubo` | the same question for the Kubo model, compact start, N up to 100 |
+| `dmin_s_base` | the reference of the sensitivity runs: wide and outlier_rich, N 100 200 400, D 1 to 16, 6 drive times |
+| `dmin_s_matched`, `dmin_s_handler`, `dmin_s_ring`, `dmin_s_goal`, `dmin_s_gap`, `dmin_s_dogspeed` | the same grid as `dmin_s_base` with one change each: field-matched sheep set, dogs start at one handler point, dogs start on a ring, a tighter goal, the dog start gap, a slower dog |
+| `dmin_f99_m12`, `dmin_f99_m6`, `dmin_f99_m3` | the grids of `dmin_m12`, `dmin_m6` and `dmin_m3` with `success_fraction` 0.99, on the same seeds |
+| `dmin_f99_s_base`, `dmin_f99_s_matched`, `dmin_f99_s_dogspeed` | `dmin_s_base`, `dmin_s_matched` and `dmin_s_dogspeed` with `success_fraction` 0.99 |
 
-| Phase | Protocol ids |
-|-------|--------------|
-| 1 size | `phase1_pilot`, `phase1_scout`, `phase1_claim` |
-| 2 structure | `phase2_pilot_state`, `phase2_scout`, `phase2_claim` |
-| 4 transfer | `phase4_{kubo,fat}_{size,structure}_{scout,claim}` (8 files) |
-| 5 information | `phase5_factor_sweep`, `phase5_obs_claim`, `phase5_range_{scout,claim}`, `phase5_comm_{scout,claim}` |
-| 8 collect-hold-gate | TODO |
+`cli/run_queue.py` runs the protocols in order, resumes unfinished folders and skips finished ones.
+
+Each file's header comment gives its reasons.
 
 ## What you can vary
 
-**Dog methods** (`sim/core/methods.py`)
+### Methods
 
-| Method | Sheep model | How the dogs behave |
-|--------|-------------|---------------------|
-| `strombom_multi` | strombom | Our baseline. If any sheep is too far out (past r_a * N^(2/3)), the dogs collect: each one goes after an outlier, farthest first. Once the flock is tight, they drive from behind it, opposite the goal |
-| `kubo` | kubo | Force-based model from Kubo et al.; dogs and sheep are both moved by summed forces |
-| `fat` | strombom | Each dog pushes the farthest sheep it can see toward the goal |
+| Method | Sheep model | Dogs |
+|--------|-------------|------|
+| `strombom_multi` | Strombom 2014 | one dog is the paper shepherd. With more dogs every dog gets its own job (see [Team rule](#team-rule-of-strombom_multi)) |
+| `fat` | Strombom 2014 | each dog aims r_a behind the sheep farthest from the goal, with the Strombom step; no coordination |
+| `kubo` | Kubo 2022 | Kubo force dogs: each targets the farthest sheep and moves under the paper forces |
 
-The paper parameters live in `sim/methods/{strombom,kubo}/`. The Strombom defaults are r_a = 2, r_s = 65, sheep speed 1 and dog speed 1.5.
+`fat` borrows the target choice of Kubo's farthest-individual rule but not its forces or speeds, so it is a HerdSim construction. Its dogs are independent: they all aim at the same sheep, so they become copies once they meet, which `dog_overlap` shows.
 
-**Starting layouts** (`sim/core/world/layouts.py`)
+### Team rule of strombom_multi
 
-| Layout | What it looks like |
-|--------|--------------------|
-| `compact` | One tight Gaussian blob |
-| `wide` | One loose blob, about 7x wider |
-| `split` | 2 clusters (N < 12) or 3 clusters |
-| `outlier_rich` | 80% in a core, 20% scattered just past the "lost sheep" distance |
+The paper's shepherd is one dog. HerdSim's multi-dog layer makes sure an added dog is never a copy of one already there:
 
-**Information ladders** (Phase 5). Each step down gives the dogs less to work with:
+- Collecting: the D farthest outliers each get one dog, matched by distance (the assignment with the least total walk). With one dog that is the paper's farthest outlier. Dogs left over when there are more dogs than outliers drive the core of the flock (the sheep within f(N)).
+- Driving: the dogs stand on an arc behind the flock at the paper drive distance, spread evenly over the angle that covers the flock's width, with the paper drive point in the middle.
+- Dogs keep their side: they are matched to drive slots by their angle around the flock.
+- Several dogs push a sheep as one: the unit pushes of the dogs within reach are added and rescaled to length 1, so the sheep feel a push from the mean direction, as with one dog.
 
-| Factor | Levels, best to worst |
-|--------|-----------------------|
-| Observation | `global` > `local_positions` > `bearing_only` |
-| Sensing range | 130, 97.5, 65 (default), 32.5 |
-| Communication | `global_shared` > `neighbour_broadcast` > `none` |
+### Start layouts
 
-Only `strombom_multi` uses the communication setting.
+| Layout | Shape |
+|--------|-------|
+| `compact` | one Gaussian, sigma = 0.5 R_f, cut at 3 sigma |
+| `wide` | one Gaussian, sigma = 0.5 x the Strombom collect distance 2 N^(2/3), cut at 3 sigma |
+| `split` | 2 (N < 12) or 3 compact clusters on a ring at the collect distance |
+| `outlier_rich` | 80% in a compact core, 20% at 1.1 to 1.6 x the collect distance |
+
+Where the dogs stand at tick 0 is set by `dog_start`, a convention with no real-world rule behind it:
+
+| `dog_start` | Placement |
+|-------------|-----------|
+| `arcs` (base) | half circles behind the flock, away from the goal, spread evenly: dog j of D at -90 + 180 (j + 0.5) / D degrees from straight behind, so one dog starts on the drive line and every added dog has its own station |
+| `ring` | full circles round the flock, goal side included: dog j of D at 360 j / D degrees from straight behind |
+| `handler` | every dog at one point straight behind the flock, as if released from a handler's post; the team rule then sends each to its own target |
+
+The first circle is `dog_start_gap` (30) units beyond the farthest possible start sheep. A circle takes as many dogs as fit `dog_start_spacing` (5) apart; more dogs go on circles 5 units farther out. Kubo runs compact starts only, because the scattered layouts are sized by Strombom's collect distance.
 
 ## Metrics
 
 ### Per tick
 
-Every tick, these get recorded (`METRICS` in `sim/plugins/metrics/__init__.py`). They're kept in the per-trial timeseries when `store_timeseries` is on:
+Every trial records these every tick. The first `timeseries_seeds` (3) seeds of every cell keep the full history as Parquet.
 
-- `cohesion`: mean distance of sheep to the flock centroid
-- `gcm_goal`: centroid distance to the goal
-- `success_rate`, `sheep_in_goal`, `time_to_goal`
-- `shepherd_path`: total distance the dogs walked, our main effort measure
-- `polarization`: how aligned the sheep headings are
-- `outlier_count`: sheep past the "lost" distance
-- `fragmentation`: largest connected group / N
-- `mean_spread`, `extent`, `perimeter`, `hull_area`, `flock_density`, `aspect_ratio`: flock shape
-- `min_separation`, `min_dog_separation`
-- `i_dir`: how much the dogs pull in different directions
-- `coverage`: share of the outer sheep that some dog can see
+| Metric | Meaning |
+|--------|---------|
+| `gcm_goal` | distance from the flock centroid to the goal |
+| `gcm_in_goal`, `sheep_in_goal` | centroid inside the goal (0/1); number of sheep inside the goal |
+| `dogs_goal_side` | fraction of dogs between the flock and the goal |
+| `cohesion`, `extent` | mean and RMS distance of the sheep to their centroid |
+| `aspect_ratio`, `perimeter`, `hull_area`, `flock_density` | flock shape |
+| `fragmentation` | largest group / N, sheep within `measurement_radius` linked |
+| `lost_sheep` | sheep farther than 2.5 R_f from the centroid |
+| `min_separation` | closest two sheep |
+| `shepherd_path` | distance the dogs' controllers walked so far (commanded velocity) |
+| `min_dog_separation` | closest two dogs |
+| `dog_overlap` | fraction of dogs with another dog within `dog_overlap_distance` (2): dogs doing the same work as a twin |
+| `dogs_stopped` | fraction of dogs with zero commanded velocity |
+| `i_dir` | 1 - length of the summed unit headings of the moving dogs / their number |
+| `coverage` | fraction of outer sheep (beyond the median centroid distance) within a dog's reaction reach |
 
-### Per trial (`trials.csv`)
+### Per trial
 
-One row per seed. Columns, grouped:
+One row per trial in `trials.csv`:
 
 | Group | Columns |
 |-------|---------|
-| Identity | `method`, `scenario`, `seed`, `sheep_model`, `dog_controller`, `obs_mode`, `n_sheep`, `n_shepherds`, `initial_layout`, `time_limit`, plus `sensing_range` / `communication` when set |
-| Outcome | `success`, `total_ticks`, `first_success_tick` |
-| Final values | `final_gcm_goal`, `final_success_rate`, `final_sheep_in_goal`, `time_to_goal`, `shepherd_path`, `final_min_separation` |
-| Trajectory stats | `mean_*`, `min_*`, `max_*`, `auc_*` for 13 of the metrics above |
-| Efficiency | `control_efficiency` = distance gained toward the goal / dog path |
-| Failure | `failure_mode`, `failure_label`, `failure_hints` |
-| Bookkeeping | `resolved_config` (JSON), `resume_key` |
+| Identity | `trial_key`, `cell_key`, `group_key`, `task`, `method`, `initial_layout`, `n_sheep`, `n_shepherds`, `seed_index`, `seed`, the factor columns |
+| What it ran with | `flock_radius`, `time_limit_ticks`, `time_limit_seconds`, `dt` |
+| Task geometry and end state | `goal_radius`, `drive_distance`, `world_width`, `world_height`, `final_gcm_goal`, `final_sheep_in_goal`, `seconds_to_90pct_in_goal`, `seconds_to_95pct_in_goal`, `seconds_to_99pct_in_goal` (first arrival of that fraction of the flock, NaN if never; success needs `success_fraction` of the sheep, every sheep by default) |
+| Outcome | `success`, `total_ticks`, `stop_reason`, `finish_ticks`, `finish_seconds`, `dog_ticks`, `shepherd_path`, `path_per_dog` |
+| Summaries | `mean_*`, `min_*`, `max_*` of every per-tick metric |
+| Failure | `failure_mode`, `failure_hints` |
 
-### What we compute from the trials
+Times compare across methods only in seconds: a Strombom tick is 1 s, a Kubo tick 0.05 s.
 
-All of these live in `analysis/frontier.py` and `analysis/regimes.py`.
+### Failure labels
 
-- **R(N, D)**: success rate of a cell.
-- **`D_min`**: smallest D with R >= theta.
-- **`D_overcrowd`**: first D above `D_min` where R drops below theta and stays there for 2 or more grid steps.
-- **`D_max`**: largest reliable D before overcrowding.
-- **B\***: the reliable cell with the lowest median dog path.
-- **Bootstrap CI on `D_min`**: 95% interval, from 1,000 resamples of the seeds in each cell.
-- **Regimes**, a label for each cell:
-  - `under_resourced_failure`: too few dogs.
-  - `efficient_operation`: reliable and near B\* effort.
-  - `wasteful_overspend`: reliable, but at least 20% more effort than B\*.
-  - `overcrowding_collapse`: R falls below theta again at D >= `D_overcrowd`.
-  - `hard_failure`: no D on the grid reaches theta.
+A failed drive trial gets the first label that matches, in this order. Every match is kept in `failure_hints`.
 
-### Analysis packages
-
-| Pkg | Question | Entry point |
-|-----|----------|-------------|
-| A | Size / structure map | `analysis.export.export_package_a` |
-| D | Transfer across methods | `analysis.transfer.build_transfer_table` |
-| E | Information ladders | `analysis.substitution.substitution_curves` |
-| F | Scaling fits (constant, linear, power, piecewise) | `analysis.fits.fit_scaling_models` |
-| G | Early warning (can we see failure coming?) | `analysis.early_warning.evaluate_early_warning_campaign` |
-
-`analysis.export.export_package_dossier` writes the D to G tables. Package B (state predictors) only survives as old output under `results/phase2/`. Package C was never built.
+`dogs_out_of_range` (coverage low while no sheep is lost), `flock_escaped` (ended farther from the goal than it started), `split` (largest group under 55%), `scatter` (RMS radius above 2 R_f), `oscillation` (swinging toward and away from the goal), `stuck` (moved less than one goal radius). `timeout` if none match; `none` for a success.
 
 ## What a run writes
 
-Everything under `results/` is written by the code. Don't edit it by hand. The folder comes from the protocol's `output:` key:
-
 ```text
-results/phase{k}/{slug}/
-|-- protocol.yaml                     resolved protocol (extends merged) - replay from this
-|-- provenance.json                   protocol hash, seeds, metric ids, timestamps
-|-- status.json                       planned / done counts, running flag, elapsed time
-|-- manifest.jsonl                    one line per finished cell, used for resume
-|-- trials.csv                        one row per trial, the raw table
-|-- timeseries/<cell>.parquet         per-tick history (only if store_timeseries; gitignored)
-|-- boundary_cells.csv                claim only: which cells get reseeded
-|-- boundary_plan.json                claim only: how that list was built
-|-- scout_dmin_bootstrap_preview.csv  claim only: D_min bootstrap on scout data
-|-- dmin_bootstrap.csv                claim only: D_min bootstrap on claim trials
-|-- merged_trials.csv                 claim only: claim rows + scout rows for the rest
-|-- merged_dmin_bootstrap.csv         claim only: D_min bootstrap on the merge
-`-- packages/<letter>/                analysis output (CSV tables + provenance.json)
+results/<protocol>/
+|-- protocol.yaml         merged protocol and canonical values, plus every method parameter
+|-- provenance.json       protocol id and physics hash
+|-- calibration.json      R_f per method and N
+|-- trials.jsonl          one line per finished trial, appended as trials finish
+|-- errors.jsonl          one line per trial that raised
+|-- trials.csv            table form of trials.jsonl, rewritten after each round
+|-- frontier_cells.csv    per cell: counts, success interval, reliability, finish times, zone, pruned
+|-- frontier_groups.csv   per D curve: D_min, D_min_low, D_best, D_sat, D_crowd, D_overcrowd, D_max, flags
+|-- status.json           progress of the adaptive run
+|-- .lock                 held by the running campaign
+`-- timeseries/           per-tick Parquet for the first seeds of every cell
 ```
 
-| File | Written by | When |
-|------|-----------|------|
-| `protocol.yaml`, `provenance.json` | `run`, `claim-reseed` | Start of the run |
-| `status.json` | `run`, `claim-reseed` | Start, after every cell, end |
-| `trials.csv`, `manifest.jsonl` | `run`, `claim-reseed` | After every cell, so a crash loses at most one cell |
-| `timeseries/` | `run`, `claim-reseed` | After every cell, if enabled |
-| `boundary_*`, `scout_dmin_bootstrap_preview.csv` | `claim-plan`, `claim-reseed` | Before any claim trial runs |
-| `dmin_bootstrap.csv`, `merged_*` | `claim-reseed` | End of the claim run |
-| `packages/<letter>/` | `analysis.export` | Whenever you run the analysis |
-
-## Tech stack
-
-| Layer | Choice |
-|-------|--------|
-| Language | Python 3.11+ |
-| Numerics / data | NumPy, pandas, SciPy, PyArrow |
-| Protocols | YAML (PyYAML) |
-| Packaging / env | uv, setuptools |
-| Tests | pytest |
-| Lint / types | Ruff, basedpyright |
+Generated YAML, CSV and JSONL files start with an AUTO-GENERATED notice line, and JSON files carry it as their first key; read the CSVs with `pd.read_csv(path, skiprows=1)`.
 
 ## Project structure
 
 ```text
 HerdSim/
-|-- sim/                 Tick engine
-|   |-- core/            Runner, state, observation, config, world
-|   |-- plugins/         Sheep, dogs, scenarios, metrics
-|   `-- methods/         Paper math (strombom, kubo)
+|-- sim/
+|   |-- core/               tick loop, state, method catalog, run config, world (arena, start layouts)
+|   |-- methods/            paper math and parameters: strombom, kubo
+|   `-- plugins/
+|       |-- sheep/          sheep models
+|       |-- dogs/           dog controllers
+|       |-- scenarios/      tasks: setup, success, task metrics, row columns, failure labels
+|       `-- metrics/        metrics for every task
+|-- services/               protocol loading, cells, calibration, adaptive run, store, workers
+|-- analysis/               frontier rules, D_min at a deadline, result tables
 |-- protocols/
-|   |-- configs/         canonical_grid.yaml + one YAML per protocol
-|   `-- packaging/       Turns a finished trial into a trials.csv row
-|-- cli/                 campaign.py and the two scripts it calls
-|-- services/            Grid expansion, resume, worker pool, results layout
-|-- analysis/            Frontiers, regimes, fits, transfer, early warning, export
-|-- results/             Run outputs (generated)
-|-- docs/                Architecture, report, figures
-`-- tests/
-    |-- sim/             Golden regression runs, core metrics
-    |-- services/        Protocol cell expansion and resume keys
-    `-- analysis/        Frontier / regimes on toy tables
+|   |-- configs/            canonical.yaml and one YAML per protocol
+|   `-- packaging/          trial row, provenance, generated-file notice
+|-- cli/                    campaign.py (run, plan, calibrate, status), run_queue.py, dmin_report.py, dmin_tables.py
+|-- tests/                  sim, services, analysis; bench/ for the miniature campaigns
+`-- docs/                   architecture, papers
 ```
 
-The sim code lives under `sim/`, but it's imported as `core.*`, `plugins.*` and `methods.*`. The mapping is in `pyproject.toml`.
+## Adding things
 
-## Setup, tests, running
+- A method: add its sheep model to `sim/plugins/sheep/`, its dog controller to `sim/plugins/dogs/` (or reuse existing ones), and one entry in `sim/core/methods.py`. Its defaults must include `dt`; a missing key or an unknown plugin name fails at import. A sheep model's `prepare` checks its own parameters and returns any keys it derives.
+- A task: one module in `sim/plugins/scenarios/` with the pieces listed in that package's docstring (setup, checks, world, starts, success, task metrics, row columns, failure labels), and one entry in its table. The protocol picks it with `task:`.
+- A metric for every task: a function of the tick view in `sim/plugins/metrics/` and one entry in its table. A metric that needs a task's geometry goes in that task's metrics instead.
+- A new sweep on existing settings: a new protocol file, with no code change.
 
-```bash
-make install        # uv sync --extra dev
-make test           # pytest
-make check          # ruff + basedpyright + pytest
-```
+## Tests
 
-```bash
-uv run cli/campaign.py help
+`make test` runs the unit, invariant and regression tests (about 25 s). The golden tests in `tests/sim/test_golden.py` pin short real trials; change their values only with a behaviour change, and say why in the same change.
 
-# scout, then claim
-uv run cli/campaign.py run          --protocol phase1_scout --workers 18
-uv run cli/campaign.py claim-plan   --protocol phase1_claim
-uv run cli/campaign.py claim-reseed --protocol phase1_claim --workers 18
+`make bench` (about 1 minute) runs miniature real campaigns through the whole pipeline (calibration, rounds, workers, store, frontier rules) and reads their tables. It checks bounds that follow from the model (no flock beats the sheep speed), properties of the machinery (a rerun adds nothing, the worker count changes no trial) and orderings the design should produce (a compact flock needs no collecting, a tight deadline asks a scattered flock for more dogs). Nothing in it is pinned to a stored number, so a failure means the printed numbers need a look. The bench protocols are in `tests/bench/protocols/`.
 
-# Phase 5 factor sweep
-uv run cli/campaign.py run --protocol phase5_factor_sweep --workers 18
+## Tech stack
 
-# quick smoke run on a tiny grid, written somewhere throwaway
-uv run cli/campaign.py run --protocol phase1_scout --n 25 --d 2 --seeds 2 \
-    --max-ticks 2000 --output /tmp/herdsim_smoke --no-resume
-```
-
-The full grids are big: 3,000 trials for a 10 x 10 scout. Pick `--workers` to match your cores.
+Python 3.11+, NumPy, SciPy, pandas, PyArrow, PyYAML; uv for the environment; pytest, Ruff and basedpyright for checks.
 
 ## Further reading
 
-- [docs/codes/architecture.md](docs/codes/architecture.md): how the system is designed and why: the principles behind it, the trade-offs we accepted, and how it's meant to grow.
-- [docs/report/short_report.md](docs/report/short_report.md): what we asked, how, what we found, and the limits.
+[docs/codes/architecture.md](docs/codes/architecture.md) explains how the system is designed and why, and what each choice costs.

@@ -1,263 +1,258 @@
-"""Start positions: X0 flock families (Cap I5) and dog placement."""
+"""Start positions: flock layouts and the dog line.
+
+Two lengths size the layouts. The compact flock (and the cluster size of the split
+layout) uses the flock radius ``R_f``. The scattered layouts (wide, split ring,
+outliers) use the separation distance, the distance from the flock centre beyond
+which Strombom 2014 treats a sheep as separated (r_a N^(2/3), p.7). A scattered layout
+sized by R_f never leaves the drive rule at N >= 100: measured, none of the split or
+outlier starts had a sheep beyond that distance.
+
+The separation distance is Strombom's collect threshold. It has no meaning for Kubo
+sheep, which have no collect rule and whose only length scale is the attraction
+range 20 (Kubo 2022 Table 1): for them a scattered start is just a sparse flock in
+Strombom units. The protocols therefore restrict Kubo to the compact layout.
+
+Every Gaussian draw is cut at ``CUT_SIGMAS`` sigma, so ``layout_extent`` is an exact
+bound on where a sheep can start and the field, the drive and the dog arcs are
+sized from it. The outlier ring is bounded by construction.
+"""
 
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Any, TypedDict, Unpack
+from typing import Any
 
 import numpy as np
 
-# Canonical X0 family names from the scaling protocol.
-X0_FAMILIES = ("compact", "wide", "split", "outlier_rich")
+from sim.core.vectors import rotate, unit
 
-# Agents start at least this far inside every wall.
+LAYOUTS = ("compact", "wide", "split", "outlier_rich")
+
+# Agents start at least this far inside the field edge.
 EDGE_MARGIN = 1.0
+# Radius of the Gaussian layouts in sigmas (HerdSim choice). An uncut 2-D Gaussian
+# has e^(-4.5) = 1.1% of its mass beyond 3 sigma, so the cut barely changes the
+# shape but gives every layout a hard edge.
+CUT_SIGMAS = 3.0
+
+# Draws n candidate points at once, shape (n, 2).
+Draw = Callable[[int], np.ndarray]
 
 
-class _LayoutBounds(TypedDict):
-    world_width: float | None
-    world_height: float | None
-    goal_center: np.ndarray | None
-    goal_radius: float | None
+def _draw_n(n: int, draw: Draw, config: dict[str, Any]) -> np.ndarray:
+    """``n`` points, all inside the field (with margin) and outside the goal.
 
-
-def normalize_layout(layout: str) -> str:
-    """Normalize layout name for comparison (strip + lower)."""
-    return str(layout).strip().lower()
-
-
-def _point_ok(
-    pos: np.ndarray,
-    *,
-    world_width: float | None,
-    world_height: float | None,
-    goal_center: np.ndarray | None,
-    goal_radius: float | None,
-) -> bool:
-    if world_width is not None and world_height is not None:
-        if not (
-            EDGE_MARGIN <= float(pos[0]) <= float(world_width) - EDGE_MARGIN
-            and EDGE_MARGIN <= float(pos[1]) <= float(world_height) - EDGE_MARGIN
-        ):
-            return False
-    if goal_center is not None and goal_radius is not None:
-        if float(np.linalg.norm(pos - goal_center)) <= float(goal_radius):
-            return False
-    return True
-
-
-def _draw_valid(
-    draw_one: Callable[[], object],
-    *,
-    world_width: float | None,
-    world_height: float | None,
-    goal_center: np.ndarray | None,
-    goal_radius: float | None,
-    max_tries: int = 400,
-) -> np.ndarray:
-    """Redraw until the point is inside the field and outside the goal."""
-    last = None
-    for _ in range(max_tries):
-        pos = np.asarray(draw_one(), dtype=float).reshape(2)
-        last = pos
-        if _point_ok(
-            pos,
-            world_width=world_width,
-            world_height=world_height,
-            goal_center=goal_center,
-            goal_radius=goal_radius,
-        ):
-            return pos
-    raise RuntimeError(
-        f"Could not place a sheep inside the field and outside the goal. Last draw was {last}."
-    )
-
-
-def generate_initial_positions(
-    n_sheep: int,
-    layout: str,
-    center: np.ndarray,
-    rng: np.random.Generator,
-    *,
-    spread: float,
-    interaction_radius: float,
-    lost_threshold: float,
-    world_width: float | None = None,
-    world_height: float | None = None,
-    goal_center: np.ndarray | None = None,
-    goal_radius: float | None = None,
-) -> np.ndarray:
-    """Generate sheep positions for a named X0 family.
-
-    Layouts
-    -------
-    compact:
-        Single Gaussian cluster with sigma = 0.3 * spread.
-    wide:
-        Single Gaussian cluster with sigma = 2.0 * spread.
-    split:
-        Two or three separated subclusters at distance >= 2 * interaction_radius.
-    outlier_rich:
-        Core cluster (80%) plus outliers (20%) beyond the lost threshold.
+    The task sizes the field and the drive from ``layout_extent`` so that every
+    possible start fits; a point outside is a sizing bug, so it raises instead
+    of being redrawn (a redraw would quietly change the layout's shape).
     """
-    if n_sheep <= 0:
-        return np.zeros((0, 2), dtype=float)
-
-    family = normalize_layout(layout)
-    center = np.asarray(center, dtype=float).reshape(2)
-    goal = None if goal_center is None else np.asarray(goal_center, dtype=float).reshape(2)
-    bounds = _LayoutBounds(
-        world_width=world_width,
-        world_height=world_height,
-        goal_center=goal,
-        goal_radius=goal_radius,
+    points = draw(n)
+    w, h = float(config["world_width"]), float(config["world_height"])
+    goal = np.asarray(config["goal_center"], dtype=float)
+    ok = (
+        (points[:, 0] >= EDGE_MARGIN)
+        & (points[:, 0] <= w - EDGE_MARGIN)
+        & (points[:, 1] >= EDGE_MARGIN)
+        & (points[:, 1] <= h - EDGE_MARGIN)
+        & (np.linalg.norm(points - goal, axis=1) > float(config["goal_radius"]))
     )
-    if family == "compact":
-        sigma = 0.3 * float(spread)
-        pos = _gaussian_cluster(n_sheep, center, sigma, rng, **bounds)
-    elif family == "wide":
-        sigma = 2.0 * float(spread)
-        pos = _gaussian_cluster(n_sheep, center, sigma, rng, **bounds)
-    elif family == "split":
-        pos = _split_positions(
-            n_sheep,
-            center,
-            rng,
-            separation=max(2.0 * float(interaction_radius), 0.8 * float(spread)),
-            **bounds,
-        )
-    elif family == "outlier_rich":
-        pos = _outlier_rich_positions(
-            n_sheep,
-            center,
-            rng,
-            core_sigma=0.4 * float(spread),
-            lost_threshold=float(lost_threshold),
-            **bounds,
-        )
-    else:
-        raise ValueError(f"Unknown initial_layout '{layout}'. Expected one of {X0_FAMILIES}.")
-    return pos
+    if not ok.all():
+        raise RuntimeError(f"{int((~ok).sum())} start sheep outside the field or in the goal")
+    return points
 
 
-def _gaussian_cluster(
-    n_sheep: int,
-    center: np.ndarray,
-    sigma: float,
-    rng: np.random.Generator,
-    **bounds: Unpack[_LayoutBounds],
-) -> np.ndarray:
-    rows = [
-        _draw_valid(
-            lambda: center + rng.normal(0.0, sigma, size=2),
-            **bounds,
-        )
-        for _ in range(n_sheep)
-    ]
-    return np.vstack(rows)
+def _truncated_gaussian(center: np.ndarray, sigma: float, rng: np.random.Generator) -> Draw:
+    """Gaussian cut at ``CUT_SIGMAS`` sigma: hard cluster edges, exact split gaps and extent."""
+
+    def draw(k: int) -> np.ndarray:
+        out = np.zeros((0, 2))
+        while out.shape[0] < k:
+            points = rng.normal(0.0, sigma, size=(k, 2))
+            out = np.vstack([out, points[np.linalg.norm(points, axis=1) <= CUT_SIGMAS * sigma]])
+        return center + out[:k]
+
+    return draw
 
 
-def _split_positions(
-    n_sheep: int,
-    center: np.ndarray,
-    rng: np.random.Generator,
-    *,
-    separation: float,
-    **bounds: Unpack[_LayoutBounds],
-) -> np.ndarray:
-    n_clusters = 2 if n_sheep < 12 else 3
-    # Place cluster centres on a circle around the flock centre.
-    angles = np.linspace(0.0, 2.0 * np.pi, n_clusters, endpoint=False)
-    radius = 0.5 * float(separation)
-    centres = np.stack(
-        [center[0] + radius * np.cos(angles), center[1] + radius * np.sin(angles)],
-        axis=1,
-    )
-    # Assign sheep round-robin to clusters.
-    counts = np.full(n_clusters, n_sheep // n_clusters, dtype=int)
-    counts[: n_sheep % n_clusters] += 1
-    parts = []
-    sigma = max(0.15 * separation, 1.0)
-    for i, count in enumerate(counts):
-        if count <= 0:
-            continue
-        origin = centres[i]
-        rows = [
-            _draw_valid(
-                lambda origin=origin, sigma=sigma: origin + rng.normal(0.0, sigma, size=2),
-                **bounds,
-            )
-            for _ in range(int(count))
-        ]
-        parts.append(np.vstack(rows))
-    return np.vstack(parts)
+def split_geometry(
+    n_sheep: int, flock_radius: float, config: dict[str, Any]
+) -> tuple[int, float, float]:
+    """(clusters, cluster sigma, distance of cluster centres from the flock centre).
 
-
-def _outlier_rich_positions(
-    n_sheep: int,
-    center: np.ndarray,
-    rng: np.random.Generator,
-    *,
-    core_sigma: float,
-    lost_threshold: float,
-    **bounds: Unpack[_LayoutBounds],
-) -> np.ndarray:
-    n_out = max(1, int(round(0.2 * n_sheep))) if n_sheep >= 5 else 1
-    n_out = min(n_out, n_sheep - 1) if n_sheep > 1 else 0
-    n_core = n_sheep - n_out
-    core = _gaussian_cluster(n_core, center, core_sigma, rng, **bounds)
-    if n_out == 0:
-        return core
-
-    def _one_outlier() -> np.ndarray:
-        angle = float(rng.uniform(0.0, 2.0 * np.pi))
-        radius = float(lost_threshold) * float(rng.uniform(1.1, 1.6))
-        return np.array([center[0] + radius * np.cos(angle), center[1] + radius * np.sin(angle)])
-
-    outliers = np.vstack([_draw_valid(_one_outlier, **bounds) for _ in range(n_out)])
-    return np.vstack([core, outliers])
-
-
-def place_flock(
-    config: dict[str, Any],
-    center: np.ndarray,
-    rng: np.random.Generator,
-    *,
-    keep_out_of_goal: bool,
-) -> np.ndarray:
-    """Sheep start for the run config's X0 family around ``center``.
-
-    ``keep_out_of_goal`` redraws sheep that land inside the goal disk.
+    Each cluster holds about N / k sheep, so its sigma is the compact sigma
+    scaled by 1 / sqrt(k) (same density). The clusters stand on a ring of
+    ``split_ring`` separation distances around the flock centre, so the
+    farthest sheep lie beyond the distance at which Strombom collects.
     """
-    n_sheep = int(config["n_sheep"])
-    return generate_initial_positions(
-        n_sheep,
-        str(config["initial_layout"]),
-        center,
-        rng,
-        spread=float(config["initial_spread"]),
-        interaction_radius=float(config["measurement_radius"]),
-        lost_threshold=float(config["r_a"]) * (float(n_sheep) ** (2.0 / 3.0)),
-        world_width=float(config["world_width"]),
-        world_height=float(config["world_height"]),
-        goal_center=np.array(config["goal_center"], dtype=float) if keep_out_of_goal else None,
-        goal_radius=float(config["goal_radius"]) if keep_out_of_goal else None,
+    k = 2 if n_sheep < 12 else 3
+    sigma = float(config["compact_spread"]) * flock_radius / np.sqrt(k)
+    return k, sigma, float(config["split_ring"]) * float(config["separation_distance"])
+
+
+def split_centres(config: dict[str, Any]) -> np.ndarray:
+    """Cluster centres of the split layout, shape (k, 2).
+
+    Angles are measured from the direction away from the goal and are symmetric
+    about the drive axis: 0, +120 and -120 degrees for three clusters, +90 and
+    -90 for two. A mirrored drive therefore gives the mirrored set of centres.
+    """
+    center = np.asarray(config["flock_center"], dtype=float)
+    k, _, ring_radius = split_geometry(
+        int(config["n_sheep"]), float(config["flock_radius"]), config
     )
+    back = unit(center - np.asarray(config["goal_center"], dtype=float))
+    angles = (0.0, 2.0 * np.pi / 3.0, -2.0 * np.pi / 3.0) if k == 3 else (np.pi / 2.0, -np.pi / 2.0)
+    return np.array([center + ring_radius * rotate(back, angle) for angle in angles])
 
 
-def place_dogs(
-    config: dict[str, Any],
-    flock_center: np.ndarray,
-    away_from: np.ndarray,
-    rng: np.random.Generator,
-) -> np.ndarray:
-    """Dogs ``shepherd_start_offset`` from the flock on the side opposite ``away_from``."""
-    away = flock_center - away_from
-    norm = float(np.linalg.norm(away))
-    direction = away / norm if norm > 1e-9 else np.array([1.0, 0.0])
-    base = flock_center + direction * float(config["shepherd_start_offset"])
-    jitter = float(config["shepherd_jitter"])
-    pos = base + rng.uniform(-jitter, jitter, size=(int(config["n_shepherds"]), 2))
-    pos[:, 0] = np.clip(pos[:, 0], EDGE_MARGIN, float(config["world_width"]) - EDGE_MARGIN)
-    pos[:, 1] = np.clip(pos[:, 1], EDGE_MARGIN, float(config["world_height"]) - EDGE_MARGIN)
-    return pos
+def place_flock(config: dict[str, Any], rng: np.random.Generator) -> np.ndarray:
+    """Sheep positions for the configured layout around the flock start centre."""
+    n = int(config["n_sheep"])
+    layout = str(config["initial_layout"])
+    r_f = float(config["flock_radius"])
+    center = np.asarray(config["flock_center"], dtype=float)
+    compact_sigma = float(config["compact_spread"]) * r_f
+
+    if layout == "compact":
+        return _draw_n(n, _truncated_gaussian(center, compact_sigma, rng), config)
+    if layout == "wide":
+        sigma = float(config["wide_sigma"]) * float(config["separation_distance"])
+        return _draw_n(n, _truncated_gaussian(center, sigma, rng), config)
+    if layout == "split":
+        centres = split_centres(config)
+        k, sigma, _ = split_geometry(n, r_f, config)
+        counts = np.full(k, n // k)
+        counts[: n % k] += 1
+        parts = []
+        for c, count in zip(centres, counts):
+            parts.append(_draw_n(int(count), _truncated_gaussian(c, sigma, rng), config))
+        return np.vstack(parts)
+    if layout == "outlier_rich":
+        n_out = int(round(float(config["outlier_fraction"]) * n))
+        core = _draw_n(n - n_out, _truncated_gaussian(center, compact_sigma, rng), config)
+        reach = float(config["separation_distance"])
+        near, far = float(config["outlier_near"]), float(config["outlier_far"])
+
+        def outlier_ring(k: int) -> np.ndarray:
+            angle = rng.uniform(0.0, 2.0 * np.pi, k)
+            radius = reach * rng.uniform(near, far, k)
+            return center + radius[:, None] * np.stack([np.cos(angle), np.sin(angle)], axis=1)
+
+        return np.vstack([core, _draw_n(n_out, outlier_ring, config)])
+    raise ValueError(f"Unknown initial_layout {layout!r}; expected one of {LAYOUTS}")
+
+
+def layout_extent(config: dict[str, Any]) -> float:
+    """Largest distance a sheep can start from the flock centre.
+
+    Exact: every Gaussian is cut at ``CUT_SIGMAS`` sigma and the outlier ring ends
+    at ``outlier_far`` separation distances.
+    """
+    r_f = float(config["flock_radius"])
+    layout = str(config["initial_layout"])
+    compact_cut = CUT_SIGMAS * float(config["compact_spread"]) * r_f
+    if layout == "compact":
+        return compact_cut
+    if layout == "wide":
+        return CUT_SIGMAS * float(config["wide_sigma"]) * float(config["separation_distance"])
+    if layout == "split":
+        _, sigma, ring_radius = split_geometry(int(config["n_sheep"]), r_f, config)
+        return ring_radius + CUT_SIGMAS * sigma
+    far = float(config["outlier_far"]) * float(config["separation_distance"])
+    return max(compact_cut, far)
+
+
+DOG_STARTS = ("arcs", "ring", "handler")
+
+
+def _dog_arcs(config: dict[str, Any]) -> list[tuple[float, int]]:
+    """(radius, dogs) of each start arc, ring or handler point, by ``dog_start``.
+
+    ``arcs`` (the base): dogs stand on half circles around the flock centre, on the side
+    away from the goal, so all of them start equally far from the flock and none starts on
+    the goal side. The first arc is ``dog_start_gap`` beyond ``layout_extent``, the farthest
+    any sheep can start, so every dog starts behind every sheep on every layout. On the
+    scattered layouts that puts the dogs farther than Strombom's r_s from most of the
+    sheep and they walk in first; that approach time is deterministic (the start is fixed
+    by the layout and D) and is part of the finish time.
+
+    ``ring``: the same, but on full circles round the flock, goal side included.
+
+    ``handler``: every dog starts at one point, straight behind the flock on the drive axis
+    at the radius of the first arc, as if released from a handler's post. The team rule then
+    sends each dog to its own target.
+
+    The dogs of an arc or ring are spread evenly over it (``place_dogs``), so each added dog
+    starts at its own station, not next to the others. A circle takes as many dogs as fit at
+    least ``dog_start_spacing`` apart, and the next one lies one spacing further out.
+    """
+    spacing = float(config["dog_start_spacing"])
+    radius = layout_extent(config) + float(config["dog_start_gap"])
+    left = int(config["n_shepherds"])
+    mode = str(config["dog_start"])
+    if mode == "handler":
+        return [(radius, left)] if left > 0 else []
+    span = np.pi if mode == "arcs" else 2.0 * np.pi
+    arcs = []
+    while left > 0:
+        count = min(left, max(1, int(span * radius / spacing)))
+        arcs.append((radius, count))
+        left -= count
+        radius += spacing
+    return arcs
+
+
+def dog_start_radius(config: dict[str, Any]) -> float:
+    """Distance from the flock centre of the outermost dog at the start."""
+    arcs = _dog_arcs(config)
+    if not arcs:  # no dogs: nothing stands outside the flock
+        return 0.0
+    return arcs[-1][0]
+
+
+def field_size(
+    config: dict[str, Any], layouts: tuple[str, ...], drive: float
+) -> tuple[float, float, float]:
+    """(width, height, flock start x) of a field that holds the whole task with clearance.
+
+    The drive axis runs along x. Behind the flock start lies the larger of the
+    flock layouts and the dogs' arcs, then ``drive`` to the goal, then the goal radius.
+    Sideways lies the larger of the layouts, the dogs' arcs and the goal.
+    ``field_clearance`` is kept free around all of it. The field only places the start; there
+    is no boundary. The size depends on the
+    layouts and on ``n_shepherds`` of ``config``, never on one cell's layout
+    or D, so every cell of a protocol at one N and one method shares the field
+    (one method, because R_f is calibrated per method and sizes everything here).
+    """
+    reach = max(layout_extent({**config, "initial_layout": name}) for name in layouts)
+    dogs = max(dog_start_radius({**config, "initial_layout": name}) for name in layouts)
+    behind = max(reach, dogs)
+    sideways = max(behind, float(config["goal_radius"]))
+    clearance = float(config["field_clearance"])
+    width = clearance + behind + abs(drive) + float(config["goal_radius"]) + clearance
+    return width, 2.0 * (sideways + clearance), clearance + behind
+
+
+def place_dogs(config: dict[str, Any]) -> np.ndarray:
+    """Dogs at their start stations, by ``dog_start`` (no randomness).
+
+    arcs: the ``count`` dogs of an arc sit at the centres of ``count`` equal sectors of the
+    half circle behind the flock, angles -90 + 180 (j + 0.5) / count degrees from straight
+    behind, so neighbours are pi r / count >= ``dog_start_spacing`` apart along it.
+    ring: angles 360 j / count degrees, so one dog starts straight behind the flock and the
+    rest are spread evenly round it. handler: all dogs at the point straight behind.
+    """
+    flock_center = np.asarray(config["flock_center"], dtype=float)
+    back = unit(flock_center - np.asarray(config["goal_center"], dtype=float))
+    mode = str(config["dog_start"])
+    positions = []
+    for radius, count in _dog_arcs(config):
+        for j in range(count):
+            if mode == "arcs":
+                angle = -np.pi / 2.0 + np.pi * (j + 0.5) / count
+            elif mode == "ring":
+                angle = 2.0 * np.pi * j / count
+            else:
+                angle = 0.0
+            positions.append(flock_center + radius * rotate(back, angle))
+    return np.array(positions).reshape(-1, 2)

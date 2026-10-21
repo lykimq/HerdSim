@@ -1,73 +1,76 @@
-"""Shepherd metrics. Each takes a state and returns one float."""
+"""Dog metrics. Each takes a TickView and returns one float."""
 
 from __future__ import annotations
 
 import numpy as np
-from core.simulation_state import SimulationState
-from scipy.spatial.distance import pdist
+from scipy.spatial.distance import squareform
 
-# Shepherds slower than this are treated as stationary and excluded from I_dir.
-_STATIONARY_SPEED = 1e-6
+from .view import TickView
 
-
-def shepherd_path(state: SimulationState) -> float:
-    """Cumulative shepherd path length; the run loop keeps the running total."""
-    return float(state.metadata["shepherd_path"])
+# Dogs slower than this count as stopped.
+STOPPED_SPEED = 1e-9
 
 
-def min_dog_separation(state: SimulationState) -> float:
-    """Minimum pairwise distance between shepherds (stacking)."""
-    if state.n_shepherds < 2:
-        return float("inf")
-    return float(np.min(pdist(state.shepherd_positions)))
+def shepherd_path(view: TickView) -> float:
+    """Total distance the dogs' controllers walked so far: the sum of |v| dt of the
+    commanded velocities."""
+    return float(view.state.metadata["shepherd_path"])
 
 
-def i_dir(state: SimulationState) -> float:
-    """Directional conflict among moving shepherds.
-
-    I_dir = 1 - ||sum u_i|| / M_active, where u_i are unit velocity directions of
-    shepherds with speed above the stationary threshold. 0 means all moving
-    shepherds agree in direction; 1 means maximal conflict.
-
-    Caveat: uses realised (post-constraint) velocities, so wall reflections can
-    inflate I_dir near boundaries.
-    """
-    vels = np.asarray(state.shepherd_velocities, dtype=float)
-    if vels.size == 0:
-        return 0.0
-    speeds = np.linalg.norm(vels, axis=1)
-    moving = speeds > _STATIONARY_SPEED
-    m_active = int(moving.sum())
-    if m_active == 0:
-        return 0.0
-    unit_vecs = vels[moving] / speeds[moving, np.newaxis]
-    resultant = float(np.linalg.norm(unit_vecs.sum(axis=0)))
-    return float(1.0 - resultant / m_active)
+def min_dog_separation(view: TickView) -> float:
+    """Smallest distance between two dogs (NaN with one dog)."""
+    pairs = view.dog_pair_distances
+    return float(pairs.min()) if pairs.size else float("nan")
 
 
-def coverage(state: SimulationState) -> float:
-    """Fraction of peripheral sheep within at least one shepherd influence radius.
-
-    Peripheral sheep are those farther from the flock centroid than the median
-    sheep-centroid distance. Influence radius is ``influence_radius`` on
-    state.metadata (the trial sensing range, else the method ``r_s``).
-    """
-    if state.n_sheep == 0 or state.n_shepherds == 0:
-        return 0.0
-    distances = state.distances_to_centroid()
-    median = float(np.median(distances))
-    peripheral = distances > median
-    if not np.any(peripheral):
-        # All sheep at the same distance (or single sheep): treat as covered
-        # if any sheep is within range of a shepherd.
-        peripheral = np.ones(state.n_sheep, dtype=bool)
-    r_s = float(state.metadata["influence_radius"])
-    if not np.isfinite(r_s):
+def dog_overlap(view: TickView) -> float:
+    """Fraction of dogs with another dog closer than ``dog_overlap_distance``: dogs doing
+    the same work as a twin. 0 with one dog, NaN without dogs."""
+    n = view.state.n_shepherds
+    if n == 0:
         return float("nan")
-    sheep = state.sheep_positions[peripheral]
-    shepherds = state.shepherd_positions
-    # Pairwise sheep-shepherd distances.
-    diffs = sheep[:, np.newaxis, :] - shepherds[np.newaxis, :, :]
-    dist = np.linalg.norm(diffs, axis=2)
-    covered = np.any(dist <= r_s, axis=1)
-    return float(np.mean(covered))
+    if n == 1:
+        return 0.0
+    close = squareform(view.dog_pair_distances) < float(view.config["dog_overlap_distance"])
+    np.fill_diagonal(close, False)
+    return float(close.any(axis=1).mean())
+
+
+def dogs_stopped(view: TickView) -> float:
+    """Fraction of dogs whose commanded velocity is zero this tick, e.g. under the stop
+    rule (NaN without dogs). A dog moved only by the separation push counts as stopped."""
+    if view.state.n_shepherds == 0:
+        return float("nan")
+    return float(np.mean(view.dog_speeds < STOPPED_SPEED))
+
+
+def i_dir(view: TickView) -> float:
+    """Directional conflict among moving dogs: 1 - |sum of unit headings| / moving dogs.
+
+    Headings are the commanded velocities. 0 when no dog moves. Clamped to [0, 1]: parallel
+    headings can sum to a length one rounding error above the count.
+    """
+    speeds = view.dog_speeds
+    moving = speeds > STOPPED_SPEED
+    if not moving.any():
+        return 0.0
+    headings = view.state.shepherd_velocities[moving] / speeds[moving, None]
+    return float(np.clip(1.0 - np.linalg.norm(headings.sum(axis=0)) / moving.sum(), 0.0, 1.0))
+
+
+def coverage(view: TickView) -> float:
+    """Fraction of outer sheep (beyond the median centroid distance) within a dog's reach.
+
+    Reach is the sheep model's reaction radius: a sheep closer than it to a dog
+    responds (strictly closer, as in the sheep models). NaN without dogs.
+    """
+    state = view.state
+    if state.n_shepherds == 0:
+        return float("nan")
+    dist = view.distances_to_centroid
+    outer = dist > np.median(dist)
+    if not outer.any():
+        outer = np.ones(state.n_sheep, dtype=bool)
+    reach = float(view.config["reaction_radius"])
+    to_dogs = state.sheep_positions[outer][:, None, :] - state.shepherd_positions[None, :, :]
+    return float(np.mean((np.linalg.norm(to_dogs, axis=2) < reach).any(axis=1)))

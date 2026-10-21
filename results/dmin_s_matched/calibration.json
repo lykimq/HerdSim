@@ -1,0 +1,11 @@
+{
+  "_auto_generated_notice": "AUTO-GENERATED: do not modify. Re-run the producing command to refresh this file.",
+  "physics_hash": "b9cf7db9bd7294eb",
+  "flock_radius": {
+    "strombom_multi": {
+      "100": 6.595305473838925,
+      "200": 6.816615915275769,
+      "400": 6.8284449210316795
+    }
+  }
+}

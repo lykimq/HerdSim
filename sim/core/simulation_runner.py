@@ -2,93 +2,95 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
 import pandas as pd
-from plugins.dogs import DOG_CONTROLLERS
-from plugins.metrics import METRICS
-from plugins.scenarios import SCENARIOS, Scenario
-from plugins.sheep import SHEEP_MODELS
 
-from core.observation import OBS_MODES
-from core.simulation_state import SimulationState
+from sim.core.simulation_state import SimulationState
+from sim.plugins.dogs import DOG_CONTROLLERS
+from sim.plugins.metrics import record
+from sim.plugins.metrics.view import TickView
+from sim.plugins.scenarios import SCENARIOS
+from sim.plugins.sheep import SHEEP_MODELS
+
+STOP_SUCCESS = "success"
+STOP_TIMEOUT = "timeout"
 
 
 @dataclass
 class RunResult:
-    """Outcome of a completed simulation run."""
-
     success: bool
     total_ticks: int
-    history: pd.DataFrame
+    stop_reason: str  # STOP_SUCCESS or STOP_TIMEOUT
+    history: pd.DataFrame  # one row per tick, tick 0 included
 
 
-def _initial_state(scenario: Scenario, config: dict[str, Any], seed: int) -> SimulationState:
-    rng = np.random.default_rng(seed)
-    world = scenario.create_world(config)
-    sheep_pos, shepherd_pos = scenario.initial_positions(config, rng)
-    sensing = config.get("sensing_range")
-    if sensing is None:
-        sensing = config.get("r_s")
+def initial_state(config: dict[str, Any], seed: int) -> SimulationState:
+    """Agents placed by the task; three random streams spawned from ``seed``.
+
+    The layout draw, the sheep noise and the dog noise each get their own
+    generator (``SeedSequence(seed).spawn(3)``, in that order), so one seed
+    gives the same start flock and the same sheep randomness whatever the
+    dog count: cells at different D are paired on the sheep's draws until
+    the dogs move the sheep.
+    """
+    layout_rng, sheep_rng, dog_rng = (
+        np.random.default_rng(child) for child in np.random.SeedSequence(seed).spawn(3)
+    )
+    scenario = SCENARIOS[config["scenario_id"]]
+    sheep, dogs = scenario.initial_positions(config, layout_rng)
     return SimulationState(
         tick=0,
-        sheep_positions=sheep_pos,
-        sheep_velocities=np.zeros_like(sheep_pos),
-        shepherd_positions=shepherd_pos,
-        shepherd_velocities=np.zeros_like(shepherd_pos),
-        world=world,
-        rng=rng,
-        metadata={
-            "r_a": float(config["r_a"]),
-            "measurement_radius": float(config["measurement_radius"]),
-            # Kubo has no r_s; coverage is NaN for it unless sensing_range is set.
-            "influence_radius": float(sensing) if sensing is not None else float("nan"),
-            "shepherd_path": 0.0,
-        },
+        sheep_positions=sheep,
+        sheep_velocities=np.zeros_like(sheep),
+        shepherd_positions=dogs,
+        shepherd_velocities=np.zeros_like(dogs),
+        world=scenario.create_world(config),
+        rng=sheep_rng,
+        dog_rng=dog_rng,
+        metadata={"shepherd_path": 0.0},
     )
 
 
-def _record(state: SimulationState) -> dict[str, Any]:
-    return {"tick": state.tick, **{name: metric(state) for name, metric in METRICS.items()}}
+def run_trial(
+    config: dict[str, Any],
+    seed: int,
+    on_tick: Callable[[SimulationState], None] | None = None,
+) -> RunResult:
+    """Run one trial until success or the time limit.
 
-
-def run_trial(config: dict[str, Any], seed: int) -> RunResult:
-    """Run one trial to success or timeout and record every metric each tick.
-
-    Tick order: sheep dynamics -> observations -> dog controller -> walls ->
-    metrics -> success check.
+    Tick order: sheep move, dogs move, metrics are recorded, then the stop checks. A trial
+    stops only on success or at ``max_ticks``; a failure runs to the limit. Every dog knows
+    every sheep and every other dog. ``shepherd_path`` sums the commanded displacement
+    |v| dt of every dog. ``on_tick`` sees the state after each tick; tests use it to check
+    invariants.
     """
     scenario = SCENARIOS[config["scenario_id"]]
-    sheep_step = SHEEP_MODELS[config["sheep_model"]]
+    sheep_step = SHEEP_MODELS[config["sheep_model"]].step
     dog_step = DOG_CONTROLLERS[config["dog_controller"]]
-    observe = OBS_MODES[config["obs_mode"]]
     max_ticks = int(config["max_ticks"])
+    dt = float(config["dt"])
 
-    state = _initial_state(scenario, config, seed)
-    history = [_record(state)]
+    def metrics(state: SimulationState) -> dict[str, float]:
+        return {"tick": state.tick, **record(TickView(state, config), scenario.metrics)}
+
+    state = initial_state(config, seed)
+    history = [metrics(state)]
     while True:
-        prev_dogs = state.shepherd_positions
         state = sheep_step(state, config)
-        observations = [observe(state, i, config) for i in range(state.n_shepherds)]
-        state = dog_step(state, observations, config)
-
+        state = dog_step(state, config)
+        state.metadata["shepherd_path"] += dt * float(
+            np.linalg.norm(state.shepherd_velocities, axis=1).sum()
+        )
         state.tick += 1
-        world = state.world
-        state.sheep_positions = world.reflect_positions(state.sheep_positions)
-        state.shepherd_positions = world.reflect_positions(state.shepherd_positions)
-        state.sheep_velocities = world.reflect_velocities(
-            state.sheep_positions, state.sheep_velocities
-        )
-        state.shepherd_velocities = world.reflect_velocities(
-            state.shepherd_positions, state.shepherd_velocities
-        )
-        step_lengths = np.linalg.norm(state.shepherd_positions - prev_dogs, axis=1)
-        state.metadata["shepherd_path"] += float(step_lengths.sum())
+        history.append(metrics(state))
+        if on_tick is not None:
+            on_tick(state)
 
-        history.append(_record(state))
-        if scenario.is_success(state, config):
-            return RunResult(True, state.tick, pd.DataFrame(history))
+        if scenario.is_success(state):
+            return RunResult(True, state.tick, STOP_SUCCESS, pd.DataFrame(history))
         if state.tick >= max_ticks:
-            return RunResult(False, state.tick, pd.DataFrame(history))
+            return RunResult(False, state.tick, STOP_TIMEOUT, pd.DataFrame(history))

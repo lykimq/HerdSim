@@ -1,24 +1,53 @@
-"""Default parameters for the Strombom 2014 herding algorithm.
+"""Strombom et al. 2014 parameters (J. R. Soc. Interface 11: 20140719, Table 1).
 
-Reference: Strombom et al., J. Royal Soc. Interface, 2014, Table 1.
-Parameter names follow the paper's notation where practical.
-
-Task setup (arena, goal, start, agent counts) comes from the protocol YAML;
-this module declares Strombom behavior parameters only.
+``PAPER`` holds Table 1 values. ``SHEPHERD_EXTENSIONS`` holds the HerdSim setting the paper does
+not have.
 """
 
-STROMBOM_DEFAULTS = {
-    # Sheep behaviour (paper Table 1)
-    "r_a": 2.0,  # sheep-sheep repulsion distance; also weight ra
+from __future__ import annotations
+
+import math
+from typing import Any
+
+PAPER: dict[str, Any] = {
+    # Sheep (agents)
+    # Agent-agent interaction distance (eq. 4.1 cutoff); the shepherd rule also uses it
+    # for f(N) = r_a N^(2/3), the Pc and Pd offsets and the 3 r_a stop distance.
+    "r_a": 2.0,
+    "rho_a": 2.0,  # relative strength of repulsion from other agents (eq. 4.2 weight)
     "r_s": 65.0,  # shepherd detection distance
-    "rs_weight": 1.0,  # relative strength of shepherd repulsion (paper rs)
-    "n_neighbors": -1,  # topological LCM; -1 => N-1 (global case)
-    "c": 1.05,  # attraction strength toward LCM of n nearest neighbours
-    "noise_strength": 0.3,  # angular noise e
-    "sheep_speed": 1.0,  # agent displacement d per time step
-    "inertia": 0.5,  # previous-heading weight h
-    "graze_move_prob": 0.05,  # p: move while grazing when dog beyond r_s
-    # Shepherd behaviour
-    "shepherd_speed": 1.5,  # shepherd displacement ds per time step
-    "shepherd_stop_multiple": 3.0,  # stop when within this * r_a of any sheep
+    "rs_weight": 1.0,  # rho_s, strength of repulsion from the shepherd
+    "c": 1.05,  # attraction to the n nearest neighbours
+    "inertia": 0.5,  # h, weight on the previous heading
+    "noise_strength": 0.3,  # e, angular noise (sheep and shepherd)
+    "sheep_speed": 1.0,  # delta, displacement per tick
+    "graze_move_prob": 0.05,  # p, probability of a grazing step
+    # Number of nearest neighbours n. -1 means all N - 1 (the paper's global
+    # case). A string like "0.25N" means ceil(0.25 * N). More than N - 1 is an error.
+    "n_neighbors": -1,
+    # Shepherd
+    "shepherd_speed": 1.5,  # delta_s
+    "shepherd_stop_multiple": 3.0,  # speed 0 within 3 r_a of any sheep
 }
+
+# HerdSim setting the paper does not have: one tick is one time step of the paper.
+SHEPHERD_EXTENSIONS: dict[str, Any] = {"dt": 1.0}
+
+
+def resolve_n_neighbors(value: int | str, n_sheep: int) -> int:
+    """Neighbour count for a flock of ``n_sheep``: -1 -> N - 1, "fN" -> ceil(f N).
+
+    A count above N - 1 is an error, not clipped: the paper's n is a parameter
+    of the rule, and a cell whose N cannot supply it is a different cell.
+    """
+    if isinstance(value, str):
+        if not value.endswith("N"):
+            raise ValueError(f"n_neighbors {value!r}: use an int, -1, or a fraction like '0.25N'")
+        k = math.ceil(float(value[:-1]) * n_sheep)
+    else:
+        k = n_sheep - 1 if int(value) == -1 else int(value)
+    if k < 1 and n_sheep > 1:
+        raise ValueError(f"n_neighbors {value!r} gives {k} neighbours for N = {n_sheep}")
+    if k > n_sheep - 1:
+        raise ValueError(f"n_neighbors {value!r} asks for {k} neighbours but N = {n_sheep}")
+    return k

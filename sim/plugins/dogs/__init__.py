@@ -1,9 +1,8 @@
-"""Dog controllers (how the shepherds move each tick).
+"""Dog controllers, picked by the method's ``dog_controller``.
 
-Each controller is a ``step(state, observations, config) -> state`` function.
-Controllers use ``observations`` for sensing and write shepherd positions,
-velocities, and metadata on the state. The method's ``dog_controller`` key
-picks one from DOG_CONTROLLERS.
+A controller is a function ``step(state, config) -> state`` that moves the dogs for one tick
+and writes their positions and velocities. Every dog knows the position of every sheep and of
+every other dog.
 """
 
 from __future__ import annotations
@@ -11,12 +10,11 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import Any
 
-from core.observation import ShepherdObservation
-from core.simulation_state import SimulationState
+from sim.core.simulation_state import SimulationState
 
 from . import collect_drive_multi, fat, kubo_forces
 
-DogStep = Callable[[SimulationState, list[ShepherdObservation], dict[str, Any]], SimulationState]
+DogStep = Callable[[SimulationState, dict[str, Any]], SimulationState]
 
 DOG_CONTROLLERS: dict[str, DogStep] = {
     "collect_drive_multi": collect_drive_multi.step,

@@ -1,0 +1,27 @@
+# Bench campaign: the D_min question in miniature, run through the real pipeline
+# (calibration, rounds, workers, store, frontier rules) in well under a minute.
+#
+# - N = 100 and 200 and 10 seeds per cell keep it small. N = 200 is the size at which the
+#   scattered starts need collecting, so the layouts can differ.
+# - The deadline is 5 drive times: tight enough that one dog cannot collect a scattered flock
+#   in time, loose enough that a compact drive finishes comfortably.
+# - theta 0.5 at 90% confidence lets 10 seeds decide a cell. The real thresholds (0.90 at 99%)
+#   need 51 straight successes per reliable cell.
+protocol_id: bench_dmin
+output: results/bench_dmin
+canonical: protocols/configs/canonical.yaml
+
+methods:
+  strombom_multi:
+    time_limit_drive_multiple: 5.0
+
+layouts: [compact, wide, outlier_rich]
+flock_sizes: [100, 200]
+shepherd_counts: [1, 2, 4, 8]
+
+reliability_theta: 0.5
+confidence: 0.9
+batch_seeds: 10
+max_seeds: 10
+timeseries_seeds: 0
+budget_hours: 0.5

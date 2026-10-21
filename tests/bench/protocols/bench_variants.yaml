@@ -1,0 +1,23 @@
+# Bench campaign: the three dog starts through the real pipeline. dog_start is a canonical
+# setting, so it is swept as a factor. Small, 5 seeds, N = 100, generous deadline.
+protocol_id: bench_variants
+output: results/bench_variants
+canonical: protocols/configs/canonical.yaml
+
+methods:
+  strombom_multi:
+    time_limit_drive_multiple: 8.0
+
+factors:
+  dog_start: [arcs, ring, handler]
+
+layouts: [wide]
+flock_sizes: [100]
+shepherd_counts: [1, 4]
+
+reliability_theta: 0.5
+confidence: 0.9
+batch_seeds: 5
+max_seeds: 5
+timeseries_seeds: 0
+budget_hours: 0.5

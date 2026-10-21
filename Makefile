@@ -1,27 +1,30 @@
-# HerdSim scaling-cli: install, tests, lint. Campaigns: cli/campaign.py
+# HerdSim: install, tests, benchmarks, lint. Campaigns: cli/campaign.py
 
-.PHONY: help install test lint format typecheck check clean
+.PHONY: help install test bench lint format typecheck check clean
 
 UV ?= uv
-# Repo root only. Do not add protocols/ here: packaging name clashes are avoided
-# by using the protocols.packaging package path.
 export PYTHONPATH := $(CURDIR)$(if $(PYTHONPATH),:$(PYTHONPATH),)
 
 help:
-	@echo "HerdSim (scaling-cli)"
+	@echo "HerdSim"
 	@echo ""
-	@echo "  make install | test | lint | format | typecheck | check | clean"
+	@echo "  make install | test | bench | lint | format | typecheck | check | clean"
+	@echo ""
+	@echo "  test            unit, invariant and reproducibility tests"
+	@echo "  bench           miniature real campaigns read for sense; run before a campaign session"
 	@echo ""
 	@echo "Campaigns:"
-	@echo "  uv run cli/campaign.py help"
-	@echo "  uv run cli/campaign.py run --protocol phase1_scout --workers 18"
+	@echo "  uv run cli/campaign.py run --protocol dmin_pilot --workers 16"
 	@echo "  Protocol ids: protocols/configs/protocols/"
 
 install:
 	$(UV) sync --extra dev
 
 test:
-	$(UV) run pytest tests -q
+	$(UV) run python -m tests.run test
+
+bench:
+	$(UV) run python -m tests.run bench
 
 lint:
 	$(UV) run ruff check .

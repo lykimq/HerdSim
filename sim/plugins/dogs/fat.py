@@ -1,48 +1,34 @@
-"""Farthest-agent targeting (FAT) under local observations."""
+"""Farthest-agent targeting (dog_controller=fat).
+
+Each dog independently pushes the sheep farthest from the goal: it aims r_a behind that sheep
+relative to the goal and moves with the Strombom shepherd step (noise and stop rule); the
+dogs do not coordinate. Every dog sees every sheep, so they all choose the same sheep and
+become copies of each other once they meet, which the ``dog_overlap`` metric shows.
+
+This is a HerdSim construction: it borrows the target choice of Kubo 2022's
+farthest-individual rule (FIT) but not its forces or speeds, so it is not FIT.
+"""
 
 from __future__ import annotations
 
 from typing import Any
 
 import numpy as np
-from core.observation import ShepherdObservation
-from core.simulation_state import SimulationState
-from methods.strombom.heuristics import shepherd_step_toward
 
-from .helpers import (
-    empty_dog_velocities,
-    finalize_dog_step,
-    position_behind_target,
-    view_from_observation,
-)
+from sim.core.simulation_state import SimulationState
+from sim.core.vectors import behind, farthest_from
+from sim.methods.strombom.heuristics import step_toward
+
+from .helpers import move_dogs, noise_angles
 
 
-def step(
-    state: SimulationState,
-    observations: list[ShepherdObservation],
-    config: dict[str, Any],
-) -> SimulationState:
-    """Drive the locally farthest observed sheep toward the goal."""
-    velocities = empty_dog_velocities(state)
+def step(state: SimulationState, config: dict[str, Any]) -> SimulationState:
+    velocities = np.zeros((state.n_shepherds, 2))
+    angles = noise_angles(state)
     goal = state.world.goal.center
-    offset = float(config["r_a"])
-
-    for obs in observations:
-        if obs.n_sheep_seen == 0:
-            continue
-        i = obs.shepherd_index
-        local = view_from_observation(state, obs)
-        # Farthest from dog among observed sheep. Bearing-only proxies sit at
-        # equal depth, so fall back to farthest from the goal among proxies.
-        dists = np.linalg.norm(obs.sheep_positions - obs.self_position, axis=1)
-        if float(np.ptp(dists)) < 1e-9:
-            far_idx = int(np.argmax(np.linalg.norm(obs.sheep_positions - goal, axis=1)))
-        else:
-            far_idx = int(np.argmax(dists))
-        sheep_pos = obs.sheep_positions[far_idx]
-        target = position_behind_target(sheep_pos, goal, offset)
-        velocities[i] = shepherd_step_toward(
-            local, config, i, target, proximity_sheep=state.sheep_positions
+    target = behind(farthest_from(state.sheep_positions, goal), goal, float(config["r_a"]))
+    for i in range(state.n_shepherds):
+        velocities[i] = step_toward(
+            state.shepherd_positions[i], target, state.sheep_positions, config, angles[i]
         )
-
-    return finalize_dog_step(state, velocities, metadata_updates={"herding_mode": "fat"})
+    return move_dogs(state, velocities, float(config["dt"]))

@@ -1,0 +1,17 @@
+# Bench campaign run twice, with one worker and with several: the rows must not differ.
+protocol_id: bench_workers
+output: results/bench_workers
+canonical: protocols/configs/canonical.yaml
+
+methods:
+  strombom_multi:
+    time_limit_drive_multiple: 5.0
+
+layouts: [wide]
+flock_sizes: [50]
+shepherd_counts: [1, 3]
+
+batch_seeds: 4
+max_seeds: 4
+timeseries_seeds: 0
+budget_hours: 0.5

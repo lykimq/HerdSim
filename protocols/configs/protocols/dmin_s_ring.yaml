@@ -1,0 +1,9 @@
+# Sensitivity: dogs start evenly round the flock on full circles, goal side included, instead
+# of on half circles behind it.
+# Same grid and deadline as dmin_s_base.yaml; only the change below differs.
+
+protocol_id: dmin_s_ring
+output: results/dmin_s_ring
+extends: dmin_s_base.yaml
+
+dog_start: ring

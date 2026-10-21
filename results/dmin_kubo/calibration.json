@@ -1,0 +1,11 @@
+{
+  "_auto_generated_notice": "AUTO-GENERATED: do not modify. Re-run the producing command to refresh this file.",
+  "physics_hash": "eec5b3081a76bf31",
+  "flock_radius": {
+    "kubo": {
+      "25": 6.1946155451988485,
+      "50": 6.055231779113192,
+      "100": 5.896837215955383
+    }
+  }
+}

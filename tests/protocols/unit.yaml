@@ -1,0 +1,22 @@
+# Protocol the unit tests load for the canonical settings and the three methods. Tests never
+# run it as a campaign and never write to its output folder.
+
+protocol_id: unit
+output: results/unit
+canonical: protocols/configs/canonical.yaml
+
+methods:
+  strombom_multi:
+    time_limit_ticks: 3000
+  fat:
+    time_limit_ticks: 3000
+  kubo:
+    time_limit_seconds: 500
+
+layouts: [compact]
+flock_sizes: [25, 100]
+shepherd_counts: [1, 2, 4, 10]
+
+batch_seeds: 5
+max_seeds: 5
+budget_hours: 1.0

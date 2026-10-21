@@ -89,6 +89,9 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 docs/science/
+!docs/science/
+docs/science/*
+!docs/science/phase1.md
 
 # --- Unused framework leftovers (safe to keep ignored) ---
 local_settings.py
@@ -112,14 +115,9 @@ activemq-data/
 .vscode/
 node_modules/
 
-# --- Project: NetLogo uploads ---
-netlogo/models/uploads/*
-!netlogo/models/uploads/.gitkeep
-
-# --- Project: sim trajectories (keep trials/status/packages tracked) ---
+# --- Project: per-tick histories of campaign runs (large; trials and tables stay tracked) ---
 *.parquet
 **/timeseries/
 
-# --- Project: background run logs ---
-.runs/
-cli/logs/
+# --- Project: the lock a running campaign holds in its folder ---
+.lock
