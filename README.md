@@ -1,306 +1,349 @@
 # HerdSim
 
-HerdSim is a multi-agent shepherding simulator: a few dogs move a flock of sheep into a goal. It is used to measure `D_min`, the fewest dogs that finish the task reliably within a deadline, and how it depends on the flock size N, the start layout of the flock, the deadline and the dog rule.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Tests](https://img.shields.io/badge/tests-242%20passed-brightgreen.svg)](tests/)
+[![Trials](https://img.shields.io/badge/simulated%20trials-112%2C785-success.svg)](results/)
 
-Reliable means the success rate is decided to be at least theta = 0.90. The same rules also give the dog count past which extra dogs stop making the task faster (`D_sat`) and counts where it gets slower or fails again (`D_crowd`, `D_overcrowd`), which are kept as side output. By default (`decide_finish_times: false`) seeds are spent only to decide `D_min`, and a side-output value whose comparison is still open is flagged undecided.
+**HerdSim** is a multi-agent simulation framework and empirical laboratory for collective shepherding. It investigates a fundamental question in bio-inspired swarm robotics and behavioural biology:
 
-Status: the code, tests and bench are built, and the planned protocols have been run (16 protocols, no trial errors); `dmin_fat` is not written yet. The research plan and its settings are in `docs/science/design_version2/plan_dmin.md` when that folder is present locally.
+> **How many autonomous shepherds ($D$) are required to reliably gather and drive a flock of $N$ sheep to a designated goal within a time deadline, and how does this minimum requirement ($D_{\min}$) scale with flock size, initial dispersion, deadline pressure, and coordination rules?**
 
-## Quick start
+Given unbounded time, a single shepherd can eventually collect and steer almost any flock by sequentially chasing stray individuals. Under finite deadlines, however, shepherding becomes an active collective coordination problem: agents must parallelize the collection of dispersed outliers, prevent the flock from fracturing, and drive the aggregate without causing boundary scattering or overcrowding.
+
+HerdSim couples high-fidelity microscopic agent physics (based on the models of [Strömbom et al. 2014](https://doi.org/10.1098/rsif.2014.0419) and [Kubo et al. 2022](https://doi.org/10.1088/2632-072X/ac6cb4)) with a novel multi-dog assignment layer, rigorous scale-invariant task geometry, and an adaptive sequential statistical engine (99% Clopper–Pearson confidence testing).
+
+![Anatomy of a real simulation trial](docs/science/design_version2/figures/fig17_trial.png)
+*Figure 1: Evolution of a real simulation trial ($N = 200$ sheep, $D = 2$ dogs, wide start, seed 2026). Dogs autonomously identify distant outliers, execute parallel collection sweeps to consolidate the flock, and subsequently establish an arc formation behind the flock centroid to drive the collective into the circular goal.*
+
+---
+
+## Table of Contents
+
+- [Core Scientific Findings](#core-scientific-findings)
+- [How a Campaign Runs](#how-a-campaign-runs)
+- [Task Geometry and Scale Invariance](#task-geometry-and-scale-invariance)
+- [Initial Flock Configurations](#initial-flock-configurations)
+- [Agent Models and Multi-Dog Coordination](#agent-models-and-multi-dog-coordination)
+- [Statistical Decisions and the Frontier](#what-the-frontier-rules-decide)
+- [Sensitivity and Robustness](#sensitivity-and-robustness)
+- [Quick Start](#quick-start)
+- [What a Run Writes](#what-a-run-writes)
+- [Project Architecture](#project-architecture)
+- [Verification and Benchmarks](#verification-and-benchmarks)
+- [References and Further Reading](#references-and-further-reading)
+
+---
+
+## Core Scientific Findings
+
+Across 17 executed campaign protocols encompassing **112,785 individual simulation trials** (with zero execution or simulation errors), HerdSim systematically mapped the scaling frontier $D_{\min}(N)$ for $N \in [25, 400]$ across multiple layouts, deadlines, and coordination variants.
+
+All empirical data tables are produced directly from `results/` by [`cli/dmin_tables.py`](cli/dmin_tables.py) and summarized in [`docs/science/design_version2/results_tables.md`](docs/science/design_version2/results_tables.md).
+
+![D_min scaling against flock size N across deadlines and layouts](docs/science/design_version2/figures/fig20_dmin_vs_n.png)
+*Figure 2: Empirical scaling of $D_{\min}$ against flock size $N$ across three normalized deadlines ($12\times$, $6\times$, and $3\times$ drive times). Circles denote strict success (100% of sheep in the goal); squares denote the 99% threshold ($f_{99}$). For cohesive flocks (compact), $D_{\min} = 1$ everywhere. For dispersed flocks, $D_{\min}$ scales sub-linearly with $N$, heavily modulated by deadline urgency.*
+
+### 1. Compact Flocks Exhibit Invariant Scaling ($D_{\min} = 1$)
+When a flock begins in a cohesive spatial state (`compact`), **a single shepherd is sufficient across every tested flock size ($N = 25$ to $400$) and every deadline ($12\times$ down to $3\times$ drive times)**. Because no sheep begin outside the collection threshold, the task is purely one of directional driving. Adding more dogs to a compact flock yields no improvement in reliability ($D_{\min} = 1$) and quickly saturates finish times.
+
+### 2. Dispersed Flocks Scale Sub-linearly with $N$
+On scattered layouts (`wide`, `split`, `outlier_rich`), shepherds must spend initial time collecting distant outliers before driving can begin:
+- At generous deadlines ($12\times$ drive time), $D_{\min}$ remains 1 for $N \le 100$, rising modestly to 2 or 3 dogs at $N = 400$.
+- In log-log space ($\log_2 D_{\min}$ vs. $\log_2 N$), growth slopes for scattered layouts fall between **0.25 and 0.45**, demonstrating strong sub-linear scaling: doubling flock size requires far less than double the shepherd force.
+
+### 3. Deadline is a First-Order Governing Parameter
+Tightening the deadline from $12\times$ to $3\times$ drive times exerts an effect comparable to a 16-fold expansion of flock size. At $3\times$ drive times, wide flocks at $N = 400$ require $D_{\min} = 6$ dogs (under $f_{99}$), and tight deadlines completely prevent single shepherds from gathering split clusters.
+
+### 4. The Last-Sheep / Straggler Mechanism
+A crucial biological insight emerged from auditing strict success criteria (100% of sheep inside the goal circle at a single tick) against a 99% threshold ($f_{99}$):
+
+![Straggler mechanism and strict vs 99% success](docs/science/design_version2/figures/fig22_straggler.png)
+*Figure 3: The Straggler Effect. Left: Under strict criteria (circles), success rates collapse for large $N$ under tight deadlines; under 99% criteria (squares), success remains high. Right: Time-series of a failed strict trial ($N = 100$, split, $D = 2$). 99% of the flock reaches the goal well within the deadline ($t \approx 226$ s of a 355 s limit), but 1 or 2 trailing stragglers remain outside. As the dogs attempt to retrieve the stragglers, the flock already inside drifts out, causing a technical timeout under strict criteria.*
+
+In biological and agricultural herding, a single stubborn or drifting sheep does not represent collective failure. Evaluating $f_{99}$ resolves artificial boundary censorship and exposes the true structural scaling laws of the multi-agent system.
+
+---
+
+## How a Campaign Runs
+
+Rather than running wasteful fixed-sample Monte Carlo sweeps across hundreds of parameter combinations, HerdSim employs an **adaptive sequential exploration algorithm**.
+
+A **protocol** (defined in [`protocols/configs/protocols/`](protocols/configs/protocols/)) specifies the parameter space: sheep models, shepherd algorithms, flock sizes $N$, shepherd counts $D$, initial layouts, and deadlines. Every unique combination of method, layout, and $N$ forms a **$D$-curve** (group). Each specific dog count $D$ within that curve is a **cell**, and each seed evaluated is a **trial**.
+
+```mermaid
+flowchart TD
+    P["Protocol YAML + canonical.yaml"] --> CAL["Calibrate R_f(N) per method"]
+    CAL --> R["Round: Plan seed batches"]
+    R --> W["Worker pool runs parallel trials<br/>(Deterministic isolated RNG streams)"]
+    W --> F["Frontier evaluation:<br/>99% Clopper-Pearson CI on reliability<br/>Paired bootstrap finish-time comparisons"]
+    F --> Q{"Any cell undecided<br/>and under max_seeds (200)?"}
+    Q -- Yes --> R
+    Q -- No --> S["Stop: Final tables, status.json, frontier CSVs"]
+```
+
+### Adaptive Execution Mechanics
+
+1. **Initial Exploration**: Each active cell is seeded with a baseline batch (`batch_seeds`, default 10).
+2. **Sequential Refinement**: Cells whose reliability classification ($\theta = 0.90$) remains open receive additional batches up to `max_seeds` (200). Obvious successes (e.g. 10 straight successes on compact $N=25$) and obvious failures stop early, concentrating CPU cycles exactly where classification variance is high.
+3. **Adaptive Grid Densification**: If the assigned behavioral zone changes between two adjacent tested $D$ values separated by more than `refine_min_gap`, the midpoint integer $D$ is automatically injected into the curve for the next round.
+4. **Saturation Pruning**: Above a confirmed saturation point ($D_{\text{sat}}$), if additional dogs act as copies of one another (mean `dog_overlap` $\ge 0.90$) without improving speed or reliability, further seeds are suppressed (`pruned`).
+5. **Deterministic Paired Comparisons**: Every seed $i$ uses `master_seed + i` (default $2026 + i$), ensuring that trials comparing $D=2$ against $D=4$ run on the **exact same initial flock configuration and identical stochastic noise draws**.
+6. **Robust Interrupt and Resume**: Every trial is committed to disk immediately upon completion. Runs can be safely interrupted (`SIGINT`) and resumed; locked directories prevent concurrent write collisions.
+
+---
+
+## Task Geometry and Scale Invariance
+
+A common flaw in agent-based herding simulations is fixing physical field dimensions while varying flock size $N$. Because 400 sheep naturally occupy vastly more physical area than 25 sheep, fixed dimensions introduce artificial confinement and confound spatial density with agent count.
+
+HerdSim enforces **scale invariance** by anchoring all spatial and temporal metrics to the **calibrated flock radius $R_f(N)$**: the steady-state radius of an $N$-sheep flock driven by a single shepherd.
+
+![Task geometry and physical scaling](docs/science/design_version2/figures/fig6_task_geometry.png)
+*Figure 4: Task geometry drawn to scale from simulation code. Left: Physical layout at $N = 200$. The goal circle, drive distance, and arena boundaries expand proportionally with $R_f(N)$. Middle: Drive length definition. Right: Calibrated growth of flock radius $R_f$ and goal radius $R_{\text{goal}}$ across $N$.*
+
+| Parameter | Mathematical Formulation | Physical Rationale |
+|---|---|---|
+| **Flock Radius** $R_f(N)$ | Empirical calibration (e.g., $3.14$ at $N=5$, $9.08$ at $N=100$, $11.4$ at $N=400$) | Reflects natural inter-individual equilibrium spacing under driving. |
+| **Drive Distance** | $\max\left(13 R_f(N),\, 80,\, \text{reach} + R_{\text{goal}} + R_f\right)$ | Ensures large flocks travel proportionally farther to match physical scale. |
+| **Goal Radius** $R_{\text{goal}}$ | $1.9 \cdot R_f(N)$ | Standardizes containment difficulty across flock sizes. |
+| **Field Clearance** | 80 units beyond farthest possible starting agent | Positions initial entities safely away from coordinates boundaries. |
+| **Open Boundary** | **No walls or reflecting boundaries** | Boundary reflections act as artificial collectors, artificially inflating success. Agents may freely roam. |
+
+### Normalized Deadline
+
+Deadlines are specified as multiples $m$ of the characteristic **drive time**:
+$$T_{\text{drive}} = \frac{\text{Drive Distance}}{v_{\text{sheep\_max}}}$$
+A trial evaluated at $m = 6$ requires the dog team to gather and drive the flock within 6 times the theoretical minimum travel time of the fastest sheep. A compact flock driven by an optimal shepherd completes the task in $1.45$ to $1.74 \times T_{\text{drive}}$; thus $m \in \{12, 6, 3\}$ provides a graded, realistic scale from relaxed to urgent time pressure.
+
+---
+
+## Initial Flock Configurations
+
+To study the transition between collection and driving, HerdSim provides four distinct initial spatial geometries:
+
+![The four starting flock layouts at N = 200](docs/science/design_version2/figures/fig7_layouts.png)
+*Figure 5: The four initial flock layouts evaluated at $N = 200$ (identical scale). The red dashed circle marks the analytical collection boundary $f(N) = r_a N^{2/3}$. Any sheep located outside this circle triggers active collection heuristics.*
+
+1. **`compact`**: Flocks sampled from a 2D Gaussian ($\sigma = 0.5 R_f$, truncated at $3\sigma$). All sheep begin well within $f(N)$; dogs immediately enter drive mode.
+2. **`wide`**: Flocks sampled from a broad Gaussian ($\sigma = 0.5 \cdot 2 N^{2/3}$). Sheep are broadly scattered, requiring substantial initial perimeter sweeping.
+3. **`split`**: The flock is partitioned into 3 compact sub-clusters (2 when $N < 12$) spaced symmetrically on a circle of radius $2 N^{2/3}$. Dogs must address isolated groupings without dispersing them further.
+4. **`outlier_rich`**: 80% of sheep reside in a dense compact core, while 20% are distributed as distant outliers between $1.1$ and $1.6 \times 2 N^{2/3}$.
+
+### Shepherd Release Configurations (`dog_start`)
+
+Dogs begin 30 units behind the flock's rear boundary, arranged in one of three experimental stations:
+- **`arcs` (default)**: Dogs are spaced evenly along concentric semi-circular arcs behind the flock. Single dogs start directly on the drive axis; additional dogs occupy distinct flanking stations.
+- **`ring`**: Dogs are distributed uniformly along a full $360^\circ$ circle surrounding the flock, testing whether encirclement aids or hinders initial gathering.
+- **`handler`**: All dogs originate from a single point directly behind the flock (simulating simultaneous release from a human handler's post).
+
+---
+
+## Agent Models and Multi-Dog Coordination
+
+HerdSim implements microscopic agent physics based on validated empirical literature, extended with a coordination layer designed to prevent trivial copycat dynamics.
+
+![Multi-dog coordination mechanisms](docs/science/design_version2/figures/fig3_team_rule.png)
+*Figure 6: Multi-dog team coordination in `strombom_multi`. Left: Outlier collection assignment. $D$ dogs are matched to the $D$ farthest outliers via minimum-weight Euclidean matching (least total walking distance). Center: Parallel driving formation. Dogs occupy equidistant angular slots along a driving arc subtending the flock's width, maintaining angular order to avoid crossing trajectories. Right: Unit push blending. Multiple dogs near a single sheep combine their influence into a normalized unit repulsion vector.*
+
+### 1. Sheep Dynamics ([Strömbom et al. 2014](https://doi.org/10.1098/rsif.2014.0419))
+Each individual sheep $i$ updates its heading vector via five additive components:
+$$\mathbf{H}_i^{t+1} = (1 - \rho)\,\mathbf{v}_i^t + \rho\,\frac{\mathbf{C}_i + \mathbf{R}_i + \mathbf{S}_i + \mathbf{e}_i}{\|\mathbf{C}_i + \mathbf{R}_i + \mathbf{S}_i + \mathbf{e}_i\|}$$
+where:
+- $\mathbf{v}_i^t$ is current momentum (persistence $\rho$).
+- $\mathbf{C}_i$: Attraction toward the local center of mass of neighbors within interaction radius $r_a$.
+- $\mathbf{R}_i$: Short-range repulsion away from neighbors within collision distance $d_a$.
+- $\mathbf{S}_i$: Strong repulsion away from any shepherd within threat distance $r_s$.
+- $\mathbf{e}_i$: Stochastic angular noise.
+
+**Push Blending**: In the original Strömbom paper, only a single dog was modeled. HerdSim resolves multi-dog repulsive scaling by summing individual dog repulsive pushes and normalizing to length 1:
+$$\mathbf{S}_i = \frac{\sum_{j \in \text{threat}} \frac{\mathbf{x}_i - \mathbf{y}_j}{\|\mathbf{x}_i - \mathbf{y}_j\|}}{\left\|\sum_{j \in \text{threat}} \frac{\mathbf{x}_i - \mathbf{y}_j}{\|\mathbf{x}_i - \mathbf{y}_j\|}\right\|}$$
+This preserves realistic biological repulsion: multiple dogs cornering a sheep apply pressure from their mean direction without generating unphysical super-velocities.
+
+### 2. Shepherd Controllers
+
+- **`strombom_multi` (Team Coordination)**:
+  - *Outlier Mode*: When any sheep lies farther than $f(N) = r_a N^{2/3}$ from the flock centroid, the $D$ farthest outliers are identified. Dogs are assigned to outliers using linear sum assignment (minimum total Euclidean travel distance). Leftover dogs assist in driving the core flock.
+  - *Drive Mode*: When the flock is cohesive, dogs form an arc behind the flock at distance $r_d$, spanning the angular width of the flock. Dogs are sorted by their relative angular station around the flock, guaranteeing they never cross paths while moving to their assigned driving slots.
+- **`fat` (Farthest-Agent Targeting baseline)**:
+  Uncoordinated baseline. Each dog independently targets the sheep farthest from the goal. Without assignment or repulsive spacing, dogs collapse into a tight cluster behind the same outlier, exhibiting high `dog_overlap`.
+- **`kubo` ([Kubo et al. 2022](https://doi.org/10.1088/2632-072X/ac6cb4) continuous force model)**:
+  Simulates shepherds using continuous force vectors, combining outlier targeting with inter-dog repulsion forces that encourage natural dispersion.
+
+---
+
+## What the Frontier Rules Decide
+
+Statistical decisions are governed by [`analysis/frontier.py`](analysis/frontier.py). For each cell (a given method, layout, $N$, and $D$):
+
+1. **Reliability ($\theta = 0.90$)**:
+   A cell is classified as **reliable** if the lower bound of its two-sided 99% Clopper–Pearson binomial confidence interval satisfies $p_{\text{lower}} \ge 0.90$. It is classified as **unreliable** if $p_{\text{upper}} < 0.90$, and **undecided** otherwise. At least 51 consecutive successes with 0 failures are mathematically required to establish reliability at 99% confidence.
+2. **Finish-Time Comparisons**:
+   Pairwise finish-time comparisons between reliable cells are evaluated using a paired bootstrap (4,000 resamples) on per-seed differences relative to the slower median. A cell is classified as **faster**, **slower**, or **same** (within a 5% margin).
+
+### Derived Frontier Metrics
+
+| Frontier Value | Definition |
+|---|---|
+| **$D_{\min}$** | Smallest reliable dog count $D$. ($D_{\min}^{\text{low}}$: lowest $D$ whose upper bound reaches $\theta$). |
+| **$D_{\text{sat}}$** | Smallest reliable $D$ such that no larger reliable $D$ is statistically faster. |
+| **$D_{\text{best}}$** | Smallest reliable $D$ that is not slower than the fastest reliable count on the curve. |
+| **$D_{\text{crowd}}$** | Smallest reliable $D > D_{\text{best}}$ that is measurably slower than $D_{\text{best}}$ (congestion). |
+| **$D_{\text{overcrowd}}$** | Smallest $D > D_{\min}$ where it and the subsequent tested $D$ are both unreliable (collapse). |
+| **$D_{\max}$** | Largest reliable dog count below $D_{\text{overcrowd}}$. |
+
+### Cell Behavioral Zones
+
+```
+  0 -------- D_min ------------- D_sat ------- D_crowd -------- D_overcrowd -------> D
+   [ too_few ]     [ improving ]       [ saturated ]   [ crowded ]       [ collapse ]
+```
+
+- `too_few`: Unreliable, below $D_{\min}$.
+- `improving`: Reliable, below $D_{\text{sat}}$; adding dogs provides statistically significant speedups.
+- `saturated`: Reliable, from $D_{\text{sat}}$ upward; additional dogs maintain reliability but yield no further speedup.
+- `crowded`: Reliable, but slower than $D_{\text{best}}$ due to dog interference.
+- `collapse`: Unreliable, at or above $D_{\text{overcrowd}}$; excessive shepherds fracture or repeatedly overshoot the flock.
+
+---
+
+## Sensitivity and Robustness
+
+To verify that findings reflect fundamental multi-agent dynamics rather than arbitrary parameter choices, HerdSim executed systematic sensitivity sweeps:
+
+![Sensitivity of D_min across experimental variations](docs/science/design_version2/figures/fig24_sensitivity.png)
+*Figure 7: Sensitivity analysis of $D_{\min}$ across experimental variants ($N \in \{100, 200, 400\}$, wide and outlier-rich layouts at $6\times$ drive time). Evaluates shepherd release geometry (handler post, full ring), start gap distance, goal radius, dog speed, and field-matched parameters.*
+
+1. **Release Geometry**: Releasing dogs from a single handler post (`handler`) requires fewer dogs than an encircling ring (`ring`), because ring dogs on the goal side can inadvertently frighten sheep backward before reaching their stations.
+2. **Dog Speed**: Counter-intuitively, slower dogs ($v_{\text{dog}} = 1.15$ vs $1.5$) achieve lower $D_{\min}$ on large flocks under strict success rules. Fast dogs tend to drive the flock forcefully through the circular goal, causing overshoots that strand trailing sheep.
+3. **Field-Matched Realism**: Calibrating sheep to empirical GPS field data ($r_a = 1.0$, interaction range $75$ m, noise $0.1$) halves the collection distance. Under strict 100% criteria, this ceiling suppresses success; under $f_{99}$, field-matched sheep herd more efficiently than the synthetic baseline.
+
+---
+
+## Quick Start
+
+### Installation
+
+HerdSim requires Python 3.11+ and uses [`uv`](https://docs.astral.sh/uv/) for high-performance dependency management:
 
 ```bash
+# Clone the repository
+git clone https://github.com/lykimq/HerdSim.git
+cd HerdSim
+
+# Install development environment and dependencies
 make install     # uv sync --extra dev
-make check       # ruff + basedpyright + tests
-make bench       # miniature real campaigns read for sense, about 1 minute; run before a campaign session
 
-uv run cli/campaign.py plan   --protocol dmin_m6                          # what a run would do; runs nothing
-uv run cli/campaign.py run    --protocol dmin_pilot --workers 16
+# Run comprehensive checks (Ruff linter + basedpyright type checker + 242 tests)
+make check
+
+# Execute miniature verification campaigns (~1 minute)
+make bench
+```
+
+### Running Campaigns
+
+Execute single protocols or batch queues using the CLI:
+
+```bash
+# Preview the trial plan for a protocol without executing
+uv run cli/campaign.py plan --protocol dmin_m6
+
+# Run a campaign with 16 parallel workers
+uv run cli/campaign.py run --protocol dmin_pilot --workers 16
+
+# Check the real-time status of an active or completed campaign
 uv run cli/campaign.py status --protocol dmin_pilot
-uv run cli/dmin_report.py     --protocol dmin_pilot --folder results/dmin_pilot --multiples 3 6 12
+
+# Inspect D_min results across multiple deadlines
+uv run cli/dmin_report.py --protocol dmin_pilot --folder results/dmin_pilot --multiples 3 6 12
+
+# Run the complete sequence of research protocols (resumes automatically)
+uv run cli/run_queue.py --workers 20
+
+# Generate publication-grade Markdown result tables from results/
+uv run cli/dmin_tables.py record
+uv run cli/dmin_tables.py dmin dmin_m12 dmin_m6 dmin_m3
 ```
 
-## How a campaign runs
+---
 
-A **protocol** is one YAML file in `protocols/configs/protocols/`. It names the methods, layouts, flock sizes N and dog counts D. Every combination of method, layout and N is a **D curve** (a group). A curve at one D is a **cell**, and one seed of a cell is a **trial**.
+## What a Run Writes
 
-`campaign.py run` runs one protocol into one folder, in rounds:
-
-```mermaid
-flowchart TD
-    P["protocol YAML + canonical.yaml"] --> CAL["calibrate R_f(N) per method"]
-    CAL --> R["round: plan trials"]
-    R --> W["worker pool runs trials,<br/>parent appends each row"]
-    W --> F["frontier rules per D curve:<br/>reliability, finish-time comparisons,<br/>D_min ... D_max, zones"]
-    F --> Q{"any cell still undecided<br/>and under max_seeds?"}
-    Q -- yes --> R
-    Q -- no --> S["stop: tables and status.json"]
-```
-
-Each round:
-
-1. A cell with fewer than one batch of seeds (`batch_seeds`, 10) is filled up to one batch.
-2. A cell whose reliability, or a finish-time comparison that can still change one of its curve's values, is undecided gets seeds up to the end of its next batch, up to `max_seeds` (200).
-3. Where the zone changes between two neighbouring D more than `refine_min_gap` (1) apart, the D halfway between is added to the curve.
-
-Above a confirmed saturation (`D_sat` decided and the next reliable D the same speed), a cell gets no more seeds when its dogs were copies of each other: mean `dog_overlap` at least `prune_overlap` (0.9), and the cell neither slower nor unreliable. These cells are marked `pruned` in `frontier_cells.csv`.
-
-The run stops when no cell needs seeds, or after `budget_hours` (72) of this run. Seed i of every cell is `master_seed + i` (2026 + i), so cells are compared on the same start flocks.
-
-Stopping and resuming are safe. A trial is saved as soon as it finishes, and a rerun of the same command continues from the folder. A second run on the same folder is refused while the first holds its lock. A folder written with different physics (any setting that changes a trial) or by another protocol is refused too; use a new `--output`.
-
-A trial that raises an exception is logged in `errors.jsonl`, and its cell gets no more seeds and is never marked reliable. A deterministic simulation that raises has a bug, so the fix is in the code.
-
-### Calibration
-
-Lengths in a task scale with the flock radius `R_f(N)`: the radius of the flock while one dog drives it. At the start of a run each method is calibrated at every flock size of the protocol, and the result is saved in `calibration.json`. Calibration fails when the radius has not settled or depends on the start size. For Strombom sheep it holds up to N = 400, so N stops there. `campaign.py calibrate` prints the table without running a campaign.
-
-### Deadline
-
-A method's time limit is one of:
-
-| Key | Meaning |
-|-----|---------|
-| `time_limit_ticks` | a fixed number of ticks |
-| `time_limit_seconds` | model seconds, converted with the method's dt |
-| `time_limit_drive_multiple` | m times the drive time, the drive length over the top sheep speed, so it grows with N and asks the same of every flock size |
-
-A trial succeeds when `success_fraction` of the sheep are inside the goal (1, every sheep, by default; 0.99 lets one or two stragglers go). It stops only on success or at its limit; a failure runs to the deadline. `cli/dmin_report.py` reads the trials of a run at tighter deadlines, since a trial that finishes inside a tighter deadline also succeeds under it.
-
-## Inside one trial
-
-One trial runs tick by tick until success or the time limit:
-
-```mermaid
-flowchart TD
-    I["place flock and dogs by the task;<br/>three random streams from the seed"] --> S
-    S["sheep move"] --> D["dogs decide and move"]
-    D --> M["record metrics"]
-    M --> Q{"task done?"}
-    Q -- yes --> OK["success"]
-    Q -- no --> T{"time limit?"}
-    T -- yes --> TO["timeout"]
-    T -- no --> S
-```
-
-The layout, the sheep noise and the dog noise each draw from their own random stream, so a seed gives the same start flock and the same sheep draws at every D. Every dog knows the position of every sheep and of every other dog. There is no boundary: agents may leave the field rectangle, which only places the start, as in the Strombom and Kubo papers. The failure label of a failed trial is worked out after the run from its metric history (see [Failure labels](#failure-labels)).
-
-## What the frontier rules decide
-
-All of this is in `analysis/frontier.py`.
-
-A cell is **reliable** when the two-sided 99% Clopper-Pearson interval of its success rate lies at or above theta (0.90), **unreliable** when it lies below, and **undecided** otherwise. At least 51 straight successes are needed for reliable. Two cells are compared on finish time by a paired bootstrap (4000 resamples) of the median per-seed difference, relative to the slower median: **faster**, **slower**, **same** (within 5%) or **undecided**.
-
-Per D curve:
-
-| Value | Meaning |
-|-------|---------|
-| `D_min` | smallest reliable D (`D_min_low`: smallest D whose upper bound reaches theta) |
-| `D_overcrowd` | smallest D above `D_min` where it and the next tested D are both unreliable |
-| `D_max` | largest reliable D below `D_overcrowd`, or the largest reliable D |
-| `D_best` | smallest reliable D not slower than the fastest reliable D |
-| `D_sat` | smallest reliable D that no larger reliable D is faster than |
-| `D_crowd` | smallest reliable D above `D_best` that is slower than `D_best` |
-
-`D_best`, `D_sat` and `D_crowd` use only the reliable D from `D_min` to `D_max`. Each of them has an `_undecided` flag, set when an open comparison could still move it. `d_min_above_grid` means no D on the grid is reliable, `d_max_at_grid_top` means the top of the grid is still reliable, and `still_improving_at_top` means `D_sat` is the top of the grid, so the real value may lie above it.
-
-Zone of each cell:
-
-| Zone | Cell |
-|------|------|
-| `too_few` | unreliable, below `D_min` |
-| `improving` | reliable, below `D_sat` |
-| `saturated` | reliable, from `D_sat` up, not slower than `D_best` |
-| `crowded` | reliable and slower than `D_best` |
-| `unreliable_dip` | unreliable, between `D_min` and `D_overcrowd` |
-| `collapse` | unreliable, from `D_overcrowd` up |
-| `recovered` | reliable again above `D_overcrowd` |
-| `undecided` | reliability, or the comparison with `D_best`, still open |
-
-## Configuration
-
-Settings are layered; later layers win:
-
-1. `protocols/configs/canonical.yaml`: shared defaults, each with a short comment.
-2. The protocol YAML, which may `extends:` another protocol (a child key replaces the parent's whole value).
-3. `--output` on the command line.
-
-Method parameters (r_a, speeds, Kubo gains) live once in `sim/methods/*/config.py`. A protocol overrides them per method under `params`.
-
-### Protocol keys
-
-| Key | Meaning |
-|-----|---------|
-| `protocol_id` | name; also recorded in the folder, which then belongs to this protocol |
-| `output` | results folder, under `results/` when inside the repo |
-| `canonical` | path of the canonical file |
-| `extends` | optional parent protocol |
-| `methods` | per method: one time limit key (see [Deadline](#deadline)) and optional `params` |
-| `layouts`, `flock_sizes`, `shepherd_counts` | the grid |
-| `factors` | optional; each key's list of levels makes its own D curves |
-| any canonical key | overrides that value for the whole protocol |
-
-A factor is a canonical setting. A method parameter cannot be a factor, because the flock radius is calibrated once per method without factors, so every level would run on the radius of the default flock; run each level as its own protocol. Whole-protocol settings (`task`, `master_seed`, the `calibration_*` keys, `settled_tolerance`, `start_agreement`) and the strategy keys that only steer the adaptive run (`reliability_theta`, `confidence`, `batch_seeds`, `max_seeds`, `time_margin`, `min_pairs`, `bootstrap_resamples`, `timeseries_seeds`, `budget_hours`, `refine_min_gap`, `prune_overlap`, `decide_finish_times`) cannot be swept either. Unknown keys and bad grids fail when the protocol loads.
-
-The scattered layouts are sized by the collect distance r_a N^(2/3), so a protocol that changes `r_a` of a Strombom method must set `separation_scale` to the same value, and the loader refuses it otherwise. The field-matched sheep set of `dmin_s_matched` (r_a 1, noise 0.1, reaction distance 75) does this.
-
-### Protocols
-
-| Protocol | Purpose |
-|----------|---------|
-| `dmin_pilot` | one run at 12 drive times, 10 seeds per cell, read at tighter deadlines to choose the main deadlines and grid |
-| `dmin_m12`, `dmin_m6`, `dmin_m3` | the D_min table for `strombom_multi` at 12, 6 and 3 drive times; they differ only in the deadline |
-| `dmin_kubo` | the same question for the Kubo model, compact start, N up to 100 |
-| `dmin_s_base` | the reference of the sensitivity runs: wide and outlier_rich, N 100 200 400, D 1 to 16, 6 drive times |
-| `dmin_s_matched`, `dmin_s_handler`, `dmin_s_ring`, `dmin_s_goal`, `dmin_s_gap`, `dmin_s_dogspeed` | the same grid as `dmin_s_base` with one change each: field-matched sheep set, dogs start at one handler point, dogs start on a ring, a tighter goal, the dog start gap, a slower dog |
-| `dmin_f99_m12`, `dmin_f99_m6`, `dmin_f99_m3` | the grids of `dmin_m12`, `dmin_m6` and `dmin_m3` with `success_fraction` 0.99, on the same seeds |
-| `dmin_f99_s_base`, `dmin_f99_s_matched`, `dmin_f99_s_dogspeed` | `dmin_s_base`, `dmin_s_matched` and `dmin_s_dogspeed` with `success_fraction` 0.99 |
-
-`cli/run_queue.py` runs the protocols in order, resumes unfinished folders and skips finished ones.
-
-Each file's header comment gives its reasons.
-
-## What you can vary
-
-### Methods
-
-| Method | Sheep model | Dogs |
-|--------|-------------|------|
-| `strombom_multi` | Strombom 2014 | one dog is the paper shepherd. With more dogs every dog gets its own job (see [Team rule](#team-rule-of-strombom_multi)) |
-| `fat` | Strombom 2014 | each dog aims r_a behind the sheep farthest from the goal, with the Strombom step; no coordination |
-| `kubo` | Kubo 2022 | Kubo force dogs: each targets the farthest sheep and moves under the paper forces |
-
-`fat` borrows the target choice of Kubo's farthest-individual rule but not its forces or speeds, so it is a HerdSim construction. Its dogs are independent: they all aim at the same sheep, so they become copies once they meet, which `dog_overlap` shows.
-
-### Team rule of strombom_multi
-
-The paper's shepherd is one dog. HerdSim's multi-dog layer makes sure an added dog is never a copy of one already there:
-
-- Collecting: the D farthest outliers each get one dog, matched by distance (the assignment with the least total walk). With one dog that is the paper's farthest outlier. Dogs left over when there are more dogs than outliers drive the core of the flock (the sheep within f(N)).
-- Driving: the dogs stand on an arc behind the flock at the paper drive distance, spread evenly over the angle that covers the flock's width, with the paper drive point in the middle.
-- Dogs keep their side: they are matched to drive slots by their angle around the flock.
-- Several dogs push a sheep as one: the unit pushes of the dogs within reach are added and rescaled to length 1, so the sheep feel a push from the mean direction, as with one dog.
-
-### Start layouts
-
-| Layout | Shape |
-|--------|-------|
-| `compact` | one Gaussian, sigma = 0.5 R_f, cut at 3 sigma |
-| `wide` | one Gaussian, sigma = 0.5 x the Strombom collect distance 2 N^(2/3), cut at 3 sigma |
-| `split` | 2 (N < 12) or 3 compact clusters on a ring at the collect distance |
-| `outlier_rich` | 80% in a compact core, 20% at 1.1 to 1.6 x the collect distance |
-
-Where the dogs stand at tick 0 is set by `dog_start`, a convention with no real-world rule behind it:
-
-| `dog_start` | Placement |
-|-------------|-----------|
-| `arcs` (base) | half circles behind the flock, away from the goal, spread evenly: dog j of D at -90 + 180 (j + 0.5) / D degrees from straight behind, so one dog starts on the drive line and every added dog has its own station |
-| `ring` | full circles round the flock, goal side included: dog j of D at 360 j / D degrees from straight behind |
-| `handler` | every dog at one point straight behind the flock, as if released from a handler's post; the team rule then sends each to its own target |
-
-The first circle is `dog_start_gap` (30) units beyond the farthest possible start sheep. A circle takes as many dogs as fit `dog_start_spacing` (5) apart; more dogs go on circles 5 units farther out. Kubo runs compact starts only, because the scattered layouts are sized by Strombom's collect distance.
-
-## Metrics
-
-### Per tick
-
-Every trial records these every tick. The first `timeseries_seeds` (3) seeds of every cell keep the full history as Parquet.
-
-| Metric | Meaning |
-|--------|---------|
-| `gcm_goal` | distance from the flock centroid to the goal |
-| `gcm_in_goal`, `sheep_in_goal` | centroid inside the goal (0/1); number of sheep inside the goal |
-| `dogs_goal_side` | fraction of dogs between the flock and the goal |
-| `cohesion`, `extent` | mean and RMS distance of the sheep to their centroid |
-| `aspect_ratio`, `perimeter`, `hull_area`, `flock_density` | flock shape |
-| `fragmentation` | largest group / N, sheep within `measurement_radius` linked |
-| `lost_sheep` | sheep farther than 2.5 R_f from the centroid |
-| `min_separation` | closest two sheep |
-| `shepherd_path` | distance the dogs' controllers walked so far (commanded velocity) |
-| `min_dog_separation` | closest two dogs |
-| `dog_overlap` | fraction of dogs with another dog within `dog_overlap_distance` (2): dogs doing the same work as a twin |
-| `dogs_stopped` | fraction of dogs with zero commanded velocity |
-| `i_dir` | 1 - length of the summed unit headings of the moving dogs / their number |
-| `coverage` | fraction of outer sheep (beyond the median centroid distance) within a dog's reaction reach |
-
-### Per trial
-
-One row per trial in `trials.csv`:
-
-| Group | Columns |
-|-------|---------|
-| Identity | `trial_key`, `cell_key`, `group_key`, `task`, `method`, `initial_layout`, `n_sheep`, `n_shepherds`, `seed_index`, `seed`, the factor columns |
-| What it ran with | `flock_radius`, `time_limit_ticks`, `time_limit_seconds`, `dt` |
-| Task geometry and end state | `goal_radius`, `drive_distance`, `world_width`, `world_height`, `final_gcm_goal`, `final_sheep_in_goal`, `seconds_to_90pct_in_goal`, `seconds_to_95pct_in_goal`, `seconds_to_99pct_in_goal` (first arrival of that fraction of the flock, NaN if never; success needs `success_fraction` of the sheep, every sheep by default) |
-| Outcome | `success`, `total_ticks`, `stop_reason`, `finish_ticks`, `finish_seconds`, `dog_ticks`, `shepherd_path`, `path_per_dog` |
-| Summaries | `mean_*`, `min_*`, `max_*` of every per-tick metric |
-| Failure | `failure_mode`, `failure_hints` |
-
-Times compare across methods only in seconds: a Strombom tick is 1 s, a Kubo tick 0.05 s.
-
-### Failure labels
-
-A failed drive trial gets the first label that matches, in this order. Every match is kept in `failure_hints`.
-
-`dogs_out_of_range` (coverage low while no sheep is lost), `flock_escaped` (ended farther from the goal than it started), `split` (largest group under 55%), `scatter` (RMS radius above 2 R_f), `oscillation` (swinging toward and away from the goal), `stuck` (moved less than one goal radius). `timeout` if none match; `none` for a success.
-
-## What a run writes
+Every executed protocol writes a self-contained, auditable results directory:
 
 ```text
-results/<protocol>/
-|-- protocol.yaml         merged protocol and canonical values, plus every method parameter
-|-- provenance.json       protocol id and physics hash
-|-- calibration.json      R_f per method and N
-|-- trials.jsonl          one line per finished trial, appended as trials finish
-|-- errors.jsonl          one line per trial that raised
-|-- trials.csv            table form of trials.jsonl, rewritten after each round
-|-- frontier_cells.csv    per cell: counts, success interval, reliability, finish times, zone, pruned
-|-- frontier_groups.csv   per D curve: D_min, D_min_low, D_best, D_sat, D_crowd, D_overcrowd, D_max, flags
-|-- status.json           progress of the adaptive run
-|-- .lock                 held by the running campaign
-`-- timeseries/           per-tick Parquet for the first seeds of every cell
+results/<protocol_id>/
+|-- protocol.yaml         Merged configuration (canonical defaults + protocol overrides)
+|-- provenance.json       Git commit, physics hash, host environment, and timestamp
+|-- calibration.json      Calibrated steady-state flock radius R_f(N) per method
+|-- trials.jsonl          Append-only stream of completed trials (safe against crashes)
+|-- trials.csv            Consolidated trial results table (rewritten after each round)
+|-- frontier_cells.csv    Statistical outcomes per cell (Clopper-Pearson CI, finish times, zone)
+|-- frontier_groups.csv   Frontier metrics per D-curve (D_min, D_sat, D_crowd, D_overcrowd)
+|-- status.json           Live execution status, round counter, and timing diagnostics
+|-- errors.jsonl          Captured execution exceptions (empty in standard runs)
+|-- .lock                 File lock held during active execution
+`-- timeseries/           Per-tick Parquet files (retained for first 3 seeds per cell)
 ```
 
-Generated YAML, CSV and JSONL files start with an AUTO-GENERATED notice line, and JSON files carry it as their first key; read the CSVs with `pd.read_csv(path, skiprows=1)`.
+All CSV tables include standard metadata headers readable with `pd.read_csv(path, skiprows=1)`.
 
-## Project structure
+---
+
+## Project Architecture
+
+The codebase is organized into modular decoupled layers:
 
 ```text
 HerdSim/
-|-- sim/
-|   |-- core/               tick loop, state, method catalog, run config, world (arena, start layouts)
-|   |-- methods/            paper math and parameters: strombom, kubo
-|   `-- plugins/
-|       |-- sheep/          sheep models
-|       |-- dogs/           dog controllers
-|       |-- scenarios/      tasks: setup, success, task metrics, row columns, failure labels
-|       `-- metrics/        metrics for every task
-|-- services/               protocol loading, cells, calibration, adaptive run, store, workers
-|-- analysis/               frontier rules, D_min at a deadline, result tables
-|-- protocols/
-|   |-- configs/            canonical.yaml and one YAML per protocol
-|   `-- packaging/          trial row, provenance, generated-file notice
-|-- cli/                    campaign.py (run, plan, calibrate, status), run_queue.py, dmin_report.py, dmin_tables.py
-|-- tests/                  sim, services, analysis; bench/ for the miniature campaigns
-`-- docs/                   architecture, papers
+|-- sim/                    # Simulation engine and domain logic
+|   |-- core/               # State dataclasses, tick runner, arena, and layouts
+|   |-- methods/            # Physical models: Strombom (2014) and Kubo (2022)
+|   `-- plugins/            # Extensible plugin system
+|       |-- sheep/          # Microscopic sheep dynamics (strombom, kubo)
+|       |-- dogs/           # Shepherd controllers (collect_drive_multi, fat, kubo_forces)
+|       |-- scenarios/      # Task geometry, goal evaluation, failure diagnostics
+|       `-- metrics/        # Per-tick and summary geometric measurements
+|-- services/               # Campaign orchestration
+|   |-- adaptive.py         # Sequential sampling engine and batch planner
+|   |-- calibration.py      # Automated R_f(N) steady-state calibration
+|   |-- cells.py            # Parameter grid combinations and D-curves
+|   |-- protocol.py         # YAML protocol loading, schema checks, inheritance
+|   `-- runner.py           # Worker pool management and trial dispatch
+|-- analysis/               # Statistical evaluation
+|   |-- frontier.py         # Clopper-Pearson CI, paired bootstrap, zone classification
+|   `-- dmin_tables.py      # Table generators for empirical reporting
+|-- protocols/configs/      # Canonical defaults and protocol definitions
+|-- cli/                    # Command-line tools (campaign, run_queue, dmin_tables)
+|-- docs/                   # Scientific plans, architecture guides, and figure scripts
+|-- results/                # Archived empirical datasets (112k+ trials)
+`-- tests/                  # Test suites and golden regression benchmarks
 ```
 
-## Adding things
+---
 
-- A method: add its sheep model to `sim/plugins/sheep/`, its dog controller to `sim/plugins/dogs/` (or reuse existing ones), and one entry in `sim/core/methods.py`. Its defaults must include `dt`; a missing key or an unknown plugin name fails at import. A sheep model's `prepare` checks its own parameters and returns any keys it derives.
-- A task: one module in `sim/plugins/scenarios/` with the pieces listed in that package's docstring (setup, checks, world, starts, success, task metrics, row columns, failure labels), and one entry in its table. The protocol picks it with `task:`.
-- A metric for every task: a function of the tick view in `sim/plugins/metrics/` and one entry in its table. A metric that needs a task's geometry goes in that task's metrics instead.
-- A new sweep on existing settings: a new protocol file, with no code change.
+## Verification and Benchmarks
 
-## Tests
+HerdSim enforces rigorous validation at every layer:
 
-`make test` runs the unit, invariant and regression tests (about 25 s). The golden tests in `tests/sim/test_golden.py` pin short real trials; change their values only with a behaviour change, and say why in the same change.
+- **Unit & Invariant Tests** (`make test`, 242 tests, ~24 s):
+  Verifies that sheep vectors conserve physics, distances match analytical Euclidean formulas, and RNG streams remain isolated.
+- **Golden Regression Tests** ([`tests/sim/test_golden.py`](tests/sim/test_golden.py)):
+  Pins exact floating-point trajectories of reference trials across multiple seeds to prevent accidental physics drift.
+- **Micro-Campaign Benchmarks** (`make bench`, ~60 s):
+  Executes miniature end-to-end campaigns validating core model invariants:
+  - *Speed bound*: No flock centroid travels faster than maximum sheep speed.
+  - *Worker invariance*: Output is identical whether executed with 1 or 20 worker processes.
+  - *Idempotency*: Re-running an existing completed folder performs zero redundant calculations.
+  - *Physical orderings*: Compact flocks require zero collection; tighter deadlines require equal or greater shepherd counts.
 
-`make bench` (about 1 minute) runs miniature real campaigns through the whole pipeline (calibration, rounds, workers, store, frontier rules) and reads their tables. It checks bounds that follow from the model (no flock beats the sheep speed), properties of the machinery (a rerun adds nothing, the worker count changes no trial) and orderings the design should produce (a compact flock needs no collecting, a tight deadline asks a scattered flock for more dogs). Nothing in it is pinned to a stored number, so a failure means the printed numbers need a look. The bench protocols are in `tests/bench/protocols/`.
+---
 
-## Tech stack
+## References and Further Reading
 
-Python 3.11+, NumPy, SciPy, pandas, PyArrow, PyYAML; uv for the environment; pytest, Ruff and basedpyright for checks.
-
-## Further reading
-
-[docs/codes/architecture.md](docs/codes/architecture.md) explains how the system is designed and why, and what each choice costs.
+1. **Strömbom, D., et al. (2014)**. *Solving the shepherding problem: heuristics for herding autonomous, interacting agents*. Journal of the Royal Society Interface, 11(100), 20140419. [DOI: 10.1098/rsif.2014.0419](https://doi.org/10.1098/rsif.2014.0419)
+2. **Kubo, T., et al. (2022)**. *A force-based collective shepherding algorithm for multiple agents*. Bioinspiration & Biomimetics, 17(4), 046001. [DOI: 10.1088/2632-072X/ac6cb4](https://doi.org/10.1088/2632-072X/ac6cb4)
+3. **Comprehensive Research Design & Plan**: [`docs/science/design_version2/plan_dmin.md`](docs/science/design_version2/plan_dmin.md)
+4. **Empirical Results Tables**: [`docs/science/design_version2/results_tables.md`](docs/science/design_version2/results_tables.md)
+5. **Architectural Deep-Dive**: [`docs/codes/architecture.md`](docs/codes/architecture.md)
