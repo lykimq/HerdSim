@@ -14,7 +14,7 @@ Given unbounded time, a single shepherd can eventually collect and steer almost 
 HerdSim couples high-fidelity microscopic agent physics (based on the models of [Strömbom et al. 2014](https://doi.org/10.1098/rsif.2014.0419) and [Kubo et al. 2022](https://doi.org/10.1088/2632-072X/ac6cb4)) with a novel multi-dog assignment layer, rigorous scale-invariant task geometry, and an adaptive sequential statistical engine (99% Clopper–Pearson confidence testing).
 
 ![Anatomy of a real simulation trial](docs/figures/fig17_trial.png)
-*Figure 1: Evolution of a real simulation trial (N = 200 sheep, D = 2 dogs, wide start, seed 2026). Dogs autonomously identify distant outliers, execute parallel collection sweeps to consolidate the flock, and subsequently establish an arc formation behind the flock centroid to drive the collective into the circular goal.*
+*Figure 1: Evolution of a real simulation trial (N = 200 sheep, D = 4 dogs, wide start, seed 2026). Dogs autonomously identify distant outliers, execute parallel collection sweeps to consolidate the flock, and subsequently establish an arc formation behind the flock centroid to drive the collective into the circular goal.*
 
 ---
 
@@ -59,7 +59,7 @@ Tightening the deadline from 12× to 3× drive times exerts an effect comparable
 A crucial biological insight emerged from auditing strict success criteria (100% of sheep inside the goal circle at a single tick) against a 99% threshold (f99):
 
 ![Straggler mechanism and strict vs 99% success](docs/figures/fig22_straggler.png)
-*Figure 3: The Straggler Effect. Left: Under strict criteria (circles), success rates collapse for large N under tight deadlines; under 99% criteria (squares), success remains high. Right: Time-series of a failed strict trial (N = 100, split, D = 2). 99% of the flock reaches the goal well within the deadline (t ≈ 226 s of a 355 s limit), but 1 or 2 trailing stragglers remain outside. As the dogs attempt to retrieve the stragglers, the flock already inside drifts out, causing a technical timeout under strict criteria.*
+*Figure 3: The Straggler Effect. Left: Across trials with 6 or more dogs (wide and outlier-rich, N in {100, 200, 400}), faster dogs (speed 1.5) bring 99% of the flock into the goal in almost every trial, yet strict 100% success collapses; slower dogs (speed 1.15) avoid this penalty. Right: Time-series of one identical start flock (wide start, N = 400, D = 16 dogs, seed 2). The faster dog team drives the flock into the goal quickly with all but a couple stragglers, but then overshoots and pushes the flock out while chasing the trailing sheep. The slower dog team steers the flock steadily inside once, completing the task.*
 
 In biological and agricultural herding, a single stubborn or drifting sheep does not represent collective failure. Evaluating f99 resolves artificial boundary censorship and exposes the true structural scaling laws of the multi-agent system.
 
@@ -123,7 +123,7 @@ A trial evaluated at m = 6 requires the dog team to gather and drive the flock w
 To study the transition between collection and driving, HerdSim provides four distinct initial spatial geometries:
 
 ![The four starting flock layouts at N = 200](docs/figures/fig7_layouts.png)
-*Figure 5: The four initial flock layouts evaluated at N = 200 (identical scale). The red dashed circle marks the analytical collection boundary f(N) = r_a · N^(2/3). Any sheep located outside this circle triggers active collection heuristics.*
+*Figure 5: The four initial flock layouts evaluated at N = 200 with D = 4 dogs (identical scale). The red dashed circle marks the analytical collection boundary f(N) = r_a · N^(2/3). Any sheep located outside this circle triggers active collection heuristics.*
 
 1. **`compact`**: Flocks sampled from a 2D Gaussian (sigma = 0.5 · R_f, truncated at 3 sigma). All sheep begin well within f(N); dogs immediately enter drive mode.
 2. **`wide`**: Flocks sampled from a broad Gaussian (sigma = 0.5 · 2 N^(2/3)). Sheep are broadly scattered, requiring substantial initial perimeter sweeping.
