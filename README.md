@@ -250,10 +250,10 @@ Statistical decisions are governed by [`analysis/frontier.py`](analysis/frontier
 To verify that findings reflect fundamental multi-agent dynamics rather than arbitrary parameter choices, HerdSim executed systematic sensitivity sweeps:
 
 ![Sensitivity of D_min across experimental variations](docs/figures/fig24_sensitivity.png)
-*Figure 13: Sensitivity analysis of D_min across experimental variants (N in {100, 200, 400}, wide and outlier-rich layouts at 6× drive time). Evaluates shepherd release geometry (handler post, full ring), start gap distance, goal radius, dog speed, and field-matched parameters.*
+*Figure 13: Sensitivity analysis of D_min across experimental variants (N in {100, 200, 400}, wide and outlier-rich layouts at 6× drive time). Rows above the horizontal divider test strict success; rows below test the 99% arrival threshold (f99). The baseline rows ("strict: base (speed 1.5)" and "99%: base (speed 1.5)") use default model parameters: dog speed 1.5, arcs release, gap 30, and goal radius 1.9 R_f.*
 
 1. **Release Geometry**: Releasing dogs from a single handler post (`handler`) requires fewer dogs than an encircling ring (`ring`), because ring dogs on the goal side can inadvertently frighten sheep backward before reaching their stations.
-2. **Dog Speed**: Counter-intuitively, slower dogs (v_dog = 1.15 vs 1.5) achieve lower D_min on large flocks under strict success rules. Fast dogs tend to drive the flock forcefully through the circular goal, causing overshoots that strand trailing sheep.
+2. **Dog Speed (Base 1.5 vs. 1.15)**: The baseline configuration runs at dog speed $v_{\text{dog}} = 1.5$ (shown in the `strict: base (speed 1.5)` and `99%: base (speed 1.5)` rows), while the `dog speed 1.15` rows evaluate reduced dog speed. Counter-intuitively, slower dogs ($v_{\text{dog}} = 1.15$) achieve substantially lower $D_{\min}$ on large flocks under strict success rules (e.g. on outlier-rich $N = 400$, $D_{\min}$ drops from failure/"none" at base speed 1.5 to $D_{\min} = 6$ at speed 1.15). Slower dogs avoid forcefully overshooting the goal and stranding trailing sheep.
 3. **Field-Matched Realism**: Calibrating sheep to empirical GPS field data (r_a = 1.0, interaction range 75 m, noise 0.1) halves the collection distance. Under strict 100% criteria, this ceiling suppresses success; under f99, field-matched sheep herd more efficiently than the synthetic baseline.
 
 ---
