@@ -157,10 +157,12 @@ To study the transition between collection and driving, HerdSim provides four di
 Dogs begin 30 units behind the flock's rear boundary, arranged in one of three experimental stations:
 - **`arcs` (default)**: Dogs are spaced evenly along concentric semi-circular arcs behind the flock. Single dogs start directly on the drive axis; additional dogs occupy distinct flanking stations.
 - **`ring`**: Dogs are distributed uniformly along a full 360° circle surrounding the flock, testing whether encirclement aids or hinders initial gathering.
-- **`handler`**: All dogs originate from a single point directly behind the flock (simulating simultaneous release from a human handler's post).
+- **`handler`**: All dogs originate from a single point directly behind the flock (simulating simultaneous release from a human handler's post; at $t = 0$ all dogs begin superimposed at this single coordinate before fanning out).
 
 ![Shepherd release configurations](docs/figures/fig8_dog_starts.png)
-*Figure 10: Shepherd release configurations (dog_start). Top: Scaling of the default arcs geometry from D = 1 to D = 64 behind an N = 100 flock (dogs positioned on concentric arcs 30 units behind the flock perimeter). Bottom: Direct comparison of the three placement geometries (arcs, ring, handler) at N = 200 with D = 8 dogs on a wide flock start.*
+*Figure 10: Shepherd release configurations (dog_start). Top: Scaling of the default arcs geometry from D = 1 to D = 64 behind an N = 100 flock (dogs positioned on concentric arcs 30 units behind the flock perimeter). Bottom: Direct comparison of the three placement geometries (arcs, ring, handler) at N = 200 with D = 8 dogs on a wide flock start (in handler mode, all 8 dogs begin superimposed at the single release coordinate).*
+
+**Why evaluate a single-point `handler` post?** In actual working trials, shepherds release dogs from a single post behind the flock rather than pre-positioning them across the pasture. HerdSim includes `handler` as an experimental control to verify that pre-deployed `arcs` do not artificially inflate algorithmic performance. Starting all dogs at the exact same $(x, y)$ coordinate at $t = 0$ prevents arbitrary directional bias before the assignment algorithm runs; at $t = 1$, the team coordinator immediately fans them out to their respective targets.
 
 ---
 
