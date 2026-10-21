@@ -142,6 +142,16 @@ $$
 
 A trial evaluated at m = 6 requires the dog team to gather and drive the flock within 6 times the theoretical minimum travel time of the fastest sheep. A compact flock driven by an optimal shepherd completes the task in 1.45 to 1.74 × T_drive; thus m in {12, 6, 3} provides a graded, realistic scale from relaxed to urgent time pressure.
 
+| Flock Size ($N$) | Flock Radius ($R_f$) | Drive Distance ($l$) | Drive Time ($T_{\text{drive}}$) | $12\times$ Deadline (Relaxed) | $6\times$ Deadline (Intermediate) | $3\times$ Deadline (Urgent) |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **$N = 25$** | $6.20\text{ m}$ | $80.6\text{ m}$ | **$80.6\text{ s}$** (~$1.3\text{ min}$) | $967\text{ s}$ (~$16.1\text{ min}$) | $484\text{ s}$ (~$8.1\text{ min}$) | $242\text{ s}$ (~$4.0\text{ min}$) |
+| **$N = 50$** | $7.60\text{ m}$ | $98.8\text{ m}$ | **$98.8\text{ s}$** (~$1.6\text{ min}$) | $1\,185\text{ s}$ (~$19.8\text{ min}$) | $593\text{ s}$ (~$9.9\text{ min}$) | $296\text{ s}$ (~$4.9\text{ min}$) |
+| **$N = 100$** | $9.08\text{ m}$ | $118.1\text{ m}$ | **$118.1\text{ s}$** (~$2.0\text{ min}$) | $1\,417\text{ s}$ (~$23.6\text{ min}$) | $708\text{ s}$ (~$11.8\text{ min}$) | $354\text{ s}$ (~$5.9\text{ min}$) |
+| **$N = 200$** | $10.47\text{ m}$ | $139.8\text{ m}$ | **$139.8\text{ s}$** (~$2.3\text{ min}$) | $1\,678\text{ s}$ (~$28.0\text{ min}$) | $839\text{ s}$ (~$14.0\text{ min}$) | $419\text{ s}$ (~$7.0\text{ min}$) |
+| **$N = 400$** | $11.40\text{ m}$ | $206.8\text{ m}$ | **$206.8\text{ s}$** (~$3.4\text{ min}$) | $2\,482\text{ s}$ (~$41.4\text{ min}$) | $1\,241\text{ s}$ (~$20.7\text{ min}$) | $620\text{ s}$ (~$10.3\text{ min}$) |
+
+*Note: Drive distance $l = \max(13 R_f, 80, \text{reach} + R_{\text{goal}} + R_f)$. At $N = 400$, the arena clearance term dominates ($206.8\text{ m}$) because the initial dispersion radius of scattered layouts grows as $N^{2/3}$ while $R_f$ grows sub-linearly, ensuring the goal never overlaps any initial sheep placement.*
+
 ---
 
 ## Initial Flock Configurations
