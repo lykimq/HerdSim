@@ -144,13 +144,13 @@ A trial evaluated at m = 6 requires the dog team to gather and drive the flock w
 
 | Flock Size ($N$) | Flock Radius ($R_f$) | Drive Distance ($l$) | Drive Time ($T_{\text{drive}}$) | $12\times$ Deadline (Relaxed) | $6\times$ Deadline (Intermediate) | $3\times$ Deadline (Urgent) |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **$N = 25$** | $6.20\text{ m}$ | $80.6\text{ m}$ | **$80.6\text{ s}$** (~$1.3\text{ min}$) | $967\text{ s}$ (~$16.1\text{ min}$) | $484\text{ s}$ (~$8.1\text{ min}$) | $242\text{ s}$ (~$4.0\text{ min}$) |
-| **$N = 50$** | $7.60\text{ m}$ | $98.8\text{ m}$ | **$98.8\text{ s}$** (~$1.6\text{ min}$) | $1\,185\text{ s}$ (~$19.8\text{ min}$) | $593\text{ s}$ (~$9.9\text{ min}$) | $296\text{ s}$ (~$4.9\text{ min}$) |
-| **$N = 100$** | $9.08\text{ m}$ | $118.1\text{ m}$ | **$118.1\text{ s}$** (~$2.0\text{ min}$) | $1\,417\text{ s}$ (~$23.6\text{ min}$) | $708\text{ s}$ (~$11.8\text{ min}$) | $354\text{ s}$ (~$5.9\text{ min}$) |
-| **$N = 200$** | $10.47\text{ m}$ | $139.8\text{ m}$ | **$139.8\text{ s}$** (~$2.3\text{ min}$) | $1\,678\text{ s}$ (~$28.0\text{ min}$) | $839\text{ s}$ (~$14.0\text{ min}$) | $419\text{ s}$ (~$7.0\text{ min}$) |
-| **$N = 400$** | $11.40\text{ m}$ | $206.8\text{ m}$ | **$206.8\text{ s}$** (~$3.4\text{ min}$) | $2\,482\text{ s}$ (~$41.4\text{ min}$) | $1\,241\text{ s}$ (~$20.7\text{ min}$) | $620\text{ s}$ (~$10.3\text{ min}$) |
+| **$N = 25$** | 6.20 m | 80.6 m | **80.6 s** (~1.3 min) | 967 s (~16.1 min) | 484 s (~8.1 min) | 242 s (~4.0 min) |
+| **$N = 50$** | 7.60 m | 98.8 m | **98.8 s** (~1.6 min) | 1,185 s (~19.8 min) | 593 s (~9.9 min) | 296 s (~4.9 min) |
+| **$N = 100$** | 9.08 m | 118.1 m | **118.1 s** (~2.0 min) | 1,417 s (~23.6 min) | 708 s (~11.8 min) | 354 s (~5.9 min) |
+| **$N = 200$** | 10.47 m | 139.8 m | **139.8 s** (~2.3 min) | 1,678 s (~28.0 min) | 839 s (~14.0 min) | 419 s (~7.0 min) |
+| **$N = 400$** | 11.40 m | 206.8 m | **206.8 s** (~3.4 min) | 2,482 s (~41.4 min) | 1,241 s (~20.7 min) | 620 s (~10.3 min) |
 
-*Note: Drive distance $l = \max(13 R_f, 80, \text{reach} + R_{\text{goal}} + R_f)$. At $N = 400$, the arena clearance term dominates ($206.8\text{ m}$) because the initial dispersion radius of scattered layouts grows as $N^{2/3}$ while $R_f$ grows sub-linearly, ensuring the goal never overlaps any initial sheep placement.*
+*Note: Drive distance $l = \max(13 R_f, 80, \text{reach} + R_{\text{goal}} + R_f)$. At $N = 400$, the arena clearance term dominates (206.8 m) because the initial dispersion radius of scattered layouts grows as $N^{2/3}$ while $R_f$ grows sub-linearly, ensuring the goal never overlaps any initial sheep placement.*
 
 ---
 
