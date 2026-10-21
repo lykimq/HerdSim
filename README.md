@@ -135,7 +135,7 @@ HerdSim enforces **scale invariance** by anchoring all spatial and temporal metr
 ### Normalized Deadline
 
 Deadlines are specified as multiples m of the characteristic **drive time**:
-$$T_{\text{drive}} = \frac{\text{Drive Distance}}{v_{\text{sheep\_max}}}$$
+$$T_{\text{drive}} = \frac{\text{Drive Distance}}{v_{\text{sheep,max}}}$$
 A trial evaluated at m = 6 requires the dog team to gather and drive the flock within 6 times the theoretical minimum travel time of the fastest sheep. A compact flock driven by an optimal shepherd completes the task in 1.45 to 1.74 × T_drive; thus m in {12, 6, 3} provides a graded, realistic scale from relaxed to urgent time pressure.
 
 ---
