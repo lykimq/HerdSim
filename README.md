@@ -7,14 +7,14 @@
 
 **HerdSim** is a multi-agent simulation framework and empirical laboratory for collective shepherding. It investigates a fundamental question in bio-inspired swarm robotics and behavioural biology:
 
-> **How many autonomous shepherds ($D$) are required to reliably gather and drive a flock of $N$ sheep to a designated goal within a time deadline, and how does this minimum requirement ($D_{\min}$) scale with flock size, initial dispersion, deadline pressure, and coordination rules?**
+> **How many autonomous shepherds (D) are required to reliably gather and drive a flock of N sheep to a designated goal within a time deadline, and how does this minimum requirement (D_min) scale with flock size, initial dispersion, deadline pressure, and coordination rules?**
 
 Given unbounded time, a single shepherd can eventually collect and steer almost any flock by sequentially chasing stray individuals. Under finite deadlines, however, shepherding becomes an active collective coordination problem: agents must parallelize the collection of dispersed outliers, prevent the flock from fracturing, and drive the aggregate without causing boundary scattering or overcrowding.
 
 HerdSim couples high-fidelity microscopic agent physics (based on the models of [Strömbom et al. 2014](https://doi.org/10.1098/rsif.2014.0419) and [Kubo et al. 2022](https://doi.org/10.1088/2632-072X/ac6cb4)) with a novel multi-dog assignment layer, rigorous scale-invariant task geometry, and an adaptive sequential statistical engine (99% Clopper–Pearson confidence testing).
 
 ![Anatomy of a real simulation trial](docs/figures/fig17_trial.png)
-*Figure 1: Evolution of a real simulation trial ($N = 200$ sheep, $D = 2$ dogs, wide start, seed 2026). Dogs autonomously identify distant outliers, execute parallel collection sweeps to consolidate the flock, and subsequently establish an arc formation behind the flock centroid to drive the collective into the circular goal.*
+*Figure 1: Evolution of a real simulation trial (N = 200 sheep, D = 2 dogs, wide start, seed 2026). Dogs autonomously identify distant outliers, execute parallel collection sweeps to consolidate the flock, and subsequently establish an arc formation behind the flock centroid to drive the collective into the circular goal.*
 
 ---
 
@@ -37,31 +37,31 @@ HerdSim couples high-fidelity microscopic agent physics (based on the models of 
 
 ## Core Scientific Findings
 
-Across 17 executed campaign protocols encompassing **112,785 individual simulation trials** (with zero execution or simulation errors), HerdSim systematically mapped the scaling frontier $D_{\min}(N)$ for $N \in [25, 400]$ across multiple layouts, deadlines, and coordination variants.
+Across 17 executed campaign protocols encompassing **112,785 individual simulation trials** (with zero execution or simulation errors), HerdSim systematically mapped the scaling frontier D_min(N) for N in [25, 400] across multiple layouts, deadlines, and coordination variants.
 
 All empirical data tables are produced directly from `results/` by [`cli/dmin_tables.py`](cli/dmin_tables.py) and summarized in [`docs/science/design_version2/results_tables.md`](docs/science/design_version2/results_tables.md).
 
 ![D_min scaling against flock size N across deadlines and layouts](docs/figures/fig20_dmin_vs_n.png)
-*Figure 2: Empirical scaling of $D_{\min}$ against flock size $N$ across three normalized deadlines ($12\times$, $6\times$, and $3\times$ drive times). Circles denote strict success (100% of sheep in the goal); squares denote the 99% threshold ($f_{99}$). For cohesive flocks (compact), $D_{\min} = 1$ everywhere. For dispersed flocks, $D_{\min}$ scales sub-linearly with $N$, heavily modulated by deadline urgency.*
+*Figure 2: Empirical scaling of D_min against flock size N across three normalized deadlines (12×, 6×, and 3× drive times). Circles denote strict success (100% of sheep in the goal); squares denote the 99% threshold (f99). For cohesive flocks (compact), D_min = 1 everywhere. For dispersed flocks, D_min scales sub-linearly with N, heavily modulated by deadline urgency.*
 
-### 1. Compact Flocks Exhibit Invariant Scaling ($D_{\min} = 1$)
-When a flock begins in a cohesive spatial state (`compact`), **a single shepherd is sufficient across every tested flock size ($N = 25$ to $400$) and every deadline ($12\times$ down to $3\times$ drive times)**. Because no sheep begin outside the collection threshold, the task is purely one of directional driving. Adding more dogs to a compact flock yields no improvement in reliability ($D_{\min} = 1$) and quickly saturates finish times.
+### 1. Compact Flocks Exhibit Invariant Scaling (D_min = 1)
+When a flock begins in a cohesive spatial state (`compact`), **a single shepherd is sufficient across every tested flock size (N = 25 to 400) and every deadline (12× down to 3× drive times)**. Because no sheep begin outside the collection threshold, the task is purely one of directional driving. Adding more dogs to a compact flock yields no improvement in reliability (D_min = 1) and quickly saturates finish times.
 
-### 2. Dispersed Flocks Scale Sub-linearly with $N$
+### 2. Dispersed Flocks Scale Sub-linearly with N
 On scattered layouts (`wide`, `split`, `outlier_rich`), shepherds must spend initial time collecting distant outliers before driving can begin:
-- At generous deadlines ($12\times$ drive time), $D_{\min}$ remains 1 for $N \le 100$, rising modestly to 2 or 3 dogs at $N = 400$.
-- In log-log space ($\log_2 D_{\min}$ vs. $\log_2 N$), growth slopes for scattered layouts fall between **0.25 and 0.45**, demonstrating strong sub-linear scaling: doubling flock size requires far less than double the shepherd force.
+- At generous deadlines (12× drive time), D_min remains 1 for N <= 100, rising modestly to 2 or 3 dogs at N = 400.
+- In log-log space (log2 D_min vs. log2 N), growth slopes for scattered layouts fall between **0.25 and 0.45**, demonstrating strong sub-linear scaling: doubling flock size requires far less than double the shepherd force.
 
 ### 3. Deadline is a First-Order Governing Parameter
-Tightening the deadline from $12\times$ to $3\times$ drive times exerts an effect comparable to a 16-fold expansion of flock size. At $3\times$ drive times, wide flocks at $N = 400$ require $D_{\min} = 6$ dogs (under $f_{99}$), and tight deadlines completely prevent single shepherds from gathering split clusters.
+Tightening the deadline from 12× to 3× drive times exerts an effect comparable to a 16-fold expansion of flock size. At 3× drive times, wide flocks at N = 400 require D_min = 6 dogs (under f99), and tight deadlines completely prevent single shepherds from gathering split clusters.
 
 ### 4. The Last-Sheep / Straggler Mechanism
-A crucial biological insight emerged from auditing strict success criteria (100% of sheep inside the goal circle at a single tick) against a 99% threshold ($f_{99}$):
+A crucial biological insight emerged from auditing strict success criteria (100% of sheep inside the goal circle at a single tick) against a 99% threshold (f99):
 
 ![Straggler mechanism and strict vs 99% success](docs/figures/fig22_straggler.png)
-*Figure 3: The Straggler Effect. Left: Under strict criteria (circles), success rates collapse for large $N$ under tight deadlines; under 99% criteria (squares), success remains high. Right: Time-series of a failed strict trial ($N = 100$, split, $D = 2$). 99% of the flock reaches the goal well within the deadline ($t \approx 226$ s of a 355 s limit), but 1 or 2 trailing stragglers remain outside. As the dogs attempt to retrieve the stragglers, the flock already inside drifts out, causing a technical timeout under strict criteria.*
+*Figure 3: The Straggler Effect. Left: Under strict criteria (circles), success rates collapse for large N under tight deadlines; under 99% criteria (squares), success remains high. Right: Time-series of a failed strict trial (N = 100, split, D = 2). 99% of the flock reaches the goal well within the deadline (t ≈ 226 s of a 355 s limit), but 1 or 2 trailing stragglers remain outside. As the dogs attempt to retrieve the stragglers, the flock already inside drifts out, causing a technical timeout under strict criteria.*
 
-In biological and agricultural herding, a single stubborn or drifting sheep does not represent collective failure. Evaluating $f_{99}$ resolves artificial boundary censorship and exposes the true structural scaling laws of the multi-agent system.
+In biological and agricultural herding, a single stubborn or drifting sheep does not represent collective failure. Evaluating f99 resolves artificial boundary censorship and exposes the true structural scaling laws of the multi-agent system.
 
 ---
 
@@ -69,7 +69,7 @@ In biological and agricultural herding, a single stubborn or drifting sheep does
 
 Rather than running wasteful fixed-sample Monte Carlo sweeps across hundreds of parameter combinations, HerdSim employs an **adaptive sequential exploration algorithm**.
 
-A **protocol** (defined in [`protocols/configs/protocols/`](protocols/configs/protocols/)) specifies the parameter space: sheep models, shepherd algorithms, flock sizes $N$, shepherd counts $D$, initial layouts, and deadlines. Every unique combination of method, layout, and $N$ forms a **$D$-curve** (group). Each specific dog count $D$ within that curve is a **cell**, and each seed evaluated is a **trial**.
+A **protocol** (defined in [`protocols/configs/protocols/`](protocols/configs/protocols/)) specifies the parameter space: sheep models, shepherd algorithms, flock sizes N, shepherd counts D, initial layouts, and deadlines. Every unique combination of method, layout, and N forms a **D-curve** (group). Each specific dog count D within that curve is a **cell**, and each seed evaluated is a **trial**.
 
 ```mermaid
 flowchart TD
@@ -85,36 +85,36 @@ flowchart TD
 ### Adaptive Execution Mechanics
 
 1. **Initial Exploration**: Each active cell is seeded with a baseline batch (`batch_seeds`, default 10).
-2. **Sequential Refinement**: Cells whose reliability classification ($\theta = 0.90$) remains open receive additional batches up to `max_seeds` (200). Obvious successes (e.g. 10 straight successes on compact $N=25$) and obvious failures stop early, concentrating CPU cycles exactly where classification variance is high.
-3. **Adaptive Grid Densification**: If the assigned behavioral zone changes between two adjacent tested $D$ values separated by more than `refine_min_gap`, the midpoint integer $D$ is automatically injected into the curve for the next round.
-4. **Saturation Pruning**: Above a confirmed saturation point ($D_{\text{sat}}$), if additional dogs act as copies of one another (mean `dog_overlap` $\ge 0.90$) without improving speed or reliability, further seeds are suppressed (`pruned`).
-5. **Deterministic Paired Comparisons**: Every seed $i$ uses `master_seed + i` (default $2026 + i$), ensuring that trials comparing $D=2$ against $D=4$ run on the **exact same initial flock configuration and identical stochastic noise draws**.
+2. **Sequential Refinement**: Cells whose reliability classification (theta = 0.90) remains open receive additional batches up to `max_seeds` (200). Obvious successes (e.g. 10 straight successes on compact N=25) and obvious failures stop early, concentrating CPU cycles exactly where classification variance is high.
+3. **Adaptive Grid Densification**: If the assigned behavioral zone changes between two adjacent tested D values separated by more than `refine_min_gap`, the midpoint integer D is automatically injected into the curve for the next round.
+4. **Saturation Pruning**: Above a confirmed saturation point (D_sat), if additional dogs act as copies of one another (mean `dog_overlap` >= 0.90) without improving speed or reliability, further seeds are suppressed (`pruned`).
+5. **Deterministic Paired Comparisons**: Every seed i uses `master_seed + i` (default 2026 + i), ensuring that trials comparing D=2 against D=4 run on the **exact same initial flock configuration and identical stochastic noise draws**.
 6. **Robust Interrupt and Resume**: Every trial is committed to disk immediately upon completion. Runs can be safely interrupted (`SIGINT`) and resumed; locked directories prevent concurrent write collisions.
 
 ---
 
 ## Task Geometry and Scale Invariance
 
-A common flaw in agent-based herding simulations is fixing physical field dimensions while varying flock size $N$. Because 400 sheep naturally occupy vastly more physical area than 25 sheep, fixed dimensions introduce artificial confinement and confound spatial density with agent count.
+A common flaw in agent-based herding simulations is fixing physical field dimensions while varying flock size N. Because 400 sheep naturally occupy vastly more physical area than 25 sheep, fixed dimensions introduce artificial confinement and confound spatial density with agent count.
 
-HerdSim enforces **scale invariance** by anchoring all spatial and temporal metrics to the **calibrated flock radius $R_f(N)$**: the steady-state radius of an $N$-sheep flock driven by a single shepherd.
+HerdSim enforces **scale invariance** by anchoring all spatial and temporal metrics to the **calibrated flock radius R_f(N)**: the steady-state radius of an N-sheep flock driven by a single shepherd.
 
 ![Task geometry and physical scaling](docs/figures/fig6_task_geometry.png)
-*Figure 4: Task geometry drawn to scale from simulation code. Left: Physical layout at $N = 200$. The goal circle, drive distance, and arena boundaries expand proportionally with $R_f(N)$. Middle: Drive length definition. Right: Calibrated growth of flock radius $R_f$ and goal radius $R_{\text{goal}}$ across $N$.*
+*Figure 4: Task geometry drawn to scale from simulation code. Left: Physical layout at N = 200. The goal circle, drive distance, and arena boundaries expand proportionally with R_f(N). Middle: Drive length definition. Right: Calibrated growth of flock radius R_f and goal radius R_goal across N.*
 
 | Parameter | Mathematical Formulation | Physical Rationale |
 |---|---|---|
-| **Flock Radius** $R_f(N)$ | Empirical calibration (e.g., $3.14$ at $N=5$, $9.08$ at $N=100$, $11.4$ at $N=400$) | Reflects natural inter-individual equilibrium spacing under driving. |
-| **Drive Distance** | $\max\left(13 R_f(N),\, 80,\, \text{reach} + R_{\text{goal}} + R_f\right)$ | Ensures large flocks travel proportionally farther to match physical scale. |
-| **Goal Radius** $R_{\text{goal}}$ | $1.9 \cdot R_f(N)$ | Standardizes containment difficulty across flock sizes. |
-| **Field Clearance** | 80 units beyond farthest possible starting agent | Positions initial entities safely away from coordinates boundaries. |
+| **Flock Radius** R_f(N) | Empirical calibration (e.g., 3.14 at N=5, 9.08 at N=100, 11.4 at N=400) | Reflects natural inter-individual equilibrium spacing under driving. |
+| **Drive Distance** | max(13 · R_f(N), 80, reach + R_goal + R_f) | Ensures large flocks travel proportionally farther to match physical scale. |
+| **Goal Radius** R_goal | 1.9 · R_f(N) | Standardizes containment difficulty across flock sizes. |
+| **Field Clearance** | 80 units beyond farthest possible starting agent | Positions initial entities safely away from coordinate boundaries. |
 | **Open Boundary** | **No walls or reflecting boundaries** | Boundary reflections act as artificial collectors, artificially inflating success. Agents may freely roam. |
 
 ### Normalized Deadline
 
-Deadlines are specified as multiples $m$ of the characteristic **drive time**:
+Deadlines are specified as multiples m of the characteristic **drive time**:
 $$T_{\text{drive}} = \frac{\text{Drive Distance}}{v_{\text{sheep\_max}}}$$
-A trial evaluated at $m = 6$ requires the dog team to gather and drive the flock within 6 times the theoretical minimum travel time of the fastest sheep. A compact flock driven by an optimal shepherd completes the task in $1.45$ to $1.74 \times T_{\text{drive}}$; thus $m \in \{12, 6, 3\}$ provides a graded, realistic scale from relaxed to urgent time pressure.
+A trial evaluated at m = 6 requires the dog team to gather and drive the flock within 6 times the theoretical minimum travel time of the fastest sheep. A compact flock driven by an optimal shepherd completes the task in 1.45 to 1.74 × T_drive; thus m in {12, 6, 3} provides a graded, realistic scale from relaxed to urgent time pressure.
 
 ---
 
@@ -123,18 +123,18 @@ A trial evaluated at $m = 6$ requires the dog team to gather and drive the flock
 To study the transition between collection and driving, HerdSim provides four distinct initial spatial geometries:
 
 ![The four starting flock layouts at N = 200](docs/figures/fig7_layouts.png)
-*Figure 5: The four initial flock layouts evaluated at $N = 200$ (identical scale). The red dashed circle marks the analytical collection boundary $f(N) = r_a N^{2/3}$. Any sheep located outside this circle triggers active collection heuristics.*
+*Figure 5: The four initial flock layouts evaluated at N = 200 (identical scale). The red dashed circle marks the analytical collection boundary f(N) = r_a · N^(2/3). Any sheep located outside this circle triggers active collection heuristics.*
 
-1. **`compact`**: Flocks sampled from a 2D Gaussian ($\sigma = 0.5 R_f$, truncated at $3\sigma$). All sheep begin well within $f(N)$; dogs immediately enter drive mode.
-2. **`wide`**: Flocks sampled from a broad Gaussian ($\sigma = 0.5 \cdot 2 N^{2/3}$). Sheep are broadly scattered, requiring substantial initial perimeter sweeping.
-3. **`split`**: The flock is partitioned into 3 compact sub-clusters (2 when $N < 12$) spaced symmetrically on a circle of radius $2 N^{2/3}$. Dogs must address isolated groupings without dispersing them further.
-4. **`outlier_rich`**: 80% of sheep reside in a dense compact core, while 20% are distributed as distant outliers between $1.1$ and $1.6 \times 2 N^{2/3}$.
+1. **`compact`**: Flocks sampled from a 2D Gaussian (sigma = 0.5 · R_f, truncated at 3 sigma). All sheep begin well within f(N); dogs immediately enter drive mode.
+2. **`wide`**: Flocks sampled from a broad Gaussian (sigma = 0.5 · 2 N^(2/3)). Sheep are broadly scattered, requiring substantial initial perimeter sweeping.
+3. **`split`**: The flock is partitioned into 3 compact sub-clusters (2 when N < 12) spaced symmetrically on a circle of radius 2 N^(2/3). Dogs must address isolated groupings without dispersing them further.
+4. **`outlier_rich`**: 80% of sheep reside in a dense compact core, while 20% are distributed as distant outliers between 1.1 and 1.6 × 2 N^(2/3).
 
 ### Shepherd Release Configurations (`dog_start`)
 
 Dogs begin 30 units behind the flock's rear boundary, arranged in one of three experimental stations:
 - **`arcs` (default)**: Dogs are spaced evenly along concentric semi-circular arcs behind the flock. Single dogs start directly on the drive axis; additional dogs occupy distinct flanking stations.
-- **`ring`**: Dogs are distributed uniformly along a full $360^\circ$ circle surrounding the flock, testing whether encirclement aids or hinders initial gathering.
+- **`ring`**: Dogs are distributed uniformly along a full 360° circle surrounding the flock, testing whether encirclement aids or hinders initial gathering.
 - **`handler`**: All dogs originate from a single point directly behind the flock (simulating simultaneous release from a human handler's post).
 
 ---
@@ -144,7 +144,7 @@ Dogs begin 30 units behind the flock's rear boundary, arranged in one of three e
 HerdSim implements microscopic agent physics based on validated empirical literature, extended with a coordination layer designed to prevent trivial copycat dynamics.
 
 ![Multi-dog coordination mechanisms](docs/figures/fig3_team_rule.png)
-*Figure 6: Multi-dog team coordination in `strombom_multi`. Left: Outlier collection assignment. $D$ dogs are matched to the $D$ farthest outliers via minimum-weight Euclidean matching (least total walking distance). Center: Parallel driving formation. Dogs occupy equidistant angular slots along a driving arc subtending the flock's width, maintaining angular order to avoid crossing trajectories. Right: Unit push blending. Multiple dogs near a single sheep combine their influence into a normalized unit repulsion vector.*
+*Figure 6: Multi-dog team coordination in strombom_multi. Left: Outlier collection assignment. D dogs are matched to the D farthest outliers via minimum-weight Euclidean matching (least total walking distance). Center: Parallel driving formation. Dogs occupy equidistant angular slots along a driving arc subtending the flock's width, maintaining angular order to avoid crossing trajectories. Right: Unit push blending. Multiple dogs near a single sheep combine their influence into a normalized unit repulsion vector.*
 
 ### 1. Sheep Dynamics ([Strömbom et al. 2014](https://doi.org/10.1098/rsif.2014.0419))
 Each individual sheep $i$ updates its heading vector via five additive components:
@@ -163,8 +163,8 @@ This preserves realistic biological repulsion: multiple dogs cornering a sheep a
 ### 2. Shepherd Controllers
 
 - **`strombom_multi` (Team Coordination)**:
-  - *Outlier Mode*: When any sheep lies farther than $f(N) = r_a N^{2/3}$ from the flock centroid, the $D$ farthest outliers are identified. Dogs are assigned to outliers using linear sum assignment (minimum total Euclidean travel distance). Leftover dogs assist in driving the core flock.
-  - *Drive Mode*: When the flock is cohesive, dogs form an arc behind the flock at distance $r_d$, spanning the angular width of the flock. Dogs are sorted by their relative angular station around the flock, guaranteeing they never cross paths while moving to their assigned driving slots.
+  - *Outlier Mode*: When any sheep lies farther than f(N) = r_a · N^(2/3) from the flock centroid, the D farthest outliers are identified. Dogs are assigned to outliers using linear sum assignment (minimum total Euclidean travel distance). Leftover dogs assist in driving the core flock.
+  - *Drive Mode*: When the flock is cohesive, dogs form an arc behind the flock at distance r_d, spanning the angular width of the flock. Dogs are sorted by their relative angular station around the flock, guaranteeing they never cross paths while moving to their assigned driving slots.
 - **`fat` (Farthest-Agent Targeting baseline)**:
   Uncoordinated baseline. Each dog independently targets the sheep farthest from the goal. Without assignment or repulsive spacing, dogs collapse into a tight cluster behind the same outlier, exhibiting high `dog_overlap`.
 - **`kubo` ([Kubo et al. 2022](https://doi.org/10.1088/2632-072X/ac6cb4) continuous force model)**:
@@ -174,10 +174,10 @@ This preserves realistic biological repulsion: multiple dogs cornering a sheep a
 
 ## What the Frontier Rules Decide
 
-Statistical decisions are governed by [`analysis/frontier.py`](analysis/frontier.py). For each cell (a given method, layout, $N$, and $D$):
+Statistical decisions are governed by [`analysis/frontier.py`](analysis/frontier.py). For each cell (a given method, layout, N, and D):
 
-1. **Reliability ($\theta = 0.90$)**:
-   A cell is classified as **reliable** if the lower bound of its two-sided 99% Clopper–Pearson binomial confidence interval satisfies $p_{\text{lower}} \ge 0.90$. It is classified as **unreliable** if $p_{\text{upper}} < 0.90$, and **undecided** otherwise. At least 51 consecutive successes with 0 failures are mathematically required to establish reliability at 99% confidence.
+1. **Reliability (theta = 0.90)**:
+   A cell is classified as **reliable** if the lower bound of its two-sided 99% Clopper–Pearson binomial confidence interval satisfies p_lower >= 0.90. It is classified as **unreliable** if p_upper < 0.90, and **undecided** otherwise. At least 51 consecutive successes with 0 failures are mathematically required to establish reliability at 99% confidence.
 2. **Finish-Time Comparisons**:
    Pairwise finish-time comparisons between reliable cells are evaluated using a paired bootstrap (4,000 resamples) on per-seed differences relative to the slower median. A cell is classified as **faster**, **slower**, or **same** (within a 5% margin).
 
@@ -185,24 +185,24 @@ Statistical decisions are governed by [`analysis/frontier.py`](analysis/frontier
 
 | Frontier Value | Definition |
 |---|---|
-| **$D_{\min}$** | Smallest reliable dog count $D$. ($D_{\min}^{\text{low}}$: lowest $D$ whose upper bound reaches $\theta$). |
-| **$D_{\text{sat}}$** | Smallest reliable $D$ such that no larger reliable $D$ is statistically faster. |
-| **$D_{\text{best}}$** | Smallest reliable $D$ that is not slower than the fastest reliable count on the curve. |
-| **$D_{\text{crowd}}$** | Smallest reliable $D > D_{\text{best}}$ that is measurably slower than $D_{\text{best}}$ (congestion). |
-| **$D_{\text{overcrowd}}$** | Smallest $D > D_{\min}$ where it and the subsequent tested $D$ are both unreliable (collapse). |
-| **$D_{\max}$** | Largest reliable dog count below $D_{\text{overcrowd}}$. |
+| **D_min** | Smallest reliable dog count D. (D_min_low: lowest D whose upper bound reaches theta). |
+| **D_sat** | Smallest reliable D such that no larger reliable D is statistically faster. |
+| **D_best** | Smallest reliable D that is not slower than the fastest reliable count on the curve. |
+| **D_crowd** | Smallest reliable D > D_best that is measurably slower than D_best (congestion). |
+| **D_overcrowd** | Smallest D > D_min where it and the subsequent tested D are both unreliable (collapse). |
+| **D_max** | Largest reliable dog count below D_overcrowd. |
 
 ### Cell Behavioral Zones
 
 ![Behavioral zones and frontier classification](docs/figures/def_D_zones.png)
-*Figure 7: Partition of the dog count axis into behavioral zones determined by reliability testing ($\theta = 0.90$) and paired bootstrap finish-time comparisons against $D_{\text{best}}$.*
+*Figure 7: Partition of the dog count axis into behavioral zones determined by reliability testing (theta = 0.90) and paired bootstrap finish-time comparisons against D_best.*
 
 
-- `too_few`: Unreliable, below $D_{\min}$.
-- `improving`: Reliable, below $D_{\text{sat}}$; adding dogs provides statistically significant speedups.
-- `saturated`: Reliable, from $D_{\text{sat}}$ upward; additional dogs maintain reliability but yield no further speedup.
-- `crowded`: Reliable, but slower than $D_{\text{best}}$ due to dog interference.
-- `collapse`: Unreliable, at or above $D_{\text{overcrowd}}$; excessive shepherds fracture or repeatedly overshoot the flock.
+- `too_few`: Unreliable, below D_min.
+- `improving`: Reliable, below D_sat; adding dogs provides statistically significant speedups.
+- `saturated`: Reliable, from D_sat upward; additional dogs maintain reliability but yield no further speedup.
+- `crowded`: Reliable, but slower than D_best due to dog interference.
+- `collapse`: Unreliable, at or above D_overcrowd; excessive shepherds fracture or repeatedly overshoot the flock.
 
 ---
 
@@ -211,11 +211,11 @@ Statistical decisions are governed by [`analysis/frontier.py`](analysis/frontier
 To verify that findings reflect fundamental multi-agent dynamics rather than arbitrary parameter choices, HerdSim executed systematic sensitivity sweeps:
 
 ![Sensitivity of D_min across experimental variations](docs/figures/fig24_sensitivity.png)
-*Figure 8: Sensitivity analysis of $D_{\min}$ across experimental variants ($N \in \{100, 200, 400\}$, wide and outlier-rich layouts at $6\times$ drive time). Evaluates shepherd release geometry (handler post, full ring), start gap distance, goal radius, dog speed, and field-matched parameters.*
+*Figure 8: Sensitivity analysis of D_min across experimental variants (N in {100, 200, 400}, wide and outlier-rich layouts at 6× drive time). Evaluates shepherd release geometry (handler post, full ring), start gap distance, goal radius, dog speed, and field-matched parameters.*
 
 1. **Release Geometry**: Releasing dogs from a single handler post (`handler`) requires fewer dogs than an encircling ring (`ring`), because ring dogs on the goal side can inadvertently frighten sheep backward before reaching their stations.
-2. **Dog Speed**: Counter-intuitively, slower dogs ($v_{\text{dog}} = 1.15$ vs $1.5$) achieve lower $D_{\min}$ on large flocks under strict success rules. Fast dogs tend to drive the flock forcefully through the circular goal, causing overshoots that strand trailing sheep.
-3. **Field-Matched Realism**: Calibrating sheep to empirical GPS field data ($r_a = 1.0$, interaction range $75$ m, noise $0.1$) halves the collection distance. Under strict 100% criteria, this ceiling suppresses success; under $f_{99}$, field-matched sheep herd more efficiently than the synthetic baseline.
+2. **Dog Speed**: Counter-intuitively, slower dogs (v_dog = 1.15 vs 1.5) achieve lower D_min on large flocks under strict success rules. Fast dogs tend to drive the flock forcefully through the circular goal, causing overshoots that strand trailing sheep.
+3. **Field-Matched Realism**: Calibrating sheep to empirical GPS field data (r_a = 1.0, interaction range 75 m, noise 0.1) halves the collection distance. Under strict 100% criteria, this ceiling suppresses success; under f99, field-matched sheep herd more efficiently than the synthetic baseline.
 
 ---
 
