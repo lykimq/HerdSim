@@ -142,15 +142,15 @@ $$
 
 A trial evaluated at m = 6 requires the dog team to gather and drive the flock within 6 times the theoretical minimum travel time of the fastest sheep. A compact flock driven by an optimal shepherd completes the task in 1.45 to 1.74 × T_drive; thus m in {12, 6, 3} provides a graded, realistic scale from relaxed to urgent time pressure.
 
-| Flock Size ($N$) | Flock Radius ($R_f$) | Drive Distance ($l$) | Drive Time ($T_{\text{drive}}$) | $12\times$ Deadline (Relaxed) | $6\times$ Deadline (Intermediate) | $3\times$ Deadline (Urgent) |
+| Flock Size (N) | Flock Radius R_f | Drive Distance l | Drive Time (T_drive) | 12× Deadline (Relaxed) | 6× Deadline (Intermediate) | 3× Deadline (Urgent) |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **$N = 25$** | 6.20 m | 80.6 m | **80.6 s** (~1.3 min) | 967 s (~16.1 min) | 484 s (~8.1 min) | 242 s (~4.0 min) |
-| **$N = 50$** | 7.60 m | 98.8 m | **98.8 s** (~1.6 min) | 1,185 s (~19.8 min) | 593 s (~9.9 min) | 296 s (~4.9 min) |
-| **$N = 100$** | 9.08 m | 118.1 m | **118.1 s** (~2.0 min) | 1,417 s (~23.6 min) | 708 s (~11.8 min) | 354 s (~5.9 min) |
-| **$N = 200$** | 10.47 m | 139.8 m | **139.8 s** (~2.3 min) | 1,678 s (~28.0 min) | 839 s (~14.0 min) | 419 s (~7.0 min) |
-| **$N = 400$** | 11.40 m | 206.8 m | **206.8 s** (~3.4 min) | 2,482 s (~41.4 min) | 1,241 s (~20.7 min) | 620 s (~10.3 min) |
+| **N = 25** | 6.20 m | 80.6 m | **80.6 s** (~1.3 min) | 967 s (~16.1 min) | 484 s (~8.1 min) | 242 s (~4.0 min) |
+| **N = 50** | 7.60 m | 98.8 m | **98.8 s** (~1.6 min) | 1,185 s (~19.8 min) | 593 s (~9.9 min) | 296 s (~4.9 min) |
+| **N = 100** | 9.08 m | 118.1 m | **118.1 s** (~2.0 min) | 1,417 s (~23.6 min) | 708 s (~11.8 min) | 354 s (~5.9 min) |
+| **N = 200** | 10.47 m | 139.8 m | **139.8 s** (~2.3 min) | 1,678 s (~28.0 min) | 839 s (~14.0 min) | 419 s (~7.0 min) |
+| **N = 400** | 11.40 m | 206.8 m | **206.8 s** (~3.4 min) | 2,482 s (~41.4 min) | 1,241 s (~20.7 min) | 620 s (~10.3 min) |
 
-*Note: Drive distance $l = \max(13 R_f, 80, \text{reach} + R_{\text{goal}} + R_f)$. At $N = 400$, the arena clearance term dominates (206.8 m) because the initial dispersion radius of scattered layouts grows as $N^{2/3}$ while $R_f$ grows sub-linearly, ensuring the goal never overlaps any initial sheep placement.*
+*Note: Drive distance l = max(13 · R_f, 80, reach + R_goal + R_f). At N = 400, the arena clearance term dominates (206.8 m) because the initial dispersion radius of scattered layouts grows as N^(2/3) while R_f grows sub-linearly, ensuring the goal never overlaps any initial sheep placement.*
 
 ---
 
