@@ -204,15 +204,15 @@ trong đó mỗi thành phần cấu thành là một **vector đơn vị** đư
 - $\mathbf{H}_i$: Vector đơn vị **hướng đi trước đó** (hướng từ nhịp trước, bằng 0 nếu nhịp trước đứng yên), với trọng số quán tính $h = 0,5$.
 - $\mathbf{C}_i$: Vector đơn vị **lực hút co cụm** hướng về tâm khối cục bộ ($\text{LCM}_i$) của $n$ láng giềng gần nhất ($n = N - 1$), với trọng số lực hút $c = 1,05$:
 
-  $$
-  \mathbf{C}_i = \frac{\text{LCM}_i - \mathbf{x}_i}{\lVert \text{LCM}_i - \mathbf{x}_i \rVert}, \quad \text{với } \text{LCM}_i = \frac{1}{n} \sum_{k \in \mathcal{N}_n(i)} \mathbf{x}_k
-  $$
+$$
+\mathbf{C}_i = \frac{\text{LCM}_i - \mathbf{x}_i}{\lVert \text{LCM}_i - \mathbf{x}_i \rVert}, \quad \text{với } \text{LCM}_i = \frac{1}{n} \sum_{k \in \mathcal{N}_n(i)} \mathbf{x}_k
+$$
 
 - $\mathbf{R}_{a,i}$: Vector đơn vị **lực đẩy né tránh giữa các cừu** đẩy xa khỏi các cá thể láng giềng gần hơn khoảng cách va chạm $r_a = 2$, với trọng số lực đẩy $\rho_a = 2,0$:
 
-  $$
-  \mathbf{R}_{a,i} = \frac{\sum_{j \ne i, \lVert \mathbf{x}_i - \mathbf{x}_j \rVert < r_a} \frac{\mathbf{x}_i - \mathbf{x}_j}{\lVert \mathbf{x}_i - \mathbf{x}_j \rVert}}{\left\lVert \sum_{j \ne i, \lVert \mathbf{x}_i - \mathbf{x}_j \rVert < r_a} \frac{\mathbf{x}_i - \mathbf{x}_j}{\lVert \mathbf{x}_i - \mathbf{x}_j \rVert} \right\rVert}
-  $$
+$$
+\mathbf{R}_{a,i} = \frac{\sum_{j \ne i, \lVert \mathbf{x}_i - \mathbf{x}_j \rVert < r_a} \frac{\mathbf{x}_i - \mathbf{x}_j}{\lVert \mathbf{x}_i - \mathbf{x}_j \rVert}}{\left\lVert \sum_{j \ne i, \lVert \mathbf{x}_i - \mathbf{x}_j \rVert < r_a} \frac{\mathbf{x}_i - \mathbf{x}_j}{\lVert \mathbf{x}_i - \mathbf{x}_j \rVert} \right\rVert}
+$$
 
 - $\mathbf{R}_{s,i}$: Vector đơn vị **lực hoảng sợ né tránh chó** đẩy xa khỏi những chú chó nằm trong bán kính đe dọa $r_s = 65$, với trọng số lực hoảng sợ $\rho_s = 1,0$.
 - $\mathbf{\epsilon}_i$: Vector đơn vị **nhiễu ngẫu nhiên** chỉ theo hướng ngẫu nhiên lấy mẫu đều từ $[0, 2\pi)$, với trọng số nhiễu $e = 0,3$.
