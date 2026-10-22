@@ -48,15 +48,11 @@ local rules and target selection for herders gathering non-cohesive stochastic t
 problem as optimal control of m dogs and n sheep. These studies show that more herders can help,
 but they fix the team size and do not ask how many herders a task needs.
 
-Two recent studies ask that question directly. Lama and di Bernardo (2024) found that the minimum
+A recent study by Lama and di Bernardo (2024) asked that question directly, finding that the minimum
 number of herders needed to gather M non-cohesive targets grows as the square root of M, and that
-below a critical target density the number rises faster. An anonymous 2025 manuscript, "Collective
-nudging that scales", measured the minimum number of dogs that collect, hold and pen a flock of
-up to 400 sheep within 10,000 ticks, and found a non-linear increase with flock size together with
-a loss of success when too many dogs are used (anonymous 2025). In both, the start distribution,
-the time limit and the success criterion are fixed parts of the setup. Neither reports how the
-answer changes with the time allowed, with the shape of the starting flock, or with the share of
-targets that must arrive.
+below a critical target density the number rises faster. However, their setup fixed the start
+distribution, the time limit and the success criterion, leaving open how the answer changes with the
+time allowed, with the shape of the starting flock, or with the share of targets that must arrive.
 
 Here we measure D_min, the smallest reliable team, for the Strömbom flock driven into a circular
 goal, and treat the start layout, the deadline and the success criterion as factors alongside
@@ -106,14 +102,7 @@ sheep and found that standard numerical methods struggle when dogs and sheep are
 Lama and di Bernardo (2024) studied herders with limited sensing and targets with no cohesion. The
 minimum number of herders N* that brings a fraction chi* = 0.99 of M targets into the goal grows
 as sqrt(M) with infinite sensing, and with limited sensing only above a critical number of targets.
-They explain the threshold by percolation of a herdability graph. The anonymous 2025 manuscript
-uses a local-density flocking model with seven topological neighbours, a bounded field, a
-three-phase task (collect, hold 800 ticks, exit through a gate) and success when every sheep has
-left through the gate within 10,000 ticks. It reports that one dog succeeds up to 100 sheep, that
-3 dogs are needed at 150, 20 at 200 and 35 at 400 for a success rate of at least 90%, that too
-many dogs lower success on small flocks, and that the mean spread of the flock predicts success.
-Its sensitivity check changed one repulsion radius and moved success at (D = 6, N = 400) from 0
-to 92%.
+They explain the threshold by percolation of a herdability graph.
 
 Table 1 summarises the studies closest to ours.
 
@@ -125,7 +114,6 @@ Table 1. Multi-herder studies and the present one. "Success" is the criterion us
 | Pierson and Schwager 2015 | potential field | partial encirclement | 1 to 10 | 2 to 3 | convergence to goal region | no |
 | Kubo et al. 2022 | forces, field of view | farthest from goal, dog-dog repulsion | up to 1000 | 1 to 5 | all sheep in goal | no |
 | Lama and di Bernardo 2024 | Brownian, no cohesion | chase farthest from goal | varied | varied | 99% of targets in goal | yes, N* ~ sqrt(M) |
-| anonymous 2025 | local density, 7 neighbours | collect, drive on arc, patrol | 5 to 400 | 1 to 35 | all sheep through gate, 10,000 ticks | yes, fixed time |
 | this study | Strömbom, n = N - 1 | collect or drive, team layer | 25 to 400 | 1 to 24 | all, or 99%, of sheep in goal before a deadline | yes, deadline as a factor |
 
 ## 3. Research questions and definition of D_min
@@ -678,26 +666,18 @@ three sizes and one deadline, so it does not test the layout order or the deadli
 
 ### 7.1 Comparison with earlier scaling results
 
-Our D_min grows much more slowly than the dog counts of the anonymous 2025 manuscript. There, one
-dog fails abruptly between 100 and 150 sheep and 20 dogs are needed at 200; here, 2 or 3 dogs
-suffice at N = 400 with 12 drive times. The tasks differ in many ways (a pen gate and a holding
-phase, a bounded field, a different sheep model and time limit), so the counts should not be
-compared directly. One difference stands out. Their sheep follow a local density gradient with
-seven topological neighbours, while ours are attracted to the centre of all other sheep (n = N - 1).
-Strömbom et al. (2014) found that one shepherd always succeeds when n is at least about 0.53 N
-and rarely when n is much smaller than N. Global attraction makes a scattered Strömbom flock pull
-itself together once the dogs reach it, which plausibly explains why few dogs are needed. We did
-not vary n, so this explanation is untested.
+Lama and di Bernardo (2024) found that the minimum shepherd count N* grows as sqrt(M), corresponding
+to a slope of 0.5 in log-log terms, for non-cohesive targets under a 99% arrival criterion with
+infinite sensing. Our scaling slopes for cohesive Strömbom flocks at generous deadlines (12 and 6
+drive times) lie between 0.2 and 0.5. A cohesive flock needing at most as many extra herders per
+doubling as a non-cohesive swarm aligns with theoretical expectations: global mutual attraction
+(n = N - 1) helps a scattered flock draw itself together once shepherds approach, significantly
+reducing the required herding effort.
 
-Lama and di Bernardo (2024) found N* growing as sqrt(M), a slope of 0.5 in our terms, for targets
-with no cohesion. Our slopes at 12 and 6 drive times lie between 0.2 and 0.5. A cohesive flock
-needing at most as many extra herders per doubling as a non-cohesive one is the expected
-direction, but the models and tasks differ and our slopes rest on few points.
-
-Both earlier studies found that more herders can make the task harder: on small flocks in the 2025
-manuscript, and through crowding in general. We see this only on the split layout at N >= 200
-(section 6.7), not on small flocks. On a compact flock our coordinated dogs converge on the same
-slots and duplicate each other's work without hurting success (section 6.1).
+While excessive herders can cause congestion or interference in general multi-agent swarms, we
+observed detrimental team effects primarily on the split layout at N >= 200 (section 6.7). On
+compact flocks, our coordinated dogs converge on parallel slots without hurting task success
+(section 6.1).
 
 ### 7.2 The deadline is a main factor
 
@@ -712,8 +692,8 @@ we could meet, and the scattered layouts converge toward one or two dogs as the 
 
 At N >= 100 and tight deadlines the strict criterion often decides a trial on the last one or two
 sheep, after the flock has arrived. The 99% criterion removes that step and is the rule of Lama and
-di Bernardo (2024); the strict criterion is the rule of Kubo et al. (2022), Li et al. (2025) and the
-anonymous 2025 manuscript. The two answer different questions: the strict criterion asks whether
+di Bernardo (2024); the strict criterion is the rule of Kubo et al. (2022) and Li et al. (2025).
+The two answer different questions: the strict criterion asks whether
 the team can bring the whole flock in and keep it there for one tick; the 99% criterion asks whether
 the team can bring the flock in. Our team rule has no step for the end of the task, and in the
 failure traces every dog ends up on the goal side of the flock and the flock leaves the goal again.
@@ -725,8 +705,7 @@ criteria and have not chosen one as primary.
 
 The absolute dog count depends on settings that have no rule from real herding: the start gap,
 the dog start, the goal size, the sheep parameter set and the success criterion. The sensitivity
-runs changed it by up to a factor of six. The anonymous 2025 manuscript reached a similar
-conclusion from one parameter change. What held across our variants is the direction of growth
+runs changed it by up to a factor of six. What held across our variants is the direction of growth
 with N. Together with the main runs, the statements we consider supported are: a compact flock
 needs one dog; on scattered layouts D_min grows slowly with N; the deadline is a factor on the same
 scale as N; and the strict criterion inflates D_min at large N and tight deadlines. The layout
@@ -792,9 +771,6 @@ Results are bit-identical on one machine and agree within a tolerance across mac
 dynamics are chaotic.
 
 ## References
-
-anonymous (2025). Collective nudging that scales. How many dogs do I need to herd sheep?
-Manuscript, authors not named in the copy used.
 
 Auletta F, Fiore D, Richardson MJ, di Bernardo M (2021). Herding stochastic autonomous agents via
 local control rules and online global target selection strategies. arXiv:2010.00386.

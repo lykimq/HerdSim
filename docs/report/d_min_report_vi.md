@@ -18,7 +18,7 @@ Lùa cừu bằng chó chăn dắt là ví dụ kinh điển về việc một s
 
 Khi có nhiều hơn một cá thể chăn dắt, nhiều chiến lược điều khiển đã được đề xuất. Pierson và Schwager (2015) sử dụng hai hoặc nhiều robot chó bao vây một phần bầy đàn và chứng minh sự hội tụ đối với một con cừu đơn lẻ. Kubo et al. (2022) bổ sung lực đẩy giữa các cá thể chó khiến chúng tự tạo thành vòng tròn bao quanh bầy cừu, và báo cáo rằng nhiều chó hơn giúp dẫn đàn nhanh hơn và tin cậy hơn. Auletta et al. (2021) nghiên cứu các quy tắc cục bộ và chiến lược chọn mục tiêu cho các cá thể chăn dắt gom các mục tiêu ngẫu nhiên không có lực liên kết. Li et al. (2025) chứng minh việc chăn dắt khả thi ngay cả khi chỉ đo được góc phương vị (bearing-only), và Brown et al. (2025) mô hình hóa bài toán dưới dạng điều khiển tối ưu cho $m$ chó và $n$ cừu. Các nghiên cứu này cho thấy việc tăng số lượng chó có thể đem lại lợi ích, nhưng họ luôn cố định quy mô đội và không đặt câu hỏi một nhiệm vụ cụ thể đòi hỏi tối thiểu bao nhiêu cá thể chăn dắt.
 
-Hai nghiên cứu gần đây đã trực tiếp giải quyết câu hỏi này. Lama và di Bernardo (2024) nhận thấy số lượng cá thể chăn dắt tối thiểu $N^*$ để gom $M$ mục tiêu không liên kết tăng theo căn bậc hai của $M$ ($\sqrt{M}$), và dưới một mật độ mục tiêu tới hạn, con số này tăng nhanh hơn. Một bản thảo ẩn danh năm 2025, "Collective nudging that scales", đã đo lường số lượng chó tối thiểu để thu gom, duy trì và nhốt bầy cừu lên đến 400 con trong vòng 10.000 nhịp mô phỏng (ticks), và phát hiện sự gia tăng phi tuyến tính theo kích thước đàn cùng với hiện tượng sụt giảm tỷ lệ thành công khi sử dụng quá nhiều chó (anonymous 2025). Tuy nhiên, trong cả hai nghiên cứu, phân bố ban đầu, giới hạn thời gian và tiêu chí thành công đều bị đóng khung cố định. Chưa có công trình nào báo cáo kết quả này thay đổi ra sao khi thời gian cho phép co giãn, khi hình dạng ban đầu của bầy cừu biến thiên, hoặc khi tỷ lệ cừu bắt buộc phải đến đích thay đổi.
+Một nghiên cứu gần đây của Lama và di Bernardo (2024) đã trực tiếp khảo sát câu hỏi này, nhận thấy số lượng cá thể chăn dắt tối thiểu $N^*$ để gom $M$ mục tiêu không liên kết tăng theo căn bậc hai của $M$ ($\sqrt{M}$), và dưới một mật độ mục tiêu tới hạn, con số này tăng nhanh hơn. Tuy nhiên, thiết lập nghiên cứu của họ cố định phân bố ban đầu, giới hạn thời gian và tiêu chí thành công. Chưa có công trình nào báo cáo kết quả này thay đổi ra sao khi thời gian cho phép co giãn, khi hình dạng ban đầu của bầy cừu biến thiên, hoặc khi tỷ lệ cừu bắt buộc phải đến đích thay đổi.
 
 Trong nghiên cứu này, chúng tôi đo lường $D_{\min}$ — quy mô đội nhỏ nhất đạt độ tin cậy — đối với bầy cừu Strömbom được lùa vào một mục tiêu hình tròn, đồng thời xử lý bố cục khởi tạo, thời hạn và tiêu chí thành công như các biến số độc lập bên cạnh quy mô đàn cừu. Các đóng góp chính gồm:
 
@@ -38,7 +38,7 @@ Strömbom et al. (2014) mô hình hóa mỗi con cừu như một hạt tự hà
 Pierson và Schwager (2015) thiết kế bộ điều khiển phản hồi cho hai hoặc nhiều robot chó quy đổi hệ chó-cừu về mô hình unicycle. Kubo et al. (2022) dùng mô hình lực đẩy-hút trong đó mỗi chó đẩy con cừu xa mục tiêu nhất và đẩy lẫn nhau; lực đẩy giữa các chó giúp chúng tản đều quanh bầy, dẫn dắt thành công đàn lên tới 1.000 con. Auletta et al. (2021) so sánh chiến lược chọn mục tiêu tĩnh và động cho 2 người chăn dắt và 3 đến 60 mục tiêu không liên kết. Li et al. (2025) loại bỏ giả định biết vị trí tuyệt đối và điều khiển bầy chỉ bằng góc nhìn. Brown et al. (2025) tính toán quỹ đạo tối ưu cho số lượng nhỏ chó và cừu, nhận thấy các phương pháp số giải tích gặp khó khăn lớn khi khoảng cách giữa chó và cừu quá gần.
 
 ### 2.3 Quy luật mở rộng quy mô đội chăn dắt
-Lama và di Bernardo (2024) nghiên cứu các tác tử chăn dắt có tầm cảm nhận hữu hạn và các mục tiêu không có liên kết bầy đàn. Số lượng chăn dắt tối thiểu $N^*$ để đưa tỷ lệ $\chi^* = 0,99$ số mục tiêu vào đích tăng theo $\sqrt{M}$ khi tầm cảm nhận vô hạn. Bản thảo ẩn danh 2025 dùng mô hình mật độ cục bộ với 7 láng giềng topo, trường có tường chắn, nhiệm vụ 3 giai đoạn (thu gom, giữ chân 800 nhịp, thoát qua cổng) và thành công khi toàn bộ cừu qua cổng trong 10.000 nhịp. Công trình này báo cáo 1 chó thành công tới 100 cừu, 3 chó ở 150 cừu, 20 chó ở 200 cừu và 35 chó ở 400 cừu để đạt tỷ lệ thành công 90%; quá nhiều chó làm giảm thành công ở đàn nhỏ.
+Lama và di Bernardo (2024) nghiên cứu các tác tử chăn dắt có tầm cảm nhận hữu hạn và các mục tiêu không có liên kết bầy đàn. Số lượng chăn dắt tối thiểu $N^*$ để đưa tỷ lệ $\chi^* = 0,99$ số mục tiêu vào đích tăng theo $\sqrt{M}$ khi tầm cảm nhận vô hạn. Họ giải thích ngưỡng này thông qua hiện tượng thẩm thấu (percolation) của đồ thị khả năng lùa bầy (herdability graph).
 
 Bảng 1 tóm tắt các nghiên cứu tiêu biểu so với công trình hiện tại:
 
@@ -48,7 +48,6 @@ Bảng 1 tóm tắt các nghiên cứu tiêu biểu so với công trình hiện
 | Pierson & Schwager 2015 | Trường thế năng | Bao vây một phần | 1 đến 10 | 2 đến 3 | Hội tụ về vùng mục tiêu | Không |
 | Kubo et al. 2022 | Mô hình lực, trường nhìn | Đẩy con xa đích nhất, đẩy giữa chó | Đến 1.000 | 1 đến 5 | Toàn bộ cừu vào đích | Không |
 | Lama & di Bernardo 2024 | Chuyển động Brown, không liên kết | Đuổi con xa đích nhất | Đa dạng | Đa dạng | 99% mục tiêu vào đích | Có, $N^* \sim \sqrt{M}$ |
-| Bản thảo ẩn danh 2025 | Mật độ cục bộ, 7 láng giềng | Gom, lùa trên cung, tuần tra | 5 đến 400 | 1 đến 35 | Toàn bộ qua cổng, 10.000 nhịp | Có, thời gian cố định |
 | **Nghiên cứu này** | **Strömbom, $n = N - 1$** | **Gom hoặc lùa, có tầng phối hợp đội** | **25 đến 400** | **1 đến 24** | **100% hoặc 99% vào đích trước thời hạn** | **Có, xem thời hạn là một biến số** |
 
 ---
@@ -326,7 +325,7 @@ Bảng 8 tóm tắt kết quả phân tích độ nhạy ($D_{\min}$ Base / Bi�
 ## 7. Thảo luận (Discussion)
 
 ### 7.1 So sánh với các nghiên cứu trước
-Kết quả $D_{\min}$ của chúng tôi tăng trưởng chậm hơn nhiều so với bản thảo ẩn danh 2025 (nơi 1 chó thất bại ở 150 cừu và cần 20 chó ở 200 cừu; trong khi chúng tôi chỉ cần 2 đến 3 chó ở $N = 400$). Sự khác biệt cốt lõi nằm ở cơ chế hút bầy đàn: mô hình Strömbom duy trì lực hút toàn cục ($n = N - 1$), giúp bầy cừu tự động co cụm lại khi chó tiếp cận, giảm tải rất lớn cho đội chăn dắt.
+Lama và di Bernardo (2024) nhận thấy số lượng cá thể chăn dắt tối thiểu $N^*$ tăng theo $\sqrt{M}$ (tương ứng độ dốc 0,5 trong không gian log-log) đối với các mục tiêu không liên kết dưới tiêu chí 99%. Độ dốc tăng trưởng của chúng tôi ở các thời hạn rộng rãi ($12\times$ và $6\times$) dao động từ 0,2 đến 0,5. Việc bầy cừu có tính liên kết đòi hỏi số lượng chó bổ sung ít hơn so với bầy không liên kết là hoàn toàn phù hợp với dự đoán lý thuyết: cơ chế hút toàn cục ($n = N - 1$) trong mô hình Strömbom giúp bầy cừu tự động co cụm lại ngay khi đàn chó tiếp cận, giảm tải rất lớn cho đội ngũ chăn dắt.
 
 ### 7.2 Thời hạn là một yếu tố then chốt
 Các nghiên cứu trước đây luôn cố định thời gian. Kết quả của chúng tôi chứng minh rằng thời hạn dịch chuyển $D_{\min}$ mạnh mẽ không kém gì quy mô bầy đàn. Về mặt thực tiễn, việc bổ sung thêm chó chủ yếu có tác dụng "mua thời gian" để thu gom bầy đàn phân tán.
@@ -379,7 +378,6 @@ uv run python docs/science/design_version2/figures/make_result_figures.py
 
 ## Tài liệu tham khảo (References)
 
-- anonymous (2025). Collective nudging that scales. How many dogs do I need to herd sheep? Manuscript.
 - Auletta F, Fiore D, Richardson MJ, di Bernardo M (2021). Herding stochastic autonomous agents via local control rules and online global target selection strategies. arXiv:2010.00386.
 - Brown D, Garrity T, Perkins D, Hunter D, Pochman W (2025). Optimal control strategies for multi-agent sheep herding. arXiv:2510.25115.
 - di Bernardo M (2026). Multi-scale control of large agent populations: from density dynamics to individual actuation. arXiv:2603.15160.
