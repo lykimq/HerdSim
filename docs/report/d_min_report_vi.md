@@ -92,17 +92,33 @@ trong đó mỗi số hạng là một vector đơn vị: $\mathbf{H}$ là hư�
 
 $$\mathbf{S}_i = \frac{\sum_{j \in \text{threat}} \frac{\mathbf{x}_i - \mathbf{y}_j}{\lVert \mathbf{x}_i - \mathbf{y}_j \rVert}}{\left\lVert \sum_{j \in \text{threat}} \frac{\mathbf{x}_i - \mathbf{y}_j}{\lVert \mathbf{x}_i - \mathbf{y}_j \rVert} \right\rVert}$$
 
-Điều này bảo đảm tính chân thực sinh học: nhiều chó cùng dồn ép một con cừu sẽ tạo áp lực từ hướng trung bình mà không gây ra gia tốc siêu vật lý phi thực tế.
+Điều này bảo đảm tính chân thực sinh học: nhiều chó cùng dồn ép một con cừu sẽ tạo áp lực từ hướng trung bình mà không gây ra gia tốc siêu vật lý phi thực tế (Hình S1).
+
+![Quy tắc di chuyển của cừu](figures/fig1_sheep_rule.png)
+
+*Hình S1: Mô hình cừu Strömbom. Trái: một cá thể cừu nằm trong khoảng cách phản xạ với 5 thành phần của phương trình (1), trọng số tương ứng và vector hướng di chuyển kết quả. Phải: một chú chó và bầy cừu xung quanh; cừu nằm ngoài bán kính r_s tiếp tục gặm cỏ, cừu nằm trong bán kính r_s di chuyển trốn chạy.*
 
 ### 4.2 Chó
-Với 1 chó, hành vi tuân thủ chính xác quy tắc của Strömbom et al. (2014). Chó chuyển sang chế độ **thu gom (collect)** khi có bất kỳ con cừu nào cách tâm bầy xa hơn $f(N) = r_a N^{2/3}$, nhắm vào điểm cách con cừu xa nhất một đoạn $r_a$ về phía đối diện tâm bầy. Ngược lại, chó chuyển sang chế độ **lùa đàn (drive)**, nhắm vào điểm cách tâm bầy một đoạn $r_a \sqrt{N}$ về phía đối diện mục tiêu. Chó di chuyển với vận tốc $\delta_s$ và đứng yên nếu cách bất kỳ con cừu nào dưới $3 r_a$.
+Với 1 chó, hành vi tuân thủ chính xác quy tắc của Strömbom et al. (2014) (Hình S2). Chó chuyển sang chế độ **thu gom (collect)** khi có bất kỳ con cừu nào cách tâm bầy xa hơn $f(N) = r_a N^{2/3}$, nhắm vào điểm cách con cừu xa nhất một đoạn $r_a$ về phía đối diện tâm bầy. Ngược lại, chó chuyển sang chế độ **lùa đàn (drive)**, nhắm vào điểm cách tâm bầy một đoạn $r_a \sqrt{N}$ về phía đối diện mục tiêu. Chó di chuyển với vận tốc $\delta_s$ và đứng yên nếu cách bất kỳ con cừu nào dưới $3 r_a$.
 
-Với nhiều chó ($D > 1$), tầng phối hợp đội phân công nhiệm vụ chuyên biệt (`strombom_multi`):
+![Người chăn dắt đơn lẻ](figures/fig2_shepherd.png)
+
+*Hình S2: Người chăn dắt đơn lẻ theo Strömbom et al. (2014). Trái: khi có cừu tản mác ngoài f(N), chó di chuyển tới điểm thu gom P_c phía sau con cừu xa nhất. Phải: khi bầy đã co cụm, chó di chuyển tới điểm lùa P_d phía sau bầy cừu đối diện với mục tiêu. Chó đứng yên khi nằm trong khoảng cách 3 r_a tới cừu (vùng tô bóng).*
+
+Với nhiều chó ($D > 1$), tầng phối hợp đội phân công nhiệm vụ chuyên biệt (`strombom_multi`) (Hình 1):
 - **Khi thu gom**: $D$ cá thể cừu tản mác xa nhất được ghép cặp với $D$ cá thể chó thông qua thuật toán gán tuyến tính tối thiểu hóa tổng quãng đường di chuyển (linear sum assignment). Chó thừa sẽ tham gia hỗ trợ lùa đàn.
 - **Khi lùa đàn**: Các chó dàn hàng trên một vòng cung phía sau bầy cừu, trải đều trên góc mở bao trọn bề rộng bầy đàn, giữ nguyên thứ tự góc để tuyệt đối không cắt chéo đường đi của nhau. Mỗi cá thể chó đều nắm rõ tọa độ của mọi con cừu và các đồng đội khác.
 
+![Quy tắc phối hợp đội strombom_multi](figures/fig3_team_rule.png)
+
+*Hình 1: Từ một chó đến nhiều chó, trích xuất từ mô phỏng khi bắt đầu thử nghiệm. Cột trái: một chó theo quy tắc Strömbom et al. (2014). Hàng trên: trên bố cục phân tán wide, các chó thu gom cừu, mỗi chó nhắm tới điểm gom của cá thể tản mác được ghép cặp theo quãng đường ngắn nhất. Hàng dưới: trên bố cục co cụm compact, các chó dàn hàng hình cung phía sau bầy, trải đều theo bề rộng bầy cừu. Dấu chữ thập đánh dấu điểm nhắm tới.*
+
 ### 4.3 Mô hình cừu thứ hai (Kubo et al. 2022)
-Để đối chứng, chúng tôi chạy thử mô hình lực liên tục của Kubo et al. (2022). Mô hình này không có nhiễu ngẫu nhiên nên các hạt giống chỉ thay đổi vị trí khởi đầu. Do mô hình này nén bầy cừu về một bán kính cố định, chúng tôi thử nghiệm đến $N = 100$.
+Để đối chứng, chúng tôi chạy thử mô hình lực liên tục của Kubo et al. (2022) (Hình S3). Mô hình này không có nhiễu ngẫu nhiên nên các hạt giống chỉ thay đổi vị trí khởi đầu. Do mô hình này nén bầy cừu về một bán kính cố định, chúng tôi thử nghiệm đến $N = 100$.
+
+![Mô hình lực Kubo](figures/fig5_kubo.png)
+
+*Hình S3: Mô hình lực liên tục của Kubo et al. (2022). Trái: 4 vector lực tác động lên một con cừu (lực đẩy, căn chỉnh hướng, lực hút, và lực trốn chạy chó). Giữa: 4 vector lực tác động lên một chú chó (hút về cừu mục tiêu, cự ly an toàn với cừu, tránh mục tiêu, và lực đẩy giữa các chó). Phải: Lượt thử nghiệm cho thấy lực đẩy giữa các chó giúp chúng tự động phân tán đều quanh chu vi bầy đàn.*
 
 ### 4.4 Các tham số
 Bảng 2 liệt kê các tham số của mô hình Strömbom:
@@ -122,7 +138,11 @@ Bảng 2 liệt kê các tham số của mô hình Strömbom:
 | $\delta_s$ | 1.5 | Bước di chuyển của chó trong 1 nhịp (tốc độ $v_{\text{dog}} = 1.5$ m/s) |
 | - | $3 r_a$ | Chó đứng yên nếu tiến sát cừu trong cự ly này để tránh làm vỡ đàn |
 
-Strömbom et al. (2014) cũng cung cấp bộ tham số thực địa GPS ($r_a = 1$, $e = 0,1$, $r_s = 75$), được chúng tôi đưa vào phân tích độ nhạy.
+Strömbom et al. (2014) cũng cung cấp bộ tham số thực địa GPS ($r_a = 1$, $e = 0,1$, $r_s = 75$), được chúng tôi đưa vào phân tích độ nhạy (Hình S6).
+
+![Đối chiếu thực địa](figures/fig14_realism_numbers.png)
+
+*Hình S6: So sánh bầy cừu thực địa của Jadhav et al. (2024) với bộ tham số cơ sở và bộ tham số thực địa GPS tại N = 100: bán kính bầy, mật độ, cự ly làm việc của chó phía sau tâm bầy, và cự ly dừng của chó.*
 
 ---
 
@@ -135,7 +155,11 @@ Bán kính mục tiêu được đặt cố định là $R_{\text{goal}} = 1,9 R
 
 $$l = \max(13 R_f(N), 80, \text{reach} + 1,9 R_f + R_f) \tag{2}$$
 
-trong đó `reach` là khoảng cách xa nhất mà một con cừu có thể xuất hiện trong bố cục ban đầu. Đấu trường hoàn toàn không có tường phản xạ (open boundary) để tránh việc tường biên trở thành công cụ gom cừu nhân tạo làm sai lệch kết quả.
+trong đó `reach` là khoảng cách xa nhất mà một con cừu có thể xuất hiện trong bố cục ban đầu. Đấu trường hoàn toàn không có tường phản xạ (open boundary) để tránh việc tường biên trở thành công cụ gom cừu nhân tạo làm sai lệch kết quả (Hình S9).
+
+![Kiểm tra tường biên phản xạ](figures/fig10_wall_check.png)
+
+*Hình S9: Tỷ lệ thành công theo số lượng chó D khi có tường phản xạ ở cự ly lề 80 và 250, so với trường hợp không có tường biên (3000), trên cùng tập hạt giống. Khác biệt rõ rệt nhất xuất hiện trên bố cục outlier_rich tại N = 400.*
 
 ### 5.2 Bố cục khởi tạo bầy cừu
 Bảng 3 định nghĩa bốn bố cục xuất phát (định cỡ bằng khoảng cách thu gom $L = f(N) = 2 N^{2/3}$):
@@ -148,9 +172,19 @@ Bảng 3 định nghĩa bốn bố cục xuất phát (định cỡ bằng kho�
 | **`outlier_rich`** | 80% cừu nằm trong lõi co cụm, 20% là các cá thể tản mác rải rác từ $1,1$ đến $1,6 L$. |
 
 ### 5.3 Điểm xuất phát của chó (`dog_start`)
-- **`arcs` (mặc định)**: Chó đứng trên các nửa đường tròn phía sau bầy cừu, cách biên bầy 30 đơn vị, cách đều nhau tối thiểu 5 đơn vị.
+- **`arcs` (mặc định)**: Chó đứng trên các nửa đường tròn phía sau bầy cừu, cách biên bầy 30 đơn vị, cách đều nhau tối thiểu 5 đơn vị (Hình S4).
 - **`ring`**: Chó phân bố đều trên đường tròn $360^\circ$ bao quanh bầy cừu.
 - **`handler`**: Toàn bộ chó xuất phát từ một điểm duy nhất phía sau bầy cừu (mô phỏng việc thả chó từ trạm của người điều khiển).
+
+Trên bố cục co cụm, toàn bộ cừu nằm trong phạm vi $r_s$ của chó tại nhịp 0; trên các bố cục phân tán, 66% đến 100% số cừu nằm ngoài tầm với và tiếp tục gặm cỏ cho đến khi chó tiếp cận (Hình S5).
+
+![Các trạm xuất phát của chó](figures/fig8_dog_starts.png)
+
+*Hình S4: Các vị trí xuất phát của chó. Phía trên: các vòng cung cho D = 1, 2, 4, 8, 24 và 64 trên bố cục compact. Một chó xuất phát trên đường lùa đàn phía sau bầy cừu và mỗi cá thể bổ sung chiếm một vị trí riêng. Phía dưới: ba kiểu bố trí (arcs, ring, handler point) cho 8 chó trên bố cục wide.*
+
+![Cự ly ban đầu](figures/fig11_start_distances.png)
+
+*Hình S5: Khởi đầu với 1 chó trên các vòng cung arcs, theo từng bố cục và N. Vòng tròn là bán kính phản xạ đe dọa r_s = 65. Cừu xanh lam phản ứng chạy trốn ngay nhịp 0, cừu xám tiếp tục gặm cỏ. Con số hiển thị khoảng cách từ chó đến tâm bầy cừu.*
 
 ### 5.4 Thời hạn (`deadline`)
 Thời hạn được tính theo $T = m l / \delta$ giây với $m \in \{12, 6, 3\}$. Với $N = 200$, thời gian lùa tiêu chuẩn $T_{\text{drive}} \approx 140$ s, tương ứng các thời hạn là 1.680 s ($12\times$), 839 s ($6\times$) và 420 s ($3\times$).
@@ -163,7 +197,11 @@ Thời hạn được tính theo $T = m l / \delta$ giây với $m \in \{12, 6, 
 Mỗi hạt giống $i$ sinh ra ba chuỗi ngẫu nhiên độc lập (bố cục, nhiễu cừu, nhiễu chó) dựa trên `master_seed + i` (2026 + $i$). Mỗi ô ban đầu nhận 1 lô 10 hạt giống. Sau mỗi vòng, chỉ các ô chưa ngã ngũ mới nhận thêm lô 10 hạt giống (tối đa 200). Điểm chia đôi (midpoint) được tự động chèn vào giữa các vùng hành vi khác biệt, và các ô trên ngưỡng bão hòa có độ trùng lặp hành vi cao (mean dog overlap $\ge 0,90$) sẽ bị cắt tỉa (pruning) để tiết kiệm năng lượng tính toán.
 
 ### 5.7 Các giao thức thực nghiệm
-17 giao thức được thực hiện: 6 giao thức chính (quét $m \in \{12, 6, 3\}$ dưới tiêu chí strict và 99%), 1 giao thức Kubo, và 10 giao thức kiểm tra độ nhạy (đối chiếu điểm xuất phát handler/ring, khoảng cách gap 15/60, bán kính mục tiêu 1.5 $R_f$, bộ tham số thực địa GPS, và tốc độ chó $v_{\text{dog}} = 1,15$).
+17 giao thức được thực hiện: 6 giao thức chính (quét $m \in \{12, 6, 3\}$ dưới tiêu chí strict và 99%), 1 giao thức Kubo, và 10 giao thức kiểm tra độ nhạy (đối chiếu điểm xuất phát handler/ring, khoảng cách gap 15/60, bán kính mục tiêu 1.5 $R_f$, bộ tham số thực địa GPS, và tốc độ chó $v_{\text{dog}} = 1,15$) (Hình S8).
+
+![Bố cục các biến thể độ nhạy](figures/fig16_variants.png)
+
+*Hình S8: Cấu hình ban đầu của từng biến thể phân tích độ nhạy trên bố cục wide tại N = 200 với 4 chó. Biến thể tốc độ chó có hình dạng tương tự như cấu hình cơ sở.*
 
 ---
 
@@ -230,6 +268,10 @@ Bảng 8 tóm tắt kết quả phân tích độ nhạy ($D_{\min}$ Base / Bi�
 - **Tốc độ chó ($v_{\text{dog}} = 1,15$ vs $1,5$):** Chó chạy chậm hơn đạt thành tích vượt trội dưới tiêu chí nghiêm ngặt trên đàn lớn ($N = 400$, wide: $D_{\min} = 5$ so với thất bại ở tốc độ 1.5; outlier: $D_{\min} = 6$ so với thất bại). Chó chậm di chuyển điềm tĩnh hơn, không tạo ra xung lực đẩy đàn cừu vọt qua vòng đích.
 - **Trạm xuất phát:** Xuất phát tập trung tại trạm `handler` cần ít chó hơn so với bao vây `ring` ở quy mô nhỏ và vừa, vì chó xuất phát từ vòng tròn ở phía mục tiêu vô tình dọa cừu chạy ngược hướng.
 
+![Cảnh bầy cừu được lùa](figures/fig15_matched_scene.png)
+
+*Hình S7: Bầy cừu trong bộ tham số cơ sở và bộ tham số thực địa GPS khi được lùa ở quy mô N = 100 với 1 chó, trên cùng một tỷ lệ không gian. Phải: bầy cừu đã ổn định trong các mục tiêu có bán kính 1,9, 1,5, 1,3 và 1,1 R_f, kèm theo số lượng cừu bị sót lại bên ngoài mỗi vòng.*
+
 ---
 
 ## 7. Thảo luận (Discussion)
@@ -276,7 +318,7 @@ Toàn bộ 112.785 lượt thử nghiệm được lưu trữ theo từng giao t
 ```bash
 make install && make check && make bench
 uv run cli/run_queue.py --workers 20                 # Chạy toàn bộ các giao thức
-uv run cli/dmin_tables.py record                     # Bảng Phụ lục B
+uv run cli/dmin_tables.py record                     # Bảng Phụ lục A
 uv run cli/dmin_tables.py dmin dmin_m12 dmin_m6 dmin_m3 dmin_f99_m12 dmin_f99_m6 dmin_f99_m3
 uv run cli/dmin_tables.py growth dmin_m12 dmin_m6 dmin_m3
 uv run cli/dmin_tables.py compare dmin_s_matched dmin_s_handler --base dmin_s_base
@@ -301,22 +343,7 @@ uv run python docs/science/design_version2/figures/make_result_figures.py
 
 ---
 
-## Phụ lục A. Các hình vẽ bổ sung (Appendix A. Supplementary Figures)
-
-- **Hình S1 (Quy tắc cừu)**: Mô hình cừu Strömbom. Trái: một cừu trong cự ly phản xạ với 5 thành phần của phương trình (1). Phải: cừu ngoài bán kính $r_s$ gặm cỏ, cừu trong bán kính $r_s$ bỏ chạy.
-- **Hình S2 (Người chăn dắt đơn lẻ)**: Trái: cừu tản mác ngoài $f(N)$, chó di chuyển đến điểm thu gom $P_c$. Phải: bầy liên kết, chó di chuyển đến điểm lùa $P_d$.
-- **Hình S3 (Mô hình lực Kubo)**: Lực đẩy giữa các chó giúp chúng tự động phân tán đều quanh bầy cừu.
-- **Hình S4 (Các trạm xuất phát của chó)**: Phía trên: các vòng cung đồng tâm từ $D = 1$ đến $64$. Phía dưới: ba hình thức xuất phát (`arcs`, `ring`, `handler`).
-- **Hình S5 (Cự ly ban đầu)**: Vòng tròn bán kính đe dọa $r_s = 65$; cừu xanh phản ứng ngay nhịp 0, cừu xám tiếp tục gặm cỏ.
-- **Hình S6 (Đối chiếu thực địa)**: So sánh bầy cừu thực địa của Jadhav et al. (2024) với bộ tham số mô phỏng cơ sở và bộ tham số thực địa GPS tại $N = 100$.
-- **Hình S7 (Cảnh bầy cừu được lùa)**: Đàn cừu $N = 100$ trong các kích thước mục tiêu $1,9$, $1,5$, $1,3$ và $1,1 R_f$.
-- **Hình S8 (Bố cục các biến thể độ nhạy)**: Cấu hình ban đầu của các biến thể phân tích độ nhạy trên bố cục `wide` tại $N = 200, D = 4$.
-- **Hình S9 (Kiểm tra tường biên phản xạ)**: So sánh tỷ lệ thành công khi có tường biên ở khoảng cách 80 và 250 so với không có tường.
-- **Hình S10 (Thử nghiệm sơ bộ - Pilot run)**: Khảo sát sơ bộ 10 hạt giống để xác định lưới kích thước đội và các mốc thời hạn.
-
----
-
-## Phụ lục B. Nhật ký các lượt chạy (Appendix B. Record of Runs)
+## Phụ lục A. Nhật ký các lượt chạy (Appendix A. Record of Runs)
 
 | Giao thức | Số lượt thử | Số ô | Đã ngã ngũ | Chưa ngã ngũ ở giới hạn 200 | Lỗi | Số giờ chạy |
 |---|---|---|---|---|---|---|
@@ -341,7 +368,11 @@ uv run python docs/science/design_version2/figures/make_result_figures.py
 
 ---
 
-## Phụ lục C. Thử nghiệm sơ bộ (Appendix C. Pilot)
+## Phụ lục B. Thử nghiệm sơ bộ (Appendix B. Pilot)
+
+![Thử nghiệm sơ bộ](figures/fig18_pilot_success.png)
+
+*Hình S10: Khảo sát sơ bộ (10 hạt giống mỗi ô): tỷ lệ thành công theo D đối với bố cục wide và outlier_rich tại N = 200 và 400, ghi nhận ở ba mốc thời hạn 3, 6 và 12 drive times. Thử nghiệm sơ bộ được sử dụng để lựa chọn các mốc thời hạn và lưới quy mô đội chó.*
 
 Tỷ lệ thành công trên bố cục `wide` trong đợt chạy thử nghiệm sơ bộ (10 hạt giống mỗi ô, không tường biên):
 
@@ -356,7 +387,7 @@ Tỷ lệ thành công trên bố cục `wide` trong đợt chạy thử nghiệ
 
 ---
 
-## Phụ lục D. So sánh hai mức tốc độ của chó (Appendix D. The Two Dog Speeds)
+## Phụ lục C. So sánh hai mức tốc độ của chó (Appendix C. The Two Dog Speeds)
 
 Các lượt thử nghiệm với $D \ge 6$ trên lưới độ nhạy tại thời hạn $6\times$ drive times. Bán kính bầy cân bằng giữa hai lượt chạy chênh lệch dưới 1%, do đó kích thước mục tiêu và thời hạn là hoàn toàn tương đồng.
 
