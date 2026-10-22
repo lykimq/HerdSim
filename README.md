@@ -71,6 +71,14 @@ An uncoordinated baseline (FAT, every dog chasing the sheep farthest from the go
 ![The team rule against FAT](docs/figures/fig26_fat.png)
 *Figure 3b: Success against D for strombom_multi (blue) and FAT (orange) on the same task, strict (solid) and 99% (dashed), 6 drive times.*
 
+### 6. What the Per-Trial Metrics Show
+Every trial stores summaries of 15 per-tick flock and dog measures. Two of them add to the findings above:
+- Across cells, success falls as the flock spreads: Spearman correlation -0.56 to -0.81 at 6 and 3 drive times under both success rules, close to the -0.70 of the 2025 scaling manuscript. Weighting the spread by N changes it by at most 0.02.
+- On split flocks at N = 200, about a quarter of the dogs stand still under the stop rule from D = 4 on, against about 1% on wide, and shortening the stop distance cuts the finish time by about a fifth. Crowding alone is not the cause: wide flocks show the same share of dogs with a twin and are unaffected.
+
+![Per-trial metrics](docs/figures/fig27_metrics.png)
+*Figure 3c: (a) Cell success against mean flock spread. (b) Dogs standing still and (c) dogs with a twin within 2 units, against D, at N = 200 under the 99% rule. Details are in section 6.10 of the [report](docs/report/d_min_report.md).*
+
 ---
 
 ## How a Campaign Runs
@@ -407,7 +415,7 @@ Every executed protocol writes a self-contained, auditable results directory:
 ```text
 results/<protocol_id>/
 |-- protocol.yaml         Merged configuration (canonical defaults + protocol overrides)
-|-- provenance.json       Git commit, physics hash, host environment, and timestamp
+|-- provenance.json       Protocol id, physics hash, and creation time
 |-- calibration.json      Calibrated steady-state flock radius R_f(N) per method
 |-- trials.jsonl          Append-only stream of completed trials (safe against crashes)
 |-- trials.csv            Consolidated trial results table (rewritten after each round)
@@ -445,10 +453,11 @@ HerdSim/
 |   `-- runner.py           # Worker pool management and trial dispatch
 |-- analysis/               # Statistical evaluation
 |   |-- frontier.py         # Clopper-Pearson CI, paired bootstrap, zone classification
+|   |-- dmin.py             # D_min of a finished run at tighter deadlines or 99% arrival
 |   `-- dmin_tables.py      # Table generators for empirical reporting
 |-- protocols/configs/      # Canonical defaults and protocol definitions
-|-- cli/                    # Command-line tools (campaign, run_queue, dmin_tables)
-|-- docs/                   # Scientific plans, architecture guides, and figure scripts
+|-- cli/                    # Command-line tools (campaign, run_queue, dmin_report, dmin_tables)
+|-- docs/                   # Report, architecture guide, figures and the scripts that draw them
 |-- results/                # Archived empirical datasets (164k+ trials)
 `-- tests/                  # Test suites and golden regression benchmarks
 ```
@@ -476,6 +485,6 @@ HerdSim enforces rigorous validation at every layer:
 
 1. **Strömbom, D., et al. (2014)**. *Solving the shepherding problem: heuristics for herding autonomous, interacting agents*. Journal of the Royal Society Interface, 11(100), 20140719. [DOI: 10.1098/rsif.2014.0719](https://doi.org/10.1098/rsif.2014.0719)
 2. **Kubo, M., Tashiro, M., Sato, H., Yamaguchi, A. (2022)**. *Herd guidance by multiple sheepdog agents with repulsive force*. Artificial Life and Robotics, 27, 416-427. [DOI: 10.1007/s10015-021-00726-7](https://doi.org/10.1007/s10015-021-00726-7)
-3. **Comprehensive Research Design & Plan**: [`docs/science/design_version2/plan_dmin.md`](docs/science/design_version2/plan_dmin.md)
-4. **Empirical Results Tables**: [`docs/science/design_version2/results_tables.md`](docs/science/design_version2/results_tables.md)
+3. **D_min Research Report**: [`docs/report/d_min_report.md`](docs/report/d_min_report.md) ([Vietnamese](docs/report/d_min_report_vi.md))
+4. **Empirical Results Tables**: [`docs/report/results_tables.md`](docs/report/results_tables.md)
 5. **Architectural Deep-Dive**: [`docs/codes/architecture.md`](docs/codes/architecture.md)

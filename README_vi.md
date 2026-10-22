@@ -71,6 +71,14 @@ Một quy tắc đối chứng không phối hợp (FAT, mọi chó cùng đuổ
 ![Quy tắc phối hợp so với FAT](docs/figures/fig26_fat.png)
 *Hình 3b: Tỷ lệ thành công theo D của strombom_multi (xanh) và FAT (cam) trên cùng nhiệm vụ, strict (nét liền) và 99% (nét đứt), thời hạn 6x.*
 
+### 6. Các thước đo theo từng lượt cho thấy gì
+Mỗi lượt chạy lưu tóm tắt của 15 thước đo theo từng nhịp về bầy và đàn chó. Hai trong số đó bổ sung cho các phát hiện trên:
+- Giữa các ô, thành công giảm khi bầy phân tán: tương quan Spearman từ -0,56 đến -0,81 ở thời hạn $6\times$ và $3\times$ dưới cả hai tiêu chí, gần với -0,70 của bản thảo 2025. Nhân độ phân tán với $N$ chỉ làm tương quan thay đổi tối đa 0,02.
+- Trên bầy split ở $N = 200$, khoảng một phần tư số chó đứng yên theo quy tắc dừng từ $D = 4$ trở đi, so với khoảng 1% trên wide, và rút ngắn khoảng dừng làm thời gian hoàn thành giảm khoảng một phần năm. Chỉ riêng việc chen nhau không phải nguyên nhân: các bầy wide có cùng tỷ lệ chó song sinh mà không bị ảnh hưởng.
+
+![Các thước đo theo từng lượt](docs/figures/fig27_metrics.png)
+*Hình 3c: (a) Thành công của ô theo độ phân tán trung bình của bầy. (b) Chó đứng yên và (c) chó có song sinh trong phạm vi 2 đơn vị, theo D, ở $N = 200$ dưới tiêu chí 99%. Chi tiết ở mục 6.10 của [báo cáo](docs/report/d_min_report_vi.md).*
+
 ---
 
 ## Cơ chế vận hành của một chiến dịch
@@ -406,7 +414,7 @@ Mỗi giao thức khi thực thi sẽ ghi dữ liệu vào một thư mục kế
 ```text
 results/<protocol_id>/
 |-- protocol.yaml         Cấu hình hợp nhất (cấu hình chuẩn canonical + ghi đè của giao thức)
-|-- provenance.json       Thông tin Git commit, mã băm vật lý, môi trường máy chủ và dấu thời gian
+|-- provenance.json       Mã giao thức, mã băm vật lý và thời điểm tạo
 |-- calibration.json      Bán kính bầy ổn định đã hiệu chuẩn R_f(N) theo từng phương pháp
 |-- trials.jsonl          Luồng ghi nối tiếp các lượt thử hoàn thành (an toàn khi gặp sự cố dừng)
 |-- trials.csv            Bảng tổng hợp kết quả các lượt thử (được cập nhật sau mỗi vòng chạy)
@@ -444,10 +452,11 @@ HerdSim/
 |   `-- runner.py           # Quản lý nhóm tiến trình và phân phối lượt thử nghiệm
 |-- analysis/               # Đánh giá và phân tích thống kê
 |   |-- frontier.py         # CI Clopper-Pearson, tái lấy mẫu ghép cặp, phân loại vùng hành vi
+|   |-- dmin.py             # D_min của một lượt chạy đã xong ở thời hạn chặt hơn hoặc ở mốc 99%
 |   `-- dmin_tables.py      # Trình tạo bảng biểu phục vụ báo cáo thực nghiệm
 |-- protocols/configs/      # Cấu hình chuẩn mặc định và định nghĩa các giao thức thực nghiệm
-|-- cli/                    # Công cụ giao diện dòng lệnh (campaign, run_queue, dmin_tables)
-|-- docs/                   # Kế hoạch nghiên cứu, tài liệu kiến trúc và tập lệnh vẽ đồ thị
+|-- cli/                    # Công cụ giao diện dòng lệnh (campaign, run_queue, dmin_report, dmin_tables)
+|-- docs/                   # Báo cáo, tài liệu kiến trúc, đồ thị và các tập lệnh vẽ đồ thị
 |-- results/                # Dữ liệu thực nghiệm lưu trữ (hơn 164 nghìn lượt thử nghiệm)
 `-- tests/                  # Bộ kiểm thử đơn vị và bộ kiểm chứng hồi quy chuẩn
 ```
@@ -475,7 +484,7 @@ HerdSim áp dụng quy trình kiểm chứng nghiêm ngặt ở mọi tầng ki�
 
 1. **Strömbom, D., et al. (2014)**. *Solving the shepherding problem: heuristics for herding autonomous, interacting agents*. Journal of the Royal Society Interface, 11(100), 20140719. [DOI: 10.1098/rsif.2014.0719](https://doi.org/10.1098/rsif.2014.0719)
 2. **Kubo, M., Tashiro, M., Sato, H., Yamaguchi, A. (2022)**. *Herd guidance by multiple sheepdog agents with repulsive force*. Artificial Life and Robotics, 27, 416-427. [DOI: 10.1007/s10015-021-00726-7](https://doi.org/10.1007/s10015-021-00726-7)
-3. **Kế hoạch và Thiết kế nghiên cứu toàn diện**: [`docs/science/design_version2/plan_dmin.md`](docs/science/design_version2/plan_dmin.md)
+3. **Bảng kết quả thực nghiệm**: [`docs/report/results_tables.md`](docs/report/results_tables.md)
 4. **Báo cáo kết quả nghiên cứu tiếng Việt**: [`docs/report/d_min_report_vi.md`](docs/report/d_min_report_vi.md)
 5. **Báo cáo kết quả nghiên cứu tiếng Anh**: [`docs/report/d_min_report.md`](docs/report/d_min_report.md)
 6. **Kiến trúc phần mềm chi tiết**: [`docs/codes/architecture.md`](docs/codes/architecture.md)

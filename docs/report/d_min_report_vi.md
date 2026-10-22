@@ -298,7 +298,7 @@ Giá trị $D_{\min}$ dưới tiêu chí 99% không bao giờ lớn hơn tiêu c
 ### 6.7 Hiện tượng thêm chó làm giảm hiệu quả trên bố cục cụm rời (split)
 Trên bố cục `split` ở $N \ge 200$, tỷ lệ thành công không tăng theo số lượng chó (Hình 9). Tại $N = 200$ thời hạn $6\times$ (tiêu chí 99%), tỷ lệ thành công đạt 0,92 (1 chó), 0,95 (2 chó), 0,92 (3 chó), nhưng chỉ 0,60 đến 0,90 khi dùng 4 đến 24 chó; thời gian hoàn thành trung vị kéo dài từ 425 s lên 650 đến 700 s. Bố cục split ở $N \ge 200$ với thời hạn $6\times$ và $3\times$ nên được xem là chưa ngã ngũ.
 
-Một phần nguyên nhân nằm ở cách tầng phối hợp giao việc thu gom: các việc là $D$ con cừu xa tâm bầy nhất theo thứ hạng, và trên bố cục split những con xa nhất thường nằm trong cùng một cụm. Chúng tôi chạy lại split ở $N = 200$, $6\times$, tiêu chí 99%, 12 hạt giống mỗi $D$, và ghi lại ở mỗi nhịp thu gom con cừu được giao cho mỗi chó thuộc cụm xuất phát nào (Bảng 8). Với từ 4 chó trở lên, việc của mọi chó đến từ một cụm duy nhất trong 82% đến 91% số nhịp thu gom. Trong một phép thử đối chứng, khi các việc được dàn ra nhiều cụm (lấy lần lượt các con xa nhất, bỏ qua con nào gần hơn $f(N)$ so với một việc đã nhận), thời gian trung vị giảm từ 631 xuống 318 s ở $D = 4$ nhưng gần như không đổi ở $D = 8$ (678 → 662 s) và $D = 16$ (724 → 703 s). Hiện tượng dồn vào một cụm là có thật và giải thích sự chậm lại ở $D = 4$, nhưng không giải thích ở $D$ lớn hơn. Cả hai phép thử chỉ dùng 12 hạt giống và là chẩn đoán, không phải kết quả.
+Một phần nguyên nhân nằm ở cách tầng phối hợp giao việc thu gom: các việc là $D$ con cừu xa tâm bầy nhất theo thứ hạng, và trên bố cục split những con xa nhất thường nằm trong cùng một cụm. Chúng tôi chạy lại split ở $N = 200$, $6\times$, tiêu chí 99%, 12 hạt giống mỗi $D$, và ghi lại ở mỗi nhịp thu gom con cừu được giao cho mỗi chó thuộc cụm xuất phát nào (Bảng 8). Với từ 4 chó trở lên, việc của mọi chó đến từ một cụm duy nhất trong 82% đến 91% số nhịp thu gom. Trong một phép thử đối chứng, khi các việc được dàn ra nhiều cụm (lấy lần lượt các con xa nhất, bỏ qua con nào gần hơn $f(N)$ so với một việc đã nhận), thời gian trung vị giảm từ 631 xuống 318 s ở $D = 4$ nhưng gần như không đổi ở $D = 8$ (678 → 662 s) và $D = 16$ (724 → 703 s). Hiện tượng dồn vào một cụm là có thật và giải thích sự chậm lại ở $D = 4$, nhưng không giải thích ở $D$ lớn hơn. Mục 6.10 thu hẹp phần còn lại về quy tắc dừng, vẫn để split chậm gấp đôi wide ở $D \ge 8$ với một nguyên nhân thứ ba chưa biết. Cả hai phép thử chỉ dùng 12 hạt giống và là chẩn đoán, không phải kết quả.
 
 *Bảng 8: Chạy lại split, $N = 200$, $6\times$, tiêu chí 99%, 12 hạt giống mỗi $D$.*
 
@@ -379,12 +379,65 @@ Tỷ lệ thành công của FAT không tăng theo $D$: trên wide ở $N = 200$
 
 $D_{\min}$ hữu hạn ở $N$ lớn vì thế là thuộc tính của sự phối hợp trong tầng đội. Thêm những chó cùng làm theo một quy tắc mà không chia việc thì không thêm được gì.
 
+### 6.10 Các thước đo theo từng lượt chạy đóng góp thêm điều gì
+
+Mỗi lượt chạy lưu giá trị trung bình, nhỏ nhất và lớn nhất trong cả lượt của 15 thước đo theo từng nhịp về bầy cừu và đàn chó. $D_{\min}$ không cần phần lớn chúng. Hai thước đo liên quan đến các câu hỏi còn bỏ ngỏ ở trên, và chúng tôi đọc chúng từ dữ liệu đã lưu, kèm một phép chạy lại nhỏ để chẩn đoán (Hình 13).
+
+![Các thước đo theo từng lượt](../figures/fig27_metrics.png)
+
+*Hình 13: (a) Tỷ lệ thành công của từng ô ở thời hạn 6x theo độ phân tán trung bình của bầy (khoảng cách quân phương tới tâm bầy), strict (hình tròn) và 99% (hình vuông). (b) Tỷ lệ chó đứng yên và (c) tỷ lệ chó có một chó "song sinh" trong phạm vi 2 đơn vị, theo D, ở $N = 200$ dưới tiêu chí 99%, cho ba bố cục phân tán.*
+
+**Độ phân tán của bầy và thành công.** Bản thảo ẩn danh 2025 báo cáo rằng độ phân tán trung bình của bầy dự đoán thành công, với tương quan Spearman $-0{,}70$ trên 110 điều kiện, và rằng nhân độ phân tán với $N$ cho kết quả tốt hơn ($-0{,}83$). Bảng 11 cho cùng tương quan trên các ô của chúng tôi có ít nhất 20 hạt giống.
+
+*Bảng 11: Tương quan Spearman giữa tỷ lệ thành công của một ô và độ phân tán của bầy, theo từng lượt chạy chính. Độ phân tán là khoảng cách quân phương của cừu tới tâm bầy, trung bình trong cả lượt hoặc đỉnh trong cả lượt. Hai cột cuối chỉ dùng các bố cục phân tán.*
+
+| Lượt chạy | Số ô (phân tán) | Độ phân tán TB, mọi ô | Độ phân tán đỉnh, mọi ô | Độ phân tán TB | Độ phân tán TB × N |
+|---|---|---|---|---|---|
+| strict, $12\times$ | 180 (135) | -0,58 | -0,53 | -0,59 | -0,58 |
+| strict, $6\times$ | 167 (122) | -0,76 | -0,74 | -0,79 | -0,81 |
+| strict, $3\times$ | 135 (90) | -0,68 | -0,62 | -0,73 | -0,75 |
+| 99%, $12\times$ | 177 (132) | -0,17 | -0,12 | -0,16 | -0,16 |
+| 99%, $6\times$ | 185 (140) | -0,66 | -0,66 | -0,68 | -0,68 |
+| 99%, $3\times$ | 157 (112) | -0,56 | -0,49 | -0,60 | -0,60 |
+
+Ở thời hạn $6\times$ và $3\times$, tương quan nằm trong khoảng $-0{,}56$ đến $-0{,}81$ dưới cả hai tiêu chí, quanh mức $-0{,}70$ của bản thảo. Ở thời hạn $12\times$ dưới tiêu chí 99% tương quan là $-0{,}17$, vì gần như mọi ô đều thành công nên không còn gì để xếp hạng. Nhân với $N$ làm tương quan thay đổi tối đa 0,02, không phải 0,13 như bản thảo báo cáo. Độ phân tán đỉnh cho giá trị tương tự, nên kết quả không đến từ độ dài lượt chạy: các lượt thất bại chạy tới hết thời hạn còn lượt thành công dừng sớm, điều làm lệch giá trị trung bình trong cả lượt. Tương quan này tính giữa các ô và bao gồm tác động của $D$, vì nhiều chó hơn làm bầy chặt hơn; nó không nói gì về nguyên nhân.
+
+**Chó chen nhau và đứng yên trên split.** Mục 6.7 để ngỏ vì sao thành công trên split không tăng theo $D$. Một phỏng đoán tự nhiên là nhiều chó chen nhau. Bảng 12 cho thấy chỉ riêng việc chen nhau không phân biệt được split: tỷ lệ chó có "song sinh" đạt 0,55 trên wide ở $D = 16$, nơi thành công là 1,00 và thời gian hoàn thành giữ ở 267 s. Điều phân biệt split là một phần tư số chó đứng yên từ $D = 4$ trở đi, so với khoảng 1% trên wide.
+
+*Bảng 12: Split và wide ở $N = 200$, thời hạn $6\times$, tiêu chí 99%. Trung vị trên các lượt của một ô; tỷ lệ của split ở $D = 4$ dựa trên 50 lượt và ở $D = 16$ trên 70 lượt, vì các ô đã được xác định là không tin cậy thì ngừng nhận hạt giống.*
+
+| $D$ | Thành công, split / wide | Chó đứng yên, split / wide | Chó có song sinh, split / wide | Trung vị hoàn thành (s), split / wide |
+|---|---|---|---|---|
+| 2 | 0,95 / 1,00 | 0,13 / 0,05 | 0,00 / 0,00 | 366 / 401 |
+| 3 | 0,92 / 1,00 | 0,18 / 0,03 | 0,00 / 0,00 | 579 / 278 |
+| 4 | 0,76 / 1,00 | 0,26 / 0,01 | 0,14 / 0,00 | 341 / 271 |
+| 8 | 0,90 / 1,00 | 0,25 / 0,01 | 0,32 / 0,07 | 677 / 269 |
+| 16 | 0,79 / 1,00 | 0,25 / 0,01 | 0,59 / 0,55 | 703 / 267 |
+
+Một chú chó đứng yên khi cách một con cừu dưới $3 r_a$ (mục 4.2). Để kiểm tra xem quy tắc này có làm chậm split không, chúng tôi chạy lại split và wide ở $N = 200$ với khoảng dừng rút xuống $r_a$, 12 hạt giống mỗi ô (Bảng 13). Trên split, tỷ lệ chó đứng yên giảm, thời gian hoàn thành trung vị ngắn đi 20% đến 24% ở $D = 8$ và 16, và thành công ở $D = 16$ tăng từ 10 lên 12 trên 12 lượt. Trên wide không có gì thay đổi.
+
+*Bảng 13: Chạy lại split và wide ở $N = 200$, tiêu chí 99%, 12 hạt giống mỗi ô: khoảng dừng $3 r_a$ (cơ sở) và $r_a$.*
+
+| Bố cục | $D$ | Thành công, $3 r_a$ / $r_a$ | Trung vị hoàn thành (s), $3 r_a$ / $r_a$ | Chó đứng yên, $3 r_a$ / $r_a$ |
+|---|---|---|---|---|
+| split | 2 | 0,83 / 0,83 | 365 / 332 | 0,14 / 0,02 |
+| split | 8 | 1,00 / 1,00 | 678 / 536 | 0,24 / 0,16 |
+| split | 16 | 0,83 / 1,00 | 724 / 550 | 0,25 / 0,18 |
+| wide | 8 | 1,00 / 1,00 | 270 / 270 | 0,02 / 0,01 |
+| wide | 16 | 1,00 / 1,00 | 268 / 268 | 0,02 / 0,01 |
+
+Quy tắc dừng vì thế là một nguyên nhân của sự chậm lại trên split ở $D \ge 8$, bên cạnh việc các chó thu gom dồn vào một cụm ở $D = 4$ (mục 6.7). Với khoảng dừng ngắn hơn, split vẫn chậm gấp đôi wide (550 s so với 268 s), nên còn một nguyên nhân thứ ba chưa biết. Tỷ lệ thành công ở $D = 4$ và 16 trong Bảng 12 dựa trên ít lượt; thời gian hoàn thành trung vị, 680 đến 700 s so với thời hạn 839 s, là dấu hiệu chắc chắn hơn. Phép chạy lại dùng 12 hạt giống và là chẩn đoán, không phải kết quả.
+
 ---
 
 ## 7. Thảo luận (Discussion)
 
 ### 7.1 So sánh với các nghiên cứu trước
 Lama và di Bernardo (2024) nhận thấy số lượng cá thể chăn dắt tối thiểu $N^*$ tăng theo $\sqrt{M}$ (tương ứng độ dốc 0,5 trong không gian log-log) đối với các mục tiêu không liên kết dưới tiêu chí 99%. Độ dốc tăng trưởng của chúng tôi ở các thời hạn rộng rãi ($12\times$ và $6\times$) dao động từ 0,2 đến 0,5. Việc bầy cừu có tính liên kết đòi hỏi số lượng chó bổ sung ít hơn so với bầy không liên kết là hoàn toàn phù hợp với dự đoán lý thuyết: cơ chế hút toàn cục ($n = N - 1$) trong mô hình Strömbom giúp bầy cừu tự động co cụm lại ngay khi đàn chó tiếp cận, giảm tải rất lớn cho đội ngũ chăn dắt.
+
+Trên bố cục split, từ $D \ge 8$ một phần tư số chó đứng yên theo quy tắc dừng, và rút ngắn khoảng dừng làm thời gian hoàn thành giảm khoảng một phần năm (mục 6.10). Chỉ riêng việc chen nhau không phải nguyên nhân: các bầy wide có cùng tỷ lệ chó song sinh mà không bị ảnh hưởng.
+
+Phát hiện của bản thảo ẩn danh rằng độ phân tán trung bình của bầy dự đoán thành công cũng đúng ở đây giữa các ô, với tương quan Spearman từ $-0{,}56$ đến $-0{,}81$ ở thời hạn $6\times$ và $3\times$ dưới cả hai tiêu chí, gần với $-0{,}70$ của họ (Bảng 11). Cải thiện nhờ nhân độ phân tán với $N$ thì không xuất hiện: việc nhân chỉ làm tương quan thay đổi tối đa 0,02. Sự trùng khớp này giữa hai mô hình cừu khác nhau, và nó là một tương quan, vì nhiều chó hơn cũng làm bầy chặt hơn.
 
 ### 7.2 Thời hạn là một yếu tố then chốt
 Các nghiên cứu trước đây luôn cố định thời gian. Kết quả của chúng tôi cho thấy thời hạn dịch chuyển $D_{\min}$ mạnh không kém quy mô bầy đàn, và tác động tập trung ở thời hạn ngắn: từ $12\times$ sang $6\times$, $D_{\min}$ thay đổi tối đa một chó; từ $6\times$ sang $3\times$ thay đổi nhiều chó (dưới tiêu chí 99%, wide $N = 400$ từ 2-3 lên 5-6, outlier_rich $N = 200$ từ 2-3 lên 4-10). Về mặt thực tiễn, việc bổ sung thêm chó chủ yếu có tác dụng "mua thời gian" để thu gom bầy đàn phân tán.
@@ -415,9 +468,11 @@ So sánh với FAT (mục 6.9) cho thấy đóng góp của tầng phối hợp.
 1. Nghiên cứu tập trung vào quy tắc `strombom_multi` trên mô hình cừu Strömbom; FAT không có phối hợp và chỉ là đường cơ sở, mô hình Kubo chỉ chạy trên bố cục compact, nên các quy luật chưa được kiểm tra với một quy tắc phối hợp khác hay một mô hình cừu khác;
 2. Chưa mô phỏng rào chắn thực tế (chuồng có cổng hẹp và hàng rào vật lý giữ cừu), và chưa chạy tiêu chí thành công có thời gian giữ bầy;
 3. Khoảng cách phản xạ đe dọa $r_s$ chưa có dữ liệu đo đạc chính xác trên cừu sống thực địa;
-4. Nguyên nhân suy giảm hiệu quả trên bố cục `split` ở $N \ge 200$ chỉ được giải thích một phần (chó thu gom dồn vào một cụm, chẩn đoán với 12 hạt giống);
-5. Tầng đội như đã đặc tả có ba tính chất mà một thiết kế khác có thể thay đổi: với $D$ chẵn không có chó nào đứng ở điểm lùa của bài báo; chó dư khi thu gom lùa lõi bầy từ khoảng cách đặt cho cả bầy; chó thu gom nhận các con xa nhất theo thứ hạng nên có thể cùng đi vào một cụm;
-6. 17 lượt chạy đầu tiên được tạo từ cây làm việc trên commit 420c4ec, sau đó được commit thành 995a99d với mã mô phỏng không đổi; các lượt chạy ngày 22-10-2026 được tạo từ cây làm việc chứa các bản sửa của ngày đó, chưa commit.
+4. Nguyên nhân suy giảm hiệu quả trên bố cục `split` ở $N \ge 200$ chỉ được giải thích một phần (chó thu gom dồn vào một cụm và quy tắc dừng, chẩn đoán với 12 hạt giống);
+5. Thước đo lưu cho mỗi lượt là trung bình, nhỏ nhất, lớn nhất trong cả lượt, và các lượt thất bại chạy tới hết thời hạn còn lượt thành công dừng sớm, nên so sánh trung bình giữa hai lượt lẫn cả độ dài lượt; phân tích theo thời gian cần các tệp theo từng nhịp, vốn chỉ giữ cho 3 hạt giống mỗi ô;
+6. Cặp cừu gần nhau nhất trong một lượt cách nhau dưới 0,1 đơn vị ở 97,5% số lượt (trung vị 0,006, và 0,0014 ở $N = 400$) so với khoảng tương tác 2, vì cừu Strömbom không có lực đẩy lõi cứng;
+7. Tầng đội như đã đặc tả có ba tính chất mà một thiết kế khác có thể thay đổi: với $D$ chẵn không có chó nào đứng ở điểm lùa của bài báo; chó dư khi thu gom lùa lõi bầy từ khoảng cách đặt cho cả bầy; chó thu gom nhận các con xa nhất theo thứ hạng nên có thể cùng đi vào một cụm;
+8. 17 lượt chạy đầu tiên được tạo từ cây làm việc trên commit 420c4ec, sau đó được commit thành 995a99d với mã mô phỏng không đổi; các lượt chạy ngày 22-10-2026 được tạo từ cây làm việc chứa các bản sửa của ngày đó, chưa commit.
 
 ---
 
@@ -425,7 +480,7 @@ So sánh với FAT (mục 6.9) cho thấy đóng góp của tầng phối hợp.
 
 Với bầy cừu Strömbom được một đội chó có phối hợp lùa vào mục tiêu, bầy compact chỉ cần 1 chó ở mọi quy mô từ 25 đến 400 và mọi thời hạn; bầy phân tán cần 1 chó tới 50 con và một đội tăng chậm sau đó (độ dốc 0,2–0,5 ở thời hạn rộng). Thời hạn tác động tới $D_{\min}$ mạnh ngang quy mô bầy. Yêu cầu mọi con cừu ở bên trong làm tăng số chó ở $N$ lớn vì một lý do không liên quan tới việc gom hay lùa: đội đưa bầy vào rồi lùa nó ra. Dưới yêu cầu đó, số chó tuyệt đối phụ thuộc quy ước xuất phát và tốc độ chó tới sáu lần; khi chỉ cần 99% bầy đến đích, các quy ước đó chỉ làm lệch tối đa một chó. Một đội không chia việc không làm tốt hơn một chó, nên sự phối hợp là điều làm $D_{\min}$ hữu hạn ở $N$ lớn.
 
-Đối với cách định nghĩa nhiệm vụ chăn dắt, kết quả ủng hộ việc tách việc bầy đến đích khỏi việc giữ bầy: một tiêu chí đếm một tỷ lệ lớn bầy vào đích, cộng một yêu cầu riêng là bầy ở yên bên trong, hoặc một chuồng giữ bầy. Hướng phát triển tiếp theo: quy tắc đội có bước kết thúc tường minh và tiêu chí thành công có thời gian giữ bầy; nguyên nhân còn lại của hiện tượng trên bố cục split; quy tắc đội chỉ dùng thông tin cục bộ; một quy tắc phối hợp khác và mô hình Kubo trên bố cục phân tán; và khảo sát sự thay đổi của tham số láng giềng $n$.
+Đối với cách định nghĩa nhiệm vụ chăn dắt, kết quả ủng hộ việc tách việc bầy đến đích khỏi việc giữ bầy: một tiêu chí đếm một tỷ lệ lớn bầy vào đích, cộng một yêu cầu riêng là bầy ở yên bên trong, hoặc một chuồng giữ bầy. Hướng phát triển tiếp theo: quy tắc đội có bước kết thúc tường minh và tiêu chí thành công có thời gian giữ bầy; nguyên nhân còn lại của hiện tượng trên bố cục split ngoài việc dồn vào một cụm và quy tắc dừng; quy tắc đội chỉ dùng thông tin cục bộ; một quy tắc phối hợp khác và mô hình Kubo trên bố cục phân tán; và khảo sát sự thay đổi của tham số láng giềng $n$.
 
 ---
 
@@ -442,8 +497,8 @@ uv run cli/dmin_tables.py dmin dmin_fat dmin_f99_fat
 uv run cli/dmin_tables.py growth dmin_m12 dmin_m6 dmin_m3
 uv run cli/dmin_tables.py compare dmin_s_matched dmin_s_handler dmin_s_ring --base dmin_s_base
 uv run cli/dmin_tables.py compare dmin_f99_s_matched dmin_f99_s_ring --base dmin_f99_s_base
-uv run python docs/science/design_version2/figures/make_figures.py
-uv run python docs/science/design_version2/figures/make_result_figures.py
+uv run --with matplotlib python docs/figures/make_figures.py
+uv run --with matplotlib python docs/figures/make_result_figures.py
 ```
 
 ---

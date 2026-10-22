@@ -636,8 +636,9 @@ collecting ticks, and the median finish time grew with D as in the full runs. In
 with the jobs spread over the clusters (the farthest outliers taken in order, skipping any closer
 than f(N) to a job already taken), the median finish time fell from 631 to 318 s at D = 4 but
 changed little at D = 8 (678 to 662 s) and D = 16 (724 to 703 s). The pile-up on one cluster is
-real and explains the slowdown at D = 4; it does not explain the slowdown at larger D, whose
-cause remains open. Both checks use 12 seeds and are a diagnosis, not a result.
+real and explains the slowdown at D = 4; it does not explain the slowdown at larger D. Section 6.10
+narrows that down to the stop rule, which leaves split twice as slow as wide at D >= 8 with a third
+cause still open. Both checks use 12 seeds and are a diagnosis, not a result.
 
 Table 8. Replay of split, N = 200, 6 drive times, 99% criterion, 12 seeds per D.
 
@@ -792,6 +793,86 @@ Figure 12. Success against D for strombom_multi (blue) and FAT (orange) on the s
 A finite D_min at large N is therefore a property of the coordination in the team layer. Adding
 dogs that all follow the same rule without dividing the work adds nothing.
 
+### 6.10 What the per-trial metrics add
+
+Every trial stores the mean, minimum and maximum over the trial of 15 per-tick measures of the
+flock and the dogs. D_min does not need most of them. Two bear on questions left open above, and
+we read them from the stored trials, with one small replay for a diagnosis (figure 13).
+
+![Per-trial metrics](../figures/fig27_metrics.png)
+
+Figure 13. (a) Success rate of every cell at 6 drive times against the mean flock spread (RMS
+distance to the flock centroid), strict (circles) and 99% (squares). (b) Share of dogs standing
+still and (c) share of dogs with a twin within 2 units, against D, at N = 200 under the 99%
+criterion, for the three scattered layouts.
+
+Flock spread and success. The anonymous 2025 manuscript reports that mean flock spread predicts
+success, with a Spearman correlation of -0.70 over its 110 conditions, and that spread times N
+does better (-0.83). Table 11 gives the same correlation over our cells with at least 20 seeds.
+
+Table 11. Spearman correlation between the success rate of a cell and its flock spread, per main
+run. Spread is the RMS distance of the sheep to the flock centroid, averaged over the trial, or its
+peak over the trial. The last two columns use the scattered layouts only.
+
+| Run | Cells (scattered) | Mean spread, all cells | Peak spread, all cells | Mean spread | Mean spread x N |
+|---|---|---|---|---|---|
+| strict, 12 drive times | 180 (135) | -0.58 | -0.53 | -0.59 | -0.58 |
+| strict, 6 | 167 (122) | -0.76 | -0.74 | -0.79 | -0.81 |
+| strict, 3 | 135 (90) | -0.68 | -0.62 | -0.73 | -0.75 |
+| 99%, 12 | 177 (132) | -0.17 | -0.12 | -0.16 | -0.16 |
+| 99%, 6 | 185 (140) | -0.66 | -0.66 | -0.68 | -0.68 |
+| 99%, 3 | 157 (112) | -0.56 | -0.49 | -0.60 | -0.60 |
+
+At 6 and 3 drive times the correlation lies between -0.56 and -0.81 under both criteria, around
+the manuscript's -0.70. At 12 drive times under the 99% criterion it is -0.17, because nearly
+every cell succeeds and there is little to rank. Multiplying by N changes the correlation by at
+most 0.02, not by the 0.13 the manuscript reports. The peak spread gives similar values, so the
+result does not come from trial length: failed trials run to the deadline and successful ones
+stop early, which shifts a mean over the trial. The correlation is across cells and includes the
+effect of D, since more dogs make a tighter flock; it says nothing about cause.
+
+Dog crowding and standing still on split. Section 6.7 left open why success on split does not
+rise with D. A natural guess is that many dogs crowd each other. Table 12 shows that crowding by
+itself does not separate split: the share of dogs with a twin reaches 0.55 on wide at D = 16,
+where success is 1.00 and the finish time stays at 267 s. What separates split is that a quarter
+of its dogs stand still from D = 4 on, against about 1% on wide.
+
+Table 12. Split and wide at N = 200, deadline 6 drive times, 99% criterion. Medians over the
+trials of a cell; the rate for split at D = 4 rests on 50 trials and at D = 16 on 70, because
+cells decided unreliable stop receiving seeds.
+
+| D | Success, split / wide | Dogs standing still, split / wide | Dogs with a twin, split / wide | Median finish (s), split / wide |
+|---|---|---|---|---|
+| 2 | 0.95 / 1.00 | 0.13 / 0.05 | 0.00 / 0.00 | 366 / 401 |
+| 3 | 0.92 / 1.00 | 0.18 / 0.03 | 0.00 / 0.00 | 579 / 278 |
+| 4 | 0.76 / 1.00 | 0.26 / 0.01 | 0.14 / 0.00 | 341 / 271 |
+| 8 | 0.90 / 1.00 | 0.25 / 0.01 | 0.32 / 0.07 | 677 / 269 |
+| 16 | 0.79 / 1.00 | 0.25 / 0.01 | 0.59 / 0.55 | 703 / 267 |
+
+A dog stands still when it is within 3 r_a of a sheep (section 4.2). To test whether this rule
+slows split, we replayed split and wide at N = 200 with the stop distance cut to r_a, 12 seeds per
+cell (Table 13). On split it lowered the share of dogs standing still, shortened the median finish
+time by 20 to 24% at D = 8 and 16, and raised success at D = 16 from 10 to 12 of 12 trials. On wide
+it changed nothing.
+
+Table 13. Replay of split and wide at N = 200, 99% criterion, 12 seeds per cell: stop distance 3 r_a
+(base) and r_a.
+
+| Layout | D | Success, 3 r_a / r_a | Median finish (s), 3 r_a / r_a | Dogs standing still, 3 r_a / r_a |
+|---|---|---|---|---|
+| split | 2 | 0.83 / 0.83 | 365 / 332 | 0.14 / 0.02 |
+| split | 8 | 1.00 / 1.00 | 678 / 536 | 0.24 / 0.16 |
+| split | 16 | 0.83 / 1.00 | 724 / 550 | 0.25 / 0.18 |
+| wide | 8 | 1.00 / 1.00 | 270 / 270 | 0.02 / 0.01 |
+| wide | 16 | 1.00 / 1.00 | 268 / 268 | 0.02 / 0.01 |
+
+The stop rule is therefore one cause of the slowdown on split at D >= 8, next to the collecting
+dogs piling onto one cluster at D = 4 (section 6.7). With the shorter stop distance split is still
+twice as slow as wide (550 s against 268 s), so a third cause is open. The success rates at
+D = 4 and 16 in Table 12 rest on few trials; the median finish times, 680 to 700 s against a
+deadline of 839 s, are the steadier sign. The replay uses 12 seeds and is a diagnosis, not a
+result.
+
 ## 7. Discussion
 
 ### 7.1 Comparison with earlier scaling results
@@ -807,8 +888,17 @@ reducing the required herding effort.
 While excessive herders can cause congestion or interference in general multi-agent swarms, we
 observed detrimental team effects primarily on the split layout at N >= 200 (section 6.7). Part of
 that effect comes from the team layer sending its collecting dogs to one cluster; spreading the
-jobs over the clusters removed the slowdown at D = 4 but not at D = 8 and 16. On compact flocks,
-our coordinated dogs converge on parallel slots without hurting task success (section 6.1).
+jobs over the clusters removed the slowdown at D = 4 but not at D = 8 and 16. At D >= 8 a quarter of
+the dogs on split stand still under the stop rule, and shortening the stop distance cut the finish
+time by about a fifth (section 6.10). Crowding by itself is not the cause: wide flocks show the same
+share of dogs with a twin and are unaffected. On compact flocks, our coordinated dogs converge on
+parallel slots without hurting task success (section 6.1).
+
+The manuscript's finding that mean flock spread predicts success also holds here across cells, with
+a Spearman correlation between -0.56 and -0.81 at 6 and 3 drive times under both criteria, close to
+its -0.70 (Table 11). Its improvement from weighting spread by N does not: the weighting changed
+the correlation by at most 0.02. The agreement is across different sheep models, and it is a
+correlation, since more dogs also tighten the flock.
 
 ### 7.2 The deadline is a main factor
 
@@ -894,10 +984,19 @@ on three to five points, and fewer at 3 drive times. The 99% criterion was run a
 and no success rule that asks the flock to stay inside for a set time was run.
 
 The causes of three observations are open: why more dogs do worse on split at N >= 200 beyond the
-pile-up of collecting dogs on one cluster (section 6.7, a 12-seed diagnosis), why the faster dog's
-flock leaves the goal again, and why the split N = 50, D = 2 cell at 3 drive times sits at 188 of
-200. That cell has the same count under both criteria, but at N = 50 the two criteria are the same
-rule (section 5.5), so the match does not rule out a last-sheep effect.
+pile-up of collecting dogs on one cluster and the stop rule (sections 6.7 and 6.10, 12-seed
+diagnoses), why the faster dog's flock leaves the goal again, and why the split N = 50, D = 2 cell
+at 3 drive times sits at 188 of 200. That cell has the same count under both criteria, but at
+N = 50 the two criteria are the same rule (section 5.5), so the match does not rule out a
+last-sheep effect.
+
+The metrics stored with each trial are means, minima and maxima over the whole trial. Failed trials
+run to the deadline and successful ones stop early, so comparing the means of two trials mixes in
+their lengths; the cross-cell comparisons of section 6.10 are less exposed to this, and a
+time-resolved analysis would need the per-tick files, which are kept for only 3 seeds per cell. The
+closest pair of sheep in a trial is below 0.1 units in 97.5% of trials (median 0.006, and 0.0014 at
+N = 400), against an interaction distance of 2: the Strömbom sheep have no hard-core repulsion, so
+sheep can occupy almost the same point.
 
 The team layer as specified has three properties that a different design might change: with an
 even D no dog stands on the paper's drive point; dogs left over while collecting drive the core of
@@ -927,7 +1026,7 @@ For the definition of herding tasks, the results argue for separating the arriva
 from its holding: a success rule that counts a large fraction of the flock in, and a separate
 requirement that it stays inside, or a pen that holds it. Next steps: a team rule with an explicit
 end-of-task step and a success rule with a holding time; the cause of the split anomaly beyond the
-pile-up of collecting dogs; a team rule with local information only; another coordinated rule and
+pile-up of collecting dogs and the stop rule; a team rule with local information only; another coordinated rule and
 the Kubo model on scattered layouts; and varying the number of neighbours n to test the
 explanation of section 7.1.
 
@@ -945,8 +1044,8 @@ paper are generated from them:
     uv run cli/dmin_tables.py compare dmin_s_matched dmin_s_handler dmin_s_ring --base dmin_s_base
     uv run cli/dmin_tables.py compare dmin_f99_s_matched dmin_f99_s_ring --base dmin_f99_s_base
     uv run cli/campaign.py run --protocol dmin_m3 --workers 20   # a finished run: adds only missing cells
-    uv run python docs/science/design_version2/figures/make_figures.py
-    uv run python docs/science/design_version2/figures/make_result_figures.py
+    uv run --with matplotlib python docs/figures/make_figures.py
+    uv run --with matplotlib python docs/figures/make_result_figures.py
 
 All tables are collected in results_tables.md beside this report. Results are bit-identical on one
 machine and agree within a tolerance across machines, because the dynamics are chaotic.
