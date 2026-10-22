@@ -19,8 +19,10 @@ drive_distance_min: 80.0
 # Goal radius in flock radii.
 goal_radius_multiple: 1.9
 # Share of the sheep that must be inside the goal at one tick for a trial to succeed. 1 is every
-# sheep, as in both papers. Below 1 (0.99), one or two stragglers no longer decide a trial: with
-# the strict rule a flock can reach the goal with 99% inside and then be driven past it.
+# sheep, as Li et al. 2025 count it and as Kubo et al. 2022 state their aim (Kubo measure it as
+# the flock centre in the target and the flock within a circle of radius 10). Below 1 (0.99), one
+# or two stragglers no longer decide a trial: with the strict rule a flock can reach the goal
+# with 99% inside and then be driven past it.
 success_fraction: 1.0
 # Free margin around the start, in units (a little more than the sheep reaction distance 65).
 # The field only places the start; there is no boundary, as in both papers.
@@ -46,7 +48,7 @@ outlier_far: 1.6
 # Where the dogs stand at tick 0, a convention with no real-world rule behind it (a real dog
 # starts at the handler, far from the sheep, and runs out round the flock).
 #   arcs:    half circles behind the flock, spread evenly (the base)
-#   ring:    full circles round the flock, goal side included
+#   ring:    circles round the flock, goal side included, leaving out the cone that holds the goal
 #   handler: every dog at one point straight behind the flock, as if released from a post
 # The first circle is dog_start_gap beyond the farthest sheep that can start. A circle holds as
 # many dogs as fit dog_start_spacing apart; more dogs go on the next one, dog_start_spacing

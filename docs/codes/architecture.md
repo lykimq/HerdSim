@@ -108,7 +108,7 @@ The time allowed is a multiple of the drive time, the drive length over the top 
 
 ### Every added dog has its own work
 
-A dog count is only worth simulating if the extra dog can change something. So the default multi-dog rule never gives two dogs the same job when another is open: in the base setup dogs start at their own stations spread over the half circle behind the flock, collecting dogs are matched one to one with the farthest outliers by distance, dogs left over drive the core, and driving dogs share out the flock's back edge. A per-tick measure records how often two dogs still end up on top of each other, so a wasted dog shows in the data, not only in a finish time that didn't improve.
+A dog count is only worth simulating if the extra dog can change something. So the default multi-dog rule gives every dog its own target while another is open: in the base setup dogs start at their own stations spread over the half circle behind the flock, collecting dogs are matched one to one with the farthest outliers by distance, dogs left over drive the core, and driving dogs share out the flock's back edge. A per-tick measure records how often two dogs still end up on top of each other, so a wasted dog shows in the data, not only in a finish time that didn't improve.
 
 *Why:* with identical dogs aimed at one point, a curve over D measures the same trial again at every D, and the campaign pays for it. Giving each dog distinct work makes the D axis a real experimental axis, and the overlap measure separates "the dogs had nothing more to do" from "the dogs got in each other's way".
 
@@ -118,7 +118,7 @@ A second dog rule is kept on purpose as a baseline. In it every dog aims at the 
 
 ### Success is stated, and both readings are kept
 
-The papers the task comes from count a trial as won when every sheep is inside the goal. HerdSim keeps that as the default and adds a reading in which a share of the sheep, 99 percent for example, is enough. The two readings are separate protocols with their own folders, run on the same grid and the same seeds, so they can be compared cell by cell.
+The source papers do not agree on when a trial is won: one counts every sheep inside the goal, one states that aim but measures the flock centre and a circle round the flock, one ends the task on the flock centre. HerdSim keeps the every-sheep rule as the default and adds a reading in which a share of the sheep, 99 percent for example, is enough. The two readings are separate protocols with their own folders, run on the same grid and the same seeds, so they can be compared cell by cell.
 
 *Why:* with an open goal, the last one or two sheep can decide a trial after the flock has arrived, and the reading used changes the dog count a result reports. Keeping both shows how much of a result belongs to the herding and how much to the definition of success.
 

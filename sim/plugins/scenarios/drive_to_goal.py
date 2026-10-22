@@ -4,7 +4,8 @@ Success rule (``is_success``): every sheep is inside the goal disk. This is a
 HerdSim choice and differs from both papers. Strombom 2014 ends the task when
 the flock's centre of mass (GCM) is within a certain distance of the target
 (p.7, distance unstated); Kubo 2022 asks for the flock centre inside the target
-and the whole flock fitting on a circle of radius 10 (section 4.1). Strombom's
+and the whole flock fitting on a circle of radius 10 (section 4.1; its introduction states the
+aim as all sheep in the goal at the same time). Strombom's
 rule can be read afterwards from the per-tick ``gcm_in_goal``; Kubo's cannot,
 since ``extent`` is an RMS radius and no metric records the farthest sheep.
 """

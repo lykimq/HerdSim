@@ -2,8 +2,8 @@
 
 The dogs take the Strombom 2014 decision (``heuristics.decide``) on the whole flock. With one
 dog that is the whole rule: the dog goes to the paper's collect point Pc or drive point Pd.
-With more dogs a team layer gives every dog a job no other dog has, so an added dog is never
-a copy of one that is already there:
+With more dogs a team layer gives every dog its own target, so an added dog does not repeat
+the target of one that is already there (at large D dogs can still stand next to each other):
 
 - collect: the D farthest outliers each get one dog, matched to the dogs by distance (the
   assignment with the least total walk to the collect points, ``linear_sum_assignment``).

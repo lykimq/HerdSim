@@ -5,8 +5,8 @@
 Needs matplotlib (not a project dependency). Every picture calls the same functions a campaign
 uses (start layouts, dog arcs, the team rule, a real trial), so if the code changes, running
 this script redraws them. The pictures are written next to this script. Flock radii come from
-the calibration of the finished runs. Figures 18 and 19 read results/dmin_pilot/trials.csv and
-are skipped when it is missing. The results figures (20 to 26) are drawn by
+the calibration of the finished runs. Figure 18 reads results/dmin_pilot/trials.csv and is
+skipped when it is missing. The results figures (20 to 32) are drawn by
 make_result_figures.py. Figure 10 reads data/wall_check_trials.csv, the trials of the wall check
 that was run with the reflecting boundary before it was removed from the code.
 """
@@ -14,7 +14,6 @@ that was run with the reflecting boundary before it was removed from the code.
 from __future__ import annotations
 
 import sys
-import textwrap
 from pathlib import Path
 
 import matplotlib
@@ -90,8 +89,26 @@ def cfg(layout: str, n: int, d: int, **kw):
 
 
 def caption(fig, text: str, width: int = 150) -> None:
-    """Wrapped caption at the top left of the figure."""
-    fig.text(0.01, 0.995, textwrap.fill(text, width), ha="left", va="top", fontsize=9, color=MUTED)
+    """Marks the figure as captioned and draws nothing.
+
+    The captions live in the documents (report and README), so the pictures carry none and
+    the layout below keeps the whole canvas. The text argument stays at every call as a note
+    of what the figure shows.
+    """
+    fig._has_caption = True  # noqa: SLF001
+
+
+_tight_layout = matplotlib.figure.Figure.tight_layout
+
+
+def _tight_layout_full_canvas(self, *args, rect=None, **kwargs):
+    """tight_layout that gives the room reserved for a caption back to the axes."""
+    if rect is not None and getattr(self, "_has_caption", False):
+        rect = (rect[0], rect[1], rect[2], 0.98)
+    return _tight_layout(self, *args, rect=rect, **kwargs)
+
+
+matplotlib.figure.Figure.tight_layout = _tight_layout_full_canvas  # type: ignore[method-assign]
 
 
 def style_map(ax, title: str) -> None:
@@ -193,12 +210,13 @@ def fig_sheep_rule() -> None:
     idx = np.array([0])
     k = len(pos) - 1
     parts = {
-        "inertia  h H": float(c["inertia"]) * prev[0],
-        "to neighbours  c C": float(c["c"]) * unit(ssheep.neighbour_centres(pos, idx, k)[0] - focal),
-        "from close sheep  rho_a R_a": float(c["rho_a"]) * unit(
+        "previous heading, h H": float(c["inertia"]) * prev[0],
+        "toward neighbours, c C": float(c["c"]) * unit(
+            ssheep.neighbour_centres(pos, idx, k)[0] - focal),
+        "away from close sheep, rho_a R_a": float(c["rho_a"]) * unit(
             ssheep.sheep_repulsion(pos, idx, c["r_a"])[0]),
-        "from the dog  rho_s R_s": float(c["rs_weight"]) * unit(focal - dog[0]),
-        "noise  e eps": float(c["noise_strength"]) * np.array([np.cos(2.4), np.sin(2.4)]),
+        "away from the dog, rho_s R_s": float(c["rs_weight"]) * unit(focal - dog[0]),
+        "noise, e eps": float(c["noise_strength"]) * np.array([np.cos(2.4), np.sin(2.4)]),
     }
     total = unit(sum(parts.values()))
     draws = ssheep.SheepDraws(np.ones(len(pos)), np.zeros(len(pos)), np.full(len(pos), 2.4))
@@ -220,8 +238,8 @@ def fig_sheep_rule() -> None:
                for (label, v), col in zip(parts.items(), colors)]
     handles.append(Line2D([0], [0], color=INK, lw=3, label="new heading H' (unit length)"))
     ax.legend(handles=handles, loc="lower left", frameon=False, fontsize=8)
-    ax.text(-8.6, 7.2, "dashed circle: r_a = 2; the dog is 32 away, to the lower left",
-            color=MUTED, fontsize=8)
+    ax.text(-8.6, 7.2, "grey: the other sheep; dashed circle: r_a = 2; the dog is 32 away, "
+            "to the lower left", color=MUTED, fontsize=8)
     ax.set_xlim(-9, 9)
     ax.set_ylim(-11, 8)
     style_map(ax, "one sheep inside the reaction distance: its five terms")
@@ -295,6 +313,8 @@ def fig_shepherd() -> None:
             ax.set_ylim(d.centroid[1] - 50, d.centroid[1] + 50)
             style_map(ax, "drive: every sheep is within f(N)")
             ax.set_xlabel("Pd is r_a sqrt(N) behind the GCM, seen from the goal", color=MUTED, fontsize=8)
+    fig.text(0.5, 0.005, "the two panels are drawn at different scales", ha="center",
+             color=MUTED, fontsize=8)
     caption(fig, "The shepherd of Strombom et al. (2014), one dog, N = 100, from the code. Dashed "
             "circle: f(N) = r_a N^(2/3) around the GCM, the centre of mass. The dog collects while "
             "any sheep is beyond it and drives otherwise, walks straight at its point with the sheep "
@@ -321,6 +341,9 @@ def fig_team_rule() -> None:
             ax.scatter(*sheep[far].T, s=14, color=BLUE, ec=INK, lw=0.5)
             ax.scatter(*dogs.T, s=34, marker="^", color=ORANGE, ec=SURFACE, lw=0.8, zorder=3)
             ax.scatter(*targets.T, s=22, marker="x", color=INK, lw=1.1, zorder=3)
+            if row == 1 and d > 1:  # the drive slots lie on an arc; a thin line makes them readable
+                ordered = targets[np.argsort(targets[:, 1])]
+                ax.plot(*ordered.T, color=INK, lw=0.5, alpha=0.4, zorder=2)
             for dog, target in zip(dogs, targets):
                 ax.annotate("", xy=target, xytext=dog,
                             arrowprops=dict(arrowstyle="->", color=ORANGE, lw=0.9))
@@ -424,7 +447,7 @@ def fig_kubo() -> None:
     legend_s = []
     for (label, v), col in zip(terms.items(), palette):
         mag = float(np.linalg.norm(v))
-        tip = unit(v) * np.sqrt(mag) * 3.2
+        tip = unit(v) * max(np.sqrt(mag) * 3.2, 3.5)  # at least 3.5 long, so small forces show
         ax.annotate("", xy=tip, xytext=focal, arrowprops=dict(arrowstyle="->", color=col, lw=1.6))
         legend_s.append(Line2D([0], [0], color=col, lw=2, label=f"{label}  {mag:.1f}"))
     ax.legend(handles=legend_s, loc="lower left", frameon=False, fontsize=8)
@@ -456,7 +479,7 @@ def fig_kubo() -> None:
     legend_d = []
     for (label, v), col in zip(parts.items(), [BLUE, MUTED, AQUA, "#e87ba4"]):
         mag = float(np.linalg.norm(v))
-        tip = unit(v) * np.sqrt(mag) * 3.2
+        tip = unit(v) * max(np.sqrt(mag) * 3.2, 3.5)  # at least 3.5 long, so small forces show
         ax.annotate("", xy=tip, xytext=X, arrowprops=dict(arrowstyle="->", color=col, lw=1.6))
         legend_d.append(Line2D([0], [0], color=col, lw=2, label=f"{label}  {mag:.1f}"))
     ax.annotate("", xy=unit(full) * np.sqrt(np.linalg.norm(full)) * 3.2, xytext=X,
@@ -571,35 +594,6 @@ def fig_pilot_success(trials: pd.DataFrame) -> None:
     plt.close(fig)
 
 
-def fig_pilot_finish(trials: pd.DataFrame) -> None:
-    n = 200
-    won = trials[trials["success"] & (trials["n_sheep"] == n)]
-    drive = float(trials[trials["n_sheep"] == n]["drive_distance"].iloc[0])
-    fig, ax = plt.subplots(figsize=(7.4, 4.0))
-    colors = {"compact": BLUE, "wide": ORANGE, "outlier_rich": AQUA}
-    for layout, color in colors.items():
-        rows = won[won["initial_layout"] == layout]
-        med = rows.groupby("n_shepherds")["finish_seconds"].median()
-        ax.plot(med.index, med.values, color=color, lw=2, marker="o", ms=4, label=layout)
-    for m in (3, 6, 12):
-        ax.axhline(m * drive, color=MUTED, lw=0.8, ls="--")
-        ax.text(26, m * drive, f"deadline {m} drive times", color=MUTED, va="bottom",
-                ha="right", fontsize=8)
-    ax.legend(loc="lower left", bbox_to_anchor=(0.02, 0.07), frameon=False, fontsize=8)
-    ax.set_xscale("log")
-    ax.set_yscale("log")
-    ax.set_xticks([1, 2, 4, 8, 16])
-    ax.set_xticklabels(["1", "2", "4", "8", "16"])
-    ax.set_xlim(0.9, 28)
-    ax.set_xlabel("dogs D")
-    ax.set_ylabel("median finish time of successful trials (s)")
-    ax.set_title(f"Why the deadline matters (pilot, N = {n}, drive time {drive:.0f} s)")
-    ax.grid(axis="y", color=GRID, lw=0.6)
-    fig.tight_layout()
-    fig.savefig(OUT / "fig19_finish_vs_deadline.png", dpi=150)
-    plt.close(fig)
-
-
 def field_config(n: int, max_dogs: int) -> dict:
     """Run config of a cell of the dmin protocol, whose field is sized for all four layouts and
     for ``max_dogs`` dogs; the field is the same for every cell of that N and largest D."""
@@ -705,7 +699,7 @@ def fig_realism_numbers() -> None:
     real_radius = 1.5 * 1.21  # disc radius from the reported mean radius 1.21 m
     panels = [
         ("flock radius (m)", [real_radius, RF[100], RF_MATCHED[100]], None),
-        ("density (sheep per m2)",
+        ("density (sheep per m$^2$)",
          [14 / (np.pi * real_radius**2), 100 / (np.pi * RF[100] ** 2),
           100 / (np.pi * RF_MATCHED[100] ** 2)], None),
         ("dog behind the flock centre (m)", [5.0, 2.0 * np.sqrt(100), 1.0 * np.sqrt(100)],
@@ -719,7 +713,8 @@ def fig_realism_numbers() -> None:
             ax.vlines(0, band[0], band[1], color=INK, lw=1.6)
             ax.hlines([band[0], band[1]], -0.08, 0.08, color=INK, lw=1.6)
         for i, v in enumerate(vals):
-            ax.text(i, v, f"{v:.2g}", ha="center", va="bottom", fontsize=8, color=INK)
+            top = max(v, band[1]) if (band is not None and i == 0) else v  # clear of the range bar
+            ax.text(i, top, f"{v:.2g}", ha="center", va="bottom", fontsize=8, color=INK)
         ax.set_xticks(range(3))
         ax.set_xticklabels(names, fontsize=8)
         ax.set_title(title)
@@ -780,8 +775,8 @@ def fig_matched_scene() -> None:
         ax.add_patch(plt.Circle((0, 0), mult * RF[100], fc="none", ec=color, lw=1.4))
         lines.append((mult, color, int((far > mult * RF[100]).sum())))
     for k, (mult, color, out) in enumerate(lines):
-        ax.text(0.02, 0.02 + 0.06 * (3 - k), f"goal {mult} R_f: {out} sheep outside", color=INK,
-                transform=ax.transAxes, va="bottom", fontsize=8)
+        ax.text(0.02, 0.02 + 0.06 * (3 - k), f"goal {mult} R_f: {out} sheep outside",
+                color=color, transform=ax.transAxes, va="bottom", fontsize=8.5)
         ax.plot([0.0], [0.0], color=color)
     ax.set_xlim(-22, 22)
     ax.set_ylim(-34, 22)
@@ -888,17 +883,18 @@ def fig_task_geometry() -> None:
         t3.append(ext + ck["goal_radius"] + ck["flock_radius"])
         actual.append(float(ck["goal_center"][0] - ck["flock_center"][0]))
     ax = fig.add_subplot(grid[0, 1])
+    ax.plot(ns, actual, color=INK, lw=5, alpha=0.25, solid_capstyle="round",
+            label="drive length used")
     ax.plot(ns, t1, color=BLUE, lw=1.6, marker="o", ms=3, label="13 R_f")
     ax.plot(ns, t2, color=MUTED, lw=1.2, ls="--", label="minimum 80")
     ax.plot(ns, t3, color=ORANGE, lw=1.6, marker="o", ms=3,
             label="reach + goal radius + R_f")
-    ax.plot(ns, actual, color=INK, lw=0.8, marker="s", ms=6, mfc="none", label="drive length used")
     ax.set_xscale("log")
     ax.set_xticks(ns)
     ax.set_xticklabels([str(k) for k in ns])
     ax.xaxis.set_minor_formatter(NullFormatter())
     ax.set_xlabel("flock size N")
-    ax.set_ylabel("length")
+    ax.set_ylabel("length (units)")
     ax.set_title("drive length: the largest of three terms")
     ax.grid(axis="y", color=GRID, lw=0.6)
     ax.legend(frameon=False, fontsize=8, loc="upper left")
@@ -913,7 +909,7 @@ def fig_task_geometry() -> None:
     ax.set_xticklabels([str(k) for k in ns])
     ax.xaxis.set_minor_formatter(NullFormatter())
     ax.set_xlabel("flock size N")
-    ax.set_ylabel("length")
+    ax.set_ylabel("length (units)")
     ax.set_title("flock radius and goal radius")
     ax.set_ylim(0, 1.9 * max(radii) * 1.1)
     ax.grid(axis="y", color=GRID, lw=0.6)
@@ -946,10 +942,9 @@ def main() -> None:
     fig_wall_check()
     trials = pilot()
     if trials is None:
-        print("results/dmin_pilot/trials.csv missing: figures 18 and 19 skipped")
+        print("results/dmin_pilot/trials.csv missing: figure 18 skipped")
         return
     fig_pilot_success(trials)
-    fig_pilot_finish(trials)
 
 
 if __name__ == "__main__":
