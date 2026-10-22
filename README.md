@@ -264,7 +264,14 @@ To evaluate the necessity of explicit multi-agent coordination, HerdSim implemen
 - **Drive Mode**: When the flock is cohesive, dogs form an arc behind the flock at distance $r_d$, spanning the angular width of the flock. Dogs are sorted by their relative angular station around the flock, guaranteeing they never cross paths while moving to their assigned driving slots.
 
 #### Uncoordinated Baseline: `fat` (Farthest-Agent Targeting)
-Each dog independently targets the sheep farthest from the goal without communicating, negotiating target assignments, or maintaining inter-dog spacing.
+
+To rigorously test whether multi-agent coordination is truly necessary—or whether scaling gains could arise simply from having multiple independent agents in the field—HerdSim proposes and implements the **FAT (Farthest-Agent Targeting)** ablation baseline (`dog_controller="fat"`).
+
+- **Relationship to prior methods**: FAT borrows the target selection heuristic of [Kubo et al. (2022)](https://doi.org/10.1088/2632-072X/ac6cb4) (where each shepherd is attracted toward the sheep farthest from the goal, aiming $r_a$ behind it) and executes it using the discrete kinematic steps of [Strömbom et al. (2014)](https://doi.org/10.1098/rsif.2014.0419).
+- **Ablation design**: Crucially, FAT intentionally removes **both** forms of multi-agent deconfliction:
+  1. It lacks the combinatorial target assignment (Hungarian matching) and angular arc sorting of `strombom_multi`.
+  2. It lacks the continuous inter-dog repulsive forces ($1/r^3$) of Kubo et al. (2022).
+- **Failure dynamics**: Because all dogs share the same global visibility and execute identical uncoordinated decision logic, every shepherd targets the exact same sheep ($\arg\max_i \lVert \mathbf{x}_i - \mathbf{x}_{\text{goal}} \rVert$). As dogs converge on that single outlier, they collide and collapse into a tight cluster behind it (exhibiting high `dog_overlap`). Consequently, an entire pack of $D$ dogs degenerates into an uncoordinated single-agent substitute, completely failing to gather dispersed herds and demonstrating that team coordination (or explicit spatial repulsion) is indispensable for multi-dog herding.
 
 ![Uncoordinated baseline FAT](docs/figures/fig4_fat.png)
 *Figure 12: Uncoordinated baseline FAT (Farthest-Agent Targeting). Left: Geometry of uncoordinated driving where dogs chase the single farthest sheep from the goal. Right: Without target assignment or repulsive spacing, dogs collapse into a tight cluster behind the same outlier, exhibiting high `dog_overlap` and failing to gather dispersed flocks.*

@@ -116,14 +116,22 @@ Với nhiều chó ($D > 1$), tầng phối hợp đội phân công nhiệm v�
 
 *Hình 1: Từ một chó đến nhiều chó, trích xuất từ mô phỏng khi bắt đầu thử nghiệm. Cột trái: một chó theo quy tắc Strömbom et al. (2014). Hàng trên: trên bố cục phân tán wide, các chó thu gom cừu, mỗi chó nhắm tới điểm gom của cá thể tản mác được ghép cặp theo quãng đường ngắn nhất. Hàng dưới: trên bố cục co cụm compact, các chó dàn hàng hình cung phía sau bầy, trải đều theo bề rộng bầy cừu. Dấu chữ thập đánh dấu điểm nhắm tới.*
 
-### 4.3 Mô hình cừu thứ hai (Kubo et al. 2022)
+### 4.3 Mô hình đối chứng không phối hợp (FAT)
+
+Để làm rõ liệu hiệu quả mở rộng quy mô bắt nguồn từ sự phối hợp đa tác tử tường minh hay chỉ đơn thuần là do có thêm nhiều tác tử độc lập trên sân, HerdSim xây dựng mô hình đối chứng triệt tiêu mang tên Farthest-Agent Targeting (`fat`) (Hình S2b). Trong FAT, mỗi chú chó độc lập nhắm vào cá thể cừu ở xa mục tiêu nhất, tiếp cận điểm cách con cừu đó một khoảng $r_a$ theo các bước di chuyển rời rạc của Strömbom et al. (2014). Quy tắc này mượn cơ chế chọn mục tiêu từ Kubo et al. (2022) nhưng chủ ý loại bỏ cả thuật toán gán cặp Hungarian / đội hình vòng cung của `strombom_multi` lẫn lực đẩy né tránh nhau giữa các chú chó ($1/r^3$) của Kubo. Vì mọi chú chó đều có cùng thông tin toàn cục và không có cơ chế giãn cách, toàn bộ đàn chó cùng săn đuổi chung một cá thể duy nhất ($\arg\max_i \lVert \mathbf{x}_i - \mathbf{x}_{\text{goal}} \rVert$). Đàn chó nhanh chóng co cụm thành một búi phía sau con cừu đó (độ trùng lặp `dog_overlap` cao, Hình S2b), khiến cả đàn $D$ chú chó suy biến thành một cá thể duy nhất và hoàn toàn bất lực trong việc gom các bầy cừu bị tản mác.
+
+![Mô hình đối chứng không phối hợp FAT](../figures/fig4_fat.png)
+
+*Hình S2b: Mô hình đối chứng không phối hợp FAT (Farthest-Agent Targeting). Trái: Hình học của hành vi lùa không phối hợp khi các chú chó độc lập săn đuổi con cừu duy nhất ở xa mục tiêu nhất. Phải: Do thiếu cơ chế phân công mục tiêu và lực đẩy giãn cách, đàn chó co cụm lại thành một đám đông hỗn loạn phía sau cùng một cá thể tản mác, dẫn đến độ trùng lặp dog_overlap rất cao và thất bại trong việc gom bầy phân tán.*
+
+### 4.4 Mô hình cừu thứ hai (Kubo et al. 2022)
 Để đối chứng, chúng tôi chạy thử mô hình lực liên tục của Kubo et al. (2022) (Hình S3). Mô hình này không có nhiễu ngẫu nhiên nên các hạt giống chỉ thay đổi vị trí khởi đầu. Do mô hình này nén bầy cừu về một bán kính cố định, chúng tôi thử nghiệm đến $N = 100$.
 
 ![Mô hình lực Kubo](../figures/fig5_kubo.png)
 
 *Hình S3: Mô hình lực liên tục của Kubo et al. (2022). Trái: 4 vector lực tác động lên một con cừu (lực đẩy, căn chỉnh hướng, lực hút, và lực trốn chạy chó). Giữa: 4 vector lực tác động lên một chú chó (hút về cừu mục tiêu, cự ly an toàn với cừu, tránh mục tiêu, và lực đẩy giữa các chó). Phải: Lượt thử nghiệm cho thấy lực đẩy giữa các chó giúp chúng tự động phân tán đều quanh chu vi bầy đàn.*
 
-### 4.4 Các tham số
+### 4.5 Các tham số
 Bảng 2 liệt kê các tham số của mô hình Strömbom:
 
 | Ký hiệu | Giá trị | Ý nghĩa vật lý |

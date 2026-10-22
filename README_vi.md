@@ -264,7 +264,14 @@ Cơ chế này cho phép đội chó phối hợp điều hướng và bao quát
 - **Chế độ lùa đàn (Drive Mode)**: Khi bầy cừu đã co cụm liên kết, đàn chó dàn thành một hàng vòng cung phía sau bầy ở khoảng cách $r_d$, bao trọn bề rộng góc của bầy. Chó được sắp xếp theo vị trí góc tương đối quanh bầy, bảo đảm chúng không bao giờ cắt chéo đường đi của nhau khi di chuyển vào vị trí lùa được chỉ định.
 
 #### Mô hình đối chứng không phối hợp: `fat` (Farthest-Agent Targeting)
-Mỗi chú chó độc lập đuổi theo con cừu ở xa mục tiêu nhất mà không giao tiếp, không thương lượng phân công mục tiêu, và không duy trì khoảng cách né tránh lẫn nhau.
+
+Nhằm kiểm chứng chặt chẽ câu hỏi khoa học: *Liệu sự phối hợp đa tác tử (multi-agent coordination) có thực sự bắt buộc hay không, hay chỉ cần tăng số lượng chó hoạt động độc lập là đủ?*, HerdSim đề xuất và thiết kế mô hình triệt tiêu đối chứng **FAT (Farthest-Agent Targeting)** (`dog_controller="fat"`).
+
+- **Mối liên hệ với các phương pháp trước**: FAT kế thừa cơ chế chọn mục tiêu từ [Kubo et al. (2022)](https://doi.org/10.1088/2632-072X/ac6cb4) (trong đó mỗi chú chó nhắm vào cá thể cừu ở xa mục tiêu nhất, tiếp cận điểm cách con cừu đó một khoảng $r_a$) và thực hiện bằng bước di chuyển rời rạc của [Strömbom et al. (2014)](https://doi.org/10.1098/rsif.2014.0419).
+- **Thiết kế triệt tiêu (ablation)**: Điểm mấu chốt là FAT cố ý loại bỏ **cả hai** cơ chế phân tách không gian đa tác tử:
+  1. Không có tầng phân công mục tiêu (Hungarian matching) và sắp xếp vòng cung góc của `strombom_multi`.
+  2. Không có trường lực đẩy né tránh lẫn nhau giữa các chú chó ($1/r^3$) như trong Kubo et al. (2022).
+- **Hệ quả và cơ chế thất bại**: Do toàn bộ các chú chó cùng quan sát trạng thái bầy cừu và thực thi thuật toán giống hệt nhau, mọi chú chó đều chọn chung đúng một con cừu duy nhất ($\arg\max_i \lVert \mathbf{x}_i - \mathbf{x}_{\text{goal}} \rVert$). Khi cùng áp sát cá thể này, đàn chó dồn cục lại phía sau con cừu đó (dẫn đến độ trùng lặp `dog_overlap` rất cao). Hệ quả là cả đội ngũ $D$ chú chó bị suy biến thành một cá thể duy nhất, hoàn toàn bất lực trong việc thu gom các bầy cừu bị tản mác. Điều này làm nổi bật vai trò cốt lõi của các tầng phối hợp mà HerdSim triển khai trong `strombom_multi`.
 
 ![Mô hình đối chứng không phối hợp FAT](docs/figures/fig4_fat.png)
 *Hình 12: Mô hình đối chứng không phối hợp FAT (Farthest-Agent Targeting). Trái: Hình học của hành vi lùa không phối hợp khi toàn bộ chó cùng săn đuổi con cừu duy nhất ở xa mục tiêu nhất. Phải: Do thiếu cơ chế phân công mục tiêu và lực đẩy giãn cách, đàn chó co cụm lại thành một đám đông hỗn loạn phía sau cùng một cá thể tản mác, dẫn đến độ trùng lặp dog_overlap rất cao và thất bại trong việc gom bầy phân tán.*

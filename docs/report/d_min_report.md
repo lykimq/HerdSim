@@ -205,7 +205,15 @@ going to the collect point of its own outlier, matched by least total walk. Bott
 start the dogs drive from slots on an arc behind the flock, spread over its width, with the
 paper's drive point in the middle. Crosses mark the targets.
 
-### 4.3 Second sheep model
+### 4.3 Uncoordinated baseline (FAT)
+
+To isolate whether scaling efficiency arises from explicit multi-agent coordination or merely from having multiple independent actuators in the field, HerdSim introduces an uncoordinated ablation baseline called Farthest-Agent Targeting (`fat`) (figure S2b). Each shepherd independently targets the single sheep farthest from the goal, aiming $r_a$ behind it using the discrete kinematic steps of Strömbom et al. (2014). This rule borrows the target selection heuristic of Kubo et al. (2022) but intentionally omits both the Hungarian outlier assignment / angular arc formation of `strombom_multi` and the continuous inter-dog repulsive forces ($1/r^3$) of Kubo. Because all shepherds observe the same sheep coordinates and lack repulsive spacing or communication, every dog selects the exact same target ($\arg\max_i \lVert \mathbf{x}_i - \mathbf{x}_{\text{goal}} \rVert$). The dogs quickly collapse into a tight cluster behind that single outlier (exhibiting high dog overlap, figure S2b), effectively degenerating into a single uncoordinated agent and failing to gather dispersed flocks.
+
+![Uncoordinated baseline FAT](../figures/fig4_fat.png)
+
+Figure S2b. Uncoordinated baseline FAT (Farthest-Agent Targeting). Left: Geometry of uncoordinated driving where dogs independently chase the single farthest sheep from the goal. Right: Without target assignment or repulsive spacing, dogs collapse into a tight cluster behind the same outlier, exhibiting high dog overlap and failing to gather dispersed flocks.
+
+### 4.4 Second sheep model
 
 As a check on the sheep model we also run the force model of Kubo et al. (2022), with its own
 dogs: sheep feel repulsion, alignment, attraction and flight from dogs; each dog is pulled toward
@@ -217,7 +225,7 @@ the flock to a fixed radius, we run it to N = 100.
 
 Figure S3. The Kubo et al. (2022) force model. Left: the four forces on one sheep. Middle: the four forces on one dog; arrow length is the square root of the force. Right: a trial in which the repulsion between dogs keeps them apart.
 
-### 4.4 Parameters
+### 4.5 Parameters
 
 Table 2 lists the Strömbom parameters, which are the values of Table 1 of that paper. One tick is
 read as 1 s and one length unit as 1 m. For the Kubo model we use the parameters of its Table 1,
