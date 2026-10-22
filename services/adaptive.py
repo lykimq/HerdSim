@@ -49,8 +49,12 @@ STOP_BUDGET = "budget_hours spent"
 def seeds_wanted(seeds_run: int, batch: int, flagged: bool) -> int:
     """How many seeds a cell gets this round: up to the end of its next batch when
     flagged, else up to one batch. Counts stay on whole batches (10, 20, ...), so
-    a resumed run seeds a cell as an uninterrupted run would."""
-    target = (seeds_run // batch + 1) * batch if flagged else batch
+    a resumed run seeds a cell as an uninterrupted run would; a later batch cut short
+    by a kill is filled even when the cell is decided."""
+    if flagged:
+        target = (seeds_run // batch + 1) * batch
+    else:
+        target = max(batch, -(-seeds_run // batch) * batch)
     return max(0, target - seeds_run)
 
 
@@ -116,10 +120,17 @@ def _refine(
     min_gap: int,
     pruned: frozenset[tuple[str, int]] | None = None,
     by_reliability: bool = False,
+    max_seeds: int | None = None,
 ) -> int:
     """Add the midpoint D wherever the zone changes between neighbouring D more than
     ``min_gap`` apart, unless either is ``pruned``. Groups the grid does not list are
-    skipped. Returns how many."""
+    skipped. Returns how many.
+
+    An undecided neighbour below ``max_seeds`` may yet decide, so it waits. One at the cap
+    stays undecided: the D between it and a decided neighbour is then added, or a D_min could
+    sit above an untested D inside its own bracket. Without ``max_seeds`` every undecided
+    cell waits. (The frontier flags an undecided cell as needing seeds even at the cap; the
+    cap is applied when seeds are picked, so the seed count decides here.)"""
     pruned = pruned or frozenset()
     added = 0
     column = "reliability" if by_reliability else "zone"
@@ -127,11 +138,15 @@ def _refine(
         if str(key) not in grid:
             continue
         zones = dict(zip(cells["n_shepherds"].astype(int), cells[column]))
+        d_all = cells["n_shepherds"].astype(int)
+        capped = cells["n_seeds"] >= max_seeds if max_seeds is not None else None
+        waiting = set(d_all if capped is None else d_all[~capped])
         ds = sorted(zones)
         for a, b in zip(ds, ds[1:]):
             if (str(key), a) in pruned or (str(key), b) in pruned:
                 continue
-            if b - a > min_gap and zones[a] != zones[b] and UNDECIDED not in (zones[a], zones[b]):
+            open_ = any(zones[d] == UNDECIDED and d in waiting for d in (a, b))
+            if b - a > min_gap and zones[a] != zones[b] and not open_:
                 mid = (a + b) // 2
                 if mid not in grid[str(key)]:
                     grid[str(key)].add(mid)
@@ -251,7 +266,14 @@ def _run(
             cell_ids = zip(front.cells["group_key"].astype(str), front.cells["n_shepherds"])
             front.cells["pruned"] = [(k, int(d)) in pruned for k, d in cell_ids]
             store.write_tables(rows, front.cells, front.groups)
-            added = _refine(grid, front, min_gap, frozenset(pruned), not rules.decide_finish_times)
+            added = _refine(
+                grid,
+                front,
+                min_gap,
+                frozenset(pruned),
+                not rules.decide_finish_times,
+                max_seeds,
+            )
             if added:
                 log(f"added {added} intermediate dog counts")
             flagged = front.cells.loc[front.cells["needs_seeds"] & ~front.cells["pruned"]]

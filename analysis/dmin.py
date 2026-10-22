@@ -102,4 +102,4 @@ def at_arrival(trials: pd.DataFrame, pct: int) -> pd.DataFrame:
 def arrival_groups(trials: pd.DataFrame, rules: Rules, pct: int) -> pd.DataFrame:
     """The frontier's D values per D curve when success means ``pct`` percent arrival."""
     front = frontier(at_arrival(trials, pct), rules)
-    return front.groups[["group_key", *DMIN_COLUMNS]].copy()
+    return front.groups[["group_key", *DMIN_COLUMNS, "d_min_above_grid"]].copy()

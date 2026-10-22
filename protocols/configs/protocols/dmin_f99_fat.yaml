@@ -1,0 +1,8 @@
+# The FAT dog rule (dmin_fat.yaml) with success at 99 percent of the flock in the goal.
+# Compare with dmin_f99_m6.
+
+protocol_id: dmin_f99_fat
+output: results/dmin_f99_fat
+extends: dmin_fat.yaml
+
+success_fraction: 0.99

@@ -9,6 +9,7 @@ import pytest
 
 from services.cells import Cell, Group, cell_config
 from sim.core.world.layouts import (
+    goal_half_angle,
     layout_extent,
     place_dogs,
     place_flock,
@@ -83,22 +84,41 @@ def test_every_start_puts_one_dog_straight_behind_the_flock(start):
     assert dog[0] < cfg["flock_center"][0]  # the goal lies at +x
 
 
+def _ring_angles(cfg) -> tuple[np.ndarray, np.ndarray, float]:
+    """(distances, signed angles from straight behind, goal half-angle) of the ring dogs."""
+    centre = np.asarray(cfg["flock_center"])
+    back = centre - np.asarray(cfg["goal_center"])
+    rel = place_dogs(cfg) - centre
+    angles = np.arctan2(back[0] * rel[:, 1] - back[1] * rel[:, 0], rel @ back)
+    half = goal_half_angle(cfg, float(np.linalg.norm(back)))
+    return np.linalg.norm(rel, axis=1), angles, half
+
+
 def test_ring_spreads_dogs_evenly_round_the_flock_goal_side_included():
     cfg = config_for(d=8, flock_radius=9.0, settings={"dog_start": "ring"})
-    centre = np.asarray(cfg["flock_center"])
-    rel = place_dogs(cfg) - centre
-    np.testing.assert_allclose(np.linalg.norm(rel, axis=1), np.linalg.norm(rel[0]))
-    assert (rel[:, 0] > 0).any()  # some dogs start on the goal side
-    angles = np.sort(
-        np.mod(np.arctan2(rel[:, 1], rel[:, 0]) - np.arctan2(rel[0, 1], rel[0, 0]), 2 * np.pi)
-    )
-    np.testing.assert_allclose(angles, 2 * np.pi * np.arange(8) / 8, atol=1e-9)
+    reach, angles, half = _ring_angles(cfg)
+    np.testing.assert_allclose(reach, reach[0])
+    assert (np.abs(angles) > np.pi / 2).any()  # some dogs start on the goal side
+    span = 2 * np.pi - 2 * half
+    np.testing.assert_allclose(np.sort(angles), -span / 2 + span * (np.arange(8) + 0.5) / 8)
+
+
+@pytest.mark.parametrize("layout", ["wide", "outlier_rich"])
+@pytest.mark.parametrize("n, r_f", [(200, 10.47), (400, 11.40)])
+@pytest.mark.parametrize("d", [2, 4, 16])
+def test_no_ring_dog_starts_in_the_goal_or_its_cone(layout, n, r_f, d):
+    """A full circle put a dog on the drive axis, inside the goal from N = 200 (even D)."""
+    cfg = config_for(n=n, d=d, layout=layout, flock_radius=r_f, settings={"dog_start": "ring"})
+    _, angles, half = _ring_angles(cfg)
+    assert np.all(np.pi - np.abs(angles) >= half - 1e-9)
+    goal = np.asarray(cfg["goal_center"])
+    assert np.all(np.linalg.norm(place_dogs(cfg) - goal, axis=1) > cfg["goal_radius"])
 
 
 def test_ring_opens_a_second_circle_only_when_the_first_is_full():
     cfg = config_for(d=60, flock_radius=9.0, settings={"dog_start": "ring"})
-    reach = np.linalg.norm(place_dogs(cfg) - np.asarray(cfg["flock_center"]), axis=1)
-    first = int(2 * np.pi * reach.min() / cfg["dog_start_spacing"])
+    reach, _, half = _ring_angles(cfg)
+    first = int((2 * np.pi - 2 * half) * reach.min() / cfg["dog_start_spacing"])
     assert (np.isclose(reach, reach.min())).sum() == min(60, first)
 
 

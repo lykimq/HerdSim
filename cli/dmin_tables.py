@@ -63,7 +63,7 @@ def markdown(frame: pd.DataFrame, index: bool = False) -> str:
 
 
 def cmd_record(_: argparse.Namespace) -> None:
-    print(markdown(run_record(RESULTS_ROOT / "queue_log.jsonl")))
+    print(markdown(run_record(RESULTS_ROOT / "queue_log.jsonl", RESULTS_ROOT)))
 
 
 def cmd_dmin(args: argparse.Namespace) -> None:
@@ -106,7 +106,6 @@ def cmd_arrival(args: argparse.Namespace) -> None:
         relaxed = arrival_groups(trials, Rules.from_settings(protocol.settings), args.pct)
         keys = pd.DataFrame([parse_group_key(k) for k in relaxed["group_key"]])
         relaxed = pd.concat([keys, relaxed.drop(columns=["group_key"])], axis=1)
-        relaxed["d_min_above_grid"] = False
         print(f"### {name}: strict, then {args.pct} percent of the flock in the goal\n")
         print(markdown(layout_by_n(strict, LAYOUTS), index=True), "\n")
         print(markdown(layout_by_n(relaxed, LAYOUTS), index=True), "\n")

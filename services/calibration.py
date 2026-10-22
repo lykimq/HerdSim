@@ -9,7 +9,9 @@ over seeds and start sizes.
 
 R_f is the size of the flock driven by one dog: calibration always uses a single dog and no
 factor, whatever the protocol sweeps, so every factor level of a method is compared on a
-task sized to that one reference flock.
+task sized to that one reference flock. A method with ``calibrate_as`` is calibrated with
+the single dog of the named method (FAT with the paper shepherd of strombom_multi), so the
+two methods are compared on the same task rather than each on its own flock size.
 
 Calibration always runs the drive task (``CALIBRATION_TASK``), whatever task
 the protocol runs: R_f is a property of the sheep model under a driving dog,
@@ -71,8 +73,11 @@ def calibration_config(
 
     The protocol's factors are not applied; the drive is set in units through
     both drive terms so the task's max() rule returns exactly ``calibration_drive``.
+    With ``calibrate_as`` the dog of that method drives, on this method's parameters
+    (``_methods`` allows it only between methods with the same sheep and parameter names).
     """
     spec = method_spec(protocol, method)
+    driver = spec.calibrate_as or method
     s = protocol.settings
     radius = start_radius(spacing, n_sheep)
     drive = calibration_drive(protocol, method)
@@ -94,7 +99,7 @@ def calibration_config(
     setup["max_ticks"] = math.ceil(float(s["calibration_seconds"]) / method_dt(method, spec.params))
     return build_config(
         task=CALIBRATION_TASK,
-        method=method,
+        method=driver,
         params=dict(spec.params),
         setup=setup,
         n_sheep=n_sheep,

@@ -1,0 +1,15 @@
+# D_min for the FAT dog rule: every dog aims behind the sheep farthest from the goal, with no
+# coordination. Same grid, deadline and seeds as dmin_m6.yaml, so each cell is the same task as
+# the strombom_multi cell beside it.
+# calibrate_as: FAT's own single dog would settle a looser flock (R_f up to 28% larger at
+# N = 400), which would make its goal and drive larger than dmin_m6's. Calibrating with the
+# paper shepherd on the same sheep gives the R_f of dmin_m6, so only the dog rule differs.
+
+protocol_id: dmin_fat
+output: results/dmin_fat
+extends: dmin_m6.yaml
+
+methods:
+  fat:
+    time_limit_drive_multiple: 6.0
+    calibrate_as: strombom_multi

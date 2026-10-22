@@ -1,5 +1,7 @@
-# Sensitivity: dogs start evenly round the flock on full circles, goal side included, instead
-# of on half circles behind it.
+# Sensitivity: dogs start evenly round the flock, goal side included, instead of on half
+# circles behind it. The ring leaves out the cone that holds the goal: the first run on full
+# circles (kept in results/dmin_s_ring_dog_in_goal) put a dog inside the goal for every even D
+# from N = 200.
 # Same grid and deadline as dmin_s_base.yaml; only the change below differs.
 
 protocol_id: dmin_s_ring

@@ -54,10 +54,12 @@ def test_group_key_with_and_without_a_factor():
     )
 
 
-def test_dmin_text_decided_undecided_and_none_on_grid():
-    base = {"d_min": 4.0, "d_min_low": 3.0, "d_min_above_grid": False}
+def test_dmin_text_decided_bracketed_undecided_and_none_on_grid():
+    base = {"d_min": 4.0, "d_min_low": 4.0, "d_min_above_grid": False}
     assert dmin_text(pd.Series(base)) == "4"
-    assert dmin_text(pd.Series({**base, "d_min": np.nan})) == "[3]"
+    # D = 4 is reliable but D = 3 is still open: the true D_min is 3 or 4, not 4.
+    assert dmin_text(pd.Series({**base, "d_min_low": 3.0})) == "3-4"
+    assert dmin_text(pd.Series({**base, "d_min": np.nan, "d_min_low": 3.0})) == "[3]"
     assert dmin_text(pd.Series({**base, "d_min": np.nan, "d_min_above_grid": True})) == (
         "none on grid"
     )
@@ -97,7 +99,19 @@ def test_layout_table_has_layouts_as_rows_and_n_as_columns():
     table = groups([("compact", 100, 1.0, 1.0), ("wide", 100, 2.0, 2.0), ("wide", 200, 4.0, 3.0)])
     wide = layout_by_n(table, ("compact", "wide", "split"))
     assert list(wide.index) == ["compact", "wide"]  # a layout without data is not listed
-    assert wide.loc["wide", 200] == "4" and wide.loc["compact", 200] == "-"
+    assert wide.loc["wide", 200] == "3-4" and wide.loc["compact", 200] == "-"
+
+
+def test_tables_keyed_by_layout_and_n_refuse_several_factor_levels():
+    table = pd.concat(
+        [
+            groups([("wide", 100, 2.0, 2.0)], "gap=15.0"),
+            groups([("wide", 100, 3.0, 3.0)], "gap=60.0"),
+        ]
+    )
+    for build in (layout_by_n, growth_table, layout_against_n):
+        with pytest.raises(ValueError, match="factor levels"):
+            build(table)
 
 
 def test_layout_and_n_spreads_are_in_doublings():
@@ -170,6 +184,17 @@ def test_run_record_keeps_the_last_entry_of_each_protocol(tmp_path):
     out = run_record(log).set_index("protocol")
     assert out.loc["a", "trials"] == 30 and out.loc["b", "trials"] == 20
     assert run_record(tmp_path / "missing.jsonl").empty
+
+
+def test_run_record_reads_current_counts_from_the_folder(tmp_path):
+    """A folder topped up outside the queue shows its current trials, not the queue's."""
+    log = tmp_path / "queue_log.jsonl"
+    log.write_text(json.dumps({"protocol": "a", "trials": 10, "cells": 4, "hours": 0.1}) + "\n")
+    (tmp_path / "a").mkdir()
+    (tmp_path / "a" / "status.json").write_text(json.dumps({"trials_done": 15, "cells": 5}))
+    out = run_record(log, tmp_path).set_index("protocol")
+    assert out.loc["a", "trials"] == 15 and out.loc["a", "cells"] == 5
+    assert out.loc["a", "hours"] == 0.1
 
 
 def test_bracket_is_none_without_a_decided_dmin():

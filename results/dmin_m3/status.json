@@ -5,20 +5,20 @@
   "running": false,
   "stop_reason": "every cell decided, at max_seeds or errored",
   "rounds": 20,
-  "trials_done": 9130,
+  "trials_done": 9530,
   "trials_ignored": 0,
-  "trials_this_run": 9130,
+  "trials_this_run": 400,
   "round_trials": 0,
   "trial_errors": 0,
   "cells_with_errors": {
     "count": 0,
     "keys": []
   },
-  "hours_this_run": 0.17,
-  "trials_per_hour": 53799.3,
-  "cells": 181,
+  "hours_this_run": 0.019,
+  "trials_per_hour": 20618.9,
+  "cells": 183,
   "cells_pruned": 4,
-  "cells_needing_seeds": 3,
-  "cells_at_max_seeds_undecided": 3,
-  "updated_at": "2026-10-20T16:42:19.642196+00:00"
+  "cells_needing_seeds": 5,
+  "cells_at_max_seeds_undecided": 5,
+  "updated_at": "2026-10-22T12:03:39.213120+00:00"
 }

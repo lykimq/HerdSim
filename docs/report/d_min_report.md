@@ -1,6 +1,6 @@
 # Minimum team size for driving a simulated sheep flock: dependence on flock size, start layout, deadline and success criterion
 
-HerdSim project. Draft of 2026-10-21, written from the study plan and the runs of 2026-10-20 and 21.
+HerdSim project. Draft of 2026-10-22, written from the study plan and the runs of 2026-10-20 to 22.
 
 ## Abstract
 
@@ -9,21 +9,26 @@ this question in simulation, using the sheep model of Strömbom et al. (2014) an
 extension of its collect-and-drive shepherd in which each dog takes its own outlier while
 collecting and its own slot on an arc behind the flock while driving. We define D_min as the
 smallest team whose success rate is shown to be at least 0.90 by a two-sided 99% Clopper-Pearson
-interval. Seeds are added only to cells whose decision is still open, up to 200 per cell. We map
-D_min over flock sizes N = 25 to 400, four start layouts and deadlines of 12, 6 and 3 drive
-times, under two success criteria: every sheep inside the goal, and 99% of the sheep inside. In
-17 protocols (112,785 trials, no errors) a compact flock needed one dog at every N and deadline.
-On scattered layouts D_min was 1 for N <= 50 and grew slowly with N, with log-log slopes of 0.2
-to 0.5 in all but one row at 12 and 6 drive times, reaching 2 or 3 dogs at N = 400 with 12 drive
-times. Shortening the deadline from 12 to 3 drive times raised D_min more than a fourfold
-increase in N did (wide layout, N = 400: 2 to 6 dogs). Under the strict criterion six large-N
-cells had no decided D_min that the 99% criterion resolved; in the failed trials the flock
-reached the goal with all but one or two sheep and was then driven through and out of it. On a
-layout of three separate clusters, success did not rise with team size at N >= 200. Runs that
-change the sheep parameters, the goal size, the dog start or the dog speed changed the absolute
-D_min by up to a factor of six, and in no cell decided at two sizes did D_min fall as N rose.
-The dependence of D_min on N, layout and deadline is therefore more robust than its absolute
-value, and any reported D_min needs its deadline and success criterion attached.
+interval. Seeds are added only to cells whose decision is still open, up to 200 per cell, and a
+curve whose smaller team sizes stay open is reported as a bracket. We map D_min over flock sizes
+N = 25 to 400, four start layouts and deadlines of 12, 6 and 3 drive times, under two success
+criteria: every sheep inside the goal, and 99% of the sheep inside. In 23 protocols (164,740
+trials, no errors) a compact flock needed one dog at every N and deadline. On scattered layouts
+D_min was 1 for N <= 50 and grew slowly with N, with log-log slopes of 0.2 to 0.5 in all but one
+row at 12 and 6 drive times, reaching 2 or 3 dogs at N = 400 with 12 drive times. Shortening the
+deadline from 12 to 3 drive times raised D_min more than a fourfold increase in N did (wide
+layout, N = 400, 99% criterion: 2 to 5-6 dogs). The two success criteria differ in what they
+measure. In the strict failures the flock reached the goal with all but one or two sheep and was
+then driven out of it, so the strict criterion scores the end of the task as much as the
+herding. Under it, six large-N cells had no decided D_min and setup conventions (start gap, dog
+start, sheep parameter set, dog speed) changed D_min by up to a factor of six. Under the 99%
+criterion the same conventions moved D_min by at most one dog, and only a tighter goal moved it
+more. A dog rule without coordination (every dog chasing the sheep farthest from the goal),
+run on the same task, did not improve with team size and had no D_min at N >= 200 on any
+scattered layout. On a layout of three separate clusters, success did not rise with team size at
+N >= 200 under either criterion. The dependence of D_min on N, layout and deadline is more robust
+than its absolute value, and any reported D_min needs its deadline and success criterion
+attached.
 
 Keywords: shepherding, multi-agent herding, scalability, agent-based simulation, sheepdog,
 minimum team size, sequential testing
@@ -63,10 +68,13 @@ the flock size. The contributions are:
 2. A map of D_min over five flock sizes, four start layouts and three deadlines, under two success
    criteria, for the Strömbom sheep and a coordinated multi-dog extension of its shepherd.
 3. Evidence that the requirement that every sheep be inside decides many large-flock cells
-   through the last one or two sheep, and a description of the failure that produces this.
+   through the last one or two sheep, a description of the failure that produces this, and what
+   it implies for how a herding task should define success.
 4. A sensitivity analysis over setup conventions that have no real-world rule (dog start, start
-   gap, goal size, sheep parameter set, dog speed), which separates the robust part of the result
-   from the absolute dog counts.
+   gap, goal size, sheep parameter set, dog speed), run under both success criteria, which
+   separates the robust part of the result from the absolute dog counts.
+5. A comparison on the same task with a dog rule that has no coordination, which shows that a
+   finite D_min at large N comes from the coordination and not from the number of dogs.
 
 Section 2 reviews related work. Section 3 states the research questions and defines D_min.
 Sections 4 and 5 describe the model and the experimental design. Section 6 gives the results,
@@ -127,6 +135,8 @@ that number depends on the flock and the task. Specifically:
 - RQ4. How does the success criterion change D_min?
 - RQ5. Which of the answers to RQ1 to RQ4 survive changes to setup conventions that have no
   real-world rule?
+- RQ6. How much of D_min comes from the coordination of the team rather than from the number of
+  dogs?
 
 A cell is one combination of dog rule, layout, N, deadline and team size D. A trial succeeds when
 the required share of the sheep is inside the goal at one tick before the deadline. For a cell
@@ -142,9 +152,11 @@ For a curve of cells over the team-size grid at fixed rule, layout, N and deadli
     D_min     = smallest D whose cell is reliable,
     D_min_low = smallest D whose upper bound U reaches theta.
 
-When the curve is decided, D_min_low = D_min. When D_min exists but a smaller D is still
-undecided, the true minimum lies in [D_min_low, D_min], and we report the curve as "[D_min_low]".
-When no D on the grid is reliable we report "none". A reliable cell needs at least 51 successes
+When the curve is decided, D_min_low = D_min and we report one number. When D_min exists but a
+smaller D is still undecided, the true minimum lies in [D_min_low, D_min], and we report the
+bracket as "D_min_low-D_min" (for example "3-8"). When no D is reliable yet but some D is still
+undecided, we report "[D_min_low]", a lower bound. When every D on the grid is decided
+unreliable we report "none". A reliable cell needs at least 51 successes
 in a row (0.9^51 < 0.005), which a batch size of 10 rounds up to 60 trials.
 
 The deadline is part of the question. Given unlimited time one dog eventually herds almost any
@@ -207,11 +219,25 @@ paper's drive point in the middle. Crosses mark the targets.
 
 ### 4.3 Uncoordinated baseline (FAT)
 
-To isolate whether scaling efficiency arises from explicit multi-agent coordination or merely from having multiple independent actuators in the field, HerdSim introduces an uncoordinated ablation baseline called Farthest-Agent Targeting (`fat`) (figure S2b). Each shepherd independently targets the single sheep farthest from the goal, aiming $r_a$ behind it using the discrete kinematic steps of Strömbom et al. (2014). This rule borrows the target selection heuristic of Kubo et al. (2022) but intentionally omits both the Hungarian outlier assignment / angular arc formation of `strombom_multi` and the continuous inter-dog repulsive forces ($1/r^3$) of Kubo. Because all shepherds observe the same sheep coordinates and lack repulsive spacing or communication, every dog selects the exact same target ($\arg\max_i \lVert \mathbf{x}_i - \mathbf{x}_{\text{goal}} \rVert$). The dogs quickly collapse into a tight cluster behind that single outlier (exhibiting high dog overlap, figure S2b), effectively degenerating into a single uncoordinated agent and failing to gather dispersed flocks.
+To tell how much of D_min comes from the coordination and how much from the number of dogs, we
+also run a rule without coordination, FAT (farthest from the goal). Each dog aims r_a behind the
+sheep farthest from the goal and moves with the Strömbom dog step, including the stop within
+3 r_a of a sheep. The target choice is that of the Kubo dogs, without their repulsion between
+dogs, and without the outlier assignment and the drive slots of strombom_multi. All dogs see the
+same flock, so all of them choose the same sheep and the same point, and once they meet they move
+as copies (figure S2b). FAT is a HerdSim construction, used here as a baseline.
+
+FAT runs on the same task as strombom_multi. The flock radius R_f sets the goal and the drive
+(section 5.1) and is calibrated with one dog. A single FAT dog settles a looser flock (R_f up to
+28% larger at N = 400), which would give FAT a larger goal and a longer drive. We therefore
+calibrate R_f for FAT with the paper shepherd on the same sheep, which reproduces the R_f of the
+strombom_multi runs exactly, so only the dog rule differs between the two.
 
 ![Uncoordinated baseline FAT](../figures/fig4_fat.png)
 
-Figure S2b. Uncoordinated baseline FAT (Farthest-Agent Targeting). Left: Geometry of uncoordinated driving where dogs independently chase the single farthest sheep from the goal. Right: Without target assignment or repulsive spacing, dogs collapse into a tight cluster behind the same outlier, exhibiting high dog overlap and failing to gather dispersed flocks.
+Figure S2b. FAT. Left: the paper's shepherd picks the sheep farthest from the flock centre; a FAT
+dog picks the sheep farthest from the goal. Right: with several dogs every FAT dog picks the same
+sheep and the same point, so the dogs become copies once they meet.
 
 ### 4.4 Second sheep model
 
@@ -327,14 +353,19 @@ circles behind the flock, 30 units beyond the farthest sheep that can start, spr
 least 5 apart; an arc holds as many dogs as fit and the rest go on arcs 5 farther out (figure S4).
 One dog starts on the drive line, as in the paper. On compact starts every sheep is within r_s of
 the dog at tick 0; on scattered starts 66 to 100% of the sheep are out of reach and graze until a
-dog approaches (figure S5). Two alternatives, a full ring round the flock and a single handler
-point behind it, and gaps of 15 and 60 units, are run as sensitivity variants.
+dog approaches (figure S5). Two alternatives, a ring round the flock and a single handler point
+behind it, and gaps of 15 and 60 units, are run as sensitivity variants. The ring leaves out the
+cone, seen from the flock centre, that holds the goal. A full circle puts one dog on the drive
+axis between the flock and the goal for every even D, and from N = 200 that dog starts inside the
+goal, because the ring radius exceeds the distance to the goal's near edge. A first ring run with
+full circles had this fault and is not used.
 
 ![Dog starts](../figures/fig8_dog_starts.png)
 
 Figure S4. Dog start stations. Top: arcs for D = 1, 2, 4, 8, 24 and 64 on a compact start. One dog
 starts behind the flock on the drive line and every added dog has its own station. Bottom: the
-three placements (arcs, ring, handler point) for 8 dogs on a wide start.
+three placements (arcs, ring, handler point) for 8 dogs on a wide start; the ring leaves a gap
+toward the goal.
 
 ![Start distances](../figures/fig11_start_distances.png)
 
@@ -369,7 +400,11 @@ change what the sheep do.
 
 Every cell receives one batch of 10 seeds. After each round, only cells still undecided receive
 another batch, up to 200 seeds. Where two neighbouring team sizes fall in different zones, a team
-size halfway between them is added (for example D = 5 or 10). Above a confirmed saturation, cells
+size halfway between them is added (for example D = 5 or 10). A cell that is still below the cap
+may yet decide, so it waits; a cell left undecided at the cap does not, and the team size between
+it and a decided neighbour is added, so that a D_min never sits above an untested D inside its
+own bracket (this rule was added after the first runs, which were then topped up). Above a
+confirmed saturation, cells
 whose dogs move as copies of each other (mean pairwise overlap of at least 0.9) receive no more
 seeds. A cell whose true rate lies close to theta stays undecided up to the cap by construction:
 a true rate of 0.93 does not reach L >= 0.90 in 200 trials.
@@ -388,15 +423,16 @@ Table 4. Protocols. Main grid: layouts compact, wide, split and outlier_rich; N 
 |---|---|---|---|
 | dmin_m12, dmin_m6, dmin_m3 | main, m = 12, 6, 3 | none | strict |
 | dmin_f99_m12, dmin_f99_m6, dmin_f99_m3 | main, m = 12, 6, 3 | none | 99% |
+| dmin_fat, dmin_f99_fat | main, m = 6 | dog rule FAT, R_f of strombom_multi | strict, 99% |
 | dmin_kubo | Kubo model, compact, N 25 to 100, D 1 to 10, 500 s | sheep model | strict |
 | dmin_s_base | sensitivity | none (reference) | strict |
 | dmin_s_matched | sensitivity | field-matched sheep set (r_a 1, e 0.1, r_s 75) | strict |
 | dmin_s_handler | sensitivity | all dogs start at one point behind the flock | strict |
-| dmin_s_ring | sensitivity | dogs start on a full circle round the flock | strict |
+| dmin_s_ring | sensitivity | dogs start on a circle round the flock, less the goal's cone | strict |
 | dmin_s_goal | sensitivity | goal radius 1.5 R_f | strict |
 | dmin_s_gap | sensitivity | start gap 15, 30, 60 | strict |
 | dmin_s_dogspeed | sensitivity | dog speed 1.15, the field ratio of dog to sheep speed | strict |
-| dmin_f99_s_base, _matched, _dogspeed | sensitivity | as above | 99% |
+| dmin_f99_s_* (all seven) | sensitivity | as above | 99% |
 
 The start variants (handler, ring, gap) keep the start flock of each seed, so their trials are
 paired with the base. The matched set changes the physics, so the same seeds draw different
@@ -410,14 +446,18 @@ dog speed variant looks the same as the base.
 
 ### 5.8 Implementation and verification
 
-HerdSim is written in Python. Before each campaign, 241 unit tests check the equations against
+HerdSim is written in Python. Before each campaign, 268 unit tests check the equations against
 hand calculations and an independent per-sheep reading of the paper, the team rule, the layouts
 and dog starts, the success fraction, the decision rules on constructed curves with known answers,
 and short real trials of every method. A bench runs small campaigns end to end and checks
 qualitative properties without pinning numbers, among them that a compact flock needs one dog,
 that a scattered start fails more often with one dog than with eight, that no success is faster
 than the straight-line drive allows, and that one and four worker processes give identical trial
-rows. Cutting the dog speed from 1.5 to 0.4 makes the bench fail.
+rows. Cutting the dog speed from 1.5 to 0.4 makes the bench fail. After the runs, a review
+reimplemented the one-dog sheep and shepherd as a separate per-sheep loop, which agreed with the
+engine to 6e-13 over 300 ticks on shared random draws, and recomputed every cell decision and
+every D_min from the stored trials with an independent Clopper-Pearson implementation; all
+agreed with the published tables.
 
 ![One trial](../figures/fig17_trial.png)
 
@@ -427,10 +467,11 @@ about two drive times.
 
 ## 6. Results
 
-The 17 protocols ran 112,785 trials with no errors in about 5 h on 20 workers. The adaptive
-allocation decided 92 to 99% of the cells of each main protocol on reliability (Appendix A). We
-write "a / b" for the strict and 99% values of the same cell, "[n]" for an undecided curve with
-D_min_low = n, and "none" for a curve with no reliable D on the grid.
+The 23 protocols ran 164,740 trials with no errors in about 8 h on 20 workers (Appendix A). The
+adaptive allocation decided 89 to 99% of the cells of each main protocol on reliability. We write
+"a / b" for the strict and 99% values of the same cell, "lo-hi" for a bracket, "[n]" for a curve
+with no reliable D yet and D_min_low = n, and "none" for a curve with no reliable D on the grid
+(section 3).
 
 ### 6.1 One dog drives a compact flock
 
@@ -450,21 +491,22 @@ two criteria are the same rule (section 5.5).
 
 | Deadline | Layout | N = 25 | 50 | 100 | 200 | 400 |
 |---|---|---|---|---|---|---|
-| 12 | wide | 1 / 1 | 1 / 1 | 1 / 1 | 2 / 2 | 3 / 2 |
-| 12 | split | 1 / 1 | 1 / 1 | 1 / 1 | 2 / 1 | 3 / 2 |
-| 12 | outlier_rich | 1 / 1 | 1 / 1 | 3 / 2 | 2 / 2 | 3 / 2 |
-| 6 | wide | 1 / 1 | 1 / 1 | 1 / 1 | 3 / 2 | [12] / 3 |
-| 6 | split | 1 / 1 | 1 / 1 | 1 / 1 | none / [1] | none / [6] |
-| 6 | outlier_rich | 1 / 1 | 1 / 1 | 3 / 2 | [12] / 3 | none / 3 |
-| 3 | wide | 1 / 1 | 1 / 1 | 3 / 2 | none / 3 | none / 6 |
+| 12 | wide | 1 / 1 | 1 / 1 | 1 / 1 | 2 / 1-2 | 3 / 2 |
+| 12 | split | 1 / 1 | 1 / 1 | 1 / 1 | 1-2 / 1 | 3 / 2 |
+| 12 | outlier_rich | 1 / 1 | 1 / 1 | 1-3 / 1-2 | 2 / 2 | 3 / 2 |
+| 6 | wide | 1 / 1 | 1 / 1 | 1 / 1 | 3 / 2 | [9] / 2-3 |
+| 6 | split | 1 / 1 | 1 / 1 | 1 / 1 | none / [1] | none / [5] |
+| 6 | outlier_rich | 1 / 1 | 1 / 1 | 3 / 2 | [12] / 2-3 | none / 3 |
+| 3 | wide | 1 / 1 | 1 / 1 | 3 / 2 | none / 3 | none / 5-6 |
 | 3 | split | 1 / 1 | 1 / 1 | 1 / 1 | none / none | none / none |
-| 3 | outlier_rich | 1 / 1 | 1 / 1 | 8 / 2 | none / 12 | none / [6] |
+| 3 | outlier_rich | 1 / 1 | 1 / 1 | 3-8 / 2 | none / 4-10 | none / [6] |
 
 ![D_min against N](../figures/fig20_dmin_vs_n.png)
 
 Figure 5. D_min against N at the three deadlines, strict (solid, circles) and 99% (dashed,
-squares), offset slightly in N. A hollow triangle is an undecided curve at its D_min_low, with a
-line up to 24; a cross is a curve with no reliable D on the grid. Compact is 1 throughout.
+squares), offset slightly in N. A shaded bar runs from D_min_low to D_min where a smaller D stayed
+undecided at 200 seeds. A hollow triangle is a curve with no reliable D yet, at its D_min_low,
+with a line up to 24; a cross is a curve with no reliable D on the grid. Compact is 1 throughout.
 
 ![Success heat maps](../figures/fig21_success_heatmaps.png)
 
@@ -473,17 +515,18 @@ marks a cell decided reliable. Low rates at N = 400 rest on 10 to 20 seeds, beca
 stops adding seeds once a cell is decided unreliable.
 
 Every layout needs one dog at N <= 50. Where D_min is decided on a scattered layout at N = 200
-and 400, it is 1 to 3 dogs at 12 and 6 drive times, and up to 6 (wide, N = 400) or 12 (outlier_rich,
-N = 200) at 3 drive times under the 99% criterion. Outlier_rich needs more dogs than wide at
-N = 100 under both criteria wherever they differ (strict 3, 3 and 8 against 1, 1 and 3; 99% 2
-against 1 at 12 and 6 drive times). At N = 400 and 12 drive times the two layouts need the same
-number. Split needs the fewest dogs at the loose deadline and has no decided value at N >= 200 at
-the tighter ones (section 6.6).
+and 400, it is 1 to 3 dogs at 12 and 6 drive times. At 3 drive times under the 99% criterion it is
+5 or 6 dogs on wide at N = 400 and between 4 and 10 on outlier_rich at N = 200, where every D
+from 4 to 9 stayed undecided at 200 seeds with success rates of 0.84 to 0.92. Outlier_rich needs at least as
+many dogs as wide at every N and deadline, and more at N = 100 at 6 and 3 drive times (strict 3
+and 3-8 against 1 and 3; 99% 2 against 1 at 6 drive times). At N = 400 and 12 drive times the two
+layouts need the same number. Split needs the fewest dogs at the loose deadline and has no decided
+value at N >= 200 at the tighter ones (section 6.7).
 
-One strict entry is not monotone in N: outlier_rich at 12 drive times needs 3 dogs at N = 100 and
-2 at N = 200. At N = 100 its strict success sits between 0.88 and 0.94 over several team sizes, so
-the D that first crosses the reliability line depends on a few trials. The 99% values for the same
-row are 2, 2, 2.
+Several entries are brackets because the success rate of a smaller D stays close to 0.90. In
+outlier_rich at N = 100 and 12 drive times, D = 3 is reliable under the strict criterion and D = 1
+and 2 are undecided, so the true D_min is 1, 2 or 3; this curve looked like a reversal in N
+(3 at N = 100, 2 at N = 200) when only D_min was printed.
 
 ### 6.3 Growth with N (RQ1)
 
@@ -501,7 +544,7 @@ means D_min = 1 at every N where it was decided.
 | strict | 3 | 0.79 (N <= 100) | flat (N <= 100) | 0.79 to 1.50 (N <= 100) |
 | 99% | 12 | 0.20 to 0.30 | 0.20 | 0.30 |
 | 99% | 6 | 0.30 to 0.42 | flat (N <= 100) | 0.42 to 0.48 |
-| 99% | 3 | 0.62 to 0.68 | flat (N <= 100) | 0.70 to 1.18 (N <= 200) |
+| 99% | 3 | 0.62 to 0.68 | flat (N <= 100) | 0.70 to 1.10 (N <= 200) |
 
 At 12 and 6 drive times the slopes are 0.2 to 0.5, with one exception (strict outlier_rich at 6
 drive times, 0.79 over N = 25 to 100): doubling the flock costs 0.2 to 0.5 of a doubling of the
@@ -519,11 +562,11 @@ Table 7. Mean spread of D_min in doublings. Cells without a value are left out.
 | Criterion | Deadline | Between layouts at one N | Between N at one layout |
 |---|---|---|---|
 | strict | 12 | 0.68 | 1.19 |
-| strict | 6 | 1.75 | 1.79 |
+| strict | 6 | 1.67 | 1.69 |
 | strict | 3 | 0.76 | 0.97 |
 | 99% | 12 | 0.50 | 0.75 |
-| 99% | 6 | 0.98 | 1.37 |
-| 99% | 3 | 1.28 | 1.31 |
+| 99% | 6 | 0.92 | 1.30 |
+| 99% | 3 | 1.25 | 1.28 |
 
 N moves D_min at least as much as the layout in all six rows, clearly at 12 drive times and by a
 small margin at 6 (strict) and 3 (99%). Most of the layout effect is the difference between the
@@ -532,7 +575,7 @@ compact start and the three scattered ones.
 ### 6.5 Deadline (RQ3)
 
 Under the 99% criterion, shortening the deadline from 12 to 3 drive times raises D_min on the wide
-layout from 2 to 3 at N = 200 and from 2 to 6 at N = 400, and on outlier_rich from 2 to 12 at
+layout from 1-2 to 3 at N = 200 and from 2 to 5-6 at N = 400, and on outlier_rich from 2 to 4-10 at
 N = 200. At 12 drive times, going from N = 100 to N = 400 on the wide layout raises D_min from 1 to
 2. The deadline effect is uneven: from 12 to 6 drive times D_min changes by at most one dog in
 every decided wide and outlier_rich cell, and the large steps come between 6 and 3. Under the
@@ -552,9 +595,9 @@ smaller in 9 of the 34 scattered cells with both decided, by 1 to 6 dogs, all at
 cells have no decided strict value and a decided 99% value: wide N = 400 at 6 drive times, wide
 N = 200 and 400 at 3, outlier_rich N = 200 and 400 at 6, and outlier_rich N = 200 at 3.
 
-In the strict failures the flock has usually arrived. On the sensitivity grid with D >= 6, 98 to
+In the strict failures the flock has usually arrived. On the sensitivity grid with D >= 6, 99 to
 100% of trials have 99% of the sheep in the goal at some tick, while strict success is 0.68 to
-1.00 (figure 8, left). The time to 99% is well inside the deadline (about 426 s of 1241 s for wide,
+1.00 (figure 8, left). The time to 99% is well inside the deadline (about 427 s of 1241 s for wide,
 N = 400). We read four failed trials in detail (N = 400, 8 to 16 dogs). In each, 386 to 399 of the
 400 sheep reach the goal, every dog is then on the goal side of the flock, the flock is driven out
 to 100 or more units from the goal centre, and it returns 400 to 800 ticks later (figure 8, right).
@@ -566,22 +609,45 @@ are a reading of the mechanism, not a count of how often it happens.
 
 Figure 8. Left: share of trials with 6 or more dogs that succeed under the strict criterion (dark),
 that reach 99% of the sheep in the goal at some tick (hatched), and that succeed under the strict
-criterion with the slower dog of section 6.7 (orange). Right: one start flock (wide, N = 400, 16
+criterion with the slower dog of section 6.8 (orange). Right: one start flock (wide, N = 400, 16
 dogs, seed 2). With dog speed 1.5 the flock arrives with all but one or two sheep, is driven out,
 and returns; with dog speed 1.15 it ends inside on the first pass.
 
 The step where a strict team fails is therefore the arrival of the last sheep, after the flock has
 been brought in. A strict D_min at N >= 100 and tight deadlines is partly a statement about that
-step.
+step. Section 6.8 shows that the same step accounts for most of the setup sensitivity of the
+strict runs, and section 7.3 discusses what this means for the choice of a success rule.
 
 ### 6.7 Cells where more dogs do worse
 
 On the split layout at N >= 200 success does not rise with D (figure 9). At N = 200 and 6 drive
 times under the 99% criterion it is 0.92 (D = 1), 0.95 (2) and 0.92 (3), and 0.60 to 0.90 for D = 4
 to 24, while the median finish time of successful trials grows from 425 s at D = 1 to 650 to 700 s
-at D >= 6, against a deadline of 839 s. At N = 400 success stays at 0.67 to 0.89 for D >= 2. We
-did not examine the cause. The split layout at N >= 200 and deadlines of 6 and 3 drive times
-should be read as undecided, and the growth statements of section 6.3 do not cover it.
+at D >= 6, against a deadline of 839 s. At N = 400 success stays at 0.67 to 0.92 for D >= 2. The
+split layout at N >= 200 and deadlines of 6 and 3 drive times should be read as undecided, and the
+growth statements of section 6.3 do not cover it.
+
+A partial cause is how the team layer assigns collecting jobs. The jobs are the D outliers
+farthest from the flock centre, by rank, and on a split start the farthest sheep usually lie in
+one cluster. We replayed split at N = 200, 6 drive times and the 99% criterion with 12 seeds per
+team size and recorded, at every collecting tick, which start cluster each dog's outlier belongs
+to (Table 8). With 4 or more dogs, every dog's job came from one cluster in 82 to 91% of the
+collecting ticks, and the median finish time grew with D as in the full runs. In a counterfactual
+with the jobs spread over the clusters (the farthest outliers taken in order, skipping any closer
+than f(N) to a job already taken), the median finish time fell from 631 to 318 s at D = 4 but
+changed little at D = 8 (678 to 662 s) and D = 16 (724 to 703 s). The pile-up on one cluster is
+real and explains the slowdown at D = 4; it does not explain the slowdown at larger D, whose
+cause remains open. Both checks use 12 seeds and are a diagnosis, not a result.
+
+Table 8. Replay of split, N = 200, 6 drive times, 99% criterion, 12 seeds per D.
+
+| D | success | median finish (s) | collecting ticks with all jobs in one cluster | median finish, jobs spread (s) |
+|---|---|---|---|---|
+| 1 | 1.00 | 424 | - | - |
+| 2 | 0.83 | 365 | 0.65 | 394 |
+| 4 | 0.92 | 631 | 0.82 | 318 |
+| 8 | 1.00 | 678 | 0.90 | 662 |
+| 16 | 0.83 | 724 | 0.91 | 703 |
 
 ![Split curves](../figures/fig23_split_curves.png)
 
@@ -598,53 +664,71 @@ so more dogs do not lift the strict rate in that cell.
 
 ### 6.8 Sensitivity to setup conventions (RQ5)
 
-Table 8 compares each variant with the base on the sensitivity grid. The grid stops at D = 16, so
-"none" here means no reliable D up to 16. Figure 10 shows the same values.
+Table 9 compares each variant with the base on the sensitivity grid, under both criteria. The grid
+stops at D = 16, so "none" here means no reliable D up to 16. Figure 10 shows the same values.
 
-Table 8. D_min, base / variant, at 6 drive times. The handler, ring, goal and gap variants were run
-under the strict criterion only.
+Table 9. D_min, base / variant, at 6 drive times.
 
 | Criterion | Variant | wide 100 | wide 200 | wide 400 | outlier 100 | outlier 200 | outlier 400 |
 |---|---|---|---|---|---|---|---|
-| strict | matched sheep set | 1 / 6 | 3 / none | [12] / none | 3 / [1] | [12] / none | none / none |
-| strict | handler start | 1 / 1 | 3 / 3 | [12] / none | 3 / 2 | [12] / [3] | none / none |
-| strict | ring start | 1 / 1 | 3 / 5 | [12] / [8] | 3 / 8 | [12] / [6] | none / none |
-| strict | goal 1.5 R_f | 1 / 3 | 3 / none | [12] / none | 3 / 3 | [12] / none | none / none |
-| strict | gap 15 | 1 / 1 | 3 / [3] | [12] / none | 3 / [1] | [12] / none | none / none |
-| strict | gap 30 (base value) | 1 / 1 | 3 / 3 | [12] / [12] | 3 / 3 | [12] / [12] | none / none |
-| strict | gap 60 | 1 / 1 | 3 / 4 | [12] / 8 | 3 / 3 | [12] / 5 | none / [12] |
-| strict | dog speed 1.15 | 1 / 1 | 3 / 3 | [12] / 5 | 3 / 3 | [12] / 4 | none / 6 |
-| 99% | matched sheep set | 1 / 1 | 2 / 1 | 3 / 2 | 2 / 1 | 3 / 1 | 3 / 3 |
-| 99% | dog speed 1.15 | 1 / 1 | 2 / 3 | 3 / 3 | 2 / 2 | 3 / 3 | 3 / 3 |
+| strict | matched sheep set | 1 / 1-6 | 3 / none | [9] / none | 3 / [1] | [12] / none | none / none |
+| strict | handler start | 1 / 1 | 3 / 3 | [9] / none | 3 / 2 | [12] / [3] | none / none |
+| strict | ring start | 1 / 1 | 3 / 3-5 | [9] / [8] | 3 / 2-7 | [12] / [5] | none / none |
+| strict | goal 1.5 R_f | 1 / 1-3 | 3 / none | [9] / none | 3 / 3 | [12] / none | none / none |
+| strict | gap 15 | 1 / 1 | 3 / [3] | [9] / none | 3 / [1] | [12] / none | none / none |
+| strict | gap 30 (base value) | 1 / 1 | 3 / 3 | [9] / [9] | 3 / 3 | [12] / [12] | none / none |
+| strict | gap 60 | 1 / 1 | 3 / 3-4 | [9] / 6-7 | 3 / 3 | [12] / 5 | none / [12] |
+| strict | dog speed 1.15 | 1 / 1 | 3 / 3 | [9] / 5 | 3 / 2-3 | [12] / 4 | none / 6 |
+| 99% | matched sheep set | 1 / 1 | 2 / 1 | 2-3 / 2 | 2 / 1 | 2-3 / 1 | 3 / 2-3 |
+| 99% | handler start | 1 / 1 | 2 / 2-3 | 2-3 / 2-3 | 2 / 2 | 2-3 / 2-3 | 3 / 3 |
+| 99% | ring start | 1 / 1 | 2 / 2-3 | 2-3 / 3 | 2 / 2 | 2-3 / 2 | 3 / 3 |
+| 99% | goal 1.5 R_f | 1 / 1 | 2 / 2 | 2-3 / 5-6 | 2 / 2 | 2-3 / 2-3 | 3 / none |
+| 99% | gap 15 | 1 / 1 | 2 / 2 | 2-3 / 2-3 | 2 / 1-2 | 2-3 / 2 | 3 / 3 |
+| 99% | gap 30 (base value) | 1 / 1 | 2 / 2 | 2-3 / 2-3 | 2 / 2 | 2-3 / 2-3 | 3 / 3 |
+| 99% | gap 60 | 1 / 1 | 2 / 2-3 | 2-3 / 2-3 | 2 / 2 | 2-3 / 2-3 | 3 / 3 |
+| 99% | dog speed 1.15 | 1 / 1 | 2 / 2-3 | 2-3 / 2-3 | 2 / 2 | 2-3 / 2-3 | 3 / 3 |
 
 ![Sensitivity overview](../figures/fig24_sensitivity.png)
 
-Figure 10. Table 8 as a picture. Darker cells need more dogs; a light cell in brackets is an
-undecided curve at its D_min_low; hatching marks "none".
+Figure 10. Table 9 as a picture, strict above the line and 99% below. Darker cells need more dogs;
+light cells are open (a bracket or a lower bound); hatching marks "none".
 
-The gap-30 variant repeats the base in every cell, which also confirms that the pipeline
-reproduces its own results.
+The two halves of Table 9 tell different stories. Under the strict criterion the variants scatter:
+the same cell can need 1, 3, 5 or no reliable team depending on the sheep set, the goal, the start
+gap or the dog speed, by up to a factor of six. Under the 99% criterion every variant except the
+tighter goal stays within one dog of the base bracket in every cell, and most brackets overlap
+the base value. The start conventions (handler, ring, gap) and the dog speed then make no difference that
+these runs can resolve. Most of the setup sensitivity of the strict runs is therefore the
+last-sheep step of section 6.6, which these conventions move one way or the other, and not a
+difference in how many dogs it takes to bring the flock in.
+
+The gap-30 variant repeats the base in every cell under both criteria, which also confirms that the
+pipeline reproduces its own results.
 
 The field-matched sheep set gives the opposite verdict under the two criteria. Under the strict
-criterion it is the hardest setting in the study: success sits at 0.89 to 0.97 at N = 100 for every
-D, D_min is 6 on wide N = 100 where the base needs 1, and four of the other five cells have no
-value. Under the 99% criterion it needs the same number of dogs as the base or fewer in all six
-cells (1 against 3 on outlier_rich N = 200). With r_a = 1 the dog stops and drives from half the
+criterion it is the hardest setting in the study: success sits near 0.9 at N = 100 for every D,
+D_min on wide N = 100 lies between 1 and 6 where the base needs 1, and the other five cells have
+no value. Under the 99% criterion it needs the same number of dogs as the base or fewer in all six
+cells (1 against 2-3 on outlier_rich N = 200). With r_a = 1 the dog stops and drives from half the
 distance and the collect distance halves, which we expect to leave a straggler inside the collect
 distance behind; we did not test this separately.
 
-The dog start matters, and how it matters depends on N. The ring needs more dogs where both are
-decided at N = 100 and 200 (outlier_rich N = 100: 8 against 3; wide N = 200: 5 against 3), but at
-N = 400 with 8 or more dogs it has the highest strict success (wide 0.92 against 0.85) and the
-fastest finishes (median 466 s against 878 s). The handler start needs the same number or fewer in
-the three cells decided under both, and at N = 400 has the lowest success (wide 0.55 against 0.85;
-outlier_rich 0.20 against 0.69) (figure 11). A start gap of 60 gives decided values where the base
-has none (wide N = 400: 8; outlier_rich N = 200: 5) and one more dog on wide N = 200; a gap of 15
-leaves cells undecided that the base decided. N = 100 is unchanged by the gap.
+The dog start matters under the strict criterion, and how it matters depends on N. With 8 or more
+dogs at N = 400 the ring has the highest strict success (wide 0.92 against 0.86 for the arcs;
+outlier_rich 0.81 against 0.69) and on wide the fastest finishes (median 464 s against 889 s); the
+handler start has the lowest (wide 0.55, outlier_rich 0.20), on 30 to 60 trials because its cells
+stopped early (figure 11). Under the 99% criterion all three starts reach 0.90 to 1.00 with 8 or
+more dogs, and D_min agrees within the brackets. The handler start is then still the slowest: at
+wide N = 400 its median finish is 874 s against 427 s for the arcs, because all its dogs leave
+from one point. A start gap of 60 gives decided strict values where the base has none (wide
+N = 400: 6-7; outlier_rich N = 200: 5); a gap of 15 leaves strict cells undecided that the base
+decided. Under the 99% criterion the gap changes nothing beyond one dog.
 
-The tighter goal needs more dogs (wide N = 100: 3 against 1) and leaves wide and outlier_rich at
-N = 200 without a value. A goal of 1.3 R_f would not fit the settled flock: with one dog on a compact
-start it gives success rates of 0.2 at N = 100 and 0 at N = 200 (figure S7).
+The tighter goal is the one variant that needs more dogs under both criteria. Under the 99%
+criterion it needs 5-6 dogs on wide N = 400 against 2-3, and has no reliable D up to 16 on
+outlier_rich N = 400. A goal of 1.5 R_f leaves little room around a settled flock, and a goal of
+1.3 R_f would not fit it: with one dog on a compact start it gives success rates of 0.2 at N = 100
+and 0 at N = 200 (figure S7).
 
 ![Matched set scene](../figures/fig15_matched_scene.png)
 
@@ -654,21 +738,59 @@ outside each.
 
 Under the strict criterion the slower dog needs fewer dogs where the base has no value (wide
 N = 400: 5; outlier_rich N = 200: 4; N = 400: 6). Under the 99% criterion this advantage disappears:
-D_min is equal in five cells and one dog higher for the slower dog on wide N = 200. Both dog speeds
+D_min agrees with the base within the brackets in all six cells. Both dog speeds
 bring 99% of the flock in at about the same time (Appendix C). The difference under the strict
 criterion is whether the last sheep is in at one tick, and the faster dog's flock is the one that
 gets driven out of the goal (figure 8, right).
 
 ![Dog start results](../figures/fig25_placement_results.png)
 
-Figure 11. Strict success against D for the three dog starts (arcs, ring, handler point) at 6
-drive times, on the same seeds.
+Figure 11. Success against D for the three dog starts (arcs, ring, handler point) at 6 drive times,
+on the same seeds, strict (top) and 99% (bottom).
 
 In every variant and every cell where D_min is decided at two sizes, D_min does not fall as N
 rises (for example wide with the slower dog: 1, 3, 5; the matched set under 99%: 1, 1, 2). The
-absolute values change with the sheep set, the goal, the dog start, the gap and the criterion, by
-up to a factor of six (wide N = 100, matched set, strict). The sensitivity grid covers two layouts,
-three sizes and one deadline, so it does not test the layout order or the deadline effect.
+absolute values change with the sheep set, the goal, the dog start, the gap and the dog speed by
+up to a factor of six under the strict criterion, and by at most one dog under the 99% criterion
+except for the goal size. The sensitivity grid covers two layouts, three sizes and one deadline,
+so it does not test the layout order or the deadline effect.
+
+### 6.9 A dog rule without coordination (RQ6)
+
+Figure 12 and Table 10 compare strombom_multi with FAT on the same task, seeds and deadline (6 drive
+times). Up to N = 100 the two rules need about the same team: one dog on every layout except
+outlier_rich, where FAT needs 2 and strombom_multi 3 (strict) or 2 (99%). From N = 200 FAT has no
+reliable D on any scattered layout under either criterion, and on the compact layout at N = 400 it
+has none under the strict criterion and only a lower bound of 12 under the 99% criterion, where
+strombom_multi needs one dog.
+
+Table 10. D_min of FAT, strict / 99%, deadline 6 drive times, with strombom_multi (dmin_m6 and
+dmin_f99_m6) in brackets.
+
+| Layout | N = 25 | 50 | 100 | 200 | 400 |
+|---|---|---|---|---|---|
+| compact | 1 / 1 | 1 / 1 | 1 / 1 | 1 / 1 | none / [12] (1 / 1) |
+| wide | 1 / 1 | 1 / 1 | 1 / 1 | none / none (3 / 2) | none / none ([9] / 2-3) |
+| split | 1 / 1 | 1 / 1 | 1 / 1 | none / none (none / [1]) | none / none (none / [5]) |
+| outlier_rich | 1 / 1 | 1 / 1 | 2 / 2 (3 / 2) | none / none ([12] / 2-3) | none / none (none / 3) |
+
+FAT success does not rise with D. On wide at N = 200 it stays at 0.30 to 0.55 from D = 2 to 24, and
+on compact at N = 400 at 0.10 to 0.30 for D = 1 to 16 (strict) while strombom_multi succeeds in
+every trial with one dog. On compact flocks at N >= 200, averaged over the trial, 73 to 82% of the
+FAT dogs have another dog within 2 units: the dogs choose the same sheep and the same point and
+move as one. Even a single FAT dog is weaker than the paper shepherd on a large compact
+flock (strict success 0.30 against 1.00 at N = 400), because pushing the rearmost sheep does not
+steer the flock the way driving from behind its centre does. On scattered starts at N >= 200 FAT
+rarely brings 99% of the flock in at all (0 to 64% of trials, against 99 to 100% for
+strombom_multi with 6 or more dogs on wide and outlier_rich, section 6.6).
+
+![FAT against the team rule](../figures/fig26_fat.png)
+
+Figure 12. Success against D for strombom_multi (blue) and FAT (orange) on the same task, strict
+(solid) and 99% (dashed), deadline 6 drive times. FAT does not improve with more dogs.
+
+A finite D_min at large N is therefore a property of the coordination in the team layer. Adding
+dogs that all follow the same rule without dividing the work adds nothing.
 
 ## 7. Discussion
 
@@ -683,48 +805,82 @@ doubling as a non-cohesive swarm aligns with theoretical expectations: global mu
 reducing the required herding effort.
 
 While excessive herders can cause congestion or interference in general multi-agent swarms, we
-observed detrimental team effects primarily on the split layout at N >= 200 (section 6.7). On
-compact flocks, our coordinated dogs converge on parallel slots without hurting task success
-(section 6.1).
+observed detrimental team effects primarily on the split layout at N >= 200 (section 6.7). Part of
+that effect comes from the team layer sending its collecting dogs to one cluster; spreading the
+jobs over the clusters removed the slowdown at D = 4 but not at D = 8 and 16. On compact flocks,
+our coordinated dogs converge on parallel slots without hurting task success (section 6.1).
 
 ### 7.2 The deadline is a main factor
 
 Earlier studies fix the time limit. Our results show that the deadline moves D_min as much as the
 flock size or the layout, and that the effect is concentrated at short deadlines: from 12 to 6
-drive times D_min changes by at most one dog, from 6 to 3 by up to nine. A minimum team size
+drive times D_min changes by at most one dog, from 6 to 3 by several (under the 99% criterion, wide
+N = 400 from 2-3 to 5-6 and outlier_rich N = 200 from 2-3 to 4-10). A minimum team size
 without its deadline is incomplete. A practical reading is that, for this team rule, extra dogs
 mainly buy time for collecting a scattered flock: a compact flock needs one dog at every deadline
 we could meet, and the scattered layouts converge toward one or two dogs as the deadline loosens.
 
 ### 7.3 What the success criterion measures
 
-At N >= 100 and tight deadlines the strict criterion often decides a trial on the last one or two
-sheep, after the flock has arrived. The 99% criterion removes that step and is the rule of Lama and
-di Bernardo (2024); the strict criterion is the rule of Kubo et al. (2022) and Li et al. (2025).
-The two answer different questions: the strict criterion asks whether
-the team can bring the whole flock in and keep it there for one tick; the 99% criterion asks whether
-the team can bring the flock in. Our team rule has no step for the end of the task, and in the
-failure traces every dog ends up on the goal side of the flock and the flock leaves the goal again.
-We did not examine why the dogs get there. A rule that holds the flock at the goal might remove
-much of the difference, and a real pen would hold the flock by itself. We report both
-criteria and have not chosen one as primary.
+We report both criteria side by side and treat the difference between them as a finding of the
+study. The strict criterion is the rule of Kubo et al. (2022), Li et al. (2025) and the anonymous
+2025 manuscript; the 99% criterion is the rule of Lama and di Bernardo (2024). They answer
+different questions. The 99% criterion asks whether the team can bring the flock in. The strict
+criterion asks whether the team can bring the whole flock in and have every sheep inside at the
+same tick, and in an open goal that also depends on what the dogs do once the flock has arrived.
+
+Three results show that, for this team rule, the strict criterion mostly measures that last step.
+In the strict failures the flock had arrived: 99 to 100% of the trials with 6 or more dogs brought
+99% of the sheep into the goal, well inside the deadline, and the traces show the flock driven out
+of the goal and back (section 6.6). The slower dog, which has no advantage in bringing the flock
+in, has a large one under the strict criterion and none under the 99% criterion (Appendix C). And
+the setup conventions that change the strict D_min by up to a factor of six change the 99% D_min
+by at most one dog (section 6.8). A study that reports only a strict D_min would attribute to the
+start gap, the dog start or the dog speed an effect that belongs to the end of the task.
+
+This points to how a herding task should define success. A rule that requires every agent inside
+at one tick in an open goal makes the result depend on a step the herding rule was not designed
+for, and on one or two agents. A better task specification separates the two steps: the arrival
+of the flock, read as a fraction of the agents inside (as with chi* in Lama and di Bernardo 2024),
+and the holding of it, read as a time the flock stays inside, or replaced by a pen that holds the
+flock. Our team rule has no holding step; in the failure traces every dog ends up on the goal side
+of the flock and the flock leaves the goal again. We did not examine why the dogs get there. A team
+rule with an explicit end-of-task step, and a success rule that asks for the flock to stay inside
+for a set time, are the natural next tests of whether the strict D_min falls to the 99% D_min once
+the end of the task is handled.
 
 ### 7.4 What is robust
 
-The absolute dog count depends on settings that have no rule from real herding: the start gap,
-the dog start, the goal size, the sheep parameter set and the success criterion. The sensitivity
-runs changed it by up to a factor of six. What held across our variants is the direction of growth
-with N. Together with the main runs, the statements we consider supported are: a compact flock
-needs one dog; on scattered layouts D_min grows slowly with N; the deadline is a factor on the same
-scale as N; and the strict criterion inflates D_min at large N and tight deadlines. The layout
-order and the deadline effect rest on the base setup only.
+Under the strict criterion the absolute dog count depends on settings that have no rule from real
+herding: the start gap, the dog start, the sheep parameter set, the dog speed. The sensitivity runs
+changed it by up to a factor of six. Under the 99% criterion the same settings move it by at most
+one dog, and only the goal size moves it more. What held across all variants under both criteria
+is the direction of growth with N. Together with the main runs, the statements we consider
+supported are: a compact flock needs one dog; on scattered layouts D_min grows slowly with N; the
+deadline is a factor on the same scale as N; the strict criterion inflates D_min at large N and
+tight deadlines; under the 99% criterion the absolute counts are robust to the start conventions
+to within one dog; and the coordination of the team, not its size, is what makes a finite D_min
+possible at large N. The layout order and the deadline effect rest on the base setup only.
+
+### 7.5 Coordination
+
+The comparison with FAT (section 6.9) shows what the team layer contributes. Without division of
+work, every added dog repeats the first, and success stays where one FAT dog leaves it. With it,
+added dogs take different outliers or different stretches of the flock's back edge, and success
+rises with D until it crosses 0.90. Kubo et al. (2022) reach a similar division through repulsion
+between dogs, which spreads them round the flock; our team layer reaches it by assignment. The
+anonymous 2025 manuscript also needed a division of the patrol among its dogs. In all three, more
+dogs help only to the extent that they do different things. A natural extension is a team rule
+with only local information, where the division of work has to emerge, as in Lama and di Bernardo
+(2024).
 
 ## 8. Limitations
 
 D_min here is a property of one team rule, strombom_multi, on Strömbom sheep with one set of start
-conventions. No other dog rule was run on scattered layouts, and the Kubo model was run on the
-compact start only, so the layout order and growth with N are not tested for another rule or sheep
-model.
+conventions. The second dog rule, FAT, has no coordination and serves as a baseline; it has no
+D_min at large N, so it cannot test the layout order or the growth with N. The Kubo model was run
+on the compact start only. Whether these patterns hold for another coordinated rule or another
+sheep model is not tested.
 
 The base setup is not realistic in several respects: the flock is looser than the field flock of
 Jadhav et al. (2024), the dog works farther back, the reaction distance r_s has not been measured
@@ -734,32 +890,46 @@ dogs are placed or how many are used, so team sizes above about 3 are explorator
 
 Cells with a true rate near 0.90 stay undecided at 200 seeds, so some values are brackets or
 "none". D_min is an integer on a grid of nine team sizes and N has five values, so the slopes rest
-on three to five points, and fewer at 3 drive times. The 99% criterion was run at one fraction only.
-Four of the seven sensitivity variants (handler, ring, goal, gap) were run under the strict
-criterion only, where the strict rule itself is in question.
+on three to five points, and fewer at 3 drive times. The 99% criterion was run at one fraction only,
+and no success rule that asks the flock to stay inside for a set time was run.
 
-The causes of three observations were not examined: why more dogs do worse on split at N >= 200,
-why the faster dog's flock leaves the goal again, and why the split N = 50, D = 2 cell at 3 drive
-times sits at 188 of 200. That cell has the same count under both criteria, but at N = 50 the two
-criteria are the same rule (section 5.5), so the match does not rule out a last-sheep effect.
+The causes of three observations are open: why more dogs do worse on split at N >= 200 beyond the
+pile-up of collecting dogs on one cluster (section 6.7, a 12-seed diagnosis), why the faster dog's
+flock leaves the goal again, and why the split N = 50, D = 2 cell at 3 drive times sits at 188 of
+200. That cell has the same count under both criteria, but at N = 50 the two criteria are the same
+rule (section 5.5), so the match does not rule out a last-sheep effect.
 
-The results were produced from a working tree with uncommitted changes on top of commit 420c4ec and
-carry no commit hash.
+The team layer as specified has three properties that a different design might change: with an
+even D no dog stands on the paper's drive point; dogs left over while collecting drive the core of
+the flock from the distance set for the whole flock; and collecting dogs take the farthest
+outliers by rank, so they can all go to one cluster.
+
+The first 17 runs were produced from a working tree on top of commit 420c4ec. That tree was
+committed as 995a99d, the simulation code has not changed since, and the stored settings of every
+run reproduce their physics hash with that code. The
+runs of 2026-10-22 (the ring, FAT and the 99% sensitivities, and the top-up of the earlier runs)
+were produced from a working tree with the fixes of that day not yet committed.
 
 ## 9. Conclusions and future work
 
 For a Strömbom flock driven into a goal by a coordinated team of dogs, a compact flock needs one
 dog at every size from 25 to 400 and every deadline we tested. A scattered flock needs one dog up
 to 50 sheep and a slowly growing team above that, with a log-log slope of 0.2 to 0.5 at loose
-deadlines. The deadline changes D_min as much as the flock size does, and the requirement that every
+deadlines. The deadline changes D_min as much as the flock size does. The requirement that every
 sheep be inside adds dogs at large N for a reason unrelated to collecting or driving: the team brings
-the flock in and then drives it out. The absolute counts depend on start and goal conventions by up
-to a factor of six, while the growth with N held in every variant where it could be read.
+the flock in and then drives it out. Under that requirement the absolute counts depend on start
+conventions and dog speed by up to a factor of six; when 99% of the flock must arrive, the same
+conventions change them by at most one dog, and only the goal size matters more. The growth with N
+held in every variant where it could be read. A team of dogs that do not divide the work does no
+better than one dog, so the coordination is what makes a finite D_min possible at large N.
 
-Next steps follow from the limitations: a second dog rule on scattered layouts (a farthest-from-goal
-rule without coordination is specified but not run), the 99% versions of the start and goal
-variants, the cause of the split anomaly, a team rule with an explicit end-of-task step, and
-varying the number of neighbours n to test the explanation of section 7.1.
+For the definition of herding tasks, the results argue for separating the arrival of the flock
+from its holding: a success rule that counts a large fraction of the flock in, and a separate
+requirement that it stays inside, or a pen that holds it. Next steps: a team rule with an explicit
+end-of-task step and a success rule with a holding time; the cause of the split anomaly beyond the
+pile-up of collecting dogs; a team rule with local information only; another coordinated rule and
+the Kubo model on scattered layouts; and varying the number of neighbours n to test the
+explanation of section 7.1.
 
 ## Data and code availability
 
@@ -770,13 +940,16 @@ paper are generated from them:
     uv run cli/run_queue.py --workers 20                 # all protocols; resumes, skips finished
     uv run cli/dmin_tables.py record                     # Appendix A
     uv run cli/dmin_tables.py dmin dmin_m12 dmin_m6 dmin_m3 dmin_f99_m12 dmin_f99_m6 dmin_f99_m3
+    uv run cli/dmin_tables.py dmin dmin_fat dmin_f99_fat
     uv run cli/dmin_tables.py growth dmin_m12 dmin_m6 dmin_m3
-    uv run cli/dmin_tables.py compare dmin_s_matched dmin_s_handler --base dmin_s_base
+    uv run cli/dmin_tables.py compare dmin_s_matched dmin_s_handler dmin_s_ring --base dmin_s_base
+    uv run cli/dmin_tables.py compare dmin_f99_s_matched dmin_f99_s_ring --base dmin_f99_s_base
+    uv run cli/campaign.py run --protocol dmin_m3 --workers 20   # a finished run: adds only missing cells
     uv run python docs/science/design_version2/figures/make_figures.py
     uv run python docs/science/design_version2/figures/make_result_figures.py
 
-Results are bit-identical on one machine and agree within a tolerance across machines, because the
-dynamics are chaotic.
+All tables are collected in results_tables.md beside this report. Results are bit-identical on one
+machine and agree within a tolerance across machines, because the dynamics are chaotic.
 
 ## References
 
@@ -811,30 +984,41 @@ shepherding problem: heuristics for herding autonomous, interacting agents. J. R
 
 ## Appendix A. Record of runs
 
-"Open at cap" counts cells still undecided after 200 seeds. dmin_m12 was the only run that also
-spent seeds on comparing finish times between team sizes; 32 of its 36 open cells were open only on
-that comparison and 4 on reliability. A cell count above 180 means midpoint team sizes were added.
+"Open at cap" counts cells still undecided on reliability after 200 seeds. A cell count above the
+grid (180 main, 48 sensitivity, 144 gap) means midpoint team sizes were added, most of them in the
+top-up of 2026-10-22 between a cell open at the cap and a decided neighbour. dmin_m12 was the only
+run that also spent seeds on comparing finish times between team sizes. Trials include the top-up;
+hours are those of the first run.
 
 | Protocol | Trials | Cells | Decided | Open at cap | Errors | Hours |
 |---|---|---|---|---|---|---|
-| dmin_m12 | 17220 | 183 | 147 | 36 | 0 | 1.24 |
-| dmin_m6 | 11625 | 180 | 165 | 15 | 0 | 0.41 |
-| dmin_m3 | 9130 | 181 | 178 | 3 | 0 | 0.17 |
+| dmin_m12 | 17220 | 183 | 179 | 4 | 0 | 1.24 |
+| dmin_m6 | 13470 | 191 | 170 | 21 | 0 | 0.41 |
+| dmin_m3 | 9530 | 183 | 178 | 5 | 0 | 0.17 |
 | dmin_f99_m12 | 11100 | 180 | 178 | 2 | 0 | 0.41 |
-| dmin_f99_m6 | 12390 | 180 | 171 | 9 | 0 | 0.49 |
-| dmin_f99_m3 | 10670 | 181 | 174 | 7 | 0 | 0.27 |
+| dmin_f99_m6 | 14240 | 191 | 174 | 17 | 0 | 0.49 |
+| dmin_f99_m3 | 11140 | 185 | 177 | 8 | 0 | 0.27 |
+| dmin_fat | 8660 | 181 | 179 | 2 | 0 | 0.22 |
+| dmin_f99_fat | 8670 | 184 | 183 | 1 | 0 | 0.23 |
 | dmin_kubo | 1080 | 18 | 18 | 0 | 0 | 0.08 |
-| dmin_s_base | 3690 | 48 | 38 | 10 | 0 | 0.21 |
-| dmin_s_matched | 3690 | 48 | 33 | 15 | 0 | 0.09 |
-| dmin_s_handler | 2370 | 48 | 46 | 2 | 0 | 0.10 |
-| dmin_s_ring | 3790 | 49 | 39 | 10 | 0 | 0.21 |
-| dmin_s_goal | 2320 | 49 | 46 | 3 | 0 | 0.09 |
-| dmin_s_gap | 10830 | 145 | 121 | 24 | 0 | 0.58 |
+| dmin_s_base | 4850 | 55 | 42 | 13 | 0 | 0.21 |
+| dmin_s_matched | 4090 | 50 | 33 | 17 | 0 | 0.09 |
+| dmin_s_handler | 2450 | 49 | 47 | 2 | 0 | 0.10 |
+| dmin_s_ring | 4470 | 52 | 40 | 12 | 0 | 0.23 |
+| dmin_s_goal | 2590 | 51 | 48 | 3 | 0 | 0.09 |
+| dmin_s_gap | 12880 | 161 | 133 | 28 | 0 | 0.58 |
 | dmin_s_dogspeed | 2620 | 50 | 49 | 1 | 0 | 0.11 |
 | dmin_f99_s_base | 3360 | 48 | 46 | 2 | 0 | 0.16 |
-| dmin_f99_s_matched | 3790 | 48 | 44 | 4 | 0 | 0.16 |
+| dmin_f99_s_matched | 3980 | 50 | 46 | 4 | 0 | 0.16 |
+| dmin_f99_s_handler | 5560 | 54 | 41 | 13 | 0 | 0.40 |
+| dmin_f99_s_ring | 2990 | 48 | 47 | 1 | 0 | 0.14 |
+| dmin_f99_s_goal | 4940 | 54 | 48 | 6 | 0 | 0.27 |
+| dmin_f99_s_gap | 11740 | 151 | 135 | 16 | 0 | 0.58 |
 | dmin_f99_s_dogspeed | 3110 | 48 | 45 | 3 | 0 | 0.16 |
-| total | 112785 | | | | 0 | |
+| total | 164740 | | | | 0 | |
+
+A first run of the ring start with full circles (3,790 trials) put a dog inside the goal at
+N >= 200 and is kept in results/dmin_s_ring_dog_in_goal but not used.
 
 ## Appendix B. Pilot
 
@@ -865,9 +1049,9 @@ runs agrees within 1%, so the goal and deadlines are the same.
 |---|---|---|---|---|---|---|
 | wide 100 | 1.00 | 1.00 | 205 | 1.00 | 1.00 | 207 |
 | wide 200 | 0.94 | 1.00 | 268 | 1.00 | 1.00 | 277 |
-| wide 400 | 0.83 | 1.00 | 426 | 1.00 | 1.00 | 442 |
+| wide 400 | 0.85 | 1.00 | 427 | 1.00 | 1.00 | 442 |
 | outlier_rich 100 | 0.99 | 1.00 | 210 | 1.00 | 1.00 | 213 |
-| outlier_rich 200 | 0.83 | 0.98 | 276 | 1.00 | 1.00 | 283 |
+| outlier_rich 200 | 0.83 | 0.99 | 276 | 1.00 | 1.00 | 283 |
 | outlier_rich 400 | 0.68 | 0.99 | 460 | 1.00 | 1.00 | 448 |
 
 At wide N = 400 with 12 dogs, the median strict success takes 876 s with the faster dog and 444 s

@@ -5,7 +5,7 @@
 [![Giấy phép: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Kiểm thử](https://img.shields.io/badge/tests-242%20passed-brightgreen.svg)](tests/)
-[![Lượt mô phỏng](https://img.shields.io/badge/simulated%20trials-112%2C785-success.svg)](results/)
+[![Lượt mô phỏng](https://img.shields.io/badge/simulated%20trials-164%2C740-success.svg)](results/)
 
 **HerdSim** là một nền tảng mô phỏng đa tác tử và phòng thí nghiệm thực nghiệm phục vụ nghiên cứu hành vi chăn dắt đàn tập thể. Nền tảng tập trung giải quyết câu hỏi nền tảng trong lĩnh vực sinh học hành vi và robot bầy đàn phỏng sinh học:
 
@@ -13,7 +13,7 @@
 
 Nếu thời gian là vô hạn, một chú chó chăn dắt duy nhất cuối cùng cũng có thể thu gom và dẫn dắt hầu hết mọi bầy cừu bằng cách tuần tự đuổi theo từng cá thể lạc đàn. Tuy nhiên, khi chịu áp lực thời hạn hữu hạn, việc chăn dắt trở thành một bài toán phối hợp tập thể chủ động: các tác tử phải phân công song song việc thu gom các cá thể tản mác, ngăn chặn bầy đàn bị vỡ cụm, và đồng thời lùa toàn bộ khối đàn mà không làm tán loạn biên hay gây ùn tắc cục bộ.
 
-HerdSim kết hợp mô hình vật lý vi mô độ trung thực cao của từng tác tử (dựa trên các mô hình của [Strömbom et al. 2014](https://doi.org/10.1098/rsif.2014.0419) và [Kubo et al. 2022](https://doi.org/10.1088/2632-072X/ac6cb4)) với tầng phân công nhiệm vụ đa chó mới, cấu trúc hình học nhiệm vụ bảo đảm tính bất biến theo quy mô, và động cơ thống kê tuần tự thích ứng (kiểm định khoảng tin cậy 99% Clopper–Pearson).
+HerdSim kết hợp mô hình vật lý vi mô độ trung thực cao của từng tác tử (dựa trên các mô hình của [Strömbom et al. 2014](https://doi.org/10.1098/rsif.2014.0719) và [Kubo et al. 2022](https://doi.org/10.1007/s10015-021-00726-7)) với tầng phân công nhiệm vụ đa chó mới, cấu trúc hình học nhiệm vụ bảo đảm tính bất biến theo quy mô, và động cơ thống kê tuần tự thích ứng (kiểm định khoảng tin cậy 99% Clopper–Pearson).
 
 ![Diễn biến một lượt mô phỏng thực tế](docs/figures/fig17_trial.png)
 *Hình 1: Diễn biến của một lượt thử nghiệm mô phỏng thực tế ($N = 200$ cừu, $D = 4$ chó, bố cục xuất phát rộng wide, hạt giống 2026). Các chú chó tự động nhận diện các cá thể tản mác ở xa, thực hiện thu gom song song để hợp nhất bầy đàn, sau đó thiết lập đội hình vòng cung phía sau tâm khối bầy để lùa toàn bộ đàn cừu vào mục tiêu hình tròn.*
@@ -39,9 +39,9 @@ HerdSim kết hợp mô hình vật lý vi mô độ trung thực cao của từ
 
 ## Phát hiện khoa học cốt lõi
 
-Qua 17 giao thức thực nghiệm hoàn thành **112.785 lượt mô phỏng độc lập** (không xảy ra bất kỳ lỗi thực thi hay lỗi mô phỏng nào), HerdSim đã lập bản đồ ranh giới mở rộng $D_{\min}(N)$ cho $N \in [25, 400]$ qua nhiều bố cục, mốc thời hạn và các biến thể phối hợp khác nhau.
+Qua 23 giao thức thực nghiệm hoàn thành **164.740 lượt mô phỏng độc lập** (không xảy ra bất kỳ lỗi thực thi hay lỗi mô phỏng nào), HerdSim đã lập bản đồ ranh giới mở rộng $D_{\min}(N)$ cho $N \in [25, 400]$ qua nhiều bố cục, mốc thời hạn và các biến thể phối hợp khác nhau.
 
-Toàn bộ các bảng dữ liệu thực nghiệm được trích xuất trực tiếp từ thư mục `results/` thông qua tập lệnh [`cli/dmin_tables.py`](cli/dmin_tables.py) và được tổng hợp trong [`docs/report/d_min_report_vi.md`](docs/report/d_min_report_vi.md).
+Toàn bộ các bảng dữ liệu thực nghiệm được trích xuất trực tiếp từ thư mục `results/` thông qua tập lệnh [`cli/dmin_tables.py`](cli/dmin_tables.py) và được tổng hợp trong [`docs/report/results_tables.md`](docs/report/results_tables.md); báo cáo đầy đủ là [`docs/report/d_min_report_vi.md`](docs/report/d_min_report_vi.md). Một ô như "3-8" là một khoảng: $D = 8$ là đội tin cậy nhỏ nhất, nhưng các $D$ từ 3 trở lên vẫn chưa ngã ngũ ở 200 hạt giống, nên $D_{\min}$ thực nằm trong $[3, 8]$.
 
 ![Mức độ mở rộng D_min theo quy mô bầy N qua các thời hạn và bố cục](docs/figures/fig20_dmin_vs_n.png)
 *Hình 2: Quy luật mở rộng thực nghiệm của D_min theo quy mô bầy đàn N tại ba mốc thời hạn chuẩn hóa (12×, 6× và 3× thời gian lùa tiêu chuẩn). Vòng tròn biểu thị tiêu chí thành công nghiêm ngặt (100% cừu nằm trong đích); hình vuông biểu thị tiêu chí 99% (f99). Đối với bầy cừu co cụm (compact), D_min = 1 ở mọi quy mô. Đối với bầy phân tán, D_min tăng trưởng dưới tuyến tính theo N và chịu sự chi phối mạnh mẽ của áp lực thời hạn.*
@@ -52,18 +52,24 @@ Khi bầy cừu khởi đầu ở trạng thái không gian liên kết chặt c
 ### 2. Bầy cừu phân tán tăng trưởng dưới tuyến tính theo $N$
 Trên các bố cục phân tán (`wide`, `split`, `outlier_rich`), đội chó phải dành thời gian ban đầu để thu gom các cá thể tản mác ở xa trước khi có thể tiến hành lùa đàn:
 - Ở các thời hạn rộng rãi ($12\times$ thời gian lùa), $D_{\min}$ duy trì ở mức 1 cho $N \le 100$, và chỉ tăng nhẹ lên 2 hoặc 3 chó khi $N = 400$.
-- Trong không gian log-log ($\log_2 D_{\min}$ so với $\log_2 N$), độ dốc tăng trưởng của các bố cục phân tán dao động trong khoảng **0,25 đến 0,45**, khẳng định quy luật mở rộng dưới tuyến tính mạnh mẽ: tăng gấp đôi quy mô bầy đàn đòi hỏi số lượng chó bổ sung ít hơn nhiều so với mức gấp đôi.
+- Trong không gian log-log ($\log_2 D_{\min}$ so với $\log_2 N$), độ dốc tăng trưởng của các bố cục phân tán nằm trong khoảng **0,2 đến 0,5** ở thời hạn $12\times$ và $6\times$ (một hàng đạt 0,8): tăng gấp đôi quy mô bầy đàn chỉ đòi hỏi 0,2 đến 0,5 lần gấp đôi số chó.
 
 ### 3. Thời hạn là tham số chi phối bậc một
-Việc rút ngắn thời hạn từ $12\times$ xuống $3\times$ thời gian lùa tạo ra tác động tương đương với việc mở rộng quy mô bầy cừu lên gấp 16 lần. Tại thời hạn gấp gáp $3\times$, bầy phân tán rộng ở quy mô $N = 400$ đòi hỏi $D_{\min} = 6$ chó (theo tiêu chí 99%), và thời hạn ngặt nghèo này ngăn cản hoàn toàn việc một chú chó đơn lẻ có thể thu gom các cụm rời rạc.
+Việc rút ngắn thời hạn từ $12\times$ xuống $3\times$ thời gian lùa làm tăng $D_{\min}$ nhiều hơn cả việc tăng quy mô bầy cừu lên gấp bốn lần. Tại thời hạn $3\times$, bầy phân tán rộng ở quy mô $N = 400$ cần 5-6 chó (theo tiêu chí 99%) so với 2 chó ở $12\times$, và không có đội nào trên lưới thu gom tin cậy được các cụm rời ở $N \ge 200$.
 
 ### 4. Cơ chế cá thể rớt lại (Hiệu ứng Straggler)
 Một hiểu biết sinh học then chốt được khám phá khi đối chiếu tiêu chí thành công nghiêm ngặt (100% cừu nằm trong vòng tròn đích tại một nhịp duy nhất) với tiêu chí ngưỡng 99% ($f_{99}$):
 
 ![Cơ chế cá thể rớt lại và so sánh tiêu chí nghiêm ngặt với 99%](docs/figures/fig22_straggler.png)
-*Hình 3: Hiệu ứng cá thể rớt lại (Straggler Effect). Trái: Trong các lượt thử nghiệm sử dụng từ 6 chó trở lên (bố cục wide và outlier_rich, N thuộc {100, 200, 400}), đàn chó chạy nhanh (tốc độ 1,5) đưa được 99% bầy cừu vào đích trong hầu hết mọi lượt chạy, nhưng tỷ lệ đạt chuẩn nghiêm ngặt 100% lại sụp đổ; đàn chó chạy chậm hơn (tốc độ 1,15) không gặp phải hiện tượng này. Phải: Chuỗi thời gian của cùng một bầy cừu xuất phát (bố cục wide, N = 400, D = 16 chó, hạt giống 2). Đội chó chạy nhanh lùa đàn cừu vào đích rất sớm chỉ còn sót 1 hoặc 2 con bên ngoài, nhưng sau đó đẩy vọt toàn bộ bầy cừu ra khỏi đích trong khi quay lại truy đuổi cá thể rớt lại. Ngược lại, đội chó chạy chậm lùa bầy cừu điềm tĩnh vào đích ngay nhịp đầu tiên và hoàn thành nhiệm vụ.*
+*Hình 3: Hiệu ứng cá thể rớt lại (Straggler Effect). Trái: Trong các lượt thử nghiệm sử dụng từ 6 chó trở lên (bố cục wide và outlier_rich, N thuộc {100, 200, 400}), đàn chó chạy nhanh (tốc độ 1,5) đưa được 99% bầy cừu vào đích trong hầu hết mọi lượt chạy, nhưng tỷ lệ đạt chuẩn nghiêm ngặt 100% lại sụp đổ; đàn chó chạy chậm hơn (tốc độ 1,15) không gặp phải hiện tượng này. Phải: Chuỗi thời gian của cùng một bầy cừu xuất phát (bố cục wide, N = 400, D = 16 chó, hạt giống 2). Đội chó chạy nhanh lùa đàn cừu vào đích chỉ còn sót 1 hoặc 2 con bên ngoài, sau đó bầy bị đẩy ra khỏi đích và rất lâu sau mới quay lại. Bầy của đội chó chạy chậm ở trong đích ngay lượt đầu.*
 
-Trong chăn dắt sinh học và nông nghiệp thực tế, một cá thể cừu bướng bỉnh hoặc di chuyển chậm chạp không đại diện cho sự thất bại của cả bầy. Đánh giá theo tiêu chí $f_{99}$ loại bỏ được sự gò ép nhân tạo của đường biên đích và phản ánh chính xác các quy luật mở rộng cấu trúc thực tế của hệ thống đa tác tử.
+Hai tiêu chí đo hai điều khác nhau. Tiêu chí 99% hỏi đội chó có đưa được bầy vào đích không; tiêu chí strict còn chấm điểm việc các chó làm gì sau khi bầy đã đến, và quy tắc đội này không có bước nào cho việc đó. Trong các lượt thất bại strict, 99% đến 100% số lượt với từ 6 chó trở lên đã đưa được 99% bầy vào. Dưới tiêu chí strict, các quy ước thiết lập không có giá trị thực tế (khoảng cách xuất phát, vị trí xuất phát, bộ tham số cừu, tốc độ chó) làm $D_{\min}$ thay đổi tới sáu lần; dưới tiêu chí 99% chúng chỉ làm lệch tối đa một chó, và chỉ mục tiêu hẹp hơn mới tác động nhiều hơn. Cả hai tiêu chí được báo cáo song song. Kết quả này ủng hộ việc tách việc bầy đến đích (một tỷ lệ bầy ở bên trong) khỏi việc giữ bầy (thời gian ở bên trong, hoặc một chuồng).
+
+### 5. Sự phối hợp, không phải số lượng chó, làm $D_{\min}$ hữu hạn
+Một quy tắc đối chứng không phối hợp (FAT, mọi chó cùng đuổi con cừu xa mục tiêu nhất), chạy trên cùng nhiệm vụ, không cải thiện khi thêm chó: từ $N = 200$ nó không có đội tin cậy nào trên mọi bố cục phân tán dưới cả hai tiêu chí, và trên bầy compact ở $N = 400$ nó thất bại trong khi đội có phối hợp chỉ cần 1 chó. Các chó của nó chọn cùng một con cừu và di chuyển như các bản sao.
+
+![Quy tắc phối hợp so với FAT](docs/figures/fig26_fat.png)
+*Hình 3b: Tỷ lệ thành công theo D của strombom_multi (xanh) và FAT (cam) trên cùng nhiệm vụ, strict (nét liền) và 99% (nét đứt), thời hạn 6x.*
 
 ---
 
@@ -172,7 +178,7 @@ Một lượt thử nghiệm đánh giá tại $m = 6$ yêu cầu đội chó ph
 
 Chó xuất phát ở vị trí cách biên sau của bầy cừu 30 đơn vị, bố trí theo một trong ba hình thức thực nghiệm:
 - **`arcs` (vòng cung mặc định)**: Chó đứng cách đều nhau trên các nửa đường tròn đồng tâm phía sau bầy cừu. Chó đơn lẻ xuất phát ngay trên trục lùa đàn; các chú chó bổ sung chiếm các vị trí bọc sườn riêng biệt.
-- **`ring` (vòng tròn bao quanh)**: Chó phân bố đều trên đường tròn trọn vẹn $360^\circ$ bao quanh bầy cừu, nhằm kiểm tra xem việc bao vây tứ phía hỗ trợ hay cản trở việc thu gom ban đầu.
+- **`ring` (vòng tròn bao quanh)**: Chó phân bố đều trên đường tròn bao quanh bầy cừu, chừa ra hình nón (nhìn từ tâm bầy) chứa mục tiêu, nhằm kiểm tra xem việc bao vây hỗ trợ hay cản trở việc thu gom ban đầu. Một đường tròn đầy đủ đặt một chó ngay trong mục tiêu với mọi $D$ chẵn từ $N = 200$; lượt chạy ring đầu tiên đó được giữ trong `results/dmin_s_ring_dog_in_goal` và không được sử dụng.
 - **`handler` (trạm người điều khiển)**: Toàn bộ đàn chó cùng xuất phát từ một điểm duy nhất phía sau bầy cừu (mô phỏng việc thả đàn chó từ vị trí của người chăn dắt; tại $t = 0$ toàn bộ chó bắt đầu trùng tọa độ tại điểm này trước khi tỏa ra).
 
 ![Các vị trí xuất phát của chó](docs/figures/fig8_dog_starts.png)
@@ -189,7 +195,7 @@ HerdSim hiện thực hóa các tương tác vật lý vi mô dựa trên tài l
 ![Quy tắc phối hợp đội ngũ đa chó](docs/figures/fig3_team_rule.png)
 *Hình 11: Cơ chế phối hợp đa chó trong quy tắc strombom_multi. Trái: Phân công thu gom cá thể tản mác. D chú chó được ghép cặp với D cá thể cừu xa nhất thông qua thuật toán gán trọng số khoảng cách Euclidean tối thiểu (tổng quãng đường di chuyển ngắn nhất). Giữa: Đội hình lùa đàn song song. Chó chiếm các vị trí góc cách đều nhau trên vòng cung lùa đàn bao trọn bề rộng bầy cừu, duy trì thứ tự góc để không cắt chéo đường đi. Phải: Hòa trộn lực đẩy đơn vị. Nhiều chú chó áp sát một con cừu kết hợp ảnh hưởng của chúng thành một vector đẩy đơn vị chuẩn hóa.*
 
-### 1. Động lực học chuyển động của cừu ([Strömbom et al. 2014](https://doi.org/10.1098/rsif.2014.0419))
+### 1. Động lực học chuyển động của cừu ([Strömbom et al. 2014](https://doi.org/10.1098/rsif.2014.0719))
 
 Được xây dựng từ các quan sát sinh học thực nghiệm về hành vi bầy đàn dưới áp lực kẻ săn mồi, hành vi của cừu được điều khiển bởi một máy trạng thái kích hoạt theo mối đe dọa:
 
@@ -267,16 +273,17 @@ Cơ chế này cho phép đội chó phối hợp điều hướng và bao quát
 
 Nhằm kiểm chứng chặt chẽ câu hỏi khoa học: *Liệu sự phối hợp đa tác tử (multi-agent coordination) có thực sự bắt buộc hay không, hay chỉ cần tăng số lượng chó hoạt động độc lập là đủ?*, HerdSim đề xuất và thiết kế mô hình triệt tiêu đối chứng **FAT (Farthest-Agent Targeting)** (`dog_controller="fat"`).
 
-- **Mối liên hệ với các phương pháp trước**: FAT kế thừa cơ chế chọn mục tiêu từ [Kubo et al. (2022)](https://doi.org/10.1088/2632-072X/ac6cb4) (trong đó mỗi chú chó nhắm vào cá thể cừu ở xa mục tiêu nhất, tiếp cận điểm cách con cừu đó một khoảng $r_a$) và thực hiện bằng bước di chuyển rời rạc của [Strömbom et al. (2014)](https://doi.org/10.1098/rsif.2014.0419).
+- **Mối liên hệ với các phương pháp trước**: FAT kế thừa cơ chế chọn mục tiêu từ [Kubo et al. (2022)](https://doi.org/10.1007/s10015-021-00726-7) (trong đó mỗi chú chó nhắm vào cá thể cừu ở xa mục tiêu nhất, tiếp cận điểm cách con cừu đó một khoảng $r_a$) và thực hiện bằng bước di chuyển rời rạc của [Strömbom et al. (2014)](https://doi.org/10.1098/rsif.2014.0719).
 - **Thiết kế triệt tiêu (ablation)**: Điểm mấu chốt là FAT cố ý loại bỏ **cả hai** cơ chế phân tách không gian đa tác tử:
-  1. Không có tầng phân công mục tiêu (Hungarian matching) và sắp xếp vòng cung góc của `strombom_multi`.
-  2. Không có trường lực đẩy né tránh lẫn nhau giữa các chú chó ($1/r^3$) như trong Kubo et al. (2022).
-- **Hệ quả và cơ chế thất bại**: Do toàn bộ các chú chó cùng quan sát trạng thái bầy cừu và thực thi thuật toán giống hệt nhau, mọi chú chó đều chọn chung đúng một con cừu duy nhất ($\arg\max_i \lVert \mathbf{x}_i - \mathbf{x}_{\text{goal}} \rVert$). Khi cùng áp sát cá thể này, đàn chó dồn cục lại phía sau con cừu đó (dẫn đến độ trùng lặp `dog_overlap` rất cao). Hệ quả là cả đội ngũ $D$ chú chó bị suy biến thành một cá thể duy nhất, hoàn toàn bất lực trong việc thu gom các bầy cừu bị tản mác. Điều này làm nổi bật vai trò cốt lõi của các tầng phối hợp mà HerdSim triển khai trong `strombom_multi`.
+  1. Không có phép gán cừu tản mác (tổng quãng đường nhỏ nhất) và các vị trí lùa của `strombom_multi`.
+  2. Không có lực đẩy giữa các chú chó như trong Kubo et al. (2022).
+- **Cùng nhiệm vụ**: $R_f$, vốn quyết định mục tiêu và quãng lùa, được hiệu chuẩn cho FAT bằng người chăn dắt của bài báo trên cùng bầy cừu (`calibrate_as: strombom_multi`), nên `dmin_fat` chạy đúng nhiệm vụ của `dmin_m6` và chỉ khác quy tắc chó.
+- **Kết quả**: mọi chó chọn cùng một con cừu và di chuyển như các bản sao (trên bầy compact ở $N \ge 200$, 73% đến 82% số chó FAT có một chó khác trong phạm vi 2 đơn vị), và tỷ lệ thành công không tăng theo $D$. Từ $N = 200$, FAT không có đội tin cậy trên mọi bố cục phân tán dưới cả hai tiêu chí.
 
 ![Mô hình đối chứng không phối hợp FAT](docs/figures/fig4_fat.png)
 *Hình 12: Mô hình đối chứng không phối hợp FAT (Farthest-Agent Targeting). Trái: Hình học của hành vi lùa không phối hợp khi toàn bộ chó cùng săn đuổi con cừu duy nhất ở xa mục tiêu nhất. Phải: Do thiếu cơ chế phân công mục tiêu và lực đẩy giãn cách, đàn chó co cụm lại thành một đám đông hỗn loạn phía sau cùng một cá thể tản mác, dẫn đến độ trùng lặp dog_overlap rất cao và thất bại trong việc gom bầy phân tán.*
 
-#### Kiến trúc trường lực liên tục đa mô hình: `kubo` ([Kubo et al. 2022](https://doi.org/10.1088/2632-072X/ac6cb4))
+#### Kiến trúc trường lực liên tục đa mô hình: `kubo` ([Kubo et al. 2022](https://doi.org/10.1007/s10015-021-00726-7))
 Để chứng minh rằng các quy luật mở rộng quy mô không phải là sản phẩm phụ của quy tắc suy nghiệm rời rạc Strömbom, HerdSim tích hợp mô hình trường thế năng liên tục hoàn chỉnh của Kubo et al. (2022), bao gồm cả **cừu Kubo** và **chó Kubo**:
 - **Động lực học cừu Kubo**: Vận tốc cừu được cập nhật liên tục qua 4 lực cộng dồn trong tầm nhìn của cừu:
   1. *Lực đẩy giữa các cừu* ($1/r^2$): Ngăn ngừa va chạm và giẫm đạp.
@@ -333,11 +340,14 @@ Các quyết định thống kê được quản trị bởi mô-đun [`analysis
 Để khẳng định các phát hiện phản ánh bản chất động lực học tập thể thay vì lựa chọn tham số ngẫu nhiên, HerdSim thực hiện các lượt quét độ nhạy có hệ thống:
 
 ![Phân tích độ nhạy của D_min qua các biến thể thực nghiệm](docs/figures/fig24_sensitivity.png)
-*Hình 15: Phân tích độ nhạy của D_min qua các biến thể thực nghiệm (N thuộc {100, 200, 400}, bố cục wide và outlier_rich tại mốc thời hạn 6× thời gian lùa). Các hàng phía trên vạch ngăn cách kiểm tra tiêu chí nghiêm ngặt; các hàng phía dưới kiểm tra tiêu chí 99% (f99). Các hàng cơ sở ("strict: base (speed 1.5)" và "99%: base (speed 1.5)") sử dụng các tham số mặc định: tốc độ chó 1,5, xuất phát dạng vòng cung arcs, khoảng cách lùi gap 30, và bán kính đích 1,9 R_f.*
+*Hình 15: Phân tích độ nhạy của D_min qua các biến thể thực nghiệm (N thuộc {100, 200, 400}, bố cục wide và outlier_rich tại mốc thời hạn 6× thời gian lùa). Các hàng phía trên vạch ngăn cách kiểm tra tiêu chí nghiêm ngặt; các hàng phía dưới kiểm tra tiêu chí 99% (f99). Các hàng cơ sở ("strict: base" và "99%: base") sử dụng các tham số mặc định: tốc độ chó 1,5, xuất phát dạng vòng cung arcs, khoảng cách lùi gap 30, và bán kính đích 1,9 R_f. Ô sáng là chưa ngã ngũ: một khoảng "lo-hi" hoặc một cận dưới "[n]".*
 
-1. **Hình thức xuất phát**: Thả đàn chó từ một trạm tập trung (`handler`) đòi hỏi ít chó hơn so với xuất phát bao quanh (`ring`), vì những chú chó ở phía mục tiêu trong cấu hình vòng tròn vô tình dọa bầy cừu chạy ngược hướng trước khi kịp vào vị trí lùa.
-2. **Vận tốc của chó (Cơ sở 1,5 so với 1,15)**: Cấu hình cơ sở chạy ở tốc độ chó $v_{\text{dog}} = 1,5$, trong khi cấu hình thử nghiệm khảo sát tốc độ giảm xuống 1,15. Trái với trực giác ban đầu, đàn chó chạy chậm hơn ($v_{\text{dog}} = 1,15$) đạt $D_{\min}$ thấp hơn rõ rệt trên bầy đàn lớn dưới tiêu chí nghiêm ngặt (ví dụ trên bố cục outlier_rich $N = 400$, $D_{\min}$ chuyển từ thất bại hoàn toàn ở tốc độ 1,5 sang đạt $D_{\min} = 6$ ở tốc độ 1,15). Chó chạy chậm di chuyển điềm tĩnh hơn, tránh được quán tính làm bầy cừu vọt qua khỏi vòng đích và bỏ rơi các cá thể tụt lại phía sau.
-3. **Đối chiếu thực địa GPS**: Hiệu chuẩn cừu theo dữ liệu định vị thực địa GPS ($r_a = 1,0$, tầm tương tác 75 m, nhiễu 0,1) làm giảm một nửa khoảng cách thu gom. Dưới tiêu chí nghiêm ngặt 100%, ngưỡng này làm giảm tỷ lệ thành công; tuy nhiên dưới tiêu chí $f_{99}$, bầy cừu thực địa được lùa hiệu quả hơn cả cấu hình cơ sở.
+Mọi biến thể được chạy dưới cả hai tiêu chí. Dưới tiêu chí strict các biến thể phân tán tới sáu lần; dưới tiêu chí 99% mọi biến thể trừ mục tiêu hẹp đều nằm trong phạm vi một chó so với cơ sở.
+
+1. **Hình thức xuất phát**: Dưới tiêu chí strict, với từ 8 chó trở lên ở $N = 400$, ring cho tỷ lệ thành công cao nhất và trạm handler thấp nhất. Dưới tiêu chí 99%, cả ba cho cùng $D_{\min}$ trong phạm vi các khoảng; handler vẫn chậm nhất vì mọi chó rời từ một điểm.
+2. **Vận tốc của chó (Cơ sở 1,5 so với 1,15)**: Dưới tiêu chí strict, chó chậm cần ít chó hơn trên bầy lớn (outlier_rich $N = 400$: 6 so với không có). Cả hai tốc độ đưa 99% bầy vào đích cùng lúc, và dưới tiêu chí 99% lợi thế này biến mất. Khác biệt nằm ở bước con cừu cuối cùng, không ở việc lùa đàn.
+3. **Bộ tham số thực địa**: Bộ tham số đối chiếu thực địa của bài báo ($r_a = 1,0$, khoảng cách phản xạ 75, nhiễu 0,1) làm giảm một nửa khoảng cách thu gom. Dưới tiêu chí strict đây là thiết lập khó nhất; dưới tiêu chí 99% nó cần số chó bằng hoặc ít hơn cơ sở.
+4. **Kích thước mục tiêu**: Mục tiêu $1,5 R_f$ là biến thể duy nhất cần nhiều chó hơn dưới cả hai tiêu chí (99%: 5-6 chó ở wide $N = 400$ so với 2-3).
 
 ---
 
@@ -355,7 +365,7 @@ cd HerdSim
 # Cài đặt môi trường phát triển và các gói phụ thuộc
 make install     # uv sync --extra dev
 
-# Chạy kiểm tra toàn diện (Ruff linter + kiểm tra kiểu basedpyright + 242 bài kiểm thử)
+# Chạy kiểm tra toàn diện (Ruff linter + kiểm tra kiểu basedpyright + 268 bài kiểm thử)
 make check
 
 # Chạy các chiến dịch thu nhỏ để kiểm chứng quy chuẩn (~1 phút)
@@ -438,7 +448,7 @@ HerdSim/
 |-- protocols/configs/      # Cấu hình chuẩn mặc định và định nghĩa các giao thức thực nghiệm
 |-- cli/                    # Công cụ giao diện dòng lệnh (campaign, run_queue, dmin_tables)
 |-- docs/                   # Kế hoạch nghiên cứu, tài liệu kiến trúc và tập lệnh vẽ đồ thị
-|-- results/                # Dữ liệu thực nghiệm lưu trữ (hơn 112 nghìn lượt thử nghiệm)
+|-- results/                # Dữ liệu thực nghiệm lưu trữ (hơn 164 nghìn lượt thử nghiệm)
 `-- tests/                  # Bộ kiểm thử đơn vị và bộ kiểm chứng hồi quy chuẩn
 ```
 
@@ -448,7 +458,7 @@ HerdSim/
 
 HerdSim áp dụng quy trình kiểm chứng nghiêm ngặt ở mọi tầng kiến trúc:
 
-- **Kiểm thử đơn vị & Bất biến vật lý** (`make test`, 242 bài kiểm thử, ~24 giây):
+- **Kiểm thử đơn vị & Bất biến vật lý** (`make test`, 268 bài kiểm thử, ~24 giây):
   Kiểm tra tính bảo toàn vật lý của các vector chuyển động cừu, tính chính xác của các công thức khoảng cách Euclidean, và tính độc lập cô lập của các luồng số ngẫu nhiên.
 - **Kiểm thử hồi quy chuẩn vàng** ([`tests/sim/test_golden.py`](tests/sim/test_golden.py)):
   Cố định chính xác quỹ đạo dấu phẩy động của các lượt thử nghiệm tham chiếu qua nhiều hạt giống để ngăn chặn việc thay đổi vô tình trong mô hình vật lý.
@@ -463,8 +473,8 @@ HerdSim áp dụng quy trình kiểm chứng nghiêm ngặt ở mọi tầng ki�
 
 ## Tài liệu tham khảo
 
-1. **Strömbom, D., et al. (2014)**. *Solving the shepherding problem: heuristics for herding autonomous, interacting agents*. Journal of the Royal Society Interface, 11(100), 20140419. [DOI: 10.1098/rsif.2014.0419](https://doi.org/10.1098/rsif.2014.0419)
-2. **Kubo, T., et al. (2022)**. *A force-based collective shepherding algorithm for multiple agents*. Bioinspiration & Biomimetics, 17(4), 046001. [DOI: 10.1088/2632-072X/ac6cb4](https://doi.org/10.1088/2632-072X/ac6cb4)
+1. **Strömbom, D., et al. (2014)**. *Solving the shepherding problem: heuristics for herding autonomous, interacting agents*. Journal of the Royal Society Interface, 11(100), 20140719. [DOI: 10.1098/rsif.2014.0719](https://doi.org/10.1098/rsif.2014.0719)
+2. **Kubo, M., Tashiro, M., Sato, H., Yamaguchi, A. (2022)**. *Herd guidance by multiple sheepdog agents with repulsive force*. Artificial Life and Robotics, 27, 416-427. [DOI: 10.1007/s10015-021-00726-7](https://doi.org/10.1007/s10015-021-00726-7)
 3. **Kế hoạch và Thiết kế nghiên cứu toàn diện**: [`docs/science/design_version2/plan_dmin.md`](docs/science/design_version2/plan_dmin.md)
 4. **Báo cáo kết quả nghiên cứu tiếng Việt**: [`docs/report/d_min_report_vi.md`](docs/report/d_min_report_vi.md)
 5. **Báo cáo kết quả nghiên cứu tiếng Anh**: [`docs/report/d_min_report.md`](docs/report/d_min_report.md)

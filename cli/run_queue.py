@@ -51,6 +51,12 @@ QUEUE = (
     "dmin_f99_s_base",
     "dmin_f99_s_matched",
     "dmin_f99_s_dogspeed",
+    "dmin_f99_s_handler",
+    "dmin_f99_s_ring",
+    "dmin_f99_s_goal",
+    "dmin_f99_s_gap",
+    "dmin_fat",
+    "dmin_f99_fat",
 )
 LOG = RESULTS_ROOT / "queue_log.jsonl"
 

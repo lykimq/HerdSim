@@ -47,9 +47,16 @@ def groups_table(folder: Path) -> pd.DataFrame:
 
 
 def dmin_text(row: pd.Series) -> str:
-    """'4' decided, '[2]' undecided with D_min_low 2, 'none on grid', or '-' with no data."""
+    """The true D_min as far as the curve decides it.
+
+    '4' when D_min is decided (every smaller D is unreliable), '2-4' when D = 4 is the smallest
+    reliable D but a D from 2 up is still undecided, '[2]' when no D is reliable yet and D_min
+    is 2 or more, 'none on grid' when every D is unreliable, '-' with no data.
+    """
     if pd.notna(row["d_min"]):
-        return str(int(row["d_min"]))
+        high = int(row["d_min"])
+        low = int(row["d_min_low"]) if pd.notna(row["d_min_low"]) else high
+        return str(high) if low >= high else f"{low}-{high}"
     if bool(row.get("d_min_above_grid", False)):
         return "none on grid"
     if pd.notna(row["d_min_low"]):
@@ -57,8 +64,18 @@ def dmin_text(row: pd.Series) -> str:
     return "-"
 
 
+def one_level(table: pd.DataFrame) -> pd.DataFrame:
+    """``table`` itself; raises when it holds several factor levels, which a table keyed by
+    layout and N would mix (a factor protocol such as dmin_s_gap is shown with ``compare``)."""
+    if "factors" in table and table["factors"].nunique() > 1:
+        levels = sorted(table["factors"].unique())
+        raise ValueError(f"several factor levels {levels}; use compare, which keeps them apart")
+    return table
+
+
 def layout_by_n(table: pd.DataFrame, layouts: tuple[str, ...] | None = None) -> pd.DataFrame:
     """The plan's section 8.2 table: layouts as rows, N as columns, one text entry per curve."""
+    table = one_level(table)
     shown = table.assign(text=table.apply(dmin_text, axis=1))
     wide = shown.pivot_table(index="layout", columns="n", values="text", aggfunc="first")
     if layouts is not None:
@@ -100,7 +117,7 @@ def growth_table(table: pd.DataFrame) -> pd.DataFrame:
     is still open on reliability.
     """
     rows = []
-    for layout, part in table.groupby("layout", sort=False):
+    for layout, part in one_level(table).groupby("layout", sort=False):
         used, above, open_ = [], [], []
         for _, row in part.sort_values("n").iterrows():
             b = bracket(row)
@@ -157,7 +174,8 @@ def layout_against_n(table: pd.DataFrame) -> dict[str, float]:
     over the N values and over the layouts respectively. Descriptive: layouts span 4 levels and
     N spans 16 times, so it states which axis moves D_min more here and says nothing more.
     """
-    mid = {(str(r["layout"]), int(r["n"])): midpoint(r) for _, r in table.iterrows()}
+    rows = one_level(table).iterrows()
+    mid = {(str(r["layout"]), int(r["n"])): midpoint(r) for _, r in rows}
     mid = {k: v for k, v in mid.items() if v is not None}
 
     def spread(values: list[float]) -> float | None:
@@ -219,14 +237,31 @@ def dips(cells: pd.DataFrame, groups: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def run_record(queue_log: Path) -> pd.DataFrame:
-    """The last queue_log entry of each protocol: the plan's section 8.1 table."""
+def run_record(queue_log: Path, results_root: Path | None = None) -> pd.DataFrame:
+    """The last queue_log entry of each protocol: the plan's section 8.1 table.
+
+    With ``results_root``, the counts come from each folder's status.json where it exists, so
+    a folder resumed outside the queue (a top-up run) shows its current trials and cells; the
+    finish time and hours stay those of the queue run.
+    """
     if not queue_log.exists():
         return pd.DataFrame()
     entries = [json.loads(line) for line in queue_log.read_text().splitlines() if line.strip()]
     last: dict[str, dict[str, Any]] = {}
     for entry in entries:
         last[entry["protocol"]] = entry
+    current = {
+        "trials": "trials_done",
+        "cells": "cells",
+        "cells_needing_seeds": "cells_needing_seeds",
+        "cells_at_max_seeds_undecided": "cells_at_max_seeds_undecided",
+        "trial_errors": "trial_errors",
+    }
+    for protocol, entry in last.items():
+        status = results_root / protocol / "status.json" if results_root else None
+        if status is not None and status.exists():
+            found = json.loads(status.read_text())
+            last[protocol] = {**entry, **{k: found[v] for k, v in current.items() if v in found}}
     cols = [
         "protocol",
         "finished",
@@ -253,6 +288,7 @@ __all__ = [
     "layout_against_n",
     "layout_by_n",
     "midpoint",
+    "one_level",
     "parse_group_key",
     "read_table",
     "run_record",

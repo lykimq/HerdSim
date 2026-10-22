@@ -1,0 +1,8 @@
+# The start gap sweep (dmin_s_gap.yaml) with success at 99 percent of the flock in the goal.
+# Compare with dmin_f99_s_base.
+
+protocol_id: dmin_f99_s_gap
+output: results/dmin_f99_s_gap
+extends: dmin_s_gap.yaml
+
+success_fraction: 0.99

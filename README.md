@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Tests](https://img.shields.io/badge/tests-242%20passed-brightgreen.svg)](tests/)
-[![Trials](https://img.shields.io/badge/simulated%20trials-112%2C785-success.svg)](results/)
+[![Trials](https://img.shields.io/badge/simulated%20trials-164%2C740-success.svg)](results/)
 
 **HerdSim** is a multi-agent simulation framework and empirical laboratory for collective shepherding. It investigates a fundamental question in bio-inspired swarm robotics and behavioural biology:
 
@@ -13,7 +13,7 @@
 
 Given unbounded time, a single shepherd can eventually collect and steer almost any flock by sequentially chasing stray individuals. Under finite deadlines, however, shepherding becomes an active collective coordination problem: agents must parallelize the collection of dispersed outliers, prevent the flock from fracturing, and drive the aggregate without causing boundary scattering or overcrowding.
 
-HerdSim couples high-fidelity microscopic agent physics (based on the models of [Strömbom et al. 2014](https://doi.org/10.1098/rsif.2014.0419) and [Kubo et al. 2022](https://doi.org/10.1088/2632-072X/ac6cb4)) with a novel multi-dog assignment layer, rigorous scale-invariant task geometry, and an adaptive sequential statistical engine (99% Clopper–Pearson confidence testing).
+HerdSim couples high-fidelity microscopic agent physics (based on the models of [Strömbom et al. 2014](https://doi.org/10.1098/rsif.2014.0719) and [Kubo et al. 2022](https://doi.org/10.1007/s10015-021-00726-7)) with a novel multi-dog assignment layer, rigorous scale-invariant task geometry, and an adaptive sequential statistical engine (99% Clopper–Pearson confidence testing).
 
 ![Anatomy of a real simulation trial](docs/figures/fig17_trial.png)
 *Figure 1: Evolution of a real simulation trial (N = 200 sheep, D = 4 dogs, wide start, seed 2026). Dogs autonomously identify distant outliers, execute parallel collection sweeps to consolidate the flock, and subsequently establish an arc formation behind the flock centroid to drive the collective into the circular goal.*
@@ -39,9 +39,9 @@ HerdSim couples high-fidelity microscopic agent physics (based on the models of 
 
 ## Core Scientific Findings
 
-Across 17 executed campaign protocols encompassing **112,785 individual simulation trials** (with zero execution or simulation errors), HerdSim systematically mapped the scaling frontier D_min(N) for N in [25, 400] across multiple layouts, deadlines, and coordination variants.
+Across 23 executed campaign protocols encompassing **164,740 individual simulation trials** (with zero execution or simulation errors), HerdSim systematically mapped the scaling frontier D_min(N) for N in [25, 400] across multiple layouts, deadlines, and coordination variants. The full write-up is [`docs/report/d_min_report.md`](docs/report/d_min_report.md).
 
-All empirical data tables are produced directly from `results/` by [`cli/dmin_tables.py`](cli/dmin_tables.py) and summarized in [`docs/reports/results_tables.md`](docs/reports/results_tables.md).
+All empirical data tables are produced directly from `results/` by [`cli/dmin_tables.py`](cli/dmin_tables.py) and summarized in [`docs/report/results_tables.md`](docs/report/results_tables.md). An entry such as "3-8" is a bracket: D = 8 is the smallest reliable team, but D from 3 up stayed undecided at 200 seeds, so the true D_min lies in [3, 8].
 
 ![D_min scaling against flock size N across deadlines and layouts](docs/figures/fig20_dmin_vs_n.png)
 *Figure 2: Empirical scaling of D_min against flock size N across three normalized deadlines (12×, 6×, and 3× drive times). Circles denote strict success (100% of sheep in the goal); squares denote the 99% threshold (f99). For cohesive flocks (compact), D_min = 1 everywhere. For dispersed flocks, D_min scales sub-linearly with N, heavily modulated by deadline urgency.*
@@ -52,18 +52,24 @@ When a flock begins in a cohesive spatial state (`compact`), **a single shepherd
 ### 2. Dispersed Flocks Scale Sub-linearly with N
 On scattered layouts (`wide`, `split`, `outlier_rich`), shepherds must spend initial time collecting distant outliers before driving can begin:
 - At generous deadlines (12× drive time), D_min remains 1 for N <= 100, rising modestly to 2 or 3 dogs at N = 400.
-- In log-log space (log2 D_min vs. log2 N), growth slopes for scattered layouts fall between **0.25 and 0.45**, demonstrating strong sub-linear scaling: doubling flock size requires far less than double the shepherd force.
+- In log-log space (log2 D_min vs. log2 N), growth slopes for scattered layouts fall between **0.2 and 0.5** at 12 and 6 drive times (one row reaches 0.8), so doubling the flock costs 0.2 to 0.5 of a doubling of the team.
 
 ### 3. Deadline is a First-Order Governing Parameter
-Tightening the deadline from 12× to 3× drive times exerts an effect comparable to a 16-fold expansion of flock size. At 3× drive times, wide flocks at N = 400 require D_min = 6 dogs (under f99), and tight deadlines completely prevent single shepherds from gathering split clusters.
+Tightening the deadline from 12x to 3x drive times raises D_min more than a fourfold increase in flock size does. At 3x drive times, wide flocks at N = 400 need 5-6 dogs (under f99) against 2 at 12x, and no team on the grid reliably gathers split clusters at N >= 200.
 
 ### 4. The Last-Sheep / Straggler Mechanism
 A crucial biological insight emerged from auditing strict success criteria (100% of sheep inside the goal circle at a single tick) against a 99% threshold (f99):
 
 ![Straggler mechanism and strict vs 99% success](docs/figures/fig22_straggler.png)
-*Figure 3: The Straggler Effect. Left: Across trials with 6 or more dogs (wide and outlier-rich, N in {100, 200, 400}), faster dogs (speed 1.5) bring 99% of the flock into the goal in almost every trial, yet strict 100% success collapses; slower dogs (speed 1.15) avoid this penalty. Right: Time-series of one identical start flock (wide start, N = 400, D = 16 dogs, seed 2). The faster dog team drives the flock into the goal quickly with all but a couple stragglers, but then overshoots and pushes the flock out while chasing the trailing sheep. The slower dog team steers the flock steadily inside once, completing the task.*
+*Figure 3: The Straggler Effect. Left: Across trials with 6 or more dogs (wide and outlier-rich, N in {100, 200, 400}), faster dogs (speed 1.5) bring 99% of the flock into the goal in almost every trial, yet strict 100% success collapses; slower dogs (speed 1.15) avoid this penalty. Right: Time-series of one identical start flock (wide start, N = 400, D = 16 dogs, seed 2). The faster dog team drives the flock into the goal with all but a couple of sheep, then the flock is pushed out of the goal and comes back much later. The slower dog team's flock ends inside on the first pass.*
 
-In biological and agricultural herding, a single stubborn or drifting sheep does not represent collective failure. Evaluating f99 resolves artificial boundary censorship and exposes the true structural scaling laws of the multi-agent system.
+The two success rules measure different things. The 99% rule asks whether the team brings the flock in; the strict rule also scores what the dogs do after the flock has arrived, and this team rule has no step for that. In the strict failures 99 to 100% of trials with 6 or more dogs had already brought 99% of the flock in. Under the strict rule, setup conventions with no real-world value (start gap, dog start, sheep parameter set, dog speed) change D_min by up to a factor of six; under the 99% rule the same conventions change it by at most one dog, and only a tighter goal matters more. Both rules are reported side by side. The result argues for herding tasks that separate the arrival of the flock (a fraction of it inside) from holding it (a time inside, or a pen).
+
+### 5. Coordination, Not Team Size, Makes D_min Finite
+An uncoordinated baseline (FAT, every dog chasing the sheep farthest from the goal), run on the same task, does not improve with more dogs: from N = 200 it has no reliable team on any scattered layout under either rule, and on a compact flock at N = 400 it fails where the coordinated team needs one dog. Its dogs pick the same sheep and move as copies.
+
+![The team rule against FAT](docs/figures/fig26_fat.png)
+*Figure 3b: Success against D for strombom_multi (blue) and FAT (orange) on the same task, strict (solid) and 99% (dashed), 6 drive times.*
 
 ---
 
@@ -172,7 +178,7 @@ To study the transition between collection and driving, HerdSim provides four di
 
 Dogs begin 30 units behind the flock's rear boundary, arranged in one of three experimental stations:
 - **`arcs` (default)**: Dogs are spaced evenly along concentric semi-circular arcs behind the flock. Single dogs start directly on the drive axis; additional dogs occupy distinct flanking stations.
-- **`ring`**: Dogs are distributed uniformly along a full 360° circle surrounding the flock, testing whether encirclement aids or hinders initial gathering.
+- **`ring`**: Dogs are distributed uniformly on a circle surrounding the flock, leaving out the cone (seen from the flock centre) that holds the goal, testing whether encirclement aids or hinders initial gathering. A full circle put one dog inside the goal for every even D from N = 200; that first ring run is kept in `results/dmin_s_ring_dog_in_goal` and not used.
 - **`handler`**: All dogs originate from a single point directly behind the flock (simulating simultaneous release from a human handler's post; at $t = 0$ all dogs begin superimposed at this single coordinate before fanning out).
 
 ![Shepherd release configurations](docs/figures/fig8_dog_starts.png)
@@ -189,7 +195,7 @@ HerdSim implements microscopic agent physics based on validated empirical litera
 ![Multi-dog coordination mechanisms](docs/figures/fig3_team_rule.png)
 *Figure 11: Multi-dog team coordination in strombom_multi. Left: Outlier collection assignment. D dogs are matched to the D farthest outliers via minimum-weight Euclidean matching (least total walking distance). Center: Parallel driving formation. Dogs occupy equidistant angular slots along a driving arc subtending the flock's width, maintaining angular order to avoid crossing trajectories. Right: Unit push blending. Multiple dogs near a single sheep combine their influence into a normalized unit repulsion vector.*
 
-### 1. Sheep Dynamics ([Strömbom et al. 2014](https://doi.org/10.1098/rsif.2014.0419))
+### 1. Sheep Dynamics ([Strömbom et al. 2014](https://doi.org/10.1098/rsif.2014.0719))
 
 Derived from empirical observations of flocking under predation, the sheep behavior is governed by a threat-triggered state machine:
 
@@ -267,16 +273,17 @@ To evaluate the necessity of explicit multi-agent coordination, HerdSim implemen
 
 To rigorously test whether multi-agent coordination is truly necessary—or whether scaling gains could arise simply from having multiple independent agents in the field—HerdSim proposes and implements the **FAT (Farthest-Agent Targeting)** ablation baseline (`dog_controller="fat"`).
 
-- **Relationship to prior methods**: FAT borrows the target selection heuristic of [Kubo et al. (2022)](https://doi.org/10.1088/2632-072X/ac6cb4) (where each shepherd is attracted toward the sheep farthest from the goal, aiming $r_a$ behind it) and executes it using the discrete kinematic steps of [Strömbom et al. (2014)](https://doi.org/10.1098/rsif.2014.0419).
-- **Ablation design**: Crucially, FAT intentionally removes **both** forms of multi-agent deconfliction:
-  1. It lacks the combinatorial target assignment (Hungarian matching) and angular arc sorting of `strombom_multi`.
-  2. It lacks the continuous inter-dog repulsive forces ($1/r^3$) of Kubo et al. (2022).
-- **Failure dynamics**: Because all dogs share the same global visibility and execute identical uncoordinated decision logic, every shepherd targets the exact same sheep ($\arg\max_i \lVert \mathbf{x}_i - \mathbf{x}_{\text{goal}} \rVert$). As dogs converge on that single outlier, they collide and collapse into a tight cluster behind it (exhibiting high `dog_overlap`). Consequently, an entire pack of $D$ dogs degenerates into an uncoordinated single-agent substitute, completely failing to gather dispersed herds and demonstrating that team coordination (or explicit spatial repulsion) is indispensable for multi-dog herding.
+- **Relationship to prior methods**: FAT borrows the target selection heuristic of [Kubo et al. (2022)](https://doi.org/10.1007/s10015-021-00726-7) (where each shepherd is attracted toward the sheep farthest from the goal, aiming $r_a$ behind it) and executes it using the discrete kinematic steps of [Strömbom et al. (2014)](https://doi.org/10.1098/rsif.2014.0719).
+- **Ablation design**: FAT removes both forms of multi-agent deconfliction:
+  1. It lacks the outlier assignment (least total walk) and the drive slots of `strombom_multi`.
+  2. It lacks the inter-dog repulsion of Kubo et al. (2022).
+- **Same task**: R_f, which sets the goal and the drive, is calibrated for FAT with the paper shepherd on the same sheep (`calibrate_as: strombom_multi` in the protocol), so `dmin_fat` runs exactly the task of `dmin_m6` and only the dog rule differs.
+- **Result**: every dog targets the same sheep, the dogs move as copies (on compact flocks at N >= 200, 73 to 82% of FAT dogs have another dog within 2 units), and success does not rise with D. From N = 200 FAT has no reliable team on any scattered layout under either success rule.
 
 ![Uncoordinated baseline FAT](docs/figures/fig4_fat.png)
 *Figure 12: Uncoordinated baseline FAT (Farthest-Agent Targeting). Left: Geometry of uncoordinated driving where dogs chase the single farthest sheep from the goal. Right: Without target assignment or repulsive spacing, dogs collapse into a tight cluster behind the same outlier, exhibiting high `dog_overlap` and failing to gather dispersed flocks.*
 
-#### Cross-Model Continuous Force Architecture: `kubo` ([Kubo et al. 2022](https://doi.org/10.1088/2632-072X/ac6cb4))
+#### Cross-Model Continuous Force Architecture: `kubo` ([Kubo et al. 2022](https://doi.org/10.1007/s10015-021-00726-7))
 To verify that scaling properties are not artifacts of the discrete Strömbom heuristic, HerdSim integrates the complete continuous potential force model of Kubo et al. (2022), encompassing both **Kubo sheep** and **Kubo dogs**:
 - **Kubo Sheep Dynamics**: Sheep velocities update continuously via four additive forces within each sheep's field of view:
   1. *Inter-sheep repulsion* ($1/r^2$): Prevents collision and crowding.
@@ -334,11 +341,14 @@ Statistical decisions are governed by [`analysis/frontier.py`](analysis/frontier
 To verify that findings reflect fundamental multi-agent dynamics rather than arbitrary parameter choices, HerdSim executed systematic sensitivity sweeps:
 
 ![Sensitivity of D_min across experimental variations](docs/figures/fig24_sensitivity.png)
-*Figure 15: Sensitivity analysis of D_min across experimental variants (N in {100, 200, 400}, wide and outlier-rich layouts at 6× drive time). Rows above the horizontal divider test strict success; rows below test the 99% arrival threshold (f99). The baseline rows ("strict: base (speed 1.5)" and "99%: base (speed 1.5)") use default model parameters: dog speed 1.5, arcs release, gap 30, and goal radius 1.9 R_f.*
+*Figure 15: Sensitivity analysis of D_min across experimental variants (N in {100, 200, 400}, wide and outlier-rich layouts at 6× drive time). Rows above the horizontal divider test strict success; rows below test the 99% arrival threshold (f99). The baseline rows ("strict: base" and "99%: base") use default model parameters: dog speed 1.5, arcs release, gap 30, and goal radius 1.9 R_f. Light cells are open: a bracket "lo-hi" or a lower bound "[n]".*
 
-1. **Release Geometry**: Releasing dogs from a single handler post (`handler`) requires fewer dogs than an encircling ring (`ring`), because ring dogs on the goal side can inadvertently frighten sheep backward before reaching their stations.
-2. **Dog Speed (Base 1.5 vs. 1.15)**: The baseline configuration runs at dog speed $v_{\text{dog}} = 1.5$ (shown in the `strict: base (speed 1.5)` and `99%: base (speed 1.5)` rows), while the `dog speed 1.15` rows evaluate reduced dog speed. Counter-intuitively, slower dogs ($v_{\text{dog}} = 1.15$) achieve substantially lower $D_{\min}$ on large flocks under strict success rules (e.g. on outlier-rich $N = 400$, $D_{\min}$ drops from failure/"none" at base speed 1.5 to $D_{\min} = 6$ at speed 1.15). Slower dogs avoid forcefully overshooting the goal and stranding trailing sheep.
-3. **Field-Matched Realism**: Calibrating sheep to empirical GPS field data (r_a = 1.0, interaction range 75 m, noise 0.1) halves the collection distance. Under strict 100% criteria, this ceiling suppresses success; under f99, field-matched sheep herd more efficiently than the synthetic baseline.
+Every variant was run under both success rules. Under the strict rule the variants scatter by up to a factor of six; under the 99% rule every variant except the tighter goal stays within one dog of the base.
+
+1. **Release Geometry**: Under the strict rule, with 8 or more dogs at N = 400, the ring has the highest success and the handler post the lowest. Under the 99% rule all three starts give the same D_min within the brackets; the handler post is still the slowest (all dogs leave from one point).
+2. **Dog Speed (Base 1.5 vs. 1.15)**: Under the strict rule slower dogs need fewer dogs on large flocks (outlier-rich N = 400: 6 against none). Both speeds bring 99% of the flock in at the same time, and under the 99% rule the advantage disappears. The difference is the last-sheep step, not the herding.
+3. **Field-Matched Realism**: Calibrating sheep to the paper's field-matched set (r_a = 1.0, reaction distance 75, noise 0.1) halves the collection distance. Under the strict rule this is the hardest setting; under the 99% rule field-matched sheep need the same number of dogs as the base or fewer.
+4. **Goal Size**: A goal of 1.5 R_f is the one variant that needs more dogs under both rules (99%: 5-6 dogs on wide N = 400 against 2-3).
 
 ---
 
@@ -356,7 +366,7 @@ cd HerdSim
 # Install development environment and dependencies
 make install     # uv sync --extra dev
 
-# Run comprehensive checks (Ruff linter + basedpyright type checker + 242 tests)
+# Run comprehensive checks (Ruff linter + basedpyright type checker + 268 tests)
 make check
 
 # Execute miniature verification campaigns (~1 minute)
@@ -439,7 +449,7 @@ HerdSim/
 |-- protocols/configs/      # Canonical defaults and protocol definitions
 |-- cli/                    # Command-line tools (campaign, run_queue, dmin_tables)
 |-- docs/                   # Scientific plans, architecture guides, and figure scripts
-|-- results/                # Archived empirical datasets (112k+ trials)
+|-- results/                # Archived empirical datasets (164k+ trials)
 `-- tests/                  # Test suites and golden regression benchmarks
 ```
 
@@ -449,7 +459,7 @@ HerdSim/
 
 HerdSim enforces rigorous validation at every layer:
 
-- **Unit & Invariant Tests** (`make test`, 242 tests, ~24 s):
+- **Unit & Invariant Tests** (`make test`, 268 tests, ~24 s):
   Verifies that sheep vectors conserve physics, distances match analytical Euclidean formulas, and RNG streams remain isolated.
 - **Golden Regression Tests** ([`tests/sim/test_golden.py`](tests/sim/test_golden.py)):
   Pins exact floating-point trajectories of reference trials across multiple seeds to prevent accidental physics drift.
@@ -464,8 +474,8 @@ HerdSim enforces rigorous validation at every layer:
 
 ## References and Further Reading
 
-1. **Strömbom, D., et al. (2014)**. *Solving the shepherding problem: heuristics for herding autonomous, interacting agents*. Journal of the Royal Society Interface, 11(100), 20140419. [DOI: 10.1098/rsif.2014.0419](https://doi.org/10.1098/rsif.2014.0419)
-2. **Kubo, T., et al. (2022)**. *A force-based collective shepherding algorithm for multiple agents*. Bioinspiration & Biomimetics, 17(4), 046001. [DOI: 10.1088/2632-072X/ac6cb4](https://doi.org/10.1088/2632-072X/ac6cb4)
+1. **Strömbom, D., et al. (2014)**. *Solving the shepherding problem: heuristics for herding autonomous, interacting agents*. Journal of the Royal Society Interface, 11(100), 20140719. [DOI: 10.1098/rsif.2014.0719](https://doi.org/10.1098/rsif.2014.0719)
+2. **Kubo, M., Tashiro, M., Sato, H., Yamaguchi, A. (2022)**. *Herd guidance by multiple sheepdog agents with repulsive force*. Artificial Life and Robotics, 27, 416-427. [DOI: 10.1007/s10015-021-00726-7](https://doi.org/10.1007/s10015-021-00726-7)
 3. **Comprehensive Research Design & Plan**: [`docs/science/design_version2/plan_dmin.md`](docs/science/design_version2/plan_dmin.md)
 4. **Empirical Results Tables**: [`docs/science/design_version2/results_tables.md`](docs/science/design_version2/results_tables.md)
 5. **Architectural Deep-Dive**: [`docs/codes/architecture.md`](docs/codes/architecture.md)

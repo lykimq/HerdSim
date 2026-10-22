@@ -1,0 +1,8 @@
+# The ring start (dmin_s_ring.yaml) with success at 99 percent of the flock in the goal.
+# Compare with dmin_f99_s_base.
+
+protocol_id: dmin_f99_s_ring
+output: results/dmin_f99_s_ring
+extends: dmin_s_ring.yaml
+
+success_fraction: 0.99

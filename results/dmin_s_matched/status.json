@@ -1,24 +1,24 @@
 {
   "_auto_generated_notice": "AUTO-GENERATED: do not modify. Re-run the producing command to refresh this file.",
   "protocol_id": "dmin_s_matched",
-  "physics_hash": "b9cf7db9bd7294eb",
+  "physics_hash": "417805ceb0b1d0f5",
   "running": false,
   "stop_reason": "every cell decided, at max_seeds or errored",
   "rounds": 20,
-  "trials_done": 3690,
+  "trials_done": 4090,
   "trials_ignored": 0,
-  "trials_this_run": 3690,
+  "trials_this_run": 400,
   "round_trials": 0,
   "trial_errors": 0,
   "cells_with_errors": {
     "count": 0,
     "keys": []
   },
-  "hours_this_run": 0.086,
-  "trials_per_hour": 42675.9,
-  "cells": 48,
+  "hours_this_run": 0.01,
+  "trials_per_hour": 40148.6,
+  "cells": 50,
   "cells_pruned": 0,
-  "cells_needing_seeds": 15,
-  "cells_at_max_seeds_undecided": 15,
-  "updated_at": "2026-10-20T16:59:51.797095+00:00"
+  "cells_needing_seeds": 17,
+  "cells_at_max_seeds_undecided": 17,
+  "updated_at": "2026-10-22T12:30:15.315409+00:00"
 }

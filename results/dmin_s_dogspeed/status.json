@@ -1,24 +1,24 @@
 {
   "_auto_generated_notice": "AUTO-GENERATED: do not modify. Re-run the producing command to refresh this file.",
   "protocol_id": "dmin_s_dogspeed",
-  "physics_hash": "11e3ec2d038ff837",
+  "physics_hash": "e0954aada36f80ac",
   "running": false,
   "stop_reason": "every cell decided, at max_seeds or errored",
-  "rounds": 20,
+  "rounds": 0,
   "trials_done": 2620,
   "trials_ignored": 0,
-  "trials_this_run": 2620,
+  "trials_this_run": 0,
   "round_trials": 0,
   "trial_errors": 0,
   "cells_with_errors": {
     "count": 0,
     "keys": []
   },
-  "hours_this_run": 0.113,
-  "trials_per_hour": 23230.4,
+  "hours_this_run": 0.0,
+  "trials_per_hour": 0.0,
   "cells": 50,
   "cells_pruned": 0,
   "cells_needing_seeds": 1,
   "cells_at_max_seeds_undecided": 1,
-  "updated_at": "2026-10-20T17:30:32.197389+00:00"
+  "updated_at": "2026-10-22T12:32:34.091896+00:00"
 }

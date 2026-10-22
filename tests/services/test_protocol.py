@@ -77,6 +77,32 @@ def test_time_limit_needs_exactly_one_unit(tmp_path):
         load_protocol(str(write(tmp_path, methods=methods)), output=tmp_path / "out")
 
 
+def test_calibrate_as_runs_the_reference_dog_on_the_same_flock(tmp_path):
+    from services.calibration import calibration_config
+
+    methods = {
+        "strombom_multi": {"time_limit_ticks": 100},
+        "fat": {"time_limit_ticks": 100, "calibrate_as": "strombom_multi"},
+    }
+    p = load_protocol(str(write(tmp_path, methods=methods)), output=tmp_path / "out")
+    fat = calibration_config(p, "fat", 10, 1.0)
+    reference = calibration_config(p, "strombom_multi", 10, 1.0)
+    assert fat == reference  # same dog, same sheep, same start: the same R_f
+    plain = {**methods, "fat": {"time_limit_ticks": 100}}
+    q = load_protocol(str(write(tmp_path, methods=plain)), output=tmp_path / "out")
+    assert calibration_config(q, "fat", 10, 1.0)["method"] == "fat"
+    assert stable_hash(p.physics()) != stable_hash(q.physics())
+
+
+@pytest.mark.parametrize(
+    ("source", "message"), [("kubo", "another sheep model"), ("nope", "not a method")]
+)
+def test_calibrate_as_needs_a_method_with_the_same_sheep(tmp_path, source, message):
+    methods = {"fat": {"time_limit_ticks": 100, "calibrate_as": source}}
+    with pytest.raises(ValueError, match=message):
+        load_protocol(str(write(tmp_path, methods=methods)), output=tmp_path / "out")
+
+
 def test_extends_merges_child_over_parent(tmp_path):
     parent = write(tmp_path)
     child = tmp_path / "child.yaml"

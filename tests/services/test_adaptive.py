@@ -99,6 +99,8 @@ def test_cell_cut_short_by_a_kill_is_filled_to_one_batch(tmp_path):
         (10, True, 10),  # open after a whole batch: one more
         (10, False, 0),  # decided: nothing
         (23, True, 7),  # cut short in a later batch: back on the grid of 10s
+        (15, False, 5),  # cut short in a later batch, decided: filled, not left at 15
+        (20, False, 0),  # decided after whole batches: nothing
     ],
 )
 def test_seed_counts_stay_on_whole_batches(seeds_run, flagged, wanted):
@@ -204,6 +206,41 @@ def test_refine_by_reliability_adds_a_midpoint_across_the_d_min_boundary_only():
     assert _refine(grid, front, min_gap=1) == 0  # by zone: the reliable cells are undecided
     assert _refine(grid, front, min_gap=1, by_reliability=True) == 1
     assert grid["g"] == {1, 4, 6, 8, 16}  # 6 lies between the unreliable 4 and the reliable 8
+
+
+def test_refine_fills_the_bracket_below_d_min_once_the_open_cell_is_at_the_cap():
+    """D = 6 stayed undecided at the cap and D = 8 is the smallest reliable D, so the true
+    D_min is 6, 7 or 8; D = 7 is added. While 6 is below the cap it may decide, so nothing is.
+    The frontier flags an undecided cell as needing seeds even at the cap (as in dmin_m3), so
+    the seed count is what tells the two apart."""
+
+    def front(six_seeds: int) -> Frontier:
+        rows = [
+            (4, "unreliable", 60, False),
+            (6, UNDECIDED, six_seeds, True),
+            (8, "reliable", 90, False),
+            (12, "reliable", 60, False),
+        ]
+        cells = pd.DataFrame(
+            [
+                {
+                    "group_key": "g",
+                    "n_shepherds": d,
+                    "zone": UNDECIDED,
+                    "reliability": r,
+                    "n_seeds": n,
+                    "needs_seeds": w,
+                }
+                for d, r, n, w in rows
+            ]
+        )
+        return Frontier(cells=cells, groups=pd.DataFrame())
+
+    grid = {"g": {4, 6, 8, 12}}
+    assert _refine(grid, front(120), 1, by_reliability=True, max_seeds=200) == 0
+    assert _refine(grid, front(200), 1, by_reliability=True) == 0  # no cap given: waits
+    assert _refine(grid, front(200), 1, by_reliability=True, max_seeds=200) == 2  # 5 and 7
+    assert grid["g"] == {4, 5, 6, 7, 8, 12}
 
 
 def test_calibration_refuses_a_flock_that_has_no_settled_size(tmp_path):

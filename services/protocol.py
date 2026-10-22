@@ -36,7 +36,7 @@ REQUIRED_KEYS = (
 )
 PROTOCOL_KEYS = (*REQUIRED_KEYS, "factors")
 TIME_LIMIT_KEYS = ("time_limit_ticks", "time_limit_seconds", "time_limit_drive_multiple")
-METHOD_KEYS = (*TIME_LIMIT_KEYS, "params")
+METHOD_KEYS = (*TIME_LIMIT_KEYS, "params", "calibrate_as")
 
 # Canonical values that hold for the whole protocol, so they cannot be swept as
 # factors: the task, the seed list, and the calibration of R_f, which runs once
@@ -83,6 +83,10 @@ class MethodSpec:
     time_limit_ticks: int | None
     params: dict[str, Any] = field(default_factory=dict)
     time_limit_drive_multiple: float | None = None
+    # Method whose single dog drives the calibration flock, when not this one. R_f then
+    # comes from the same reference drive as that method's, so both run the same task
+    # (goal, drive, deadline). Only between methods with the same sheep model.
+    calibrate_as: str | None = None
 
 
 @dataclass(frozen=True)
@@ -123,6 +127,8 @@ class Protocol:
                     "time_limit_ticks": m.time_limit_ticks,
                     "time_limit_drive_multiple": m.time_limit_drive_multiple,
                     "config": config,
+                    # Left out when unset, so folders written before it keep their hash.
+                    **({"calibrate_as": m.calibrate_as} if m.calibrate_as else {}),
                 }
                 for m, config in zip(self.methods, self.method_config().values())
             },
@@ -235,7 +241,18 @@ def _methods(raw: dict[str, Any]) -> tuple[MethodSpec, ...]:
         if bad:
             raise ValueError(f"Method {name!r} has no parameters {bad}")
         ticks, multiple = _time_limit(name, spec)
-        specs.append(MethodSpec(name, ticks, params, multiple))
+        source = spec.get("calibrate_as")
+        if source is not None:
+            if source not in METHODS:
+                raise ValueError(f"Method {name!r}: calibrate_as {source!r} is not a method")
+            if METHODS[source].sheep_model != METHODS[name].sheep_model:
+                raise ValueError(
+                    f"Method {name!r}: calibrate_as {source!r} has another sheep model"
+                )
+            if set(METHODS[source].defaults) != set(METHODS[name].defaults):
+                raise ValueError(f"Method {name!r}: calibrate_as {source!r} has other parameters")
+            source = None if source == name else str(source)
+        specs.append(MethodSpec(name, ticks, params, multiple, source))
     return tuple(specs)
 
 

@@ -165,7 +165,28 @@ def layout_extent(config: dict[str, Any]) -> float:
 DOG_STARTS = ("arcs", "ring", "handler")
 
 
-def _dog_arcs(config: dict[str, Any]) -> list[tuple[float, int]]:
+def goal_half_angle(config: dict[str, Any], drive: float) -> float:
+    """Half-angle of the cone, seen from the flock centre, that holds the goal disc.
+
+    ``drive`` is the distance from the flock centre to the goal centre. A point outside this
+    cone is outside the goal, whatever its distance from the flock.
+    """
+    if drive <= 0.0:
+        return 0.0
+    return float(np.arcsin(min(1.0, float(config["goal_radius"]) / drive)))
+
+
+def _ring_span(config: dict[str, Any], drive: float) -> float:
+    """Angle of the full circle that the ring uses: all of it but the goal's cone."""
+    return 2.0 * np.pi - 2.0 * goal_half_angle(config, drive)
+
+
+def _drive_of(config: dict[str, Any]) -> float:
+    flock_center = np.asarray(config["flock_center"], dtype=float)
+    return float(np.linalg.norm(np.asarray(config["goal_center"], dtype=float) - flock_center))
+
+
+def _dog_arcs(config: dict[str, Any], drive: float) -> list[tuple[float, int]]:
     """(radius, dogs) of each start arc, ring or handler point, by ``dog_start``.
 
     ``arcs`` (the base): dogs stand on half circles around the flock centre, on the side
@@ -176,7 +197,10 @@ def _dog_arcs(config: dict[str, Any]) -> list[tuple[float, int]]:
     sheep and they walk in first; that approach time is deterministic (the start is fixed
     by the layout and D) and is part of the finish time.
 
-    ``ring``: the same, but on full circles round the flock, goal side included.
+    ``ring``: the same, but on circles round the flock, goal side included, leaving out the
+    cone of half-angle ``goal_half_angle`` that holds the goal. A full circle put a dog on
+    the drive axis between flock and goal for every even D, and from N = 200 that dog
+    started inside the goal (the ring radius exceeds the distance to the goal's near edge).
 
     ``handler``: every dog starts at one point, straight behind the flock on the drive axis
     at the radius of the first arc, as if released from a handler's post. The team rule then
@@ -192,7 +216,7 @@ def _dog_arcs(config: dict[str, Any]) -> list[tuple[float, int]]:
     mode = str(config["dog_start"])
     if mode == "handler":
         return [(radius, left)] if left > 0 else []
-    span = np.pi if mode == "arcs" else 2.0 * np.pi
+    span = np.pi if mode == "arcs" else _ring_span(config, drive)
     arcs = []
     while left > 0:
         count = min(left, max(1, int(span * radius / spacing)))
@@ -202,9 +226,10 @@ def _dog_arcs(config: dict[str, Any]) -> list[tuple[float, int]]:
     return arcs
 
 
-def dog_start_radius(config: dict[str, Any]) -> float:
-    """Distance from the flock centre of the outermost dog at the start."""
-    arcs = _dog_arcs(config)
+def dog_start_radius(config: dict[str, Any], drive: float) -> float:
+    """Distance from the flock centre of the outermost dog at the start, for a goal ``drive``
+    away (the ring leaves out the goal's cone, so how many dogs a circle holds depends on it)."""
+    arcs = _dog_arcs(config, drive)
     if not arcs:  # no dogs: nothing stands outside the flock
         return 0.0
     return arcs[-1][0]
@@ -225,7 +250,7 @@ def field_size(
     (one method, because R_f is calibrated per method and sizes everything here).
     """
     reach = max(layout_extent({**config, "initial_layout": name}) for name in layouts)
-    dogs = max(dog_start_radius({**config, "initial_layout": name}) for name in layouts)
+    dogs = max(dog_start_radius({**config, "initial_layout": name}, abs(drive)) for name in layouts)
     behind = max(reach, dogs)
     sideways = max(behind, float(config["goal_radius"]))
     clearance = float(config["field_clearance"])
@@ -239,19 +264,23 @@ def place_dogs(config: dict[str, Any]) -> np.ndarray:
     arcs: the ``count`` dogs of an arc sit at the centres of ``count`` equal sectors of the
     half circle behind the flock, angles -90 + 180 (j + 0.5) / count degrees from straight
     behind, so neighbours are pi r / count >= ``dog_start_spacing`` apart along it.
-    ring: angles 360 j / count degrees, so one dog starts straight behind the flock and the
-    rest are spread evenly round it. handler: all dogs at the point straight behind.
+    ring: the same sector centres over the ring's span (the circle less the goal's cone),
+    angles -span / 2 + span (j + 0.5) / count from straight behind, so one dog starts straight
+    behind the flock when the count is odd and none starts in the goal's cone.
+    handler: all dogs at the point straight behind.
     """
     flock_center = np.asarray(config["flock_center"], dtype=float)
     back = unit(flock_center - np.asarray(config["goal_center"], dtype=float))
     mode = str(config["dog_start"])
+    drive = _drive_of(config)
+    span = _ring_span(config, drive)
     positions = []
-    for radius, count in _dog_arcs(config):
+    for radius, count in _dog_arcs(config, drive):
         for j in range(count):
             if mode == "arcs":
                 angle = -np.pi / 2.0 + np.pi * (j + 0.5) / count
             elif mode == "ring":
-                angle = 2.0 * np.pi * j / count
+                angle = -span / 2.0 + span * (j + 0.5) / count
             else:
                 angle = 0.0
             positions.append(flock_center + radius * rotate(back, angle))
