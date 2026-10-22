@@ -185,7 +185,7 @@ details open, and we read them as follows: a grazing sheep feels no neighbour re
 step has length delta, and the previous heading is zero after a tick without movement. These
 readings only affect sheep outside every dog's reach. The terms of equation (1) are drawn from the code in figure S1.
 
-![Sheep rule](figures/fig1_sheep_rule.png)
+![Sheep rule](../figures/fig1_sheep_rule.png)
 
 Figure S1. The Strömbom sheep, computed with the simulation code. Left: one sheep inside the reaction distance with the five terms of equation (1), their weights and the resulting heading. Right: a dog and the sheep around it; inside r_s a sheep moves, outside it grazes.
 
@@ -197,7 +197,7 @@ the farthest sheep as seen from the centre. Otherwise it drives, aiming at a poi
 behind the flock centre as seen from the goal. It walks at speed delta_s toward its target with
 angular noise e and stands still while within 3 r_a of any sheep.
 
-![Shepherd](figures/fig2_shepherd.png)
+![Shepherd](../figures/fig2_shepherd.png)
 
 Figure S2. The shepherd of Strömbom et al. (2014), one dog. Left: a sheep is beyond f(N) from the centre of mass, so the dog goes to the collect point Pc behind the farthest one. Right: the flock is cohesive, so the dog goes to the drive point Pd behind the flock as seen from the goal. The dog stands still within 3 r_a of a sheep (shaded).
 
@@ -209,7 +209,7 @@ the angle that covers the flock's width, with the paper's drive point in the mid
 their side by matching to slots by angle. Every dog knows the position of every sheep and every
 other dog. We call this rule strombom_multi.
 
-![Team rule of strombom_multi](figures/fig3_team_rule.png)
+![Team rule of strombom_multi](../figures/fig3_team_rule.png)
 
 Figure 1. From one dog to many, drawn from the simulation code at the start of a trial. Left
 column: one dog, the rule of Strömbom et al. (2014). Top: on a wide start the dogs collect, each
@@ -225,7 +225,7 @@ the sheep farthest from the goal, pushed away from it and from the goal, and rep
 dogs (figure S3). The model has no noise, so seeds change only the start. Because this model packs
 the flock to a fixed radius, we run it to N = 100.
 
-![Kubo model](figures/fig5_kubo.png)
+![Kubo model](../figures/fig5_kubo.png)
 
 Figure S3. The Kubo et al. (2022) force model. Left: the four forces on one sheep. Middle: the four forces on one dog; arrow length is the square root of the force. Right: a trial in which the repulsion between dogs keeps them apart.
 
@@ -258,7 +258,7 @@ Strömbom et al. (2014) also give a field-matched set for their comparison with 
 field data of Jadhav et al. (2024), the Table 1 flock is 1.4 to 7 times less dense and its dog
 works 3 to 7 times farther behind the flock centre; the matched set is closer on both (figure S6).
 
-![Realism](figures/fig14_realism_numbers.png)
+![Realism](../figures/fig14_realism_numbers.png)
 
 Figure S6. The field flock of Jadhav et al. (2024) against the base parameter set and the field-matched set at N = 100: flock radius, density, dog working distance behind the flock centre, and dog stop distance.
 
@@ -282,7 +282,7 @@ where reach is the farthest a sheep can start in any layout of the protocol. 13 
 length up to N = 100 and the reach term from N = 200 (figure 2). The field has no boundary: agents
 may leave it, as in both source papers. The field rectangle only places the start.
 
-![Task geometry](figures/fig6_task_geometry.png)
+![Task geometry](../figures/fig6_task_geometry.png)
 
 Figure 2. The task at N = 200, to scale. Left: the flock starts around a centre and is driven to
 a circular goal. The blue disc is the farthest a sheep can start in any layout, the dotted circle
@@ -297,7 +297,7 @@ N = 400, D = 6: 0.85 against 0.55), while a clearance of 250 matched no wall (fi
 wall lowers D_min for reasons unrelated to the dogs, and neither source paper has one, the study
 uses no boundary.
 
-![Wall check](figures/fig10_wall_check.png)
+![Wall check](../figures/fig10_wall_check.png)
 
 Figure S9. Success against D with a reflecting wall at clearances of 80 and 250, and with no
 reachable wall (3000), on the same seeds. The clear difference is outlier_rich at N = 400.
@@ -318,7 +318,7 @@ Table 3. Start layouts. R_f is the calibrated flock radius, L = 2 N^(2/3) the co
 | split | 3 compact clusters (2 when N < 12) on a ring of radius L |
 | outlier_rich | 80% in a compact core, 20% at 1.1 to 1.6 L from the centre |
 
-![The four start layouts](figures/fig7_layouts.png)
+![The four start layouts](../figures/fig7_layouts.png)
 
 Figure 3. The four layouts at N = 200, one seed, on one scale. The dashed circle is the collect
 distance f(N) around the flock centre; a dog collects while any sheep is outside it. The compact
@@ -334,13 +334,13 @@ the dog at tick 0; on scattered starts 66 to 100% of the sheep are out of reach 
 dog approaches (figure S5). Two alternatives, a full ring round the flock and a single handler
 point behind it, and gaps of 15 and 60 units, are run as sensitivity variants.
 
-![Dog starts](figures/fig8_dog_starts.png)
+![Dog starts](../figures/fig8_dog_starts.png)
 
 Figure S4. Dog start stations. Top: arcs for D = 1, 2, 4, 8, 24 and 64 on a compact start. One dog
 starts behind the flock on the drive line and every added dog has its own station. Bottom: the
 three placements (arcs, ring, handler point) for 8 dogs on a wide start.
 
-![Start distances](figures/fig11_start_distances.png)
+![Start distances](../figures/fig11_start_distances.png)
 
 Figure S5. The start with one dog on arcs, per layout and N. The circle is the reaction distance
 r_s = 65. Blue sheep react at tick 0, grey sheep graze. The number is the distance from the dog to
@@ -407,7 +407,7 @@ paired with the base. The matched set changes the physics, so the same seeds dra
 flocks and its comparison is between decided values. A goal of 1.5 R_f also shortens the drive by
 2 to 3% at N >= 200 through equation (2), which works against finding the tighter goal harder (figure S8).
 
-![Variants](figures/fig16_variants.png)
+![Variants](../figures/fig16_variants.png)
 
 Figure S8. The start of each sensitivity variant on the wide layout at N = 200 with 4 dogs. The
 dog speed variant looks the same as the base.
@@ -423,7 +423,7 @@ that a scattered start fails more often with one dog than with eight, that no su
 than the straight-line drive allows, and that one and four worker processes give identical trial
 rows. Cutting the dog speed from 1.5 to 0.4 makes the bench fail.
 
-![One trial](figures/fig17_trial.png)
+![One trial](../figures/fig17_trial.png)
 
 Figure 4. One trial: wide start, N = 200, D = 4, seed 2026. The dogs spread out to the outliers,
 bring them in, line up behind the flock and drive it into the goal. The trial finishes in 279 ticks,
@@ -464,13 +464,13 @@ two criteria are the same rule (section 5.5).
 | 3 | split | 1 / 1 | 1 / 1 | 1 / 1 | none / none | none / none |
 | 3 | outlier_rich | 1 / 1 | 1 / 1 | 8 / 2 | none / 12 | none / [6] |
 
-![D_min against N](figures/fig20_dmin_vs_n.png)
+![D_min against N](../figures/fig20_dmin_vs_n.png)
 
 Figure 5. D_min against N at the three deadlines, strict (solid, circles) and 99% (dashed,
 squares), offset slightly in N. A hollow triangle is an undecided curve at its D_min_low, with a
 line up to 24; a cross is a curve with no reliable D on the grid. Compact is 1 throughout.
 
-![Success heat maps](figures/fig21_success_heatmaps.png)
+![Success heat maps](../figures/fig21_success_heatmaps.png)
 
 Figure 6. Success rate of every cell at 6 drive times, strict (top) and 99% (bottom). A black frame
 marks a cell decided reliable. Low rates at N = 400 rest on 10 to 20 seeds, because the allocation
@@ -543,7 +543,7 @@ every decided wide and outlier_rich cell, and the large steps come between 6 and
 strict criterion the same rise is cut off by cells without a decided value. Figure 7 shows the
 mechanism: a layout needs the team size at which its median finish time falls below the deadline.
 
-![Finish time against D with deadlines](figures/fig19_finish_vs_deadline.png)
+![Finish time against D with deadlines](../figures/fig19_finish_vs_deadline.png)
 
 Figure 7. Median finish time of successful trials against D at N = 200, with the three deadlines.
 A layout needs the number of dogs at which its line falls below the deadline. The compact flock is
@@ -566,7 +566,7 @@ Strict successes of these teams appear to come on a second pass: at wide N = 400
 median finish time of a strict success is 876 s, about twice the time to 99%. These four traces
 are a reading of the mechanism, not a count of how often it happens.
 
-![Strict against 99 percent](figures/fig22_straggler.png)
+![Strict against 99 percent](../figures/fig22_straggler.png)
 
 Figure 8. Left: share of trials with 6 or more dogs that succeed under the strict criterion (dark),
 that reach 99% of the sheep in the goal at some tick (hatched), and that succeed under the strict
@@ -587,7 +587,7 @@ at D >= 6, against a deadline of 839 s. At N = 400 success stays at 0.67 to 0.89
 did not examine the cause. The split layout at N >= 200 and deadlines of 6 and 3 drive times
 should be read as undecided, and the growth statements of section 6.3 do not cover it.
 
-![Split curves](figures/fig23_split_curves.png)
+![Split curves](../figures/fig23_split_curves.png)
 
 Figure 9. Success against D at 6 drive times with 99% intervals. On split at N = 200 and 400 the
 rate does not rise with D; wide at N = 400 is shown for contrast.
@@ -621,7 +621,7 @@ under the strict criterion only.
 | 99% | matched sheep set | 1 / 1 | 2 / 1 | 3 / 2 | 2 / 1 | 3 / 1 | 3 / 3 |
 | 99% | dog speed 1.15 | 1 / 1 | 2 / 3 | 3 / 3 | 2 / 2 | 3 / 3 | 3 / 3 |
 
-![Sensitivity overview](figures/fig24_sensitivity.png)
+![Sensitivity overview](../figures/fig24_sensitivity.png)
 
 Figure 10. Table 8 as a picture. Darker cells need more dogs; a light cell in brackets is an
 undecided curve at its D_min_low; hatching marks "none".
@@ -650,7 +650,7 @@ The tighter goal needs more dogs (wide N = 100: 3 against 1) and leaves wide and
 N = 200 without a value. A goal of 1.3 R_f would not fit the settled flock: with one dog on a compact
 start it gives success rates of 0.2 at N = 100 and 0 at N = 200 (figure S7).
 
-![Matched set scene](figures/fig15_matched_scene.png)
+![Matched set scene](../figures/fig15_matched_scene.png)
 
 Figure S7. The base and matched sets as driven flocks at N = 100 with one dog, on one scale.
 Right: the settled flock in goals of 1.9, 1.5, 1.3 and 1.1 R_f, with the number of sheep left
@@ -663,7 +663,7 @@ bring 99% of the flock in at about the same time (Appendix C). The difference un
 criterion is whether the last sheep is in at one tick, and the faster dog's flock is the one that
 gets driven out of the goal (figure 8, right).
 
-![Dog start results](figures/fig25_placement_results.png)
+![Dog start results](../figures/fig25_placement_results.png)
 
 Figure 11. Strict success against D for the three dog starts (arcs, ring, handler point) at 6
 drive times, on the same seeds.
@@ -854,7 +854,7 @@ that comparison and 4 on reliability. A cell count above 180 means midpoint team
 
 ## Appendix B. Pilot
 
-![Pilot](figures/fig18_pilot_success.png)
+![Pilot](../figures/fig18_pilot_success.png)
 
 Figure S10. Pilot run (10 seeds per cell): success against D for wide and outlier_rich at N = 200
 and 400, read at 3, 6 and 12 drive times. The pilot was used to choose the deadlines and the team

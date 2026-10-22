@@ -1,5 +1,7 @@
 # HerdSim
 
+[**English**](README.md) | [**Tiếng Việt**](README_vi.md)
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Tests](https://img.shields.io/badge/tests-242%20passed-brightgreen.svg)](tests/)
@@ -189,34 +191,61 @@ HerdSim implements microscopic agent physics based on validated empirical litera
 
 ### 1. Sheep Dynamics ([Strömbom et al. 2014](https://doi.org/10.1098/rsif.2014.0419))
 
-Derived from empirical biological observations of flocking under predation, each sheep $i$ updates its heading vector via a balance between physical momentum and four social/environmental forces:
+Derived from empirical observations of flocking under predation, the sheep behavior is governed by a threat-triggered state machine:
+
+#### Active Flight Mode ($\min_j \lVert \mathbf{x}_i - \mathbf{y}_j \rVert < r_s$)
+When any dog is within threat distance $r_s$, sheep $i$ computes a raw heading vector $\mathbf{H}_i'$ balancing momentum, social forces, dog avoidance, and noise:
 
 $$
-\mathbf{H}_i^{t+1} = (1 - \rho)\,\mathbf{v}_i^t + \rho\,\frac{\mathbf{C}_i + \mathbf{R}_i + \mathbf{S}_i + \mathbf{e}_i}{\left\lVert \mathbf{C}_i + \mathbf{R}_i + \mathbf{S}_i + \mathbf{e}_i \right\rVert}
+\mathbf{H}_i' = h\,\mathbf{H}_i + c\,\mathbf{C}_i + \rho_a\,\mathbf{R}_{a,i} + \rho_s\,\mathbf{R}_{s,i} + e\,\mathbf{\epsilon}_i
 $$
 
-where:
-- $\mathbf{v}_i^t$: Current momentum/velocity vector of sheep $i$ (persistence weight $1 - \rho$ preserves forward inertia so sheep turn smoothly rather than instantaneously).
-- $\mathbf{C}_i$: **Cohesion** (attraction toward the local center of mass of neighbors within interaction radius $r_a$, reflecting the social urge to stay with the herd).
-- $\mathbf{R}_i$: **Repulsion** (short-range push away from neighboring sheep within collision distance $d_a$, preventing crowding and trampling).
-- $\mathbf{S}_i$: **Shepherd Escape** (strong repulsion away from dogs within threat distance $r_s$).
-- $\mathbf{e}_i$: **Noise** (stochastic angular perturbation representing natural biological motor fluctuation).
+where each constituent component is a **unit vector** scaled by its behavioral weight (Table 2):
+- $\mathbf{H}_i$: **Previous heading** unit vector (direction from last tick, zero if stationary), with inertia weight $h = 0.5$.
+- $\mathbf{C}_i$: **Cohesion** unit vector pointing toward the local center of mass ($\text{LCM}_i$) of the $n$ nearest neighbors ($n = N - 1$), with attraction weight $c = 1.05$:
 
-Dividing the summed forces by their Euclidean norm $\lVert \mathbf{C}_i + \mathbf{R}_i + \mathbf{S}_i + \mathbf{e}_i \rVert$ ensures the net vector determines **only the direction** (unit heading), while physical movement distance per tick is governed independently by top sheep speed $\delta$.
+  $$
+  \mathbf{C}_i = \frac{\text{LCM}_i - \mathbf{x}_i}{\lVert \text{LCM}_i - \mathbf{x}_i \rVert}, \quad \text{where } \text{LCM}_i = \frac{1}{n} \sum_{k \in \mathcal{N}_n(i)} \mathbf{x}_k
+  $$
 
-#### Multi-Dog Push Blending
+- $\mathbf{R}_{a,i}$: **Inter-sheep Repulsion** unit vector pushing away from neighbors closer than collision distance $r_a = 2$, with repulsion weight $\rho_a = 2.0$:
 
-The original Strömbom et al. (2014) model was formulated for **only a single dog**, where the threat vector was simply the unit vector pointing directly away from that dog. When scaling to multi-dog teams ($D \ge 2$), naively adding independent dog repulsions would multiply the fear force, overpowering flock cohesion and causing the flock to fracture. HerdSim resolves multi-dog repulsive scaling by blending individual dog repulsive pushes and normalizing to length 1:
+  $$
+  \mathbf{R}_{a,i} = \frac{\sum_{j \ne i, \lVert \mathbf{x}_i - \mathbf{x}_j \rVert < r_a} \frac{\mathbf{x}_i - \mathbf{x}_j}{\lVert \mathbf{x}_i - \mathbf{x}_j \rVert}}{\left\lVert \sum_{j \ne i, \lVert \mathbf{x}_i - \mathbf{x}_j \rVert < r_a} \frac{\mathbf{x}_i - \mathbf{x}_j}{\lVert \mathbf{x}_i - \mathbf{x}_j \rVert} \right\rVert}
+  $$
+
+- $\mathbf{R}_{s,i}$: **Shepherd Escape** unit vector pushing away from shepherds within threat distance $r_s = 65$, with escape weight $\rho_s = 1.0$.
+- $\mathbf{\epsilon}_i$: **Noise** unit vector pointing in a random direction drawn uniformly from $[0, 2\pi)$, with noise weight $e = 0.3$.
+
+Sheep $i$ advances a distance $\delta = 1$ m (speed $\delta = 1$ m/s) along the normalized heading:
 
 $$
-\mathbf{S}_i = \frac{\sum_{j \in \text{threat}} \frac{\mathbf{x}_i - \mathbf{y}_j}{\lVert \mathbf{x}_i - \mathbf{y}_j \rVert}}{\left\lVert \sum_{j \in \text{threat}} \frac{\mathbf{x}_i - \mathbf{y}_j}{\lVert \mathbf{x}_i - \mathbf{y}_j \rVert} \right\rVert}
+\mathbf{x}_i^{t+1} = \mathbf{x}_i^t + \delta\,\frac{\mathbf{H}_i'}{\lVert \mathbf{H}_i' \rVert}
+$$
+
+#### Grazing Mode ($\min_j \lVert \mathbf{x}_i - \mathbf{y}_j \rVert \ge r_s$)
+When all dogs are outside threat range $r_s$, sheep do not experience social attraction or repulsion; they **graze**: staying put, or with probability $p = 0.05$ taking a step of length $\delta$ in a uniformly random direction:
+
+$$
+\mathbf{x}_i^{t+1} = \begin{cases}
+\mathbf{x}_i^t + \delta\,\mathbf{\epsilon}_{\text{graze}}, & \text{with probability } 0.05 \\
+\mathbf{x}_i^t, & \text{with probability } 0.95
+\end{cases}
+$$
+
+#### Multi-Dog Push Blending ($\mathbf{R}_{s,i}$)
+
+The original Strömbom et al. (2014) model was formulated for **only a single dog**, where the threat vector was simply the unit vector pointing directly away from that single shepherd: $\frac{\mathbf{x}_i - \mathbf{y}}{\lVert \mathbf{x}_i - \mathbf{y} \rVert}$. When scaling to multi-dog teams ($D \ge 2$), naively adding independent dog repulsions would multiply the fear force, overpowering flock cohesion and causing the flock to fracture. HerdSim resolves multi-dog repulsive scaling by blending individual dog repulsive pushes and normalizing to length 1:
+
+$$
+\mathbf{R}_{s,i} = \frac{\sum_{j \in \text{threat}} \frac{\mathbf{x}_i - \mathbf{y}_j}{\lVert \mathbf{x}_i - \mathbf{y}_j \rVert}}{\left\lVert \sum_{j \in \text{threat}} \frac{\mathbf{x}_i - \mathbf{y}_j}{\lVert \mathbf{x}_i - \mathbf{y}_j \rVert} \right\rVert}
 $$
 
 where:
 - $\mathbf{x}_i$: 2D position vector of sheep $i$.
 - $\mathbf{y}_j$: 2D position vector of dog $j$.
 - $\frac{\mathbf{x}_i - \mathbf{y}_j}{\lVert \mathbf{x}_i - \mathbf{y}_j \rVert}$: Unit vector pointing directly away from dog $j$ toward sheep $i$ (the pure escape direction from dog $j$).
-- $\text{threat}$: Set of all dogs currently within threat range of sheep $i$ ($\lVert \mathbf{x}_i - \mathbf{y}_j \rVert \le r_s$).
+- $\text{threat}$: Set of all dogs currently within threat range of sheep $i$ ($\lVert \mathbf{x}_i - \mathbf{y}_j \rVert < r_s$).
 
 **Intuitive Example:**
 Imagine a sheep at $(0, 5)$ pursued by two flanking dogs: Dog 1 is stationed at $(-3, 0)$ (back-left) and Dog 2 is stationed at $(3, 0)$ (back-right). 

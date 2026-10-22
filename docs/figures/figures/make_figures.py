@@ -110,7 +110,7 @@ def fig_layouts():
     names = ["compact", "wide", "split", "outlier_rich"]
     fig, axes = plt.subplots(1, 4, figsize=(17, 4.8))
     cfgs = {name: cell(100, 8, name) for name in names}
-    half = max(dog_start_radius(c) for c in cfgs.values()) + 12
+    half = max(dog_start_radius(c, abs(c["goal_center"][0] - c["flock_center"][0])) for c in cfgs.values()) + 12
     for ax, name in zip(axes, names):
         cfg = cfgs[name]
         sheep = place_flock(cfg, np.random.default_rng(3))
