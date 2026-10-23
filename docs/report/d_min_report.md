@@ -40,16 +40,24 @@ Existing multi-herder literature has evaluated fixed team sizes or non-cohesive 
 *(For full implementation of the adaptive execution loop, Clopper–Pearson intervals, and common random number seeds, see [README: Adaptive Execution Mechanics](../../README.md#adaptive-execution-mechanics).)*
 
 ### 2.1 Formal Decision Criteria for $D_{\min}$
-A **cell** is defined by the parameter tuple (method, layout, $N$, deadline, $D$). Each simulation trial is an independent Bernoulli trial resulting in success ($1$) or failure ($0$). For $n$ trials with $k$ observed successes, let $[L, U]$ denote the exact two-sided 99% Clopper–Pearson binomial confidence interval:
+A **cell** is defined by the parameter tuple (method, layout, $N$, deadline, $D$). Each simulation trial is an independent Bernoulli trial resulting in success ($1$) or failure ($0$). For a sample of $n_{\text{trials}}$ evaluated seeds with $k$ observed successes, let $[L, U]$ denote the exact two-sided 99% Clopper–Pearson binomial confidence interval for the true success probability $p$:
 
 $$
-L = B\left(\frac{\alpha}{2};\, k,\, n - k + 1\right), \quad U = B\left(1 - \frac{\alpha}{2};\, k + 1,\, n - k\right)
+L = B\left(\frac{\alpha}{2}, k, n_{\text{trials}} - k + 1\right), \quad U = B\left(1 - \frac{\alpha}{2}, k + 1, n_{\text{trials}} - k\right)
 $$
 
-where $\alpha = 0.01$ (99% confidence level) and $B(q; a, b)$ is the Beta quantile function. With target reliability $\theta = 0.90$:
-- **Reliable**: $L \ge 0.90$. (Requires at least 51 consecutive successes with 0 failures, rounded to 60 trials under batch size 10).
-- **Unreliable**: $U < 0.90$. (Triggers early stopping after 10–20 trials).
-- **Undecided**: $L < 0.90 \le U$. (Receives adaptive batches of 10 seeds up to a hard cap of 200 seeds).
+where:
+- $n_{\text{trials}} \in [10, 200]$: The cumulative number of simulated trials evaluated for that cell.
+- $k \in [0, n_{\text{trials}}]$: The number of successful trials observed.
+- $\alpha = 0.01$: The statistical significance level, corresponding to a two-sided 99% confidence level ($1 - \alpha = 0.99$, with $\alpha/2 = 0.005$ in each tail).
+- $B(q, a, b)$: The quantile function (inverse cumulative distribution function) of the Beta distribution with shape parameters $a$ and $b$, evaluated at cumulative probability $q$.
+- $L$: The statistical lower bound of the true success rate.
+- $U$: The statistical upper bound of the true success rate.
+
+With the target reliability threshold set to $\theta = 0.90$:
+- **Reliable**: $L \ge 0.90$. We are 99% confident that the true success rate is at least 90%. (Mathematically requires at least 51 consecutive wins with zero failures, which rounds to 60 trials under batch size 10).
+- **Unreliable**: $U < 0.90$. We are 99% confident that the true success rate cannot reach 90%, triggering early stopping to save compute (typically halts after 10–20 trials).
+- **Undecided**: $L < 0.90 \le U$. The interval straddles the 90% threshold, so the cell receives additional batches of 10 seeds up to a hard cap of 200 seeds.
 
 For a curve of tested dog counts $D \in \mathcal{D}$ at fixed method, layout, $N$, and deadline:
 

@@ -40,16 +40,24 @@ Các nghiên cứu trước đây về chăn dắt đa tác tử chủ yếu kh�
 *(Chi tiết đầy đủ về vòng lặp thích ứng, khoảng tin cậy Clopper–Pearson và hệ thống hạt giống ngẫu nhiên chung CRN được trình bày tại [README_vi: Cơ chế thực thi thích ứng](../../README_vi.md#các-cơ-chế-thực-thi-thích-ứng).)*
 
 ### 2.1 Tiêu chí quyết định hình thức cho $D_{\min}$
-Một **ô (cell)** được xác định bởi bộ tham số (phương pháp, bố cục, $N$, thời hạn, $D$). Mỗi lượt chạy mô phỏng là một phép thử Bernoulli độc lập cho ra kết quả thành công ($1$) hoặc thất bại ($0$). Với $n$ lượt thử và $k$ lần thành công, khoảng tin cậy nhị thức Clopper–Pearson hai phía 99% $[L, U]$ được tính toán chính xác:
+Một **ô (cell)** được xác định bởi bộ tham số (phương pháp, bố cục, $N$, thời hạn, $D$). Mỗi lượt chạy mô phỏng là một phép thử Bernoulli độc lập cho ra kết quả thành công ($1$) hoặc thất bại ($0$). Với một mẫu gồm $n_{\text{trials}}$ hạt giống được đánh giá và $k$ lần thành công quan sát được, khoảng tin cậy nhị thức Clopper–Pearson hai phía 99% $[L, U]$ cho xác suất thành công thực tế $p$ được tính toán như sau:
 
 $$
-L = B\left(\frac{\alpha}{2};\, k,\, n - k + 1\right), \quad U = B\left(1 - \frac{\alpha}{2};\, k + 1,\, n - k\right)
+L = B\left(\frac{\alpha}{2}, k, n_{\text{trials}} - k + 1\right), \quad U = B\left(1 - \frac{\alpha}{2}, k + 1, n_{\text{trials}} - k\right)
 $$
 
-với $\alpha = 0{,}01$ (độ tin cậy 99%) và $B(q; a, b)$ là hàm phân vị Beta. Với ngưỡng tin cậy $\theta = 0{,}90$:
-- **Đạt độ tin cậy (Reliable)**: $L \ge 0{,}90$ (đòi hỏi ít nhất 51 trận thắng liên tiếp không có trận thua nào, tương đương 60 lượt chạy với kích thước lô 10).
-- **Không đạt tin cậy (Unreliable)**: $U < 0{,}90$ (dừng sớm sau 10–20 lượt).
-- **Chưa quyết định (Undecided)**: $L < 0{,}90 \le U$ (nhận tiếp các lô 10 hạt giống lên tới trần 200 hạt giống).
+trong đó:
+- $n_{\text{trials}} \in [10, 200]$: Tổng số lượt mô phỏng tích lũy đã chạy cho ô tham số đó.
+- $k \in [0, n_{\text{trials}}]$: Số lượt mô phỏng ghi nhận thành công.
+- $\alpha = 0{,}01$: Mức ý nghĩa thống kê, tương ứng với độ tin cậy hai phía $1 - \alpha = 99\%$ (mỗi phía đuôi phân phối chiếm $\alpha/2 = 0{,}005$).
+- $B(q, a, b)$: Hàm phân vị (hàm phân phối tích lũy nghịch đảo) của phân phối Beta với hai tham số hình dạng $a$ và $b$, tính tại xác suất tích lũy $q$.
+- $L$: Cận dưới thống kê của tỷ lệ thành công thực tế với độ tin cậy 99%.
+- $U$: Cận trên thống kê của tỷ lệ thành công thực tế với độ tin cậy 99%.
+
+Với ngưỡng tin cậy mục tiêu quy định là $\theta = 0{,}90$:
+- **Đạt độ tin cậy (Reliable)**: $L \ge 0{,}90$. Chúng ta có độ tin cậy toán học 99% rằng tỷ lệ thành công thực tế đạt ít nhất 90% (đòi hỏi tối thiểu 51 trận thắng liên tiếp không có trận thua nào, được làm tròn thành 60 lượt chạy với kích thước lô 10).
+- **Không đạt tin cậy (Unreliable)**: $U < 0{,}90$. Chúng ta tin cậy 99% rằng ô này không thể đạt ngưỡng 90%, kích hoạt cơ chế dừng sớm để tiết kiệm thời gian (thường dừng sau 10–20 lượt).
+- **Chưa quyết định (Undecided)**: $L < 0{,}90 \le U$. Khoảng tin cậy vẫn đang bao trùm ngưỡng 90%, ô sẽ tiếp tục nhận các lô 10 hạt giống tiếp theo cho đến trần tối đa 200 hạt giống.
 
 Trên một đường cong kiểm thử theo số lượng chó $D \in \mathcal{D}$:
 

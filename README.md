@@ -139,6 +139,19 @@ flowchart TD
     Q -- No --> S["Finished: Save CSV tables, status.json, and frontier logs"]
 ```
 
+### Summary of Executed Research Campaigns
+
+Across 23 research protocols, HerdSim completed **164,740 simulation trials** (2,291 parameter cells evaluated) with zero crashes or execution errors:
+
+| Campaign Group | Protocols | Trials | Cells | Core Research Objective |
+| :--- | :--- | :---: | :---: | :--- |
+| **Strict Scaling Grid** | `dmin_m12`, `dmin_m6`, `dmin_m3` | 40,220 | 557 | Maps $D_{\min}(N)$ under strict 100% containment across relaxed ($12\times$), intermediate ($6\times$), and urgent ($3\times$) deadlines. |
+| **99% Arrival Grid** | `dmin_f99_m12`, `dmin_f99_m6`, `dmin_f99_m3` | 36,480 | 556 | Maps $D_{\min}(N)$ under practical 99% arrival rule across all 3 deadlines, isolating herding ability from finish-line boundary noise. |
+| **Uncoordinated Baseline** | `dmin_fat`, `dmin_f99_fat` | 17,330 | 365 | Evaluates Farthest-Agent Targeting without inter-dog coordination under both success rules at $6\times$ drive time. |
+| **Continuous Force Model** | `dmin_kubo` | 1,080 | 18 | Cross-paradigm validation of $D_{\min}$ using continuous potential fields with mutual dog repulsion on compact flocks ($N \le 100$). |
+| **Sensitivity Protocols** | 14 protocols (7 pairs: strict + 99%) | 69,630 | 805 | Sweeps dog release points, dog speeds, field-matched GPS sheep parameters, start gaps, and goal radius at $6\times$ drive time. |
+| **Total** | **23 Protocols** | **164,740** | **2,291** | **Complete empirical mapping (~7.0 hours wall-clock time)** |
+
 ### Adaptive Execution Mechanics
 
 Four automated mechanisms decide where simulations are needed:
@@ -217,6 +230,23 @@ A compact flock driven by an experienced single dog finishes in roughly 1.44 to 
 | **$N = 200$** | 10.47 m | 139.8 m | **139.8 s** (~2.3 min) | 1,678 s (~28.0 min) | 839 s (~14.0 min) | 419 s (~7.0 min) |
 | **$N = 400$** | 11.40 m | 206.8 m | **206.8 s** (~3.4 min) | 2,482 s (~41.4 min) | 1,241 s (~20.7 min) | 620 s (~10.3 min) |
 
+### Why Flock Sizes $N \in [25, 400]$ and Dog Counts $D \in [1, 24]$?
+
+A common question in scaling research is: *Why test flocks from 25 to 400 sheep, and dog teams from 1 to 24, rather than other numbers?*
+
+1. **Flock Sizes ($N = 25, 50, 100, 200, 400$)**:
+   - **Geometric Progression ($2\times$ Doubling)**: Doubling flock size at each step creates an exact logarithmic grid ($\log_2 N \in [4.64, 8.64]$). This allows us to measure power-law scaling exponents ($\Delta \log_2 D_{\min} / \Delta \log_2 N$) cleanly without uneven spacing artifacts across a 16-fold range of animal numbers.
+   - **Why start at $N = 25$ (Lower Bound)?**: Flocks smaller than 20–25 animals do not exhibit true macroscopic collective behavior. In tiny groups, individual random wandering dominates social cohesion, and structured spatial layouts—such as dividing the flock into 3 clusters on the `split` pasture, which requires at least 8 sheep per cluster—lose their physical meaning.
+   - **Why cap at $N = 400$ (Upper Bound)?**:
+     - *Flock stability limit*: In empirical calibration, Strömbom's biological cohesion rules settle into a stable equilibrium radius $R_f(N)$ up to $N = 400$. Beyond 400, internal collision noise causes an unconfined flock to spontaneously shear and fragment even without dogs present.
+     - *Agricultural realism*: Flocks of 25 to 400 sheep accurately represent typical commercial sheep drives managed by shepherd dog teams on open pastures.
+     - *Computational feasibility*: Pairwise animal interactions scale quadratically as $\mathcal{O}(N^2)$ per simulation tick. Testing up to 400 sheep across 164,740 trials represents a rigorous upper bound that remains computationally tractable while thoroughly capturing non-linear scaling trends.
+
+2. **Dog Team Sizes ($D \in [1, 24]$)**:
+   - **The Single-Dog Baseline ($D = 1$)**: Starting at $D = 1$ grounds the research in canonical biology literature (Strömbom 2014), establishing what one dog can achieve before adding teammates.
+   - **The Grid Progression**: We systematically test $D \in \{1, 2, 3, 4, 6, 8, 10, 12, 16, 24\}$. Small team sizes ($D = 2, 3, 4$) capture the immediate transition to multi-agent parallelization, while large dog packs ($D \ge 8$) identify upper boundaries: performance saturation ($D_{\text{sat}}$), spatial crowding ($D_{\text{crowd}}$), and catastrophic breakdown ($D_{\text{overcrowd}}$).
+   - **Adaptive Densification**: If adjacent counts jump across a behavioral boundary (e.g., $D = 4$ fails while $D = 6$ succeeds), HerdSim automatically tests the midpoint ($D = 5$) in subsequent rounds, pinpointing exact thresholds without brute-forcing every single integer.
+
 ---
 
 ## Initial Flock Configurations
@@ -252,50 +282,67 @@ HerdSim simulates individual agent dynamics based on peer-reviewed biology liter
 
 ### 1. How Sheep Behave ([Strömbom et al. 2014](https://doi.org/10.1098/rsif.2014.0719))
 
-Derived from empirical tracking of real sheep flocks under dog pursuit, each sheep follows five basic behavioral instincts:
+Derived from empirical GPS tracking of real sheep flocks pursued by shepherd dogs, Strömbom et al. revealed that sheep do not follow complex master plans. Instead, each individual sheep $i$ at 2D coordinate $\mathbf{x}_i = (x_i, y_i)$ balances five competing biological instincts at each discrete time step (tick $t \to t+1$, where 1 tick = 1 second):
 
 #### Active Flight Mode ($\min_j \lVert \mathbf{x}_i - \mathbf{y}_j \rVert < r_s$)
-When any dog enters threat distance $r_s = 65$ m, sheep $i$ calculates its flight heading $\mathbf{H}_i'$ by balancing inertia, social attraction, collision avoidance, predator escape, and random noise:
+
+When any shepherd dog $j$ at position $\mathbf{y}_j$ comes within threat sensing distance $r_s = 65$ m (the visual detection horizon of domestic sheep), sheep $i$ detects the danger and enters **active flight mode**. It calculates a combined desired heading vector $\mathbf{H}_i'$:
 
 $$
 \mathbf{H}_i' = h\,\mathbf{H}_i + c\,\mathbf{C}_i + \rho_a\,\mathbf{R}_{a,i} + \rho_s\,\mathbf{R}_{s,i} + e\,\mathbf{\epsilon}_i
 $$
 
-where each component is a **unit vector** scaled by its behavioral weight:
-- $\mathbf{H}_i$: **Momentum** unit vector (direction from last tick), weight $h = 0.5$.
-- $\mathbf{C}_i$: **Flock Cohesion** unit vector pointing toward the local center of mass ($\text{LCM}_i$) of its nearest neighbors, weight $c = 1.05$:
+where each component is a normalized **unit vector** scaled by its behavioral weight:
+
+1. **Momentum / Inertia ($\mathbf{H}_i$, weight $h = 0.5$)**:
+   - Represents physical inertia: animals cannot change direction instantaneously.
+   - $\mathbf{H}_i$ is the unit vector of the sheep's heading from the previous tick: $\mathbf{H}_i = \frac{\mathbf{x}_i^t - \mathbf{x}_i^{t-1}}{\lVert \mathbf{x}_i^t - \mathbf{x}_i^{t-1} \rVert}$.
+2. **Social Cohesion ($\mathbf{C}_i$, weight $c = 1.05$)**:
+   - Represents the fundamental flocking instinct: safety in numbers. An isolated sheep feels a strong pull toward the center of its group.
+   - Defined as the unit vector pointing from sheep $\mathbf{x}_i$ toward the Local Center of Mass ($\text{LCM}_i$) of its $n$ nearest neighbors:
 
 $$
 \mathbf{C}_i = \frac{\text{LCM}_i - \mathbf{x}_i}{\lVert \text{LCM}_i - \mathbf{x}_i \rVert}, \quad \text{where } \text{LCM}_i = \frac{1}{n} \sum_{k \in \mathcal{N}_n(i)} \mathbf{x}_k
 $$
 
-- $\mathbf{R}_{a,i}$: **Collision Avoidance** unit vector pushing away from neighbors closer than distance $r_a = 2$ m, weight $\rho_a = 2.0$:
+   - $\mathcal{N}_n(i)$ is the set of $n$ nearest neighbor sheep. In Strömbom's canonical model, each sheep interacts with all other sheep in the flock ($n = N - 1$), creating global cohesion.
+3. **Collision Avoidance ($\mathbf{R}_{a,i}$, weight $\rho_a = 2.0$)**:
+   - Prevents sheep from trampling or colliding with one another. Notice that $\rho_a = 2.0$ has the highest weight in the equation—avoiding collisions is an animal's highest immediate priority.
+   - Any neighbor $j$ closer than personal space $r_a = 2$ m (the physical body buffer of an adult sheep) exerts a repulsive push:
 
 $$
 \mathbf{R}_{a,i} = \frac{\sum_{j \ne i, \lVert \mathbf{x}_i - \mathbf{x}_j \rVert < r_a} \frac{\mathbf{x}_i - \mathbf{x}_j}{\lVert \mathbf{x}_i - \mathbf{x}_j \rVert}}{\left\lVert \sum_{j \ne i, \lVert \mathbf{x}_i - \mathbf{x}_j \rVert < r_a} \frac{\mathbf{x}_i - \mathbf{x}_j}{\lVert \mathbf{x}_i - \mathbf{x}_j \rVert} \right\rVert}
 $$
 
-- $\mathbf{R}_{s,i}$: **Predator Escape** unit vector pushing away from active dogs within threat distance $r_s = 65$ m, weight $\rho_s = 1.0$.
-- $\mathbf{\epsilon}_i$: **Random Noise** unit vector drawn uniformly from $[0, 2\pi)$, weight $e = 0.3$.
+   - *Why the fraction?* The term $\frac{\mathbf{x}_i - \mathbf{x}_j}{\lVert \mathbf{x}_i - \mathbf{x}_j \rVert}$ is a unit vector pointing directly away from neighbor $j$ toward sheep $i$. Summing these vectors over all crowded neighbors combines their repulsive directions, and dividing by the total norm normalizes the net repulsion back to unit length.
+4. **Predator Escape ($\mathbf{R}_{s,i}$, weight $\rho_s = 1.0$)**:
+   - Pushes the sheep directly away from threatening dogs within detection distance $r_s = 65$ m. (See multi-dog blending below).
+5. **Random Noise ($\mathbf{\epsilon}_i$, weight $e = 0.3$)**:
+   - Represents individual behavioral unpredictability and sensory noise. $\mathbf{\epsilon}_i$ is a unit vector pointing in a random angle drawn uniformly from $[0, 2\pi)$.
 
-Sheep $i$ advances a step $\delta = 1$ m/s along its normalized heading:
+#### Position Update
+At each tick ($1$ second), sheep $i$ moves forward by distance $\delta = 1$ meter along its normalized heading:
 
 $$
 \mathbf{x}_i^{t+1} = \mathbf{x}_i^t + \delta\,\frac{\mathbf{H}_i'}{\lVert \mathbf{H}_i' \rVert}
 $$
 
+This caps the sheep's maximum walking/running speed at $\delta = 1.0$ m/s.
+
 #### Grazing Mode ($\min_j \lVert \mathbf{x}_i - \mathbf{y}_j \rVert \ge r_s$)
-When all dogs are outside threat range $r_s$, sheep ignore social attraction and predator escape. They **graze**: staying put, or with probability $p = 0.05$ taking a random exploratory step:
+When all dogs are farther away than threat distance $r_s = 65$ m, sheep feel safe. They ignore social attraction and predator flight, relaxing into **grazing mode**: 95% of the time they stand still chewing grass, and 5% of the time ($p = 0.05$) they take a casual exploratory step in a random direction:
 
 $$
 \mathbf{x}_i^{t+1} = \begin{cases}
-\mathbf{x}_i^t + \delta\,\mathbf{\epsilon}_{\text{graze}}, & \text{with probability } 0.05 \\
-\mathbf{x}_i^t, & \text{with probability } 0.95
+\mathbf{x}_i^t + \delta\,\mathbf{\epsilon}_{\text{graze}}, & \text{with probability } p = 0.05 \\
+\mathbf{x}_i^t, & \text{with probability } 1 - p = 0.95
 \end{cases}
 $$
 
+where $\mathbf{\epsilon}_{\text{graze}}$ is a unit vector with a random angle drawn from $[0, 2\pi)$.
+
 #### Multi-Dog Push Blending ($\mathbf{R}_{s,i}$)
-The original 2014 Strömbom model was built for **only a single dog**, where the threat vector pointed directly away from that single shepherd. If you naively add up independent dog pushes for 4 or 8 dogs, the fear force would multiply, overpowering flock cohesion and causing the flock to shatter into pieces. 
+The original 2014 Strömbom model was designed for **only a single dog**, where the threat vector pointed directly away from that lone shepherd. If you naively add independent dog repulsion vectors for 4 or 8 dogs, the cumulative fear force would multiply up to 8-fold, overpowering the flock's social cohesion ($c = 1.05$) and tearing the flock apart.
 
 HerdSim blends individual dog repulsions and normalizes the sum to unit length:
 
@@ -303,9 +350,11 @@ $$
 \mathbf{R}_{s,i} = \frac{\sum_{j \in \text{threat}} \frac{\mathbf{x}_i - \mathbf{y}_j}{\lVert \mathbf{x}_i - \mathbf{y}_j \rVert}}{\left\lVert \sum_{j \in \text{threat}} \frac{\mathbf{x}_i - \mathbf{y}_j}{\lVert \mathbf{x}_i - \mathbf{y}_j \rVert} \right\rVert}
 $$
 
-**Intuitive Example:** Imagine a sheep at $(0, 5)$ pursued by two flanking dogs: Dog 1 is stationed at $(-3, 0)$ (back-left) and Dog 2 is at $(3, 0)$ (back-right). 
-- Dog 1 pushes the sheep forward and right.
-- Dog 2 pushes the sheep forward and left.
+where $\text{threat} = \{j \mid \lVert \mathbf{x}_i - \mathbf{y}_j \rVert < r_s\}$ is the set of all active dogs within threat distance.
+
+**Intuitive Flanking Example:** Imagine a sheep at $(0, 5)$ pursued by two flanking dogs: Dog 1 is stationed at $(-3, 0)$ (back-left) and Dog 2 is at $(3, 0)$ (back-right). 
+- Dog 1 pushes the sheep forward and right $(+x, +y)$.
+- Dog 2 pushes the sheep forward and left $(-x, +y)$.
 - Summing their unit vectors cancels out the lateral sideways pushes while reinforcing forward motion. Normalizing back to unit length yields a resultant push directed straight ahead $(0, 1)$ with normal strength.
 
 ### 2. Shepherd Controllers
@@ -313,8 +362,25 @@ $$
 HerdSim implements three shepherd architectures:
 
 #### Coordinated Architecture: `strombom_multi`
-- **Outlier Mode**: When any sheep lies farther than $f(N) = r_a \cdot N^{2/3}$ from the flock center, the $D$ farthest outliers are identified. Dogs are assigned 1-to-1 to outliers using linear sum assignment (Hungarian matching) to minimize total travel distance. Extra dogs assist in driving the core flock.
-- **Drive Mode**: When the flock is cohesive, dogs form an arc behind the flock at distance $r_d$, spanning the angular width of the flock. Dogs are sorted by their angular station around the flock, guaranteeing they never cross paths while moving to their slots.
+Extends Strömbom's heuristics into an autonomous multi-dog team:
+
+1. **Outlier Detection ($f(N) = r_a \cdot N^{2/3}$)**:
+   - *Why $r_a \cdot N^{2/3}$?* In 2D close packing of $N$ disks of diameter $r_a$, a solid cluster has radius $\sim N^{1/2}$. In 3D spheres, it scales as $\sim N^{1/3}$. On open pastures, sheep spread out with fractal cluster density, so the natural boundary where an animal considers itself "separated" scales as $N^{2/3}$.
+   - If any sheep lies farther than $f(N)$ from the Global Center of Mass ($\text{GCM} = \frac{1}{N} \sum_k \mathbf{x}_k$), the flock is deemed scattered, triggering **Outlier Collection Mode**.
+2. **Outlier Target Assignment (Hungarian Matching)**:
+   - For each outlier $o$, the dog's target collection point $P_c$ is positioned $r_a = 2$ m directly behind the stray relative to the herd's center:
+     $$P_c = \mathbf{x}_o + r_a \frac{\mathbf{x}_o - \text{GCM}}{\lVert \mathbf{x}_o - \text{GCM} \rVert}$$
+     This guarantees that when a dog approaches $P_c$, it pushes the stray back toward the main flock.
+   - The $D$ farthest outliers are matched 1-to-1 to the $D$ dogs using the Hungarian algorithm (`linear_sum_assignment`), minimizing the total running distance of the entire dog team and preventing crossing paths. Extra dogs assist in driving the core flock.
+3. **Driving Formation ($P_d$)**:
+   - When all sheep are within $f(N)$, the flock is cohesive, and dogs switch to **Drive Mode**.
+   - The central driving point $P_d$ is placed behind the flock relative to the goal:
+     $$P_d = \text{GCM} + r_a \sqrt{N} \frac{\text{GCM} - \mathbf{x}_{\text{goal}}}{\lVert \text{GCM} - \mathbf{x}_{\text{goal}} \rVert}$$
+     *Why $r_a \sqrt{N}$?* A cohesive flock of $N$ sheep forms an approximate disc of radius $\propto r_a \sqrt{N}$. Placing the driving point at $r_a \sqrt{N}$ positions dogs right behind the flock's rear perimeter.
+   - Multiple dogs fan out along an arc of radius $R$ spanning the flock's angular width ($\pm \arcsin(R_{\text{flock}} / R)$). Dogs are assigned slots ordered by their polar angle around the flock, guaranteeing they never cross paths.
+4. **Dog Speed and Standoff Rule**:
+   - Working speed: $v_{\text{dog}} = 1.5$ m/s (1.5 times faster than sheep, matching the biological ratio of border collies to sheep).
+   - Standoff Rule: If a dog gets closer than $3 r_a = 6$ m to any sheep, it stops moving ($\mathbf{v}_{\text{dog}} = 0$) to avoid trampling animals or causing localized panic.
 
 #### Uncoordinated Baseline: `fat` (Farthest-Agent Targeting)
 An uncoordinated ablation baseline (`dog_controller="fat"`) designed to test whether team coordination is actually necessary.
@@ -326,12 +392,27 @@ An uncoordinated ablation baseline (`dog_controller="fat"`) designed to test whe
 *Figure 19: FAT baseline. Left: Chasing geometry. Right: Without target assignment, all dogs clump behind the same outlier, exhibiting high overlap.*
 
 #### Continuous Potential Force Model: `kubo` ([Kubo et al. 2022](https://doi.org/10.1007/s10015-021-00726-7))
-A cross-check using a fundamentally different physics model:
+
+A cross-check using a fundamentally different physics model based on continuous potential fields rather than discrete behavioral states:
 - **Kubo Sheep**: Move continuously under four additive forces: inter-sheep collision repulsion ($1/r^2$), velocity alignment, social attraction ($-1/r$), and predator escape ($1/r^3$).
-- **Kubo Dogs**: Guided by four continuous potential fields: pulled toward the farthest sheep, repelled when too close to that sheep ($1/r^3$), repelled away from the goal perimeter, and **strongly repelled from other dogs** ($1/r^3$). This mutual dog repulsion naturally spreads shepherds along the flock boundary like repelling magnets.
+- **Kubo Dogs**: Guided by four continuous potential fields: pulled toward the farthest sheep, repelled when too close to that sheep ($1/r^3$), repelled away from the goal perimeter, and **strongly repelled from other dogs** ($1/r^3$, weight $K_{f4} = 3000$). This mutual dog repulsion acts like like-charged magnets: it naturally fans shepherds out along the flock boundary without needing any centralized coordinator or assignment algorithm.
 
 ![Kubo continuous force model](docs/figures/fig5_kubo.png)
 *Figure 20: The Kubo et al. (2022) model. Left: Forces on a sheep. Middle: Forces on a dog. Right: Simulation snapshot showing inter-dog repulsion dispersing shepherds around the flock.*
+
+**Experimental Setup and Why Kubo Requires Specific Conditions:**
+1. **Starting Layout (`compact` only)**:
+   - In HerdSim, the dispersed layouts (`wide`, `split`, `outlier_rich`) are sized by Strömbom's collection threshold $f(N) = r_a N^{2/3}$.
+   - However, Kubo sheep do not have an outlier-gathering state machine—they only attract each other within a fixed sensing radius of 20 meters. If sheep start scattered beyond 20 meters, they never detect each other and drift apart indefinitely. To evaluate the model fairly as intended by its authors, protocols restrict Kubo to `compact` starts.
+2. **Dog Release Geometry (`dog_start: arcs`, gap 30 m, spacing 5 m)**:
+   - Dogs start 30 meters behind the flock along concentric arcs, spaced 5 meters apart.
+   - **Why `handler` release is physically impossible for Kubo**: Under Kubo's mutual dog repulsion force, the push between two dogs scales as $1/r^3$. If all dogs started at a single handler post (the exact same point $r \to 0$), this $1/r^3$ force would suffer a division-by-zero singularity, exploding into a massive mathematical force that would violently launch the dogs across the field on tick 0. Spacing them 5 meters apart on arcs (`dog_start_spacing = 5.0`) provides a finite, smooth initial repulsion force ($3000 / 5^3 = 24$), allowing the dogs to naturally self-organize into a driving arc.
+   - Starting 30 meters behind the flock gives the dogs sufficient breathing room to establish their formation without crashing into the sheep or triggering erratic initial scattering.
+3. **Flock Sizes ($N \in [25, 50, 100]$) and Fixed Deadline (500 s)**:
+   - Unlike Strömbom flocks whose radius scales naturally with flock size, Kubo sheep pack tightly to an equilibrium radius of $R_f \approx 5.8$ m regardless of $N$. Testing up to $N = 100$ validates model transferability without creating artificial super-dense clusters. The 500-second deadline directly matches Section 4.1 of the original 2022 paper.
+4. **Behavioral Outcome: Team Size Accelerates Completion**:
+   - On compact starts, **1 dog is sufficient for 100% reliability ($D_{\min} = 1$)**, confirming our primary finding across paradigms.
+   - However, unlike Strömbom (where completion time is invariant to team size because sheep walk at a fixed 1 m/s), Kubo sheep feel continuous, additive pushing forces from all nearby dogs. Adding dogs from $D = 1$ to $10$ compresses the flock and steers it progressively faster, cutting completion times from ~116 s down to ~30 s.
 
 ---
 
@@ -369,16 +450,33 @@ Statistical classifications are managed by [`analysis/frontier.py`](analysis/fro
 
 ## Sensitivity and Robustness
 
-To verify that findings reflect real collective behavior rather than arbitrary simulation choices, HerdSim executed systematic sensitivity sweeps:
+To verify that findings reflect real collective behavior rather than arbitrary simulation choices, HerdSim executed systematic sensitivity sweeps across 14 protocols (69,630 trials) on a shared benchmark grid ($N \in \{100, 200, 400\}$, `wide` and `outlier_rich` layouts at $6\times$ drive times).
 
 ![Sensitivity of D_min across experimental variations](docs/figures/fig24_sensitivity.png)
-*Figure 22: Sensitivity analysis across experimental variants ($N \in \{100, 200, 400\}$, wide and outlier-rich layouts at $6\times$ drive time). Strict success (above divider) shows high volatility; 99% arrival (below divider) proves exceptionally robust.*
+*Figure 22: Heatmap of minimum team size $D_{\min}$ across experimental variants. The horizontal dividing line separates strict 100% containment (top) from 99% arrival (bottom). Darker shading indicates more dogs needed; hatched cells ("none") indicate no tested team size reached 90% reliability.*
 
-Key insights:
-1. **Release Geometry**: Releasing dogs from a single handler post (`handler`), an open ring (`ring`), or concentric arcs (`arcs`) yields the **same $D_{\min}$ within 1 dog** under the 99% arrival rule. The handler post is slightly slower overall because all dogs start at one point.
-2. **Dog Speed ($1.5$ vs. $1.15$)**: Slower dogs ($v = 1.15$ m/s) achieve substantially higher strict success on large flocks because they avoid overshooting the goal. Under the 99% arrival rule, both speeds require the exact same team size.
-3. **Field-Matched Realism**: Calibrating sheep to empirical GPS field data ($r_a = 1.0$ m, interaction range 75 m, noise 0.1) reduces the collection radius. Under 99% arrival, field-matched sheep herd just as efficiently as the synthetic baseline.
-4. **Goal Size**: Shrinking the goal radius to $1.5 R_f$ is the only variant that fundamentally increases $D_{\min}$ across both rules, because a tightly packed flock barely fits inside the pen.
+### Understanding the Variants (Vertical Axis)
+
+Each horizontal row in the heatmap tests a specific experimental variation against the baseline:
+
+| Row Label | What Was Changed | Scientific Rationale |
+| :--- | :--- | :--- |
+| **`base`** | Canonical default settings | Concentric arcs release (`arcs`), gap 30 m, spacing 5 m, goal radius $1.9 R_f$, dog speed 1.50 m/s, theoretical Strömbom sheep parameters ($r_a = 2.0$, threat range 65 m, noise 0.3). |
+| **`matched sheep set`** | Real-world GPS collar parameters | Tests whether findings hold for real sheep. Replaces synthetic parameters with empirical field data from GPS tracking collars: tighter collision radius ($r_a = 1.0$ m), expanded interaction range (75 m), and lower noise (0.1). |
+| **`handler start`** | Single handler post release | All dogs start grouped at a single coordinate directly behind the flock (`dog_start = handler`), mimicking a human handler releasing dogs from a single post. |
+| **`ring start`** | Encircling ring release | Dogs start distributed in an open circle surrounding the flock (`dog_start = ring`), testing whether encircling sheep from the start helps or hinders collection. |
+| **`goal 1.5 R_f`** | Tighter goal pen | Shrinks the goal radius from $1.9 R_f$ down to $1.5 R_f$, making containment physically tighter and testing the boundary difficulty of penning. |
+| **`gap 15`** | Closer starting distance | Dogs start 15 meters behind the flock (half the standard 30 m gap), testing if closer proximity spooks the flock prematurely. |
+| **`gap 60`** | Farther starting distance | Dogs start 60 meters behind the flock (twice the standard gap, near the 65 m detection limit), testing whether extra approach distance slows the drive. |
+| **`dog speed 1.15`** | Calmer, slower dogs | Dogs run at $v_{\text{dog}} = 1.15$ m/s instead of $1.50$ m/s, testing whether calmer dogs avoid overshooting the pen at the finish line. |
+
+### How to Read the Heatmap & Key Takeaways
+
+- **Horizontal Dividing Line (Strict vs. 99% Arrival)**:
+  - **Top Half (Strict 100% Rule)**: Highly volatile and riddled with `none` (hatched cells) and high dog requirements on large flocks ($N = 200, 400$). Because every single sheep must remain inside an unfenced pen, trials frequently fail due to the **Straggler Effect**—dogs overshoot chasing a lone stray and accidentally flush the rest of the flock back out. Notice that only `dog speed 1.15` reliably rescues strict success at $N = 400$, because calmer dogs do not overshoot the pen!
+  - **Bottom Half (99% Arrival Rule)**: Exceptionally solid and consistent. Across almost all variants (GPS parameters, handler start, ring start, gap 15, gap 60, dog speed 1.15), the required team size $D_{\min}$ **remains identical within 1 dog** of the baseline!
+- **The Only Parameter That Fundamentally Changes $D_{\min}$**:
+  - **`goal 1.5 R_f`** is the single variant that significantly raises $D_{\min}$ across both rules. Why? Because squeezing a flock into a pen with radius $1.5 R_f$ means the flock must be physically compressed below its natural steady-state density, requiring substantially more dogs to maintain tight perimeter pressure.
 
 ---
 
