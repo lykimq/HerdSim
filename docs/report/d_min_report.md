@@ -17,7 +17,7 @@ Our empirical findings demonstrate:
 4. **The Straggler Mechanism**: In 95% of strict failures for teams with $D \ge 6$, the team had already brought 99% of the flock into the goal well before the deadline. Strict failure occurs because dogs chasing the final trailing straggler overshoot the goal and inadvertently drive the main herd back out. Reducing dog speed ($v_{\mathrm{dog}} = 1.15$) eliminates this overshoot, lowering strict $D_{\min}$ on outlier-rich $N = 400$ from complete failure (`none`) to 6.
 5. **Statistical Robustness of 99% Arrival**: Under 99% arrival, $D_{\min}$ remains within 1 dog of the base bracket across handler release, ring placement, initial dog-flock clearance, and empirical GPS sheep parameters. Strict criteria artificially amplify setup sensitivities by a factor of three or more.
 6. **Necessity of Team Coordination**: An uncoordinated baseline (FAT) that lacks task assignment and spatial repulsion fails to scale: independent dogs collapse into duplicates (`dog_overlap` $> 0.80$), achieving no decided $D_{\min}$ for $N \ge 200$.
-7. **Enough Dogs, and No Harm under 99% Arrival** (follow-up analysis, section 3.7): beyond the team size $D_{\mathrm{sat}}$ at which the drive stops getting faster, extra dogs leave the finish time at 0.90 to 1.02 of the $D_{\mathrm{sat}}$ time while dog time grows in proportion to $D$, and the time each sheep spends in flight does not rise. Under the 99% rule no team size up to 24 makes the task fail; extra dogs only slow `split` flocks at $N = 200$. $D_{\mathrm{sat}}$ itself is still a range on a third of the scattered curves.
+7. **Enough Dogs, and No Harm under 99% Arrival** (follow-up analysis, section 3.7): beyond the team size *D*<sub>sat</sub> at which the drive stops getting faster, extra dogs leave the finish time at 0.90 to 1.02 of the *D*<sub>sat</sub> time while dog time grows in proportion to $D$, and the time each sheep spends in flight does not rise. Under the 99% rule no team size up to 24 makes the task fail; extra dogs only slow `split` flocks at $N = 200$. *D*<sub>sat</sub> itself is still a range on a third of the scattered curves.
 
 ---
 
@@ -31,7 +31,7 @@ Existing multi-herder literature has evaluated fixed team sizes or non-cohesive 
 - **RQ4 (Success Criteria & The Straggler Effect)**: How do strict 100% containment and 99% arrival criteria diverge, and what microscopic mechanism causes large dog teams to fail under strict criteria?
 - **RQ5 (Robustness to Setup Conventions)**: Do empirical scaling laws survive perturbations to arbitrary simulation parameters (handler release, ring placement, initial gaps, goal radius, empirical GPS parameters, and reduced dog speed)?
 - **RQ6 (Necessity of Explicit Coordination)**: Can multiple independent shepherds without communication or task assignment achieve finite $D_{\min}$ on large flocks, or is explicit multi-agent coordination strictly necessary?
-- **RQ7 (Beyond $D_{\min}$: Enough and Too Many)**: From which team size $D_{\mathrm{sat}}$ does an extra dog stop making the drive faster, what does each dog beyond it cost, does it add pressure on the sheep, and does any team size make the task worse? (Follow-up analysis of the existing 99% runs; no new campaigns.)
+- **RQ7 (Beyond $D_{\min}$: Enough and Too Many)**: From which team size *D*<sub>sat</sub> does an extra dog stop making the drive faster, what does each dog beyond it cost, does it add pressure on the sheep, and does any team size make the task worse? (Follow-up analysis of the existing 99% runs; no new campaigns.)
 
 ---
 
@@ -111,11 +111,11 @@ Table 1 presents the complete empirical $D_{\min}$ scaling grid (Strict 100% / 9
 
 ![D_min Scaling against Flock Size N](../figures/fig20_dmin_vs_n.png)
 
-*Figure 1: Empirical scaling of $D_{\min}$ against flock size $N$ across deadlines and layouts. Circles/solid lines: strict success; squares/dashed lines: 99% arrival. Shaded vertical bars represent undecided brackets.*
+**Figure 1:** Empirical scaling of *D*<sub>min</sub> against flock size *N* across deadlines and layouts. Circles/solid lines: strict success; squares/dashed lines: 99% arrival. Shaded vertical bars represent undecided brackets.
 
 ![Finish Time on Compact Flocks](../figures/fig31_compact.png)
 
-*Figure 2: Finish time against $D$ on compact starts. Left: Strömbom sheep with team rule (finish time is invariant to $D$). Right: Kubo continuous model (finish time drops from 116 s to 30 s as $D$ increases from 1 to 10).*
+**Figure 2:** Finish time against *D* on compact starts. Left: Strömbom sheep with team rule (finish time is invariant to *D*). Right: Kubo continuous model (finish time drops from 116 s to 30 s as *D* increases from 1 to 10).
 
 Table 2 provides the empirical log-log scaling exponents:
 
@@ -188,7 +188,7 @@ Table 3 compares the quantitative spread in doublings:
 
 ![Deadline Impact on Success Curves](../figures/fig29_deadline.png)
 
-*Figure 3: Impact of deadline urgency. Left/Middle: Success curves at $12\times$, $6\times$, and $3\times$ drive times. Right: $D_{\min}$ as a direct function of deadline multiplier $m$.*
+**Figure 3:** Impact of deadline urgency. Left/Middle: Success curves at 12&times;, 6&times;, and 3&times; drive times. Right: *D*<sub>min</sub> as a direct function of deadline multiplier *m*.
 
 ---
 
@@ -202,11 +202,11 @@ Table 3 compares the quantitative spread in doublings:
 
 ![Strict vs 99% Success Rates](../figures/fig30_strict_vs_99.png)
 
-*Figure 4: Strict vs. 99% arrival success rates on identical seeds. Points in the shaded region represent trials reaching $\ge 90\%$ reliability under 99% criteria while failing under strict 100% criteria.*
+**Figure 4:** Strict vs. 99% arrival success rates on identical seeds. Points in the shaded region represent trials reaching &ge; 90% reliability under 99% criteria while failing under strict 100% criteria.
 
 ![The Straggler Mechanism](../figures/fig22_straggler.png)
 
-*Figure 5: Microscopic analysis of the Straggler Effect. Left: Share of trials with $D \ge 6$ reaching 99% inside vs. strict success. Right: Trajectory time-series showing faster dogs ($1.5$) flushing the flock out of the goal while slower dogs ($1.15$) maintain containment.*
+**Figure 5:** Microscopic analysis of the Straggler Effect. Left: Share of trials with *D* &ge; 6 reaching 99% inside vs. strict success. Right: Trajectory time-series showing faster dogs (1.5 m/s) flushing the flock out of the goal while slower dogs (1.15 m/s) maintain containment.
 
 ---
 
@@ -219,7 +219,7 @@ Table 3 compares the quantitative spread in doublings:
 
 ![Sensitivity Analysis Heatmap](../figures/fig24_sensitivity.png)
 
-*Figure 6: Sensitivity analysis across experimental variants at $6\times$ drive times. Strict results (above) show high volatility; 99% arrival results (below) demonstrate remarkable stability.*
+**Figure 6:** Sensitivity analysis across experimental variants at 6&times; drive times. Strict results (above) show high volatility; 99% arrival results (below) demonstrate remarkable stability.
 
 ---
 
@@ -241,7 +241,7 @@ Table 5 compares $D_{\min}$ between FAT and `strombom_multi` at $6\times$ drive 
 
 ![FAT vs Coordinated Team Rule](../figures/fig26_fat.png)
 
-*Figure 7: Success against team size $D$ for coordinated strombom_multi (blue) vs. uncoordinated FAT (orange). FAT displays flat performance curves that fail to improve with team size.*
+**Figure 7:** Success against team size *D* for coordinated strombom_multi (blue) vs. uncoordinated FAT (orange). FAT displays flat performance curves that fail to improve with team size.
 
 ---
 
@@ -253,19 +253,19 @@ Once the minimal reliable team size $D_{\min}$ is identified, a vital practical 
 To investigate, we re-analyzed our full 99% arrival dataset across 11 protocol directories (main runs, uncoordinated FAT baselines, and 7 sensitivity variants), coupled with a detailed replay of 164 representative trials to capture second-by-second microscopic flight dynamics. All replayed trials faithfully reproduced their stored outcomes and tick counts.
 
 #### 1. Speed Saturation (*D*<sub>sat</sub>)
-- **Definition**: $D_{\mathrm{sat}}$ is the smallest reliable team size beyond which adding more dogs yields no statistically significant reduction in completion time (speed plateaus).
+- **Definition**: *D*<sub>sat</sub> is the smallest reliable team size beyond which adding more dogs yields no statistically significant reduction in completion time (speed plateaus).
 - **Empirical Findings**:
-  - *On compact starts and small flocks ($N \le 50$)*: $D_{\mathrm{sat}} = 1$ from the outset. A single dog already drives the cohesive flock at maximum animal speed; additional dogs cannot accelerate sheep beyond their natural walking pace ($1.0$ m/s).
-  - *On scattered flocks at intermediate deadlines ($6\times$)*: $D_{\mathrm{sat}}$ typically ranges from 3 to 6 dogs (e.g. `outlier_rich` $N = 100$ saturates at $D_{\mathrm{sat}} = 3$; `wide` $N = 400$ saturates at $D_{\mathrm{sat}} = 6$).
-  - *Unresolved parameter cells*: Across 6 of the 18 scattered curves, pairwise finish-time comparisons between reliable cells remain undecided because compute was allocated primarily toward establishing the reliability frontier (`decide_finish_times: false`). Here, $D_{\mathrm{sat}}$ is recorded as a bracket (e.g. `wide` $N = 200$ is 3–24).
+  - *On compact starts and small flocks ($N \le 50$)*: *D*<sub>sat</sub> = 1 from the outset. A single dog already drives the cohesive flock at maximum animal speed; additional dogs cannot accelerate sheep beyond their natural walking pace ($1.0$ m/s).
+  - *On scattered flocks at intermediate deadlines ($6\times$)*: *D*<sub>sat</sub> typically ranges from 3 to 6 dogs (e.g. `outlier_rich` $N = 100$ saturates at *D*<sub>sat</sub> = 3; `wide` $N = 400$ saturates at *D*<sub>sat</sub> = 6).
+  - *Unresolved parameter cells*: Across 6 of the 18 scattered curves, pairwise finish-time comparisons between reliable cells remain undecided because compute was allocated primarily toward establishing the reliability frontier (`decide_finish_times: false`). Here, *D*<sub>sat</sub> is recorded as a bracket (e.g. `wide` $N = 200$ is 3–24).
 
 #### 2. Diminishing Returns and Economic Cost (*D* > *D*<sub>sat</sub>)
 - **Surplus dogs provide negligible speedups while multiplying operational overhead**:
-  - Across all 128 reliable cells above $D_{\mathrm{sat}}$ at $6\times$, finish times hover stubbornly between **0.90 and 1.02 times** the time recorded at $D_{\mathrm{sat}}$. Deploying dozens of extra dogs shaves less than 5–10% off the clock, and occasionally increases duration due to mutual path interference.
-  - Meanwhile, **total cumulative dog work** ($\mathrm{dog\_time} = D \times T$) and total distance traveled scale directly with the ratio $D / D_{\mathrm{sat}}$.
+  - Across all 128 reliable cells above *D*<sub>sat</sub> at $6\times$, finish times hover stubbornly between **0.90 and 1.02 times** the time recorded at *D*<sub>sat</sub>. Deploying dozens of extra dogs shaves less than 5–10% off the clock, and occasionally increases duration due to mutual path interference.
+  - Meanwhile, **total cumulative dog work** ($\mathrm{dog\_time} = D \times T$) and total distance traveled scale directly with the ratio *D* / *D*<sub>sat</sub>.
   - *Real-world illustration*: On a compact flock, deploying 24 dogs consumes 24 times the cumulative energy of a single dog, yet brings the flock home in the exact same elapsed time (~140 s).
 
-Table 6 summarizes the operational cost at twice saturation ($2 D_{\mathrm{sat}}$) and at the maximum tested team ($D = 24$) relative to the $D_{\mathrm{sat}}$ baseline across scattered curves at $6\times$:
+Table 6 summarizes the operational cost at twice saturation (2 *D*<sub>sat</sub>) and at the maximum tested team ($D = 24$) relative to the *D*<sub>sat</sub> baseline across scattered curves at $6\times$:
 
 | Layout, Flock Size *N* | Threshold *D*<sub>sat</sub> | At 2 *D*<sub>sat</sub>: Finish Time / Dog Time | At *D* = 24: Finish Time / Dog Time |
 | :--- | :---: | :---: | :---: |
@@ -279,7 +279,7 @@ Table 6 summarizes the operational cost at twice saturation ($2 D_{\mathrm{sat}}
 
 #### 3. Psychological Stress and Flock Welfare
 A common concern in livestock robotics is whether a large pack causes excessive panic or physiological distress. Microscopic tick-level telemetry reveals the opposite:
-- **Cumulative flight time per sheep actually decreases**: A sheep enters the flight state whenever any dog approaches within threat radius $r_s = 65$ m. Moving from $D_{\min}$ to $D_{\mathrm{sat}}$, parallel collection rounds up stragglers much faster, reducing cumulative flight duration per animal (on `wide` $N = 400$, mean flight time per sheep drops from 485 s at $D = 3$ to 359 s at $D = 6$). Beyond $D_{\mathrm{sat}}$, individual flight time remains flat (361 s at $D = 12$).
+- **Cumulative flight time per sheep actually decreases**: A sheep enters the flight state whenever any dog approaches within threat radius $r_s = 65$ m. Moving from $D_{\min}$ to *D*<sub>sat</sub>, parallel collection rounds up stragglers much faster, reducing cumulative flight duration per animal (on `wide` $N = 400$, mean flight time per sheep drops from 485 s at $D = 3$ to 359 s at $D = 6$). Beyond *D*<sub>sat</sub>, individual flight time remains flat (361 s at $D = 12$).
 - **Instantaneous flight proportion rises**: At any given second during the drive, a larger dog team spans a wider arc, putting a higher fraction of the flock into simultaneous motion (increasing from an average 68% of the flock fleeing at $D = 3$ to 84% at $D = 12$). But because total herding time is shorter, total cumulative exposure is not elevated.
 - **Physical safety buffers are maintained**: Under the $3 r_a = 6$ m standoff safety rule, the total time a dog spends within 6 m of any sheep averages less than 1.3 seconds per animal over the entire trial, never rising with team size $D$.
 
@@ -290,11 +290,11 @@ A common concern in livestock robotics is whether a large pack causes excessive 
 
 ![Cost of dogs beyond D_sat](../figures/fig33_effort.png)
 
-*Figure 8: Operating costs beyond saturation $D_{\mathrm{sat}}$ at $6\times$ drive times (99% arrival criterion). Left: Finish time relative to $D_{\mathrm{sat}}$ plateaus between 0.90 and 1.02. Right: Cumulative dog work scales linearly along the diagonal $D / D_{\mathrm{sat}}$.*
+**Figure 8:** Operating costs beyond saturation *D*<sub>sat</sub> at 6&times; drive times (99% arrival criterion). Left: Finish time relative to *D*<sub>sat</sub> plateaus between 0.90 and 1.02. Right: Cumulative dog work scales linearly along the diagonal *D* / *D*<sub>sat</sub>.
 
 ![Pressure on the flock](../figures/fig34_pressure.png)
 
-*Figure 9: Microscopic flock flight dynamics (12 seeds per cell, `dmin_f99_m6`). Left: Cumulative fleeing seconds per sheep decline sharply up to $D_{\mathrm{sat}}$ and remain flat thereafter. Right: The instantaneous percentage of fleeing sheep rises with dog team size.*
+**Figure 9:** Microscopic flock flight dynamics (12 seeds per cell, `dmin_f99_m6`). Left: Cumulative fleeing seconds per sheep decline sharply up to *D*<sub>sat</sub> and remain flat thereafter. Right: The instantaneous percentage of fleeing sheep rises with dog team size *D*.
 
 These flock pressure findings are partly intrinsic to the Strömbom formulation: repulsive forces from multiple dogs are normalized to unit magnitude (the blending mechanism), preventing local force amplification, while the 65 m detection radius naturally envelopes compact clusters. Detailed data tables and verification scripts are available in [`results_tables.md`](results_tables.md) (section "Phase 1").
 
@@ -309,7 +309,7 @@ On the `split` layout at $N \ge 200$, increasing $D$ does not improve success un
 
 ![Split Curves and Metric Diagnoses](../figures/fig23_split_curves.png)
 
-*Figure 10: Performance stall on split flocks. Increasing team size fails to achieve reliability at $N \ge 200$ due to sub-cluster pile-up and stop-rule freezing.*
+**Figure 10:** Performance stall on split flocks. Increasing team size fails to achieve reliability at *N* &ge; 200 due to sub-cluster pile-up and stop-rule freezing.
 
 ### 4.2 Per-Trial Metric Correlations
 Across all executed trials, per-tick measurements confirm:
