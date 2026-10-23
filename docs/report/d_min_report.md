@@ -96,18 +96,18 @@ Table 1 presents the complete empirical $D_{\min}$ scaling grid (Strict 100% / 9
 
 | Deadline | Layout | $N = 25$ | $N = 50$ | $N = 100$ | $N = 200$ | $N = 400$ |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: |
-| **$12\times$** | `compact` | 1 / 1 | 1 / 1 | 1 / 1 | 1 / 1 | 1 / 1 |
-| **$12\times$** | `wide` | 1 / 1 | 1 / 1 | 1 / 1 | 2 / 1–2 | 3 / 2 |
-| **$12\times$** | `split` | 1 / 1 | 1 / 1 | 1 / 1 | 1–2 / 1 | 3 / 2 |
-| **$12\times$** | `outlier_rich` | 1 / 1 | 1 / 1 | 1–3 / 1–2 | 2 / 2 | 3 / 2 |
-| **$6\times$** | `compact` | 1 / 1 | 1 / 1 | 1 / 1 | 1 / 1 | 1 / 1 |
-| **$6\times$** | `wide` | 1 / 1 | 1 / 1 | 1 / 1 | 3 / 2 | [9] / 2–3 |
-| **$6\times$** | `split` | 1 / 1 | 1 / 1 | 1 / 1 | none / [1] | none / [5] |
-| **$6\times$** | `outlier_rich` | 1 / 1 | 1 / 1 | 3 / 2 | [12] / 2–3 | none / 3 |
-| **$3\times$** | `compact` | 1 / 1 | 1 / 1 | 1 / 1 | 1 / 1 | 1 / 1 |
-| **$3\times$** | `wide` | 1 / 1 | 1 / 1 | 3 / 2 | none / 3 | none / 5–6 |
-| **$3\times$** | `split` | 1 / 1 | 1 / 1 | 1 / 1 | none / none | none / none |
-| **$3\times$** | `outlier_rich` | 1 / 1 | 1 / 1 | 3–8 / 2 | none / 4–10 | none / [6] |
+| **12&times;** | `compact` | 1 / 1 | 1 / 1 | 1 / 1 | 1 / 1 | 1 / 1 |
+| **12&times;** | `wide` | 1 / 1 | 1 / 1 | 1 / 1 | 2 / 1–2 | 3 / 2 |
+| **12&times;** | `split` | 1 / 1 | 1 / 1 | 1 / 1 | 1–2 / 1 | 3 / 2 |
+| **12&times;** | `outlier_rich` | 1 / 1 | 1 / 1 | 1–3 / 1–2 | 2 / 2 | 3 / 2 |
+| **6&times;** | `compact` | 1 / 1 | 1 / 1 | 1 / 1 | 1 / 1 | 1 / 1 |
+| **6&times;** | `wide` | 1 / 1 | 1 / 1 | 1 / 1 | 3 / 2 | [9] / 2–3 |
+| **6&times;** | `split` | 1 / 1 | 1 / 1 | 1 / 1 | none / [1] | none / [5] |
+| **6&times;** | `outlier_rich` | 1 / 1 | 1 / 1 | 3 / 2 | [12] / 2–3 | none / 3 |
+| **3&times;** | `compact` | 1 / 1 | 1 / 1 | 1 / 1 | 1 / 1 | 1 / 1 |
+| **3&times;** | `wide` | 1 / 1 | 1 / 1 | 3 / 2 | none / 3 | none / 5–6 |
+| **3&times;** | `split` | 1 / 1 | 1 / 1 | 1 / 1 | none / none | none / none |
+| **3&times;** | `outlier_rich` | 1 / 1 | 1 / 1 | 3–8 / 2 | none / 4–10 | none / [6] |
 
 ![D_min Scaling against Flock Size N](../figures/fig20_dmin_vs_n.png)
 
@@ -131,9 +131,9 @@ Table 2 provides the empirical log-log scaling exponents:
 **Physical Rationale and Interpretation of Table 2:**
 1. **Concept of Log-Log Slope ($\alpha$)**:
    In log-log coordinates ($\log_2 D_{\min}$ vs. $\log_2 N$), scaling follows a power-law relationship: $D_{\min} \propto N^\alpha$, where the slope $\alpha = \frac{\Delta \log_2 D_{\min}}{\Delta \log_2 N}$ directly measures **economies of scale**:
-   - **$\alpha = 1.0$ (Linear scaling)**: Doubling flock size strictly requires doubling the shepherd team (fixed sheep-to-dog ratio, no economies of scale).
-   - **$\alpha < 1.0$ (Sub-linear scaling)**: Larger flocks require progressively fewer additional dogs per animal. For example, at $\alpha \approx 0.33$, an $8\times$ increase in flock size ($2^3$) requires only a $2\times$ increase in shepherd team size ($2^1 = 2$).
-   - **$\alpha = 0$ ("Flat")**: Shepherd demand does not increase with $N$ at all. On `split` layouts at $N \le 100$, a single dog ($D_{\min} = 1$) successfully gathers all three sub-clusters within the deadline.
+   - **&alpha; = 1.0 (Linear scaling)**: Doubling flock size strictly requires doubling the shepherd team (fixed sheep-to-dog ratio, no economies of scale).
+   - **&alpha; < 1.0 (Sub-linear scaling)**: Larger flocks require progressively fewer additional dogs per animal. For example, at $\alpha \approx 0.33$, an $8\times$ increase in flock size ($2^3$) requires only a $2\times$ increase in shepherd team size ($2^1 = 2$).
+   - **&alpha; = 0 ("Flat")**: Shepherd demand does not increase with $N$ at all. On `split` layouts at $N \le 100$, a single dog ($D_{\min} = 1$) successfully gathers all three sub-clusters within the deadline.
 2. **Advantage of Biological Swarm Cohesion**:
    In robotic collection of independent, non-cohesive targets (e.g. foraging or trash collection on an open plane), the theoretical lower bound is $\alpha = 0.50$ ($D \propto \sqrt{M}$). In contrast, for cohesive sheep flocks under generous deadlines ($12\times$), the empirical slope drops to **0.20 to 0.42** (and **0.20 to 0.30** under the 99% criterion). This demonstrates that biological cohesion does half the work for the shepherd team: as the flock grows, natural social attraction pulls animals inward toward the group center, drastically reducing the need for additional herders.
 3. **Why Urgency Steepens the Scaling Slope**:

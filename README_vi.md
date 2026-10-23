@@ -13,7 +13,7 @@ Thực tế này đặt ra một câu hỏi nền tảng trong lĩnh vực hành
 
 > **Cần tối thiểu bao nhiêu chú chó ($D$) để gom một đàn gồm $N$ con cừu và lùa chúng vào chuồng một cách tin cậy trước thời hạn quy định?**
 
-**HerdSim** là một phòng thí nghiệm mô phỏng mã nguồn mở được xây dựng để trả lời câu hỏi đó. Chúng tôi nghiên cứu quy mô đội hình tối thiểu này (gọi là **$D_{\min}$**) thay đổi như thế nào khi đàn cừu tăng từ 25 lên đến 400 con, trên nhiều bố cục bãi cỏ khác nhau, dưới các mức áp lực thời gian từ thong thả đến gấp rút, và với các chiến lược phối hợp đội hình khác nhau.
+**HerdSim** là một phòng thí nghiệm mô phỏng mã nguồn mở được xây dựng để trả lời câu hỏi đó. Chúng tôi nghiên cứu quy mô đội hình tối thiểu này (gọi là ***D*<sub>min</sub>**) thay đổi như thế nào khi đàn cừu tăng từ 25 lên đến 400 con, trên nhiều bố cục bãi cỏ khác nhau, dưới các mức áp lực thời gian từ thong thả đến gấp rút, và với các chiến lược phối hợp đội hình khác nhau.
 
 ![Một lượt mô phỏng](docs/figures/fig17_trial.png)
 **Hình 1:** Một lượt mô phỏng trực tiếp (*N* = 200 cừu, *D* = 4 chó, bố cục xuất phát tản mác wide, hạt giống ngẫu nhiên 2026). Các chú chó tỏa ra song song để gom những con cừu lạc xa nhất, kết nối chúng thành một đàn thống nhất, dàn thành vòng cung lùa phía sau và điều khiển cả đàn tiến êm ả vào mục tiêu hình tròn.
@@ -226,11 +226,11 @@ Một đàn cừu gọn gàng được lùa bởi một chú chó thuần thục
 
 | Quy mô đàn ($N$) | Bán kính đàn $R_f$ | Cự ly lùa $l$ | Thời gian lùa ($T_{\mathrm{drive}}$) | Thời hạn $12\times$ (Thong thả) | Thời hạn $6\times$ (Trung bình) | Thời hạn $3\times$ (Gấp rút) |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **$N = 25$** | 6,20 m | 80,6 m | **80,6 s** (~1,3 phút) | 967 s (~16,1 phút) | 484 s (~8,1 phút) | 242 s (~4,0 phút) |
-| **$N = 50$** | 7,60 m | 98,8 m | **98,8 s** (~1,6 phút) | 1.185 s (~19,8 phút) | 593 s (~9,9 phút) | 296 s (~4,9 phút) |
+| ***N* = 25** | 6,20 m | 80,6 m | **80,6 s** (~1,3 phút) | 967 s (~16,1 phút) | 484 s (~8,1 phút) | 242 s (~4,0 phút) |
+| ***N* = 50** | 7,60 m | 98,8 m | **98,8 s** (~1,6 phút) | 1.185 s (~19,8 phút) | 593 s (~9,9 phút) | 296 s (~4,9 phút) |
 | ***N* = 100** | 9,08 m | 118,1 m | **118,1 s** (~2,0 phút) | 1.417 s (~23,6 phút) | 708 s (~11,8 phút) | 354 s (~5,9 phút) |
-| **$N = 200$** | 10,47 m | 139,8 m | **139,8 s** (~2,3 phút) | 1.678 s (~28,0 phút) | 839 s (~14,0 phút) | 419 s (~7,0 phút) |
-| **$N = 400$** | 11,40 m | 206,8 m | **206,8 s** (~3,4 phút) | 2.482 s (~41,4 phút) | 1.241 s (~20,7 phút) | 620 s (~10,3 phút) |
+| ***N* = 200** | 10,47 m | 139,8 m | **139,8 s** (~2,3 phút) | 1.678 s (~28,0 phút) | 839 s (~14,0 phút) | 419 s (~7,0 phút) |
+| ***N* = 400** | 11,40 m | 206,8 m | **206,8 s** (~3,4 phút) | 2.482 s (~41,4 phút) | 1.241 s (~20,7 phút) | 620 s (~10,3 phút) |
 
 ### Tại sao lại chọn quy mô đàn *N* &in; [25, 400] và số lượng chó *D* &in; [1, 24]?
 
@@ -366,23 +366,31 @@ HerdSim cung cấp ba cơ chế điều khiển chó chăn cừu:
 #### Kiến trúc phối hợp đội ngũ: `strombom_multi`
 Mở rộng các quy tắc kinh nghiệm của Strömbom thành một đội ngũ tự hành thông minh:
 
-1. **Phát hiện cá thể lạc đàn ($f(N) = r_a \cdot N^{2/3}$)**:
-   - *Tại sao lại là $r_a \cdot N^{2/3}$?* Nếu nén $N$ hình tròn đường kính $r_a$ trên mặt phẳng 2D, bán kính cụm đặc tăng theo $\sim N^{1/2}$. Với hình cầu 3D, bán kính tăng theo $\sim N^{1/3}$. Trên đồng cỏ mở thực tế, cừu phân bố theo dạng cụm fractal, do đó ranh giới tự nhiên mà cừu tự coi là "bị tách rời khỏi bầy" mở rộng theo tỉ lệ $N^{2/3}$.
-   - Nếu có bất kỳ con cừu nào nằm cách Khối tâm Toàn thể ($\mathrm{GCM} = \frac{1}{N} \sum_k \mathbf{x}_k$) xa hơn khoảng cách $f(N)$, đàn cừu bị coi là tản mác, kích hoạt **Chế độ Gom cừu lạc**.
+1. **Phát hiện cá thể lạc đàn (*f*(*N*) = *r*<sub>a</sub> &middot; *N*<sup>2/3</sup>)**:
+   - **Tại sao lại là *r*<sub>a</sub> &middot; *N*<sup>2/3</sup>?** Nếu nén *N* hình tròn đường kính *r*<sub>a</sub> trên mặt phẳng 2D, bán kính cụm đặc tăng theo ~ *N*<sup>1/2</sup>. Với hình cầu 3D, bán kính tăng theo ~ *N*<sup>1/3</sup>. Trên đồng cỏ mở thực tế, cừu phân bố theo dạng cụm fractal, do đó ranh giới tự nhiên mà cừu tự coi là "bị tách rời khỏi bầy" mở rộng theo tỉ lệ *N*<sup>2/3</sup>.
+   - Nếu có bất kỳ con cừu nào nằm cách Khối tâm Toàn thể (GCM = 1/*N* &sum;<sub>*k*</sub> **x**<sub>*k*</sub>) xa hơn khoảng cách *f*(*N*), đàn cừu bị coi là tản mác, kích hoạt **Chế độ Gom cừu lạc**.
 2. **Phân công gom cừu lạc (Thuật toán Hungarian)**:
-   - Với mỗi con cừu lạc $o$, điểm đích của chú chó $P_c$ được đặt lùi $r_a = 2$ m ngay phía sau con cừu đó so với tâm bầy:
-     $$P_c = \mathbf{x}_o + r_a \frac{\mathbf{x}_o - \mathrm{GCM}}{\lVert \mathbf{x}_o - \mathrm{GCM} \rVert}$$
-     Điều này đảm bảo khi chú chó áp sát điểm $P_c$, sự hiện diện của nó sẽ đẩy con cừu lạc chạy ngược trở lại khối chính.
-   - $D$ con cừu lạc xa nhất được ghép cặp 1-1 với $D$ chú chó thông qua thuật toán Hungarian (`linear_sum_assignment`), giúp tối thiểu hóa tổng quãng đường chạy của cả đội và ngăn chặn hoàn toàn việc các đường chạy đan chéo vào nhau. Những chú chó còn dư sẽ hỗ trợ giữ nhịp khối chính.
-3. **Đội hình lùa bầy về đích ($P_d$)**:
-   - Khi toàn bộ cừu đã nằm gọn trong bán kính $f(N)$, bầy cừu đã kết nối thành một khối, đàn chó chuyển sang **Chế độ Lùa bầy**.
-   - Điểm lùa trung tâm $P_d$ được đặt phía sau bầy so với đích:
-     $$P_d = \mathrm{GCM} + r_a \sqrt{N} \frac{\mathrm{GCM} - \mathbf{x}_{\mathrm{goal}}}{\lVert \mathrm{GCM} - \mathbf{x}_{\mathrm{goal}} \rVert}$$
-     *Tại sao lại là $r_a \sqrt{N}$?* Một đàn gồm $N$ con cừu đứng gần nhau tạo thành một hình tròn có bán kính xấp xỉ $\propto r_a \sqrt{N}$. Đặt điểm lùa ở cự ly $r_a \sqrt{N}$ giúp chó đứng ngay sát mép sau của đàn cừu để đẩy đàn tiến thẳng về đích.
-   - Khi có nhiều chó, chúng dàn thành một vòng cung bán kính $R$ ôm trọn bề ngang góc nhìn của đàn cừu ($\pm \arcsin(R_{\mathrm{flock}} / R)$). Các chú chó được chia vị trí cố định theo thứ tự góc cực, bảo đảm không bao giờ vướng chân hay cắt mặt nhau.
+   - Với mỗi con cừu lạc *o*, điểm đích của chú chó *P*<sub>c</sub> được đặt lùi *r*<sub>a</sub> = 2 m ngay phía sau con cừu đó so với tâm bầy:
+
+$$
+P_c = \mathbf{x}_o + r_a \frac{\mathbf{x}_o - \mathrm{GCM}}{\lVert \mathbf{x}_o - \mathrm{GCM} \rVert}
+$$
+
+   - Điều này đảm bảo khi chú chó áp sát điểm *P*<sub>c</sub>, sự hiện diện của nó sẽ đẩy con cừu lạc chạy ngược trở lại khối chính.
+   - *D* con cừu lạc xa nhất được ghép cặp 1-1 với *D* chú chó thông qua thuật toán Hungarian (`linear_sum_assignment`), giúp tối thiểu hóa tổng quãng đường chạy của cả đội và ngăn chặn hoàn toàn việc các đường chạy đan chéo vào nhau. Những chú chó còn dư sẽ hỗ trợ giữ nhịp khối chính.
+3. **Đội hình lùa bầy về đích (*P*<sub>d</sub>)**:
+   - Khi toàn bộ cừu đã nằm gọn trong bán kính *f*(*N*), bầy cừu đã kết nối thành một khối, đàn chó chuyển sang **Chế độ Lùa bầy**.
+   - Điểm lùa trung tâm *P*<sub>d</sub> được đặt phía sau bầy so với đích:
+
+$$
+P_d = \mathrm{GCM} + r_a \sqrt{N} \frac{\mathrm{GCM} - \mathbf{x}_{\mathrm{goal}}}{\lVert \mathrm{GCM} - \mathbf{x}_{\mathrm{goal}} \rVert}
+$$
+
+   - **Tại sao cự ly lùa lại tỉ lệ với *r*<sub>a</sub>&radic;*N*?** Một đàn gồm *N* con cừu đứng gần nhau tạo thành một hình tròn có bán kính xấp xỉ tỉ lệ với *r*<sub>a</sub>&radic;*N*. Đặt điểm lùa ở cự ly *r*<sub>a</sub>&radic;*N* giúp chó đứng ngay sát mép sau của đàn cừu để đẩy đàn tiến thẳng về đích.
+   - Khi có nhiều chó, chúng dàn thành một vòng cung bán kính *R* ôm trọn bề ngang góc nhìn của đàn cừu (&plusmn; arcsin(*R*<sub>flock</sub> / *R*)). Các chú chó được chia vị trí cố định theo thứ tự góc cực, bảo đảm không bao giờ vướng chân hay cắt mặt nhau.
 4. **Vận tốc và Quy tắc dừng giữ khoảng cách của chó**:
-   - Vận tốc làm việc: $v_{\mathrm{dog}} = 1{,}5$ m/s (nhanh gấp 1,5 lần cừu, phản ánh đúng tương quan vận tốc giữa giống chó Border Collie và cừu nhà).
-   - Quy tắc phanh dừng: Nếu chó đến gần bất kỳ con cừu nào hơn $3 r_a = 6$ m, nó sẽ lập tức phanh dừng lại ($\mathbf{v}_{\mathrm{dog}} = 0$) để tránh giẫm đạp hoặc làm đàn cừu hoảng sợ hỗn loạn.
+   - Vận tốc làm việc: *v*<sub>dog</sub> = 1,5 m/s (nhanh gấp 1,5 lần cừu, phản ánh đúng tương quan vận tốc giữa giống chó Border Collie và cừu nhà).
+   - Quy tắc phanh dừng: Nếu chó đến gần bất kỳ con cừu nào hơn 3*r*<sub>a</sub> = 6 m, nó sẽ lập tức phanh dừng lại (**v**<sub>dog</sub> = 0) để tránh giẫm đạp hoặc làm đàn cừu hoảng sợ hỗn loạn.
 
 #### Mô hình đối chứng không phối hợp: `fat` (Farthest-Agent Targeting)
 Một thuật toán đối chứng (`dog_controller="fat"`) nhằm chứng minh tầm quan trọng của việc tổ chức đội ngũ.
@@ -429,7 +437,7 @@ Các phân loại thống kê được tính toán tự động bởi [`analysis
 
 | Chỉ số | Định nghĩa |
 | :--- | :--- |
-| **$D_{\min}$** | Số lượng chó nhỏ nhất đạt chuẩn tin cậy. ($D_{\min,\mathrm{low}}$: số chó nhỏ nhất có cận trên chạm tới 0,90). |
+| ***D*<sub>min</sub>** | Số lượng chó nhỏ nhất đạt chuẩn tin cậy. ($D_{\min,\mathrm{low}}$: số chó nhỏ nhất có cận trên chạm tới 0,90). |
 | ***D*<sub>sat</sub>** | Ngưỡng bão hòa: Số chó nhỏ nhất đạt độ tin cậy mà việc bổ sung thêm chó không còn mang lại sự gia tăng tốc độ có ý nghĩa thống kê. |
 | ***D*<sub>best</sub>** | Số chó nhỏ nhất đạt tốc độ nhanh tương đương với đội hình nhanh nhất trên đường cong. |
 | ***D*<sub>crowd</sub>** | Ngưỡng chen chúc: Số chó nhỏ nhất ($> D_{\mathrm{best}}$) bị chậm đi rõ rệt do các chú chó cản trở lẫn nhau. |

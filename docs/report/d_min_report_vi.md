@@ -96,18 +96,18 @@ Bảng 1 tổng hợp lưới ranh giới $D_{\min}$ thực nghiệm (Nghiêm ng
 
 | Thời hạn | Bố cục xuất phát | $N = 25$ | $N = 50$ | $N = 100$ | $N = 200$ | $N = 400$ |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: |
-| **$12\times$** | `compact` | 1 / 1 | 1 / 1 | 1 / 1 | 1 / 1 | 1 / 1 |
-| **$12\times$** | `wide` | 1 / 1 | 1 / 1 | 1 / 1 | 2 / 1–2 | 3 / 2 |
-| **$12\times$** | `split` | 1 / 1 | 1 / 1 | 1 / 1 | 1–2 / 1 | 3 / 2 |
-| **$12\times$** | `outlier_rich` | 1 / 1 | 1 / 1 | 1–3 / 1–2 | 2 / 2 | 3 / 2 |
-| **$6\times$** | `compact` | 1 / 1 | 1 / 1 | 1 / 1 | 1 / 1 | 1 / 1 |
-| **$6\times$** | `wide` | 1 / 1 | 1 / 1 | 1 / 1 | 3 / 2 | [9] / 2–3 |
-| **$6\times$** | `split` | 1 / 1 | 1 / 1 | 1 / 1 | none / [1] | none / [5] |
-| **$6\times$** | `outlier_rich` | 1 / 1 | 1 / 1 | 3 / 2 | [12] / 2–3 | none / 3 |
-| **$3\times$** | `compact` | 1 / 1 | 1 / 1 | 1 / 1 | 1 / 1 | 1 / 1 |
-| **$3\times$** | `wide` | 1 / 1 | 1 / 1 | 3 / 2 | none / 3 | none / 5–6 |
-| **$3\times$** | `split` | 1 / 1 | 1 / 1 | 1 / 1 | none / none | none / none |
-| **$3\times$** | `outlier_rich` | 1 / 1 | 1 / 1 | 3–8 / 2 | none / 4–10 | none / [6] |
+| **12&times;** | `compact` | 1 / 1 | 1 / 1 | 1 / 1 | 1 / 1 | 1 / 1 |
+| **12&times;** | `wide` | 1 / 1 | 1 / 1 | 1 / 1 | 2 / 1–2 | 3 / 2 |
+| **12&times;** | `split` | 1 / 1 | 1 / 1 | 1 / 1 | 1–2 / 1 | 3 / 2 |
+| **12&times;** | `outlier_rich` | 1 / 1 | 1 / 1 | 1–3 / 1–2 | 2 / 2 | 3 / 2 |
+| **6&times;** | `compact` | 1 / 1 | 1 / 1 | 1 / 1 | 1 / 1 | 1 / 1 |
+| **6&times;** | `wide` | 1 / 1 | 1 / 1 | 1 / 1 | 3 / 2 | [9] / 2–3 |
+| **6&times;** | `split` | 1 / 1 | 1 / 1 | 1 / 1 | none / [1] | none / [5] |
+| **6&times;** | `outlier_rich` | 1 / 1 | 1 / 1 | 3 / 2 | [12] / 2–3 | none / 3 |
+| **3&times;** | `compact` | 1 / 1 | 1 / 1 | 1 / 1 | 1 / 1 | 1 / 1 |
+| **3&times;** | `wide` | 1 / 1 | 1 / 1 | 3 / 2 | none / 3 | none / 5–6 |
+| **3&times;** | `split` | 1 / 1 | 1 / 1 | 1 / 1 | none / none | none / none |
+| **3&times;** | `outlier_rich` | 1 / 1 | 1 / 1 | 3–8 / 2 | none / 4–10 | none / [6] |
 
 ![D_min mở rộng theo quy mô N](../figures/fig20_dmin_vs_n.png)
 
@@ -131,9 +131,9 @@ Bảng 2 liệt kê độ dốc tăng trưởng trong không gian log-log:
 **Ý nghĩa vật lý và giải thích các số liệu trong Bảng 2:**
 1. **Khái niệm độ dốc log-log ($\alpha$)**:
    Trong biểu đồ hai trục logarit ($\log_2 D_{\min}$ theo $\log_2 N$), mối quan hệ mở rộng được mô hình hóa dưới dạng hàm lũy thừa: $D_{\min} \propto N^\alpha$, với hệ số góc $\alpha = \frac{\Delta \log_2 D_{\min}}{\Delta \log_2 N}$. Hệ số này đo lường mức độ nhạy cảm của nhu cầu bổ sung chó khi đàn cừu tăng quy mô:
-   - **$\alpha = 1{,}0$ (Tuyến tính)**: Cứ tăng gấp đôi số cừu thì phải tăng gấp đôi số chó (tỉ lệ cừu/chó cố định, không có lợi thế quy mô).
-   - **$\alpha < 1{,}0$ (Dưới tuyến tính - Sub-linear)**: Bầy cừu càng lớn thì số lượng chó cần thêm càng ít đi (tính kinh tế theo quy mô). Ví dụ với $\alpha = 0{,}33$, khi quy mô bầy $N$ tăng gấp 8 lần ($2^3$), số lượng chó cần thiết chỉ tăng gấp đôi ($2^1 = 2$).
-   - **$\alpha = 0$ ("Đi ngang" - Flat)**: Nhu cầu chó không hề tăng theo $N$. Trên bố cục `split` ở quy mô $N \le 100$, một chú chó ($D_{\min} = 1$) vẫn hoàn thành tốt nhiệm vụ thu gom cả 3 phân cụm trong thời hạn cho phép.
+   - **&alpha; = 1,0 (Tuyến tính)**: Cứ tăng gấp đôi số cừu thì phải tăng gấp đôi số chó (tỉ lệ cừu/chó cố định, không có lợi thế quy mô).
+   - **&alpha; < 1,0 (Dưới tuyến tính - Sub-linear)**: Bầy cừu càng lớn thì số lượng chó cần thêm càng ít đi (tính kinh tế theo quy mô). Ví dụ với $\alpha = 0{,}33$, khi quy mô bầy $N$ tăng gấp 8 lần ($2^3$), số lượng chó cần thiết chỉ tăng gấp đôi ($2^1 = 2$).
+   - **&alpha; = 0 ("Đi ngang" - Flat)**: Nhu cầu chó không hề tăng theo $N$. Trên bố cục `split` ở quy mô $N \le 100$, một chú chó ($D_{\min} = 1$) vẫn hoàn thành tốt nhiệm vụ thu gom cả 3 phân cụm trong thời hạn cho phép.
 2. **Lợi thế từ tính gắn kết bầy đàn sinh học (Cohesion)**:
    Trong các bài toán thu gom mục tiêu độc lập không có tính xã hội (chẳng hạn robot gom rác hay lùa các hạt rời rạc trên mặt phẳng), độ dốc lý thuyết tối thiểu là $\alpha = 0{,}50$ ($D \propto \sqrt{M}$). Ngược lại, đối với bầy cừu có tính bầy đàn tự nhiên, ở thời hạn thong thả ($12\times$), độ dốc thực nghiệm chỉ đạt từ **0,20 đến 0,42** (dưới tiêu chí 99% thậm chí chỉ từ **0,20 đến 0,30**). Điều này chứng minh rằng bản năng tự gắn kết bầy đàn của cừu đã san sẻ gánh nặng gom đàn cho bầy chó: khi số cừu tăng lên, lực hút về khối tâm tự nhiên giúp đàn cừu dễ tụ lại hơn, giúp hạn chế tối đa việc phải bổ sung thêm chó.
 3. **Tại sao độ dốc lại tăng mạnh khi thời hạn siết chặt?**:
@@ -213,7 +213,7 @@ Bảng 3 so sánh định lượng độ biến động theo số lần nhân đ
 ### 3.5 RQ5: Những quy luật nào đứng vững trước các phân tích độ nhạy?
 
 **Câu trả lời trực tiếp cho RQ5**:
-- **Dưới tiêu chí 99%**: Các quy luật mở rộng có tính vững chắc vượt trội. Dù thay đổi hình học thả chó (`handler`, `ring`, `arcs`), cự ly xuất phát (15, 30, 60 m), vận tốc chó (1,15 so với 1,50), hay áp dụng bộ tham số thực địa GPS của cừu, giá trị $D_{\min}$ vẫn duy trì ổn định trong phạm vi **$\pm 1$ chó** so với mốc cơ sở trên mọi ô.
+- **Dưới tiêu chí 99%**: Các quy luật mở rộng có tính vững chắc vượt trội. Dù thay đổi hình học thả chó (`handler`, `ring`, `arcs`), cự ly xuất phát (15, 30, 60 m), vận tốc chó (1,15 so với 1,50), hay áp dụng bộ tham số thực địa GPS của cừu, giá trị $D_{\min}$ vẫn duy trì ổn định trong phạm vi **&plusmn;1 chó** so với mốc cơ sở trên mọi ô.
 - **Dưới tiêu chí nghiêm ngặt**: Giá trị tuyệt đối biến động dữ dội gấp 3 lần trở lên, do các quy ước thiết lập làm thay đổi quỹ đạo nhạy cảm của con cừu cuối cùng khi vào đích.
 - **Hình học đích**: Việc thu hẹp bán kính đích ($1{,}5 R_f$) là biến thể duy nhất làm tăng thực sự $D_{\min}$ dưới cả hai tiêu chí (nâng `wide` $N = 400$ từ 2–3 lên 5–6 chó).
 
