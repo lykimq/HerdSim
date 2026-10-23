@@ -190,25 +190,6 @@ Table 3 compares the quantitative spread in doublings:
 - **Under Strict Criteria**: Absolute counts fluctuate by factors of three or more, because minor setup variations alter the delicate trajectory of the final straggler into the goal.
 - **Goal Geometry**: A tighter goal radius ($1.5 R_f$) is the only parameter that fundamentally increases $D_{\min}$ under both criteria (raising wide $N = 400$ from 2–3 to 5–6 dogs).
 
-Table 4 summarizes the sensitivity grid at $6\times$ drive times ($D_{\min}$ Base / Variant):
-
-| Criterion | Sensitivity Variant | `wide` 100 | `wide` 200 | `wide` 400 | `outlier` 100 | `outlier` 200 | `outlier` 400 |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Strict** | Field-Matched GPS Parameters | 1 / 1–6 | 3 / none | [9] / none | 3 / [1] | [12] / none | none / none |
-| **Strict** | Single Handler Post Release | 1 / 1 | 3 / 3 | [9] / none | 3 / 2 | [12] / [3] | none / none |
-| **Strict** | Encircling Ring Release | 1 / 1 | 3 / 3–5 | [9] / [8] | 3 / 2–7 | [12] / [5] | none / none |
-| **Strict** | Tighter Goal Radius ($1.5 R_f$) | 1 / 1–3 | 3 / none | [9] / none | 3 / 3 | [12] / none | none / none |
-| **Strict** | Reduced Start Gap ($15$) | 1 / 1 | 3 / [3] | [9] / none | 3 / [1] | [12] / none | none / none |
-| **Strict** | Expanded Start Gap ($60$) | 1 / 1 | 3 / 3–4 | [9] / 6–7 | 3 / 3 | [12] / 5 | none / [12] |
-| **Strict** | Reduced Dog Speed ($1.15$) | 1 / 1 | 3 / 3 | [9] / 5 | 3 / 2–3 | [12] / 4 | none / 6 |
-| **99%** | Field-Matched GPS Parameters | 1 / 1 | 2 / 1 | 2–3 / 2 | 2 / 1 | 2–3 / 1 | 3 / 2–3 |
-| **99%** | Single Handler Post Release | 1 / 1 | 2 / 2–3 | 2–3 / 2–3 | 2 / 2 | 2–3 / 2–3 | 3 / 3 |
-| **99%** | Encircling Ring Release | 1 / 1 | 2 / 2–3 | 2–3 / 3 | 2 / 2 | 2–3 / 2 | 3 / 3 |
-| **99%** | Tighter Goal Radius ($1.5 R_f$) | 1 / 1 | 2 / 2 | 2–3 / 5–6 | 2 / 2 | 2–3 / 2–3 | 3 / none |
-| **99%** | Reduced Start Gap ($15$) | 1 / 1 | 2 / 2 | 2–3 / 2–3 | 2 / 1–2 | 2–3 / 2 | 3 / 3 |
-| **99%** | Expanded Start Gap ($60$) | 1 / 1 | 2 / 2–3 | 2–3 / 2–3 | 2 / 2 | 2–3 / 2–3 | 3 / 3 |
-| **99%** | Reduced Dog Speed ($1.15$) | 1 / 1 | 2 / 2–3 | 2–3 / 2–3 | 2 / 2 | 2–3 / 2–3 | 3 / 3 |
-
 ![Sensitivity Analysis Heatmap](../figures/fig24_sensitivity.png)
 
 *Figure 6: Sensitivity analysis across experimental variants at $6\times$ drive times. Strict results (above) show high volatility; 99% arrival results (below) demonstrate remarkable stability.*
