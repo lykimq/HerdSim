@@ -771,10 +771,99 @@ def fig_design() -> None:
     plt.close(fig)
 
 
+# ---------------------------------------------------------------------------------- figure 33
+def fig_effort() -> None:
+    """Cost of dogs beyond D_sat: finish time and dog time relative to the D_sat cell."""
+    if not have("dmin_f99_m6"):
+        return
+    c = cells("dmin_f99_m6")
+    g = groups_table(RESULTS / "dmin_f99_m6")
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.2))
+    for _, r in g.dropna(subset=["d_sat", "d_max"]).iterrows():
+        sat, top = int(r["d_sat"]), int(r["d_max"])
+        part = c[(c["layout"] == r["layout"]) & (c["n"] == r["n"]) & (c["reliability"] == "reliable")]
+        part = part[(part["d"] >= sat) & (part["d"] <= top)].sort_values("d")
+        base = part[part["d"] == sat]
+        if top <= sat or base.empty:
+            continue
+        x = part["d"] / sat
+        color = LAYOUT_COLOR[str(r["layout"])]
+        kw = {"color": color, "lw": 1.0, "marker": "o", "ms": 3, "alpha": 0.85}
+        axes[0].plot(x, part["median_finish"] / float(base["median_finish"].iloc[0]), **kw)
+        axes[1].plot(x, part["median_dog_ticks"] / float(base["median_dog_ticks"].iloc[0]), **kw)
+    ref = np.array([1, 24])
+    axes[1].plot(ref, ref, color=INK, lw=0.8, ls="--", label="dog time = D / D_sat")
+    for ax, ylabel in zip(axes, ("finish time / finish time at D_sat", "dog time / dog time at D_sat")):
+        ax.set_xscale("log")
+        ax.set_xticks([1, 2, 4, 8, 16, 24])
+        ax.set_xticklabels([1, 2, 4, 8, 16, 24])
+        ax.minorticks_off()
+        ax.set_xlabel("D / D_sat")
+        ax.set_ylabel(ylabel)
+        ax.grid(color=GRID, lw=0.6)
+    axes[0].set_ylim(0.6, 1.2)
+    axes[0].axhline(1.0, color=INK, lw=0.8, ls="--")
+    axes[1].set_yscale("log")
+    axes[1].set_yticks([1, 2, 4, 8, 16, 24])
+    axes[1].set_yticklabels([1, 2, 4, 8, 16, 24])
+    axes[1].minorticks_off()
+    axes[0].set_title("finish time beyond D_sat", fontsize=10)
+    axes[1].set_title("dog time beyond D_sat", fontsize=10)
+    for layout, color in LAYOUT_COLOR.items():
+        axes[0].plot([], [], color=color, lw=1.4, label=layout)
+    axes[0].legend(frameon=False, fontsize=8, loc="upper left", ncol=2)
+    axes[1].legend(frameon=False, fontsize=8, loc="upper left")
+    fig.tight_layout(rect=(0, 0.05, 1, 1))
+    fig.text(0.5, 0.01, "dmin_f99_m6 (99 percent rule, 6 drive times). One line per curve with a D_sat "
+             "below its largest reliable D; medians over successful seeds. Where D_sat is open, its "
+             "low end is used.", ha="center", fontsize=8, color=MUTED)
+    fig.savefig(OUT / "fig33_effort.png", dpi=150)
+    plt.close(fig)
+
+
+# ---------------------------------------------------------------------------------- figure 34
+def fig_pressure() -> None:
+    """Replayed trials: seconds in flight per sheep, and the share in flight, against D."""
+    path = RESULTS / "diagnostics" / "pressure_dmin_f99_m6.csv"
+    if not path.exists():
+        print("missing", path, ": figure skipped")
+        return
+    t = pd.read_csv(path)
+    t = t[t["success"]]
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.2))
+    for (layout, n), part in t.groupby(["layout", "n"]):
+        med = part.groupby("d")[["flight_seconds_per_sheep", "mean_flight_share"]].median()
+        color = LAYOUT_COLOR[str(layout)]
+        kw = {"color": color, "marker": "o" if n == 100 else "s", "ms": 4, "lw": 1.2,
+              "ls": "-" if n == 400 else ":", "label": f"{layout}, N = {n}"}
+        axes[0].plot(med.index, med["flight_seconds_per_sheep"], **kw)
+        axes[1].plot(med.index, med["mean_flight_share"], **kw)
+    for ax in axes:
+        ax.set_xscale("log")
+        ax.set_xticks([1, 2, 3, 6, 12])
+        ax.set_xticklabels([1, 2, 3, 6, 12])
+        ax.minorticks_off()
+        ax.set_xlabel("dogs D")
+        ax.grid(color=GRID, lw=0.6)
+    axes[0].set_ylim(0, 520)
+    axes[0].set_ylabel("seconds in flight per sheep (median)")
+    axes[0].set_title("time each sheep spends fleeing a dog", fontsize=10)
+    axes[1].set_ylim(0, 1)
+    axes[1].set_ylabel("share of the flock in flight, mean over the trial")
+    axes[1].set_title("share of sheep within r_s of a dog", fontsize=10)
+    axes[1].legend(frameon=False, fontsize=8, loc="lower right")
+    fig.tight_layout(rect=(0, 0.05, 1, 1))
+    fig.text(0.5, 0.01, "12 stored seeds per cell of dmin_f99_m6 replayed (each replay reproduces the "
+             "stored trial); D = 1, D_min, D_sat, 2 D_sat; successful trials only. D = 1 at N = 400 "
+             "never succeeds.", ha="center", fontsize=8, color=MUTED)
+    fig.savefig(OUT / "fig34_pressure.png", dpi=150)
+    plt.close(fig)
+
+
 def main() -> None:
     for draw in (fig_dmin_vs_n, fig_curves, fig_heatmaps, fig_deadline, fig_straggler,
                  fig_strict_vs_99, fig_split_curves, fig_sensitivity, fig_placement_results,
-                 fig_fat, fig_metrics, fig_compact, fig_design):
+                 fig_fat, fig_metrics, fig_compact, fig_design, fig_effort, fig_pressure):
         draw()
 
 

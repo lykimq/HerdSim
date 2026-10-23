@@ -243,5 +243,6 @@ Some things the current design doesn't handle yet, and would need real changes:
 | Trial row, provenance | `protocols/packaging/` |
 | Frontier rules | `analysis/frontier.py` |
 | D_min of a finished run, and its tables | `analysis/dmin.py`, `analysis/dmin_tables.py` |
+| Replays of stored trials with extra measures (pressure on the flock) | `analysis/pressure.py`, `cli/pressure_replay.py` |
 | Command-line entry points | `cli/` |
 | Regression tests | `tests/sim/test_golden.py` |

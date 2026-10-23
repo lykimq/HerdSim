@@ -14,6 +14,9 @@ from analysis.dmin_tables import (
     compare,
     dips,
     dmin_text,
+    dsat_bracket,
+    dsat_text,
+    effort_table,
     growth_table,
     layout_against_n,
     layout_by_n,
@@ -200,3 +203,49 @@ def test_run_record_reads_current_counts_from_the_folder(tmp_path):
 def test_bracket_is_none_without_a_decided_dmin():
     assert bracket(pd.Series({"d_min": np.nan, "d_min_low": 2.0})) is None
     assert bracket(pd.Series({"d_min": 4.0, "d_min_low": 3.0})) == (3.0, 4.0)
+
+
+def curve(**values) -> pd.Series:
+    base = {
+        "method": "strombom_multi",
+        "layout": "wide",
+        "factors": "",
+        "n": 200,
+        "d_min": 2.0,
+        "d_min_low": 2.0,
+        "d_sat": 3.0,
+        "d_max": 24.0,
+        "d_crowd": float("nan"),
+        "d_sat_undecided": False,
+        "still_improving_at_top": False,
+    }
+    return pd.Series({**base, **values})
+
+
+def test_dsat_bracket_open_only_upward_and_censored_at_the_grid_top():
+    assert dsat_bracket(curve()) == (3.0, 3.0) and dsat_text(curve()) == "3"
+    # A larger reliable D is still open against D_sat: the true D_sat is 3 up to D_max.
+    assert dsat_bracket(curve(d_sat_undecided=True)) == (3.0, 24.0)
+    assert dsat_text(curve(d_sat_undecided=True)) == "3-24"
+    top = curve(d_sat=24.0, still_improving_at_top=True)
+    assert dsat_bracket(top) is None and dsat_text(top) == "[24]"
+    assert dsat_text(curve(d_sat=float("nan"))) == "-"
+
+
+def test_effort_is_relative_to_the_dsat_cell():
+    key = "strombom_multi|wide|N=200"
+    cells = pd.DataFrame(
+        [
+            # D, median finish, median dog ticks (= D x finish), path per dog
+            {"n_shepherds": 2, "median_finish": 300.0, "median_path_per_dog": 400.0},
+            {"n_shepherds": 4, "median_finish": 200.0, "median_path_per_dog": 300.0},
+            {"n_shepherds": 8, "median_finish": 190.0, "median_path_per_dog": 250.0},
+        ]
+    ).assign(group_key=key, reliability="reliable")
+    cells["median_dog_ticks"] = cells["n_shepherds"] * cells["median_finish"]
+    table = pd.DataFrame([curve(d_sat=4.0, d_max=8.0)])
+    row = effort_table(cells, table).iloc[0]
+    assert row["d_double"] == 8 and row["d_top"] == 8
+    assert row["time_double"] == round(190 / 200, 2)
+    assert row["dog_time_double"] == round(8 * 190 / (4 * 200), 2)
+    assert row["path_double"] == round(8 * 250 / (4 * 300), 2)

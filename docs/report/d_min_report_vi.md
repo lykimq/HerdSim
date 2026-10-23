@@ -17,6 +17,7 @@ Các kết quả thực nghiệm chỉ ra:
 4. **Cơ chế cá thể lạc đàn (The Straggler Mechanism)**: Trong 95% số lượt thất bại nghiêm ngặt của các đội có từ 6 chó trở lên, đàn chó thực chất đã đưa được 99% số cừu vào đích từ rất sớm. Thất bại nghiêm ngặt xảy ra do đàn chó quay sang săn đuổi 1–2 cá thể rớt lại sau cùng, vượt quá đà và vô tình lùa ngược khối cừu chủ lực ra ngoài pasture. Việc giảm vận tốc chó ($v_{\text{dog}} = 1{,}15$) loại bỏ được xung lực vượt đà này, giúp đưa $D_{\min}$ nghiêm ngặt từ thất bại hoàn toàn (`none`) xuống còn 6 chó ở bố cục `outlier_rich` ($N = 400$).
 5. **Tính vững chắc của tiêu chí tiếp cận 99%**: Dưới tiêu chí 99%, giá trị $D_{\min}$ duy trì sự ổn định cao (dao động trong phạm vi $\pm 1$ chó so với mốc cơ sở) trước các thay đổi về quy ước mô phỏng (xuất phát từ cọc người chăn, xuất phát vòng tròn, cự ly xuất phát, và các tham số cừu thực địa GPS). Ngược lại, tiêu chí nghiêm ngặt phóng đại quá mức các sai số do quy ước hình học gây ra.
 6. **Sự bắt buộc của tầng phối hợp đội**: Mô hình đối chứng không phối hợp (FAT) thiếu thuật toán gán nhiệm vụ và lực đẩy không gian đã thất bại hoàn toàn: các chú chó dồn cục thành bản sao trùng lặp (`dog_overlap` $> 0{,}80$), không đạt được bất kỳ giá trị $D_{\min}$ tin cậy nào ở $N \ge 200$.
+7. **Đủ chó, và không có tác hại theo tiêu chí 99%** (phân tích tiếp theo, mục 3.7): vượt quá quy mô đội $D_{\text{sat}}$ mà tại đó việc lùa không còn nhanh hơn, chó thêm giữ thời gian hoàn thành ở mức 0,90 đến 1,02 lần thời gian tại $D_{\text{sat}}$, trong khi thời gian chó tăng tỉ lệ với $D$, và thời gian mỗi con cừu chạy trốn không tăng. Theo tiêu chí 99%, không quy mô đội nào đến 24 làm nhiệm vụ thất bại; chó thêm chỉ làm bầy `split` ở $N = 200$ chậm hơn. Bản thân $D_{\text{sat}}$ vẫn còn là một khoảng trên một phần ba các đường cong phân tán.
 
 ---
 
@@ -30,6 +31,7 @@ Các nghiên cứu trước đây về chăn dắt đa tác tử chủ yếu kh�
 - **RQ4 (Tiêu chí thành công và Hiệu ứng cá thể lạc đàn)**: Tiêu chí nghiêm ngặt 100% khác biệt thế nào so với tiêu chí 99% tiếp cận? Cơ chế vi mô nào gây ra sự sụp đổ thành công của các đội nhiều chó dưới tiêu chí nghiêm ngặt?
 - **RQ5 (Tính vững chắc trước các quy ước mô phỏng)**: Các quy luật mở rộng có đứng vững trước những thay đổi về quy ước thiết lập (vị trí thả chó, cự ly xuất phát, bán kính đích, tham số thực địa, vận tốc chó) hay không?
 - **RQ6 (Sự cần thiết của phối hợp đa tác tử)**: Một đàn chó hoạt động độc lập không phối hợp (FAT) có thể đạt được $D_{\min}$ hữu hạn ở đàn lớn hay không?
+- **RQ7 (Vượt quá $D_{\min}$: đủ chó và quá nhiều chó)**: Từ quy mô đội $D_{\text{sat}}$ nào thì thêm một con chó không còn làm việc lùa nhanh hơn, mỗi con chó vượt quá nó tốn bao nhiêu, nó có thêm áp lực lên cừu không, và có quy mô đội nào làm nhiệm vụ tệ đi không? (Phân tích tiếp theo trên các lượt chạy 99% hiện có; không chạy chiến dịch mới.)
 
 ---
 
@@ -227,6 +229,38 @@ Bảng 5 so sánh $D_{\min}$ giữa FAT và `strombom_multi` ở thời hạn $6
 
 ---
 
+### 3.7 RQ7: Vượt quá $D_{\min}$: đủ chó, chi phí của chúng, và áp lực lên bầy
+
+Mục này đọc lại các lượt chạy 99% hiện có (`dmin_f99_m12`, `dmin_f99_m6`, `dmin_f99_m3`, `dmin_f99_fat`, và `dmin_kubo` được gán nhãn lại theo tiêu chí đến nơi 99%) và chạy lại 164 lượt đã lưu. Không chạy chiến dịch mới nào, và mọi lượt chạy lại đều tái hiện đúng kết quả thành công và số tick đã lưu.
+
+**Câu trả lời trực tiếp cho RQ7**:
+- **$D_{\text{sat}}$ phần lớn vẫn còn mở.** Nó được quyết định bằng 1 trên mọi đường cong compact và ở $N \le 50$, và ở vài đường cong phân tán (`outlier_rich` $N = 100$: 3; `wide` $N = 400$: 6 ở $6\times$). Trên 6 trong 18 đường cong có $D_{\min}$ ở $6\times$ (8 trong 20 ở $12\times$), một $D$ đạt độ tin cậy lớn hơn vẫn chưa ngã ngũ khi so với nó, nên chỉ biết được một khoảng (ví dụ `outlier_rich` $N = 400$: 6 đến 24). Các lượt chạy này không dành hạt giống cho các phép so sánh thời gian hoàn thành (`decide_finish_times: false`), nên các phép so sánh quyết định $D_{\text{sat}}$ chưa bao giờ được giải quyết. Trả lời câu hỏi này cần bổ sung các phép so sánh đó.
+- **Chó vượt quá $D_{\text{sat}}$ không mua được gì và tốn theo tỉ lệ.** Ở $6\times$, mọi $D$ đạt độ tin cậy trên $D_{\text{sat}}$ hoàn thành trong 0,90 đến 1,02 lần thời gian tại $D_{\text{sat}}$ (128 ô), trong khi thời gian chó tăng theo $D / D_{\text{sat}}$ (tỉ số 0,90 đến 1,02 so với đường đó). Trên bầy compact, 24 con chó tốn khoảng 24 lần thời gian chó của một con cho cùng một lần lùa.
+- **Nhiều chó hơn không thêm áp lực lên mỗi con cừu.** Một con cừu ở trạng thái chạy trốn khi có chó gần hơn $r_s = 65$ m. Từ $D_{\min}$ đến $D_{\text{sat}}$, số giây chạy trốn của mỗi con cừu giảm (`wide` $N = 400$: 485 s ở $D = 3$, 359 s ở $D = 6$), và từ $D_{\text{sat}}$ đến $2 D_{\text{sat}}$ thì giữ nguyên (361 s ở $D = 12$). Tại mỗi thời điểm, nhiều chó hơn khiến phần lớn bầy chạy trốn hơn (tỉ lệ trung bình 0,68 ở $D = 3$, 0,84 ở $D = 12$), nhưng quãng lùa ngắn hơn. Thời gian ở trong khoảng cách dừng của chó (6 m) dưới 1,3 s mỗi con cừu và không tăng theo $D$.
+- **Theo tiêu chí 99%, không quy mô đội nào làm nhiệm vụ thất bại.** Không đường cong nào trong mười một thư mục 99% (các lượt chính, FAT và bảy biến thể độ nhạy) có một $D$ không đạt độ tin cậy sau một $D$ đã đạt: không có sụt giảm, không có sụp đổ và không có $D_{\text{overcrowd}}$ trên lưới nào đến $D = 24$. Sự sụp đổ của `split` $N = 100$ theo tiêu chí strict ở $3\times$ ($D = 2$ đến 4) không xuất hiện theo tiêu chí 99%, nơi $D = 1, 2, 4$ đến 24 đều đạt độ tin cậy và $D = 3$ ở mức 0,935. Thêm chó chỉ làm nhiệm vụ chậm hơn ở hai chỗ: `split` $N = 200$ ở $12\times$, nơi $D \ge 8$ mất 695 đến 744 s so với 364,5 s ở $D = 2$, và FAT trên `split` $N = 100$, nơi $D \ge 4$ mất 219 đến 224 s so với 205 s ở $D = 1$.
+
+Bảng 6 cho chi phí ở hai lần $D_{\text{sat}}$ và ở $D$ đạt độ tin cậy lớn nhất cho các đường cong phân tán ở $6\times$ (thời gian hoàn thành và thời gian chó so với ô $D_{\text{sat}}$; khi $D_{\text{sat}}$ là một khoảng thì lấy đầu dưới; tổng quãng đường của chó nằm trong `results_tables.md` và bám theo thời gian chó trong khoảng 0,01):
+
+| Bố cục, $N$ | $D_{\text{sat}}$ | $2 D_{\text{sat}}$: thời gian / thời gian chó | $D = 24$: thời gian / thời gian chó |
+| :--- | :---: | :---: | :---: |
+| `wide`, 200 | 3–24 | 0,97 / 1,94 | 0,96 / 7,68 |
+| `wide`, 400 | 6 | 0,99 / 1,98 | 0,98 / 3,93 |
+| `outlier_rich`, 100 | 3 | 0,99 / 1,98 | 0,98 / 7,85 |
+| `outlier_rich`, 400 | 6–24 | 0,97 / 1,93 | 0,95 / 3,78 |
+| `split`, 100 | 2–24 | 0,95 / 1,89 | 0,93 / 11,19 |
+
+![Chi phí của chó vượt quá D_sat](../figures/fig33_effort.png)
+
+*Hình 8: Chó vượt quá $D_{\text{sat}}$ ở $6\times$ thời gian lùa (tiêu chí 99%). Trái: thời gian hoàn thành so với ô $D_{\text{sat}}$ giữ ở 0,90 đến 1,02. Phải: thời gian chó đi theo đường $D / D_{\text{sat}}$.*
+
+![Áp lực lên bầy](../figures/fig34_pressure.png)
+
+*Hình 9: Các lượt chạy lại (12 hạt giống mỗi ô, `dmin_f99_m6`). Trái: số giây mỗi con cừu chạy trốn, giảm đến $D_{\text{sat}}$ rồi giữ nguyên. Phải: tỉ lệ bầy đang chạy trốn tại một thời điểm, tăng theo $D$.*
+
+Kết quả về áp lực một phần là tính chất của mô hình. Lực đẩy của nhiều chó lên một con cừu được chuẩn hóa về độ dài 1, nên con chó thứ hai ở gần không đẩy mạnh hơn, và $r_s = 65$ m gấp khoảng bảy lần bán kính bầy ở $N = 100$, nên chỉ vài con chó đã giữ phần lớn bầy ở trạng thái chạy trốn. Số đo này cho biết cừu chạy trốn bao lâu, không cho biết điều đó ảnh hưởng thế nào đến con vật. Bảng và lệnh nằm trong [`results_tables.md`](results_tables.md) (mục "Phase 1").
+
+---
+
 ## 4. Phân tích vi mô chuyên sâu: Dị thường bố cục và Động lực học từng lượt chạy
 
 ### 4.1 Hiện tượng tắc nghẽn trên bố cục phân cụm (`split`)
@@ -236,7 +270,7 @@ Trên bố cục `split` ở $N \ge 200$, việc tăng số lượng chó $D$ kh
 
 ![Đường cong thành công trên bố cục Split](../figures/fig23_split_curves.png)
 
-*Hình 8: Tắc nghẽn hiệu năng trên bố cục split. Tăng số chó không giúp đạt độ tin cậy ở $N \ge 200$ do dồn ứ cụm và quy tắc dừng cự ly.*
+*Hình 10: Tắc nghẽn hiệu năng trên bố cục split. Tăng số chó không giúp đạt độ tin cậy ở $N \ge 200$ do dồn ứ cụm và quy tắc dừng cự ly.*
 
 ### 4.2 Tương quan các chỉ số vi mô
 Trên toàn bộ các lượt chạy, các phép đo từng nhịp khẳng định:
@@ -245,7 +279,7 @@ Trên toàn bộ các lượt chạy, các phép đo từng nhịp khẳng đị
 
 ![Tương quan chỉ số vi mô](../figures/fig27_metrics.png)
 
-*Hình 9: Tương quan chỉ số vi mô. (a) Tương quan nghịch mạnh giữa độ tản trung bình của bầy và tỷ lệ thành công. (b) Tỷ lệ chó đứng yên trên split so với wide. (c) Tỷ lệ trùng lặp cặp đôi giữa các chú chó.*
+*Hình 11: Tương quan chỉ số vi mô. (a) Tương quan nghịch mạnh giữa độ tản trung bình của bầy và tỷ lệ thành công. (b) Tỷ lệ chó đứng yên trên split so với wide. (c) Tỷ lệ trùng lặp cặp đôi giữa các chú chó.*
 
 ---
 

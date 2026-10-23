@@ -17,6 +17,7 @@ Our empirical findings demonstrate:
 4. **The Straggler Mechanism**: In 95% of strict failures for teams with $D \ge 6$, the team had already brought 99% of the flock into the goal well before the deadline. Strict failure occurs because dogs chasing the final trailing straggler overshoot the goal and inadvertently drive the main herd back out. Reducing dog speed ($v_{\text{dog}} = 1.15$) eliminates this overshoot, lowering strict $D_{\min}$ on outlier-rich $N = 400$ from complete failure (`none`) to 6.
 5. **Statistical Robustness of 99% Arrival**: Under 99% arrival, $D_{\min}$ remains within 1 dog of the base bracket across handler release, ring placement, initial dog-flock clearance, and empirical GPS sheep parameters. Strict criteria artificially amplify setup sensitivities by a factor of three or more.
 6. **Necessity of Team Coordination**: An uncoordinated baseline (FAT) that lacks task assignment and spatial repulsion fails to scale: independent dogs collapse into duplicates (`dog_overlap` $> 0.80$), achieving no decided $D_{\min}$ for $N \ge 200$.
+7. **Enough Dogs, and No Harm under 99% Arrival** (follow-up analysis, section 3.7): beyond the team size $D_{\text{sat}}$ at which the drive stops getting faster, extra dogs leave the finish time at 0.90 to 1.02 of the $D_{\text{sat}}$ time while dog time grows in proportion to $D$, and the time each sheep spends in flight does not rise. Under the 99% rule no team size up to 24 makes the task fail; extra dogs only slow `split` flocks at $N = 200$. $D_{\text{sat}}$ itself is still a range on a third of the scattered curves.
 
 ---
 
@@ -30,6 +31,7 @@ Existing multi-herder literature has evaluated fixed team sizes or non-cohesive 
 - **RQ4 (Success Criteria & The Straggler Effect)**: How do strict 100% containment and 99% arrival criteria diverge, and what microscopic mechanism causes large dog teams to fail under strict criteria?
 - **RQ5 (Robustness to Setup Conventions)**: Do empirical scaling laws survive perturbations to arbitrary simulation parameters (handler release, ring placement, initial gaps, goal radius, empirical GPS parameters, and reduced dog speed)?
 - **RQ6 (Necessity of Explicit Coordination)**: Can multiple independent shepherds without communication or task assignment achieve finite $D_{\min}$ on large flocks, or is explicit multi-agent coordination strictly necessary?
+- **RQ7 (Beyond $D_{\min}$: Enough and Too Many)**: From which team size $D_{\text{sat}}$ does an extra dog stop making the drive faster, what does each dog beyond it cost, does it add pressure on the sheep, and does any team size make the task worse? (Follow-up analysis of the existing 99% runs; no new campaigns.)
 
 ---
 
@@ -227,6 +229,38 @@ Table 5 compares $D_{\min}$ between FAT and `strombom_multi` at $6\times$ drive 
 
 ---
 
+### 3.7 RQ7: Beyond $D_{\min}$: Enough Dogs, Their Cost, and Pressure on the Flock
+
+This section reads the existing 99% runs again (`dmin_f99_m12`, `dmin_f99_m6`, `dmin_f99_m3`, `dmin_f99_fat`, and `dmin_kubo` relabelled to 99% arrival) and replays 164 stored trials. No new campaign was run, and every replayed trial reproduced its stored success and tick count exactly.
+
+**Direct Answer to RQ7**:
+- **$D_{\text{sat}}$ is mostly still open.** It is decided at 1 on every compact curve and at $N \le 50$, and at a few scattered curves (`outlier_rich` $N = 100$: 3; `wide` $N = 400$: 6 at $6\times$). On 6 of the 18 curves with a $D_{\min}$ at $6\times$ (8 of 20 at $12\times$), a larger reliable $D$ is still undecided against it, so only a range is known (for example `outlier_rich` $N = 400$: 6 to 24). These runs were made without seeds for the finish-time comparisons (`decide_finish_times: false`), so the comparisons that decide $D_{\text{sat}}$ were never resolved. Answering it needs a top-up of those comparisons.
+- **Dogs beyond $D_{\text{sat}}$ buy nothing and cost in proportion.** At $6\times$, every reliable $D$ above $D_{\text{sat}}$ finishes in 0.90 to 1.02 of the $D_{\text{sat}}$ time (128 cells), while dog time grows as $D / D_{\text{sat}}$ (ratio 0.90 to 1.02 of that line). On a compact flock, 24 dogs spend about 24 times the dog time of one dog for the same drive.
+- **More dogs do not add pressure per sheep.** A sheep is in flight while a dog is closer than $r_s = 65$ m. From $D_{\min}$ to $D_{\text{sat}}$ the seconds in flight per sheep fall (`wide` $N = 400$: 485 s at $D = 3$, 359 s at $D = 6$), and from $D_{\text{sat}}$ to $2 D_{\text{sat}}$ they stay level (361 s at $D = 12$). At any moment more of the flock is in flight with more dogs (mean share 0.68 at $D = 3$, 0.84 at $D = 12$), but the drive is shorter. Time within the dog stop distance (6 m) stays below 1.3 s per sheep and does not rise with $D$.
+- **Under the 99% rule no team size makes the task fail.** No curve in any of the eleven 99% folders (main runs, FAT and the seven sensitivity variants) has a $D$ that is unreliable after a reliable one: there is no dip, no collapse and no $D_{\text{overcrowd}}$ on any grid up to $D = 24$. The collapse of strict `split` $N = 100$ at $3\times$ ($D = 2$ to 4) does not appear under the 99% rule, where $D = 1, 2, 4$ to 24 are reliable and $D = 3$ is at 0.935. More dogs make the task slower in two places only: `split` $N = 200$ at $12\times$, where $D \ge 8$ takes 695 to 744 s against 364.5 s at $D = 2$, and FAT on `split` $N = 100$, where $D \ge 4$ takes 219 to 224 s against 205 s at $D = 1$.
+
+Table 6 gives the cost at twice $D_{\text{sat}}$ and at the largest reliable $D$ for the scattered curves at $6\times$ (finish time and dog time relative to the $D_{\text{sat}}$ cell; where $D_{\text{sat}}$ is a range, its low end; total dog path is in `results_tables.md` and follows dog time within 0.01):
+
+| Layout, $N$ | $D_{\text{sat}}$ | $2 D_{\text{sat}}$: time / dog time | $D = 24$: time / dog time |
+| :--- | :---: | :---: | :---: |
+| `wide`, 200 | 3–24 | 0.97 / 1.94 | 0.96 / 7.68 |
+| `wide`, 400 | 6 | 0.99 / 1.98 | 0.98 / 3.93 |
+| `outlier_rich`, 100 | 3 | 0.99 / 1.98 | 0.98 / 7.85 |
+| `outlier_rich`, 400 | 6–24 | 0.97 / 1.93 | 0.95 / 3.78 |
+| `split`, 100 | 2–24 | 0.95 / 1.89 | 0.93 / 11.19 |
+
+![Cost of dogs beyond D_sat](../figures/fig33_effort.png)
+
+*Figure 8: Dogs beyond $D_{\text{sat}}$ at $6\times$ drive times (99% rule). Left: finish time relative to the $D_{\text{sat}}$ cell stays at 0.90 to 1.02. Right: dog time follows the line $D / D_{\text{sat}}$.*
+
+![Pressure on the flock](../figures/fig34_pressure.png)
+
+*Figure 9: Replayed trials (12 seeds per cell, `dmin_f99_m6`). Left: seconds each sheep spends in flight, which fall up to $D_{\text{sat}}$ and then stay level. Right: the share of the flock in flight at a given moment, which rises with $D$.*
+
+The pressure result is partly a property of the model. The push of several dogs on a sheep is normalised to length 1, so a second dog nearby does not push harder, and $r_s = 65$ m is about seven times the flock radius at $N = 100$, so even a few dogs keep most of the flock in flight. The measure says how long sheep flee, not what that does to an animal. Tables and commands are in [`results_tables.md`](results_tables.md) (section "Phase 1").
+
+---
+
 ## 4. Microscopic Deep-Dive: Anomaly Analysis and Per-Trial Dynamics
 
 ### 4.1 The `split` Layout Anomaly
@@ -236,7 +270,7 @@ On the `split` layout at $N \ge 200$, increasing $D$ does not improve success un
 
 ![Split Curves and Metric Diagnoses](../figures/fig23_split_curves.png)
 
-*Figure 8: Performance stall on split flocks. Increasing team size fails to achieve reliability at $N \ge 200$ due to sub-cluster pile-up and stop-rule freezing.*
+*Figure 10: Performance stall on split flocks. Increasing team size fails to achieve reliability at $N \ge 200$ due to sub-cluster pile-up and stop-rule freezing.*
 
 ### 4.2 Per-Trial Metric Correlations
 Across all executed trials, per-tick measurements confirm:
@@ -245,7 +279,7 @@ Across all executed trials, per-tick measurements confirm:
 
 ![Per-Trial Metrics](../figures/fig27_metrics.png)
 
-*Figure 9: Per-trial metric correlations. (a) Negative correlation between mean flock spread and trial success. (b) Share of dogs standing still on split vs. wide. (c) Pairwise dog overlap.*
+*Figure 11: Per-trial metric correlations. (a) Negative correlation between mean flock spread and trial success. (b) Share of dogs standing still on split vs. wide. (c) Pairwise dog overlap.*
 
 ---
 

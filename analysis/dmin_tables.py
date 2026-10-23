@@ -157,6 +157,166 @@ def growth_table(table: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def dsat_bracket(row: pd.Series) -> tuple[float, float] | None:
+    """(low, high) of the true D_sat, or None when the curve has no D_sat or the grid censors it.
+
+    An undecided D_sat can only move up: what is open is whether a larger reliable D is faster
+    than it. So the true value lies between d_sat and the largest working D, d_max. A curve
+    still improving at the top of the grid has its D_sat above the grid.
+    """
+    if pd.isna(row["d_sat"]) or bool(row.get("still_improving_at_top", False)):
+        return None
+    low = float(row["d_sat"])
+    if bool(row.get("d_sat_undecided", False)) and pd.notna(row["d_max"]):
+        return low, max(low, float(row["d_max"]))
+    return low, low
+
+
+def dsat_text(row: pd.Series) -> str:
+    """'5' decided, '5-24' when a larger D may still turn out faster, '[24]' when the curve is
+    still improving at the top of the grid, '-' without a reliable D."""
+    if pd.isna(row["d_sat"]):
+        return "-"
+    if bool(row.get("still_improving_at_top", False)):
+        return f"[{int(row['d_sat'])}]"
+    low, high = dsat_bracket(row) or (row["d_sat"], row["d_sat"])
+    return str(int(low)) if low >= high else f"{int(low)}-{int(high)}"
+
+
+def dsat_by_n(table: pd.DataFrame, layouts: tuple[str, ...] | None = None) -> pd.DataFrame:
+    """D_sat as text, layouts as rows and N as columns, like ``layout_by_n``."""
+    table = one_level(table)
+    shown = table.assign(text=table.apply(dsat_text, axis=1))
+    wide = shown.pivot_table(index="layout", columns="n", values="text", aggfunc="first")
+    if layouts is not None:
+        wide = wide.reindex([layout for layout in layouts if layout in wide.index])
+    return wide.fillna("-")
+
+
+def dsat_growth(table: pd.DataFrame) -> pd.DataFrame:
+    """Per layout: the range of slopes of log2 D_sat against log2 N over the D_sat brackets."""
+    rows = []
+    for layout, part in one_level(table).groupby("layout", sort=False):
+        points, left_out = [], []
+        for _, row in part.sort_values("n").iterrows():
+            b = dsat_bracket(row)
+            if b:
+                points.append((int(row["n"]), b[0], b[1]))
+            else:
+                left_out.append(int(row["n"]))
+        result = slope_range(points)
+        if points and all(p[1] == p[2] == 1.0 for p in points):
+            slope = "0 (flat)"
+        else:
+            slope = "-" if result is None else f"{result[0]:.2f} to {result[1]:.2f}"
+        rows.append(
+            {
+                "layout": layout,
+                "slope_range": slope,
+                "n_used": " ".join(str(p[0]) for p in points) or "-",
+                "n_left_out": " ".join(map(str, left_out)) or "-",
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def effort_table(cells: pd.DataFrame, table: pd.DataFrame) -> pd.DataFrame:
+    """What dogs beyond D_sat cost, per curve with a D_sat below its largest working D.
+
+    Medians over the successful seeds of each cell (frontier_cells.csv), relative to the D_sat
+    cell: finish time, dog time (D x finish ticks) and total dog path (D x path per dog). Shown
+    at the smallest reliable working D at or above 2 D_sat, and at the largest working D. A
+    ratio of finish time near 1 with dog time near D / D_sat is effort spent for no gain.
+    """
+    rows = []
+    for _, curve in one_level(table).iterrows():
+        if pd.isna(curve["d_sat"]) or pd.isna(curve["d_max"]):
+            continue
+        sat, top = int(curve["d_sat"]), int(curve["d_max"])
+        if top <= sat:
+            continue
+        factors = [str(curve["factors"])] if curve.get("factors") else []
+        key = "|".join([str(curve["method"]), str(curve["layout"]), *factors, f"N={curve['n']}"])
+        mine = cells[(cells["group_key"] == key) & (cells["reliability"] == "reliable")]
+        medians = {
+            int(c["n_shepherds"]): (
+                float(c["median_finish"]),
+                float(c["median_dog_ticks"]),
+                int(c["n_shepherds"]) * float(c["median_path_per_dog"]),
+            )
+            for _, c in mine.iterrows()
+        }
+        if sat not in medians:
+            continue
+        working = [d for d in medians if sat <= d <= top]
+        base = medians[sat]
+
+        def ratios(d: int) -> dict[str, float]:
+            return dict(
+                zip(("time", "dog_time", "path"), (v / b for v, b in zip(medians[d], base)))
+            )
+
+        double = next((d for d in sorted(working) if d >= 2 * sat), None)
+        row: dict[str, Any] = {
+            "layout": curve["layout"],
+            "n": int(curve["n"]),
+            "d_sat": dsat_text(curve),
+            "d_double": double if double is not None else "-",
+        }
+        for label, d in (("double", double), ("top", top)):
+            r = ratios(d) if d is not None else {}
+            for name in ("time", "dog_time", "path"):
+                row[f"{name}_{label}"] = round(r[name], 2) if name in r else "-"
+        row["d_top"] = top
+        rows.append(row)
+    if not rows:
+        return pd.DataFrame()
+    return pd.DataFrame(rows).sort_values(["layout", "n"], ignore_index=True)
+
+
+def unusual_zones(cells: pd.DataFrame) -> pd.DataFrame:
+    """Curves with a cell where more dogs did worse: crowded (slower than D_best), an
+    unreliable dip, a collapse or a recovery. One row per such cell, with the median finish of
+    the curve's fastest reliable D beside it for scale."""
+    flagged = cells[cells["zone"].isin(["crowded", "unreliable_dip", "collapse", "recovered"])]
+    rows = []
+    for key, part in flagged.groupby("group_key", sort=True):
+        curve = cells[cells["group_key"] == key]
+        reliable = curve[curve["reliability"] == "reliable"].sort_values("median_finish")
+        fastest = reliable.iloc[0] if len(reliable) else None
+        for _, cell in part.iterrows():
+            rows.append(
+                {
+                    **{k: v for k, v in parse_group_key(str(key)).items() if k != "factors"},
+                    "d": int(cell["n_shepherds"]),
+                    "zone": cell["zone"],
+                    "success_rate": round(float(cell["success_rate"]), 2),
+                    "median_finish": cell["median_finish"],
+                    "fastest_d": int(fastest["n_shepherds"]) if fastest is not None else "-",
+                    "fastest_finish": fastest["median_finish"] if fastest is not None else "-",
+                }
+            )
+    return pd.DataFrame(rows)
+
+
+def frontier_values(table: pd.DataFrame) -> pd.DataFrame:
+    """D_min, D_sat, D_crowd and D_max of every curve as text, for a table across methods."""
+    rows = []
+    for _, curve in table.iterrows():
+        rows.append(
+            {
+                "method": curve["method"],
+                "layout": curve["layout"],
+                "n": int(curve["n"]),
+                "d_min": dmin_text(curve),
+                "d_sat": dsat_text(curve),
+                "d_crowd": "-" if pd.isna(curve["d_crowd"]) else int(curve["d_crowd"]),
+                "d_max": "-" if pd.isna(curve["d_max"]) else int(curve["d_max"]),
+            }
+        )
+    return pd.DataFrame(rows).sort_values(["method", "layout", "n"], ignore_index=True)
+
+
 def midpoint(row: pd.Series) -> float | None:
     """Geometric middle of the bracket, or D_min_low when only the low end is known."""
     b = bracket(row)
@@ -283,6 +443,12 @@ __all__ = [
     "compare",
     "dips",
     "dmin_text",
+    "dsat_bracket",
+    "dsat_by_n",
+    "dsat_growth",
+    "dsat_text",
+    "effort_table",
+    "frontier_values",
     "groups_table",
     "growth_table",
     "layout_against_n",
@@ -293,4 +459,5 @@ __all__ = [
     "read_table",
     "run_record",
     "slope_range",
+    "unusual_zones",
 ]

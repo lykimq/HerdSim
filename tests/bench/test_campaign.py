@@ -90,7 +90,15 @@ def test_campaign_runs_every_cell_to_a_decision_without_errors(dmin: Run):
     assert not (dmin.folder() / "errors.jsonl").exists() or not (
         (dmin.folder() / "errors.jsonl").read_text().strip()
     )
-    assert len(dmin.cells) == 3 * 2 * 4  # layouts x N x D
+    grid = [1, 2, 4, 8]
+    for _, cells in dmin.cells.groupby("group_key"):
+        counts = sorted(int(d) for d in cells["n_shepherds"])
+        assert set(grid) <= set(counts)
+        # max_seeds is the batch size, so every cell is at the cap; a midpoint is added next
+        # to an undecided one, and nothing else.
+        midpoints = {(a + b) // 2 for a, b in zip(grid, grid[1:])}
+        assert set(counts) - set(grid) <= midpoints
+    assert dmin.cells["group_key"].nunique() == 3 * 2  # layouts x N
     assert (dmin.cells["n_seeds"] == 10).all()
     assert dmin.cells["reliability"].isin(["reliable", "unreliable", "undecided"]).all()
     print(f"\nbench_dmin: {len(dmin.trials)} trials, {dmin.status['trials_per_hour']:.0f} per hour")
