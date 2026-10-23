@@ -190,25 +190,6 @@ Bảng 3 so sánh định lượng độ biến động theo số lần nhân đ
 - **Dưới tiêu chí nghiêm ngặt**: Giá trị tuyệt đối biến động dữ dội gấp 3 lần trở lên, do các quy ước thiết lập làm thay đổi quỹ đạo nhạy cảm của con cừu cuối cùng khi vào đích.
 - **Hình học đích**: Việc thu hẹp bán kính đích ($1{,}5 R_f$) là biến thể duy nhất làm tăng thực sự $D_{\min}$ dưới cả hai tiêu chí (nâng `wide` $N = 400$ từ 2–3 lên 5–6 chó).
 
-Bảng 4 tổng hợp lưới phân tích độ nhạy ở thời hạn $6\times$ ($D_{\min}$ Cơ sở / Biến thể):
-
-| Tiêu chí | Biến thể kiểm tra độ nhạy | `wide` 100 | `wide` 200 | `wide` 400 | `outlier` 100 | `outlier` 200 | `outlier` 400 |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Nghiêm ngặt** | Bộ tham số GPS thực địa | 1 / 1–6 | 3 / none | [9] / none | 3 / [1] | [12] / none | none / none |
-| **Nghiêm ngặt** | Xuất phát từ cọc Handler | 1 / 1 | 3 / 3 | [9] / none | 3 / 2 | [12] / [3] | none / none |
-| **Nghiêm ngặt** | Xuất phát vòng tròn Ring | 1 / 1 | 3 / 3–5 | [9] / [8] | 3 / 2–7 | [12] / [5] | none / none |
-| **Nghiêm ngặt** | Thu hẹp bán kính đích ($1{,}5 R_f$) | 1 / 1–3 | 3 / none | [9] / none | 3 / 3 | [12] / none | none / none |
-| **Nghiêm ngặt** | Thu hẹp cự ly xuất phát ($15$) | 1 / 1 | 3 / [3] | [9] / none | 3 / [1] | [12] / none | none / none |
-| **Nghiêm ngặt** | Mở rộng cự ly xuất phát ($60$) | 1 / 1 | 3 / 3–4 | [9] / 6–7 | 3 / 3 | [12] / 5 | none / [12] |
-| **Nghiêm ngặt** | Giảm vận tốc chó ($1{,}15$) | 1 / 1 | 3 / 3 | [9] / 5 | 3 / 2–3 | [12] / 4 | none / 6 |
-| **99%** | Bộ tham số GPS thực địa | 1 / 1 | 2 / 1 | 2–3 / 2 | 2 / 1 | 2–3 / 1 | 3 / 2–3 |
-| **99%** | Xuất phát từ cọc Handler | 1 / 1 | 2 / 2–3 | 2–3 / 2–3 | 2 / 2 | 2–3 / 2–3 | 3 / 3 |
-| **99%** | Xuất phát vòng tròn Ring | 1 / 1 | 2 / 2–3 | 2–3 / 3 | 2 / 2 | 2–3 / 2 | 3 / 3 |
-| **99%** | Thu hẹp bán kính đích ($1{,}5 R_f$) | 1 / 1 | 2 / 2 | 2–3 / 5–6 | 2 / 2 | 2–3 / 2–3 | 3 / none |
-| **99%** | Thu hẹp cự ly xuất phát ($15$) | 1 / 1 | 2 / 2 | 2–3 / 2–3 | 2 / 1–2 | 2–3 / 2 | 3 / 3 |
-| **99%** | Mở rộng cự ly xuất phát ($60$) | 1 / 1 | 2 / 2–3 | 2–3 / 2–3 | 2 / 2 | 2–3 / 2–3 | 3 / 3 |
-| **99%** | Giảm vận tốc chó ($1{,}15$) | 1 / 1 | 2 / 2–3 | 2–3 / 2–3 | 2 / 2 | 2–3 / 2–3 | 3 / 3 |
-
 ![Biểu đồ nhiệt phân tích độ nhạy](../figures/fig24_sensitivity.png)
 
 *Hình 6: Phân tích độ nhạy trên các biến thể thực nghiệm ở thời hạn $6\times$. Tiêu chí nghiêm ngặt (trên) biến động mạnh; tiêu chí tiếp cận 99% (dưới) thể hiện tính ổn định cao.*
