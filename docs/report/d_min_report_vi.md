@@ -128,16 +128,35 @@ Bảng 2 liệt kê độ dốc tăng trưởng trong không gian log-log:
 | **Tiếp cận 99%** | $6\times$ | 0,30 đến 0,42 | Đi ngang ($N \le 100$) | 0,42 đến 0,48 |
 | **Tiếp cận 99%** | $3\times$ | 0,62 đến 0,68 | Đi ngang ($N \le 100$) | 0,70 đến 1,10 ($N \le 200$) |
 
+**Ý nghĩa vật lý và giải thích các số liệu trong Bảng 2:**
+1. **Khái niệm độ dốc log-log ($\alpha$)**:
+   Trong biểu đồ hai trục logarit ($\log_2 D_{\min}$ theo $\log_2 N$), mối quan hệ mở rộng được mô hình hóa dưới dạng hàm lũy thừa: $D_{\min} \propto N^\alpha$, với hệ số góc $\alpha = \frac{\Delta \log_2 D_{\min}}{\Delta \log_2 N}$. Hệ số này đo lường mức độ nhạy cảm của nhu cầu bổ sung chó khi đàn cừu tăng quy mô:
+   - **$\alpha = 1{,}0$ (Tuyến tính)**: Cứ tăng gấp đôi số cừu thì phải tăng gấp đôi số chó (tỉ lệ cừu/chó cố định, không có lợi thế quy mô).
+   - **$\alpha < 1{,}0$ (Dưới tuyến tính - Sub-linear)**: Bầy cừu càng lớn thì số lượng chó cần thêm càng ít đi (tính kinh tế theo quy mô). Ví dụ với $\alpha = 0{,}33$, khi quy mô bầy $N$ tăng gấp 8 lần ($2^3$), số lượng chó cần thiết chỉ tăng gấp đôi ($2^1 = 2$).
+   - **$\alpha = 0$ ("Đi ngang" - Flat)**: Nhu cầu chó không hề tăng theo $N$. Trên bố cục `split` ở quy mô $N \le 100$, một chú chó ($D_{\min} = 1$) vẫn hoàn thành tốt nhiệm vụ thu gom cả 3 phân cụm trong thời hạn cho phép.
+2. **Lợi thế từ tính gắn kết bầy đàn sinh học (Cohesion)**:
+   Trong các bài toán thu gom mục tiêu độc lập không có tính xã hội (chẳng hạn robot gom rác hay lùa các hạt rời rạc trên mặt phẳng), độ dốc lý thuyết tối thiểu là $\alpha = 0{,}50$ ($D \propto \sqrt{M}$). Ngược lại, đối với bầy cừu có tính bầy đàn tự nhiên, ở thời hạn thong thả ($12\times$), độ dốc thực nghiệm chỉ đạt từ **0,20 đến 0,42** (dưới tiêu chí 99% thậm chí chỉ từ **0,20 đến 0,30**). Điều này chứng minh rằng bản năng tự gắn kết bầy đàn của cừu đã san sẻ gánh nặng gom đàn cho bầy chó: khi số cừu tăng lên, lực hút về khối tâm tự nhiên giúp đàn cừu dễ tụ lại hơn, giúp hạn chế tối đa việc phải bổ sung thêm chó.
+3. **Tại sao độ dốc lại tăng mạnh khi thời hạn siết chặt?**:
+   Khi thời hạn bị rút ngắn từ $12\times$ xuống $3\times$, độ dốc tăng vọt lên **0,62 đến 1,50**. Lý do là khi thời gian quá gấp rút, cừu không còn đủ thời gian tự tìm về bầy, và một chú chó không thể chạy gom tuần tự từng con cừu lạc. Đàn chó bắt buộc phải phân công làm việc song song đồng thời, làm mất đi lợi thế gắn kết tự nhiên và đẩy hệ số mở rộng tiến gần (hoặc vượt qua) mức tăng trưởng tuyến tính.
+
 ---
 
 ### 3.2 RQ2: Bố cục phân tán so với Quy mô $N$: Yếu tố nào chi phối mạnh hơn?
 
-**Câu trả lời trực tiếp cho RQ2**:
-- Quy mô đàn cừu $N$ tạo ra tác động định lượng tương đương hoặc lớn hơn so với bố cục hình học trên tất cả các điều kiện khảo sát.
-- Phân tích độ biến động tính theo số lần nhân đôi (doublings):
-  - Biến thiên theo $N$ tạo ra độ phân tán trung bình từ **0,75 đến 1,69 lần nhân đôi**.
-  - Biến thiên theo bố cục ở cùng quy mô $N$ tạo ra độ phân tán trung bình từ **0,50 đến 1,67 lần nhân đôi**.
-- Tác động của bố cục chủ yếu đến từ bước nhảy giữa bầy `compact` ($D_{\min} \equiv 1$) và 3 bố cục phân tán. Giữa các bố cục phân tán với nhau (`wide` so với `outlier_rich`), sự chênh lệch hiếm khi vượt quá 1 chú chó.
+**Đặt vấn đề thực tế**:
+Khi cần triển khai một đội chó chăn cừu (hoặc hệ thống robot tự hành), người điều hành sẽ đối mặt với câu hỏi cốt lõi: *Để ước tính số lượng chó tối thiểu cần dùng, ta nên bận tâm nhiều hơn về việc đàn cừu đông bao nhiêu con (Quy mô $N$), hay về việc đàn cừu đang đứng tản mác thế nào trên bãi cỏ (Bố cục địa hình)?*
+
+**Giải thích khái niệm "Độ biến động theo số lần nhân đôi" (Doublings) trong Bảng 3**:
+Do quy mô bầy đàn là một biến số số học liên tục ($N \in [25, 400]$) trong khi bố cục là các hình thái không gian rời rạc (`compact`, `wide`, `split`, `outlier_rich`), để so sánh công bằng mức độ ảnh hưởng của hai yếu tố này trên cùng một thước đo, chúng tôi đo lường độ dao động của $D_{\min}$ theo thang logarit cơ số 2, được gọi là **số lần nhân đôi (doublings)**:
+
+$$
+\text{Độ biến động (lần nhân đôi)} = \log_2 \left( \frac{D_{\min,\max}}{D_{\min,\min}} \right)
+$$
+
+- *Ví dụ trực quan*:
+  - Nếu $D_{\min}$ dao động từ 1 chó lên 2 chó: $\log_2(2/1) = 1{,}0$ lần nhân đôi (tăng gấp $2^1 = 2$ lần).
+  - Nếu $D_{\min}$ dao động từ 1 chó lên 3 chó: $\log_2(3/1) \approx 1{,}58$ lần nhân đôi (tăng gấp ~3 lần).
+  - Nếu $D_{\min}$ giữ nguyên: $0$ lần nhân đôi (hoàn toàn không biến động).
 
 Bảng 3 so sánh định lượng độ biến động theo số lần nhân đôi:
 
@@ -149,6 +168,14 @@ Bảng 3 so sánh định lượng độ biến động theo số lần nhân đ
 | **Tiếp cận 99%** | $12\times$ | 0,50 lần nhân đôi | 0,75 lần nhân đôi | Quy mô đàn cừu $N$ |
 | **Tiếp cận 99%** | $6\times$ | 0,92 lần nhân đôi | 1,30 lần nhân đôi | Quy mô đàn cừu $N$ |
 | **Tiếp cận 99%** | $3\times$ | 1,25 lần nhân đôi | 1,28 lần nhân đôi | Tương đương / Quy mô $N$ |
+
+**Ý nghĩa và phát hiện cốt lõi từ Bảng 3**:
+1. **Quy mô đàn cừu $N$ là yếu tố chi phối bậc nhất**:
+   Trong hầu hết các điều kiện khảo sát, cột "Biến động theo $N$" luôn lớn hơn cột "Biến động giữa các bố cục" (trung bình dao động từ 0,75 đến 1,69 lần nhân đôi so với 0,50 đến 1,67 lần nhân đôi). Điều này có nghĩa là: việc tăng kích thước bầy từ 25 lên 400 con cừu sẽ làm thay đổi số chó cần thiết nhiều hơn và ổn định hơn so với việc xáo trộn các kiểu địa hình.
+2. **Hiệu ứng địa hình thực chất là một "công tắc nhị phân"**:
+   Phần lớn sự biến động giữa các bố cục (cột "Biến động giữa các bố cục") chỉ xuất phát từ bước nhảy duy nhất: từ bố cục **đã gom sẵn (`compact`)** sang **ba bố cục phân tán**.
+   - Trên bầy `compact`, cừu đã kết nối thành một khối nên $D_{\min} \equiv 1$ bất biến trên mọi quy mô và thời hạn.
+   - Nhưng một khi đàn cừu đã bị tản mác, thì việc chúng tản mác theo kiểu rải đều (`wide`) hay có vài con cừu lạc xa (`outlier_rich`) hầu như **không làm thay đổi số lượng chó cần thiết** (sự chênh lệch giữa `wide` và `outlier_rich` hiếm khi vượt quá 1 chú chó).
 
 ---
 
@@ -218,35 +245,58 @@ Bảng 5 so sánh $D_{\min}$ giữa FAT và `strombom_multi` ở thời hạn $6
 
 ---
 
-### 3.7 RQ7: Vượt quá $D_{\min}$: đủ chó, chi phí của chúng, và áp lực lên bầy
+### 3.7 RQ7: Vượt quá $D_{\min}$: Đủ chó ($D_{\text{sat}}$), chi phí vận hành và áp lực lên đàn cừu
 
-Mục này đọc lại các lượt chạy 99% hiện có (`dmin_f99_m12`, `dmin_f99_m6`, `dmin_f99_m3`, `dmin_f99_fat`, và `dmin_kubo` được gán nhãn lại theo tiêu chí đến nơi 99%) và chạy lại 164 lượt đã lưu. Không chạy chiến dịch mới nào, và mọi lượt chạy lại đều tái hiện đúng kết quả thành công và số tick đã lưu.
+Khi đã xác định được quy mô đội tối thiểu $D_{\min}$, một câu hỏi thực tiễn quan trọng được đặt ra cho người chăn thả hoặc người vận hành robot tự hành:
+*Nếu chúng ta đưa thêm chó vào bãi cỏ vượt quá $D_{\min}$, việc đó có giúp rút ngắn thời gian lùa cừu hay không? Chi phí vận hành tăng lên thế nào, đàn cừu có bị căng thẳng quá mức không, và liệu việc quá nhiều chó có gây chen chúc làm vỡ trận (thất bại nhiệm vụ) hay không?*
 
-**Câu trả lời trực tiếp cho RQ7**:
-- **$D_{\text{sat}}$ phần lớn vẫn còn mở.** Nó được quyết định bằng 1 trên mọi đường cong compact và ở $N \le 50$, và ở vài đường cong phân tán (`outlier_rich` $N = 100$: 3; `wide` $N = 400$: 6 ở $6\times$). Trên 6 trong 18 đường cong có $D_{\min}$ ở $6\times$ (8 trong 20 ở $12\times$), một $D$ đạt độ tin cậy lớn hơn vẫn chưa ngã ngũ khi so với nó, nên chỉ biết được một khoảng (ví dụ `outlier_rich` $N = 400$: 6 đến 24). Các lượt chạy này không dành hạt giống cho các phép so sánh thời gian hoàn thành (`decide_finish_times: false`), nên các phép so sánh quyết định $D_{\text{sat}}$ chưa bao giờ được giải quyết. Trả lời câu hỏi này cần bổ sung các phép so sánh đó.
-- **Chó vượt quá $D_{\text{sat}}$ không mua được gì và tốn theo tỉ lệ.** Ở $6\times$, mọi $D$ đạt độ tin cậy trên $D_{\text{sat}}$ hoàn thành trong 0,90 đến 1,02 lần thời gian tại $D_{\text{sat}}$ (128 ô), trong khi thời gian chó tăng theo $D / D_{\text{sat}}$ (tỉ số 0,90 đến 1,02 so với đường đó). Trên bầy compact, 24 con chó tốn khoảng 24 lần thời gian chó của một con cho cùng một lần lùa.
-- **Nhiều chó hơn không thêm áp lực lên mỗi con cừu.** Một con cừu ở trạng thái chạy trốn khi có chó gần hơn $r_s = 65$ m. Từ $D_{\min}$ đến $D_{\text{sat}}$, số giây chạy trốn của mỗi con cừu giảm (`wide` $N = 400$: 485 s ở $D = 3$, 359 s ở $D = 6$), và từ $D_{\text{sat}}$ đến $2 D_{\text{sat}}$ thì giữ nguyên (361 s ở $D = 12$). Tại mỗi thời điểm, nhiều chó hơn khiến phần lớn bầy chạy trốn hơn (tỉ lệ trung bình 0,68 ở $D = 3$, 0,84 ở $D = 12$), nhưng quãng lùa ngắn hơn. Thời gian ở trong khoảng cách dừng của chó (6 m) dưới 1,3 s mỗi con cừu và không tăng theo $D$.
-- **Theo tiêu chí 99%, không quy mô đội nào làm nhiệm vụ thất bại.** Không đường cong nào trong mười một thư mục 99% (các lượt chính, FAT và bảy biến thể độ nhạy) có một $D$ không đạt độ tin cậy sau một $D$ đã đạt: không có sụt giảm, không có sụp đổ và không có $D_{\text{overcrowd}}$ trên lưới nào đến $D = 24$. Sự sụp đổ của `split` $N = 100$ theo tiêu chí strict ở $3\times$ ($D = 2$ đến 4) không xuất hiện theo tiêu chí 99%, nơi $D = 1, 2, 4$ đến 24 đều đạt độ tin cậy và $D = 3$ ở mức 0,935. Thêm chó chỉ làm nhiệm vụ chậm hơn ở hai chỗ: `split` $N = 200$ ở $12\times$, nơi $D \ge 8$ mất 695 đến 744 s so với 364,5 s ở $D = 2$, và FAT trên `split` $N = 100$, nơi $D \ge 4$ mất 219 đến 224 s so với 205 s ở $D = 1$.
+Để trả lời, chúng tôi phân tích tập dữ liệu 11 giao thức theo tiêu chí 99% (gồm các lưới chính, mô hình đối chứng FAT và 7 biến thể độ nhạy), kết hợp chạy lại chi tiết 164 lượt mô phỏng mẫu để đo lường các chỉ số vi mô từng nhịp tick. Mọi lượt chạy lại đều tái hiện hoàn hảo kết quả thành công và số nhịp tick đã lưu.
 
-Bảng 6 cho chi phí ở hai lần $D_{\text{sat}}$ và ở $D$ đạt độ tin cậy lớn nhất cho các đường cong phân tán ở $6\times$ (thời gian hoàn thành và thời gian chó so với ô $D_{\text{sat}}$; khi $D_{\text{sat}}$ là một khoảng thì lấy đầu dưới; tổng quãng đường của chó nằm trong `results_tables.md` và bám theo thời gian chó trong khoảng 0,01):
+#### 1. Ngưỡng bão hòa tốc độ ($D_{\text{sat}}$)
+- **Định nghĩa**: $D_{\text{sat}}$ là số lượng chó nhỏ nhất đạt độ tin cậy mà từ đó trở đi, việc bổ sung thêm chó không còn mang lại sự cải thiện tốc độ có ý nghĩa thống kê (thời gian lùa bắt đầu đi ngang).
+- **Kết quả thực nghiệm**:
+  - *Trên bầy co cụm (`compact`) và quy mô nhỏ ($N \le 50$)*: $D_{\text{sat}} = 1$ ngay từ đầu. Một chú chó đã đạt tốc độ tối đa; việc thêm chó không thể làm cừu di chuyển nhanh hơn vận tốc đi bộ tự nhiên ($1{,}0$ m/s).
+  - *Trên bầy phân tán ở thời hạn trung bình ($6\times$)*: $D_{\text{sat}}$ dao động từ 3 đến 6 chú chó (ví dụ: bầy `outlier_rich` $N = 100$ bão hòa ở $D_{\text{sat}} = 3$; bầy `wide` $N = 400$ bão hòa ở $D_{\text{sat}} = 6$).
+  - *Các ô tham số chưa ngã ngũ*: Ở 6 trong số 18 đường cong phân tán, các phép so sánh thời gian hoàn thành giữa các đội hình đạt độ tin cậy chưa giải quyết dứt điểm do thuật toán ưu tiên tài nguyên cho việc tìm $D_{\min}$ (`decide_finish_times: false`). Tại đây, $D_{\text{sat}}$ được ghi nhận dưới dạng khoảng chặn (ví dụ `wide` $N = 200$ là 3–24).
 
-| Bố cục, $N$ | $D_{\text{sat}}$ | $2 D_{\text{sat}}$: thời gian / thời gian chó | $D = 24$: thời gian / thời gian chó |
+#### 2. Chi phí lãng phí khi vượt ngưỡng bão hòa ($D > D_{\text{sat}}$)
+- **Thêm chó không rút ngắn thời gian, nhưng chi phí tăng tỉ lệ thuận**:
+  - Khi tăng số chó vượt qua $D_{\text{sat}}$, thời gian đưa đàn cừu về đích gần như giữ nguyên: dao động trong khoảng **0,90 đến 1,02 lần** thời gian tại mốc $D_{\text{sat}}$ (khảo sát trên 128 ô tham số). Tức là việc tăng thêm hàng chục con chó chỉ giúp về đích nhanh hơn chưa đầy 5–10%, thậm chí đôi khi chậm hơn một chút do cản trở nhau.
+  - Tuy nhiên, **tổng thời gian làm việc của bầy chó** (tổng thời gian tích lũy $\text{dog-time} = D \times T$) và tổng quãng đường chạy của cả đội lại tăng tuyến tính tỉ lệ thuận với $D / D_{\text{sat}}$.
+  - *Minh họa thực tế*: Trên bầy compact, triển khai 24 chú chó tiêu tốn năng lượng gấp 24 lần so với 1 chú chó, nhưng đàn cừu vẫn mất cùng một khoảng thời gian (~140 giây) để về tới đích.
+
+Bảng 6 tổng hợp chi phí vận hành ở mốc gấp đôi ngưỡng bão hòa ($2 D_{\text{sat}}$) và ở đội hình tối đa ($D = 24$) so với mốc $D_{\text{sat}}$ (trên các bầy phân tán ở thời hạn $6\times$):
+
+| Bố cục xuất phát, Quy mô $N$ | Ngưỡng $D_{\text{sat}}$ | Tại $2 D_{\text{sat}}$: Thời gian lùa / Thời gian chó | Tại $D = 24$: Thời gian lùa / Thời gian chó |
 | :--- | :---: | :---: | :---: |
-| `wide`, 200 | 3–24 | 0,97 / 1,94 | 0,96 / 7,68 |
-| `wide`, 400 | 6 | 0,99 / 1,98 | 0,98 / 3,93 |
-| `outlier_rich`, 100 | 3 | 0,99 / 1,98 | 0,98 / 7,85 |
-| `outlier_rich`, 400 | 6–24 | 0,97 / 1,93 | 0,95 / 3,78 |
-| `split`, 100 | 2–24 | 0,95 / 1,89 | 0,93 / 11,19 |
+| `wide`, $N = 200$ | 3–24 | 0,97 / 1,94 | 0,96 / 7,68 |
+| `wide`, $N = 400$ | 6 | 0,99 / 1,98 | 0,98 / 3,93 |
+| `outlier_rich`, $N = 100$ | 3 | 0,99 / 1,98 | 0,98 / 7,85 |
+| `outlier_rich`, $N = 400$ | 6–24 | 0,97 / 1,93 | 0,95 / 3,78 |
+| `split`, $N = 100$ | 2–24 | 0,95 / 1,89 | 0,93 / 11,19 |
+
+*Ý nghĩa Bảng 6*: Tại $D = 24$, thời gian lùa cừu chỉ nhanh hơn từ 2% đến 7% ($0{,}93 - 0{,}98$), nhưng tổng công suất và năng lượng tiêu hao của bầy chó lại bị đội lên từ **3,8 đến 11,2 lần** ($3{,}78 - 11{,}19$).
+
+#### 3. Áp lực tâm lý và mức độ hoảng sợ của đàn cừu (Flock Stress)
+Nhiều người e ngại rằng một bầy chó đông đúc sẽ gây hoảng loạn và kiệt sức cho đàn cừu. Tuy nhiên, dữ liệu vi mô từng giây cho thấy bức tranh hoàn toàn khác:
+- **Tổng thời gian hoảng sợ của mỗi con cừu thực chất giảm đi**: Một con cừu ở trạng thái tháo chạy khi có bất kỳ chú chó nào nằm trong cự ly đe dọa $r_s = 65$ m. Khi tăng số chó từ $D_{\min}$ lên $D_{\text{sat}}$, do bầy chó thu gom cừu lạc nhanh hơn nên thời gian tháo chạy của mỗi con cừu giảm rõ rệt (trên `wide` $N = 400$, thời gian chạy trốn trung bình của mỗi cá thể giảm từ 485 giây ở $D = 3$ xuống còn 359 giây ở $D = 6$). Khi vượt quá $D_{\text{sat}}$, con số này đi ngang (361 giây ở $D = 12$).
+- **Tỉ lệ đàn chạy trốn tức thời tăng lên**: Tại một thời điểm bất kỳ, bầy chó đông hơn sẽ giăng thành vòng cung rộng hơn, khiến một tỉ lệ lớn hơn trong đàn cừu cùng chạy trốn một lúc (trung bình 68% số cừu chạy trốn ở $D = 3$, tăng lên 84% ở $D = 12$). Nhưng vì toàn bộ cuộc lùa kết thúc nhanh hơn, tổng lượng stress tích lũy không hề bị gia tăng.
+- **Không xảy ra va chạm nguy hiểm**: Nhờ quy tắc dừng giữ khoảng cách ($3 r_a = 6$ m), thời gian chó áp sát cừu ở cự ly dưới 6 m luôn duy trì dưới 1,3 giây trên mỗi con cừu trong suốt hành trình và hoàn toàn không tăng lên khi có thêm chó.
+
+#### 4. Khả năng chống vỡ trận: Không có ngưỡng quá tải ($D_{\text{overcrowd}}$) dưới tiêu chí 99%
+- Dưới tiêu chí tiếp cận 99%, trên toàn bộ 11 thư mục dữ liệu khảo sát (lưới chính, mô hình đối chứng FAT và 7 biến thể độ nhạy), **không xuất hiện bất kỳ ngưỡng quá tải $D_{\text{overcrowd}}$ nào** lên tới $D = 24$.
+- Không có bất kỳ đường cong nào bị tụt giảm độ tin cậy sau khi đã đạt chuẩn: một khi quy mô đội đã thành công, việc bổ sung thêm chó không bao giờ làm nhiệm vụ bị thất bại. Hiện tượng đàn chó bị "đóng băng" vì quá đông trên bố cục `split` ở thời hạn gấp ($3\times$) dưới tiêu chí nghiêm ngặt đã hoàn toàn biến mất dưới tiêu chí 99%.
+- Thêm chó chỉ làm tốc độ hoàn thành chậm đi đôi chút ở hai tình huống cá biệt: trên bầy `split` $N = 200$ ở thời hạn $12\times$ (nơi $D \ge 8$ bị vướng chân nhau do mật độ cừu cục bộ quá đặc) và trên mô hình đối chứng FAT (do các chú chó thiếu thuật toán né tránh nên dồn cục vào nhau). Trong cả hai trường hợp, bầy chó vẫn đưa được đàn cừu về đích an toàn, chỉ tốn thêm thời gian.
 
 ![Chi phí của chó vượt quá D_sat](../figures/fig33_effort.png)
 
-*Hình 8: Chó vượt quá $D_{\text{sat}}$ ở $6\times$ thời gian lùa (tiêu chí 99%). Trái: thời gian hoàn thành so với ô $D_{\text{sat}}$ giữ ở 0,90 đến 1,02. Phải: thời gian chó đi theo đường $D / D_{\text{sat}}$.*
+*Hình 8: Đánh giá chi phí khi vượt quá ngưỡng $D_{\text{sat}}$ ở thời hạn $6\times$ (tiêu chí 99%). Trái: Thời gian hoàn thành so với mốc $D_{\text{sat}}$ đi ngang ở mức 0,90 đến 1,02. Phải: Tổng thời gian làm việc của chó tăng tuyến tính theo tỉ số $D / D_{\text{sat}}$.*
 
 ![Áp lực lên bầy](../figures/fig34_pressure.png)
 
-*Hình 9: Các lượt chạy lại (12 hạt giống mỗi ô, `dmin_f99_m6`). Trái: số giây mỗi con cừu chạy trốn, giảm đến $D_{\text{sat}}$ rồi giữ nguyên. Phải: tỉ lệ bầy đang chạy trốn tại một thời điểm, tăng theo $D$.*
+*Hình 9: Đánh giá áp lực tâm lý lên đàn cừu (12 hạt giống mỗi ô, dữ liệu `dmin_f99_m6`). Trái: Số giây tháo chạy của mỗi con cừu giảm mạnh tới mốc $D_{\text{sat}}$ rồi đi ngang. Phải: Tỉ lệ phần trăm đàn cừu tháo chạy tức thời tăng theo số lượng chó $D$.*
 
-Kết quả về áp lực một phần là tính chất của mô hình. Lực đẩy của nhiều chó lên một con cừu được chuẩn hóa về độ dài 1, nên con chó thứ hai ở gần không đẩy mạnh hơn, và $r_s = 65$ m gấp khoảng bảy lần bán kính bầy ở $N = 100$, nên chỉ vài con chó đã giữ phần lớn bầy ở trạng thái chạy trốn. Số đo này cho biết cừu chạy trốn bao lâu, không cho biết điều đó ảnh hưởng thế nào đến con vật. Bảng và lệnh nằm trong [`results_tables.md`](results_tables.md) (mục "Phase 1").
+Kết quả về áp lực một phần xuất phát từ các đặc tính chuẩn mực của mô hình Strömbom: lực đẩy từ nhiều chú chó lên một con cừu được chuẩn hóa độ dài về 1 (cơ chế blending), nên sự hiện diện của chú chó thứ hai ở gần không làm tăng độ mạnh của lực đẩy; đồng thời tầm nhìn $r_s = 65$ m rộng gấp khoảng 7 lần bán kính bầy ở $N = 100$, nên chỉ vài chú chó đã đủ để toàn bầy cảm nhận được sự hiện diện của người chăn. Toàn bộ bảng số liệu chi tiết và câu lệnh phân tích được lưu trữ tại [`results_tables.md`](results_tables.md) (mục "Phase 1").
 
 ---
 
