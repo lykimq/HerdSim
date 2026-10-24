@@ -1,4 +1,7 @@
-"""D_min as a function of the deadline, read from the trials of one run.
+"""D_min at a tighter deadline, read from the trials of one run, without new trials.
+
+Used by cli/dmin_report.py (D_min at several deadlines) and by the ``arrival`` and ``methods``
+verbs of cli/dmin_tables.py (success read at a share of the flock instead of every sheep).
 
 A trial that succeeds at time t also succeeds under every deadline at or above t and fails
 under every deadline below it, and a failed trial ran to its own limit. So the trials of a run

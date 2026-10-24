@@ -25,6 +25,7 @@ import numpy as np  # noqa: E402
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO))
 
+from analysis.results import flock_radii  # noqa: E402
 from services.cells import Cell, Group, cell_config  # noqa: E402
 from services.protocol import load_protocol  # noqa: E402
 from sim.core.simulation_runner import initial_state, run_trial  # noqa: E402
@@ -46,12 +47,10 @@ BLUE, ORANGE, AQUA = "#2a78d6", "#eb6834", "#1baf7a"  # categorical slots 1 to 3
 
 def calibrated(protocol: str, fallback: dict[int, float]) -> dict[int, float]:
     """Flock radii of a finished run (results/<protocol>/calibration.json), else the fallback."""
-    import json
-
-    path = REPO / "results" / protocol / "calibration.json"
-    if not path.exists():
+    folder = REPO / "results" / protocol
+    if not (folder / "calibration.json").exists():
         return fallback
-    radii = json.loads(path.read_text())["flock_radius"]["strombom_multi"]
+    radii = flock_radii(folder)["strombom_multi"]
     return {int(n): float(r) for n, r in radii.items()}
 
 

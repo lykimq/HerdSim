@@ -1,10 +1,8 @@
 """Pressure on the flock in a replayed trial: how long the sheep spend near a dog.
 
 The trial rows keep summaries of the tick metrics, and none of them says how close the dogs
-come to the sheep. A replay runs a stored trial again from its seed. A trial is deterministic in
-its config and seed, so the replay is the same trial; ``replay`` checks this against the stored
-outcome and raises when it differs, because a replay that is not the stored trial says nothing
-about the stored results.
+come to the sheep, so these measures are taken while a stored trial is replayed
+(services/replay.py, cli/diagnostics/pressure_replay.py).
 
 Two shares are recorded per tick: the share of sheep closer than the reaction radius to some
 dog (for Strombom sheep, the sheep in flight: they react to a dog strictly closer than r_s),
@@ -15,19 +13,11 @@ ticks and multiplied by dt they give the seconds a sheep spends in each, on aver
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Any
+from dataclasses import dataclass, field
 
 import numpy as np
 import pandas as pd
 from scipy.spatial.distance import cdist
-
-from sim.core.simulation_runner import run_trial
-from sim.core.simulation_state import SimulationState
-
-
-class ReplayMismatch(RuntimeError):
-    """A replayed trial did not reproduce the stored outcome."""
 
 
 def near_shares(
@@ -40,43 +30,27 @@ def near_shares(
     return float(np.mean(nearest < reach)), float(np.mean(nearest < close))
 
 
-@dataclass(frozen=True)
-class ReplayJob:
-    config: dict[str, Any]
-    seed: int
-    stored_success: bool
-    stored_ticks: int
-    label: dict[str, Any]  # layout, n, d, seed_index: carried into the result row
+@dataclass
+class Pressure:
+    """The two shares of every tick of one trial, and their summary."""
 
+    reach: float
+    close: float
+    flight: list[float] = field(default_factory=list)
+    near: list[float] = field(default_factory=list)
 
-def replay(job: ReplayJob) -> dict[str, Any]:
-    """One stored trial run again, with the pressure measures; raises ReplayMismatch."""
-    config = job.config
-    reach = float(config["reaction_radius"])
-    close = float(config["shepherd_stop_multiple"]) * float(config["r_a"])
-    flight: list[float] = []
-    near: list[float] = []
+    def add(self, sheep: np.ndarray, dogs: np.ndarray) -> None:
+        a, b = near_shares(sheep, dogs, self.reach, self.close)
+        self.flight.append(a)
+        self.near.append(b)
 
-    def watch(state: SimulationState) -> None:
-        a, b = near_shares(state.sheep_positions, state.shepherd_positions, reach, close)
-        flight.append(a)
-        near.append(b)
-
-    result = run_trial(config, job.seed, on_tick=watch)
-    if result.success != job.stored_success or result.total_ticks != job.stored_ticks:
-        got = f"success={result.success} ticks={result.total_ticks}"
-        want = f"success={job.stored_success} ticks={job.stored_ticks}"
-        raise ReplayMismatch(f"{job.label}: replay gave {got}, stored {want}")
-    dt = float(config["dt"])
-    return {
-        **job.label,
-        "success": result.success,
-        "finish_seconds": result.total_ticks * dt,
-        "flight_seconds_per_sheep": float(np.sum(flight)) * dt,
-        "close_seconds_per_sheep": float(np.sum(near)) * dt,
-        "mean_flight_share": float(np.mean(flight)) if flight else 0.0,
-        "peak_flight_share": float(np.max(flight)) if flight else 0.0,
-    }
+    def summary(self, dt: float) -> dict[str, float]:
+        return {
+            "flight_seconds_per_sheep": float(np.sum(self.flight)) * dt,
+            "close_seconds_per_sheep": float(np.sum(self.near)) * dt,
+            "mean_flight_share": float(np.mean(self.flight)) if self.flight else 0.0,
+            "peak_flight_share": float(np.max(self.flight)) if self.flight else 0.0,
+        }
 
 
 def pressure_table(rows: pd.DataFrame) -> pd.DataFrame:

@@ -461,6 +461,8 @@ In practical robotics and agricultural herding, a single straggling sheep does n
 
 The direct use is in robot and drone herding, where a team size has to be chosen before a trial. For working shepherds the numbers are indirect: they decide by experience and direct the dogs themselves, and the model's sheep differ from real ones (looser flock, a single fixed reaction distance).
 
+Below, a *unit* is one herder of the team: a dog, a robot or a drone. The number of units is the team size $D$ used throughout this report, so "one to three units" means $D = 1$ to 3.
+
 - **Sizing a team.** At a relaxed deadline one to three units handle a scattered flock of up to 400, and a compact flock needs one at any size. The deadline moves the answer about as much as a fourfold larger flock does, so the time available should be fixed before the team size.
 - **Speed costs more than reliability.** On `wide` and `outlier_rich` flocks the team that finishes fastest is one and a half to two and a half times the minimum (more on `split`), and units beyond it add battery time with no gain (Table 6).
 - **Physical size limits the useful team.** Units that cannot stand closer than 2 m crowd the drive arc of a scattered flock from about 9 units at $N = 400$; the arc length (13 to 23 m here) bounds the useful team.

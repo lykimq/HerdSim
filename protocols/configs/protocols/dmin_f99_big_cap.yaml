@@ -1,5 +1,5 @@
 # dmin_f99_big with the drive offset capped at r_s - r_a = 63 (a HerdSim variant of the paper
-# rule; plan design_min_max section 7). In dmin_f99_big no D drives the flock from N = 1131 on:
+# rule; report section 3.13). In dmin_f99_big no D drives the flock from N = 1131 on:
 # the paper's drive point r_a sqrt(N) lies beyond the sheep reaction distance r_s = 65 from
 # N = (r_s / r_a)^2 = 1056, so the dogs stand where only the nearest sheep feel them. With the
 # cap the dogs drive from within reach, so D_min above 1056 can be measured at all. N = 800 is

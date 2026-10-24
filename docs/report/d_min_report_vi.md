@@ -461,6 +461,8 @@ Trong thực tế ứng dụng robot và chăn thả nông nghiệp, một con c
 
 Ứng dụng trực tiếp là chăn dắt bằng robot và drone, nơi phải chọn quy mô đội trước một lượt thử nghiệm. Với người chăn cừu thực thụ, các con số chỉ mang tính gián tiếp: họ quyết định theo kinh nghiệm và tự điều khiển chó, và cừu trong mô hình khác với cừu thật (bầy lỏng hơn, một cự ly phản ứng cố định duy nhất).
 
+Dưới đây, một *đơn vị* là một tác tử chăn trong đội: một con chó, một robot hoặc một drone. Số đơn vị chính là quy mô đội $D$ dùng trong toàn bộ báo cáo, nên "một đến ba đơn vị" nghĩa là $D = 1$ đến 3.
+
 - **Định cỡ đội.** Ở thời hạn thong thả, một đến ba đơn vị xử lý được một bầy phân tán đến 400 con, và một bầy compact cần một đơn vị ở mọi kích thước. Thời hạn làm thay đổi câu trả lời gần bằng một bầy lớn gấp bốn lần, nên cần cố định thời gian có được trước khi chọn quy mô đội.
 - **Tốc độ tốn kém hơn độ tin cậy.** Trên các bầy `wide` và `outlier_rich`, đội hoàn thành nhanh nhất lớn gấp một rưỡi đến hai lần rưỡi mức tối thiểu (nhiều hơn trên `split`), và các đơn vị vượt quá nó chỉ tốn thêm thời gian pin mà không đem lại gì (Bảng 6).
 - **Kích thước vật lý giới hạn đội hữu ích.** Các đơn vị không thể đứng gần nhau dưới 2 m sẽ làm chật vòng cung lùa của một bầy phân tán từ khoảng 9 đơn vị ở $N = 400$; chiều dài vòng cung (13 đến 23 m ở đây) giới hạn đội hữu ích.

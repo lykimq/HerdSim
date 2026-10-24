@@ -1,4 +1,4 @@
-"""Holding (hold time, withdrawal) and dog spacing: the rules of plan design_min_max 4.2, 4.3."""
+"""Holding (hold time, withdrawal) and dog spacing: the rules behind report section 3.10."""
 
 from __future__ import annotations
 

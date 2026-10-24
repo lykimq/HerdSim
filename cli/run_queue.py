@@ -1,13 +1,15 @@
-"""Run the D_min protocols one after another, resumably, and keep a log of each.
+"""Run the protocols of the study one after another, and keep a log of each.
 
-    uv run cli/run_queue.py --workers 20            run every protocol that is not done
-    uv run cli/run_queue.py --only dmin_m12 dmin_m6  run just these, in this order
-    uv run cli/run_queue.py --list                   show the queue and the state of each folder
+    uv run cli/run_queue.py --list                    the queue and the state of each folder
+    uv run cli/run_queue.py --workers 20              every protocol that is not finished
+    uv run cli/run_queue.py --only dmin_m12 dmin_m6   just these, in this order
 
-Each protocol writes to its own folder results/<protocol_id>. A protocol whose folder says "every
-cell decided" is skipped, a folder that stopped for any other reason is resumed, and a protocol
-that raises is logged and the queue goes on. After each protocol one line goes to
-results/queue_log.jsonl: when it ran, for how long, the trials, errors and open cells.
+This is how the whole study is run again with one command. Each protocol runs as
+`cli/campaign.py run` would, into its own folder results/<protocol_id>. A folder where every
+cell is decided is skipped, one that stopped for any other reason is resumed, and a protocol
+that raises is logged while the queue moves on. After each protocol one line goes to
+results/queue_log.jsonl (when it ran, how long, trials, errors, open cells), which
+`cli/dmin_tables.py record` turns into the table of runs.
 """
 
 from __future__ import annotations
@@ -32,7 +34,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from services.adaptive import STOP_DECIDED, run_campaign  # noqa: E402
 from services.protocol import RESULTS_ROOT, load_protocol  # noqa: E402
 
-# Order of the plan: the main table first, then the sensitivities, then the other method.
+# The order the study ran in: the first study (main grids, sensitivities, Kubo, FAT), then the
+# follow-ups.
 QUEUE = (
     "dmin_m12",
     "dmin_m6",

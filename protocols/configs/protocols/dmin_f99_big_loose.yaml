@@ -1,4 +1,4 @@
-# How much the imposed density decides the large-N answer (RQ-E3): as dmin_f99_big at N = 566
+# How much the imposed density decides the large-N answer (report section 3.13): as dmin_f99_big at N = 566
 # and 800 on the wide start, with the imposed radius scaled by 1.4142135623730951, so the N = 800 flock is
 # half as dense as the 566 flock. One protocol per scale, because R_f is calibrated once per protocol
 # and a factor cannot change it.

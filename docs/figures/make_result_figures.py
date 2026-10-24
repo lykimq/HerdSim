@@ -29,7 +29,8 @@ sys.path.insert(0, str(HERE.parents[1]))
 
 from make_figures import AQUA, BLUE, GRID, INK, MUTED, ORANGE, OUT, REPO, SURFACE, caption  # noqa: E402
 
-from analysis.dmin_tables import dmin_text, groups_table, parse_group_key  # noqa: E402
+from analysis.dmin_tables import dmin_text, groups_table, split_group_key  # noqa: E402
+from analysis.results import read_cells, read_trials  # noqa: E402
 
 RESULTS = REPO / "results"
 LAYOUT_COLOR = {"compact": MUTED, "wide": BLUE, "split": ORANGE, "outlier_rich": AQUA}
@@ -45,9 +46,7 @@ def have(*names: str) -> bool:
 
 
 def cells(name: str) -> pd.DataFrame:
-    t = pd.read_csv(RESULTS / name / "frontier_cells.csv", skiprows=1)
-    keys = pd.DataFrame([parse_group_key(k) for k in t["group_key"]])
-    t = pd.concat([keys, t], axis=1)
+    t = split_group_key(read_cells(RESULTS / name))
     t["d"] = t["n_shepherds"].astype(int)
     return t
 
@@ -63,7 +62,7 @@ def rate_line(ax, t: pd.DataFrame, color, marker, ls="-", label=None, dx=1.0, fe
 
 
 def trials(name: str) -> pd.DataFrame:
-    return pd.read_csv(RESULTS / name / "trials.csv", skiprows=1, low_memory=False)
+    return read_trials(RESULTS / name)
 
 
 # ---------------------------------------------------------------------------------- figure 20

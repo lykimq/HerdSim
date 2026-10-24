@@ -72,6 +72,14 @@ The engine runs exactly one trial: one flock, one set of dogs, one seed, until s
 
 *Why:* it keeps the engine small and easy to test on its own, and lets the campaign side change without touching the simulation. A single trial can be pulled out and run by hand for debugging.
 
+### Layers depend only downward
+
+The code has four layers. The engine runs one trial. The campaign layer runs things: protocols, calibration, rounds, and replays of stored trials. The analysis layer reads finished results folders and turns them into decisions and tables, and never runs the model. The command-line tools sit on top; each one parses its arguments, calls the layers below and prints. A layer imports only from layers below it (the campaign layer uses the frontier rules to decide cells), and no tool imports another tool. A test checks these rules on every run.
+
+*Why:* each piece can then be removed, replaced or extended on its own. Deleting a tool breaks nothing else, the analysis can be rerun without a simulation, and a rule that several tools need (how a results folder is read, how a replay is checked against its stored trial) lives in one place below them.
+
+*Cost:* a helper that two tools share has to move down into a layer, even when it is small.
+
 ### Everything that varies is a plugin chosen by name
 
 Sheep behaviour, dog behaviour, the task and every metric are separate plugins, listed under string ids. A method is a named pairing of a sheep model and a dog controller, plus their default parameters. A protocol picks methods and the task by name.
@@ -248,9 +256,12 @@ Some things the current design doesn't handle yet, and would need real changes:
 | Adaptive rounds, worker batches, results folder | `services/adaptive.py`, `services/runner.py`, `services/pool.py`, `services/store.py` |
 | Trial row, provenance | `protocols/packaging/` |
 | Frontier rules | `analysis/frontier.py` |
+| Reading a results folder, Markdown tables | `analysis/results.py` |
 | D_min of a finished run, and its tables | `analysis/dmin.py`, `analysis/dmin_tables.py` |
-| Replays of stored trials with extra measures (pressure on the flock) | `analysis/pressure.py`, `cli/pressure_replay.py` |
 | Growth-shape fits of D_min against N | `analysis/growth_fits.py` |
-| Diagnostic replays of the split layout | `cli/split_diagnostic.py` |
-| Command-line entry points | `cli/` |
+| Replays of stored trials, checked against the stored outcome | `services/replay.py` |
+| Pressure on the flock in a replay | `analysis/pressure.py`, `cli/diagnostics/pressure_replay.py` |
+| Diagnostic replays of the split layout | `cli/diagnostics/split_diagnostic.py` |
+| Command-line entry points | `cli/` (see `cli/README.md`) |
+| Layer rules | `tests/test_layers.py` |
 | Regression tests | `tests/sim/test_golden.py` |

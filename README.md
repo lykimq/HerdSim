@@ -537,7 +537,7 @@ The follow-up campaigns (findings 8 to 12) use these settings of `protocols/conf
 
 Method choices: `independent` (each dog an independent copy of the paper shepherd, no team layer) in `dmin_f99_indep`; the sheep attraction weight `c` and the neighbour count `n_neighbors` as method parameters in `dmin_f99_c1.3`, `_c1.6`, `_c2.0` and `dmin_f99_k05`. The calibration dog is always the paper's dog with the full view, whatever these settings say, so every protocol's task is sized from the same reference flock.
 
-Two diagnostic replays (they rerun stored trials and refuse to go on if a replay differs from its stored trial): `uv run cli/pressure_replay.py` (time each sheep spends in flight) and `uv run cli/split_diagnostic.py` (why more dogs slow the split layout).
+Two diagnostic replays (they rerun stored trials and refuse to go on if a replay differs from its stored trial): `uv run cli/diagnostics/pressure_replay.py` (time each sheep spends in flight) and `uv run cli/diagnostics/split_diagnostic.py` (why more dogs slow the split layout). See [cli/README.md](cli/README.md).
 
 ---
 
@@ -574,7 +574,7 @@ The largest D sizes the field, so it is part of the physics: raising it always m
 
 - **Batches of 10, cap of 200.** A cell is reliable when its 99% lower bound reaches 0.90, which needs 51 successes in a row (60 trials in batches of 10). A clearly failing cell is decided after 10 to 20 trials.
 - **Why 200**: after 200 seeds a cell is decided only if its observed rate is at least 0.955 or at most 0.835. Doubling to 400 narrows that only to 0.94 and 0.86, so halving the open zone costs about four times the seeds. 388 of the 4,773 cells (8.1%) ended open at the cap; the tables show them as brackets ("2-3") or lower bounds ("[5]"), never as a single number.
-- **Finish times**: D_min runs spend seeds only on reliability. The runs that ask for D_sat also decide the finish-time comparisons (`decide_finish_times: true`), which costs about a third more trials.
+- **Finish times**: D_min runs spend seeds only on reliability. The runs that ask for D_sat also decide the finish-time comparisons (`decide_finish_times: true`), which cost 5 to 38 percent more trials on the resumed 99% grids (more at looser deadlines).
 - **Diagnostics**: the pressure and split replays use 12 seeds per cell and give a direction, not a decided value.
 
 ### Deadlines and success rule
@@ -679,7 +679,7 @@ HerdSim/
 |   |-- growth_fits.py      # Power law against saturating curve for D_min(N)
 |   `-- pressure.py         # Replays of stored trials: pressure on the flock
 |-- protocols/configs/      # Canonical defaults and protocol definitions
-|-- cli/                    # Command-line tools (campaign, run_queue, dmin_report, dmin_tables, pressure_replay, split_diagnostic)
+|-- cli/                    # Command-line tools; what each runs and why: cli/README.md
 |-- docs/                   # Report, architecture guide, figures and visualization scripts
 |-- results/                # Archived empirical datasets (326k+ trials)
 `-- tests/                  # Test suites and golden regression benchmarks

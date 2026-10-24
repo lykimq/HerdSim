@@ -1,4 +1,4 @@
-# Holding task (plan design_min_max section 4.2, RQ-B8): the goal counts as reached only after
+# Holding task (report section 3.10): the goal counts as reached only after
 # 99 percent of the sheep have stayed inside for one drive time, and while it is reached the
 # dogs withdraw beyond r_s so the flock grazes (hold_withdraw). Same field, seeds and deadline as
 # dmin_f99_m6 (6 drive times, which now include the hold). The D grid adds 7, 9, 10, 11, 13

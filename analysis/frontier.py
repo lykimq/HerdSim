@@ -1,4 +1,9 @@
-"""Reliability and finish-time frontiers along each D curve.
+"""The decision rules: which team sizes work, which are faster, and where the zones lie.
+
+This is the one place that turns trial outcomes into answers. The adaptive run calls it after
+every round to see which cells still need seeds, and every table and figure reads its output
+(frontier_cells.csv, frontier_groups.csv). Changing a rule here and rereading the trials redoes
+every answer without running a simulation.
 
 A D curve is every cell of one group (method, layout, factors, N) ordered by
 dog count D. For each cell this module decides:
@@ -103,10 +108,14 @@ class Rules:
     min_pairs: int
     bootstrap_resamples: int
     seed: int
-    # False: an open finish-time comparison (D_best, D_sat, D_crowd) no longer asks for seeds,
-    # only an open reliability does. D_min does not depend on those comparisons, and they cost
-    # most of the seeds of a run; the values stay in the tables, flagged undecided.
-    decide_finish_times: bool = True
+    # Whether open finish-time comparisons may ask for seeds (canonical: false).
+    # true:  a cell gets more seeds while its reliability or one of its finish-time comparisons
+    #        is open, so D_best, D_sat and D_crowd get decided. For runs that ask for D_sat.
+    # false: only an open reliability asks for seeds, which is all D_min needs. Open comparisons
+    #        stay open and D_best, D_sat and D_crowd are flagged undecided in the tables.
+    # Deciding the comparisons cost 5 to 38 percent more trials on the resumed 99 percent grids
+    # (more at looser deadlines, where more cells are reliable and compared).
+    decide_finish_times: bool
 
     @classmethod
     def from_settings(cls, settings: dict[str, Any]) -> Rules:
@@ -117,7 +126,7 @@ class Rules:
             min_pairs=int(settings["min_pairs"]),
             bootstrap_resamples=int(settings["bootstrap_resamples"]),
             seed=int(settings["master_seed"]),
-            decide_finish_times=bool(settings.get("decide_finish_times", True)),
+            decide_finish_times=bool(settings["decide_finish_times"]),
         )
 
 

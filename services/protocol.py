@@ -1,9 +1,18 @@
 """Load and check a protocol: canonical defaults, optional ``extends`` chain, the protocol.
 
-A protocol names its output folder, the methods with their time limits and
-parameter overrides, the grid, optional factors (a sweepable canonical setting; each value is
-its own D curve), and any canonical value it changes.
-Unknown keys are errors.
+A protocol is one experiment written as data, in protocols/configs/protocols/. It names its
+output folder, the methods with their time limits and parameter overrides, the grid (layouts,
+flock sizes, dog counts), optional factors (a sweepable canonical setting; each value is its own
+D curve), and any canonical value it changes. Everything else comes from
+protocols/configs/canonical.yaml. A protocol can ``extends`` another and change only what
+differs, which is how a variant of a finished run gets its own id and folder:
+
+    protocol_id: dmin_f99_hold_spacing
+    output: results/dmin_f99_hold_spacing
+    extends: dmin_f99_hold.yaml
+    dog_spacing: 2.0
+
+Unknown keys are errors, so a typo stops the run instead of being ignored.
 """
 
 from __future__ import annotations
@@ -334,6 +343,12 @@ def resolve_output(output: str | Path) -> Path:
     if inside_repo and not path.is_relative_to(RESULTS_ROOT):
         raise ValueError(f"Output inside the repo must be under {RESULTS_ROOT}, got {path}")
     return path
+
+
+def results_folder(name: str) -> Path:
+    """A finished run's folder: a path as given, else results/<protocol_id>."""
+    path = Path(name)
+    return path if path.exists() else RESULTS_ROOT / name
 
 
 def load_protocol(name_or_path: str, output: Path | None = None) -> Protocol:

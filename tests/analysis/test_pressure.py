@@ -1,13 +1,11 @@
-"""Pressure replays: the distance shares, and that a replay is the stored trial or stops."""
+"""Pressure measures: the distance shares and their sum over a trial."""
 
 from __future__ import annotations
 
 import numpy as np
 import pytest
 
-from analysis.pressure import ReplayJob, ReplayMismatch, near_shares, replay
-from sim.core.simulation_runner import run_trial
-from tests.helpers import config_for
+from analysis.pressure import Pressure, near_shares
 
 
 def test_near_shares_count_sheep_strictly_inside_each_radius():
@@ -18,13 +16,13 @@ def test_near_shares_count_sheep_strictly_inside_each_radius():
     assert near_shares(sheep, np.empty((0, 2)), reach=5.0, close=1.5) == (0.0, 0.0)
 
 
-def test_replay_reproduces_the_stored_trial_and_refuses_one_that_differs():
-    config = config_for(n=25, d=2, layout="wide", ticks=120)
-    stored = run_trial(config, 2026)
-    label = {"layout": "wide", "n": 25, "d": 2, "role": "D_min", "seed_index": 0}
-    row = replay(ReplayJob(config, 2026, stored.success, stored.total_ticks, label))
-    assert row["finish_seconds"] == stored.total_ticks * float(config["dt"])
-    assert 0.0 <= row["mean_flight_share"] <= row["peak_flight_share"] <= 1.0
-    assert row["close_seconds_per_sheep"] <= row["flight_seconds_per_sheep"]
-    with pytest.raises(ReplayMismatch):
-        replay(ReplayJob(config, 2026, stored.success, stored.total_ticks + 1, label))
+def test_pressure_sums_the_shares_into_seconds_per_sheep():
+    sheep = np.array([[0.0, 0.0], [10.0, 0.0]])
+    pressure = Pressure(reach=5.0, close=1.5)
+    pressure.add(sheep, np.array([[0.0, 1.0]]))  # flight 0.5, close 0.5
+    pressure.add(sheep, np.array([[50.0, 50.0]]))  # flight 0, close 0
+    out = pressure.summary(dt=2.0)
+    assert out["flight_seconds_per_sheep"] == pytest.approx(1.0)
+    assert out["close_seconds_per_sheep"] == pytest.approx(1.0)
+    assert out["mean_flight_share"] == pytest.approx(0.25)
+    assert out["peak_flight_share"] == pytest.approx(0.5)

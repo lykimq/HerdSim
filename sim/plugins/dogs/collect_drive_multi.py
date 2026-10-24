@@ -19,12 +19,12 @@ Dogs are matched to drive slots by their angle around the flock centre, so neigh
 neighbours and no two dogs cross to swap places. Every dog knows every sheep and every other
 dog, so the team is planned once per tick from the true state.
 
-With ``hold_withdraw`` (a HerdSim holding step, plan design_min_max 4.2), while the goal is
+With ``hold_withdraw`` (a HerdSim holding step, not from the papers), while the goal is
 reached every dog walks to the point r_s + r_a beyond the farthest sheep on its own bearing
 from the flock centre, so no dog is within r_s of a sheep and the flock grazes. When the goal is
 no longer reached the team rule above takes over again.
 
-With ``sensing_range`` above 0 (plan design_min_max section 6) a dog knows only the sheep within
+With ``sensing_range`` above 0 (report section 3.12) a dog knows only the sheep within
 that range, plus what other dogs see under ``communication``: with shared, the team is planned
 once from the pooled view; with none or neighbour, each dog plans the team from its own view
 and takes its own target from that plan. f(N) and the drive offset use the true N. A dog that
@@ -101,7 +101,7 @@ def spread_jobs(flock: np.ndarray, outliers: np.ndarray, count: int, gap: float)
     ``gap`` > 0 the farthest first but none closer than ``gap`` to one already taken, so the dogs
     do not all go to one cluster; the rest are filled in farthest first if too few are that far
     apart. ``gap`` is a diagnostic hook (``collect_min_gap`` in a config, not a protocol
-    setting; analysis/split_diagnostic.py), 0 in every campaign."""
+    setting; cli/diagnostics/split_diagnostic.py), 0 in every campaign."""
     if gap <= 0.0:
         return outliers[:count]
     taken: list[int] = []

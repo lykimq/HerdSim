@@ -1,4 +1,4 @@
-"""Local views of collect_drive_multi (plan design_min_max section 6)."""
+"""Local views of collect_drive_multi (report section 3.12)."""
 
 from __future__ import annotations
 

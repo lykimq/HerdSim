@@ -1,4 +1,4 @@
-# What a dog sees (plan design_min_max section 6, RQ-D2): the sensing range of every dog, with no
+# What a dog sees (report section 3.12): the sensing range of every dog, with no
 # sharing, from 15 to 100, and 0 (every dog knows every sheep) as the control on the same field.
 # 99 percent rule, 6 drive times, wide and split starts (where outliers must be found), flock
 # sizes 50 to 200, D 1 to 16. A dog that knows no sheep walks to the flock centre it last knew.

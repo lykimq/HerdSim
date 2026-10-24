@@ -537,7 +537,7 @@ Các chiến dịch tiếp theo (phát hiện 8 đến 12) dùng các thiết l�
 
 Các lựa chọn phương pháp: `independent` (mỗi chó là một bản sao độc lập của người chăn trong bài báo, không có tầng đội) trong `dmin_f99_indep`; trọng số lực hút của cừu `c` và số hàng xóm `n_neighbors` là tham số phương pháp trong `dmin_f99_c1.3`, `_c1.6`, `_c2.0` và `dmin_f99_k05`. Chó dùng để hiệu chuẩn luôn là chó của bài báo với góc nhìn đầy đủ, bất kể các thiết lập này là gì, nên nhiệm vụ của mọi giao thức đều được định cỡ từ cùng một bầy tham chiếu.
 
-Hai công cụ chạy lại để chẩn đoán (chúng chạy lại các lượt chạy đã lưu và từ chối tiếp tục nếu một lần chạy lại khác với lượt chạy đã lưu): `uv run cli/pressure_replay.py` (thời gian mỗi con cừu tháo chạy) và `uv run cli/split_diagnostic.py` (vì sao thêm chó làm bố cục split chậm đi).
+Hai công cụ chạy lại để chẩn đoán (chúng chạy lại các lượt chạy đã lưu và từ chối tiếp tục nếu một lần chạy lại khác với lượt chạy đã lưu): `uv run cli/diagnostics/pressure_replay.py` (thời gian mỗi con cừu tháo chạy) và `uv run cli/diagnostics/split_diagnostic.py` (vì sao thêm chó làm bố cục split chậm đi). Xem [cli/README.md](cli/README.md).
 
 ---
 
@@ -574,7 +574,7 @@ D lớn nhất định cỡ bãi cỏ, nên nó là một phần của vật lý
 
 - **Mỗi đợt 10, trần 200.** Một ô đạt độ tin cậy khi cận dưới 99% của nó đạt 0,90, điều này cần 51 lần thành công liên tiếp (60 lượt chạy theo các đợt 10). Một ô thất bại rõ ràng được quyết định sau 10 đến 20 lượt chạy.
 - **Vì sao 200**: sau 200 hạt giống, một ô chỉ được quyết định nếu tỉ lệ quan sát được ít nhất là 0,955 hoặc nhiều nhất là 0,835. Tăng gấp đôi lên 400 chỉ thu hẹp khoảng đó về 0,94 và 0,86, nên giảm một nửa vùng chưa quyết định tốn khoảng gấp bốn lần số hạt giống. 388 trong số 4.773 ô (8,1%) kết thúc ở trạng thái chưa quyết định tại mức trần; các bảng ghi chúng dưới dạng khoảng chặn ("2-3") hoặc cận dưới ("[5]"), không bao giờ là một số duy nhất.
-- **Thời gian hoàn thành**: các lượt chạy D_min chỉ dùng hạt giống cho độ tin cậy. Các lượt chạy hỏi về D_sat cũng quyết định các phép so sánh thời gian hoàn thành (`decide_finish_times: true`), tốn thêm khoảng một phần ba số lượt chạy.
+- **Thời gian hoàn thành**: các lượt chạy D_min chỉ dùng hạt giống cho độ tin cậy. Các lượt chạy hỏi về D_sat cũng quyết định các phép so sánh thời gian hoàn thành (`decide_finish_times: true`), tốn thêm 5 đến 38 phần trăm số lượt chạy trên các lưới 99% chạy tiếp (nhiều hơn ở thời hạn rộng hơn).
 - **Chẩn đoán**: các lượt chạy lại đo áp lực và chẩn đoán split dùng 12 hạt giống mỗi ô và cho một hướng, không phải một giá trị đã quyết định.
 
 ### Thời hạn và quy tắc thành công

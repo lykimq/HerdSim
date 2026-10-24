@@ -1,5 +1,11 @@
 """Which shape D_min(N) follows: a power law that grows without limit, or a curve that levels off.
 
+    uv run cli/dmin_tables.py fits dmin_f99_m12 dmin_f99_m6
+
+The answer decides what a larger flock would need: a power law keeps adding dogs, a saturating
+curve stops. Up to N = 566 both fit the data equally well, and this module says how far apart
+their predictions lie beyond it.
+
 Each D curve gives D_min at every N only as an interval, because D is an integer and some cells
 stay undecided: a decided D_min d says the true value lies in [d - 0.5, d + 0.5], a bracket
 lo-hi in [lo - 0.5, hi + 0.5], and a curve with no reliable D yet (a lower bound lo, or no D on

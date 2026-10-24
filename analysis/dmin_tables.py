@@ -1,7 +1,9 @@
-"""Tables of D_min from finished runs: the figures the plan's results section is made of.
+"""The tables behind the report: D_min, D_sat, their growth with N, cost, zones, comparisons.
 
-Everything here reads the tables a campaign wrote (frontier_groups.csv, frontier_cells.csv,
-trials.csv, status.json) and never runs a simulation.
+Each function takes what a finished run wrote (frontier_groups.csv, frontier_cells.csv,
+trials.csv, the queue log) and returns a DataFrame; cli/dmin_tables.py has one verb per table
+and prints it as Markdown. Nothing here runs a simulation, so every table can be redone in
+seconds after a rule or a run changes.
 
 A D curve has two numbers. ``d_min`` is the smallest D decided reliable. ``d_min_low`` is the
 smallest D whose success interval still reaches theta. The true D_min lies in [d_min_low, d_min]
@@ -21,6 +23,7 @@ import numpy as np
 import pandas as pd
 
 from .dmin import arrival_groups
+from .results import read_groups
 
 
 def parse_group_key(key: str) -> dict[str, Any]:
@@ -34,16 +37,15 @@ def parse_group_key(key: str) -> dict[str, Any]:
     }
 
 
-def read_table(path: Path) -> pd.DataFrame:
-    """A generated CSV: the first line is the AUTO-GENERATED notice."""
-    return pd.read_csv(path, skiprows=1)
+def split_group_key(frame: pd.DataFrame) -> pd.DataFrame:
+    """``frame`` with its group_key column replaced by method, layout, factors and n."""
+    keys = pd.DataFrame([parse_group_key(k) for k in frame["group_key"]], index=frame.index)
+    return pd.concat([keys, frame.drop(columns=["group_key"])], axis=1)
 
 
 def groups_table(folder: Path) -> pd.DataFrame:
     """One row per D curve: method, layout, factors, n and the D values."""
-    groups = read_table(folder / "frontier_groups.csv")
-    keys = pd.DataFrame([parse_group_key(k) for k in groups["group_key"]])
-    return pd.concat([keys, groups.drop(columns=["group_key"])], axis=1)
+    return split_group_key(read_groups(folder))
 
 
 def dmin_text(row: pd.Series) -> str:
@@ -74,7 +76,7 @@ def one_level(table: pd.DataFrame) -> pd.DataFrame:
 
 
 def layout_by_n(table: pd.DataFrame, layouts: tuple[str, ...] | None = None) -> pd.DataFrame:
-    """The plan's section 8.2 table: layouts as rows, N as columns, one text entry per curve."""
+    """The D_min table: layouts as rows, N as columns, one text entry per curve."""
     table = one_level(table)
     shown = table.assign(text=table.apply(dmin_text, axis=1))
     wide = shown.pivot_table(index="layout", columns="n", values="text", aggfunc="first")
@@ -425,7 +427,7 @@ def dips(cells: pd.DataFrame, groups: pd.DataFrame) -> pd.DataFrame:
 
 
 def run_record(queue_log: Path, results_root: Path | None = None) -> pd.DataFrame:
-    """The last queue_log entry of each protocol: the plan's section 8.1 table.
+    """The table of runs: the last queue_log entry of each protocol.
 
     With ``results_root``, the counts come from each folder's status.json where it exists, so
     a folder resumed outside the queue (a top-up run) shows its current trials and cells; the
@@ -484,8 +486,8 @@ __all__ = [
     "midpoint",
     "one_level",
     "parse_group_key",
-    "read_table",
     "run_record",
     "slope_range",
+    "split_group_key",
     "unusual_zones",
 ]

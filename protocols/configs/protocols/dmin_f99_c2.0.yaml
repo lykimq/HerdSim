@@ -1,4 +1,4 @@
-# Cohesion level c = 2.0 (plan design_min_max section 3, RQ-F2): the sheep attraction weight of
+# Cohesion level c = 2.0 (report section 3.11): the sheep attraction weight of
 # Strombom 2014 (1.05 in the paper) raised to 2.0. Everything else as dmin_f99_m12 (12 drive times,
 # 99 percent rule, four layouts, seeds), on the five flock sizes 25 to 400 of the main runs, so
 # the slope of D_min against N compares with dmin_f99_m12 on the same sizes. R_f is calibrated

@@ -1,40 +1,49 @@
-"""Tables for the results section of the plan, from finished runs.
+"""Turn finished runs into Markdown tables, one question per verb.
 
     uv run cli/dmin_tables.py record
-    uv run cli/dmin_tables.py dmin    dmin_m12 dmin_m6 dmin_m3
-    uv run cli/dmin_tables.py growth  dmin_m12 dmin_m6 dmin_m3
-    uv run cli/dmin_tables.py dips    dmin_m6
-    uv run cli/dmin_tables.py arrival dmin_m6 --pct 99
-    uv run cli/dmin_tables.py compare dmin_s_matched dmin_s_handler --base dmin_s_base
-    uv run cli/dmin_tables.py dsat    dmin_f99_m12 dmin_f99_m6 dmin_f99_m3
-    uv run cli/dmin_tables.py effort  dmin_f99_m12
-    uv run cli/dmin_tables.py zones   dmin_f99_m12 dmin_f99_fat
-    uv run cli/dmin_tables.py methods dmin_f99_m6 dmin_f99_fat dmin_kubo --pct 99
-    uv run cli/dmin_tables.py fits    dmin_f99_m12 dmin_f99_m6
+    uv run cli/dmin_tables.py dmin    dmin_f99_m12 dmin_f99_m6
+    uv run cli/dmin_tables.py dsat    dmin_f99_m6
     uv run cli/dmin_tables.py extent  dmin_f99_big --layout compact
 
-Each prints Markdown to paste into the plan. Folders are protocol ids under results/, or paths.
-record     the table of runs (plan 8.1), from results/queue_log.jsonl
-dmin       D_min by layout and N, one table per folder (8.2)
-growth     range of slopes of log D_min against log N, and layout against N (8.3, 8.4)
-dips       cells above D_min that are not reliable (8.8)
-arrival    D_min with success defined as pct percent of the flock in the goal, beside strict (8.6)
-compare    each variant beside the base for the same curve (8.9)
-dsat       D_sat by layout and N, and the range of slopes of log D_sat against log N
-effort     finish time, dog time and dog path beyond D_sat, relative to the D_sat cell
-zones      cells where more dogs did worse (crowded, dip, collapse, recovered)
-methods    D_min, D_sat, D_crowd, D_max per curve across folders; --pct relabels a strict
-           run (such as dmin_kubo) to pct percent arrival so all rows use one success rule
-fits       power law against saturating curve for D_min(N), per layout (analysis/growth_fits.py);
-           split is left out, since its success does not rise with D at N >= 200
-extent     the flock's own size against the R_f its task was sized from, per cell (a check for
-           sizes whose R_f is imposed above the calibration edge)
+Each verb takes one or more folders (a protocol id under results/, or a path) and prints a table
+ready to paste; docs/report/results_tables.md was made this way. Nothing here runs a simulation:
+the tables are read from the files a run wrote, and the calculations live in analysis/.
+
+The runs
+  record     every run: when it finished, trials, cells, open cells, errors, hours
+             (from results/queue_log.jsonl; takes no folder)
+
+How many dogs are needed
+  dmin      D_min by layout and flock size, one table per folder
+  growth     how fast D_min grows with N (the range of log-log slopes the brackets allow),
+             and whether layout or N moves it more
+  fits       a power law against a curve that levels off, fitted to D_min(N) per layout;
+             split is left out, since its success does not rise with D at N >= 200
+
+How many are enough, and when more hurt
+  dsat       D_sat (the team beyond which the drive gets no faster) by layout and N
+  effort     finish time, dog time and dog path beyond D_sat, relative to the D_sat cell
+  zones      cells where more dogs did worse (crowded, dip, collapse, recovered)
+  dips       cells above D_min that are not reliable
+
+Comparing rules, variants and methods
+  arrival    D_min if success meant --pct percent of the flock in the goal, beside the run's own
+  compare    each variant folder beside --base, curve by curve
+             (e.g. compare dmin_s_matched dmin_s_handler --base dmin_s_base)
+  methods    D_min, D_sat, D_crowd and D_max per curve across folders; --pct relabels a strict
+             run (such as dmin_kubo) so every row uses one success rule
+
+Checks
+  extent     the flock's own size against the R_f its task was sized from, per cell; above the
+             calibration edge R_f is imposed, and this shows how well it matches (--layout)
+
+An entry such as "2-3" is a bracket (D = 3 is reliable, D = 2 still undecided), "[5]" a lower
+bound with no reliable D yet, and "none on grid" a curve where every D is unreliable.
 """
 
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from pathlib import Path
 
@@ -58,35 +67,23 @@ from analysis.dmin_tables import (  # noqa: E402
     growth_table,
     layout_against_n,
     layout_by_n,
-    parse_group_key,
-    read_table,
     run_record,
+    split_group_key,
     unusual_zones,
 )
 from analysis.frontier import Rules, frontier  # noqa: E402
 from analysis.growth_fits import compare as compare_shapes  # noqa: E402
 from analysis.growth_fits import interval_of  # noqa: E402
-from services.protocol import RESULTS_ROOT, load_protocol  # noqa: E402
+from analysis.results import (  # noqa: E402
+    flock_radii,
+    markdown,
+    read_cells,
+    read_groups,
+    read_trials,
+)
+from services.protocol import RESULTS_ROOT, load_protocol, results_folder  # noqa: E402
 
 LAYOUTS = ("compact", "wide", "split", "outlier_rich")
-
-
-def folder_of(name: str) -> Path:
-    path = Path(name)
-    return path if path.exists() else RESULTS_ROOT / name
-
-
-def markdown(frame: pd.DataFrame, index: bool = False) -> str:
-    """A Markdown table; no extra dependency."""
-    if frame.empty:
-        return "(no rows)"
-    frame = frame.reset_index() if index else frame
-    columns = [str(c) for c in frame.columns]
-    lines = ["| " + " | ".join(columns) + " |", "|" + "|".join("---" for _ in columns) + "|"]
-    for row in frame.itertuples(index=False):
-        cells = ("" if isinstance(v, float) and pd.isna(v) else str(v) for v in row)
-        lines.append("| " + " | ".join(cells) + " |")
-    return "\n".join(lines)
 
 
 def cmd_record(_: argparse.Namespace) -> None:
@@ -95,14 +92,14 @@ def cmd_record(_: argparse.Namespace) -> None:
 
 def cmd_dmin(args: argparse.Namespace) -> None:
     for name in args.folders:
-        table = groups_table(folder_of(name))
+        table = groups_table(results_folder(name))
         print(f"### {name}\n")
         print(markdown(layout_by_n(table, LAYOUTS), index=True), "\n")
 
 
 def cmd_growth(args: argparse.Namespace) -> None:
     for name in args.folders:
-        table = groups_table(folder_of(name))
+        table = groups_table(results_folder(name))
         print(f"### {name}\n")
         print(markdown(growth_table(table)), "\n")
         effect = layout_against_n(table)
@@ -116,38 +113,35 @@ def cmd_growth(args: argparse.Namespace) -> None:
 
 def cmd_dips(args: argparse.Namespace) -> None:
     for name in args.folders:
-        folder = folder_of(name)
-        found = dips(
-            read_table(folder / "frontier_cells.csv"), read_table(folder / "frontier_groups.csv")
-        )
+        folder = results_folder(name)
+        found = dips(read_cells(folder), read_groups(folder))
         print(f"### {name}: {len(found)} cells above D_min that are not reliable\n")
         print(markdown(found), "\n")
 
 
 def cmd_arrival(args: argparse.Namespace) -> None:
     for name in args.folders:
-        folder = folder_of(name)
+        folder = results_folder(name)
         protocol = load_protocol(name, output=folder)
-        trials = pd.read_csv(folder / "trials.csv", skiprows=1)
         strict = groups_table(folder)
-        relaxed = arrival_groups(trials, Rules.from_settings(protocol.settings), args.pct)
-        keys = pd.DataFrame([parse_group_key(k) for k in relaxed["group_key"]])
-        relaxed = pd.concat([keys, relaxed.drop(columns=["group_key"])], axis=1)
+        relaxed = split_group_key(
+            arrival_groups(read_trials(folder), Rules.from_settings(protocol.settings), args.pct)
+        )
         print(f"### {name}: strict, then {args.pct} percent of the flock in the goal\n")
         print(markdown(layout_by_n(strict, LAYOUTS), index=True), "\n")
         print(markdown(layout_by_n(relaxed, LAYOUTS), index=True), "\n")
 
 
 def cmd_compare(args: argparse.Namespace) -> None:
-    base = groups_table(folder_of(args.base))
+    base = groups_table(results_folder(args.base))
     for name in args.variants:
         print(f"### {name}: {args.base} / {name}\n")
-        print(markdown(compare(base, groups_table(folder_of(name))), index=True), "\n")
+        print(markdown(compare(base, groups_table(results_folder(name))), index=True), "\n")
 
 
 def cmd_dsat(args: argparse.Namespace) -> None:
     for name in args.folders:
-        table = groups_table(folder_of(name))
+        table = groups_table(results_folder(name))
         print(f"### {name}: D_sat\n")
         print(markdown(dsat_by_n(table, LAYOUTS), index=True), "\n")
         print(markdown(dsat_growth(table)), "\n")
@@ -155,15 +149,14 @@ def cmd_dsat(args: argparse.Namespace) -> None:
 
 def cmd_effort(args: argparse.Namespace) -> None:
     for name in args.folders:
-        folder = folder_of(name)
-        cells = read_table(folder / "frontier_cells.csv")
+        folder = results_folder(name)
         print(f"### {name}: cost of dogs beyond D_sat, relative to the D_sat cell\n")
-        print(markdown(effort_table(cells, groups_table(folder))), "\n")
+        print(markdown(effort_table(read_cells(folder), groups_table(folder))), "\n")
 
 
 def cmd_zones(args: argparse.Namespace) -> None:
     for name in args.folders:
-        found = unusual_zones(read_table(folder_of(name) / "frontier_cells.csv"))
+        found = unusual_zones(read_cells(results_folder(name)))
         print(f"### {name}: {len(found)} cells where more dogs did worse\n")
         print(markdown(found), "\n")
 
@@ -171,17 +164,16 @@ def cmd_zones(args: argparse.Namespace) -> None:
 def cmd_methods(args: argparse.Namespace) -> None:
     rows = []
     for name in args.folders:
-        folder = folder_of(name)
+        folder = results_folder(name)
         protocol = load_protocol(name, output=folder)
         fraction = float(protocol.settings["success_fraction"])
         if fraction < 1.0 or args.pct is None:
             table = groups_table(folder)
             rule = "strict" if fraction == 1.0 else f"{round(fraction * 100)} percent"
         else:
-            trials = pd.read_csv(folder / "trials.csv", skiprows=1)
+            trials = read_trials(folder)
             front = frontier(at_arrival(trials, args.pct), Rules.from_settings(protocol.settings))
-            keys = pd.DataFrame([parse_group_key(k) for k in front.groups["group_key"]])
-            table = pd.concat([keys, front.groups.drop(columns=["group_key"])], axis=1)
+            table = split_group_key(front.groups)
             rule = f"{args.pct} percent (relabelled)"
         rows.append(frontier_values(table).assign(folder=name, rule=rule))
     print(markdown(pd.concat(rows, ignore_index=True)))
@@ -189,7 +181,7 @@ def cmd_methods(args: argparse.Namespace) -> None:
 
 def cmd_fits(args: argparse.Namespace) -> None:
     for name in args.folders:
-        table = groups_table(folder_of(name))
+        table = groups_table(results_folder(name))
         rows = []
         for layout in ("wide", "outlier_rich"):
             part = table[table["layout"] == layout].sort_values("n")
@@ -205,10 +197,8 @@ def cmd_fits(args: argparse.Namespace) -> None:
 
 def cmd_extent(args: argparse.Namespace) -> None:
     for name in args.folders:
-        folder = folder_of(name)
-        radii = json.loads((folder / "calibration.json").read_text())["flock_radius"]
-        trials = pd.read_csv(folder / "trials.csv", skiprows=1, low_memory=False)
-        table = extent_check(trials, radii)
+        folder = results_folder(name)
+        table = extent_check(read_trials(folder), flock_radii(folder))
         if args.layout:
             table = table[table["layout"] == args.layout]
         suffix = f" ({args.layout})" if args.layout else ""

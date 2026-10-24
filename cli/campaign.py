@@ -1,16 +1,22 @@
-"""HerdSim campaigns.
+"""Run one experiment (a protocol), and check on it.
 
-    uv run cli/campaign.py run       --protocol <id or yaml> [--output DIR] [--workers N]
-    uv run cli/campaign.py plan      --protocol <id or yaml>
-    uv run cli/campaign.py calibrate --protocol <id or yaml> [--workers N]
-    uv run cli/campaign.py status    --protocol <id or yaml> [--output DIR]
+    uv run cli/campaign.py plan      --protocol dmin_f99_m6
+    uv run cli/campaign.py calibrate --protocol dmin_f99_m6 --workers 20
+    uv run cli/campaign.py run       --protocol dmin_f99_m6 --workers 20
+    uv run cli/campaign.py status    --protocol dmin_f99_m6
 
-run        the adaptive campaign; resumes an existing folder
-plan       print what a run would do (curves, cells, first round, folder); runs nothing
-calibrate  print the flock radius R_f(N) per method without running a campaign
-status     print the folder's status.json
+A protocol is a YAML file in protocols/configs/protocols/, given by its id or by a path. Only
+`run` produces results; the other verbs help you get there safely.
 
-Run `make test` and `make bench` before a campaign session.
+plan       what a run would do: the grid, the number of cells, the cost of the first round, and
+           whether the results folder is new, will be resumed, or is refused. Runs nothing.
+calibrate  the radius R_f(N) a driven flock settles to, per method and N. It sizes the goal,
+           the drive and the deadline. Prints it and saves nothing; `run` calibrates by itself.
+run        the adaptive campaign into results/<protocol_id>/. Every trial is written as it
+           finishes, so the same command resumes after Ctrl+C, a crash or the time budget.
+status     how far a run has got, whether it is running now, and why it stopped.
+
+Run `make test` and `make bench` before a long session. cli/README.md has the full routine.
 """
 
 from __future__ import annotations

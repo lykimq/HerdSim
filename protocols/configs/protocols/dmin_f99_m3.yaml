@@ -7,7 +7,7 @@ extends: dmin_m3.yaml
 
 success_fraction: 0.99
 
-# Resumed on 2026-10-23 with decide_finish_times true (plan design_min_max RQ-A1): the earlier
+# Resumed on 2026-10-23 with decide_finish_times true (report section 3.8): the earlier
 # rounds ran with false, so the seeds added after that date go to the finish-time comparisons
 # that decide D_sat, D_best and D_crowd. Reliability decisions already made do not change.
 decide_finish_times: true
