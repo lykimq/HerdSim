@@ -1,0 +1,16 @@
+# Holding task (plan design_min_max section 4.2, RQ-B8): the goal counts as reached only after
+# 99 percent of the sheep have stayed inside for one drive time, and while it is reached the
+# dogs withdraw beyond r_s so the flock grazes (hold_withdraw). Same field, seeds and deadline as
+# dmin_f99_m6 (6 drive times, which now include the hold). The D grid adds 7, 9, 10, 11, 13
+# around the drive-arc capacity D_cap = 7 to 12 (section 4.3). Five flock sizes 25 to 400.
+# Finish-time seeds off: D_overcrowd and D_max are decided on reliability alone.
+
+protocol_id: dmin_f99_hold
+output: results/dmin_f99_hold
+extends: dmin_f99_m6.yaml
+
+hold_drive_multiple: 1.0
+hold_withdraw: true
+flock_sizes: [25, 50, 100, 200, 400]
+shepherd_counts: [1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 16, 24]
+decide_finish_times: false

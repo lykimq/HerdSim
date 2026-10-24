@@ -1,0 +1,9 @@
+# Holding task with dogs that take up room (plan design_min_max section 4.3, RQ-B6): as
+# dmin_f99_hold, with dogs closer than 2 (the model's twin distance dog_overlap_distance) walking
+# apart. Predicted onset of crowding on the drive arc: D_cap = 7, 9, 10, 11, 12 at N = 25 to 400.
+
+protocol_id: dmin_f99_hold_spacing
+output: results/dmin_f99_hold_spacing
+extends: dmin_f99_hold.yaml
+
+dog_spacing: 2.0

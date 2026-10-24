@@ -12,7 +12,7 @@ from typing import Any
 
 from sim.core.simulation_state import SimulationState
 
-from . import collect_drive_multi, fat, kubo_forces
+from . import collect_drive_multi, fat, independent, kubo_forces
 
 DogStep = Callable[[SimulationState, dict[str, Any]], SimulationState]
 
@@ -20,4 +20,5 @@ DOG_CONTROLLERS: dict[str, DogStep] = {
     "collect_drive_multi": collect_drive_multi.step,
     "kubo_forces": kubo_forces.step,
     "fat": fat.step,
+    "independent": independent.step,
 }

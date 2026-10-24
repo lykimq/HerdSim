@@ -1,0 +1,20 @@
+# What a dog sees (plan design_min_max section 6, RQ-D2): the sensing range of every dog, with no
+# sharing, from 15 to 100, and 0 (every dog knows every sheep) as the control on the same field.
+# 99 percent rule, 6 drive times, wide and split starts (where outliers must be found), flock
+# sizes 50 to 200, D 1 to 16. A dog that knows no sheep walks to the flock centre it last knew.
+
+protocol_id: dmin_f99_view_range
+output: results/dmin_f99_view_range
+canonical: protocols/configs/canonical.yaml
+
+methods:
+  strombom_multi:
+    time_limit_drive_multiple: 6.0
+
+layouts: [wide, split]
+flock_sizes: [50, 100, 200]
+shepherd_counts: [1, 2, 3, 4, 6, 8, 12, 16]
+success_fraction: 0.99
+
+factors:
+  sensing_range: [0.0, 15.0, 30.0, 45.0, 65.0, 100.0]

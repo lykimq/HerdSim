@@ -10,6 +10,8 @@
     uv run cli/dmin_tables.py effort  dmin_f99_m12
     uv run cli/dmin_tables.py zones   dmin_f99_m12 dmin_f99_fat
     uv run cli/dmin_tables.py methods dmin_f99_m6 dmin_f99_fat dmin_kubo --pct 99
+    uv run cli/dmin_tables.py fits    dmin_f99_m12 dmin_f99_m6
+    uv run cli/dmin_tables.py extent  dmin_f99_big
 
 Each prints Markdown to paste into the plan. Folders are protocol ids under results/, or paths.
 record     the table of runs (plan 8.1), from results/queue_log.jsonl
@@ -23,11 +25,16 @@ effort     finish time, dog time and dog path beyond D_sat, relative to the D_sa
 zones      cells where more dogs did worse (crowded, dip, collapse, recovered)
 methods    D_min, D_sat, D_crowd, D_max per curve across folders; --pct relabels a strict
            run (such as dmin_kubo) to pct percent arrival so all rows use one success rule
+fits       power law against saturating curve for D_min(N), per layout (analysis/growth_fits.py);
+           split is left out, since its success does not rise with D at N >= 200
+extent     the flock's own size against the R_f its task was sized from, per cell (a check for
+           sizes whose R_f is imposed above the calibration edge)
 """
 
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -45,6 +52,7 @@ from analysis.dmin_tables import (  # noqa: E402
     dsat_by_n,
     dsat_growth,
     effort_table,
+    extent_check,
     frontier_values,
     groups_table,
     growth_table,
@@ -56,6 +64,8 @@ from analysis.dmin_tables import (  # noqa: E402
     unusual_zones,
 )
 from analysis.frontier import Rules, frontier  # noqa: E402
+from analysis.growth_fits import compare as compare_shapes  # noqa: E402
+from analysis.growth_fits import interval_of  # noqa: E402
 from services.protocol import RESULTS_ROOT, load_protocol  # noqa: E402
 
 LAYOUTS = ("compact", "wide", "split", "outlier_rich")
@@ -177,6 +187,31 @@ def cmd_methods(args: argparse.Namespace) -> None:
     print(markdown(pd.concat(rows, ignore_index=True)))
 
 
+def cmd_fits(args: argparse.Namespace) -> None:
+    for name in args.folders:
+        table = groups_table(folder_of(name))
+        rows = []
+        for layout in ("wide", "outlier_rich"):
+            part = table[table["layout"] == layout].sort_values("n")
+            points = []
+            for _, r in part.iterrows():
+                found = interval_of(float(r["d_min"]), float(r["d_min_low"]))
+                if found is not None:
+                    points.append((int(r["n"]), found))
+            rows.append({"layout": layout, **compare_shapes(points)})
+        print(f"### {name}: D_min(N), power law against saturating curve\n")
+        print(markdown(pd.DataFrame(rows)), "\n")
+
+
+def cmd_extent(args: argparse.Namespace) -> None:
+    for name in args.folders:
+        folder = folder_of(name)
+        radii = json.loads((folder / "calibration.json").read_text())["flock_radius"]
+        trials = pd.read_csv(folder / "trials.csv", skiprows=1, low_memory=False)
+        print(f"### {name}: flock size against R_f\n")
+        print(markdown(extent_check(trials, radii)), "\n")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -199,6 +234,12 @@ def main() -> None:
     p.add_argument("folders", nargs="+")
     p.add_argument("--pct", type=int, default=None, choices=(90, 95, 99))
     p.set_defaults(run=cmd_methods)
+    p = sub.add_parser("extent")
+    p.add_argument("folders", nargs="+")
+    p.set_defaults(run=cmd_extent)
+    p = sub.add_parser("fits")
+    p.add_argument("folders", nargs="+")
+    p.set_defaults(run=cmd_fits)
     p = sub.add_parser("compare")
     p.add_argument("variants", nargs="+")
     p.add_argument("--base", default="dmin_s_base")

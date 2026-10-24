@@ -29,6 +29,8 @@ Thực tế này đặt ra một câu hỏi nền tảng trong lĩnh vực hành
 - [Mô hình tác tử và phối hợp nhiều chó](#mô-hình-tác-tử-và-phối-hợp-nhiều-chó)
 - [Các quy tắc ranh giới quyết định điều gì](#các-quy-tắc-ranh-giới-quyết-định-điều-gì)
 - [Độ nhạy và tính bền vững](#độ-nhạy-và-tính-bền-vững)
+- [Thiết lập cho các chiến dịch tiếp theo](#thiết-lập-cho-các-chiến-dịch-tiếp-theo)
+- [Vì sao lưới dừng ở những giới hạn này](#vì-sao-lưới-dừng-ở-những-giới-hạn-này)
 - [Bắt đầu nhanh](#bắt-đầu-nhanh)
 - [Một lần chạy ghi ra những gì](#một-lần-chạy-ghi-ra-những-gì)
 - [Kiến trúc dự án](#kiến-trúc-dự-án)
@@ -114,11 +116,42 @@ HerdSim ghi lại 19 phép đo vật lý chính xác trong từng nhịp chuyể
 Sau D_min, một phân tích tiếp theo trên các lượt chạy 99% (không chạy chiến dịch mới) hỏi: từ quy mô đội nào thì thêm một con chó không còn giúp ích (D_sat), chó vượt quá nó tốn gì, và chúng có gây thêm áp lực lên cừu không:
 - **Chó vượt quá D_sat chỉ là chi phí**: mọi đội đạt độ tin cậy lớn hơn D_sat hoàn thành trong 0,90 đến 1,02 lần thời gian tại D_sat, trong khi tổng thời gian chó tăng tỉ lệ với số chó. Trên bầy compact, 24 con chó tốn khoảng 24 lần thời gian chó của một con cho cùng một lần lùa.
 - **Nhiều chó hơn không có nghĩa là nhiều áp lực hơn lên mỗi con cừu**: trong 164 lượt chạy lại, số giây mỗi con cừu chạy trốn khỏi chó giảm từ D_min đến D_sat rồi giữ nguyên. Tại mỗi thời điểm có nhiều cừu chạy trốn hơn, nhưng quãng lùa ngắn hơn. Một phần là do mô hình: lực đẩy của nhiều chó bị giới hạn bằng lực đẩy của một con.
-- **Theo tiêu chí 99%, không quy mô đội nào làm nhiệm vụ thất bại**: trong mười một thư mục 99%, không có quy mô đội nào rơi trở lại dưới ngưỡng tin cậy sau khi đã đạt, đến 24 con chó. Chó thêm chỉ làm bầy `split` ở N = 200 chậm hơn (khoảng 700 s từ D = 8 so với 365 s với 2 con).
-- **D_sat vẫn còn là một khoảng trên một phần ba các đường cong phân tán**, vì các lượt chạy này không dành hạt giống cho các phép so sánh thời gian hoàn thành quyết định nó. Giai đoạn tiếp theo sẽ bổ sung.
+- **Theo tiêu chí 99%, hầu như không quy mô đội nào làm nhiệm vụ thất bại**: trên năm kích thước bầy ban đầu, trong mười một thư mục 99%, không có quy mô đội nào rơi trở lại dưới ngưỡng tin cậy sau khi đã đạt, đến 24 con chó. Trên lưới dày hơn của phát hiện 8 xuất hiện một lần sụt giảm như vậy (`split` N = 141, D = 4: 0,80). Chó thêm làm bầy `split` chậm hơn ở 12 thời gian lùa ở mọi N từ 200 đến 566 (ví dụ khoảng 700 s từ D = 8 so với 365 s với 2 con ở N = 200).
+- **D_sat từng là một khoảng trên một phần ba các đường cong phân tán**, vì các lượt chạy này không dành hạt giống cho các phép so sánh thời gian hoàn thành quyết định nó. Các lượt chạy tiếp theo đã bổ sung (phát hiện 8).
 
 ![Chi phí của chó vượt quá D_sat](docs/figures/fig33_effort.png)
 **Hình 10:** Chó vượt quá D_sat ở 6 thời gian lùa (tiêu chí 99%). Trái: thời gian hoàn thành so với D_sat giữ ngang. Phải: thời gian chó tăng theo đường D / D_sat. Chi tiết và phần chạy lại đo áp lực nằm ở mục 3.7 của [báo cáo](docs/report/d_min_report_vi.md).
+
+
+### 8. Lưới dày hơn: đội tăng nhanh thế nào, và điều gì chưa thể biết
+Bốn kích thước bầy được thêm vào (71, 141, 283, 566), để mọi kích thước trên 50 cách nhau một bước sqrt(2), đến kích thước lớn nhất mà bầy của mô hình vẫn còn kích thước riêng (khoảng 600):
+- **Mức tăng giờ đã được xác định chặt**: độ dốc log-log của D_min theo N là 0,27 đến 0,38 ở 12 thời gian lùa và 0,38 đến 0,61 ở 6, so với 0,5 của các mục tiêu không đi theo bầy.
+- **D_sat tăng nhanh gấp khoảng hai lần D_min** (0,70 đến 0,91 trên `wide`: 1, 1, 1, 2, 3, 3, 4, 5 chó từ N = 25 đến 400), nên đội nhanh nhất có thể ngày càng tách xa đội chỉ vừa đạt độ tin cậy.
+- **Tăng trưởng đều và chững lại khớp như nhau đến N = 566**: mọi đường cong thuộc một trong hai dạng đi qua dữ liệu đều cho phép từ 1,5 đến 6,7 chó ở N = 1600.
+
+![D_min trên chín kích thước](docs/figures/fig35_growth_fits.png)
+**Hình 11:** D_min theo N trên chín kích thước, và phạm vi mà mỗi dạng đã khớp cho phép sau N = 566.
+
+### 9. Phần nào của quy tắc đội có tác dụng
+Một đội gồm các người chăn độc lập theo bài báo (mỗi chó chạy quy tắc một chó, không có tầng đội) đạt được một đội đạt độ tin cậy trên mọi bố cục phân tán đến N = 200, nơi FAT thất bại, và thất bại ở N = 400, nơi quy tắc đội cần 2 đến 3 chó. Vậy công tắc gom/lùa của bài báo làm phần việc đến N = 200, và tầng đội là thứ giúp đạt được N = 400. Trong mô hình Kubo, nơi thêm chó thực sự giúp lùa bầy compact nhanh hơn, phần lớn lợi ích đã có khi có 10 chó (115 s với một chó, 29 s với mười, 25 s với 24).
+
+### 10. Khi thêm chó lại tệ hơn
+Hai thay đổi được dùng để tìm tác hại của chó thêm:
+- **Giữ bầy trong đích** trong một khoảng thời gian lùa có tác dụng từ N = 100 khi các chó lùi ra ngoài cự ly đe dọa của cừu (nếu không, đội lùa bầy xuyên thẳng qua đích). Ở N <= 50 không đội nào giữ được: một chó đang lùi vẫn ở trong phạm vi 65 m khoảng 40 s, đủ lâu để đẩy bầy ra khỏi một đích nhỏ.
+- **Chó chiếm chỗ** (không bao giờ gần nhau hơn 2 m): trên `outlier_rich` N = 400, mọi đội từ 9 đến 24 chó đều được quyết định là không đạt độ tin cậy, trong khi 3 đến 6 chó thành công trong 93 đến 94% số lượt chạy. Trên `wide`, các chó thêm chỉ đứng lùi lại và không gây hại. Chó dạng điểm không cho thấy tác hại đã quyết định nào đến 24.
+
+![Giữ bầy với chó dạng điểm và với chó cách nhau 2 m](docs/figures/fig36_spacing.png)
+**Hình 12:** Nhiệm vụ giữ bầy ở N = 400. Trên `outlier_rich`, tỉ lệ thành công giảm từ D = 9 khi chó chiếm chỗ.
+
+### 11. Tính liên kết và những gì một chó nhìn thấy
+- **Tính liên kết**: một bầy chặt hơn (trọng số lực hút 1,3 đến 2,0 thay vì 1,05) tiết kiệm nhiều nhất một chó. Một bầy lỏng hơn (mỗi con cừu bị hút về một nửa bầy) làm mức tăng dốc hơn, tới độ dốc 0,40 đến 0,70, và làm các bầy split khó hơn nhiều. Các bầy yếu hơn thế không giữ được sự gắn kết dưới một chó lùa.
+- **Cảm nhận**: khi mỗi chó chỉ thấy những con cừu trong phạm vi 30 đến 100 m, một bầy 200 con cần thêm khoảng một chó; ở 15 m thêm chó không bù lại được. Chia sẻ những gì mọi chó thấy lấy lại được con chó bị mất; chỉ chia sẻ với các chó ở gần thì không.
+
+![D_min theo tầm cảm nhận, và chia sẻ](docs/figures/fig37_view.png)
+**Hình 13:** Trái: D_min theo tầm cảm nhận của mỗi chó. Phải: tỉ lệ thành công ở tầm 65 khi có và không có chia sẻ.
+
+### 12. Một giới hạn của quy tắc lùa trong bài báo
+Bài báo đặt chó lùa phía sau bầy một khoảng r_a sqrt(N). Khoảng cách đó vượt cự ly đe dọa của cừu (65 m) tại N = (65 / 2)^2, khoảng 1056. Trên mức này, các chó đứng ở chỗ ít con cừu cảm nhận được chúng, và không đội nào với bất kỳ quy mô nào lùa được bầy (đã kiểm tra đến N = 3200 với mật độ bầy giữ bằng mật độ của N = 566). Dưới mức này, N = 566 và 800 hoạt động như các bầy nhỏ hơn. Khi giới hạn điểm lùa ở 63 m (một biến thể được ghi rõ, không phải quy tắc của bài báo), các bầy lớn có thể được lùa, và một bầy phân tán khi đó cần 3 chó ở N = 800, 5 đến 9 ở 1131 và hơn 12 ở 1600, trong khi một bầy compact cần 1, 1 và 2. Kích thước bầy áp đặt cũng lỏng hơn bầy mà các chó thực sự lùa (0,5 đến 0,8 của nó), nên các con số này đúng theo cả hai lựa chọn đó.
 
 ---
 
@@ -154,6 +187,17 @@ Qua 23 giao thức nghiên cứu, HerdSim đã hoàn thành tổng cộng **164.
 | **Các giao thức Kiểm tra độ nhạy** | 14 giao thức (7 cặp: strict + 99%) | 69.630 | 805 | Khảo sát vị trí xuất phát của chó, tốc độ chó, thông số cừu đo đạc từ GPS thực tế, khoảng cách xuất phát và kích thước chuồng đích ở thời hạn $6\times$. |
 | **Tổng cộng** | **23 Giao thức** | **164.740** | **2.291** | **Bản đồ thực nghiệm hoàn chỉnh (~7,0 giờ tính toán)** |
 
+Các chiến dịch tiếp nối (phát hiện 8 đến 12) thêm 14 giao thức và chạy tiếp ba lưới 99%, thêm **162.130 lượt** với 0 lỗi (tổng cộng 37 giao thức và 326.870 lượt):
+
+| Nhóm chiến dịch | Giao thức | Lượt chạy | Mục tiêu nghiên cứu |
+| :--- | :--- | :---: | :--- |
+| **Lưới dày hơn và thời gian hoàn thành** | `dmin_f99_m12`, `dmin_f99_m6`, `dmin_f99_m3` (chạy tiếp) | +38.770 | Thêm kích thước bầy 71, 141, 283, 566; quyết định các phép so sánh thời gian hoàn thành, nên biết được D_sat. |
+| **Các phần của quy tắc đội** | `dmin_f99_indep`, `dmin_f99_kubo` | 16.250 | Các chó chăn độc lập theo bài báo; mô hình Kubo với tối đa 24 chó. |
+| **Quá nhiều chó** | `dmin_f99_hold`, `dmin_f99_hold_spacing` | 28.210 | Giữ bầy trong đích; chó chiếm chỗ. |
+| **Độ gắn kết** | `dmin_f99_c1.3`, `_c1.6`, `_c2.0`, `dmin_f99_k05` | 44.040 | Gắn kết giữa các con cừu mạnh hơn và yếu hơn. |
+| **Chó nhìn thấy gì** | `dmin_f99_view_range`, `dmin_f99_view_comm` | 27.930 | Tầm cảm nhận của mỗi chó, và chia sẻ những gì các chó thấy. |
+| **N lớn** | `dmin_f99_big`, `_dense`, `_loose`, `_cap` | 6.930 | Trên ngưỡng hiệu chuẩn của mô hình, ở mật độ áp đặt; điểm lùa có giới hạn. |
+
 ### Cơ chế thực thi thích ứng thông minh
 
 Bốn cơ chế tự động giúp điều phối tài nguyên tính toán chuẩn xác:
@@ -165,25 +209,25 @@ Mỗi ô bắt đầu bằng một lô nhỏ gồm 10 hạt giống. Sau mỗi l
 - **Trường hợp giằng co**: Chỉ những ô mà khoảng tin cậy còn bao trùm ngưỡng 0,90 mới được cấp thêm các lô 10 hạt giống tiếp theo, cho đến khi chạm trần tối đa 200 hạt giống.
 
 ![Lấy mẫu tuần tự và dừng sớm](docs/figures/fig_adaptive_1_refinement.png)
-**Hình 11:** Tinh chỉnh tuần tự. Những ô thất bại rõ ràng dừng sau 10–20 lượt chạy; những ô thành công vượt trội dừng sau 60 trận thắng liên tiếp; chỉ những ô ở ranh giới mới tiếp tục chạy đến mức tối đa 200 hạt giống.
+**Hình 14:** Tinh chỉnh tuần tự. Những ô thất bại rõ ràng dừng sau 10–20 lượt chạy; những ô thành công vượt trội dừng sau 60 trận thắng liên tiếp; chỉ những ô ở ranh giới mới tiếp tục chạy đến mức tối đa 200 hạt giống.
 
 #### 2. Thử nghiệm điểm giữa (Midpoint densification)
 Nếu hai số lượng chó liền kề nhảy vọt qua ranh giới hành vi—chẳng hạn $D = 2$ thất bại nhưng $D = 4$ thành công—hệ thống sẽ tự động chèn điểm nằm giữa ($D = 3$) vào vòng chạy tiếp theo. Điều này giúp định vị chính xác ngưỡng $D_{\min}$ mà không cần phải chạy thử mọi số lượng chó ngay từ đầu.
 
 ![Làm dày lưới thích ứng](docs/figures/fig_adaptive_2_densification.png)
-**Hình 12:** Làm dày điểm giữa. Phát hiện bước chuyển giữa *D* = 2 và *D* = 4 sẽ tự động kích hoạt lượt đánh giá cho *D* = 3 trong vòng tiếp theo.
+**Hình 15:** Làm dày điểm giữa. Phát hiện bước chuyển giữa *D* = 2 và *D* = 4 sẽ tự động kích hoạt lượt đánh giá cho *D* = 3 trong vòng tiếp theo.
 
 #### 3. Cắt tỉa khi bão hòa và xuất hiện hiện tượng trùng lặp
 Khi một quy mô đội đã đạt tốc độ tối đa (*D*<sub>sat</sub>), nếu việc thử nghiệm các đội chó đông hơn cho thấy các chú chó chỉ đơn thuần chạy bám đuôi đồng đội (độ trùng lặp trung bình `dog_overlap` $\ge 0,90$) mà không giúp lùa cừu nhanh hơn, hệ thống sẽ đánh dấu ô đó là **đã cắt tỉa** (pruned) và ngừng chạy thêm hạt giống.
 
 ![Cắt tỉa khi bão hòa](docs/figures/fig_adaptive_3_pruning.png)
-**Hình 13:** Cắt tỉa bão hòa. Khi tốc độ hoàn thành chạm ngưỡng trần, các ô có độ trùng lặp cao (&ge; 0,90) sẽ được dừng lại để tránh lãng phí năng lực xử lý.
+**Hình 16:** Cắt tỉa bão hòa. Khi tốc độ hoàn thành chạm ngưỡng trần, các ô có độ trùng lặp cao (&ge; 0,90) sẽ được dừng lại để tránh lãng phí năng lực xử lý.
 
 #### 4. So sánh công bằng với hạt giống ngẫu nhiên ghép cặp
 Mỗi hạt giống $i$ sử dụng một luồng ngẫu nhiên độc lập cố định `master_seed + i` (ví dụ: $2026 + i$). Tọa độ ban đầu của từng con cừu và mọi quyết định rẽ hướng ngẫu nhiên của chúng đều được giữ nguyên vẹn tuyệt đối. Khi so sánh đội 2 chú chó với đội 4 chú chó, cả hai đội đều phải đối mặt với **chính xác cùng một bãi cỏ và cùng những phản ứng của đàn cừu**. Điều này triệt tiêu hoàn toàn yếu tố may rủi, đảm bảo kết quả chỉ phản ánh năng lực của chiến thuật và quy mô đội chó.
 
 ![So sánh ghép cặp xác định](docs/figures/fig_adaptive_4_paired_seeds.png)
-**Hình 14:** Ghép cặp hạt giống. Cùng một hạt giống 2026 sẽ tạo ra các vị trí cừu ban đầu giống hệt nhau trên mọi quy mô đội chó *D*, cô lập chính xác hiệu ứng của số lượng chó.
+**Hình 17:** Ghép cặp hạt giống. Cùng một hạt giống 2026 sẽ tạo ra các vị trí cừu ban đầu giống hệt nhau trên mọi quy mô đội chó *D*, cô lập chính xác hiệu ứng của số lượng chó.
 
 #### 5. Tự động lưu trữ an toàn, có thể tạm dừng và tiếp tục bất kỳ lúc nào
 Mỗi lượt chạy được ghi ngay lập tức vào ổ đĩa (`trials.jsonl`). Bạn có thể bấm `Ctrl+C` để tạm dừng chiến dịch bất kỳ lúc nào và tiếp tục lại sau đó mà không làm mất dù chỉ một lượt chạy; cơ chế khóa tệp ngăn các tiến trình chạy song song ghi đè làm hỏng dữ liệu.
@@ -199,7 +243,7 @@ Một sai lầm rất phổ biến trong các mô hình mô phỏng bầy đàn 
 HerdSim bảo đảm **tính bất biến theo quy mô** (scale invariance) bằng cách gắn toàn bộ kích thước của đồng cỏ vào **bán kính đàn ổn định đã hiệu chuẩn $R_f(N)$**: tức bán kính cân bằng tự nhiên của một đàn $N$ con cừu khi đang được dẫn dắt nhịp nhàng bởi một chú chó.
 
 ![Hình học nhiệm vụ và quy mô vật lý](docs/figures/fig6_task_geometry.png)
-**Hình 15:** Kích thước nhiệm vụ được vẽ đúng tỉ lệ. Trái: Bố cục sân bãi ở *N* = 200. Giữa: Cách xác định cự ly lùa. Phải: Bán kính đàn *R*<sub>f</sub> và bán kính đích qua các quy mô đàn cừu.
+**Hình 18:** Kích thước nhiệm vụ được vẽ đúng tỉ lệ. Trái: Bố cục sân bãi ở *N* = 200. Giữa: Cách xác định cự ly lùa. Phải: Bán kính đàn *R*<sub>f</sub> và bán kính đích qua các quy mô đàn cừu.
 
 | Tham số | Quy tắc toán học | Ý nghĩa vật lý |
 | :--- | :--- | :--- |
@@ -256,7 +300,7 @@ Một câu hỏi rất tự nhiên là: *Tại sao chúng tôi lại chọn đà
 Để nghiên cứu bước chuyển tiếp từ giai đoạn gom cừu lạc sang giai đoạn lùa cả đàn về đích, HerdSim cung cấp bốn bố cục không gian ban đầu:
 
 ![Bốn bố cục xuất phát ở N = 200](docs/figures/fig7_layouts.png)
-**Hình 16:** Bốn bố cục bãi cỏ ban đầu ở quy mô *N* = 200 cừu với *D* = 4 chó (được vẽ cùng tỉ lệ). Vòng tròn nét đứt đánh dấu ranh giới gom cừu lý thuyết *f*(*N*) = *r*<sub>a</sub> &middot; *N*<sup>2/3</sup>. Bất kỳ con cừu nào nằm ngoài vòng tròn này sẽ kích hoạt chế độ gom cừu lạc của bầy chó.
+**Hình 19:** Bốn bố cục bãi cỏ ban đầu ở quy mô *N* = 200 cừu với *D* = 4 chó (được vẽ cùng tỉ lệ). Vòng tròn nét đứt đánh dấu ranh giới gom cừu lý thuyết *f*(*N*) = *r*<sub>a</sub> &middot; *N*<sup>2/3</sup>. Bất kỳ con cừu nào nằm ngoài vòng tròn này sẽ kích hoạt chế độ gom cừu lạc của bầy chó.
 
 1. **`compact` (Gọn gàng)**: Cừu được tạo ngẫu nhiên từ phân phối Gaussian hẹp ($\sigma = 0,5 \cdot R_f$). Tất cả cừu đều nằm gọn bên trong khoảng cách kết nối tự nhiên $f(N)$; bầy chó có thể lập tức bắt đầu lùa thẳng về đích.
 2. **`wide` (Rải rác)**: Cừu phân bố trên diện rộng ($\sigma = 0,5 \cdot 2 N^{2/3}$). Cừu nằm rải rác khắp nơi, đòi hỏi bầy chó phải lượn quanh chu vi để gom chúng lại.
@@ -271,7 +315,7 @@ Một câu hỏi rất tự nhiên là: *Tại sao chúng tôi lại chọn đà
 - **`handler` (Điểm xuất phát duy nhất)**: Toàn bộ đàn chó cùng xuất phát từ một tọa độ duy nhất phía sau bầy cừu, mô phỏng việc người chăn thả chó ra từ một vị trí cố định.
 
 ![Các cấu hình xuất phát của chó](docs/figures/fig8_dog_starts.png)
-**Hình 17:** Các kiểu bố trí xuất phát của đàn chó. Trên: Đội hình cung tròn mặc định cho *D* = 1 đến 64 phía sau đàn *N* = 100 cừu. Dưới: So sánh trực tiếp giữa ba kiểu xuất phát arcs, ring, và handler ở quy mô *N* = 200 với *D* = 8 chó.
+**Hình 20:** Các kiểu bố trí xuất phát của đàn chó. Trên: Đội hình cung tròn mặc định cho *D* = 1 đến 64 phía sau đàn *N* = 100 cừu. Dưới: So sánh trực tiếp giữa ba kiểu xuất phát arcs, ring, và handler ở quy mô *N* = 200 với *D* = 8 chó.
 
 ---
 
@@ -280,7 +324,7 @@ Một câu hỏi rất tự nhiên là: *Tại sao chúng tôi lại chọn đà
 HerdSim mô phỏng động lực học của từng cá thể dựa trên các công trình nghiên cứu sinh học uy tín đã qua bình duyệt, kết hợp với tầng điều phối bầy đàn thông minh.
 
 ![Cơ chế phối hợp nhiều chó](docs/figures/fig3_team_rule.png)
-**Hình 18:** Cơ chế chăn dắt phối hợp trong strombom_multi. Hàng trên: Phân công gom cừu phân tán. *D* cá thể cừu lạc xa nhất được ghép cặp 1-1 với *D* chú chó thông qua thuật toán Hungarian nhằm tối thiểu hóa tổng quãng đường chạy. Hàng dưới: Vòng cung lùa song song nhịp nhàng. Các chú chó dàn đều thành vòng cung phía sau đàn cừu, giữ vững thứ tự vị trí góc để không bao giờ đâm chéo đường chạy của nhau.
+**Hình 21:** Cơ chế chăn dắt phối hợp trong strombom_multi. Hàng trên: Phân công gom cừu phân tán. *D* cá thể cừu lạc xa nhất được ghép cặp 1-1 với *D* chú chó thông qua thuật toán Hungarian nhằm tối thiểu hóa tổng quãng đường chạy. Hàng dưới: Vòng cung lùa song song nhịp nhàng. Các chú chó dàn đều thành vòng cung phía sau đàn cừu, giữ vững thứ tự vị trí góc để không bao giờ đâm chéo đường chạy của nhau.
 
 ### 1. Hành vi của từng con cừu ([Strömbom et al. 2014](https://doi.org/10.1098/rsif.2014.0719))
 
@@ -399,7 +443,7 @@ Một thuật toán đối chứng (`dog_controller="fat"`) nhằm chứng minh 
 - **Hậu quả**: Tất cả các chú chó đều chọn chung một con cừu. Chúng lao vào nhau thành một cục, hoạt động không khác gì một con chó duy nhất, và thất bại hoàn toàn trong việc gom đàn cừu tản mác khi $N \ge 200$.
 
 ![Mô hình đối chứng FAT](docs/figures/fig4_fat.png)
-**Hình 19:** Thuật toán đối chứng FAT. Trái: Hình học săn đuổi. Phải: Do thiếu cơ chế phân chia mục tiêu, toàn bộ đàn chó co cụm lại sau cùng một con cừu lạc, dẫn đến mức độ trùng lặp vị trí rất cao.
+**Hình 22:** Thuật toán đối chứng FAT. Trái: Hình học săn đuổi. Phải: Do thiếu cơ chế phân chia mục tiêu, toàn bộ đàn chó co cụm lại sau cùng một con cừu lạc, dẫn đến mức độ trùng lặp vị trí rất cao.
 
 #### Mô hình lực thế liên tục: `kubo` ([Kubo et al. 2022](https://doi.org/10.1007/s10015-021-00726-7))
 
@@ -408,7 +452,7 @@ Một cách tiếp cận vật lý hoàn toàn khác để đối chiếu chéo,
 - **Chó Kubo**: Được dẫn dắt bởi bốn trường thế liên tục: bị hút về phía con cừu xa nhất, bị đẩy lùi nếu đến quá gần con cừu đó ($1/r^3$), bị đẩy ra xa khỏi vòng tròn đích, và **bị đẩy cực mạnh ra xa khỏi các chú chó khác** ($1/r^3$, trọng số $K_{f4} = 3000$). Lực đẩy tương hỗ này hoạt động như các nam châm cùng cực đẩy nhau: nó tự động dàn đều các chú chó dọc theo đuôi đàn cừu một cách tự nhiên mà không cần bất kỳ bộ não chỉ huy trung tâm hay thuật toán phân công nào.
 
 ![Mô hình lực liên tục Kubo](docs/figures/fig5_kubo.png)
-**Hình 20:** Mô hình Kubo et al. (2022). Trái: Các lực tác động lên một con cừu. Giữa: Các lực tác động lên một chú chó. Phải: Ảnh chụp mô phỏng cho thấy lực đẩy giữa các chú chó tự động tản đàn chó đều ra phía sau bầy cừu.
+**Hình 23:** Mô hình Kubo et al. (2022). Trái: Các lực tác động lên một con cừu. Giữa: Các lực tác động lên một chú chó. Phải: Ảnh chụp mô phỏng cho thấy lực đẩy giữa các chú chó tự động tản đàn chó đều ra phía sau bầy cừu.
 
 **Thiết lập thực nghiệm và lý do Kubo đòi hỏi các điều kiện đặc thù:**
 1. **Bố cục bãi cỏ (Chỉ chạy trên xuất phát `compact`):**
@@ -447,7 +491,7 @@ Các phân loại thống kê được tính toán tự động bởi [`analysis
 ### Các vùng hành vi của đội hình
 
 ![Các vùng hành vi và phân loại ranh giới](docs/figures/def_D_zones.png)
-**Hình 21:** Phân loại trục số lượng chó thành các vùng hành vi dựa trên kiểm định độ tin cậy và so sánh tốc độ bằng paired bootstrap.
+**Hình 24:** Phân loại trục số lượng chó thành các vùng hành vi dựa trên kiểm định độ tin cậy và so sánh tốc độ bằng paired bootstrap.
 
 - `too_few` (Quá ít): Chưa đạt độ tin cậy, nằm dưới $D_{\min}$.
 - `improving` (Đang cải thiện): Đạt độ tin cậy, nằm dưới *D*<sub>sat</sub>; thêm chó sẽ giúp lùa nhanh hơn rõ rệt.
@@ -463,7 +507,7 @@ Các phân loại thống kê được tính toán tự động bởi [`analysis
 Để bảo đảm các kết luận phản ánh đúng hành vi tập thể thực tế chứ không phải là sản phẩm ngẫu nhiên của các thiết lập phần mềm, HerdSim đã thực hiện các kiểm tra độ nhạy toàn diện qua 14 giao thức (69.630 lượt chạy) trên cùng một lưới đối chứng ($N \in \{100, 200, 400\}$, trên hai bố cục `wide` và `outlier_rich` ở thời hạn $6\times$).
 
 ![Độ nhạy của D_min qua các biến thể thực nghiệm](docs/figures/fig24_sensitivity.png)
-**Hình 22:** Biểu đồ nhiệt của quy mô đội tối thiểu *D*<sub>min</sub> qua các biến thể thực nghiệm. Vạch kẻ ngang màu đen phân chia giữa tiêu chí tuyệt đối 100% (nửa trên) và tiêu chí 99% cừu vào đích (nửa dưới). Màu càng sẫm biểu thị số chó cần thiết càng lớn; ô gạch chéo ("none") biểu thị không có số lượng chó nào đạt ngưỡng tin cậy 90%.
+**Hình 25:** Biểu đồ nhiệt của quy mô đội tối thiểu *D*<sub>min</sub> qua các biến thể thực nghiệm. Vạch kẻ ngang màu đen phân chia giữa tiêu chí tuyệt đối 100% (nửa trên) và tiêu chí 99% cừu vào đích (nửa dưới). Màu càng sẫm biểu thị số chó cần thiết càng lớn; ô gạch chéo ("none") biểu thị không có số lượng chó nào đạt ngưỡng tin cậy 90%.
 
 ### Ý nghĩa của các biến thể thực nghiệm (Trục đứng bên trái)
 
@@ -487,6 +531,69 @@ Mỗi hàng ngang trong biểu đồ nhiệt kiểm tra một biến thể thi�
   - **Nửa dưới (Tiêu chí 99% Đưa đàn đến nơi)**: Cực kỳ ổn định và vững chắc. Qua hầu hết các biến thể (dữ liệu GPS thực tế, trạm người chăn, vòng tròn bao quanh, cự ly 15m, cự ly 60m, tốc độ 1.15), quy mô đội chó tối thiểu $D_{\min}$ **hoàn toàn giữ nguyên (chênh lệch không quá 1 chú chó)** so với cấu hình chuẩn gốc!
 - **Biến thể duy nhất thực sự làm thay đổi bản chất $D_{\min}$**:
   - **`goal 1.5 R_f`** là biến thể duy nhất khiến $D_{\min}$ tăng vọt dưới cả hai tiêu chí. Lý do: Để nhốt vừa một đàn cừu vào một chiếc chuồng chỉ rộng $1,5 R_f$, đàn cừu buộc phải bị nén chặt hơn rất nhiều so với mật độ tự nhiên của chúng, đòi hỏi đàn chó phải đông hơn hẳn để duy trì áp lực vây ép liên tục xung quanh chu vi.
+
+---
+
+## Thiết lập cho các chiến dịch tiếp theo
+
+Các chiến dịch tiếp theo (phát hiện 8 đến 12) dùng các thiết lập sau của `protocols/configs/canonical.yaml`. Mỗi thiết lập mặc định là tắt, và ở giá trị mặc định nó giữ nguyên lượt chạy và mã băm vật lý (physics hash) của mọi thư mục trước đó.
+
+| Thiết lập | Mặc định | Tác dụng | Dùng trong |
+|---|---|---|---|
+| `hold_drive_multiple` | 0 | đích chỉ được tính sau khi tỉ lệ yêu cầu đã ở yên bên trong trong ngần ấy lần thời gian lùa | `dmin_f99_hold`, `dmin_f99_hold_spacing` |
+| `hold_withdraw` | false | trong lúc đích đang đạt, các chó lùi ra cách con cừu xa nhất 65 + 2 m, để bầy gặm cỏ | như trên |
+| `dog_spacing` | 0 | không chó nào bước tới gần chó khác dưới khoảng cách này; chó nào đã ở gần như vậy sẽ đi ra xa (các chó di chuyển lần lượt) | `dmin_f99_hold_spacing` |
+| `sensing_range` | 0 | mỗi chó chỉ biết những con cừu trong phạm vi này (0: mọi con cừu) | `dmin_f99_view_range` |
+| `communication` | none | khi có tầm cảm nhận: biết thêm những gì các chó trong tầm thấy (`neighbour`) hoặc những gì mọi chó thấy (`shared`) | `dmin_f99_view_comm` |
+| `impose_radius_above` | 0 | trên N này, bán kính bầy không được hiệu chuẩn mà được áp đặt theo mật độ của N đó | `dmin_f99_big*` |
+| `imposed_radius_scale` | 1 | nhân bán kính áp đặt theo hệ số này (quét mật độ); mỗi giá trị một giao thức, vì hiệu chuẩn chạy một lần cho mỗi giao thức | `dmin_f99_big_dense`, `_loose` |
+| `drive_offset_cap` | 0 | đặt giới hạn trên cho khoảng cách lùa r_a sqrt(N) của bài báo, một biến thể có gắn nhãn của quy tắc | `dmin_f99_big_cap` |
+
+Các lựa chọn phương pháp: `independent` (mỗi chó là một bản sao độc lập của người chăn trong bài báo, không có tầng đội) trong `dmin_f99_indep`; trọng số lực hút của cừu `c` và số hàng xóm `n_neighbors` là tham số phương pháp trong `dmin_f99_c1.3`, `_c1.6`, `_c2.0` và `dmin_f99_k05`. Chó dùng để hiệu chuẩn luôn là chó của bài báo với góc nhìn đầy đủ, bất kể các thiết lập này là gì, nên nhiệm vụ của mọi giao thức đều được định cỡ từ cùng một bầy tham chiếu.
+
+Hai công cụ chạy lại để chẩn đoán (chúng chạy lại các lượt chạy đã lưu và từ chối tiếp tục nếu một lần chạy lại khác với lượt chạy đã lưu): `uv run cli/pressure_replay.py` (thời gian mỗi con cừu tháo chạy) và `uv run cli/split_diagnostic.py` (vì sao thêm chó làm bố cục split chậm đi).
+
+---
+
+## Vì sao lưới dừng ở những giới hạn này
+
+Mỗi lượt chạy dừng ở một kích thước bầy, một số chó và một số hạt giống nhất định. Dưới đây là lý do, để có thể đọc trực tiếp giới hạn của từng kết quả.
+
+### Kích thước bầy N
+
+| Lượt chạy | N | Vì sao bắt đầu và dừng ở đó |
+| :--- | :--- | :--- |
+| Các lưới chính, độ nhạy, FAT | 25 đến 400 | Ở N <= 50 mọi bố cục đều cần một chó dưới mọi thời hạn, nên bầy nhỏ hơn chỉ thêm các kết quả bằng một. 400 là kích thước lớn nhất được hiệu chuẩn trong nghiên cứu đầu tiên. |
+| Các lưới 99%, chạy tiếp | + 71, 141, 283, 566 | Các bước sqrt(2) trên N = 50, để mọi kích thước có trọng số như nhau trong các phép khớp tăng trưởng. 566 = 400 sqrt(2) là bước cuối cùng như vậy nằm trong mép của mô hình: bầy tự ổn định về một kích thước riêng đến N = 600, ở 630 một lượt xuất phát thưa vẫn lớn hơn 17%, ở 800 hiệu chuẩn thất bại. |
+| Kubo | 25 đến 100 | Bầy Kubo co lại về bán kính khoảng 5,8 ở mọi N, nên N lớn hơn không còn là một bầy ngoài đồng. |
+| Tầm cảm nhận | 50 đến 200 | Ở N = 400 khoảng cách gom (109 m) lớn hơn tầm nhìn 65 m, nên quy tắc cục bộ không thấy được những gì nó cần gom. |
+| Giữ bầy | 25 đến 400 | Chạy đầy đủ; ở N <= 50 không đội nào giữ được bầy, vì một lý do không liên quan đến quy mô đội (phát hiện 10). |
+| Liên kết yếu hơn (0,5N) | 50 đến 400 | Ở N = 25, một con cừu bị hút về 13 hàng xóm không cho ra bầy ổn định. |
+| N lớn | 566 đến 3200 | Trên mép, bán kính được áp đặt theo mật độ của N = 566, với cùng các bước sqrt(2). Theo quy tắc của bài báo, không bầy nào trên N = 1056 được lùa. Trong biến thể có giới hạn, N = 2263 và 3200 bị bỏ sau hai giờ: một lượt wide ở đó chạy hết 8.796 nhịp tick, và lần chạy sẽ mất nhiều ngày. Các lượt 3200 đã chạy được giữ lại như một cận dưới. |
+
+### Số chó D
+
+| Lượt chạy | D | Vì sao |
+| :--- | :--- | :--- |
+| Các lưới chính | 1, 2, 3, 4, 6, 8, 12, 16, 24 | Các bước khoảng 1,5, để mỗi lần D tăng gấp đôi có ít nhất hai điểm. 24 vì mức 16 của lượt thử nghiệm có thể không đạt được các ô khó nhất (bố cục phân tán, N = 400). Sau đó: không đường cong nào còn nhanh lên ở 24, và các đường cong không có D_min có tỉ lệ thành công đi ngang hoặc giảm, nên D lớn hơn sẽ không thay đổi câu trả lời nào. |
+| Mọi lượt chạy | + các điểm giữa | Được thêm tự động ở chỗ vùng thay đổi giữa hai D đã kiểm tra, và bên cạnh một ô vẫn chưa quyết định ở mức trần hạt giống. |
+| Giữ bầy, giãn cách | + 7, 9, 10, 11, 13 | Số chó mà vòng cung lùa chứa được khi cách nhau 2 m là 7, 9, 10, 11, 12 ở N = 25 đến 400; các giá trị này nằm quanh số đó. Tác hại tìm thấy bắt đầu ở D = 9, trong lưới, nên không cần lượt chạy nào quá 24. |
+| Kubo | 1 đến 24 | Lượt chạy đầu dừng ở 10 trong khi thời gian hoàn thành vẫn đang giảm. |
+| Tầm cảm nhận | 1 đến 16 | D_min nhiều nhất là 3 ở N <= 200 với góc nhìn đầy đủ. |
+| N lớn | 1 đến 12 | D_min là 2 đến 3 ở N = 566; một đường cong thất bại ở 12 được báo cáo là "không có đến 12". |
+
+D lớn nhất định cỡ bãi cỏ, nên nó là một phần của vật lý: tăng nó luôn đồng nghĩa với một thư mục kết quả mới.
+
+### Số hạt giống mỗi ô
+
+- **Mỗi đợt 10, trần 200.** Một ô đạt độ tin cậy khi cận dưới 99% của nó đạt 0,90, điều này cần 51 lần thành công liên tiếp (60 lượt chạy theo các đợt 10). Một ô thất bại rõ ràng được quyết định sau 10 đến 20 lượt chạy.
+- **Vì sao 200**: sau 200 hạt giống, một ô chỉ được quyết định nếu tỉ lệ quan sát được ít nhất là 0,955 hoặc nhiều nhất là 0,835. Tăng gấp đôi lên 400 chỉ thu hẹp khoảng đó về 0,94 và 0,86, nên giảm một nửa vùng chưa quyết định tốn khoảng gấp bốn lần số hạt giống. 388 trong số 4.773 ô (8,1%) kết thúc ở trạng thái chưa quyết định tại mức trần; các bảng ghi chúng dưới dạng khoảng chặn ("2-3") hoặc cận dưới ("[5]"), không bao giờ là một số duy nhất.
+- **Thời gian hoàn thành**: các lượt chạy D_min chỉ dùng hạt giống cho độ tin cậy. Các lượt chạy hỏi về D_sat cũng quyết định các phép so sánh thời gian hoàn thành (`decide_finish_times: true`), tốn thêm khoảng một phần ba số lượt chạy.
+- **Chẩn đoán**: các lượt chạy lại đo áp lực và chẩn đoán split dùng 12 hạt giống mỗi ô và cho một hướng, không phải một giá trị đã quyết định.
+
+### Thời hạn và quy tắc thành công
+
+Các lượt chạy chính dùng 12, 6 và 3 thời gian lùa; một bầy compact với một chó cần 1,45 đến 1,74. Các lượt chạy tiếp theo dùng 12 thời gian lùa ở chỗ câu hỏi là dạng tăng trưởng và 6 ở chỗ câu hỏi là quy mô đội và chi phí, và chỉ dùng quy tắc thành công 99%: quy tắc tuyệt đối do con cừu cuối cùng quyết định (phát hiện 4).
 
 ---
 

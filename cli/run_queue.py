@@ -57,6 +57,20 @@ QUEUE = (
     "dmin_f99_s_gap",
     "dmin_fat",
     "dmin_f99_fat",
+    "dmin_f99_indep",
+    "dmin_f99_kubo",
+    "dmin_f99_c1.3",
+    "dmin_f99_c1.6",
+    "dmin_f99_c2.0",
+    "dmin_f99_k05",
+    "dmin_f99_hold",
+    "dmin_f99_hold_spacing",
+    "dmin_f99_view_range",
+    "dmin_f99_view_comm",
+    "dmin_f99_big",
+    "dmin_f99_big_dense",
+    "dmin_f99_big_loose",
+    "dmin_f99_big_cap",
 )
 LOG = RESULTS_ROOT / "queue_log.jsonl"
 

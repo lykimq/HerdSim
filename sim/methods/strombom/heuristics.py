@@ -46,8 +46,13 @@ def radius_of(flock: np.ndarray, centroid: np.ndarray) -> float:
 
 
 def drive_point(flock: np.ndarray, goal: np.ndarray, config: dict[str, Any]) -> np.ndarray:
-    """Pd: r_a sqrt(N) behind the centroid of ``flock`` relative to the goal (the paper rule)."""
+    """Pd: r_a sqrt(N) behind the centroid of ``flock`` relative to the goal (the paper rule),
+    or ``drive_offset_cap`` behind it when that is set and shorter (a HerdSim variant; a config
+    without the key is the paper rule)."""
     offset = float(config["r_a"]) * np.sqrt(int(config["n_sheep"]))
+    cap = float(config.get("drive_offset_cap", 0.0))
+    if cap > 0.0:
+        offset = min(offset, cap)
     return behind(flock.mean(axis=0), goal, offset)
 
 

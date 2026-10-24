@@ -114,8 +114,13 @@ def setup_for(
         layouts=layouts,
         max_dogs=max_dogs,
     )
+    hold = float(settings["hold_drive_multiple"])
+    if hold < 0.0:
+        raise ValueError("hold_drive_multiple must not be negative")
+    drive = abs(float(geometry["goal_center"][0]) - float(geometry["flock_center"][0]))
     return {
         "max_ticks": _max_ticks(method, geometry),
+        "hold_ticks": drive_limit_ticks(hold, drive, method.name, method.params) if hold else 0,
         "measurement_radius": float(settings["measurement_radius"]),
         "dog_overlap_distance": float(settings["dog_overlap_distance"]),
         **geometry,

@@ -546,3 +546,524 @@ flight = a dog closer than r_s = 65; close = a dog closer than the dog stop dist
 | wide | 400 | 6 | D_sat | 12 | 1.0 | 432.0 | 358.99 | 0.08 | 0.83 |
 | wide | 400 | 12 | 2 D_sat | 12 | 1.0 | 430.5 | 360.52 | 0.12 | 0.84 |
 
+
+## Phase 2 (2026-10-23): finish-time top-up, densified N, independent shepherds, Kubo to D = 24, 99 percent
+
+Generated 2026-10-23 18:37 by cli/dmin_tables.py. dmin_f99_m12 and dmin_f99_m6 were resumed with decide_finish_times true and the flock sizes 71, 141, 283, 566 added (N above 50 is then spaced by sqrt 2; every added size calibrates cleanly, the edge of the model lies between 600 and 630). dmin_f99_m3 is resumed later. D_sat entries as in Phase 1. Fits: interval-censored maximum likelihood of a power law and a saturating curve to the D_min brackets; the last two columns give the range of D that every curve of each shape passing through all the brackets allows at N = 1600 and 3200.
+
+### D_min, dmin_f99_m12
+
+| layout | 25 | 50 | 71 | 100 | 141 | 200 | 283 | 400 | 566 |
+|---|---|---|---|---|---|---|---|---|---|
+| compact | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 |
+| wide | 1 | 1 | 1 | 1 | 2 | 1-2 | 2 | 2 | 2-3 |
+| split | 1 | 1 | 1 | 1 | 1 | 1 | 2 | 2 | 3 |
+| outlier_rich | 1 | 1 | 1 | 1-2 | 2 | 2 | 2 | 2 | 2-3 | 
+
+### D_min, dmin_f99_m6
+
+| layout | 25 | 50 | 71 | 100 | 141 | 200 | 283 | 400 | 566 |
+|---|---|---|---|---|---|---|---|---|---|
+| compact | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 |
+| wide | 1 | 1 | 1 | 1 | 2 | 2 | 2-3 | 2-3 | 3-7 |
+| split | 1 | 1 | 1 | 1 | 1 | [1] | [5] | [5] | none on grid |
+| outlier_rich | 1 | 1 | 1 | 2 | 2 | 2-3 | 2-3 | 3 | 3-6 | 
+
+### Growth, dmin_f99_m12
+
+| layout | slope_range | n_used | note |
+|---|---|---|---|
+| compact | 0 (flat) | 25 50 71 100 141 200 283 400 566 | D_min = 1 throughout |
+| outlier_rich | 0.28 to 0.38 | 25 50 71 100 141 200 283 400 566 |  |
+| split | 0.34 to 0.34 | 25 50 71 100 141 200 283 400 566 |  |
+| wide | 0.27 to 0.38 | 25 50 71 100 141 200 283 400 566 |  | 
+
+Spread of D_min in doublings: between layouts at one N 0.68, between N at one layout 1.04.
+
+### Growth, dmin_f99_m6
+
+| layout | slope_range | n_used | note |
+|---|---|---|---|
+| compact | 0 (flat) | 25 50 71 100 141 200 283 400 566 | D_min = 1 throughout |
+| outlier_rich | 0.40 to 0.58 | 25 50 71 100 141 200 283 400 566 |  |
+| split | 0 (flat, decided sizes only) | 25 50 71 100 141 | D_min = 1 where decided; no reliable D on the grid at N = 566; still open on reliability at N = 200 283 400 |
+| wide | 0.38 to 0.61 | 25 50 71 100 141 200 283 400 566 |  | 
+
+Spread of D_min in doublings: between layouts at one N 1.13, between N at one layout 1.65.
+
+### Fits, dmin_f99_m12: D_min(N), power law against saturating curve
+
+| layout | points | exponent_b | d_inf | log_odds_power_vs_saturating | N=1600: power / saturating | N=3200: power / saturating |
+|---|---|---|---|---|---|---|
+| wide | 9 | 0.29 | 2.6 | 0.0 | 1.8-4.7 / 1.5-6.7 | 1.9-6.5 / 1.5-11.7 |
+| outlier_rich | 9 | 0.22 | 2.0 | 0.0 | 1.7-4.7 / 1.5-6.7 | 1.7-6.5 / 1.5-11.7 | 
+
+### Fits, dmin_f99_m6: D_min(N), power law against saturating curve
+
+| layout | points | exponent_b | d_inf | log_odds_power_vs_saturating | N=1600: power / saturating | N=3200: power / saturating |
+|---|---|---|---|---|---|---|
+| wide | 9 | 0.34 | 7.4 | 0.0 | 3.5-10.4 / 3.1-8.4 | 4.3-18.0 / 3.4-14.7 |
+| outlier_rich | 9 | 0.34 | 8.0 | 0.0 | 3.8-8.1 / 3.3-10.2 | 4.8-12.2 / 3.5-17.8 | 
+
+### D_sat, dmin_f99_m12: D_sat
+
+| layout | 25 | 50 | 71 | 100 | 141 | 200 | 283 | 400 | 566 |
+|---|---|---|---|---|---|---|---|---|---|
+| compact | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 |
+| wide | 1 | 1 | 1 | 2 | 3 | 3 | 4 | 5 | 7-24 |
+| split | 1 | 1 | 1 | 4 | 7 | 2-24 | 2-24 | 4-24 | 3-24 |
+| outlier_rich | 1 | 1-24 | 2 | 3 | 3 | 4 | 5-24 | 6-24 | 8-24 | 
+
+| layout | slope_range | n_used | n_left_out |
+|---|---|---|---|
+| compact | 0 (flat) | 25 50 71 100 141 200 283 400 566 | - |
+| outlier_rich | 0.32 to 1.22 | 25 50 71 100 141 200 283 400 566 | - |
+| split | 0.42 to 1.35 | 25 50 71 100 141 200 283 400 566 | - |
+| wide | 0.70 to 0.91 | 25 50 71 100 141 200 283 400 566 | - | 
+
+### D_sat, dmin_f99_m6: D_sat
+
+| layout | 25 | 50 | 71 | 100 | 141 | 200 | 283 | 400 | 566 |
+|---|---|---|---|---|---|---|---|---|---|
+| compact | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 |
+| wide | 1 | 1 | 1 | 2 | 3 | 3 | 4 | 5 | 7-24 |
+| split | 1 | 1 | 1 | 4 | 7 | - | - | - | - |
+| outlier_rich | 1 | 1-24 | 2 | 3 | 3 | 4 | 5-24 | 6-24 | 8-12 | 
+
+| layout | slope_range | n_used | n_left_out |
+|---|---|---|---|
+| compact | 0 (flat) | 25 50 71 100 141 200 283 400 566 | - |
+| outlier_rich | 0.32 to 1.10 | 25 50 71 100 141 200 283 400 566 | - |
+| split | 1.16 to 1.16 | 25 50 71 100 141 | 200 283 400 566 |
+| wide | 0.70 to 0.91 | 25 50 71 100 141 200 283 400 566 | - | 
+
+### Effort, dmin_f99_m12: cost of dogs beyond D_sat, relative to the D_sat cell
+
+| layout | n | d_sat | d_double | time_double | dog_time_double | path_double | time_top | dog_time_top | path_top | d_top |
+|---|---|---|---|---|---|---|---|---|---|---|
+| compact | 25 | 1 | 2 | 0.98 | 1.97 | 1.41 | 0.99 | 23.8 | 19.54 | 24 |
+| compact | 50 | 1 | 2 | 0.98 | 1.97 | 1.95 | 1.0 | 23.92 | 23.86 | 24 |
+| compact | 71 | 1 | 2 | 0.98 | 1.97 | 1.97 | 0.99 | 23.86 | 23.86 | 24 |
+| compact | 100 | 1 | 2 | 0.98 | 1.97 | 1.97 | 0.99 | 23.88 | 23.88 | 24 |
+| compact | 141 | 1 | 2 | 0.99 | 1.98 | 1.98 | 1.0 | 24.0 | 24.0 | 24 |
+| compact | 200 | 1 | 2 | 0.99 | 1.97 | 1.97 | 1.0 | 23.9 | 23.9 | 24 |
+| compact | 283 | 1 | 2 | 0.99 | 1.99 | 1.99 | 1.0 | 23.92 | 23.92 | 24 |
+| compact | 400 | 1 | 2 | 0.99 | 1.99 | 1.99 | 1.0 | 23.97 | 23.97 | 24 |
+| compact | 566 | 1 | 2 | 1.0 | 1.99 | 1.99 | 1.0 | 23.92 | 23.92 | 24 |
+| outlier_rich | 25 | 1 | 2 | 0.98 | 1.97 | 1.56 | 1.0 | 23.9 | 20.8 | 24 |
+| outlier_rich | 50 | 1-24 | 2 | 0.95 | 1.9 | 1.87 | 0.96 | 23.05 | 22.64 | 24 |
+| outlier_rich | 71 | 2 | 4 | 0.97 | 1.94 | 1.97 | 0.96 | 11.57 | 11.76 | 24 |
+| outlier_rich | 100 | 3 | 6 | 0.99 | 1.98 | 2.0 | 0.98 | 7.85 | 7.92 | 24 |
+| outlier_rich | 141 | 3 | 6 | 0.99 | 1.98 | 2.0 | 0.97 | 7.79 | 7.92 | 24 |
+| outlier_rich | 200 | 4 | 8 | 0.97 | 1.94 | 1.96 | 0.96 | 5.77 | 5.79 | 24 |
+| outlier_rich | 283 | 5-24 | 12 | 0.48 | 1.16 | 1.36 | 0.47 | 2.27 | 2.65 | 24 |
+| outlier_rich | 400 | 6-24 | 12 | 0.96 | 1.91 | 1.94 | 0.93 | 3.74 | 3.76 | 24 |
+| outlier_rich | 566 | 8-24 | 16 | 1.69 | 3.38 | 2.97 | 1.71 | 5.12 | 4.43 | 24 |
+| split | 25 | 1 | 2 | 0.99 | 1.98 | 1.52 | 0.99 | 23.8 | 20.14 | 24 |
+| split | 50 | 1 | 2 | 1.01 | 2.02 | 1.94 | 1.0 | 24.0 | 23.24 | 24 |
+| split | 71 | 1 | 2 | 1.12 | 2.25 | 1.97 | 1.0 | 24.0 | 23.14 | 24 |
+| split | 100 | 4 | 8 | 0.99 | 1.98 | 2.02 | 0.99 | 5.91 | 6.03 | 24 |
+| split | 141 | 7 | 16 | 0.97 | 2.21 | 2.27 | 0.96 | 3.31 | 3.41 | 24 |
+| split | 200 | 2-24 | 4 | 1.67 | 3.35 | 2.9 | 1.96 | 23.46 | 20.28 | 24 |
+| split | 283 | 2-24 | 4 | 0.94 | 1.88 | 1.73 | 1.04 | 12.44 | 11.13 | 24 |
+| split | 400 | 4-24 | 8 | 1.11 | 2.23 | 2.12 | 1.2 | 7.19 | 6.75 | 24 |
+| split | 566 | 3-24 | 6 | 1.01 | 2.02 | 1.79 | 1.14 | 9.15 | 7.65 | 24 |
+| wide | 25 | 1 | 2 | 1.0 | 2.0 | 1.57 | 1.0 | 24.0 | 20.75 | 24 |
+| wide | 50 | 1 | 2 | 0.98 | 1.96 | 1.94 | 0.99 | 23.85 | 23.67 | 24 |
+| wide | 71 | 1 | 2 | 0.98 | 1.96 | 1.95 | 0.98 | 23.61 | 23.46 | 24 |
+| wide | 100 | 2 | 4 | 1.0 | 1.99 | 1.99 | 1.0 | 11.94 | 11.94 | 24 |
+| wide | 141 | 3 | 6 | 0.99 | 1.99 | 1.99 | 0.99 | 7.91 | 7.89 | 24 |
+| wide | 200 | 3 | 6 | 0.97 | 1.94 | 1.96 | 0.96 | 7.7 | 7.77 | 24 |
+| wide | 283 | 4 | 8 | 0.99 | 1.97 | 1.97 | 0.97 | 5.83 | 5.82 | 24 |
+| wide | 400 | 5 | 12 | 0.97 | 2.32 | 2.34 | 0.96 | 4.59 | 4.64 | 24 |
+| wide | 566 | 7-24 | 16 | 0.96 | 2.18 | 2.2 | 0.95 | 3.26 | 3.28 | 24 | 
+
+### Effort, dmin_f99_m6: cost of dogs beyond D_sat, relative to the D_sat cell
+
+| layout | n | d_sat | d_double | time_double | dog_time_double | path_double | time_top | dog_time_top | path_top | d_top |
+|---|---|---|---|---|---|---|---|---|---|---|
+| compact | 25 | 1 | 2 | 0.98 | 1.97 | 1.41 | 0.99 | 23.8 | 19.54 | 24 |
+| compact | 50 | 1 | 2 | 0.98 | 1.97 | 1.95 | 1.0 | 23.92 | 23.86 | 24 |
+| compact | 71 | 1 | 2 | 0.98 | 1.97 | 1.97 | 0.99 | 23.86 | 23.86 | 24 |
+| compact | 100 | 1 | 2 | 0.98 | 1.97 | 1.97 | 0.99 | 23.88 | 23.88 | 24 |
+| compact | 141 | 1 | 2 | 0.99 | 1.98 | 1.98 | 1.0 | 24.0 | 24.0 | 24 |
+| compact | 200 | 1 | 2 | 0.99 | 1.97 | 1.97 | 1.0 | 23.9 | 23.9 | 24 |
+| compact | 283 | 1 | 2 | 0.99 | 1.99 | 1.99 | 1.0 | 23.92 | 23.92 | 24 |
+| compact | 400 | 1 | 2 | 0.99 | 1.99 | 1.99 | 1.0 | 23.97 | 23.97 | 24 |
+| compact | 566 | 1 | 2 | 1.0 | 1.99 | 1.99 | 1.0 | 23.92 | 23.92 | 24 |
+| outlier_rich | 25 | 1 | 2 | 0.98 | 1.97 | 1.56 | 1.0 | 23.9 | 20.8 | 24 |
+| outlier_rich | 50 | 1-24 | 2 | 0.95 | 1.9 | 1.87 | 0.96 | 23.05 | 22.64 | 24 |
+| outlier_rich | 71 | 2 | 4 | 0.97 | 1.95 | 1.97 | 0.97 | 11.63 | 11.79 | 24 |
+| outlier_rich | 100 | 3 | 6 | 0.99 | 1.98 | 2.0 | 0.98 | 7.85 | 7.92 | 24 |
+| outlier_rich | 141 | 3 | 6 | 0.99 | 1.98 | 2.0 | 0.97 | 7.79 | 7.92 | 24 |
+| outlier_rich | 200 | 4 | 8 | 0.98 | 1.95 | 1.96 | 0.96 | 5.77 | 5.78 | 24 |
+| outlier_rich | 283 | 5-24 | 12 | 0.49 | 1.18 | 1.37 | 0.48 | 2.31 | 2.67 | 24 |
+| outlier_rich | 400 | 6-24 | 12 | 0.96 | 1.91 | 1.94 | 0.94 | 3.74 | 3.77 | 24 |
+| outlier_rich | 566 | 8-12 | - | - | - | - | 1.57 | 2.35 | 2.09 | 12 |
+| split | 25 | 1 | 2 | 0.99 | 1.98 | 1.52 | 0.99 | 23.8 | 20.14 | 24 |
+| split | 50 | 1 | 2 | 1.01 | 2.02 | 1.92 | 1.0 | 24.0 | 23.24 | 24 |
+| split | 71 | 1 | 3 | 1.0 | 3.0 | 2.83 | 1.0 | 24.0 | 23.14 | 24 |
+| split | 100 | 4 | 8 | 0.99 | 1.98 | 2.02 | 0.99 | 5.91 | 6.03 | 24 |
+| split | 141 | 7 | 16 | 0.97 | 2.21 | 2.28 | 0.96 | 3.31 | 3.42 | 24 |
+| wide | 25 | 1 | 2 | 1.0 | 2.0 | 1.57 | 1.0 | 24.0 | 20.75 | 24 |
+| wide | 50 | 1 | 2 | 0.98 | 1.96 | 1.94 | 0.99 | 23.85 | 23.67 | 24 |
+| wide | 71 | 1 | 2 | 0.97 | 1.95 | 1.94 | 0.98 | 23.61 | 23.46 | 24 |
+| wide | 100 | 2 | 4 | 1.0 | 1.99 | 1.99 | 1.0 | 11.94 | 11.94 | 24 |
+| wide | 141 | 3 | 6 | 0.99 | 1.99 | 1.99 | 0.99 | 7.91 | 7.89 | 24 |
+| wide | 200 | 3 | 6 | 0.97 | 1.94 | 1.96 | 0.96 | 7.7 | 7.77 | 24 |
+| wide | 283 | 4 | 8 | 0.98 | 1.97 | 1.96 | 0.97 | 5.81 | 5.81 | 24 |
+| wide | 400 | 5 | 12 | 0.97 | 2.32 | 2.34 | 0.96 | 4.61 | 4.64 | 24 |
+| wide | 566 | 7-24 | 16 | 0.96 | 2.18 | 2.2 | 0.95 | 3.27 | 3.28 | 24 | 
+
+### Zones, dmin_f99_m12: 25 cells where more dogs did worse
+
+| method | layout | n | d | zone | success_rate | median_finish | fastest_d | fastest_finish |
+|---|---|---|---|---|---|---|---|---|
+| strombom_multi | outlier_rich | 566 | 15 | crowded | 1.0 | 1172.0 | 10 | 628.0 |
+| strombom_multi | outlier_rich | 566 | 16 | crowded | 1.0 | 1129.5 | 10 | 628.0 |
+| strombom_multi | outlier_rich | 566 | 24 | crowded | 1.0 | 1142.0 | 10 | 628.0 |
+| strombom_multi | split | 200 | 5 | crowded | 1.0 | 662.0 | 2 | 368.5 |
+| strombom_multi | split | 200 | 6 | crowded | 1.0 | 665.0 | 2 | 368.5 |
+| strombom_multi | split | 200 | 8 | crowded | 1.0 | 695.0 | 2 | 368.5 |
+| strombom_multi | split | 200 | 12 | crowded | 1.0 | 713.0 | 2 | 368.5 |
+| strombom_multi | split | 200 | 16 | crowded | 1.0 | 744.0 | 2 | 368.5 |
+| strombom_multi | split | 200 | 24 | crowded | 1.0 | 720.5 | 2 | 368.5 |
+| strombom_multi | split | 283 | 14 | crowded | 1.0 | 878.0 | 4 | 772.0 |
+| strombom_multi | split | 283 | 16 | crowded | 1.0 | 853.5 | 4 | 772.0 |
+| strombom_multi | split | 283 | 20 | crowded | 1.0 | 863.0 | 4 | 772.0 |
+| strombom_multi | split | 283 | 21 | crowded | 1.0 | 856.5 | 4 | 772.0 |
+| strombom_multi | split | 283 | 23 | crowded | 1.0 | 854.0 | 4 | 772.0 |
+| strombom_multi | split | 400 | 9 | crowded | 1.0 | 951.5 | 5 | 839.0 |
+| strombom_multi | split | 400 | 10 | crowded | 1.0 | 987.5 | 5 | 839.0 |
+| strombom_multi | split | 400 | 12 | crowded | 1.0 | 1043.0 | 5 | 839.0 |
+| strombom_multi | split | 400 | 16 | crowded | 1.0 | 1022.5 | 5 | 839.0 |
+| strombom_multi | split | 400 | 24 | crowded | 1.0 | 1022.0 | 5 | 839.0 |
+| strombom_multi | split | 566 | 4 | crowded | 1.0 | 1469.5 | 3 | 1160.5 |
+| strombom_multi | split | 566 | 5 | crowded | 1.0 | 1374.0 | 3 | 1160.5 |
+| strombom_multi | split | 566 | 15 | crowded | 1.0 | 1283.0 | 3 | 1160.5 |
+| strombom_multi | split | 566 | 16 | crowded | 1.0 | 1292.0 | 3 | 1160.5 |
+| strombom_multi | split | 566 | 24 | crowded | 1.0 | 1328.0 | 3 | 1160.5 |
+| strombom_multi | split | 71 | 2 | crowded | 0.96 | 209.0 | 1 | 186.0 | 
+
+### Zones, dmin_f99_m6: 1 cells where more dogs did worse
+
+| method | layout | n | d | zone | success_rate | median_finish | fastest_d | fastest_finish |
+|---|---|---|---|---|---|---|---|---|
+| strombom_multi | split | 141 | 4 | unreliable_dip | 0.8 | 264.5 | 24 | 233.5 | 
+
+### Zones, dmin_f99_indep: 0 cells where more dogs did worse
+
+(no rows) 
+
+### Methods at 99 percent, 6 drive times: team rule, independent paper shepherds, FAT
+
+| method | layout | n | d_min | d_sat | d_crowd | d_max | folder | rule |
+|---|---|---|---|---|---|---|---|---|
+| strombom_multi | compact | 25 | 1 | 1 | - | 24 | dmin_f99_m6 | 99 percent |
+| strombom_multi | compact | 50 | 1 | 1 | - | 24 | dmin_f99_m6 | 99 percent |
+| strombom_multi | compact | 71 | 1 | 1 | - | 24 | dmin_f99_m6 | 99 percent |
+| strombom_multi | compact | 100 | 1 | 1 | - | 24 | dmin_f99_m6 | 99 percent |
+| strombom_multi | compact | 141 | 1 | 1 | - | 24 | dmin_f99_m6 | 99 percent |
+| strombom_multi | compact | 200 | 1 | 1 | - | 24 | dmin_f99_m6 | 99 percent |
+| strombom_multi | compact | 283 | 1 | 1 | - | 24 | dmin_f99_m6 | 99 percent |
+| strombom_multi | compact | 400 | 1 | 1 | - | 24 | dmin_f99_m6 | 99 percent |
+| strombom_multi | compact | 566 | 1 | 1 | - | 24 | dmin_f99_m6 | 99 percent |
+| strombom_multi | outlier_rich | 25 | 1 | 1 | - | 24 | dmin_f99_m6 | 99 percent |
+| strombom_multi | outlier_rich | 50 | 1 | 1-24 | - | 24 | dmin_f99_m6 | 99 percent |
+| strombom_multi | outlier_rich | 71 | 1 | 2 | - | 24 | dmin_f99_m6 | 99 percent |
+| strombom_multi | outlier_rich | 100 | 2 | 3 | - | 24 | dmin_f99_m6 | 99 percent |
+| strombom_multi | outlier_rich | 141 | 2 | 3 | - | 24 | dmin_f99_m6 | 99 percent |
+| strombom_multi | outlier_rich | 200 | 2-3 | 4 | - | 24 | dmin_f99_m6 | 99 percent |
+| strombom_multi | outlier_rich | 283 | 2-3 | 5-24 | - | 24 | dmin_f99_m6 | 99 percent |
+| strombom_multi | outlier_rich | 400 | 3 | 6-24 | - | 24 | dmin_f99_m6 | 99 percent |
+| strombom_multi | outlier_rich | 566 | 3-6 | 8-12 | - | 12 | dmin_f99_m6 | 99 percent |
+| strombom_multi | split | 25 | 1 | 1 | - | 24 | dmin_f99_m6 | 99 percent |
+| strombom_multi | split | 50 | 1 | 1 | - | 24 | dmin_f99_m6 | 99 percent |
+| strombom_multi | split | 71 | 1 | 1 | - | 24 | dmin_f99_m6 | 99 percent |
+| strombom_multi | split | 100 | 1 | 4 | - | 24 | dmin_f99_m6 | 99 percent |
+| strombom_multi | split | 141 | 1 | 7 | - | 24 | dmin_f99_m6 | 99 percent |
+| strombom_multi | split | 200 | [1] | - | - | - | dmin_f99_m6 | 99 percent |
+| strombom_multi | split | 283 | [5] | - | - | - | dmin_f99_m6 | 99 percent |
+| strombom_multi | split | 400 | [5] | - | - | - | dmin_f99_m6 | 99 percent |
+| strombom_multi | split | 566 | none on grid | - | - | - | dmin_f99_m6 | 99 percent |
+| strombom_multi | wide | 25 | 1 | 1 | - | 24 | dmin_f99_m6 | 99 percent |
+| strombom_multi | wide | 50 | 1 | 1 | - | 24 | dmin_f99_m6 | 99 percent |
+| strombom_multi | wide | 71 | 1 | 1 | - | 24 | dmin_f99_m6 | 99 percent |
+| strombom_multi | wide | 100 | 1 | 2 | - | 24 | dmin_f99_m6 | 99 percent |
+| strombom_multi | wide | 141 | 2 | 3 | - | 24 | dmin_f99_m6 | 99 percent |
+| strombom_multi | wide | 200 | 2 | 3 | - | 24 | dmin_f99_m6 | 99 percent |
+| strombom_multi | wide | 283 | 2-3 | 4 | - | 24 | dmin_f99_m6 | 99 percent |
+| strombom_multi | wide | 400 | 2-3 | 5 | - | 24 | dmin_f99_m6 | 99 percent |
+| strombom_multi | wide | 566 | 3-7 | 7-24 | - | 24 | dmin_f99_m6 | 99 percent |
+| independent | compact | 25 | 1 | 1 | - | 24 | dmin_f99_indep | 99 percent |
+| independent | compact | 50 | 1 | 1 | - | 24 | dmin_f99_indep | 99 percent |
+| independent | compact | 100 | 1 | 1 | - | 24 | dmin_f99_indep | 99 percent |
+| independent | compact | 200 | 1 | 1 | - | 24 | dmin_f99_indep | 99 percent |
+| independent | compact | 400 | 1 | 1 | - | 24 | dmin_f99_indep | 99 percent |
+| independent | outlier_rich | 25 | 1 | 1 | - | 24 | dmin_f99_indep | 99 percent |
+| independent | outlier_rich | 50 | 1 | 1 | - | 24 | dmin_f99_indep | 99 percent |
+| independent | outlier_rich | 100 | 2 | 2-24 | - | 24 | dmin_f99_indep | 99 percent |
+| independent | outlier_rich | 200 | 3 | 4-24 | - | 24 | dmin_f99_indep | 99 percent |
+| independent | outlier_rich | 400 | none on grid | - | - | - | dmin_f99_indep | 99 percent |
+| independent | split | 25 | 1 | 1 | - | 24 | dmin_f99_indep | 99 percent |
+| independent | split | 50 | 1 | 1 | - | 24 | dmin_f99_indep | 99 percent |
+| independent | split | 100 | 1 | 2 | - | 24 | dmin_f99_indep | 99 percent |
+| independent | split | 200 | 1-3 | 5-24 | - | 24 | dmin_f99_indep | 99 percent |
+| independent | split | 400 | none on grid | - | - | - | dmin_f99_indep | 99 percent |
+| independent | wide | 25 | 1 | 1 | - | 24 | dmin_f99_indep | 99 percent |
+| independent | wide | 50 | 1 | 1 | - | 24 | dmin_f99_indep | 99 percent |
+| independent | wide | 100 | 1 | 2 | - | 24 | dmin_f99_indep | 99 percent |
+| independent | wide | 200 | 2-3 | 3 | - | 24 | dmin_f99_indep | 99 percent |
+| independent | wide | 400 | none on grid | - | - | - | dmin_f99_indep | 99 percent |
+| fat | compact | 25 | 1 | 1 | - | 24 | dmin_f99_fat | 99 percent |
+| fat | compact | 50 | 1 | 1 | - | 24 | dmin_f99_fat | 99 percent |
+| fat | compact | 100 | 1 | 1 | - | 24 | dmin_f99_fat | 99 percent |
+| fat | compact | 200 | 1 | 1 | - | 24 | dmin_f99_fat | 99 percent |
+| fat | compact | 400 | [12] | - | - | - | dmin_f99_fat | 99 percent |
+| fat | outlier_rich | 25 | 1 | 1 | - | 24 | dmin_f99_fat | 99 percent |
+| fat | outlier_rich | 50 | 1 | 1 | - | 24 | dmin_f99_fat | 99 percent |
+| fat | outlier_rich | 100 | 2 | 2-24 | - | 24 | dmin_f99_fat | 99 percent |
+| fat | outlier_rich | 200 | none on grid | - | - | - | dmin_f99_fat | 99 percent |
+| fat | outlier_rich | 400 | none on grid | - | - | - | dmin_f99_fat | 99 percent |
+| fat | split | 25 | 1 | 1 | - | 24 | dmin_f99_fat | 99 percent |
+| fat | split | 50 | 1 | 1 | - | 24 | dmin_f99_fat | 99 percent |
+| fat | split | 100 | 1 | 1-24 | 4 | 24 | dmin_f99_fat | 99 percent |
+| fat | split | 200 | none on grid | - | - | - | dmin_f99_fat | 99 percent |
+| fat | split | 400 | none on grid | - | - | - | dmin_f99_fat | 99 percent |
+| fat | wide | 25 | 1 | 1 | - | 24 | dmin_f99_fat | 99 percent |
+| fat | wide | 50 | 1 | 1 | - | 24 | dmin_f99_fat | 99 percent |
+| fat | wide | 100 | 1 | 1 | - | 24 | dmin_f99_fat | 99 percent |
+| fat | wide | 200 | none on grid | - | - | - | dmin_f99_fat | 99 percent |
+| fat | wide | 400 | none on grid | - | - | - | dmin_f99_fat | 99 percent |
+
+### Kubo, compact, D to 24, 99 percent
+
+| method | layout | n | d_min | d_sat | d_crowd | d_max | folder | rule |
+|---|---|---|---|---|---|---|---|---|
+| kubo | compact | 25 | 1 | 16-24 | - | 24 | dmin_f99_kubo | 99 percent |
+| kubo | compact | 50 | 1 | 17-24 | - | 24 | dmin_f99_kubo | 99 percent |
+| kubo | compact | 100 | 1 | 16-24 | - | 24 | dmin_f99_kubo | 99 percent |
+
+
+## RQ-B1 split diagnostic (2026-10-24)
+
+Generated by cli/split_diagnostic.py (12 stored seeds per cell; every base replay reproduced its stored trial). stop: dog stop distance r_a instead of 3 r_a; spread: collecting dogs take outliers at least f(N) apart; both. success = share of the 12 seeds; median_finish in seconds over the successful ones; stopped = mean share of dogs standing still.
+
+| deadline | n | d | version | success | median_finish | stopped |
+|---|---|---|---|---|---|---|
+| 3 | 100 | 2 | base | 1.0 | 227.5 | 0.11 |
+| 3 | 100 | 2 | both | 0.92 | 223.0 | 0.02 |
+| 3 | 100 | 2 | spread | 1.0 | 227.5 | 0.11 |
+| 3 | 100 | 2 | stop | 0.92 | 218.0 | 0.02 |
+| 3 | 100 | 4 | base | 1.0 | 210.5 | 0.08 |
+| 3 | 100 | 4 | both | 1.0 | 216.5 | 0.04 |
+| 3 | 100 | 4 | spread | 1.0 | 208.5 | 0.08 |
+| 3 | 100 | 4 | stop | 1.0 | 214.0 | 0.05 |
+| 3 | 100 | 8 | base | 1.0 | 207.0 | 0.07 |
+| 3 | 100 | 8 | both | 1.0 | 208.0 | 0.03 |
+| 3 | 100 | 8 | spread | 1.0 | 207.0 | 0.07 |
+| 3 | 100 | 8 | stop | 1.0 | 207.5 | 0.03 |
+| 3 | 100 | 16 | base | 1.0 | 207.0 | 0.06 |
+| 3 | 100 | 16 | both | 1.0 | 207.0 | 0.03 |
+| 3 | 100 | 16 | spread | 1.0 | 207.0 | 0.06 |
+| 3 | 100 | 16 | stop | 1.0 | 207.0 | 0.03 |
+| 3 | 200 | 2 | base | 0.67 | 349.5 | 0.12 |
+| 3 | 200 | 2 | both | 0.92 | 388.0 | 0.02 |
+| 3 | 200 | 2 | spread | 0.92 | 393.0 | 0.1 |
+| 3 | 200 | 2 | stop | 0.83 | 332.0 | 0.02 |
+| 3 | 200 | 4 | base | 0.33 | 328.5 | 0.25 |
+| 3 | 200 | 4 | both | 0.33 | 295.5 | 0.1 |
+| 3 | 200 | 4 | spread | 0.58 | 309.0 | 0.19 |
+| 3 | 200 | 4 | stop | 0.33 | 308.5 | 0.1 |
+| 3 | 200 | 8 | base | 0.08 | 289.0 | 0.24 |
+| 3 | 200 | 8 | both | 0.08 | 309.0 | 0.14 |
+| 3 | 200 | 8 | spread | 0.25 | 305.0 | 0.21 |
+| 3 | 200 | 8 | stop | 0.08 | 308.0 | 0.15 |
+| 3 | 200 | 16 | base | 0.08 | 283.0 | 0.24 |
+| 3 | 200 | 16 | both | 0.0 |  | 0.16 |
+| 3 | 200 | 16 | spread | 0.08 | 283.0 | 0.24 |
+| 3 | 200 | 16 | stop | 0.0 |  | 0.16 |
+| 6 | 100 | 2 | base | 1.0 | 227.5 | 0.11 |
+| 6 | 100 | 2 | both | 0.92 | 223.0 | 0.03 |
+| 6 | 100 | 2 | spread | 1.0 | 227.5 | 0.11 |
+| 6 | 100 | 2 | stop | 0.92 | 218.0 | 0.02 |
+| 6 | 100 | 4 | base | 1.0 | 210.5 | 0.08 |
+| 6 | 100 | 4 | both | 1.0 | 216.5 | 0.04 |
+| 6 | 100 | 4 | spread | 1.0 | 208.5 | 0.08 |
+| 6 | 100 | 4 | stop | 1.0 | 214.0 | 0.05 |
+| 6 | 100 | 8 | base | 1.0 | 207.0 | 0.07 |
+| 6 | 100 | 8 | both | 1.0 | 208.0 | 0.03 |
+| 6 | 100 | 8 | spread | 1.0 | 207.0 | 0.07 |
+| 6 | 100 | 8 | stop | 1.0 | 207.5 | 0.03 |
+| 6 | 100 | 16 | base | 1.0 | 207.0 | 0.06 |
+| 6 | 100 | 16 | both | 1.0 | 207.0 | 0.03 |
+| 6 | 100 | 16 | spread | 1.0 | 207.0 | 0.06 |
+| 6 | 100 | 16 | stop | 1.0 | 207.0 | 0.03 |
+| 6 | 200 | 2 | base | 0.83 | 365.0 | 0.14 |
+| 6 | 200 | 2 | both | 0.92 | 388.0 | 0.03 |
+| 6 | 200 | 2 | spread | 1.0 | 393.5 | 0.1 |
+| 6 | 200 | 2 | stop | 0.83 | 332.0 | 0.02 |
+| 6 | 200 | 4 | base | 0.92 | 631.0 | 0.25 |
+| 6 | 200 | 4 | both | 0.83 | 499.0 | 0.13 |
+| 6 | 200 | 4 | spread | 0.83 | 317.5 | 0.2 |
+| 6 | 200 | 4 | stop | 0.83 | 476.0 | 0.12 |
+| 6 | 200 | 8 | base | 1.0 | 678.5 | 0.24 |
+| 6 | 200 | 8 | both | 1.0 | 530.5 | 0.16 |
+| 6 | 200 | 8 | spread | 0.83 | 661.5 | 0.22 |
+| 6 | 200 | 8 | stop | 1.0 | 536.0 | 0.16 |
+| 6 | 200 | 16 | base | 0.83 | 724.0 | 0.25 |
+| 6 | 200 | 16 | both | 1.0 | 539.0 | 0.18 |
+| 6 | 200 | 16 | spread | 0.83 | 703.0 | 0.25 |
+| 6 | 200 | 16 | stop | 1.0 | 550.5 | 0.18 |
+
+## Phase 3 and 4 (2026-10-23 to 24): holding, spacing, cohesion, views, large N, 99 percent
+
+Generated 2026-10-24 07:04 by cli/dmin_tables.py. Holding: 99 percent inside for one drive time, dogs withdraw while the goal is reached. Spacing: no dog steps to within 2 of another (the first, soft rule is archived as results/dmin_f99_hold_spacing_soft). Cohesion: sheep attraction weight c, or neighbours n_neighbors = 0.5N. Views: sensing range per dog, and sharing at range 65. Large N: R_f imposed above N = 566 at that density (scale 1, and 1/sqrt 2 = dense, sqrt 2 = loose at N = 800).
+
+### D_min, dmin_f99_hold
+
+| layout | 25 | 50 | 100 | 200 | 400 |
+|---|---|---|---|---|---|
+| compact | none on grid | none on grid | 1 | 1 | 1 |
+| wide | none on grid | none on grid | 1 | 2 | 3 |
+| split | none on grid | none on grid | 1 | [2] | none on grid |
+| outlier_rich | none on grid | none on grid | 3 | 3 | 3-4 | 
+
+### D_min, dmin_f99_hold_spacing
+
+| layout | 25 | 50 | 100 | 200 | 400 |
+|---|---|---|---|---|---|
+| compact | none on grid | none on grid | 1 | 1 | 1 |
+| wide | none on grid | none on grid | 1 | 2 | 3 |
+| split | none on grid | none on grid | 1 | [2] | none on grid |
+| outlier_rich | none on grid | none on grid | 2-3 | 3 | [3] | 
+
+### D_min, dmin_f99_c1.3
+
+| layout | 25 | 50 | 100 | 200 | 400 |
+|---|---|---|---|---|---|
+| compact | 1 | 1 | 1 | 1 | 1 |
+| wide | 1 | 1 | 1 | 1 | 2 |
+| split | 1 | 1 | 1 | 1 | 1-2 |
+| outlier_rich | 1 | 1 | 1 | 2 | 2 | 
+
+### D_min, dmin_f99_c1.6
+
+| layout | 25 | 50 | 100 | 200 | 400 |
+|---|---|---|---|---|---|
+| compact | 1 | 1 | 1 | 1 | 1 |
+| wide | 1 | 1 | 1 | 1 | 2 |
+| split | 1 | 1 | 1 | 1 | 1 |
+| outlier_rich | 1 | 1 | 1 | 1 | 2 | 
+
+### D_min, dmin_f99_c2.0
+
+| layout | 25 | 50 | 100 | 200 | 400 |
+|---|---|---|---|---|---|
+| compact | 1 | 1 | 1 | 1 | 1 |
+| wide | 1 | 1 | 1 | 1 | 2 |
+| split | 1 | 1 | 1 | 1 | 2 |
+| outlier_rich | 1 | 1 | 1 | 1 | 2 | 
+
+### D_min, dmin_f99_k05
+
+| layout | 50 | 100 | 200 | 400 |
+|---|---|---|---|---|
+| compact | 1 | 1 | 1 | 1 |
+| wide | 1 | 1 | 2 | 2-4 |
+| split | 1-4 | 1-2 | 3-4 | 4-5 |
+| outlier_rich | 1 | 2 | 2 | 2 | 
+
+### D_min, dmin_f99_big
+
+| layout | 566 | 800 | 1131 | 1600 | 2263 | 3200 |
+|---|---|---|---|---|---|---|
+| compact | 1 | 1 | none on grid | none on grid | none on grid | none on grid |
+| wide | 2-3 | 3 | none on grid | none on grid | none on grid | none on grid | 
+
+### D_min, dmin_f99_big_dense
+
+| layout | 566 | 800 |
+|---|---|---|
+| wide | 2-3 | 4-5 | 
+
+### D_min, dmin_f99_big_loose
+
+| layout | 566 | 800 |
+|---|---|---|
+| wide | 2-3 | 3 | 
+
+### Zones, dmin_f99_hold: 0 cells where more dogs did worse
+
+(no rows) 
+
+### Zones, dmin_f99_hold_spacing: 1 cells where more dogs did worse
+
+| method | layout | n | d | zone | success_rate | median_finish | fastest_d | fastest_finish |
+|---|---|---|---|---|---|---|---|---|
+| strombom_multi | outlier_rich | 200 | 4 | unreliable_dip | 0.81 | 423.0 | 24 | 412.0 | 
+
+### Views: sensing range (no sharing), base row = range 0 (global)
+
+| row | split N=100 | split N=200 | split N=50 | wide N=100 | wide N=200 | wide N=50 |
+|---|---|---|---|---|---|---|
+| sensing_range=0.0 | 1 / 1 | [1] / [1] | 1 / 1 | 1 / 1 | 2 / 2 | 1 / 1 |
+| sensing_range=100.0 | 1 / 1 | [1] / 1-5 | 1 / 1 | 1 / 1 | 2 / 2-3 | 1 / 1 |
+| sensing_range=15.0 | 1 / 1 | [1] / [3] | 1 / 1 | 1 / [6] | 2 / [7] | 1 / none on grid |
+| sensing_range=30.0 | 1 / 1 | [1] / 2-3 | 1 / 1 | 1 / 1 | 2 / 3 | 1 / 1 |
+| sensing_range=45.0 | 1 / 1 | [1] / 3 | 1 / 1 | 1 / 1 | 2 / 3-4 | 1 / 1 |
+| sensing_range=65.0 | 1 / 1 | [1] / 3 | 1 / 1 | 1 / 1 | 2 / 3 | 1 / 1 | 
+
+### Views: sharing at range 65, beside the no-sharing rows of dmin_f99_view_range
+
+| row | split N=100 | split N=200 | split N=50 | wide N=100 | wide N=200 | wide N=50 |
+|---|---|---|---|---|---|---|
+| communication=neighbour | 1 / 1 | [1] / 3 | 1 / 1 | 1 / 1 | 2 / 3 | 1 / 1 |
+| communication=shared | 1 / 1 | [1] / 3 | 1 / 1 | 1 / 1 | 2 / 2 | 1 / 1 | 
+
+### Large N: flock size against the imposed R_f (compact)
+
+| layout | n | d | r_f | extent_over_r_f |
+| compact | 1131 | 1 | 16.71 | 0.59 |
+| compact | 1131 | 2 | 16.71 | 0.54 |
+| compact | 1131 | 3 | 16.71 | 0.53 |
+| compact | 1131 | 4 | 16.71 | 0.52 |
+| compact | 1131 | 6 | 16.71 | 0.52 |
+| compact | 1131 | 8 | 16.71 | 0.52 |
+| compact | 1131 | 12 | 16.71 | 0.51 |
+| compact | 1600 | 1 | 19.88 | 1.11 |
+| compact | 1600 | 2 | 19.88 | 0.96 |
+| compact | 1600 | 3 | 19.88 | 0.89 |
+| compact | 1600 | 4 | 19.88 | 0.87 |
+| compact | 1600 | 6 | 19.88 | 0.85 |
+| compact | 1600 | 8 | 19.88 | 0.84 |
+| compact | 1600 | 12 | 19.88 | 0.84 |
+| compact | 2263 | 1 | 23.64 | 1.18 |
+| compact | 2263 | 2 | 23.64 | 1.06 |
+| compact | 2263 | 3 | 23.64 | 0.99 |
+| compact | 2263 | 4 | 23.64 | 0.94 |
+| compact | 2263 | 6 | 23.64 | 0.89 |
+| compact | 2263 | 8 | 23.64 | 0.88 |
+| compact | 2263 | 12 | 23.64 | 0.85 |
+| compact | 3200 | 1 | 28.11 | 1.18 |
+| compact | 3200 | 2 | 28.11 | 1.11 |
+| compact | 3200 | 3 | 28.11 | 1.06 |
+| compact | 3200 | 4 | 28.11 | 1.02 |
+| compact | 3200 | 6 | 28.11 | 0.98 |
+| compact | 3200 | 8 | 28.11 | 0.96 |
+| compact | 3200 | 12 | 28.11 | 0.93 |
+| compact | 566 | 1 | 11.82 | 0.99 |
+| compact | 566 | 2 | 11.82 | 0.99 |
+| compact | 566 | 3 | 11.82 | 0.99 |
+| compact | 566 | 4 | 11.82 | 0.99 |
+| compact | 566 | 6 | 11.82 | 0.99 |
+| compact | 566 | 8 | 11.82 | 0.99 |
+| compact | 566 | 12 | 11.82 | 0.99 |
+| compact | 800 | 1 | 14.06 | 0.82 |
+| compact | 800 | 2 | 14.06 | 0.81 |
+| compact | 800 | 3 | 14.06 | 0.82 |
+| compact | 800 | 4 | 14.06 | 0.82 |
+| compact | 800 | 6 | 14.06 | 0.82 |
+| compact | 800 | 8 | 14.06 | 0.82 |
+| compact | 800 | 12 | 14.06 | 0.83 |
+

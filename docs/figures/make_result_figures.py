@@ -133,7 +133,7 @@ def fig_heatmaps() -> None:
         t = cells(name)
         for col, layout in enumerate(("wide", "split", "outlier_rich")):
             ax = axes[row, col]
-            part = t[t["layout"] == layout]
+            part = t[(t["layout"] == layout) & t["n"].isin(NS)]  # the sizes both runs have
             ds = sorted(t["d"].unique())
             grid = np.full((len(NS), len(ds)), np.nan)
             reliable = np.zeros_like(grid, dtype=bool)
@@ -857,6 +857,150 @@ def fig_pressure() -> None:
              "stored trial); D = 1, D_min, D_sat, 2 D_sat; successful trials only. D = 1 at N = 400 "
              "never succeeds.", ha="center", fontsize=8, color=MUTED)
     fig.savefig(OUT / "fig34_pressure.png", dpi=150)
+    plt.close(fig)
+
+
+# ---------------------------------------------------------------------------------- figure 35
+def fig_growth_fits() -> None:
+    """D_min against N on the nine sizes (99 percent), with the range each fitted shape allows."""
+    from analysis.growth_fits import consistent_range, interval_of
+
+    runs = (("dmin_f99_m12", "12 drive times"), ("dmin_f99_m6", "6 drive times"))
+    if not have(*[r for r, _ in runs]):
+        return
+    fig, axes = plt.subplots(1, 2, figsize=(11.5, 4.4), sharey=True)
+    ahead = np.array([566, 800, 1131, 1600, 2263, 3200])
+    for ax, (name, title) in zip(axes, runs):
+        g = groups_table(RESULTS / name)
+        for layout, marker in (("wide", "o"), ("outlier_rich", "s")):
+            part = g[g["layout"] == layout].sort_values("n")
+            points = []
+            for _, r in part.iterrows():
+                found = interval_of(float(r["d_min"]), float(r["d_min_low"]))
+                if found is None:
+                    continue
+                points.append((int(r["n"]), found))
+                ax.plot([r["n"], r["n"]], [found[0] + 0.5, found[1] - 0.5], color=LAYOUT_COLOR[layout], lw=3, alpha=0.5)
+                ax.plot(r["n"], found[1] - 0.5, marker=marker, color=LAYOUT_COLOR[layout], ms=5, ls="")
+            for shape, ls in (("power law", "--"), ("saturating", ":")):
+                lo, hi = zip(*[consistent_range(points, shape, int(n)) for n in ahead])
+                ax.fill_between(ahead, lo, hi, color=LAYOUT_COLOR[layout], alpha=0.08 if ls == ":" else 0.15)
+                ax.plot(ahead, hi, color=LAYOUT_COLOR[layout], lw=0.9, ls=ls)
+            ax.plot([], [], color=LAYOUT_COLOR[layout], marker=marker, ls="", label=layout)
+        ax.axvline(600, color=MUTED, lw=0.8)
+        ax.text(610, 0.85, "calibration edge", fontsize=8, color=MUTED)
+        ax.set_xscale("log")
+        ax.set_yscale("log")
+        ax.set_xticks([25, 50, 100, 200, 400, 800, 1600, 3200])
+        ax.set_xticklabels([25, 50, 100, 200, 400, 800, 1600, 3200])
+        ax.set_yticks([1, 2, 3, 5, 10, 20])
+        ax.set_yticklabels([1, 2, 3, 5, 10, 20])
+        ax.minorticks_off()
+        ax.set_xlabel("flock size N")
+        ax.set_title(f"D_min, 99 percent rule, {title}", fontsize=10)
+        ax.grid(color=GRID, lw=0.6)
+    axes[0].set_ylabel("dogs")
+    axes[0].plot([], [], color=INK, ls="--", lw=0.9, label="power law: largest allowed")
+    axes[0].plot([], [], color=INK, ls=":", lw=0.9, label="saturating: largest allowed")
+    axes[0].legend(frameon=False, fontsize=8, loc="upper left")
+    fig.tight_layout(rect=(0, 0.05, 1, 1))
+    fig.text(0.5, 0.01, "Bars: the D_min bracket at each N (marker at the reliable D). Shaded beyond N = 566: the "
+             "range of D allowed by every curve of each shape that passes through all the brackets.",
+             ha="center", fontsize=8, color=MUTED)
+    fig.savefig(OUT / "fig35_growth_fits.png", dpi=150)
+    plt.close(fig)
+
+
+# ---------------------------------------------------------------------------------- figure 36
+def fig_spacing() -> None:
+    """Holding task: success against D with point dogs and with dogs that take up room."""
+    if not have("dmin_f99_hold", "dmin_f99_hold_spacing"):
+        return
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.2), sharey=True)
+    for ax, layout in zip(axes, ("wide", "outlier_rich")):
+        for name, ls, label in (("dmin_f99_hold", ":", "point dogs"), ("dmin_f99_hold_spacing", "-", "dogs 2 apart")):
+            t = cells(name)
+            part = t[(t["layout"] == layout) & (t["n"] == 400)].sort_values("d")
+            rate_line(ax, part, BLUE if ls == "-" else MUTED, "o", ls=ls, label=label)
+        ax.axhline(0.9, color=INK, lw=0.8, ls="--")
+        ax.axvspan(10, 12, color=ORANGE, alpha=0.12)
+        ax.text(10.2, 0.05, "drive-arc\ncapacity", fontsize=8, color=ORANGE)
+        ax.set_xscale("log")
+        ax.set_xticks(D_TICKS)
+        ax.set_xticklabels(D_TICKS)
+        ax.minorticks_off()
+        ax.set_ylim(0, 1.02)
+        ax.set_xlabel("dogs D")
+        ax.set_title(f"{layout}, N = 400, holding task", fontsize=10)
+        ax.grid(color=GRID, lw=0.6)
+    axes[0].set_ylabel("success rate (99 percent held for one drive time)")
+    axes[0].legend(frameon=False, fontsize=8, loc="center right")
+    fig.tight_layout(rect=(0, 0.07, 1, 1))
+    fig.text(0.5, 0.01, "dmin_f99_hold and dmin_f99_hold_spacing, 6 drive times. Dashed: theta = 0.90. Shaded: dogs the "
+             "drive arc holds at 2 apart (N = 200 to 400).\nHollow: fewer than 30 trials.",
+             ha="center", fontsize=8, color=MUTED)
+    fig.savefig(OUT / "fig36_spacing.png", dpi=150)
+    plt.close(fig)
+
+
+# ---------------------------------------------------------------------------------- figure 37
+def fig_view() -> None:
+    """D_min against what a dog sees: sensing range, and sharing at range 65."""
+    if not have("dmin_f99_view_range", "dmin_f99_view_comm"):
+        return
+    from analysis.dmin_tables import bracket
+
+    g = groups_table(RESULTS / "dmin_f99_view_range")
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.2))
+    ranges = [15.0, 30.0, 45.0, 65.0, 100.0]
+    for layout, marker in (("wide", "o"), ("split", "s")):
+        for n, shade in ((100, 0.5), (200, 1.0)):
+            color = LAYOUT_COLOR[layout]
+            dx = {("wide", 100): -1.5, ("wide", 200): -0.5, ("split", 100): 0.5, ("split", 200): 1.5}[(layout, n)]
+            for r_ in ranges:
+                row = g[(g["layout"] == layout) & (g["n"] == n) & (g["factors"] == f"sensing_range={r_}")]
+                if row.empty:
+                    continue
+                b = bracket(row.iloc[0])
+                if b:
+                    axes[0].plot([r_ + dx] * 2, b, color=color, alpha=shade, lw=3)
+                    axes[0].plot(r_ + dx, b[1], marker=marker, color=color, alpha=shade, ls="")
+                elif pd.notna(row.iloc[0]["d_min_low"]):
+                    axes[0].plot(r_ + dx, float(row.iloc[0]["d_min_low"]), marker="^", ls="", mfc=SURFACE,
+                                 mec=color, alpha=shade)
+            axes[0].plot([], [], marker=marker, color=color, alpha=shade, ls="", label=f"{layout}, N = {n}")
+    axes[0].set_xlabel("sensing range of each dog (no sharing)")
+    axes[0].set_ylabel("D_min (bar: bracket; hollow: lower bound)")
+    axes[0].set_title("a narrower view needs more dogs", fontsize=10)
+    axes[0].axvline(65, color=MUTED, lw=0.8, ls="--")
+    axes[0].text(66, 0.6, "r_s", fontsize=8, color=MUTED)
+    axes[0].set_ylim(0, 8)
+    axes[0].grid(color=GRID, lw=0.6)
+    axes[0].legend(frameon=False, fontsize=8)
+    c = cells("dmin_f99_view_comm")
+    r = cells("dmin_f99_view_range")
+    ax = axes[1]
+    for label, t, ls in (("no sharing", r[r["factors"] == "sensing_range=65.0"], ":"),
+                         ("with dogs in range", c[c["factors"] == "communication=neighbour"], "--"),
+                         ("whole team", c[c["factors"] == "communication=shared"], "-"),
+                         ("global view", r[r["factors"] == "sensing_range=0.0"], "-")):
+        part = t[(t["layout"] == "wide") & (t["n"] == 200)].sort_values("d")
+        rate_line(ax, part, INK if label == "global view" else BLUE, "o", ls=ls, label=label)
+    ax.axhline(0.9, color=INK, lw=0.8, ls="--")
+    ax.set_xscale("log")
+    ax.set_xticks([1, 2, 3, 4, 6, 8, 12, 16])
+    ax.set_xticklabels([1, 2, 3, 4, 6, 8, 12, 16])
+    ax.minorticks_off()
+    ax.set_ylim(0, 1.02)
+    ax.set_xlabel("dogs D")
+    ax.set_ylabel("success rate")
+    ax.set_title("wide, N = 200, range 65: sharing", fontsize=10)
+    ax.grid(color=GRID, lw=0.6)
+    ax.legend(frameon=False, fontsize=8, loc="lower right")
+    fig.tight_layout(rect=(0, 0.05, 1, 1))
+    fig.text(0.5, 0.01, "dmin_f99_view_range and dmin_f99_view_comm (99 percent rule, 6 drive times). A dog that sees no "
+             "sheep walks to the flock centre it last knew.", ha="center", fontsize=8, color=MUTED)
+    fig.savefig(OUT / "fig37_view.png", dpi=150)
     plt.close(fig)
 
 

@@ -1,6 +1,8 @@
 """Drive task: herd every sheep into a circular goal.
 
-Success rule (``is_success``): every sheep is inside the goal disk. This is a
+Success rule (``is_success``): every sheep is inside the goal disk (or the share
+``success_fraction``), and with a hold time it has stayed inside without a break for
+``hold_ticks`` ticks. This is a
 HerdSim choice and differs from both papers. Strombom 2014 ends the task when
 the flock's centre of mass (GCM) is within a certain distance of the target
 (p.7, distance unstated); Kubo 2022 asks for the flock centre inside the target
@@ -52,11 +54,20 @@ REQUIRED_KEYS = (
     "dog_start_spacing",
     # Read only at setup time (field_size), but part of the setup record.
     "field_clearance",
+    "hold_ticks",
+    "hold_withdraw",
+    "dog_spacing",
+    "sensing_range",
+    "communication",
+    "drive_offset_cap",
 )
 
 # Fractions of the flock whose first full arrival is recorded in every trial row, so a
 # weaker success rule than "every sheep" (both papers use one) can be read afterwards.
 ARRIVAL_FRACTIONS = (0.90, 0.95, 0.99)
+
+# What dogs share when they see only part of the flock (collect_drive_multi).
+COMMUNICATION = ("none", "neighbour", "shared")
 
 
 def check(config: dict[str, Any]) -> None:
@@ -65,6 +76,19 @@ def check(config: dict[str, Any]) -> None:
         raise ValueError(f"dog_start {config['dog_start']!r} not in {DOG_STARTS}")
     if config["initial_layout"] not in LAYOUTS:
         raise ValueError(f"initial_layout {config['initial_layout']!r} not in {LAYOUTS}")
+    if int(config["hold_ticks"]) < 0 or float(config["dog_spacing"]) < 0.0:
+        raise ValueError("hold_ticks and dog_spacing must not be negative")
+    if config["hold_withdraw"] and config["dog_controller"] != "collect_drive_multi":
+        raise ValueError("hold_withdraw is a step of the collect_drive_multi team rule only")
+    if float(config["dog_spacing"]) > 0.0 and config["dog_controller"] == "kubo_forces":
+        raise ValueError("dog_spacing is not for the Kubo dogs, which repel each other already")
+    if config["communication"] not in COMMUNICATION:
+        raise ValueError(f"communication {config['communication']!r} not in {COMMUNICATION}")
+    if float(config["sensing_range"]) > 0.0:
+        if config["dog_controller"] != "collect_drive_multi":
+            raise ValueError("sensing_range is a setting of the collect_drive_multi team rule only")
+        if config["hold_withdraw"]:
+            raise ValueError("hold_withdraw judges the goal from the true flock; not with sensing")
 
 
 def row_columns(config: dict[str, Any], history: pd.DataFrame) -> dict[str, Any]:
@@ -107,6 +131,7 @@ def create_world(config: dict[str, Any]) -> World:
             center=np.asarray(config["goal_center"], dtype=float),
             radius=float(config["goal_radius"]),
             required_fraction=float(config["success_fraction"]),
+            hold_ticks=int(config["hold_ticks"]),
         ),
     )
 
@@ -120,8 +145,17 @@ def initial_positions(
 
 def is_success(state: SimulationState) -> bool:
     """Every sheep is inside the goal, or the share ``success_fraction`` of them when that is
-    below 1 (HerdSim rule; see the module docstring)."""
-    return state.world.goal.reached(state.sheep_positions)
+    below 1, and has been for the goal's ``hold_ticks`` (HerdSim rule; see the module docstring).
+
+    The tick at which the goal was last reached is kept in ``state.metadata``; leaving the goal
+    clears it, so the hold has to start again.
+    """
+    goal = state.world.goal
+    if not goal.reached(state.sheep_positions):
+        state.metadata.pop("reached_since", None)
+        return False
+    since = state.metadata.setdefault("reached_since", state.tick)
+    return state.tick - since >= goal.hold_ticks
 
 
 def build_setup(
@@ -174,6 +208,11 @@ def build_setup(
         "dog_start_gap": float(s["dog_start_gap"]),
         "dog_start_spacing": float(s["dog_start_spacing"]),
         "field_clearance": float(s["field_clearance"]),
+        "hold_withdraw": bool(s["hold_withdraw"]),
+        "dog_spacing": float(s["dog_spacing"]),
+        "sensing_range": float(s["sensing_range"]),
+        "communication": str(s["communication"]),
+        "drive_offset_cap": float(s["drive_offset_cap"]),
     }
     sizing = {**setup, "n_sheep": n_sheep, "n_shepherds": max_dogs}
     reach = max(layout_extent({**sizing, "initial_layout": name}) for name in layouts)

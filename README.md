@@ -27,6 +27,8 @@ That raises a fundamental question in collective animal behavior and autonomous 
 - [Agent Models and Multi-Dog Coordination](#agent-models-and-multi-dog-coordination)
 - [What the Frontier Rules Decide](#what-the-frontier-rules-decide)
 - [Sensitivity and Robustness](#sensitivity-and-robustness)
+- [Follow-up Settings](#follow-up-settings)
+- [Why the Grid Stops Where It Does](#why-the-grid-stops-where-it-does)
 - [Quick Start](#quick-start)
 - [What a Run Writes](#what-a-run-writes)
 - [Project Architecture](#project-architecture)
@@ -112,11 +114,42 @@ HerdSim records 19 physical measurements on every single tick of every simulatio
 After D_min, a follow-up analysis of the 99% runs (no new campaigns) asked from which team size an extra dog stops helping (D_sat), what dogs beyond it cost, and whether they put more pressure on the sheep:
 - **Extra dogs beyond D_sat are pure cost**: every reliable team larger than D_sat finishes in 0.90 to 1.02 of the D_sat time, while total dog time grows in proportion to the number of dogs. On a compact flock, 24 dogs spend about 24 times the dog time of one dog for the same drive.
 - **More dogs do not mean more pressure per sheep**: in 164 replayed trials, the seconds each sheep spends fleeing a dog fall from D_min to D_sat and then stay level. More of the flock is in flight at a given moment, but the drive is shorter. Part of this is the model: the push of several dogs is capped at the push of one.
-- **No team size made the task fail under the 99% rule**: none of the eleven 99% folders has a team size that drops back below the reliability threshold after reaching it, up to 24 dogs. Extra dogs only made `split` flocks at N = 200 slower (about 700 s from D = 8 against 365 s with 2 dogs).
-- **D_sat is still a range on a third of the scattered curves**, because these runs did not spend seeds on the finish-time comparisons that decide it. The next phase fills them in.
+- **Almost no team size made the task fail under the 99% rule**: on the original five flock sizes, none of the eleven 99% folders has a team size that drops back below the reliability threshold after reaching it, up to 24 dogs. On the denser grid of finding 8 one such dip appears (`split` N = 141, D = 4: 0.80). Extra dogs make `split` flocks slower at 12 drive times at every N from 200 to 566 (for example about 700 s from D = 8 against 365 s with 2 dogs at N = 200).
+- **D_sat was a range on a third of the scattered curves**, because these runs did not spend seeds on the finish-time comparisons that decide it. The follow-up runs fill them in (finding 8).
 
 ![Cost of dogs beyond D_sat](docs/figures/fig33_effort.png)
 **Figure 10:** Dogs beyond D_sat at 6 drive times (99% rule). Left: finish time relative to D_sat stays flat. Right: dog time grows along the line D / D_sat. Details and the pressure replay are in section 3.7 of the [report](docs/report/d_min_report.md).
+
+
+### 8. A denser grid: how fast the team grows, and what cannot be told yet
+Four flock sizes were added (71, 141, 283, 566), so every size above 50 is a step of sqrt(2), up to the largest size at which the model's flock still has a size of its own (about 600):
+- **The growth is now pinned down**: the log-log slope of D_min against N is 0.27 to 0.38 at 12 drive times and 0.38 to 0.61 at 6, against 0.5 for targets that do not flock.
+- **D_sat grows about twice as fast as D_min** (0.70 to 0.91 on `wide`: 1, 1, 1, 2, 3, 3, 4, 5 dogs from N = 25 to 400), so the team that is as fast as possible pulls away from the team that is merely reliable.
+- **Steady growth and levelling off fit equally well up to N = 566**: every curve of either shape that passes through the data allows between 1.5 and 6.7 dogs at N = 1600.
+
+![D_min on nine sizes](docs/figures/fig35_growth_fits.png)
+**Figure 11:** D_min against N on nine sizes, and the range each fitted shape allows beyond N = 566.
+
+### 9. Which part of the team rule matters
+A team of independent paper shepherds (each dog runs the one-dog rule, with no team layer) reaches a reliable team on every scattered layout up to N = 200, where FAT fails, and fails at N = 400, where the team rule needs 2 to 3 dogs. So the paper's collect/drive switch does the work up to N = 200, and the team layer is what makes N = 400 possible. In the Kubo model, where more dogs do speed up a compact flock, most of the gain comes by 10 dogs (115 s with one, 29 s with ten, 25 s with 24).
+
+### 10. When more dogs make it worse
+Two changes look for harm from extra dogs:
+- **Holding the flock in the goal** for one drive time works from N = 100 when the dogs back off beyond the sheep's reaction distance (without that, the team drives the flock straight through the goal). At N <= 50 no team holds: a dog backing off stays within 65 m for about 40 s, long enough to push the flock out of a small goal.
+- **Dogs that take up room** (never closer than 2 m): on `outlier_rich` N = 400 every team from 9 to 24 dogs is decided unreliable, while 3 to 6 dogs succeed in 93 to 94% of trials. On `wide` the extra dogs simply stand back and do no harm. Point dogs show no decided harm up to 24.
+
+![Holding with point dogs and with dogs 2 m apart](docs/figures/fig36_spacing.png)
+**Figure 12:** Holding task at N = 400. On `outlier_rich`, success falls from D = 9 once dogs take up room.
+
+### 11. Cohesion and what a dog sees
+- **Cohesion**: a tighter flock (attraction weight 1.3 to 2.0 instead of 1.05) saves at most one dog. A looser one (each sheep drawn to half the flock) steepens the growth to a slope of 0.40 to 0.70 and makes split flocks much harder. Weaker flocks than that do not hold together under one driving dog.
+- **Sensing**: when each dog sees only the sheep within 30 to 100 m, a flock of 200 needs about one more dog; at 15 m extra dogs cannot make up for it. Sharing what all dogs see buys the lost dog back; sharing only with nearby dogs does not.
+
+![D_min against sensing range, and sharing](docs/figures/fig37_view.png)
+**Figure 13:** Left: D_min against each dog's sensing range. Right: success at range 65 with and without sharing.
+
+### 12. A limit of the paper's drive rule
+The paper places the driving dog r_a sqrt(N) behind the flock. That distance passes the sheep's reaction distance (65 m) at N = (65 / 2)^2, about 1056. Above it the dogs stand where few sheep feel them, and no team of any size drives the flock (checked up to N = 3200 with the flock density held at that of N = 566). Below it, N = 566 and 800 behave as the smaller flocks do. With the drive point capped at 63 m (a labelled variant, not the paper's rule), large flocks can be driven, and a scattered one then needs 3 dogs at N = 800, 5 to 9 at 1131 and more than 12 at 1600, while a compact one needs 1, 1 and 2. The imposed flock size is also looser than the flock the dogs actually drive (0.5 to 0.8 of it), so these numbers hold under both choices.
 
 ---
 
@@ -152,6 +185,17 @@ Across 23 research protocols, HerdSim completed **164,740 simulation trials** (2
 | **Sensitivity Protocols** | 14 protocols (7 pairs: strict + 99%) | 69,630 | 805 | Sweeps dog release points, dog speeds, field-matched GPS sheep parameters, start gaps, and goal radius at $6\times$ drive time. |
 | **Total** | **23 Protocols** | **164,740** | **2,291** | **Complete empirical mapping (~7.0 hours wall-clock time)** |
 
+The follow-up campaigns (findings 8 to 12) added 14 protocols and resumed the three 99% grids, another **162,130 trials** with zero errors (37 protocols and 326,870 trials in all):
+
+| Campaign Group | Protocols | Trials | Core Research Objective |
+| :--- | :--- | :---: | :--- |
+| **Denser grid and finish times** | `dmin_f99_m12`, `dmin_f99_m6`, `dmin_f99_m3` (resumed) | +38,770 | Flock sizes 71, 141, 283, 566 added; finish-time comparisons decided, so D_sat is known. |
+| **Parts of the team rule** | `dmin_f99_indep`, `dmin_f99_kubo` | 16,250 | Independent paper shepherds; the Kubo model with up to 24 dogs. |
+| **Too many dogs** | `dmin_f99_hold`, `dmin_f99_hold_spacing` | 28,210 | Holding the flock in the goal; dogs that take up room. |
+| **Cohesion** | `dmin_f99_c1.3`, `_c1.6`, `_c2.0`, `dmin_f99_k05` | 44,040 | Stronger and weaker cohesion between sheep. |
+| **What a dog sees** | `dmin_f99_view_range`, `dmin_f99_view_comm` | 27,930 | Sensing range per dog, and sharing what dogs see. |
+| **Large N** | `dmin_f99_big`, `_dense`, `_loose`, `_cap` | 6,930 | Above the model's calibration edge, at an imposed density; a capped drive point. |
+
 ### Adaptive Execution Mechanics
 
 Four automated mechanisms decide where simulations are needed:
@@ -163,25 +207,25 @@ Each cell begins with a small batch of 10 seeds. After each batch, we calculate 
 - **Borderline cases**: Only cells hovering right around the 90% threshold receive additional batches of 10 seeds, up to a cap of 200 seeds.
 
 ![Sequential Refinement and Early Stopping](docs/figures/fig_adaptive_1_refinement.png)
-**Figure 11:** Sequential refinement. Obvious failures stop after 10–20 seeds; clear successes stop after 60 consecutive wins; only borderline cells continue receiving seeds up to the 200-seed cap.
+**Figure 14:** Sequential refinement. Obvious failures stop after 10–20 seeds; clear successes stop after 60 consecutive wins; only borderline cells continue receiving seeds up to the 200-seed cap.
 
 #### 2. Midpoint densification
 If adjacent tested dog counts jump across a behavioral boundary—for instance, if $D = 2$ fails and $D = 4$ succeeds—the engine automatically inserts the midpoint ($D = 3$) into the next round. This pinpoints the exact threshold $D_{\min}$ without having to test every single number up front.
 
 ![Adaptive Grid Densification](docs/figures/fig_adaptive_2_densification.png)
-**Figure 12:** Midpoint densification. A detected zone transition between *D* = 2 and *D* = 4 automatically schedules *D* = 3 for evaluation in the following round.
+**Figure 15:** Midpoint densification. A detected zone transition between *D* = 2 and *D* = 4 automatically schedules *D* = 3 for evaluation in the following round.
 
 #### 3. Saturation and copycat pruning
 Once a team size reaches peak speed (*D*<sub>sat</sub>), if testing even larger dog packs shows that additional dogs simply copy existing dogs (mean `dog_overlap` $\ge 0.90$) without making the drive any faster, the engine marks the cell as **pruned** and stops running further seeds.
 
 ![Saturation and Overlap Pruning](docs/figures/fig_adaptive_3_pruning.png)
-**Figure 13:** Saturation pruning. Once completion speed plateaus, cells exhibiting high dog overlap (&ge; 0.90) are pruned to avoid wasted compute.
+**Figure 16:** Saturation pruning. Once completion speed plateaus, cells exhibiting high dog overlap (&ge; 0.90) are pruned to avoid wasted compute.
 
 #### 4. Paired common random numbers
 Every seed $i$ uses `master_seed + i` (e.g., $2026 + i$). The initial flock placement and the sheep's random choices are generated from dedicated, isolated random streams. This guarantees that when comparing $D = 2$ dogs against $D = 4$ dogs, both teams face the **exact same starting pasture and the exact same sheep reactions**, eliminating random pasture luck from the comparison.
 
 ![Deterministic Paired Comparisons](docs/figures/fig_adaptive_4_paired_seeds.png)
-**Figure 14:** Paired random seeds. Seed 2026 generates the identical initial sheep coordinates across all tested dog counts *D*, isolating the true algorithmic effect of team size.
+**Figure 17:** Paired random seeds. Seed 2026 generates the identical initial sheep coordinates across all tested dog counts *D*, isolating the true algorithmic effect of team size.
 
 #### 5. Crash-safe interrupt and resume
 Trials are appended to disk immediately upon completion (`trials.jsonl`). Campaigns can be safely stopped (`Ctrl+C` / `SIGINT`) and resumed at any time without lost progress; directory locks prevent multiple processes from corrupting files.
@@ -197,7 +241,7 @@ A common flaw in animal and robotic flocking simulations is keeping the arena si
 HerdSim enforces **scale invariance** by anchoring all arena dimensions to the **calibrated flock radius $R_f(N)$**: the natural steady-state radius of an $N$-sheep flock when driven by a single dog.
 
 ![Task geometry and physical scaling](docs/figures/fig6_task_geometry.png)
-**Figure 15:** Task geometry drawn to scale. Left: Arena layout at *N* = 200. Middle: How drive distance is scaled. Right: Calibrated flock radius *R*<sub>f</sub> and goal radius across flock sizes.
+**Figure 18:** Task geometry drawn to scale. Left: Arena layout at *N* = 200. Middle: How drive distance is scaled. Right: Calibrated flock radius *R*<sub>f</sub> and goal radius across flock sizes.
 
 | Parameter | Mathematical Rule | Physical Meaning |
 | :--- | :--- | :--- |
@@ -254,7 +298,7 @@ A common question in scaling research is: *Why test flocks from 25 to 400 sheep,
 To study the transition from gathering stragglers to driving the flock, HerdSim provides four initial pasture layouts:
 
 ![The four starting flock layouts at N = 200](docs/figures/fig7_layouts.png)
-**Figure 16:** The four initial flock layouts evaluated at *N* = 200 with *D* = 4 dogs (drawn to identical scale). The dashed circle marks the analytical collection boundary *f*(*N*) = *r*<sub>a</sub> &middot; *N*<sup>2/3</sup>. Any sheep outside this boundary triggers active outlier collection.
+**Figure 19:** The four initial flock layouts evaluated at *N* = 200 with *D* = 4 dogs (drawn to identical scale). The dashed circle marks the analytical collection boundary *f*(*N*) = *r*<sub>a</sub> &middot; *N*<sup>2/3</sup>. Any sheep outside this boundary triggers active outlier collection.
 
 1. **`compact`**: Flocks sampled from a tight 2D Gaussian ($\sigma = 0.5 \cdot R_f$). All sheep start close together well within $f(N)$; dogs immediately enter drive mode.
 2. **`wide`**: Flocks sampled from a broad Gaussian ($\sigma = 0.5 \cdot 2 N^{2/3}$). Sheep are scattered over a wide area, requiring extensive perimeter rounding.
@@ -269,7 +313,7 @@ Dogs begin 30 meters behind the flock, arranged in one of three release geometri
 - **`handler`**: All dogs start from a single coordinate directly behind the flock, mimicking a human handler releasing dogs from a single post.
 
 ![Shepherd release configurations](docs/figures/fig8_dog_starts.png)
-**Figure 17:** Shepherd release geometries. Top: Default concentric arcs for *D* = 1 to 64 behind an *N* = 100 flock. Bottom: Direct comparison of arcs, ring, and handler release at *N* = 200 with *D* = 8 dogs.
+**Figure 20:** Shepherd release geometries. Top: Default concentric arcs for *D* = 1 to 64 behind an *N* = 100 flock. Bottom: Direct comparison of arcs, ring, and handler release at *N* = 200 with *D* = 8 dogs.
 
 ---
 
@@ -278,7 +322,7 @@ Dogs begin 30 meters behind the flock, arranged in one of three release geometri
 HerdSim simulates individual agent dynamics based on peer-reviewed biology literature, extended with multi-agent coordination.
 
 ![Multi-dog coordination mechanisms](docs/figures/fig3_team_rule.png)
-**Figure 18:** Coordinated multi-dog herding in strombom_multi. Top row: Dispersed collection assignment. The *D* farthest outliers are matched 1-to-1 to the *D* dogs via minimum-distance Hungarian matching. Bottom row: Cohesive parallel driving arc. Dogs spread evenly across an arc behind the flock, maintaining angular station order to prevent crossing paths.
+**Figure 21:** Coordinated multi-dog herding in strombom_multi. Top row: Dispersed collection assignment. The *D* farthest outliers are matched 1-to-1 to the *D* dogs via minimum-distance Hungarian matching. Bottom row: Cohesive parallel driving arc. Dogs spread evenly across an arc behind the flock, maintaining angular station order to prevent crossing paths.
 
 ### 1. How Sheep Behave ([Strömbom et al. 2014](https://doi.org/10.1098/rsif.2014.0719))
 
@@ -397,7 +441,7 @@ An uncoordinated ablation baseline (`dog_controller="fat"`) designed to test whe
 - **Result**: Every dog picks the exact same sheep. The dogs collapse into a clump, acting like a single dog, and fail to gather dispersed flocks at $N \ge 200$.
 
 ![Uncoordinated baseline FAT](docs/figures/fig4_fat.png)
-**Figure 19:** FAT baseline. Left: Chasing geometry. Right: Without target assignment, all dogs clump behind the same outlier, exhibiting high overlap.
+**Figure 22:** FAT baseline. Left: Chasing geometry. Right: Without target assignment, all dogs clump behind the same outlier, exhibiting high overlap.
 
 #### Continuous Potential Force Model: `kubo` ([Kubo et al. 2022](https://doi.org/10.1007/s10015-021-00726-7))
 
@@ -406,7 +450,7 @@ A cross-check using a fundamentally different physics model based on continuous 
 - **Kubo Dogs**: Guided by four continuous potential fields: pulled toward the farthest sheep, repelled when too close to that sheep ($1/r^3$), repelled away from the goal perimeter, and **strongly repelled from other dogs** ($1/r^3$, weight $K_{f4} = 3000$). This mutual dog repulsion acts like like-charged magnets: it naturally fans shepherds out along the flock boundary without needing any centralized coordinator or assignment algorithm.
 
 ![Kubo continuous force model](docs/figures/fig5_kubo.png)
-**Figure 20:** The Kubo et al. (2022) model. Left: Forces on a sheep. Middle: Forces on a dog. Right: Simulation snapshot showing inter-dog repulsion dispersing shepherds around the flock.
+**Figure 23:** The Kubo et al. (2022) model. Left: Forces on a sheep. Middle: Forces on a dog. Right: Simulation snapshot showing inter-dog repulsion dispersing shepherds around the flock.
 
 **Experimental Setup and Why Kubo Requires Specific Conditions:**
 1. **Starting Layout (`compact` only)**:
@@ -445,7 +489,7 @@ Statistical classifications are managed by [`analysis/frontier.py`](analysis/fro
 ### Behavioral Zones
 
 ![Behavioral zones and frontier classification](docs/figures/def_D_zones.png)
-**Figure 21:** Classification of the dog count axis into behavioral zones based on reliability testing and paired bootstrap speed comparisons.
+**Figure 24:** Classification of the dog count axis into behavioral zones based on reliability testing and paired bootstrap speed comparisons.
 
 - `too_few`: Unreliable, below $D_{\min}$.
 - `improving`: Reliable, below *D*<sub>sat</sub>; adding dogs provides meaningful speedups.
@@ -461,7 +505,7 @@ Statistical classifications are managed by [`analysis/frontier.py`](analysis/fro
 To verify that findings reflect real collective behavior rather than arbitrary simulation choices, HerdSim executed systematic sensitivity sweeps across 14 protocols (69,630 trials) on a shared benchmark grid ($N \in \{100, 200, 400\}$, `wide` and `outlier_rich` layouts at $6\times$ drive times).
 
 ![Sensitivity of D_min across experimental variations](docs/figures/fig24_sensitivity.png)
-**Figure 22:** Heatmap of minimum team size *D*<sub>min</sub> across experimental variants. The horizontal dividing line separates strict 100% containment (top) from 99% arrival (bottom). Darker shading indicates more dogs needed; hatched cells ("none") indicate no tested team size reached 90% reliability.
+**Figure 25:** Heatmap of minimum team size *D*<sub>min</sub> across experimental variants. The horizontal dividing line separates strict 100% containment (top) from 99% arrival (bottom). Darker shading indicates more dogs needed; hatched cells ("none") indicate no tested team size reached 90% reliability.
 
 ### Understanding the Variants (Vertical Axis)
 
@@ -485,6 +529,69 @@ Each horizontal row in the heatmap tests a specific experimental variation again
   - **Bottom Half (99% Arrival Rule)**: Exceptionally solid and consistent. Across almost all variants (GPS parameters, handler start, ring start, gap 15, gap 60, dog speed 1.15), the required team size $D_{\min}$ **remains identical within 1 dog** of the baseline!
 - **The Only Parameter That Fundamentally Changes $D_{\min}$**:
   - **`goal 1.5 R_f`** is the single variant that significantly raises $D_{\min}$ across both rules. Why? Because squeezing a flock into a pen with radius $1.5 R_f$ means the flock must be physically compressed below its natural steady-state density, requiring substantially more dogs to maintain tight perimeter pressure.
+
+---
+
+## Follow-up Settings
+
+The follow-up campaigns (findings 8 to 12) use these settings of `protocols/configs/canonical.yaml`. Each is off by default, and at its default it leaves the trial and the physics hash of every earlier folder unchanged.
+
+| Setting | Default | What it does | Used by |
+|---|---|---|---|
+| `hold_drive_multiple` | 0 | the goal counts only after the required share has stayed inside this many drive times | `dmin_f99_hold`, `dmin_f99_hold_spacing` |
+| `hold_withdraw` | false | while the goal is reached, the dogs back off to 65 + 2 m beyond the farthest sheep, so the flock grazes | same |
+| `dog_spacing` | 0 | no dog steps to within this distance of another; a dog already that close walks away (dogs move one after another) | `dmin_f99_hold_spacing` |
+| `sensing_range` | 0 | each dog knows only the sheep within this range (0: every sheep) | `dmin_f99_view_range` |
+| `communication` | none | with a sensing range: also what the dogs in range see (`neighbour`) or what all dogs see (`shared`) | `dmin_f99_view_comm` |
+| `impose_radius_above` | 0 | above this N the flock radius is not calibrated but imposed at the density of that N | `dmin_f99_big*` |
+| `imposed_radius_scale` | 1 | scales the imposed radius (a density sweep); one protocol per value, since calibration runs once per protocol | `dmin_f99_big_dense`, `_loose` |
+| `drive_offset_cap` | 0 | caps the paper's drive distance r_a sqrt(N), a labelled variant of the rule | `dmin_f99_big_cap` |
+
+Method choices: `independent` (each dog an independent copy of the paper shepherd, no team layer) in `dmin_f99_indep`; the sheep attraction weight `c` and the neighbour count `n_neighbors` as method parameters in `dmin_f99_c1.3`, `_c1.6`, `_c2.0` and `dmin_f99_k05`. The calibration dog is always the paper's dog with the full view, whatever these settings say, so every protocol's task is sized from the same reference flock.
+
+Two diagnostic replays (they rerun stored trials and refuse to go on if a replay differs from its stored trial): `uv run cli/pressure_replay.py` (time each sheep spends in flight) and `uv run cli/split_diagnostic.py` (why more dogs slow the split layout).
+
+---
+
+## Why the Grid Stops Where It Does
+
+Every run stops at some flock size, some number of dogs and some number of seeds. These are the reasons, so the limits of each result can be read off directly.
+
+### Flock size N
+
+| Runs | N | Why it starts and stops there |
+| :--- | :--- | :--- |
+| Main grids, sensitivity, FAT | 25 to 400 | At N <= 50 every layout needs one dog under every deadline, so smaller flocks would only add more ones. 400 was the largest size calibrated in the first study. |
+| 99% grids, resumed | + 71, 141, 283, 566 | Steps of sqrt(2) above N = 50, so every size weighs the same in the growth fits. 566 = 400 sqrt(2) is the last such step inside the model's edge: the flock settles to a size of its own up to N = 600, at 630 a loose start stays 17% larger, at 800 calibration fails. |
+| Kubo | 25 to 100 | The Kubo flock packs to a radius of about 5.8 at any N, so a larger N is not a field flock. |
+| Sensing range | 50 to 200 | At N = 400 the collect distance (109 m) is larger than a 65 m view, so the local rule cannot see what it should collect. |
+| Holding | 25 to 400 | Run in full; at N <= 50 no team holds, for a reason that has nothing to do with team size (finding 10). |
+| Weaker cohesion (0.5N) | 50 to 400 | At N = 25 a sheep drawn to 13 neighbours gives no settled flock. |
+| Large N | 566 to 3200 | Above the edge the radius is imposed at the density of N = 566, in the same sqrt(2) steps. With the paper's rule nothing is driven above N = 1056. In the capped variant N = 2263 and 3200 were dropped after two hours: a wide trial there runs its full 8,796 ticks, and the run would have taken days. The 3200 trials already run are kept as a lower bound. |
+
+### Number of dogs D
+
+| Runs | D | Why |
+| :--- | :--- | :--- |
+| Main grids | 1, 2, 3, 4, 6, 8, 12, 16, 24 | Steps of about 1.5, so every doubling of D has at least two points. 24 because the pilot's 16 might not reach the hardest cells (scattered, N = 400). Afterwards: no curve was still getting faster at 24, and the curves without a D_min have flat or falling success, so a larger D would not have changed any answer. |
+| All runs | + midpoints | Added automatically where the zone changes between two tested D, and next to a cell still open at the seed cap. |
+| Holding, spacing | + 7, 9, 10, 11, 13 | The number of dogs the drive arc holds at 2 m apart is 7, 9, 10, 11, 12 at N = 25 to 400; these values sit around it. The harm found starts at D = 9, inside the grid, so no run past 24 was needed. |
+| Kubo | 1 to 24 | The first run stopped at 10 while the finish time was still falling. |
+| Sensing range | 1 to 16 | D_min is at most 3 at N <= 200 with a full view. |
+| Large N | 1 to 12 | D_min is 2 to 3 at N = 566; a curve that fails at 12 is reported as "none up to 12". |
+
+The largest D sizes the field, so it is part of the physics: raising it always means a new results folder.
+
+### Seeds per cell
+
+- **Batches of 10, cap of 200.** A cell is reliable when its 99% lower bound reaches 0.90, which needs 51 successes in a row (60 trials in batches of 10). A clearly failing cell is decided after 10 to 20 trials.
+- **Why 200**: after 200 seeds a cell is decided only if its observed rate is at least 0.955 or at most 0.835. Doubling to 400 narrows that only to 0.94 and 0.86, so halving the open zone costs about four times the seeds. 388 of the 4,773 cells (8.1%) ended open at the cap; the tables show them as brackets ("2-3") or lower bounds ("[5]"), never as a single number.
+- **Finish times**: D_min runs spend seeds only on reliability. The runs that ask for D_sat also decide the finish-time comparisons (`decide_finish_times: true`), which costs about a third more trials.
+- **Diagnostics**: the pressure and split replays use 12 seeds per cell and give a direction, not a decided value.
+
+### Deadlines and success rule
+
+The main runs use 12, 6 and 3 drive times; a compact flock with one dog needs 1.45 to 1.74. The follow-up runs use 12 drive times where the growth shape is the question and 6 where team size and cost are, and only the 99% success rule: the strict rule is decided by the last sheep (finding 4).
 
 ---
 

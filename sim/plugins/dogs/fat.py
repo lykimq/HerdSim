@@ -31,4 +31,4 @@ def step(state: SimulationState, config: dict[str, Any]) -> SimulationState:
         velocities[i] = step_toward(
             state.shepherd_positions[i], target, state.sheep_positions, config, angles[i]
         )
-    return move_dogs(state, velocities, float(config["dt"]))
+    return move_dogs(state, velocities, float(config["dt"]), config)

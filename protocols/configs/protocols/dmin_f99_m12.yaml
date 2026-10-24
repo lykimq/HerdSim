@@ -12,3 +12,14 @@ output: results/dmin_f99_m12
 extends: dmin_m12.yaml
 
 success_fraction: 0.99
+
+# Resumed on 2026-10-23 with decide_finish_times true (plan design_min_max RQ-A1): the earlier
+# rounds ran with false, so the seeds added after that date go to the finish-time comparisons
+# that decide D_sat, D_best and D_crowd. Reliability decisions already made do not change.
+decide_finish_times: true
+# Flock sizes added on 2026-10-23 (plan design_min_max RQ-E1, RQ-E1b): the log midpoints 71, 141,
+# 283 between 50, 100, 200, 400, and 566 = 400 sqrt(2), the next step of the same spacing. Every
+# one was checked to calibrate cleanly: the six calibration runs agree within 2 percent. At 630
+# one loose-start run stays 17 percent larger and at 700 the loose start keeps its size (spread
+# 24 percent), so the model's edge lies between 600 and 630 and no larger N is added.
+flock_sizes: [25, 50, 71, 100, 141, 200, 283, 400, 566]

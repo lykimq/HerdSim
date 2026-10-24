@@ -1,0 +1,12 @@
+# The Kubo run (dmin_kubo.yaml) at 99 percent of the flock in the goal, with the D grid to 24:
+# in dmin_kubo the finish time still fell at its top D = 10, so its D_sat was above the grid.
+# The grid is the main one (1 to 24) plus D = 10, so the cells of dmin_kubo pair with these.
+# decide_finish_times true, so D_sat is decided as well.
+
+protocol_id: dmin_f99_kubo
+output: results/dmin_f99_kubo
+extends: dmin_kubo.yaml
+
+shepherd_counts: [1, 2, 3, 4, 6, 8, 10, 12, 16, 24]
+success_fraction: 0.99
+decide_finish_times: true

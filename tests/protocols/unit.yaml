@@ -10,6 +10,8 @@ methods:
     time_limit_ticks: 3000
   fat:
     time_limit_ticks: 3000
+  independent:
+    time_limit_ticks: 3000
   kubo:
     time_limit_seconds: 500
 

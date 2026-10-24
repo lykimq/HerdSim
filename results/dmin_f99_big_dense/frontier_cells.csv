@@ -1,0 +1,17 @@
+# AUTO-GENERATED: do not modify. Re-run the producing command to refresh this file.
+group_key,n_shepherds,n_seeds,n_success,success_rate,rate_low,rate_high,reliability,median_finish,p90_finish,median_finish_seconds,p90_finish_seconds,median_dog_ticks,median_path_per_dog,n_errors,zone,needs_seeds,pruned
+strombom_multi|wide|N=566,1,10,0,0.0,0.0,0.4112959813475253,unreliable,,,,,,,0,too_few,False,False
+strombom_multi|wide|N=566,2,200,186,0.93,0.8701062821515833,0.9683034782375852,undecided,1711.0,2266.0,1711.0,2266.0,3422.0,2526.375,0,undecided,True,False
+strombom_multi|wide|N=566,3,60,60,1.0,0.9154813472667045,1.0,reliable,1035.5,1243.0,1035.5,1243.0,3106.5,1518.75,0,improving,False,False
+strombom_multi|wide|N=566,4,60,60,1.0,0.9154813472667045,1.0,reliable,892.5,1813.9,892.5,1813.9,3570.0,1289.25,0,improving,False,False
+strombom_multi|wide|N=566,6,60,60,1.0,0.9154813472667045,1.0,reliable,609.5,1132.2,609.5,1132.2,3657.0,888.375,0,improving,False,False
+strombom_multi|wide|N=566,8,60,60,1.0,0.9154813472667045,1.0,reliable,528.0,982.3000000000001,528.0,982.3000000000001,4224.0,780.5625,0,saturated,False,False
+strombom_multi|wide|N=566,12,60,60,1.0,0.9154813472667045,1.0,reliable,523.0,533.0,523.0,533.0,6276.0,772.0,0,saturated,False,False
+strombom_multi|wide|N=800,1,10,0,0.0,0.0,0.4112959813475253,unreliable,,,,,,,0,too_few,False,False
+strombom_multi|wide|N=800,2,10,0,0.0,0.0,0.4112959813475253,unreliable,,,,,,,0,too_few,False,False
+strombom_multi|wide|N=800,3,100,81,0.81,0.690162112253299,0.8991826697383024,unreliable,2610.0,3236.0,2610.0,3236.0,7830.0,3620.0,0,too_few,False,False
+strombom_multi|wide|N=800,4,200,188,0.94,0.8829192062752051,0.9749003588584978,undecided,2190.5,3036.8,2190.5,3036.8,8762.0,2963.8125,0,undecided,True,False
+strombom_multi|wide|N=800,5,130,126,0.9692307692307692,0.9062773065542017,0.9947822559931842,reliable,2244.5,2843.0,2244.5,2843.0,11222.5,2878.8,0,improving,False,False
+strombom_multi|wide|N=800,6,140,135,0.9642857142857143,0.9021889225770539,0.9922188728160217,reliable,2166.0,2954.4,2166.0,2954.4,12996.0,2733.25,0,improving,False,False
+strombom_multi|wide|N=800,8,130,126,0.9692307692307692,0.9062773065542017,0.9947822559931842,reliable,1817.0,2536.5,1817.0,2536.5,14536.0,2255.25,0,saturated,False,False
+strombom_multi|wide|N=800,12,90,88,0.9777777777777777,0.9010320373006957,0.9988442860335379,reliable,1480.5,2447.0,1480.5,2447.0,17766.0,1886.6875,0,saturated,False,False

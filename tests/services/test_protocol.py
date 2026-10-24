@@ -290,3 +290,49 @@ def test_factor_can_sweep_a_setting_and_reaches_the_run_config(tmp_path):
     assert drive(near) == pytest.approx(13.0 * 7.0)
     assert drive(far) == pytest.approx(20.0 * 7.0)
     assert protocol.settings["drive_distance_multiple"] == 13.0  # the protocol default is untouched
+
+
+def test_radius_above_the_edge_is_imposed_from_the_calibrated_size(tmp_path):
+    from services.calibration import calibrate
+
+    methods = {"strombom_multi": {"time_limit_ticks": 100}}
+    plain = load_protocol(str(write(tmp_path, methods=methods, flock_sizes=[20])), tmp_path / "a")
+    imposed = load_protocol(
+        str(
+            write(
+                tmp_path,
+                methods=methods,
+                flock_sizes=[20, 80, 180],
+                impose_radius_above=20,
+                imposed_radius_scale=1.5,
+            )
+        ),
+        output=tmp_path / "b",
+    )
+    base = calibrate(plain, workers=2)["strombom_multi"][20]
+    table = calibrate(imposed, workers=2)["strombom_multi"]
+    assert table[20] == base  # N_cal is calibrated as usual
+    assert table[80] == pytest.approx(1.5 * base * 2.0)  # sqrt(80 / 20) = 2
+    assert table[180] == pytest.approx(1.5 * base * 3.0)
+
+
+def test_settings_that_act_only_through_calibration_cannot_be_factors(tmp_path):
+    with pytest.raises(ValueError, match="not sweepable"):
+        load_protocol(
+            str(write(tmp_path, factors={"imposed_radius_scale": [0.5, 2.0]})),
+            output=tmp_path / "out",
+        )
+
+
+def test_calibration_drives_with_the_paper_dog_whatever_the_protocol_sets(tmp_path):
+    from services.calibration import calibration_config
+
+    methods = {"strombom_multi": {"time_limit_ticks": 100}}
+    plain = load_protocol(str(write(tmp_path, methods=methods)), output=tmp_path / "a")
+    local = load_protocol(
+        str(write(tmp_path, methods=methods, sensing_range=15.0, dog_spacing=2.0)),
+        output=tmp_path / "b",
+    )
+    assert calibration_config(local, "strombom_multi", 20, 1.0) == calibration_config(
+        plain, "strombom_multi", 20, 1.0
+    )

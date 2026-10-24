@@ -5,6 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+from sim.core.simulation_runner import initial_state, run_trial
 from sim.core.vectors import behind, unit
 from sim.methods.strombom import sheep
 from sim.methods.strombom.config import resolve_n_neighbors
@@ -16,6 +17,7 @@ from sim.methods.strombom.heuristics import (
     radius_of,
     step_toward,
 )
+from sim.plugins.dogs import independent
 from sim.plugins.dogs.collect_drive_multi import drive_front, team_targets
 from tests.helpers import config_for
 
@@ -238,3 +240,39 @@ def test_several_dogs_push_as_one_unit_vector_from_their_mean_direction():
     to_dogs = np.array([[[3.0, 4.0], [3.0, -4.0], [-500.0, 0.0]]])  # the third is out of reach
     dist = np.linalg.norm(to_dogs, axis=2)
     np.testing.assert_allclose(sheep.dog_push(to_dogs, dist, 65.0), [[1.0, 0.0]], atol=1e-12)
+
+
+def test_one_independent_dog_is_the_paper_shepherd_trial():
+    multi = run_trial(config_for(n=60, d=1, layout="wide", ticks=200), 2026)
+    alone = run_trial(config_for("independent", n=60, d=1, layout="wide", ticks=200), 2026)
+    assert alone.total_ticks == multi.total_ticks
+    np.testing.assert_array_equal(alone.history.to_numpy(), multi.history.to_numpy())
+
+
+def test_independent_dogs_all_take_the_one_paper_target():
+    config = config_for("independent", n=60, d=4, layout="wide")
+    state = initial_state(config, 2026)
+    aims = independent.targets(state, config)
+    paper = decide(state.sheep_positions, state.world.goal.center, config).target
+    assert aims.shape == (4, 2)
+    np.testing.assert_array_equal(aims, np.tile(paper, (4, 1)))
+
+
+def test_capped_drive_offset_stays_within_reach_and_is_off_by_default():
+    flock = np.array([[0.0, 0.0], [2.0, 0.0], [0.0, 2.0]])
+    goal = np.array([100.0, 0.0])
+    paper = config_for(n=1600, d=1)  # r_a sqrt(N) = 80, beyond r_s = 65
+    capped = {**paper, "drive_offset_cap": 63.0}
+    centre = flock.mean(axis=0)
+    assert np.linalg.norm(drive_point(flock, goal, paper) - centre) == pytest.approx(80.0)
+    assert np.linalg.norm(drive_point(flock, goal, capped) - centre) == pytest.approx(63.0)
+
+
+def test_spread_jobs_skip_outliers_near_one_already_taken():
+    from sim.plugins.dogs.collect_drive_multi import spread_jobs
+
+    flock = np.array([[100.0, 0.0], [99.0, 1.0], [-90.0, 0.0], [0.0, 80.0]])
+    outliers = np.array([0, 1, 2, 3])  # farthest first
+    assert spread_jobs(flock, outliers, 2, 0.0).tolist() == [0, 1]  # the team rule
+    assert spread_jobs(flock, outliers, 2, 50.0).tolist() == [0, 2]  # 1 is next to 0
+    assert spread_jobs(flock, outliers, 4, 50.0).tolist() == [0, 2, 3, 1]  # filled in at the end

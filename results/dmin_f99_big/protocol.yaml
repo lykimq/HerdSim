@@ -1,0 +1,90 @@
+# AUTO-GENERATED: do not modify. Re-run the producing command to refresh this file.
+protocol_id: dmin_f99_big
+output: results/dmin_f99_big
+canonical: protocols/configs/canonical.yaml
+methods:
+  strombom_multi:
+    time_limit_drive_multiple: 12.0
+layouts:
+- compact
+- wide
+flock_sizes:
+- 566
+- 800
+- 1131
+- 1600
+- 2263
+- 3200
+shepherd_counts:
+- 1
+- 2
+- 3
+- 4
+- 6
+- 8
+- 12
+success_fraction: 0.99
+impose_radius_above: 566
+canonical_values:
+  task: drive_to_goal
+  drive_distance_multiple: 13.0
+  drive_distance_min: 80.0
+  goal_radius_multiple: 1.9
+  success_fraction: 1.0
+  hold_drive_multiple: 0.0
+  hold_withdraw: false
+  dog_spacing: 0.0
+  sensing_range: 0.0
+  communication: none
+  field_clearance: 80.0
+  compact_spread: 0.5
+  separation_scale: 2.0
+  wide_sigma: 0.5
+  split_ring: 1.0
+  outlier_fraction: 0.2
+  outlier_near: 1.1
+  outlier_far: 1.6
+  dog_start: arcs
+  dog_start_gap: 30.0
+  dog_start_spacing: 5.0
+  dog_overlap_distance: 2.0
+  measurement_radius: 5.0
+  lost_radius_multiple: 2.5
+  calibration_seeds: 3
+  calibration_seconds: 300.0
+  calibration_window_seconds: 90.0
+  calibration_starts:
+  - 1.0
+  - 3.0
+  settled_tolerance: 0.15
+  start_agreement: 0.25
+  impose_radius_above: 0
+  imposed_radius_scale: 1.0
+  master_seed: 2026
+  reliability_theta: 0.9
+  confidence: 0.99
+  batch_seeds: 10
+  max_seeds: 200
+  time_margin: 0.05
+  min_pairs: 5
+  bootstrap_resamples: 4000
+  refine_min_gap: 1
+  decide_finish_times: false
+  prune_overlap: 0.9
+  timeseries_seeds: 3
+  budget_hours: 72.0
+method_config:
+  strombom_multi:
+    r_a: 2.0
+    rho_a: 2.0
+    r_s: 65.0
+    rs_weight: 1.0
+    c: 1.05
+    inertia: 0.5
+    noise_strength: 0.3
+    sheep_speed: 1.0
+    graze_move_prob: 0.05
+    n_neighbors: -1
+    shepherd_speed: 1.5
+    shepherd_stop_multiple: 3.0
+    dt: 1.0

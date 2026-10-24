@@ -22,6 +22,8 @@ class GoalZone:
     radius: float
     # Share of the sheep that must be inside for the goal to count as reached; 1 is every sheep.
     required_fraction: float = 1.0
+    # Ticks the share must stay inside without a break before the task succeeds; 0 is at once.
+    hold_ticks: int = 0
 
     def contains(self, positions: np.ndarray) -> np.ndarray:
         """Which positions are inside the goal, shape (n,)."""

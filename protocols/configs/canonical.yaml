@@ -24,6 +24,30 @@ goal_radius_multiple: 1.9
 # or two stragglers no longer decide a trial: with the strict rule a flock can reach the goal
 # with 99% inside and then be driven past it.
 success_fraction: 1.0
+# Holding (plan design_min_max section 4.2). The goal counts as reached only after the share above
+# has been inside without a break for hold_drive_multiple drive times (0: at the first such tick,
+# the D_min rule). With hold_withdraw true, the dogs of collect_drive_multi withdraw while it is
+# inside, to r_s + r_a beyond the farthest sheep, so the flock grazes: a Strombom sheep flees
+# while any dog is closer than r_s, so dogs that only stop would push it through the goal.
+hold_drive_multiple: 0.0
+hold_withdraw: false
+# Dogs closer than dog_spacing to each other walk apart: the unit vector away from each such dog
+# is added to the dog's step and the sum keeps the dog's speed (plan section 4.3). 0: dogs are
+# points, as in the papers. Not for the Kubo dogs, which repel each other by their own force.
+dog_spacing: 0.0
+# What a dog of collect_drive_multi knows (plan design_min_max section 6). sensing_range 0: every
+# sheep, the paper's shepherd. Above 0: the sheep closer than that to the dog, and with
+# communication also what other dogs see: none (its own view only), neighbour (plus the dogs
+# within sensing_range of it), shared (every dog's view, planned once for the team). Dog
+# positions are known to every dog. A dog that knows no sheep walks to the flock centre it last
+# knew (at first the flock's start position).
+sensing_range: 0.0
+communication: none
+# Cap on the Strombom drive offset r_a sqrt(N) (plan design_min_max section 7). The paper's
+# offset passes the sheep reaction distance r_s at N = (r_s / r_a)^2 = 1056, so above that the
+# dog stands where few sheep feel it and no team drives the flock. A cap of r_s - r_a keeps the
+# drive point within reach; it changes the paper rule, so it is a labelled variant. 0 is off.
+drive_offset_cap: 0.0
 # Free margin around the start, in units (a little more than the sheep reaction distance 65).
 # The field only places the start; there is no boundary, as in both papers.
 field_clearance: 80.0
@@ -76,9 +100,14 @@ calibration_window_seconds: 90.0
 calibration_starts: [1.0, 3.0]
 # Calibration raises when R_f changed by more than settled_tolerance between the last two
 # windows, or differs by more than start_agreement between the start sizes. Strombom sheep
-# settle up to N = 400, so N stops there.
+# settle up to N = 600 (measured 2026-10-23: from about 630 a loose start keeps part of its size).
 settled_tolerance: 0.15
 start_agreement: 0.25
+# Above the edge a protocol may impose R_f instead (plan design_min_max RQ-E3): with
+# impose_radius_above = N_cal, every N above it gets imposed_radius_scale x R_f(N_cal) x
+# sqrt(N / N_cal), the density of the N_cal flock held constant. 0 is off.
+impose_radius_above: 0
+imposed_radius_scale: 1.0
 
 # --- Seeds and decisions -------------------------------------------------------------------
 # Seed i of every cell is master_seed + i, so cells share start flocks.

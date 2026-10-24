@@ -22,6 +22,9 @@ CASES: list[tuple[str, dict[str, Any]]] = [
     ("strombom_multi", {"layout": "outlier_rich", "n": 60}),
     ("fat", {}),
     ("fat", {"layout": "wide", "d": 6}),
+    ("independent", {"layout": "wide", "d": 6}),
+    ("strombom_multi", {"layout": "wide", "d": 12, "settings": {"dog_spacing": 2.0}}),
+    ("strombom_multi", {"d": 6, "settings": {"hold_drive_multiple": 1.0, "hold_withdraw": True}}),
     ("kubo", {}),
     ("kubo", {"d": 6}),
 ]

@@ -4,21 +4,21 @@
   "physics_hash": "97ae699639b0c161",
   "running": false,
   "stop_reason": "every cell decided, at max_seeds or errored",
-  "rounds": 37,
-  "trials_done": 11140,
+  "rounds": 14,
+  "trials_done": 11740,
   "trials_ignored": 0,
-  "trials_this_run": 470,
+  "trials_this_run": 600,
   "round_trials": 0,
   "trial_errors": 0,
   "cells_with_errors": {
     "count": 0,
     "keys": []
   },
-  "hours_this_run": 0.05,
-  "trials_per_hour": 9336.6,
+  "hours_this_run": 0.017,
+  "trials_per_hour": 35117.1,
   "cells": 185,
   "cells_pruned": 4,
-  "cells_needing_seeds": 8,
-  "cells_at_max_seeds_undecided": 8,
-  "updated_at": "2026-10-22T12:23:33.962320+00:00"
+  "cells_needing_seeds": 10,
+  "cells_at_max_seeds_undecided": 10,
+  "updated_at": "2026-10-24T00:00:40.868467+00:00"
 }

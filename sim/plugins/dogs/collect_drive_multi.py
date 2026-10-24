@@ -18,6 +18,17 @@ the target of one that is already there (at large D dogs can still stand next to
 Dogs are matched to drive slots by their angle around the flock centre, so neighbours stay
 neighbours and no two dogs cross to swap places. Every dog knows every sheep and every other
 dog, so the team is planned once per tick from the true state.
+
+With ``hold_withdraw`` (a HerdSim holding step, plan design_min_max 4.2), while the goal is
+reached every dog walks to the point r_s + r_a beyond the farthest sheep on its own bearing
+from the flock centre, so no dog is within r_s of a sheep and the flock grazes. When the goal is
+no longer reached the team rule above takes over again.
+
+With ``sensing_range`` above 0 (plan design_min_max section 6) a dog knows only the sheep within
+that range, plus what other dogs see under ``communication``: with shared, the team is planned
+once from the pooled view; with none or neighbour, each dog plans the team from its own view
+and takes its own target from that plan. f(N) and the drive offset use the true N. A dog that
+knows no sheep walks to the flock centre it last knew, kept per dog in ``state.metadata``.
 """
 
 from __future__ import annotations
@@ -30,7 +41,7 @@ from scipy.optimize import linear_sum_assignment
 from scipy.spatial.distance import cdist
 
 from sim.core.simulation_state import SimulationState
-from sim.core.vectors import behind, rotate
+from sim.core.vectors import behind, rotate, unit
 from sim.methods.strombom.heuristics import (
     COLLECT,
     collect_threshold,
@@ -85,6 +96,28 @@ def _drive(
     return _to_slots(dogs, slots, centroid, target - centroid)
 
 
+def spread_jobs(flock: np.ndarray, outliers: np.ndarray, count: int, gap: float) -> np.ndarray:
+    """The outliers the collecting dogs take: the ``count`` farthest (the team rule), or with
+    ``gap`` > 0 the farthest first but none closer than ``gap`` to one already taken, so the dogs
+    do not all go to one cluster; the rest are filled in farthest first if too few are that far
+    apart. ``gap`` is a diagnostic hook (``collect_min_gap`` in a config, not a protocol
+    setting; analysis/split_diagnostic.py), 0 in every campaign."""
+    if gap <= 0.0:
+        return outliers[:count]
+    taken: list[int] = []
+    for o in outliers:
+        if len(taken) == count:
+            break
+        if all(np.linalg.norm(flock[o] - flock[t]) >= gap for t in taken):
+            taken.append(int(o))
+    for o in outliers:
+        if len(taken) == count:
+            break
+        if int(o) not in taken:
+            taken.append(int(o))
+    return np.array(taken, dtype=int)
+
+
 def team_targets(
     flock: np.ndarray, goal: np.ndarray, dogs: np.ndarray, config: dict[str, Any]
 ) -> np.ndarray:
@@ -95,7 +128,8 @@ def team_targets(
     if decision.mode != COLLECT:
         return _drive(flock, goal, dogs, config)
     r_a = float(config["r_a"])
-    jobs = decision.outliers[: len(dogs)]
+    gap = float(config.get("collect_min_gap", 0.0))
+    jobs = spread_jobs(flock, decision.outliers, len(dogs), gap)
     points = np.array([behind(flock[o], decision.centroid, r_a) for o in jobs])
     rows, cols = linear_sum_assignment(cdist(dogs, points))
     targets = np.empty_like(dogs)
@@ -108,14 +142,74 @@ def team_targets(
     return targets
 
 
+def withdraw_targets(flock: np.ndarray, dogs: np.ndarray, config: dict[str, Any]) -> np.ndarray:
+    """Holding points: r_s + r_a beyond the farthest sheep, on each dog's bearing from the flock
+    centre. A dog exactly at the centre has no bearing and takes the +x direction."""
+    centroid = flock.mean(axis=0)
+    farthest = float(np.max(np.linalg.norm(flock - centroid, axis=1)))
+    reach = farthest + float(config["reaction_radius"]) + float(config["r_a"])
+    out = np.empty_like(dogs)
+    for i, dog in enumerate(dogs):
+        bearing = dog - centroid
+        bearing = unit(bearing) if np.linalg.norm(bearing) > 0.0 else np.array([1.0, 0.0])
+        out[i] = centroid + reach * bearing
+    return out
+
+
+def known_sheep(sheep: np.ndarray, dogs: np.ndarray, config: dict[str, Any]) -> np.ndarray:
+    """Which sheep each dog knows, shape (D, N): within ``sensing_range`` of it, and under
+    ``communication`` also what the dogs it hears see (neighbour: dogs within the range;
+    shared: every dog)."""
+    reach = float(config["sensing_range"])
+    sees = cdist(dogs, sheep) < reach
+    mode = str(config["communication"])
+    if mode == "shared":
+        return np.tile(sees.any(axis=0), (len(dogs), 1))
+    if mode == "neighbour":
+        hears = cdist(dogs, dogs) < reach  # includes the dog itself
+        return (hears.astype(int) @ sees.astype(int)) > 0
+    return sees
+
+
+def local_targets(state: SimulationState, config: dict[str, Any]) -> np.ndarray:
+    """Targets when each dog knows only part of the flock (``known_sheep``)."""
+    sheep, dogs, goal = state.sheep_positions, state.shepherd_positions, state.world.goal.center
+    last = state.metadata.setdefault(
+        "last_flock_centre",
+        np.tile(np.asarray(config["flock_center"], dtype=float), (len(dogs), 1)),
+    )
+    knows = known_sheep(sheep, dogs, config)
+    targets = np.empty_like(dogs)
+    if str(config["communication"]) == "shared":
+        if knows[0].any():
+            targets[:] = team_targets(sheep[knows[0]], goal, dogs, config)
+            last[:] = sheep[knows[0]].mean(axis=0)
+        else:
+            targets[:] = last
+        return targets
+    for i in range(len(dogs)):
+        if knows[i].any():
+            targets[i] = team_targets(sheep[knows[i]], goal, dogs, config)[i]
+            last[i] = sheep[knows[i]].mean(axis=0)
+        else:
+            targets[i] = last[i]
+    return targets
+
+
 def step(state: SimulationState, config: dict[str, Any]) -> SimulationState:
     dogs = state.shepherd_positions
     velocities = np.zeros((state.n_shepherds, 2))
     angles = noise_angles(state)
     if state.n_shepherds:
-        targets = team_targets(state.sheep_positions, state.world.goal.center, dogs, config)
+        holding = bool(config["hold_withdraw"]) and state.world.goal.reached(state.sheep_positions)
+        if holding:
+            targets = withdraw_targets(state.sheep_positions, dogs, config)
+        elif float(config["sensing_range"]) > 0.0:
+            targets = local_targets(state, config)
+        else:
+            targets = team_targets(state.sheep_positions, state.world.goal.center, dogs, config)
         for i in range(state.n_shepherds):
             velocities[i] = step_toward(
                 dogs[i], targets[i], state.sheep_positions, config, angles[i]
             )
-    return move_dogs(state, velocities, float(config["dt"]))
+    return move_dogs(state, velocities, float(config["dt"]), config)

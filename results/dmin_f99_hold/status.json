@@ -1,0 +1,24 @@
+{
+  "_auto_generated_notice": "AUTO-GENERATED: do not modify. Re-run the producing command to refresh this file.",
+  "protocol_id": "dmin_f99_hold",
+  "physics_hash": "58ccad8f3192da77",
+  "running": false,
+  "stop_reason": "every cell decided, at max_seeds or errored",
+  "rounds": 20,
+  "trials_done": 14280,
+  "trials_ignored": 0,
+  "trials_this_run": 14280,
+  "round_trials": 0,
+  "trial_errors": 0,
+  "cells_with_errors": {
+    "count": 0,
+    "keys": []
+  },
+  "hours_this_run": 0.738,
+  "trials_per_hour": 19354.0,
+  "cells": 280,
+  "cells_pruned": 0,
+  "cells_needing_seeds": 18,
+  "cells_at_max_seeds_undecided": 18,
+  "updated_at": "2026-10-23T17:20:55.416348+00:00"
+}

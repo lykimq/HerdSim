@@ -42,6 +42,12 @@ METHODS: dict[str, Method] = {
         dog_controller="fat",
         defaults={**strombom.PAPER, **strombom.SHEPHERD_EXTENSIONS},
     ),
+    # Strombom sheep, every dog an independent copy of the paper shepherd (no team layer).
+    "independent": Method(
+        sheep_model="strombom",
+        dog_controller="independent",
+        defaults={**strombom.PAPER, **strombom.SHEPHERD_EXTENSIONS},
+    ),
     # Kubo sheep and Kubo force dogs.
     "kubo": Method(
         sheep_model="kubo",

@@ -1,0 +1,23 @@
+# D_min above the calibration edge (plan design_min_max section 7, RQ-E3). Strombom flocks have
+# a flock size of their own only up to N = 600, so above N_cal = 566 R_f is imposed: the density
+# of the 566 flock held constant, R_f(N) = R_f(566) sqrt(N / 566). Every result above 566 is a
+# result at that imposed density; `cli/dmin_tables.py extent` compares each cell's flock size
+# with it. The sizes continue the sqrt(2) spacing of the main runs. Why: up to N = 566 a power
+# law and a curve that levels off both pass through every D_min bracket, and the two only part
+# from about N = 1600 to 3200 (results_tables.md, Phase 2 fits).
+# 12 drive times (the deadline those fits used), 99 percent rule, compact (the clean check of
+# the flock size) and wide, D 1 to 12 (D_min is 2-3 at N = 566). Finish-time seeds off.
+
+protocol_id: dmin_f99_big
+output: results/dmin_f99_big
+canonical: protocols/configs/canonical.yaml
+
+methods:
+  strombom_multi:
+    time_limit_drive_multiple: 12.0
+
+layouts: [compact, wide]
+flock_sizes: [566, 800, 1131, 1600, 2263, 3200]
+shepherd_counts: [1, 2, 3, 4, 6, 8, 12]
+success_fraction: 0.99
+impose_radius_above: 566

@@ -1,0 +1,12 @@
+# How much the imposed density decides the large-N answer (RQ-E3): as dmin_f99_big at N = 566
+# and 800 on the wide start, with the imposed radius scaled by 0.7071067811865476, so the N = 800 flock is
+# twice as dense as the 566 flock. One protocol per scale, because R_f is calibrated once per protocol
+# and a factor cannot change it.
+
+protocol_id: dmin_f99_big_dense
+output: results/dmin_f99_big_dense
+extends: dmin_f99_big.yaml
+
+layouts: [wide]
+flock_sizes: [566, 800]
+imposed_radius_scale: 0.7071067811865476

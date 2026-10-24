@@ -317,6 +317,33 @@ def frontier_values(table: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows).sort_values(["method", "layout", "n"], ignore_index=True)
 
 
+def extent_check(trials: pd.DataFrame, radii: dict[str, dict[str, float]]) -> pd.DataFrame:
+    """Per cell: the flock's own size during the trial against the R_f its task was sized from.
+
+    sqrt(2) x mean_extent is the radius of a uniform disc with the flock's RMS spread, the same
+    measure R_f is (services/calibration.py). Above the calibration edge R_f is imposed, so a
+    ratio far from 1 says the imposed size does not match the flock the model forms there. The
+    mean runs over the whole trial, so on scattered layouts it also holds the spread before the
+    flock is gathered; compact starts give the clean comparison.
+    """
+    rows = []
+    for _, part in trials.groupby(["group_key", "n_shepherds"], sort=True):
+        info = parse_group_key(str(part["group_key"].iloc[0]))
+        d = part["n_shepherds"].iloc[0]
+        radius = radii[info["method"]][str(info["n"])]
+        ratio = np.sqrt(2.0) * part["mean_extent"].astype(float) / radius
+        rows.append(
+            {
+                "layout": info["layout"],
+                "n": info["n"],
+                "d": int(d),
+                "r_f": round(radius, 2),
+                "extent_over_r_f": round(float(ratio.median()), 2),
+            }
+        )
+    return pd.DataFrame(rows)
+
+
 def midpoint(row: pd.Series) -> float | None:
     """Geometric middle of the bracket, or D_min_low when only the low end is known."""
     b = bracket(row)
@@ -448,6 +475,7 @@ __all__ = [
     "dsat_growth",
     "dsat_text",
     "effort_table",
+    "extent_check",
     "frontier_values",
     "groups_table",
     "growth_table",

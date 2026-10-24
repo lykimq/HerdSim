@@ -38,7 +38,8 @@ def dog_overlap(view: TickView) -> float:
 
 def dogs_stopped(view: TickView) -> float:
     """Fraction of dogs whose commanded velocity is zero this tick, e.g. under the stop
-    rule (NaN without dogs). A dog moved only by the separation push counts as stopped."""
+    rule (NaN without dogs). A dog held by the stop rule but moved apart by ``dog_spacing``
+    counts as moving."""
     if view.state.n_shepherds == 0:
         return float("nan")
     return float(np.mean(view.dog_speeds < STOPPED_SPEED))

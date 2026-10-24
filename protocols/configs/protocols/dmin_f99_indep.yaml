@@ -1,0 +1,18 @@
+# D_min for a team of independent paper shepherds: every dog runs the single-dog Strombom rule
+# (collect or drive) on the whole flock, with no team layer and no assignment, so all dogs aim at
+# the same point. Same task as dmin_f99_fat and dmin_f99_m6 (grid, deadline 6 drive times, seeds,
+# 99 percent rule). Beside FAT, which lacks both the team layer and the collect/drive switch, it
+# shows what the switch alone gives; beside strombom_multi, what the team layer adds.
+# calibrate_as: the paper shepherd is this method's single dog, so R_f is that of dmin_f99_m6.
+# decide_finish_times true, so D_sat is decided as well.
+
+protocol_id: dmin_f99_indep
+output: results/dmin_f99_indep
+extends: dmin_f99_fat.yaml
+
+methods:
+  independent:
+    time_limit_drive_multiple: 6.0
+    calibrate_as: strombom_multi
+
+decide_finish_times: true

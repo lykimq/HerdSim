@@ -64,7 +64,7 @@ The hash covers the task, every setting that changes a trial, each method's full
 
 *Why:* a campaign can then grow (more seeds, more flock sizes, intermediate dog counts) and still resume into the same folder, but a change that would make old and new trials incomparable cannot slip in.
 
-*Cost:* changing anything physical, even a small change to one default, needs a new folder.
+*Cost:* changing anything physical, even a small change to one default, needs a new folder. A setting added later is left out of the hash while it sits at its neutral value (the value that reproduces the old behaviour), so the folders written before it keep their hash and can still resume.
 
 ### The engine knows nothing about campaigns
 
@@ -94,7 +94,9 @@ Goal size, start spread, lost-sheep distance and drive length are multiples of t
 
 *Why:* fixed lengths make the task easier or harder as N grows for reasons that have nothing to do with the dogs. Tying them to the real flock keeps "every sheep in the goal" meaning the same thing at every N and for every sheep model.
 
-*Cost:* by default each method gets a task sized to its own flock, so methods are compared on equivalent tasks, not on one shared field. That is wrong for two methods that differ only in their dog rule, because the flock one rule settles differs from the other's and so would the goal and the drive. For such a pair, one method can be calibrated with the other's dog, so both run exactly the same task. Calibration always uses the drive task, whatever task the protocol runs.
+*Cost:* by default each method gets a task sized to its own flock, so methods are compared on equivalent tasks, not on one shared field. That is wrong for two methods that differ only in their dog rule, because the flock one rule settles differs from the other's and so would the goal and the drive. For such a pair, one method can be calibrated with the other's dog, so both run exactly the same task. Calibration always uses the drive task, whatever task the protocol runs, and always the paper's single dog that sees every sheep, whatever the protocol sets for the dogs (sensing range, spacing, holding), so every protocol's task is sized from the same reference flock.
+
+Above the largest size at which the flock settles to a radius of its own, a protocol may impose the radius instead, at the density of a calibrated size. Settings that act only through calibration hold for the whole protocol and cannot be swept as factors, because calibration runs once per protocol and a factor level would never reach it.
 
 ### The field is open and the deadline scales with the task
 
@@ -221,8 +223,9 @@ The extension points follow the plugin boundaries:
 
 Some things the current design doesn't handle yet, and would need real changes:
 
-- The world has one circular goal, and the start layouts, the field sizing and the dog start arcs assume a single drive from a start toward that goal. A task with a gate, a holding area or several stages needs a more general world and its own start geometry.
-- The multi-dog collect/drive controller reads the flock's start position from the task setup, and its dogs share out the work using each other's positions. Roles beyond collect and drive (flanking, holding a gap) would be new jobs in that layer.
+- The world has one circular goal, and the start layouts, the field sizing and the dog start arcs assume a single drive from a start toward that goal. Holding the flock in that goal exists (a hold time in the task, and a step in which the dogs back off beyond the sheep's reaction distance); a gate, a pen or several stages still need a more general world and its own start geometry.
+- The multi-dog collect/drive controller reads the flock's start position from the task setup, and its dogs share out the work using each other's positions. Backing off to hold is one role beyond collect and drive; others (flanking, holding a gap) would be new jobs in that layer.
+- The paper's drive point lies r_a sqrt(N) behind the flock, which passes the sheep's reaction distance near N = 1056; above that the drive rule itself stops working, and only a capped drive point (a labelled variant) drives such flocks.
 - The failure-label type lives with the drive task's rules; a second task would move it to a shared place.
 - Much larger flocks would need the per-dog loops in the controllers vectorised.
 
@@ -244,5 +247,7 @@ Some things the current design doesn't handle yet, and would need real changes:
 | Frontier rules | `analysis/frontier.py` |
 | D_min of a finished run, and its tables | `analysis/dmin.py`, `analysis/dmin_tables.py` |
 | Replays of stored trials with extra measures (pressure on the flock) | `analysis/pressure.py`, `cli/pressure_replay.py` |
+| Growth-shape fits of D_min against N | `analysis/growth_fits.py` |
+| Diagnostic replays of the split layout | `cli/split_diagnostic.py` |
 | Command-line entry points | `cli/` |
 | Regression tests | `tests/sim/test_golden.py` |

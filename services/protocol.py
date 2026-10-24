@@ -50,6 +50,8 @@ WHOLE_PROTOCOL_KEYS = (
     "calibration_starts",
     "settled_tolerance",
     "start_agreement",
+    "impose_radius_above",
+    "imposed_radius_scale",
 )
 
 # Canonical values that only steer the adaptive run; they do not change any
@@ -72,7 +74,17 @@ STRATEGY_KEYS = (
 
 # Settings added after the first runs. At their neutral value they do not change any trial, so
 # they stay out of the physics hash and the folders written before them remain resumable.
-NEUTRAL_SETTINGS = {"success_fraction": 1.0}
+NEUTRAL_SETTINGS = {
+    "success_fraction": 1.0,
+    "hold_drive_multiple": 0.0,
+    "hold_withdraw": False,
+    "dog_spacing": 0.0,
+    "impose_radius_above": 0,
+    "drive_offset_cap": 0.0,
+    "sensing_range": 0.0,
+    "communication": "none",
+    "imposed_radius_scale": 1.0,
+}
 
 
 @dataclass(frozen=True)
