@@ -1,4 +1,4 @@
-# Quy mô đội tối thiểu để lùa một bầy cừu mô phỏng: Quy luật mở rộng thực nghiệm, Động lực học ranh giới và Cơ chế thất bại
+# Quy mô đội để lùa một bầy cừu mô phỏng: Tối thiểu, đủ và quá nhiều chó
 
 *Báo cáo nghiên cứu khoa học dự án HerdSim*  
 *Đánh giá thực nghiệm qua 23 giao thức chiến dịch (164.740 lượt chạy mô phỏng) trên các kiến trúc chăn dắt đa tác tử, tiếp theo là 14 giao thức tiếp nối và ba lượt chạy tiếp (162.130 lượt): tổng cộng 37 giao thức và 326.870 lượt chạy, không có lỗi.*  
@@ -8,16 +8,16 @@
 
 ## Tóm tắt (Abstract)
 
-Cần bao nhiêu tác tử chăn dắt tự hành ($D$) để thu gom và lùa một bầy cừu gồm $N$ cá thể vào một khu vực đích trước một thời hạn xác định? Chúng tôi khảo sát bài toán này thông qua môi trường mô phỏng trên 23 giao thức chiến dịch với tổng cộng 164.740 lượt chạy mà không phát sinh bất kỳ lỗi mô phỏng nào. Chúng tôi định nghĩa $D_{\min}$ là quy mô đội nhỏ nhất đạt độ tin cậy (tỷ lệ thành công được chứng minh $\ge 0{,}90$ dưới khoảng tin cậy nhị thức Clopper–Pearson hai phía ở mức ý nghĩa 99%). Sử dụng thuật toán phân bổ tuần tự thích ứng giúp tập trung tài nguyên tính toán vào các ô tham số ranh giới (tối đa 200 hạt giống mỗi ô), chúng tôi lập bản đồ $D_{\min}$ qua 5 quy mô bầy đàn ($N \in [25, 400]$), 4 bố cục không gian xuất phát (`compact`, `wide`, `split`, `outlier_rich`) và 3 mức thời hạn chuẩn hóa ($12\times$, $6\times$, và $3\times$ thời gian lùa tối thiểu) dưới cả hai tiêu chí: *chặn giữ nghiêm ngặt* (100% cừu trong đích) và *tiếp cận 99%* (tối thiểu $\lceil 0{,}99 N \rceil$ cừu trong đích).
+Cần bao nhiêu tác tử chăn dắt tự hành ($D$) để gom một bầy $N$ con cừu và lùa bầy vào vùng đích một cách tin cậy trước thời hạn: tối thiểu là bao nhiêu, bao nhiêu thì đủ, và từ khi nào thêm chó lại làm hỏng việc? Chúng tôi khảo sát bài toán này thông qua môi trường mô phỏng trên 37 giao thức chiến dịch với tổng cộng 326.870 lượt chạy mà không phát sinh bất kỳ lỗi mô phỏng nào. Chúng tôi định nghĩa $D_{\min}$ là quy mô đội nhỏ nhất đạt độ tin cậy (tỷ lệ thành công được chứng minh $\ge 0{,}90$ dưới khoảng tin cậy nhị thức Clopper–Pearson hai phía ở mức ý nghĩa 99%). Sử dụng thuật toán phân bổ tuần tự thích ứng giúp tập trung tài nguyên tính toán vào các ô tham số ranh giới (tối đa 200 hạt giống mỗi ô), 23 giao thức đầu tiên (164.740 lượt) lập bản đồ $D_{\min}$ qua 5 quy mô bầy đàn ($N \in [25, 400]$), 4 bố cục không gian xuất phát (`compact`, `wide`, `split`, `outlier_rich`) và 3 mức thời hạn chuẩn hóa ($12\times$, $6\times$, và $3\times$ thời gian lùa tối thiểu) dưới cả hai tiêu chí: *chặn giữ nghiêm ngặt* (100% cừu trong đích) và *tiếp cận 99%* (tối thiểu $\lceil 0{,}99 N \rceil$ cừu trong đích). Các giao thức tiếp theo chỉ dùng tiêu chí 99% và bổ sung quy mô đội mà từ đó thêm chó không còn giúp ích (*D*<sub>sat</sub>), bốn quy mô bầy mới đến $N = 566$, các quy tắc đội, giữ đàn, giãn cách chó, độ gắn kết, tầm cảm nhận, và các bầy vượt giới hạn của mô hình đến $N = 3200$.
 
 Các kết quả thực nghiệm chỉ ra:
 1. **Tính bất biến của bầy co cụm**: Với bầy xuất phát co cụm (`compact`), $D_{\min} \equiv 1$ là một hằng số bất biến tuyệt đối trên mọi quy mô ($N = 25$ đến $400$) và mọi thời hạn. Bổ sung thêm chó không giúp rút ngắn thời gian lùa đàn.
-2. **Quy luật tăng trưởng dưới tuyến tính trên bầy phân tán**: Với bầy phân tán, $D_{\min} = 1$ khi $N \le 50$, và chỉ cần 2 đến 3 chó ở $N = 400$ dưới thời hạn nới lỏng ($12\times$). Trong không gian log-log ($\log_2 D_{\min}$ theo $\log_2 N$), độ dốc tăng trưởng dao động từ 0,20 đến 0,50 ở thời hạn $12\times$, và từ 0,30 đến 0,80 ở thời hạn $6\times$.
+2. **Quy luật tăng trưởng dưới tuyến tính trên bầy phân tán**: Với bầy phân tán, $D_{\min} = 1$ khi $N \le 50$, và chỉ cần 2 đến 3 chó ở $N = 400$ dưới thời hạn nới lỏng ($12\times$). Trong không gian log-log ($\log_2 D_{\min}$ theo $\log_2 N$), độ dốc tăng trưởng trên năm kích thước ban đầu dao động từ 0,20 đến 0,50 ở thời hạn $12\times$, và từ 0,30 đến 0,80 ở thời hạn $6\times$ (thu hẹp trên chín kích thước, mục 8).
 3. **Áp lực thời hạn là yếu tố chi phối hàng đầu**: Rút ngắn thời hạn từ $12\times$ xuống $3\times$ làm tăng vọt $D_{\min}$ trên bố cục `wide` ở $N = 400$ từ 2 lên 5–6 chó—mức gia tăng này vượt qua cả tác động của việc mở rộng quy mô đàn cừu lên gấp bốn lần.
 4. **Cơ chế cá thể lạc đàn (The Straggler Mechanism)**: Trong 95% số lượt thất bại nghiêm ngặt của các đội có từ 6 chó trở lên, đàn chó thực chất đã đưa được 99% số cừu vào đích từ rất sớm. Thất bại nghiêm ngặt xảy ra do đàn chó quay sang săn đuổi 1–2 cá thể rớt lại sau cùng, vượt quá đà và vô tình lùa ngược khối cừu chủ lực ra ngoài pasture. Việc giảm vận tốc chó ($v_{\mathrm{dog}} = 1{,}15$) loại bỏ được xung lực vượt đà này, giúp đưa $D_{\min}$ nghiêm ngặt từ thất bại hoàn toàn (`none`) xuống còn 6 chó ở bố cục `outlier_rich` ($N = 400$).
 5. **Tính vững chắc của tiêu chí tiếp cận 99%**: Dưới tiêu chí 99%, giá trị $D_{\min}$ duy trì sự ổn định cao (dao động trong phạm vi $\pm 1$ chó so với mốc cơ sở) trước các thay đổi về quy ước mô phỏng (xuất phát từ cọc người chăn, xuất phát vòng tròn, cự ly xuất phát, và các tham số cừu thực địa GPS). Ngược lại, tiêu chí nghiêm ngặt phóng đại quá mức các sai số do quy ước hình học gây ra.
 6. **Sự bắt buộc của tầng phối hợp đội**: Mô hình đối chứng không phối hợp (FAT) thiếu thuật toán gán nhiệm vụ và lực đẩy không gian đã thất bại hoàn toàn: các chú chó dồn cục thành bản sao trùng lặp (`dog_overlap` $> 0{,}80$), không đạt được bất kỳ giá trị $D_{\min}$ tin cậy nào ở $N \ge 200$.
-7. **Đủ chó, và không có tác hại theo tiêu chí 99%** (phân tích tiếp theo, mục 3.7): vượt quá quy mô đội *D*<sub>sat</sub> mà tại đó việc lùa không còn nhanh hơn, chó thêm giữ thời gian hoàn thành ở mức 0,90 đến 1,02 lần thời gian tại *D*<sub>sat</sub>, trong khi thời gian chó tăng tỉ lệ với $D$, và thời gian mỗi con cừu chạy trốn không tăng. Theo tiêu chí 99%, không quy mô đội nào đến 24 làm nhiệm vụ thất bại; chó thêm chỉ làm bầy `split` ở $N = 200$ chậm hơn. Bản thân *D*<sub>sat</sub> vẫn còn là một khoảng trên một phần ba các đường cong phân tán.
+7. **Đủ chó, và không có tác hại theo tiêu chí 99%** (phân tích tiếp theo, mục 3.7): vượt quá quy mô đội *D*<sub>sat</sub> mà tại đó việc lùa không còn nhanh hơn, chó thêm giữ thời gian hoàn thành ở mức 0,96 đến 1,01 lần thời gian tại *D*<sub>sat</sub>, trong khi thời gian chó tăng tỉ lệ với $D$, và thời gian mỗi con cừu chạy trốn không tăng. Theo tiêu chí 99%, không quy mô đội nào đến 24 làm nhiệm vụ thất bại trên năm kích thước ban đầu (một lần sụt trên lưới dày hơn); chó thêm chỉ làm bầy `split` chậm hơn, ở $N \ge 200$.
 8. **Lưới dày hơn** (mục 3.8): trên chín kích thước bầy, $D_{\min}$ tăng với độ dốc 0,27–0,38 ở $12\times$ và 0,38–0,61 ở $6\times$, còn *D*<sub>sat</sub> tăng nhanh gấp khoảng hai lần (0,70–0,91 trên `wide`). Đến $N = 566$, một quy luật lũy thừa và một đường cong chững lại khớp dữ liệu tốt như nhau.
 9. **Các phần của quy tắc đội** (mục 3.9): riêng công tắc gom/lùa của bài báo đã đưa một đội chó độc lập đến $N = 200$; tầng đội là điều làm cho $N = 400$ trở nên khả thi.
 10. **Quá nhiều chó** (mục 3.10): với chó chiếm chỗ (cách nhau 2 m), `outlier_rich` $N = 400$ thất bại từ $D = 9$ (được quyết định không đạt độ tin cậy đến $D = 24$), trong khi chó dạng điểm không cho thấy tác hại được quyết định đến 24.
@@ -28,7 +28,7 @@ Các kết quả thực nghiệm chỉ ra:
 
 ## 1. Câu hỏi nghiên cứu và mục tiêu
 
-Các nghiên cứu trước đây về chăn dắt đa tác tử chủ yếu khảo sát các quy mô đội cố định hoặc trên các mục tiêu không liên kết (Pierson và Schwager 2015; Kubo et al. 2022; Lama và di Bernardo 2024). Để xác lập quy luật mở rộng quy mô của đội chăn tối thiểu dưới ảnh hưởng của lực hút bầy đàn, áp lực thời hạn và sự phân tán không gian, nghiên cứu này giải quyết 6 Câu hỏi Nghiên cứu (RQs):
+Các nghiên cứu trước đây về chăn dắt đa tác tử chủ yếu khảo sát các quy mô đội cố định hoặc trên các mục tiêu không liên kết (Pierson và Schwager 2015; Kubo et al. 2022; Lama và di Bernardo 2024). Để xác lập quy luật mở rộng quy mô của đội chăn tối thiểu dưới ảnh hưởng của lực hút bầy đàn, áp lực thời hạn và sự phân tán không gian, nghiên cứu này giải quyết 7 Câu hỏi Nghiên cứu (RQs):
 
 - **RQ1 (Quy luật mở rộng quy mô $N$)**: Quy mô đội tối thiểu $D_{\min}$ tăng trưởng thế nào theo kích thước bầy $N \in [25, 400]$ trên các bố cục không gian và thời hạn khác nhau? Lực hút bầy đàn có làm giảm độ dốc tăng trưởng so với bầy không liên kết ($\sqrt{N}$) hay không?
 - **RQ2 (Bố cục hình học so với quy mô dân số $N$)**: Với cùng một thời hạn, yếu tố nào chi phối $D_{\min}$ mạnh mẽ hơn: bố cục xuất phát (co cụm hay phân tán) hay quy mô đàn cừu $N$?
@@ -86,14 +86,16 @@ $$
 - **Giá trị quyết định**: Khi $D_{\min,\mathrm{low}} = D_{\min}$, mọi $D < D_{\min}$ đều chắc chắn không đạt tin cậy ($U < 0{,}90$).
 - **Khoảng chặn ($[D_{\min,\mathrm{low}}, D_{\min}]$)**: Khi $D_{\min}$ đạt tin cậy nhưng vẫn còn một số $D$ nhỏ hơn ở trạng thái chưa quyết định tại mốc 200 hạt giống (ví dụ `3-8`).
 - **Cận dưới ($[n]$)**: Chưa có $D$ nào đạt tin cậy nhưng tồn tại $D \ge n$ chưa quyết định.
-- **Thất bại (`none`)**: Toàn bộ các giá trị $D$ trên lưới kiểm thử đều chắc chắn không đạt độ tin cậy ($U < 0{,}90$).
+- **Thất bại (`none`)**: Toàn bộ các giá trị $D$ trên lưới kiểm thử (đến $D = 24$ ở các lượt chạy chính) đều chắc chắn không đạt độ tin cậy ($U < 0{,}90$).
 
 ### 2.2 Tổng quan ma trận 23 giao thức thực nghiệm
-Tập dữ liệu nghiên cứu bao gồm 23 giao thức (164.740 lượt chạy, 20 luồng worker, 0 lỗi):
-- **Lưới chính (12 giao thức)**: Đánh giá đầy đủ 5 quy mô ($N \in [25, 400]$), 4 bố cục (`compact`, `wide`, `split`, `outlier_rich`), và 3 thời hạn ($12\times, 6\times, 3\times$ thời gian lùa) dưới cả hai tiêu chí Nghiêm ngặt 100% và Tiếp cận 99%.
+Nghiên cứu đầu tiên bao gồm 23 giao thức (164.740 lượt chạy, 20 luồng worker, 0 lỗi):
+- **Lưới chính (6 giao thức)**: Đánh giá đầy đủ 5 quy mô ($N \in [25, 400]$), 4 bố cục (`compact`, `wide`, `split`, `outlier_rich`), và 3 thời hạn ($12\times, 6\times, 3\times$ thời gian lùa) dưới cả hai tiêu chí Nghiêm ngặt 100% và Tiếp cận 99%.
 - **Đối chứng không phối hợp (2 giao thức)**: `dmin_fat` và `dmin_f99_fat` ở thời hạn $6\times$.
 - **Mô hình lực liên tục Kubo (1 giao thức)**: `dmin_kubo` trên bầy co cụm ($N \in [25, 100]$).
 - **Bộ kiểm tra độ nhạy (14 giao thức)**: Đánh giá ở thời hạn $6\times$ qua 7 biến thể (cọc handler, vòng tròn ring, khoảng cách khởi đầu 15/30/60, bán kính đích $1{,}5 R_f$, tham số thực địa GPS, và tốc độ chó 1,15) dưới cả hai tiêu chí.
+
+Phần tiếp theo bổ sung 14 giao thức và chạy tiếp ba lưới 99% (162.130 lượt, 0 lỗi, chỉ tiêu chí 99%), được liệt kê cùng RQ8–RQ13 và trong phụ lục.
 
 ---
 
@@ -270,12 +272,12 @@ Khi đã xác định được quy mô đội tối thiểu $D_{\min}$, một c�
 - **Định nghĩa**: *D*<sub>sat</sub> là số lượng chó nhỏ nhất đạt độ tin cậy mà từ đó trở đi, việc bổ sung thêm chó không còn mang lại sự cải thiện tốc độ có ý nghĩa thống kê (thời gian lùa bắt đầu đi ngang).
 - **Kết quả thực nghiệm**:
   - *Trên bầy co cụm (`compact`) và quy mô nhỏ ($N \le 50$)*: *D*<sub>sat</sub> = 1 ngay từ đầu. Một chú chó đã đạt tốc độ tối đa; việc thêm chó không thể làm cừu di chuyển nhanh hơn vận tốc đi bộ tự nhiên ($1{,}0$ m/s).
-  - *Trên bầy phân tán ở thời hạn trung bình ($6\times$)*: *D*<sub>sat</sub> dao động từ 3 đến 6 chú chó (ví dụ: bầy `outlier_rich` $N = 100$ bão hòa ở *D*<sub>sat</sub> = 3; bầy `wide` $N = 400$ bão hòa ở *D*<sub>sat</sub> = 6).
-  - *Các ô tham số chưa ngã ngũ*: Ở 6 trong số 18 đường cong phân tán, các phép so sánh thời gian hoàn thành giữa các đội hình đạt độ tin cậy chưa giải quyết dứt điểm do thuật toán ưu tiên tài nguyên cho việc tìm $D_{\min}$ (`decide_finish_times: false`). Tại đây, *D*<sub>sat</sub> được ghi nhận dưới dạng khoảng chặn (ví dụ `wide` $N = 200$ là 3–24). Lượt bổ sung các phép so sánh này sau đó đã quyết định phần lớn (mục 3.8): trên `wide`, *D*<sub>sat</sub> giờ là 1, 1, 1, 2, 3, 3, 4, 5 từ $N = 25$ đến $400$.
+  - *Trên bầy phân tán ở thời hạn trung bình ($6\times$)*: *D*<sub>sat</sub> dao động từ 2 đến 7 chú chó ở $N = 100$–400 (ví dụ: bầy `outlier_rich` $N = 100$ bão hòa ở *D*<sub>sat</sub> = 3; bầy `wide` $N = 400$ ở *D*<sub>sat</sub> = 5).
+  - *Các ô tham số chưa ngã ngũ*: Trong các lượt chạy đầu, các phép so sánh thời gian hoàn thành chưa giải quyết dứt điểm trên 6 trong số 18 đường cong phân tán do tài nguyên được ưu tiên cho việc tìm $D_{\min}$ (`decide_finish_times: false`), nên *D*<sub>sat</sub> được ghi nhận dưới dạng khoảng chặn (ví dụ `wide` $N = 200$ là 3–24). Lượt bổ sung sau đó đã quyết định phần lớn (mục 3.8): trên `wide`, *D*<sub>sat</sub> giờ là 1, 1, 1, 2, 3, 3, 4, 5 từ $N = 25$ đến $400$. Ở $6\times$ nó vẫn là một khoảng trên 5 trong 23 đường cong phân tán (`outlier_rich` $N = 50$, 283, 400, 566; `wide` 566).
 
 #### 2. Chi phí lãng phí khi vượt ngưỡng bão hòa (*D* > *D*<sub>sat</sub>)
 - **Thêm chó không rút ngắn thời gian, nhưng chi phí tăng tỉ lệ thuận**:
-  - Khi tăng số chó vượt qua *D*<sub>sat</sub>, thời gian đưa đàn cừu về đích gần như giữ nguyên: dao động trong khoảng **0,90 đến 1,02 lần** thời gian tại mốc *D*<sub>sat</sub> (khảo sát trên 128 ô tham số). Tức là việc tăng thêm hàng chục con chó chỉ giúp về đích nhanh hơn chưa đầy 5–10%, thậm chí đôi khi chậm hơn một chút do cản trở nhau.
+  - Khi tăng số chó vượt qua *D*<sub>sat</sub>, thời gian đưa đàn cừu về đích gần như giữ nguyên: dao động trong khoảng **0,96 đến 1,01 lần** thời gian tại mốc *D*<sub>sat</sub> (189 ô đạt độ tin cậy trên một *D*<sub>sat</sub> đã quyết định, chín quy mô bầy). Tức là việc tăng thêm hàng chục con chó chỉ giúp về đích nhanh hơn tối đa 4%, và đôi khi chậm hơn khoảng 1%.
   - Tuy nhiên, **tổng thời gian làm việc của bầy chó** (tổng thời gian tích lũy $\mathrm{dog\_time} = D \times T$) và tổng quãng đường chạy của cả đội lại tăng tuyến tính tỉ lệ thuận với *D* / *D*<sub>sat</sub>.
   - *Minh họa thực tế*: Trên bầy compact, triển khai 24 chú chó tiêu tốn năng lượng gấp 24 lần so với 1 chú chó, nhưng đàn cừu vẫn mất cùng một khoảng thời gian (~140 giây) để về tới đích.
 
@@ -283,13 +285,13 @@ Bảng 6 tổng hợp chi phí vận hành ở mốc gấp đôi ngưỡng bão 
 
 | Bố cục xuất phát, Quy mô *N* | Ngưỡng *D*<sub>sat</sub> | Tại 2 *D*<sub>sat</sub>: Thời gian lùa / Thời gian chó | Tại *D* = 24: Thời gian lùa / Thời gian chó |
 | :--- | :---: | :---: | :---: |
-| `wide`, $N = 200$ | 3–24 | 0,97 / 1,94 | 0,96 / 7,68 |
-| `wide`, $N = 400$ | 6 | 0,99 / 1,98 | 0,98 / 3,93 |
+| `wide`, $N = 200$ | 3 | 0,97 / 1,94 | 0,96 / 7,70 |
+| `wide`, $N = 400$ | 5 | 0,97 / 2,32 (tại $D = 12$) | 0,96 / 4,61 |
 | `outlier_rich`, $N = 100$ | 3 | 0,99 / 1,98 | 0,98 / 7,85 |
-| `outlier_rich`, $N = 400$ | 6–24 | 0,97 / 1,93 | 0,95 / 3,78 |
-| `split`, $N = 100$ | 2–24 | 0,95 / 1,89 | 0,93 / 11,19 |
+| `outlier_rich`, $N = 400$ | 6–24 | 0,96 / 1,91 | 0,94 / 3,74 |
+| `split`, $N = 100$ | 4 | 0,99 / 1,98 | 0,99 / 5,91 |
 
-*Ý nghĩa Bảng 6*: Tại $D = 24$, thời gian lùa cừu chỉ nhanh hơn từ 2% đến 7% ($0{,}93 - 0{,}98$), nhưng tổng công suất và năng lượng tiêu hao của bầy chó lại bị đội lên từ **3,8 đến 11,2 lần** ($3{,}78 - 11{,}19$).
+*Ý nghĩa Bảng 6*: Tại $D = 24$, thời gian lùa cừu chỉ nhanh hơn từ 1% đến 6% ($0{,}94 - 0{,}99$), nhưng tổng công suất và năng lượng tiêu hao của bầy chó lại bị đội lên từ **3,7 đến 7,9 lần** ($3{,}74 - 7{,}85$). Giá trị sau lượt bổ sung thời gian hoàn thành (`uv run cli/dmin_tables.py effort dmin_f99_m6`).
 
 #### 3. Áp lực tâm lý và mức độ hoảng sợ của đàn cừu (Flock Stress)
 Nhiều người e ngại rằng một bầy chó đông đúc sẽ gây hoảng loạn và kiệt sức cho đàn cừu. Tuy nhiên, dữ liệu vi mô từng giây cho thấy bức tranh hoàn toàn khác:
@@ -304,7 +306,7 @@ Nhiều người e ngại rằng một bầy chó đông đúc sẽ gây hoảng
 
 ![Chi phí của chó vượt quá D_sat](../figures/fig33_effort.png)
 
-**Hình 8:** Đánh giá chi phí khi vượt quá ngưỡng *D*<sub>sat</sub> ở thời hạn 6&times; (tiêu chí 99%). Trái: Thời gian hoàn thành so với mốc *D*<sub>sat</sub> đi ngang ở mức 0,90 đến 1,02. Phải: Tổng thời gian làm việc của chó tăng tuyến tính theo tỉ số *D* / *D*<sub>sat</sub>.
+**Hình 8:** Đánh giá chi phí khi vượt quá ngưỡng *D*<sub>sat</sub> ở thời hạn 6&times; (tiêu chí 99%). Trái: Thời gian hoàn thành so với mốc *D*<sub>sat</sub> giữ sát mức 1. Phải: Tổng thời gian làm việc của chó tăng tuyến tính theo tỉ số *D* / *D*<sub>sat</sub>.
 
 ![Áp lực lên bầy](../figures/fig34_pressure.png)
 
@@ -416,7 +418,7 @@ Trên bố cục `split` ở $N \ge 200$, việc tăng số lượng chó $D$ kh
 
 ![Đường cong thành công trên bố cục Split](../figures/fig23_split_curves.png)
 
-**Hình 13:** Tắc nghẽn hiệu năng trên bố cục split. Tăng số chó không giúp đạt độ tin cậy ở *N* &ge; 200 do dồn ứ cụm và quy tắc dừng cự ly.
+**Hình 13:** Tắc nghẽn hiệu năng trên bố cục split. Tăng số chó không giúp đạt độ tin cậy ở *N* &ge; 200, một phần do dồn ứ cụm và quy tắc dừng cự ly (nguyên nhân thứ ba vẫn chưa rõ).
 
 ### 4.2 Tương quan các chỉ số vi mô
 Trên toàn bộ các lượt chạy, các phép đo từng nhịp khẳng định:
@@ -460,7 +462,7 @@ Trong thực tế ứng dụng robot và chăn thả nông nghiệp, một con c
 Ứng dụng trực tiếp là chăn dắt bằng robot và drone, nơi phải chọn quy mô đội trước một lượt thử nghiệm. Với người chăn cừu thực thụ, các con số chỉ mang tính gián tiếp: họ quyết định theo kinh nghiệm và tự điều khiển chó, và cừu trong mô hình khác với cừu thật (bầy lỏng hơn, một cự ly phản ứng cố định duy nhất).
 
 - **Định cỡ đội.** Ở thời hạn thong thả, một đến ba đơn vị xử lý được một bầy phân tán đến 400 con, và một bầy compact cần một đơn vị ở mọi kích thước. Thời hạn làm thay đổi câu trả lời gần bằng một bầy lớn gấp bốn lần, nên cần cố định thời gian có được trước khi chọn quy mô đội.
-- **Tốc độ tốn kém hơn độ tin cậy.** Trên các bầy phân tán, đội hoàn thành nhanh nhất lớn gấp một rưỡi đến ba lần mức tối thiểu, và các đơn vị vượt quá nó chỉ tốn thêm thời gian pin mà không đem lại gì (Bảng 6).
+- **Tốc độ tốn kém hơn độ tin cậy.** Trên các bầy `wide` và `outlier_rich`, đội hoàn thành nhanh nhất lớn gấp một rưỡi đến hai lần rưỡi mức tối thiểu (nhiều hơn trên `split`), và các đơn vị vượt quá nó chỉ tốn thêm thời gian pin mà không đem lại gì (Bảng 6).
 - **Kích thước vật lý giới hạn đội hữu ích.** Các đơn vị không thể đứng gần nhau dưới 2 m sẽ làm chật vòng cung lùa của một bầy phân tán từ khoảng 9 đơn vị ở $N = 400$; chiều dài vòng cung (13 đến 23 m ở đây) giới hạn đội hữu ích.
 - **Chia sẻ bản đồ trước khi thêm đơn vị.** Góc nhìn cục bộ tốn khoảng một đơn vị ở $N = 200$, và gộp những gì mọi đơn vị nhìn thấy sẽ lấy lại được đơn vị đó.
 - **Lùi ra để giữ bầy.** Các đơn vị phải đi ra ngoài cự ly tháo chạy của con vật để giữ bầy tại chỗ; các đơn vị chỉ dừng lại thì vẫn làm bầy tiếp tục di chuyển.
@@ -474,7 +476,7 @@ Trong thực tế ứng dụng robot và chăn thả nông nghiệp, một con c
 1. **Đơn giản hóa động học 2D**: Cừu và chó được mô phỏng như các chất điểm 2D có khả năng đổi hướng tức thời và không bị suy giảm thể lực theo thời gian.
 2. **Điều kiện biên mở hoàn toàn**: Đồng cỏ thực tế luôn có hàng rào bao quanh, đóng vai trò hỗ trợ đắc lực cho chó chăn dồn ép gia súc.
 3. **Ranh giới khoảng chặn do rời rạc hóa**: Các ô có độ tin cậy thực tế xấp xỉ $\theta = 0{,}90$ sẽ không thể ngã ngũ ở mốc 200 hạt giống, đòi hỏi phải báo cáo dưới dạng khoảng chặn.
-4. **Giả định thông tin toàn cục**: Kiến trúc `strombom_multi` giả định đàn chó nắm rõ tọa độ chính xác của mọi cá thể, trong khi robot thực địa phải dựa trên thông tin cục bộ, cảm biến góc nhìn hoặc truyền thông giới hạn.
+4. **Thông tin toàn cục trong các lượt chạy chính**: ngoài các lượt chạy về tầm cảm nhận ở mục 3.12, `strombom_multi` giả định chó biết vị trí của mọi con cừu. Mục 3.12 kiểm tra tầm cảm nhận giới hạn với vị trí đã biết trong tầm đó; cảm biến chỉ đo hướng (bearing-only) chưa được mô hình hóa.
 5. **Các lựa chọn định hình kết quả tiếp nối**: bước giữ bầy (chó rút ra ngoài $r_s$), quy tắc giãn cách (không chó nào trong vòng 2 m của chó khác), quy tắc tầm nhìn cục bộ (chó không thấy gì đi về tâm bầy biết lần cuối), mật độ áp đặt trên $N = 566$, và điểm lùa có giới hạn là các lựa chọn của HerdSim, không có nguồn trong các bài báo. Mỗi kết quả trong mục 3.10 đến 3.13 đúng theo lựa chọn được nêu cùng nó.
 6. **N lớn**: trên $N \approx 600$ bầy của mô hình không có kích thước riêng, và bán kính áp đặt lỏng hơn bầy mà các chó lùa (0,53–0,82 của nó). Trên $N = 1056$ chỉ biến thể có giới hạn mới lùa được bầy.
 7. **Các chẩn đoán còn nhỏ**: các lượt chạy lại đo áp lực và chẩn đoán split dùng 12 hạt giống mỗi ô; chúng cho hướng, không cho giá trị đã quyết định.

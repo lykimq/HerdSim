@@ -17,6 +17,8 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
+from matplotlib.figure import Figure  # noqa: E402
+from matplotlib.patches import Circle, Rectangle  # noqa: E402
 from matplotlib.ticker import NullFormatter  # noqa: E402
 import numpy as np  # noqa: E402
 
@@ -91,7 +93,7 @@ def caption(fig, text: str, width: int = 150) -> None:
     fig._has_caption = True  # noqa: SLF001
 
 
-_tight_layout = matplotlib.figure.Figure.tight_layout
+_tight_layout = Figure.tight_layout
 
 
 def _tight_layout_full_canvas(self, *args, rect=None, **kwargs):
@@ -101,7 +103,12 @@ def _tight_layout_full_canvas(self, *args, rect=None, **kwargs):
     return _tight_layout(self, *args, rect=rect, **kwargs)
 
 
-matplotlib.figure.Figure.tight_layout = _tight_layout_full_canvas  # type: ignore[method-assign]
+Figure.tight_layout = _tight_layout_full_canvas  # type: ignore[method-assign]
+
+
+def xy(point) -> tuple[float, float]:
+    """A point as the (x, y) tuple matplotlib patches take."""
+    return float(point[0]), float(point[1])
 
 
 def style_map(ax, title: str) -> None:
@@ -116,7 +123,7 @@ def style_map(ax, title: str) -> None:
 def draw_scene(ax, c, sheep, dogs, goal_arrow: bool = True) -> None:
     center = np.asarray(c["flock_center"])
     goal = np.asarray(c["goal_center"])
-    ax.add_patch(plt.Circle(goal, c["goal_radius"], fc="none", ec=AQUA, lw=1.5))
+    ax.add_patch(Circle(xy(goal), c["goal_radius"], fc="none", ec=AQUA, lw=1.5))
     ax.scatter(*sheep.T, s=7, color=BLUE, alpha=0.85, lw=0)
     ax.scatter(*dogs.T, s=34, marker="^", color=ORANGE, ec=SURFACE, lw=0.8, zorder=3)
     if goal_arrow:
@@ -134,7 +141,7 @@ def fig_layouts() -> None:
         draw_scene(ax, c, sheep, dogs)
         center = np.asarray(c["flock_center"])
         f = collect_threshold(n, c["r_a"])
-        ax.add_patch(plt.Circle(center, f, fc="none", ec=MUTED, lw=0.9, ls="--"))
+        ax.add_patch(Circle(xy(center), f,fc="none", ec=MUTED, lw=0.9, ls="--"))
         ax.text(center[0] - f * 0.72, center[1] + f * 0.78, "f(N)", color=MUTED, ha="center")
         ax.set_xlim(center[0] - 150, center[0] + 175)  # same window in every panel
         ax.set_ylim(center[1] - 150, center[1] + 150)
@@ -299,10 +306,11 @@ def fig_kubo() -> None:
     terms = {"K_s1 repulsion": c["K_s1"] * a, "K_s2 alignment": c["K_s2"] * b,
              "K_s3 attraction": c["K_s3"] * cc, "K_s4 flight from the dog": c["K_s4"] * dflee}
     code = sheep_velocities(pos, vel, dog, c)[0]
-    assert np.allclose(code, clamp_speed(sum(terms.values())[None, :], c["sheep_speed_max"])[0]), \
+    total = np.sum(list(terms.values()), axis=0)
+    assert np.allclose(code, clamp_speed(total[None, :], c["sheep_speed_max"])[0]), \
         "figure disagrees with the Kubo sheep code"
     ax = axes[0]
-    ax.add_patch(plt.Circle(focal, c["sheep_radius"], fc="none", ec=MUTED, lw=0.8, ls="--"))
+    ax.add_patch(Circle(xy(focal),c["sheep_radius"], fc="none", ec=MUTED, lw=0.8, ls="--"))
     ax.scatter(*nbr.T, s=24, color="#a8a7a0", lw=0)
     ax.scatter(*dog.T, s=50, marker="^", color=ORANGE, zorder=4)
     ax.scatter(*focal, s=50, color=INK, zorder=4)
@@ -366,7 +374,7 @@ def fig_kubo() -> None:
     run_trial(ck, 2026, on_tick=keep)
     sh, dg = snap["s"]
     ax = axes[2]
-    ax.add_patch(plt.Circle(np.asarray(ck["goal_center"]), ck["goal_radius"], fc="none", ec=AQUA, lw=1.4))
+    ax.add_patch(Circle(xy(ck["goal_center"]),ck["goal_radius"], fc="none", ec=AQUA, lw=1.4))
     ax.scatter(*sh.T, s=10, color=BLUE, lw=0)
     ax.scatter(*dg.T, s=44, marker="^", color=ORANGE, ec=SURFACE, lw=0.8, zorder=4)
     allp = np.vstack([sh, dg, np.asarray(ck["goal_center"])[None, :]])
@@ -406,7 +414,7 @@ def fig_trial() -> None:
     goal = np.asarray(c["goal_center"])
     for ax, tick in zip(axes.flat, shots):
         sheep, dogs = states[tick]
-        ax.add_patch(plt.Circle(goal, c["goal_radius"], fc="none", ec=AQUA, lw=1.5))
+        ax.add_patch(Circle(xy(goal), c["goal_radius"], fc="none", ec=AQUA, lw=1.5))
         for j in range(d):
             ax.plot(*trail[: tick + 1, j].T, color=ORANGE, lw=0.7, alpha=0.6)
         ax.scatter(*sheep.T, s=7, color=BLUE, alpha=0.85, lw=0)
@@ -445,13 +453,13 @@ def fig_task_geometry() -> None:
     goal = np.asarray(c["goal_center"])
     rf = c["flock_radius"]
     reach = max(layout_extent({**c, "initial_layout": k}) for k in layouts)
-    ax.add_patch(plt.Rectangle((0, 0), c["world_width"], c["world_height"], fc="none", ec=GRID,
+    ax.add_patch(Rectangle((0, 0),c["world_width"], c["world_height"], fc="none", ec=GRID,
                                lw=1.0))
-    ax.add_patch(plt.Circle(centre, reach, fc=BLUE, ec="none", alpha=0.10))
-    ax.add_patch(plt.Circle(centre, rf, fc="none", ec=BLUE, lw=1.0, ls=":"))
+    ax.add_patch(Circle(xy(centre), reach, fc=BLUE, ec="none", alpha=0.10))
+    ax.add_patch(Circle(xy(centre), rf,fc="none", ec=BLUE, lw=1.0, ls=":"))
     sheep = place_flock({**c, "initial_layout": "compact"}, np.random.default_rng(2026))
     ax.scatter(*sheep.T, s=7, color=BLUE, lw=0)
-    ax.add_patch(plt.Circle(goal, c["goal_radius"], fc="none", ec=AQUA, lw=1.6))
+    ax.add_patch(Circle(xy(goal), c["goal_radius"], fc="none", ec=AQUA, lw=1.6))
     drive = float(goal[0] - centre[0])
     ax.annotate("", xy=(goal[0], centre[1] - reach - 28), xytext=(centre[0], centre[1] - reach - 28),
                 arrowprops=dict(arrowstyle="<->", color=INK, lw=1.0))

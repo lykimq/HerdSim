@@ -2,16 +2,16 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-268%20passed-brightgreen.svg)](tests/)
-[![Trials](https://img.shields.io/badge/simulated%20trials-164%2C740-success.svg)](results/)
+[![Tests](https://img.shields.io/badge/tests-313%20passed-brightgreen.svg)](tests/)
+[![Trials](https://img.shields.io/badge/simulated%20trials-326%2C870-success.svg)](results/)
 
 Have you ever watched sheepdogs work a flock across an open field? A single border collie working patiently can eventually round up dozens of sheep. But what happens when the clock is ticking? Or when sheep are scattered across a vast pasture, split into separate groups, or wandering in opposite directions? A single dog simply cannot run in multiple directions at once. To gather the flock before time runs out, dogs must work together as a coordinated team.
 
 That raises a fundamental question in collective animal behavior and autonomous swarm robotics:
 
-> **How many dogs ($D$) do you actually need to gather a flock of $N$ sheep and guide them into a pen before a deadline?**
+> **How many dogs ($D$) does it take to gather a flock of $N$ sheep and drive it into a goal reliably before a deadline: how few will do, how many are enough, and when do more dogs start to hurt?**
 
-**HerdSim** is an open-source simulation laboratory built to answer that question. We investigate how this minimum team size (which we call ***D*<sub>min</sub>**) changes as flocks grow from 25 to 400 sheep, across different pasture layouts, under relaxed versus urgent deadlines, and with different levels of team coordination.
+**HerdSim** is an open-source simulation laboratory built to answer that question. We map the smallest reliable team (***D*<sub>min</sub>**), the team beyond which more dogs stop making the drive faster (***D*<sub>sat</sub>**), and the conditions under which extra dogs make the task fail. The main grids cover flocks of 25 to 400 sheep across pasture layouts, deadlines and levels of team coordination; follow-up runs extend this to 566 sheep, to the cohesion of the flock, to what each dog can see, and above the model's edge up to 3200 sheep. Sometimes the answer is that no team size works.
 
 ![One simulation trial](docs/figures/fig17_trial.png)
 **Figure 1:** A live simulation trial (*N* = 200 sheep, *D* = 4 dogs, wide start layout, seed 2026). The dogs fan out in parallel to collect distant strays, assemble them into a cohesive flock, form a driving arc behind them, and steer the collective smoothly into the circular goal.
@@ -39,12 +39,12 @@ That raises a fundamental question in collective animal behavior and autonomous 
 
 ## Core Scientific Findings
 
-To map out how team size scales, we conducted **164,740 simulated herding trials** across 23 different research protocols (with zero crashes or execution errors). We evaluated flock sizes from 25 to 400 sheep across four initial pasture layouts, three deadline pressures, and two standards of mission success.
+To map out how team size scales, we conducted **326,870 simulated herding trials** across 37 research protocols (with zero crashes or execution errors). The first 23 protocols (164,740 trials, findings 1 to 7) cover flock sizes from 25 to 400 sheep across four initial pasture layouts, three deadline pressures, and two standards of mission success. The 14 follow-up protocols and three resumed grids (findings 8 to 12) use the 99% rule only.
 
 The complete scientific paper is available in [`docs/report/d_min_report.md`](docs/report/d_min_report.md). All underlying tables can be reproduced directly from the raw data using [`cli/dmin_tables.py`](cli/dmin_tables.py) and are collected in [`docs/report/results_tables.md`](docs/report/results_tables.md).
 
 ![The study design](docs/figures/fig32_design.png)
-**Figure 2:** The experimental design. Top: The adaptive sampling loop. Bottom: Coverage of the 23 protocols (main scaling grid, uncoordinated FAT baseline, continuous force model, and 14 sensitivity sweeps).
+**Figure 2:** The experimental design. Top: The adaptive sampling loop. Bottom: What each group of runs covers: the first 23 protocols (main scaling grids, uncoordinated FAT baseline, continuous force model, 14 sensitivity sweeps) and the 14 follow-up protocols (independent dogs, the force model up to 24 dogs, holding and spacing, cohesion, sensing, large N).
 
 ![D_min against flock size across deadlines and layouts](docs/figures/fig20_dmin_vs_n.png)
 **Figure 3:** Minimum team size *D*<sub>min</sub> plotted against flock size *N* across three deadlines (12&times;, 6&times;, and 3&times; drive times). Solid lines and circles indicate strict 100% containment; dashed lines and squares show 99% arrival. Shaded bars denote undecided brackets (e.g., [3, 8]), hollow triangles mark lower bounds, and crosses indicate that no team size on our grid met the 90% reliability threshold.
@@ -54,7 +54,7 @@ When sheep start close together in a neat cluster (`compact`), **a single dog is
 
 **Why?** Sheep are naturally social animals. When they start close together, no sheep are lost or wandering off. The dog never needs to waste time gathering strays—the mission is purely about steering the group forward. 
 
-**Does adding more dogs help?** In our primary model ([Strömbom et al. 2014](https://doi.org/10.1098/rsif.2014.0719)), having 2, 4, or even 24 dogs does not speed up the drive at all (median completion time stays between 1.44 and 1.74 drive times regardless of team size). This is because a walking flock already moves at its natural cruising speed; extra dogs behind them cannot push them any faster without causing unnecessary panic. In the continuous force model of [Kubo et al. (2022)](https://doi.org/10.1007/s10015-021-00726-7), one dog is also sufficient for reliability, though adding dogs does help compress the flock slightly and guide it faster (finish times drop from ~110 s with 1 dog to ~30 s with 10 dogs).
+**Does adding more dogs help?** In our primary model ([Strömbom et al. 2014](https://doi.org/10.1098/rsif.2014.0719)), having 2, 4, or even 24 dogs does not speed up the drive at all (median completion time stays between 1.44 and 1.74 drive times regardless of team size). This is because a walking flock already moves at its natural cruising speed; extra dogs behind them cannot push them any faster without causing unnecessary panic. In the continuous force model of [Kubo et al. (2022)](https://doi.org/10.1007/s10015-021-00726-7), one dog is also sufficient for reliability, though adding dogs does help compress the flock slightly and guide it faster (finish times drop from about 115 s with 1 dog to 29 s with 10 dogs, finding 9).
 
 ![Compact flocks](docs/figures/fig31_compact.png)
 **Figure 4:** Finish time versus team size *D* on compact starts. Left: Strömbom flock with team coordination (median completion time is invariant to team size). Right: Kubo force model (completion time drops smoothly as more dogs join the drive). Both models achieve 100% success across all team sizes.
@@ -62,7 +62,7 @@ When sheep start close together in a neat cluster (`compact`), **a single dog is
 ### 2. On scattered pastures, *D*<sub>min</sub> grows much slower than flock size
 When sheep start scattered across the pasture (`wide`, `split`, `outlier_rich`), dogs must first round up the strays before they can drive the flock to the pen:
 - Under a relaxed deadline ($12\times$ drive time), **1 dog** is enough for up to $N = 50$ sheep, and you only need **2 or 3 dogs** for a large flock of $N = 400$ sheep.
-- In log-log space ($\log_2 D_{\min}$ vs. $\log_2 N$), the scaling slope falls between **0.20 and 0.50** at $12\times$ drive times, and **0.30 and 0.80** at $6\times$ drive times. 
+- In log-log space ($\log_2 D_{\min}$ vs. $\log_2 N$), the scaling slope on these five flock sizes falls between **0.20 and 0.50** at $12\times$ drive times, and **0.30 and 0.80** at $6\times$ drive times. The denser grid of finding 8 narrows this to 0.27 to 0.38 and 0.38 to 0.61.
 
 **Why does it scale so well?** You might imagine that herding four times as many sheep would require four times as many dogs. But sheep naturally want to stick together. Once a dog nudges a distant stray sheep toward the center, the stray spots its flock-mates and runs back to join them on its own. The flock's natural social attraction does half the gathering work for free!
 
@@ -104,7 +104,7 @@ The result is failure: because every dog has the same view of the field, **all d
 ### 6. What the detailed trial metrics reveal
 HerdSim records 19 physical measurements on every single tick of every simulation:
 - **Flock spread predicts success**: Across all trials, there is a strong negative correlation ($r = -0.56$ to $-0.81$) between average flock spread and mission success. When sheep stay tightly bunched, herding succeeds; when the flock scatters, success drops.
-- **The `split` pasture anomaly**: On flocks split into separate clusters, adding more dogs ($D \ge 4$) surprisingly caused performance to plateau. Why? Our metrics revealed that dogs were freezing in place! Under Strömbom's rule, a dog stops moving if it gets within 6 meters ($3 r_a$) of a sheep to avoid spooking it. In dense clusters, this rule froze up to 25% of the dog pack. Reducing this standoff distance in replay experiments restored dog movement and cut completion times by ~22%.
+- **The `split` pasture anomaly**: On flocks split into separate clusters, adding more dogs ($D \ge 4$) surprisingly caused performance to plateau. Why? Our metrics revealed that dogs were freezing in place! Under Strömbom's rule, a dog stops moving if it gets within 6 meters ($3 r_a$) of a sheep to avoid spooking it. In dense clusters, this rule froze up to 25% of the dog pack. In replays, a shorter standoff distance cut completion times by about a fifth at $D \ge 8$, and sending the collecting dogs to outliers far apart halved the time at $D = 4$. With both changes, 8 to 16 dogs are still slower than 2, and at 3 drive times neither change restores success, so part of the cause is still unknown.
 
 ![Per-trial metrics](docs/figures/fig27_metrics.png)
 **Figure 9:** Detailed trial diagnostics. (a) Negative correlation between flock dispersion and success rate. (b) Percentage of dogs frozen in place under the standoff rule on split versus wide flocks. (c) Pairwise dog overlap.
@@ -112,10 +112,10 @@ HerdSim records 19 physical measurements on every single tick of every simulatio
 
 ### 7. Beyond the minimum: enough dogs, and what extra dogs cost
 After D_min, a follow-up analysis of the 99% runs (no new campaigns) asked from which team size an extra dog stops helping (D_sat), what dogs beyond it cost, and whether they put more pressure on the sheep:
-- **Extra dogs beyond D_sat are pure cost**: every reliable team larger than D_sat finishes in 0.90 to 1.02 of the D_sat time, while total dog time grows in proportion to the number of dogs. On a compact flock, 24 dogs spend about 24 times the dog time of one dog for the same drive.
+- **Extra dogs beyond D_sat are pure cost**: at 6 drive times every reliable team larger than a decided D_sat finishes in 0.96 to 1.01 of the D_sat time (189 cells), while total dog time grows in proportion to the number of dogs. On a compact flock, 24 dogs spend about 24 times the dog time of one dog for the same drive.
 - **More dogs do not mean more pressure per sheep**: in 164 replayed trials, the seconds each sheep spends fleeing a dog fall from D_min to D_sat and then stay level. More of the flock is in flight at a given moment, but the drive is shorter. Part of this is the model: the push of several dogs is capped at the push of one.
 - **Almost no team size made the task fail under the 99% rule**: on the original five flock sizes, none of the eleven 99% folders has a team size that drops back below the reliability threshold after reaching it, up to 24 dogs. On the denser grid of finding 8 one such dip appears (`split` N = 141, D = 4: 0.80). Extra dogs make `split` flocks slower at 12 drive times at every N from 200 to 566 (for example about 700 s from D = 8 against 365 s with 2 dogs at N = 200).
-- **D_sat was a range on a third of the scattered curves**, because these runs did not spend seeds on the finish-time comparisons that decide it. The follow-up runs fill them in (finding 8).
+- **D_sat was a range on a third of the scattered curves** in the first runs, because they did not spend seeds on the finish-time comparisons that decide it. The top-up of finding 8 decided most of them; at 6 drive times it stays a range on 5 of 23 scattered curves (`outlier_rich` at N = 50, 283, 400, 566 and `wide` at 566).
 
 ![Cost of dogs beyond D_sat](docs/figures/fig33_effort.png)
 **Figure 10:** Dogs beyond D_sat at 6 drive times (99% rule). Left: finish time relative to D_sat stays flat. Right: dog time grows along the line D / D_sat. Details and the pressure replay are in section 3.7 of the [report](docs/report/d_min_report.md).
@@ -174,7 +174,7 @@ flowchart TD
 
 ### Summary of Executed Research Campaigns
 
-Across 23 research protocols, HerdSim completed **164,740 simulation trials** (2,291 parameter cells evaluated) with zero crashes or execution errors:
+The first 23 research protocols completed **164,740 simulation trials** (2,291 parameter cells evaluated) with zero crashes or execution errors:
 
 | Campaign Group | Protocols | Trials | Cells | Core Research Objective |
 | :--- | :--- | :---: | :---: | :--- |
@@ -261,7 +261,7 @@ $$
 T_{\mathrm{drive}} = \frac{l}{v_{\mathrm{sheep,max}}}
 $$
 
-A compact flock driven by an experienced single dog finishes in roughly 1.44 to 1.74 $\times T_{\mathrm{drive}}$. We evaluate three realistic levels of time pressure:
+A compact flock driven by an experienced single dog finishes in roughly 1.44 to 1.74 $\times T_{\mathrm{drive}}$. The main grids use three levels of time pressure:
 - **Relaxed ($12\times T_{\mathrm{drive}}$)**: Plenty of time. A single dog has time to gather strays one by one.
 - **Intermediate ($6\times T_{\mathrm{drive}}$)**: A standard, realistic working pace.
 - **Urgent ($3\times T_{\mathrm{drive}}$)**: Fast and tight. Leaves almost no margin for sequential gathering—dogs must work in parallel.
@@ -274,22 +274,7 @@ A compact flock driven by an experienced single dog finishes in roughly 1.44 to 
 | ***N* = 200** | 10.47 m | 139.8 m | **139.8 s** (~2.3 min) | 1,678 s (~28.0 min) | 839 s (~14.0 min) | 419 s (~7.0 min) |
 | ***N* = 400** | 11.40 m | 206.8 m | **206.8 s** (~3.4 min) | 2,482 s (~41.4 min) | 1,241 s (~20.7 min) | 620 s (~10.3 min) |
 
-### Why Flock Sizes *N* &in; [25, 400] and Dog Counts *D* &in; [1, 24]?
-
-A common question in scaling research is: *Why test flocks from 25 to 400 sheep, and dog teams from 1 to 24, rather than other numbers?*
-
-1. **Flock Sizes ($N = 25, 50, 100, 200, 400$)**:
-   - **Geometric Progression ($2\times$ Doubling)**: Doubling flock size at each step creates an exact logarithmic grid ($\log_2 N \in [4.64, 8.64]$). This allows us to measure power-law scaling exponents ($\Delta \log_2 D_{\min} / \Delta \log_2 N$) cleanly without uneven spacing artifacts across a 16-fold range of animal numbers.
-   - **Why start at $N = 25$ (Lower Bound)?**: Flocks smaller than 20–25 animals do not exhibit true macroscopic collective behavior. In tiny groups, individual random wandering dominates social cohesion, and structured spatial layouts—such as dividing the flock into 3 clusters on the `split` pasture, which requires at least 8 sheep per cluster—lose their physical meaning.
-   - **Why cap at $N = 400$ (Upper Bound)?**:
-     - *Flock stability limit*: In empirical calibration, Strömbom's biological cohesion rules settle into a stable equilibrium radius $R_f(N)$ up to $N = 400$. Beyond 400, internal collision noise causes an unconfined flock to spontaneously shear and fragment even without dogs present.
-     - *Agricultural realism*: Flocks of 25 to 400 sheep accurately represent typical commercial sheep drives managed by shepherd dog teams on open pastures.
-     - *Computational feasibility*: Pairwise animal interactions scale quadratically as $\mathcal{O}(N^2)$ per simulation tick. Testing up to 400 sheep across 164,740 trials represents a rigorous upper bound that remains computationally tractable while thoroughly capturing non-linear scaling trends.
-
-2. **Dog Team Sizes ($D \in [1, 24]$)**:
-   - **The Single-Dog Baseline ($D = 1$)**: Starting at $D = 1$ grounds the research in canonical biology literature (Strömbom 2014), establishing what one dog can achieve before adding teammates.
-   - **The Grid Progression**: We systematically test $D \in \{1, 2, 3, 4, 6, 8, 10, 12, 16, 24\}$. Small team sizes ($D = 2, 3, 4$) capture the immediate transition to multi-agent parallelization, while large dog packs ($D \ge 8$) identify upper boundaries: performance saturation (*D*<sub>sat</sub>), spatial crowding (*D*<sub>crowd</sub>), and catastrophic breakdown (*D*<sub>overcrowd</sub>).
-   - **Adaptive Densification**: If adjacent counts jump across a behavioral boundary (e.g., $D = 4$ fails while $D = 6$ succeeds), HerdSim automatically tests the midpoint ($D = 5$) in subsequent rounds, pinpointing exact thresholds without brute-forcing every single integer.
+The sizes added later (71, 141, 283, 566) calibrate to 8.48, 9.79, 11.01 and 11.82 m. Why the flock sizes, team sizes and seed counts stop where they do is explained in [Why the Grid Stops Where It Does](#why-the-grid-stops-where-it-does).
 
 ---
 
@@ -403,7 +388,7 @@ where $\mathrm{threat} = \{j \mid \lVert \mathbf{x}_i - \mathbf{y}_j \rVert < r_
 
 ### 2. Shepherd Controllers
 
-HerdSim implements three shepherd architectures:
+HerdSim implements four shepherd architectures:
 
 #### Coordinated Architecture: `strombom_multi`
 Extends Strömbom's heuristics into an autonomous multi-dog team:
@@ -440,6 +425,9 @@ An uncoordinated ablation baseline (`dog_controller="fat"`) designed to test whe
 - **What is missing**: FAT has no Hungarian assignment, no driving arc, and no repulsion between dogs.
 - **Result**: Every dog picks the exact same sheep. The dogs collapse into a clump, acting like a single dog, and fail to gather dispersed flocks at $N \ge 200$.
 
+#### Independent Paper Shepherds: `independent`
+Each dog runs the single-dog rule of Strömbom 2014 on its own: the collect/drive switch is decided on the whole flock and the dog walks to that target with the paper's step, noise and stop rule. There is no outlier assignment and no drive arc, so all dogs pick the same target. With one dog it is the paper's shepherd. It separates the two parts FAT lacks: it has the switch but no team layer (finding 9).
+
 ![Uncoordinated baseline FAT](docs/figures/fig4_fat.png)
 **Figure 22:** FAT baseline. Left: Chasing geometry. Right: Without target assignment, all dogs clump behind the same outlier, exhibiting high overlap.
 
@@ -464,7 +452,7 @@ A cross-check using a fundamentally different physics model based on continuous 
    - Unlike Strömbom flocks whose radius scales naturally with flock size, Kubo sheep pack tightly to an equilibrium radius of $R_f \approx 5.8$ m regardless of $N$. Testing up to *N* = 100 validates model transferability without creating artificial super-dense clusters. The 500-second deadline directly matches Section 4.1 of the original 2022 paper.
 4. **Behavioral Outcome: Team Size Accelerates Completion**:
    - On compact starts, **1 dog is sufficient for 100% reliability ($D_{\min} = 1$)**, confirming our primary finding across paradigms.
-   - However, unlike Strömbom (where completion time is invariant to team size because sheep walk at a fixed 1 m/s), Kubo sheep feel continuous, additive pushing forces from all nearby dogs. Adding dogs from $D = 1$ to $10$ compresses the flock and steers it progressively faster, cutting completion times from ~116 s down to ~30 s.
+   - However, unlike Strömbom (where completion time is invariant to team size because sheep walk at a fixed 1 m/s), Kubo sheep feel continuous, additive pushing forces from all nearby dogs. Adding dogs from $D = 1$ to $10$ compresses the flock and steers it progressively faster, cutting completion times from about 115 s to 29 s at $N = 100$; most of the gain comes by 10 dogs (25 s with 24, `dmin_f99_kubo`).
 
 ---
 
@@ -591,7 +579,7 @@ The largest D sizes the field, so it is part of the physics: raising it always m
 
 ### Deadlines and success rule
 
-The main runs use 12, 6 and 3 drive times; a compact flock with one dog needs 1.45 to 1.74. The follow-up runs use 12 drive times where the growth shape is the question and 6 where team size and cost are, and only the 99% success rule: the strict rule is decided by the last sheep (finding 4).
+The main runs use 12, 6 and 3 drive times; a compact flock with one dog needs 1.44 to 1.74. The follow-up runs use 12 drive times where the growth shape is the question and 6 where team size and cost are, and only the 99% success rule: the strict rule is decided by the last sheep (finding 4).
 
 ---
 
@@ -609,7 +597,7 @@ cd HerdSim
 # Install development environment and dependencies
 make install     # uv sync --extra dev
 
-# Run comprehensive checks (Ruff linter + basedpyright type checker + 268 tests)
+# Run comprehensive checks (Ruff linter + basedpyright type checker + 313 tests)
 make check
 
 # Execute miniature verification campaigns (~1 minute)
@@ -701,7 +689,7 @@ HerdSim/
 
 ## Verification and Benchmarks
 
-- **Unit & Invariant Tests** (`make test`, 268 tests, ~24 s):
+- **Unit & Invariant Tests** (`make test`, 313 tests, ~32 s):
   Verifies vector mathematics, collision avoidance boundaries, exact random stream isolation, and adaptive frontier decision logic.
 - **Golden Regression Tests** ([`tests/sim/test_golden.py`](tests/sim/test_golden.py)):
   Verifies that reference simulation trials match recorded baseline trajectories to floating-point precision, ensuring physics parameters never drift silently.

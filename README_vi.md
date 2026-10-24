@@ -1,19 +1,17 @@
 # HerdSim
 
-[**English**](README.md) | [**Tiếng Việt**](README_vi.md)
-
 [![Giấy phép: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Kiểm thử](https://img.shields.io/badge/tests-268%20passed-brightgreen.svg)](tests/)
-[![Lượt mô phỏng](https://img.shields.io/badge/simulated%20trials-164%2C740-success.svg)](results/)
+[![Kiểm thử](https://img.shields.io/badge/tests-313%20passed-brightgreen.svg)](tests/)
+[![Lượt mô phỏng](https://img.shields.io/badge/simulated%20trials-326%2C870-success.svg)](results/)
 
 Bạn đã bao giờ quan sát những chú chó chăn cừu làm việc trên một đồng cỏ rộng lớn chưa? Một chú chó chăn cừu kiên nhẫn làm việc một mình cuối cùng cũng có thể gom được hàng chục con cừu. Nhưng điều gì sẽ xảy ra khi đồng hồ đang đếm ngược từng giây? Hoặc khi đàn cừu bị tản mác khắp cánh đồng, tách thành nhiều cụm riêng biệt, hay chạy theo các hướng ngược nhau? Một chú chó đơn độc không thể nào chạy về bốn phương tám hướng cùng một lúc. Để hoàn thành nhiệm vụ trước khi hết giờ, chúng bắt buộc phải làm việc cùng nhau như một đội ngũ được phối hợp nhịp nhàng.
 
 Thực tế này đặt ra một câu hỏi nền tảng trong lĩnh vực hành vi tập thể và robot bầy đàn tự hành:
 
-> **Cần tối thiểu bao nhiêu chú chó ($D$) để gom một đàn gồm $N$ con cừu và lùa chúng vào chuồng một cách tin cậy trước thời hạn quy định?**
+> **Cần bao nhiêu chú chó ($D$) để gom một đàn $N$ con cừu và lùa đàn vào vùng đích một cách tin cậy trước thời hạn: tối thiểu là bao nhiêu, bao nhiêu thì đủ, và từ khi nào thêm chó lại làm hỏng việc?**
 
-**HerdSim** là một phòng thí nghiệm mô phỏng mã nguồn mở được xây dựng để trả lời câu hỏi đó. Chúng tôi nghiên cứu quy mô đội hình tối thiểu này (gọi là ***D*<sub>min</sub>**) thay đổi như thế nào khi đàn cừu tăng từ 25 lên đến 400 con, trên nhiều bố cục bãi cỏ khác nhau, dưới các mức áp lực thời gian từ thong thả đến gấp rút, và với các chiến lược phối hợp đội hình khác nhau.
+**HerdSim** là một phòng thí nghiệm mô phỏng mã nguồn mở được xây dựng để trả lời câu hỏi đó. Chúng tôi xác định đội nhỏ nhất đạt độ tin cậy (***D*<sub>min</sub>**), quy mô đội mà từ đó thêm chó không còn giúp lùa nhanh hơn (***D*<sub>sat</sub>**), và những điều kiện khiến chó thêm làm nhiệm vụ thất bại. Các lưới chính bao phủ đàn từ 25 đến 400 con cừu trên nhiều bố cục bãi cỏ, nhiều mức thời hạn và nhiều mức phối hợp đội; các lượt chạy tiếp theo mở rộng lên 566 con, sang độ gắn kết của bầy, sang tầm nhìn của từng chó, và vượt giới hạn của mô hình lên đến 3200 con. Có những trường hợp câu trả lời là không có quy mô đội nào làm được.
 
 ![Một lượt mô phỏng](docs/figures/fig17_trial.png)
 **Hình 1:** Một lượt mô phỏng trực tiếp (*N* = 200 cừu, *D* = 4 chó, bố cục xuất phát tản mác wide, hạt giống ngẫu nhiên 2026). Các chú chó tỏa ra song song để gom những con cừu lạc xa nhất, kết nối chúng thành một đàn thống nhất, dàn thành vòng cung lùa phía sau và điều khiển cả đàn tiến êm ả vào mục tiêu hình tròn.
@@ -41,12 +39,12 @@ Thực tế này đặt ra một câu hỏi nền tảng trong lĩnh vực hành
 
 ## Phát hiện khoa học cốt lõi
 
-Để xác định chính xác quy luật mở rộng của đội hình, chúng tôi đã tiến hành **164.740 lượt mô phỏng** qua 23 giao thức nghiên cứu khác nhau (với 0 lỗi thực thi hay dừng đột ngột). Nghiên cứu khảo sát các quy mô đàn từ 25 đến 400 con cừu trên bốn bố cục bãi cỏ ban đầu, ba mức thời hạn và hai tiêu chí đánh giá thành công.
+Để xác định chính xác quy luật mở rộng của đội hình, chúng tôi đã tiến hành **326.870 lượt mô phỏng** qua 37 giao thức nghiên cứu (với 0 lỗi thực thi hay dừng đột ngột). 23 giao thức đầu tiên (164.740 lượt, phát hiện 1 đến 7) khảo sát các quy mô đàn từ 25 đến 400 con cừu trên bốn bố cục bãi cỏ ban đầu, ba mức thời hạn và hai tiêu chí đánh giá thành công. 14 giao thức tiếp theo và ba lưới chạy tiếp (phát hiện 8 đến 12) chỉ dùng tiêu chí 99%.
 
 Báo cáo khoa học đầy đủ có tại [`docs/report/d_min_report_vi.md`](docs/report/d_min_report_vi.md) (bản tiếng Anh: [`docs/report/d_min_report.md`](docs/report/d_min_report.md)). Toàn bộ các bảng dữ liệu gốc có thể tái tạo trực tiếp bằng [`cli/dmin_tables.py`](cli/dmin_tables.py) và được tổng hợp tại [`docs/report/results_tables.md`](docs/report/results_tables.md).
 
 ![Thiết kế nghiên cứu](docs/figures/fig32_design.png)
-**Hình 2:** Thiết kế thực nghiệm. Trên: Vòng lặp lấy mẫu thích ứng. Dưới: Phạm vi bao phủ của 23 giao thức (lưới mở rộng chính, mô hình đối chứng không phối hợp FAT, mô hình lực liên tục Kubo và 14 biến thể kiểm tra độ nhạy).
+**Hình 2:** Thiết kế thực nghiệm. Trên: Vòng lặp lấy mẫu thích ứng. Dưới: Phạm vi bao phủ của từng nhóm lượt chạy: 23 giao thức đầu tiên (các lưới mở rộng chính, mô hình đối chứng không phối hợp FAT, mô hình lực liên tục Kubo, 14 biến thể kiểm tra độ nhạy) và 14 giao thức tiếp nối (chó độc lập, mô hình lực đến 24 chó, giữ đàn và giãn cách, độ kết dính, tầm nhìn, N lớn).
 
 ![D_min theo quy mô bầy qua các thời hạn và bố cục](docs/figures/fig20_dmin_vs_n.png)
 **Hình 3:** Quy mô đội tối thiểu *D*<sub>min</sub> theo số cừu *N* ở ba mức thời hạn (12&times;, 6&times;, và 3&times; thời gian lùa). Đường liền và vòng tròn biểu thị tiêu chí tuyệt đối 100%; đường đứt và hình vuông biểu thị tiêu chí đưa được 99% đàn cừu vào đích. Vùng tô bóng là khoảng chặn chưa ngã ngũ (ví dụ: [3, 8]), tam giác rỗng là cận dưới, và dấu chéo biểu thị không có số lượng chó nào trên lưới đạt ngưỡng tin cậy 90%.
@@ -56,7 +54,7 @@ Khi đàn cừu bắt đầu gần nhau trong một cụm gọn gàng (`compact`
 
 **Tại sao?** Cừu là loài động vật có tập tính bầy đàn tự nhiên. Khi chúng đã ở gần nhau, không có con cừu nào bị lạc ra ngoài. Người chăn dắt không bao giờ phải mất thời gian đi gom cừu lạc—nhiệm vụ lúc này chỉ đơn thuần là đứng sau và lùa cả đàn tiến về phía trước.
 
-**Thêm chó có giúp nhanh hơn không?** Đáng ngạc nhiên là trong mô hình hành vi chính của chúng tôi ([Strömbom et al. 2014](https://doi.org/10.1098/rsif.2014.0719)), việc có 2, 4, hay thậm chí 24 chú chó hoàn toàn không làm giảm thời gian lùa đàn (trung vị thời gian hoàn thành luôn duy trì trong khoảng 1,44 đến 1,74 lần thời gian lùa lý thuyết, bất kể số lượng chó). Lý do là vì một đàn cừu khi đi bộ đã di chuyển ở tốc độ tự nhiên ổn định; thêm nhiều chó phía sau không thể đẩy chúng đi nhanh hơn mà chỉ gây hoảng loạn không cần thiết. Trong mô hình lực liên tục của [Kubo et al. (2022)](https://doi.org/10.1007/s10015-021-00726-7), một chó cũng đủ để đạt độ tin cậy, mặc dù thêm chó có giúp nén đàn cừu chặt hơn một chút và dẫn đường nhanh hơn (thời gian giảm từ ~110 giây với 1 chó xuống ~30 giây với 10 chó).
+**Thêm chó có giúp nhanh hơn không?** Đáng ngạc nhiên là trong mô hình hành vi chính của chúng tôi ([Strömbom et al. 2014](https://doi.org/10.1098/rsif.2014.0719)), việc có 2, 4, hay thậm chí 24 chú chó hoàn toàn không làm giảm thời gian lùa đàn (trung vị thời gian hoàn thành luôn duy trì trong khoảng 1,44 đến 1,74 lần thời gian lùa lý thuyết, bất kể số lượng chó). Lý do là vì một đàn cừu khi đi bộ đã di chuyển ở tốc độ tự nhiên ổn định; thêm nhiều chó phía sau không thể đẩy chúng đi nhanh hơn mà chỉ gây hoảng loạn không cần thiết. Trong mô hình lực liên tục của [Kubo et al. (2022)](https://doi.org/10.1007/s10015-021-00726-7), một chó cũng đủ để đạt độ tin cậy, mặc dù thêm chó có giúp nén đàn cừu chặt hơn một chút và dẫn đường nhanh hơn (thời gian giảm từ khoảng 115 giây với 1 chó xuống 29 giây với 10 chó, phát hiện 9).
 
 ![Bầy compact](docs/figures/fig31_compact.png)
 **Hình 4:** Thời gian hoàn thành theo số chó *D* trên bố cục xuất phát gọn compact. Trái: Đàn cừu Strömbom với quy tắc đội phối hợp (thời gian hoàn thành trung vị không đổi theo số chó). Phải: Mô hình lực Kubo (thời gian hoàn thành giảm dần khi có thêm chó tham gia lùa). Cả hai mô hình đều đạt tỉ lệ thành công 100% trên mọi quy mô đội.
@@ -64,7 +62,7 @@ Khi đàn cừu bắt đầu gần nhau trong một cụm gọn gàng (`compact`
 ### 2. Trên đồng cỏ tản mác, số lượng chó cần thiết tăng chậm hơn nhiều so với quy mô đàn
 Khi cừu xuất phát rải rác trên đồng cỏ (`wide`, `split`, `outlier_rich`), các chú chó bắt buộc phải đi gom những con lạc đàn trước khi có thể lùa cả bầy về đích:
 - Dưới thời hạn thong thả ($12\times$ thời gian lùa), **1 chú chó** là đủ cho đàn lên đến $N = 50$ con, và chỉ cần **2 hoặc 3 chú chó** cho một đàn lớn gồm $N = 400$ con cừu.
-- Trong không gian log-log ($\log_2 D_{\min}$ so với $\log_2 N$), hệ số góc tăng trưởng chỉ rơi vào khoảng **0,20 đến 0,50** ở thời hạn $12\times$, và **0,30 đến 0,80** ở thời hạn $6\times$.
+- Trong không gian log-log ($\log_2 D_{\min}$ so với $\log_2 N$), hệ số góc tăng trưởng trên năm quy mô đàn này chỉ rơi vào khoảng **0,20 đến 0,50** ở thời hạn $12\times$, và **0,30 đến 0,80** ở thời hạn $6\times$. Lưới dày hơn của phát hiện 8 thu hẹp khoảng này còn 0,27 đến 0,38 và 0,38 đến 0,61.
 
 **Tại sao lại tăng chậm như vậy?** Bạn có thể nghĩ rằng gấp 4 lần số cừu thì phải cần gấp 4 lần số chó. Nhưng cừu luôn có bản năng tìm về đồng loại. Khi một chú chó đuổi một con cừu lạc hướng về phía trung tâm, con cừu đó sẽ nhìn thấy đàn và tự động chạy nhanh về nhập bọn. Lực hút xã hội tự nhiên của bầy cừu đã làm giúp một nửa khối lượng công việc gom đàn hoàn toàn miễn phí!
 
@@ -106,7 +104,7 @@ Kết quả là một sự thất bại toàn diện: vì các chú chó đều 
 ### 6. Các thước đo chi tiết trong từng lượt chạy hé lộ điều gì
 HerdSim ghi lại 19 phép đo vật lý chính xác trong từng nhịp chuyển động của mỗi lượt mô phỏng:
 - **Độ tản mác của đàn dự báo khả năng thành công**: Trên tất cả các lượt chạy, có một mối tương quan nghịch rất mạnh ($r = -0,56$ đến $-0,81$) giữa độ tản mác trung bình của đàn cừu và khả năng hoàn thành nhiệm vụ. Khi cừu giữ được khối liên kết chặt chẽ, đàn chó sẽ thành công; khi cừu bị xé lẻ tản mác, tỉ lệ thành công sụt giảm nghiêm trọng.
-- **Hiện tượng đàn chó bị "đóng băng" trên bãi cỏ chia cụm (`split`)**: Khi cừu xuất phát thành 3 cụm riêng biệt, việc tăng thêm số lượng chó ($D \ge 4$) bất ngờ không mang lại hiệu quả tăng tốc. Tại sao? Số liệu vi mô của chúng tôi cho thấy các chú chó đã bị... đứng yên bất động! Theo mô hình sinh học của Strömbom, chó sẽ tự động dừng bước nếu tiến lại gần cừu hơn 6 mét ($3 r_a$) nhằm tránh làm cừu hoảng sợ. Trong các cụm cừu dày đặc, quy tắc này đã làm đóng băng tới 25% quân số của đội chó. Khi chúng tôi rút ngắn khoảng cách dừng này trong các thử nghiệm mô phỏng lại, các chú chó đã chuyển động linh hoạt trở lại và rút ngắn thời gian lùa đàn khoảng ~22%.
+- **Hiện tượng đàn chó bị "đóng băng" trên bãi cỏ chia cụm (`split`)**: Khi cừu xuất phát thành 3 cụm riêng biệt, việc tăng thêm số lượng chó ($D \ge 4$) bất ngờ không mang lại hiệu quả tăng tốc. Tại sao? Số liệu vi mô của chúng tôi cho thấy các chú chó đã bị... đứng yên bất động! Theo mô hình sinh học của Strömbom, chó sẽ tự động dừng bước nếu tiến lại gần cừu hơn 6 mét ($3 r_a$) nhằm tránh làm cừu hoảng sợ. Trong các cụm cừu dày đặc, quy tắc này đã làm đóng băng tới 25% quân số của đội chó. Trong các lượt chạy lại, khoảng cách dừng ngắn hơn rút ngắn thời gian hoàn thành khoảng một phần năm ở $D \ge 8$, và việc cho các chó gom nhắm vào những con cừu lạc cách xa nhau làm thời gian giảm một nửa ở $D = 4$. Khi áp dụng cả hai, 8 đến 16 chó vẫn chậm hơn 2 chó, và ở 3 thời gian lùa không thay đổi nào khôi phục được tỉ lệ thành công, nên một phần nguyên nhân vẫn chưa rõ.
 
 ![Các thước đo theo từng lượt](docs/figures/fig27_metrics.png)
 **Hình 9:** Chẩn đoán chi tiết theo từng lượt chạy. (a) Tương quan nghịch giữa độ tản mác của đàn và tỉ lệ thành công. (b) Tỉ lệ phần trăm chó bị đóng băng theo quy tắc giữ khoảng cách trên đàn split so với đàn wide. (c) Mức độ chồng lấn vị trí giữa các cặp chó.
@@ -114,10 +112,10 @@ HerdSim ghi lại 19 phép đo vật lý chính xác trong từng nhịp chuyể
 
 ### 7. Vượt quá mức tối thiểu: đủ chó, và chó thêm tốn gì
 Sau D_min, một phân tích tiếp theo trên các lượt chạy 99% (không chạy chiến dịch mới) hỏi: từ quy mô đội nào thì thêm một con chó không còn giúp ích (D_sat), chó vượt quá nó tốn gì, và chúng có gây thêm áp lực lên cừu không:
-- **Chó vượt quá D_sat chỉ là chi phí**: mọi đội đạt độ tin cậy lớn hơn D_sat hoàn thành trong 0,90 đến 1,02 lần thời gian tại D_sat, trong khi tổng thời gian chó tăng tỉ lệ với số chó. Trên bầy compact, 24 con chó tốn khoảng 24 lần thời gian chó của một con cho cùng một lần lùa.
+- **Chó vượt quá D_sat chỉ là chi phí**: ở 6 thời gian lùa, mọi đội đạt độ tin cậy lớn hơn một D_sat đã quyết định hoàn thành trong 0,96 đến 1,01 lần thời gian tại D_sat (189 ô), trong khi tổng thời gian chó tăng tỉ lệ với số chó. Trên bầy compact, 24 con chó tốn khoảng 24 lần thời gian chó của một con cho cùng một lần lùa.
 - **Nhiều chó hơn không có nghĩa là nhiều áp lực hơn lên mỗi con cừu**: trong 164 lượt chạy lại, số giây mỗi con cừu chạy trốn khỏi chó giảm từ D_min đến D_sat rồi giữ nguyên. Tại mỗi thời điểm có nhiều cừu chạy trốn hơn, nhưng quãng lùa ngắn hơn. Một phần là do mô hình: lực đẩy của nhiều chó bị giới hạn bằng lực đẩy của một con.
 - **Theo tiêu chí 99%, hầu như không quy mô đội nào làm nhiệm vụ thất bại**: trên năm kích thước bầy ban đầu, trong mười một thư mục 99%, không có quy mô đội nào rơi trở lại dưới ngưỡng tin cậy sau khi đã đạt, đến 24 con chó. Trên lưới dày hơn của phát hiện 8 xuất hiện một lần sụt giảm như vậy (`split` N = 141, D = 4: 0,80). Chó thêm làm bầy `split` chậm hơn ở 12 thời gian lùa ở mọi N từ 200 đến 566 (ví dụ khoảng 700 s từ D = 8 so với 365 s với 2 con ở N = 200).
-- **D_sat từng là một khoảng trên một phần ba các đường cong phân tán**, vì các lượt chạy này không dành hạt giống cho các phép so sánh thời gian hoàn thành quyết định nó. Các lượt chạy tiếp theo đã bổ sung (phát hiện 8).
+- **D_sat từng là một khoảng trên một phần ba các đường cong phân tán** trong các lượt chạy đầu, vì chúng không dành hạt giống cho các phép so sánh thời gian hoàn thành quyết định nó. Lượt bổ sung của phát hiện 8 đã quyết định phần lớn; ở 6 thời gian lùa nó vẫn là một khoảng trên 5 trong 23 đường cong phân tán (`outlier_rich` ở N = 50, 283, 400, 566 và `wide` ở 566).
 
 ![Chi phí của chó vượt quá D_sat](docs/figures/fig33_effort.png)
 **Hình 10:** Chó vượt quá D_sat ở 6 thời gian lùa (tiêu chí 99%). Trái: thời gian hoàn thành so với D_sat giữ ngang. Phải: thời gian chó tăng theo đường D / D_sat. Chi tiết và phần chạy lại đo áp lực nằm ở mục 3.7 của [báo cáo](docs/report/d_min_report_vi.md).
@@ -176,7 +174,7 @@ flowchart TD
 
 ### Bảng tổng hợp các chiến dịch nghiên cứu thực nghiệm
 
-Qua 23 giao thức nghiên cứu, HerdSim đã hoàn thành tổng cộng **164.740 lượt mô phỏng** (đánh giá 2.291 ô tham số) với 0 lỗi thực thi:
+23 giao thức nghiên cứu đầu tiên đã hoàn thành **164.740 lượt mô phỏng** (đánh giá 2.291 ô tham số) với 0 lỗi thực thi:
 
 | Nhóm chiến dịch | Giao thức | Số lượt chạy | Số ô đánh giá | Mục tiêu nghiên cứu cốt lõi |
 | :--- | :--- | :---: | :---: | :--- |
@@ -263,7 +261,7 @@ $$
 T_{\mathrm{drive}} = \frac{l}{v_{\mathrm{sheep,max}}}
 $$
 
-Một đàn cừu gọn gàng được lùa bởi một chú chó thuần thục sẽ về đích trong khoảng 1,44 đến 1,74 $\times T_{\mathrm{drive}}$. Do đó, chúng tôi khảo sát ba mức áp lực thời gian rất thực tế:
+Một đàn cừu gọn gàng được lùa bởi một chú chó thuần thục sẽ về đích trong khoảng 1,44 đến 1,74 $\times T_{\mathrm{drive}}$. Các lưới chính dùng ba mức áp lực thời gian:
 - **Thong thả ($12\times T_{\mathrm{drive}}$)**: Rất nhiều thời gian. Một chú chó có thể kiên nhẫn đi gom từng con cừu lạc một.
 - **Trung bình ($6\times T_{\mathrm{drive}}$)**: Nhịp độ làm việc tiêu chuẩn và thực tế.
 - **Gấp rút ($3\times T_{\mathrm{drive}}$)**: Rất gấp gáp. Hầu như không có thời gian cho việc gom tuần tự—đòi hỏi đàn chó phải phối hợp làm việc song song.
@@ -276,22 +274,7 @@ Một đàn cừu gọn gàng được lùa bởi một chú chó thuần thục
 | ***N* = 200** | 10,47 m | 139,8 m | **139,8 s** (~2,3 phút) | 1.678 s (~28,0 phút) | 839 s (~14,0 phút) | 419 s (~7,0 phút) |
 | ***N* = 400** | 11,40 m | 206,8 m | **206,8 s** (~3,4 phút) | 2.482 s (~41,4 phút) | 1.241 s (~20,7 phút) | 620 s (~10,3 phút) |
 
-### Tại sao lại chọn quy mô đàn *N* &in; [25, 400] và số lượng chó *D* &in; [1, 24]?
-
-Một câu hỏi rất tự nhiên là: *Tại sao chúng tôi lại chọn đàn từ 25 đến 400 con cừu, và đội từ 1 đến 24 chú chó, mà không phải là các con số khác?*
-
-1. **Quy mô đàn cừu ($N = 25, 50, 100, 200, 400$)**:
-   - **Tăng trưởng hình học (Gấp đôi $2\times$)**: Việc nhân đôi quy mô đàn cừu qua từng bước tạo thành một lưới logarit chuẩn xác ($\log_2 N \in [4,64; 8,64]$). Điều này cho phép chúng tôi đo lường các quy luật mở rộng (hệ số góc tăng trưởng $\Delta \log_2 D_{\min} / \Delta \log_2 N$) một cách liền mạch, không bị sai lệch khoảng cách, trên một dải quy mô bầy rộng gấp 16 lần.
-   - **Tại sao bắt đầu từ $N = 25$ (Cận dưới)?**: Đàn cừu nhỏ hơn 20–25 con không thể hiện được tính chất bầy đàn tập thể vĩ mô thực sự. Trong các nhóm quá nhỏ, sự lang thang ngẫu nhiên của từng cá thể sẽ lấn át tính gắn kết xã hội, và các bố cục không gian có cấu trúc—chẳng hạn như việc chia đàn làm 3 cụm trên bãi cỏ `split` (đòi hỏi mỗi cụm có ít nhất 8 con cừu)—sẽ mất đi ý nghĩa vật lý.
-   - **Tại sao dừng lại ở $N = 400$ (Cận trên)?**:
-     - *Giới hạn ổn định sinh học của bầy*: Qua quá trình hiệu chuẩn thực nghiệm, các quy tắc gắn kết xã hội của Strömbom đạt tới một bán kính cân bằng $R_f(N)$ ổn định tối đa đến $N = 400$. Vượt quá 400 con, xung đột va chạm nội bộ sẽ khiến một đàn cừu không có hàng rào tự động bị xé rách và phân mảnh ngay cả khi không có chó đuổi.
-     - *Thực tế chăn thả gia súc*: Các đàn từ 25 đến 400 con cừu phản ánh chính xác quy mô chăn thả thương mại thông thường do một đội chó chăn cừu quản lý trên đồng cỏ mở.
-     - *Độ phức tạp tính toán*: Tương tác từng cặp giữa các con cừu tăng theo hàm bậc hai $\mathcal{O}(N^2)$ trong mỗi nhịp tick. Việc khảo sát đến 400 con cừu qua 164.740 lượt mô phỏng là một ngưỡng chặn trên chặt chẽ, vừa bảo đảm tính khả thi về mặt thời gian tính toán, vừa phản ánh trọn vẹn xu hướng phi tuyến tính của bài toán.
-
-2. **Số lượng chó chăn cừu ($D \in [1, 24]$)**:
-   - **Điểm xuất phát chuẩn tắc ($D = 1$)**: Bắt đầu từ 1 chú chó là chuẩn mực cơ sở trong y văn sinh học (Strömbom 2014), nhằm xác định năng lực giới hạn của một cá thể trước khi bổ sung thêm đồng đội.
-   - **Tiến trình tăng dần trên lưới**: Chúng tôi khảo sát có hệ thống $D \in \{1, 2, 3, 4, 6, 8, 10, 12, 16, 24\}$. Đội hình nhỏ ($D = 2, 3, 4$) giúp bắt trọn bước chuyển tiếp sang làm việc song song; trong khi các đội chó đông đảo ($D \ge 8$) giúp định vị các ngưỡng giới hạn trên: bão hòa tốc độ (*D*<sub>sat</sub>), chen chúc vướng chân nhau (*D*<sub>crowd</sub>), và hỗn loạn vỡ trận (*D*<sub>overcrowd</sub>).
-   - **Làm dày điểm giữa thích ứng**: Nếu hai số lượng chó liền kề có sự nhảy vọt về kết quả (ví dụ $D = 4$ thất bại nhưng $D = 6$ thành công), HerdSim sẽ tự động chèn điểm nằm giữa ($D = 5$) vào vòng chạy sau để tìm ra chính xác ngưỡng $D_{\min}$ mà không cần phải vét cạn từng số nguyên một.
+Các quy mô thêm vào sau (71, 141, 283, 566) hiệu chuẩn ra 8,48; 9,79; 11,01 và 11,82 m. Lý do quy mô đàn, quy mô đội và số hạt giống dừng ở đâu được giải thích tại [Vì sao lưới dừng ở những giới hạn này](#vì-sao-lưới-dừng-ở-những-giới-hạn-này).
 
 ---
 
@@ -405,7 +388,7 @@ với $\mathrm{threat} = \{j \mid \lVert \mathbf{x}_i - \mathbf{y}_j \rVert < r_
 
 ### 2. Các thuật toán điều khiển đàn chó
 
-HerdSim cung cấp ba cơ chế điều khiển chó chăn cừu:
+HerdSim cung cấp bốn cơ chế điều khiển chó chăn cừu:
 
 #### Kiến trúc phối hợp đội ngũ: `strombom_multi`
 Mở rộng các quy tắc kinh nghiệm của Strömbom thành một đội ngũ tự hành thông minh:
@@ -442,6 +425,9 @@ Một thuật toán đối chứng (`dog_controller="fat"`) nhằm chứng minh 
 - **Điểm khiếm khuyết**: FAT không hề có thuật toán phân công việc, không có vòng cung lùa, và không có lực đẩy tránh va chạm giữa các chú chó.
 - **Hậu quả**: Tất cả các chú chó đều chọn chung một con cừu. Chúng lao vào nhau thành một cục, hoạt động không khác gì một con chó duy nhất, và thất bại hoàn toàn trong việc gom đàn cừu tản mác khi $N \ge 200$.
 
+#### Các chó chăn độc lập theo bài báo: `independent`
+Mỗi chú chó tự chạy quy tắc một chó của Strömbom 2014: việc chọn gom hay lùa được quyết định trên toàn bầy, và chó đi tới mục tiêu đó với bước chân, nhiễu và quy tắc dừng của bài báo. Không có phân công cừu lạc và không có vòng cung lùa, nên mọi chó chọn cùng một mục tiêu. Với một chó, đây chính là chó chăn của bài báo. Cơ chế này tách hai phần mà FAT thiếu: nó có công tắc gom/lùa nhưng không có tầng phối hợp đội (phát hiện 9).
+
 ![Mô hình đối chứng FAT](docs/figures/fig4_fat.png)
 **Hình 22:** Thuật toán đối chứng FAT. Trái: Hình học săn đuổi. Phải: Do thiếu cơ chế phân chia mục tiêu, toàn bộ đàn chó co cụm lại sau cùng một con cừu lạc, dẫn đến mức độ trùng lặp vị trí rất cao.
 
@@ -466,7 +452,7 @@ Một cách tiếp cận vật lý hoàn toàn khác để đối chiếu chéo,
    - Khác với cừu Strömbom có bán kính đàn mở rộng tự nhiên theo số cừu, cừu Kubo bị nén rất chặt vào một bán kính cân bằng cố định ($R_f \approx 5,8$ m) ở mọi $N$. Khảo sát đến *N* = 100 là đủ để kiểm chứng tính chuyển giao của mô hình mà không tạo ra các khối cừu dày đặc phi thực tế. Thời hạn 500 giây được giữ nguyên bản theo đúng Mục 4.1 trong bài báo gốc của Kubo et al. (2022).
 4. **Kết quả hành vi: Thêm chó giúp tăng tốc độ lùa:**
    - Trên xuất phát compact, **1 chú chó Kubo là đủ để đạt độ tin cậy 100% ($D_{\min} = 1$)**, tái khẳng định phát hiện cốt lõi của chúng tôi trên một trường phái vật lý hoàn toàn khác.
-   - Tuy nhiên, khác với Strömbom (nơi thời gian lùa không đổi khi thêm chó do cừu đi bộ ở vận tốc cố định 1 m/s), cừu Kubo chịu các lực đẩy cộng dồn liên tục từ tất cả các chú chó xung quanh. Việc tăng số lượng chó từ $D = 1$ lên $10$ nén đàn cừu chặt hơn và đẩy đàn di chuyển nhanh hơn hẳn, rút ngắn thời gian hoàn thành từ ~116 giây xuống chỉ còn ~30 giây.
+   - Tuy nhiên, khác với Strömbom (nơi thời gian lùa không đổi khi thêm chó do cừu đi bộ ở vận tốc cố định 1 m/s), cừu Kubo chịu các lực đẩy cộng dồn liên tục từ tất cả các chú chó xung quanh. Việc tăng số lượng chó từ $D = 1$ lên $10$ nén đàn cừu chặt hơn và đẩy đàn di chuyển nhanh hơn hẳn, rút ngắn thời gian hoàn thành từ khoảng 115 giây xuống 29 giây ở $N = 100$; phần lớn lợi ích đạt được trước 10 chó (25 giây với 24 chó, `dmin_f99_kubo`).
 
 ---
 
@@ -593,7 +579,7 @@ D lớn nhất định cỡ bãi cỏ, nên nó là một phần của vật lý
 
 ### Thời hạn và quy tắc thành công
 
-Các lượt chạy chính dùng 12, 6 và 3 thời gian lùa; một bầy compact với một chó cần 1,45 đến 1,74. Các lượt chạy tiếp theo dùng 12 thời gian lùa ở chỗ câu hỏi là dạng tăng trưởng và 6 ở chỗ câu hỏi là quy mô đội và chi phí, và chỉ dùng quy tắc thành công 99%: quy tắc tuyệt đối do con cừu cuối cùng quyết định (phát hiện 4).
+Các lượt chạy chính dùng 12, 6 và 3 thời gian lùa; một bầy compact với một chó cần 1,44 đến 1,74. Các lượt chạy tiếp theo dùng 12 thời gian lùa ở chỗ câu hỏi là dạng tăng trưởng và 6 ở chỗ câu hỏi là quy mô đội và chi phí, và chỉ dùng quy tắc thành công 99%: quy tắc tuyệt đối do con cừu cuối cùng quyết định (phát hiện 4).
 
 ---
 
@@ -611,7 +597,7 @@ cd HerdSim
 # Cài đặt môi trường phát triển và các thư viện phụ thuộc
 make install     # uv sync --extra dev
 
-# Chạy toàn bộ các bước kiểm tra (linter Ruff + type checker basedpyright + 268 kiểm thử)
+# Chạy toàn bộ các bước kiểm tra (linter Ruff + type checker basedpyright + 313 kiểm thử)
 make check
 
 # Chạy chiến dịch kiểm chứng mini (~1 phút)
@@ -703,7 +689,7 @@ HerdSim/
 
 ## Kiểm chứng và chuẩn thử nghiệm
 
-- **Kiểm thử đơn vị và tính bất biến** (`make test`, 268 bài kiểm thử, ~24 giây):
+- **Kiểm thử đơn vị và tính bất biến** (`make test`, 313 bài kiểm thử, ~32 giây):
   Kiểm tra chặt chẽ các phép toán véc-tơ, ranh giới tránh va chạm, tính cô lập tuyệt đối của các dòng ngẫu nhiên và logic ra quyết định của thuật toán thích ứng.
 - **Kiểm thử hồi quy chuẩn vàng (Golden Tests)** ([`tests/sim/test_golden.py`](tests/sim/test_golden.py)):
   Bảo đảm các lượt chạy mẫu luôn khớp chính xác từng số thực dấu phẩy động với quỹ đạo chuẩn đã lưu, ngăn chặn tuyệt đối hiện tượng các tham số vật lý bị trôi lệch âm thầm.

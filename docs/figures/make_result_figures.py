@@ -20,6 +20,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 from matplotlib.colors import LinearSegmentedColormap  # noqa: E402
+from matplotlib.patches import Rectangle  # noqa: E402
 
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE))
@@ -72,8 +73,10 @@ def fig_dmin_vs_n() -> None:
     top = 40
     fig, axes = plt.subplots(1, 3, figsize=(13, 4.4), sharey=True)
     for ax, (m, (strict, f99)) in zip(axes, runs.items()):
+        largest = 0
         for k, (name, marker) in enumerate(((strict, "o"), (f99, "s"))):
             g = groups_table(RESULTS / name)
+            largest = max(largest, int(g["n"].max()))
             for li, (layout, color) in enumerate(LAYOUT_COLOR.items()):
                 part = g[g["layout"] == layout].sort_values("n")
                 xs, ys, kind = [], [], []
@@ -95,8 +98,9 @@ def fig_dmin_vs_n() -> None:
                     ax.plot(xs, ys, marker=marker, color=color, ms=6, ls="", mec=SURFACE, mew=0.8)
         ax.set_xscale("log")
         ax.set_yscale("log")
-        ax.set_xticks(NS)
-        ax.set_xticklabels(NS)
+        ticks = [n for n in (*NS, 566) if n <= largest]
+        ax.set_xticks(ticks)
+        ax.set_xticklabels(ticks)
         ax.minorticks_off()
         ax.set_yticks([1, 2, 3, 4, 6, 8, 12, 24, top])
         ax.set_yticklabels(["1", "2", "3", "4", "6", "8", "12", "24", "none"])
@@ -117,7 +121,8 @@ def fig_dmin_vs_n() -> None:
             "99 percent of the flock (dashed, squares), with the two rules and the four layouts offset a little in N. A shaded bar "
             "runs from D_min_low to D_min where a smaller D stayed undecided at 200 seeds; a hollow "
             "triangle is a curve with no reliable D yet, at its D_min_low; a cross is a curve with "
-            "no reliable D on the grid. Compact is 1 throughout.", 150)
+            "no reliable D on the grid. Compact is 1 throughout. The 99 percent runs at 12 and 6 "
+            "drive times also have N = 71, 141, 283 and 566.", 150)
     fig.tight_layout(rect=(0, 0.14, 1, 0.88))
     fig.savefig(OUT / "fig20_dmin_vs_n.png", dpi=150)
     plt.close(fig)
@@ -256,12 +261,12 @@ def fig_sensitivity() -> None:
     for i, (_, cells_) in enumerate(rows):
         for j, (text, value) in enumerate(cells_):
             if text == "none" or np.isnan(value):
-                ax.add_patch(plt.Rectangle((j - .5, i - .5), 1, 1, fc="#d9d8d3", ec=SURFACE, lw=1.5, hatch="//"))
+                ax.add_patch(Rectangle((j - .5, i - .5), 1, 1, fc="#d9d8d3", ec=SURFACE, lw=1.5, hatch="//"))
                 ax.text(j, i, "none", ha="center", va="center", fontsize=8, color=INK)
                 continue
             shade = np.log2(max(value, 1)) / np.log2(16)
             open_ = text.startswith("[") or "-" in text
-            ax.add_patch(plt.Rectangle((j - .5, i - .5), 1, 1, fc=SEQ(min(shade, 1)), ec=SURFACE, lw=1.5,
+            ax.add_patch(Rectangle((j - .5, i - .5), 1, 1, fc=SEQ(min(shade, 1)), ec=SURFACE, lw=1.5,
                                        alpha=0.55 if open_ else 1.0))
             ax.text(j, i, text, ha="center", va="center", fontsize=9,
                     color="white" if shade > 0.55 and not open_ else INK)
@@ -482,7 +487,7 @@ def fig_strict_vs_99() -> None:
         cell = both.groupby(["initial_layout", "n_sheep", "n_shepherds"]).agg(
             strict=("strict", "mean"), f99=("f99", "mean"), n=("strict", "size")).reset_index()
         cell = cell[cell["n"] >= 20]
-        ax.add_patch(plt.Rectangle((0, 0.9), 0.9, 0.1, fc="#f3dccf", ec="none", alpha=0.7))
+        ax.add_patch(Rectangle((0, 0.9), 0.9, 0.1, fc="#f3dccf", ec="none", alpha=0.7))
         for layout in ("wide", "split", "outlier_rich"):
             part = cell[cell["initial_layout"] == layout]
             ax.scatter(part["strict"], part["f99"], s=26, color=LAYOUT_COLOR[layout], alpha=0.75,
@@ -561,8 +566,8 @@ def fig_design() -> None:
     """The study as one picture: the pipeline of a protocol and what each group of runs varies."""
     from matplotlib.patches import FancyBboxPatch
 
-    fig = plt.figure(figsize=(14, 8.2))
-    top = fig.add_axes((0.01, 0.55, 0.98, 0.42))
+    fig = plt.figure(figsize=(14, 11.5))
+    top = fig.add_axes((0.01, 0.69, 0.98, 0.29))
     top.set_xlim(0, 100)
     top.set_ylim(0, 40)
     top.axis("off")
@@ -571,7 +576,7 @@ def fig_design() -> None:
         ("2  calibration", "one dog drives a compact\nflock: settled radius R_f(N)\nsets goal, drive, deadline"),
         ("3  adaptive rounds", "10 seeds for every cell;\ncells still open get 10 more\n(cap 200); midpoint D added"),
         ("4  decision", "99% Clopper-Pearson interval\nof the success rate:\nreliable, unreliable, open"),
-        ("5  results", "D_min, bracket D_min_low\nto D_min; tables, figures,\nreport"),
+        ("5  results", "D_min (or a bracket), D_sat,\nD_crowd, D_max; tables,\nfigures, report"),
     ]
     w, gap = 16.0, 3.5
     for i, (title, body) in enumerate(boxes):
@@ -598,17 +603,27 @@ def fig_design() -> None:
     rows = [
         ("main, strict (3 runs)", ["4", "25 to 400", "1 to 24", "12, 6, 3", "every sheep", "team",
                                    "Strombom", "deadline"]),
-        ("main, 99% (3 runs)", ["4", "25 to 400", "1 to 24", "12, 6, 3", "99%", "team", "Strombom",
-                                "deadline"]),
+        ("main, 99% (3 runs)", ["4", "25 to 566", "1 to 24", "12, 6, 3", "99%", "team", "Strombom",
+                                "deadline; N 71 to 566 at 12, 6"]),
         ("FAT (2 runs)", ["4", "25 to 400", "1 to 24", "6", "both", "FAT", "Strombom", "dog rule"]),
-        ("Kubo (1 run)", ["compact", "25 to 100", "1 to 10", "500 s", "every sheep", "Kubo", "Kubo",
-                          "sheep model"]),
+        ("Kubo (2 runs)", ["compact", "25 to 100", "1 to 24", "500 s", "both", "Kubo", "Kubo",
+                           "sheep model"]),
         ("sensitivity (14 runs)", ["wide, outlier_rich", "100 to 400", "1 to 16", "6", "both", "team",
                                    "Strombom", "one setup choice, 6 variants"]),
+        ("independent (1 run)", ["4", "25 to 400", "1 to 24", "6", "99%", "independent", "Strombom",
+                                 "no team layer"]),
+        ("holding (2 runs)", ["4", "25 to 400", "1 to 24", "6", "99%, held", "team", "Strombom",
+                              "hold the flock; dogs 2 m apart"]),
+        ("cohesion (4 runs)", ["4", "25 to 400", "1 to 24", "12", "99%", "team", "Strombom",
+                               "attraction c; neighbours 0.5N"]),
+        ("sensing (2 runs)", ["wide, split", "50 to 200", "1 to 16", "6", "99%", "team", "Strombom",
+                              "sensing range; sharing"]),
+        ("large N (4 runs)", ["compact, wide", "566 to 3200", "1 to 12", "12", "99%", "team",
+                              "Strombom", "imposed density; capped drive"]),
         ("pilot (not counted)", ["4", "50 to 400", "1 to 16", "12, read at 6, 3", "every sheep",
                                  "team", "Strombom", "choose the grid"]),
     ]
-    bottom = fig.add_axes((0.01, 0.02, 0.98, 0.50))
+    bottom = fig.add_axes((0.01, 0.01, 0.98, 0.64))
     bottom.set_xlim(0, 100)
     bottom.set_ylim(0, len(rows) + 1.6)
     bottom.axis("off")
@@ -622,7 +637,7 @@ def fig_design() -> None:
     for i, (name, vals) in enumerate(rows):
         y = ytop - 1 - i
         if i % 2 == 0:
-            bottom.add_patch(plt.Rectangle((0, y - 0.45), 100, 0.9, fc="#f3f2ee", ec="none"))
+            bottom.add_patch(Rectangle((0, y - 0.45), 100, 0.9, fc="#f3f2ee", ec="none"))
         bottom.text(0.5, y, name, fontsize=9, va="center", color=INK, fontweight="bold")
         for j, v in enumerate(vals):
             bottom.text(xs[j] + 0.5, y, v, fontsize=8.6, va="center", color=INK)
@@ -639,6 +654,8 @@ def fig_effort() -> None:
     g = groups_table(RESULTS / "dmin_f99_m6")
     fig, axes = plt.subplots(1, 2, figsize=(11, 4.2))
     for _, r in g.dropna(subset=["d_sat", "d_max"]).iterrows():
+        if bool(r["d_sat_undecided"]):
+            continue
         sat, top = int(r["d_sat"]), int(r["d_max"])
         part = c[(c["layout"] == r["layout"]) & (c["n"] == r["n"]) & (c["reliability"] == "reliable")]
         part = part[(part["d"] >= sat) & (part["d"] <= top)].sort_values("d")
@@ -660,7 +677,7 @@ def fig_effort() -> None:
         ax.set_xlabel("D / D_sat")
         ax.set_ylabel(ylabel)
         ax.grid(color=GRID, lw=0.6)
-    axes[0].set_ylim(0.6, 1.2)
+    axes[0].set_ylim(0.9, 1.05)
     axes[0].axhline(1.0, color=INK, lw=0.8, ls="--")
     axes[1].set_yscale("log")
     axes[1].set_yticks([1, 2, 4, 8, 16, 24])
@@ -673,9 +690,9 @@ def fig_effort() -> None:
     axes[0].legend(frameon=False, fontsize=8, loc="upper left", ncol=2)
     axes[1].legend(frameon=False, fontsize=8, loc="upper left")
     fig.tight_layout(rect=(0, 0.05, 1, 1))
-    fig.text(0.5, 0.01, "dmin_f99_m6 (99 percent rule, 6 drive times). One line per curve with a D_sat "
-             "below its largest reliable D; medians over successful seeds. Where D_sat is open, its "
-             "low end is used.", ha="center", fontsize=8, color=MUTED)
+    fig.text(0.5, 0.01, "dmin_f99_m6 (99 percent rule, 6 drive times). One line per curve with a decided D_sat "
+             "below its largest reliable D; medians over successful seeds. Curves whose D_sat is "
+             "still a range are left out.", ha="center", fontsize=8, color=MUTED)
     fig.savefig(OUT / "fig33_effort.png", dpi=150)
     plt.close(fig)
 
