@@ -3,8 +3,8 @@
 # which a start that needs collecting is slow but not hopeless for one dog.
 #
 # Strombom 2014 sheep and the multi-dog shepherd rule, point dogs, global observation, four
-# layouts, N 25 to 400 (the largest calibrated flock size; above it the flock radius is imposed
-# by the density rule, so N stops there). Drive limit is the paper rule. Reliability is the
+# layouts, N 25 to 400 (400 was the largest size calibrated when this ran; the flock was later
+# measured to settle up to N = 600, and dmin_f99_m12 adds 71, 141, 283 and 566). Drive limit is the paper rule. Reliability is the
 # canonical theta 0.90 at 99% confidence.
 #
 # The D grid reaches 24 because the hardest cells (scattered starts at N = 400) may need more

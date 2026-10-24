@@ -1,4 +1,4 @@
-"""Figures of the results (D_min report, section 6), drawn from the finished runs in results/.
+"""Figures of the results (README findings, report section 3), drawn from the runs in results/.
 
     uv run --with matplotlib python docs/figures/make_result_figures.py
 
@@ -120,56 +120,6 @@ def fig_dmin_vs_n() -> None:
             "no reliable D on the grid. Compact is 1 throughout.", 150)
     fig.tight_layout(rect=(0, 0.14, 1, 0.88))
     fig.savefig(OUT / "fig20_dmin_vs_n.png", dpi=150)
-    plt.close(fig)
-
-
-# ---------------------------------------------------------------------------------- figure 21
-def fig_heatmaps() -> None:
-    if not have("dmin_m6", "dmin_f99_m6"):
-        return
-    fig, axes = plt.subplots(2, 3, figsize=(15, 6.6), sharex=True, sharey=True)
-    image = None
-    for row, (name, label) in enumerate((("dmin_m6", "strict"), ("dmin_f99_m6", "99 percent"))):
-        t = cells(name)
-        for col, layout in enumerate(("wide", "split", "outlier_rich")):
-            ax = axes[row, col]
-            part = t[(t["layout"] == layout) & t["n"].isin(NS)]  # the sizes both runs have
-            ds = sorted(t["d"].unique())
-            grid = np.full((len(NS), len(ds)), np.nan)
-            reliable = np.zeros_like(grid, dtype=bool)
-            for _, r in part.iterrows():
-                i, j = NS.index(r["n"]), ds.index(r["d"])
-                grid[i, j] = r["success_rate"]
-                reliable[i, j] = r["reliability"] == "reliable"
-            image = ax.imshow(grid, origin="lower", cmap=SEQ, vmin=0, vmax=1, aspect="auto")
-            for i in range(len(NS)):
-                for j in range(len(ds)):
-                    if np.isnan(grid[i, j]):  # a D that this curve did not test
-                        ax.add_patch(plt.Rectangle((j - .5, i - .5), 1, 1, fc="#e9e8e4",
-                                                   ec="white", lw=0.6, hatch="////"))
-                        continue
-                    ax.text(j, i, f"{grid[i, j]:.2f}".lstrip("0") if grid[i, j] < 1 else "1",
-                            ha="center", va="center", fontsize=7,
-                            color="white" if grid[i, j] > 0.55 else INK)
-                    if reliable[i, j]:
-                        ax.add_patch(plt.Rectangle((j - .5, i - .5), 1, 1, fill=False, ec=INK, lw=1.4))
-            ax.set_xticks(range(len(ds)))
-            ax.set_xticklabels(ds, fontsize=7.5)
-            ax.set_yticks(range(len(NS)))
-            ax.set_yticklabels(NS)
-            ax.set_title(f"{layout}, {label}")
-            if row == 1:
-                ax.set_xlabel("dogs D (the D values tested; hatched = not tested)")
-            if col == 0:
-                ax.set_ylabel("flock size N")
-    caption(fig, "Success rate in every cell of the deadline 6 runs (dmin_m6 above, dmin_f99_m6 below). "
-            "A black frame marks a cell decided reliable (99% interval at or above 0.90). Cell seeds "
-            "run from 10 to 200; the low rates at large N rest on 10 to 20 seeds. At N = 400 strict "
-            "success never reaches 1 where the 99 percent run does.", 150)
-    fig.tight_layout(rect=(0, 0, 0.93, 0.98))
-    cax = fig.add_axes((0.945, 0.25, 0.012, 0.5))
-    fig.colorbar(image, cax=cax, label="success rate")
-    fig.savefig(OUT / "fig21_success_heatmaps.png", dpi=150)
     plt.close(fig)
 
 
@@ -335,42 +285,6 @@ def fig_sensitivity() -> None:
     plt.close(fig)
 
 
-# ---------------------------------------------------------------------------------- figure 25
-def fig_placement_results() -> None:
-    starts = (("s_base", "arcs (base)", BLUE, "o"), ("s_ring", "ring", ORANGE, "s"),
-              ("s_handler", "handler point", AQUA, "^"))
-    names = [f"dmin_{rule}{s[0]}" for rule in ("", "f99_") for s in starts]
-    if not have(*names):
-        return
-    data = {name: cells(name) for name in names}
-    panels = [(lay, n) for lay in ("wide", "outlier_rich") for n in (200, 400)]
-    fig, axes = plt.subplots(2, 4, figsize=(13, 6.6), sharey=True, sharex=True)
-    for r, (rule, label_rule) in enumerate((("", "strict"), ("f99_", "99 percent"))):
-        for ax, (lay, n) in zip(axes[r], panels):
-            for k, (tag, label, color, marker) in enumerate(starts):
-                t = data[f"dmin_{rule}{tag}"]
-                t = t[(t["layout"] == lay) & (t["n"] == n)].sort_values("d")
-                rate_line(ax, t, color, marker, label=label, dx=1 + 0.04 * (k - 1))
-            ax.axhline(0.9, color=MUTED, lw=0.8, ls=":")
-            ax.set_xscale("log")
-            ax.set_xticks([1, 2, 4, 8, 16])
-            ax.set_xticklabels([1, 2, 4, 8, 16])
-            ax.minorticks_off()
-            ax.set_title(f"{lay}, N = {n}, {label_rule}", fontsize=10)
-            if r == 1:
-                ax.set_xlabel("dogs D")
-            ax.grid(color=GRID, lw=0.6)
-        axes[r][0].set_ylabel(f"success rate, {label_rule}")
-    axes[0][0].legend(frameon=False, fontsize=8, loc="lower right")
-    caption(fig, "Where the dogs start, from the runs (deadline 6 drive times, same seeds), strict success above "
-            "and 99 percent below. The ring leaves out the cone that holds the goal. Under the strict rule the "
-            "three starts differ at N = 400; under the 99 percent rule the curves lie close together. A hollow "
-            "marker is a cell with fewer than 30 trials. Dotted line: theta = 0.90.", 150)
-    fig.tight_layout(rect=(0, 0, 1, 0.9))
-    fig.savefig(OUT / "fig25_placement_results.png", dpi=150)
-    plt.close(fig)
-
-
 # ---------------------------------------------------------------------------------- figure 26
 def fig_fat() -> None:
     runs = (("dmin_m6", "strombom_multi, strict", BLUE, "o", "-"),
@@ -481,61 +395,6 @@ def fig_metrics() -> None:
 
 # ---------------------------------------------------------------------------------- figure 28
 D_TICKS = [1, 2, 4, 8, 16, 24]
-
-
-def mark_dmin(ax, row: pd.Series, color, y: float) -> None:
-    """D_min of a curve as a triangle on the bottom of the axes: filled at D_min, hollow at
-    D_min_low when a smaller D is still open, '>' at D_min_low when no D is reliable yet, and a
-    cross above the grid when every D is unreliable."""
-    if not np.isnan(row["d_min"]):
-        if row["d_min_low"] < row["d_min"]:
-            ax.plot([row["d_min_low"], row["d_min"]], [y, y], color=color, lw=1.6, alpha=0.5)
-            ax.plot(row["d_min_low"], y, marker="^", ms=6, mfc=SURFACE, mec=color)
-        ax.plot(row["d_min"], y, marker="^", ms=6, color=color)
-    elif not np.isnan(row["d_min_low"]):
-        ax.plot(row["d_min_low"], y, marker=">", ms=6, mfc=SURFACE, mec=color)
-    else:
-        ax.plot(28, y, marker="x", ms=6, color=color)
-
-
-def fig_curves() -> None:
-    """Success against D with 99% intervals: how D_min is read off, strict and 99 percent."""
-    names = {"strict": "dmin_m6", "99 percent": "dmin_f99_m6"}
-    if not have(*names.values()):
-        return
-    layouts = ("wide", "split", "outlier_rich")
-    fig, axes = plt.subplots(2, 3, figsize=(14, 7.0), sharey=True, sharex=True)
-    for r, (rule, name) in enumerate(names.items()):
-        t, g = cells(name), groups_table(RESULTS / name)
-        for ax, n in zip(axes[r], (100, 200, 400)):
-            for li, layout in enumerate(layouts):
-                part = t[(t["layout"] == layout) & (t["n"] == n)].sort_values("d")
-                x = part["d"] * (1 + 0.035 * (li - 1))
-                err = [part["success_rate"] - part["rate_low"], part["rate_high"] - part["success_rate"]]
-                ax.errorbar(x, part["success_rate"], yerr=err, color=LAYOUT_COLOR[layout], marker="o",
-                            ms=3.5, lw=1.0, elinewidth=0.7, capsize=1.5, label=layout)
-                row = g[(g["layout"] == layout) & (g["n"] == n)].iloc[0]
-                mark_dmin(ax, row, LAYOUT_COLOR[layout], -0.04 - 0.045 * li)
-            ax.axhline(0.9, color=MUTED, lw=0.8, ls=":")
-            ax.set_xscale("log")
-            ax.set_xticks(D_TICKS)
-            ax.set_xticklabels(D_TICKS)
-            ax.minorticks_off()
-            ax.set_ylim(-0.2, 1.04)
-            ax.set_yticks([0, 0.25, 0.5, 0.75, 1.0])
-            ax.set_title(f"N = {n}, {rule}", fontsize=10)
-            ax.grid(color=GRID, lw=0.6)
-            if r == 1:
-                ax.set_xlabel("dogs D")
-        axes[r][0].set_ylabel(f"success rate, {rule}")
-    axes[0][0].legend(frameon=False, fontsize=8, loc="lower right")
-    fig.tight_layout(rect=(0, 0, 1, 0.96))
-    fig.text(0.5, 0.005, "triangles below each panel: D_min of the curve (filled), D_min_low when a "
-             "smaller D is open (hollow, joined by a bar), '>' a lower bound with no reliable D yet, "
-             "x no reliable D up to 24; dotted line: theta = 0.90; bars: 99% intervals",
-             ha="center", fontsize=8, color=MUTED)
-    fig.savefig(OUT / "fig28_curves.png", dpi=150)
-    plt.close(fig)
 
 
 # ---------------------------------------------------------------------------------- figure 29
@@ -1005,9 +864,9 @@ def fig_view() -> None:
 
 
 def main() -> None:
-    for draw in (fig_dmin_vs_n, fig_curves, fig_heatmaps, fig_deadline, fig_straggler,
-                 fig_strict_vs_99, fig_split_curves, fig_sensitivity, fig_placement_results,
-                 fig_fat, fig_metrics, fig_compact, fig_design, fig_effort, fig_pressure):
+    for draw in (fig_dmin_vs_n, fig_deadline, fig_straggler, fig_strict_vs_99, fig_split_curves,
+                 fig_sensitivity, fig_fat, fig_metrics, fig_compact, fig_design, fig_effort,
+                 fig_pressure, fig_growth_fits, fig_spacing, fig_view):
         draw()
 
 

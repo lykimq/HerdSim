@@ -17,7 +17,7 @@ from sim.core.world.arena import GoalZone, World
 
 UNIT_YAML = (
     Path(__file__).parent / "protocols" / "unit.yaml"
-)  # canonical setup and the three methods
+)  # canonical setup and every method
 BASE_PROTOCOL = load_protocol(str(UNIT_YAML), output=Path(tempfile.gettempdir()) / "herdsim-tests")
 
 

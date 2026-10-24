@@ -677,7 +677,7 @@ HerdSim/
 |   |-- methods/            # Các mô hình vật lý: Strombom (2014) và Kubo (2022)
 |   `-- plugins/            # Hệ thống plugin mở rộng
 |       |-- sheep/          # Động lực học vi mô của đàn cừu (strombom, kubo)
-|       |-- dogs/           # Bộ điều khiển chó (collect_drive_multi, fat, kubo_forces)
+|       |-- dogs/           # Bộ điều khiển chó (collect_drive_multi, independent, fat, kubo_forces)
 |       |-- scenarios/      # Hình học nhiệm vụ, đánh giá đích, chẩn đoán thất bại
 |       `-- metrics/        # Các phép đo hình học theo từng nhịp và tổng hợp
 |-- services/               # Điều phối chiến dịch mô phỏng
@@ -689,11 +689,13 @@ HerdSim/
 |-- analysis/               # Đánh giá thống kê
 |   |-- frontier.py         # Tính toán khoảng tin cậy Clopper-Pearson, Bootstrap, phân loại vùng
 |   |-- dmin.py             # Trích xuất D_min khi thắt chặt thời hạn hoặc đổi sang tiêu chí 99%
-|   `-- dmin_tables.py      # Công cụ tạo bảng kết quả phục vụ báo cáo khoa học
+|   |-- dmin_tables.py      # Công cụ tạo bảng kết quả phục vụ báo cáo khoa học
+|   |-- growth_fits.py      # Quy luật lũy thừa so với đường cong bão hòa cho D_min(N)
+|   `-- pressure.py         # Chạy lại các lượt đã lưu: áp lực lên bầy
 |-- protocols/configs/      # Các định nghĩa giao thức và giá trị mặc định chuẩn tắc
-|-- cli/                    # Công cụ dòng lệnh (campaign, run_queue, dmin_report, dmin_tables)
+|-- cli/                    # Công cụ dòng lệnh (campaign, run_queue, dmin_report, dmin_tables, pressure_replay, split_diagnostic)
 |-- docs/                   # Báo cáo khoa học, hướng dẫn kiến trúc, hình ảnh và mã tạo đồ thị
-|-- results/                # Kho lưu trữ dữ liệu thực nghiệm đã chạy (hơn 164.000 lượt chạy)
+|-- results/                # Kho lưu trữ dữ liệu thực nghiệm đã chạy (hơn 326.000 lượt chạy)
 `-- tests/                  # Bộ kiểm thử đơn vị và các bài kiểm tra hồi quy chuẩn vàng
 ```
 

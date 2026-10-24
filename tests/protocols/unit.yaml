@@ -1,4 +1,4 @@
-# Protocol the unit tests load for the canonical settings and the three methods. Tests never
+# Protocol the unit tests load for the canonical settings and every method. Tests never
 # run it as a campaign and never write to its output folder.
 
 protocol_id: unit

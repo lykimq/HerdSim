@@ -114,9 +114,9 @@ A dog count is only worth simulating if the extra dog can change something. So t
 
 *Why:* with identical dogs aimed at one point, a curve over D measures the same trial again at every D, and the campaign pays for it. Giving each dog distinct work makes the D axis a real experimental axis, and the overlap measure separates "the dogs had nothing more to do" from "the dogs got in each other's way".
 
-*Cost:* the team rule is HerdSim's, not the paper's, so multi-dog results are results about this rule. Dogs use each other's positions to share out the work, which is a form of coordination.
+*Cost:* the team rule is HerdSim's, not the paper's, so multi-dog results are results about this rule. Dogs use each other's positions to share out the work, which is a form of coordination. Dogs are points by default and may stand on top of each other; a protocol can give them room instead, so that no dog steps closer than a set distance to another, which is how crowding can be tested at all.
 
-A second dog rule is kept on purpose as a baseline. In it every dog aims at the sheep farthest from the goal and nothing shares out the work, so all dogs choose the same sheep and become copies once they meet. Run on the same task, it shows what the D axis looks like when added dogs repeat each other's work, and the overlap measure shows it in the data.
+A second dog rule is kept on purpose as a baseline. In it every dog aims at the sheep farthest from the goal and nothing shares out the work, so all dogs choose the same sheep and become copies once they meet. Run on the same task, it shows what the D axis looks like when added dogs repeat each other's work, and the overlap measure shows it in the data. A third rule gives every dog the paper's single-dog decision on its own, with no team layer. It has the paper's switch between collecting and driving, which the farthest-sheep baseline lacks, so the two controls together separate what the switch contributes from what the team layer contributes.
 
 ### Success is stated, and both readings are kept
 
@@ -125,6 +125,8 @@ The source papers do not agree on when a trial is won: one counts every sheep in
 *Why:* with an open goal, the last one or two sheep can decide a trial after the flock has arrived, and the reading used changes the dog count a result reports. Keeping both shows how much of a result belongs to the herding and how much to the definition of success.
 
 *Cost:* every question that has to hold under both readings is asked twice, which doubles the runs.
+
+A third reading asks the flock to stay: the goal counts only after the required share has been inside without a break for a set time. It is off by default, so it changes nothing unless a protocol sets it, and it comes with a step in which the dogs back off, because a dog that only stops still keeps a sheep in flight.
 
 ### Conventions are tested, not argued
 
@@ -144,7 +146,7 @@ Every trial draws its start layout, its sheep noise and its dog noise from three
 
 ### Spend seeds where the answer is still open
 
-There is no fixed seed depth. Every cell starts with one batch; after each round the frontier rules mark the cells whose reliability, or a finish-time comparison that could still move one of the curve's values, is undecided, and only those get another batch. Where the zone changes between two dog counts that are far apart, the count halfway between is added. A dog count between a decided cell and a cell that stays undecided at the seed cap is added too, so the undecided stretch is bracketed on both sides; a cell still below the cap may yet decide, so it waits. Comparisons that cannot change any value never ask for seeds. Above a confirmed saturation, dog counts whose dogs were measured to be copies of each other get no more seeds either; a dog count that is slower or failing is always kept, because that is a measured harm.
+There is no fixed seed depth. Every cell starts with one batch; after each round the frontier rules mark the cells whose reliability, or a finish-time comparison that could still move one of the curve's values, is undecided, and only those get another batch. Where the zone changes between two dog counts that are far apart, the count halfway between is added. A dog count between a decided cell and a cell that stays undecided at the seed cap is added too, so the undecided stretch is bracketed on both sides; a cell still below the cap may yet decide, so it waits. Comparisons that cannot change any value never ask for seeds, and a protocol can switch the finish-time comparisons off altogether when only the minimum team is asked for; the values that rest on them are then reported as undecided. Above a confirmed saturation, dog counts whose dogs were measured to be copies of each other get no more seeds either; a dog count that is slower or failing is always kept, because that is a measured harm.
 
 *Why:* most cells always succeed or always fail, and most comparisons are clear after one batch. Precision only matters near the boundaries, so that's where the budget goes, and the stop rule is "nothing left to decide" instead of a depth fixed before anyone saw the data.
 
@@ -184,7 +186,7 @@ flowchart LR
     T -- no --> S
 ```
 
-Sheep move first, reacting to where the dogs were. Then the dogs, who know every sheep and every other dog, decide and move. Metrics are recorded on the resulting state, and the task decides whether it is done.
+Sheep move first, reacting to where the dogs were. Then the dogs decide and move. By default each dog knows every sheep and every other dog; a protocol can limit each dog to the sheep within a range of it, and say whether dogs share what they see. Metrics are recorded on the resulting state, and the task decides whether it is done.
 
 ## A campaign, conceptually
 
@@ -211,6 +213,7 @@ Workers get a small description of one trial, run it and send back its row. Beca
 | Regression tests use tolerances | Small drifts go unnoticed | Bit-exact comparisons break across machines because the dynamics are chaotic |
 | Every metric recorded on every trial | Some compute per tick | Metrics we didn't plan to use have explained results before. Recording them is cheap insurance |
 | Calibration always on the drive task | A task with its own flock behaviour can't calibrate its own scale | The flock radius is a property of the sheep model under a driving dog, which every current task builds on |
+| Imposed radius above the calibration edge | Results there are conditional on a chosen density | The model gives no flock size of its own there; the choice is a setting, swept in its own protocols, and the flock's real size is reported beside it |
 
 ## How it's meant to grow
 

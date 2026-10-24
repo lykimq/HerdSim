@@ -675,7 +675,7 @@ HerdSim/
 |   |-- methods/            # Physical models: Strombom (2014) and Kubo (2022)
 |   `-- plugins/            # Extensible plugin system
 |       |-- sheep/          # Microscopic sheep dynamics (strombom, kubo)
-|       |-- dogs/           # Shepherd controllers (collect_drive_multi, fat, kubo_forces)
+|       |-- dogs/           # Shepherd controllers (collect_drive_multi, independent, fat, kubo_forces)
 |       |-- scenarios/      # Task geometry, goal evaluation, failure diagnostics
 |       `-- metrics/        # Per-tick and summary geometric measurements
 |-- services/               # Campaign orchestration
@@ -687,11 +687,13 @@ HerdSim/
 |-- analysis/               # Statistical evaluation
 |   |-- frontier.py         # Clopper-Pearson CI, paired bootstrap, zone classification
 |   |-- dmin.py             # D_min of a finished run at tighter deadlines or 99% arrival
-|   `-- dmin_tables.py      # Table generators for empirical reporting
+|   |-- dmin_tables.py      # Table generators for empirical reporting
+|   |-- growth_fits.py      # Power law against saturating curve for D_min(N)
+|   `-- pressure.py         # Replays of stored trials: pressure on the flock
 |-- protocols/configs/      # Canonical defaults and protocol definitions
-|-- cli/                    # Command-line tools (campaign, run_queue, dmin_report, dmin_tables)
+|-- cli/                    # Command-line tools (campaign, run_queue, dmin_report, dmin_tables, pressure_replay, split_diagnostic)
 |-- docs/                   # Report, architecture guide, figures and visualization scripts
-|-- results/                # Archived empirical datasets (164k+ trials)
+|-- results/                # Archived empirical datasets (326k+ trials)
 `-- tests/                  # Test suites and golden regression benchmarks
 ```
 
