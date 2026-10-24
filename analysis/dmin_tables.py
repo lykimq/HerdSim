@@ -341,7 +341,7 @@ def extent_check(trials: pd.DataFrame, radii: dict[str, dict[str, float]]) -> pd
                 "extent_over_r_f": round(float(ratio.median()), 2),
             }
         )
-    return pd.DataFrame(rows)
+    return pd.DataFrame(rows).sort_values(["layout", "n", "d"], ignore_index=True)
 
 
 def midpoint(row: pd.Series) -> float | None:

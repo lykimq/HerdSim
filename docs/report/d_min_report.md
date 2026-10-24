@@ -310,7 +310,7 @@ A common concern in livestock robotics is whether a large pack causes excessive 
 
 **Figure 9:** Microscopic flock flight dynamics (12 seeds per cell, `dmin_f99_m6`). Left: Cumulative fleeing seconds per sheep decline sharply up to *D*<sub>sat</sub> and remain flat thereafter. Right: The instantaneous percentage of fleeing sheep rises with dog team size *D*.
 
-These flock pressure findings are partly intrinsic to the Strömbom formulation: repulsive forces from multiple dogs are normalized to unit magnitude (the blending mechanism), preventing local force amplification, while the 65 m detection radius naturally envelopes compact clusters. Detailed data tables and verification scripts are available in [`results_tables.md`](results_tables.md) (section "Phase 1").
+These flock pressure findings are partly intrinsic to the Strömbom formulation: repulsive forces from multiple dogs are normalized to unit magnitude (the blending mechanism), preventing local force amplification, while the 65 m detection radius naturally envelopes compact clusters. Detailed data tables and verification scripts are available in [`results_tables.md`](results_tables.md) (section "D_sat, effort, zones and methods, 99 percent").
 
 ### 3.8 RQ8: Growth with *N* on a Denser Grid, *D*<sub>sat</sub>, and the Shape of the Curve
 

@@ -310,7 +310,7 @@ Nhiều người e ngại rằng một bầy chó đông đúc sẽ gây hoảng
 
 **Hình 9:** Đánh giá áp lực tâm lý lên đàn cừu (12 hạt giống mỗi ô, dữ liệu `dmin_f99_m6`). Trái: Số giây tháo chạy của mỗi con cừu giảm mạnh tới mốc *D*<sub>sat</sub> rồi đi ngang. Phải: Tỉ lệ phần trăm đàn cừu tháo chạy tức thời tăng theo số lượng chó *D*.
 
-Kết quả về áp lực một phần xuất phát từ các đặc tính chuẩn mực của mô hình Strömbom: lực đẩy từ nhiều chú chó lên một con cừu được chuẩn hóa độ dài về 1 (cơ chế blending), nên sự hiện diện của chú chó thứ hai ở gần không làm tăng độ mạnh của lực đẩy; đồng thời tầm nhìn $r_s = 65$ m rộng gấp khoảng 7 lần bán kính bầy ở $N = 100$, nên chỉ vài chú chó đã đủ để toàn bầy cảm nhận được sự hiện diện của người chăn. Toàn bộ bảng số liệu chi tiết và câu lệnh phân tích được lưu trữ tại [`results_tables.md`](results_tables.md) (mục "Phase 1").
+Kết quả về áp lực một phần xuất phát từ các đặc tính chuẩn mực của mô hình Strömbom: lực đẩy từ nhiều chú chó lên một con cừu được chuẩn hóa độ dài về 1 (cơ chế blending), nên sự hiện diện của chú chó thứ hai ở gần không làm tăng độ mạnh của lực đẩy; đồng thời tầm nhìn $r_s = 65$ m rộng gấp khoảng 7 lần bán kính bầy ở $N = 100$, nên chỉ vài chú chó đã đủ để toàn bầy cảm nhận được sự hiện diện của người chăn. Toàn bộ bảng số liệu chi tiết và câu lệnh phân tích được lưu trữ tại [`results_tables.md`](results_tables.md) (mục "D_sat, effort, zones and methods, 99 percent").
 
 ### 3.8 RQ8: Tăng trưởng theo *N* trên lưới dày hơn, *D*<sub>sat</sub> và hình dạng đường cong
 

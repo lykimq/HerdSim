@@ -11,7 +11,7 @@
     uv run cli/dmin_tables.py zones   dmin_f99_m12 dmin_f99_fat
     uv run cli/dmin_tables.py methods dmin_f99_m6 dmin_f99_fat dmin_kubo --pct 99
     uv run cli/dmin_tables.py fits    dmin_f99_m12 dmin_f99_m6
-    uv run cli/dmin_tables.py extent  dmin_f99_big
+    uv run cli/dmin_tables.py extent  dmin_f99_big --layout compact
 
 Each prints Markdown to paste into the plan. Folders are protocol ids under results/, or paths.
 record     the table of runs (plan 8.1), from results/queue_log.jsonl
@@ -208,8 +208,12 @@ def cmd_extent(args: argparse.Namespace) -> None:
         folder = folder_of(name)
         radii = json.loads((folder / "calibration.json").read_text())["flock_radius"]
         trials = pd.read_csv(folder / "trials.csv", skiprows=1, low_memory=False)
-        print(f"### {name}: flock size against R_f\n")
-        print(markdown(extent_check(trials, radii)), "\n")
+        table = extent_check(trials, radii)
+        if args.layout:
+            table = table[table["layout"] == args.layout]
+        suffix = f" ({args.layout})" if args.layout else ""
+        print(f"### {name}: flock size against R_f{suffix}\n")
+        print(markdown(table), "\n")
 
 
 def main() -> None:
@@ -236,6 +240,7 @@ def main() -> None:
     p.set_defaults(run=cmd_methods)
     p = sub.add_parser("extent")
     p.add_argument("folders", nargs="+")
+    p.add_argument("--layout", default=None)
     p.set_defaults(run=cmd_extent)
     p = sub.add_parser("fits")
     p.add_argument("folders", nargs="+")
