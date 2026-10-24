@@ -20,6 +20,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 from matplotlib.colors import LinearSegmentedColormap  # noqa: E402
+from matplotlib.lines import Line2D  # noqa: E402
 from matplotlib.patches import Rectangle  # noqa: E402
 
 HERE = Path(__file__).parent
@@ -79,12 +80,13 @@ def fig_dmin_vs_n() -> None:
             largest = max(largest, int(g["n"].max()))
             for li, (layout, color) in enumerate(LAYOUT_COLOR.items()):
                 part = g[g["layout"] == layout].sort_values("n")
-                xs, ys, kind = [], [], []
+                xs, ys = [], []
                 for _, r in part.iterrows():
                     # each rule and each layout has its own x offset, so markers do not overprint
                     x = r["n"] * (1.0 + 0.07 * (k - 0.5) + 0.022 * (li - 1.5))
                     if not np.isnan(r["d_min"]):
-                        xs.append(x), ys.append(r["d_min"]), kind.append("decided")
+                        xs.append(x)
+                        ys.append(r["d_min"])
                         if r["d_min_low"] < r["d_min"]:  # a smaller D is still open: a bracket
                             ax.plot([x, x], [r["d_min_low"], r["d_min"]], color=color, lw=2.2, alpha=0.45)
                             ax.plot(x, r["d_min_low"], marker="_", color=color, ms=9, mew=1.6, ls="")
@@ -108,13 +110,13 @@ def fig_dmin_vs_n() -> None:
         ax.set_xlabel("flock size N")
         ax.grid(color=GRID, lw=0.6)
     axes[0].set_ylabel("D_min (dogs)")
-    handles = [plt.Line2D([], [], color=c, lw=2, label=l) for l, c in LAYOUT_COLOR.items()]
+    handles = [Line2D([], [], color=c, lw=2, label=l) for l, c in LAYOUT_COLOR.items()]
     handles += [
-        plt.Line2D([], [], color=MUTED, marker="o", ls="-", label="strict (every sheep)"),
-        plt.Line2D([], [], color=MUTED, marker="s", ls="--", label="99 percent of the sheep"),
-        plt.Line2D([], [], color=MUTED, lw=2.2, alpha=0.45, label="bracket: a smaller D still open"),
-        plt.Line2D([], [], color=MUTED, marker="^", mfc="none", ls="", label="not decided: D_min_low (line up to 24)"),
-        plt.Line2D([], [], color=MUTED, marker="x", ls="", label="none: no D up to 24 reliable"),
+        Line2D([], [], color=MUTED, marker="o", ls="-", label="strict (every sheep)"),
+        Line2D([], [], color=MUTED, marker="s", ls="--", label="99 percent of the sheep"),
+        Line2D([], [], color=MUTED, lw=2.2, alpha=0.45, label="bracket: a smaller D still open"),
+        Line2D([], [], color=MUTED, marker="^", mfc="none", ls="", label="not decided: D_min_low (line up to 24)"),
+        Line2D([], [], color=MUTED, marker="x", ls="", label="none: no D up to 24 reliable"),
     ]
     fig.legend(handles=handles, loc="lower center", ncol=4, frameon=False, fontsize=8.5)
     caption(fig, "D_min against N from the three main runs, strict success (solid, circles) and success at "
@@ -361,9 +363,9 @@ def fig_metrics() -> None:
     ax.set_ylabel("success rate of the cell")
     ax.set_title("(a) spread against success, deadline 6, cells with >= 20 seeds", fontsize=9.5)
     ax.grid(color=GRID, lw=0.6)
-    handles = [plt.Line2D([], [], color=c, marker="o", ls="", label=l) for l, c in LAYOUT_COLOR.items()]
-    handles += [plt.Line2D([], [], color=MUTED, marker="o", ls="", label="strict"),
-                plt.Line2D([], [], color=MUTED, marker="s", ls="", label="99 percent")]
+    handles = [Line2D([], [], color=c, marker="o", ls="", label=l) for l, c in LAYOUT_COLOR.items()]
+    handles += [Line2D([], [], color=MUTED, marker="o", ls="", label="strict"),
+                Line2D([], [], color=MUTED, marker="s", ls="", label="99 percent")]
     ax.legend(handles=handles, frameon=False, fontsize=7.5, loc="center right")
 
     t = trials("dmin_f99_m6")
