@@ -452,7 +452,7 @@ A cross-check using a fundamentally different physics model based on continuous 
    - Unlike Strömbom flocks whose radius scales naturally with flock size, Kubo sheep pack tightly to an equilibrium radius of $R_f \approx 5.8$ m regardless of $N$. Testing up to *N* = 100 validates model transferability without creating artificial super-dense clusters. The 500-second deadline directly matches Section 4.1 of the original 2022 paper.
 4. **Behavioral Outcome: Team Size Accelerates Completion**:
    - On compact starts, **1 dog is sufficient for 100% reliability ($D_{\min} = 1$)**, confirming our primary finding across paradigms.
-   - However, unlike Strömbom (where completion time is invariant to team size because sheep walk at a fixed 1 m/s), Kubo sheep feel continuous, additive pushing forces from all nearby dogs. Adding dogs from $D = 1$ to $10$ compresses the flock and steers it progressively faster, cutting completion times from about 115 s to 29 s at $N = 100$; most of the gain comes by 10 dogs (25 s with 24, `dmin_f99_kubo`).
+   - However, unlike Strömbom (where completion time is invariant to team size because sheep walk at a fixed 1 m/s), Kubo sheep move under continuous forces: the push they feel is the average over the dogs they see, and each dog's push grows as it comes closer ($1/r^2$). Adding dogs from $D = 1$ to $10$ compresses the flock and steers it progressively faster, cutting completion times from about 115 s to 29 s at $N = 100$; most of the gain comes by 10 dogs (25 s with 24, `dmin_f99_kubo`).
 
 ---
 

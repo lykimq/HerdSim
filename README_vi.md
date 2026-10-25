@@ -452,7 +452,7 @@ Một cách tiếp cận vật lý hoàn toàn khác để đối chiếu chéo,
    - Khác với cừu Strömbom có bán kính đàn mở rộng tự nhiên theo số cừu, cừu Kubo bị nén rất chặt vào một bán kính cân bằng cố định ($R_f \approx 5,8$ m) ở mọi $N$. Khảo sát đến *N* = 100 là đủ để kiểm chứng tính chuyển giao của mô hình mà không tạo ra các khối cừu dày đặc phi thực tế. Thời hạn 500 giây được giữ nguyên bản theo đúng Mục 4.1 trong bài báo gốc của Kubo et al. (2022).
 4. **Kết quả hành vi: Thêm chó giúp tăng tốc độ lùa:**
    - Trên xuất phát compact, **1 chú chó Kubo là đủ để đạt độ tin cậy 100% ($D_{\min} = 1$)**, tái khẳng định phát hiện cốt lõi của chúng tôi trên một trường phái vật lý hoàn toàn khác.
-   - Tuy nhiên, khác với Strömbom (nơi thời gian lùa không đổi khi thêm chó do cừu đi bộ ở vận tốc cố định 1 m/s), cừu Kubo chịu các lực đẩy cộng dồn liên tục từ tất cả các chú chó xung quanh. Việc tăng số lượng chó từ $D = 1$ lên $10$ nén đàn cừu chặt hơn và đẩy đàn di chuyển nhanh hơn hẳn, rút ngắn thời gian hoàn thành từ khoảng 115 giây xuống 29 giây ở $N = 100$; phần lớn lợi ích đạt được trước 10 chó (25 giây với 24 chó, `dmin_f99_kubo`).
+   - Tuy nhiên, khác với Strömbom (nơi thời gian lùa không đổi khi thêm chó do cừu đi bộ ở vận tốc cố định 1 m/s), cừu Kubo di chuyển theo các lực liên tục: lực đẩy mà con cừu chịu là trung bình lực đẩy của các con chó nó nhìn thấy, và lực của mỗi con chó càng mạnh khi nó càng đến gần ($1/r^2$). Việc tăng số lượng chó từ $D = 1$ lên $10$ nén đàn cừu chặt hơn và đẩy đàn di chuyển nhanh hơn hẳn, rút ngắn thời gian hoàn thành từ khoảng 115 giây xuống 29 giây ở $N = 100$; phần lớn lợi ích đạt được trước 10 chó (25 giây với 24 chó, `dmin_f99_kubo`).
 
 ---
 
