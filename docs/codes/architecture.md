@@ -106,6 +106,8 @@ Goal size, start spread, lost-sheep distance and drive length are multiples of t
 
 Above the largest size at which the flock settles to a radius of its own, a protocol may impose the radius instead, at the density of a calibrated size. Settings that act only through calibration hold for the whole protocol and cannot be swept as factors, because calibration runs once per protocol and a factor level would never reach it.
 
+A task may instead size itself from its own settings and skip calibration. The gather task does: its targets do not flock, so a driven flock has no radius to measure, and the paper it comes from sizes everything by the radius of the disc the agents start on. That radius then stands in for the flock radius in the rows and the generic metrics, which is exact for a uniform disc (the flock radius is defined as the radius of the uniform disc with the flock's RMS spread). The settings such a task owns are hashed only when that task runs, so adding a task leaves every existing folder's hash as it was.
+
 ### The field is open and the deadline scales with the task
 
 The papers the sheep and dog rules come from have no boundary, so HerdSim has none: agents may leave the field, and the field rectangle only places the start. A reflecting wall was tried and measured. It rescued trials that would time out, mostly in the hardest cells, so it lowered the dog count for a reason that has nothing to do with the dogs.
@@ -174,9 +176,11 @@ A trial that raises is logged, its cell gets no further seeds, and that cell is 
 
 ### Label failures after the run, not during it
 
-A trial stops only on success or the time limit. Why it failed (dogs out of range, flock escaped, split, scatter, oscillation, stuck) is worked out afterwards from the metric history, by rules the task provides.
+A trial stops on success, on the time limit, or when the task itself says the trial is over. The drive task never says so, so its failures run to the limit. The gather task ends a trial once every dog is inside the goal and none senses a target outside it, because its source paper stops there and reads the outcome at that moment; a trial ended that way is a failure unless the success rule holds at the same tick. Why a trial failed (dogs out of range, flock escaped, split, scatter, oscillation, stuck; targets lost, outnumbered) is worked out afterwards from the metric history, by rules the task provides.
 
-*Why:* the stopping rule stays the same for every task and method, so trial lengths are comparable. Failure categories are an interpretation, and they can be refined later without re-running anything.
+*Why:* the stopping rule is fixed per task and the same for every method, so trial lengths are comparable within a task. Failure categories are an interpretation, and they can be refined later without re-running anything.
+
+Metrics are recorded every tick by default; a protocol may record every k-th tick for a method whose time step is small, where the metrics would otherwise cost more than the model. The stop checks run every tick whatever the stride, and the last tick is always recorded, so outcomes do not depend on it; only the per-tick history and what is read from it (first arrivals, summaries) are coarser.
 
 ### Results are evidence; the rules only read them
 
@@ -234,10 +238,10 @@ The extension points follow the plugin boundaries:
 
 Some things the current design doesn't handle yet, and would need real changes:
 
-- The world has one circular goal, and the start layouts, the field sizing and the dog start arcs assume a single drive from a start toward that goal. Holding the flock in that goal exists (a hold time in the task, and a step in which the dogs back off beyond the sheep's reaction distance); a gate, a pen or several stages still need a more general world and its own start geometry.
+- The world has one circular goal. The drive task's layouts, field sizing and dog start arcs assume a single drive from a start toward that goal, and the gather task's assume a disc round it. Holding the flock in that goal exists (a hold time in the task, and a step in which the dogs back off beyond the sheep's reaction distance); a gate, a pen or several stages still need a more general world and its own start geometry.
 - The multi-dog collect/drive controller reads the flock's start position from the task setup, and its dogs share out the work using each other's positions. Backing off to hold is one role beyond collect and drive; others (flanking, holding a gap) would be new jobs in that layer.
 - The paper's drive point lies r_a sqrt(N) behind the flock, which passes the sheep's reaction distance near N = 1056; above that the drive rule itself stops working, and only a capped drive point (a labelled variant) drives such flocks.
-- The failure-label type lives with the drive task's rules; a second task would move it to a shared place.
+- The two sheep models and the two dog rules of the two tasks have only been run in their own pairing: Strombom and Kubo dogs on their flocks in the drive task, the Lama herders on Lama targets in the gather task. Crossing them (a flocking dog rule on targets that do not flock, or the other way round) needs each rule's assumptions about the other side checked first: the team rule reads a flock start and a collect distance that mean nothing without cohesion, and the herders read distances from the goal centre, which in the drive task is far from the flock.
 - Much larger flocks would need the per-dog loops in the controllers vectorised.
 
 ## Where to look in the code
@@ -246,7 +250,8 @@ Some things the current design doesn't handle yet, and would need real changes:
 |---------|----------|
 | Single trial, tick loop | `sim/core/simulation_runner.py` |
 | State, world, start layouts | `sim/core/simulation_state.py`, `sim/core/world/` |
-| Method catalog and paper parameters | `sim/core/methods.py`, `sim/methods/` |
+| Method catalog and paper parameters | `sim/core/methods.py`, `sim/methods/` (`strombom/`, `kubo/`, `lama/`) |
+| The tasks and what they share | `sim/plugins/scenarios/drive_to_goal.py`, `gather.py`; shared `goal.py`, `failures.py`, `team_settings.py` |
 | How a trial's config is assembled and checked | `sim/core/config/experiment.py` |
 | Plugins | `sim/plugins/{sheep,dogs,scenarios,metrics}/` |
 | Canonical defaults and the protocol files | `protocols/configs/` |

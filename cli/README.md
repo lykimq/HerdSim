@@ -35,7 +35,7 @@ Only `run` produces results. The other three help you get there safely.
 | Verb | What it does | Writes |
 | :--- | :--- | :--- |
 | `plan` | Prints what a run would do: the grid, the number of cells, the cost of the first round, and whether the results folder is new, will be resumed, or will be refused | nothing |
-| `calibrate` | Lets one dog drive a compact flock at each size and measures the radius it settles to, R_f(N). That radius sizes the goal, the drive and the deadline. Fails if a size never settles | nothing (prints) |
+| `calibrate` | Lets one dog drive a compact flock at each size and measures the radius it settles to, R_f(N). That radius sizes the goal, the drive and the deadline. Fails if a size never settles. The gather task sizes itself from its start disc instead, so for it this verb says there is nothing to calibrate | nothing (prints) |
 | `run` | The campaign itself: calibrates (or reuses the saved radii), then runs rounds of trials until every cell is decided | `results/<protocol_id>/` |
 | `status` | Shows how far a run has got, whether it is running right now, and why it stopped | nothing |
 
