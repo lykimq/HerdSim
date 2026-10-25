@@ -18,6 +18,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.figure import Figure  # noqa: E402
+from matplotlib.lines import Line2D  # noqa: E402
 from matplotlib.patches import Circle, Rectangle  # noqa: E402
 from matplotlib.ticker import NullFormatter  # noqa: E402
 import numpy as np  # noqa: E402
@@ -36,7 +37,12 @@ from sim.core.world.layouts import (  # noqa: E402
 )
 from sim.core.vectors import behind, farthest_from, unit  # noqa: E402
 from sim.methods.kubo.forces import clamp_speed, dog_velocity, sheep_velocities  # noqa: E402
-from sim.methods.strombom.heuristics import collect_threshold, decide  # noqa: E402
+from sim.methods.strombom.heuristics import (  # noqa: E402
+    collect_threshold,
+    decide,
+    drive_point,
+    radius_of,
+)
 from sim.plugins.dogs.collect_drive_multi import team_targets  # noqa: E402
 from tests.helpers import config_for  # noqa: E402
 
@@ -532,9 +538,315 @@ def fig_task_geometry() -> None:
     plt.close(fig)
 
 
+def fig_sheep_forces() -> None:
+    """The 5 Strömbom (2014) sheep instincts: geometry and vector decomposition."""
+    fig, axes = plt.subplots(1, 2, figsize=(14, 5.8))
+    focal = np.array([0.0, 0.0])
+    flock_neighbors = np.array([
+        [16.0, 12.0], [22.0, -3.0], [9.0, 24.0], [26.0, 16.0],
+        [19.0, 27.0], [31.0, 6.0], [13.0, -14.0], [23.0, -17.0],
+    ])
+    close_neighbor = np.array([1.2, 0.9])
+    dog = np.array([-25.0, -20.0])
+    all_neighbors = np.vstack([flock_neighbors, close_neighbor])
+    lcm = all_neighbors.mean(axis=0)
+
+    H_i = unit(np.array([0.5, 0.85]))
+    h = 0.5
+    C_i = unit(lcm - focal)
+    c = 1.05
+    R_a = unit(focal - close_neighbor)
+    rho_a = 2.0
+    R_s = unit(focal - dog)
+    rho_s = 1.0
+    eps = unit(np.array([-0.8, 0.5]))
+    e = 0.3
+    H_prime = h * H_i + c * C_i + rho_a * R_a + rho_s * R_s + e * eps
+
+    ax0 = axes[0]
+    ax0.add_patch(Circle((0, 0), 65, fc="#eb6834", alpha=0.04, ec=ORANGE, lw=1.0, ls="--", label="Threat detection $r_s = 65$ m"))
+    ax0.add_patch(Circle((0, 0), 2.0, fc="#d9534f", alpha=0.25, ec="#d9534f", lw=1.2, label="Personal space $r_a = 2$ m"))
+    ax0.scatter(*flock_neighbors.T, s=35, color=BLUE, alpha=0.75, lw=0, label="Flock-mates")
+    ax0.scatter(*close_neighbor, s=50, color="#d9534f", ec=INK, lw=0.9, zorder=4, label=r"Intruding neighbor ($< r_a$)")
+    ax0.scatter(*focal, s=85, color=INK, zorder=5, label="Focal sheep $i$")
+    ax0.text(focal[0] + 1.5, focal[1] - 3.2, "Sheep $i$", color=INK, fontsize=9, fontweight="bold")
+    ax0.scatter(*lcm, s=75, marker="+", color=AQUA, lw=2.2, zorder=4, label="Local Center of Mass (LCM)")
+    ax0.text(lcm[0] + 2.0, lcm[1] - 1.0, r"$\mathrm{LCM}_i$", color=AQUA, fontsize=9, fontweight="bold")
+    ax0.scatter(*dog, s=95, marker="^", color=ORANGE, ec=SURFACE, lw=1.0, zorder=5, label=r"Shepherd dog ($< r_s$)")
+    ax0.text(dog[0] - 2.0, dog[1] - 4.5, r"Dog ($< r_s$)", color=ORANGE, fontsize=9, fontweight="bold")
+    ax0.set_xlim(-40, 45)
+    ax0.set_ylim(-35, 45)
+    ax0.legend(loc="upper left", frameon=False, fontsize=8)
+    style_map(ax0, "A. Biological interaction geometry on open pasture")
+
+    ax1 = axes[1]
+    scale = 12.0
+    vectors = [
+        (r"1. Momentum $h\,\mathbf{H}_i$", h * H_i, BLUE, f"weight h = {h}"),
+        (r"2. Social Cohesion $c\,\mathbf{C}_i$", c * C_i, AQUA, f"weight c = {c}"),
+        (r"3. Avoidance $\rho_a\,\mathbf{R}_{a,i}$", rho_a * R_a, "#d9534f", f"weight $\\rho_a$ = {rho_a} (highest)"),
+        (r"4. Predator Escape $\rho_s\,\mathbf{R}_{s,i}$", rho_s * R_s, ORANGE, f"weight $\\rho_s$ = {rho_s}"),
+        (r"5. Noise $e\,\mathbf{\epsilon}_i$", e * eps, MUTED, f"weight e = {e}"),
+    ]
+    legend_handles = []
+    for label, vec, color, note in vectors:
+        tip = vec * scale
+        ax1.annotate("", xy=tip, xytext=(0, 0), arrowprops=dict(arrowstyle="->", color=color, lw=2.2))
+        legend_handles.append(Line2D([0], [0], color=color, lw=2.2, label=f"{label} ({note})"))
+
+    tip_res = H_prime * (scale * 0.42)
+    ax1.annotate("", xy=tip_res, xytext=(0, 0), arrowprops=dict(arrowstyle="-|>", color=INK, lw=3.2))
+    legend_handles.append(Line2D([0], [0], color=INK, lw=3.2,
+                                 label=r"Resultant Heading $\mathbf{H}_i'$ ($\mathbf{x}_i^{t+1} = \mathbf{x}_i^t + \delta\,\mathbf{H}_i' / \|\mathbf{H}_i'\|$)"))
+    ax1.scatter(0, 0, s=70, color=INK, zorder=5)
+    ax1.text(0, -2.5, "Sheep $i$", color=INK, fontsize=9, fontweight="bold", ha="center")
+    ax1.text(vectors[0][1][0] * scale + 0.5, vectors[0][1][1] * scale + 1.0, r"$h\,\mathbf{H}_i$", color=BLUE, fontsize=9, fontweight="bold")
+    ax1.text(vectors[1][1][0] * scale + 1.0, vectors[1][1][1] * scale, r"$c\,\mathbf{C}_i$", color=AQUA, fontsize=9, fontweight="bold")
+    ax1.text(vectors[2][1][0] * scale - 2.0, vectors[2][1][1] * scale - 2.0, r"$\rho_a\,\mathbf{R}_{a,i}$", color="#d9534f", fontsize=9, fontweight="bold")
+    ax1.text(vectors[3][1][0] * scale + 1.0, vectors[3][1][1] * scale, r"$\rho_s\,\mathbf{R}_{s,i}$", color=ORANGE, fontsize=9, fontweight="bold")
+    ax1.text(vectors[4][1][0] * scale - 2.0, vectors[4][1][1] * scale + 1.0, r"$e\,\mathbf{\epsilon}_i$", color=MUTED, fontsize=9, fontweight="bold")
+    ax1.text(tip_res[0] + 1.2, tip_res[1] - 1.2, r"$\mathbf{H}_i'$ (Resultant)", color=INK, fontsize=9.5, fontweight="bold")
+    ax1.legend(handles=legend_handles, loc="lower left", frameon=False, fontsize=8)
+    ax1.set_xlim(-30, 25)
+    ax1.set_ylim(-30, 20)
+    style_map(ax1, r"B. 5 competing instinct forces and Resultant heading $\mathbf{H}_i'$")
+
+    caption(fig, "The 5 Strömbom (2014) sheep instincts. Left: focal sheep i senses nearby flock-mates, "
+            "an intruding neighbor closer than personal space r_a = 2 m, and a dog within threat horizon r_s = 65 m. "
+            "Right: weighted sum of the 5 unit vectors. Collision avoidance carries the highest weight (rho_a = 2.0), "
+            "preventing stampedes, while cohesion (c = 1.05) and predator flight (rho_s = 1.0) steer the sheep safely away.", 150)
+    fig.tight_layout(rect=(0, 0, 1, 0.90))
+    fig.savefig(OUT / "fig_sheep_forces.png", dpi=150)
+    plt.close(fig)
+
+
+def fig_independent() -> None:
+    """Comparison of strombom_multi vs uncoordinated independent controllers."""
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5.0))
+    rng = np.random.default_rng(2026)
+
+    # Panel 1: strombom_multi (wide start, D=4)
+    c_wide = cfg("wide", 100, 4)
+    sheep_w = place_flock(c_wide, rng)
+    dogs_w = place_dogs(c_wide)
+    goal_w = np.asarray(c_wide["goal_center"])
+    centroid_w = sheep_w.mean(axis=0)
+    thresh_w = collect_threshold(100, c_wide["r_a"])
+    dists_w = np.linalg.norm(sheep_w - centroid_w, axis=1)
+    far_w = dists_w > thresh_w
+    targets_multi = team_targets(sheep_w, goal_w, dogs_w, c_wide)
+
+    ax0 = axes[0]
+    ax0.scatter(*sheep_w[~far_w].T, s=9, color=BLUE, alpha=0.6, lw=0)
+    ax0.scatter(*sheep_w[far_w].T, s=16, color=BLUE, ec=INK, lw=0.6)
+    ax0.scatter(*centroid_w, s=40, marker="+", color=INK, zorder=4)
+    ax0.text(centroid_w[0] + 3, centroid_w[1] + 3, "GCM", color=INK, fontsize=8)
+    ax0.scatter(*dogs_w.T, s=42, marker="^", color=ORANGE, ec=SURFACE, lw=0.8, zorder=4)
+    ax0.scatter(*targets_multi.T, s=36, marker="x", color=INK, lw=1.4, zorder=4)
+    for dog, tgt in zip(dogs_w, targets_multi):
+        ax0.annotate("", xy=tgt, xytext=dog, arrowprops=dict(arrowstyle="->", color=ORANGE, lw=1.2))
+    ax0.set_xlim(centroid_w[0] - 130, centroid_w[0] + 80)
+    ax0.set_ylim(centroid_w[1] - 110, centroid_w[1] + 110)
+    style_map(ax0, "strombom_multi: Hungarian Matching (Parallel)")
+
+    # Panel 2: independent collecting (wide start, D=4)
+    ax1 = axes[1]
+    ax1.scatter(*sheep_w[~far_w].T, s=9, color=BLUE, alpha=0.6, lw=0)
+    ax1.scatter(*sheep_w[far_w].T, s=16, color=BLUE, ec=INK, lw=0.6)
+    ax1.scatter(*centroid_w, s=40, marker="+", color=INK, zorder=4)
+    ax1.text(centroid_w[0] + 3, centroid_w[1] + 3, "GCM", color=INK, fontsize=8)
+    ax1.scatter(*dogs_w.T, s=42, marker="^", color=ORANGE, ec=SURFACE, lw=0.8, zorder=4)
+
+    dec = decide(sheep_w, goal_w, c_wide)
+    single_tgt = dec.target
+    farthest_stray = sheep_w[dec.outliers[0]]
+    ax1.scatter(*farthest_stray, s=90, facecolors="none", ec=ORANGE, lw=1.5, zorder=3)
+    ax1.scatter(*single_tgt, s=70, marker="x", color=INK, lw=1.8, zorder=4)
+    for dog in dogs_w:
+        ax1.annotate("", xy=single_tgt, xytext=dog, arrowprops=dict(arrowstyle="->", color=ORANGE, lw=1.2, ls="--"))
+    ax1.set_xlim(centroid_w[0] - 130, centroid_w[0] + 80)
+    ax1.set_ylim(centroid_w[1] - 110, centroid_w[1] + 110)
+    style_map(ax1, "independent: Collect (All 4 dogs chase 1 stray)")
+
+    # Panel 3: independent driving (compact start, D=4)
+    c_comp = cfg("compact", 100, 4)
+    sheep_c = place_flock(c_comp, np.random.default_rng(2026))
+    dogs_c = place_dogs(c_comp)
+    goal_c = np.asarray(c_comp["goal_center"])
+    centroid_c = sheep_c.mean(axis=0)
+    targets_arc = team_targets(sheep_c, goal_c, dogs_c, c_comp)
+    pd_single = drive_point(sheep_c, goal_c, c_comp)
+
+    ax2 = axes[2]
+    ax2.scatter(*sheep_c.T, s=9, color=BLUE, alpha=0.7, lw=0)
+    ax2.scatter(*centroid_c, s=40, marker="+", color=INK, zorder=4)
+    ax2.text(centroid_c[0] + 2, centroid_c[1] + 2, "GCM", color=INK, fontsize=8)
+    ax2.scatter(*dogs_c.T, s=42, marker="^", color=ORANGE, ec=SURFACE, lw=0.8, zorder=4)
+    ordered_arc = targets_arc[np.argsort(targets_arc[:, 1])]
+    ax2.plot(*ordered_arc.T, color=AQUA, lw=1.2, ls=":", label="strombom_multi arc")
+    ax2.scatter(*pd_single, s=80, marker="x", color=INK, lw=2.0, zorder=4, label="independent Pd (single)")
+    for dog in dogs_c:
+        ax2.annotate("", xy=pd_single, xytext=dog, arrowprops=dict(arrowstyle="->", color=ORANGE, lw=1.2, ls="--"))
+    ax2.annotate("", xy=goal_c - [c_comp["goal_radius"] + 5, 0], xytext=centroid_c + [20, 0],
+                 arrowprops=dict(arrowstyle="->", color=AQUA, lw=1.2))
+    ax2.text(centroid_c[0] + 25, centroid_c[1] + 3, "to goal", color=AQUA, fontsize=8)
+    ax2.set_xlim(centroid_c[0] - 50, centroid_c[0] + 40)
+    ax2.set_ylim(centroid_c[1] - 45, centroid_c[1] + 45)
+    ax2.legend(loc="upper left", frameon=False, fontsize=8)
+    style_map(ax2, "independent: Drive (Crowding single point Pd)")
+
+    caption(fig, "Comparison of multi-dog controllers: strombom_multi vs independent. Left: strombom_multi "
+            "assigns strays 1-to-1 via Hungarian matching, gathering multiple strays in parallel. "
+            "Middle: independent controller lacks team coordination; every dog targets the same single "
+            "farthest stray, chasing one sheep sequentially. Right: during drive mode, independent dogs "
+            "all converge on a single Pd point without fanning out along an arc.", 150)
+    fig.tight_layout(rect=(0, 0, 1, 0.88))
+    fig.savefig(OUT / "fig_independent.png", dpi=150)
+    plt.close(fig)
+
+
+def fig_hungarian_matching() -> None:
+    """Outlier detection geometry and Hungarian matching vs naive crossing."""
+    fig, axes = plt.subplots(1, 2, figsize=(14, 5.8))
+    rng = np.random.default_rng(2026)
+    c = cfg("wide", 100, 4)
+    sheep = place_flock(c, rng)
+    dogs = place_dogs(c)
+    goal = np.asarray(c["goal_center"])
+    centroid = sheep.mean(axis=0)
+    thresh = collect_threshold(100, c["r_a"])
+    dists = np.linalg.norm(sheep - centroid, axis=1)
+    far = dists > thresh
+    outlier_indices = np.argsort(dists)[::-1][:4]
+
+    ax0 = axes[0]
+    ax0.add_patch(Circle(xy(centroid), thresh, fc="#2a78d6", alpha=0.04, ec=MUTED, lw=1.2, ls="--", label=r"Ngưỡng $f(N) = r_a N^{2/3}$"))
+    ax0.scatter(*sheep[~far].T, s=18, color=BLUE, alpha=0.6, lw=0, label="Cừu trong bầy (an toàn)")
+    ax0.scatter(*sheep[far].T, s=30, color=BLUE, ec=INK, lw=0.8, label=r"Cừu lạc đàn ($> f(N)$)")
+    ax0.scatter(*centroid, s=65, marker="+", color=INK, lw=2.0, zorder=5)
+    ax0.text(centroid[0] + 3, centroid[1] - 4, "GCM (Trọng tâm bầy)", color=INK, fontsize=9, fontweight="bold")
+
+    stray_idx = outlier_indices[0]
+    stray_pos = sheep[stray_idx]
+    vec_gcm_stray = unit(stray_pos - centroid)
+    pc_pos = stray_pos + float(c["r_a"]) * 4.0 * vec_gcm_stray
+
+    ax0.annotate("", xy=pc_pos, xytext=centroid, arrowprops=dict(arrowstyle="->", color=MUTED, lw=1.0, ls=":"))
+    ax0.scatter(*stray_pos, s=95, facecolors="none", ec=ORANGE, lw=1.8, zorder=4)
+    ax0.text(stray_pos[0] + 3, stray_pos[1] - 2, r"Cừu lạc $o$", color=ORANGE, fontsize=9.5, fontweight="bold")
+    ax0.scatter(*pc_pos, s=90, marker="x", color=INK, lw=2.2, zorder=5)
+    ax0.text(pc_pos[0] + 3, pc_pos[1] + 3, r"Điểm gom $P_c$" + "\n" + r"($r_a = 2$ m sau lưng)", color=INK, fontsize=9, fontweight="bold")
+    ax0.text(centroid[0] - thresh * 0.72, centroid[1] + thresh * 0.72, r"Vùng bầy đàn: $f(N) = r_a N^{2/3}$", color=MUTED, fontsize=8.5)
+    ax0.legend(loc="lower left", frameon=False, fontsize=8.5)
+    ax0.set_xlim(centroid[0] - 130, centroid[0] + 90)
+    ax0.set_ylim(centroid[1] - 110, centroid[1] + 110)
+    style_map(ax0, "A. Nhận diện cừu lạc đàn và Tọa độ điểm gom Pc")
+
+    ax1 = axes[1]
+    targets = team_targets(sheep, goal, dogs, c)
+    ax1.scatter(*sheep[~far].T, s=15, color=BLUE, alpha=0.5, lw=0)
+    ax1.scatter(*sheep[far].T, s=28, color=BLUE, ec=INK, lw=0.6)
+    ax1.scatter(*centroid, s=50, marker="+", color=MUTED, lw=1.5, zorder=3)
+    ax1.scatter(*dogs.T, s=70, marker="^", color=ORANGE, ec=SURFACE, lw=1.0, zorder=5, label="Đàn chó ($D = 4$)")
+    ax1.scatter(*targets.T, s=65, marker="x", color=INK, lw=1.8, zorder=5, label="Điểm gom $P_{c,1..4}$")
+
+    for dog, tgt in zip(dogs, targets):
+        ax1.annotate("", xy=tgt, xytext=dog, arrowprops=dict(arrowstyle="->", color=ORANGE, lw=1.8))
+
+    ax1.plot([dogs[0, 0], targets[2, 0]], [dogs[0, 1], targets[2, 1]], color="#d9534f", ls="--", lw=1.0, alpha=0.45, label="Gán tham lam ngây thơ (Cắt chéo đường)")
+    ax1.plot([dogs[2, 0], targets[0, 0]], [dogs[2, 1], targets[0, 1]], color="#d9534f", ls="--", lw=1.0, alpha=0.45)
+
+    for i, d in enumerate(dogs):
+        ax1.text(d[0] - 6, d[1] - 2, f"Chó {i+1}", color=ORANGE, fontsize=8.5, fontweight="bold")
+
+    ax1.legend(loc="lower left", frameon=False, fontsize=8.5)
+    ax1.set_xlim(centroid[0] - 130, centroid[0] + 90)
+    ax1.set_ylim(centroid[1] - 110, centroid[1] + 110)
+    style_map(ax1, "B. Phân công Hungarian tối ưu (Không cắt chéo đường)")
+
+    caption(fig, "Outlier detection and Hungarian assignment in strombom_multi. Left: any sheep outside "
+            "f(N) = r_a N^(2/3) triggers collection mode; waypoint P_c is placed r_a behind the stray "
+            "along the ray from GCM. Right: Hungarian bipartite matching assigns dogs 1-to-1 to waypoints, "
+            "minimizing total travel distance and preventing trajectory collisions (dashed red shows "
+            "naive greedy crossing).", 150)
+    fig.tight_layout(rect=(0, 0, 1, 0.90))
+    fig.savefig(OUT / "fig_hungarian_matching.png", dpi=150)
+    plt.close(fig)
+
+
+def fig_driving_arc() -> None:
+    """Driving arc formation and nominal drive point geometry."""
+    fig, axes = plt.subplots(1, 2, figsize=(14, 5.8))
+    c = cfg("compact", 100, 4)
+    sheep = place_flock(c, np.random.default_rng(2026))
+    dogs = place_dogs(c)
+    goal = np.asarray(c["goal_center"])
+    centroid = sheep.mean(axis=0)
+    r_flock = radius_of(sheep, centroid)
+    pd = drive_point(sheep, goal, c)
+
+    ax0 = axes[0]
+    ax0.add_patch(Circle(xy(centroid), r_flock, fc="#2a78d6", alpha=0.15, ec=BLUE, lw=1.2, label=r"Bầy cừu gắn kết ($R_{\mathrm{flock}} \propto r_a\sqrt{N}$)"))
+    ax0.scatter(*sheep.T, s=14, color=BLUE, alpha=0.7, lw=0)
+    ax0.scatter(*centroid, s=65, marker="+", color=INK, lw=2.0, zorder=4)
+    ax0.text(centroid[0] + 1.5, centroid[1] - 3.5, "GCM", color=INK, fontsize=9, fontweight="bold")
+
+    goal_dir = unit(goal - centroid)
+    ax0.annotate("", xy=centroid + goal_dir * 32, xytext=centroid,
+                 arrowprops=dict(arrowstyle="->", color=AQUA, lw=2.0))
+    ax0.text(centroid[0] + 16, centroid[1] + 3.0, r"Trục hướng đích $\mathbf{x}_{\mathrm{goal}}$", color=AQUA, fontsize=9, fontweight="bold")
+    ax0.plot([centroid[0], pd[0]], [centroid[1], pd[1]], color=MUTED, ls=":", lw=1.2)
+    ax0.scatter(*pd, s=95, marker="x", color=INK, lw=2.2, zorder=5, label=r"Điểm lùa danh định $P_d$")
+    ax0.text(pd[0] - 2, pd[1] - 4.5, r"$P_d$ (Cách GCM $r_a\sqrt{N}$)", color=INK, fontsize=9, fontweight="bold", ha="center")
+
+    mid_standoff = (centroid + pd) / 2.0
+    ax0.text(mid_standoff[0] - 1.5, mid_standoff[1] + 2.5, r"Khoảng đệm: $r_a\sqrt{N} = 20$ m", color=MUTED, fontsize=8.5, ha="center")
+    ax0.legend(loc="upper left", frameon=False, fontsize=8.5)
+    ax0.set_xlim(centroid[0] - 35, centroid[0] + 38)
+    ax0.set_ylim(centroid[1] - 28, centroid[1] + 28)
+    style_map(ax0, "A. Hình học khoảng cách lùa an toàn Pd")
+
+    ax1 = axes[1]
+    targets_arc = team_targets(sheep, goal, dogs, c)
+    ax1.scatter(*sheep.T, s=14, color=BLUE, alpha=0.6, lw=0)
+    ax1.scatter(*centroid, s=50, marker="+", color=MUTED, lw=1.5, zorder=3)
+
+    ordered_arc = targets_arc[np.argsort(targets_arc[:, 1])]
+    ax1.plot(*ordered_arc.T, color=AQUA, lw=2.0, ls="-", label="Vòng cung lùa đàn (Driving Arc)")
+    ax1.scatter(*targets_arc.T, s=65, marker="x", color=INK, lw=1.8, zorder=4, label="Vị trí mục tiêu trên vòng cung")
+    ax1.scatter(*dogs.T, s=70, marker="^", color=ORANGE, ec=SURFACE, lw=1.0, zorder=5, label="Đàn chó ($D = 4$)")
+
+    for i, (dog, tgt) in enumerate(zip(dogs, targets_arc)):
+        ax1.annotate("", xy=tgt, xytext=dog, arrowprops=dict(arrowstyle="->", color=ORANGE, lw=1.6))
+        push_dir = unit(centroid - tgt)
+        ax1.annotate("", xy=tgt + push_dir * 6, xytext=tgt, arrowprops=dict(arrowstyle="->", color=AQUA, lw=1.2, ls="--"))
+        ax1.text(dog[0] - 6, dog[1] - 2, f"Chó {i+1}", color=ORANGE, fontsize=8.5, fontweight="bold")
+
+    ax1.text(centroid[0] + 2, centroid[1] + r_flock + 2, "Bao vây cánh trên", color=AQUA, fontsize=8.5, fontstyle="italic")
+    ax1.text(centroid[0] + 2, centroid[1] - r_flock - 4, "Bao vây cánh dưới", color=AQUA, fontsize=8.5, fontstyle="italic")
+    ax1.annotate("", xy=goal - [c["goal_radius"] + 5, 0], xytext=centroid + [25, 0],
+                 arrowprops=dict(arrowstyle="->", color=AQUA, lw=1.5))
+    ax1.text(centroid[0] + 27, centroid[1] + 2, "Tiến vào chuồng đích", color=AQUA, fontsize=8.5, fontweight="bold")
+    ax1.legend(loc="upper left", frameon=False, fontsize=8.5)
+    ax1.set_xlim(centroid[0] - 65, centroid[0] + 55)
+    ax1.set_ylim(centroid[1] - 55, centroid[1] + 55)
+    style_map(ax1, "B. Đội hình Vòng cung ôm sườn và đẩy đàn về đích")
+
+    caption(fig, "Driving formation geometry in strombom_multi. Left: the nominal driving point P_d is "
+            "placed r_a*sqrt(N) behind GCM along the goal ray, keeping shepherds immediately outside the flock disk. "
+            "Right: multi-dog driving arc fanning out shepherds across the flock width, preventing flanking escapes.", 150)
+    fig.tight_layout(rect=(0, 0, 1, 0.90))
+    fig.savefig(OUT / "fig_driving_arc.png", dpi=150)
+    plt.close(fig)
+
+
 def main() -> None:
+    fig_sheep_forces()
     fig_team_rule()
+    fig_hungarian_matching()
+    fig_driving_arc()
     fig_fat()
+    fig_independent()
     fig_kubo()
     fig_task_geometry()
     fig_layouts()

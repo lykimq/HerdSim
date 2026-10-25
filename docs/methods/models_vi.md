@@ -28,48 +28,67 @@ HerdSim kết nối giữa nghiên cứu hành vi động vật thực nghiệm 
 
 Dựa trên dữ liệu định vị GPS tần số cao thu được từ các đàn cừu thực tế bị rượt đuổi bởi chó chăn cừu giống Border Collie ([Strömbom et al. 2014](https://doi.org/10.1098/rsif.2014.0719)), các nhà khoa học nhận thấy cừu không có một kế hoạch tổng thể phức tạp. Thay vào đó, mỗi cá thể cừu $i$ tự cân bằng **5 bản năng sinh học cạnh tranh nhau** tại mỗi bước thời gian rời rạc ($t \to t+1$, với 1 tick = 1 giây).
 
-![Cơ chế phối hợp đa chó](../../docs/figures/fig3_team_rule.png)
-*Hình 1: Tương tác giữa cừu và chó. Cừu chuyển đổi giữa trạng thái gặm cỏ bình yên và chạy trốn chủ động dựa trên khoảng cách tới chó. Khi chạy trốn, cừu tổng hợp các lực: tránh va chạm với bạn cùng bầy, lực hút bầy đàn, quán tính di chuyển, lực chạy trốn kẻ săn mồi và nhiễu ngẫu nhiên.*
+![Năm bản năng cạnh tranh của cừu](../../docs/figures/fig_sheep_forces.png)
+*Hình 1: Mô hình hành vi cá thể cừu theo Strömbom et al. (2014). (A) Hình học tương tác trên đồng cỏ: cừu $i$ phát hiện bạn cùng đàn, láng giềng xâm lấn không gian cá nhân ($r_a = 2\text{ m}$), chó nằm trong cự ly đe dọa ($r_s = 65\text{ m}$) và trọng tâm cục bộ $\mathrm{LCM}_i$. (B) Phân rã 5 vector bản năng: Lực đẩy tránh va chạm mang trọng số lớn nhất ($\rho_a = 2.0$) ngăn ngừa giẫm đạp; lực gắn kết bầy ($c = 1.05$) kéo về $\mathrm{LCM}_i$; lực né chó ($\rho_s = 1.0$) đẩy ra xa kẻ săn mồi; cùng quán tính ($h = 0.5$) và nhiễu ngẫu nhiên ($e = 0.3$) tổng hợp thành hướng di chuyển mong muốn $\mathbf{H}_i'$.*
 
 #### Trạng thái chạy trốn chủ động (Khoảng cách tới chó $< r_s$)
 
 Khi bất kỳ chú chó nào tiến vào cự ly đe dọa $r_s = 65\text{ m}$ (tầm nhìn phát hiện nguy hiểm tự nhiên của loài cừu), cừu $i$ phát hiện mối đe dọa và chuyển sang **trạng thái chạy trốn chủ động**. Hướng di chuyển mong muốn $\mathbf{H}_i'$ được tính bằng tổng có trọng số của 5 vector đơn vị:
 
-$$\mathbf{H}_i' = h\,\mathbf{H}_i + c\,\mathbf{C}_i + \rho_a\,\mathbf{R}_{a,i} + \rho_s\,\mathbf{R}_{s,i} + e\,\mathbf{\epsilon}_i$$
+$$
+\mathbf{H}_i' = h\,\mathbf{H}_i + c\,\mathbf{C}_i + \rho_a\,\mathbf{R}_{a,i} + \rho_s\,\mathbf{R}_{s,i} + e\,\mathbf{\epsilon}_i
+$$
 
-1. **Quán tính di chuyển ($\mathbf{H}_i$, trọng số $h = 0.5$)**:
-   - *Tại sao?* Động vật có khối lượng cơ thể nên không thể đổi hướng đột ngột ngay tức khắc.
-   - Vector: Hướng chuyển động từ bước thời gian trước đó:
-     $$\mathbf{H}_i = \frac{\mathbf{x}_i^t - \mathbf{x}_i^{t-1}}{\lVert \mathbf{x}_i^t - \mathbf{x}_i^{t-1} \rVert}$$
+##### 1. Quán tính di chuyển ($\mathbf{H}_i$, trọng số $h = 0.5$)
+- *Tại sao?* Động vật có khối lượng cơ thể nên không thể đổi hướng đột ngột ngay tức khắc.
+- Vector hướng chuyển động từ bước thời gian trước đó:
 
-2. **Lực hút gắn kết xã hội ($\mathbf{C}_i$, trọng số $c = 1.05$)**:
-   - *Tại sao?* An toàn nhờ số đông. Một con cừu đứng tách biệt luôn cảm thấy bất an và có xu hướng tự nhiên muốn lao về phía trung tâm đàn.
-   - Vector: Hướng từ vị trí cừu $\mathbf{x}_i$ tới Trọng tâm Cục bộ ($\mathrm{LCM}_i$) của $n$ cá thể láng giềng gần nhất:
-     $$\mathbf{C}_i = \frac{\mathrm{LCM}_i - \mathbf{x}_i}{\lVert \mathrm{LCM}_i - \mathbf{x}_i \rVert}, \quad \text{với } \mathrm{LCM}_i = \frac{1}{n} \sum_{k \in \mathcal{N}_n(i)} \mathbf{x}_k$$
-   - Trong mô hình chuẩn, $n = N - 1$ (tương tác với toàn bộ thành viên trong đàn).
+$$
+\mathbf{H}_i = \frac{\mathbf{x}_i^t - \mathbf{x}_i^{t-1}}{\lVert \mathbf{x}_i^t - \mathbf{x}_i^{t-1} \rVert}
+$$
 
-3. **Tránh va chạm ($\mathbf{R}_{a,i}$, trọng số $\rho_a = 2.0$)**:
-   - *Tại sao?* Động vật ưu tiên việc không giẫm đạp hay húc vào nhau lên hàng đầu. Do đó, lực này mang trọng số cao nhất ($\rho_a = 2.0$).
-   - Bất kỳ cá thể láng giềng $j$ nào ở cự ly gần hơn không gian cá nhân $r_a = 2\text{ m}$ sẽ tạo ra một lực đẩy né tránh:
-     $$\mathbf{R}_{a,i} = \frac{\sum_{j \ne i, \lVert \mathbf{x}_i - \mathbf{x}_j \rVert < r_a} \frac{\mathbf{x}_i - \mathbf{x}_j}{\lVert \mathbf{x}_i - \mathbf{x}_j \rVert}}{\left\lVert \sum_{j \ne i, \lVert \mathbf{x}_i - \mathbf{x}_j \rVert < r_a} \frac{\mathbf{x}_i - \mathbf{x}_j}{\lVert \mathbf{x}_i - \mathbf{x}_j \rVert} \right\rVert}$$
+##### 2. Lực hút gắn kết xã hội ($\mathbf{C}_i$, trọng số $c = 1.05$)
+- *Tại sao?* An toàn nhờ số đông. Một con cừu đứng tách biệt luôn cảm thấy bất an và có xu hướng tự nhiên muốn lao về phía trung tâm đàn.
+- Vector hướng từ vị trí cừu $\mathbf{x}_i$ tới Trọng tâm Cục bộ ($\mathrm{LCM}_i$) của $n$ cá thể láng giềng gần nhất:
 
-4. **Trốn chạy kẻ săn mồi ($\mathbf{R}_{s,i}$, trọng số $\rho_s = 1.0$)**:
-   - Lực đẩy trực tiếp tránh xa những chú chó đang nằm trong cự ly đe dọa $r_s = 65\text{ m}$. (Xem cơ chế gộp lực bên dưới).
+$$
+\mathbf{C}_i = \frac{\mathrm{LCM}_i - \mathbf{x}_i}{\lVert \mathrm{LCM}_i - \mathbf{x}_i \rVert}, \quad \text{với } \mathrm{LCM}_i = \frac{1}{n} \sum_{k \in \mathcal{N}_n(i)} \mathbf{x}_k
+$$
 
-5. **Nhiễu hành vi ngẫu nhiên ($\mathbf{\epsilon}_i$, trọng số $e = 0.3$)**:
-   - Mô phỏng sự bất định và giác quan không hoàn hảo của cá thể. $\mathbf{\epsilon}_i$ là vector đơn vị có góc định hướng phân bố đều ngẫu nhiên trong $[0, 2\pi)$.
+Trong mô hình chuẩn, $n = N - 1$ (tương tác với toàn bộ thành viên trong đàn).
+
+##### 3. Tránh va chạm ($\mathbf{R}_{a,i}$, trọng số $\rho_a = 2.0$)
+- *Tại sao?* Động vật ưu tiên việc không giẫm đạp hay húc vào nhau lên hàng đầu. Do đó, lực này mang trọng số cao nhất ($\rho_a = 2.0$).
+- Bất kỳ cá thể láng giềng $j$ nào ở cự ly gần hơn không gian cá nhân $r_a = 2\text{ m}$ sẽ tạo ra một lực đẩy né tránh:
+
+$$
+\mathbf{R}_{a,i} = \frac{\sum_{j \in \mathcal{N}_a(i)} \frac{\mathbf{x}_i - \mathbf{x}_j}{\lVert \mathbf{x}_i - \mathbf{x}_j \rVert}}{\left\lVert \sum_{j \in \mathcal{N}_a(i)} \frac{\mathbf{x}_i - \mathbf{x}_j}{\lVert \mathbf{x}_i - \mathbf{x}_j \rVert} \right\rVert}, \quad \text{với } \mathcal{N}_a(i) = \{j \ne i \mid \lVert \mathbf{x}_i - \mathbf{x}_j \rVert < r_a\}
+$$
+
+##### 4. Trốn chạy kẻ săn mồi ($\mathbf{R}_{s,i}$, trọng số $\rho_s = 1.0$)
+- Lực đẩy trực tiếp tránh xa những chú chó đang nằm trong cự ly đe dọa $r_s = 65\text{ m}$. (Xem cơ chế gộp lực bên dưới).
+
+##### 5. Nhiễu hành vi ngẫu nhiên ($\mathbf{\epsilon}_i$, trọng số $e = 0.3$)
+- Mô phỏng sự bất định và giác quan không hoàn hảo của cá thể. $\mathbf{\epsilon}_i$ là vector đơn vị có góc định hướng phân bố đều ngẫu nhiên trong $[0, 2\pi)$.
 
 #### Cập nhật vị trí
 Tại mỗi giây ($1\text{ tick}$), cừu $i$ tiến về phía trước một khoảng $\delta = 1\text{ m}$ theo hướng chuyển động chuẩn hóa:
 
-$$\mathbf{x}_i^{t+1} = \mathbf{x}_i^t + \delta\,\frac{\mathbf{H}_i'}{\lVert \mathbf{H}_i' \rVert}$$
+$$
+\mathbf{x}_i^{t+1} = \mathbf{x}_i^t + \delta\,\frac{\mathbf{H}_i'}{\lVert \mathbf{H}_i' \rVert}
+$$
 
 Quy tắc này giới hạn vận tốc tối đa của cừu ở mức $1.0\text{ m/s}$.
 
 #### Trạng thái gặm cỏ (Khoảng cách tới chó $\ge r_s$)
 Khi tất cả chó ở xa hơn $r_s = 65\text{ m}$, đàn cừu cảm thấy an toàn và chuyển sang **gặm cỏ**: 95% thời gian chúng đứng yên, và 5% thời gian ($p = 0.05$) chúng bước một bước ngẫu nhiên:
 
-$$\mathbf{x}_i^{t+1} = \begin{cases} \mathbf{x}_i^t + \delta\,\mathbf{\epsilon}_{\mathrm{graze}}, & \text{với xác suất } 0.05 \\ \mathbf{x}_i^t, & \text{với xác suất } 0.95 \end{cases}$$
+$$
+\mathbf{x}_i^{t+1} = \begin{cases} 
+\mathbf{x}_i^t + \delta\,\mathbf{\epsilon}_{\mathrm{graze}}, & \text{với xác suất } 0.05 \\ 
+\mathbf{x}_i^t, & \text{với xác suất } 0.95 
+\end{cases}
+$$
 
 ---
 
@@ -79,9 +98,9 @@ Mô hình gốc năm 2014 của Strömbom chỉ được thiết kế cho **duy 
 
 HerdSim giải quyết triệt để vấn đề này bằng cách **cộng vector và chuẩn hóa về độ dài đơn vị**:
 
-$$\mathbf{R}_{s,i} = \frac{\sum_{j \in \mathrm{threat}} \frac{\mathbf{x}_i - \mathbf{y}_j}{\lVert \mathbf{x}_i - \mathbf{y}_j \rVert}}{\left\lVert \sum_{j \in \mathrm{threat}} \frac{\mathbf{x}_i - \mathbf{y}_j}{\lVert \mathbf{x}_i - \mathbf{y}_j \rVert} \right\rVert}$$
-
-với $\mathrm{threat} = \{j \mid \lVert \mathbf{x}_i - \mathbf{y}_j \rVert < r_s\}$.
+$$
+\mathbf{R}_{s,i} = \frac{\sum_{j \in \mathrm{threat}} \frac{\mathbf{x}_i - \mathbf{y}_j}{\lVert \mathbf{x}_i - \mathbf{y}_j \rVert}}{\left\lVert \sum_{j \in \mathrm{threat}} \frac{\mathbf{x}_i - \mathbf{y}_j}{\lVert \mathbf{x}_i - \mathbf{y}_j \rVert} \right\rVert}, \quad \text{với } \mathrm{threat} = \{j \mid \lVert \mathbf{x}_i - \mathbf{y}_j \rVert < r_s\}
+$$
 
 #### Ví dụ trực quan về thế gọng kìm (Flanking)
 Giả sử một con cừu ở tọa độ $(0, 5)$ đang bị kẹp giữa hai chú chó: Chó 1 ở $(-3, 0)$ (sau-trái) và Chó 2 ở $(3, 0)$ (sau-phải):
@@ -137,21 +156,38 @@ Các bộ điều khiển chó
 
 Mở rộng các quy tắc kinh nghiệm của Strömbom thành một đội đa tác tử tự hành, có ý thức tránh va chạm:
 
+![Cơ chế phối hợp đa chó trong strombom_multi](../../docs/figures/fig3_team_rule.png)
+*Hình 3: Cơ chế phối hợp đội hình tự hành `strombom_multi` từ 1 chó đến 8 chó ($D = 1, 2, 4, 8$). Hàng trên (Gom cừu lạc trên bãi cỏ tản mác `wide`, $N = 200$): Thuật toán Hungarian gán 1-đối-1 từng con cừu lạc xa nhất cho từng chú chó (dấu $\times$ là điểm gom $P_c$), tối thiểu hóa tổng quãng đường chạy và gom song song. Hàng dưới (Lùa đàn trên bãi cỏ tập trung `compact`, $N = 200$): Toàn bộ đàn chó tự động dàn đều trên một vòng cung bán kính $R$ ôm trọn bề rộng bầy cừu (với điểm lùa danh định $P_d$ ở chính giữa), chia đều góc cực để đẩy cả bầy tiến về đích mà không cắt mặt nhau.*
+
 #### 1. Ngưỡng phát hiện cá thể lạc đàn ($f(N) = r_a N^{2/3}$)
 - *Tại sao là $r_a N^{2/3}$?* Khi xếp chặt các hình tròn bán kính $r_a$ trong mặt phẳng 2D, bán kính cụm tăng theo $\sim N^{1/2}$. Trong không gian 3D, bán kính tăng theo $\sim N^{1/3}$. Trên đồng cỏ mở, cừu phân tán theo cụm dạng fractal tự nhiên, nên biên giới tự nhiên nơi một cá thể bị xem là "lạc đàn" tăng theo hàm $N^{2/3}$.
 - Nếu có bất kỳ con cừu nào nằm xa hơn $f(N)$ tính từ Trọng tâm Toàn cục ($\mathrm{GCM} = \frac{1}{N} \sum_k \mathbf{x}_k$), bầy cừu được xem là bị phân tán, kích hoạt **Chế độ Gom cừu lạc (Outlier Collection Mode)**.
 
 #### 2. Phân công mục tiêu gom bằng thuật toán Hungarian
 - Đối với mỗi con cừu lạc $o$, điểm gom $P_c$ được đặt sau lưng con cừu $r_a = 2\text{ m}$ theo hướng chiếu từ trọng tâm bầy:
-  $$P_c = \mathbf{x}_o + r_a \frac{\mathbf{x}_o - \mathrm{GCM}}{\lVert \mathbf{x}_o - \mathrm{GCM} \rVert}$$
+
+$$
+P_c = \mathbf{x}_o + r_a \frac{\mathbf{x}_o - \mathrm{GCM}}{\lVert \mathbf{x}_o - \mathrm{GCM} \rVert}
+$$
+
 - $D$ con cừu lạc xa nhất được phân công tương ứng 1-đối-1 cho $D$ chú chó sẵn sàng thông qua thuật toán Hungarian (`scipy.optimize.linear_sum_assignment`). Thuật toán này tối thiểu hóa tổng quãng đường chạy của toàn đội và ngăn ngừa tình trạng các chú chó chạy chéo đường cắt mặt nhau. Chó dư thừa sẽ tham gia đội hình lùa phía sau.
+
+![Hình học điểm gom Pc và phân công Hungarian](../../docs/figures/fig_hungarian_matching.png)
+*Hình 4: Cơ chế nhận diện cừu lạc và phân công Hungarian trong chế độ Gom. (A) Bất kỳ con cừu nào vượt ra ngoài ranh giới hình tròn $f(N) = r_a N^{2/3}$ đều kích hoạt chế độ gom; điểm gom $P_c$ được đặt lùi sau lưng cừu $r_a = 2\text{ m}$ theo phương chiếu từ trọng tâm bầy (GCM). (B) Thuật toán Hungarian phân công 1-đối-1 giữa chó và cừu lạc giúp tối thiểu hóa tổng quãng đường di chuyển và loại bỏ hoàn toàn hiện tượng chạy cắt chéo đường gây va chạm (đường nét đứt thể hiện rủi ro cắt chéo nếu gán tham lam ngây thơ).*
 
 #### 3. Đội hình Vòng cung lùa đàn ($P_d$)
 - Khi toàn bộ cừu đã nằm gọn trong phạm vi $f(N)$, bầy cừu đã gắn kết, các chú chó đồng loạt chuyển sang **Chế độ Lùa đàn (Drive Mode)**.
 - Điểm lùa danh định $P_d$ được đặt sau lưng đàn cừu dọc theo trục thẳng hướng về đích:
-  $$P_d = \mathrm{GCM} + r_a \sqrt{N} \frac{\mathrm{GCM} - \mathbf{x}_{\mathrm{goal}}}{\lVert \mathrm{GCM} - \mathbf{x}_{\mathrm{goal}} \rVert}$$
+
+$$
+P_d = \mathrm{GCM} + r_a \sqrt{N} \frac{\mathrm{GCM} - \mathbf{x}_{\mathrm{goal}}}{\lVert \mathrm{GCM} - \mathbf{x}_{\mathrm{goal}} \rVert}
+$$
+
 - *Tại sao khoảng cách lùa tỷ lệ với $r_a \sqrt{N}$?* Một đàn cừu gắn kết gồm $N$ con tạo thành một hình đĩa có bán kính tỷ lệ thuận với $r_a\sqrt{N}$. Khoảng cách này đảm bảo đàn chó đứng ngay sát phía sau rìa mép của bầy cừu.
 - Các chú chó dàn đều trên một vòng cung bán kính $R$ ôm trọn góc mở của đàn cừu ($\pm \arcsin(R_{\mathrm{flock}} / R)$). Thứ tự góc cực của các chú chó quanh bầy được cố định, đảm bảo không chú chó nào chen lấn hay cắt ngang đường chạy của đồng đội.
+
+![Hình học điểm lùa Pd và Đội hình Vòng cung](../../docs/figures/fig_driving_arc.png)
+*Hình 5: Hình học chế độ Lùa đàn và Đội hình Vòng cung. (A) Điểm lùa danh định $P_d$ đặt lùi về sau lưng bầy cừu một khoảng đệm an toàn $r_a\sqrt{N} = 20\text{ m}$ dọc theo trục hướng đích $\mathbf{x}_{\mathrm{goal}}$, giữ đàn chó ngay sát rìa ngoài của đĩa bầy cừu $R_{\mathrm{flock}}$. (B) Toàn bộ đàn chó dàn thành vòng cung ôm trọn hai cánh sườn đàn cừu, triệt tiêu xu hướng cừu tản dạt sang hai bên và dẫn dắt cả khối tiến êm ả vào chuồng đích.*
 
 #### 4. Vận tốc và Quy tắc Giữ khoảng cách an toàn (Standoff Rule)
 - **Vận tốc**: $v_{\mathrm{dog}} = 1.5\text{ m/s}$ (nhanh gấp 1.5 lần cừu, đúng theo tỷ lệ thực tế giữa chó chăn cừu Border Collie và cừu).
@@ -166,7 +202,7 @@ Bộ điều khiển **FAT** được thiết kế để kiểm chứng xem kh�
 - **Điểm khiếm khuyết**: Hoàn toàn không có thuật toán Hungarian, không có vòng cung lùa, không có giao tiếp và không tránh va chạm giữa các chú chó.
 
 ![FAT clumping](../../docs/figures/fig4_fat.png)
-*Hình 3: Hiện tượng co cụm của thuật toán FAT. Vì không có cơ chế phân công nhiệm vụ, toàn bộ đàn chó đều chọn chung một con cừu xa nhất, dồn vào thành một đám đông hỗn loạn. Thêm nhiều chó không mang lại bất kỳ lợi ích mở rộng nào.*
+*Hình 6: Hiện tượng co cụm của thuật toán FAT. Trái: Quy tắc 1 chó chuẩn của Strömbom nhắm vào con cừu xa trọng tâm bầy (GCM) nhất. Giữa: Thuật toán FAT với 1 chó nhắm vào con cừu xa đích nhất. Phải: Khi tăng lên 4 chó ($D = 4$), vì không có cơ chế phân công nhiệm vụ, toàn bộ đàn chó đều chọn chung một con cừu xa nhất, dồn vào thành một đám đông hỗn loạn hoạt động vụng về như một con chó duy nhất. Thêm nhiều chó không mang lại bất kỳ lợi ích mở rộng nào.*
 
 ---
 
@@ -178,16 +214,20 @@ Mỗi chú chó độc lập thực thi quy tắc một-chó nguyên bản của
 - Có máy trạng thái chuyển đổi nhưng **hoàn toàn thiếu tầng điều phối đa tác tử**.
 - *Kết quả*: Hoạt động ổn định trên đàn nhỏ lên đến $N = 200$ cừu; nhưng thất bại hoàn toàn ở $N = 400$ nơi sự phối hợp phân tán là bắt buộc.
 
+![So sánh cơ chế hoạt động giữa strombom_multi và independent](../../docs/figures/fig_independent.png)
+*Hình 7: So sánh cơ chế hoạt động giữa `strombom_multi` và `independent` ($N = 100, D = 4$). Trái (`strombom_multi`): Phân công Hungarian 1-đối-1 giúp 4 chú chó tỏa ra 4 mục tiêu cừu lạc khác nhau, gom song song toàn bộ đàn. Giữa (`independent` Gom): Mỗi chú chó thực thi độc lập thuật toán một-chó cổ điển; vì tất cả nhìn thấy cùng trạng thái toàn cục, cả 4 chú chó cùng lao vào con cừu xa nhất từ GCM, biến thành một bầy rượt đuổi tuần tự từng con một và bỏ rơi các con cừu lạc còn lại. Phải (`independent` Lùa): Khi chuyển sang lùa đàn, đàn chó dồn về cùng một điểm danh định $P_d$ duy nhất thay vì dàn thành vòng cung (đường chấm xanh), gây chèn ép cục bộ và không kiểm soát được hai bên sườn đàn cừu.*
+
 ---
 
 ### Mô hình lực liên tục: `kubo`
 
-Điều khiển đàn chó bằng các trường thế liên tục:
-1. Lực hút về phía con cừu xa nhất.
-2. Lực đẩy khi lại quá gần con cừu đó ($1/r^3$).
-3. Lực đẩy tránh xa bờ chuồng đích.
+Điều khiển đàn chó bằng các trường thế liên tục (xem minh họa chi tiết ở Hình 2):
+1. **Lực hút mục tiêu**: Chó bị hút về phía con cừu xa đích nhất ($K_{f1} = 10.0$).
+2. **Giữ khoảng cách**: Lực đẩy tránh đè lên con cừu mục tiêu ($1/r^3$, $K_{f2} = 0.2$).
+3. **Né bờ chuồng**: Lực đẩy tránh xa bờ chuồng đích ($K_{f3} = 8.0$).
 4. **Lực đẩy tương hỗ giữa các chú chó**: Lực đẩy rất mạnh ($1/r^3$, trọng số $K_{f4} = 3000$) giữa các chú chó với nhau.
-- Đàn chó hành xử tương tự như các hạt tích điện cùng dấu: chúng tự động tản đều dọc theo rìa sau của bầy cừu một cách tự nhiên mà không cần bất kỳ bộ điều phối trung tâm nào.
+
+Đàn chó hành xử tương tự như các hạt tích điện cùng dấu: lực đẩy tương hỗ $K_{f4}$ đẩy các chú chó dãn đều ra hai bên sườn một cách tự nhiên. Khi cân bằng với lực hút về phía bầy cừu, các chú chó tự động tản đều tạo thành một vòng cung ôm trọn đàn cừu từ phía sau (như thể hiện ở bảng phải Hình 2) mà không cần thuật toán điều phối tập trung hay gán mục tiêu Hungarian.
 
 ---
 

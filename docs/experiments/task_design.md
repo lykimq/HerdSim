@@ -62,7 +62,9 @@ Giving a fixed 5-minute timer to all flock sizes would unfairly penalize larger 
 
 HerdSim normalizes all deadlines using the **characteristic drive time** ($T_{\mathrm{drive}}$): the minimum time required for the fastest sheep walking in a straight line at cruising speed ($v_{\mathrm{sheep,max}} = 1.0\text{ m/s}$) to traverse the drive distance:
 
-$$T_{\mathrm{drive}} = \frac{l}{v_{\mathrm{sheep,max}}}$$
+$$
+T_{\mathrm{drive}} = \frac{l}{v_{\mathrm{sheep,max}}}
+$$
 
 A compact flock driven smoothly by a single dog completes the drive in approximately $1.44$ to $1.74 \times T_{\mathrm{drive}}$. The benchmark protocols evaluate three normalized deadlines:
 - **Relaxed ($12\times T_{\mathrm{drive}}$)**: Plentiful time. A single dog has margin to collect strays sequentially.

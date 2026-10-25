@@ -62,7 +62,9 @@ Nếu đặt cùng một thời hạn cố định 5 phút cho tất cả các �
 
 HerdSim chuẩn hóa thời hạn bằng **thời gian lùa đặc trưng** ($T_{\mathrm{drive}}$): thời gian tối thiểu để con cừu chạy nhanh nhất đi trên đường thẳng ở vận tốc ổn định ($v_{\mathrm{sheep,max}} = 1.0\text{ m/s}$) vượt qua quãng đường lùa:
 
-$$T_{\mathrm{drive}} = \frac{l}{v_{\mathrm{sheep,max}}}$$
+$$
+T_{\mathrm{drive}} = \frac{l}{v_{\mathrm{sheep,max}}}
+$$
 
 Một đàn cừu tập trung được lùa bởi 1 chú chó thông thường sẽ hoàn thành nhiệm vụ trong khoảng $1.44$ đến $1.74 \times T_{\mathrm{drive}}$. Các thử nghiệm nghiên cứu đánh giá trên 3 mức áp lực thời gian:
 - **Thong thả ($12\times T_{\mathrm{drive}}$)**: Dư dả thời gian. Một chú chó duy nhất có đủ thời gian đi gom tuần tự từng con cừu lạc.
