@@ -28,6 +28,7 @@ Tài liệu này trình bày chi tiết về phương pháp luận thực nghi�
 - [5. Các Quy tắc Ranh giới Thống kê và Vùng Hành vi](#5-các-quy-tắc-ranh-giới-thống-kê-và-vùng-hành-vi)
   - [Định nghĩa các chỉ số ranh giới](#định-nghĩa-các-chỉ-số-ranh-giới)
   - [Phân loại các vùng hành vi](#phân-loại-các-vùng-hành-vi)
+- [6. Nhiệm vụ gom (Lama và di Bernardo 2024)](#6-nhiệm-vụ-gom-lama-và-di-bernardo-2024)
 
 ---
 
@@ -114,6 +115,8 @@ Nếu chạy đủ 200 lượt cho mọi tổ hợp tham số, chúng ta sẽ l�
 
 HerdSim sử dụng **vòng lặp lấy mẫu thích ứng tuần tự**, chỉ tập trung tài nguyên tính toán vào những ô tham số còn nhiều bất định.
 
+### Vòng lặp lấy mẫu thích ứng
+
 ```mermaid
 flowchart TD
     P["Cấu hình Protocol<br/>(File YAML)"] --> CAL["Hiệu chuẩn bán kính bầy R_f(N)"]
@@ -175,6 +178,7 @@ Mỗi chiến dịch mô phỏng đều có các chặn giới hạn. Dưới đ
 | :--- | :--- | :--- |
 | **Các lưới chính** | $25$ đến $400$ | Tại $N \le 50$, mọi bố cục đều chỉ cần 1 chó ở mọi thời hạn, do đó thử nghiệm nhỏ hơn không cung cấp thêm tri thức mới. $400$ là mức trần hiệu chuẩn của nghiên cứu ban đầu. |
 | **Lưới dày mở rộng** | $+ 71, 141, 283, 566$ | Các bước nhân $\sqrt{2}$ trên $N = 50$, đảm bảo trọng số hình học đều nhau khi khớp hàm lũy thừa. $N = 566 = 400\sqrt{2}$ là giới hạn cuối cùng trước khi bán kính dừng của mô hình Strömbom bị phá vỡ (ở $N \ge 600$, bầy cừu không còn ổn định kích thước riêng). |
+| **Nhiệm vụ gom (`lama`)** | $1$ đến $400$ mục tiêu, các số chính phương | Lưới của chính bài báo: $\sqrt{N} = 1$ đến $20$ trên trục của nó, để phần kiểm chứng đọc đúng các ô đó (mục 6). |
 | **Mô hình Kubo** | $25$ đến $100$ | Bầy cừu Kubo nén chặt về bán kính $R_f \approx 5.8\text{ m}$ ở mọi $N$. Vượt quá $N = 100$ sẽ tạo ra mật độ chèn ép phi thực tế. |
 | **Tầm nhìn hạn chế** | $50$ đến $200$ | Tại $N = 400$, bán kính gom cừu lạc ($109\text{ m}$) vượt quá tầm nhìn $65\text{ m}$ của cừu, khiến quy tắc cục bộ không thể thấy cừu lạc. |
 | **Đàn $N$ cực lớn** | $566$ đến $3200$ | Khảo sát giới hạn mô hình khi áp đặt mật độ đàn không đổi. Phát hiện điểm kỳ dị toán học tại $N = 1056$ nơi cự ly lùa của bài báo vượt quá cự ly phản ứng của cừu. |
@@ -182,6 +186,7 @@ Mỗi chiến dịch mô phỏng đều có các chặn giới hạn. Dưới đ
 ### Số lượng chó $D$
 
 - **Lưới chính ($1, 2, 3, 4, 6, 8, 12, 16, 24$)**: Các bước nhân khoảng $1.5\times$ đảm bảo mỗi lần tăng gấp đôi số chó đều có ít nhất 2 điểm đo. Mức $D = 24$ được chọn vì không có đường cong nào còn tiếp tục tăng tốc ở 24; các đường không đạt tin cậy đều có tỷ lệ thành công đi ngang hoặc giảm sút.
+- **Nhiệm vụ gom ($1$ đến $25$, mọi giá trị)**: Lưới người chăn của bài báo, với độ phân giải một người chăn, để đọc được đội tối thiểu của nó mà không cần nội suy.
 - **Giữ đàn với giãn cách chó ($+ 7, 9, 10, 11, 13$)**: Số lượng chó tối đa mà vòng cung lùa có thể chứa ở khoảng cách an toàn $2\text{ m}$ là $7, 9, 10, 11, 12$ tương ứng từ $N = 25$ đến $400$. Thử nghiệm xung quanh các giá trị này giúp bắt trọn thời điểm bắt đầu xảy ra hiện tượng chèn lấn gây hại.
 
 ### Số hạt giống trên mỗi ô (Mức trần 200)
@@ -223,3 +228,52 @@ Quá trình phân loại thống kê được quản lý bởi [`analysis/fronti
 - `saturated`: Đạt tin cậy, từ $D_{\mathrm{sat}}$ trở lên; thêm chó không giúp chạy nhanh hơn.
 - `crowded`: Đạt tin cậy, nhưng chạy chậm hơn $D_{\mathrm{best}}$ do chó cản trở nhau.
 - `collapse`: Không tin cậy, tại hoặc trên mức $D_{\mathrm{overcrowd}}$.
+
+---
+
+## 6. Nhiệm vụ gom (Lama và di Bernardo 2024)
+
+Mọi phần ở trên mô tả nhiệm vụ lùa (`drive_to_goal`), dùng cho mọi giao thức Strömbom và Kubo. Phương pháp `lama` chạy trong một nhiệm vụ thứ hai, `gather`, tái hiện bối cảnh của [Lama & di Bernardo (2024)](https://doi.org/10.1103/PhysRevResearch.6.L032012) (mô hình: [`docs/methods/models_vi.md`](../methods/models_vi.md#mô-hình-mục-tiêu-brownian-không-liên-kết-lama-2024)). Giao thức chọn nó bằng `task: gather`.
+
+**Trạng thái:** đã cài đặt và kiểm thử. Đang chạy kiểm chứng với kết quả của bài báo; chưa có kết quả nào được báo cáo.
+
+### Hình học: một đĩa quanh đích
+
+| Tham số | Quy tắc | Nguồn |
+| :--- | :--- | :--- |
+| **Đĩa xuất phát** $R$ | `gather_start_radius`, $50$ | Trường hợp chính của bài báo (Hình 2) |
+| **Bán kính đích** | `gather_goal_fraction` $\times R$ $= R/5 = 10$ | $r^* = R/5$ của bài báo |
+| **Xuất phát** (bố cục `uniform`) | Cừu và chó phân bố đều trong đĩa, kể cả vùng đích | $\Omega_0$ của bài báo |
+| **Tỷ lệ cần đạt** | `success_fraction` $= 0{,}99$ | $\chi^* = 0{,}99$ của bài báo |
+| **Giới hạn thời gian** | $166.667$ tick $= 5000$ s với $\Delta t = 0{,}03$ | $t_{\max}$ của bài báo (Hình S8) |
+| **Biên mở** | Không có tường | Như nhiệm vụ lùa |
+
+Mục tiêu không tụ bầy nên không có bán kính bầy bị lùa để hiệu chuẩn: nhiệm vụ định cỡ bằng $R$, và `calibrate` không có việc gì để làm. Cừu được rút trước chó, nên một hạt giống cho cùng các mục tiêu dù số chó là bao nhiêu, và các ô ở các $D$ khác nhau vẫn được ghép cặp như trong nhiệm vụ lùa.
+
+### Khi nào một lượt kết thúc và thế nào là thành công
+
+- **Thành công**: ít nhất 99% mục tiêu ở trong đích tại thời điểm mọi người chăn đều ở trong đích. Đây là điểm dừng của bài báo ("mô phỏng dừng khi mọi người chăn ở trong $\Omega_G$").
+- **Kết thúc sớm (thất bại)**: mọi người chăn ở trong đích và không ai cảm nhận được mục tiêu nào bên ngoài. Người chăn đã gom hết những gì nhìn thấy, phần còn lại bị mất. Hiểu theo nghĩa đen, quy tắc của bài báo sẽ kết thúc lượt chạy một người chăn ngay tick đầu tiên mỗi khi người chăn đó xuất phát trong đích; mệnh đề thêm loại bỏ trường hợp này.
+- **Còn lại**: lượt chạy tiếp tục tới giới hạn thời gian.
+
+Thất bại được gắn nhãn `targets_lost` (có mục tiêu ngoài tầm nhìn của mọi người chăn lúc kết thúc) hoặc `outnumbered` (mọi mục tiêu đều được thấy nhưng không đạt tỷ lệ kịp giờ). Mỗi hàng cũng lưu tỷ lệ trong đích lúc kết thúc (`final_in_goal_fraction`), nên thống kê riêng của bài báo (trung bình tỷ lệ đó trên các hạt giống) có thể tính cạnh quy tắc tin cậy của HerdSim.
+
+### Hai thống kê
+
+| | Bài báo | HerdSim |
+| :--- | :--- | :--- |
+| Một cỡ đội được xem là đạt khi | trung bình tỷ lệ trong đích lúc kết thúc, trên 50 lượt, ít nhất bằng $0{,}99$ | khoảng Clopper-Pearson 99% của tỷ lệ thành công nằm tại hoặc trên $0{,}90$ |
+| Hạt giống | 50 mỗi ô | thích ứng, 10 đến 200 mỗi ô |
+
+Cả hai được đọc từ cùng các hàng dữ liệu. Phần kiểm chứng dùng thống kê của bài báo trên 50 hạt giống mỗi ô; các chiến dịch báo cáo theo quy tắc của HerdSim, quy tắc mọi kết quả HerdSim khác đều dùng, kèm thống kê của bài báo bên cạnh.
+
+### Ghi metric mỗi 10 tick
+
+Với $\Delta t = 0{,}03$, một lượt thất bại chạy $166.667$ tick, và chi phí metric mỗi tick còn lớn hơn chính mô hình. Vì vậy các giao thức gom đặt `metrics_stride: 10` (một bản ghi mỗi $0{,}3$ s). Thành công, kết thúc sớm và giới hạn thời gian vẫn được kiểm tra mỗi tick, và tick cuối luôn được ghi, nên kết quả của một lượt không phụ thuộc bước ghi. Chỉ thời gian tới đích lần đầu được đọc từ các tick đã ghi, nên không bao giờ sớm hơn giá trị chính xác và có thể muộn hơn (một tỷ lệ đạt rồi mất giữa hai lần ghi sẽ bị bỏ lỡ).
+
+### Giao thức
+
+| Giao thức | Bán kính cảm nhận $\xi$ | Hình trong bài báo |
+| :--- | :---: | :--- |
+| `lama_r50` | $10$ | Hình 2b, Bảng I |
+| `lama_r50_inf` | vô hạn | Hình 2a |

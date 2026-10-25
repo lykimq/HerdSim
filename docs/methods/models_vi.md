@@ -18,6 +18,7 @@ HerdSim kết nối giữa nghiên cứu hành vi động vật thực nghiệm 
   - [Mô hình đối chứng tham lam: `fat` (Farthest-Agent Targeting)](#mô-hình-đối-chứng-tham-lam-fat-farthest-agent-targeting)
   - [Mô hình chó độc lập: `independent`](#mô-hình-chó-độc-lập-independent)
   - [Mô hình lực liên tục: `kubo`](#mô-hình-lực-liên-tục-kubo)
+  - [Người chăn cảm nhận cục bộ: `lama_herders`](#người-chăn-cảm-nhận-cục-bộ-lama_herders)
 - [Tài liệu tham khảo](#tài-liệu-tham-khảo)
 
 ---
@@ -131,23 +132,43 @@ Giả sử một con cừu ở tọa độ $(0, 5)$ đang bị kẹp giữa hai 
 
 ### Mô hình mục tiêu Brownian không liên kết Lama (2024)
 
-HerdSim tích hợp mô hình từ bài báo của [Lama & di Bernardo (2024)](https://doi.org/10.1103/PhysRevResearch.6.L032012):
-- **Mục tiêu (đóng vai trò "cừu")**: Các hạt chuyển động nhiệt Brownian ngẫu nhiên, **hoàn toàn không có lực gắn kết bầy đàn** và không đồng bộ vận tốc.
-- **Tác dụng của người lùa**: Khi người lùa lại gần hơn cự ly $\lambda = 2.5$, mục tiêu bị đẩy ra xa với cường độ giảm tuyến tính về 0 ở khoảng cách $\lambda$.
-- **Mục đích**: Cung cấp một hệ quy chiếu thực nghiệm để so sánh động lực học giữa các sinh vật có tính xã hội (bầy cừu) với các tập hợp hạt ngẫu nhiên rời rạc (kiểm chứng định luật tỷ lệ $D \propto \sqrt{N}$).
+HerdSim tích hợp mô hình mục tiêu không gắn kết từ bài báo của [Lama & di Bernardo (2024)](https://doi.org/10.1103/PhysRevResearch.6.L032012) thành phương pháp `lama` (mô hình cừu `lama_targets`, bộ điều khiển chó `lama_herders`). Nó chạy trong nhiệm vụ riêng, `gather` (xem [thiết kế nhiệm vụ](../experiments/task_design_vi.md#6-nhiệm-vụ-gom-lama-và-di-bernardo-2024)).
+
+**Trạng thái:** đã cài đặt và kiểm thử; đang chạy kiểm chứng với kết quả của chính bài báo. Chưa có kết quả nào từ mô hình này được báo cáo.
+
+**Ký hiệu.** Bài báo viết $N$ cho số người chăn và $M$ cho số mục tiêu. HerdSim giữ chữ cái của mình ở mọi nơi: $D$ là số chó (người chăn) và $N$ là số cừu (mục tiêu). Vì vậy $N^*(M)$ của bài báo là $D_{\min}(N)$ của HerdSim trên nhiệm vụ gom. $D$ (hệ số khuếch tán) của bài báo ở đây gọi là `target_diffusion`.
+
+- **Mục tiêu (đóng vai trò "cừu")**: các hạt chuyển động Brown **không gắn kết, không đồng hướng, không giới hạn tốc độ**. Mỗi mục tiêu di chuyển theo nhiễu riêng cộng với lực đẩy của các người chăn trong bán kính $\lambda$ (phương trình 1 của bài báo):
+
+$$
+\dot{\mathbf{x}}_a = \sqrt{2D_T}\,\boldsymbol{\xi}_a + \beta \sum_{i:\ \lVert \mathbf{x}_a - \mathbf{y}_i \rVert \le \lambda} \left(\lambda - \lVert \mathbf{x}_a - \mathbf{y}_i \rVert\right) \frac{\mathbf{x}_a - \mathbf{y}_i}{\lVert \mathbf{x}_a - \mathbf{y}_i \rVert}
+$$
+
+- **Phản ứng trốn chạy**: lực đẩy hướng ra xa người chăn, bằng $\beta\lambda$ khi chạm và giảm tuyến tính về 0 tại $\lambda$. Lực đẩy của nhiều người chăn **cộng lại**, khác với lực đẩy Strömbom đã chuẩn hóa ở trên. Tốc độ chạy trốn tối đa khỏi một người chăn là $v_T = \beta\lambda = 7{,}5$.
+- **Tích phân**: Euler-Maruyama với $\Delta t = 0{,}03$ s.
+
+| Tham số | Bài báo | Khóa HerdSim | Giá trị |
+| :--- | :---: | :--- | :---: |
+| Khuếch tán của mục tiêu | $D$ | `target_diffusion` | 1 |
+| Cường độ đẩy | $\beta$ | `repulsion_strength` | 3 |
+| Bán kính đẩy | $\lambda$ | `repulsion_radius` | 2,5 |
+| Bước thời gian | $\Delta t$ | `dt` | 0,03 |
+
+- **Mục đích**: báo cáo so sánh độ dốc của $D_{\min}$ theo $N$ cho cừu tụ bầy (0,27 đến 0,50) với quy luật của bài báo cho mục tiêu không gắn kết ($N^* \propto \sqrt{M}$, chỉ đúng trên một ngưỡng mật độ $M_{\mathrm{low}}$ khi người chăn có tầm cảm nhận giới hạn). Chạy mô hình của bài báo ngay trong HerdSim đặt cả hai lên cùng một mô phỏng và cùng một lớp thống kê.
 
 ---
 
 ## 2. Các Bộ điều khiển Chó chăn cừu
 
-HerdSim hiện thực 4 kiến trúc điều khiển chó chăn cừu:
+HerdSim hiện thực 5 kiến trúc điều khiển chó chăn cừu:
 
 ```text
 Các bộ điều khiển chó
 ├── strombom_multi   (Đội hình phối hợp tự hành: Hungarian matching + vòng cung lùa)
 ├── fat              (Đối chứng tham lam không phối hợp: Farthest-Agent Targeting)
 ├── independent      (Các cá thể độc lập: máy trạng thái nhưng không có tầng phối hợp đội)
-└── kubo_forces      (Trường thế vật lý liên tục với lực đẩy tương hỗ giữa các chó)
+├── kubo_forces      (Trường thế vật lý liên tục với lực đẩy tương hỗ giữa các chó)
+└── lama_herders     (Cảm nhận cục bộ, đuổi mục tiêu xa nhất, chỉ dùng cho nhiệm vụ gom)
 ```
 
 ---
@@ -223,7 +244,7 @@ Mỗi chú chó độc lập thực thi quy tắc một-chó nguyên bản của
 
 Điều khiển đàn chó bằng các trường thế liên tục (xem minh họa chi tiết ở Hình 2):
 1. **Lực hút mục tiêu**: Chó bị hút về phía con cừu xa đích nhất ($K_{f1} = 10.0$).
-2. **Giữ khoảng cách**: Lực đẩy tránh đè lên con cừu mục tiêu ($1/r^3$, $K_{f2} = 0.2$).
+2. **Giữ khoảng cách**: Lực đẩy tránh đè lên con cừu mục tiêu ($1/r^3$, $K_{f2} = 200$).
 3. **Né bờ chuồng**: Lực đẩy tránh xa bờ chuồng đích ($K_{f3} = 8.0$).
 4. **Lực đẩy tương hỗ giữa các chú chó**: Lực đẩy rất mạnh ($1/r^3$, trọng số $K_{f4} = 3000$) giữa các chú chó với nhau.
 
@@ -231,8 +252,34 @@ Mỗi chú chó độc lập thực thi quy tắc một-chó nguyên bản của
 
 ---
 
+### Người chăn cảm nhận cục bộ: `lama_herders`
+
+Quy tắc người chăn của Lama & di Bernardo (2024), phương trình 2 đến 4 của bài báo. Mọi khoảng cách đều đo từ tâm đích, chính là gốc tọa độ của bài báo.
+
+1. **Người chăn cảm nhận gì**: các mục tiêu và các người chăn khác trong bán kính $\xi = 10$ (`sensing_radius`; giao thức `lama_r50_inf` đặt bán kính này vô hạn).
+2. **Đuổi mục tiêu nào**: mục tiêu trong tầm **xa tâm đích nhất**, bỏ qua mục tiêu nào gần một người chăn khác trong tầm hơn. Nhờ vậy các người chăn gần nhau tự chia việc mà không cần trao đổi và không cần nhìn toàn cục.
+3. **Đứng ở đâu**: cách mục tiêu $\delta = \lambda/2 = 1{,}25$ về phía ngoài trên tia từ tâm đích, để lực đẩy đưa mục tiêu vào trong. Nó di chuyển tới điểm đó với hệ số $\alpha = 5$, tối đa $v_H = 8$ mỗi giây:
+
+$$
+\dot{\mathbf{y}}_i = \left[\,-\alpha\left(\mathbf{y}_i - \mathbf{x}^*_i - \delta\,\hat{\mathbf{x}}^*_i\right)\right]_{v_H}
+$$
+
+4. **Khi không có gì để đuổi**: đi thẳng về tâm đích với tốc độ $v_H$ và đứng yên khi đã vào trong đích.
+5. **Không nhiễu, không lực đẩy giữa các chó, không tầng phối hợp đội.** HerdSim từ chối bộ tham số có $v_H \le v_T$, vì bài báo giả định người chăn nhanh hơn.
+
+| Tham số | Bài báo | Khóa HerdSim | Giá trị |
+| :--- | :---: | :--- | :---: |
+| Bán kính cảm nhận | $\xi$ | `sensing_radius` | 10 |
+| Tốc độ tối đa | $v_H$ | `herder_speed` | 8 |
+| Hệ số khuếch đại | $\alpha$ | `herder_gain` | 5 |
+| Khoảng đứng sau mục tiêu | $\delta$ | `chase_offset` | 1,25 |
+
+Ở những chỗ bài báo không nói rõ, cách đọc của HerdSim được ghi trong docstring của mã: dấu của lực đẩy trong [`sim/methods/lama/dynamics.py`](../../sim/methods/lama/dynamics.py), còn khi nào một lượt chạy kết thúc và thứ tự tick trong [`sim/plugins/scenarios/gather.py`](../../sim/plugins/scenarios/gather.py).
+
+---
+
 ## Tài liệu tham khảo
 
 1. **Strömbom, D., et al. (2014)**. *Solving the shepherding problem: heuristics for herding autonomous, interacting agents*. Journal of the Royal Society Interface, 11(100), 20140719. [DOI: 10.1098/rsif.2014.0719](https://doi.org/10.1098/rsif.2014.0719)
 2. **Kubo, M., Tashiro, M., Sato, H., Yamaguchi, A. (2022)**. *Herd guidance by multiple sheepdog agents with repulsive force*. Artificial Life and Robotics, 27, 416–427. [DOI: 10.1007/s10015-021-00726-7](https://doi.org/10.1007/s10015-021-00726-7)
-3. **Lama, A., & di Bernardo, M. (2024)**. *Universal scaling laws in multi-agent herding of non-cohesive targets*. Physical Review Research, 6(L032012). [DOI: 10.1103/PhysRevResearch.6.L032012](https://doi.org/10.1103/PhysRevResearch.6.L032012)
+3. **Lama, A., & di Bernardo, M. (2024)**. *Shepherding control and herdability in complex multiagent systems*. Physical Review Research, 6, L032012. [DOI: 10.1103/PhysRevResearch.6.L032012](https://doi.org/10.1103/PhysRevResearch.6.L032012)

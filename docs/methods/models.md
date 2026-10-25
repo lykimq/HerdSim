@@ -9,7 +9,7 @@ HerdSim bridges the gap between empirical animal behavior literature and autonom
 ## Table of Contents
 
 - [1. Sheep Flocking Models](#1-sheep-flocking-models)
-  - [Strömbom et al. (2014) Discrete Behavioral Model](#strombom-et-al-2014-discrete-behavioral-model)
+  - [Strömbom et al. (2014) Discrete Behavioral Model](#strömbom-et-al-2014-discrete-behavioral-model)
   - [Multi-Dog Push Blending (HerdSim Extension)](#multi-dog-push-blending-herdsim-extension)
   - [Kubo et al. (2022) Continuous Potential Fields](#kubo-et-al-2022-continuous-potential-fields)
   - [Lama & di Bernardo (2024) Non-Cohesive Targets](#lama--di-bernardo-2024-non-cohesive-targets)
@@ -18,7 +18,7 @@ HerdSim bridges the gap between empirical animal behavior literature and autonom
   - [Uncoordinated Greedy Baseline: `fat`](#uncoordinated-greedy-baseline-fat)
   - [Independent Paper Shepherds: `independent`](#independent-paper-shepherds-independent)
   - [Continuous Force Shepherds: `kubo`](#continuous-force-shepherds-kubo)
-  - [Brownian Herders: `lama`](#brownian-herders-lama)
+  - [Local Herders: `lama_herders`](#local-herders-lama_herders)
 - [References](#references)
 
 ---
@@ -132,23 +132,43 @@ As a cross-paradigm benchmark, HerdSim implements the continuous physics model o
 
 ### Lama & di Bernardo (2024) Non-Cohesive Targets
 
-HerdSim integrates the non-cohesive target model from [Lama & di Bernardo (2024)](https://doi.org/10.1103/PhysRevResearch.6.L032012):
-- **Targets (the "sheep")**: Pure Brownian random walkers with diffusion coefficient 1, **no social cohesion**, and no alignment.
-- **Escape Dynamics**: A herder closer than $\lambda = 2.5$ exerts a repulsive push that drops linearly to zero at distance $\lambda$.
-- **Purpose**: Establishes an empirical baseline to compare flocking animals against non-cohesive swarms (validating the theoretical $D \propto \sqrt{N}$ scaling conjecture).
+HerdSim integrates the non-cohesive target model from [Lama & di Bernardo (2024)](https://doi.org/10.1103/PhysRevResearch.6.L032012) as the method `lama` (sheep model `lama_targets`, dog controller `lama_herders`). It runs in its own task, `gather` (see [task design](../experiments/task_design.md#6-the-gather-task-lama-and-di-bernardo-2024)).
+
+**Status:** implemented and tested; the validation against the paper's own results is running. No results from this model are reported yet.
+
+**Notation.** The paper writes $N$ for the number of herders and $M$ for the number of targets. HerdSim keeps its own letters everywhere: $D$ is the number of dogs (herders) and $N$ the number of sheep (targets). So the paper's $N^*(M)$ is HerdSim's $D_{\min}(N)$ on the gather task. The paper's $D$ (diffusion) is called `target_diffusion` here.
+
+- **Targets (the "sheep")**: Brownian walkers with **no cohesion, no alignment and no speed cap**. Each moves under its own noise plus the pushes of the herders within $\lambda$ (paper eq. 1):
+
+$$
+\dot{\mathbf{x}}_a = \sqrt{2D_T}\,\boldsymbol{\xi}_a + \beta \sum_{i:\ \lVert \mathbf{x}_a - \mathbf{y}_i \rVert \le \lambda} \left(\lambda - \lVert \mathbf{x}_a - \mathbf{y}_i \rVert\right) \frac{\mathbf{x}_a - \mathbf{y}_i}{\lVert \mathbf{x}_a - \mathbf{y}_i \rVert}
+$$
+
+- **Escape dynamics**: the push points away from the herder, is $\beta\lambda$ at contact and falls linearly to zero at $\lambda$. Pushes of several herders **add**, unlike the normalised Strömbom push above. The top escape speed from one herder is $v_T = \beta\lambda = 7.5$.
+- **Integration**: Euler-Maruyama with $\Delta t = 0.03$ s.
+
+| Parameter | Paper | HerdSim key | Value |
+| :--- | :---: | :--- | :---: |
+| Diffusion of the targets | $D$ | `target_diffusion` | 1 |
+| Push strength | $\beta$ | `repulsion_strength` | 3 |
+| Push radius | $\lambda$ | `repulsion_radius` | 2.5 |
+| Time step | $\Delta t$ | `dt` | 0.03 |
+
+- **Purpose**: the report compares HerdSim's slopes of $D_{\min}$ against $N$ for flocking sheep (0.27 to 0.50) with the paper's law for targets without cohesion ($N^* \propto \sqrt{M}$, which holds only above a density threshold $M_{\mathrm{low}}$ when the herders' sensing is limited). Running the paper's model inside HerdSim puts both on one simulator and one statistics layer.
 
 ---
 
 ## 2. Shepherd Controllers
 
-HerdSim implements four distinct shepherd architectures:
+HerdSim implements five distinct shepherd architectures:
 
 ```text
 Shepherd Controllers
 ├── strombom_multi   (Coordinated autonomous team: Hungarian matching + driving arc)
 ├── fat              (Greedy uncoordinated baseline: Farthest-Agent Targeting)
 ├── independent      (Independent single-dog agents: collect/drive switch without team layer)
-└── kubo_forces      (Physics-based continuous fields with mutual dog repulsion)
+├── kubo_forces      (Physics-based continuous fields with mutual dog repulsion)
+└── lama_herders     (Local sensing, farthest-target chase, gather task only)
 ```
 
 ---
@@ -224,7 +244,7 @@ Each dog independently executes the original single-dog rule of Strömbom (2014)
 
 Guides shepherds via continuous potential fields rather than discrete states (see detailed illustration in Figure 2):
 1. **Target attraction**: Dogs are pulled toward the sheep farthest from the goal ($K_{f1} = 10.0$).
-2. **Target standoff**: Repelled when getting too close to that sheep ($1/r^3$, $K_{f2} = 0.2$).
+2. **Target standoff**: Repelled when getting too close to that sheep ($1/r^3$, $K_{f2} = 200$).
 3. **Goal repulsion**: Repelled from the goal perimeter to avoid blocking entry ($K_{f3} = 8.0$).
 4. **Mutual dog repulsion**: A strong repulsive force ($1/r^3$, weight $K_{f4} = 3000$) between dogs.
 
@@ -232,8 +252,34 @@ Shepherds behave like like-charged electrostatic particles: mutual dog repulsion
 
 ---
 
+### Local Herders: `lama_herders`
+
+The herder rule of Lama & di Bernardo (2024), paper eqs. 2 to 4. Every distance is measured from the goal centre, which is the paper's origin.
+
+1. **What a herder senses**: the targets and the other herders within $\xi = 10$ of it (`sensing_radius`; the protocol `lama_r50_inf` sets it infinite).
+2. **Which target it chases**: the sensed target **farthest from the goal centre**, leaving out any target that is closer to another sensed herder. So nearby herders split the work without talking to each other and without any global view.
+3. **Where it stands**: $\delta = \lambda/2 = 1.25$ beyond its target on the ray from the goal centre, so its push sends the target inward. It moves toward that point with gain $\alpha = 5$, at most $v_H = 8$ per second:
+
+$$
+\dot{\mathbf{y}}_i = \left[\,-\alpha\left(\mathbf{y}_i - \mathbf{x}^*_i - \delta\,\hat{\mathbf{x}}^*_i\right)\right]_{v_H}
+$$
+
+4. **With nothing to chase**: it walks straight back toward the goal centre at $v_H$ and stands still once inside the goal.
+5. **No noise, no dog-dog repulsion, no team layer.** HerdSim refuses a parameter set with $v_H \le v_T$, as the paper assumes faster herders.
+
+| Parameter | Paper | HerdSim key | Value |
+| :--- | :---: | :--- | :---: |
+| Sensing radius | $\xi$ | `sensing_radius` | 10 |
+| Top speed | $v_H$ | `herder_speed` | 8 |
+| Gain | $\alpha$ | `herder_gain` | 5 |
+| Stand-off beyond the target | $\delta$ | `chase_offset` | 1.25 |
+
+Where the paper is silent, HerdSim's reading is written in the code docstrings: the sign of the push in [`sim/methods/lama/dynamics.py`](../../sim/methods/lama/dynamics.py), and when a trial ends and the tick order in [`sim/plugins/scenarios/gather.py`](../../sim/plugins/scenarios/gather.py).
+
+---
+
 ## References
 
 1. **Strömbom, D., et al. (2014)**. *Solving the shepherding problem: heuristics for herding autonomous, interacting agents*. Journal of the Royal Society Interface, 11(100), 20140719. [DOI: 10.1098/rsif.2014.0719](https://doi.org/10.1098/rsif.2014.0719)
 2. **Kubo, M., Tashiro, M., Sato, H., Yamaguchi, A. (2022)**. *Herd guidance by multiple sheepdog agents with repulsive force*. Artificial Life and Robotics, 27, 416–427. [DOI: 10.1007/s10015-021-00726-7](https://doi.org/10.1007/s10015-021-00726-7)
-3. **Lama, A., & di Bernardo, M. (2024)**. *Universal scaling laws in multi-agent herding of non-cohesive targets*. Physical Review Research, 6(L032012). [DOI: 10.1103/PhysRevResearch.6.L032012](https://doi.org/10.1103/PhysRevResearch.6.L032012)
+3. **Lama, A., & di Bernardo, M. (2024)**. *Shepherding control and herdability in complex multiagent systems*. Physical Review Research, 6, L032012. [DOI: 10.1103/PhysRevResearch.6.L032012](https://doi.org/10.1103/PhysRevResearch.6.L032012)

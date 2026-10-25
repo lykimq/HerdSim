@@ -75,6 +75,8 @@ HerdSim được thiết kế từ gốc như một nền tảng nghiên cứu h
    Hệ sinh thái chạy thử nghiệm tự động tính toán khoảng tin cậy Clopper-Pearson 99%, dừng sớm các trường hợp chắc chắn thắng/thua chỉ sau 10–20 hạt giống và dồn tài nguyên tính toán vào các ô ranh giới chưa ngã ngũ lên tới mức trần 200 hạt giống.
 5. **Tính tất định và khả năng phục hồi khi dừng đột ngột**:
    Các dòng ngẫu nhiên độc lập đảm bảo khả năng tái lập kết quả chính xác đến từng bit. Mọi lượt thử nghiệm sau khi hoàn thành đều ghi nối tiếp ngay vào đĩa (`trials.jsonl`), cho phép dừng (`Ctrl+C`) và chạy tiếp bất kỳ lúc nào mà không mất dữ liệu.
+6. **Ba mô hình nguồn, hai nhiệm vụ**:
+   Ngoài bầy cừu Strömbom, HerdSim chạy mô hình lực liên tục của Kubo et al. (2022) trên cùng nhiệm vụ lùa, và mô hình mục tiêu không gắn kết cùng người chăn cảm nhận cục bộ của Lama & di Bernardo (2024) trên nhiệm vụ gom riêng (cừu và chó xuất phát rải đều trong một đĩa và chó đưa mục tiêu vào tâm). Mô hình Lama được thêm vào để kiểm tra quy luật $\sqrt{N}$ đã công bố ngay trong cùng một mô phỏng và cùng một lớp thống kê; phần kiểm chứng với bài báo đang chạy và chưa có kết quả nào được báo cáo.
 
 ---
 
@@ -158,8 +160,8 @@ HerdSim duy trì hệ thống tài liệu chuyên sâu được phân loại rõ
 | Tài liệu | Mô tả |
 | :--- | :--- |
 | **Báo cáo Khoa học Đầy đủ**<br>[`docs/report/d_min_report_vi.md`](docs/report/d_min_report_vi.md) ([EN](docs/report/d_min_report.md)) | Chuyên khảo nghiên cứu toàn diện: tất cả 12 phát hiện, bảng số liệu, đường cong tăng trưởng và thảo luận. |
-| **Mô hình Tác tử & Thuật toán**<br>[`docs/methods/models_vi.md`](docs/methods/models_vi.md) ([EN](docs/methods/models.md)) | Công thức toán học của cừu, thuật toán phối hợp đa chó Hungarian matching, vòng cung lùa và các mô hình đối chứng. |
-| **Thiết kế Thực nghiệm & Vì sao chọn $N, D$**<br>[`docs/experiments/task_design_vi.md`](docs/experiments/task_design_vi.md) ([EN](docs/experiments/task_design.md)) | Tính bất biến quy mô $R_f(N)$, chuẩn hóa deadline $T_{\mathrm{drive}}$, lấy mẫu thích ứng và cơ sở lựa chọn các giới hạn $N, D$. |
+| **Mô hình Tác tử & Thuật toán**<br>[`docs/methods/models_vi.md`](docs/methods/models_vi.md) ([EN](docs/methods/models.md)) | Công thức toán học của cừu, thuật toán phối hợp đa chó Hungarian matching, vòng cung lùa, các mô hình đối chứng, và hai mô hình Kubo và Lama. |
+| **Thiết kế Thực nghiệm & Vì sao chọn $N, D$**<br>[`docs/experiments/task_design_vi.md`](docs/experiments/task_design_vi.md) ([EN](docs/experiments/task_design.md)) | Tính bất biến quy mô $R_f(N)$, chuẩn hóa deadline $T_{\mathrm{drive}}$, lấy mẫu thích ứng và cơ sở lựa chọn các giới hạn $N, D$, và nhiệm vụ gom. |
 | **Hướng dẫn Cấu hình & Protocol**<br>[`docs/guides/configuration.md`](docs/guides/configuration.md) | Cơ chế kế thừa file YAML, giải thích các cờ tham số mở rộng và cấu trúc thư mục lưu trữ kết quả. |
 | **Sổ tay Dòng lệnh CLI**<br>[`docs/guides/cli_reference.md`](docs/guides/cli_reference.md) | Hướng dẫn sử dụng các lệnh CLI để lập kế hoạch, chạy chiến dịch và thực thi replay chẩn đoán. |
 | **Kiến trúc Mã nguồn Phần mềm**<br>[`docs/codes/architecture.md`](docs/codes/architecture.md) | Hướng dẫn chuyên sâu về thiết kế codebase, hệ sinh thái plugin và cách mở rộng các bộ điều khiển mới. |
@@ -172,5 +174,5 @@ Nếu bạn sử dụng HerdSim trong nghiên cứu của mình, vui lòng tríc
 
 1. **Strömbom, D., et al. (2014)**. *Solving the shepherding problem: heuristics for herding autonomous, interacting agents*. Journal of the Royal Society Interface, 11(100), 20140719. [DOI: 10.1098/rsif.2014.0719](https://doi.org/10.1098/rsif.2014.0719)
 2. **Kubo, M., Tashiro, M., Sato, H., Yamaguchi, A. (2022)**. *Herd guidance by multiple sheepdog agents with repulsive force*. Artificial Life and Robotics, 27, 416–427. [DOI: 10.1007/s10015-021-00726-7](https://doi.org/10.1007/s10015-021-00726-7)
-3. **Lama, A., & di Bernardo, M. (2024)**. *Universal scaling laws in multi-agent herding of non-cohesive targets*. Physical Review Research, 6(L032012). [DOI: 10.1103/PhysRevResearch.6.L032012](https://doi.org/10.1103/PhysRevResearch.6.L032012)
+3. **Lama, A., & di Bernardo, M. (2024)**. *Shepherding control and herdability in complex multiagent systems*. Physical Review Research, 6, L032012. [DOI: 10.1103/PhysRevResearch.6.L032012](https://doi.org/10.1103/PhysRevResearch.6.L032012)
 4. **Bảng Số liệu Thực nghiệm**: [`docs/report/results_tables.md`](docs/report/results_tables.md)

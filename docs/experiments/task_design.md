@@ -28,6 +28,7 @@ This document details the experimental methodology, task geometry, statistical d
 - [5. Statistical Frontier Rules and Behavioral Zones](#5-statistical-frontier-rules-and-behavioral-zones)
   - [Frontier Metric Definitions](#frontier-metric-definitions)
   - [Behavioral Zones](#behavioral-zones)
+- [6. The Gather Task (Lama and di Bernardo 2024)](#6-the-gather-task-lama-and-di-bernardo-2024)
 
 ---
 
@@ -114,6 +115,8 @@ Running full grids with 200 trials per cell across all parameter combinations wo
 
 HerdSim employs an **adaptive sequential sampling loop** that allocates compute cycles exclusively to parameter cells where the outcome is genuinely uncertain.
 
+### The Adaptive Sampling Loop
+
 ```mermaid
 flowchart TD
     P["Protocol Configuration<br/>(YAML definition)"] --> CAL["Calibrate steady-state flock radius R_f(N)"]
@@ -177,11 +180,13 @@ Every simulation campaign must bound its search space. Below are the physical an
 | **Dense Resumed Grids** | $+ 71, 141, 283, 566$ | Multiplicative steps of $\sqrt{2}$ above $N = 50$, ensuring uniform geometric weight in power-law fitting. $N = 566 = 400\sqrt{2}$ is the maximum size before the biological model's steady-state radius breaks down (above $N \approx 600$, loose flocks fail to settle). |
 | **Kubo Model** | $25$ to $100$ | Kubo flocks pack tightly to $R_f \approx 5.8\text{ m}$ regardless of $N$. Exceeding $N = 100$ creates unphysically dense crowding. |
 | **Sensing Range** | $50$ to $200$ | At $N = 400$, the collection radius ($109\text{ m}$) exceeds the sheep's $65\text{ m}$ vision, preventing local rules from identifying strays. |
+| **Gather Task (`lama`)** | $1$ to $400$ targets, as perfect squares | The paper's own grid: $\sqrt{N} = 1$ to $20$ on its axis, so the validation reads the same cells (section 6). |
 | **Large $N$ Variants** | $566$ to $3200$ | Investigates whether large flocks can be herded by imposing constant flock density. Identifies the mathematical singularity where the paper's drive offset exceeds sheep reaction distance at $N = 1056$. |
 
 ### Dog Pack Size $D$
 
 - **Main Grids ($1, 2, 3, 4, 6, 8, 12, 16, 24$)**: Geometric steps of $\approx 1.5\times$ ensure at least two test points per doubling of team size. $D = 24$ was chosen because no curve was still accelerating at $24$; curves that failed at $24$ had flat or falling success.
+- **Gather Task ($1$ to $25$, every count)**: The paper's grid of herders, at its resolution of one herder, so its minimum team can be read without interpolation.
 - **Holding with Dog Spacing ($+ 7, 9, 10, 11, 13$)**: The maximum number of physical dogs the driving arc can accommodate at $2\text{ m}$ spacing is $7, 9, 10, 11, 12$ across $N = 25$ to $400$. Testing around these values detects the exact onset of geometric overcrowding.
 
 ### Seeds per Cell (Cap of 200)
@@ -223,3 +228,52 @@ Statistical classifications are governed by [`analysis/frontier.py`](../../analy
 - `saturated`: Reliable, from $D_{\mathrm{sat}}$ upward; extra dogs add no speedup.
 - `crowded`: Reliable, but slower than $D_{\mathrm{best}}$ due to dog interference.
 - `collapse`: Unreliable, at or above $D_{\mathrm{overcrowd}}$.
+
+---
+
+## 6. The Gather Task (Lama and di Bernardo 2024)
+
+Everything above describes the drive task (`drive_to_goal`), used by every Strömbom and Kubo protocol. The `lama` method runs in a second task, `gather`, which reproduces the setting of [Lama & di Bernardo (2024)](https://doi.org/10.1103/PhysRevResearch.6.L032012) instead (models: [`docs/methods/models.md`](../methods/models.md#lama--di-bernardo-2024-non-cohesive-targets)). It is selected in a protocol with `task: gather`.
+
+**Status:** implemented and tested. The validation against the paper's results is running; no results are reported yet.
+
+### Geometry: a disc round the goal
+
+| Parameter | Rule | Source |
+| :--- | :--- | :--- |
+| **Start disc** $R$ | `gather_start_radius`, $50$ | The paper's main case (Fig. 2) |
+| **Goal radius** | `gather_goal_fraction` $\times R$ $= R/5 = 10$ | The paper's $r^* = R/5$ |
+| **Start** (layout `uniform`) | Sheep and dogs uniform over the disc, goal included | The paper's $\Omega_0$ |
+| **Required share** | `success_fraction` $= 0.99$ | The paper's $\chi^* = 0.99$ |
+| **Time limit** | $166{,}667$ ticks $= 5000$ s at $\Delta t = 0.03$ | The paper's $t_{\max}$ (Fig. S8) |
+| **Open boundary** | No walls | As in the drive task |
+
+The targets do not flock, so there is no driven flock radius to calibrate: the task is sized by $R$, and `calibrate` has nothing to do. Sheep are drawn before dogs, so a seed gives the same targets whatever the dog count, and cells at different $D$ stay paired as in the drive task.
+
+### When a trial ends and what counts as success
+
+- **Success**: at least 99% of the targets are inside the goal at the moment every herder is inside it. This is the paper's stop ("the simulation is stopped when all the herders are inside $\Omega_G$").
+- **Early end (a failure)**: every herder is inside the goal and none of them senses a target outside it. The herders have brought in everything they can see, and the rest is lost. Taken literally, the paper's rule would end a one-herder trial at the first tick whenever that herder starts inside the goal; the extra clause removes that case.
+- **Otherwise**: the trial runs to the time limit.
+
+Failures are labelled `targets_lost` (some targets were out of every herder's sight at the end) or `outnumbered` (every target was seen, but the share was not reached in time). Every row also keeps the share inside at the end (`final_in_goal_fraction`), so the paper's own statistic (the mean of that share over the seeds) can be computed next to HerdSim's reliability rule.
+
+### Two statistics
+
+| | Paper | HerdSim |
+| :--- | :--- | :--- |
+| A team size works when | the mean share inside at the end, over 50 runs, is at least $0.99$ | the 99% Clopper-Pearson interval of the success rate lies at or above $0.90$ |
+| Seeds | 50 per cell | adaptive, 10 to 200 per cell |
+
+Both are read from the same rows. The validation uses the paper's statistic on 50 seeds per cell; the campaigns report HerdSim's rule, the one every other HerdSim result uses, with the paper's beside it.
+
+### Metrics recorded every 10 ticks
+
+At $\Delta t = 0.03$ a failing trial runs $166{,}667$ ticks, and the per-tick metrics cost more than the model itself. The gather protocols therefore set `metrics_stride: 10` (one record every $0.3$ s). Success, the early end and the time limit are still checked every tick, and the last tick is always recorded, so the outcome of a trial does not depend on the stride. Only the first-arrival times are read from the recorded ticks, so they are never earlier than the exact time and can be later (a share reached and lost again between two records is missed).
+
+### Protocols
+
+| Protocol | Sensing radius $\xi$ | Paper figure |
+| :--- | :---: | :--- |
+| `lama_r50` | $10$ | Fig. 2b, Table I |
+| `lama_r50_inf` | infinite | Fig. 2a |

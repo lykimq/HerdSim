@@ -16,7 +16,7 @@ A protocol defines the experimental grid. Execute single protocols using one of 
 # 1. Preview the execution plan without running any simulations
 uv run cli/campaign.py plan --protocol dmin_f99_m6
 
-# 2. Calibrate steady-state flock radius R_f(N)
+# 2. Calibrate steady-state flock radius R_f(N) (drive task only; the gather task sizes itself)
 uv run cli/campaign.py calibrate --protocol dmin_f99_m6 --workers 20
 
 # 3. Execute the campaign with 20 parallel workers
@@ -24,6 +24,13 @@ uv run cli/campaign.py run --protocol dmin_f99_m6 --workers 20
 
 # 4. Check real-time progress and diagnostics
 uv run cli/campaign.py status --protocol dmin_f99_m6
+```
+
+The gather task runs the same way. Its protocols are not in the study queue yet, so run them directly:
+
+```bash
+uv run cli/campaign.py plan --protocol lama_r50
+uv run cli/campaign.py run  --protocol lama_r50 --workers 20
 ```
 
 ### Running Batch Queues (`cli/run_queue.py`)

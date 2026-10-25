@@ -75,6 +75,8 @@ HerdSim is built from the ground up as a high-performance, deterministic researc
    An automated experimental engine evaluates Clopper-Pearson 99% confidence intervals, early-stopping obvious outcomes after 10–20 seeds and focusing compute exclusively on undecided boundary cells up to a 200-seed cap.
 5. **Deterministic & Crash-Safe**:
    Dedicated common random number streams isolate starting conditions, ensuring bit-identical reproducibility. All trials append immediately to disk (`trials.jsonl`) with crash-safe interrupt and resume capabilities.
+6. **Three Source Models, Two Tasks**:
+   Besides the Strömbom flock, HerdSim runs the continuous force model of Kubo et al. (2022) on the same drive task, and the non-cohesive targets and local herders of Lama & di Bernardo (2024) on their own gather task (sheep and dogs start scattered over a disc and the dogs bring the targets into its centre). The Lama model is there to test the published $\sqrt{N}$ law inside the same simulator and statistics; its validation against the paper is running and no results are reported yet.
 
 ---
 
@@ -158,8 +160,8 @@ HerdSim maintains structured documentation categorized by audience and topic:
 | Document | Description |
 | :--- | :--- |
 | **Scientific Report**<br>[`docs/report/d_min_report.md`](docs/report/d_min_report.md) | Full research monograph: all 12 findings, empirical analysis, scaling fits, and discussion. |
-| **Agent Models & Algorithms**<br>[`docs/methods/models.md`](docs/methods/models.md) | Mathematical formulation of sheep flocking, multi-dog coordination, Hungarian matching, and baselines. |
-| **Task Design & Grid Rationale**<br>[`docs/experiments/task_design.md`](docs/experiments/task_design.md) | Scale invariance, arena geometry $R_f(N)$, normalized deadlines $T_{\mathrm{drive}}$, and why $N$ and $D$ stop where they do. |
+| **Agent Models & Algorithms**<br>[`docs/methods/models.md`](docs/methods/models.md) | Mathematical formulation of sheep flocking, multi-dog coordination, Hungarian matching, baselines, and the Kubo and Lama models. |
+| **Task Design & Grid Rationale**<br>[`docs/experiments/task_design.md`](docs/experiments/task_design.md) | Scale invariance, arena geometry $R_f(N)$, normalized deadlines $T_{\mathrm{drive}}$, why $N$ and $D$ stop where they do, and the gather task. |
 | **Configuration Guide**<br>[`docs/guides/configuration.md`](docs/guides/configuration.md) | How YAML protocols inherit, explanation of follow-up flags, and output folder structure. |
 | **CLI & Workflow Reference**<br>[`docs/guides/cli_reference.md`](docs/guides/cli_reference.md) | Command-line guide for planning, executing campaigns, and running diagnostic replays. |
 | **Software Architecture**<br>[`docs/codes/architecture.md`](docs/codes/architecture.md) | Deep dive into codebase design, plugin registry, and extension patterns for developers. |
@@ -172,5 +174,5 @@ If you use HerdSim in your research, please cite:
 
 1. **Strömbom, D., et al. (2014)**. *Solving the shepherding problem: heuristics for herding autonomous, interacting agents*. Journal of the Royal Society Interface, 11(100), 20140719. [DOI: 10.1098/rsif.2014.0719](https://doi.org/10.1098/rsif.2014.0719)
 2. **Kubo, M., Tashiro, M., Sato, H., Yamaguchi, A. (2022)**. *Herd guidance by multiple sheepdog agents with repulsive force*. Artificial Life and Robotics, 27, 416–427. [DOI: 10.1007/s10015-021-00726-7](https://doi.org/10.1007/s10015-021-00726-7)
-3. **Lama, A., & di Bernardo, M. (2024)**. *Universal scaling laws in multi-agent herding of non-cohesive targets*. Physical Review Research, 6(L032012). [DOI: 10.1103/PhysRevResearch.6.L032012](https://doi.org/10.1103/PhysRevResearch.6.L032012)
+3. **Lama, A., & di Bernardo, M. (2024)**. *Shepherding control and herdability in complex multiagent systems*. Physical Review Research, 6, L032012. [DOI: 10.1103/PhysRevResearch.6.L032012](https://doi.org/10.1103/PhysRevResearch.6.L032012)
 4. **Empirical Results Tables**: [`docs/report/results_tables.md`](docs/report/results_tables.md)
