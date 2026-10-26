@@ -16,16 +16,16 @@ That raises a fundamental question in collective animal behavior and autonomous 
 Across **367,150 simulation trials** evaluated with zero execution errors, HerdSim establishes the scaling laws of multi-agent shepherding across flock sizes from 25 to 566 sheep (extended to 3,200), under varying deadline pressures, pasture layouts, flock cohesion levels, and sensing ranges.
 
 ![One simulation trial](docs/figures/fig17_trial.png)
-**Figure 1: Live simulation trial in HerdSim ($N = 200$ sheep, $D = 4$ dogs, wide start layout, seed 2026).**
-*How to read this figure:* The open circle on the far right represents the goal pen ($R_{\mathrm{goal}} = 1.9 R_f$). Four shepherd dogs (red markers with trajectory trails) coordinate autonomously: two dogs fan out along flanking wings to round up distant stray sheep, while the rear dogs assemble them toward the center of mass. Once cohesive, the dogs form a circular driving arc behind the flock, steering the collective smoothly into the goal circle without scattering them.
+**Figure 1: Autonomous multi-dog herding trial in HerdSim ($N = 200$ sheep, $D = 4$ dogs, wide start layout, seed 2026).**
+The open circle on the far right represents the goal pen ($R_{\mathrm{goal}} = 1.9 R_f$). Four shepherd dogs (red markers with trajectory trails) coordinate autonomously: two dogs fan out along flanking wings to round up distant stray sheep, while the rear dogs assemble them toward the center of mass. Once cohesive, the dogs form a circular driving arc behind the flock, steering the collective smoothly into the goal circle without scattering them.
 
 ---
 
 ## Table of Contents
 
-- [Core Scientific Takeaways](#core-scientific-takeaways)
+- [Key Scientific Findings](#key-scientific-findings)
 - [The HerdSim Simulation Engine](#the-herdsim-simulation-engine)
-- [Quick Start](#quick-start)
+- [Quick Start & Reproducibility](#quick-start--reproducibility)
 - [Running Campaigns and Workflows](#running-campaigns-and-workflows)
 - [Project Architecture](#project-architecture)
 - [Documentation Index](#documentation-index)
@@ -33,13 +33,13 @@ Across **367,150 simulation trials** evaluated with zero execution errors, HerdS
 
 ---
 
-## Core Scientific Takeaways
+## Key Scientific Findings
 
 The complete scientific monograph and empirical datasets are available in [`docs/report/d_min_report.md`](docs/report/d_min_report.md) and [`docs/report/results_tables.md`](docs/report/results_tables.md). Below is an executive summary of the primary discoveries:
 
 ![D_min against flock size across deadlines and layouts](docs/figures/fig20_dmin_vs_n.png)
 **Figure 2: Minimum reliable team size $D_{\min}$ as a function of flock size $N$ across deadlines and layouts.**
-*How to read this figure:* The horizontal axis is flock size $N$; the vertical axis is the smallest team size $D_{\min}$ achieving $\ge 90$% reliability. Columns separate pasture layouts (`compact`, `split`, `wide`, `outlier_rich`); rows represent deadline pressures (relaxed $12\times$, intermediate $6\times$, urgent $3\times$). Solid lines show strict 100% containment; dashed lines show practical 99% arrival. Notice how `compact` starts remain flat at $D_{\min} = 1$ across all conditions, while urgent deadlines dramatically lift the curves on scattered pastures.
+Flock size $N$ is on the horizontal axis; the vertical axis is the smallest team size $D_{\min}$ achieving $\ge 90$% reliability. Columns separate pasture layouts (`compact`, `split`, `wide`, `outlier_rich`); rows represent deadline pressures (relaxed $12\times$, intermediate $6\times$, urgent $3\times$). Solid lines show strict 100% containment; dashed lines show practical 99% arrival. Notice how `compact` starts remain flat at $D_{\min} = 1$ across all conditions, while urgent deadlines dramatically lift the curves on scattered pastures.
 
 ### 1. Cohesive flocks only ever need one dog ($D_{\min} = 1$)
 When sheep start close together in a neat cluster (`compact`), **a single dog is sufficient across all tested flock sizes ($N = 25$ to $400$) and all deadlines ($12\times$ down to $3\times$ drive times)**. Because no sheep are wandering off, the dog never wastes time gathering strays—its role is purely steering. Furthermore, adding more dogs behind a walking flock does not accelerate the drive: sheep cruise at their natural walking speed ($1\text{ m/s}$), and extra dogs behind them cannot push them faster without causing panic.
@@ -86,7 +86,7 @@ HerdSim is built from the ground up as a high-performance, deterministic researc
 
 ---
 
-## Quick Start
+## Quick Start & Reproducibility
 
 ### Installation
 
@@ -106,6 +106,8 @@ make check
 # Execute miniature verification benchmark campaigns (~1 minute)
 make bench
 ```
+
+To reproduce full empirical campaigns or verify bit-identical seed determinism, see the [Reproducibility Checklist](docs/report/d_min_report.md#appendix-c-reproducibility-checklist) and [Archived Results Tables](docs/report/results_tables.md).
 
 ---
 

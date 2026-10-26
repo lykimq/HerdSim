@@ -55,11 +55,11 @@ def drive_point(flock: np.ndarray, goal: np.ndarray, config: dict[str, Any]) -> 
     offset = float(config["r_a"]) * np.sqrt(int(config["n_sheep"]))
     cap = float(config.get("drive_offset_cap", 0.0))
     if cap > 0.0:
-        # Mathematical singularity at N = 1056: When 2*sqrt(N) > 65 m (the sheep flight horizon r_s),
+        # Mathematical singularity at N = 1056: When 2*sqrt(N) > 65 m (sheep flight horizon r_s),
         # uncapped standoff places the dog outside the visual perception range of every sheep in
         # the herd. The flock remains in grazing mode while dogs push empty space, causing complete
         # failure at N >= 1131. Capping the standoff at r_s - r_a = 63 m guarantees that rear-guard
-        # sheep detect canine pressure, enabling coordinated driving for massive flocks up to N = 3200.
+        # sheep detect canine pressure, enabling coordinated driving for flocks up to N = 3200.
         offset = min(offset, cap)
     return behind(flock.mean(axis=0), goal, offset)
 
@@ -87,9 +87,9 @@ def step_toward(
 ) -> np.ndarray:
     # Standoff safety threshold (canonical 3 * r_a = 6.0 m):
     # Stops canine forward motion to prevent trampling or panic-induced flock dispersion.
-    # On continuous pastures, frozen dogs account for only 1-7% of ticks. However, on multi-cluster
-    # pastures ('split'), navigating between fragmented groups causes ~25% of the dog pack to freeze,
-    # precipitating an artificial performance plateau at D >= 4.
+    # On continuous pastures, frozen dogs account for only 1-7% of ticks. However, on
+    # multi-cluster pastures ('split'), navigating between fragmented groups causes ~25%
+    # of the dog pack to freeze, precipitating an artificial performance plateau at D >= 4.
     r_a = float(config["r_a"])
     if sheep.shape[0] and float(np.min(np.linalg.norm(sheep - dog, axis=1))) < (
         float(config["shepherd_stop_multiple"]) * r_a

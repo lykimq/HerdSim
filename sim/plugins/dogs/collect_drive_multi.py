@@ -137,16 +137,18 @@ def team_targets(
 
     # Hungarian assignment (linear_sum_assignment) globally minimizes total Euclidean distance
     # traveled by all dogs.
-    # Algorithmic pathology on 'split' pastures: Euclidean minimization is topologically cluster-blind.
-    # If the herd ruptures into separate clusters, a cluster marginally closer or with more strays
-    # captures all dogs. The entire pack swarms one sub-cluster while the abandoned cluster drifts.
-    # Enforcing target dispersion via `spread_jobs(gap=f(N))` restores parallel collection.
+    # Algorithmic pathology on 'split' pastures: Euclidean minimization is topologically
+    # cluster-blind. If the herd ruptures into separate clusters, a cluster marginally closer
+    # or with more strays captures all dogs. The entire pack swarms one sub-cluster while the
+    # abandoned cluster drifts. Enforcing target dispersion via `spread_jobs(gap=f(N))`
+    # restores parallel collection.
     rows, cols = linear_sum_assignment(cdist(dogs, points))
     targets = np.empty_like(dogs)
     targets[rows] = points[cols]
 
-    # Surplus dogs beyond the number of active strays do not idle: they form a driving arc behind
-    # the cohesive herd core to maintain forward pressure toward the goal while perimeter dogs collect.
+    # Surplus dogs beyond the number of active strays do not idle: they form a driving arc
+    # behind the cohesive herd core to maintain forward pressure toward the goal while
+    # perimeter dogs collect.
     rest = np.setdiff1d(np.arange(len(dogs)), rows)
     if rest.size:
         dists = np.linalg.norm(flock - decision.centroid, axis=1)

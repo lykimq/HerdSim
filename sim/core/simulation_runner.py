@@ -30,13 +30,18 @@ class RunResult:
 
 
 def initial_state(config: dict[str, Any], seed: int) -> SimulationState:
-    """Agents placed by the task; three random streams spawned from ``seed``.
+    """Initialize agents with mathematically decoupled pseudo-random number streams.
 
-    The layout draw, the sheep noise and the dog noise each get their own
-    generator (``SeedSequence(seed).spawn(3)``, in that order), so one seed
-    gives the same start flock and the same sheep randomness whatever the
-    dog count: cells at different D are paired on the sheep's draws until
-    the dogs move the sheep.
+    Uses `SeedSequence(seed).spawn(3)` to derive three independent PRNG generators:
+    1. layout_rng: Initial flock and shepherd spatial coordinate placement.
+    2. sheep_rng: Sheep Brownian angular diffusion noise throughout the trial.
+    3. dog_rng: Shepherd heading noise and stochastic tie-breaking.
+
+    Crucial Common Random Numbers (CRN) invariant:
+    Spawning distinct generators guarantees that varying team size D (e.g. D=1 vs D=12)
+    consumes draws exclusively from dog_rng. It never draws from or desynchronizes sheep_rng.
+    Consequently, trials with identical seed_index experience identical environmental flock
+    trajectories until physical canine interaction exerts divergent force.
     """
     layout_rng, sheep_rng, dog_rng = (
         np.random.default_rng(child) for child in np.random.SeedSequence(seed).spawn(3)

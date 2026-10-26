@@ -49,7 +49,8 @@ class ReplayMismatch(RuntimeError):
 class ReplayJob:
     config: dict[str, Any]
     seed: int
-    stored: Outcome | None  # checked when given; None for a replay with an experimental intervention
+    # checked when given; None for a replay with an experimental intervention
+    stored: Outcome | None
     label: dict[str, Any]  # carried into the result row
 
 

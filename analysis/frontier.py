@@ -132,14 +132,20 @@ class Rules:
 
 def clopper_pearson(successes: int, trials: int, confidence: float) -> tuple[float, float]:
     """Two-sided exact binomial confidence interval for success rate.
-    
+
     Inverts the equal-tailed binomial test via incomplete Beta distribution quantiles.
     Normal/Wald approximations (p_hat +/- z * sqrt(p(1-p)/n)) collapse to zero width at
     extremes (k=0 or k=n) and severely undercover near theta = 0.90 at finite n.
     Clopper-Pearson guarantees actual coverage >= 1 - alpha for all sample sizes.
-    
-    The degree-of-freedom shift (+1 in trials - successes + 1 for lower, successes + 1 for upper)
-    derives from the exact cumulative binomial to regularized incomplete beta identity:
+
+    Sequential sampling note:
+    Because Clopper-Pearson intervals are conservative (actual coverage >= 99%, often ~99.5%
+    due to lattice discreteness), discrete evaluation in whole batches of 10 seeds inherently
+    buffers against false discovery inflation from optional stopping. Reaching theta=0.90
+    demands a minimum of 51 consecutive unbroken successes (round 6 = 60 seeds).
+
+    The degree-of-freedom shift (+1 in trials - successes + 1 for lower, successes + 1 for
+    upper) derives from the exact cumulative binomial to regularized incomplete beta identity:
     P(Binomial(n, p) >= k) = I_p(k, n - k + 1).
     """
     alpha = 1.0 - confidence

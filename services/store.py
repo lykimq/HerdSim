@@ -14,11 +14,15 @@
       status.json             progress of the adaptive run
       timeseries/             per-tick Parquet for the first seeds of every cell
 
-Only the campaign process writes here: ``open`` takes an exclusive lock on
-``.lock`` for the life of the process, so a second run on the same folder
-fails at once. ``status`` reads without repairing. A trial counts as done once
-its line is in trials.jsonl or errors.jsonl; a kill can at worst cut the last
-line, which is dropped and rerun.
+Concurrency and crash safety:
+- Single Writer Pattern: Multiprocessing worker processes never write directly to disk;
+  they return trial records to the master orchestrator via IPC queues. Only the master
+  process executes serial append operations, eliminating concurrent write race conditions.
+- Mutual Exclusion: `open` acquires an exclusive advisory lock via `fcntl.flock(LOCK_EX)`
+  on `.lock` for the lifespan of the run. A second process targeting the same folder
+  aborts immediately with `FolderBusy`.
+- Crash Recovery: A SIGKILL mid-write at worst truncates the final JSON line. `_read_jsonl`
+  automatically identifies and prunes partial lines (`repair=True`), ensuring clean resumptions.
 """
 
 from __future__ import annotations

@@ -114,6 +114,9 @@ Giả sử một con cừu ở tọa độ $(0, 5)$ đang bị kẹp giữa hai 
 - Phép cộng vector triệt tiêu hai lực đẩy ngang sang hai bên, nhưng lại cộng dồn lực đẩy thẳng về phía trước.
 - Phép chuẩn hóa đưa độ lớn lực sợ hãi trở lại đúng độ dài đơn vị tiêu chuẩn ($\lVert \mathbf{R}_{s,i} \rVert = 1.0$). Nhờ đó, cừu bị hướng thẳng về phía trước một cách tự nhiên mà không bị tăng áp lực sợ hãi phi lý.
 
+> [!NOTE]
+> **Bản chất Tiên đề Mô hình hóa (Modeling Postulate)**: Chuẩn hóa vector đơn vị là một tiên đề có chủ đích nhằm giữ đúng thang độ sợ hãi $\rho_s = 1.0$ của mô hình gốc Strömbom, bảo toàn tính gắn kết bầy đàn và cô lập năng lực điều phối không gian của đội chó. Việc động vật thực tế có tăng phản xạ hoảng sợ phi tuyến khi bị bao vây bởi nhiều kẻ săn mồi hay không là một câu hỏi mở cho sinh học thực địa.
+
 ---
 
 ### Mô hình trường lực thế liên tục Kubo et al. (2022)

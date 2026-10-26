@@ -58,8 +58,8 @@ def seeds_wanted(seeds_run: int, batch: int, flagged: bool) -> int:
        resumes with the exact same seed sequence and batch boundaries as an uninterrupted run.
 
     Sample size economics: Under theta=0.90 and 99% confidence, a minimum of 51 consecutive
-    unbroken successes is required to prove reliability (Clopper-Pearson lower bound reaches 0.9009).
-    Allocating in batches of 10 ensures clean passes conclude in round 6 (60 seeds), while
+    unbroken successes is required to prove reliability (Clopper-Pearson lower bound reaches
+    0.9009). Allocating in batches of 10 ensures clean passes conclude in round 6 (60 seeds), while
     undecided cells increment up to max_seeds=200, which bounds interval uncertainty to +/- 0.06.
     """
     if flagged:
@@ -107,14 +107,14 @@ def pruned_cells(front: Frontier, trials: pd.DataFrame, overlap: float) -> set[t
     """Identify (group, D) cells beyond confirmed saturation where dogs execute duplicate roles.
 
     When team size exceeds D_sat and shepherds are constrained to driving arcs or target slots,
-    additional agents often collapse onto identical geometric trajectories (mean_dog_overlap >= 0.90).
-    Once saturation is statistically confirmed (D_sat decided, uncensored, and confirmed by an
-    adjacent saturated neighbor), further simulation of redundant agents yields zero marginal
-    scientific insight.
+    additional agents often collapse onto identical geometric trajectories
+    (mean_dog_overlap >= 0.90). Once saturation is statistically confirmed (D_sat decided,
+    uncensored, and confirmed by an adjacent saturated neighbor), further simulation of redundant
+    agents yields zero marginal scientific insight.
 
     Safety invariant: Pruning is restricted exclusively to cells zoned as SATURATED or UNDECIDED.
-    Cells exhibiting SLOWER completion (crowding drag) or UNRELIABLE outcomes (canine jamming collapse)
-    are NEVER pruned, ensuring genuine multi-agent pathologies are faithfully measured.
+    Cells exhibiting SLOWER completion (crowding drag) or UNRELIABLE outcomes (canine jamming
+    collapse) are NEVER pruned, ensuring genuine multi-agent pathologies are faithfully measured.
     """
     out: set[tuple[str, int]] = set()
     mean_overlap = trials.groupby(["group_key", "n_shepherds"])["mean_dog_overlap"].mean()

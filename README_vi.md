@@ -16,8 +16,8 @@ Thực tế này đặt ra một câu hỏi nền tảng trong lĩnh vực hành
 Trải qua **367.150 lượt mô phỏng** với 0 lỗi thực thi, HerdSim thiết lập các quy luật mở rộng (scaling laws) của bài toán chăn thả đa tác tử trên các quy mô đàn từ 25 đến 566 con cừu (mở rộng lên tới 3.200 con), dưới nhiều mức áp lực thời hạn, bố cục bãi cỏ, mức độ gắn kết bầy và giới hạn tầm nhìn.
 
 ![Một lượt mô phỏng](docs/figures/fig17_trial.png)
-**Hình 1: Một lượt mô phỏng trực tiếp trong HerdSim ($N = 200$ cừu, $D = 4$ chó, bố cục xuất phát tản mác wide, hạt giống 2026).**
-*Cách đọc hình ảnh:* Vòng tròn hở ở góc phải đại diện cho chuồng đích ($R_{\mathrm{goal}} = 1.9 R_f$). Bốn chú chó chăn cừu (điểm màu đỏ kèm vệt đường đi) phối hợp tự hành hoàn toàn: hai chú chó tỏa ra hai bên cánh để gom các cá thể cừu lạc xa nhất, trong khi các chú chó phía sau dồn chúng về phía trọng tâm đàn. Khi đàn cừu đã kết nối thành một khối gắn kết, các chú chó tự động dàn thành một vòng cung lùa phía sau bầy cừu, điều khiển cả đàn tiến êm ả vào đích mà không làm chúng hoảng loạn tản ra.
+**Hình 1: Một lượt mô phỏng chăn bầy tự hành đa tác tử trong HerdSim ($N = 200$ cừu, $D = 4$ chó, bố cục xuất phát wide, hạt giống 2026).**
+Vòng tròn hở ở góc phải đại diện cho chuồng đích ($R_{\mathrm{goal}} = 1.9 R_f$). Bốn chú chó chăn cừu (điểm màu đỏ kèm vệt đường đi) phối hợp tự hành hoàn toàn: hai chú chó tỏa ra hai bên cánh để gom các cá thể cừu lạc xa nhất, trong khi các chú chó phía sau dồn chúng về phía trọng tâm đàn. Khi đàn cừu đã kết nối thành một khối gắn kết, các chú chó tự động dàn thành một vòng cung lùa phía sau bầy cừu, điều khiển cả đàn tiến êm ả vào đích mà không làm chúng hoảng loạn tản ra.
 
 ---
 
@@ -25,7 +25,7 @@ Trải qua **367.150 lượt mô phỏng** với 0 lỗi thực thi, HerdSim thi
 
 - [Các Phát hiện Khoa học Cốt lõi](#các-phát-hiện-khoa-học-cốt-lõi)
 - [Động cơ Mô phỏng HerdSim](#động-cơ-mô-phỏng-herdsim)
-- [Bắt đầu Nhanh (Quick Start)](#bắt-đầu-nhanh-quick-start)
+- [Bắt đầu Nhanh & Khả năng Tái lập Nghiên cứu](#bắt-đầu-nhanh--khả-năng-tái-lập-nghiên-cứu)
 - [Vận hành Chiến dịch và Quy trình Lệnh](#vận-hành-chiến-dịch-và-quy-trình-lệnh)
 - [Kiến trúc Mã nguồn Dự án](#kiến-trúc-mã-nguồn-dự-án)
 - [Bản đồ Tài liệu (Documentation Index)](#bản-đồ-tài-liệu-documentation-index)
@@ -39,7 +39,7 @@ Toàn bộ báo cáo chuyên khảo khoa học và các tập dữ liệu thực
 
 ![D_min theo quy mô bầy qua các thời hạn và bố cục](docs/figures/fig20_dmin_vs_n.png)
 **Hình 2: Quy mô đội tối thiểu $D_{\min}$ theo số cừu $N$ ở ba mức thời hạn và bốn bố cục xuất phát.**
-*Cách đọc biểu đồ:* Trục hoành là quy mô đàn cừu $N$; trục tung là số chó tối thiểu $D_{\min}$ đạt độ tin cậy $\ge 90$%. Các cột đại diện cho 4 bố cục bãi cỏ (`compact`, `split`, `wide`, `outlier_rich`); các hàng đại diện cho 3 mức thời hạn (thong thả $12\times$, trung bình $6\times$, khẩn cấp $3\times$). Đường nét liền là tiêu chí tuyệt đối 100%; đường nét đứt là tiêu chí đưa 99% đàn cừu vào đích. Hãy chú ý thấy bố cục tập trung `compact` luôn nằm phẳng ở mức $D_{\min} = 1$ trên mọi điều kiện, trong khi thời hạn khẩn cấp đẩy đường cong trên các bãi cỏ tản mác lên rất cao.
+Trục hoành là quy mô đàn cừu $N$; trục tung là số chó tối thiểu $D_{\min}$ đạt độ tin cậy $\ge 90$%. Các cột đại diện cho 4 bố cục bãi cỏ (`compact`, `split`, `wide`, `outlier_rich`); các hàng đại diện cho 3 mức thời hạn (thong thả $12\times$, trung bình $6\times$, khẩn cấp $3\times$). Đường nét liền là tiêu chí tuyệt đối 100%; đường nét đứt là tiêu chí đưa 99% đàn cừu vào đích. Bố cục tập trung `compact` luôn nằm phẳng ở mức $D_{\min} = 1$ trên mọi điều kiện, trong khi thời hạn khẩn cấp đẩy đường cong trên các bãi cỏ tản mác lên rất cao.
 
 ### 1. Đàn cừu tập trung chỉ cần duy nhất một chú chó ($D_{\min} = 1$)
 Khi đàn cừu bắt đầu gần nhau trong một cụm gọn gàng (`compact`), **một chú chó duy nhất là đủ cho mọi quy mô đàn ($N = 25$ đến $400$) và mọi mức thời hạn (từ $12\times$ xuống tới $3\times$ thời gian lùa)**. Khi không có cừu lạc, người chăn dắt không bao giờ phải mất thời gian đi gom—nhiệm vụ lúc này chỉ thuần túy là lùa bầy. Thêm vào đó, việc bố trí thêm nhiều chó phía sau một đàn cừu đang đi bộ không hề làm giảm thời gian lùa: cừu di chuyển ở vận tốc đi bộ tự nhiên ($1\text{ m/s}$), thêm chó phía sau không thể ép chúng chạy nhanh hơn mà chỉ gây hoảng loạn.
@@ -86,7 +86,7 @@ HerdSim được thiết kế từ gốc như một nền tảng nghiên cứu h
 
 ---
 
-## Bắt đầu Nhanh (Quick Start)
+## Bắt đầu Nhanh & Khả năng Tái lập Nghiên cứu
 
 ### Cài đặt môi trường
 
@@ -106,6 +106,8 @@ make check
 # Chạy kiểm chứng các chiến dịch thu nhỏ (~1 phút)
 make bench
 ```
+
+Để tái lập toàn bộ các chiến dịch thực nghiệm hoặc kiểm chứng tính tất định bit-identical của các hạt giống ngẫu nhiên, xem [Danh mục Kiểm tra Tái lập (Reproducibility Checklist)](docs/report/d_min_report_vi.md#phụ-lục-c-danh-mục-kiểm-tra-tái-lập-reproducibility-checklist) và [Bảng Số liệu Thực nghiệm](docs/report/results_tables.md).
 
 ---
 

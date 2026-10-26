@@ -114,6 +114,9 @@ Consider a sheep at $(0, 5)$ pursued by two flanking dogs: Dog 1 at $(-3, 0)$ (r
 - Vector addition cancels lateral pushes while reinforcing forward propulsion.
 - Normalization restores standard fear intensity ($\lVert \mathbf{R}_{s,i} \rVert = 1.0$), steering the sheep smoothly forward without artificial force inflation.
 
+> [!NOTE]
+> **Status as an Explicit Modeling Postulate**: Unit-vector normalization is an intentional design postulate that maintains Strömbom's original fear scale ($\rho_s = 1.0$), preserves collective cohesion, and isolates the spatial geometry of multi-dog coordination. Whether real biological prey experience non-linear panic amplification under multi-predator pursuit remains an open question for empirical field ethology.
+
 ---
 
 ### Kubo et al. (2022) Continuous Potential Fields
