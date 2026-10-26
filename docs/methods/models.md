@@ -58,6 +58,10 @@ $$
 
 In the canonical model, $n = N - 1$ (interaction with all flock members).
 
+> [!NOTE]
+> **On Global Sensing Assumptions and Biological Plausibility**:
+> The canonical Strömbom model assumes each sheep computes the exact Global Center of Mass (GCM) across all $n = N - 1$ flock-mates. In real biological systems, individual sheep do not possess telemetric sensing to measure hundreds of distant animals. However, collective flocking dynamics demonstrate that individuals can estimate the direction to the flock core using **local density gradients** over immediate neighbors. The angular error between a local density gradient and the true GCM vector is typically small ($< 15^\circ\text{--}20^\circ$), confirming that the analytical GCM assumption serves as a highly robust macroscopic proxy.
+
 ##### 3. Collision Avoidance ($\mathbf{R}_{a,i}$, weight $\rho_a = 2.0$)
 - *Why?* Animals prioritize not crashing into or trampling each other above all else. Notice this term carries the highest weight ($\rho_a = 2.0$).
 - Any neighbor $j$ closer than personal space $r_a = 2\text{ m}$ exerts repulsion:

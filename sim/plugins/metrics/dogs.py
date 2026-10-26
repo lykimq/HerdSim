@@ -75,3 +75,17 @@ def coverage(view: TickView) -> float:
     reach = float(view.config["reaction_radius"])
     to_dogs = state.sheep_positions[outer][:, None, :] - state.shepherd_positions[None, :, :]
     return float(np.mean((np.linalg.norm(to_dogs, axis=2) < reach).any(axis=1)))
+
+
+def collect_mode(view: TickView) -> float:
+    """Returns 1.0 if any sheep is outside the collection boundary f(N) = r_a * N^(2/3),
+    indicating that the flock requires active outlier gathering, and 0.0 otherwise.
+
+    When averaged over trial history, this yields the fraction of time spent in
+    the gathering/collecting phase versus the cohesive driving phase.
+    """
+    r_a = float(view.config.get("r_a", 2.0))
+    n_sheep = int(view.config.get("n_sheep", view.state.n_sheep))
+    threshold = r_a * (float(n_sheep) ** (2.0 / 3.0))
+    return float(np.any(view.distances_to_centroid > threshold))
+

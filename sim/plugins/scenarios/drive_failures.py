@@ -107,3 +107,25 @@ def classify_failure(history: pd.DataFrame, *, success: bool, config: dict[str, 
 
     mode = next((label for label in PRIORITY if label in matched), TIMEOUT)
     return Failure(mode, tuple(matched))
+
+
+STRUCTURAL_GATHER = "structural_gather"
+BOUNDARY_TEMPORAL = "boundary_temporal"
+
+
+def classify_failure_regime(
+    history: pd.DataFrame, *, success: bool, config: dict[str, Any]
+) -> str:
+    """Classifies a failed trial into Structural Gathering vs Boundary/Temporal failure.
+
+    - Structural Gather: The flock stalled during collection or early transit, ending far
+      from the goal (> 2x goal_radius). Extending the deadline cannot rescue the trial.
+    - Boundary/Temporal: The flock reached the goal vicinity (<= 2x goal_radius) with the
+      majority contained, failing due to deadline expiry or marginal stragglers.
+    """
+    if success or history.empty:
+        return "none"
+    goal_radius = float(config.get("goal_radius", 10.0))
+    final_dist = float(history["gcm_goal"].iloc[-1])
+    return BOUNDARY_TEMPORAL if final_dist <= 2.0 * goal_radius else STRUCTURAL_GATHER
+

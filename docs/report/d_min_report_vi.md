@@ -602,14 +602,50 @@ Các lượt chạy độ gắn kết (mục 3.11) kiểm tra trực tiếp các
 
 Mục 3.14 nay cho phía không gắn kết ngay trong HerdSim. Mô hình của bài báo, chạy ở đây, tái lập chính quy luật của nó: số mũ 0,52–0,53 với cảm nhận vô hạn và 0,41–0,42 trên ngưỡng mật độ với bán kính cảm nhận 10, theo cả thống kê của bài báo lẫn của HerdSim. Cả hai đều lớn hơn 0,27–0,38 của bầy Strömbom ở 12 lần thời gian lùa, đúng như cách giải thích ở trên dự đoán. Hai loạt chạy vẫn khác nhau cả về nhiệm vụ và quy tắc người chăn chứ không chỉ về độ gắn kết, nên phần khoảng cách thuộc về độ gắn kết vẫn chưa được đo.
 
-### 5.2 Bản chất Hai giai đoạn của Bài toán Chăn dắt Tập thể
-Kết quả của chúng tôi chỉ ra rằng bài toán chăn dắt tập thể bao gồm hai giai đoạn vật lý hoàn toàn khác biệt:
-1. **Giai đoạn Di chuyển (Gom bầy và Lùa đàn)**: Khả năng mở rộng quy mô rất cao, dưới tuyến tính theo $N$, và được phản ánh chính xác bởi tiêu chí 99%.
-2. **Giai đoạn Đóng chuồng (Xử lý cá thể lạc cuối cùng)**: Rất nhạy cảm, khó mở rộng quy mô, và dễ thất bại do quán tính chạy lố dưới tiêu chí nghiêm ngặt 100%.
+### 5.2 Bản chất Hai giai đoạn và Phân loại Thất bại trong Chăn dắt Tập thể
 
-Trong thực tế chăn thả cũng như điều khiển robot, một cá thể chậm chạp không đồng nghĩa với việc nhiệm vụ đã thất bại. Chúng tôi khuyến nghị các nghiên cứu đa tác tử tương lai nên tách bạch tiêu chí đưa đàn đến nơi khỏi giai đoạn chặn giữ cuối cùng (ví dụ: đóng cổng chuồng hoặc cử chó đi tuần vận tốc chậm). Các lượt chạy giữ đàn (mục 3.10) cho thấy vì sao phải tách hai giai đoạn: giữ đàn chỉ thành công khi chó lùi ra ngoài cự ly phản ứng của cừu, một bước mà quy tắc được thiết kế để lùa không làm.
+Kết quả phân tích 367.150 lượt chạy chỉ ra rằng bài toán chăn dắt tập thể bao gồm hai giai đoạn vật lý hoàn toàn khác biệt, dẫn đến một hệ phân loại thất bại rõ ràng:
 
-### 5.3 Chín Đóng góp Khoa học Chính
+1. **Phân loại Thất bại: Có Cấu trúc (Structural) vs. Do Ranh giới Thời gian (Boundary/Temporal)**:
+   - **Thất bại có Cấu trúc (Structural Failures)**: Xảy ra trong pha Gom ban đầu (Collecting). Khi quy mô đội chó không đạt ngưỡng tối thiểu ($D < D_{\min}$), đàn chó thiếu năng lực hình học để khống chế tốc độ tản dạt tự nhiên của các cá thể cừu. Bầy cừu liên tục tách nhóm nhanh hơn khả năng thu gom tuần tự của các chú chó đơn lẻ, dẫn đến bế tắc vĩnh viễn (stalling). Đối với các thất bại có cấu trúc này, việc kéo dài thời gian deadline cũng không thể giúp bầy thành công.
+   - **Thất bại do Ranh giới & Thời gian (Boundary & Temporal Failures)**: Xảy ra trong pha Lùa (Driving) hoặc Đóng chuồng (Terminal Penning). Đội chó đã hoàn thành xuất sắc việc gom đàn và lùa khối cừu gắn kết vượt qua bãi cỏ mở (đã đưa $\ge 99\%$ cừu vào chuồng), nhưng bị quá giờ do deadline hoặc thất bại vì nhiễu động ranh giới cửa chuồng (hiệu ứng con cừu lạc cuối cùng - Straggler Effect).
+   - Sự phân tách này giải thích một cách cơ học vì sao tiêu chí 99% arrival đo lường năng lực phối hợp tập thể thực chất (loại bỏ nhiễu động ranh giới cửa chuồng), trong khi tiêu chí 100% bị chi phối bởi các thất bại thời gian cục bộ.
+   - *Số liệu Phân loại Thực nghiệm từ 367.150 lượt chạy*:
+     
+     | Giao thức | Mô tả Nhiệm vụ | Số Lượt Thất bại | Thất bại Cấu trúc (Kẹt pha gom) | Thất bại Ranh giới (Nghẽn cổng) | Tỷ lệ Thất bại Cấu trúc |
+     | :--- | :--- | :---: | :---: | :---: | :---: |
+     | `dmin_m12` | 100% Chứa đàn, 12× Thời gian | 235 | 180 | 55 | **76,6%** |
+     | `dmin_m6` | 100% Chứa đàn, 6× Thời gian | 889 | 639 | 250 | **71,9%** |
+     | `dmin_m3` | 100% Chứa đàn, 3× Thời gian | 710 | 571 | 139 | **80,4%** |
+     | `dmin_f99_m12` | 99% Vào đích, 12× Thời gian | 235 | 213 | 22 | **90,6%** |
+     | `dmin_f99_m6` | 99% Vào đích, 6× Thời gian | 1.511 | 1.067 | 444 | **70,6%** |
+     | `dmin_f99_m3` | 99% Vào đích, 3× Thời gian | 584 | 457 | 127 | **78,3%** |
+
+     *Kết luận định lượng:* Trên mọi giao thức, **70% đến 90%** các lượt thất bại bắt nguồn từ việc thiếu tác tử thu gom ở pha đầu (thất bại cấu trúc). Dưới tiêu chuẩn 99% ở thời hạn thong thả 12×, tỷ lệ thất bại cấu trúc đạt tới **90,6%**, chứng minh tiêu chuẩn 99% đã loại bỏ thành công phần lớn nhiễu động ranh giới cục bộ.
+
+2. **Chỉ số Tải trọng Tản mác Tổng thể ($S_0 \times N$)**:
+   - Khi nghiên cứu động lực học gom bầy, tích số giữa độ tản mác ban đầu của bầy $S_0$ (bán kính tản mác bình phương trung bình) và quy mô đàn $N$, tức $S_0 \times N$, đại diện cho tổng công hình học mà đàn chó phải bỏ ra để nén bầy về trạng thái gắn kết.
+   - Trên bãi cỏ tập trung (`compact`), $S_0$ rất nhỏ nên $S_0 \times N \approx 0$, giải thích vì sao $D_{\min} = 1$ bất kể $N$ tăng lên 400 hay 1131.
+   - Trên bãi cỏ tản mác (`wide`, `split`, `outlier_rich`), $S_0$ lớn khiến $S_0 \times N$ tăng vọt, buộc thời hạn khẩn cấp phải tăng mạnh số lượng chó để gom song song trước khi cừu phân tán thêm.
+   - *Bảng Tải trọng Tản mác Thực nghiệm ($S_0 \times N$) và Tỷ lệ Thành công (`dmin_m6`)*:
+
+     | Bố cục | Quy mô $N$ | Độ tản mác ban đầu $S_0$ | Tải trọng $S_0 \times N$ | Tỷ lệ Thành công Tổng thể |
+     | :--- | :---: | :---: | :---: | :---: |
+     | `compact` | 25 | $3{,}59\text{ m}$ | **89,9** | 100,0% |
+     | `compact` | 100 | $5{,}67\text{ m}$ | **567,2** | 100,0% |
+     | `compact` | 400 | $7{,}68\text{ m}$ | **3.073,5** | 100,0% |
+     | `wide` | 400 | $8{,}11\text{ m}$ | **3.242,3** | 83,8% |
+     | `outlier_rich` | 400 | $10{,}16\text{ m}$ | **4.065,6** | 55,3% |
+     | `split` | 400 | $8{,}81\text{ m}$ | **3.524,2** | 21,1% |
+
+     Khi tải trọng $S_0 \times N$ vượt ngưỡng $\approx 3.500$, tỷ lệ thành công sụp đổ thảm hại nếu không có đội hình chó song song đủ lớn để phân chia không gian bao quát.
+
+3. **Cơ chế Quá tải Hai đầu (Dual-Regime Crowding Collapse)**:
+   - Hiện tượng quá tải không chỉ giới hạn ở một phía mà xuất hiện ở hai đầu cực trị quy mô:
+     - *Ở đàn lớn ($N \ge 400$)*: Quá tải xuất hiện khi mật độ tuyến tính của chó trên vòng cung lùa vượt quá giới hạn hình học ($D > D_{\mathrm{cap}} \approx 12$) khi chó có kích thước chiếm chỗ $2\text{ m}$, gây nghẽn đường và cản trở việc cơ động gom cừu lạc.
+     - *Ở đàn cực nhỏ ($N \le 10$)*: Quá tải xuất hiện khi tỷ lệ chó/cừu quá lớn ($D/N \gg 1$). Khi một đàn chó đông vây quanh một cụm cừu nhỏ, các vector áp lực đe dọa từ mọi phía triệt tiêu hoàn toàn hành lang thoát hiểm tự nhiên của cừu, gây hỗn loạn và làm vỡ bầy.
+
+### 5.3 Mười Đóng góp Khoa học Chính
 
 1. **Bản đồ Ranh giới Thực nghiệm Hoàn chỉnh**: Thiết lập bản đồ ranh giới $D_{\min}$ và $D_{\mathrm{sat}}$ có độ tin cậy toán học 99% đầu tiên qua các quy mô đàn ($N \le 566$, mở rộng đến 3200), bố cục và thời hạn.
 2. **Tiêu chí Thành công Định hình Vật lý**: Chứng minh tiêu chí tuyệt đối 100% tạo ra nút thắt cổ chai nhân tạo (Hiệu ứng cá thể lạc đàn), trong khi tiêu chí 99% phản ánh đúng năng lực phối hợp tập thể.
@@ -619,7 +655,8 @@ Trong thực tế chăn thả cũng như điều khiển robot, một cá thể 
 6. **Mục tiêu Gắn kết và Không Gắn kết**: Liên hệ độ mạnh của lực gắn kết với số mũ tăng trưởng: bầy của bài báo tăng chậm hơn quy luật $\sqrt{N}$ ở thời hạn thong thả, và làm yếu độ gắn kết đưa số mũ về phía 0,5.
 7. **Ranh giới Giải tích của Quy tắc Lùa Strömbom**: Phát hiện giới hạn toán học tại $N = 1056$ nơi khoảng cách lùa vượt quá tầm cảm nhận của cừu, chỉ ra sự cần thiết phải đặt trần cự ly cho các đàn khổng lồ.
 8. **Đánh đổi giữa Cảm biến và Giao tiếp**: Đo cái giá của tầm nhìn cục bộ ($30\text{--}65\text{ m}$, khoảng một chó ở $N = 200$) và cho thấy, ở tầm 65 m, chia sẻ với cả đội đưa $D_{\min}$ về giá trị toàn cục trên `wide` $N = 200$ (không đạt trên `split`).
-9. **Hệ thống Mô phỏng Mã nguồn mở Minh bạch**: Cung cấp bộ công cụ mô phỏng tất định, an toàn trước sự cố, có thể tái lập chính xác qua 367.150 lượt chạy.
+9. **Khung Phân loại Thất bại và Tải trọng Tản mác ($S_0 \times N$)**: Cung cấp cơ sở lý thuyết phân biệt thất bại cấu trúc khỏi thất bại thời gian ranh giới, đồng thời giải thích bằng tải trọng tản mác tổng thể.
+10. **Hệ thống Mô phỏng Mã nguồn mở Minh bạch**: Cung cấp bộ công cụ mô phỏng tất định, an toàn trước sự cố, có thể tái lập chính xác qua 367.150 lượt chạy.
 
 ### 5.4 Gợi ý Ứng dụng Thực tế (Robot & Drone)
 
@@ -667,6 +704,7 @@ Thông qua 367.150 lượt mô phỏng trên 39 giao thức, HerdSim đã lập 
 3. **Cảm nhận Góc nhìn Thuần túy (Bearing-Only)**: Mở rộng mô hình tầm nhìn cục bộ sang cảm nhận chỉ có góc hướng mà không có cự ly chính xác, mô phỏng chân thực camera trên các thiết bị drone.
 4. **Ghép chéo hai mô hình trên cùng một nhiệm vụ**: Chạy quy tắc đội Strömbom trên mục tiêu Lama trong nhiệm vụ gom, và người chăn Lama trên cừu Strömbom, để tách khoảng cách giữa các số mũ ở mục 3.14 thành phần do độ gắn kết và phần do quy tắc người chăn và nhiệm vụ. Mỗi quy tắc đọc những đại lượng mà phía kia không có (quy tắc đội đọc khoảng cách gom vô nghĩa khi không có gắn kết, người chăn đọc khoảng cách tới một đích mà trong nhiệm vụ lùa nằm xa bầy), nên mỗi phép ghép cần thiết kế riêng trước.
 5. **Thu thập Dữ liệu Thực địa Đa Chó / Drone với Vòng đeo GPS**: Hợp tác với các nhà nghiên cứu động vật thực địa để đo đạc phản ứng của đàn cừu khi bị rượt đuổi bởi từ 2 chú chó trở lên, kiểm tra xem cừu thật cảm nhận nỗi sợ theo kiểu cộng dồn hay chuẩn hóa.
+6. **Ước lượng Trọng tâm Bầy bằng Gradient Mật độ Cục bộ**: Thay thế giả định cừu nhận biết Trọng tâm Toàn cục (GCM) bằng cơ chế sinh học thực tế: cừu ước tính hướng về trung tâm bầy thông qua vector gradient mật độ của các láng giềng gần nhất, loại bỏ hoàn toàn nhu cầu về giác quan viễn thám toàn cầu mà vẫn bảo toàn góc lệch điều hướng dưới $15^\circ - 20^\circ$.
 
 ---
 

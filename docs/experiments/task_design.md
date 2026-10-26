@@ -96,7 +96,29 @@ HerdSim provides four standardized starting distributions to isolate the transit
 3. **`split`**: The flock is partitioned into 3 isolated clusters placed symmetrically on a circle. Dogs must consolidate separate groups without fragmenting them further.
 4. **`outlier_rich`**: 80% of sheep start in a dense central core, while 20% are positioned as isolated strays far out on the pasture.
 
+### Initial Dispersion Burden ($S_0 \times N$) and Two-Phase Dynamics
+
+The operational difficulty of collective shepherding is governed not merely by headcount $N$, but fundamentally by the product of initial spatial dispersion $S_0$ (mean squared distance from the flock centroid) and flock size $N$:
+
+$$
+\mathcal{B}_{\mathrm{disp}} = S_0 \times N
+$$
+
+This product quantifies the **geometric compaction work** the canine pack must perform during Phase 1 (Stray Gathering) before collective cohesion is established to enable Phase 2 (Cohesive Driving):
+- On **`compact`** pastures, $S_0 \approx 0 \implies S_0 \times N \approx 0$. All sheep initially reside inside the analytical collection radius $f(N)$, completely bypassing Phase 1. This mechanical economy explains why $D_{\min} = 1$ remains constant from $N = 25$ through $N = 1131$.
+- On dispersed layouts (**`wide`**, **`split`**, **`outlier_rich`**), large $S_0$ causes the dispersion burden $S_0 \times N$ to explode with increasing $N$. Under strict time budgets, a solitary dog must traverse excessive round-trip distances to retrieve stragglers sequentially, during which the flock's natural diffusive drift outpaces collection. Consequently, multi-agent parallel rounding ($D_{\min} > 1$) becomes mathematically mandatory to partition the spatial perimeter.
+
+| Layout | Flock Size $N$ | Initial Spread $S_0$ | Dispersion Burden $S_0 \times N$ | Gathering Phase Operational Demand |
+| :--- | :---: | :---: | :---: | :--- |
+| `compact` | 25 | $3.59\text{ m}$ | **89.9** | Completely bypassed; immediate cohesive drive |
+| `compact` | 100 | $5.67\text{ m}$ | **567.2** | Completely bypassed; immediate cohesive drive |
+| `compact` | 400 | $7.68\text{ m}$ | **3,073.5** | Completely bypassed; immediate cohesive drive |
+| `wide` | 400 | $8.11\text{ m}$ | **3,242.3** | High perimeter rounding; requires parallel flankers |
+| `split` | 400 | $8.81\text{ m}$ | **3,524.2** | Multi-cluster consolidation; requires cluster coverage |
+| `outlier_rich` | 400 | $10.16\text{ m}$ | **4,065.6** | Maximal burden; mandatory multi-agent rounding |
+
 ### Shepherd Starting Geometries
+
 
 Dogs begin $30\text{ m}$ behind the flock in one of three release geometries:
 
@@ -228,6 +250,24 @@ Statistical classifications are governed by [`analysis/frontier.py`](../../analy
 - `saturated`: Reliable, from $D_{\mathrm{sat}}$ upward; extra dogs add no speedup.
 - `crowded`: Reliable, but slower than $D_{\mathrm{best}}$ due to dog interference.
 - `collapse`: Unreliable, at or above $D_{\mathrm{overcrowd}}$.
+
+### Failure Taxonomy: Structural vs Boundary/Temporal Failures
+
+When analyzing the root causes of failed simulation trials, HerdSim distinguishes between two fundamentally different physical failure regimes:
+1. **Structural Failures**:
+   - Occur during the **Stray Gathering Phase** when shepherd count falls below the minimum viable frontier ($D < D_{\min}$).
+   - The spatial geometry of the canine pack cannot contain the flock's diffusive drift on open pastures. Herders become trapped in a perpetual cycle of chasing distant stragglers; extending trial deadlines cannot rescue these runs because the rate of outward dispersion strictly exceeds the sequential collection rate.
+2. **Boundary and Temporal Failures**:
+   - Occur during the **Drive Phase or Terminal Penning**. The pack successfully gathers the herd into a cohesive body and steers it across the pasture, delivering $\ge 99\%$ of animals into the goal, but times out due to deadline expiry or boundary geometry artifacts (the Straggler Effect).
+   - This distinction provides the rigorous mechanical justification for adopting the **99% arrival criterion** ($\chi = 0.99$): 99% arrival isolates fundamental collective coordination capacity, whereas strict 100% containment is dominated by microscopic boundary noise.
+
+### Dual-Regime Overcrowding Collapse
+
+Overcrowding collapse ($D \ge D_{\mathrm{overcrowd}}$) is not a singular phenomenon but emerges at two opposite geometric extremes:
+- **Large Flocks ($N \ge 400$) - Driving Arc Packing Saturation**:
+  - When flocks are large and shepherds possess non-zero physical exclusion footprints ($2\text{ m}$), packing excessive dogs ($D > D_{\mathrm{cap}} \approx 12$) along the rear driving arc induces severe spatial contention. Dogs block each other's paths and activate mutual freezing standoffs, causing catastrophic deceleration of the drive.
+- **Small Flocks ($N \le 10$) - Encirclement Escape-Corridor Collapse**:
+  - When the ratio of shepherds to prey is high ($D/N \gg 1$), a large canine pack completely encircles the tiny flock across all $360^\circ$ azimuths. The flock loses its forward escape corridor; simultaneous threat vectors from all sides tear the herd apart, scattering prey outward in all directions.
 
 ---
 

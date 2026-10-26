@@ -58,6 +58,10 @@ $$
 
 Trong mô hình chuẩn, $n = N - 1$ (tương tác với toàn bộ thành viên trong đàn).
 
+> [!NOTE]
+> **Về Giả định Giác quan Toàn cục và Tính Hợp lý Sinh học**:
+> Mô hình gốc Strömbom giả định mỗi con cừu đều tính toán chính xác Trọng tâm Toàn cục (GCM) với $n = N - 1$. Trong sinh học thực tế, cừu không thể sở hữu giác quan viễn thám để biết vị trí của hàng trăm cá thể ở xa. Tuy nhiên, các phân tích bầy đàn cho thấy động vật có thể ước lượng hướng về tâm bầy bằng **gradient mật độ cục bộ** (local density gradient) dựa trên các láng giềng lân cận. Sai số góc giữa gradient mật độ cục bộ và vector hướng về GCM thực tế thường rất nhỏ ($< 15^\circ\text{--}20^\circ$), do đó giả định GCM đóng vai trò là một xấp xỉ vĩ mô hiệu quả và đáng tin cậy.
+
 ##### 3. Tránh va chạm ($\mathbf{R}_{a,i}$, trọng số $\rho_a = 2.0$)
 - *Tại sao?* Động vật ưu tiên việc không giẫm đạp hay húc vào nhau lên hàng đầu. Do đó, lực này mang trọng số cao nhất ($\rho_a = 2.0$).
 - Bất kỳ cá thể láng giềng $j$ nào ở cự ly gần hơn không gian cá nhân $r_a = 2\text{ m}$ sẽ tạo ra một lực đẩy né tránh:

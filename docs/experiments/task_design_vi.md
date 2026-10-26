@@ -96,7 +96,29 @@ HerdSim cung cấp 4 cấu hình xuất phát chuẩn hóa để tách bạch gi
 3. **`split`**: Đàn cừu bị tách thành 3 cụm riêng biệt đối xứng trên một vòng tròn. Chó phải gom các cụm lại với nhau mà không làm chúng vỡ vụn thêm.
 4. **`outlier_rich`**: 80% số cừu bắt đầu trong một lõi đặc trung tâm, 20% còn lại bị rải rác làm những cá thể lạc đàn rất xa trên đồng cỏ.
 
+### Tải trọng Tản mác Ban đầu ($S_0 \times N$) và Hai Giai đoạn Nhiệm vụ
+
+Độ khó thực sự của một nhiệm vụ chăn dắt không chỉ phụ thuộc vào số lượng cá thể $N$, mà bị chi phối mạnh mẽ bởi tích số giữa độ tản mác ban đầu $S_0$ (trung bình bình phương khoảng cách tới trọng tâm bầy) và quy mô đàn $N$:
+
+$$
+\mathcal{B}_{\mathrm{disp}} = S_0 \times N
+$$
+
+Tích số này phản ánh lượng **công việc nén hình học** mà bầy chó phải hoàn tất trong Giai đoạn 1 (Gom cừu lạc / Gathering phase) trước khi đàn cừu đạt trạng thái gắn kết để có thể bước sang Giai đoạn 2 (Lùa bầy / Drive phase):
+- Trên bố cục **`compact`**, $S_0 \approx 0 \implies S_0 \times N \approx 0$. Toàn bộ cừu đã nằm sẵn trong bán kính gom $f(N)$, nhiệm vụ bỏ qua hoàn toàn giai đoạn gom lạc đàn. Đây là lý do sâu xa vì sao quy mô tối thiểu $D_{\min} = 1$ không đổi từ $N = 25$ đến $N = 1131$.
+- Trên các bố cục phân tán (**`wide`**, **`split`**, **`outlier_rich`**), $S_0$ lớn khiến tải trọng $S_0 \times N$ bùng nổ khi $N$ tăng. Dưới thời hạn ngặt nghèo, một chú chó đơn lẻ phải di chuyển quãng đường quá lớn để thu gom tuần tự từng con cừu lạc, khiến tốc độ tản mác tự nhiên của bầy vượt quá tốc độ gom. Do đó, bầy chó bắt buộc phải mở rộng quy mô ($D_{\min} > 1$) để phân chia không gian và thu gom song song.
+
+| Bố cục | Quy mô $N$ | Bán kính tản mác $S_0$ | Tải trọng $S_0 \times N$ | Trạng thái Gom cừu lạc |
+| :--- | :---: | :---: | :---: | :--- |
+| `compact` | 25 | $3{,}59\text{ m}$ | **89,9** | Bỏ qua hoàn toàn; lập tức vào chế độ lùa |
+| `compact` | 100 | $5{,}67\text{ m}$ | **567,2** | Bỏ qua hoàn toàn; lập tức vào chế độ lùa |
+| `compact` | 400 | $7{,}68\text{ m}$ | **3.073,5** | Bỏ qua hoàn toàn; lập tức vào chế độ lùa |
+| `wide` | 400 | $8{,}11\text{ m}$ | **3.242,3** | Đòi hỏi gom biên rộng song song |
+| `split` | 400 | $8{,}81\text{ m}$ | **3.524,2** | Đòi hỏi gom các phân cụm tách biệt |
+| `outlier_rich` | 400 | $10{,}16\text{ m}$ | **4.065,6** | Tải trọng tối đa; bắt buộc nhiều chó gom |
+
 ### 3 Cách thả chó xuất phát
+
 
 Đàn chó xuất phát cách đàn cừu $30\text{ m}$ về phía sau theo một trong 3 hình học:
 
@@ -228,6 +250,24 @@ Quá trình phân loại thống kê được quản lý bởi [`analysis/fronti
 - `saturated`: Đạt tin cậy, từ $D_{\mathrm{sat}}$ trở lên; thêm chó không giúp chạy nhanh hơn.
 - `crowded`: Đạt tin cậy, nhưng chạy chậm hơn $D_{\mathrm{best}}$ do chó cản trở nhau.
 - `collapse`: Không tin cậy, tại hoặc trên mức $D_{\mathrm{overcrowd}}$.
+
+### Cơ chế Thất bại: Thất bại Cấu trúc (Structural) vs. Ranh giới Thời gian (Boundary/Temporal)
+
+Khi phân tích nguyên nhân thất bại của các lượt chạy không đạt độ tin cậy, HerdSim phân biệt rõ hai cơ chế vật lý:
+1. **Thất bại Cấu trúc (Structural Failures)**:
+   - Xảy ra trong **Giai đoạn Gom cừu lạc** khi số lượng chó dưới ngưỡng tối thiểu ($D < D_{\min}$).
+   - Hình học của đội chó không đủ khả năng kiềm tỏa tốc độ phân tán tự nhiên của bầy cừu trên đồng cỏ rộng. Đàn chó rơi vào trạng thái đuổi bắt tuần tự vô tận; việc gia hạn thời gian chạy không thể cứu vãn lượt mô phỏng vì tốc độ gom chậm hơn tốc độ bầy tản mát.
+2. **Thất bại Ranh giới và Thời gian (Boundary / Temporal Failures)**:
+   - Xảy ra trong **Giai đoạn Lùa bầy hoặc Nhốt chuồng**. Đội chó đã gom thành công đàn cừu thành một khối thống nhất và dẫn dắt vượt đồng cỏ đạt $\ge 99\%$ số lượng vào chuồng, nhưng bị hết giờ chỉ vì một vài cá thể lạc lẻ loi ở mép chuồng (Hiệu ứng Straggler Effect).
+   - Sự phân biệt này là nền tảng khoa học giải thích vì sao tiêu chí **99% cừu vào chuồng** phản ánh chính xác năng lực điều phối tập thể, trong khi tiêu chí nghiêm ngặt 100% bị nhiễu bởi động lực học ranh giới vi mô.
+
+### Hai Chế độ Suy sụp do Quá tải Đội hình (Dual-Regime Overcrowding Collapse)
+
+Hiện tượng suy sụp do thừa tác tử ($D \ge D_{\mathrm{overcrowd}}$) không phải là một hiện tượng đơn nhất mà xuất hiện ở hai thái cực hình học đối lập:
+- **Đàn lớn ($N \ge 400$) - Suy sụp do Chen lấn Vòng cung Lùa (Driving Arc Saturation)**:
+  - Khi đàn cừu lớn và bầy chó có bán kính loại trừ vật lý ($2\text{ m}$), việc nhồi nhét quá nhiều chó ($D > D_{\mathrm{cap}} \approx 12$) vào một vòng cung hẹp phía sau đàn gây ra hiện tượng cạnh tranh không gian, các chú chó chặn đường nhau và kích hoạt quy tắc đóng băng đứng yên, khiến tốc độ lùa bị sụt giảm thảm hại.
+- **Đàn nhỏ ($N \le 10$) - Suy sụp do Bao vây Triệt tiêu Hành lang Thoát (Encirclement Collapse)**:
+  - Khi tỷ lệ chó trên cừu quá cao ($D/N \gg 1$), bầy chó đông đảo vô tình bao vây kín đàn cừu từ mọi hướng góc $360^\circ$. Đàn cừu không còn hành lang an toàn để chạy trốn về phía trước; áp lực sợ hãi từ mọi phía xé toạc đàn cừu và phân tán chúng ra xung quanh.
 
 ---
 
