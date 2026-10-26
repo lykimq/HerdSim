@@ -70,7 +70,7 @@ the folder refuses it. That keeps old and new trials from ever being mixed.
    smoothly with N. Otherwise skip it; `run` calibrates by itself.
 4. `run` with no more workers than you have cores. Start long runs in the background with their
    output going to a log file. If anything stops it, run it again.
-5. Check `status` at the end. The stop reason should be "every cell decided" and `trial_errors`
+5. Check `status` at the end. The stop reason should be "every cell decided, at max_seeds or errored" and `trial_errors`
    should be 0. An error in a deterministic simulation is a bug, so its cell is never counted as
    reliable.
 6. To try another setting, write a new protocol that `extends` the old one, with its own id and
@@ -86,7 +86,7 @@ uv run cli/run_queue.py --workers 20                  # every protocol that is n
 uv run cli/run_queue.py --only dmin_f99_hold --workers 20
 ```
 
-The queue lists all 39 protocols in the order they ran. Finished folders are skipped, stopped
+The queue lists the 39 protocols of the study in the order they ran (the one-batch `dmin_pilot` is not in it). Finished folders are skipped, stopped
 ones are resumed, and a protocol that fails is logged while the queue moves on. Each protocol
 adds a line to `results/queue_log.jsonl` (when it ran, how long, trials, errors, open cells).
 With this one command the whole study can be run again from scratch.
@@ -144,8 +144,9 @@ uv run cli/diagnostics/pressure_replay.py dmin_f99_m6 --layouts wide outlier_ric
     --seeds 12 --out results/diagnostics/pressure_dmin_f99_m6.csv
 ```
 
-The cells follow the folder's current D_sat. Since the finish-time top-up, a rerun picks `wide`
-D = 4 and 5 where the stored CSV has D = 6; the rows both runs share are identical.
+The cells follow the folder's current D_sat. Since the finish-time top-up, a rerun on `wide`
+adds D = 4 at N = 100 and picks D = 5 at N = 400 where the stored CSV has D = 6; the rows both
+runs share are identical.
 
 `split_diagnostic.py` asks why more dogs slow the `split` layout. It replays `split` N = 100 and
 200 at D = 2, 4, 8 and 16 in four versions: the rule as run, a shorter dog stop distance,
@@ -182,7 +183,7 @@ cli/            the tools in this folder; none imports another
 sim/            the model: one trial, tick by tick
 ```
 
-| Tool | Uses |
+| Tool | Main modules used |
 | :--- | :--- |
 | `campaign.py` | `services/protocol.py`, `services/calibration.py`, `services/adaptive.py`, `services/store.py` |
 | `run_queue.py` | `services/protocol.py`, `services/adaptive.py` |

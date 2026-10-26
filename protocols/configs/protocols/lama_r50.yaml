@@ -5,9 +5,9 @@
 # The grid covers sqrt(M) = 1 to 20 targets and N = 1 to 25 herders (HerdSim's N and D).
 # The paper's axes run to 25 in both, so targets above 400 are not run. That range already
 # holds the threshold of Table I and the sqrt(M) rise above it, which is enough for the check;
-# the five larger sizes would about double the run time. The time limit is the paper's t_max = 5000 at dt 0.03, rounded up to
-# whole ticks. The paper reports N* about 0.85 sqrt(M) above the threshold, sqrt(M_low) = 11,
-# and no N up to 25 at sqrt(M) <= 6. Finish-time seeds off: D_min is the question.
+# the five larger sizes would about double the run time. The time limit is the paper's
+# t_max = 5000 at dt 0.03, rounded up to whole ticks. The paper's Table I puts the threshold
+# at sqrt(M_low) = 11 for the 99 percent share. Finish-time seeds off: D_min is the question.
 
 protocol_id: lama_r50
 output: results/lama_r50

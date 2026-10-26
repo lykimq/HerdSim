@@ -21,9 +21,9 @@ Kết quả chính:
 5. **Quy tắc 99% ổn định trước các lựa chọn thiết lập.** Dưới quy tắc này, $D_{\min}$ thay đổi nhiều nhất khoảng một chó khi đổi vị trí thả chó, khoảng cách xuất phát, tốc độ chó hay tham số cừu; chỉ đích nhỏ hơn làm nó tăng nhiều hơn. Dưới quy tắc nghiêm ngặt, cùng những thay đổi đó thường đẩy nó thành "không có trên lưới".
 6. **Chó không có quy tắc đội thì không mở rộng được.** Với FAT, mọi chó đuổi cùng một con cừu, nên không đội nào tin cậy ở $N \ge 200$ trên bất kỳ bố cục phân tán nào, kể cả bầy tập trung $N = 400$.
 7. **Vượt $D_{\mathrm{sat}}$, thêm chó tốn kém nhưng không gây hại** (mục 3.7). Thời gian hoàn thành ở mức 0,96–1,01 lần thời gian tại $D_{\mathrm{sat}}$, trong khi thời gian chó tăng theo $D$, và thời gian mỗi con cừu chạy trốn không tăng. Dưới quy tắc 99%, không đội nào đến 24 chó làm nhiệm vụ thất bại trên năm quy mô ban đầu (một chỗ trũng trên lưới dày hơn); thêm chó chủ yếu làm chậm bầy `split`.
-8. **Lưới dày hơn** (mục 3.8): trên chín quy mô bầy, $D_{\min}$ tăng với độ dốc 0,27–0,38 ở 12 lần thời gian lùa và 0,38–0,61 ở 6 lần, còn $D_{\mathrm{sat}}$ tăng nhanh gấp khoảng đôi. Đến $N = 566$, một luật lũy thừa và một đường cong chững lại khớp dữ liệu như nhau.
+8. **Lưới dày hơn** (mục 3.8): trên chín quy mô bầy, $D_{\min}$ tăng với độ dốc 0,27–0,38 ở 12 lần thời gian lùa và 0,38–0,61 ở 6 lần, còn $D_{\mathrm{sat}}$ tăng nhanh gấp khoảng một rưỡi đến hai lần. Đến $N = 566$, một luật lũy thừa và một đường cong chững lại khớp dữ liệu như nhau.
 9. **Phần nào của quy tắc đội quan trọng** (mục 3.9): riêng công tắc gom/lùa của bài báo đã đưa một đội chó độc lập đến $N = 200$; ở $N = 400$ cần đến tầng đội.
-10. **Quá nhiều chó** (mục 3.10): khi chó giữ cách nhau 2 m, `outlier_rich` $N = 400$ thất bại từ $D = 9$ trở lên; chó dạng điểm không có thất bại như vậy đến 24.
+10. **Quá nhiều chó** (mục 3.10): khi chó giữ cách nhau 2 m, `outlier_rich` $N = 400$ thất bại từ $D = 9$ trở lên; chó dạng điểm ở đó còn chưa quyết định ở mức 0,85–0,92, chưa bao giờ bị kết luận không tin cậy.
 11. **Độ gắn kết và tầm cảm nhận** (mục 3.11, 3.12): gắn kết yếu hơn làm $D_{\min}$ tăng nhanh hơn, về phía 0,5 của mục tiêu không gắn kết; tầm nhìn cục bộ tốn khoảng một chó ở $N = 200$, và chia sẻ những gì mọi chó thấy bù lại được.
 12. **Một giới hạn của quy tắc lùa** (mục 3.13): trên $N \approx 1056$, điểm lùa của bài báo nằm ngoài khoảng cách mà cừu phản ứng với chó, và không đội nào đến 12 chó lùa được bầy. Khi giới hạn điểm lùa trong tầm, một bầy phân tán cần 3 chó ở $N = 800$, 5–9 ở 1131 và hơn 12 ở 1600.
 13. **Mục tiêu không gắn kết** (mục 3.14): HerdSim cho lại ngưỡng mà Lama và di Bernardo công bố trong Bảng I của họ, và bản đồ của HerdSim có cùng hình dạng với bản đồ của họ. Khi thấy mọi thứ, đội nhỏ nhất tăng theo căn bậc hai của số mục tiêu (số mũ 0,52–0,53) theo cả thống kê của bài báo lẫn của HerdSim. Với bán kính cảm nhận 10, hai cách tách nhau gần ngưỡng: ở 144 mục tiêu, trung bình của bài báo đạt 0,99 với 11 người chăn, trong khi 17 đến 25 người chăn vẫn sót một mục tiêu trong khoảng một lượt trên mười.
@@ -143,7 +143,7 @@ Ba khung là ba thời hạn (12, 6 và 3 lần thời gian lùa), trên trục 
 *(Phải)* Cừu Kubo ($N = 25, 50, 100$): cừu tăng tốc khi bị đẩy mạnh hơn, đến 5 m/s, nên nhiều chó xong sớm hơn: từ 115 s với một chó xuống 29 s với mười chó ở $N = 100$.  
 *Dữ liệu:* các lượt thành công trên bầy tập trung trong `results/dmin_m6` và `results/dmin_kubo`; $D_{\min}$ của Kubo trong [results_tables.md: Kubo (compact, strict)](results_tables.md#kubo-compact-strict).
 
-Bảng 2 cho độ dốc của $\log_2 D_{\min}$ theo $\log_2 N$:
+Bảng 2 cho độ dốc của $\log_2 D_{\min}$ theo $\log_2 N$ trên năm quy mô gốc (các lưới 99% ở 12 và 6 lần thời gian lùa sau đó được mở rộng, mục 3.8):
 
 | Quy tắc | Thời hạn | `wide` | `split` | `outlier_rich` |
 | :--- | :---: | :---: | :---: | :---: |
@@ -158,7 +158,7 @@ Một khoảng là tập các độ dốc mà các khoảng $D_{\min}$ cho phép
 *Dữ liệu:* [results_tables.md: Growth with N, strict](results_tables.md#growth-with-n-strict) và [results_tables.md: Growth with N, 99 percent](results_tables.md#growth-with-n-99-percent).
 
 **Điều gì quyết định độ dốc.**
-1. **Độ gắn kết giữ nó thấp.** Với mục tiêu không gắn kết, Lama và di Bernardo công bố độ dốc 0,5. Với bầy Strömbom ở thời hạn thong thả, nó là 0,20 đến 0,30 dưới quy tắc 99%. Mỗi con cừu bị hút về cả bầy ($c = 1{,}05$, cả $N - 1$ hàng xóm), nên con cừu lạc mà chó lùa quay lại sẽ tự đi về bầy, và chó không phải đi bắt từng con.
+1. **Độ gắn kết giữ nó thấp.** Với mục tiêu không gắn kết, Lama và di Bernardo công bố độ dốc 0,5. Với bầy Strömbom ở thời hạn thong thả, nó là 0,20 đến 0,30 dưới quy tắc 99% trên năm quy mô gốc (0,27 đến 0,38 với bốn quy mô thêm vào, mục 3.8). Mỗi con cừu bị hút về cả bầy ($c = 1{,}05$, cả $N - 1$ hàng xóm), nên con cừu lạc mà chó lùa quay lại sẽ tự đi về bầy, và chó không phải đi bắt từng con.
 2. **Thời hạn gấp làm nó tăng.** Ở 3 lần thời gian lùa, độ dốc tăng lên 0,62–1,50. Không đủ thời gian để một chó đưa từng con lạc về lần lượt, nên cả đội phải làm việc ở nhiều phía của bầy cùng lúc.
 
 ---
@@ -173,9 +173,9 @@ $$
 \text{độ trải (lần gấp đôi)} = \log_2 \left( \frac{D_{\min} \text{ lớn nhất}}{D_{\min} \text{ nhỏ nhất}} \right)
 $$
 
-Vậy đi từ 1 chó lên 2 là một lần gấp đôi, từ 1 lên 3 là 1,58, và không đổi là 0. Độ trải theo bố cục được lấy ở từng $N$ rồi lấy trung bình qua các $N$; độ trải theo $N$ được lấy ở từng bố cục rồi lấy trung bình qua các bố cục. Một khoảng được tính tại trung điểm nhân của nó, và các đường cong không có $D$ tin cậy bị bỏ ra.
+Vậy đi từ 1 chó lên 2 là một lần gấp đôi, từ 1 lên 3 là 1,58, và không đổi là 0. Độ trải theo bố cục được lấy ở từng $N$ rồi lấy trung bình qua các $N$; độ trải theo $N$ được lấy ở từng bố cục rồi lấy trung bình qua các bố cục. Một khoảng được tính tại trung bình nhân của hai đầu khoảng, và các đường cong không có $D$ tin cậy bị bỏ ra.
 
-Bảng 3:
+Bảng 3 (năm quy mô gốc):
 
 | Quy tắc | Thời hạn | Độ trải theo bố cục ($N$ cố định) | Độ trải theo $N$ (bố cục cố định) |
 | :--- | :---: | :---: | :---: |
@@ -197,7 +197,7 @@ Bảng 3:
 ### 3.3 RQ3: Thời hạn làm $D_{\min}$ thay đổi thế nào?
 
 1. **Thay đổi đột ngột, không từ từ.**  
-   Dưới quy tắc 99% trên `wide` và `outlier_rich`, đi từ 6 lên 12 lần thời gian lùa tiết kiệm nhiều nhất một chó. Đi từ 6 xuống 3 lần tốn hơn nhiều: trên `wide` $N = 400$, $D_{\min}$ từ 2–3 lên 5–6, và trên `split` $N \ge 200$ không đội nào đến 24 là tin cậy.
+   Dưới quy tắc 99% trên `wide` và `outlier_rich`, đi từ 6 lên 12 lần thời gian lùa tiết kiệm nhiều nhất một chó. Đi từ 6 xuống 3 lần tốn hơn nhiều: trên `wide` $N = 400$, $D_{\min}$ từ 2–3 lên 5–6 (trên `split` $N \ge 200$ không đội nào đến 24 là tin cậy ở cả hai thời hạn).
 
 2. **Vì sao.**  
    Cừu đi 1 m/s và chó chạy 1,5 m/s. Với 12 lần thời gian lùa, có đủ thời gian để một chó đưa từng con lạc về trước khi lùa cả bầy. Với 3 lần, trình tự đó không còn vừa, nên nhiều chó phải làm việc ở các phía khác nhau của bầy cùng lúc.
@@ -214,7 +214,7 @@ Bảng 3:
 ### 3.4 RQ4: Quy tắc thành công và con cừu cuối cùng
 
 1. **Quy tắc 99% không bao giờ cần nhiều chó hơn.**  
-   Ở cả 34 ô phân tán mà cả hai quy tắc đều có đội tin cậy, quy tắc 99% cần bằng hoặc ít chó hơn. Ở những ô cả hai đều đã quyết định, nó tiết kiệm đúng một chó (từ 3 xuống 2 chẳng hạn); trên `outlier_rich` $N = 100$ ở 3 lần thời gian lùa, $D_{\min}$ đi từ khoảng 3–8 xuống 2. Sáu ô bầy lớn thất bại dưới quy tắc nghiêm ngặt (bốn `none`, hai còn mở ở 200 lượt) có đội tin cậy dưới quy tắc 99% (hai đã quyết định, bốn khoảng hẹp).
+   Ở cả 34 đường cong phân tán mà cả hai quy tắc đều có đội tin cậy, quy tắc 99% cần bằng hoặc ít chó hơn. Ở những đường cả hai đều đã quyết định và khác nhau, mức tiết kiệm là đúng một chó (từ 3 xuống 2 chẳng hạn); trên `outlier_rich` $N = 100$ ở 3 lần thời gian lùa, $D_{\min}$ đi từ khoảng 3–8 xuống 2. Sáu đường cong bầy lớn thất bại dưới quy tắc nghiêm ngặt (bốn `none`, hai còn mở ở 200 lượt) có đội tin cậy dưới quy tắc 99% (hai đã quyết định, ba khoảng hẹp và một khoảng rộng, 4–10).
 
 2. **Vì sao đội lớn thất bại dưới quy tắc nghiêm ngặt.**  
    Trong **97% số lượt thất bại nghiêm ngặt** với 6 chó trở lên ở lượt chạy cơ sở của phần độ nhạy (`dmin_s_base`; 91% ở `dmin_m6`), 99% bầy đã từng ở trong đích trước thời hạn. Một hai con cừu cuối cùng quyết định lượt chạy. Trong một lượt mẫu (`wide` $N = 400$, 16 chó, hạt giống 2), các chó đuổi theo con lạc cuối cùng, đứng vào giữa bầy và đích, và lùa bầy đã vào đích ra ngoài trở lại, hai lần (Hình 5).
@@ -225,13 +225,13 @@ Bảng 3:
 ![Thành công nghiêm ngặt so với 99%](../figures/fig30_strict_vs_99.png)
 
 **Hình 4: Thành công nghiêm ngặt so với 99%, từng ô, trên cùng các hạt giống.**  
-Mỗi khung một thời hạn (12, 6, 3), các bố cục phân tán ở $N \ge 100$ (80, 57 và 33 ô chung có ít nhất 20 hạt giống). Trục hoành: tỷ lệ thành công nghiêm ngặt; trục tung: tỷ lệ thành công 99%; đường chéo là $y = x$. Vùng tô ở góc trên trái chứa 40 ô (31 ở $N \ge 200$) tin cậy dưới quy tắc 99% nhưng không dưới quy tắc nghiêm ngặt. Ở đó, con cừu cuối cùng có vào được hay không quyết định kết quả nghiêm ngặt.  
+Mỗi khung một thời hạn (12, 6, 3), các bố cục phân tán ở $N \ge 100$ (80, 57 và 33 ô chung có ít nhất 20 hạt giống). Trục hoành: tỷ lệ thành công nghiêm ngặt; trục tung: tỷ lệ thành công 99%; đường chéo là $y = x$. Vùng tô ở góc trên trái chứa 40 ô (32 ở $N \ge 200$) có tỷ lệ thành công 99% từ 0,90 trở lên trong khi tỷ lệ nghiêm ngặt ở dưới mức đó. Ở đó, con cừu cuối cùng có vào được hay không quyết định kết quả nghiêm ngặt.  
 *Dữ liệu:* `results/dmin_m12`, `dmin_m6` và `dmin_m3`; giá trị trong [results_tables.md: strict success](results_tables.md#d_min-by-layout-and-n-strict-success) và [results_tables.md: success at 99 percent](results_tables.md#d_min-by-layout-and-n-success-at-99-percent).
 
 ![Con cừu cuối cùng](../figures/fig22_straggler.png)
 
 **Hình 5: Con cừu cuối cùng quyết định.**  
-*(Trái)* Tỷ lệ các lượt có 6 chó trở lên mà mọi con cừu đều vào (xanh đậm), mà 99% số cừu đã ở trong đích tại một thời điểm nào đó (gạch chéo), và mà mọi con cừu đều vào khi chó chậm hơn (cam). Với chó 1,5 m/s, hai cột đầu chênh nhau đến khoảng 30 điểm; với chó 1,15 m/s, gần như mọi lượt đưa được mọi con cừu vào.  
+*(Trái)* Tỷ lệ các lượt có 6 chó trở lên mà mọi con cừu đều vào (xanh đậm), mà 99% số cừu đã ở trong đích tại một thời điểm nào đó (gạch chéo), và mà mọi con cừu đều vào khi chó chậm hơn (cam). Với chó 1,5 m/s, hai cột đầu chênh nhau khoảng 30 điểm; với chó 1,15 m/s, gần như mọi lượt đưa được mọi con cừu vào.  
 *(Phải)* Một lượt chạy (`wide` $N = 400$, 16 chó, hạt giống 2): trên, khoảng cách từ tâm bầy đến đích; dưới, số cừu ngoài đích (thang symlog). Chó nhanh (xanh) đưa 399 con vào, rồi lùa bầy ra ngoài hai lần khi đuổi con cuối cùng. Chó chậm hơn (cam) xong trong một lượt.  
 *Dữ liệu:* `results/dmin_s_base` và `results/dmin_s_dogspeed`; giá trị trong [results_tables.md: Sensitivity, strict: base / variant](results_tables.md#sensitivity-strict-base--variant).
 
@@ -266,7 +266,7 @@ FAT (nhắm con xa nhất) là một đối chứng không phối hợp: mỗi c
    FAT tin cậy trên bầy nhỏ ($N \le 100$) nhưng không có đội tin cậy nào ở $N \ge 200$ trên bất kỳ bố cục phân tán nào, và cũng không có trên bầy tập trung $N = 400$, nơi quy tắc đội chỉ cần một chó. Thêm chó không giúp gì.
 
 2. **Vì sao.**  
-   Mọi chó thấy mọi con cừu và chọn theo cùng một quy tắc, nên cả $D$ chó đuổi cùng một con cừu. Chúng dồn cục: ở $N \ge 200$, trung vị tỷ lệ chó có một chó khác trong vòng 2 m là 0,86 trên `compact` và 0,79 trên `split` (0,46 trên `wide`, 0,30 trên `outlier_rich`). Một đội FAT lớn hơn chỉ là một đám đông lớn hơn sau một con cừu trong khi phần còn lại của bầy tản ra.  
+   Mọi chó thấy mọi con cừu và chọn theo cùng một quy tắc, nên cả $D$ chó đuổi cùng một con cừu. Chúng dồn cục: ở $N \ge 200$, trung vị tỷ lệ chó có một chó khác trong vòng 2 m, với đội từ hai chó trở lên, là 0,86 trên `compact` và 0,79 trên `split` (0,46 trên `wide`, 0,30 trên `outlier_rich`). Một đội FAT lớn hơn chỉ là một đám đông lớn hơn sau một con cừu trong khi phần còn lại của bầy tản ra.  
    Các chó chăn độc lập ở mục 3.9 cũng không có tầng đội, nhưng chúng giữ công tắc gom/lùa của Strömbom, và đạt $D_{\min}$ hữu hạn đến $N = 200$. FAT thất bại vì nó không có cả tầng đội lẫn công tắc.
 
 Bảng 5 so FAT với `strombom_multi` ở 6 lần thời gian lùa (FAT nghiêm ngặt / 99%, `strombom_multi` trong ngoặc):
@@ -283,7 +283,7 @@ Bảng 5 so FAT với `strombom_multi` ở 6 lần thời gian lùa (FAT nghiêm
 ![FAT so với quy tắc đội](../figures/fig26_fat.png)
 
 **Hình 7: Tỷ lệ thành công theo quy mô đội cho `strombom_multi` (xanh) và FAT (cam) ở 6 lần thời gian lùa.**  
-Năm khung: `compact` $N = 400$, `wide` $N = 200$ và 400, `outlier_rich` $N = 200$, và `split` $N = 200$. Đường liền: quy tắc nghiêm ngặt; đứt: quy tắc 99%; chấm: $\theta = 0{,}90$. Quá hai chó, FAT ở dưới khoảng 0,55, trong khi `strombom_multi` trở nên tin cậy trên `wide` và `outlier_rich`.  
+Năm khung: `compact` $N = 400$, `wide` $N = 200$ và 400, `outlier_rich` $N = 200$, và `split` $N = 200$. Đường liền: quy tắc nghiêm ngặt; đứt: quy tắc 99%; chấm: $\theta = 0{,}90$. Quá hai chó, FAT không bao giờ đạt $\theta$: nó ở dưới khoảng 0,55 trên `wide` và `outlier_rich`, và dưới 0,9 trên `compact` $N = 400$ và `split` $N = 200$, trong khi `strombom_multi` trở nên tin cậy trên `wide` và `outlier_rich`.  
 *Dữ liệu:* `results/dmin_fat`, `dmin_f99_fat`, `dmin_m6` và `dmin_f99_m6`.
 
 ---
@@ -295,7 +295,7 @@ Biết đội tin cậy nhỏ nhất vẫn để lại những câu hỏi thực
 #### 1. Khi nào thêm chó không còn giúp ($D_{\mathrm{sat}}$)
 $D_{\mathrm{sat}}$ là đội tin cậy nhỏ nhất mà không đội tin cậy lớn hơn nào nhanh hơn.
 - **Bầy tập trung và $N \le 50$:** $D_{\mathrm{sat}} = 1$ (trừ `outlier_rich` $N = 50$, khoảng 1–24). Một chó đã giữ bầy đi với 1 m/s.
-- **Bầy phân tán ở 6 lần thời gian lùa:** $D_{\mathrm{sat}}$ là 2 đến 6 ở $N = 100$ đến 400 (`outlier_rich` $N = 100$: 3; `wide` $N = 400$: 5).
+- **Bầy phân tán ở 6 lần thời gian lùa:** $D_{\mathrm{sat}}$ là 2 đến 7 ở những chỗ đã quyết định với $N = 100$ đến 400 (`outlier_rich` $N = 100$: 3; `wide` $N = 400$: 5; `split` $N = 141$: 7); trên `outlier_rich` ở $N \ge 283$ đầu trên của khoảng vẫn còn mở.
 - Sau các lượt chạy bổ sung thời gian hoàn thành (mục 3.8), $D_{\mathrm{sat}}$ trên `wide` là 1, 1, 1, 2, 3, 3, 4, 5 từ $N = 25$ đến 400.
 
 #### 2. Chó vượt $D_{\mathrm{sat}}$ tốn bao nhiêu
@@ -317,7 +317,7 @@ Tại $D = 24$, việc lùa nhanh hơn 1% đến 6% so với tại $D_{\mathrm{s
 
 #### 3. Áp lực lên cừu
 Một con cừu chạy trốn khi có chó trong vòng 65 m ($r_s$). Các lượt chạy lại đo khoảng thời gian đó.
-- **Mỗi con cừu chạy trốn ít hơn, cho đến $D_{\mathrm{sat}}$.** Nhiều chó gom bầy sớm hơn, nên lượt lùa ngắn hơn. Trên `wide` $N = 400$, trung vị thời gian chạy trốn mỗi con giảm từ 485 s ở $D = 3$ xuống 359 s ở $D = 6$, rồi giữ ở đó (361 s ở $D = 12$).
+- **Mỗi con cừu chạy trốn ít hơn, cho đến $D_{\mathrm{sat}}$.** Nhiều chó gom bầy sớm hơn, nên lượt lùa ngắn hơn. Trên `wide` $N = 400$, trung vị thời gian chạy trốn mỗi con giảm từ 485 s ở $D = 3$ xuống 359 s ở $D = 6$, rồi giữ ở đó (361 s ở $D = 12$). Lượt chạy lại dùng $D = 6$ làm $D_{\mathrm{sat}}$, là giá trị trước đợt bổ sung thời gian hoàn thành; nay nó là 5.
 - **Nhiều cừu chạy trốn cùng lúc hơn.** Một đội lớn hơn trải trên một vòng cung rộng hơn: trung vị tỷ lệ bầy đang chạy trốn tại một thời điểm tăng từ 68% ở $D = 3$ lên 84% ở $D = 12$. Vì lượt lùa xong sớm hơn, tổng thời gian mỗi con cừu chạy trốn không tăng.
 - **Chó không áp sát cừu.** Thời gian một con cừu ở trong vòng 6 m ($3 r_a$, khoảng cách dừng của chó) quanh một chó dưới 1,3 s mỗi con (trung vị) ở mọi quy mô đội.
 
@@ -327,7 +327,7 @@ Dưới quy tắc 99%, trên năm quy mô bầy ban đầu và đến 24 chó, k
 ![Chi phí của chó vượt D_sat](../figures/fig33_effort.png)
 
 **Hình 8: Chi phí của chó vượt $D_{\mathrm{sat}}$ (6 lần thời gian lùa, quy tắc 99%).**  
-*(Trái)* Thời gian hoàn thành so với ô $D_{\mathrm{sat}}$ theo $D / D_{\mathrm{sat}}$ (thang log). Mọi đường đều nằm trong 0,96 đến 1,01.  
+*(Trái)* Thời gian hoàn thành so với ô $D_{\mathrm{sat}}$ theo $D / D_{\mathrm{sat}}$ (thang log). Mọi đường đều nằm trong 0,96 đến 1,02.  
 *(Phải)* Thời gian chó ($D$ nhân thời gian hoàn thành) so với ô $D_{\mathrm{sat}}$; các đường đi theo đường chéo $y = x$, nên thời gian chó tăng tỷ lệ với đội.  
 *Dữ liệu:* [results_tables.md: Effort, dmin_f99_m6](results_tables.md#effort-dmin_f99_m6-cost-of-dogs-beyond-d_sat-relative-to-the-d_sat-cell-1).
 
@@ -345,12 +345,12 @@ Trung vị trên các lượt thành công cho $N = 100$ (hình tròn, chấm) v
 
 Để xác định hình dạng của $D_{\min}(N)$, các lưới 99% ở 12 và 6 lần thời gian lùa được thêm bốn quy mô bầy: $N = 71, 141, 283$ (trung điểm trên thang log giữa 50 và 400) và $N = 566 = 400\sqrt{2}$.
 
-**Vì sao các bước $\sqrt{2}$, và vì sao dừng ở 566.** Các bước $\sqrt{2}$ cho mọi quy mô cùng trọng số trong một phép khớp log-log. 566 là bước cuối như vậy dưới quy mô mà bầy của mô hình không còn ổn định: dưới khoảng 600, một bầy bị lùa ổn định về một bán kính $R_f(N)$ bất kể nó xuất phát lớn hay nhỏ. Ở $N = 630$, một bầy xuất phát lỏng vẫn lớn hơn 17% so với bầy xuất phát chặt, và ở 800 việc hiệu chỉnh thất bại.
+**Vì sao các bước $\sqrt{2}$, và vì sao dừng ở 566.** Các bước $\sqrt{2}$ cho mọi quy mô cùng trọng số trong một phép khớp log-log. 566 là bước cuối như vậy dưới quy mô mà bầy của mô hình không còn ổn định: dưới khoảng 600, một bầy bị lùa ổn định về một bán kính $R_f(N)$ bất kể nó xuất phát lớn hay nhỏ. Từ khoảng 630, một bầy xuất phát lỏng giữ lại một phần kích thước của nó, nên việc hiệu chỉnh không còn cho một bán kính duy nhất.
 
 1. **Các độ dốc hẹp lại.**  
    Trên chín quy mô, độ dốc của $D_{\min}$ theo $N$ là **0,27 đến 0,38** trên `wide` và **0,28 đến 0,38** trên `outlier_rich` ở 12 lần thời gian lùa, và **0,38 đến 0,61** ở 6 lần. Ở thời hạn thong thả nó vẫn dưới 0,5.
 
-2. **$D_{\mathrm{sat}}$ tăng nhanh gấp khoảng đôi $D_{\min}$.**  
+2. **$D_{\mathrm{sat}}$ tăng nhanh gấp khoảng một rưỡi đến hai lần $D_{\min}$.**  
    Trên `wide` ở 6 lần thời gian lùa, $D_{\mathrm{sat}}$ là 1, 1, 1, 2, 3, 3, 4, 5 chó từ $N = 25$ đến 400, và 7–24 ở 566 (độ dốc **0,70 đến 0,91**). Khoảng cách giữa đội tin cậy và đội nhanh nhất rộng ra khi bầy lớn lên.
 
 3. **Tăng đều và đường cong chững lại khớp như nhau.**  
@@ -405,15 +405,15 @@ Bảng 8 so ba quy tắc ở 6 lần thời gian lùa (quy tắc 99%):
 
 ### 3.10 RQ10: Khi nào thêm chó gây hại? Giữ bầy, và chó chiếm chỗ
 
-Khi lùa ngoài trời dưới quy tắc 99%, thêm chó dạng điểm chưa bao giờ làm nhiệm vụ thất bại. Hai giao thức thử những tình huống mà chó thêm có thể cản nhau:
+Trong nhiệm vụ lùa thường (không giữ bầy) dưới quy tắc 99%, thêm chó dạng điểm chưa bao giờ làm nhiệm vụ thất bại. Hai giao thức thử những tình huống mà chó thêm có thể cản nhau:
 
 1. **Giữ bầy (`dmin_f99_hold`):** một lượt chỉ thành công khi 99% bầy đã ở trong đích suốt một lần thời gian lùa. Trong lúc bầy ở trong đích, chó lùi ra $r_s + r_a = 67$ m sau con cừu xa nhất, để không con cừu nào phản ứng với chúng và bầy gặm cỏ.
-2. **Chó chiếm chỗ (`dmin_f99_hold_spacing`):** cùng nhiệm vụ, nhưng không chó nào được đến gần chó khác dưới 2 m. Vòng cung sau bầy khi đó chỉ có chỗ cho một số chó nhất định, khoảng $D_{\mathrm{cap}} = 7, 9, 10, 11, 12$ ở $N = 25$ đến 400.
+2. **Chó chiếm chỗ (`dmin_f99_hold_spacing`):** cùng nhiệm vụ, nhưng không chó nào được đến gần chó khác dưới 2 m. Vòng cung sau bầy khi đó chỉ có chỗ cho một số chó nhất định, khoảng $D_{\mathrm{cap}} = 7, 9, 10, 11, 12$ ở $N = 25$ đến 400 (chiều dài cung chia cho khoảng cách 2 m).
 
 #### Kết quả
 
 1. **Giữ bầy thất bại trên bầy nhỏ vì lý do hình học.**  
-   Trên bầy lớn hơn ($N \ge 100$), giữ bầy thành công trên `wide` và `compact`, với $D_{\min}$ bằng lúc lùa ngoài trời hoặc thêm một (1, 2 và 3 chó trên `wide` ở $N = 100$, 200, 400).  
+   Trên bầy lớn hơn ($N \ge 100$), giữ bầy thành công trên `wide` và `compact`, với $D_{\min}$ bằng lúc lùa thường hoặc thêm một (1, 2 và 3 chó trên `wide` ở $N = 100$, 200, 400).  
    Trên bầy nhỏ ($N \le 50$), không đội nào giữ được bầy. Đích ở đó chỉ có bán kính 12–14 m, trong khi chó phải lùi ra 67 m. Khi chó đi xa, cừu gặm cỏ lang thang ra khỏi cái đích nhỏ trước khi hết thời gian giữ. Thất bại đến từ kích thước đích, không phải từ việc thiếu chó.
 
 2. **Chó chiếm chỗ làm chó thêm trở nên có hại trên `outlier_rich` $N = 400$.**  
@@ -458,7 +458,7 @@ Bảng 9, các mức gắn kết (`wide`, quy tắc 99%, 12 lần thời gian l�
 Chó, robot và drone thật không thấy cả cánh đồng. Ở đây mỗi chó chỉ thấy những con cừu trong một tầm cảm nhận (15, 30, 45, 65 hoặc 100 m), và các chó chia sẻ những gì chúng thấy theo một trong ba cách: không chia sẻ (`none`), chia sẻ với các chó trong tầm (`neighbour`), hoặc với cả đội (`shared`).
 
 1. **Một tầm thực tế tốn khoảng một chó.**  
-   Trên `wide` $N = 200$, chó thấy mọi thứ cần 2 con. Với tầm 30 đến 65 m chúng cần 3 (3–4 ở 45 m). Trên bầy 100 con trở xuống, tầm cảm nhận không tốn gì, vì cả bầy phân tán nằm gọn trong 65 m.
+   Trên `wide` $N = 200$, chó thấy mọi thứ cần 2 con. Với tầm 30 đến 65 m chúng cần 3 (3–4 ở 45 m). Trên bầy 100 con trở xuống, tầm cảm nhận không tốn gì ở mọi mức đã thử.
 
 2. **Dưới 30 m chó mất dấu bầy.**  
    Với tầm 15 m trên `wide`, không đội nào đến 16 là tin cậy ở $N = 50$, và ở $N = 100$ cần ít nhất 6 chó. Khi tầm ngắn hơn khoảng cách giữa các con lạc, chó không còn thấy những con cừu ở rìa.
@@ -484,7 +484,7 @@ Trong quy tắc của Strömbom, chó lùa nhắm tới một điểm sau tâm b
 $$
 \mathbf{P}_d = \mathrm{GCM} - r_a \sqrt{N} \, \hat{\mathbf{e}}_{\mathrm{GCM} \to \mathrm{đích}}
 $$
-với $r_a = 2$ m, nên chó đứng cách tâm $2\sqrt{N}$ m. Một con cừu chỉ phản ứng với chó trong vòng $r_s = 65$ m. Điểm lùa nằm ngoài tầm của mọi con cừu khi
+với $r_a = 2$ m, nên chó đứng phía sau tâm bầy $2\sqrt{N}$ m. Một con cừu chỉ phản ứng với chó trong vòng $r_s = 65$ m. Điểm lùa nằm ngoài tầm của mọi con cừu khi
 $$
 r_a \sqrt{N} > r_s \iff 2\sqrt{N} > 65 \iff N > 1056
 $$
@@ -517,7 +517,7 @@ Cùng các lượt chạy được đọc theo hai cách:
 
 #### 2. Kết quả
 1. **HerdSim cho lại kết quả của bài báo.**  
-   Bài báo công bố bằng số một kết quả là ngưỡng trong Bảng I: với bán kính cảm nhận 10, đội nhỏ nhất chỉ theo quy luật căn bậc hai từ $\sqrt{N} = 8$, 9 và 11 trở lên, ứng với mức 90%, 95% và 99%. HerdSim cho 8, 9 và 12. Các kết quả còn lại của bài báo là bản đồ màu ([Hình 2](https://doi.org/10.1103/PhysRevResearch.6.L032012)). Đặt cạnh nhau (Hình 13), bản đồ của HerdSim và của bài báo có cùng hình dạng: với bán kính 10, khi ít mục tiêu thì không đội nào đến 25 đạt được, rồi có một ngưỡng rõ, và trên ngưỡng là một dải đội tăng theo căn bậc hai của số mục tiêu; khi thấy mọi thứ, dải đó kéo dài suốt cả khoảng. Có hai khác biệt nhỏ: với bán kính 10 và ít mục tiêu, HerdSim gom được ít hơn bài báo một chút, và đường 0,99 của HerdSim quay lên ở khoảng $\sqrt{N} = 12$, còn của bài báo ở khoảng 10 đến 11.
+   Bài báo chỉ nêu một kết quả dưới dạng số, là ngưỡng trong Bảng I của họ: với bán kính cảm nhận 10, đội nhỏ nhất chỉ theo quy luật căn bậc hai từ $\sqrt{N} = 8$, 9 và 11 trở lên, ứng với mức 90%, 95% và 99%. HerdSim cho 8, 9 và 12, đọc ngưỡng là $\sqrt{N}$ đầu tiên mà từ đó đội nhỏ nhất nhập vào dải căn bậc hai. Các kết quả còn lại của bài báo là bản đồ màu ([Hình 2](https://doi.org/10.1103/PhysRevResearch.6.L032012)). Đặt cạnh nhau (Hình 13), bản đồ của HerdSim và của bài báo có cùng hình dạng: với bán kính 10, khi ít mục tiêu thì không đội nào đến 25 đạt được, rồi có một ngưỡng rõ, và trên ngưỡng là một dải đội tăng theo căn bậc hai của số mục tiêu; khi thấy mọi thứ, dải đó kéo dài suốt cả khoảng. Có hai khác biệt nhỏ: với bán kính 10 và ít mục tiêu, HerdSim gom được ít hơn bài báo một chút, và đường 0,99 của HerdSim quay lên hơi xa hơn về bên phải so với của bài báo.
 
    ![Hình 2 của bài báo cạnh bản đồ của HerdSim](../figures/fig39_lama_maps.png)
 
@@ -532,12 +532,12 @@ Cùng các lượt chạy được đọc theo hai cách:
    Ngay trên ngưỡng, từ 100 đến 196 mục tiêu, hai cách tách nhau:
    - Ở 144 mục tiêu, 11 người chăn gom trung bình 99,2% mục tiêu, nên thống kê của bài báo chấp nhận. Nhưng chỉ 70% số lượt của họ kết thúc với 99% mục tiêu trong đích. Các lượt mất hai trên 144 mục tiêu (98,6%) trộn với các lượt không mất gì vẫn cho trung bình trên 0,99.
    - Quy tắc của HerdSim không chấp nhận 11 người chăn; $D_{\min}$ của nó là khoảng 17–25.
-   - Một mức trung bình có thể che đi những lượt thất bại. Đếm từng lượt thì không, nên gần ngưỡng hai câu trả lời chênh nhau 6 đến 14 người chăn.
+   - Một mức trung bình có thể che đi những lượt thất bại. Đếm từng lượt thì không, nên gần ngưỡng hai câu trả lời chênh nhau, 6 đến 14 người chăn ở 144 mục tiêu và ít hơn ở các mức trên.
 
 ![Mô hình Lama và di Bernardo trong HerdSim](../figures/fig38_lama.png)
 
 **Hình 14: Đội nhỏ nhất theo số mục tiêu trong mô hình của Lama và di Bernardo (2024).**  
-Trái: bán kính cảm nhận 10 (vùng ngưỡng tô xám); phải: thấy mọi thứ. Hình vuông là đội của bài báo như thể hiện trên Hình 2 của bài báo; hình tròn là thống kê của bài báo áp dụng lên các lượt của HerdSim; hình thoi là $D_{\min}$ của HerdSim (thanh là khoảng, tam giác là cận dưới, dấu chéo là không có đội tin cậy đến 25). Khi thấy mọi thứ, hai thống kê trùng nhau. Gần ngưỡng ở bán kính 10, trung bình chấp nhận 11 người chăn ở 144 mục tiêu, trong khi quy tắc của HerdSim cần 17–25.  
+Trái: bán kính cảm nhận 10 (vùng ngưỡng tô xám); phải: thấy mọi thứ. Hình tròn là thống kê của bài báo áp dụng lên các lượt của HerdSim; hình thoi là $D_{\min}$ của HerdSim (thanh là khoảng, tam giác là cận dưới, dấu chéo là không có đội tin cậy đến 25). Khi thấy mọi thứ, hai thống kê trùng nhau. Gần ngưỡng ở bán kính 10, trung bình chấp nhận 11 người chăn ở 144 mục tiêu, trong khi quy tắc của HerdSim cần 17–25.  
 *Dữ liệu:* [results_tables.md: Lama and di Bernardo (2024): gather task](results_tables.md#lama-and-di-bernardo-2024-gather-task).
 
 ---
@@ -545,7 +545,7 @@ Trái: bán kính cảm nhận 10 (vùng ngưỡng tô xám); phải: thấy m�
 ## 4. Xem kỹ hơn: bố cục `split` và các số đo theo từng bước
 
 ### 4.1 Vì sao thêm chó không giúp trên `split`
-Trên bầy `split` ở $N \ge 200$, thêm chó không làm tăng tỷ lệ thành công: ở 6 lần thời gian lùa dưới quy tắc 99%, nó nằm trong khoảng 0,60 đến 0,92 với mọi $D \ge 4$ (0,10–0,76 dưới quy tắc nghiêm ngặt), và ở 3 lần thời gian lùa nó giảm về gần không.
+Trên bầy `split` ở $N \ge 200$, thêm chó không làm tăng tỷ lệ thành công: ở 6 lần thời gian lùa dưới quy tắc 99%, nó nằm trong khoảng 0,60 đến 0,92 với mọi $D \ge 4$ ở $N = 200$ và 400 (0,10–0,76 dưới quy tắc nghiêm ngặt), và ở 3 lần thời gian lùa nó giảm về gần không.
 
 Chạy lại các lượt đã lưu (`cli/diagnostics/split_diagnostic.py`, 12 hạt giống mỗi ô, $N = 200$) chỉ ra hai nguyên nhân:
 
@@ -559,14 +559,14 @@ Chạy lại các lượt đã lưu (`cli/diagnostics/split_diagnostic.py`, 12 h
 ![Đường cong split và các số đo](../figures/fig23_split_curves.png)
 
 **Hình 15: Tỷ lệ thành công trên bầy `split` theo quy mô đội (6 lần thời gian lùa).**  
-Các khung cho `split` ở $N = 100$, 200 và 400, và `wide` ở $N = 400$ để so sánh, với khoảng Clopper–Pearson 99% theo $D$ (thang log). Hình tròn xanh: quy tắc nghiêm ngặt; hình vuông cam: quy tắc 99%; đường chấm: $\theta = 0{,}90$. Trên `wide` tỷ lệ thành công tăng lên 1; trên `split` nó đi ngang dưới ngưỡng.  
+Các khung cho `split` ở $N = 100$, 200 và 400, và `wide` ở $N = 400$ để so sánh, với khoảng Clopper–Pearson 99% theo $D$ (thang log). Hình tròn xanh: quy tắc nghiêm ngặt; hình vuông cam: quy tắc 99%; đường chấm: $\theta = 0{,}90$. Trên `wide` tỷ lệ thành công tăng lên 1; trên `split` ở $N = 200$ và 400 nó đi ngang dưới ngưỡng ($N = 100$ tin cậy dưới cả hai quy tắc).  
 *Dữ liệu:* `results/dmin_m6` và `results/dmin_f99_m6`; giá trị trong [results_tables.md: dmin_m6](results_tables.md#dmin_m6) và [results_tables.md: dmin_f99_m6](results_tables.md#dmin_f99_m6).
 
 ### 4.2 Các số đo theo từng bước
 - **Bầy tản ra thất bại nhiều hơn.**  
   Trên các ô có ít nhất 20 hạt giống ở 6 lần thời gian lùa, tương quan hạng (Spearman) giữa độ trải trung bình của bầy (khoảng cách RMS đến tâm) và tỷ lệ thành công là $-0{,}76$ dưới quy tắc nghiêm ngặt và $-0{,}71$ dưới quy tắc 99% ($-0{,}57$ đến $-0{,}68$ ở 3 lần thời gian lùa).
 - **Các chó đến gần nhau bao nhiêu.**  
-  Với `strombom_multi` trên `wide`, không chó nào có chó khác trong vòng 2 m đến $D = 6$; ở $D = 16$ tỷ lệ là 0,45–0,59 trên các bố cục phân tán. Với FAT nó là 0,56–0,82 từ $D = 2$, vì mọi chó đuổi cùng một con cừu.
+  Với `strombom_multi` trên `wide`, không chó nào có chó khác trong vòng 2 m đến $D = 6$; ở $D = 16$ tỷ lệ là 0,45–0,59 trên các bố cục phân tán. Với FAT nó là 0,45–0,66 ở $D = 2$ và 0,72–0,90 ở $D = 16$ (trung vị qua mọi $N$), vì mọi chó đuổi cùng một con cừu.
 
 ![Các số đo từng lượt](../figures/fig27_metrics.png)
 
@@ -585,7 +585,7 @@ Các khung cho `split` ở $N = 100$, 200 và 400, và `wide` ở $N = 400$ đ�
 
 Các lượt chạy về độ gắn kết (mục 3.11) kiểm tra cách đọc này. Một bầy gắn kết hơn bầy của bài báo hầu như không đổi độ dốc (0,20 trên `wide`, so với 0,20–0,30), trong khi bầy yếu hơn duy nhất mà mô hình tạo được (mỗi con cừu bị hút về một nửa bầy) nâng nó lên 0,40–0,70, một khoảng chứa 0,5. Thời hạn cũng vậy: ở 6 lần thời gian lùa, độ dốc là 0,38–0,61. Độ gắn kết và áp lực thời gian cùng nhau quyết định một bầy nằm ở phía nào của quy luật căn bậc hai.
 
-Mục 3.14 cho phía không gắn kết ngay trong HerdSim. Mô hình của bài báo cho lại quy luật của chính nó: số mũ 0,52–0,53 khi thấy mọi thứ và 0,41–0,42 trên ngưỡng với bán kính cảm nhận 10, theo cả hai thống kê. Cả hai đều cao hơn 0,27–0,38 của bầy Strömbom ở 12 lần thời gian lùa, đúng như cách đọc trên. Hai loạt chạy còn khác nhau về nhiệm vụ và quy tắc người chăn, nên phần chênh lệch do độ gắn kết chưa được đo.
+Mục 3.14 cho phía không gắn kết ngay trong HerdSim. Mô hình của bài báo cho lại quy luật của chính nó: số mũ 0,52–0,53 khi thấy mọi thứ ($N \ge 100$) và 0,41–0,42 với bán kính cảm nhận 10 cho $N \ge 225$, theo cả hai thống kê (gần ngưỡng hơn thì hai thống kê không trùng nhau, như mục 3.14 cho thấy). Cả hai đều cao hơn 0,27–0,38 của bầy Strömbom ở 12 lần thời gian lùa, đúng như cách đọc trên. Hai loạt chạy còn khác nhau về nhiệm vụ và quy tắc người chăn, nên phần chênh lệch do độ gắn kết chưa được đo.
 
 ### 5.2 Các lượt thất bại kết thúc thế nào, và độ trải lúc xuất phát
 
@@ -623,9 +623,9 @@ Mục 3.14 cho phía không gắn kết ngay trong HerdSim. Mô hình của bài
 
 1. **Một bản đồ quy mô đội đã quyết định.** $D_{\min}$ và $D_{\mathrm{sat}}$ qua các quy mô bầy ($N \le 566$, với các lượt chạy đến 3200), bố cục và thời hạn, mỗi ô được quyết định với độ tin cậy 99% hoặc báo cáo dưới dạng khoảng.
 2. **Quy tắc thành công thay đổi câu trả lời.** Dưới quy tắc nghiêm ngặt, con cừu cuối cùng thường quyết định một lượt; quy tắc 99% đo những gì cả đội làm được với bầy.
-3. **Đội tin cậy và đội nhanh là hai đội khác nhau.** Đội nhanh nhất tăng theo $N$ nhanh gấp khoảng đôi đội tin cậy nhỏ nhất, và chó vượt quá nó chỉ thêm chi phí mà không thêm tốc độ.
+3. **Đội tin cậy và đội nhanh là hai đội khác nhau.** Đội nhanh nhất tăng theo $N$ nhanh gấp khoảng một rưỡi đến hai lần đội tin cậy nhỏ nhất, và chó vượt quá nó chỉ thêm chi phí mà không thêm tốc độ.
 4. **Phần nào của quy tắc đội quan trọng.** Công tắc gom/lùa đưa một đội không phối hợp đến $N = 200$; ở $N = 400$ cần phân công.
-5. **Khi nào thêm chó gây hại.** Chó dạng điểm chưa bao giờ làm nhiệm vụ thất bại; chó giữ cách nhau 2 m thì có, trên `outlier_rich` $N = 400$ từ khoảng 9 chó.
+5. **Khi nào thêm chó gây hại.** Chó dạng điểm chưa bao giờ làm nhiệm vụ thất bại trên `wide` hay `outlier_rich` (một chỗ lõm trên `split` ở lưới dày hơn); chó giữ cách nhau 2 m thì có, trên `outlier_rich` $N = 400$ từ khoảng 9 chó.
 6. **Độ gắn kết và quy luật căn bậc hai.** Bầy Strömbom tăng chậm hơn $\sqrt{N}$ ở thời hạn thong thả, và gắn kết yếu hơn đẩy nó về phía 0,5.
 7. **Một giới hạn của quy tắc lùa.** Trên $N \approx 1056$, điểm lùa của Strömbom nằm ngoài khoảng cách phản ứng của cừu; giới hạn nó lại làm việc lùa hoạt động trở lại.
 8. **Cảm nhận và chia sẻ.** Tầm nhìn cục bộ tốn khoảng một chó ở $N = 200$, và chia sẻ với cả đội lấy lại được trên `wide` (không trên `split`).
@@ -638,7 +638,7 @@ Mục 3.14 cho phía không gắn kết ngay trong HerdSim. Mô hình của bài
 
 Dưới đây, một *đơn vị* là một thành viên của đội: một chó, một robot hay một drone. Số đơn vị chính là quy mô đội $D$, nên "một đến ba đơn vị" nghĩa là $D = 1$ đến 3.
 
-- **Định cỡ một đội.** Ở thời hạn thong thả, một đến ba đơn vị xử lý được một bầy phân tán đến 400 con, và một bầy tập trung cần một đơn vị đến $N = 1131$ (hai ở 1600, với điểm lùa bị giới hạn). Thời hạn làm thay đổi câu trả lời gần bằng một bầy lớn gấp bốn, nên hãy chốt thời gian có được trước khi chọn quy mô đội.
+- **Định cỡ một đội.** Ở thời hạn thong thả, một đến ba đơn vị xử lý được một bầy phân tán đến 400 con, và một bầy tập trung cần một đơn vị đến $N = 1131$ (hai ở 1600, với điểm lùa bị giới hạn). Thời hạn làm thay đổi câu trả lời nhiều hơn một bầy lớn gấp bốn, nên hãy chốt thời gian có được trước khi chọn quy mô đội.
 - **Tốc độ tốn hơn độ tin cậy.** Trên `wide` và `outlier_rich`, đội nhanh nhất lớn gấp rưỡi đến hai lần rưỡi đội tối thiểu (nhiều hơn trên `split`), và các đơn vị vượt quá nó chỉ thêm thời gian chạy mà không thêm lợi ích (Bảng 6).
 - **Chỗ mỗi đơn vị chiếm giới hạn đội hữu ích.** Các đơn vị không thể đến gần nhau dưới 2 m làm chật vòng cung sau một bầy `outlier_rich` từ khoảng 9 đơn vị ở $N = 400$.
 - **Chia sẻ bản đồ trước khi thêm đơn vị.** Tầm nhìn cục bộ tốn khoảng một đơn vị ở $N = 200$, và chia sẻ những gì mọi đơn vị thấy đã lấy lại được trên `wide` (không trên `split`).
@@ -661,18 +661,18 @@ Dưới đây, một *đơn vị* là một thành viên của đội: một ch�
 9. **Tốc độ cừu.** Một con cừu Strömbom đang phản ứng luôn đi với 1 m/s, nên thời gian hoàn thành phẳng sau $D_{\mathrm{sat}}$ là hệ quả của mô hình. Cừu Kubo tăng tốc khi bị đẩy mạnh hơn (đến 5 m/s), vì thế thêm chó Kubo vẫn tiếp tục rút ngắn lượt lùa.
 10. **Tái lập trên máy khác.** Chạy lại cho kết quả chính xác trên cùng một máy, với các phiên bản phụ thuộc đã khóa (`uv.lock`) và một luồng BLAS mỗi tiến trình. Trên CPU khác, các bit cuối của phép tính dấu phẩy động có thể khác, có thể làm đổi kết quả của những lượt hiếm kết thúc sát thời hạn.
 11. **Xem kết quả giữa các lô.** Độ tin cậy được quyết định sau mỗi lô 10 hạt giống. Khoảng Clopper–Pearson thận trọng và một ô tin cậy cần ít nhất 51 lượt thành công liên tiếp, nhưng việc xem nhiều lần không được hiệu chỉnh, nên độ tin cậy 99% của một quyết định chỉ là gần đúng.
-12. **Mô hình Lama và di Bernardo được dựng lại từ văn bản bài báo**; không có mã nguồn công bố. Ở những chỗ văn bản không nói, HerdSim chọn và ghi rõ (lực đẩy hướng ra xa người chăn; một lượt kết thúc khi mọi người chăn ở trong đích và không ai thấy mục tiêu nào bên ngoài; mục tiêu và người chăn được di chuyển từ cùng một trạng thái). Mục 3.14 chỉ so bằng số với Bảng I của bài báo và so phần còn lại với hình của bài báo bằng cách đặt cạnh nhau.
+12. **Mô hình Lama và di Bernardo được dựng lại từ văn bản bài báo**; không có mã nguồn công bố. Ở những chỗ văn bản không nói, HerdSim chọn và ghi rõ (lực đẩy hướng ra xa người chăn; một lượt kết thúc khi mọi người chăn ở trong đích và không ai thấy mục tiêu nào bên ngoài; mục tiêu và người chăn được di chuyển từ cùng một trạng thái). Mục 3.14 chỉ so bằng số với Bảng I của bài báo và so phần còn lại với hình của bài báo bằng mắt.
 
 ---
 
 ## 7. Kết luận và hướng tiếp theo
 
-Qua 367.150 lượt trong 39 giao thức, HerdSim lập bản đồ đội tin cậy nhỏ nhất $D_{\min}$, đội mà vượt quá nó thêm chó không còn giúp ($D_{\mathrm{sat}}$), và những tình huống mà thêm chó gây hại. Một bầy tập trung cần một chó đến $N = 1131$ (với điểm lùa bị giới hạn trên 1056). Trên bầy phân tán, đội nhỏ nhất tăng chậm hơn bầy, với độ dốc 0,27–0,38 ở 12 lần thời gian lùa và 0,38–0,61 ở 6 lần, trong khi đội nhanh nhất tăng nhanh gấp khoảng đôi. Dưới quy tắc nghiêm ngặt, con cừu cuối cùng quyết định; dưới quy tắc 99%, câu trả lời giữ nguyên khi đổi thiết lập. Phối hợp quan trọng ở bầy lớn. Thêm chó dạng điểm chưa bao giờ làm nhiệm vụ thất bại trên `wide` hay `outlier_rich` nhưng làm chậm `split`, còn chó chiếm chỗ thì có gây thất bại. Bản thân quy tắc lùa của Strömbom ngừng hoạt động trên khoảng một nghìn con. Chạy trong cùng bộ mô phỏng, các mục tiêu không gắn kết của Lama và di Bernardo theo đúng quy luật căn bậc hai của họ, cả dưới quy tắc tin cậy của HerdSim, trừ gần ngưỡng của họ, nơi một mức trung bình 0,99 che đi những lượt sót mục tiêu.
+Qua 367.150 lượt trong 39 giao thức, HerdSim lập bản đồ đội tin cậy nhỏ nhất $D_{\min}$, đội mà vượt quá nó thêm chó không còn giúp ($D_{\mathrm{sat}}$), và những tình huống mà thêm chó gây hại. Một bầy tập trung cần một chó đến $N = 1131$ (với điểm lùa bị giới hạn trên 1056). Trên bầy phân tán, đội nhỏ nhất tăng chậm hơn bầy, với độ dốc 0,27–0,38 ở 12 lần thời gian lùa và 0,38–0,61 ở 6 lần, trong khi đội nhanh nhất tăng nhanh gấp khoảng một rưỡi đến hai lần. Dưới quy tắc nghiêm ngặt, con cừu cuối cùng quyết định; dưới quy tắc 99%, câu trả lời giữ nguyên khi đổi thiết lập. Phối hợp quan trọng ở bầy lớn. Thêm chó dạng điểm chưa bao giờ làm nhiệm vụ thất bại trên `wide` hay `outlier_rich` nhưng làm chậm `split`, còn chó chiếm chỗ thì có gây thất bại. Bản thân quy tắc lùa của Strömbom ngừng hoạt động trên khoảng một nghìn con. Chạy trong cùng bộ mô phỏng, các mục tiêu không gắn kết của Lama và di Bernardo theo đúng quy luật căn bậc hai của họ, cả dưới quy tắc tin cậy của HerdSim, trừ gần ngưỡng của họ, nơi một mức trung bình 0,99 che đi những lượt sót mục tiêu.
 
 ### Hướng tiếp theo
 
 1. **Phân công có nhìn thấy cụm.** Trên `split`, phân công chó sao cho mỗi cụm đều có chó, thay vì chỉ theo tổng quãng đường.
-2. **Giữ bầy có cổng.** Thử giữ bầy trong một chuồng đóng thay vì cho chó lùi ra ngoài trời, xem bầy nhỏ có giữ được không.
+2. **Giữ bầy có cổng.** Thử giữ bầy trong một chuồng đóng thay vì cho chó lùi ra khoảng trống, xem bầy nhỏ có giữ được không.
 3. **Chỉ cảm nhận hướng.** Cho chó cảm nhận hướng tới một con cừu mà không biết khoảng cách, như một camera trên drone.
 4. **Ghép chéo hai mô hình trên một nhiệm vụ.** Chạy quy tắc đội của Strömbom trên các mục tiêu của Lama trong nhiệm vụ gom, và người chăn của Lama trên cừu Strömbom, để tách chênh lệch số mũ ở mục 3.14 thành phần do độ gắn kết và phần do quy tắc người chăn và nhiệm vụ. Mỗi quy tắc đọc những đại lượng mà phía kia không có (quy tắc đội đọc khoảng cách gom, vô nghĩa khi không có gắn kết; người chăn đọc khoảng cách đến một đích mà trong nhiệm vụ lùa nằm xa bầy), nên mỗi cách ghép cần thiết kế riêng trước.
 5. **Dữ liệu thực địa với nhiều chó.** Hợp tác với các nhà nghiên cứu chăn nuôi để thu dữ liệu GPS khi chăn bằng nhiều chó hoặc drone, nhằm kiểm tra cừu thật có chạy mạnh hơn khi gặp nhiều chó không.
@@ -704,6 +704,8 @@ Mọi lượt chạy và quyết định của từng ô được lưu trong `re
 ---
 
 ## Phụ lục A: Nhật ký chạy giao thức
+
+Lượt, ô và quyết định là tổng hiện tại của các thư mục; giờ là của lượt chạy đầu của mỗi giao thức (giờ chạy tiếp được liệt kê dưới bảng).
 
 | Giao thức | Lượt | Ô | Đã quyết định | Còn mở ở 200 lượt | Lỗi | Giờ |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -768,7 +770,7 @@ Chạy lại chẩn đoán: 164 lượt về áp lực và 768 lượt về `spl
 | Bố cục xuất phát | `sim/core/world/layouts.py` (`compact`, `wide`, `split`, `outlier_rich`). |
 | Dòng ngẫu nhiên | Hạt giống $i$ của mọi ô là `master_seed + i`; mỗi lượt có các dòng riêng cho bố cục xuất phát, cho cừu và cho chó, nên các ô cùng hạt giống xuất phát từ cùng một bầy. |
 | Phần cứng | Máy trạm Linux, 20 worker (`--workers 20`). |
-| Dữ liệu thô | 367.150 dòng lượt chạy trong `results/<protocol>/trials.jsonl`, kèm bản `trials.csv`. |
+| Dữ liệu thô | 367.150 dòng lượt chạy trong `results/<protocol>/trials.csv`; `trials.jsonl` giữ cùng các dòng đó cộng thêm 100 lượt $N = 3200$ không được tính của `dmin_f99_big_cap`. |
 | Chạy nghiên cứu | `uv run cli/campaign.py run --protocol <id>` và `uv run cli/run_queue.py`. |
 | Các bảng | `cli/dmin_tables.py` dựng [results_tables.md](results_tables.md) từ các thư mục kết quả. |
 | Kiểm thử | `make test` chạy 330 kiểm thử đơn vị, bất biến và hồi quy; `make bench` chạy 23 chiến dịch thu nhỏ. |

@@ -44,7 +44,7 @@ A flock of 400 sheep covers much more ground than a flock of 25. If both were ru
 HerdSim therefore sizes the field, the goal and the drive from the flock's own size, and has no walls at all.
 
 ![Task geometry and physical scaling](../../docs/figures/fig6_task_geometry.png)
-*Figure 1: Task geometry drawn to scale. Left: the field at* $N = 200$ *sheep. Middle: how the drive distance* $l$ *grows with the flock radius. Right: the calibrated flock radius* $R_f(N)$ *and the goal radius across flock sizes.*
+*Figure 1: Task geometry drawn to scale. Left: the field at* $N = 200$ *sheep. Middle: the drive distance* $l$ *against* $N$*, the largest of its three terms. Right: the calibrated flock radius* $R_f(N)$ *and the goal radius across flock sizes.*
 
 ### Sizing by the Calibrated Flock Radius $R_f(N)$
 
@@ -55,7 +55,7 @@ Every length of the drive task is a multiple of the **calibrated flock radius $R
 | **Flock radius** $R_f(N)$ | Calibrated (for example $6.2$ m at $N = 25$, $11.4$ m at $N = 400$) | The size of an $N$-sheep flock under one driving dog. |
 | **Drive distance** $l$ | $\max(13\,R_f(N),\ 80,\ l_{\mathrm{reach}} + R_{\mathrm{goal}} + R_f)$ | Larger flocks are driven farther; the goal never overlaps a start ($l_{\mathrm{reach}}$ is the farthest any sheep can start, over every layout of the protocol). |
 | **Goal radius** $R_{\mathrm{goal}}$ | $1.9\,R_f(N)$ | The goal holds the settled flock with the same margin at every $N$. |
-| **Field clearance** | $80$ m around the start | Only places the start; nothing stops the animals there. |
+| **Field clearance** | $80$ m around everything placed at the start (flock, dog stations, goal) | Only sizes the field; nothing stops the animals there. |
 | **Boundary** | None | Animals can move anywhere, as in Strömbom et al. (2014) and Kubo et al. (2022). |
 
 ### Deadlines in Drive Times
@@ -68,7 +68,7 @@ $$
 T_{\mathrm{drive}} = \frac{l}{v_{\mathrm{sheep,max}}}
 $$
 
-A compact flock driven by one dog finishes in about $1.44$ to $1.74\,T_{\mathrm{drive}}$. The main protocols use three deadlines:
+A compact flock driven by one dog finishes in about $1.46$ to $1.74\,T_{\mathrm{drive}}$. The main protocols use three deadlines:
 - **Loose ($12\,T_{\mathrm{drive}}$):** plenty of time; one dog can bring strays back one after another.
 - **Middle ($6\,T_{\mathrm{drive}}$).**
 - **Tight ($3\,T_{\mathrm{drive}}$):** bringing strays back one by one is too slow; several dogs must work at once.
@@ -132,7 +132,7 @@ The first dog circle lies $30$ m (`dog_start_gap`) beyond the farthest point any
 ![Shepherd release configurations](../../docs/figures/fig8_dog_starts.png)
 *Figure 3: Dog starts. Top: the default arcs for* $D = 1$ *to* $64$ *behind an* $N = 100$ *flock. Bottom: arcs, ring and handler start compared at* $N = 200$ *with* $D = 8$ *dogs.*
 
-- **`arcs` (default):** half circles behind the flock, on the side away from the goal, with the dogs spread evenly over each; one dog starts on the drive axis.
+- **`arcs` (default):** half circles behind the flock, on the side away from the goal, with the dogs spread evenly over each; one dog starts on the drive axis when the count is odd.
 - **`ring`:** full circles round the flock, leaving out the cone that holds the goal.
 - **`handler`:** every dog at one point straight behind the flock, as if released from a handler's post.
 
@@ -166,18 +166,18 @@ Each cell starts with a batch of 10 seeds. After each batch HerdSim computes the
 - **Undecided:** otherwise the cell gets another batch of 10, up to 200.
 
 ![Sequential Refinement and Early Stopping](../../docs/figures/fig_adaptive_1_refinement.png)
-*Figure 4: Stopping early. Clear failures stop after 10 to 20 seeds, clear successes after 60; only cells near the threshold continue toward 200.*
+*Figure 4: Stopping early. Clear failures stop after 10 to 20 seeds; clear successes once 51 successes in a row are in, at the end of the 60-trial batch; only cells near the threshold continue toward 200.*
 
 ### Midpoint Densification
 
-When two neighbouring dog counts on a curve fall in different zones (for example $D = 2$ unreliable and $D = 4$ reliable) and are more than `refine_min_gap` apart, the next round adds the count halfway between ($D = 3$). $D_{\min}$ is then found without testing every count.
+When two neighbouring dog counts on a curve fall in different zones (different reliability when finish times are not decided; for example $D = 2$ unreliable and $D = 4$ reliable) and are more than `refine_min_gap` apart, the next round adds the count halfway between ($D = 3$). $D_{\min}$ is then found without testing every count.
 
 ![Adaptive Grid Densification](../../docs/figures/fig_adaptive_2_densification.png)
 *Figure 5: Midpoint densification. A change of zone between* $D = 2$ *and* $D = 4$ *adds* $D = 3$ *to the next round.*
 
 ### Pruning Above Saturation
 
-Above a confirmed $D_{\mathrm{sat}}$, a cell gets no more seeds when its dogs were copies of each other: when, on average, at least 90% of its dogs had another dog within 2 m (`prune_overlap`), and the cell is neither slower than $D_{\mathrm{best}}$ nor unreliable. Such cells are marked **pruned** in `frontier_cells.csv`.
+Above the first cell beyond a confirmed $D_{\mathrm{sat}}$ that is itself saturated, a cell gets no more seeds when its dogs were copies of each other: when, on average, at least 90% of its dogs had another dog within 2 m (`prune_overlap`), and the cell is neither slower than $D_{\mathrm{best}}$ nor unreliable. Such cells are marked **pruned** in `frontier_cells.csv`.
 
 ![Saturation and Overlap Pruning](../../docs/figures/fig_adaptive_3_pruning.png)
 *Figure 6: Pruning. Above saturation, cells whose dogs overlap (at least 0.90) get no more seeds.*
@@ -205,8 +205,8 @@ Every finished trial is appended to `trials.jsonl` at once. A run can be stopped
 | :--- | :--- | :--- |
 | **Main grids and sensitivity** | $25$ to $400$ | At $N \le 50$ every layout needs one dog at every deadline, so smaller sizes add nothing. $N = 400$ was the largest calibrated size when the first study ran. |
 | **Added sizes** | $71, 141, 283, 566$ | Steps of $\sqrt{2}$, so each size has the same weight in a log-log fit. $566 = 400\sqrt{2}$ is the last such step below about $N = 600$, above which a loose start no longer settles to the same flock size. |
-| **Kubo model** | $25$ to $100$ | The Kubo flock packs to a radius of about $5.8$ m at any $N$, so larger $N$ only makes it denser. |
-| **Sensing range** | $50$ to $200$ | At $N = 400$ the collect distance ($109$ m) is larger than the sheep's reaction distance ($65$ m), the top of the realistic sensing ranges tested. |
+| **Kubo model** | $25$ to $100$ | The Kubo flock packs to a radius of about $6$ m ($5.9$ to $6.2$) at any $N$, so larger $N$ only makes it denser. |
+| **Sensing range** | $50$ to $200$ | The ranges tested, 15 to 100 m, bracket the sheep's reaction distance ($65$ m). The flock sizes stop at 200, where the collect distance $f(N) = 68$ m already exceeds that distance. |
 | **Gather task (`lama`)** | $1$ to $400$ targets, perfect squares | The paper's cells up to $\sqrt{N} = 20$; its axis runs to 25. That range holds the threshold of its Table I ($\sqrt{N} = 8$ to 11) and the square-root rise above it, which are the results compared (section 6). The five larger sizes would about double the run time and add nothing to the check. |
 | **Large $N$** | $566$ to $3200$ | Tests large flocks at an imposed density, and the limit where the paper's drive point passes the sheep's reaction distance ($N \approx 1056$). |
 
@@ -246,7 +246,7 @@ The finish-time values use the working range: the reliable $D$ from $D_{\min}$ u
 | **$D_{\min}$** | Smallest reliable $D$ ($L \ge 0.90$). |
 | **$D_{\mathrm{overcrowd}}$** | Smallest $D$ above $D_{\min}$ where it and the next tested $D$ are both unreliable. |
 | **$D_{\max}$** | Largest reliable $D$ below $D_{\mathrm{overcrowd}}$ (or the largest reliable $D$). |
-| **$D_{\mathrm{best}}$** | Smallest working $D$ that is not slower than the fastest working $D$. |
+| **$D_{\mathrm{best}}$** | Smallest working $D$ whose paired comparison with the fastest working $D$ is decided same or faster. |
 | **$D_{\mathrm{sat}}$** | Smallest working $D$ that no larger working $D$ is faster than. |
 | **$D_{\mathrm{crowd}}$** | Smallest working $D$ above $D_{\mathrm{best}}$ that is slower than $D_{\mathrm{best}}$. |
 
@@ -271,9 +271,9 @@ Over the six main protocols, 70% to 91% of failed trials end far from the goal (
 
 ### When More Dogs Hurt
 
-Point dogs never made the drive fail in the main runs. Two settings were tested where extra dogs might get in each other's way:
+Point dogs never made the drive fail on `wide` or `outlier_rich` in the main runs (on `split` a few cells above $D_{\min}$ are unreliable, section 4 of the report). Two settings were tested where extra dogs might get in each other's way:
 - **Dogs that take up room:** with no dog allowed within 2 m of another, a dog whose step would end that close does not move that tick. On `outlier_rich` $N = 400$ in the holding task, every team from 9 dogs up is unreliable (success 0.77 at $D = 9$, 0.50 at $D = 16$). The arc behind the flock holds about 12 dogs at that spacing.
-- **Holding small flocks:** holding fails at $N \le 50$, but because the dogs withdraw 67 m from a goal only 12 to 14 m across and the sheep wander out, not because of the number of dogs.
+- **Holding small flocks:** holding fails at $N \le 50$, but because the dogs withdraw to 67 m beyond the farthest sheep, from a goal of radius only 12 to 14 m, and the sheep wander out, not because of the number of dogs.
 
 ---
 

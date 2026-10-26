@@ -7,7 +7,7 @@ The paper integrates targets and herders from the same state at time t. HerdSim'
 moves the sheep first and the dogs after, so the step keeps the targets' positions from
 before it moved them in ``state.metadata[TARGETS_AT_TICK_START]``, and the Lama herders
 read those. With herders reading the moved targets instead, a team of 16 gathered 400
-targets where the paper needs 18; with the paper's order, 17.
+targets; with the paper's order, 17.
 
 ``prepare`` checks the whole parameter set, the herders' side included, because the paper's
 assumption v_H > v_T ties the two sides together.

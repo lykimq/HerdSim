@@ -881,21 +881,11 @@ def fig_view() -> None:
     plt.close(fig)
 
 
-# The paper's N* at sqrt(M) = 2 to 20 (Lama and di Bernardo 2024, Fig. 2b and 2a, R = 50,
-# chi* = 0.99), read cell by cell from the figure's embedded raster through its own colour bar:
-# the smallest N from which every larger N has chi >= 0.99. None: no N up to 25 reaches it, or
-# (sqrt(M) = 11 at sensing 10) the column is covered by the drawn M_low line. Its grid starts at
-# N = 2, so a 2 there means "2 or fewer".
-PAPER_NSTAR = {
-    "lama_r50": [None, None, None, None, None, None, None, None, 19, None, 11, 12, 13, 14, 15, 16,
-                 17, 17, 18],
-    "lama_r50_inf": [2, 3, 4, 5, 6, 6, 7, 8, 9, 10, 11, 12, 12, 13, 14, 15, 16, 17, 18],
-}
-
-
 def fig_lama() -> None:
-    """The Lama and di Bernardo model in HerdSim against the paper: the smallest team per number
-    of targets, under the paper's statistic and under HerdSim's reliability rule."""
+    """The Lama and di Bernardo model in HerdSim: the smallest team per number of targets,
+    under the paper's statistic and under HerdSim's reliability rule. The paper's own values
+    are not drawn: it states only the thresholds of its Table I as numbers, and its maps are
+    compared by eye in fig_lama_maps."""
     if not have("lama_r50", "lama_r50_inf"):
         return
     from analysis.dmin_tables import bracket
@@ -904,10 +894,6 @@ def fig_lama() -> None:
     fig, axes = plt.subplots(1, 2, figsize=(11, 4.4), sharey=True)
     for ax, name, title in ((axes[0], "lama_r50", "sensing radius 10"),
                             (axes[1], "lama_r50_inf", "sensing infinite")):
-        k = np.arange(2, 21)
-        paper = PAPER_NSTAR[name]
-        ax.plot([x for x, v in zip(k, paper) if v], [v for v in paper if v], marker="s", ls="",
-                mfc=SURFACE, mec=INK, ms=7, label="paper, Fig. 2 (mean share >= 0.99)")
         ours = paper_nstar(trials(name), (0.99,))
         ok = ours["nstar_0.99"].notna()
         ax.plot(ours.loc[ok, "sqrt_n"] - 0.12, ours.loc[ok, "nstar_0.99"], marker="o", ls="",
@@ -939,7 +925,7 @@ def fig_lama() -> None:
     axes[1].legend(frameon=False, fontsize=8, loc="upper left")
     fig.tight_layout(rect=(0, 0.05, 1, 1))
     fig.text(0.5, 0.01, "lama_r50 and lama_r50_inf: gather task, R = 50, goal R/5, 99 percent of the "
-             "targets, 5000 s. Paper values read from its Fig. 2 raster.", ha="center", fontsize=8,
+             "targets, 5000 s.", ha="center", fontsize=8,
              color=MUTED)
     fig.savefig(OUT / "fig38_lama.png", dpi=150)
     plt.close(fig)

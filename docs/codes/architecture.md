@@ -92,7 +92,7 @@ Each plugin owns what is specific to it. A sheep model checks its own parameters
 
 ### Each setting has one source
 
-Task setup comes only from the protocol and the canonical defaults. Behaviour parameters come only from the method definition. Plugins keep no fallback copies of either, and every canonical value carries a note saying where its number comes from.
+Task setup comes only from the protocol and the canonical defaults. Behaviour parameters come only from the method definition. Plugins keep no fallback copies of either, apart from two zero defaults that mean off, and every canonical value carries a note saying where its number comes from.
 
 *Why:* when the same number lives in several places, changing it means finding every copy, and a missed copy changes results without anyone noticing. With one source, a protocol that leaves out a setting fails at the start of the run instead of quietly picking up an old default.
 
@@ -184,7 +184,7 @@ Metrics are recorded every tick by default; a protocol may record every k-th tic
 
 ### Results are evidence; the rules only read them
 
-The campaign layer writes results. The frontier rules never run the simulation, they only read rows. Every generated file carries a notice saying it is machine-written.
+The campaign layer writes results. The frontier rules never run the simulation, they only read rows. Every generated text file carries a notice saying it is machine-written.
 
 *Why:* thresholds and comparisons can then be redone in seconds without re-simulating, and the rules can never silently produce new data.
 

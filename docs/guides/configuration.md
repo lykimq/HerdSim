@@ -44,7 +44,7 @@ The model parameters are not in this file. They live with each method in code, o
 
 ### Protocol Overrides
 
-A protocol names its id, its output folder, the methods with their time limits, and the grid. It can `extends` another protocol and give only what differs. Any canonical value it names replaces the default; an unknown key stops the run at load.
+A protocol names its id, its output folder, the methods with their time limits, and the grid. It can `extends` another protocol and give only what differs. Any canonical value it names replaces the default; an unknown key stops the run at load. Two further keys appear in a few protocols: `factors` sweeps one setting over several values, each value getting its own curves (`dmin_f99_view_range.yaml`), and a method's `calibrate_as` names another method whose single dog settles the flock for the radius calibration (`dmin_fat.yaml`; it enters the physics hash).
 
 A full protocol (`dmin_m12.yaml`, trimmed):
 
@@ -70,7 +70,10 @@ output: results/dmin_f99_m6
 extends: dmin_m6.yaml           # dmin_m6 extends dmin_m12 and sets the 6x deadline
 
 success_fraction: 0.99          # 99% of the flock inside the goal (1.0: every sheep)
+decide_finish_times: true       # also spend seeds until the finish-time ranking is decided
 ```
+
+The real file also lists nine flock sizes. `decide_finish_times` (canonical default false) changes where a run spends its seeds, so a rerun that leaves it out reproduces the decisions but not the seed counts.
 
 A protocol on the gather task with a method parameter changed (`lama_r50_inf.yaml`):
 

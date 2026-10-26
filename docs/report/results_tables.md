@@ -1,6 +1,6 @@
 # Result tables (generated)
 
-Generated 2026-10-22 15:04 by cli/dmin_tables.py from results/. Do not edit by hand; rerun the commands. Entries are D_min as decided; "3-8" means D = 8 is the smallest reliable D but a D from 3 up is still undecided, so the true D_min lies in [3, 8]; [n] is a curve with no reliable D yet whose D_min_low is n; "none on grid" means every D up to the grid top is decided unreliable. Strict = every sheep inside the goal; f99 = 99 percent of the sheep inside (ceil(0.99 N), so the two rules coincide at N <= 50). Trial counts include the top-up of 2026-10-22.
+Generated 2026-10-22 15:04 by cli/dmin_tables.py from results/. Do not edit by hand; rerun the commands. Entries are D_min as decided; "3-8" means D = 8 is the smallest reliable D but a D from 3 up is still undecided, so the true D_min lies in [3, 8]; [n] is a curve with no reliable D yet whose D_min_low is n; "none on grid" means every D up to the grid top is decided unreliable. Strict = every sheep inside the goal; f99 = 99 percent of the sheep inside (ceil(0.99 N), so the two rules coincide at N <= 71). The Runs table was regenerated on 2026-10-26. The dmin_f99_m12 and dmin_f99_m6 tables in this first section are from 2026-10-22, on the five original flock sizes, before those two folders were resumed with four added sizes; their current tables are in the section "Finish-time top-up, densified N, independent shepherds, Kubo to D = 24, 99 percent" below, and the D_min values of the five original sizes did not change. The dmin_f99_m6 dips table and the dmin_f99_m3 D_sat table were regenerated on 2026-10-26.
 
 ## Runs
 
@@ -17,9 +17,9 @@ Generated 2026-10-22 15:04 by cli/dmin_tables.py from results/. Do not edit by h
 | dmin_s_dogspeed | 2026-10-20 19:30:32 | 2620 | 50 | 1 | 1 | 0 | 0.113 | 20 | ran |
 | dmin_s_gap | 2026-10-20 20:05:21 | 12880 | 161 | 28 | 28 | 0 | 0.58 | 20 | ran |
 | dmin_kubo | 2026-10-20 20:10:24 | 1080 | 18 | 0 | 0 | 0 | 0.084 | 20 | ran |
-| dmin_f99_m6 | 2026-10-20 20:40:21 | 14240 | 191 | 17 | 17 | 0 | 0.492 | 20 | ran |
-| dmin_f99_m3 | 2026-10-20 20:56:31 | 11140 | 185 | 8 | 8 | 0 | 0.269 | 20 | ran |
-| dmin_f99_m12 | 2026-10-20 21:20:51 | 11100 | 180 | 2 | 2 | 0 | 0.405 | 20 | ran |
+| dmin_f99_m6 | 2026-10-20 20:40:21 | 31920 | 354 | 58 | 58 | 0 | 0.492 | 20 | ran |
+| dmin_f99_m3 | 2026-10-20 20:56:31 | 11740 | 185 | 10 | 10 | 0 | 0.269 | 20 | ran |
+| dmin_f99_m12 | 2026-10-20 21:20:51 | 31590 | 349 | 53 | 53 | 0 | 0.405 | 20 | ran |
 | dmin_f99_s_base | 2026-10-20 21:31:10 | 3360 | 48 | 2 | 2 | 0 | 0.164 | 20 | ran |
 | dmin_f99_s_matched | 2026-10-20 21:40:34 | 3980 | 50 | 4 | 4 | 0 | 0.157 | 20 | ran |
 | dmin_f99_s_dogspeed | 2026-10-21 10:57:17 | 3110 | 48 | 3 | 3 | 0 | 0.159 | 20 | ran |
@@ -29,6 +29,23 @@ Generated 2026-10-22 15:04 by cli/dmin_tables.py from results/. Do not edit by h
 | dmin_f99_s_gap | 2026-10-22 13:23:47 | 11740 | 151 | 16 | 16 | 0 | 0.578 | 20 | ran |
 | dmin_fat | 2026-10-22 13:36:46 | 8660 | 181 | 2 | 2 | 0 | 0.217 | 20 | ran |
 | dmin_f99_fat | 2026-10-22 13:50:43 | 8670 | 184 | 1 | 1 | 0 | 0.232 | 20 | ran |
+| dmin_f99_indep | 2026-10-23 14:28:19 | 12990 | 181 | 18 | 18 | 0 | 0.298 | 20 | ran |
+| dmin_f99_kubo | 2026-10-23 14:38:51 | 3260 | 38 | 6 | 6 | 0 | 0.175 | 20 | ran |
+| dmin_f99_hold | 2026-10-23 19:20:55 | 14280 | 280 | 18 | 18 | 0 | 0.739 | 20 | ran |
+| dmin_f99_hold_spacing | 2026-10-24 02:43:34 | 13930 | 283 | 19 | 19 | 0 | 0.704 | 20 | ran |
+| dmin_f99_c1.3 | 2026-10-23 20:27:27 | 10800 | 180 | 1 | 1 | 0 | 0.313 | 20 | ran |
+| dmin_f99_c1.6 | 2026-10-23 20:44:32 | 10830 | 180 | 0 | 0 | 0 | 0.285 | 20 | ran |
+| dmin_f99_c2.0 | 2026-10-23 21:09:10 | 10780 | 180 | 0 | 0 | 0 | 0.41 | 20 | ran |
+| dmin_f99_k05 | 2026-10-24 05:01:04 | 11630 | 149 | 14 | 14 | 0 | 2.286 | 20 | ran |
+| dmin_f99_view_range | 2026-10-23 21:41:21 | 21040 | 293 | 27 | 27 | 0 | 0.534 | 20 | ran |
+| dmin_f99_view_comm | 2026-10-23 21:53:08 | 6890 | 102 | 3 | 3 | 0 | 0.196 | 20 | ran |
+| dmin_f99_big | 2026-10-24 01:00:04 | 2230 | 84 | 1 | 1 | 0 | 3.116 | 20 | ran |
+| dmin_f99_big_dense | 2026-10-24 01:43:58 | 1320 | 15 | 2 | 2 | 0 | 0.732 | 20 | ran |
+| dmin_f99_big_loose | 2026-10-24 01:59:38 | 830 | 14 | 1 | 1 | 0 | 0.261 | 20 | ran |
+| lama_r50 | 2026-10-26 04:06:38 | 17660 | 500 | 23 | 23 | 0 | 6.529 | 20 | ran |
+| lama_r50_inf | 2026-10-26 10:34:34 | 22620 | 500 | 1 | 1 | 0 | 6.466 | 20 | ran |
+
+Trial and cell counts are the folders' totals as of 2026-10-26; "finished" is the end of the first run of each protocol, so the three resumed folders (dmin_f99_m12 and dmin_f99_m6 on 2026-10-23, dmin_f99_m3 on 2026-10-24) show their final counts beside their first finish. Four folders in results/ are not in the queue and so not in this table: dmin_pilot (a one-batch pilot before the study), dmin_s_ring_dog_in_goal (the first dmin_s_ring run, kept as it was), dmin_f99_hold_spacing_soft (the archived soft spacing rule, see the follow-up section) and dmin_f99_big_cap (run outside the queue, its tables are in the last section). results/diagnostics holds the CSVs of the two replay tools.
 
 ## D_min by layout and N, strict success
 
@@ -234,9 +251,11 @@ Spread of D_min in doublings: between layouts at one N 0.33, between N at one la
 
 (no rows) 
 
-### dmin_f99_m6: 0 cells above D_min that are not reliable
+### dmin_f99_m6: 1 cells above D_min that are not reliable
 
-(no rows) 
+| layout | n | d | d_min | success_rate | seeds | zone |
+|---|---|---|---|---|---|---|
+| split | 141 | 4 | 1 | 0.8 | 110 | unreliable_dip | 
 
 ### dmin_f99_m3: 0 cells above D_min that are not reliable
 
@@ -351,7 +370,7 @@ Spread of D_min in doublings: between layouts at one N 0.33, between N at one la
 
 ## D_sat, effort, zones and methods, 99 percent
 
-Generated 2026-10-23 13:46 by cli/dmin_tables.py (verbs dsat, effort, zones, methods) and cli/diagnostics/pressure_replay.py. D_sat entries: "3" decided; "3-24" means a larger reliable D is still open against D = 3, so the true D_sat lies between 3 and D_max (the 99 percent folders ran with decide_finish_times false); "[n]" means the curve still improves at the top of its grid. In the effort table, ratios are medians over successful seeds relative to the D_sat cell (low end where open): time = finish time, dog_time = D x finish ticks, path = total dog path; "double" is the smallest reliable D at or above 2 D_sat, "top" the largest working D.
+Generated 2026-10-23 13:46 by cli/dmin_tables.py (verbs dsat, effort, zones, methods) and cli/diagnostics/pressure_replay.py, before dmin_f99_m12 and dmin_f99_m6 were resumed; their current D_sat, effort, zones and methods tables are in the next section. The dmin_f99_m3 D_sat table was regenerated on 2026-10-26 after that folder's own resume. D_sat entries: "3" decided; "3-24" means a larger reliable D is still open against D = 3, so the true D_sat lies between 3 and D_max (the 99 percent folders ran with decide_finish_times false); "[n]" means the curve still improves at the top of its grid. In the effort table, ratios are medians over successful seeds relative to the D_sat cell (low end where open): time = finish time, dog_time = D x finish ticks, path = total dog path; "double" is the smallest reliable D at or above 2 D_sat, "top" the largest working D.
 
 ### D_sat, dmin_f99_m12: D_sat
 
@@ -390,16 +409,16 @@ Generated 2026-10-23 13:46 by cli/dmin_tables.py (verbs dsat, effort, zones, met
 | layout | 25 | 50 | 100 | 200 | 400 |
 |---|---|---|---|---|---|
 | compact | 1 | 1 | 1 | 1 | 1 |
-| wide | 1 | 1 | 2 | 3-24 | 6 |
-| split | 1 | 1 | 2-24 | - | - |
+| wide | 1 | 1 | 2 | 3 | 6 |
+| split | 1 | 1 | 4 | - | - |
 | outlier_rich | 1 | 1-24 | 3 | 10 | - | 
 
 | layout | slope_range | n_used | n_left_out |
 |---|---|---|---|
 | compact | 0 (flat) | 25 50 100 200 400 | - |
 | outlier_rich | 0.70 to 1.16 | 25 50 100 200 | 400 |
-| split | 0.50 to 2.29 | 25 50 100 | 200 400 |
-| wide | 0.68 to 0.98 | 25 50 100 200 400 | - | 
+| split | 1.00 to 1.00 | 25 50 100 | 200 400 |
+| wide | 0.68 to 0.68 | 25 50 100 200 400 | - | 
 
 ### Effort, dmin_f99_m12: cost of dogs beyond D_sat, relative to the D_sat cell
 
@@ -549,7 +568,7 @@ flight = a dog closer than r_s = 65; close = a dog closer than the dog stop dist
 
 ## Finish-time top-up, densified N, independent shepherds, Kubo to D = 24, 99 percent
 
-Generated 2026-10-23 18:37 by cli/dmin_tables.py. dmin_f99_m12 and dmin_f99_m6 were resumed with decide_finish_times true and the flock sizes 71, 141, 283, 566 added (N above 50 is then spaced by sqrt 2; every added size calibrates cleanly, the edge of the model lies between 600 and 630). dmin_f99_m3 is resumed later. D_sat entries as in the D_sat, effort, zones and methods section. Fits: interval-censored maximum likelihood of a power law and a saturating curve to the D_min brackets; the last two columns give the range of D that every curve of each shape passing through all the brackets allows at N = 1600 and 3200.
+Generated 2026-10-23 18:37 by cli/dmin_tables.py. dmin_f99_m12 and dmin_f99_m6 were resumed with decide_finish_times true and the flock sizes 71, 141, 283, 566 added (N above 50 is then spaced by sqrt 2; every added size calibrates cleanly, the edge of the model lies between 600 and 630). dmin_f99_m3 was resumed on 2026-10-24 with decide_finish_times true on its five sizes (600 trials); its D_sat table in the previous section was regenerated after that resume. D_sat entries as in the D_sat, effort, zones and methods section. Fits: interval-censored maximum likelihood of a power law and a saturating curve to the D_min brackets; the last two columns give the range of D that every curve of each shape passing through all the brackets allows at N = 1600 and 3200.
 
 ### D_min, dmin_f99_m12
 
@@ -1071,7 +1090,7 @@ Generated 2026-10-24 07:04 by cli/dmin_tables.py. Holding: 99 percent inside for
 
 ## Lama and di Bernardo (2024): gather task
 
-Generated 2026-10-26 10:36 by `uv run cli/dmin_tables.py herdability lama_r50 lama_r50_inf` (the exponent tables with `--above 225` for sensing 10 and `--above 100` for infinite sensing). N is the number of targets (the paper's M) and D the number of herders (the paper's N). "paper N*" is the paper's statistic computed from HerdSim's own trials: the smallest D from which every larger D has a mean share of targets in the goal at the end of at least 0.99. "HerdSim D_min" is the reliability rule of every other table here.
+Generated 2026-10-26 10:36 by `uv run cli/dmin_tables.py herdability lama_r50 lama_r50_inf` (the exponent tables with `--above 225` for sensing 10, the first size above the threshold from which both statistics give a decided team at every size, and `--above 100` for infinite sensing). N is the number of targets (the paper's M) and D the number of herders (the paper's N). "paper N*" is the paper's statistic computed from HerdSim's own trials: the smallest D from which every larger D has a mean share of targets in the goal at the end of at least 0.99. "HerdSim D_min" is the reliability rule of every other table here.
 
 ### Runs
 

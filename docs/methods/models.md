@@ -209,7 +209,7 @@ $$
 - The $D$ farthest outliers are assigned one to a dog by the Hungarian algorithm (`scipy.optimize.linear_sum_assignment`), which minimises the dogs' total walking distance; in the plane, such an assignment has no crossing paths. Dogs left over when there are fewer outliers than dogs drive the core of the flock (the sheep within $f(N)$) from behind.
 
 ![Waypoint geometry Pc and Hungarian bipartite assignment](../../docs/figures/fig_hungarian_matching.png)
-*Figure 4: Collecting. (A) A sheep outside the circle* $f(N) = r_a N^{2/3}$ *is an outlier; its collect point* $P_c$ *lies* $r_a = 2$ *m behind it on the ray from the flock centre (GCM). (B) The Hungarian algorithm assigns dogs to collect points one to one with the least total distance, so no two paths cross (dashed lines show the crossings a greedy choice can make).*
+*Figure 4: Collecting. (A) A sheep outside the circle* $f(N) = r_a N^{2/3}$ *is an outlier; its collect point* $P_c$ *lies* $r_a = 2$ *m behind it on the ray from the flock centre (GCM); the drawing puts the cross four times farther out so it can be seen. (B) The Hungarian algorithm assigns dogs to collect points one to one with the least total distance, so no two paths cross (the dashed lines are a hand-drawn assignment that crosses).*
 
 #### 3. Driving ($P_d$) and its limit at large $N$
 - When every sheep is within $f(N)$, the dogs **drive**.
@@ -220,7 +220,7 @@ P_d = \mathrm{GCM} + r_a \sqrt{N} \frac{\mathrm{GCM} - \mathbf{x}_{\mathrm{goal}
 $$
 
 - The offset $r_a \sqrt{N}$ grows like the radius of a packed flock. With the calibrated flock it puts the dog about 2.2 flock radii behind the centre at $N = 100$ and 3.5 at $N = 400$.
-- **Above $N \approx 1056$ the drive point is out of reach.** Sheep react to a dog only within $r_s = 65$ m. Once $r_a \sqrt{N} = 2\sqrt{N} > 65$, that is $N > 1056$, the dog stands where few or no sheep react, and no team up to 12 dogs drives the flock at $N = 1131$. As a labelled HerdSim variant, `drive_offset_cap` limits the offset to $r_s - r_a = 63$ m, which brings the drive back (tested up to $N = 3200$).
+- **Above $N \approx 1056$ the drive point is out of reach.** Sheep react to a dog only within $r_s = 65$ m. Once $r_a \sqrt{N} = 2\sqrt{N} > 65$, that is $N > 1056$, the dog stands where few or no sheep react, and no team up to 12 dogs drives the flock at $N = 1131$. As a labelled HerdSim variant, `drive_offset_cap` limits the offset to $r_s - r_a = 63$ m, which brings the compact drive back (one dog at $N = 1131$, two at 1600, and 42 of 42 partial trials at 3200); on `wide` the cap gives $D_{\min} = 9$ at 1131 and no reliable team up to 12 at 1600.
 - With several dogs, they spread over an arc of radius $R$ (the distance to $P_d$) covering the flock's width, $\pm \arcsin(R_{\mathrm{flock}} / R)$. Dogs and arc slots are matched in angular order round the flock centre, so neighbours stay neighbours and no two dogs cross.
 
 ![Driving point geometry Pd and driving arc formation](../../docs/figures/fig_driving_arc.png)
@@ -250,7 +250,7 @@ Every dog runs Strömbom's single-dog rule on its own:
 - It takes the collect/drive decision on the whole flock.
 - It walks to its target with Strömbom's step, noise and stop rule.
 - It has the collect/drive switch but **no team layer**.
-- *Result*: reliable up to $N = 200$ sheep; fails at $N = 400$, where the team rule needs 2 to 3 dogs.
+- *Result*: reliable up to $N = 200$ sheep; fails at $N = 400$, where the team rule needs 3 dogs on `wide` and `outlier_rich` and has no reliable team on `split`.
 
 ![Comparison of strombom_multi vs independent controllers](../../docs/figures/fig_independent.png)
 *Figure 7: `strombom_multi` against `independent` (*$N = 100, D = 4$*). Left (`strombom_multi`): the 4 dogs are assigned to 4 different strays and collect in parallel. Middle (`independent`, collecting): every dog sees the same flock and makes the same choice, so all 4 chase the same outlier while the other strays wait. Right (`independent`, driving): all dogs go to the same drive point* $P_d$ *instead of spreading over an arc (dotted green), so they crowd and do not cover the flock's sides.*
@@ -274,7 +274,7 @@ The repulsion between dogs spreads them out behind the flock (Figure 2, right) w
 The herder rule of Lama & di Bernardo (2024), paper eqs. 2 to 4. Every distance is measured from the goal centre, which is the paper's origin.
 
 ![The Lama herder rule and a real gather trial](../../docs/figures/fig_lama.png)
-*Figure 8: The Lama & di Bernardo (2024) method. Top: the herder rule on a hand-made scene, checked against the code. H1 senses three targets within* $\xi$ *(dashed). It leaves the farthest one to H2, which is closer to it, and chases the next farthest from the goal. The cross is the point* $\delta$ *beyond that target on the ray from the goal centre, where H1 stands to push it inward. H3 senses nothing and walks back toward the goal. The shaded discs are the push radius* $\lambda$ *. Bottom: one real trial with* $\xi = 10$ *,* $N = 196$ *targets and* $D = 20$ *herders, at the start, a third of the way and the end. The dashed grey circle is the start disc of radius 50. In the middle panel the dashed circles are the herders' sensing and each line joins a herder to the target it chases. The herders spread round the edge and work inward. At the end every target and every herder is inside the goal.*
+*Figure 8: The Lama & di Bernardo (2024) method. Top: the herder rule on a hand-made scene, checked against the code. H1 senses three targets within* $\xi$ *(dashed). It leaves the farthest one to H2, which is closer to it, and chases the next farthest from the goal. The cross is the point* $\delta$ *beyond that target on the ray from the goal centre, where H1 stands to push it inward. H3 senses nothing and walks back toward the goal. The shaded discs are the push radius* $\lambda$ *. Bottom: one real trial with* $\xi = 10$ *,* $N = 196$ *targets and* $D = 20$ *herders, at the start, a third of the way and the end. The dashed grey circle is the start disc of radius 50. In the middle panel the dashed circles are the herders' sensing and each line joins a herder to the target it chases. The herders spread round the edge and work inward. At the end every target is inside the goal and the herders stand just inside its rim.*
 
 1. **What a herder senses**: the targets and the other herders within $\xi = 10$ of it (`sensing_radius`; the protocol `lama_r50_inf` sets it infinite).
 2. **Which target it chases**: the sensed target **farthest from the goal centre**, leaving out any target that is closer to another sensed herder. So nearby herders split the work without talking to each other and without any global view.
@@ -294,7 +294,7 @@ $$
 | Gain | $\alpha$ | `herder_gain` | 5 |
 | Stand-off beyond the target | $\delta$ | `chase_offset` | 1.25 |
 
-Herders and targets are moved from the same state at the start of each step, as in the paper's explicit schemes. In a first validation pass the herders read the already moved targets, and that needed up to two herders fewer than the paper. Where the paper is silent, HerdSim's choices are written in the code: the sign of the push in [`sim/methods/lama/dynamics.py`](../../sim/methods/lama/dynamics.py), and when a trial ends and the tick order in [`sim/plugins/scenarios/gather.py`](../../sim/plugins/scenarios/gather.py).
+Herders and targets are moved from the same state at the start of each step, as in the paper's explicit schemes. In a first validation pass the herders read the already moved targets, and that needed one herder fewer at 400 targets than with the paper's order (16 against 17 with infinite sensing). Where the paper is silent, HerdSim's choices are written in the code: the sign of the push in [`sim/methods/lama/dynamics.py`](../../sim/methods/lama/dynamics.py), and when a trial ends and the tick order in [`sim/plugins/scenarios/gather.py`](../../sim/plugins/scenarios/gather.py).
 
 ---
 

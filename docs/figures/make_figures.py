@@ -813,49 +813,50 @@ def fig_hungarian_matching() -> None:
     outlier_indices = np.argsort(dists)[::-1][:4]
 
     ax0 = axes[0]
-    ax0.add_patch(Circle(xy(centroid), thresh, fc="#2a78d6", alpha=0.04, ec=MUTED, lw=1.2, ls="--", label=r"Ngưỡng $f(N) = r_a N^{2/3}$"))
-    ax0.scatter(*sheep[~far].T, s=18, color=BLUE, alpha=0.6, lw=0, label="Cừu trong bầy (an toàn)")
-    ax0.scatter(*sheep[far].T, s=30, color=BLUE, ec=INK, lw=0.8, label=r"Cừu lạc đàn ($> f(N)$)")
+    ax0.add_patch(Circle(xy(centroid), thresh, fc="#2a78d6", alpha=0.04, ec=MUTED, lw=1.2, ls="--", label=r"threshold $f(N) = r_a N^{2/3}$"))
+    ax0.scatter(*sheep[~far].T, s=18, color=BLUE, alpha=0.6, lw=0, label="sheep inside the flock")
+    ax0.scatter(*sheep[far].T, s=30, color=BLUE, ec=INK, lw=0.8, label=r"outliers ($> f(N)$)")
     ax0.scatter(*centroid, s=65, marker="+", color=INK, lw=2.0, zorder=5)
-    ax0.text(centroid[0] + 3, centroid[1] - 4, "GCM (Trọng tâm bầy)", color=INK, fontsize=9, fontweight="bold")
+    ax0.text(centroid[0] + 3, centroid[1] - 4, "GCM (flock centre)", color=INK, fontsize=9, fontweight="bold")
 
     stray_idx = outlier_indices[0]
     stray_pos = sheep[stray_idx]
     vec_gcm_stray = unit(stray_pos - centroid)
+    # drawn four times farther out than the real r_a, or the cross would sit on the sheep
     pc_pos = stray_pos + float(c["r_a"]) * 4.0 * vec_gcm_stray
 
     ax0.annotate("", xy=pc_pos, xytext=centroid, arrowprops=dict(arrowstyle="->", color=MUTED, lw=1.0, ls=":"))
     ax0.scatter(*stray_pos, s=95, facecolors="none", ec=ORANGE, lw=1.8, zorder=4)
-    ax0.text(stray_pos[0] + 3, stray_pos[1] - 2, r"Cừu lạc $o$", color=ORANGE, fontsize=9.5, fontweight="bold")
+    ax0.text(stray_pos[0] + 3, stray_pos[1] - 2, r"outlier $o$", color=ORANGE, fontsize=9.5, fontweight="bold")
     ax0.scatter(*pc_pos, s=90, marker="x", color=INK, lw=2.2, zorder=5)
-    ax0.text(pc_pos[0] + 3, pc_pos[1] + 3, r"Điểm gom $P_c$" + "\n" + r"($r_a = 2$ m sau lưng)", color=INK, fontsize=9, fontweight="bold")
-    ax0.text(centroid[0] - thresh * 0.72, centroid[1] + thresh * 0.72, r"Vùng bầy đàn: $f(N) = r_a N^{2/3}$", color=MUTED, fontsize=8.5)
+    ax0.text(pc_pos[0] + 3, pc_pos[1] + 3, r"collect point $P_c$" + "\n" + r"($r_a = 2$ m behind, drawn 4x)", color=INK, fontsize=9, fontweight="bold")
+    ax0.text(centroid[0] - thresh * 0.72, centroid[1] + thresh * 0.72, r"flock region: $f(N) = r_a N^{2/3}$", color=MUTED, fontsize=8.5)
     ax0.legend(loc="lower left", frameon=False, fontsize=8.5)
     ax0.set_xlim(centroid[0] - 130, centroid[0] + 90)
     ax0.set_ylim(centroid[1] - 110, centroid[1] + 110)
-    style_map(ax0, "A. Nhận diện cừu lạc đàn và Tọa độ điểm gom Pc")
+    style_map(ax0, "A. outliers and the collect point Pc")
 
     ax1 = axes[1]
     targets = team_targets(sheep, goal, dogs, c)
     ax1.scatter(*sheep[~far].T, s=15, color=BLUE, alpha=0.5, lw=0)
     ax1.scatter(*sheep[far].T, s=28, color=BLUE, ec=INK, lw=0.6)
     ax1.scatter(*centroid, s=50, marker="+", color=MUTED, lw=1.5, zorder=3)
-    ax1.scatter(*dogs.T, s=70, marker="^", color=ORANGE, ec=SURFACE, lw=1.0, zorder=5, label="Đàn chó ($D = 4$)")
-    ax1.scatter(*targets.T, s=65, marker="x", color=INK, lw=1.8, zorder=5, label="Điểm gom $P_{c,1..4}$")
+    ax1.scatter(*dogs.T, s=70, marker="^", color=ORANGE, ec=SURFACE, lw=1.0, zorder=5, label="dogs ($D = 4$)")
+    ax1.scatter(*targets.T, s=65, marker="x", color=INK, lw=1.8, zorder=5, label="collect points $P_{c,1..4}$")
 
     for dog, tgt in zip(dogs, targets):
         ax1.annotate("", xy=tgt, xytext=dog, arrowprops=dict(arrowstyle="->", color=ORANGE, lw=1.8))
 
-    ax1.plot([dogs[0, 0], targets[2, 0]], [dogs[0, 1], targets[2, 1]], color="#d9534f", ls="--", lw=1.0, alpha=0.45, label="Gán tham lam ngây thơ (Cắt chéo đường)")
+    ax1.plot([dogs[0, 0], targets[2, 0]], [dogs[0, 1], targets[2, 1]], color="#d9534f", ls="--", lw=1.0, alpha=0.45, label="a crossing assignment (drawn by hand)")
     ax1.plot([dogs[2, 0], targets[0, 0]], [dogs[2, 1], targets[0, 1]], color="#d9534f", ls="--", lw=1.0, alpha=0.45)
 
     for i, d in enumerate(dogs):
-        ax1.text(d[0] - 6, d[1] - 2, f"Chó {i+1}", color=ORANGE, fontsize=8.5, fontweight="bold")
+        ax1.text(d[0] - 16, d[1] - 2, f"dog {i+1}", color=ORANGE, fontsize=8.5, fontweight="bold")
 
     ax1.legend(loc="lower left", frameon=False, fontsize=8.5)
     ax1.set_xlim(centroid[0] - 130, centroid[0] + 90)
     ax1.set_ylim(centroid[1] - 110, centroid[1] + 110)
-    style_map(ax1, "B. Phân công Hungarian tối ưu (Không cắt chéo đường)")
+    style_map(ax1, "B. Hungarian assignment: no two paths cross")
 
     caption(fig, "Outlier detection and Hungarian assignment in strombom_multi. Left: any sheep outside "
             "f(N) = r_a N^(2/3) triggers collection mode; waypoint P_c is placed r_a behind the stray "
@@ -879,7 +880,7 @@ def fig_driving_arc() -> None:
     pd = drive_point(sheep, goal, c)
 
     ax0 = axes[0]
-    ax0.add_patch(Circle(xy(centroid), r_flock, fc="#2a78d6", alpha=0.15, ec=BLUE, lw=1.2, label=r"Bầy cừu gắn kết ($R_{\mathrm{flock}} \propto r_a\sqrt{N}$)"))
+    ax0.add_patch(Circle(xy(centroid), r_flock, fc="#2a78d6", alpha=0.15, ec=BLUE, lw=1.2, label=r"the flock ($R_{\mathrm{flock}} \propto r_a\sqrt{N}$)"))
     ax0.scatter(*sheep.T, s=14, color=BLUE, alpha=0.7, lw=0)
     ax0.scatter(*centroid, s=65, marker="+", color=INK, lw=2.0, zorder=4)
     ax0.text(centroid[0] + 1.5, centroid[1] - 3.5, "GCM", color=INK, fontsize=9, fontweight="bold")
@@ -887,17 +888,17 @@ def fig_driving_arc() -> None:
     goal_dir = unit(goal - centroid)
     ax0.annotate("", xy=centroid + goal_dir * 32, xytext=centroid,
                  arrowprops=dict(arrowstyle="->", color=AQUA, lw=2.0))
-    ax0.text(centroid[0] + 16, centroid[1] + 3.0, r"Trục hướng đích $\mathbf{x}_{\mathrm{goal}}$", color=AQUA, fontsize=9, fontweight="bold")
+    ax0.text(centroid[0] + 16, centroid[1] + 3.0, r"toward the goal $\mathbf{x}_{\mathrm{goal}}$", color=AQUA, fontsize=9, fontweight="bold")
     ax0.plot([centroid[0], pd[0]], [centroid[1], pd[1]], color=MUTED, ls=":", lw=1.2)
-    ax0.scatter(*pd, s=95, marker="x", color=INK, lw=2.2, zorder=5, label=r"Điểm lùa danh định $P_d$")
-    ax0.text(pd[0] - 2, pd[1] - 4.5, r"$P_d$ (Cách GCM $r_a\sqrt{N}$)", color=INK, fontsize=9, fontweight="bold", ha="center")
+    ax0.scatter(*pd, s=95, marker="x", color=INK, lw=2.2, zorder=5, label=r"drive point $P_d$")
+    ax0.text(pd[0] - 2, pd[1] - 4.5, r"$P_d$ ($r_a\sqrt{N}$ behind the GCM)", color=INK, fontsize=9, fontweight="bold", ha="center")
 
     mid_standoff = (centroid + pd) / 2.0
-    ax0.text(mid_standoff[0] - 1.5, mid_standoff[1] + 2.5, r"Khoảng đệm: $r_a\sqrt{N} = 20$ m", color=MUTED, fontsize=8.5, ha="center")
+    ax0.text(mid_standoff[0] - 1.5, mid_standoff[1] + 2.5, r"offset $r_a\sqrt{N} = 20$ m", color=MUTED, fontsize=8.5, ha="center")
     ax0.legend(loc="upper left", frameon=False, fontsize=8.5)
     ax0.set_xlim(centroid[0] - 35, centroid[0] + 38)
     ax0.set_ylim(centroid[1] - 28, centroid[1] + 28)
-    style_map(ax0, "A. Hình học khoảng cách lùa an toàn Pd")
+    style_map(ax0, "A. the drive point Pd")
 
     ax1 = axes[1]
     targets_arc = team_targets(sheep, goal, dogs, c)
@@ -905,25 +906,25 @@ def fig_driving_arc() -> None:
     ax1.scatter(*centroid, s=50, marker="+", color=MUTED, lw=1.5, zorder=3)
 
     ordered_arc = targets_arc[np.argsort(targets_arc[:, 1])]
-    ax1.plot(*ordered_arc.T, color=AQUA, lw=2.0, ls="-", label="Vòng cung lùa đàn (Driving Arc)")
-    ax1.scatter(*targets_arc.T, s=65, marker="x", color=INK, lw=1.8, zorder=4, label="Vị trí mục tiêu trên vòng cung")
-    ax1.scatter(*dogs.T, s=70, marker="^", color=ORANGE, ec=SURFACE, lw=1.0, zorder=5, label="Đàn chó ($D = 4$)")
+    ax1.plot(*ordered_arc.T, color=AQUA, lw=2.0, ls="-", label="driving arc")
+    ax1.scatter(*targets_arc.T, s=65, marker="x", color=INK, lw=1.8, zorder=4, label="arc slots")
+    ax1.scatter(*dogs.T, s=70, marker="^", color=ORANGE, ec=SURFACE, lw=1.0, zorder=5, label="dogs ($D = 4$)")
 
     for i, (dog, tgt) in enumerate(zip(dogs, targets_arc)):
         ax1.annotate("", xy=tgt, xytext=dog, arrowprops=dict(arrowstyle="->", color=ORANGE, lw=1.6))
         push_dir = unit(centroid - tgt)
         ax1.annotate("", xy=tgt + push_dir * 6, xytext=tgt, arrowprops=dict(arrowstyle="->", color=AQUA, lw=1.2, ls="--"))
-        ax1.text(dog[0] - 6, dog[1] - 2, f"Chó {i+1}", color=ORANGE, fontsize=8.5, fontweight="bold")
+        ax1.text(dog[0] - 16, dog[1] - 2, f"dog {i+1}", color=ORANGE, fontsize=8.5, fontweight="bold")
 
-    ax1.text(centroid[0] + 2, centroid[1] + r_flock + 2, "Bao vây cánh trên", color=AQUA, fontsize=8.5, fontstyle="italic")
-    ax1.text(centroid[0] + 2, centroid[1] - r_flock - 4, "Bao vây cánh dưới", color=AQUA, fontsize=8.5, fontstyle="italic")
+    ax1.text(centroid[0] + 2, centroid[1] + r_flock + 2, "upper flank covered", color=AQUA, fontsize=8.5, fontstyle="italic")
+    ax1.text(centroid[0] + 2, centroid[1] - r_flock - 4, "lower flank covered", color=AQUA, fontsize=8.5, fontstyle="italic")
     ax1.annotate("", xy=goal - [c["goal_radius"] + 5, 0], xytext=centroid + [25, 0],
                  arrowprops=dict(arrowstyle="->", color=AQUA, lw=1.5))
-    ax1.text(centroid[0] + 27, centroid[1] + 2, "Tiến vào chuồng đích", color=AQUA, fontsize=8.5, fontweight="bold")
+    ax1.text(centroid[0] + 27, centroid[1] + 2, "toward the goal", color=AQUA, fontsize=8.5, fontweight="bold")
     ax1.legend(loc="upper left", frameon=False, fontsize=8.5)
     ax1.set_xlim(centroid[0] - 65, centroid[0] + 55)
     ax1.set_ylim(centroid[1] - 55, centroid[1] + 55)
-    style_map(ax1, "B. Đội hình Vòng cung ôm sườn và đẩy đàn về đích")
+    style_map(ax1, "B. the driving arc round the flock's sides")
 
     caption(fig, "Driving formation geometry in strombom_multi. Left: the nominal driving point P_d is "
             "placed r_a*sqrt(N) behind GCM along the goal ray, keeping shepherds immediately outside the flock disk. "

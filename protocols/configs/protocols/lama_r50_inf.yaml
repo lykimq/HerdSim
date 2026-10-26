@@ -1,6 +1,6 @@
 # The paper's infinite-sensing case (Fig. 2a): every herder sees every target and herder, so
-# there is no threshold and N* grows as sqrt(M) over the whole range (about 0.9 sqrt(M) from
-# the figure). Grid, limit and share of lama_r50.
+# there is no threshold and N* grows as sqrt(M) over the whole range. Grid, limit and share
+# of lama_r50.
 
 protocol_id: lama_r50_inf
 output: results/lama_r50_inf

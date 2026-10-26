@@ -209,7 +209,7 @@ $$
 - $D$ con lạc xa nhất được thuật toán Hungarian (`scipy.optimize.linear_sum_assignment`) phân cho mỗi chó một con, sao cho tổng quãng đường đi của các chó nhỏ nhất; trên mặt phẳng, một phép phân công như vậy không có đường đi nào cắt nhau. Những chó thừa khi số con lạc ít hơn số chó sẽ lùa phần lõi bầy (những con trong vòng $f(N)$) từ phía sau.
 
 ![Hình học điểm gom Pc và phân công Hungarian](../../docs/figures/fig_hungarian_matching.png)
-*Hình 4: Gom. (A) Một con cừu ngoài vòng* $f(N) = r_a N^{2/3}$ *là con lạc; điểm gom* $P_c$ *của nó nằm sau nó* $r_a = 2$ *m trên tia từ tâm bầy (GCM). (B) Thuật toán Hungarian phân chó cho các điểm gom từng cặp với tổng quãng đường nhỏ nhất, nên không có hai đường đi nào cắt nhau (nét đứt cho thấy những chỗ cắt mà cách chọn tham lam có thể tạo ra).*
+*Hình 4: Gom. (A) Một con cừu ngoài vòng* $f(N) = r_a N^{2/3}$ *là con lạc; điểm gom* $P_c$ *của nó nằm sau nó* $r_a = 2$ *m trên tia từ tâm bầy (GCM); hình vẽ đặt dấu chéo xa gấp bốn lần để nhìn thấy được. (B) Thuật toán Hungarian phân chó cho các điểm gom từng cặp với tổng quãng đường nhỏ nhất, nên không có hai đường đi nào cắt nhau (nét đứt là một cách phân công vẽ tay có đường cắt nhau).*
 
 #### 3. Lùa ($P_d$) và giới hạn của nó ở $N$ lớn
 - Khi mọi con cừu đều trong vòng $f(N)$, các chó **lùa**.
@@ -220,7 +220,7 @@ P_d = \mathrm{GCM} + r_a \sqrt{N} \frac{\mathrm{GCM} - \mathbf{x}_{\mathrm{goal}
 $$
 
 - Khoảng $r_a \sqrt{N}$ tăng giống bán kính của một bầy chặt. Với bầy đã hiệu chỉnh, nó đặt chó sau tâm khoảng 2,2 bán kính bầy ở $N = 100$ và 3,5 ở $N = 400$.
-- **Trên $N \approx 1056$, điểm lùa nằm ngoài tầm.** Cừu chỉ phản ứng với chó trong vòng $r_s = 65$ m. Khi $r_a \sqrt{N} = 2\sqrt{N} > 65$, tức $N > 1056$, chó đứng ở nơi ít hoặc không con cừu nào phản ứng, và không đội nào đến 12 chó lùa được bầy ở $N = 1131$. Như một biến thể HerdSim có ghi rõ, `drive_offset_cap` giới hạn khoảng đó ở $r_s - r_a = 63$ m, và việc lùa hoạt động trở lại (đã thử đến $N = 3200$).
+- **Trên $N \approx 1056$, điểm lùa nằm ngoài tầm.** Cừu chỉ phản ứng với chó trong vòng $r_s = 65$ m. Khi $r_a \sqrt{N} = 2\sqrt{N} > 65$, tức $N > 1056$, chó đứng ở nơi ít hoặc không con cừu nào phản ứng, và không đội nào đến 12 chó lùa được bầy ở $N = 1131$. Như một biến thể HerdSim có ghi rõ, `drive_offset_cap` giới hạn khoảng đó ở $r_s - r_a = 63$ m, và việc lùa bầy tập trung hoạt động trở lại (một chó ở $N = 1131$, hai ở 1600, và 42 trên 42 lượt chạy dở ở 3200); trên `wide` giới hạn này cho $D_{\min} = 9$ ở 1131 và không có đội tin cậy nào đến 12 ở 1600.
 - Với nhiều chó, chúng trải trên một cung bán kính $R$ (khoảng cách đến $P_d$) phủ hết bề rộng bầy, $\pm \arcsin(R_{\mathrm{flock}} / R)$. Chó và các vị trí trên cung được ghép theo thứ tự góc quanh tâm bầy, nên chó cạnh nhau vẫn cạnh nhau và không có hai chó nào cắt qua nhau.
 
 ![Hình học điểm lùa Pd và vòng cung lùa](../../docs/figures/fig_driving_arc.png)
@@ -250,7 +250,7 @@ Mỗi chó tự chạy quy tắc một chó của Strömbom:
 - Nó quyết định gom hay lùa dựa trên cả bầy.
 - Nó đi tới mục tiêu với bước đi, nhiễu và quy tắc dừng của Strömbom.
 - Nó có công tắc gom/lùa nhưng **không có tầng đội**.
-- *Kết quả*: tin cậy đến $N = 200$ con; thất bại ở $N = 400$, nơi quy tắc đội cần 2 đến 3 chó.
+- *Kết quả*: tin cậy đến $N = 200$ con; thất bại ở $N = 400$, nơi quy tắc đội cần 3 chó trên `wide` và `outlier_rich` và không có đội tin cậy nào trên `split`.
 
 ![So sánh strombom_multi và independent](../../docs/figures/fig_independent.png)
 *Hình 7: `strombom_multi` so với `independent` (*$N = 100, D = 4$*). Trái (`strombom_multi`): 4 chó được phân cho 4 con lạc khác nhau và gom song song. Giữa (`independent`, gom): mọi chó thấy cùng một bầy và chọn giống nhau, nên cả 4 đuổi cùng một con lạc trong khi các con khác chờ. Phải (`independent`, lùa): mọi chó đi tới cùng điểm lùa* $P_d$ *thay vì trải trên một cung (chấm xanh lá), nên chúng chen nhau và không che được hai bên bầy.*
@@ -274,7 +274,7 @@ Lực đẩy giữa các chó làm chúng trải ra sau bầy (Hình 2, phải) 
 Quy tắc người chăn của Lama & di Bernardo (2024), phương trình 2 đến 4 của bài báo. Mọi khoảng cách được đo từ tâm đích, là gốc tọa độ của bài báo.
 
 ![Quy tắc người chăn Lama và một lượt gom thật](../../docs/figures/fig_lama.png)
-*Hình 8: Phương pháp của Lama & di Bernardo (2024). Trên: quy tắc người chăn trên một cảnh dựng tay, được kiểm tra với code. H1 cảm nhận ba mục tiêu trong* $\xi$ *(nét đứt). Nó nhường mục tiêu xa nhất cho H2, vì mục tiêu đó gần H2 hơn, và đuổi mục tiêu xa đích kế tiếp. Dấu chéo là điểm cách mục tiêu đó* $\delta$ *trên tia từ tâm đích, nơi H1 đứng để đẩy nó vào trong. H3 không cảm nhận gì nên đi về phía đích. Các đĩa tô nhạt là bán kính đẩy* $\lambda$ *. Dưới: một lượt chạy thật với* $\xi = 10$ *,* $N = 196$ *mục tiêu và* $D = 20$ *người chăn, lúc bắt đầu, sau một phần ba thời gian và lúc kết thúc. Vòng tròn xám nét đứt là đĩa xuất phát bán kính 50. Ở hình giữa, các vòng nét đứt là vùng cảm nhận của người chăn và mỗi đoạn thẳng nối một người chăn với mục tiêu nó đang đuổi. Người chăn trải quanh mép và làm dần vào trong. Lúc kết thúc mọi mục tiêu và mọi người chăn đều ở trong đích.*
+*Hình 8: Phương pháp của Lama & di Bernardo (2024). Trên: quy tắc người chăn trên một cảnh dựng tay, được kiểm tra với code. H1 cảm nhận ba mục tiêu trong* $\xi$ *(nét đứt). Nó nhường mục tiêu xa nhất cho H2, vì mục tiêu đó gần H2 hơn, và đuổi mục tiêu xa đích kế tiếp. Dấu chéo là điểm cách mục tiêu đó* $\delta$ *trên tia từ tâm đích, nơi H1 đứng để đẩy nó vào trong. H3 không cảm nhận gì nên đi về phía đích. Các đĩa tô nhạt là bán kính đẩy* $\lambda$ *. Dưới: một lượt chạy thật với* $\xi = 10$ *,* $N = 196$ *mục tiêu và* $D = 20$ *người chăn, lúc bắt đầu, sau một phần ba thời gian và lúc kết thúc. Vòng tròn xám nét đứt là đĩa xuất phát bán kính 50. Ở hình giữa, các vòng nét đứt là vùng cảm nhận của người chăn và mỗi đoạn thẳng nối một người chăn với mục tiêu nó đang đuổi. Người chăn trải quanh mép và làm dần vào trong. Lúc kết thúc mọi mục tiêu đều ở trong đích và người chăn đứng ngay bên trong mép đích.*
 
 1. **Người chăn cảm nhận gì**: các mục tiêu và các người chăn khác trong vòng $\xi = 10$ (`sensing_radius`; giao thức `lama_r50_inf` đặt nó vô hạn).
 2. **Đuổi mục tiêu nào**: mục tiêu cảm nhận được **xa tâm đích nhất**, bỏ qua mục tiêu nào gần một người chăn khác cảm nhận được hơn. Nhờ đó các người chăn gần nhau chia việc mà không cần nói chuyện và không cần nhìn toàn cục.
@@ -294,7 +294,7 @@ $$
 | Hệ số | $\alpha$ | `herder_gain` | 5 |
 | Khoảng đứng sau mục tiêu | $\delta$ | `chase_offset` | 1,25 |
 
-Người chăn và mục tiêu được di chuyển từ cùng một trạng thái ở đầu mỗi bước, như các lược đồ hiển của bài báo. Ở lượt kiểm chứng đầu, người chăn đọc vị trí mục tiêu đã di chuyển, và cần ít hơn bài báo đến hai người chăn. Ở những chỗ bài báo không nói, lựa chọn của HerdSim được ghi trong mã: chiều của lực đẩy trong [`sim/methods/lama/dynamics.py`](../../sim/methods/lama/dynamics.py), và khi nào một lượt kết thúc cùng thứ tự các bước trong [`sim/plugins/scenarios/gather.py`](../../sim/plugins/scenarios/gather.py).
+Người chăn và mục tiêu được di chuyển từ cùng một trạng thái ở đầu mỗi bước, như các lược đồ hiển của bài báo. Ở lượt kiểm chứng đầu, người chăn đọc vị trí mục tiêu đã di chuyển, và ở 400 mục tiêu cần ít hơn một người chăn so với thứ tự của bài báo (16 so với 17 khi thấy mọi thứ). Ở những chỗ bài báo không nói, lựa chọn của HerdSim được ghi trong mã: chiều của lực đẩy trong [`sim/methods/lama/dynamics.py`](../../sim/methods/lama/dynamics.py), và khi nào một lượt kết thúc cùng thứ tự các bước trong [`sim/plugins/scenarios/gather.py`](../../sim/plugins/scenarios/gather.py).
 
 ---
 

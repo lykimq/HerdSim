@@ -44,7 +44,7 @@ Một bầy 400 con chiếm diện tích lớn hơn nhiều so với một bầy
 Vì vậy HerdSim định cỡ cánh đồng, đích và quãng lùa theo chính kích thước của bầy, và hoàn toàn không có tường.
 
 ![Hình học nhiệm vụ và tỷ lệ vật lý](../../docs/figures/fig6_task_geometry.png)
-*Hình 1: Hình học nhiệm vụ vẽ theo tỷ lệ. Trái: cánh đồng ở* $N = 200$ *con. Giữa: quãng lùa* $l$ *tăng theo bán kính bầy. Phải: bán kính bầy đã hiệu chỉnh* $R_f(N)$ *và bán kính đích theo quy mô bầy.*
+*Hình 1: Hình học nhiệm vụ vẽ theo tỷ lệ. Trái: cánh đồng ở* $N = 200$ *con. Giữa: quãng lùa* $l$ *theo* $N$*, là số lớn nhất trong ba thành phần của nó. Phải: bán kính bầy đã hiệu chỉnh* $R_f(N)$ *và bán kính đích theo quy mô bầy.*
 
 ### Định cỡ theo bán kính bầy đã hiệu chỉnh $R_f(N)$
 
@@ -55,7 +55,7 @@ Mọi độ dài của nhiệm vụ lùa là bội số của **bán kính bầy
 | **Bán kính bầy** $R_f(N)$ | Hiệu chỉnh (ví dụ $6{,}2$ m ở $N = 25$, $11{,}4$ m ở $N = 400$) | Kích thước của một bầy $N$ con dưới một chó lùa. |
 | **Quãng lùa** $l$ | $\max(13\,R_f(N),\ 80,\ l_{\mathrm{reach}} + R_{\mathrm{goal}} + R_f)$ | Bầy lớn hơn được lùa xa hơn; đích không bao giờ chồng lên vùng xuất phát ($l_{\mathrm{reach}}$ là khoảng xa nhất mà một con cừu có thể xuất phát, trên mọi bố cục của giao thức). |
 | **Bán kính đích** $R_{\mathrm{goal}}$ | $1{,}9\,R_f(N)$ | Đích chứa bầy đã ổn định với cùng một biên ở mọi $N$. |
-| **Khoảng trống quanh cánh đồng** | $80$ m quanh vùng xuất phát | Chỉ để đặt vị trí xuất phát; không có gì chặn con vật ở đó. |
+| **Khoảng trống quanh cánh đồng** | $80$ m quanh mọi thứ được đặt lúc xuất phát (bầy, chỗ đứng của chó, đích) | Chỉ để định cỡ cánh đồng; không có gì chặn con vật ở đó. |
 | **Biên** | Không có | Con vật đi đâu cũng được, như trong Strömbom et al. (2014) và Kubo et al. (2022). |
 
 ### Thời hạn tính theo thời gian lùa
@@ -68,7 +68,7 @@ $$
 T_{\mathrm{drive}} = \frac{l}{v_{\mathrm{sheep,max}}}
 $$
 
-Một bầy tập trung do một chó lùa xong trong khoảng $1{,}44$ đến $1{,}74\,T_{\mathrm{drive}}$. Các giao thức chính dùng ba thời hạn:
+Một bầy tập trung do một chó lùa xong trong khoảng $1{,}46$ đến $1{,}74\,T_{\mathrm{drive}}$. Các giao thức chính dùng ba thời hạn:
 - **Thong thả ($12\,T_{\mathrm{drive}}$):** nhiều thời gian; một chó có thể đưa từng con lạc về lần lượt.
 - **Trung bình ($6\,T_{\mathrm{drive}}$).**
 - **Gấp ($3\,T_{\mathrm{drive}}$):** đưa từng con lạc về lần lượt là quá chậm; nhiều chó phải làm cùng lúc.
@@ -132,7 +132,7 @@ Vòng chó đầu tiên nằm cách điểm xa nhất mà một con cừu của 
 ![Các kiểu thả chó](../../docs/figures/fig8_dog_starts.png)
 *Hình 3: Vị trí xuất phát của chó. Trên: các cung mặc định cho* $D = 1$ *đến* $64$ *sau một bầy* $N = 100$*. Dưới: so sánh cung, vòng tròn và điểm thả ở* $N = 200$ *với* $D = 8$ *chó.*
 
-- **`arcs` (mặc định):** các nửa vòng tròn sau bầy, ở phía xa đích, các chó trải đều trên mỗi cung; một chó xuất phát trên trục lùa.
+- **`arcs` (mặc định):** các nửa vòng tròn sau bầy, ở phía xa đích, các chó trải đều trên mỗi cung; khi số chó lẻ, một chó xuất phát trên trục lùa.
 - **`ring`:** các vòng tròn đầy đủ quanh bầy, chừa ra hình nón chứa đích.
 - **`handler`:** mọi chó ở một điểm ngay sau bầy, như được thả từ cọc của người chăn.
 
@@ -166,18 +166,18 @@ Mỗi ô bắt đầu với một lô 10 hạt giống. Sau mỗi lô, HerdSim t
 - **Chưa quyết định:** nếu không, ô nhận thêm một lô 10, đến tối đa 200.
 
 ![Tinh chỉnh tuần tự và dừng sớm](../../docs/figures/fig_adaptive_1_refinement.png)
-*Hình 4: Dừng sớm. Thất bại rõ ràng dừng sau 10 đến 20 hạt giống, thành công rõ ràng sau 60; chỉ những ô gần ngưỡng mới tiếp tục về phía 200.*
+*Hình 4: Dừng sớm. Thất bại rõ ràng dừng sau 10 đến 20 hạt giống; thành công rõ ràng dừng khi đã có 51 lần thành công liên tiếp, ở cuối lô 60 lượt; chỉ những ô gần ngưỡng mới tiếp tục về phía 200.*
 
 ### Chèn điểm giữa
 
-Khi hai số chó cạnh nhau trên một đường cong nằm ở hai vùng khác nhau (ví dụ $D = 2$ không tin cậy và $D = 4$ tin cậy) và cách nhau hơn `refine_min_gap`, vòng sau thêm số chó ở giữa ($D = 3$). Nhờ đó tìm được $D_{\min}$ mà không phải thử mọi số chó.
+Khi hai số chó cạnh nhau trên một đường cong nằm ở hai vùng khác nhau (khác về độ tin cậy khi thời gian hoàn thành không được quyết định; ví dụ $D = 2$ không tin cậy và $D = 4$ tin cậy) và cách nhau hơn `refine_min_gap`, vòng sau thêm số chó ở giữa ($D = 3$). Nhờ đó tìm được $D_{\min}$ mà không phải thử mọi số chó.
 
 ![Chèn điểm giữa trên lưới](../../docs/figures/fig_adaptive_2_densification.png)
 *Hình 5: Chèn điểm giữa. Một thay đổi vùng giữa* $D = 2$ *và* $D = 4$ *thêm* $D = 3$ *vào vòng sau.*
 
 ### Tỉa ô trên mức bão hòa
 
-Trên một $D_{\mathrm{sat}}$ đã được xác nhận, một ô không nhận thêm hạt giống khi các chó của nó là bản sao của nhau: khi trung bình ít nhất 90% số chó có một chó khác trong vòng 2 m (`prune_overlap`), và ô không chậm hơn $D_{\mathrm{best}}$ cũng không bị đánh giá là không tin cậy. Các ô đó được đánh dấu **pruned** trong `frontier_cells.csv`.
+Trên ô đầu tiên vượt quá một $D_{\mathrm{sat}}$ đã được xác nhận mà bản thân nó đã bão hòa, một ô không nhận thêm hạt giống khi các chó của nó là bản sao của nhau: khi trung bình ít nhất 90% số chó có một chó khác trong vòng 2 m (`prune_overlap`), và ô không chậm hơn $D_{\mathrm{best}}$ cũng không bị đánh giá là không tin cậy. Các ô đó được đánh dấu **pruned** trong `frontier_cells.csv`.
 
 ![Tỉa ô bão hòa và trùng lặp](../../docs/figures/fig_adaptive_3_pruning.png)
 *Hình 6: Tỉa ô. Trên mức bão hòa, các ô có chó chồng lên nhau (ít nhất 0,90) không nhận thêm hạt giống.*
@@ -205,8 +205,8 @@ Mỗi lượt xong được ghi ngay vào `trials.jsonl`. Một lần chạy có
 | :--- | :--- | :--- |
 | **Lưới chính và độ nhạy** | $25$ đến $400$ | Ở $N \le 50$, mọi bố cục chỉ cần một chó ở mọi thời hạn, nên quy mô nhỏ hơn không thêm gì. $N = 400$ là quy mô lớn nhất đã hiệu chỉnh khi nghiên cứu đầu chạy. |
 | **Các quy mô thêm** | $71, 141, 283, 566$ | Các bước $\sqrt{2}$, để mỗi quy mô có cùng trọng số trong phép khớp log-log. $566 = 400\sqrt{2}$ là bước cuối như vậy dưới khoảng $N = 600$, quá đó một bầy xuất phát lỏng không còn ổn định về cùng kích thước. |
-| **Mô hình Kubo** | $25$ đến $100$ | Bầy Kubo co về bán kính khoảng $5{,}8$ m ở mọi $N$, nên $N$ lớn hơn chỉ làm bầy dày hơn. |
-| **Tầm cảm nhận** | $50$ đến $200$ | Ở $N = 400$, khoảng cách gom ($109$ m) lớn hơn khoảng cách phản ứng của cừu ($65$ m), mức cao nhất trong các tầm cảm nhận thực tế đã thử. |
+| **Mô hình Kubo** | $25$ đến $100$ | Bầy Kubo co về bán kính khoảng $6$ m ($5{,}9$ đến $6{,}2$) ở mọi $N$, nên $N$ lớn hơn chỉ làm bầy dày hơn. |
+| **Tầm cảm nhận** | $50$ đến $200$ | Các tầm đã thử, 15 đến 100 m, bao quanh khoảng cách phản ứng của cừu ($65$ m). Quy mô bầy dừng ở 200, nơi khoảng cách gom $f(N) = 68$ m đã vượt khoảng cách đó. |
 | **Nhiệm vụ gom (`lama`)** | $1$ đến $400$ mục tiêu, số chính phương | Các ô của bài báo đến $\sqrt{N} = 20$; trục của bài báo đi tới 25. Phạm vi này chứa ngưỡng trong Bảng I của bài báo ($\sqrt{N} = 8$ đến 11) và đoạn tăng theo căn bậc hai phía trên ngưỡng, là những kết quả được so sánh (mục 6). Năm quy mô lớn hơn sẽ làm thời gian chạy tăng gần gấp đôi mà không thêm gì cho phép kiểm tra. |
 | **$N$ lớn** | $566$ đến $3200$ | Thử bầy lớn ở một mật độ áp đặt, và giới hạn nơi điểm lùa của bài báo vượt khoảng cách phản ứng của cừu ($N \approx 1056$). |
 
@@ -246,7 +246,7 @@ Các giá trị về thời gian hoàn thành dùng khoảng làm việc: các $
 | **$D_{\min}$** | $D$ tin cậy nhỏ nhất ($L \ge 0{,}90$). |
 | **$D_{\mathrm{overcrowd}}$** | $D$ nhỏ nhất trên $D_{\min}$ mà nó và $D$ đã thử kế tiếp đều không tin cậy. |
 | **$D_{\max}$** | $D$ tin cậy lớn nhất dưới $D_{\mathrm{overcrowd}}$ (hoặc $D$ tin cậy lớn nhất). |
-| **$D_{\mathrm{best}}$** | $D$ làm việc nhỏ nhất không chậm hơn $D$ làm việc nhanh nhất. |
+| **$D_{\mathrm{best}}$** | $D$ làm việc nhỏ nhất mà phép so sánh ghép cặp với $D$ làm việc nhanh nhất được quyết định là bằng hoặc nhanh hơn. |
 | **$D_{\mathrm{sat}}$** | $D$ làm việc nhỏ nhất mà không $D$ làm việc lớn hơn nào nhanh hơn. |
 | **$D_{\mathrm{crowd}}$** | $D$ làm việc nhỏ nhất trên $D_{\mathrm{best}}$ chậm hơn $D_{\mathrm{best}}$. |
 
@@ -271,9 +271,9 @@ Trên sáu giao thức chính, 70% đến 91% số lượt thất bại kết th
 
 ### Khi nào thêm chó gây hại
 
-Chó dạng điểm chưa bao giờ làm việc lùa thất bại ở các lượt chạy chính. Hai tình huống được thử, nơi chó thêm có thể cản nhau:
+Chó dạng điểm chưa bao giờ làm việc lùa thất bại trên `wide` hay `outlier_rich` ở các lượt chạy chính (trên `split` một vài ô trên $D_{\min}$ không tin cậy, mục 4 của báo cáo). Hai tình huống được thử, nơi chó thêm có thể cản nhau:
 - **Chó chiếm chỗ:** khi không chó nào được đến gần chó khác dưới 2 m, một chó mà bước đi sẽ kết thúc quá gần thì đứng yên bước đó. Trên `outlier_rich` $N = 400$ trong nhiệm vụ giữ bầy, mọi đội từ 9 chó trở lên đều không tin cậy (thành công 0,77 ở $D = 9$, 0,50 ở $D = 16$). Vòng cung sau bầy chứa khoảng 12 chó với khoảng cách đó.
-- **Giữ bầy nhỏ:** giữ bầy thất bại ở $N \le 50$, nhưng vì chó lùi ra 67 m khỏi một đích chỉ rộng 12 đến 14 m và cừu lang thang ra ngoài, không phải vì số chó.
+- **Giữ bầy nhỏ:** giữ bầy thất bại ở $N \le 50$, nhưng vì chó lùi ra 67 m ngoài con cừu xa nhất, khỏi một đích chỉ có bán kính 12 đến 14 m, và cừu lang thang ra ngoài, không phải vì số chó.
 
 ---
 
