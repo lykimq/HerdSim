@@ -35,7 +35,7 @@ protocols/configs/
 
 Every protocol names `protocols/configs/canonical.yaml`, directly or through the file it `extends`. It holds the task and campaign settings, each with a comment saying where its value comes from:
 - The task (`task: drive_to_goal`, or `gather` for the Lama model) and its geometry: drive distance and goal radius in flock radii, the start layouts, the gather disc.
-- Release geometry: concentric arcs behind the flock, gap $30\text{ m}$, start spacing $5.0\text{ m}$.
+- Dog starts: half circles behind the flock, the first one $30\text{ m}$ beyond the farthest sheep that can start, dogs at least $5.0\text{ m}$ apart.
 - Calibration of $R_f(N)$, the seeds, the decision rules (theta $0.90$, $99$% intervals, batches of 10 up to 200 seeds) and the time budget.
 
 The model parameters are not in this file. They live with each method in code, one table per paper, and a protocol overrides them under `params`:
@@ -90,19 +90,20 @@ methods:
 
 ## 2. Follow-Up Settings and Advanced Flags
 
-The follow-up research campaigns extend protocols with specialized experimental switches. Each setting defaults to an inactive value (`0` or `false`), ensuring complete backward compatibility with baseline physics:
+The follow-up campaigns added these settings. At their default value each one leaves every trial as the first runs had it, and it stays out of the physics hash, so the folders written before it remain resumable:
 
 | Setting | Default | What it does | Protocols |
 | :--- | :---: | :--- | :--- |
-| `hold_drive_multiple` | `0` | Goal containment counts only after sheep remain inside for this many drive times. | `dmin_f99_hold`, `dmin_f99_hold_spacing` |
-| `hold_withdraw` | `false` | While goal condition is met, dogs back off beyond threat distance ($65 + 2\text{ m}$) to allow sheep to graze calmly. | `dmin_f99_hold`, `dmin_f99_hold_spacing` |
-| `dog_spacing` | `0` | Physical dog volume: no dog may step closer than this distance to another dog. Dogs already closer walk away. | `dmin_f99_hold_spacing` |
-| `sensing_range` | `0` | Each dog only perceives sheep within this radius (`0` = omniscient global view). | `dmin_f99_view_range` |
-| `communication` | `none` | Inter-dog information sharing under limited sensing: `neighbour` (shares with nearby dogs) or `shared` (global dog network). | `dmin_f99_view_comm` |
-| `impose_radius_above` | `0` | Above this flock size $N$, flock radius is not calibrated but imposed at the density of this threshold. | `dmin_f99_big*` |
-| `imposed_radius_scale`| `1.0` | Density sweep multiplier for imposed flock radius. | `dmin_f99_big_dense`, `_loose` |
-| `drive_offset_cap` | `0` | Caps the driving standoff distance ($r_a\sqrt{N}$), preventing dogs from standing beyond sheep reaction horizon ($65\text{ m}$). | `dmin_f99_big_cap` |
-| `metrics_stride` | `1` | Records the per-tick metrics every k ticks. Outcomes are unchanged (stop checks run every tick); only the history and first-arrival times are coarser. | `lama_r50`, `lama_r50_inf` (10) |
+| `success_fraction` | `1.0` | Share of the sheep that must be in the goal at one tick for a trial to succeed (`1.0`: every sheep). | `dmin_f99_*` (0.99), `lama_*` (0.99) |
+| `hold_drive_multiple` | `0` | The goal counts as reached only once that share has stayed inside for this many drive times. | `dmin_f99_hold`, `dmin_f99_hold_spacing` |
+| `hold_withdraw` | `false` | While the goal is reached, the dogs of `collect_drive_multi` withdraw to $r_s + r_a = 67\text{ m}$ beyond the farthest sheep, so the flock grazes. | `dmin_f99_hold`, `dmin_f99_hold_spacing` |
+| `dog_spacing` | `0` | No dog may step closer than this to another. A dog already that close walks straight away; a dog whose step would end that close does not step. | `dmin_f99_hold_spacing` |
+| `sensing_range` | `0` | Each dog of `collect_drive_multi` knows only the sheep within this range (`0`: every sheep). | `dmin_f99_view_range` |
+| `communication` | `none` | With a sensing range, what dogs share: `none`, `neighbour` (the dogs within range) or `shared` (the whole team). | `dmin_f99_view_comm` |
+| `impose_radius_above` | `0` | Above this flock size, $R_f$ is not calibrated but set from it at constant density. | `dmin_f99_big*` |
+| `imposed_radius_scale`| `1.0` | Multiplies the imposed $R_f$, to vary the density. | `dmin_f99_big_dense`, `_loose` |
+| `drive_offset_cap` | `0` | Caps the drive offset $r_a\sqrt{N}$, so the drive point stays within the sheep's reaction distance ($65\text{ m}$). | `dmin_f99_big_cap` |
+| `metrics_stride` | `1` | Records the per-tick metrics every k ticks. Outcomes are unchanged (stop checks run every tick); only the history and first-arrival times are coarser. Hashed when not 1. | `lama_r50`, `lama_r50_inf` (10) |
 
 Settings of the gather task, read only when `task: gather` and hashed only then:
 
@@ -115,19 +116,19 @@ Settings of the gather task, read only when `task: gather` and hashed only then:
 
 ## 3. What a Simulation Run Writes
 
-Every executed protocol writes a self-contained, auditable results directory under `results/<protocol_id>/`:
+Every protocol writes one folder, `results/<protocol_id>/`:
 
 ```text
 results/<protocol_id>/
-├── protocol.yaml         Merged configuration (canonical defaults + protocol overrides)
-├── provenance.json       Protocol ID, code physics hash, and execution timestamps
-├── calibration.json      Calibrated steady-state flock radius R_f(N) (not written for the gather task)
-├── trials.jsonl          Append-only stream of completed trials (crash-safe)
-├── trials.csv            Consolidated trial results table (updated after each round)
-├── frontier_cells.csv    Statistical outcomes per cell (Clopper-Pearson CI, finish times, zone)
-├── frontier_groups.csv   Frontier metrics per D-curve (D_min, D_sat, D_crowd, D_overcrowd)
-├── status.json           Live execution status, round counter, and timing diagnostics
-├── errors.jsonl          Captured execution exceptions (empty in standard runs)
-├── .lock                 File lock held during active execution to prevent race conditions
-└── timeseries/           Per-tick Parquet trajectories (retained for first 3 seeds per cell)
+├── protocol.yaml         The protocol as run (canonical defaults + overrides), and every method parameter
+├── provenance.json       Protocol id, physics hash and creation time
+├── calibration.json      Calibrated flock radius R_f(N) per method (not written for the gather task)
+├── trials.jsonl          One line per finished trial, appended as trials finish
+├── trials.csv            The same rows as a table, rewritten after each round
+├── frontier_cells.csv    Per cell: success interval, reliability, finish times, zone
+├── frontier_groups.csv   Per D curve: D_min, D_min_low, D_best, D_sat, D_crowd, D_overcrowd, D_max
+├── status.json           Progress of the run: rounds, trials, open cells, why it stopped
+├── errors.jsonl          Trials that raised (only written when one does)
+├── .lock                 Held while a run is going, so a second run cannot write to the folder
+└── timeseries/           Per-tick Parquet histories for the first 3 seeds of every cell
 ```

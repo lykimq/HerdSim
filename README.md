@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-343%20passed-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-330%20passed-brightgreen.svg)](tests/)
 [![Trials](https://img.shields.io/badge/simulated%20trials-367%2C150-success.svg)](results/)
 
 Have you ever watched sheepdogs work a flock across an open field? A single border collie working patiently can eventually round up dozens of sheep. But what happens when the clock is ticking? Or when sheep are scattered across a vast pasture, split into separate groups, or wandering in opposite directions? A single dog simply cannot run in multiple directions at once. To gather the flock before time runs out, dogs must work together as a coordinated team.
@@ -11,13 +11,13 @@ That raises a fundamental question in collective animal behavior and autonomous 
 
 > **How many dogs ($D$) does it take to gather a flock of $N$ sheep and drive it into a goal reliably before a deadline: how few will do ($D_{\min}$), how many are enough ($D_{\mathrm{sat}}$), and when do more dogs start to hurt?**
 
-**HerdSim** is a dual-purpose scientific study and open-source simulation laboratory built to answer that question. We map the minimum reliable team size ($D_{\min}$), the saturation team size beyond which adding dogs yields no speedup ($D_{\mathrm{sat}}$), and the conditions under which overcrowding causes missions to fail. 
+**HerdSim** is a study and an open-source simulator built to answer that question. It maps the smallest reliable team ($D_{\min}$), the team beyond which more dogs no longer speed up the drive ($D_{\mathrm{sat}}$), and the settings in which more dogs make the task fail.
 
-Across **367,150 simulation trials** evaluated with zero execution errors, HerdSim establishes the scaling laws of multi-agent shepherding across flock sizes from 25 to 566 sheep (extended to 3,200), under varying deadline pressures, pasture layouts, flock cohesion levels, and sensing ranges.
+Over **367,150 simulated trials**, with no simulation errors, HerdSim maps how the team size grows with flock size from 25 to 566 sheep (with runs up to 3,200), under different deadlines, start layouts, cohesion levels and sensing ranges.
 
 ![One simulation trial](docs/figures/fig17_trial.png)
-**Figure 1: Autonomous multi-dog herding trial in HerdSim ($N = 200$ sheep, $D = 4$ dogs, wide start layout, seed 2026).**
-The open circle on the far right represents the goal pen ($R_{\mathrm{goal}} = 1.9 R_f$). Four shepherd dogs (red markers with trajectory trails) coordinate autonomously: two dogs fan out along flanking wings to round up distant stray sheep, while the rear dogs assemble them toward the center of mass. Once cohesive, the dogs form a circular driving arc behind the flock, steering the collective smoothly into the goal circle without scattering them.
+**Figure 1: One trial in HerdSim ($N = 200$ sheep, $D = 4$ dogs, `wide` start, seed 2026), at ticks 0, 55, 139 and 279.**
+The green circle on the right is the goal ($R_{\mathrm{goal}} = 1.9 R_f$). The dogs (orange triangles, with their tracks) start on an arc behind the scattered flock and close in from several sides while the flock gathers. Once it is together they drive it from behind into the goal.
 
 ---
 
@@ -35,52 +35,70 @@ The open circle on the far right represents the goal pen ($R_{\mathrm{goal}} = 1
 
 ## Key Scientific Findings
 
-The complete scientific monograph and empirical datasets are available in [`docs/report/d_min_report.md`](docs/report/d_min_report.md) and [`docs/report/results_tables.md`](docs/report/results_tables.md). Below is an executive summary of the primary discoveries:
+The full report is [`docs/report/d_min_report.md`](docs/report/d_min_report.md), and the tables behind it are in [`docs/report/results_tables.md`](docs/report/results_tables.md). The main results:
 
 ![D_min against flock size across deadlines and layouts](docs/figures/fig20_dmin_vs_n.png)
 **Figure 2: Minimum reliable team size $D_{\min}$ as a function of flock size $N$ across deadlines and layouts.**
-Flock size $N$ is on the horizontal axis; the vertical axis is the smallest team size $D_{\min}$ achieving $\ge 90$% reliability. Columns separate pasture layouts (`compact`, `split`, `wide`, `outlier_rich`); rows represent deadline pressures (relaxed $12\times$, intermediate $6\times$, urgent $3\times$). Solid lines show strict 100% containment; dashed lines show practical 99% arrival. Notice how `compact` starts remain flat at $D_{\min} = 1$ across all conditions, while urgent deadlines dramatically lift the curves on scattered pastures.
+Flock size $N$ is on the horizontal axis; the vertical axis is the smallest team whose success rate is at least 0.90 with 99% confidence. Columns are the start layouts (`compact`, `split`, `wide`, `outlier_rich`); rows are the deadlines (12, 6 and 3 drive times). Solid lines: every sheep must be in the goal (strict); dashed lines: 99% of the sheep. `compact` starts stay at $D_{\min} = 1$ everywhere, while tight deadlines raise the curves of the scattered layouts.
 
 ### 1. Cohesive flocks only ever need one dog ($D_{\min} = 1$)
-When sheep start close together in a neat cluster (`compact`), **a single dog is sufficient across all tested flock sizes ($N = 25$ to $400$) and all deadlines ($12\times$ down to $3\times$ drive times)**. Because no sheep are wandering off, the dog never wastes time gathering strays—its role is purely steering. Furthermore, adding more dogs behind a walking flock does not accelerate the drive: sheep cruise at their natural walking speed ($1\text{ m/s}$), and extra dogs behind them cannot push them faster without causing panic.
+When the sheep start close together (`compact`), **one dog is enough at every flock size tested ($N = 25$ to $400$) and every deadline (12 down to 3 drive times)**. No sheep has to be fetched, so the dog only drives. More dogs do not make the drive faster either: in the model a sheep that reacts to a dog always walks at $1$ m/s, so dogs change the flock's direction but not its speed.
 
 ### 2. On scattered pastures, $D_{\min}$ grows much slower than flock size
-When sheep start scattered (`wide`, `split`, `outlier_rich`), dogs must round up strays before driving the collective. In log-log space ($\log_2 D_{\min}$ vs. $\log_2 N$), the scaling slope falls between **0.27 and 0.38** at relaxed deadlines ($12\times$) and 0.38 to 0.61 at $6\times$ (sub-linear growth). 
-*Why does it scale so favorably?* Sheep possess natural social attraction. Once a dog nudges a stray toward the center, the stray spots its flock-mates and runs back to join them on its own. The flock's biological cohesion does half the rounding work for free!
+When the sheep start scattered (`wide`, `split`, `outlier_rich`), the dogs must bring the strays back before they can drive the flock. On a log-log scale ($\log_2 D_{\min}$ against $\log_2 N$) the slope is **0.27 to 0.38** at the loose deadline (12 drive times) and 0.38 to 0.61 at 6, so the team grows much slower than the flock.  
+*Why so slowly?* Every sheep is drawn toward the flock. Once a dog turns a stray back, it walks to the flock by itself, so the dogs do not have to fetch each sheep.
 
 ### 3. Tight deadlines demand more dogs than larger flocks
-Time pressure is a far stronger multiplier than flock size. Under practical arrival rules, cutting the deadline from relaxed ($12\times$) to urgent ($3\times$) raises $D_{\min}$ on large scattered flocks ($N = 400$) from **2 dogs to 5–6 dogs**. In contrast, quadrupling the flock size (from $N = 100$ to $400$) under a relaxed deadline only raises the requirement from 1 dog to 2 dogs. Urgency prevents sequential gathering; dogs must divide and conquer in parallel.
+Under the 99% rule, cutting the deadline from 12 to 3 drive times raises $D_{\min}$ on a `wide` flock of 400 from **2 dogs to 5–6**. Making that flock four times larger (from $N = 100$ to 400) at the loose deadline only raises it from 1 dog to 2. With little time, one dog cannot bring the strays back one after another, so several dogs must work at once.
 
 ### 4. Without teamwork, extra dogs are useless
-To test whether coordination algorithms are truly necessary, we evaluated an uncoordinated greedy baseline called **FAT (Farthest-Agent Targeting)**, where each dog independently chases whichever sheep is farthest from the goal. Because every dog has the same view, **all dogs pick the exact same stray**, collapsing into a tight pack that acts like a single clumsy dog. FAT has no reliable team size on scattered pastures at $N \ge 200$: past two dogs its success stays near or below 0.5, so extra dogs add no parallel work.
+To test whether coordination is needed, we ran a baseline without it, **FAT (farthest-agent targeting)**: every dog goes behind the sheep farthest from the goal. Every dog sees the same flock, so **all dogs pick the same sheep** and bunch into one pack that works like a single dog. FAT has no reliable team on scattered layouts at $N \ge 200$: beyond two dogs its success stays below about 0.55, so extra dogs add no parallel work.
 
-### 5. What counts as success? The "Straggler Effect"
-Under strict 100% containment (every single sheep inside the pen simultaneously), large dog packs ($D \ge 6$) paradoxically fail on large flocks. Why? In 97% of those failed trials, the dogs had already brought 99% of the sheep into the goal before the deadline. In a sample trace, the dogs chasing the last stray end up between the flock and the goal and drive the penned flock back out. Slower, calmer dogs ($v_{\mathrm{dog}} = 1.15\text{ m/s}$) or evaluating practical **99% arrival** isolates genuine coordination ability from boundary penning noise.
+### 5. What counts as success? The last sheep
+When every sheep must be in the goal at the same moment (strict rule), large teams ($D \ge 6$) often fail on large flocks. In 97% of those failed trials, 99% of the sheep had already been in the goal before the deadline. In a sample trial, the dogs chasing the last stray end up between the flock and the goal and drive the flock back out. With slower dogs ($1.15$ m/s instead of $1.5$) the strict $D_{\min}$ on `outlier_rich` $N = 400$ drops from none on the grid to 6. Counting a trial as a success when **99% of the sheep** are in avoids the problem and measures what the team does with the flock.
 
 ### 6. Targets without cohesion follow the square-root law, in HerdSim too
-Run inside HerdSim on its own gather task, the non-cohesive model of Lama & di Bernardo (2024) reproduces the paper's map cell by cell (median difference 0.034 in the share of targets gathered with sensing radius 10, 0.003 with infinite sensing). With herders that see everything, the smallest team grows as $\sqrt{N}$ (exponent 0.52–0.53 over 100 to 400 targets): 8 herders for 100 targets, 17 for 400. That is steeper than the 0.27–0.38 of the cohesive Strömbom flock at relaxed deadlines, though the two runs also differ in task and herder rule. With a sensing radius of 10, no team up to 25 herders gathers 81 targets or fewer reliably; just above that threshold the paper's average reaches 99% while runs that lose a target or two remain common, so HerdSim's reliability rule needs many more herders there (17–25 instead of 11 at 144 targets).
+The sheep in findings 1 to 5 stick together. Lama & di Bernardo (2024) study the opposite case: targets that do not attract each other at all. Each target wanders at random and only moves away when a herder comes close. Targets and herders start scattered over a disc, and the herders must bring 99% of the targets into a small goal at its centre. The paper reports that the smallest team grows as the square root of the number of targets. We ran their model inside HerdSim to check that law with the same simulator and the same reliability rule used for the sheep.
+
+First, HerdSim reproduces the paper. The paper gives one result as numbers, the threshold in its Table I: with radius 10, the smallest team follows the square-root law only from $\sqrt{N} = 8$, 9 and 11 upward, at the 90%, 95% and 99% levels. HerdSim gives 8, 9 and 12. The paper's other results are colour maps ([Fig. 2](https://doi.org/10.1103/PhysRevResearch.6.L032012)). Side by side (Figure 3), HerdSim's maps and the paper's have the same shape. With radius 10, no team up to 25 herders succeeds with few targets, then comes a sharp threshold, and above it a band of teams that grows with the square root of the number of targets. With full sight, that band runs over the whole range.
+
+![The paper's Fig. 2 beside HerdSim's maps](docs/figures/fig39_lama_maps.png)
+**Figure 3: The paper's map above HerdSim's.** Each cell is the share of targets in the goal at the end, averaged over runs, for one number of targets (x, as its square root) and one number of herders (y); the white line marks 0.99. Left: herders see everything. Right: herders see within radius 10. HerdSim's grid stops at 400 targets ($\sqrt{N} = 20$), so the grey band from 21 to 25 on the paper's axis has no data. That range already holds the threshold and the square-root rise above it, so the five larger sizes were left out; they would about double the run time. Two small differences show: at radius 10 with few targets HerdSim gathers a little less than the paper, and its 0.99 line turns at about $\sqrt{N} = 12$ where the paper's turns at about 10 to 11.  
+*Top: Fig. 2 of Lama and di Bernardo (2024), Phys. Rev. Research 6, L032012, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), cropped.*
+
+When herders see everything, the square-root law holds in HerdSim too: 8 herders for 100 targets, 17 for 400 (exponent 0.52–0.53). That is steeper than the 0.27–0.38 of the cohesive flock at relaxed deadlines.
+*Why the difference?* In finding 2 a stray runs back to its flock on its own once a dog turns it. Here nothing pulls a target back, so the herders must fetch every one. The two runs also differ in task and herder rule, so this comparison is indicative only.
+
+When herders see only within radius 10, there is a threshold. With 81 targets or fewer, the targets are so sparse that no team up to 25 herders finds them all reliably. Just above the threshold, from 100 to 196 targets, the paper's rule and HerdSim's rule part ways (Figure 4, left). The paper averages the share gathered over runs, and at 144 targets that average reaches 99% with 11 herders. HerdSim counts runs, and with 17 to 25 herders about one run in ten still loses a target or two. An average of 99% can hide those failed runs; counting runs does not, so HerdSim asks for more herders there.
 
 ![The Lama and di Bernardo model in HerdSim](docs/figures/fig38_lama.png)
-**Figure 3: The smallest team per number of targets in the Lama & di Bernardo model, against the paper's Fig. 2.** Squares are the paper's values, circles the paper's statistic on HerdSim's trials, diamonds HerdSim's $D_{\min}$ (bars are brackets; crosses mean no reliable team up to 25). Left: sensing radius 10. Right: infinite sensing.
+**Figure 4: The smallest team for each number of targets in the Lama & di Bernardo model, counted two ways.** The x-axis is the square root of the number of targets, the y-axis the number of herders. Left: herders see only within radius 10. Right: herders see everything.
 
-👉 *Read the full scientific analysis, sensitivity sweeps, and theoretical derivations in [docs/report/d_min_report.md](docs/report/d_min_report.md).*
+The two ways of choosing "the smallest team" differ in whether they average or count runs:
+
+- The paper averages: a team is enough when, averaged over runs, 99% of the targets end in the goal.
+- HerdSim counts runs: a team is enough when at least 90% of its runs end with 99% of the targets in the goal, at 99% confidence. This is $D_{\min}$.
+
+Squares are the values the paper published, read from its figure. Circles apply the paper's rule to HerdSim's runs; where a circle sits on a square, HerdSim reproduces the paper. Diamonds are HerdSim's $D_{\min}$. A vertical bar is the range $D_{\min}$ can still lie in, a triangle is a lower bound where no team is decided reliable yet, and a cross at the top means no team up to 25 herders is reliable.
+
+With full sight the two rules almost agree. With radius 10, in the shaded band just above the threshold, the average reaches 99% with about 11 herders while single runs still often miss targets, so counting runs needs 17 to 25.
+
+👉 *The full analysis, the sensitivity runs and the other follow-up results are in [docs/report/d_min_report.md](docs/report/d_min_report.md).*
 
 ---
 
 ## The HerdSim Simulation Engine
 
-HerdSim is built from the ground up as a high-performance, deterministic research platform:
-
-1. **Biologically Grounded Physics**:
-   Individual sheep dynamics are derived from empirical high-frequency GPS tracking collars ([Strömbom et al. 2014](https://doi.org/10.1098/rsif.2014.0719)), balancing inertia, social attraction, collision avoidance, and predator flight.
-2. **Autonomous Multi-Dog Coordination**:
-   Extends single-dog heuristics with distributed Hungarian target assignment, polar angular driving arcs, and vectorially normalized multi-dog threat blending to prevent artificial fear inflation.
-3. **Physical Scale Invariance**:
-   Unlike flawed fixed-arena setups that crowd large flocks against artificial boundaries, HerdSim dynamically scales drive distance, goal radius, and deadlines to the steady-state calibrated flock radius $R_f(N)$.
-4. **Adaptive Sequential Sampling**:
-   An automated experimental engine evaluates Clopper-Pearson 99% confidence intervals, early-stopping obvious outcomes after 10–20 seeds and focusing compute exclusively on undecided boundary cells up to a 200-seed cap.
-5. **Deterministic & Crash-Safe**:
-   Dedicated common random number streams isolate starting conditions, ensuring bit-identical reproducibility. All trials append immediately to disk (`trials.jsonl`) with crash-safe interrupt and resume capabilities.
+1. **The sheep model of Strömbom et al. (2014)**:
+   Each sheep weighs its previous heading, attraction to the flock, keeping space from close neighbours, running from dogs, and noise. The authors compared the model with GPS data from a real flock and dog ([Strömbom et al. 2014](https://doi.org/10.1098/rsif.2014.0719)).
+2. **A team rule for several dogs**:
+   Strömbom's single-dog rule extended to a team: outliers assigned to dogs by the Hungarian algorithm, drive positions spread on an arc behind the flock in angular order, and the push of several dogs on a sheep normalised to the size of one dog's push.
+3. **Tasks sized to the flock**:
+   There are no walls, and the drive distance, goal radius and deadline are scaled from the calibrated flock radius $R_f(N)$, so a large flock is not helped or hindered by a field that is too small.
+4. **Adaptive sampling**:
+   After every batch of 10 seeds, each cell's 99% Clopper-Pearson interval decides whether it needs more. Clear cells stop after 10 to 60 seeds; only cells near the threshold continue, up to 200.
+5. **Reproducible and safe to stop**:
+   Each trial has its own random streams for the start, the sheep and the dogs, so a trial replays exactly from its config and seed on the same machine. Every finished trial is written to disk (`trials.jsonl`) at once, so a run can be stopped and resumed.
 6. **Three Source Models, Two Tasks**:
    Besides the Strömbom flock, HerdSim runs the continuous force model of Kubo et al. (2022) on the same drive task, and the non-cohesive targets and local herders of Lama & di Bernardo (2024) on their own gather task (sheep and dogs start scattered over a disc and the dogs bring the targets into its centre). The Lama model is there to test the published $\sqrt{N}$ law inside the same simulator and statistics (finding 6).
 
@@ -90,7 +108,7 @@ HerdSim is built from the ground up as a high-performance, deterministic researc
 
 ### Installation
 
-HerdSim requires Python 3.11+ and uses [`uv`](https://docs.astral.sh/uv/) for high-performance dependency management:
+HerdSim needs Python 3.11+ and uses [`uv`](https://docs.astral.sh/uv/) to manage dependencies:
 
 ```bash
 # Clone the repository
@@ -100,14 +118,14 @@ cd HerdSim
 # Install development environment and dependencies
 make install     # uv sync --extra dev
 
-# Run comprehensive checks (Ruff linter + type checking + 343 tests)
+# Lint, type check and run the 330 tests
 make check
 
-# Execute miniature verification benchmark campaigns (~1 minute)
+# Run 23 small campaigns end to end (about 1.5 minutes)
 make bench
 ```
 
-To reproduce full empirical campaigns or verify bit-identical seed determinism, see the [Reproducibility Checklist](docs/report/d_min_report.md#appendix-c-reproducibility-checklist) and [Archived Results Tables](docs/report/results_tables.md).
+To run the full campaigns again or check that a trial replays exactly, see the [reproducibility appendix](docs/report/d_min_report.md#appendix-c-reproducibility) and the [results tables](docs/report/results_tables.md).
 
 ---
 
@@ -128,7 +146,7 @@ uv run cli/campaign.py status --protocol dmin_m6
 # 4. Run the entire sequence of research protocols (resumes automatically)
 uv run cli/run_queue.py --workers 20
 
-# 5. Generate publication-ready Markdown result tables from raw data
+# 5. Build Markdown result tables from the result folders
 uv run cli/dmin_tables.py record
 uv run cli/dmin_tables.py dmin dmin_m12 dmin_m6 dmin_m3
 ```
@@ -139,44 +157,42 @@ For detailed command options and diagnostic replay scripts, see [`docs/guides/cl
 
 ## Project Architecture
 
-HerdSim is organized into decoupled, modular layers:
+HerdSim is split into layers that only import downward:
 
 ```text
 HerdSim/
-├── sim/                    # Core simulation physics & domain logic
-│   ├── core/               # State dataclasses, tick runner, arena geometry, layouts
+├── sim/                    # The model: one trial, tick by tick
+│   ├── core/               # State, tick loop, world, start layouts
 │   ├── methods/            # Models: Strombom (2014), Kubo (2022), Lama (2024)
-│   └── plugins/            # Extensible plugins: sheep, dog controllers, scenarios, metrics
-├── services/               # Campaign orchestration & sampling engines
-│   ├── adaptive.py         # Sequential sampling engine & Clopper-Pearson early stopping
-│   ├── calibration.py      # Automated R_f(N) steady-state calibration
-│   └── runner.py           # Worker pool management and parallel dispatch
-├── analysis/               # Statistical frontier evaluation & table generators
-├── protocols/configs/      # Protocol definitions (canonical defaults + overrides)
+│   └── plugins/            # Sheep models, dog controllers, tasks, metrics
+├── services/               # Running things: protocols, campaigns, calibration, replays
+│   ├── adaptive.py         # The adaptive campaign: rounds of seeds until every cell is decided
+│   ├── calibration.py      # The flock radius R_f(N)
+│   └── runner.py           # Running a batch of trials in worker processes
+├── analysis/               # Decision rules (frontier) and the result tables
+├── protocols/configs/      # Protocols (canonical defaults + overrides)
 ├── cli/                    # Command-line tools (campaign.py, run_queue.py, dmin_tables.py)
-├── docs/                   # Scientific monographs, technical guides, and figures
-├── results/                # Archived empirical datasets (367,150 trials)
-└── tests/                  # Unit tests and floating-point golden regression suites
+├── docs/                   # Report, method notes, guides and figures
+├── results/                # Result folders (367,150 trials)
+└── tests/                  # Unit, invariant and regression tests
 ```
 
 ---
 
 ## Documentation Index
 
-HerdSim maintains structured documentation categorized by audience and topic:
-
-- **Scientific Report** ([`docs/report/d_min_report.md`](docs/report/d_min_report.md))  
-  Full research monograph: all 12 findings, empirical analysis, scaling fits, and discussion.
-- **Agent Models & Algorithms** ([`docs/methods/models.md`](docs/methods/models.md))  
-  Mathematical formulation of sheep flocking, multi-dog coordination, Hungarian matching, baselines, and the Kubo and Lama models.
-- **Task Design & Grid Rationale** ([`docs/experiments/task_design.md`](docs/experiments/task_design.md))  
-  Scale invariance, arena geometry $R_f(N)$, normalized deadlines $T_{\mathrm{drive}}$, why $N$ and $D$ stop where they do, and the gather task.
-- **Configuration Guide** ([`docs/guides/configuration.md`](docs/guides/configuration.md))  
-  How YAML protocols inherit, explanation of follow-up flags, and output folder structure.
-- **CLI & Workflow Reference** ([`docs/guides/cli_reference.md`](docs/guides/cli_reference.md))  
-  Command-line guide for planning, executing campaigns, and running diagnostic replays.
-- **Software Architecture** ([`docs/codes/architecture.md`](docs/codes/architecture.md))  
-  Deep dive into codebase design, plugin registry, and extension patterns for developers.
+- **Report** ([`docs/report/d_min_report.md`](docs/report/d_min_report.md))  
+  The study: all 13 results, the analysis behind them, the curve fits and the discussion.
+- **Models** ([`docs/methods/models.md`](docs/methods/models.md))  
+  The sheep model, the team rule, the Hungarian assignment, the baselines, and the Kubo and Lama models.
+- **Task design** ([`docs/experiments/task_design.md`](docs/experiments/task_design.md))  
+  Field and goal sized by $R_f(N)$, deadlines in drive times, why $N$ and $D$ stop where they do, and the gather task.
+- **Configuration** ([`docs/guides/configuration.md`](docs/guides/configuration.md))  
+  How protocols inherit from each other, the follow-up settings, and the result folders.
+- **CLI reference** ([`docs/guides/cli_reference.md`](docs/guides/cli_reference.md))  
+  Planning and running campaigns, and the diagnostic replays.
+- **Architecture** ([`docs/codes/architecture.md`](docs/codes/architecture.md))  
+  How the code is organised and how to add a model, a controller or a task.
 
 ---
 

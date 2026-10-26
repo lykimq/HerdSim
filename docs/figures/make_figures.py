@@ -37,6 +37,7 @@ from sim.core.world.layouts import (  # noqa: E402
 )
 from sim.core.vectors import behind, farthest_from, unit  # noqa: E402
 from sim.methods.kubo.forces import clamp_speed, dog_velocity, sheep_velocities  # noqa: E402
+from sim.methods.lama.dynamics import herder_velocities  # noqa: E402
 from sim.methods.strombom.heuristics import (  # noqa: E402
     collect_threshold,
     decide,
@@ -395,6 +396,98 @@ def fig_kubo() -> None:
             "right. Each dog targets the sheep farthest from the goal.", 150)
     fig.tight_layout(rect=(0, 0, 1, 0.84))
     fig.savefig(OUT / "fig5_kubo.png", dpi=150)
+    plt.close(fig)
+
+
+def lama_rule_panel(ax, c) -> None:
+    """The Lama herder rule on a hand-placed scene, checked against the code.
+
+    Positions are relative to the goal centre, as in the dynamics. H1 senses three targets:
+    it leaves the farthest one to H2, which is closer to it, and chases the next farthest.
+    H3 senses nothing and walks home."""
+    herders = np.array([[24.0, 2.0], [29.0, -6.0], [-20.0, 15.0]])
+    targets = np.array([[27.0, 9.0], [31.0, -3.0], [20.0, 0.0], [38.0, 14.0],
+                        [3.0, 2.0], [-4.0, -1.0], [1.0, -5.0]])
+    goal_r = float(c["goal_radius"])
+    velocity, choice = herder_velocities(targets, herders, goal_r, c)
+    assert list(choice.target) == [0, 1, -1], "figure disagrees with the Lama herder code"
+    xi, lam, delta = c["sensing_radius"], c["repulsion_radius"], c["chase_offset"]
+    ax.add_patch(Circle((0, 0), goal_r, fc="none", ec=AQUA, lw=1.5))
+    ax.text(0, -goal_r - 2.5, "goal", color=AQUA, fontsize=8, ha="center")
+    ax.add_patch(Circle(xy(herders[0]), xi, fc="none", ec=MUTED, lw=0.9, ls="--"))
+    ax.text(herders[0][0], herders[0][1] - xi - 2.5, "H1 senses within xi", color=MUTED,
+            fontsize=8, ha="center")
+    for h in herders:
+        ax.add_patch(Circle(xy(h), lam, fc=ORANGE, ec="none", alpha=0.12))
+    ax.scatter(*targets.T, s=26, color=BLUE, lw=0, zorder=3)
+    ax.scatter(*herders.T, s=60, marker="^", color=ORANGE, ec=SURFACE, lw=0.8, zorder=4)
+    for name, h in zip(("H1", "H2", "H3"), herders):
+        ax.text(h[0] - 1.0, h[1] - 3.2, name, color=ORANGE, fontsize=9, ha="right")
+    # the chase point, delta beyond the target on the ray from the goal centre
+    aim = targets[0]
+    point = aim + delta * unit(aim)
+    ray = aim * (1 + 4 / np.linalg.norm(aim))
+    ax.plot([0, ray[0]], [0, ray[1]], color=MUTED, lw=0.7, ls=":")
+    ax.scatter(*point, s=22, marker="x", color=INK, zorder=4)
+    for i in range(3):
+        tip = herders[i] + velocity[i] * 0.9
+        ax.annotate("", xy=xy(tip), xytext=xy(herders[i]),
+                    arrowprops=dict(arrowstyle="->", color=ORANGE, lw=1.6))
+    ax.text(aim[0] - 1, aim[1] + 2.5, "chased by H1", color=BLUE, fontsize=8, ha="right")
+    ax.text(point[0] + 1.2, point[1] + 0.3, "where H1 stands", color=INK, fontsize=8)
+    ax.text(targets[1][0] + 4.0, targets[1][1] - 0.5, "farther, but closer\nto H2: left to H2",
+            color=BLUE, fontsize=8, va="center")
+    ax.text(targets[3][0], targets[3][1] + 2.0, "not sensed", color=BLUE, fontsize=8, ha="center")
+    ax.text(herders[2][0], herders[2][1] + 3.0, "senses nothing: walks home",
+            color=ORANGE, fontsize=8, ha="center")
+    ax.set_xlim(-32, 52)
+    ax.set_ylim(-17, 21)
+    style_map(ax, "the herder rule")
+
+
+def fig_lama() -> None:
+    """The Lama and di Bernardo gather method: the herder rule and a real trial."""
+    protocol = load_protocol("lama_r50")
+    n, d = 196, 20
+    c = cell_config(protocol, Cell(Group("lama", "uniform", (), n), d), float("nan"))
+    goal = np.asarray(c["goal_center"])
+    snaps: dict[int, tuple[np.ndarray, np.ndarray, np.ndarray]] = {}
+    start = initial_state(c, 2026)
+    snaps[0] = (start.sheep_positions.copy(), start.shepherd_positions.copy(), np.full(d, -1))
+
+    def keep(state) -> None:
+        snaps[state.tick] = (state.sheep_positions.copy(), state.shepherd_positions.copy(),
+                             np.asarray(state.metadata["herder_target"]).copy())
+
+    result = run_trial(c, 2026, on_tick=keep)
+    assert result.success, "the example trial should gather the targets"
+    last = result.total_ticks
+    fig = plt.figure(figsize=(13, 10))
+    grid = fig.add_gridspec(2, 3, height_ratios=(1.15, 1))
+    lama_rule_panel(fig.add_subplot(grid[0, :]), c)
+    shots = [fig.add_subplot(grid[1, k]) for k in range(3)]
+    for ax, tick in zip(shots, (0, last // 3, last)):
+        targets, herders, chosen = snaps[tick]
+        ax.add_patch(Circle(xy(goal), c["start_radius"], fc="none", ec=GRID, lw=1.0, ls="--"))
+        ax.add_patch(Circle(xy(goal), c["goal_radius"], fc="none", ec=AQUA, lw=1.5))
+        if 0 < tick < last:
+            for h in herders:
+                ax.add_patch(Circle(xy(h), c["sensing_radius"], fc="none", ec=MUTED, lw=0.5,
+                                    ls="--", alpha=0.6))
+            for h, t in zip(herders, chosen):
+                if t >= 0:
+                    ax.plot(*np.array([h, targets[t]]).T, color=ORANGE, lw=0.8)
+        ax.scatter(*targets.T, s=7, color=BLUE, alpha=0.85, lw=0)
+        ax.scatter(*herders.T, s=34, marker="^", color=ORANGE, ec=SURFACE, lw=0.8, zorder=3)
+        span = c["start_radius"] + 6
+        ax.set_xlim(goal[0] - span, goal[0] + span)
+        ax.set_ylim(goal[1] - span, goal[1] + span)
+        style_map(ax, f"t = {tick * c['dt']:.0f} s (tick {tick})")
+    caption(fig, "The Lama and di Bernardo (2024) gather method. Top: the herder rule on a "
+            "hand-made scene, checked against the code. Bottom: one real trial at xi = 10, "
+            f"N = {n} targets, D = {d} herders, seed 2026.", 150)
+    fig.tight_layout()
+    fig.savefig(OUT / "fig_lama.png", dpi=150)
     plt.close(fig)
 
 
@@ -848,6 +941,7 @@ def main() -> None:
     fig_fat()
     fig_independent()
     fig_kubo()
+    fig_lama()
     fig_task_geometry()
     fig_layouts()
     fig_dog_starts()

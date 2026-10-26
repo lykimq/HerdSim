@@ -1,124 +1,117 @@
 # Team Size for Driving a Simulated Sheep Flock: Minimum, Enough and Too Many Dogs
 
-*HerdSim Project Research Report*  
-*Empirical evaluation of 23 campaign protocols (164,740 trials) across multi-agent herding architectures, followed by 14 follow-up protocols and three resumed runs (162,130 trials), and two protocols of the non-cohesive model of Lama and di Bernardo (2024) (40,280 trials): 39 protocols and 367,150 trials in all, with zero simulation errors.*  
-*(Note: Foundational agent equations and coordination algorithms are documented in [docs/methods/models.md](../methods/models.md). Task geometry, scale invariance, and sampling mechanics are detailed in [docs/experiments/task_design.md](../experiments/task_design.md). This report focuses exclusively on empirical scaling laws, statistical frontier decisions, microscopic failure dynamics, and scientific implications.)*
+*HerdSim research report*  
+*39 protocols and 367,150 trials, with no simulation errors: 23 protocols of the first study (164,740 trials), 14 follow-up protocols and three resumed runs (162,130 trials), and two protocols of the non-cohesive model of Lama and di Bernardo (2024) (40,280 trials).*  
+*The models and the team rule are described in [docs/methods/models.md](../methods/models.md), the task geometry and the sampling in [docs/experiments/task_design.md](../experiments/task_design.md). This report gives the results.*
 
 ---
 
 ## Abstract
 
-How many autonomous shepherds ($D$) does it take to gather a flock of $N$ sheep and drive it to a goal reliably before a deadline: how few will do ($D_{\min}$), how many are enough ($D_{\mathrm{sat}}$), and when do more dogs start to hurt? We study this problem in simulation across 39 campaign protocols encompassing 367,150 executed trials with zero simulation errors. We define $D_{\min}$ as the smallest team size whose task success rate is proven to be at least 0.90 under an exact two-sided 99% Clopper–Pearson binomial confidence interval. Using an adaptive sequential allocation engine that concentrates compute exclusively on undecided parameter cells (up to 200 seeds per cell), the first 23 protocols (164,740 trials) map $D_{\min}$ across flock sizes $N \in [25, 400]$, four initial spatial layouts (`compact`, `wide`, `split`, `outlier_rich`), and three normalized deadlines ($12\times$, $6\times$, and $3\times$ drive times) under both *strict containment* (100% inside) and *99% arrival* criteria. The follow-up protocols use the 99% rule only and add the team size beyond which dogs stop helping (*D*<sub>sat</sub>), four more flock sizes up to $N = 566$, team rules, holding, dog spacing, cohesion, sensing, and flocks above the model's edge up to $N = 3200$. Two last protocols run the non-cohesive targets and local herders of Lama and di Bernardo (2024) on their own gather task, to test their square-root law inside the same simulator and statistics.
+How many dogs ($D$) does it take to gather a flock of $N$ sheep and drive it into a goal before a deadline? We ask three things: how few will do ($D_{\min}$), how many are enough before more stop helping ($D_{\mathrm{sat}}$), and when more dogs make things worse. $D_{\min}$ is the smallest team whose success rate is at least 0.90 with 99% confidence (an exact Clopper–Pearson interval). An adaptive runner adds seeds only to cells whose answer is still open, up to 200 per cell.
 
-Our empirical findings demonstrate:
-1. **Flock Cohesion Invariance**: On cohesive (`compact`) flocks, $D_{\min} = 1$ is an exact invariant across all flock sizes ($N = 25$ to $400$) and deadlines. Additional shepherds do not reduce completion times.
-2. **Sub-linear Scaling on Dispersed Flocks**: On scattered pastures, $D_{\min} = 1$ for $N \le 50$, growing to only 2 or 3 dogs at $N = 400$ under relaxed deadlines ($12\times$). In log-log space ($\log_2 D_{\min}$ vs. $\log_2 N$), growth slopes on the five original sizes fall between 0.20 and 0.42 at $12\times$, and 0.30 and 0.79 at $6\times$ (narrowed on nine sizes, item 8).
-3. **Deadline Urgency as a Dominant Driver**: Tightening the deadline from $12\times$ to $3\times$ drive times raises $D_{\min}$ on `wide` flocks at $N = 400$ from 2 to 5–6 dogs—exceeding the effect of a fourfold expansion in flock size.
-4. **The Straggler Mechanism**: In 97% of strict failures for teams with $D \ge 6$ (sensitivity base run), the team had already brought 99% of the flock into the goal well before the deadline. In a sample trace the dogs chasing the last stragglers drive the main herd back out through the goal. Reducing dog speed ($v_{\mathrm{dog}} = 1.15\text{ m/s}$) eliminates this overshoot, lowering strict $D_{\min}$ on outlier-rich $N = 400$ from complete failure (`none`) to 6.
-5. **Statistical Robustness of 99% Arrival**: Under 99% arrival, $D_{\min}$ remains within about 1 dog of the base bracket across handler release, ring placement, initial dog-flock clearance, and empirical GPS sheep parameters. Strict criteria artificially amplify setup sensitivities by a factor of three or more.
-6. **The Greedy Baseline Fails**: An uncoordinated baseline (FAT) in which every dog chases the same sheep fails to scale: it has no reliable team size for $N \ge 200$ on any scattered layout, nor on compact $N = 400$.
-7. **Enough Dogs, and No Harm under 99% Arrival** (section 3.7): beyond the team size *D*<sub>sat</sub> at which the drive stops getting faster, extra dogs leave the finish time at 0.96 to 1.01 of the *D*<sub>sat</sub> time while dog time grows in proportion to $D$, and the time each sheep spends in flight does not rise. Under the 99% rule no team size up to 24 makes the task fail on the five original sizes (one dip on the denser grid); extra dogs slow mainly `split` flocks at $N \ge 200$ (and `outlier_rich` at $N = 566$, $12\times$).
-8. **Denser grid** (section 3.8): on nine flock sizes, $D_{\min}$ grows with slope 0.27–0.38 at $12\times$ and 0.38–0.61 at $6\times$, and *D*<sub>sat</sub> about twice as fast (0.70–0.91 on `wide`). Up to $N = 566$ a power law and a curve that levels off fit the data equally well.
-9. **The parts of the team rule** (section 3.9): the paper's collect/drive switch alone carries a team of independent dogs to $N = 200$; the team layer is what makes $N = 400$ possible.
-10. **Too many dogs** (section 3.10): with dogs that take up room (2 m apart), `outlier_rich` $N = 400$ fails from $D = 9$ (decided unreliable to $D = 24$), while point dogs show no decided harm up to 24.
-11. **Cohesion and sensing** (sections 3.11, 3.12): weaker cohesion steepens the growth toward the 0.5 of non-cohesive targets; a local view costs about one dog at $N = 200$, which sharing with the whole team buys back.
-12. **A limit of the drive rule** (section 3.13): above $N \approx 1056$ the paper's drive point lies beyond the sheep's reaction distance, and no team up to 12 dogs drives the flock. With the drive point capped within reach, a scattered flock needs 3 dogs at $N = 800$, 5–9 at 1131 and more than 12 at 1600.
-13. **Targets without cohesion** (section 3.14): the model of Lama and di Bernardo (2024), run in HerdSim on its own task, reproduces the paper's Fig. 2 cell by cell (median difference in the share of targets gathered 0.034 with sensing radius 10, 0.003 with infinite sensing) once herders and targets are integrated from the same state, as the paper does. With infinite sensing the minimum team grows as the square root of the number of targets (exponent 0.52–0.53 over 100 to 400 targets) under both the paper's statistic and HerdSim's. With sensing radius 10 no team up to 25 herders gathers 81 targets or fewer reliably, and near the threshold (100 to 196 targets) the two statistics part: the paper's mean share reaches 0.99 with 11 herders at 144 targets, while 17 to 25 herders still lose a target in about one run in ten.
+The first 23 protocols cover flock sizes $N = 25$ to 400, four start layouts (`compact`, `wide`, `split`, `outlier_rich`) and three deadlines (12, 6 and 3 times the drive time), each under two success rules: every sheep in the goal (strict) and 99% of the sheep in the goal. The follow-up protocols use the 99% rule only. They add $D_{\mathrm{sat}}$, four more flock sizes up to $N = 566$, other team rules, holding the flock in the goal, dogs that take up room, cohesion, limited sensing, and flocks up to $N = 3200$. Two last protocols run the non-cohesive targets of Lama and di Bernardo (2024) on their own task.
 
----
+Main results:
 
-## 1. Research Questions and Objectives
-
-Existing multi-herder literature has evaluated fixed team sizes or non-cohesive swarms (Pierson and Schwager 2015; Kubo et al. 2022; Lama and di Bernardo 2024). To rigorously establish how the minimum shepherd requirement scales under social cohesion, deadline pressure, and spatial dispersion, this study investigates seven formal Research Questions (RQs):
-
-- **RQ1 (Flock Size Scaling)**: How does $D_{\min}$ scale with flock size $N \in [25, 400]$ across different spatial layouts and deadlines? Does flock cohesion alter the theoretical $\sqrt{N}$ scaling observed in non-cohesive targets?
-- **RQ2 (Spatial Geometry vs. Population Size)**: For a given deadline, which factor exerts a stronger quantitative shift on $D_{\min}$: the initial spatial layout (compact vs. scattered) or the flock population $N$?
-- **RQ3 (Temporal Deadline Urgency)**: How does deadline pressure ($12\times \to 6\times \to 3\times$ drive times) shift $D_{\min}$? Is the impact of deadline tightening linear or threshold-based?
-- **RQ4 (Success Criteria & The Straggler Effect)**: How do strict 100% containment and 99% arrival criteria diverge, and what microscopic mechanism causes large dog teams to fail under strict criteria?
-- **RQ5 (Robustness to Setup Conventions)**: Do empirical scaling laws survive perturbations to arbitrary simulation parameters (handler release, ring placement, initial gaps, goal radius, empirical GPS parameters, and reduced dog speed)?
-- **RQ6 (Necessity of Explicit Coordination)**: Can multiple independent shepherds without communication or task assignment achieve finite $D_{\min}$ on large flocks, or is explicit multi-agent coordination strictly necessary?
-- **RQ7 (Beyond $D_{\min}$: Enough and Too Many)**: From which team size *D*<sub>sat</sub> does an extra dog stop making the drive faster, what does each dog beyond it cost, does it add pressure on the sheep, and does any team size make the task worse? (Follow-up analysis of the existing 99% runs; no new campaigns.)
-
-Follow-up campaigns (99% arrival throughout) add seven questions:
-
-- **RQ8 (Denser Grid and Curve Shape)**: With nine flock sizes up to the model's edge ($N = 566$), how fast do $D_{\min}$ and *D*<sub>sat</sub> grow, and can steady growth be told from a curve that levels off?
-- **RQ9 (Which Part of the Rule Matters)**: What do the collect/drive switch and the team layer each contribute, and how does a model whose finish time falls with $D$ (Kubo) saturate?
-- **RQ10 (Too Many Dogs)**: Does holding the flock in the goal, or dogs that take up room, make extra dogs harmful?
-- **RQ11 (Cohesion)**: How does the growth of $D_{\min}$ change with the strength of the sheep's cohesion?
-- **RQ12 (What a Dog Sees)**: How many extra dogs does a limited sensing range cost, and does sharing what dogs see make up for it?
-- **RQ13 (Large N)**: What happens above the size at which the model's flock still has a size of its own?
-- **RQ14 (Targets without Cohesion)**: Does HerdSim reproduce the minimum team, the density threshold and the square-root law of Lama and di Bernardo (2024) for targets that do not flock, and does the law hold under HerdSim's reliability rule as well as under the paper's statistic?
+1. **Compact flocks need one dog.** $D_{\min} = 1$ at every flock size and deadline, and extra dogs do not shorten the drive.
+2. **Scattered flocks need few more.** $D_{\min} = 1$ up to $N = 50$ and only 2 or 3 dogs at $N = 400$ with the loose deadline. On a log-log scale the growth slope is 0.20–0.42 at 12 drive times and 0.30–0.79 at 6 (five flock sizes; 0.27–0.38 and 0.38–0.61 on nine sizes, item 8).
+3. **The deadline matters more than the flock size.** Going from 12 to 3 drive times raises $D_{\min}$ on `wide` $N = 400$ from 2 to 5–6, more than going from $N = 100$ to 400 does.
+4. **Under the strict rule, the last sheep decides.** In 97% of strict failures with 6 or more dogs (sensitivity base run), 99% of the flock had already been in the goal. With slower dogs (1.15 m/s instead of 1.5) the strict $D_{\min}$ on `outlier_rich` $N = 400$ drops from none on the grid to 6.
+5. **The 99% rule is robust to setup choices.** Under it, $D_{\min}$ moves by about one dog at most when the dog start, the start gap, the dog speed or the sheep parameters change; only a smaller goal raises it more. Under the strict rule the same changes often move it to "none on the grid".
+6. **Dogs without a team rule do not scale.** With FAT, where every dog chases the same sheep, no team is reliable at $N \ge 200$ on any scattered layout, nor on compact $N = 400$.
+7. **Beyond $D_{\mathrm{sat}}$ extra dogs cost but do not hurt** (section 3.7). The finish time stays at 0.96–1.01 of the $D_{\mathrm{sat}}$ time while dog time grows with $D$, and the time each sheep spends fleeing does not rise. Under the 99% rule no team up to 24 dogs makes the task fail on the five original sizes (one dip on the denser grid); extra dogs slow mainly `split` flocks.
+8. **Denser grid** (section 3.8): on nine flock sizes $D_{\min}$ grows with slope 0.27–0.38 at 12 drive times and 0.38–0.61 at 6, and $D_{\mathrm{sat}}$ about twice as fast. Up to $N = 566$ a power law and a curve that levels off fit equally well.
+9. **Which part of the team rule matters** (section 3.9): the paper's collect/drive switch alone carries a team of independent dogs to $N = 200$; the team layer is needed at $N = 400$.
+10. **Too many dogs** (section 3.10): with dogs that keep 2 m apart, `outlier_rich` $N = 400$ fails from $D = 9$ on; point dogs show no such failure up to 24.
+11. **Cohesion and sensing** (sections 3.11, 3.12): weaker cohesion makes $D_{\min}$ grow faster, toward the 0.5 of non-cohesive targets; a local view costs about one dog at $N = 200$, and sharing what every dog sees wins it back.
+12. **A limit of the drive rule** (section 3.13): above $N \approx 1056$ the paper's drive point lies beyond the distance at which sheep react to a dog, and no team up to 12 dogs moves the flock. With the drive point capped within reach, a scattered flock needs 3 dogs at $N = 800$, 5–9 at 1131 and more than 12 at 1600.
+13. **Targets without cohesion** (section 3.14): HerdSim reproduces the threshold Lama and di Bernardo report in their Table I, and its maps have the same shape as theirs. With infinite sensing the smallest team grows as the square root of the number of targets (exponent 0.52–0.53) under both the paper's statistic and HerdSim's. With sensing radius 10 the two part near the threshold: at 144 targets the paper's average reaches 0.99 with 11 herders, while 17 to 25 herders still lose a target in about one run in ten.
 
 ---
 
-## 2. Statistical Methodology and Decision Rules
+## 1. Research Questions
 
-*(For full implementation of the adaptive execution loop, Clopper–Pearson intervals, and common random number seeds, see [docs/experiments/task_design.md: Adaptive Sequential Sampling Engine](../experiments/task_design.md#3-adaptive-sequential-sampling-engine).)*
+Earlier multi-dog work studied fixed team sizes or targets that do not flock (Pierson and Schwager 2015; Kubo et al. 2022; Lama and di Bernardo 2024). This study asks how the minimum team grows when the sheep flock, when the deadline is tight and when the flock starts scattered. The first study has seven questions:
 
-### 2.1 Formal Decision Criteria for *D*<sub>min</sub>
-A **cell** is defined by the parameter tuple (method, layout, $N$, deadline, $D$). Each simulation trial is an independent Bernoulli trial resulting in success ($1$) or failure ($0$). For a sample of $n_{\mathrm{trials}}$ evaluated seeds with $k$ observed successes, let $[L, U]$ denote the exact two-sided 99% Clopper–Pearson binomial confidence interval for the true success probability $p$:
+- **RQ1 (flock size):** how does $D_{\min}$ grow with $N$ from 25 to 400, across layouts and deadlines? Does cohesion change the $\sqrt{N}$ growth seen for non-cohesive targets?
+- **RQ2 (layout against size):** at a given deadline, which moves $D_{\min}$ more, the start layout or $N$?
+- **RQ3 (deadline):** how does $D_{\min}$ change from 12 to 6 to 3 drive times, and is the change gradual or sudden?
+- **RQ4 (success rule):** how do the strict rule and the 99% rule differ, and why do large teams fail under the strict one?
+- **RQ5 (setup choices):** do the results hold when choices with no real-world value change (dog start, start gap, goal radius, sheep parameters, dog speed)?
+- **RQ6 (coordination):** can dogs that do not coordinate reach a finite $D_{\min}$ on large flocks?
+- **RQ7 (enough and too many):** from which team $D_{\mathrm{sat}}$ does another dog stop shortening the drive, what does each dog beyond it cost, does it put more pressure on the sheep, and does any team make the task fail? (Read from the existing 99% runs.)
 
-$$
-L = B\left(\frac{\alpha}{2}, k, n_{\mathrm{trials}} - k + 1\right), \quad U = B\left(1 - \frac{\alpha}{2}, k + 1, n_{\mathrm{trials}} - k\right)
-$$
+The follow-up runs (99% rule throughout) add seven more:
 
-where:
-- $n_{\mathrm{trials}} \in [10, 200]$: The cumulative number of simulated trials evaluated for that cell.
-- $k \in [0, n_{\mathrm{trials}}]$: The number of successful trials observed.
-- $\alpha = 0.01$: The statistical significance level, corresponding to a two-sided 99% confidence level ($1 - \alpha = 0.99$, with $\alpha/2 = 0.005$ in each tail).
-- $B(q, a, b)$: The quantile function (inverse cumulative distribution function) of the Beta distribution with shape parameters $a$ and $b$, evaluated at cumulative probability $q$.
-- $L$: The statistical lower bound of the true success rate.
-- $U$: The statistical upper bound of the true success rate.
-
-With the target reliability threshold set to $\theta = 0.90$:
-- **Reliable**: $L \ge 0.90$. We are 99% confident that the true success rate is at least 90%. (Mathematically requires at least 51 consecutive wins with zero failures, which rounds to 60 trials under batch size 10).
-- **Unreliable**: $U \lt 0.90$. We are 99% confident that the true success rate cannot reach 90%, triggering early stopping to save compute (typically halts after 10–20 trials).
-- **Undecided**: $L \lt 0.90 \le U$. The interval straddles the 90% threshold, so the cell receives additional batches of 10 seeds up to a hard cap of 200 seeds.
-
-For a curve of tested dog counts $D \in \mathcal{D}$ at fixed method, layout, $N$, and deadline:
-
-$$
-D_{\min} = \min \lbrace D \in \mathcal{D} \mid \text{Cell}(D) \text{ is Reliable} \rbrace
-$$
-
-$$
-D_{\min,\mathrm{low}} = \min \lbrace D \in \mathcal{D} \mid U(D) \ge \theta \rbrace
-$$
-
-- **Decided Value**: When $D_{\min,\mathrm{low}} = D_{\min}$, all $D \lt D_{\min}$ are confirmed unreliable ($U \lt 0.90$).
-- **Bracket $[D_{\min,\mathrm{low}}, D_{\min}]$**: When $D_{\min}$ is reliable, but some smaller $D \lt D_{\min}$ remains undecided at 200 seeds (e.g. `3-8`).
-- **Lower Bound $[n]$**: No tested $D$ has achieved reliability, but some $D \ge n$ remains undecided.
-- **Failure (`none`)**: All tested dog counts up to the top of the grid ($D = 24$ in the main runs) are confirmed unreliable ($U \lt 0.90$).
-
-### 2.2 Protocol Matrix Overview
-The first study encompasses 23 protocols (164,740 trials, 20 worker threads, 0 errors):
-- **Main Protocols (6 runs)**: Full factorial evaluation of 5 flock sizes ($N \in [25, 400]$), 4 layouts (`compact`, `wide`, `split`, `outlier_rich`), and 3 deadlines ($12\times, 6\times, 3\times$ drive times) under both Strict 100% and 99% Arrival criteria.
-- **Uncoordinated Baseline (2 runs)**: `dmin_fat` and `dmin_f99_fat` at $6\times$ drive time.
-- **Cross-Model Continuous Potential Force (1 run)**: `dmin_kubo` on compact flocks ($N \in [25, 100]$).
-- **Sensitivity Suite (14 runs)**: Evaluated at $6\times$ drive time, a base and 6 variants (handler post release, encircling ring, start gap 15/60 against the base 30, goal radius $1.5 R_f$, field-calibrated GPS parameters, and dog speed 1.15) under both success criteria.
-
-The follow-up adds 14 protocols and resumes the three 99% grids (162,130 trials, 0 errors, 99% arrival only), listed with RQ8–RQ13 and in the appendix. Two protocols of the Lama and di Bernardo model on the gather task (40,280 trials, 0 errors) answer RQ14.
+- **RQ8 (denser grid):** on nine flock sizes up to $N = 566$, how fast do $D_{\min}$ and $D_{\mathrm{sat}}$ grow, and can steady growth be told from a curve that levels off?
+- **RQ9 (parts of the rule):** what do the collect/drive switch and the team layer each add, and how does a model whose finish time falls with $D$ (Kubo) saturate?
+- **RQ10 (too many dogs):** does holding the flock in the goal, or dogs that take up room, make extra dogs harmful?
+- **RQ11 (cohesion):** how does the growth of $D_{\min}$ change with the strength of cohesion?
+- **RQ12 (what a dog sees):** how many dogs does a limited sensing range cost, and does sharing what dogs see make up for it?
+- **RQ13 (large N):** what happens above the size at which the model's flock still has a size of its own?
+- **RQ14 (targets without cohesion):** does HerdSim reproduce the results of Lama and di Bernardo (2024), and does their square-root law hold under HerdSim's reliability rule as well as under their statistic?
 
 ---
 
-## 3. Empirical Results and In-Depth Mechanistic Analysis
+## 2. Decision Rules
 
-### 3.1 RQ1: How Does *D*<sub>min</sub> Scale with Flock Size *N*?
+*(The adaptive runner, the intervals and the shared seeds are described in [task_design.md: adaptive sampling](../experiments/task_design.md#3-adaptive-sequential-sampling-engine).)*
 
-Our factorial exploration of 23 base protocols establishes three foundational scaling regimes:
+### 2.1 When a team is reliable
+A **cell** is one combination of method, layout, $N$, deadline and $D$. Each trial succeeds or fails. For $n$ trials with $k$ successes, $[L, U]$ is the exact two-sided 99% Clopper–Pearson interval for the true success rate $p$:
 
-1. **Flock Cohesion Invariance on `compact` Flocks**:  
-   On pre-clustered flocks, $D_{\min} \equiv 1$ is an exact invariant constant across all tested flock sizes ($N \in [25, 400]$) and all temporal deadlines ($12\times, 6\times, 3\times$). Additional shepherds do not reduce mission completion time (median finish time remains 1.44–1.74 drive times for all $D \in [1, 24]$).  
-   *Physical Mechanism*: This invariance is rooted in the Strömbom model's repulsive force normalization: the combined fear vector exerted by multiple dogs within sensing range ($r_s = 65\text{ m}$) is normalized to unit length, and individual sheep forward speed is strictly clamped at $v_{\mathrm{sheep}} = 1.0\text{ m/s}$. Adding dogs behind a compact flock cannot compress or accelerate the herd beyond its natural walking pace. In contrast, under models with additive potential fields such as Kubo et al. (2022), completion time plummets from $115\text{ s}$ (1 dog) to $29\text{ s}$ (10 dogs) at $N = 100$ (Figure 2).
+$$
+L = B\left(\frac{\alpha}{2}, k, n - k + 1\right), \quad U = B\left(1 - \frac{\alpha}{2}, k + 1, n - k\right)
+$$
 
-2. **Spatial Confinement Threshold at $N \le 50$**:  
-   Across all dispersed layouts (`wide`, `split`, `outlier_rich`), $D_{\min} \equiv 1$ remains sufficient for $N \le 50$ under all deadlines.  
-   *Physical Mechanism*: The characteristic flock aggregation radius scales as $R_f(N) = r_a N^{2/3}$ with $r_a = 2\text{ m}$. For $N \le 50$, $R_f(50) \le 7.6\text{ m}$. Even under scattered initializations, all stragglers fall within or near the single dog's sensing horizon ($r_s = 65\text{ m}$). Operating at $v_{\mathrm{dog}} = 1.5\text{ m/s}$ against $v_{\mathrm{sheep}} = 1.0\text{ m/s}$, a single shepherd can rapidly patrol the entire perimeter, gathering dispersed animals before any subgroup escapes.
+where $B(q, a, b)$ is the $q$ quantile of the Beta distribution with parameters $a$ and $b$, $\alpha = 0.01$, and $n$ runs from 10 to 200 trials per cell.
 
-3. **Sub-linear Scaling on Dispersed Flocks at Large $N$**:  
-   For $N \ge 100$ on scattered pastures, $D_{\min}$ scales sub-linearly with $N$. Under relaxed deadlines ($12\times$), $D_{\min}$ increases to only 2 or 3 dogs at $N = 400$. In log-log space ($\log_2 D_{\min}$ vs. $\log_2 N$), empirical scaling exponents fall between **0.20 and 0.42** at $12\times$, well below the theoretical $\alpha = 0.50$ ($\sqrt{M}$) lower bound for independent Brownian particles (Lama and di Bernardo 2024).
+With the threshold $\theta = 0.90$:
+- **Reliable:** $L \ge 0.90$. This takes at least 51 successes without a failure, so 60 trials in batches of 10.
+- **Unreliable:** $U < 0.90$. Usually decided after 10 to 20 trials, and the cell gets no more seeds.
+- **Undecided:** $L < 0.90 \le U$. The cell gets another batch of 10 seeds, up to 200.
 
-Table 1 presents the complete empirical $D_{\min}$ scaling grid (Strict 100% / 99% Arrival):
+For one curve of tested dog counts at fixed method, layout, $N$ and deadline:
+
+$$
+D_{\min} = \min \lbrace D \mid \text{cell } D \text{ is reliable} \rbrace, \qquad
+D_{\min,\mathrm{low}} = \min \lbrace D \mid U(D) \ge \theta \rbrace
+$$
+
+The tables show $D_{\min}$ in four forms:
+- **A single value (`3`):** every smaller $D$ is unreliable.
+- **A bracket (`3-8`):** $D = 8$ is reliable but a smaller $D$ from 3 up is still undecided at 200 seeds.
+- **A lower bound (`[5]`):** no $D$ is reliable yet, and $D_{\min}$ is at least 5.
+- **`none`:** every tested $D$ up to the top of the grid (24 in the main runs) is unreliable.
+
+### 2.2 Protocols
+The first study has 23 protocols (164,740 trials, 20 workers, no errors):
+- **Main grids (6 runs):** 5 flock sizes, 4 layouts and 3 deadlines, each under the strict and the 99% rule.
+- **FAT baseline (2 runs):** `dmin_fat` and `dmin_f99_fat` at 6 drive times.
+- **Kubo model (1 run):** `dmin_kubo` on compact flocks of 25 to 100.
+- **Sensitivity (14 runs):** at 6 drive times, a base and six variants (dogs released from one point, dogs on a ring, start gap 15 and 60 instead of 30, goal radius $1.5 R_f$, the field-matched sheep parameters, dog speed 1.15), each under both rules.
+
+The follow-up adds 14 protocols and resumes the three 99% grids (162,130 trials, no errors, 99% rule only); they are listed with RQ8–RQ13 and in the appendix. Two protocols of the Lama and di Bernardo model (40,280 trials, no errors) answer RQ14.
+
+---
+
+## 3. Results
+
+### 3.1 RQ1: How does $D_{\min}$ grow with $N$?
+
+1. **Compact flocks need one dog.**  
+   $D_{\min} = 1$ at every flock size from 25 to 400 and every deadline. Extra dogs do not shorten the drive: the median finish time stays at 1.44–1.74 drive times for every $D$ from 1 to 24.  
+   *Why:* in the Strömbom model a sheep that reacts to dogs always walks at 1 m/s, and the push of several dogs is normalised to the size of one dog's push. Dogs behind a compact flock change its direction but cannot make it faster. In the Kubo model, where sheep speed up under a stronger push, the finish time does fall with $D$: from 115 s with one dog to 29 s with ten at $N = 100$ (Figure 2).
+
+2. **Up to $N = 50$ one dog is enough on every layout.**  
+   On the scattered layouts too, $D_{\min} = 1$ for $N \le 50$ at every deadline.  
+   *A likely reason:* the scattered layouts are sized by the collect distance $r_a N^{2/3}$, so at $N = 50$ the farthest sheep starts at most about 45 m from the flock centre, inside the 65 m at which a sheep reacts to a dog. One dog behind the flock moves almost every sheep from the start.
+
+3. **On scattered flocks $D_{\min}$ grows slower than $N$.**  
+   For $N \ge 100$ on scattered layouts, $D_{\min}$ grows, but slowly: with the loose deadline it reaches only 2 or 3 dogs at $N = 400$. On a log-log scale the slope is **0.20 to 0.42** at 12 drive times, below the 0.5 that Lama and di Bernardo (2024) report for non-cohesive targets.
+
+Table 1 gives $D_{\min}$ for every main cell (strict / 99%):
 
 | Deadline | Layout | $N = 25$ | $N = 50$ | $N = 100$ | $N = 200$ | $N = 400$ |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: |
@@ -135,166 +128,148 @@ Table 1 presents the complete empirical $D_{\min}$ scaling grid (Strict 100% / 9
 | **3&times;** | `split` | 1 / 1 | 1 / 1 | 1 / 1 | none / none | none / none |
 | **3&times;** | `outlier_rich` | 1 / 1 | 1 / 1 | 3–8 / 2 | none / 4–10 | none / [6] |
 
-*Data source:* [results_tables.md: strict success](results_tables.md#d_min-by-layout-and-n-strict-success) (`dmin_m12`, `dmin_m6`, `dmin_m3`) and [results_tables.md: success at 99 percent](results_tables.md#d_min-by-layout-and-n-success-at-99-percent) (`dmin_f99_m12`, `dmin_f99_m6`, `dmin_f99_m3`).
+*Data:* [results_tables.md: strict success](results_tables.md#d_min-by-layout-and-n-strict-success) (`dmin_m12`, `dmin_m6`, `dmin_m3`) and [results_tables.md: success at 99 percent](results_tables.md#d_min-by-layout-and-n-success-at-99-percent) (`dmin_f99_m12`, `dmin_f99_m6`, `dmin_f99_m3`).
 
 ![D_min Scaling against Flock Size N](../figures/fig20_dmin_vs_n.png)
 
-**Figure 1: Empirical scaling of minimum reliable team size $D_{\min}$ against flock size $N$ across deadlines and layouts.**  
-The three panels represent decreasing deadline multipliers ($12\times \to 6\times \to 3\times$ drive times) in log-log coordinates. Solid lines with circles denote strict 100% containment; dashed lines with squares denote 99% arrival. Shaded vertical bars mark undecided brackets (e.g. $[3, 8]$) open at the 200-seed cap; hollow triangles indicate lower bounds ($[n]$); crosses mark confirmed unreliability up to $D = 24$ (`none`). While compact herds remain invariant at $D_{\min} = 1$, dispersed layouts scale sub-linearly under relaxed deadlines, but diverge sharply under strict criteria at $N \ge 100$ due to the Straggler Effect.  
-*Data:* [results_tables.md: strict success](results_tables.md#d_min-by-layout-and-n-strict-success), [results_tables.md: success at 99 percent](results_tables.md#d_min-by-layout-and-n-success-at-99-percent), and supplementary densified sizes $N \in \lbrace 71, 141, 283, 566\rbrace$.
+**Figure 1: $D_{\min}$ against flock size $N$ across deadlines and layouts.**  
+The three panels are the three deadlines (12, 6 and 3 drive times), on log-log axes. Solid lines with circles are the strict rule; dashed lines with squares the 99% rule. Shaded bars are brackets still open at 200 seeds; hollow triangles are lower bounds; crosses mean no reliable team up to 24. Compact flocks stay at 1; scattered flocks grow slowly at the loose deadline and much faster under the strict rule at $N \ge 100$.  
+*Data:* [results_tables.md: strict success](results_tables.md#d_min-by-layout-and-n-strict-success), [results_tables.md: success at 99 percent](results_tables.md#d_min-by-layout-and-n-success-at-99-percent), and the added sizes $N = 71, 141, 283, 566$.
 
 ![Finish Time on Compact Flocks](../figures/fig31_compact.png)
 
-**Figure 2: Completion time versus team size $D$ on compact starting flocks under discrete vs. continuous potential mechanics.**  
-*(Left)* Strömbom model with team coordination rule `strombom_multi` ($N = 25$ to $400$): finish time is perfectly flat across team sizes because forward velocity is clamped ($1.0\text{ m/s}$) and combined fear vectors are normalized to unit length.  
-*(Right)* Continuous potential field model of Kubo et al. (2022) ($N = 25, 50, 100$): non-linear repulsive forces ($1/r^3$) sum additively, accelerating herd displacement from $115\text{ s}$ (1 dog) down to $29\text{ s}$ (10 dogs) at $N = 100$.  
-*Data:* Successful compact trials in `results/dmin_m6` and `results/dmin_kubo`; Kubo $D_{\min}$ in [results_tables.md: Kubo (compact, strict)](results_tables.md#kubo-compact-strict).
+**Figure 2: Finish time against team size on compact flocks, Strömbom against Kubo sheep.**  
+*(Left)* Strömbom sheep with the team rule `strombom_multi` ($N = 25$ to 400): the finish time is flat in $D$, because a reacting sheep walks at 1 m/s whatever the dogs do.  
+*(Right)* Kubo sheep ($N = 25, 50, 100$): sheep speed up under a stronger push, up to 5 m/s, so more dogs finish sooner: from 115 s with one dog to 29 s with ten at $N = 100$.  
+*Data:* successful compact trials in `results/dmin_m6` and `results/dmin_kubo`; Kubo $D_{\min}$ in [results_tables.md: Kubo (compact, strict)](results_tables.md#kubo-compact-strict).
 
-Table 2 provides the empirical log-log scaling exponents ($\alpha$ in $D_{\min} \propto N^\alpha$):
+Table 2 gives the slope of $\log_2 D_{\min}$ against $\log_2 N$:
 
-| Criterion | Deadline | `wide` Slope | `split` Slope | `outlier_rich` Slope |
+| Rule | Deadline | `wide` | `split` | `outlier_rich` |
 | :--- | :---: | :---: | :---: | :---: |
-| **Strict 100%** | $12\times$ | 0.42 | 0.32 to 0.42 | 0.42 |
-| **Strict 100%** | $6\times$ | 0.48 ($N \le 200$) | Flat ($N \le 100$) | 0.79 ($N \le 100$) |
-| **Strict 100%** | $3\times$ | 0.79 ($N \le 100$) | Flat ($N \le 100$) | 0.79 to 1.50 ($N \le 100$) |
-| **99% Arrival** | $12\times$ | 0.20 to 0.30 | 0.20 | 0.30 |
-| **99% Arrival** | $6\times$ | 0.30 to 0.42 | Flat ($N \le 100$) | 0.42 to 0.48 |
-| **99% Arrival** | $3\times$ | 0.62 to 0.68 | Flat ($N \le 100$) | 0.70 to 1.10 ($N \le 200$) |
+| **Strict** | $12\times$ | 0.42 | 0.32 to 0.42 | 0.42 |
+| **Strict** | $6\times$ | 0.48 ($N \le 200$) | flat ($N \le 100$) | 0.79 ($N \le 100$) |
+| **Strict** | $3\times$ | 0.79 ($N \le 100$) | flat ($N \le 100$) | 0.79 to 1.50 ($N \le 100$) |
+| **99%** | $12\times$ | 0.20 to 0.30 | 0.20 | 0.30 |
+| **99%** | $6\times$ | 0.30 to 0.42 | flat ($N \le 100$) | 0.42 to 0.48 |
+| **99%** | $3\times$ | 0.62 to 0.68 | flat ($N \le 100$) | 0.70 to 1.10 ($N \le 200$) |
 
+A range is the set of slopes the brackets allow; "$N \le 100$" means larger sizes had no decided $D_{\min}$.  
 *Data:* [results_tables.md: Growth with N, strict](results_tables.md#growth-with-n-strict) and [results_tables.md: Growth with N, 99 percent](results_tables.md#growth-with-n-99-percent).
 
-**Physical Mechanics of the Scaling Exponent ($\alpha$):**
-1. **Economies of Scale via Biological Swarm Cohesion**:  
-   For independent non-cohesive targets in open space, the theoretical lower bound is $\alpha = 0.50$ ($D \propto \sqrt{M}$). For cohesive sheep flocks under relaxed deadlines ($12\times$), the empirical slope drops to **0.20 to 0.30** under 99% arrival. Global social attraction ($c = 1.05$, interaction degree $n = N - 1$) ensures that shepherds only need to herd peripheral stragglers into visual sightlines; mutual attraction automatically draws animals inward toward the herd center, yielding substantial economies of scale.
-2. **Breakdown of Scaling under Deadline Urgency**:  
-   Tightening the deadline from $12\times$ to $3\times$ steepens the slope $\alpha$ to **0.62 to 1.50**. When temporal budgets are compressed, there is insufficient time for self-aggregation. A single dog cannot gather stragglers sequentially; the team must deploy in parallel to contain peripheral flanks simultaneously, overriding natural cohesion and driving agent requirements toward linear scaling.
+**What sets the slope.**
+1. **Cohesion keeps it low.** For non-cohesive targets Lama and di Bernardo report a slope of 0.5. For the Strömbom flock at the loose deadline it is 0.20 to 0.30 under the 99% rule. Every sheep is drawn toward the whole flock ($c = 1.05$, all $N - 1$ neighbours), so a stray that a dog turns back walks to the flock by itself, and the dogs need not fetch every sheep.
+2. **A tight deadline raises it.** At 3 drive times the slope rises to 0.62–1.50. There is no time for one dog to bring the strays back one after another, so the team has to work on several sides of the flock at once.
 
 ---
 
-### 3.2 RQ2: Layout Dispersion vs. Flock Size: Which Exerts Greater Impact?
+### 3.2 RQ2: Layout or flock size, which moves $D_{\min}$ more?
 
-**Practical Motivation**:
-When deploying shepherd teams (or autonomous herding robots), a system designer faces a core question: *To estimate the required team size (*$D_{\min}$*), should one focus primarily on flock headcount (Size* $N$*), or on how scattered the flock is across the field (Layout geometry)?*
+Someone sizing a team of dogs or robots would want to know whether to look first at the number of animals or at how scattered they are.
 
-**Measuring Spread via "Doublings" in Table 3**:
-Because flock size is a continuous numeric variable ($N \in [25, 400]$) while layout geometries are discrete spatial patterns (`compact`, `wide`, `split`, `outlier_rich`), we compare their relative impact on a shared, scale-invariant metric: the number of **doublings** ($\log_2$ span of $D_{\min}$):
+To compare a numeric factor ($N$) with a categorical one (layout), we measure both in **doublings** of $D_{\min}$:
 
 $$
-\text{Spread (doublings)} = \log_2 \left( \frac{D_{\min,\max}}{D_{\min,\min}} \right)
+\text{spread (doublings)} = \log_2 \left( \frac{\text{largest } D_{\min}}{\text{smallest } D_{\min}} \right)
 $$
 
-The spread is taken over layouts at each $N$ and then averaged over $N$ (and over $N$ at each layout, averaged over layouts), using the geometric midpoint of a bracket; curves with no reliable $D$ on the grid are left out.
+So a change from 1 dog to 2 is one doubling, from 1 to 3 is 1.58, and no change is 0. The spread across layouts is taken at each $N$ and averaged over $N$; the spread across $N$ is taken at each layout and averaged over layouts. A bracket counts at its geometric midpoint, and curves with no reliable $D$ are left out.
 
-- *Intuitive Examples*:
-  - If $D_{\min}$ increases from 1 dog to 2 dogs: $\log_2(2/1) = 1.0$ doubling (a $2\times$ increase).
-  - If $D_{\min}$ increases from 1 dog to 3 dogs: $\log_2(3/1) \approx 1.58$ doublings (a $\sim 3\times$ increase).
-  - If $D_{\min}$ remains constant: $0$ doublings (zero variance).
+Table 3:
 
-Table 3 compares the quantitative spread in doublings:
+| Rule | Deadline | Spread across layouts (fixed $N$) | Spread across $N$ (fixed layout) |
+| :--- | :---: | :---: | :---: |
+| **Strict** | $12\times$ | 0.68 | 1.19 |
+| **Strict** | $6\times$ | 1.67 | 1.69 |
+| **Strict** | $3\times$ | 0.76 | 0.97 |
+| **99%** | $12\times$ | 0.50 | 0.75 |
+| **99%** | $6\times$ | 0.92 | 1.30 |
+| **99%** | $3\times$ | 1.25 | 1.28 |
 
-| Criterion | Deadline | Spread Across Layouts (Fixed $N$) | Spread Across $N$ (Fixed Layout) | Dominant Factor |
-| :--- | :---: | :---: | :---: | :---: |
-| **Strict** | $12\times$ | 0.68 doublings | 1.19 doublings | Flock Size $N$ |
-| **Strict** | $6\times$ | 1.67 doublings | 1.69 doublings | Parity / Size $N$ |
-| **Strict** | $3\times$ | 0.76 doublings | 0.97 doublings | Flock Size $N$ |
-| **99%** | $12\times$ | 0.50 doublings | 0.75 doublings | Flock Size $N$ |
-| **99%** | $6\times$ | 0.92 doublings | 1.30 doublings | Flock Size $N$ |
-| **99%** | $3\times$ | 1.25 doublings | 1.28 doublings | Parity / Size $N$ |
+*Data:* computed from the doubling summaries in [Growth with N, strict](results_tables.md#growth-with-n-strict) and [Growth with N, 99 percent](results_tables.md#growth-with-n-99-percent).
 
-Data: computed from the doubling summaries in [Growth with N, strict](results_tables.md#growth-with-n-strict) and [Growth with N, 99 percent](results_tables.md#growth-with-n-99-percent).
-
-**Core Takeaways from Table 3**:
-1. **Flock size $N$ is the primary governing factor**:
-   In virtually all conditions, the spread across flock size $N$ exceeds the spread across layouts (averaging 0.75 to 1.69 doublings vs. 0.50 to 1.67 doublings). Scaling headcount from 25 to 400 animals systematically forces larger team size increases than swapping layout geometries.
-2. **Layout impact is essentially a binary threshold**:
-   Nearly all variance across layouts (the "Spread Across Layouts" column) stems from a single transition: switching from **pre-gathered flocks (`compact`)** to **scattered pastures**.
-   - On `compact` starts, sheep begin as a single cohesive unit, holding $D_{\min} \equiv 1$ invariant across all sizes and deadlines.
-   - Under the 99% rule at $12\times$, whether sheep are uniformly dispersed (`wide`) or have isolated outliers (`outlier_rich`) makes little difference: the two rarely differ by more than 1 dog. Under the strict rule at $6\times$ they differ widely (3 against [12] at $N = 200$), and `split` can fail outright where the other two have a finite $D_{\min}$.
+**What the table says.**
+1. **Flock size moves $D_{\min}$ a little more.** In every row the spread across $N$ is at least as large as the spread across layouts; at the strict 6× deadline and the 99% 3× deadline the two are nearly equal.
+2. **The layout effect is mostly compact against scattered.** Compact flocks hold $D_{\min} = 1$ everywhere. Under the 99% rule at 12 drive times, `wide` and `outlier_rich` rarely differ by more than one dog. Under the strict rule at 6 drive times they differ widely (3 against [12] at $N = 200$), and `split` can fail outright where the other two have a $D_{\min}$.
 
 ---
 
----
+### 3.3 RQ3: How does the deadline change $D_{\min}$?
 
-### 3.3 RQ3: How Does Deadline Urgency Shift *D*<sub>min</sub>?
+1. **The effect is sudden, not gradual.**  
+   Under the 99% rule on `wide` and `outlier_rich`, going from 6 to 12 drive times saves at most one dog. Going from 6 to 3 drive times costs much more: on `wide` $N = 400$, $D_{\min}$ goes from 2–3 to 5–6, and on `split` $N \ge 200$ no team up to 24 is reliable.
 
-Temporal urgency acts as a non-linear multiplier on the shepherd requirement, fundamentally altering the spatial coordination mode of the team:
-
-1. **Non-linear Multiplier on Team Sizing**:  
-   Under 99% arrival on `wide` and `outlier_rich` layouts, relaxing the deadline from $6\times$ to $12\times$ drive times saves at most 1 dog (though on `split` and under strict containment the difference is larger due to boundary sensitivity). In stark contrast, compressing the deadline from $6\times$ down to $3\times$ triggers rapid escalation in herder demand: on `wide` $N = 400$, $D_{\min}$ surges from 2–3 to 5–6 dogs; on `split` $N \ge 200$, tight deadlines induce complete catastrophic failure across all tested team sizes ($D \le 24$).
-
-2. **Physical Mechanism from Sequential Rounding to Parallel Flanking**:  
-   This non-linearity arises from the finite maximum velocities of both agent types ($v_{\mathrm{sheep}} = 1.0\text{ m/s}$, $v_{\mathrm{dog}} = 1.5\text{ m/s}$). Under relaxed deadlines ($12\times$), the temporal budget $T_{\mathrm{budget}} = 12 \times (d_{\mathrm{start}} / v_{\mathrm{sheep}})$ is large enough for a single shepherd to round up dispersed outliers sequentially, herding each stray into the main cluster before pursuing the next. At $3\times$, sequential travel exceeds the physical reach of a single agent within the remaining time; the team must deploy simultaneously in parallel, partitioning the pasture into spatial sectors to arrest the outward drift of stragglers from the outset.
+2. **Why.**  
+   Sheep walk at 1 m/s and dogs run at 1.5 m/s. With 12 drive times there is time for one dog to bring the strays back one by one before driving the flock. With 3 drive times that sequence no longer fits, so several dogs must work on different sides of the flock at the same time.
 
 ![Deadline Impact on Success Curves](../figures/fig29_deadline.png)
 
-**Figure 3: Non-linear impact of deadline urgency on empirical success curves and reliability boundaries.**  
-*(Left & Middle Panels)* Mission success rates with Clopper–Pearson 99% confidence intervals against team size $D$ on `wide` $N = 400$ (left) and `outlier_rich` $N = 200$ (middle) across deadlines: $12\times$ (light blue), $6\times$ (mid blue), and $3\times$ (dark blue); dotted horizontal line denotes the reliability threshold $\theta = 0.90$.  
-*(Right Panel)* $D_{\min}$ trajectories (log scale) across deadlines for `wide` and `outlier_rich` at $N = 200$ (solid lines, circles) and $N = 400$ (dashed lines, squares); hollow markers denote lower bounds of open cells. Compressing the deadline shifts curves non-linearly to the right as parallel spatial containment becomes mandatory.  
-*Data:* `results/dmin_f99_m12`, `dmin_f99_m6`, and `dmin_f99_m3`; detailed values in [results_tables.md: D_min by layout and N, success at 99 percent](results_tables.md#d_min-by-layout-and-n-success-at-99-percent).
+**Figure 3: Success against team size at the three deadlines.**  
+*(Left and middle)* Success rate with 99% Clopper–Pearson intervals against $D$ on `wide` $N = 400$ (left) and `outlier_rich` $N = 200$ (middle), at 12 (light blue), 6 (mid blue) and 3 (dark blue) drive times; the dotted line is $\theta = 0.90$.  
+*(Right)* $D_{\min}$ against deadline for `wide` and `outlier_rich` at $N = 200$ (solid, circles) and $N = 400$ (dashed, squares); hollow markers are lower bounds. A tighter deadline moves the curves to larger teams, and the step from 6 to 3 is much larger than from 12 to 6.  
+*Data:* `results/dmin_f99_m12`, `dmin_f99_m6` and `dmin_f99_m3`; values in [results_tables.md: D_min by layout and N, success at 99 percent](results_tables.md#d_min-by-layout-and-n-success-at-99-percent).
 
 ---
 
-### 3.4 RQ4: Success Criteria & The Straggler Effect
+### 3.4 RQ4: The success rule and the last sheep
 
-The divergence between practical 99% arrival and strict 100% containment is not merely an arbitrary statistical threshold choice, but delineates distinct physical regimes of collective multi-agent herding:
+1. **The 99% rule never needs more dogs.**  
+   In all 34 scattered cells where both rules give a reliable team, the 99% rule needs the same or fewer dogs. Where both are decided, it saves exactly one dog (from 3 to 2, for example); on `outlier_rich` $N = 100$ at 3 drive times $D_{\min}$ goes from the bracket 3–8 to 2. Six large-flock cells that fail under the strict rule (four `none`, two open at 200 seeds) have a reliable team under the 99% rule (two decided, four narrow brackets).
 
-1. **Systematic Disparity Across Parameter Cells**:  
-   The 99% arrival criterion requires equal or fewer dogs than strict 100% containment across all 34 dispersed cells where both criteria yield reliable solutions. In cells where both criteria are decisively resolved, the saving is exactly one dog (e.g. from 3 down to 2); on `outlier_rich` $N = 100$ at $3\times$, $D_{\min}$ drops from the bracket $[3, 8]$ to 2. Most crucially, six large-flock parameter cells that fail completely under strict containment (four confirmed `none`, two open at the 200-seed cap) achieve stable reliability under 99% arrival (two decided, four narrow brackets).
+2. **Why large teams fail under the strict rule.**  
+   In **97% of strict failures** with 6 or more dogs in the sensitivity base run (`dmin_s_base`; 91% in `dmin_m6`), 99% of the flock had been in the goal before the deadline. The last one or two sheep decided the trial. In a sample trace (`wide` $N = 400$, 16 dogs, seed 2), the dogs go after the last stray, end up between the flock and the goal, and drive the flock that was already in back out of it, twice (Figure 5).
 
-2. **Microscopic Dynamics of the Straggler Effect**:  
-   Micro-telemetry analysis reveals why large teams fail under strict containment: in **97% of all strict failures** for large teams ($D \ge 6$) in the sensitivity base run (`dmin_s_base`; 91% in `dmin_m6`), **99% of the flock had already entered the goal pen well before the deadline**.  
-   This paradox stems from terminal approach dynamics: when a team of 16 dogs running at $1.5\text{ m/s}$ converges on the 1–2 final stragglers lingering outside the pen, the algorithmic driving position places the dogs behind the stragglers relative to the goal. In doing so, the dogs position themselves directly between the goal mouth and the core flock already inside. The collective repulsion of the dense pack cuts across the pen entrance, flushing the 99% core back out into the open pasture and transforming an essentially complete mission into a catastrophic failure.
-
-3. **Resolving the Artifact via Approach Velocity**:  
-   Moderating shepherd speed to a calmer pace ($v_{\mathrm{dog}} = 1.15\text{ m/s}$) completely eliminates this terminal overshoot momentum. The dogs round up stragglers with controlled acceleration, preserving the spatial integrity of the penned animals. On `outlier_rich` $N = 400$, this single velocity adjustment rescues strict performance from total failure (`none`) to a robust $D_{\min} = 6$. This proves that large-team failures under strict containment are local boundary artifacts of the penning geometry, rather than failures of collective gathering capability.
+3. **Slower dogs avoid it.**  
+   With dogs at 1.15 m/s instead of 1.5 (`dmin_s_dogspeed`), the strict $D_{\min}$ on `outlier_rich` $N = 400$ drops from none on the grid to 6, and on `wide` $N = 400$ from [9] to 5. So these strict failures come from what happens at the goal, not from a team too small to gather the flock.
 
 ![Strict vs 99% Success Rates](../figures/fig30_strict_vs_99.png)
 
-**Figure 4: Cell-by-cell comparison of strict 100% containment versus practical 99% arrival success rates on identical random seeds.**  
-Panels represent deadlines ($12\times$, $6\times$, $3\times$) for dispersed layouts at $N \ge 100$ (80, 57, and 33 shared cells with $\ge 20$ seeds). Horizontal axis: strict success rate; vertical axis: 99% arrival success rate; diagonal line: identity $y = x$. The upper-left shaded region contains 40 cells (31 at $N \ge 200$) achieving $\ge 90$% reliability under 99% arrival while failing under strict containment. In this regime, the stochastic escape of the final straggler, rather than flock gathering capability, dominates the strict outcome.  
-*Data:* `results/dmin_m12`, `dmin_m6`, and `dmin_m3`; tabulated in [results_tables.md: strict success](results_tables.md#d_min-by-layout-and-n-strict-success) and [results_tables.md: success at 99 percent](results_tables.md#d_min-by-layout-and-n-success-at-99-percent).
+**Figure 4: Strict against 99% success, cell by cell, on the same seeds.**  
+One panel per deadline (12, 6, 3), scattered layouts at $N \ge 100$ (80, 57 and 33 shared cells with at least 20 seeds). Horizontal axis: strict success rate; vertical axis: 99% success rate; the diagonal is $y = x$. The shaded upper left holds 40 cells (31 at $N \ge 200$) reliable under the 99% rule but not under the strict one. There, whether the last sheep gets in decides the strict result.  
+*Data:* `results/dmin_m12`, `dmin_m6` and `dmin_m3`; values in [results_tables.md: strict success](results_tables.md#d_min-by-layout-and-n-strict-success) and [results_tables.md: success at 99 percent](results_tables.md#d_min-by-layout-and-n-success-at-99-percent).
 
 ![The Straggler Mechanism](../figures/fig22_straggler.png)
 
-**Figure 5: Microscopic dynamics of the Straggler Effect at the penning boundary.**  
-*(Left Panel)* Proportion of trials achieving 99% arrival versus strict 100% containment for large teams ($D \ge 6$). At standard dog speed ($1.50\text{ m/s}$), the failure gap reaches 97%, whereas calm dogs ($1.15\text{ m/s}$) eliminate the disparity completely.  
-*(Right Panels)* State trajectories for a representative trial (`wide` $N = 400$, 16 dogs, seed 2): top panel shows flock centroid distance to goal; bottom panel shows sheep outside the goal (symlog scale). Fast dogs (blue) pen 399 animals, but the pursuit of the final stray drives the flock back out of the pen twice. Calm dogs (orange) maintain formation, completing the drive in a single pass.  
-*Data:* `results/dmin_s_base` and `results/dmin_s_dogspeed`; tabulated in [results_tables.md: Sensitivity, strict: base / variant](results_tables.md#sensitivity-strict-base--variant).
+**Figure 5: The last sheep decides.**  
+*(Left)* Share of trials with 6 or more dogs in which every sheep got in (dark blue), in which 99% of the sheep were in at some tick (hatched), and in which every sheep got in with slower dogs (orange). With dogs at 1.5 m/s the first two differ by up to 30 points; with dogs at 1.15 m/s nearly every trial brings every sheep in.  
+*(Right)* One trial (`wide` $N = 400$, 16 dogs, seed 2): top, the distance from the flock centre to the goal; bottom, the sheep outside the goal (symlog scale). Fast dogs (blue) bring 399 sheep in, then drive the flock back out twice while chasing the last one. Slower dogs (orange) finish in one pass.  
+*Data:* `results/dmin_s_base` and `results/dmin_s_dogspeed`; values in [results_tables.md: Sensitivity, strict: base / variant](results_tables.md#sensitivity-strict-base--variant).
 
 ---
 
-### 3.5 RQ5: Which Scaling Laws Survive Sensitivity Perturbations?
+### 3.5 RQ5: Which results survive changes to the setup?
 
-Evaluation across 14 sensitivity protocols at $6\times$ drive times highlights the stark contrast in empirical stability between the two success criteria:
+The 14 sensitivity protocols at 6 drive times change one setup choice at a time.
 
-1. **Invariance of the 99% Frontier**:  
-   Under 99% arrival, empirical scaling frontiers exhibit remarkable structural invariance. Across variations in shepherd release geometry (`handler`, `ring`, `arcs`), initial clearance gaps (15, 30, 60 m), shepherd speed (1.15 vs. 1.50 m/s), and empirical GPS-collared sheep parameters, $D_{\min}$ shifts by at most **$\pm 1$ dog** relative to baseline (the largest discrepancy occurring in the matched parameter set on `outlier_rich` $N = 200$, shifting from 1 to 2–3 dogs).
+1. **Under the 99% rule $D_{\min}$ barely moves.**  
+   Releasing the dogs from one point or from a ring, changing the start gap (15, 30, 60 m), slowing the dogs (1.15 m/s) or using the field-matched sheep parameters moves $D_{\min}$ by at most about one dog. The largest change is the field-matched sheep on `outlier_rich` $N = 200$, from 2–3 down to 1.
 
-2. **Extreme Volatility of Strict Containment**:  
-   Under strict 100% containment, $D_{\min}$ fluctuates by factors of three or more, frequently collapsing to `none`. Minor geometric variations in release locations perturb initial approach angles, pushing the trajectory of the final straggler into unrecoverable escape vectors.
+2. **Under the strict rule it moves a lot.**  
+   The same changes often turn a finite $D_{\min}$ into "none on the grid" (for example `wide` $N = 200$ from 3 to none with the field-matched sheep, or to a lower bound of [3] with a gap of 15). Small changes in where the dogs start change how the last sheep comes in.
 
-3. **Goal Pen Geometry as the Sole Structural Bottleneck**:  
-   Constricting the goal pen radius from $2.0 R_f$ to $1.5 R_f$ is the only experimental perturbation that systematically escalates $D_{\min}$ under both criteria (under 99% arrival, shifting `wide` $N = 400$ from 2–3 to 5–6 dogs). Compressing goal area increases internal repulsion density ($f_{\mathrm{rep}}$) among penned sheep, requiring a substantially denser herder perimeter to prevent sheep from overflowing back into the pasture.
+3. **The goal size is the one setting that matters under both rules.**  
+   With a goal radius of $1.5 R_f$ instead of $1.9 R_f$, $D_{\min}$ rises under both rules: under the 99% rule `wide` $N = 400$ goes from 2–3 to 5–6 dogs, and `outlier_rich` $N = 400$ from 3 to none. A settled flock only just fits in the smaller goal.
 
 ![Sensitivity Analysis Heatmap](../figures/fig24_sensitivity.png)
 
-**Figure 6: Sensitivity analysis heatmap evaluating the stability of $D_{\min}$ across experimental variants at $6\times$ drive times.**  
-Top half represents strict 100% containment; bottom half represents 99% arrival. Rows denote experimental perturbations: release configurations (`handler`, `ring`), initial clearances (`gap 15`, `gap 60`), constricted goal pen (`goal 1.5 R_f`), calm shepherds (`dog speed 1.15`), and field-fitted GPS parameters (`matched sheep set`). Columns correspond to layout and flock size combinations ($N \in \lbrace 100, 200, 400\rbrace$). Color intensity scales with $D_{\min}$; hatched cells labeled "none" indicate no tested team achieved reliability. The 99% frontier displays solid structural invariance ($\le 1$ dog shift), whereas strict containment degrades under boundary perturbations.  
-*Data:* [results_tables.md: Sensitivity, strict: base / variant](results_tables.md#sensitivity-strict-base--variant) and [results_tables.md: Sensitivity, 99 percent: base / variant](resu---
+**Figure 6: $D_{\min}$ for each setup change at 6 drive times.**  
+Top half: strict rule; bottom half: 99% rule. Rows are the changes: dog start (`handler`, `ring`), start gap (15, 60), goal radius $1.5 R_f$, dog speed 1.15 and the field-matched sheep. Columns are layout and flock size ($N = 100, 200, 400$). The colour shows $D_{\min}$; hatched cells marked "none" have no reliable team. Under the 99% rule most rows match the base within one dog; under the strict rule many do not.  
+*Data:* [results_tables.md: Sensitivity, strict: base / variant](results_tables.md#sensitivity-strict-base--variant) and [results_tables.md: Sensitivity, 99 percent: base / variant](results_tables.md#sensitivity-99-percent-base--variant).
 
-### 3.6 RQ6: Does an Uncoordinated Baseline (FAT) Achieve Finite *D*<sub>min</sub>?
+---
 
-Evaluating the greedy uncoordinated baseline FAT (Furthest Agent Targeting) demonstrates the devastating consequences of missing spatial coordination:
+### 3.6 RQ6: Do dogs without a team rule reach a finite $D_{\min}$?
 
-1. **Catastrophic Failure on Large Flocks**:  
-   While FAT achieves reliability on small flocks ($N \le 100$), it yields **zero decided reliable cells** once the flock expands to $N \ge 200$ across all dispersed layouts. Remarkably, FAT fails even on pre-clustered flocks (`compact`) at $N = 400$—where the coordinated controller `strombom_multi` requires exactly 1 shepherd. Adding shepherds is completely ineffective at salvaging FAT performance.
+FAT (farthest-agent targeting) is a baseline without coordination: every dog goes behind the sheep farthest from the goal.
 
-2. **Physical Dynamics of Pack Clumping**:  
-   This failure stems from target redundancy and lack of spatial deconfliction: because all dogs share identical global visibility and evaluate the same greedy objective ($\arg\max_i \lVert \mathbf{x}_i - \mathbf{x}_{\text{goal}} \rVert$), all $D$ dogs converge onto the exact same stray animal.  
-   This causes severe spatial bunching: the median proportion of dogs with another dog within $2\text{ m}$ reaches **0.86 on `compact` and 0.79 on `split`** at $N \ge 200$ (0.46 on `wide`, 0.30 on `outlier_rich`). Instead of dividing the perimeter into parallel sectors, increasing team size in FAT merely creates a dense, stumbling pack chasing a single sheep while the remainder of the flock scatters freely.  
-   Crucially, the independent-shepherd baseline (Section 3.9)—which also lacks a centralized coordinator but preserves Strömbom's behavioral collect/drive state switch—achieves finite $D_{\min}$ up to $N = 200$. This confirms that FAT fails due to the combination of uncoordinated target convergence and the absence of a biologically grounded state machine.
+1. **FAT fails on large flocks.**  
+   FAT is reliable on small flocks ($N \le 100$) but has no reliable team at $N \ge 200$ on any scattered layout, and none on compact $N = 400$, where the team rule needs one dog. Adding dogs does not help.
 
-Table 5 compares $D_{\min}$ between FAT and `strombom_multi` at $6\times$ drive times:
+2. **Why.**  
+   Every dog sees every sheep and picks by the same rule, so all $D$ dogs chase the same sheep. They bunch together: at $N \ge 200$ the median share of dogs with another dog within 2 m is 0.86 on `compact` and 0.79 on `split` (0.46 on `wide`, 0.30 on `outlier_rich`). A larger FAT team is a larger pack behind one sheep while the rest of the flock spreads out.  
+   The independent shepherds of section 3.9 also have no team layer, but they keep Strömbom's collect/drive switch, and they reach a finite $D_{\min}$ up to $N = 200$. FAT fails because it has neither the team layer nor the switch.
+
+Table 5 compares FAT with `strombom_multi` at 6 drive times (FAT strict / 99%, with `strombom_multi` in brackets):
 
 | Layout | $N = 25$ | $N = 50$ | $N = 100$ | $N = 200$ | $N = 400$ |
 | :--- | :---: | :---: | :---: | :---: | :---: |
@@ -303,36 +278,33 @@ Table 5 compares $D_{\min}$ between FAT and `strombom_multi` at $6\times$ drive 
 | `split` | 1 / 1 (1 / 1) | 1 / 1 (1 / 1) | 1 / 1 (1 / 1) | none / none (none / [1]) | none / none (none / [5]) |
 | `outlier_rich` | 1 / 1 (1 / 1) | 1 / 1 (1 / 1) | 2 / 2 (3 / 2) | none / none ([12] / 2–3) | none / none (none / 3) |
 
-*Data source:* [results_tables.md: FAT dog rule, deadline 6](results_tables.md#fat-dog-rule-deadline-6-strict-then-99-percent) (`dmin_fat`, `dmin_f99_fat`); bracketed `strombom_multi` baselines in [results_tables.md: strict success](results_tables.md#d_min-by-layout-and-n-strict-success) and [results_tables.md: success at 99 percent](results_tables.md#d_min-by-layout-and-n-success-at-99-percent).
+*Data:* [results_tables.md: FAT dog rule, deadline 6](results_tables.md#fat-dog-rule-deadline-6-strict-then-99-percent) (`dmin_fat`, `dmin_f99_fat`); `strombom_multi` in [results_tables.md: strict success](results_tables.md#d_min-by-layout-and-n-strict-success) and [results_tables.md: success at 99 percent](results_tables.md#d_min-by-layout-and-n-success-at-99-percent).
 
 ![FAT vs Coordinated Team Rule](../figures/fig26_fat.png)
 
-**Figure 7: Success rate against team size $D$ for coordinated `strombom_multi` (blue) versus uncoordinated FAT (orange) at $6\times$ drive times.**  
-Five panels examine `compact` $N = 400$, `wide` $N = 200$ and $400$, `outlier_rich` $N = 200$, and `split` $N = 200$. Solid and dashed lines denote strict containment and 99% arrival; dotted horizontal line marks $\theta = 0.90$. FAT success remains trapped below 0.55 across all $D > 2$ due to pack clumping. In contrast, `strombom_multi` achieves stable reliability on `wide` and `outlier_rich` via Hungarian assignment and arc formation.  
-*Data:* `results/dmin_fat`, `dmin_f99_fat`, `dmin_m6`, and `dmin_f99_m6`.
+**Figure 7: Success against team size for `strombom_multi` (blue) and FAT (orange) at 6 drive times.**  
+Five panels: `compact` $N = 400$, `wide` $N = 200$ and 400, `outlier_rich` $N = 200$, and `split` $N = 200$. Solid lines: strict rule; dashed: 99% rule; dotted: $\theta = 0.90$. Beyond two dogs FAT stays below about 0.55, while `strombom_multi` becomes reliable on `wide` and `outlier_rich`.  
+*Data:* `results/dmin_fat`, `dmin_f99_fat`, `dmin_m6` and `dmin_f99_m6`.
 
 ---
 
-### 3.7 RQ7: Beyond *D*<sub>min</sub>: Enough Dogs (*D*<sub>sat</sub>), Operating Cost, and Pressure on the Flock
+### 3.7 RQ7: Beyond $D_{\min}$: enough dogs, cost, and pressure on the flock
 
-Identifying the minimal reliable team size $D_{\min}$ answers the question of operational feasibility, but raises a vital practical trade-off: *Does deploying surplus dogs beyond $D_{\min}$ accelerate herding? How rapidly do operational costs mount, and does an oversized pack inflict excessive panic or physical exhaustion on the livestock?*
+Knowing the smallest reliable team leaves practical questions. Do more dogs make the drive faster? What does each extra dog cost? Do more dogs put the sheep under more stress? We read these from the 99% runs (11 protocols), and replayed 164 stored trials to measure how long each sheep spends fleeing (every replay reproduced its stored trial exactly).
 
-To resolve this, we analyzed our full 99% arrival dataset across 11 protocol suites, complemented by 164 diagnostic trial replays tracking second-by-second flight exposure (every replay reproduced bit-identical stored outcomes).
+#### 1. When more dogs stop helping ($D_{\mathrm{sat}}$)
+$D_{\mathrm{sat}}$ is the smallest reliable team that no larger reliable team beats on finish time.
+- **Compact flocks and $N \le 50$:** $D_{\mathrm{sat}} = 1$ (except `outlier_rich` $N = 50$, bracketed at 1–24). One dog already keeps the flock walking at 1 m/s.
+- **Scattered flocks at 6 drive times:** $D_{\mathrm{sat}}$ is 2 to 6 at $N = 100$ to 400 (`outlier_rich` $N = 100$: 3; `wide` $N = 400$: 5).
+- After the finish-time top-up runs (section 3.8), $D_{\mathrm{sat}}$ on `wide` is 1, 1, 1, 2, 3, 3, 4, 5 from $N = 25$ to 400.
 
-#### 1. Speed Saturation (*D*<sub>sat</sub>)
-*D*<sub>sat</sub> is defined as the smallest reliable team size beyond which adding more shepherds produces no statistically significant reduction in completion time:
-- **On `compact` Flocks and Small Herds ($N \le 50$)**: $D_{\mathrm{sat}} = 1$ from the outset (with the sole exception of `outlier_rich` $N = 50$, bracketed at 1–24). A single shepherd already drives the flock at maximum forward walking velocity ($1.0\text{ m/s}$); additional herders cannot compel sheep to move faster.
-- **On Dispersed Flocks at Intermediate Deadlines ($6\times$)**: $D_{\mathrm{sat}}$ ranges from 2 to 7 dogs at $N = 100\text{--}400$ (e.g. `outlier_rich` $N = 100$ saturates at $D_{\mathrm{sat}} = 3$; `wide` $N = 400$ saturates at $D_{\mathrm{sat}} = 5$).
-- **Resolution of Brackets**: Compute top-ups (Section 3.8) resolved pairwise finish times: on `wide`, $D_{\mathrm{sat}}$ progresses cleanly through $1, 1, 1, 2, 3, 3, 4, 5$ from $N = 25$ to $400$.
+#### 2. What dogs beyond $D_{\mathrm{sat}}$ cost
+- In all 189 reliable cells above a decided $D_{\mathrm{sat}}$ at 6 drive times, the finish time is 0.96 to 1.01 times the $D_{\mathrm{sat}}$ time: at most 4% faster, sometimes 1% slower.
+- Dog time ($D$ times the finish time) grows with $D / D_{\mathrm{sat}}$. On a compact flock of 50, 24 dogs take the same 154 s as one dog, for 24 times the dog time.
 
-#### 2. Diminishing Returns and Economic Cost (*D* > *D*<sub>sat</sub>)
-Deploying shepherds beyond saturation yields negligible speedups while multiplying operational overhead:
-- Across all 189 reliable cells above a decided $D_{\mathrm{sat}}$ at $6\times$, completion times remain strictly between **0.96 and 1.01 times** the baseline duration at $D_{\mathrm{sat}}$ (saving at most 4% on elapsed time, and occasionally slowing by 1%).
-- Concurrently, **cumulative team work** (`dog_time` $= D \times T$) and total battery expenditure scale directly with the ratio $D / D_{\mathrm{sat}}$. For example, on a compact flock of $N = 50$, deploying 24 dogs consumes 24 times the cumulative energy of a single dog, yet delivers the flock home in the identical elapsed duration (154 s with 1 dog vs. 154 s with 24 dogs).
+Table 6 compares twice $D_{\mathrm{sat}}$ and $D = 24$ with the $D_{\mathrm{sat}}$ cell (scattered flocks, 6 drive times):
 
-Table 6 summarizes operational overhead at twice saturation ($2 D_{\mathrm{sat}}$) and at maximum tested capacity ($D = 24$) relative to the $D_{\mathrm{sat}}$ baseline across dispersed curves at $6\times$:
-
-| Layout, Flock Size $N$ | Threshold $D_{\mathrm{sat}}$ | At $2 D_{\mathrm{sat}}$: Finish Time / Dog Time | At $D = 24$: Finish Time / Dog Time |
+| Layout, $N$ | $D_{\mathrm{sat}}$ | At $2 D_{\mathrm{sat}}$: finish time / dog time | At $D = 24$: finish time / dog time |
 | :--- | :---: | :---: | :---: |
 | `wide`, $N = 200$ | 3 | 0.97 / 1.94 | 0.96 / 7.70 |
 | `wide`, $N = 400$ | 5 | 0.97 / 2.32 (at $D = 12$) | 0.96 / 4.61 |
@@ -340,399 +312,377 @@ Table 6 summarizes operational overhead at twice saturation ($2 D_{\mathrm{sat}}
 | `outlier_rich`, $N = 400$ | 6–24 | 0.96 / 1.91 | 0.94 / 3.74 |
 | `split`, $N = 100$ | 4 | 0.99 / 1.98 | 0.99 / 5.91 |
 
-*Interpretation of Table 6*: At $D = 24$, herding speed increases by only 1% to 6% ($0.94 - 0.99$), while cumulative agent energy expenditure surges by **3.7 to 7.9 times** ($3.74 - 7.85$).  
+At $D = 24$ the drive is 1% to 6% faster than at $D_{\mathrm{sat}}$, for 3.7 to 7.9 times the dog time.  
 *Data:* [results_tables.md: Effort, dmin_f99_m6](results_tables.md#effort-dmin_f99_m6-cost-of-dogs-beyond-d_sat-relative-to-the-d_sat-cell-1) and [results_tables.md: D_sat, dmin_f99_m6](results_tables.md#d_sat-dmin_f99_m6-d_sat-1).
 
-#### 3. Psychological Flight Stress and Animal Welfare
-Second-by-second micro-telemetry reveals a counterintuitive finding regarding animal stress:
-- **Cumulative Flight Duration per Sheep Actually Decreases**: A sheep enters the panic flight state only when a shepherd penetrates within threat radius $r_s = 65\text{ m}$. Expanding the team from $D_{\min}$ to $D_{\mathrm{sat}}$ enables parallel stray gathering, significantly shortening total drive duration and reducing the cumulative seconds each sheep spends fleeing (on `wide` $N = 400$, median flight time per sheep drops from 485 s at $D = 3$ down to 359 s at $D = 6$). Beyond $D_{\mathrm{sat}}$, cumulative flight duration plateaus (361 s at $D = 12$).
-- **Instantaneous Proportion vs. Total Exposure**: At any single second, a larger pack spans a broader arc, setting a higher instantaneous fraction of the flock into motion (median increases from 68% fleeing at $D = 3$ to 84% at $D = 12$). However, because the mission finishes earlier, total cumulative distress exposure is minimized.
-- **Physical Safety Standoff is Preserved**: Under the $3 r_a = 6\text{ m}$ standoff rule, the time a sheep spends within 6 m of any dog remains below 1.3 s per animal (median) across all tested team sizes.
+#### 3. Pressure on the sheep
+A sheep flees while a dog is within 65 m ($r_s$). The replays measure how long that lasts.
+- **Each sheep flees for less time, up to $D_{\mathrm{sat}}$.** More dogs gather the flock sooner, so the drive is shorter. On `wide` $N = 400$ the median flight time per sheep falls from 485 s at $D = 3$ to 359 s at $D = 6$, and stays there (361 s at $D = 12$).
+- **More of the flock flees at once.** A larger team spreads over a wider arc: the median share of the flock fleeing at a given moment rises from 68% at $D = 3$ to 84% at $D = 12$. Because the drive ends sooner, the total time each sheep spends fleeing does not rise.
+- **Dogs stay off the sheep.** The time a sheep spends within 6 m ($3 r_a$, the dog's stop distance) of a dog stays below 1.3 s per sheep (median) at every team size.
 
-#### 4. System Stability: Absence of Overcrowding Failures ($D_{\mathrm{overcrowd}}$)
-Under 99% arrival, across all 11 protocol suites up to $D = 24$ dogs, **we observe no overcrowding collapse ($D_{\mathrm{overcrowd}}$)** on the original five flock sizes. Point-mass agents never cause a curve to drop below reliability once attained. While surplus dogs introduce completion slowdowns on `split` at $12\times$ ($N = 400$: 950–1040 s for $D \ge 9$ vs. 839 s at $D = 5$), the mission completes reliably.
+#### 4. No team size makes the task fail
+Under the 99% rule, on the five original flock sizes and up to 24 dogs, no curve becomes unreliable again once it is reliable. Point dogs therefore show no overcrowding failure. On the denser grid there is one dip (`split` $N = 141$, $D = 4$, success 0.80). Extra dogs do slow some flocks: on `split` $N = 400$ at 12 drive times, the median finish time is 950–1040 s for $D \ge 9$ against 839 s at $D = 5$, though the task still succeeds.
 
 ![Cost of dogs beyond D_sat](../figures/fig33_effort.png)
 
-**Figure 8: Operating cost and diminishing returns beyond saturation team size $D_{\mathrm{sat}}$ ($6\times$ deadline, 99% arrival).**  
-*(Left Panel)* Mission completion time normalized to the $D_{\mathrm{sat}}$ cell ($T / T_{\mathrm{sat}}$) versus team size ratio ($D / D_{\mathrm{sat}}$, log scale). All curves fall within 0.96 to 1.01, demonstrating speed saturation.  
-*(Right Panel)* Cumulative shepherd operating effort (`dog_time` $= D \times T$) normalized to the $D_{\mathrm{sat}}$ cell, tracking the linear diagonal $y = x$. Deploying surplus shepherds beyond saturation multiplies resource consumption with negligible speed gains.  
+**Figure 8: Cost of dogs beyond $D_{\mathrm{sat}}$ (6 drive times, 99% rule).**  
+*(Left)* Finish time relative to the $D_{\mathrm{sat}}$ cell against $D / D_{\mathrm{sat}}$ (log scale). Every curve stays between 0.96 and 1.01.  
+*(Right)* Dog time ($D$ times the finish time) relative to the $D_{\mathrm{sat}}$ cell; the curves follow the diagonal $y = x$, so dog time grows in proportion to the team.  
 *Data:* [results_tables.md: Effort, dmin_f99_m6](results_tables.md#effort-dmin_f99_m6-cost-of-dogs-beyond-d_sat-relative-to-the-d_sat-cell-1).
 
 ![Pressure on the flock](../figures/fig34_pressure.png)
 
-**Figure 9: Microscopic flock flight dynamics across shepherd team sizes ($6\times$ deadline, 99% arrival).**  
-Medians over successful trials for $N = 100$ (circles, dotted lines) and $N = 400$ (squares, solid lines).  
-*(Left Panel)* Cumulative seconds in flight per sheep (time within threat distance $65\text{ m}$). Increasing dogs from $D_{\min}$ to $D_{\mathrm{sat}}$ reduces flight exposure by accelerating gathering; beyond $D_{\mathrm{sat}}$, flight exposure plateaus.  
-*(Right Panel)* Instantaneous proportion of the flock fleeing at a given second. Larger teams induce higher instantaneous flight, but reduce total exposure duration.  
+**Figure 9: How long the sheep flee, against team size (6 drive times, 99% rule).**  
+Medians over successful trials for $N = 100$ (circles, dotted) and $N = 400$ (squares, solid).  
+*(Left)* Seconds each sheep spends with a dog within 65 m. From $D_{\min}$ to $D_{\mathrm{sat}}$ it falls, because the flock is gathered sooner; beyond $D_{\mathrm{sat}}$ it stays flat.  
+*(Right)* Share of the flock fleeing at a given moment. Larger teams make more sheep flee at once, for a shorter time.  
 *Data:* [results_tables.md: Pressure, dmin_f99_m6](results_tables.md#pressure-dmin_f99_m6-replay-of-12-stored-seeds-per-cell-every-replay-reproduced-its-stored-trial).
 
 ---
 
-### 3.8 RQ8: Growth with *N* on a Denser Grid, *D*<sub>sat</sub>, and the Shape of the Curve
+### 3.8 RQ8: Growth with $N$ on a denser grid, $D_{\mathrm{sat}}$, and the shape of the curve
 
-To rigorously resolve the functional form of $D_{\min}(N)$, we extended the 99% arrival grids ($12\times$ and $6\times$) with four intermediate flock sizes: $N = 71, 141, 283$ (logarithmic midpoints between 50 and 400) and $N = 566 = 400\sqrt{2}$.
+To pin down the shape of $D_{\min}(N)$, the 99% grids at 12 and 6 drive times got four more flock sizes: $N = 71, 141, 283$ (midpoints on a log scale between 50 and 400) and $N = 566 = 400\sqrt{2}$.
 
-**Rationale for $\sqrt{2}$ Steps and the $N = 566$ Boundary:**  
-Multiplicative steps of $\sqrt{2}$ assign identical geometric weight to each flock scale in log-log regression. Furthermore, $N = 566$ marks the natural physical limit of the biological flocking model: below 600 sheep, flocks reliably condense to a stable equilibrium radius $R_f(N)$. Above 600 sheep, loosely initialized flocks lose the ability to self-aggregate (at $N = 630$, scattered starts remain 17% wider than compact starts; at $N = 800$, steady-state radius calibration fails).
+**Why steps of $\sqrt{2}$, and why stop at 566.** Steps of $\sqrt{2}$ give every size the same weight in a log-log fit. 566 is the last such step below the size at which the model's flock stops settling: below about 600 a driven flock settles to one radius $R_f(N)$ whatever size it starts at. At $N = 630$ a flock started loose stays 17% larger than one started tight, and at 800 the calibration fails.
 
-1. **Tightly Bounded Scaling Exponents**:  
-   Across nine flock sizes, the log-log scaling slope of $D_{\min}$ against $N$ is **0.27 to 0.38** on `wide` and **0.28 to 0.38** on `outlier_rich` at relaxed deadlines ($12\times$), and **0.38 to 0.61** at intermediate deadlines ($6\times$). Under relaxed conditions, growth remains strictly below the $\alpha = 0.50$ square-root law of non-cohesive swarms.
+1. **The slopes narrow.**  
+   On nine sizes the slope of $D_{\min}$ against $N$ is **0.27 to 0.38** on `wide` and **0.28 to 0.38** on `outlier_rich` at 12 drive times, and **0.38 to 0.61** at 6 drive times. At the loose deadline it stays below 0.5.
 
-2. ***D*<sub>sat</sub> Scales Twice as Fast as $D_{\min}$**:  
-   On `wide` at $6\times$, $D_{\mathrm{sat}}$ scales steadily: $1, 1, 1, 2, 3, 3, 4, 5$ dogs from $N = 25$ to $400$, reaching $7\text{--}24$ at $N = 566$ (log-log slope **0.70 to 0.91**). The gap between the minimal team for reliability and the optimal team for speed widens continuously with herd scale.
+2. **$D_{\mathrm{sat}}$ grows about twice as fast as $D_{\min}$.**  
+   On `wide` at 6 drive times $D_{\mathrm{sat}}$ is 1, 1, 1, 2, 3, 3, 4, 5 dogs from $N = 25$ to 400, and 7–24 at 566 (slope **0.70 to 0.91**). The gap between the team that is reliable and the team that is fastest widens as the flock grows.
 
-3. **Steady Growth vs. Saturating Curve Fits**:  
-   Within $N \le 566$, empirical data fits both an unbounded power law ($D \propto N^\alpha$) and a saturating plateau curve ($D \propto D_\infty / [1 + (N_0/N)^\gamma]$) with equal likelihood ($\Delta\log\text{-odds} \approx 0.0$). Extrapolating to $N = 1600$ admits team sizes from 1.5 to 6.7 dogs at $12\times$ (3.1 to 10.4 at $6\times$). Resolving whether herder demand plateaus requires testing massive super-flocks beyond the biological calibration boundary ($N > 1000$, Section 3.13).
+3. **Steady growth and a curve that levels off fit equally well.**  
+   Up to $N = 566$ the data fit a power law $D = c N^b$ and a saturating curve $D = 1 + (D_\infty - 1) N / (N + K)$ equally well (log odds 0.0). At $N = 1600$ the curves that fit allow 1.5 to 6.7 dogs at 12 drive times (3.1 to 10.4 at 6). Telling them apart needs larger flocks, which the model cannot calibrate (section 3.13).
 
-Table 7 displays the empirical progression across all nine flock sizes (99% arrival):
+Table 7, nine flock sizes (99% rule):
 
 | $N$ | 25 | 50 | 71 | 100 | 141 | 200 | 283 | 400 | 566 |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | `wide`, $12\times$ | 1 | 1 | 1 | 1 | 2 | 1–2 | 2 | 2 | 2–3 |
 | `outlier_rich`, $12\times$ | 1 | 1 | 1 | 1–2 | 2 | 2 | 2 | 2 | 2–3 |
 | `wide`, $6\times$ | 1 | 1 | 1 | 1 | 2 | 2 | 2–3 | 2–3 | 3–7 |
 | `outlier_rich`, $6\times$ | 1 | 1 | 1 | 2 | 2 | 2–3 | 2–3 | 3 | 3–6 |
-| *D*<sub>sat</sub> `wide`, $6\times$ | 1 | 1 | 1 | 2 | 3 | 3 | 4 | 5 | 7–24 |
+| $D_{\mathrm{sat}}$ `wide`, $6\times$ | 1 | 1 | 1 | 2 | 3 | 3 | 4 | 5 | 7–24 |
 
-*Data source:* [results_tables.md: Finish-time top-up, densified N, independent shepherds, Kubo to D = 24, 99 percent](results_tables.md#finish-time-top-up-densified-n-independent-shepherds-kubo-to-d--24-99-percent).
+*Data:* [results_tables.md: Finish-time top-up, densified N, independent shepherds, Kubo to D = 24, 99 percent](results_tables.md#finish-time-top-up-densified-n-independent-shepherds-kubo-to-d--24-99-percent).
 
 ![D_min on nine sizes and the range of both shapes](../figures/fig35_growth_fits.png)
 
-**Figure 10: Minimum team size $D_{\min}$ plotted across nine flock sizes and extrapolation ranges for competing growth models.**  
-Left panel: $12\times$; right panel: $6\times$ in log-log coordinates (`wide` circles, `outlier_rich` squares). Vertical bars denote $D_{\min}$ brackets; vertical line marks the biological calibration boundary ($N \approx 600$). Shaded extrapolation regions to the right illustrate the allowable parameter envelope for power-law curves (dashed upper edge) versus saturating curves (dotted upper edge). Both model families fit the data up to $N = 566$ equally well, necessitating super-flock trials to separate them.  
+**Figure 10: $D_{\min}$ on nine flock sizes, and where each curve shape could go.**  
+Left: 12 drive times; right: 6 (log-log; `wide` circles, `outlier_rich` squares). Bars are brackets; the vertical line marks the calibration edge ($N \approx 600$). To the right, the shaded regions show where power laws (dashed upper edge) and saturating curves (dotted upper edge) that fit the data could lie. Both fit up to $N = 566$.  
 *Data:* [results_tables.md: D_min, dmin_f99_m12](results_tables.md#d_min-dmin_f99_m12), [results_tables.md: D_min, dmin_f99_m6](results_tables.md#d_min-dmin_f99_m6), and [results_tables.md: fits dmin_f99_m12](results_tables.md#fits-dmin_f99_m12-d_minn-power-law-against-saturating-curve).
 
 ---
 
-### 3.9 RQ9: Dissecting the Coordination Stack: State-Switching Heuristics vs. Multi-Agent Task Allocation
+### 3.9 RQ9: Which part of the team rule matters?
 
-In Section 3.6, the uncoordinated FAT baseline was demonstrated to fail at $N \ge 200$ across all scattered pastures. However, FAT lacks two distinct operational layers: (1) Strömbom's behavioral state machine, which switches dynamically between collecting dispersed outliers and driving the flock, and (2) the multi-agent coordination layer, which performs Hungarian bipartite assignment and arranges shepherds along collision-free driving arcs.
+FAT (section 3.6) lacks two things the team rule has: (1) Strömbom's switch between collecting outliers and driving the flock, and (2) the team layer, which assigns dogs to outliers (Hungarian assignment) and spreads them on an arc behind the flock in angular order.
 
-To isolate which of these mechanisms underpins collective scalability, we evaluated a team of **independent paper shepherds** (`dmin_f99_indep`). Each shepherd independently executes Strömbom's original 2014 single-dog algorithm, calculating the global centroid and driving outliers without inter-dog communication, spatial role division, or collision avoidance.
+To separate the two, `dmin_f99_indep` runs a team of **independent paper shepherds**: each dog runs Strömbom's single-dog rule on the whole flock, with no assignment and no arc.
 
-#### Key Findings and Physical Mechanisms
+1. **The switch alone is enough up to $N = 200$.**  
+   Independent shepherds are reliable on every scattered layout up to $N = 200$, where FAT fails: 2–3 dogs on `wide`, 3 on `outlier_rich`. Even when they chase the same outlier, switching to driving once the flock is gathered keeps it together.
 
-1. **Behavioral State Switching Suffices for Small-to-Medium Flocks ($N \le 200$)**:  
-   Independent shepherds succeed across every scattered pasture up to $N = 200$, precisely where FAT failed completely. On `wide` and `outlier_rich` pastures, uncoordinated dogs executing independent collect/drive transitions achieve the 99% arrival criterion with 2–3 shepherds. This demonstrates that for swarms up to 200 individuals, behavioral switching alone provides sufficient negative feedback to keep the herd cohesive, even when agents occasionally target the same outlier.
+2. **At $N = 400$ the team layer is needed.**  
+   Independent shepherds have no reliable team up to 24 dogs at $N = 400$. The team rule needs 2–3 dogs on `wide` and 3 on `outlier_rich`. Without assignment the dogs keep going after the same sheep while other parts of a large flock spread.
 
-2. **Explicit Multi-Agent Allocation is Mandatory at $N = 400$**:  
-   At $N = 400$, independent shepherds fail completely: no team size up to 16 dogs achieves statistical reliability (no decided $D_{\min}$). In contrast, coordinated `strombom_multi` successfully drives the herd with 2–3 dogs on `wide` and 3 dogs on `outlier_rich`. At this scale, uncoordinated dogs frequently experience target conflicts, cycling redundantly behind the same peripheral sheep while the opposite flank disperses. Bipartite Hungarian assignment becomes strictly indispensable to distribute agents across the herd's expanding perimeter.
+3. **In the Kubo model more dogs keep helping, with diminishing returns.**  
+   With Kubo sheep (`dmin_f99_kubo`), one dog is enough on compact flocks of 25 to 100. Unlike Strömbom sheep, Kubo sheep walk faster under a stronger push (up to 5 m/s), so more dogs shorten the drive: at $N = 100$ the median finish time falls from 115 s with one dog to 29 s with ten, and to 25 s with 24. Ten dogs already give 95% of the gain of 24.
 
-3. **Continuous Force Dynamics and Diminishing Acceleration Returns**:  
-   In the continuous-force model of Kubo et al. (2022) (`dmin_f99_kubo`), where canine threat fields decay smoothly as $1/r^3$ and sum additively, $D_{\min} = 1$ across $N \in [25, 100]$ on `compact` pastures, confirming the single-dog drive principle across disparate mathematical frameworks.  
-   Crucially, because Kubo forces are additive and lack the unit-vector normalization and artificial speed saturation of the Strömbom model, additional shepherds physically accelerate the herd. At $N = 100$, median completion times drop precipitously from $115\text{ s}$ with 1 dog to $29\text{ s}$ with 10 dogs. However, scaling the team further to 24 dogs yields only marginal improvement ($25\text{ s}$). Over 85% of the achievable speedup is attained by $D = 10$, demonstrating that diminishing returns on actuator scaling are intrinsic to herd physics rather than an artifact of kinematic speed caps.
+Table 8 compares the three rules at 6 drive times (99% rule):
 
-Table 8 compares independent shepherds against coordinated and greedy controllers at $6\times$ drive times:
-
-| Controller Comparison (`strombom_multi` / `independent` / `fat`), 99%, $6\times$ | $N = 200$ | $N = 400$ |
+| `strombom_multi` / `independent` / `fat` | $N = 200$ | $N = 400$ |
 | :--- | :---: | :---: |
 | `wide` | 2 / 2–3 / none | 2–3 / none / none |
 | `outlier_rich` | 2–3 / 3 / none | 3 / none / none |
 | `split` | [1] / 1–3 / none | [5] / none / none |
 
-*Data source:* [results_tables.md: Methods at 99 percent, 6 drive times](results_tables.md#methods-at-99-percent-6-drive-times-team-rule-independent-paper-shepherds-fat) and [results_tables.md: Kubo, compact, D to 24](results_tables.md#kubo-compact-d-to-24-99-percent); Kubo completion times from `results/dmin_f99_kubo`.
+*Data:* [results_tables.md: Methods at 99 percent, 6 drive times](results_tables.md#methods-at-99-percent-6-drive-times-team-rule-independent-paper-shepherds-fat) and [results_tables.md: Kubo, compact, D to 24](results_tables.md#kubo-compact-d-to-24-99-percent); Kubo finish times from `results/dmin_f99_kubo`.
 
 ---
 
-### 3.10 RQ10: Overcrowding Boundaries: Terminal Holding Dynamics and Physical Spatial Footprint
+### 3.10 RQ10: When do more dogs hurt? Holding the flock, and dogs that take up room
 
-In open driving under the 99% arrival criterion, surplus shepherds beyond saturation never caused mission failure for point agents. However, theoretical swarm robotics indicates that overcrowding and destructive interference occur predominantly during terminal containment and barrier coverage (Green et al. 2022). We investigated this boundary via two rigorous stress protocols:
+In the open drive under the 99% rule, extra point dogs never made the task fail. Two protocols test settings where extra dogs might get in each other's way:
 
-1. **The Holding Task (`dmin_f99_hold`)**: A mission succeeds only when $\ge 99\%$ of the flock remains inside the pen continuously for one full characteristic drive duration ($T_{\mathrm{drive}}$). Upon herd entry, shepherds must withdraw beyond the sheep's threat detection radius ($r_s + r_a = 65 + 2 = 67\text{ m}$) to allow calm grazing without flight agitation.
-2. **Physical Agent Footprint (`dmin_f99_hold_spacing`)**: Shepherds are modeled with non-zero physical bodies; no dog may encroach within $2\text{ m}$ of another dog (`dog_spacing = 2.0`). Because the driving arc behind the flock has finite arc length, it imposes a hard geometric capacity ceiling: $D_{\mathrm{cap}} \approx 7, 9, 10, 11, 12$ across $N = 25$ to $400$.
+1. **Holding (`dmin_f99_hold`):** a trial succeeds only once 99% of the flock has stayed in the goal for one drive time. While the flock is in, the dogs withdraw to $r_s + r_a = 67$ m beyond the farthest sheep, so no sheep reacts to them and the flock grazes.
+2. **Dogs that take up room (`dmin_f99_hold_spacing`):** the same task, but no dog may come within 2 m of another. The arc behind the flock then has room for a limited number of dogs, about $D_{\mathrm{cap}} = 7, 9, 10, 11, 12$ at $N = 25$ to 400.
 
-#### Mechanistic Discoveries
+#### Results
 
-1. **Geometric Goal Bottleneck on Small Flocks ($N \le 50$)**:  
-   Holding succeeds reliably on large flocks ($N \ge 100$) on `wide` and `compact` pastures, where $D_{\min}$ matches open driving identically (1, 2, and 3 dogs at $N = 100, 200, 400$).  
-   Conversely, holding fails catastrophically on small flocks ($N \le 50$). Detailed trial replay reveals an unexpected geometric paradox: for $N \le 50$, the goal pen radius is only $12\text{--}14\text{ m}$. The withdrawal rule mandates that dogs retreat $67\text{ m}$ into the pasture. Once shepherds retreat beyond sensing range, the uncorralled sheep undergo Brownian diffusion out of the small pen opening before the holding timer elapses. Small-flock failures are caused by pastoral enclosure geometry rather than inadequate herding capacity.
+1. **Holding fails on small flocks for a geometric reason.**  
+   On larger flocks ($N \ge 100$) holding works on `wide` and `compact`, with the same $D_{\min}$ as the open drive or one more (1, 2 and 3 dogs on `wide` at $N = 100$, 200, 400).  
+   On small flocks ($N \le 50$) no team holds the flock. The goal there has a radius of only 12–14 m, while the dogs must withdraw 67 m. Once the dogs are gone, the grazing sheep wander out of the small goal before the hold time is over. The failure comes from the size of the goal, not from too few dogs.
 
-2. **Physical Body Volume Triggers Active Overcrowding Collapse ($D_{\mathrm{overcrowd}}$)**:  
-   On `outlier_rich` pastures at $N = 400$, incorporating a $2\text{ m}$ physical body buffer triggers an acute overcrowding collapse:
-   - Modest teams ($D = 3\text{--}6$) achieve 92.5–94% success (within the statistical uncertainty band).  
-   - However, once team size expands to $D \ge 9$, **every team up to 24 dogs is confirmed statistically unreliable** ($L < 0.90$): success plummets to 0.77 at $D = 9$, 0.65 at $D = 12$, and 0.50 at $D = 16$.  
-   - *Physical Mechanism*: The geometric driving arc accommodates at most $D_{\mathrm{cap}} \approx 12$ dogs. When surplus dogs crowd the arc, spatial displacement forces push shepherds out of their assigned tangents, causing positional gridlock and preventing perimeter dogs from breaking formation to intercept fleeing stragglers.  
-   - On `wide` and `compact` pastures, surplus dogs unable to enter the arc passively wait in the rear echelon without disrupting formation, maintaining reliability up to 24 dogs. Overcrowding harm is thus contingent upon the interaction between pasture dispersion geometry and physical spatial volume.
+2. **Dogs that take up room make extra dogs harmful on `outlier_rich` $N = 400$.**  
+   - With 3 to 6 dogs the success rate is 0.925–0.94, undecided.  
+   - From $D = 9$ on, every team up to 24 is decided unreliable: success 0.77 at $D = 9$, 0.65 at $D = 12$, 0.50 at $D = 16$.  
+   - *A likely reason:* the arc behind the flock holds about 12 dogs 2 m apart. With more dogs than that, dogs push each other off their places on the arc and cannot leave it to catch a sheep that breaks away.  
+   - On `wide` and `compact` the extra dogs that do not fit on the arc stay behind it without getting in the way, and the task stays reliable up to 24 dogs. Whether extra dogs hurt therefore depends on the layout as well as on the space each dog takes.
 
 ![Holding with point dogs and with dogs 2 m apart](../figures/fig36_spacing.png)
 
-**Figure 11: Holding task reliability at $N = 400$ contrasting idealized point shepherds against physical shepherds with $2\text{ m}$ spatial exclusion.**  
-Left panel: `wide` pasture; right panel: `outlier_rich` pasture plotted against dog count $D$ (log scale). Dotted grey curves denote point dogs; solid blue curves denote physical dogs with $2\text{ m}$ spacing; orange shading marks driving-arc capacity ($D_{\mathrm{cap}} \approx 10\text{--}12$); horizontal dashed line indicates the reliability threshold ($\theta = 0.90$). On `wide` pastures, surplus physical dogs stand down in rear echelons without impeding active herders. On `outlier_rich`, spatial contention along the driving arc triggers a catastrophic overcrowding collapse at $D \ge 9$.  
-*Data source:* [results_tables.md: D_min, dmin_f99_hold](results_tables.md#d_min-dmin_f99_hold) and [results_tables.md: D_min, dmin_f99_hold_spacing](results_tables.md#d_min-dmin_f99_hold_spacing).
+**Figure 11: Holding at $N = 400$, point dogs against dogs kept 2 m apart.**  
+Left: `wide`; right: `outlier_rich`; success against $D$ (log scale). Dotted grey: point dogs; solid blue: dogs 2 m apart; orange band: arc capacity ($D_{\mathrm{cap}} \approx 10$–12); dashed line: $\theta = 0.90$. On `wide` the extra spaced dogs stay behind and success holds; on `outlier_rich` it falls from $D = 9$.  
+*Data:* [results_tables.md: D_min, dmin_f99_hold](results_tables.md#d_min-dmin_f99_hold) and [results_tables.md: D_min, dmin_f99_hold_spacing](results_tables.md#d_min-dmin_f99_hold_spacing).
 
 ---
 
-### 3.11 RQ11: Flock Social Cohesion and the Theoretical Scaling Boundary
+### 3.11 RQ11: Cohesion and the growth of $D_{\min}$
 
-The theoretical square-root scaling law $\alpha = 0.50$ ($D \propto \sqrt{M}$) established by Lama and di Bernardo (2024) was formulated for non-cohesive targets. To establish a rigorous bridge between non-cohesive particle dynamics and biological flocking, we systematically manipulated two social cohesion parameters: (1) the social attraction weight $c$ (elevated from the biological baseline $1.05$ to $1.3, 1.6$, and $2.0$), and (2) the topological interaction neighborhood $n$ (restricted from global interaction $n = N - 1$ down to half the flock $n = 0.5N$).
+Lama and di Bernardo (2024) report that the team grows as $\sqrt{N}$ for targets that do not flock. To connect their case with the Strömbom flock, we changed the cohesion in two ways: (1) the attraction weight $c$, raised from the paper's 1.05 to 1.3, 1.6 and 2.0, and (2) the number of neighbours each sheep is drawn to, cut from all $N - 1$ to half the flock ($n = 0.5N$).
 
-1. **Diminishing Returns of Super-Cohesion**:  
-   Increasing social attraction weight from $c = 1.05$ to $1.3, 1.6$, or $2.0$ yields identical log-log scaling slopes on `wide` pastures ($\alpha = 0.20$), saving at most 1 shepherd across all flock sizes. The biological baseline ($c = 1.05$) with all-to-all connectivity already ensures that the flock moves as a continuous topological manifold; hyper-compressing the flock provides negligible geometric advantage to shepherds driving from the rear.
+1. **More cohesion changes little.**  
+   With $c = 1.3$, 1.6 or 2.0 the slope on `wide` is 0.20, and $D_{\min}$ falls by at most one dog at any size. With the paper's $c = 1.05$ and every sheep drawn to the whole flock, the flock already stays together; pulling it tighter does not help the dogs driving it.
 
-2. **Weakened Cohesion Steepens Scaling Toward the Square-Root Law**:  
-   Conversely, restricting the interaction neighborhood to $n = 0.5N$ steepens the scaling exponent to **0.40 to 0.70**, directly spanning the theoretical $\alpha = 0.50$ non-cohesive mark.  
-   On `split` pastures, reduced cohesion causes the flock to rupture into independent sub-clusters under single-dog pressure, raising $D_{\min}$ from 1 to 3–4 at $N = 200$, and from 2 to 4–5 at $N = 400$. This confirms that sub-linear scaling ($\alpha < 0.50$) in biological herding depends critically on global social cohesion; as mutual attraction decays, collective herding degenerates into discrete particle collection.
+2. **Less cohesion makes $D_{\min}$ grow faster, toward the square-root law.**  
+   With $n = 0.5N$ the slope on `wide` becomes **0.40 to 0.70**, a range that includes the 0.5 of non-cohesive targets.  
+   On `split` the weaker flock comes apart under one dog: $D_{\min}$ goes from 1 to 3–4 at $N = 200$ and from 2 to 4–5 at $N = 400$. The slow growth of $D_{\min}$ for the Strömbom flock depends on every sheep being drawn to the whole flock.
 
-Table 9 summarizes scaling slopes across cohesion regimes (`wide`, 99% arrival, $12\times$):
+Table 9, cohesion levels (`wide`, 99% rule, 12 drive times):
 
-| Social Cohesion Regime (`wide`, 99%, $12\times$) | $N = 50$ | $N = 100$ | $N = 200$ | $N = 400$ | Log-Log Slope $\alpha$ |
+| Cohesion (`wide`, 99%, $12\times$) | $N = 50$ | $N = 100$ | $N = 200$ | $N = 400$ | Slope |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **Weakened Cohesion ($n = 0.5N$)** | 1 | 1 | 2 | 2–4 | **0.40 to 0.70** |
-| **Biological Baseline ($c = 1.05$)** | 1 | 1 | 1–2 | 2 | **0.20 to 0.30** |
-| **Elevated Cohesion ($c = 1.3, 1.6, 2.0$)** | 1 | 1 | 1 | 2 | **0.20** |
+| **Weaker ($n = 0.5N$)** | 1 | 1 | 2 | 2–4 | **0.40 to 0.70** |
+| **Paper ($c = 1.05$)** | 1 | 1 | 1–2 | 2 | **0.20 to 0.30** |
+| **Stronger ($c = 1.3, 1.6, 2.0$)** | 1 | 1 | 1 | 2 | **0.20** |
 
-*Data source:* Baseline row from [results_tables.md: dmin_f99_m12](results_tables.md#dmin_f99_m12) and [results_tables.md: Growth with N, 99 percent](results_tables.md#growth-with-n-99-percent); cohesion variants from [results_tables.md: D_min, dmin_f99_c1.3](results_tables.md#d_min-dmin_f99_c13), [results_tables.md: dmin_f99_c1.6](results_tables.md#d_min-dmin_f99_c16), [results_tables.md: dmin_f99_c2.0](results_tables.md#d_min-dmin_f99_c20) and [results_tables.md: D_min, dmin_f99_k05](results_tables.md#d_min-dmin_f99_k05); the slope column from [results_tables.md: dmin_f99_c1.3](results_tables.md#dmin_f99_c13), [results_tables.md: dmin_f99_c1.6](results_tables.md#dmin_f99_c16), [results_tables.md: dmin_f99_c2.0](results_tables.md#dmin_f99_c20) and [results_tables.md: dmin_f99_k05](results_tables.md#dmin_f99_k05) (growth).
+*Data:* paper row from [results_tables.md: dmin_f99_m12](results_tables.md#dmin_f99_m12) and [results_tables.md: Growth with N, 99 percent](results_tables.md#growth-with-n-99-percent); cohesion runs from [results_tables.md: D_min, dmin_f99_c1.3](results_tables.md#d_min-dmin_f99_c13), [dmin_f99_c1.6](results_tables.md#d_min-dmin_f99_c16), [dmin_f99_c2.0](results_tables.md#d_min-dmin_f99_c20) and [dmin_f99_k05](results_tables.md#d_min-dmin_f99_k05); slopes from [results_tables.md: dmin_f99_c1.3](results_tables.md#dmin_f99_c13), [dmin_f99_c1.6](results_tables.md#dmin_f99_c16), [dmin_f99_c2.0](results_tables.md#dmin_f99_c20) and [dmin_f99_k05](results_tables.md#dmin_f99_k05) (growth).
 
 ---
 
-### 3.12 RQ12: Limited Sensing Horizons and Inter-Agent Communication Topologies
+### 3.12 RQ12: What a dog sees, and sharing it
 
-Deploying autonomous robots or drones in field environments precludes the assumption of omniscient global field sensing. We evaluated herding performance when each shepherd is constrained by a finite visual perception horizon ($r_{\mathrm{view}} \in \{15, 30, 45, 65, 100\}\text{ m}$), evaluated across three communication topologies: isolated vision (`none`), local peer-to-peer sharing (`neighbour`), and global team broadcasting (`shared`).
+Real dogs, robots and drones do not see the whole field. Here each dog sees only the sheep within a sensing range (15, 30, 45, 65 or 100 m), and dogs share what they see in one of three ways: not at all (`none`), with the dogs in range (`neighbour`), or with the whole team (`shared`).
 
-1. **The Cost of Realistic Local Sensing ($30\text{--}65\text{ m}$)**:  
-   On `wide` pastures at $N = 200$, omniscient shepherds achieve $D_{\min} = 2$. Restricting perception to realistic horizons ($30\text{--}65\text{ m}$) adds exactly **1 shepherd** to the minimum viable team ($D_{\min} = 3$; bracket 3–4 at $45\text{ m}$). On small flocks ($N \le 100$), sensory restriction incurs zero penalty because the entire dispersed herd fits comfortably within a $65\text{ m}$ envelope.
+1. **A realistic range costs about one dog.**  
+   On `wide` $N = 200$, dogs that see everything need 2. With a range of 30 to 65 m they need 3 (3–4 at 45 m). On flocks of 100 or fewer the range costs nothing, because the whole scattered flock fits within 65 m.
 
-2. **Sensory Collapse Below 30 m**:  
-   Restricting the visual horizon to $15\text{ m}$ causes severe failure on `wide` pastures: at $N = 50$, no team up to 16 dogs achieves reliability; at $N = 100$, requirements spike to $\ge 6$ shepherds. When visual range drops below inter-straggler spacing, shepherds lose sight of peripheral sheep and revert to uncoordinated wandering.
+2. **Below 30 m the dogs lose the flock.**  
+   With a range of 15 m on `wide`, no team up to 16 is reliable at $N = 50$, and at $N = 100$ at least 6 dogs are needed. Once the range is shorter than the gaps between strays, dogs lose sight of the outer sheep.
 
-3. **Mesh Networking Recovers Omniscient Performance**:  
-   At a $65\text{ m}$ visual horizon on `wide` ($N = 200$), isolated shepherds require 3 agents. Implementing a whole-team broadcast network (`shared`) immediately restores $D_{\min} = 2$, perfectly recovering omniscient performance without requiring sensor hardware upgrades.  
-   Crucially, sharing target positions only with neighboring dogs within line-of-sight (`neighbour`) fails to reduce team requirements (remaining at 3 dogs), proving that global awareness across the pasture perimeter is required to redirect distant herders. On `split` pastures ($N = 200$), communication cannot overcome the Hungarian allocation bottleneck (remaining at 3 dogs vs [1] under omniscient control).
+3. **Sharing with the whole team wins the dog back.**  
+   At 65 m on `wide` $N = 200$, dogs that do not share need 3. Sharing with the whole team brings $D_{\min}$ back to 2, as with full sight. Sharing only with the dogs in range does not help (still 3): a dog far away has to learn about a stray it cannot see. On `split` $N = 200$ sharing does not help either (3, against [1] with full sight).
 
 ![D_min against sensing range, and sharing](../figures/fig37_view.png)
 
-**Figure 12: Influence of individual sensory horizons and inter-agent communication topologies on minimum viable team size $D_{\min}$.**  
-Left panel: $D_{\min}$ versus visual perception horizon for `wide` (circles) and `split` (squares) at $N = 100$ (faded) and $N = 200$; vertical dashed line marks the sheep flight horizon $r_s = 65\text{ m}$. Sensing horizons below $30\text{ m}$ precipitate catastrophic failure on `wide` pastures.  
-Right panel: Mission success rate versus team size on `wide` ($N = 200$, $r_{\mathrm{view}} = 65\text{ m}$) across communication topologies: isolated vision (dotted blue), local neighbor mesh (dashed blue), whole-team broadcasting (solid blue), and omniscient control (solid black). Whole-team communication completely closes the performance deficit of local sensing.  
-*Data source:* [results_tables.md: Views: sensing range](results_tables.md#views-sensing-range-no-sharing-base-row--range-0-global) and [results_tables.md: Views: sharing at range 65](results_tables.md#views-sharing-at-range-65-beside-the-no-sharing-rows-of-dmin_f99_view_range).
+**Figure 12: $D_{\min}$ against sensing range, and the effect of sharing.**  
+Left: $D_{\min}$ against the range for `wide` (circles) and `split` (squares) at $N = 100$ (faded) and $N = 200$; the dashed line marks 65 m, the distance at which a sheep reacts. Below 30 m `wide` fails.  
+Right: success against $D$ on `wide` $N = 200$ at a range of 65 m: no sharing (dotted blue), sharing with dogs in range (dashed blue), sharing with the whole team (solid blue), and full sight (solid black). Sharing with the whole team matches full sight.  
+*Data:* [results_tables.md: Views: sensing range](results_tables.md#views-sensing-range-no-sharing-base-row--range-0-global) and [results_tables.md: Views: sharing at range 65](results_tables.md#views-sharing-at-range-65-beside-the-no-sharing-rows-of-dmin_f99_view_range).
 
 ---
 
-### 3.13 RQ13: Super-Flock Scaling and the Mathematical Singularity of Classic Driving Heuristics
+### 3.13 RQ13: Very large flocks and a limit of the drive rule
 
-To evaluate the extreme scaling limits of collective herding, we tested super-flocks from $N = 800$ to $3200$ sheep under relaxed deadlines ($12\times$). Beyond the biological calibration threshold ($N = 566$), flock radius was mathematically constrained by preserving areal packing density: $R_f(N) = R_f(566)\sqrt{N/566}$.
+We ran flocks of 800 to 3200 sheep at 12 drive times. Above $N = 566$ the model's flock has no settled size, so $R_f$ was set to keep the density of the 566 flock: $R_f(N) = R_f(566)\sqrt{N/566}$.
 
-#### 1. Discovery of the Mathematical Singularity at $N \approx 1056$
-In the canonical Strömbom model (2014), the driving shepherd's target waypoint $\mathbf{P}_d$ is positioned behind the flock's global center of mass (GCM):
+#### 1. Above $N \approx 1056$ the drive point is out of the sheep's reach
+In Strömbom's rule the driving dog aims at a point behind the flock centre, on the side away from the goal:
 $$
-\mathbf{P}_d = \mathrm{GCM} + r_a \sqrt{N} \, \hat{\mathbf{e}}_{\mathrm{GCM} \to \mathrm{goal}}
+\mathbf{P}_d = \mathrm{GCM} - r_a \sqrt{N} \, \hat{\mathbf{e}}_{\mathrm{GCM} \to \mathrm{goal}}
 $$
-where $r_a = 2\text{ m}$ is the inter-sheep repulsion radius. The standoff distance separating shepherds from the herd center is $d_{\mathrm{drive}} = r_a \sqrt{N} = 2\sqrt{N}\text{ m}$.  
-Because sheep react to canine threats only within a finite perceptual horizon $r_s = 65\text{ m}$, a mathematical breakdown occurs whenever the standoff distance exceeds the sensory radius:
+with $r_a = 2$ m, so the dog stands $2\sqrt{N}$ m behind the centre. A sheep reacts to a dog only within $r_s = 65$ m. The drive point is out of every sheep's reach once
 $$
-r_a \sqrt{N} > r_s \iff 2\sqrt{N} > 65 \iff \sqrt{N} > 32.5 \iff N > 1056.25
+r_a \sqrt{N} > r_s \iff 2\sqrt{N} > 65 \iff N > 1056
 $$
-At $N \ge 1056$, the canonical algorithm places the driving shepherds farther than $65\text{ m}$ behind the herd center. Consequently, **the flock cannot perceive the shepherds' presence** and remains grazing peacefully while the shepherds drive empty space. At $N = 1131$, every team size up to $D = 12$ failed completely (0/10 successes at every $D$).
+Above that size the dogs stand where few or no sheep react to them, and the flock is not driven. At $N = 1131$ no team up to 12 dogs succeeded in any of its 10 trials, on compact or wide.
 
-#### 2. Capped Standoff Heuristic ($63\text{ m}$ Cap) Rescues Massive Flocks
-By capping the driving standoff distance to remain strictly within the perceptual horizon, $d_{\mathrm{drive}} \le r_s - r_a = 63\text{ m}$, continuous tactile pressure is restored:
-- **On `compact` pastures**: A single dog ($D_{\min} = 1$) easily drives super-flocks of $N = 800$ and $1131$ sheep, and only 2 dogs are required for $N = 1600$. At $N = 3200$, teams of 3 to 12 dogs achieved a perfect 100% success rate across all 42 benchmark trials.
-- **On `wide` pastures**: Shepherding demand escalates rapidly: 3 dogs at $N = 800$, 5–9 dogs at $N = 1131$, and more than 12 dogs at $N = 1600$. This sharp rise highlights the geometric challenge: containing the expansive perimeter of a massive dispersed herd requires an extended containment line to prevent bilateral leakage.
+#### 2. Capping the drive point brings the flock back
+With the drive offset capped at $r_s - r_a = 63$ m (`dmin_f99_big_cap`), a HerdSim variant of the paper's rule:
+- **Compact:** one dog drives flocks of 800 and 1131, two are needed at 1600. At 3200 every team from 3 to 12 dogs succeeded in all 42 trials run.
+- **Wide:** 3 dogs at $N = 800$, 5–9 at 1131 and more than 12 at 1600. A large scattered flock needs many dogs to keep its sides together.
 
-Table 10 summarizes scaling under the capped driving rule (99% arrival, $12\times$):
+Table 10, capped drive point (99% rule, 12 drive times):
 
-| Capped Standoff ($63\text{ m}$ Cap), 99%, $12\times$ | $N = 800$ | $N = 1131$ | $N = 1600$ | $N = 3200$ (Partial Benchmark) |
+| Capped at 63 m, 99%, $12\times$ | $N = 800$ | $N = 1131$ | $N = 1600$ | $N = 3200$ (partial) |
 | :--- | :---: | :---: | :---: | :---: |
-| `compact` | 1 | 1 | 2 | 42 / 42 successes at $D = 3$–12 ($D = 1, 2$ not evaluated) |
-| `wide` | 3 | 5–9 | none up to 12 | **none** (0 / 58 at $D = 2\text{--}12$) |
+| `compact` | 1 | 1 | 2 | 42 / 42 successes at $D = 3$–12 ($D = 1, 2$ not run) |
+| `wide` | 3 | 5–9 | none up to 12 | **none** (0 / 58 at $D = 2$–12) |
 
-*Data source:* [results_tables.md: dmin_f99_big_cap](results_tables.md#dmin_f99_big_cap); $N = 3200$ column from `results/dmin_f99_big_cap` (100 trials, terminated early). Uncapped trials from [results_tables.md: D_min, dmin_f99_big](results_tables.md#d_min-dmin_f99_big).
+*Data:* [results_tables.md: dmin_f99_big_cap](results_tables.md#dmin_f99_big_cap); the $N = 3200$ column from `results/dmin_f99_big_cap` (100 trials, run stopped early). Uncapped results in [results_tables.md: D_min, dmin_f99_big](results_tables.md#d_min-dmin_f99_big).
 
 ---
 
-### 3.14 RQ14: Non-Cohesive Targets: Replicating and Critiquing the Square-Root Law of Lama & di Bernardo (2024)
+### 3.14 RQ14: Targets without cohesion: the square-root law of Lama and di Bernardo (2024)
 
-To contextualize biological flocking within general multi-agent control theory, we integrated the non-cohesive Brownian target model of Lama and di Bernardo (2024) into HerdSim under method `lama` executing task `gather` ([Model details](../methods/models.md#lama--di-bernardo-2024-non-cohesive-targets) and [Task specifications](../experiments/task_design.md#6-the-gather-task-lama-and-di-bernardo-2024)). Brownian targets are repelled linearly by herders within $\lambda = 2.5$; herders pursue the farthest detected target relative to the goal; agents start uniformly on a disc of radius $R = 50$ centered on a pen of radius $R/5$; with a 5000 s deadline.
+To compare the Strömbom flock with targets that do not flock, we ran the model of Lama and di Bernardo (2024) in HerdSim as method `lama` on task `gather` ([model](../methods/models.md#lama--di-bernardo-2024-non-cohesive-targets), [task](../experiments/task_design.md#6-the-gather-task-lama-and-di-bernardo-2024)). Each target wanders at random and is pushed away by herders within $\lambda = 2.5$; each herder chases the target farthest from the goal among those it senses. Targets and herders start uniform over a disc of radius $R = 50$ round a goal of radius $R/5$, and a run lasts at most 5000 s.
 
-#### 1. Statistical Divergence: Mean Share vs. Clopper-Pearson Reliability
-We analyzed two distinct acceptance criteria from the identical simulation corpus:
-- **Lama et al. Criterion (Mean Target Share)**: Average proportion of targets corralled across all runs; a team size is deemed successful when $\bar{S}_{\mathrm{gathered}} \ge 0.99$.
-- **HerdSim Criterion (Clopper-Pearson Reliability)**: Proportion of runs that independently achieve $\ge 99\%$ containment must satisfy $L \ge 0.90$ at 99% confidence.
+#### 1. Two ways to call a team enough
+The same trials are read in two ways:
+- **The paper's statistic:** a team is enough when the share of targets in the goal at the end, averaged over runs, is at least 0.99.
+- **HerdSim's rule:** a team is enough when the share of runs that end with 99% of the targets in the goal is at least 0.90 with 99% confidence.
 
-#### 2. Replication and Physical Mechanisms
-1. **Faithful Map Reproduction**:  
-   Across the complete parameter lattice, HerdSim matches Figure 2 of Lama and di Bernardo (2024) with a median discrepancy of only 0.034 at sensing radius $r_{\mathrm{view}} = 10$ (448 cells) and 0.003 under infinite sensing (451 cells). HerdSim's minimal team matches or requires 1 fewer herder than the published figure across all sizes $\sqrt{N} \ge 12$.
+#### 2. Results
+1. **HerdSim reproduces the paper.**  
+   The paper gives one result as numbers, the threshold in its Table I: with sensing radius 10, the smallest team follows the square-root law only from $\sqrt{N} = 8$, 9 and 11 up, at the 90%, 95% and 99% levels. HerdSim gives 8, 9 and 12. Its other results are colour maps ([Fig. 2](https://doi.org/10.1103/PhysRevResearch.6.L032012)). Side by side (Figure 13), HerdSim's maps and the paper's have the same shape: with radius 10, no team up to 25 succeeds with few targets, then comes a sharp threshold, and above it a band of teams that grows with the square root of the number of targets; with infinite sensing that band runs over the whole range. Two small differences show: at radius 10 with few targets HerdSim gathers a little less than the paper, and its 0.99 line turns at about $\sqrt{N} = 12$ where the paper's turns at about 10 to 11.
 
-2. **Verification of the Square-Root Law Under Infinite Sensing**:  
-   Under infinite sensing, minimal team size agrees perfectly between both metrics across nearly all sizes (8 herders for 100 targets, 13 for 225, 17 for 400). The fitted power-law scaling exponents are **0.52** (Lama metric) and **0.53** (HerdSim metric), rigorously confirming the theoretical $\sqrt{M}$ scaling law for non-cohesive swarms.
+   ![The paper's Fig. 2 beside HerdSim's maps](../figures/fig39_lama_maps.png)
 
-3. **Density Threshold and Tail-Risk Masking Under Finite Sensing ($r_{\mathrm{view}} = 10$)**:  
-   Under finite sensing, an acute density threshold emerges: below 81 targets, no team up to 25 herders achieves reliability because isolated targets drift beyond the visual horizon (`targets_lost`).  
-   Crucially, in the transitional regime ($\sqrt{N} \in [12, 14]$, 144 to 196 targets), **the two statistical metrics sharply diverge**:  
-   - At 144 targets, an 11-herder team achieves a mean target share of $\bar{S} = 0.992$ (accepted by Lama et al.). However, the actual run success rate is only **70%**. Runs that lose just 2 targets ($142/144 = 0.986$), when averaged with perfect runs, produce a mean exceeding $0.99$.  
-   - HerdSim's Clopper-Pearson reliability criterion firmly rejects 11 herders, demanding **17 to 25 herders** to guarantee 90% run reliability.  
-   - This divergence exposes a critical methodological vulnerability: reporting mean target share averages out catastrophic failures, masking tail risk and generating an illusion of control stability in sparse target environments.
+   **Figure 13: The paper's map above HerdSim's.** Each cell is the share of targets in the goal at the end, averaged over runs, for one number of targets (x, as its square root) and one number of herders (y); the white line marks 0.99. Left: infinite sensing; right: sensing radius 10. HerdSim's grid stops at 400 targets ($\sqrt{N} = 20$), so the grey band from 21 to 25 on the paper's axis has no data. That range already holds the threshold and the square-root rise above it, so the five larger sizes were left out; they would about double the run time. The grid has 10 to 200 runs per cell, the paper 50.  
+   *Top: Fig. 2 of Lama and di Bernardo (2024), Phys. Rev. Research 6, L032012, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), cropped. Bottom: `lama_r50_inf` and `lama_r50`.*
+
+2. **With infinite sensing both rules give the square-root law.**  
+   The two rules give the same smallest team at almost every size (8 herders for 100 targets, 13 for 225, 17 for 400). The fitted exponents are **0.52** (paper's statistic) and **0.53** (HerdSim's rule).
+
+3. **With sensing radius 10 the two rules part near the threshold.**  
+   With 81 targets or fewer no team up to 25 herders is reliable; every failure there ends with targets no herder can see.  
+   Just above the threshold, from 100 to 196 targets, the two rules part:
+   - At 144 targets, 11 herders gather on average 99.2% of the targets, so the paper's statistic accepts them. But only 70% of their runs end with 99% of the targets in. Runs that lose two of 144 targets (98.6%) mixed with runs that lose none still average above 0.99.
+   - HerdSim's rule does not accept 11 herders; its $D_{\min}$ is the bracket 17–25.
+   - An average can hide runs that fail. Counting runs does not, so near the threshold the two answers differ by 6 to 14 herders.
 
 ![The Lama and di Bernardo model in HerdSim](../figures/fig38_lama.png)
 
-**Figure 13: Minimum herder team size across target counts in the gather task of Lama & di Bernardo (2024).**  
-Left panel: finite sensing horizon ($r_{\mathrm{view}} = 10$, density threshold shaded grey); right panel: infinite sensing. Squares denote points extracted from Figure 2 of the original paper; circles represent Lama's mean statistic ($\ge 0.99$) evaluated on HerdSim trials; diamonds with error bars represent HerdSim's Clopper-Pearson reliability boundary ($L \ge 0.90$). Under infinite sensing, both statistics converge to power-law exponents $\approx 0.53$. Near the density threshold ($r_{\mathrm{view}} = 10$), the mean statistic accepts undersized teams prematurely (11 herders at 144 targets), whereas HerdSim's reliability criterion exposes catastrophic tail risk, establishing the true boundary at 17–25 herders.  
-*Data source:* [results_tables.md: Lama and di Bernardo (2024): gather task](results_tables.md#lama-and-di-bernardo-2024-gather-task).
+**Figure 14: The smallest team for each number of targets in the model of Lama and di Bernardo (2024).**  
+Left: sensing radius 10 (the threshold region shaded); right: infinite sensing. Squares are the paper's teams as they appear in its Fig. 2; circles apply the paper's statistic to HerdSim's runs; diamonds are HerdSim's $D_{\min}$ (bars are brackets, a triangle a lower bound, a cross no reliable team up to 25). With infinite sensing the two statistics agree. Near the threshold at radius 10, the average accepts 11 herders at 144 targets while HerdSim's rule needs 17–25.  
+*Data:* [results_tables.md: Lama and di Bernardo (2024): gather task](results_tables.md#lama-and-di-bernardo-2024-gather-task).
 
 ---
 
-## 4. Microscopic Deep-Dive: Anomaly Analysis and Per-Tick Dynamics
+## 4. A Closer Look: the `split` Layout and Per-Tick Measures
 
-### 4.1 The `split` Layout Anomaly and Topological Cluster Blindness of Hungarian Assignment
-On `split` pastures at $N \ge 200$, adding shepherds fails to improve mission reliability: at $6\times$ under 99% arrival, success plateaus at 0.60–0.90 for all $D \ge 4$ (and collapses to 0.10–0.76 under strict containment), while at $3\times$ it collapses to zero across all team sizes.
+### 4.1 Why more dogs do not help on `split`
+On `split` flocks at $N \ge 200$ more dogs do not raise success: at 6 drive times under the 99% rule it stays between 0.60 and 0.92 for every $D \ge 4$ (0.10–0.76 under the strict rule), and at 3 drive times it falls toward zero.
 
-Per-tick telemetry and high-resolution replays identify two fatal systemic pathologies:
-1. **Topological Cluster Blindness of Bipartite Hungarian Matching ($D = 4$)**:  
-   The Hungarian algorithm matches agents to tasks by minimizing total Euclidean distance: $\min \sum \|\mathbf{x}_{\mathrm{dog}} - \mathbf{x}_{\mathrm{sheep}}\|$. Crucially, this optimization is **topologically cluster-blind**. When a herd splits into disconnected spatial clusters, one cluster that happens to be marginally closer or more scattered captures all available shepherds. The entire team swarms into a single sub-cluster, abandoning the second cluster to drift uncontrolled into the pasture. When we modified the assignment heuristic to enforce spatial dispersion of collection jobs—requiring target outliers to be separated by at least one characteristic herd radius $f(N) = r_a N^{2/3}$—median completion time at $D = 4$ was halved: from $631\text{ s}$ to $318\text{ s}$ ($N = 200$, $6\times$).
+Replays of stored trials (`cli/diagnostics/split_diagnostic.py`, 12 seeds per cell, $N = 200$) point to two causes:
 
-2. **The $3 r_a$ Standoff Freeze Rule ($D \ge 4$)**:  
-   Strömbom's canonical heuristic commands a shepherd to stop immediately whenever its distance to any sheep falls below $3 r_a = 6\text{ m}$. On continuous pastures (`wide`, `outlier_rich`), frozen shepherds account for only 1% to 7% of dog-ticks.  
-   On `split` pastures, fragmented clusters intersect the trajectories of approaching shepherds, causing **an average of 25% of the dog team to freeze motionless**. Diagnostic replays reducing the stop threshold to actual physical body size ($r_a = 2\text{ m}$) accelerated completion by 21–24% at $D = 8$ and 16, restoring perfect 12/12 reliability at $D = 16$ ($N = 200$, $6\times$).  
-   Under tight deadlines ($3\times$), however, this intervention fails: without topological cluster awareness, tactical fine-tuning cannot overcome fundamental multi-cluster dispersion.
+1. **All collecting dogs go to one cluster ($D = 4$).**  
+   The team rule assigns dogs to outliers by the least total walking distance. That ignores which cluster an outlier belongs to, so when the flock is in separate clusters, the nearer or more scattered cluster can take every dog while another drifts. When the collecting dogs were made to pick outliers at least $f(N) = r_a N^{2/3}$ apart, the median finish time at $D = 4$ fell from 631 s to 318 s (6 drive times).
+
+2. **Many dogs stand still under the stop rule ($D \ge 4$).**  
+   Strömbom's dog stops while any sheep is within $3 r_a = 6$ m. On `wide` and `outlier_rich` that holds 1% to 7% of the dogs still. On `split` about 25% of the dogs stand still, held next to one cluster on their way to another. With the stop distance cut to $r_a = 2$ m, the drive was 21–24% faster at $D = 8$ and 16, and $D = 16$ succeeded in all 12 seeds.  
+   At 3 drive times neither change made `split` reliable: changing the dog's rules does not solve the problem of one team serving several clusters.
 
 ![Split Curves and Metric Diagnoses](../figures/fig23_split_curves.png)
 
-**Figure 14: Performance plateau and failure modes on fragmented `split` pastures ($N \ge 200$, $6\times$ deadline).**  
-Panels contrast `split` pastures ($N = 100, 200, 400$) against `wide` ($N = 400$) showing success rate with 99% Clopper-Pearson intervals versus dog count $D$ (log scale). Blue circles denote strict 100% containment; orange squares denote 99% arrival; dotted horizontal line marks the reliability threshold ($\theta = 0.90$). While reliability scales monotonically toward 1.0 on `wide`, performance plateaus on `split` due to cluster-blind Hungarian swarming and $3 r_a$ agent freezing.  
-*Data source:* `results/dmin_m6` and `results/dmin_f99_m6`; tabulations in [results_tables.md: dmin_m6](results_tables.md#dmin_m6) and [results_tables.md: dmin_f99_m6](results_tables.md#dmin_f99_m6).
+**Figure 15: Success on `split` flocks against team size (6 drive times).**  
+Panels show `split` at $N = 100$, 200 and 400 and `wide` at $N = 400$ for comparison, with 99% Clopper–Pearson intervals against $D$ (log scale). Blue circles: strict rule; orange squares: 99% rule; dotted line: $\theta = 0.90$. On `wide` success rises to 1; on `split` it levels off below the threshold.  
+*Data:* `results/dmin_m6` and `results/dmin_f99_m6`; values in [results_tables.md: dmin_m6](results_tables.md#dmin_m6) and [results_tables.md: dmin_f99_m6](results_tables.md#dmin_f99_m6).
 
-### 4.2 Per-Tick Telemetry Correlations
-Comprehensive telemetry recordings capture per-tick spatial dynamics across all evaluated protocols:
-- **Flock Dispersion Predicts Mission Failure**:  
-   Spearman rank correlation between mean flock spread (RMS distance from centroid) and mission success rate is strongly negative: **$r = -0.71$ to $-0.76$** at $6\times$ ($-0.57$ to $-0.68$ at $3\times$) across cells with $\ge 20$ seeds. Control policies that maintain compact herd topology achieve decisive operational superiority.
-- **Inter-Agent Crowding Dynamics**:  
-   In coordinated `strombom_multi`, the proportion of shepherds within $2\text{ m}$ of a teammate is exactly zero up to $D = 6$ on `wide`, rising smoothly to 0.45–0.59 at $D = 16$ across scattered pastures. In contrast, uncoordinated FAT exhibits severe congestion ($0.56\text{--}0.82$) starting from $D = 2$, reflecting chaotic agent clumping.
+### 4.2 Per-tick measures
+- **A spread-out flock fails more often.**  
+  Across cells with at least 20 seeds at 6 drive times, the rank correlation (Spearman) between the mean flock spread (RMS distance to the centroid) and the success rate is $-0.76$ under the strict rule and $-0.71$ under the 99% rule ($-0.57$ to $-0.68$ at 3 drive times).
+- **How close the dogs come to each other.**  
+  With `strombom_multi` on `wide`, no dog has another within 2 m up to $D = 6$; at $D = 16$ the share is 0.45–0.59 across the scattered layouts. With FAT it is 0.56–0.82 from $D = 2$ on, because every dog chases the same sheep.
 
 ![Per-Trial Metrics](../figures/fig27_metrics.png)
 
-**Figure 15: Per-tick telemetry correlations and microscopic diagnostic metrics.**  
-Panel (a): Strong linear negative correlation between mean flock spread (RMS radius in meters) and trial success rate at $6\times$ ($r = -0.71$ to $-0.76$).  
-Panel (b): Median proportion of frozen shepherds versus team size $D$ at $N = 200$ (99% arrival) for `wide`, `split`, and `outlier_rich`. On `split` pastures, approximately 25% of the canine workforce is paralyzed by the $3 r_a = 6\text{ m}$ standoff rule.  
-Panel (c): Median proportion of shepherds experiencing spatial crowding ($< 2\text{ m}$ teammate proximity) versus $D$, demonstrating controlled spacing in coordinated teams versus severe packing in greedy baselines.  
-*Data source:* `results/dmin_m6` and `results/dmin_f99_m6`.
+**Figure 16: Per-tick measures at 6 drive times.**  
+(a) Mean flock spread (RMS distance to the centroid) against success rate, one point per cell (rank correlation $-0.76$ strict, $-0.71$ at 99%).  
+(b) Median share of dogs standing still against $D$ at $N = 200$ (99% rule) for `wide`, `split` and `outlier_rich`. On `split` about a quarter of the dogs stand still under the 6 m stop rule.  
+(c) Median share of dogs with another dog within 2 m against $D$.  
+*Data:* `results/dmin_m6` and `results/dmin_f99_m6`.
 
 ---
 
-## 5. Discussion and Scientific Implications
+## 5. Discussion
 
-### 5.1 Comparison with Theoretical Scaling Laws
-Our sub-linear scaling slopes ($\alpha = 0.20 - 0.42$ at $12\times$ on five flock sizes; 0.27–0.38 on nine sizes, section 3.8) contrast sharply with the theoretical $\sqrt{M}$ ($\alpha = 0.50$) scaling proven by Lama and di Bernardo (2024) for non-cohesive targets. This difference is biologically and mechanically intuitive: in non-cohesive targets, each stray particle must be individually herded by an actuator. In cohesive flocks, global attraction ($n = N - 1$) allows a single shepherd to indirectly influence the entire flock once outliers are brought into sensory contact, dramatically reducing the actuator requirements for large swarms.
+### 5.1 Against the square-root law
+Our slopes (0.20–0.42 at 12 drive times on five sizes; 0.27–0.38 on nine, section 3.8) are below the $\sqrt{N}$ growth (slope 0.5) that Lama and di Bernardo (2024) report for targets that do not flock. A plausible reading: without cohesion every target has to be fetched by a herder; in a cohesive flock every sheep is drawn to the whole flock ($n = N - 1$), so once a dog turns a stray back, it rejoins the flock by itself.
 
-The cohesion runs (section 3.11) test this reading directly. Making the flock more cohesive than the paper's barely changes the slope (0.20 on `wide`, against 0.20–0.30 for the paper's flock), while the one weaker flock the model can form (each sheep drawn to half the flock) steepens it to 0.40–0.70, a range that includes the non-cohesive 0.5. The deadline does the same: at $6\times$ the slope is 0.38–0.61. Cohesion and time pressure together decide which side of the square-root law a flock falls on.
+The cohesion runs (section 3.11) test this reading. A more cohesive flock than the paper's barely changes the slope (0.20 on `wide`, against 0.20–0.30), while the one weaker flock the model can form (each sheep drawn to half the flock) raises it to 0.40–0.70, a range that includes 0.5. The deadline does the same: at 6 drive times the slope is 0.38–0.61. Cohesion and time pressure together decide on which side of the square-root law a flock falls.
 
-Section 3.14 now gives the non-cohesive side inside HerdSim. The paper's model, run here, reproduces its own law: an exponent of 0.52–0.53 with infinite sensing and 0.41–0.42 above the density threshold with sensing radius 10, under both the paper's statistic and HerdSim's. Both lie above the 0.27–0.38 of the Strömbom flock at 12 drive times, as the reading above expects. The two runs still differ in task and herder rule as well as in cohesion, so the size of the gap that belongs to cohesion is not yet measured.
+Section 3.14 gives the non-cohesive side inside HerdSim. The paper's model reproduces its own law: an exponent of 0.52–0.53 with infinite sensing and 0.41–0.42 above the threshold with sensing radius 10, under both statistics. Both are above the 0.27–0.38 of the Strömbom flock at 12 drive times, as the reading above expects. The two runs also differ in task and herder rule, so how much of the gap is due to cohesion is not yet measured.
 
-### 5.2 Two-Phase Dynamics and a Failure Taxonomy for Collective Herding
+### 5.2 How failed trials end, and the start spread
 
-Analysis of 367,150 simulation trials reveals that collective shepherding decomposes into two physically distinct phases, yielding a clear failure taxonomy:
+1. **Two kinds of failed trial.**  
+   We split failed drive trials by where the flock ended. A trial is **near the goal** when the flock centre ended within two goal radii of the goal centre: the flock got there but missed the deadline or left sheep outside. It is **far from the goal** when the flock centre ended farther away: the flock was never gathered and driven to the goal. Most failures are far from the goal:
 
-1. **Failure Taxonomy: Structural vs Boundary/Temporal Failures**:
-   - **Structural Failures**: Occur during the initial Gathering/Collecting phase. When team size falls below threshold ($D < D_{\min}$), herders lack the spatial geometry required to counteract the flock's natural outward dispersion. Stragglers disperse faster than individual herders can sequentially round them up, inducing permanent stalling. For structural failures, extending the deadline cannot rescue the trial.
-   - **Boundary and Temporal Failures**: Occur during the Transit/Drive phase or Terminal Penning. The pack successfully rounds up the herd and guides the cohesive collective across open pasture (bringing $\ge 99\%$ into the pen), but times out due to deadline expiry or boundary geometry artifacts (the Straggler Effect).
-   - This physical distinction explains why 99% arrival isolates fundamental collective herding capacity, whereas strict 100% containment is dominated by local terminal boundary noise.
-   - *Empirical Failure Regime Classification across 367,150 Trials*:
+   | Protocol | Rule | Failed trials | Far from goal | Near goal | Share far |
+   | :--- | :--- | :---: | :---: | :---: | :---: |
+   | `dmin_m12` | strict, 12× | 235 | 180 | 55 | **76.6%** |
+   | `dmin_m6` | strict, 6× | 889 | 639 | 250 | **71.9%** |
+   | `dmin_m3` | strict, 3× | 710 | 571 | 139 | **80.4%** |
+   | `dmin_f99_m12` | 99%, 12× | 235 | 213 | 22 | **90.6%** |
+   | `dmin_f99_m6` | 99%, 6× | 1,511 | 1,067 | 444 | **70.6%** |
+   | `dmin_f99_m3` | 99%, 3× | 584 | 457 | 127 | **78.3%** |
 
-     | Campaign Protocol | Task Description | Total Failed Trials | Structural Gather Failures | Boundary / Temporal Failures | Structural Failure Share |
-     | :--- | :--- | :---: | :---: | :---: | :---: |
-     | `dmin_m12` | 100% Containment, 12× Drive Time | 235 | 180 | 55 | **76.6%** |
-     | `dmin_m6` | 100% Containment, 6× Drive Time | 889 | 639 | 250 | **71.9%** |
-     | `dmin_m3` | 100% Containment, 3× Drive Time | 710 | 571 | 139 | **80.4%** |
-     | `dmin_f99_m12` | 99% Arrival, 12× Drive Time | 235 | 213 | 22 | **90.6%** |
-     | `dmin_f99_m6` | 99% Arrival, 6× Drive Time | 1,511 | 1,067 | 444 | **70.6%** |
-     | `dmin_f99_m3` | 99% Arrival, 3× Drive Time | 584 | 457 | 127 | **78.3%** |
+   In 70% to 91% of failed trials the flock ended far from the goal, so most failures come from gathering and driving, not from the last metres. This rule uses only where the flock ended; it does not tell whether more time would have saved the trial.  
+   *Data:* `python -m analysis.dispersion_burden`, on the six main protocols.
 
-     *Quantitative Takeaway:* Across all protocols, **70% to 90%** of all failure outcomes stem from structural under-provisioning during the initial gathering phase. Under relaxed deadlines (12×) with 99% arrival, structural failures account for **90.6%**, proving that 99% arrival successfully strips away marginal boundary noise.
+2. **The start spread times $N$.**  
+   The product of the flock's start spread $S_0$ (its RMS radius at the start) and $N$ measures how much gathering a layout asks for. At $N = 400$ it is 8 to 13 times larger on the scattered layouts than on `compact`, and success at 6 drive times (over all $D$) falls as it grows:
 
-2. **Total Dispersion Burden ($S_0 \times N$)**:
-   - The product of initial spatial dispersion $S_0$ (mean squared distance from centroid) and flock size $N$ represents the total geometric compaction work herders must perform before cohesive driving can commence.
-   - On `compact` pastures, $S_0$ is negligible ($S_0 \times N \approx 0$), explaining why $D_{\min} = 1$ remains constant from $N = 25$ up to $N = 1131$.
-   - On dispersed pastures (`wide`, `split`, `outlier_rich`), large $S_0$ causes $S_0 \times N$ to explode, demanding multi-agent parallel collection under tight deadlines.
-   - *Empirical Dispersion Burden ($S_0 \times N$) and Success Rate (`dmin_m6`)*:
+   | Layout | $N$ | Start spread $S_0$ | $S_0 \times N$ | Success rate (all $D$) |
+   | :--- | :---: | :---: | :---: | :---: |
+   | `compact` | 25 | 4.8 m | 119 | 100.0% |
+   | `compact` | 100 | 6.7 m | 665 | 100.0% |
+   | `compact` | 400 | 8.3 m | 3,316 | 100.0% |
+   | `wide` | 400 | 74.8 m | 29,931 | 83.8% |
+   | `outlier_rich` | 400 | 66.2 m | 26,496 | 55.3% |
+   | `split` | 400 | 108.8 m | 43,507 | 21.1% |
 
-     | Layout | Flock Size $N$ | Initial Spread $S_0$ | Dispersion Burden $S_0 \times N$ | Overall Success Rate |
-     | :--- | :---: | :---: | :---: | :---: |
-     | `compact` | 25 | $3.59\text{ m}$ | **89.9** | 100.0% |
-     | `compact` | 100 | $5.67\text{ m}$ | **567.2** | 100.0% |
-     | `compact` | 400 | $7.68\text{ m}$ | **3,073.5** | 100.0% |
-     | `wide` | 400 | $8.11\text{ m}$ | **3,242.3** | 83.8% |
-     | `outlier_rich` | 400 | $10.16\text{ m}$ | **4,065.6** | 55.3% |
-     | `split` | 400 | $8.81\text{ m}$ | **3,524.2** | 21.1% |
+   The burden separates compact from scattered starts, but it does not order the scattered layouts: `outlier_rich` has a smaller burden than `wide` and a lower success rate. How the strays are placed matters as well as how far.  
+   *Data:* `python -m analysis.dispersion_burden` on `dmin_m6`; $S_0$ is the mean of `max_extent` (the flock's largest RMS radius in a trial, which is its start).
 
-     When the dispersion burden $S_0 \times N$ exceeds $\approx 3,500$, operational success collapses unless partitioned among a sufficiently scaled multi-agent pack.
+### 5.3 What this study adds
 
-3. **Dual-Regime Crowding Collapse**:
-   - Overcrowding collapse is not confined to one regime, but manifests at opposite geometric extremes:
-     - *Large Flocks ($N \ge 400$)*: Driven by linear packing saturation along the rear driving arc ($D > D_{\mathrm{cap}} \approx 12$) when agents possess finite exclusion footprints ($2\text{ m}$), causing spatial contention and lateral immobilization.
-     - *Small Flocks ($N \le 10$)*: Driven by excessive encirclement ratios ($D/N \gg 1$), where overwhelming canine numbers project threat forces from all azimuths simultaneously, eliminating the flock's natural flight escape corridor and scattering sheep outward.
+1. **A decided map of team sizes.** $D_{\min}$ and $D_{\mathrm{sat}}$ across flock sizes ($N \le 566$, with runs to 3200), layouts and deadlines, each cell decided at 99% confidence or reported as a bracket.
+2. **The success rule changes the answer.** Under the strict rule the last sheep often decides a trial; the 99% rule measures what the team can do with the flock.
+3. **Reliable and fast are different teams.** The fastest team grows about twice as fast with $N$ as the smallest reliable one, and dogs beyond it add cost but no speed.
+4. **Which part of the team rule matters.** The collect/drive switch carries a team without coordination to $N = 200$; assignment is needed at $N = 400$.
+5. **When more dogs hurt.** Point dogs never made the task fail; dogs that keep 2 m apart do, on `outlier_rich` $N = 400$ from about 9 dogs.
+6. **Cohesion and the square-root law.** The Strömbom flock grows below $\sqrt{N}$ at the loose deadline, and weaker cohesion moves it toward 0.5.
+7. **A limit of the drive rule.** Above $N \approx 1056$ Strömbom's drive point is beyond the sheep's reaction distance; capping it restores the drive.
+8. **Sensing and sharing.** A local view costs about one dog at $N = 200$, and sharing with the whole team wins it back on `wide` (not on `split`).
+9. **How failures end.** Most failed drives end far from the goal.
+10. **A reproducible simulator.** Every trial can be replayed from its config and seed; 932 diagnostic replays reproduced their stored trials exactly.
 
-### 5.3 Ten Primary Scientific Contributions
+### 5.4 Possible uses
 
-1. **Decided Empirical Frontier**: Established the first statistically rigorous scaling map of $D_{\min}$ and $D_{\mathrm{sat}}$ across flock sizes ($N \le 566$, extended to 3200), layouts, and deadlines, decided at exact 99% confidence.
-2. **The Success Criterion Dictates the Physics**: Proven that strict 100% containment creates an artificial bottleneck (the Straggler Effect), whereas 99% arrival isolates true multi-agent coordination.
-3. **Decoupling Reliability from Speed**: Established that peak speed ($D_{\mathrm{sat}}$) scales approximately twice as fast with flock size as minimal reliability ($D_{\min}$). Extra agents beyond $D_{\mathrm{sat}}$ yield negligible speedups while multiplying operational overhead.
-4. **Anatomy of Multi-Dog Coordination**: Demonstrated that behavioral state switching carries uncoordinated teams to $N = 200$, while explicit multi-agent task assignment is strictly required for $N \ge 400$.
-5. **Overcrowding and Physical Spacing**: Proved that overcrowding harm does not manifest for idealized point dogs, but emerges predictably once physical body buffers ($2\text{ m}$) cause congestion along the driving arc.
-6. **Cohesive and Non-Cohesive Targets**: Linked cohesion strength to the growth exponent: the paper's flock grows below the $\sqrt{N}$ law at relaxed deadlines, and weakening cohesion moves it toward 0.5.
-7. **Upper Analytical Boundary of Driving Heuristics**: Discovered the analytical limit of Strömbom driving standoff distances at $N = 1056$, demonstrating why classic heuristics must be capped for massive swarms.
-8. **Sensor-Communication Trade-offs**: Measured the cost of local sensing ($30\text{--}65\text{ m}$, about one dog at $N = 200$) and showed that, at 65 m, sharing with the whole team recovers the global $D_{\min}$ on `wide` $N = 200$ (not on `split`).
-9. **Failure Taxonomy and Total Dispersion Metric ($S_0 \times N$)**: Provided a theoretical framework separating structural gathering deficits from boundary timing noise, formalized by the total initial dispersion burden.
-10. **Fully Auditable, Open Simulation Suite**: Provided a crash-safe, deterministic, bit-reproducible software platform validated across 367,150 trials.
+The direct use is in robot and drone herding, where a team size has to be chosen before a run. For working shepherds the numbers are indirect: they decide from experience and direct the dogs themselves, and the model's sheep differ from real ones (a looser flock, one fixed reaction distance).
 
-### 5.4 Potential for Real-World Application
+Below, a *unit* is one member of the team: a dog, a robot or a drone. The number of units is the team size $D$, so "one to three units" means $D = 1$ to 3.
 
-The direct use is in robot and drone herding, where a team size has to be chosen before a trial. For working shepherds the numbers are indirect: they decide by experience and direct the dogs themselves, and the model's sheep differ from real ones (looser flock, a single fixed reaction distance).
-
-Below, a *unit* is one herder of the team: a dog, a robot or a drone. The number of units is the team size $D$ used throughout this report, so "one to three units" means $D = 1$ to 3.
-
-- **Sizing a team.** At a relaxed deadline one to three units handle a scattered flock of up to 400, and a compact flock needs one up to $N = 1131$ (two at 1600). The deadline moves the answer about as much as a fourfold larger flock does, so the time available should be fixed before the team size.
-- **Speed costs more than reliability.** On `wide` and `outlier_rich` flocks the team that finishes fastest is one and a half to two and a half times the minimum (more on `split`), and units beyond it add battery time with no gain (Table 6).
-- **Physical size limits the useful team.** Units that cannot stand closer than 2 m crowd the drive arc of an `outlier_rich` flock from about 9 units at $N = 400$; the arc length bounds the useful team.
-- **Share the map before adding units.** A local view costs about one unit at $N = 200$, and pooling what all units see recovered it on `wide` (not on `split`).
-- **Back off to hold.** Units must move beyond the animals' flight distance to keep a flock in place; units that only stop keep it moving.
-- **Large flocks need a closer drive point.** A controller using the Strömbom drive rule must cap its standoff at the flight distance for flocks above about a thousand animals.
-- **Welfare.** In the model the time each sheep spends fleeing does not rise with more units, a hypothesis for field tests in the spirit of Yaxley et al. (2021), not a finding about animals.
+- **Sizing a team.** At a loose deadline one to three units handle a scattered flock of up to 400, and a compact flock needs one up to $N = 1131$ (two at 1600, with the capped drive point). The deadline changes the answer about as much as a four times larger flock does, so fix the time available before the team size.
+- **Speed costs more than reliability.** On `wide` and `outlier_rich` the fastest team is one and a half to two and a half times the minimum (more on `split`), and units beyond it add running time with no gain (Table 6).
+- **The space each unit takes limits the useful team.** Units that cannot come closer than 2 m to each other crowd the arc behind an `outlier_rich` flock from about 9 units at $N = 400$.
+- **Share the map before adding units.** A local view costs about one unit at $N = 200$, and sharing what every unit sees won it back on `wide` (not on `split`).
+- **Back off to hold a flock.** Units must move beyond the animals' flight distance to keep a flock in place; units that only stop keep it moving.
+- **Large flocks need a closer drive point.** A controller using Strömbom's drive rule must cap its standoff at the flight distance for flocks above about a thousand animals.
+- **Welfare.** In the model the time each sheep spends fleeing does not rise with more units. This is a hypothesis for field tests in the spirit of Yaxley et al. (2021), not a finding about animals.
 
 ---
 
-## 6. Limitations and Threats to Validity
+## 6. Limitations
 
-1. **2D Kinematic Simplifications**: Sheep and dogs are modeled as point masses with instantaneous turning and no physical fatigue.
-2. **Open Boundary Conditions**: Real pastures have boundary fences that assist dogs in corralling stray animals.
-3. **Discretized Grid Brackets**: Cells with true reliability near $\theta = 0.90$ remain undecided at 200 seeds, necessitating bounded reporting brackets.
-4. **Global Visibility in the Main Runs**: Apart from the sensing runs of section 3.12, `strombom_multi` assumes dogs know the position of every sheep. Section 3.12 tests a limited range with known positions within it; bearing-only sensing is not modelled.
-5. **Follow-Up Engineering Choices**: The holding withdrawal rule, $2\text{ m}$ dog spacing, and capped drive offsets are HerdSim design implementations rather than biological observations.
-6. **Flock Calibration Ceiling and Metric Disc Assumption**: Above $N \approx 600$, canonical Strömbom flocks do not settle to a unique equilibrium radius; scaling investigations above 600 require imposed density assumptions. The model assumes metric interaction discs ($r_a = 2\text{ m}$) rather than topological $k$-nearest neighbors; at massive flock sizes ($N = 3200$), the inner flock core experiences slight compression because metric interactions do not model visual occlusion.
-7. **Diagnostic Sample Sizes**: Diagnostic replays for flight pressure and split anomalies use 12 seeds per cell, indicating strong directional mechanisms rather than exhaustive bounds.
-8. **Modeling Postulate on Threat Normalization**:
-   - The canonical Strömbom model defines repulsive fear for a single dog. HerdSim normalizes the summed threat vectors of all active dogs within $r_s = 65\text{ m}$ to unit length ($\lVert \mathbf{R}_{s,i} \rVert = 1.0$).
-   - *Why additive forces were rejected*: In Strömbom dynamics, an animal's social attraction weight is $c = 1.05$. If independent fear forces from two dogs are summed additively, their combined magnitude equals $2\cos(\theta/2)$, which strictly exceeds $1.05$ whenever dogs are separated by less than $116^\circ$. Thus, linear additive threat causes two flanking dogs to overpower flock cohesion, violently fragmenting the herd from $D = 2$ upward.
-   - *Postulate status*: Unit-vector normalization is an intentional modeling postulate to preserve collective cohesion and isolate multi-agent geometric coordination. Whether real biological prey experience non-linear panic inflation under multi-predator pursuit remains an open question for empirical field ethology.
-9. **Kinematic Velocity Clamping vs Continuous Acceleration**:
-   - In Strömbom dynamics, individual sheep speed is strictly clamped to step size $\delta = 1.0\text{ m/s}$. The horizontal saturation plateau $D_{\mathrm{sat}}$ (where surplus shepherds yield zero speedup) is an inevitable kinematic consequence once the driving arc is filled.
-   - Conversely, continuous potential models such as Kubo et al. (2022) permit additive acceleration beyond cruising speed, explaining why Kubo continues to reduce completion times with increasing $D$.
-10. **Scope of Floating-Point Reproducibility**:
-    - Bit-identical replay verification is strictly guaranteed on homogeneous x86_64 CPU architectures under the locked `uv.lock` dependency graph and single-threaded BLAS execution (`OPENBLAS_NUM_THREADS=1`).
-    - Compiling or executing across heterogeneous architectures (e.g. ARM NEON vs x86 AVX-512) can induce 1-ULP transcendental rounding variations, which may flip outcomes on rare borderline timeout seeds.
-11. **Safeguards Against Sequential Optional Stopping Bias**:
-    - HerdSim evaluates reliability via 99% Clopper-Pearson intervals. Because exact binomial inversion produces conservative coverage ($\ge 99\%$, often $\approx 99.5\%$ due to lattice discreteness) and allocations occur in discrete batches of 10 seeds (requiring at least 51 consecutive wins to reach $\theta = 0.90$), the framework inherently buffers against false discovery inflation from sequential peeking.
-12. **The Lama and di Bernardo model is a reproduction from the paper's text**: no code was published. Where the text is silent HerdSim made stated choices (the push points away from the herder; a run ends when every herder is inside the goal and none sees a target outside it; targets and herders are integrated from the same state). The paper's values were read from its figure at a resolution of one herder and 50 runs per cell. HerdSim's teams stay up to one herder smaller than the paper's at the outnumbered boundary; the cause of that last herder was not found.
+1. **Simple bodies.** Sheep and dogs are points that turn instantly and do not tire.
+2. **No fences.** Real fields have fences that help dogs hold strays; the model has none.
+3. **Brackets.** Cells whose true success rate is near 0.90 stay undecided at 200 seeds, so some answers are brackets.
+4. **Full view in most runs.** Apart from section 3.12, dogs know where every sheep is. Section 3.12 limits the range but still gives exact positions within it; sensing only directions is not modelled.
+5. **HerdSim choices in the follow-up.** The withdrawal rule for holding, the 2 m dog spacing and the capped drive point are HerdSim's choices, not observations of real dogs.
+6. **The calibration edge.** Above about $N = 600$ the Strömbom flock does not settle to one size, so results at larger $N$ are at an imposed density. At $N = 800$ to 1131 the compact flock in a trial is 0.5–0.8 times the imposed radius (`cli/dmin_tables.py extent`).
+7. **Small diagnostic samples.** The pressure and `split` replays use 12 seeds per cell. They show directions, not tight bounds.
+8. **Several dogs pushing one sheep.** Strömbom's model defines the push of one dog. HerdSim normalises the summed push of all dogs within 65 m to the size of one dog's push. Summed without normalising, two dogs less than 116° apart would push harder than the flock's attraction ($c = 1.05$) and tear it apart from $D = 2$ on. This is a modelling choice; whether real sheep flee harder from several dogs is a question for field data.
+9. **Sheep speed.** A reacting Strömbom sheep always walks at 1 m/s, so the flat finish time beyond $D_{\mathrm{sat}}$ follows from the model. Kubo sheep speed up under a stronger push (up to 5 m/s), which is why more Kubo dogs keep shortening the drive.
+10. **Reproducibility across machines.** Replays are exact on the same machine, with the locked dependencies (`uv.lock`) and one BLAS thread per process. On another CPU the last floating-point bits can differ, which may change the outcome of rare trials that end right at the deadline.
+11. **Looking at the results between batches.** Reliability is decided after every batch of 10 seeds. The Clopper–Pearson interval is conservative and a reliable cell needs at least 51 straight successes, but the repeated looks are not corrected for, so the 99% confidence of a decision is approximate.
+12. **The Lama and di Bernardo model is reproduced from the paper's text**; no code was published. Where the text is silent HerdSim made stated choices (the push points away from the herder; a run ends when every herder is inside the goal and none sees a target outside it; targets and herders are moved from the same state). Section 3.14 compares numbers only with the paper's Table I and compares the rest of its results with its figure by eye.
 
 ---
 
 ## 7. Conclusions and Future Work
 
-Through 367,150 simulation trials across 39 campaign protocols, HerdSim maps the minimum team size $D_{\min}$, the team size beyond which dogs stop helping (*D*<sub>sat</sub>), and the conditions under which more dogs hurt. Cohesive flocks need one dog up to $N = 1131$; on dispersed pastures the minimum team grows sub-linearly, with slopes of 0.27–0.38 at $12\times$ and 0.38–0.61 at $6\times$, while the fastest team grows about twice as fast. Under strict containment the last sheep decides; under 99% arrival the answers are robust to setup conventions. Coordination matters at large flocks; extra point dogs never broke reliability on `wide` or `outlier_rich` but slowed `split`, and dogs that take up room cause failures; and the paper's drive rule itself stops working above about a thousand sheep. Run in the same simulator, the non-cohesive targets of Lama and di Bernardo reproduce their square-root law, which holds under HerdSim's reliability rule too, except near their density threshold, where a mean share of 0.99 hides runs that lose a target.
+Over 367,150 trials in 39 protocols, HerdSim maps the smallest reliable team $D_{\min}$, the team beyond which more dogs stop helping ($D_{\mathrm{sat}}$), and the settings in which more dogs hurt. A compact flock needs one dog up to $N = 1131$ (with the capped drive point above 1056). On scattered flocks the smallest team grows slower than the flock, with slopes of 0.27–0.38 at 12 drive times and 0.38–0.61 at 6, while the fastest team grows about twice as fast. Under the strict rule the last sheep decides; under the 99% rule the answers hold when the setup changes. Coordination matters at large flocks. Extra point dogs never made the task fail on `wide` or `outlier_rich` but slowed `split`, while dogs that take up room do cause failures. Strömbom's drive rule itself stops working above about a thousand sheep. Run in the same simulator, the non-cohesive targets of Lama and di Bernardo follow their square-root law, also under HerdSim's reliability rule, except near their threshold, where an average of 0.99 hides runs that lose a target.
 
-### Future Research Directions
+### Future work
 
-1. **Cluster-Aware Task Allocation on Split Pastures**: Resolve the `split` layout plateau by designing assignment algorithms that distribute herders across separate topological clusters rather than assigning outliers purely by global centroid distance.
-2. **Gated Holding Enclosures**: Evaluate terminal holding using physical boundary gates rather than withdrawal into open fields, testing whether holding bottlenecks persist when enclosures prevent escape.
-3. **Bearing-Only Visual Sensing**: Extend local vision models to bearing-only perception (angles without exact depth), simulating realistic onboard cameras on autonomous drones.
-4. **Crossing the Two Models on One Task**: Run the Strömbom team rule on the Lama targets in the gather task, and the Lama herders on Strömbom sheep, so that the gap between the exponents of section 3.14 can be split into the part due to cohesion and the part due to the herder rule and the task. Each rule reads quantities the other side lacks (the team rule a collect distance that means nothing without cohesion, the herders distances from a goal that in the drive task lies far from the flock), so each crossing needs its own design first.
-5. **Empirical GPS Field Trials with Multi-Dog Teams**: Partner with livestock researchers to collect high-frequency GPS collar data during multi-dog and drone herding trials, testing whether real sheep experience additive or normalized fear.
-6. **Local Density Gradient Estimation of GCM**: Replace the omniscient Global Center of Mass (GCM) perception assumption with a biologically realistic local density gradient computed over topological nearest neighbors, eliminating global sensing while preserving low angular heading error ($< 15^\circ\text{--}20^\circ$).
+1. **Assignment that sees clusters.** On `split`, assign dogs so that each cluster gets some, instead of by total walking distance alone.
+2. **Holding with a gate.** Test holding with a closed pen instead of dogs withdrawing into the open, to see whether small flocks can then be held.
+3. **Sensing directions only.** Let dogs sense the direction to a sheep but not its distance, as a camera on a drone would.
+4. **Crossing the two models on one task.** Run the Strömbom team rule on Lama's targets in the gather task, and Lama's herders on Strömbom sheep, so that the gap between the exponents of section 3.14 can be split into the part due to cohesion and the part due to the herder rule and the task. Each rule reads quantities the other side lacks (the team rule a collect distance that means nothing without cohesion, the herders distances to a goal that in the drive task lies far from the flock), so each crossing needs its own design first.
+5. **Field data with several dogs.** Work with livestock researchers to collect GPS data from herding with several dogs or drones, to test whether real sheep flee harder from more dogs.
+6. **A local estimate of the flock centre.** Replace the sheep's knowledge of the whole flock's centre with the direction toward its nearest neighbours. `cli/diagnostics/gradient_validation.py` measures how far off that direction is on the start layouts; at $N = 400$ with 15 neighbours the mean error is still about 30°.
 
 ---
 
-## Data and Code Availability
+## Data and Code
 
-Every trial and cell decision is stored under `results/<protocol>/`. The tables behind the numbers in this report are in [results_tables.md](results_tables.md); each block names the script that generated it. To run the study again and rebuild the tables, see [cli/README.md](../../cli/README.md) and the [CLI reference](../guides/cli_reference.md).
+Every trial and cell decision is stored under `results/<protocol>/`. The tables behind the numbers in this report are in [results_tables.md](results_tables.md); each block names the command that made it. To run the study again and rebuild the tables, see [cli/README.md](../../cli/README.md) and the [CLI reference](../guides/cli_reference.md).
 
 ---
 
@@ -753,27 +703,27 @@ Every trial and cell decision is stored under `results/<protocol>/`. The tables 
 
 ---
 
-## Appendix: Protocol Run Record
+## Appendix A: Protocol Run Record
 
-| Protocol | Total Trials | Cells Evaluated | Cells Decided | Open at Cap (200) | Errors | Execution Time |
+| Protocol | Trials | Cells | Decided | Open at 200 seeds | Errors | Hours |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| `dmin_m12` | 17,220 | 183 | 179 | 4 | 0 | 1.24 h |
-| `dmin_m6` | 13,470 | 191 | 170 | 21 | 0 | 0.28 h |
-| `dmin_m3` | 9,530 | 183 | 178 | 5 | 0 | 0.17 h |
-| `dmin_f99_m12` | 11,100 | 180 | 178 | 2 | 0 | 0.41 h |
-| `dmin_f99_m6` | 14,240 | 191 | 174 | 17 | 0 | 0.49 h |
-| `dmin_f99_m3` | 11,140 | 185 | 177 | 8 | 0 | 0.27 h |
-| `dmin_fat` | 8,660 | 181 | 179 | 2 | 0 | 0.22 h |
-| `dmin_f99_fat` | 8,670 | 184 | 183 | 1 | 0 | 0.23 h |
-| `dmin_kubo` | 1,080 | 18 | 18 | 0 | 0 | 0.08 h |
-| Sensitivity Protocols (14 runs) | 69,630 | 921 | 800 | 121 | 0 | 3.27 h |
-| **Total** | **164,740** | **2,417** | **2,236** | **181** | **0** | **~6.7 h** |
+| `dmin_m12` | 17,220 | 183 | 179 | 4 | 0 | 1.24 |
+| `dmin_m6` | 13,470 | 191 | 170 | 21 | 0 | 0.28 |
+| `dmin_m3` | 9,530 | 183 | 178 | 5 | 0 | 0.17 |
+| `dmin_f99_m12` | 11,100 | 180 | 178 | 2 | 0 | 0.41 |
+| `dmin_f99_m6` | 14,240 | 191 | 174 | 17 | 0 | 0.49 |
+| `dmin_f99_m3` | 11,140 | 185 | 177 | 8 | 0 | 0.27 |
+| `dmin_fat` | 8,660 | 181 | 179 | 2 | 0 | 0.22 |
+| `dmin_f99_fat` | 8,670 | 184 | 183 | 1 | 0 | 0.23 |
+| `dmin_kubo` | 1,080 | 18 | 18 | 0 | 0 | 0.08 |
+| Sensitivity protocols (14 runs) | 69,630 | 921 | 800 | 121 | 0 | 3.27 |
+| **Total** | **164,740** | **2,417** | **2,236** | **181** | **0** | **about 6.7** |
 
-Follow-up runs (99% arrival; hours at 20 workers):
+Follow-up runs (99% rule; hours at 20 workers):
 
-| Protocol | Trials | Cells | Open at cap | Errors | Hours |
+| Protocol | Trials | Cells | Open at 200 seeds | Errors | Hours |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| `dmin_f99_m12`, `dmin_f99_m6`, `dmin_f99_m3` (resumed: finish-time seeds; $N$ 71, 141, 283, 566 added to the first two) | +38,770 | | | 0 | 4.0 |
+| `dmin_f99_m12`, `dmin_f99_m6`, `dmin_f99_m3` (resumed with finish-time seeds; $N$ 71, 141, 283, 566 added to the first two) | +38,770 | | | 0 | 4.0 |
 | `dmin_f99_indep` | 12,990 | 181 | 18 | 0 | 0.30 |
 | `dmin_f99_kubo` | 3,260 | 38 | 6 | 0 | 0.18 |
 | `dmin_f99_hold` | 14,280 | 280 | 18 | 0 | 0.74 |
@@ -784,45 +734,42 @@ Follow-up runs (99% arrival; hours at 20 workers):
 | `dmin_f99_view_comm` | 6,890 | 102 | 3 | 0 | 0.20 |
 | `dmin_f99_big` | 2,230 | 84 | 1 | 0 | 3.12 |
 | `dmin_f99_big_dense`, `_loose` | 1,320 / 830 | 15 / 14 | 2 / 1 | 0 | 0.73 / 0.26 |
-| `dmin_f99_big_cap` | 2,550 (+100 at $N = 3200$, not counted) | 45 | 3 | 0 | 5.5 (7.6 including $N = 3200$) |
+| `dmin_f99_big_cap` | 2,550 (+100 at $N = 3200$, not counted) | 45 | 3 | 0 | 5.5 (7.6 with $N = 3200$) |
 | `lama_r50` (gather task, sensing radius 10) | 17,660 | 500 | 23 | 0 | 6.53 |
 | `lama_r50_inf` (gather task, infinite sensing) | 22,620 | 500 | 1 | 0 | 6.47 |
 
-Diagnostic replays: 164 pressure replays and 768 split replays, every unchanged replay identical to its stored trial. Validation pilots of the Lama model (8,200 trials in two passes, scratch folders not kept) are described in section 3.14.
+Diagnostic replays: 164 pressure replays and 768 `split` replays, every unchanged replay identical to its stored trial. Two validation passes of the Lama model (8,200 trials, scratch folders not kept) came before `lama_r50`; the second fixed the order in which herders and targets are moved (section 6, item 12).
 
 ---
 
-## Appendix B: Claim–Evidence Matrix
+## Appendix B: Claims and Evidence
 
-To maintain intellectual honesty and allow independent peer reviewers to verify all findings, the following matrix classifies the ten core contributions according to scientific epistemic categories:
-
-| # | Scientific Claim / Thesis | Epistemic Category | Empirical Evidence & Benchmark Sources | Statistical Rigor | Caveat & Boundary Conditions |
-| :-: | :--- | :---: | :--- | :---: | :--- |
-| **1** | **Compact Flock Invariance**: Pre-clustered flocks require exactly 1 shepherd ($D_{\min} \equiv 1$) up to $N = 1131$. | **Measured & Derived** | `dmin_f99_m12`, `dmin_f99_big_cap`. 42/42 successes at $N = 1131, D = 1$. | Exact ($L = 1.0$) | Contingent upon initial cohesion; animals must start within personal interaction distance. |
-| **2** | **Spatial Confinement Boundary ($N \le 50$)**: $D_{\min} \equiv 1$ across all dispersed layouts and deadlines. | **Measured & Interpreted** | 23 base protocols; all $N \le 50$ cells decided at $D = 1$. $R_f \le 7.6\text{ m} \ll r_s = 65\text{ m}$. | High ($L \ge 0.90$) | Requires canine forward speed advantage ($v_{\mathrm{dog}} = 1.5\text{ m/s} > 1.0\text{ m/s}$). |
-| **3** | **Sub-Linear Scalability**: $D_{\min}$ scales with exponent $\alpha \in [0.27, 0.38]$ ($12\times$) and $[0.38, 0.61]$ ($6\times$). | **Measured & Derived** | Log-log power-law fits across 9 flock sizes ($N = 25\text{--}566$), 367,150 trials. | High ($R^2 \ge 0.91$) | Validated within calibrated biological domain ($N \le 566$). Constant density imposed above 566. |
-| **4** | **Straggler Effect Bottleneck**: 97% of strict failures at $N \ge 100$ result from velocity overshoot at the pen entrance. | **Measured & Interpreted** | Per-tick telemetry in `dmin_m6`. Replay reducing speed to $1.15\text{ m/s}$ eliminates 100% of failures. | High (Diagnostic replays) | Inherent to strict simultaneous 100% containment and open goal geometries. |
-| **5** | **Hungarian Topological Cluster Blindness**: Distance-minimizing assignment causes swarming deadlock on `split`. | **Observed & Interpreted** | `dmin_f99_m6`. Success plateaus at 0.60–0.90. Replay enforcing $f(N)$ outlier spacing halves drive time. | High (Paired replays) | Full resolution under $3\times$ requires hierarchical cluster-aware task allocation. |
-| **6** | **Social Cohesion Bridges to Square-Root Law**: Weakening cohesion to $n = 0.5N$ raises exponent $\alpha$ to $0.40\text{--}0.70$. | **Measured & Derived** | `dmin_f99_k05`, `dmin_f99_c1.3` to `_c2.0`. Table 9 and regression fits. | High ($L \ge 0.90$) | Evaluated under topological all-to-all and fractional neighborhoods; complex networks unmodeled. |
-| **7** | **Mathematical Singularity at $N = 1056$**: Standoff $2\sqrt{N} > 65\text{ m}$ leaves shepherds invisible; $63\text{ m}$ cap restores control. | **Derived & Measured** | Analytical derivation $2\sqrt{N} > 65$. Uncapped fails 0/10 at $N = 1131$. Capped succeeds 42/42 up to $N = 3200$. | Exact (Analytical & empirical) | Assumes constant domestic sheep visual detection horizon $r_s = 65\text{ m}$. |
-| **8** | **Overcrowding Collapse Under Physical Spacing**: $2\text{ m}$ agent buffers cause deadlock on `outlier_rich` ($N = 400, D \ge 9$). | **Measured & Observed** | `dmin_f99_hold_spacing`. Success drops from 0.94 ($D=6$) to 0.77 ($D=9$) and 0.50 ($D=16$). | High ($L < 0.90$) | Manifests only when finite physical volume interacts with complex perimeter geometries. |
-| **9** | **Sensory Horizon Deficit and Mesh Recovery**: Horizons $< 30\text{ m}$ collapse; team-wide broadcast restores $D_{\min} = 2$. | **Measured** | `dmin_f99_view_range`, `dmin_f99_view_comm`. Factorial communication matrix. | High ($L \ge 0.90$) | Assumes idealized zero-latency communication mesh across the team. |
-| **10** | **Lama (2024) Statistical Divergence**: Mean target share $\ge 0.99$ masks $30\%$ trial failure rate at $N = 144$. | **Measured & Interpreted** | `lama_r50` (17,660 trials). 11 herders yield mean 0.992 but only 70% run success; Clopper-Pearson demands 17–25. | High ($L \ge 0.90$ vs Mean) | Evaluated on 2D disc Brownian targets with no social cohesion forces. |
+| # | Claim | Kind | Evidence | Limits |
+| :-: | :--- | :--- | :--- | :--- |
+| 1 | A compact flock needs one dog ($D_{\min} = 1$) up to $N = 1131$. | Measured | `dmin_m12`, `dmin_m6`, `dmin_m3`, `dmin_f99_*` up to $N = 566$; `dmin_f99_big_cap` at 800 and 1131. | Above 1056 only with the capped drive point. |
+| 2 | Up to $N = 50$ one dog is enough on every layout and deadline. | Measured | All $N \le 50$ cells of the 23 base protocols decided at $D = 1$. | The reason given in 3.1 is a likely one, not tested. |
+| 3 | On scattered flocks $D_{\min}$ grows with slope 0.27–0.38 at 12 drive times and 0.38–0.61 at 6. | Measured | Slope ranges over the brackets of nine flock sizes ($N = 25$–566), `dmin_f99_m12`, `dmin_f99_m6`. | Only up to the calibration edge. |
+| 4 | Under the strict rule large teams fail on the last sheep. | Measured | 97% of strict failures with $D \ge 6$ had 99% of the flock in (`dmin_s_base`); with slower dogs (`dmin_s_dogspeed`) strict $D_{\min}$ on `outlier_rich` $N = 400$ goes from none to 6. | Applies to the strict rule with an open goal. |
+| 5 | On `split`, collecting dogs crowd one cluster and many stand still. | Measured in replays | `split_diagnostic` replays: spreading the outliers halves the finish time at $D = 4$; a shorter stop distance makes the drive 21–24% faster at $D = 8$, 16. | 12 seeds per cell; neither change fixes 3 drive times. |
+| 6 | Weaker cohesion makes $D_{\min}$ grow faster, toward 0.5. | Measured | `dmin_f99_k05` slope 0.40–0.70 on `wide`; `dmin_f99_c*` 0.20. | One weaker level only; weaker flocks do not calibrate. |
+| 7 | Above $N \approx 1056$ Strömbom's drive point is beyond the sheep's reaction distance. | Derived and measured | $2\sqrt{N} > 65$; uncapped, 0 of 10 trials succeed at $N = 1131$ for every $D$; capped, compact succeeds at 800, 1131, 1600 and 42 of 42 at 3200. | Assumes the reaction distance $r_s = 65$ m. |
+| 8 | Dogs kept 2 m apart make extra dogs harmful on `outlier_rich` $N = 400$. | Measured | `dmin_f99_hold_spacing`: success 0.94 at $D = 6$, 0.77 at 9, 0.50 at 16; every $D \ge 9$ unreliable. | Not seen on `wide` or `compact`. |
+| 9 | A local view costs about one dog at $N = 200$; sharing with the whole team wins it back. | Measured | `dmin_f99_view_range`, `dmin_f99_view_comm`. | Sharing is instant and error-free in the model. |
+| 10 | Near the threshold, an average of 0.99 accepts teams that fail one run in three. | Measured | `lama_r50`: at 144 targets 11 herders average 0.992 but succeed in 70% of runs; HerdSim's $D_{\min}$ is 17–25. | Targets without cohesion on a disc. |
 
 ---
 
-## Appendix C: Reproducibility Checklist
+## Appendix C: Reproducibility
 
-| Audit Item | Verification Status | Artifact & Evidence in Repository |
-| :--- | :---: | :--- |
-| **Source Code & Branch** | `Verified` | Branch `scaling-cli-d-min-max`, repository `HerdSim`. |
-| **Commit Baseline** | `Verified` | Anchor commit: `3fc2267` (and subsequent documentation commits). |
-| **Environment & Toolchain** | `Verified` | Packaged via `uv` with Python 3.12+; fully pinned in `pyproject.toml` and `uv.lock`. |
-| **Input World & Layouts** | `Verified` | Deterministic generation routines in `sim/core/world/layouts.py` (`compact`, `wide`, `split`, `outlier_rich`). |
-| **Pseudorandom Number Streams**| `Verified` | Common Random Numbers: paired streams `master_seed + i` isolating layout from controller noise. |
-| **Computational Hardware** | `Verified` | Multicore Linux workstation; parallelized over 20 workers (`--workers 20`). |
-| **Raw Simulation Corpus** | `Verified` | Complete 367,150 trial records stored in `results/<protocol>/trials.jsonl` and aggregated in `trials.csv`. |
-| **Execution Pipeline** | `Verified` | Headless CLI commands: `uv run cli/campaign.py run --protocol <id>` and `uv run cli/run_queue.py`. |
-| **Automated Table Generation** | `Verified` | `cli/dmin_tables.py` reads raw data directly into [results_tables.md](results_tables.md). |
-| **Automated Test Suite** | `Verified` | `make test` runs 330 unit, invariant and regression tests; `make bench` runs 23 miniature campaigns. |
-| **Bit-Identical Replay Audit** | `Verified` | `services/replay.py` verifies 932 diagnostic replays matching stored tick-by-tick records bit-for-bit. |
+| Item | Where |
+| :--- | :--- |
+| Code | Repository `HerdSim`, branch `scaling-cli-d-min-max`. |
+| Environment | `uv`, Python 3.11 or later; versions locked in `pyproject.toml` and `uv.lock`. |
+| Start layouts | `sim/core/world/layouts.py` (`compact`, `wide`, `split`, `outlier_rich`). |
+| Random streams | Seed $i$ of every cell is `master_seed + i`; each trial has separate streams for the start layout, the sheep and the dogs, so cells with the same seed start from the same flock. |
+| Hardware | Linux workstation, 20 workers (`--workers 20`). |
+| Raw data | 367,150 trial rows in `results/<protocol>/trials.jsonl`, also as `trials.csv`. |
+| Running the study | `uv run cli/campaign.py run --protocol <id>` and `uv run cli/run_queue.py`. |
+| Tables | `cli/dmin_tables.py` builds [results_tables.md](results_tables.md) from the result folders. |
+| Tests | `make test` runs 330 unit, invariant and regression tests; `make bench` runs 23 small campaigns. |
+| Replays | `services/replay.py`; 932 diagnostic replays reproduced their stored trials exactly. |

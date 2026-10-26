@@ -54,7 +54,7 @@ uv run cli/run_queue.py --only dmin_f99_hold --workers 20
 
 ### Generating Tables (`cli/dmin_tables.py`)
 
-Converts raw trial data into publication-ready Markdown tables:
+Turns the result folders into Markdown tables:
 
 ```bash
 # Record all protocol summaries
@@ -80,14 +80,17 @@ uv run cli/dmin_report.py --protocol dmin_pilot --folder results/dmin_pilot --mu
 
 ---
 
-## 3. Diagnostic Replays (`cli/diagnostics/`)
+## 3. Diagnostics (`cli/diagnostics/`)
 
-Rerun stored trials deterministically to answer specific behavioral questions:
+The first two run stored trials again; an unchanged replay must reproduce its stored outcome, or the tool stops. Both write their rows to `--out` and print a summary.
 
 ```bash
-# Replay trials to measure the time each sheep spends fleeing dogs
-uv run cli/diagnostics/pressure_replay.py
+# Replay cells of a finished run to measure how long each sheep spends fleeing a dog
+uv run cli/diagnostics/pressure_replay.py dmin_f99_m6 --out results/diagnostics/pressure_dmin_f99_m6.csv
 
-# Replay split-layout trials to diagnose standoff freezing
-uv run cli/diagnostics/split_diagnostic.py
+# Replay split-layout trials with a shorter stop distance, outliers spread apart, or both
+uv run cli/diagnostics/split_diagnostic.py --out results/diagnostics/split_diagnostic.csv
+
+# Start layouts only: how far a sheep's local estimate of the flock centre is off
+uv run cli/diagnostics/gradient_validation.py --seeds 10
 ```

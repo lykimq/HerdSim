@@ -48,8 +48,8 @@ or below 90% is decided and gets no more trials. A cell that is still unclear ge
 adds D = 3 by itself. The run ends when nothing is left to decide, or when its time budget
 (`budget_hours`) is spent.
 
-The seeds go where the answer is still open. Across the whole study, 4,773 cells took 326,870
-trials; giving every cell 200 seeds would have taken 954,600.
+The seeds go where the answer is still open. Across the 37 drive-task protocols, 4,773 cells
+took 326,870 trials; giving every cell 200 seeds would have taken 954,600.
 
 ### Stopping and resuming
 
@@ -86,7 +86,7 @@ uv run cli/run_queue.py --workers 20                  # every protocol that is n
 uv run cli/run_queue.py --only dmin_f99_hold --workers 20
 ```
 
-The queue lists all 37 protocols in the order they ran. Finished folders are skipped, stopped
+The queue lists all 39 protocols in the order they ran. Finished folders are skipped, stopped
 ones are resumed, and a protocol that fails is logged while the queue moves on. Each protocol
 adds a line to `results/queue_log.jsonl` (when it ran, how long, trials, errors, open cells).
 With this one command the whole study can be run again from scratch.
@@ -127,7 +127,7 @@ read this way to choose the grid of the main runs.
 ## 3. Looking closer: the diagnostics
 
 Some questions can't be answered from the stored results, because a trial row keeps only a
-summary. The two tools in `diagnostics/` run stored trials again, either with extra measurements
+summary. Two tools in `diagnostics/` run stored trials again, either with extra measurements
 or with one rule changed. Because a trial is fully determined by its settings and seed, an
 unchanged replay is the same trial. The tools check that it gives the same outcome and length as
 the stored one and stop if it doesn't, which is what lets the report say every replay matched.
@@ -150,11 +150,18 @@ D = 4 and 5 where the stored CSV has D = 6; the rows both runs share are identic
 `split_diagnostic.py` asks why more dogs slow the `split` layout. It replays `split` N = 100 and
 200 at D = 2, 4, 8 and 16 in four versions: the rule as run, a shorter dog stop distance,
 collecting dogs that take outliers far apart (the `collect_min_gap` setting, which exists only
-for this tool), and both changes together. This is the follow-up in report section 4.1 and
-README finding 6.
+for this tool), and both changes together. This is the follow-up in report section 4.1.
 
 ```bash
 uv run cli/diagnostics/split_diagnostic.py --out results/diagnostics/split_diagnostic.csv
+```
+
+The third tool, `gradient_validation.py`, replays nothing. It draws start flocks and measures
+how far a sheep's estimate of the flock centre from its nearest neighbours is from the true
+centre (the note on the sheep model in `docs/methods/models.md`).
+
+```bash
+uv run cli/diagnostics/gradient_validation.py --seeds 10
 ```
 
 ---
@@ -179,10 +186,11 @@ sim/            the model: one trial, tick by tick
 | :--- | :--- |
 | `campaign.py` | `services/protocol.py`, `services/calibration.py`, `services/adaptive.py`, `services/store.py` |
 | `run_queue.py` | `services/protocol.py`, `services/adaptive.py` |
-| `dmin_tables.py` | `analysis/dmin_tables.py`, `analysis/results.py`, `analysis/growth_fits.py`, `analysis/frontier.py` |
+| `dmin_tables.py` | `analysis/dmin_tables.py`, `analysis/dmin.py`, `analysis/results.py`, `analysis/growth_fits.py`, `analysis/herdability.py`, `analysis/frontier.py` |
 | `dmin_report.py` | `analysis/dmin.py`, `analysis/results.py` |
 | `diagnostics/pressure_replay.py` | `services/replay.py`, `analysis/pressure.py` |
 | `diagnostics/split_diagnostic.py` | `services/replay.py` |
+| `diagnostics/gradient_validation.py` | `services/protocol.py`, `services/cells.py`, `sim/core/world/layouts.py` |
 
 Imports only point down the arrows, so these changes stay small:
 

@@ -74,7 +74,7 @@ The engine runs exactly one trial: one flock, one set of dogs, one seed, until s
 
 ### Layers depend only downward
 
-The code has four layers. The engine runs one trial. The campaign layer runs things: protocols, calibration, rounds, and replays of stored trials. The analysis layer reads finished results folders and turns them into decisions and tables, and never runs the model. The command-line tools sit on top; each one parses its arguments, calls the layers below and prints. A layer imports only from layers below it (the campaign layer uses the frontier rules to decide cells), and no tool imports another tool. A test checks these rules on every run.
+The code has four layers. The engine runs one trial. The campaign layer runs things: protocols, calibration, rounds, and replays of stored trials. The analysis layer reads finished results folders and turns them into decisions and tables, and never runs the model. The command-line tools sit on top; each one parses its arguments, calls the layers below and prints. A layer imports only from layers below it (the campaign layer uses the frontier rules to decide cells), and no tool imports another tool. These rules are kept by convention; nothing checks them automatically.
 
 *Why:* each piece can then be removed, replaced or extended on its own. Deleting a tool breaks nothing else, the analysis can be rerun without a simulation, and a rule that several tools need (how a results folder is read, how a replay is checked against its stored trial) lives in one place below them.
 
@@ -241,7 +241,7 @@ Some things the current design doesn't handle yet, and would need real changes:
 - The world has one circular goal. The drive task's layouts, field sizing and dog start arcs assume a single drive from a start toward that goal, and the gather task's assume a disc round it. Holding the flock in that goal exists (a hold time in the task, and a step in which the dogs back off beyond the sheep's reaction distance); a gate, a pen or several stages still need a more general world and its own start geometry.
 - The multi-dog collect/drive controller reads the flock's start position from the task setup, and its dogs share out the work using each other's positions. Backing off to hold is one role beyond collect and drive; others (flanking, holding a gap) would be new jobs in that layer.
 - The paper's drive point lies r_a sqrt(N) behind the flock, which passes the sheep's reaction distance near N = 1056; above that the drive rule itself stops working, and only a capped drive point (a labelled variant) drives such flocks.
-- The two sheep models and the two dog rules of the two tasks have only been run in their own pairing: Strombom and Kubo dogs on their flocks in the drive task, the Lama herders on Lama targets in the gather task. Crossing them (a flocking dog rule on targets that do not flock, or the other way round) needs each rule's assumptions about the other side checked first: the team rule reads a flock start and a collect distance that mean nothing without cohesion, and the herders read distances from the goal centre, which in the drive task is far from the flock.
+- The sheep models and dog rules have only been run in their own pairings: the Strombom and Kubo dogs on their own flocks in the drive task, the Lama herders on Lama targets in the gather task. Crossing them (a flocking dog rule on targets that do not flock, or the other way round) needs each rule's assumptions about the other side checked first: the team rule reads a flock start and a collect distance that mean nothing without cohesion, and the herders read distances from the goal centre, which in the drive task is far from the flock.
 - Much larger flocks would need the per-dog loops in the controllers vectorised.
 
 ## Where to look in the code
@@ -264,8 +264,11 @@ Some things the current design doesn't handle yet, and would need real changes:
 | Reading a results folder, Markdown tables | `analysis/results.py` |
 | D_min of a finished run, and its tables | `analysis/dmin.py`, `analysis/dmin_tables.py` |
 | Growth-shape fits of D_min against N | `analysis/growth_fits.py` |
+| The gather task read the paper's way, beside D_min | `analysis/herdability.py` |
+| Start spread times N, and where failed drives ended | `analysis/dispersion_burden.py` |
 | Replays of stored trials, checked against the stored outcome | `services/replay.py` |
 | Pressure on the flock in a replay | `analysis/pressure.py`, `cli/diagnostics/pressure_replay.py` |
 | Diagnostic replays of the split layout | `cli/diagnostics/split_diagnostic.py` |
+| Local estimate of the flock centre on start layouts | `cli/diagnostics/gradient_validation.py` |
 | Command-line entry points | `cli/` (see `cli/README.md`) |
 | Regression tests | `tests/sim/test_golden.py` |

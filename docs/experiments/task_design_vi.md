@@ -1,319 +1,325 @@
-# Thiết kế Nhiệm vụ và Phương pháp luận Thực nghiệm
+# Thiết kế Nhiệm vụ và Phương pháp Thực nghiệm
 
-Tài liệu này trình bày chi tiết về phương pháp luận thực nghiệm, hình học nhiệm vụ, các quy tắc quyết định thống kê và cơ sở lựa chọn tham số trong **HerdSim**.
+Tài liệu này mô tả cách HerdSim thiết lập các nhiệm vụ: hình học, bố cục xuất phát, cách lấy mẫu thích ứng, các quy tắc quyết định, và vì sao các lưới dừng ở những giới hạn đã chọn.
 
 ---
 
 ## Mục lục
 
-- [1. Hình học Nhiệm vụ và Tính Bất biến theo Quy mô](#1-hình-học-nhiệm-vụ-và-tính-bất-biến-theo-quy-mô)
-  - [Sai lầm chí tử của việc cố định kích thước bãi cỏ](#sai-lầm-chí-tử-của-việc-cố-định-kích-thước-bãi-cỏ)
-  - [Quy chuẩn theo Bán kính Bầy tự nhiên *R*<sub>f</sub>(*N*)](#quy-chuẩn-theo-bán-kính-bầy-tự-nhiên-r_fn)
-  - [Thời hạn Chuẩn hóa và Thời gian Lùa đặc trưng](#thời-hạn-chuẩn-hóa-và-thời-gian-lùa-đặc-trưng)
-- [2. Cấu hình Xuất phát Ban đầu](#2-cấu-hình-xuất-phát-ban-đầu)
-  - [4 Bố cục phân bố cừu ban đầu](#4-bố-cục-phân-bố-cừu-ban-đầu)
-  - [3 Cách thả chó xuất phát](#3-cách-thả-chó-xuất-phát)
+- [1. Hình học Nhiệm vụ và Quy mô](#1-hình-học-nhiệm-vụ-và-quy-mô)
+  - [Vì sao cánh đồng lớn theo bầy](#vì-sao-cánh-đồng-lớn-theo-bầy)
+  - [Định cỡ theo bán kính bầy đã hiệu chỉnh *R*<sub>f</sub>(*N*)](#định-cỡ-theo-bán-kính-bầy-đã-hiệu-chỉnh-r_fn)
+  - [Thời hạn tính theo thời gian lùa](#thời-hạn-tính-theo-thời-gian-lùa)
+- [2. Bố cục Xuất phát và Vị trí Xuất phát của Chó](#2-bố-cục-xuất-phát-và-vị-trí-xuất-phát-của-chó)
+  - [Bố cục xuất phát của bầy](#bố-cục-xuất-phát-của-bầy)
+  - [Độ trải lúc xuất phát nhân quy mô bầy](#độ-trải-lúc-xuất-phát-nhân-quy-mô-bầy)
+  - [Vị trí xuất phát của chó](#vị-trí-xuất-phát-của-chó)
 - [3. Động cơ Lấy mẫu Thích ứng Tuần tự (Adaptive Sequential Sampling)](#3-động-cơ-lấy-mẫu-thích-ứng-tuần-tự-adaptive-sequential-sampling)
   - [Vòng lặp lấy mẫu thích ứng](#vòng-lặp-lấy-mẫu-thích-ứng)
   - [Dừng sớm bằng khoảng tin cậy Clopper-Pearson 99%](#dừng-sớm-bằng-khoảng-tin-cậy-clopper-pearson-99)
-  - [Tự động chèn điểm giữa (Midpoint Densification)](#tự-động-chèn-điểm-giữa-midpoint-densification)
-  - [Tỉa ô bão hòa và trùng lặp (Saturation & Overlap Pruning)](#tỉa-ô-bão-hòa-và-trùng-lặp-saturation--overlap-pruning)
-  - [Cặp dòng ngẫu nhiên dùng chung (Common Random Numbers)](#cặp-dòng-ngẫu-nhiên-dùng-chung-common-random-numbers)
-  - [Ghi đĩa an toàn và khả năng tiếp tục chạy (Resume)](#ghi-đĩa-an-toàn-và-khả-năng-tiếp-tục-chạy-resume)
-- [4. Vì sao Lưới Dừng ở những Giới hạn này? (Cơ sở chọn tham số)](#4-vì-sao-lưới-dừng-ở-những-giới-hạn-này-cơ-sở-chọn-tham-số)
-  - [Quy mô đàn cừu *N*](#quy-mô-đàn-cừu-n)
-  - [Số lượng chó *D*](#số-lượng-chó-d)
-  - [Số hạt giống trên mỗi ô (Mức trần 200)](#số-hạt-giống-trên-mỗi-ô-mức-trần-200)
-  - [Thời hạn và Tiêu chí đánh giá thành công](#thời-hạn-và-tiêu-chí-đánh-giá-thành-công)
-- [5. Các Quy tắc Ranh giới Thống kê và Vùng Hành vi](#5-các-quy-tắc-ranh-giới-thống-kê-và-vùng-hành-vi)
-  - [Định nghĩa các chỉ số ranh giới](#định-nghĩa-các-chỉ-số-ranh-giới)
-  - [Phân loại các vùng hành vi](#phân-loại-các-vùng-hành-vi)
+  - [Chèn điểm giữa](#chèn-điểm-giữa)
+  - [Tỉa ô trên mức bão hòa](#tỉa-ô-trên-mức-bão-hòa)
+  - [Dòng ngẫu nhiên ghép cặp](#dòng-ngẫu-nhiên-ghép-cặp)
+  - [Lưu lượt chạy và chạy tiếp](#lưu-lượt-chạy-và-chạy-tiếp)
+- [4. Vì sao Lưới Dừng ở những Giới hạn này](#4-vì-sao-lưới-dừng-ở-những-giới-hạn-này)
+  - [Quy mô bầy *N*](#quy-mô-bầy-n)
+  - [Quy mô đội *D*](#quy-mô-đội-d)
+  - [Số hạt giống mỗi ô (trần 200)](#số-hạt-giống-mỗi-ô-trần-200)
+  - [Thời hạn và quy tắc thành công](#thời-hạn-và-quy-tắc-thành-công)
+- [5. Quy tắc Ranh giới và các Vùng](#5-quy-tắc-ranh-giới-và-các-vùng)
+  - [Các giá trị ranh giới](#các-giá-trị-ranh-giới)
+  - [Các vùng](#các-vùng)
+  - [Các lượt thất bại kết thúc thế nào](#các-lượt-thất-bại-kết-thúc-thế-nào)
+  - [Khi nào thêm chó gây hại](#khi-nào-thêm-chó-gây-hại)
 - [6. Nhiệm vụ gom (Lama và di Bernardo 2024)](#6-nhiệm-vụ-gom-lama-và-di-bernardo-2024)
 
 ---
 
-## 1. Hình học Nhiệm vụ và Tính Bất biến theo Quy mô
+## 1. Hình học Nhiệm vụ và Quy mô
 
-### Sai lầm chí tử của việc cố định kích thước bãi cỏ
+### Vì sao cánh đồng lớn theo bầy
 
-Một sai lầm rất phổ biến trong các mô phỏng bầy đàn động vật và robot là giữ nguyên kích thước bãi cỏ khi tăng số lượng cá thể $N$.
+Một bầy 400 con chiếm diện tích lớn hơn nhiều so với một bầy 25 con. Nếu cả hai chạy trong một cánh đồng cùng kích thước, bầy lớn sẽ lấp đầy nó, và tường hay mép cánh đồng sẽ làm thay một phần việc của chó. Tác động của quy mô bầy khi đó bị lẫn với tác động của cánh đồng.
 
-400 con cừu chiếm diện tích vật lý lớn hơn rất nhiều so với 25 con. Nếu bạn nhốt 400 con cừu vào một sân bóng đá, chúng sẽ bị nén chặt sát các bức tường ranh giới. Đàn chó lúc này chẳng cần phải vất vả chăn dắt; chính các bức tường biên đã gom cừu hộ chúng! Điều đó sẽ làm sai lệch hoàn toàn kết quả nghiên cứu khoa học, vì đã đánh đồng *quy mô bầy* với *hiện tượng chèn ép nhân tạo do tường bao*.
+Vì vậy HerdSim định cỡ cánh đồng, đích và quãng lùa theo chính kích thước của bầy, và hoàn toàn không có tường.
 
-HerdSim thiết lập **tính bất biến quy mô thực sự (physical scale invariance)** bằng cách mở rộng kích thước trường chạy tỷ lệ thuận với kích thước tự nhiên của đàn cừu.
+![Hình học nhiệm vụ và tỷ lệ vật lý](../../docs/figures/fig6_task_geometry.png)
+*Hình 1: Hình học nhiệm vụ vẽ theo tỷ lệ. Trái: cánh đồng ở* $N = 200$ *con. Giữa: quãng lùa* $l$ *tăng theo bán kính bầy. Phải: bán kính bầy đã hiệu chỉnh* $R_f(N)$ *và bán kính đích theo quy mô bầy.*
 
-![Hình học nhiệm vụ](../../docs/figures/fig6_task_geometry.png)
-*Hình 1: Hình học nhiệm vụ được vẽ theo đúng tỷ lệ vật lý. Trái: Bố trí đấu trường ở* $N = 200$ *cừu. Giữa: Cách cự ly lùa* $l$ *co giãn theo quy mô đàn. Phải: Bán kính bầy tự nhiên* $R_f(N)$ *và bán kính chuồng đích trên các quy mô đàn, đảm bảo mật độ bầy và độ khó lùa luôn tương đương nhau.*
+### Định cỡ theo bán kính bầy đã hiệu chỉnh $R_f(N)$
 
-### Quy chuẩn theo Bán kính Bầy tự nhiên $R_f(N)$
+Mọi độ dài của nhiệm vụ lùa là bội số của **bán kính bầy đã hiệu chỉnh $R_f(N)$**: bán kính mà một bầy $N$ con ổn định về khi một chó lùa nó (đo ở đầu mỗi lần chạy, theo từng phương pháp và $N$).
 
-Toàn bộ kích thước hình học được neo vào **bán kính bầy trạng thái dừng đã được hiệu chuẩn $R_f(N)$**: bán kính cân bằng thực nghiệm của đàn $N$ con cừu khi được lùa bởi một chú chó giàu kinh nghiệm.
-
-| Tham số | Quy tắc Toán học | Ý nghĩa Vật lý |
+| Đại lượng | Quy tắc | Ý nghĩa |
 | :--- | :--- | :--- |
-| **Bán kính bầy** $R_f(N)$ | Hiệu chuẩn thực nghiệm ($6.2\text{ m}$ tại $N=25$; $11.4\text{ m}$ tại $N=400$) | Bán kính trạng thái dừng tự nhiên của đàn $N$ cừu dưới áp lực lùa ổn định. |
-| **Khoảng cách lùa** $l$ | $\max(13 \cdot R_f(N),\thinspace 80,\thinspace l_{\mathrm{reach}} + R_{\mathrm{goal}} + R_f)$ | Đảm bảo đàn cừu lớn phải đi quãng đường dài hơn tương ứng để bảo toàn tỷ lệ quy mô. |
-| **Bán kính chuồng đích** $R_{\mathrm{goal}}$ | $1.9 \cdot R_f(N)$ | Giữ nguyên mật độ chứa đàn và độ khó khi lùa vào cửa chuồng cho mọi quy mô đàn. |
-| **Khoảng đệm biên** | $80\text{ m}$ tính từ vị trí tác tử xa nhất | Ngăn chặn hiện tượng tác tử chạm mép tọa độ. |
-| **Biên giới mở** | **Không có tường hay biên phản xạ** | Đồng cỏ tự nhiên không có tường bóng bàn. Tác tử tự do di chuyển ra ngoài mà không bị dội ngược lại. |
+| **Bán kính bầy** $R_f(N)$ | Hiệu chỉnh (ví dụ $6{,}2$ m ở $N = 25$, $11{,}4$ m ở $N = 400$) | Kích thước của một bầy $N$ con dưới một chó lùa. |
+| **Quãng lùa** $l$ | $\max(13\,R_f(N),\ 80,\ l_{\mathrm{reach}} + R_{\mathrm{goal}} + R_f)$ | Bầy lớn hơn được lùa xa hơn; đích không bao giờ chồng lên vùng xuất phát ($l_{\mathrm{reach}}$ là khoảng xa nhất mà một con cừu có thể xuất phát, trên mọi bố cục của giao thức). |
+| **Bán kính đích** $R_{\mathrm{goal}}$ | $1{,}9\,R_f(N)$ | Đích chứa bầy đã ổn định với cùng một biên ở mọi $N$. |
+| **Khoảng trống quanh cánh đồng** | $80$ m quanh vùng xuất phát | Chỉ để đặt vị trí xuất phát; không có gì chặn con vật ở đó. |
+| **Biên** | Không có | Con vật đi đâu cũng được, như trong Strömbom et al. (2014) và Kubo et al. (2022). |
 
-### Thời hạn Chuẩn hóa và Thời gian Lùa đặc trưng
+### Thời hạn tính theo thời gian lùa
 
-Nếu đặt cùng một thời hạn cố định 5 phút cho tất cả các đàn, đàn lớn sẽ bị phạt oan uổng vì chúng phải di chuyển hơn $200\text{ m}$ so với chỉ $80\text{ m}$ của đàn nhỏ.
+Một giới hạn cố định 5 phút cho mọi quy mô bầy sẽ không công bằng với bầy lớn, vốn được lùa hơn 200 m so với 80 m của bầy nhỏ.
 
-HerdSim chuẩn hóa thời hạn bằng **thời gian lùa đặc trưng** ($T_{\mathrm{drive}}$): thời gian tối thiểu để con cừu chạy nhanh nhất đi trên đường thẳng ở vận tốc ổn định ($v_{\mathrm{sheep,max}} = 1.0\text{ m/s}$) vượt qua quãng đường lùa:
+HerdSim viết thời hạn dưới dạng bội số của **thời gian lùa** $T_{\mathrm{drive}}$, thời gian một con cừu đi thẳng với tốc độ tối đa ($1{,}0$ m/s với cừu Strömbom) cần để đi hết quãng lùa:
 
 $$
 T_{\mathrm{drive}} = \frac{l}{v_{\mathrm{sheep,max}}}
 $$
 
-Một đàn cừu tập trung được lùa bởi 1 chú chó thông thường sẽ hoàn thành nhiệm vụ trong khoảng $1.44$ đến $1.74 \times T_{\mathrm{drive}}$. Các thử nghiệm nghiên cứu đánh giá trên 3 mức áp lực thời gian:
-- **Thong thả ($12\times T_{\mathrm{drive}}$)**: Dư dả thời gian. Một chú chó duy nhất có đủ thời gian đi gom tuần tự từng con cừu lạc.
-- **Trung bình ($6\times T_{\mathrm{drive}}$)**: Nhịp độ làm việc tiêu chuẩn ngoài thực địa.
-- **Gấp rút ($3\times T_{\mathrm{drive}}$)**: Rất khẩn cấp. Việc gom tuần tự chắc chắn sẽ trễ hạn; các chú chó bắt buộc phải tỏa ra làm việc song song.
+Một bầy tập trung do một chó lùa xong trong khoảng $1{,}44$ đến $1{,}74\,T_{\mathrm{drive}}$. Các giao thức chính dùng ba thời hạn:
+- **Thong thả ($12\,T_{\mathrm{drive}}$):** nhiều thời gian; một chó có thể đưa từng con lạc về lần lượt.
+- **Trung bình ($6\,T_{\mathrm{drive}}$).**
+- **Gấp ($3\,T_{\mathrm{drive}}$):** đưa từng con lạc về lần lượt là quá chậm; nhiều chó phải làm cùng lúc.
 
-| Quy mô đàn ($N$) | Bán kính bầy $R_f$ | Cự ly lùa $l$ | Thời gian lùa ($T_{\mathrm{drive}}$) | Thời hạn $12\times$ (Thong thả) | Thời hạn $6\times$ (Trung bình) | Thời hạn $3\times$ (Khẩn cấp) |
+Thời hạn của các lưới chính (giao thức `dmin_m12` và các biến thể, bốn bố cục):
+
+| Quy mô bầy ($N$) | Bán kính bầy $R_f$ | Quãng lùa $l$ | Thời gian lùa $T_{\mathrm{drive}}$ | Thời hạn $12\times$ | Thời hạn $6\times$ | Thời hạn $3\times$ |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **$N = 25$** | $6.20\text{ m}$ | $80.6\text{ m}$ | **$80.6\text{ s}$** ($\sim 1.3\text{ phút}$) | $967\text{ s}$ ($\sim 16.1\text{ phút}$) | $484\text{ s}$ ($\sim 8.1\text{ phút}$) | $242\text{ s}$ ($\sim 4.0\text{ phút}$) |
-| **$N = 50$** | $7.60\text{ m}$ | $98.8\text{ m}$ | **$98.8\text{ s}$** ($\sim 1.6\text{ phút}$) | $1,185\text{ s}$ ($\sim 19.8\text{ phút}$) | $593\text{ s}$ ($\sim 9.9\text{ phút}$) | $296\text{ s}$ ($\sim 4.9\text{ phút}$) |
-| **$N = 100$** | $9.08\text{ m}$ | $118.1\text{ m}$ | **$118.1\text{ s}$** ($\sim 2.0\text{ phút}$) | $1,417\text{ s}$ ($\sim 23.6\text{ phút}$) | $708\text{ s}$ ($\sim 11.8\text{ phút}$) | $354\text{ s}$ ($\sim 5.9\text{ phút}$) |
-| **$N = 200$** | $10.47\text{ m}$ | $139.8\text{ m}$ | **$139.8\text{ s}$** ($\sim 2.3\text{ phút}$) | $1,678\text{ s}$ ($\sim 28.0\text{ phút}$) | $839\text{ s}$ ($\sim 14.0\text{ phút}$) | $419\text{ s}$ ($\sim 7.0\text{ phút}$) |
-| **$N = 400$** | $11.40\text{ m}$ | $206.8\text{ m}$ | **$206.8\text{ s}$** ($\sim 3.4\text{ phút}$) | $2,482\text{ s}$ ($\sim 41.4\text{ phút}$) | $1,241\text{ s}$ ($\sim 20.7\text{ phút}$) | $620\text{ s}$ ($\sim 10.3\text{ phút}$) |
+| **$N = 25$** | $6{,}20$ m | $80{,}6$ m | **$80{,}6$ s** (khoảng 1,3 phút) | $968$ s (khoảng 16,1 phút) | $484$ s (khoảng 8,1 phút) | $242$ s (khoảng 4,0 phút) |
+| **$N = 50$** | $7{,}60$ m | $98{,}8$ m | **$98{,}8$ s** (khoảng 1,6 phút) | $1.186$ s (khoảng 19,8 phút) | $593$ s (khoảng 9,9 phút) | $297$ s (khoảng 4,9 phút) |
+| **$N = 100$** | $9{,}08$ m | $118{,}1$ m | **$118{,}1$ s** (khoảng 2,0 phút) | $1.417$ s (khoảng 23,6 phút) | $709$ s (khoảng 11,8 phút) | $355$ s (khoảng 5,9 phút) |
+| **$N = 200$** | $10{,}47$ m | $139{,}8$ m | **$139{,}8$ s** (khoảng 2,3 phút) | $1.678$ s (khoảng 28,0 phút) | $839$ s (khoảng 14,0 phút) | $420$ s (khoảng 7,0 phút) |
+| **$N = 400$** | $11{,}40$ m | $206{,}8$ m | **$206{,}8$ s** (khoảng 3,4 phút) | $2.482$ s (khoảng 41,4 phút) | $1.241$ s (khoảng 20,7 phút) | $621$ s (khoảng 10,3 phút) |
+
+Từ $N = 200$ trở lên, quãng lùa dài hơn $13\,R_f$, vì các bố cục phân tán trải xa hơn bố cục tập trung và đích phải nằm ngoài chúng.
 
 ---
 
-## 2. Cấu hình Xuất phát Ban đầu
+## 2. Bố cục Xuất phát và Vị trí Xuất phát của Chó
 
-### 4 Bố cục phân bố cừu ban đầu
+### Bố cục xuất phát của bầy
 
-HerdSim cung cấp 4 cấu hình xuất phát chuẩn hóa để tách bạch giai đoạn gom cừu lạc khỏi giai đoạn lùa bầy:
+HerdSim có bốn bố cục xuất phát, từ một bầy không cần gom đến một bầy cần gom nhiều:
 
-![4 bố cục bầy ban đầu](../../docs/figures/fig7_layouts.png)
-*Hình 2: Bốn bố cục bầy ban đầu tại* $N = 200$ *cừu với* $D = 4$ *chó (vẽ theo cùng một tỷ lệ xích). Vòng tròn đứt nét đánh dấu biên giới gom* $f(N) = r_a N^{2/3}$*. Bất kỳ con cừu nào nằm ngoài vòng này sẽ kích hoạt hành vi gom cừu lạc.*
+![Bốn bố cục xuất phát ở N = 200](../../docs/figures/fig7_layouts.png)
+*Hình 2: Bốn bố cục xuất phát ở* $N = 200$ *với* $D = 4$ *chó, vẽ cùng tỷ lệ. Vòng tròn đứt là khoảng cách gom của Strömbom* $f(N) = r_a N^{2/3}$*; con cừu xuất phát ngoài vòng này phải được gom trước khi lùa cả bầy.*
 
-1. **`compact`**: Cừu lấy mẫu từ phân phối Gaussian hẹp ($\sigma = 0.5 \cdot R_f$). Toàn bộ cừu nằm trong $f(N)$; đàn chó lập tức vào chế độ lùa bầy.
-2. **`wide`**: Cừu phân tán trên diện rộng ($\sigma = 0.5 \cdot 2 N^{2/3}$), đòi hỏi các chú chó phải đi vòng rộng để bao quát chu vi.
-3. **`split`**: Đàn cừu bị tách thành 3 cụm riêng biệt đối xứng trên một vòng tròn. Chó phải gom các cụm lại với nhau mà không làm chúng vỡ vụn thêm.
-4. **`outlier_rich`**: 80% số cừu bắt đầu trong một lõi đặc trung tâm, 20% còn lại bị rải rác làm những cá thể lạc đàn rất xa trên đồng cỏ.
+Các bố cục phân tán được định cỡ theo $L = 2\,N^{2/3}$, chính khoảng cách gom đó (với $r_a = 2$).
 
-### Tải trọng Tản mác Ban đầu ($S_0 \times N$) và Hai Giai đoạn Nhiệm vụ
+1. **`compact`:** phân phối Gauss với $\sigma = 0{,}5\,R_f$, cắt ở $3\sigma$. Mọi con cừu xuất phát trong $f(N)$, nên chó bắt đầu bằng việc lùa.
+2. **`wide`:** phân phối Gauss với $\sigma = 0{,}5\,L$, cắt ở $3\sigma$. Cừu xuất phát trải rộng.
+3. **`split`:** ba cụm tập trung (hai cụm khi $N < 12$) trên một vòng tròn bán kính $L$ quanh tâm bầy.
+4. **`outlier_rich`:** 80% số cừu trong một lõi tập trung và 20% trên một vành từ $1{,}1\,L$ đến $1{,}6\,L$ quanh lõi.
 
-Độ khó thực sự của một nhiệm vụ chăn dắt không chỉ phụ thuộc vào số lượng cá thể $N$, mà bị chi phối mạnh mẽ bởi tích số giữa độ tản mác ban đầu $S_0$ (trung bình bình phương khoảng cách tới trọng tâm bầy) và quy mô đàn $N$:
+### Độ trải lúc xuất phát nhân quy mô bầy
+
+Tích của độ trải lúc xuất phát $S_0$ (bán kính RMS của bầy lúc xuất phát) và $N$ là một thước đo thô về lượng công gom mà một bố cục đòi hỏi:
 
 $$
-\mathcal{B}_{\mathrm{disp}} = S_0 \times N
+B = S_0 \times N
 $$
 
-Tích số này phản ánh lượng **công việc nén hình học** mà bầy chó phải hoàn tất trong Giai đoạn 1 (Gom cừu lạc / Gathering phase) trước khi đàn cừu đạt trạng thái gắn kết để có thể bước sang Giai đoạn 2 (Lùa bầy / Drive phase):
-- Trên bố cục **`compact`**, $S_0 \approx 0 \implies S_0 \times N \approx 0$. Toàn bộ cừu đã nằm sẵn trong bán kính gom $f(N)$, nhiệm vụ bỏ qua hoàn toàn giai đoạn gom lạc đàn. Đây là lý do sâu xa vì sao quy mô tối thiểu $D_{\min} = 1$ không đổi từ $N = 25$ đến $N = 1131$.
-- Trên các bố cục phân tán (**`wide`**, **`split`**, **`outlier_rich`**), $S_0$ lớn khiến tải trọng $S_0 \times N$ bùng nổ khi $N$ tăng. Dưới thời hạn ngặt nghèo, một chú chó đơn lẻ phải di chuyển quãng đường quá lớn để thu gom tuần tự từng con cừu lạc, khiến tốc độ tản mác tự nhiên của bầy vượt quá tốc độ gom. Do đó, bầy chó bắt buộc phải mở rộng quy mô ($D_{\min} > 1$) để phân chia không gian và thu gom song song.
+Ở 6 lần thời gian lùa (`dmin_m6`, tỷ lệ thành công trên mọi $D$ đã thử):
 
-| Bố cục | Quy mô $N$ | Bán kính tản mác $S_0$ | Tải trọng $S_0 \times N$ | Trạng thái Gom cừu lạc |
-| :--- | :---: | :---: | :---: | :--- |
-| `compact` | 25 | $3{,}59\text{ m}$ | **89,9** | Bỏ qua hoàn toàn; lập tức vào chế độ lùa |
-| `compact` | 100 | $5{,}67\text{ m}$ | **567,2** | Bỏ qua hoàn toàn; lập tức vào chế độ lùa |
-| `compact` | 400 | $7{,}68\text{ m}$ | **3.073,5** | Bỏ qua hoàn toàn; lập tức vào chế độ lùa |
-| `wide` | 400 | $8{,}11\text{ m}$ | **3.242,3** | Đòi hỏi gom biên rộng song song |
-| `split` | 400 | $8{,}81\text{ m}$ | **3.524,2** | Đòi hỏi gom các phân cụm tách biệt |
-| `outlier_rich` | 400 | $10{,}16\text{ m}$ | **4.065,6** | Tải trọng tối đa; bắt buộc nhiều chó gom |
+| Bố cục | $N$ | Độ trải xuất phát $S_0$ | $S_0 \times N$ | Tỷ lệ thành công (mọi $D$) |
+| :--- | :---: | :---: | :---: | :---: |
+| `compact` | 25 | $4{,}8$ m | 119 | 100,0% |
+| `compact` | 100 | $6{,}7$ m | 665 | 100,0% |
+| `compact` | 400 | $8{,}3$ m | 3.316 | 100,0% |
+| `wide` | 400 | $74{,}8$ m | 29.931 | 83,8% |
+| `outlier_rich` | 400 | $66{,}2$ m | 26.496 | 55,3% |
+| `split` | 400 | $108{,}8$ m | 43.507 | 21,1% |
 
-### 3 Cách thả chó xuất phát
+Ở $N = 400$, các bố cục phân tán có giá trị gấp 8 đến 13 lần `compact`, và cần nhiều chó hơn. Tuy vậy thước đo này không xếp thứ tự được các bố cục phân tán: `outlier_rich` có giá trị nhỏ hơn `wide` nhưng tỷ lệ thành công thấp hơn, nên các con lạc nằm ở đâu cũng quan trọng như chúng xa đến đâu.  
+*Dữ liệu:* `python -m analysis.dispersion_burden`; $S_0$ là trung bình của `max_extent`, bán kính RMS lớn nhất của bầy trong một lượt, tức lúc xuất phát.
 
+### Vị trí xuất phát của chó
 
-Đàn chó xuất phát cách đàn cừu $30\text{ m}$ về phía sau theo một trong 3 hình học:
+Vòng chó đầu tiên nằm cách điểm xa nhất mà một con cừu của bố cục có thể xuất phát $30$ m (`dog_start_gap`), nên mọi chó đều xuất phát sau mọi con cừu. Các chó trên một vòng cách nhau ít nhất $5$ m (`dog_start_spacing`); chó thừa đứng trên vòng xa hơn $5$ m. Có ba kiểu xuất phát:
 
-![Bố trí thả chó](../../docs/figures/fig8_dog_starts.png)
-*Hình 3: Các dạng bố trí thả chó xuất phát. Trên: Vòng cung đồng tâm mặc định cho* $D = 1$ *đến* $64$ *phía sau đàn* $N = 100$*. Dưới: So sánh trực tiếp giữa thả vòng cung (`arcs`), thả bao vây (`ring`) và thả từ một cọc (`handler`) tại* $N = 200$ *với* $D = 8$ *chó.*
+![Các kiểu thả chó](../../docs/figures/fig8_dog_starts.png)
+*Hình 3: Vị trí xuất phát của chó. Trên: các cung mặc định cho* $D = 1$ *đến* $64$ *sau một bầy* $N = 100$*. Dưới: so sánh cung, vòng tròn và điểm thả ở* $N = 200$ *với* $D = 8$ *chó.*
 
-- **`arcs` (Mặc định)**: Các vòng cung đồng tâm phía sau đàn cừu. Chó đơn lẻ đứng ngay trục lùa; các chú chó thêm vào sẽ đứng cánh đối xứng.
-- **`ring`**: Chó phân bố đều trên một vòng tròn hở bao quanh đàn cừu (chừa một lối mở hướng về phía đích).
-- **`handler`**: Toàn bộ đàn chó xuất phát từ một tọa độ duy nhất phía sau đàn, mô phỏng người chăn dắt thả chó từ một vị trí cố định.
+- **`arcs` (mặc định):** các nửa vòng tròn sau bầy, ở phía xa đích, các chó trải đều trên mỗi cung; một chó xuất phát trên trục lùa.
+- **`ring`:** các vòng tròn đầy đủ quanh bầy, chừa ra hình nón chứa đích.
+- **`handler`:** mọi chó ở một điểm ngay sau bầy, như được thả từ cọc của người chăn.
 
 ---
 
 ## 3. Động cơ Lấy mẫu Thích ứng Tuần tự (Adaptive Sequential Sampling)
 
-Nếu chạy đủ 200 lượt cho mọi tổ hợp tham số, chúng ta sẽ lãng phí hàng trăm ngàn lượt tính toán vô ích (ví dụ: chạy 200 lần chỉ để chứng minh 1 chó không thể lùa 400 cừu tản mác trong 4 phút, hoặc 12 chó dễ dàng lùa 25 cừu tập trung).
+Chạy mọi ô đến 200 lượt sẽ tốn phần lớn thời gian cho những ô có câu trả lời hiển nhiên (một chó với 400 con cừu phân tán ở thời hạn gấp, hay mười hai chó với 25 con cừu tập trung).
 
-HerdSim sử dụng **vòng lặp lấy mẫu thích ứng tuần tự**, chỉ tập trung tài nguyên tính toán vào những ô tham số còn nhiều bất định.
+Thay vào đó HerdSim chạy theo vòng và chỉ thêm lượt ở những ô chưa có câu trả lời.
 
 ### Vòng lặp lấy mẫu thích ứng
 
 ```mermaid
 flowchart TD
-    P["Cấu hình Protocol<br/>(File YAML)"] --> CAL["Hiệu chuẩn bán kính bầy R_f(N)"]
-    CAL --> R["Vòng lặp thích ứng: Lên kế hoạch lô hạt giống"]
-    R --> W["Nhóm worker chạy song song các lượt mô phỏng<br/>(Dòng ngẫu nhiên độc lập, tất định)"]
-    W --> F["Đánh giá Ranh giới Tin cậy:<br/>Khoảng tin cậy Clopper-Pearson 99% (theta = 0.90)<br/>Kiểm định bootstrap thời gian hoàn thành"]
-    Q{"Còn ô nào chưa ngã ngũ<br/>và dưới 200 hạt giống?"}
+    P["Giao thức (YAML)"] --> CAL["Hiệu chỉnh bán kính bầy R_f(N)"]
+    CAL --> R["Vòng: lên kế hoạch các hạt giống mỗi ô còn cần"]
+    R --> W["Các worker chạy lượt<br/>(dòng ngẫu nhiên riêng cho mỗi lượt)"]
+    W --> F["Quy tắc ranh giới:<br/>khoảng Clopper-Pearson 99% (theta = 0,90)<br/>so sánh thời gian hoàn thành bằng bootstrap ghép cặp"]
+    Q{"Còn ô chưa quyết định<br/>và dưới 200 hạt giống?"}
     F --> Q
     Q -- Có --> R
-    Q -- Không --> S["Hoàn tất: Lưu các bảng CSV, status.json và nhật ký"]
+    Q -- Không --> S["Dừng: ghi các bảng và status.json"]
 ```
 
 ### Dừng sớm bằng khoảng tin cậy Clopper-Pearson 99%
 
-Mỗi ô tham số bắt đầu với một lô nhỏ gồm 10 hạt giống. Sau mỗi lô, hệ thống tính khoảng tin cậy 2 phía chính xác 99% Clopper-Pearson $[L, U]$ cho xác suất thành công thực sự:
-- **Dừng sớm khi chắc chắn thất bại**: Nếu cận trên $U \lt 0.90$, đội hình này chắc chắn không đạt chuẩn tin cậy. Quá trình thử nghiệm dừng ngay lập tức.
-- **Dừng sớm khi chắc chắn thành công**: Nếu một đội thắng liên tiếp 60 lượt (không thua lượt nào), cận dưới $L \ge 0.90$. Hệ thống chắc chắn ô này đạt tin cậy; thử nghiệm dừng sớm.
-- **Các ô ranh giới**: Chỉ những ô mấp mé ngưỡng tin cậy 90% mới được cấp thêm các lô 10 hạt giống tiếp theo, tối đa lên tới 200 hạt giống.
+Mỗi ô bắt đầu với một lô 10 hạt giống. Sau mỗi lô, HerdSim tính khoảng Clopper-Pearson hai phía 99% chính xác $[L, U]$ cho tỷ lệ thành công:
+- **Không tin cậy:** nếu $U < 0{,}90$, ô không tin cậy với độ tin cậy 99% và không nhận thêm hạt giống.
+- **Tin cậy:** nếu $L \ge 0{,}90$, ô tin cậy. Cần ít nhất 51 lượt thành công không thất bại, tức 60 lượt theo lô 10.
+- **Chưa quyết định:** nếu không, ô nhận thêm một lô 10, đến tối đa 200.
 
-![Dừng sớm](../../docs/figures/fig_adaptive_1_refinement.png)
-*Hình 4: Cơ chế dừng sớm. Thất bại rõ ràng dừng sau 10–20 hạt giống; thành công rõ ràng dừng sau 60 trận thắng liên tiếp; chỉ những ô chưa ngã ngũ mới chạy tiếp lên mức trần 200.*
+![Tinh chỉnh tuần tự và dừng sớm](../../docs/figures/fig_adaptive_1_refinement.png)
+*Hình 4: Dừng sớm. Thất bại rõ ràng dừng sau 10 đến 20 hạt giống, thành công rõ ràng sau 60; chỉ những ô gần ngưỡng mới tiếp tục về phía 200.*
 
-### Tự động chèn điểm giữa (Midpoint Densification)
+### Chèn điểm giữa
 
-Nếu hai giá trị số chó liền kề có bước nhảy về vùng hành vi (ví dụ: $D = 2$ thất bại nhưng $D = 4$ thành công), động cơ sẽ tự động đưa điểm giữa ($D = 3$) vào vòng chạy tiếp theo. Điều này giúp định vị chính xác $D_{\min}$ mà không cần chạy quét toàn bộ các số.
+Khi hai số chó cạnh nhau trên một đường cong nằm ở hai vùng khác nhau (ví dụ $D = 2$ không tin cậy và $D = 4$ tin cậy) và cách nhau hơn `refine_min_gap`, vòng sau thêm số chó ở giữa ($D = 3$). Nhờ đó tìm được $D_{\min}$ mà không phải thử mọi số chó.
 
-![Chèn điểm giữa](../../docs/figures/fig_adaptive_2_densification.png)
-*Hình 5: Tự động chèn điểm giữa. Sự chuyển tiếp vùng hành vi giữa* $D = 2$ *và* $D = 4$ *tự động kích hoạt lượt đánh giá cho* $D = 3$.
+![Chèn điểm giữa trên lưới](../../docs/figures/fig_adaptive_2_densification.png)
+*Hình 5: Chèn điểm giữa. Một thay đổi vùng giữa* $D = 2$ *và* $D = 4$ *thêm* $D = 3$ *vào vòng sau.*
 
-### Tỉa ô bão hòa và trùng lặp (Saturation & Overlap Pruning)
+### Tỉa ô trên mức bão hòa
 
-Khi tốc độ hoàn thành đã đạt mức bão hòa ($D_{\mathrm{sat}}$), nếu việc tăng thêm số lượng chó khiến chúng chỉ hành động sao chép lẫn nhau (độ trùng lặp trung bình $\ge 0.90$) mà không giúp lùa nhanh hơn, động cơ sẽ đánh dấu ô đó là **đã tỉa (pruned)** và ngừng chạy thêm hạt giống.
+Trên một $D_{\mathrm{sat}}$ đã được xác nhận, một ô không nhận thêm hạt giống khi các chó của nó là bản sao của nhau: khi trung bình ít nhất 90% số chó có một chó khác trong vòng 2 m (`prune_overlap`), và ô không chậm hơn $D_{\mathrm{best}}$ cũng không bị đánh giá là không tin cậy. Các ô đó được đánh dấu **pruned** trong `frontier_cells.csv`.
 
-![Tỉa bão hòa](../../docs/figures/fig_adaptive_3_pruning.png)
-*Hình 6: Tỉa bão hòa. Khi thời gian lùa đã đi ngang, các ô có độ trùng lặp cao (&ge; 0.90) sẽ được tỉa bỏ để tiết kiệm tài nguyên.*
+![Tỉa ô bão hòa và trùng lặp](../../docs/figures/fig_adaptive_3_pruning.png)
+*Hình 6: Tỉa ô. Trên mức bão hòa, các ô có chó chồng lên nhau (ít nhất 0,90) không nhận thêm hạt giống.*
 
-### Cặp dòng ngẫu nhiên dùng chung (Common Random Numbers)
+### Dòng ngẫu nhiên ghép cặp
 
-Mỗi hạt giống $i$ dùng `master_seed + i` (ví dụ: $2026 + i$). Tọa độ ban đầu của cừu và các quyết định ngẫu nhiên của từng cá thể được sinh ra từ các luồng ngẫu nhiên biệt lập.
+Hạt giống $i$ của mọi ô là `master_seed + i` (ví dụ $2026 + i$). Mỗi lượt lấy vị trí xuất phát, các lựa chọn ngẫu nhiên của cừu và các lựa chọn ngẫu nhiên của chó từ ba dòng riêng.
 
-Khi so sánh $D = 2$ chó với $D = 4$ chó, cả hai đội đều đối mặt với **chính xác cùng một bãi cỏ ban đầu và cùng một chuỗi phản ứng ngẫu nhiên của đàn cừu**, triệt tiêu hoàn toàn yếu tố may rủi về địa hình.
+Vì vậy khi so $D = 2$ với $D = 4$, hạt giống $i$ cho cả hai đội cùng một bầy xuất phát và cùng các số ngẫu nhiên cho cừu. Khác biệt giữa hai đội đến từ chó, không phải từ một lần xuất phát may mắn hơn.
 
-![Cặp hạt giống ngẫu nhiên](../../docs/figures/fig_adaptive_4_paired_seeds.png)
-*Hình 7: Cặp hạt giống ngẫu nhiên. Hạt giống 2026 tạo ra cùng một bố cục cừu ban đầu cho mọi số lượng chó D, giúp đo lường thuần túy hiệu quả thuật toán của quy mô đội.*
+![So sánh ghép cặp tất định](../../docs/figures/fig_adaptive_4_paired_seeds.png)
+*Hình 7: Hạt giống ghép cặp. Hạt giống 2026 cho cùng một bầy xuất phát ở mọi số chó* $D$*.*
 
-### Ghi đĩa an toàn và khả năng tiếp tục chạy (Resume)
+### Lưu lượt chạy và chạy tiếp
 
-Mọi lượt thử nghiệm sau khi hoàn thành đều được ghi nối tiếp ngay vào file `trials.jsonl`. Các chiến dịch có thể tạm dừng bất kỳ lúc nào (`Ctrl+C`) và chạy tiếp mà không bị mất dữ liệu; cơ chế khóa file `.lock` ngăn ngừa xung đột dữ liệu.
+Mỗi lượt xong được ghi ngay vào `trials.jsonl`. Một lần chạy có thể dừng bất cứ lúc nào (`Ctrl+C`) và chạy tiếp bằng cùng lệnh mà không mất lượt nào. Một khóa trên thư mục ngăn lần chạy thứ hai ghi vào cùng lúc.
 
 ---
 
-## 4. Vì sao Lưới Dừng ở những Giới hạn này? (Cơ sở chọn tham số)
+## 4. Vì sao Lưới Dừng ở những Giới hạn này
 
-Mỗi chiến dịch mô phỏng đều có các chặn giới hạn. Dưới đây là cơ sở vật lý và toán học của các giới hạn trong HerdSim:
+### Quy mô bầy $N$
 
-### Quy mô đàn cừu $N$
-
-| Phạm vi | Giá trị $N$ | Cơ sở Khoa học & Vật lý |
+| Thiết lập | Khoảng | Lý do |
 | :--- | :--- | :--- |
-| **Các lưới chính** | $25$ đến $400$ | Tại $N \le 50$, mọi bố cục đều chỉ cần 1 chó ở mọi thời hạn, do đó thử nghiệm nhỏ hơn không cung cấp thêm tri thức mới. $400$ là mức trần hiệu chuẩn của nghiên cứu ban đầu. |
-| **Lưới dày mở rộng** | $+ 71, 141, 283, 566$ | Các bước nhân $\sqrt{2}$ trên $N = 50$, đảm bảo trọng số hình học đều nhau khi khớp hàm lũy thừa. $N = 566 = 400\sqrt{2}$ là giới hạn cuối cùng trước khi bán kính dừng của mô hình Strömbom bị phá vỡ (ở $N \ge 600$, bầy cừu không còn ổn định kích thước riêng). |
-| **Nhiệm vụ gom (`lama`)** | $1$ đến $400$ mục tiêu, các số chính phương | Lưới của chính bài báo: $\sqrt{N} = 1$ đến $20$ trên trục của nó, để phần kiểm chứng đọc đúng các ô đó (mục 6). |
-| **Mô hình Kubo** | $25$ đến $100$ | Bầy cừu Kubo nén chặt về bán kính $R_f \approx 5.8\text{ m}$ ở mọi $N$. Vượt quá $N = 100$ sẽ tạo ra mật độ chèn ép phi thực tế. |
-| **Tầm nhìn hạn chế** | $50$ đến $200$ | Tại $N = 400$, bán kính gom cừu lạc ($109\text{ m}$) vượt quá tầm nhìn $65\text{ m}$ của cừu, khiến quy tắc cục bộ không thể thấy cừu lạc. |
-| **Đàn $N$ cực lớn** | $566$ đến $3200$ | Khảo sát giới hạn mô hình khi áp đặt mật độ đàn không đổi. Phát hiện điểm kỳ dị toán học tại $N = 1056$ nơi cự ly lùa của bài báo vượt quá cự ly phản ứng của cừu. |
+| **Lưới chính và độ nhạy** | $25$ đến $400$ | Ở $N \le 50$, mọi bố cục chỉ cần một chó ở mọi thời hạn, nên quy mô nhỏ hơn không thêm gì. $N = 400$ là quy mô lớn nhất đã hiệu chỉnh khi nghiên cứu đầu chạy. |
+| **Các quy mô thêm** | $71, 141, 283, 566$ | Các bước $\sqrt{2}$, để mỗi quy mô có cùng trọng số trong phép khớp log-log. $566 = 400\sqrt{2}$ là bước cuối như vậy dưới khoảng $N = 600$, quá đó một bầy xuất phát lỏng không còn ổn định về cùng kích thước. |
+| **Mô hình Kubo** | $25$ đến $100$ | Bầy Kubo co về bán kính khoảng $5{,}8$ m ở mọi $N$, nên $N$ lớn hơn chỉ làm bầy dày hơn. |
+| **Tầm cảm nhận** | $50$ đến $200$ | Ở $N = 400$, khoảng cách gom ($109$ m) lớn hơn khoảng cách phản ứng của cừu ($65$ m), mức cao nhất trong các tầm cảm nhận thực tế đã thử. |
+| **Nhiệm vụ gom (`lama`)** | $1$ đến $400$ mục tiêu, số chính phương | Các ô của bài báo đến $\sqrt{N} = 20$; trục của bài báo đi tới 25. Phạm vi này chứa ngưỡng trong Bảng I của bài báo ($\sqrt{N} = 8$ đến 11) và đoạn tăng theo căn bậc hai phía trên ngưỡng, là những kết quả được so sánh (mục 6). Năm quy mô lớn hơn sẽ làm thời gian chạy tăng gần gấp đôi mà không thêm gì cho phép kiểm tra. |
+| **$N$ lớn** | $566$ đến $3200$ | Thử bầy lớn ở một mật độ áp đặt, và giới hạn nơi điểm lùa của bài báo vượt khoảng cách phản ứng của cừu ($N \approx 1056$). |
 
-### Số lượng chó $D$
+### Quy mô đội $D$
 
-- **Lưới chính ($1, 2, 3, 4, 6, 8, 12, 16, 24$)**: Các bước nhân khoảng $1.5\times$ đảm bảo mỗi lần tăng gấp đôi số chó đều có ít nhất 2 điểm đo. Mức $D = 24$ được chọn vì không có đường cong nào còn tiếp tục tăng tốc ở 24; các đường không đạt tin cậy đều có tỷ lệ thành công đi ngang hoặc giảm sút.
-- **Nhiệm vụ gom ($1$ đến $25$, mọi giá trị)**: Lưới người chăn của bài báo, với độ phân giải một người chăn, để đọc được đội tối thiểu của nó mà không cần nội suy.
-- **Giữ đàn với giãn cách chó ($+ 7, 9, 10, 11, 13$)**: Số lượng chó tối đa mà vòng cung lùa có thể chứa ở khoảng cách an toàn $2\text{ m}$ là $7, 9, 10, 11, 12$ tương ứng từ $N = 25$ đến $400$. Thử nghiệm xung quanh các giá trị này giúp bắt trọn thời điểm bắt đầu xảy ra hiện tượng chèn lấn gây hại.
+- **Lưới chính ($1, 2, 3, 4, 6, 8, 12, 16, 24$):** các bước khoảng $1{,}5\times$, nên có ít nhất hai số chó cho mỗi lần gấp đôi. $D = 24$ nằm cao hơn hẳn mọi $D_{\min}$ đã quyết định của các lưới chính.
+- **Nhiệm vụ gom ($1$ đến $25$, mọi số):** lưới của bài báo, với độ phân giải một người chăn.
+- **Giữ bầy với chó giãn cách (thêm $7, 9, 10, 11, 13$):** vòng cung sau bầy chứa khoảng $7, 9, 10, 11, 12$ chó cách nhau 2 m ở $N = 25$ đến $400$; thử quanh các số đó cho thấy chỗ bắt đầu chật.
 
-### Số hạt giống trên mỗi ô (Mức trần 200)
+### Số hạt giống mỗi ô (trần 200)
 
-- **Lô 10 hạt giống, trần 200**: Để cận dưới đạt $L \ge 0.90$ với khoảng tin cậy 99% cần 51 trận thắng liên tiếp ($60$ lượt theo lô 10).
-- **Tại sao là 200**: Sau 200 hạt giống, một ô chỉ ngã ngũ nếu tỷ lệ quan sát được $\ge 0.955$ hoặc $\le 0.835$. Nếu tăng gấp đôi lên 400 hạt giống, khoảng bất định này chỉ thu hẹp thành $0.94$ và $0.86$, tốn gấp 4 lần chi phí tính toán nhưng lợi ích thống kê thu lại không đáng kể. Trên toàn bộ 4,773 ô đã đánh giá, chỉ có 8.1% ô kết thúc ở trạng thái mở tại trần 200, và được báo cáo minh bạch dưới dạng khoảng chặn (ví dụ: `[2, 3]`).
+- **Lô 10, trần 200:** một ô tin cậy cần ít nhất 51 lượt thành công không thất bại (60 lượt theo lô 10).
+- **Vì sao 200:** ở 200 hạt giống, một ô chỉ được quyết định nếu tỷ lệ thành công ít nhất $0{,}955$ hoặc nhiều nhất $0{,}835$. Tăng gấp đôi lên 400 chỉ thu hẹp dải đó còn $0{,}94$ và $0{,}86$, với gấp đôi số lượt. Trên 39 giao thức, 324 trên 5.773 ô (5,6%) kết thúc còn mở ở mức trần; các bảng ghi chúng dưới dạng khoảng (ví dụ `2-3`).
 
-### Thời hạn và Tiêu chí đánh giá thành công
+### Thời hạn và quy tắc thành công
 
-- **Thời hạn**: $12\times, 6\times, 3\times$ thời gian lùa đại diện cho 3 cấp độ áp lực: thong thả, làm việc bình thường và khẩn cấp.
-- **Tiêu chí thành công**:
-  - *Tuyệt đối 100%*: Toàn bộ 100% cừu phải vào chuồng cùng lúc. Thường thất bại ở các đội nhiều chó do hiện tượng **Hiệu ứng cá thể lạc đàn (Straggler Effect)** (chó đuổi 1 con cừu lạc làm cả đàn trong chuồng hoảng sợ chạy bung ra).
-  - *Đạt 99%*: Có ít nhất 99% cừu vào chuồng. Tách bạch năng lực phối hợp đội hình khỏi nhiễu ranh giới ở cửa chuồng mở.
+- **Thời hạn:** $12$, $6$ và $3$ lần thời gian lùa: thong thả, trung bình và gấp.
+- **Quy tắc thành công:**
+  - *Nghiêm ngặt:* mọi con cừu trong đích cùng một thời điểm. Các đội lớn thường thất bại vì con cừu cuối cùng: khi đuổi nó, chúng có thể lùa bầy ra khỏi đích trở lại.
+  - *99%:* ít nhất 99% số cừu ở trong đích. Một hai con lạc không còn quyết định lượt chạy.
 
 ---
 
-## 5. Các Quy tắc Ranh giới Thống kê và Vùng Hành vi
+## 5. Quy tắc Ranh giới và các Vùng
 
-Quá trình phân loại thống kê được quản lý bởi [`analysis/frontier.py`](../../analysis/frontier.py):
+Các quy tắc nằm trong [`analysis/frontier.py`](../../analysis/frontier.py):
 
-![Vùng hành vi](../../docs/figures/def_D_zones.png)
-*Hình 8: Phân loại các vùng hành vi dọc theo trục số lượng chó D. Các ô được phân định ranh giới dựa trên khoảng tin cậy Clopper-Pearson và kiểm định bootstrap tốc độ theo cặp hạt giống.*
+![Các vùng và phân loại ranh giới](../../docs/figures/def_D_zones.png)
+*Hình 8: Các vùng theo số chó* $D$*, từ độ tin cậy của từng ô và các phép so sánh thời gian hoàn thành ghép cặp.*
 
-### Định nghĩa các chỉ số ranh giới
+### Các giá trị ranh giới
 
-| Chỉ số | Định nghĩa |
+Các giá trị về thời gian hoàn thành dùng khoảng làm việc: các $D$ tin cậy từ $D_{\min}$ đến $D_{\max}$.
+
+| Giá trị | Định nghĩa |
 | :--- | :--- |
-| **$D_{\min}$** | Đội hình chó nhỏ nhất đạt độ tin cậy ($L \ge 0.90$). |
-| **$D_{\mathrm{sat}}$** | Đội hình chó nhỏ nhất mà từ đó thêm chó không làm tăng tốc độ có ý nghĩa thống kê. |
-| **$D_{\mathrm{best}}$** | Đội hình nhỏ nhất không chậm hơn đội hình nhanh nhất trên đường cong. |
-| **$D_{\mathrm{crowd}}$** | Đội hình nhỏ nhất $\gt D_{\mathrm{best}}$ bị chậm đi rõ rệt do ùn ứ, cản trở lẫn nhau. |
-| **$D_{\mathrm{overcrowd}}$** | Số chó nhỏ nhất $\gt D_{\min}$ mà tại đó và các mức cao hơn bị rớt khỏi ngưỡng tin cậy (suy sụp). |
-| **$D_{\max}$** | Đội hình tin cậy lớn nhất nằm ngay dưới $D_{\mathrm{overcrowd}}$. |
+| **$D_{\min}$** | $D$ tin cậy nhỏ nhất ($L \ge 0{,}90$). |
+| **$D_{\mathrm{overcrowd}}$** | $D$ nhỏ nhất trên $D_{\min}$ mà nó và $D$ đã thử kế tiếp đều không tin cậy. |
+| **$D_{\max}$** | $D$ tin cậy lớn nhất dưới $D_{\mathrm{overcrowd}}$ (hoặc $D$ tin cậy lớn nhất). |
+| **$D_{\mathrm{best}}$** | $D$ làm việc nhỏ nhất không chậm hơn $D$ làm việc nhanh nhất. |
+| **$D_{\mathrm{sat}}$** | $D$ làm việc nhỏ nhất mà không $D$ làm việc lớn hơn nào nhanh hơn. |
+| **$D_{\mathrm{crowd}}$** | $D$ làm việc nhỏ nhất trên $D_{\mathrm{best}}$ chậm hơn $D_{\mathrm{best}}$. |
 
-### Phân loại các vùng hành vi
+### Các vùng
 
-- `too_few`: Không tin cậy, dưới mức $D_{\min}$.
-- `improving`: Đạt tin cậy, dưới mức $D_{\mathrm{sat}}$; thêm chó giúp tăng tốc rõ rệt.
-- `saturated`: Đạt tin cậy, từ $D_{\mathrm{sat}}$ trở lên; thêm chó không giúp chạy nhanh hơn.
-- `crowded`: Đạt tin cậy, nhưng chạy chậm hơn $D_{\mathrm{best}}$ do chó cản trở nhau.
-- `collapse`: Không tin cậy, tại hoặc trên mức $D_{\mathrm{overcrowd}}$.
+- `too_few`: không tin cậy, dưới $D_{\min}$.
+- `improving`: tin cậy, dưới $D_{\mathrm{sat}}$; thêm chó xong sớm hơn.
+- `saturated`: tin cậy, từ $D_{\mathrm{sat}}$ trở lên, và không chậm hơn $D_{\mathrm{best}}$.
+- `crowded`: tin cậy, nhưng chậm hơn $D_{\mathrm{best}}$.
+- `unreliable_dip`: không tin cậy, giữa $D_{\min}$ và $D_{\mathrm{overcrowd}}$.
+- `collapse`: không tin cậy, từ $D_{\mathrm{overcrowd}}$ trở lên.
+- `recovered`: tin cậy trở lại trên $D_{\mathrm{overcrowd}}$.
+- `undecided`: độ tin cậy, hoặc phép so sánh với $D_{\mathrm{best}}$, vẫn còn mở.
 
-### Cơ chế Thất bại: Thất bại Cấu trúc (Structural) vs. Ranh giới Thời gian (Boundary/Temporal)
+### Các lượt thất bại kết thúc thế nào
 
-Khi phân tích nguyên nhân thất bại của các lượt chạy không đạt độ tin cậy, HerdSim phân biệt rõ hai cơ chế vật lý:
-1. **Thất bại Cấu trúc (Structural Failures)**:
-   - Xảy ra trong **Giai đoạn Gom cừu lạc** khi số lượng chó dưới ngưỡng tối thiểu ($D < D_{\min}$).
-   - Hình học của đội chó không đủ khả năng kiềm tỏa tốc độ phân tán tự nhiên của bầy cừu trên đồng cỏ rộng. Đàn chó rơi vào trạng thái đuổi bắt tuần tự vô tận; việc gia hạn thời gian chạy không thể cứu vãn lượt mô phỏng vì tốc độ gom chậm hơn tốc độ bầy tản mát.
-2. **Thất bại Ranh giới và Thời gian (Boundary / Temporal Failures)**:
-   - Xảy ra trong **Giai đoạn Lùa bầy hoặc Nhốt chuồng**. Đội chó đã gom thành công đàn cừu thành một khối thống nhất và dẫn dắt vượt đồng cỏ đạt $\ge 99\%$ số lượng vào chuồng, nhưng bị hết giờ chỉ vì một vài cá thể lạc lẻ loi ở mép chuồng (Hiệu ứng Straggler Effect).
-   - Sự phân biệt này là nền tảng khoa học giải thích vì sao tiêu chí **99% cừu vào chuồng** phản ánh chính xác năng lực điều phối tập thể, trong khi tiêu chí nghiêm ngặt 100% bị nhiễu bởi động lực học ranh giới vi mô.
+Các lượt lùa thất bại được chia theo nơi bầy kết thúc (`classify_failure_regime`):
+- **Xa đích:** tâm bầy kết thúc cách tâm đích hơn hai bán kính đích. Bầy chưa bao giờ được gom và lùa đến đích.
+- **Gần đích:** tâm bầy kết thúc trong vòng hai bán kính đích. Bầy đã đến đó nhưng hết hạn, hoặc còn cừu bên ngoài.
 
-### Hai Chế độ Suy sụp do Quá tải Đội hình (Dual-Regime Overcrowding Collapse)
+Trên sáu giao thức chính, 70% đến 91% số lượt thất bại kết thúc xa đích (mục 5.2 của báo cáo). Cách chia này chỉ dùng nơi bầy kết thúc; nó không cho biết thêm thời gian có cứu được lượt chạy hay không.
 
-Hiện tượng suy sụp do thừa tác tử ($D \ge D_{\mathrm{overcrowd}}$) không phải là một hiện tượng đơn nhất mà xuất hiện ở hai thái cực hình học đối lập:
-- **Đàn lớn ($N \ge 400$) - Suy sụp do Chen lấn Vòng cung Lùa (Driving Arc Saturation)**:
-  - Khi đàn cừu lớn và bầy chó có bán kính loại trừ vật lý ($2\text{ m}$), việc nhồi nhét quá nhiều chó ($D > D_{\mathrm{cap}} \approx 12$) vào một vòng cung hẹp phía sau đàn gây ra hiện tượng cạnh tranh không gian, các chú chó chặn đường nhau và kích hoạt quy tắc đóng băng đứng yên, khiến tốc độ lùa bị sụt giảm thảm hại.
-- **Đàn nhỏ ($N \le 10$) - Suy sụp do Bao vây Triệt tiêu Hành lang Thoát (Encirclement Collapse)**:
-  - Khi tỷ lệ chó trên cừu quá cao ($D/N \gg 1$), bầy chó đông đảo vô tình bao vây kín đàn cừu từ mọi hướng góc $360^\circ$. Đàn cừu không còn hành lang an toàn để chạy trốn về phía trước; áp lực sợ hãi từ mọi phía xé toạc đàn cừu và phân tán chúng ra xung quanh.
+### Khi nào thêm chó gây hại
+
+Chó dạng điểm chưa bao giờ làm việc lùa thất bại ở các lượt chạy chính. Hai tình huống được thử, nơi chó thêm có thể cản nhau:
+- **Chó chiếm chỗ:** khi không chó nào được đến gần chó khác dưới 2 m, một chó mà bước đi sẽ kết thúc quá gần thì đứng yên bước đó. Trên `outlier_rich` $N = 400$ trong nhiệm vụ giữ bầy, mọi đội từ 9 chó trở lên đều không tin cậy (thành công 0,77 ở $D = 9$, 0,50 ở $D = 16$). Vòng cung sau bầy chứa khoảng 12 chó với khoảng cách đó.
+- **Giữ bầy nhỏ:** giữ bầy thất bại ở $N \le 50$, nhưng vì chó lùi ra 67 m khỏi một đích chỉ rộng 12 đến 14 m và cừu lang thang ra ngoài, không phải vì số chó.
 
 ---
 
 ## 6. Nhiệm vụ gom (Lama và di Bernardo 2024)
 
-Mọi phần ở trên mô tả nhiệm vụ lùa (`drive_to_goal`), dùng cho mọi giao thức Strömbom và Kubo. Phương pháp `lama` chạy trong một nhiệm vụ thứ hai, `gather`, tái hiện bối cảnh của [Lama & di Bernardo (2024)](https://doi.org/10.1103/PhysRevResearch.6.L032012) (mô hình: [`docs/methods/models_vi.md`](../methods/models_vi.md#mô-hình-mục-tiêu-brownian-không-liên-kết-lama-2024)). Giao thức chọn nó bằng `task: gather`.
+Mọi điều ở trên mô tả nhiệm vụ lùa (`drive_to_goal`), dùng cho mọi giao thức Strömbom và Kubo. Phương pháp `lama` chạy trong nhiệm vụ thứ hai, `gather`, tái lập bối cảnh của [Lama & di Bernardo (2024)](https://doi.org/10.1103/PhysRevResearch.6.L032012) (mô hình: [`docs/methods/models_vi.md`](../methods/models_vi.md#mô-hình-mục-tiêu-brownian-không-liên-kết-lama-2024)). Một giao thức chọn nó bằng `task: gather`. Hình 8 của [tài liệu mô hình](../methods/models_vi.md#người-chăn-cảm-nhận-cục-bộ-lama_herders) minh họa quy tắc người chăn và một lượt gom thật từ đầu đến cuối.
 
-**Trạng thái:** đã kiểm chứng với Hình 2 của bài báo và chạy trên lưới của bài báo (40.280 lượt); kết quả ở mục 3.14 của báo cáo.
+**Trạng thái:** đã chạy trên lưới của bài báo (40.280 lượt). HerdSim cho các ngưỡng trong Bảng I của bài báo lệch không quá một bước $\sqrt{N}$, và bản đồ của HerdSim có cùng hình dạng với Hình 2 của bài báo; kết quả ở mục 3.14 của báo cáo.
 
-### Hình học: một đĩa quanh đích
+### Hình học: một hình tròn quanh đích
 
-| Tham số | Quy tắc | Nguồn |
+| Đại lượng | Quy tắc | Nguồn |
 | :--- | :--- | :--- |
-| **Đĩa xuất phát** $R$ | `gather_start_radius`, $50$ | Trường hợp chính của bài báo (Hình 2) |
-| **Bán kính đích** | `gather_goal_fraction` $\times R$ $= R/5 = 10$ | $r^{\ast} = R/5$ của bài báo |
-| **Xuất phát** (bố cục `uniform`) | Cừu và chó phân bố đều trong đĩa, kể cả vùng đích | $\Omega_0$ của bài báo |
+| **Hình tròn xuất phát** $R$ | `gather_start_radius`, $50$ | Trường hợp chính của bài báo (Hình 2) |
+| **Bán kính đích** | `gather_goal_fraction` $\times R = R/5 = 10$ | $r^{\ast} = R/5$ của bài báo |
+| **Xuất phát** (bố cục `uniform`) | Cừu và chó phân bố đều trên hình tròn, kể cả trong đích | $\Omega_0$ của bài báo |
 | **Tỷ lệ cần đạt** | `success_fraction` $= 0{,}99$ | $\chi^{\ast} = 0{,}99$ của bài báo |
-| **Giới hạn thời gian** | $166.667$ tick $= 5000$ s với $\Delta t = 0{,}03$ | $t_{\max}$ của bài báo (Hình S8) |
-| **Biên mở** | Không có tường | Như nhiệm vụ lùa |
+| **Giới hạn thời gian** | $166.667$ bước $= 5000$ s với $\Delta t = 0{,}03$ | $t_{\max}$ của bài báo (Hình S8) |
+| **Biên** | Không có | Như nhiệm vụ lùa |
 
-Mục tiêu không tụ bầy nên không có bán kính bầy bị lùa để hiệu chuẩn: nhiệm vụ định cỡ bằng $R$, và `calibrate` không có việc gì để làm. Cừu được rút trước chó, nên một hạt giống cho cùng các mục tiêu dù số chó là bao nhiêu, và các ô ở các $D$ khác nhau vẫn được ghép cặp như trong nhiệm vụ lùa.
+Các mục tiêu không tụ bầy, nên không có bán kính bầy để hiệu chỉnh: nhiệm vụ được định cỡ theo $R$. Cừu được rút trước chó, nên một hạt giống cho cùng các mục tiêu bất kể số chó, và các ô ở các $D$ khác nhau vẫn ghép cặp như trong nhiệm vụ lùa.
 
 ### Khi nào một lượt kết thúc và thế nào là thành công
 
-- **Thành công**: ít nhất 99% mục tiêu ở trong đích tại thời điểm mọi người chăn đều ở trong đích. Đây là điểm dừng của bài báo ("mô phỏng dừng khi mọi người chăn ở trong $\Omega_G$").
-- **Kết thúc sớm (thất bại)**: mọi người chăn ở trong đích và không ai cảm nhận được mục tiêu nào bên ngoài. Người chăn đã gom hết những gì nhìn thấy, phần còn lại bị mất. Hiểu theo nghĩa đen, quy tắc của bài báo sẽ kết thúc lượt chạy một người chăn ngay tick đầu tiên mỗi khi người chăn đó xuất phát trong đích; mệnh đề thêm loại bỏ trường hợp này.
-- **Còn lại**: lượt chạy tiếp tục tới giới hạn thời gian.
+- **Thành công:** ít nhất 99% mục tiêu ở trong đích tại một bước mà mọi người chăn đều ở trong đích. Đây là điểm dừng của bài báo ("the simulation is stopped when all the herders are inside $\Omega_G$").
+- **Kết thúc sớm (thất bại):** mọi người chăn ở trong đích và không ai cảm nhận được mục tiêu nào bên ngoài. Người chăn đã đưa vào mọi thứ họ thấy, phần còn lại bị mất. Đọc theo đúng chữ, quy tắc của bài báo sẽ kết thúc một lượt một người chăn ngay bước đầu nếu người chăn đó xuất phát trong đích; điều kiện thêm này loại bỏ trường hợp đó.
+- **Còn lại:** lượt chạy đến giới hạn thời gian.
 
-Thất bại được gắn nhãn `targets_lost` (có mục tiêu ngoài tầm nhìn của mọi người chăn lúc kết thúc) hoặc `outnumbered` (mọi mục tiêu đều được thấy nhưng không đạt tỷ lệ kịp giờ). Mỗi hàng cũng lưu tỷ lệ trong đích lúc kết thúc (`final_in_goal_fraction`), nên thống kê riêng của bài báo (trung bình tỷ lệ đó trên các hạt giống) có thể tính cạnh quy tắc tin cậy của HerdSim.
+Thất bại được gắn nhãn `targets_lost` (một số mục tiêu nằm ngoài tầm của mọi người chăn lúc kết thúc) hoặc `outnumbered` (mọi mục tiêu đều được thấy, nhưng chưa đạt tỷ lệ kịp thời hạn). Mỗi dòng còn giữ tỷ lệ trong đích lúc kết thúc (`final_in_goal_fraction`), nên thống kê của bài báo (trung bình của tỷ lệ đó qua các hạt giống) tính được cạnh quy tắc tin cậy của HerdSim.
 
 ### Hai thống kê
 
 | | Bài báo | HerdSim |
 | :--- | :--- | :--- |
-| Một cỡ đội được xem là đạt khi | trung bình tỷ lệ trong đích lúc kết thúc, trên 50 lượt, ít nhất bằng $0{,}99$ | khoảng Clopper-Pearson 99% của tỷ lệ thành công nằm tại hoặc trên $0{,}90$ |
+| Một đội là đủ khi | trung bình tỷ lệ trong đích lúc kết thúc, qua 50 lượt, ít nhất $0{,}99$ | khoảng Clopper-Pearson 99% của tỷ lệ thành công nằm ở hoặc trên $0{,}90$ |
 | Hạt giống | 50 mỗi ô | thích ứng, 10 đến 200 mỗi ô |
 
-Cả hai được đọc từ cùng các hàng dữ liệu. Phần kiểm chứng dùng thống kê của bài báo trên 50 hạt giống mỗi ô; các chiến dịch báo cáo theo quy tắc của HerdSim, quy tắc mọi kết quả HerdSim khác đều dùng, kèm thống kê của bài báo bên cạnh.
+Cả hai được đọc từ cùng các dòng lượt chạy.
 
-### Ghi metric mỗi 10 tick
+### Ghi số đo mỗi 10 bước
 
-Với $\Delta t = 0{,}03$, một lượt thất bại chạy $166.667$ tick, và chi phí metric mỗi tick còn lớn hơn chính mô hình. Vì vậy các giao thức gom đặt `metrics_stride: 10` (một bản ghi mỗi $0{,}3$ s). Thành công, kết thúc sớm và giới hạn thời gian vẫn được kiểm tra mỗi tick, và tick cuối luôn được ghi, nên kết quả của một lượt không phụ thuộc bước ghi. Chỉ thời gian tới đích lần đầu được đọc từ các tick đã ghi, nên không bao giờ sớm hơn giá trị chính xác và có thể muộn hơn (một tỷ lệ đạt rồi mất giữa hai lần ghi sẽ bị bỏ lỡ).
+Với $\Delta t = 0{,}03$, một lượt thất bại chạy $166.667$ bước, và các số đo theo từng bước tốn hơn chính mô hình. Vì vậy các giao thức gom đặt `metrics_stride: 10` (một bản ghi mỗi $0{,}3$ s). Thành công, kết thúc sớm và giới hạn thời gian vẫn được kiểm tra mỗi bước, và bước cuối luôn được ghi, nên kết quả của một lượt không phụ thuộc bước ghi. Chỉ các thời điểm đến đầu tiên được đọc từ các bước đã ghi, nên chúng không bao giờ sớm hơn thời điểm chính xác và có thể muộn hơn (một tỷ lệ đạt rồi mất giữa hai lần ghi sẽ bị bỏ sót).
 
-### Giao thức
+### Các giao thức
 
-| Giao thức | Bán kính cảm nhận $\xi$ | Hình trong bài báo |
+| Giao thức | Bán kính cảm nhận $\xi$ | Hình của bài báo |
 | :--- | :---: | :--- |
 | `lama_r50` | $10$ | Hình 2b, Bảng I |
 | `lama_r50_inf` | vô hạn | Hình 2a |
