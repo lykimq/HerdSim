@@ -19,9 +19,11 @@ The rest of this page follows an experiment from start to finish.
 
 ## 1. Running an experiment
 
-An experiment in HerdSim is a protocol: a YAML file in `protocols/configs/protocols/` that says
-which flock sizes, layouts, team sizes and deadlines to test. You never write code to start a new
-one. You give `campaign.py` the protocol's id (or a path to the file), and one of four verbs:
+A protocol is the YAML file in `protocols/configs/protocols/` that describes an experiment:
+which flock sizes, layouts, team sizes (`shepherd_counts`, the D of the tables) and deadlines to
+test. A campaign, or run, is one execution of it into a results folder. You never write code to
+start a new one. You give `campaign.py` the protocol's id (or a path to the file), and one of
+four verbs:
 
 ```bash
 uv run cli/campaign.py plan      --protocol dmin_f99_m6
@@ -41,25 +43,28 @@ Only `run` produces results. The other three help you get there safely.
 
 ### What happens during `run`
 
-Every cell (one layout, one flock size, one team size) starts with 10 seeds. After each round the
-frontier rules look at the success rate of every cell. A cell whose 99% interval is clearly above
-or below 90% is decided and gets no more trials. A cell that is still unclear gets 10 more, up to
-200. Where the answer changes between two team sizes, say D = 2 fails and D = 4 succeeds, the run
-adds D = 3 by itself. The run ends when nothing is left to decide, or when its time budget
-(`budget_hours`) is spent.
+Every cell (one layout, one flock size, one team size) starts with 10 seeds; one seed is one
+trial of the cell. After each round the frontier rules look at every cell. A cell is decided
+when the 99% interval of its success rate lies at or above 0.90, or below it. A cell that is
+undecided, or whose finish time is still being compared with its neighbours (when the protocol
+asks for that with `decide_finish_times`), gets 10 more, up to 200. Where the answer changes
+between two team sizes, say D = 2 fails and D = 4 succeeds, the run adds D = 3 by itself. The
+run ends when nothing is left to decide, or when its time budget (`budget_hours`) is spent.
 
-The seeds go where the answer is still open. Across the 37 drive-task protocols, 4,773 cells
-took 326,870 trials; giving every cell 200 seeds would have taken 954,600.
+The seeds go where the answer is still open. Across the 37 drive-task protocols (the 39 of the
+study less the two gather runs), 4,773 cells took 326,870 trials; giving every cell 200 seeds
+would have taken 954,600.
 
 ### Stopping and resuming
 
 Every trial is written to disk the moment it finishes. If you press Ctrl+C, the machine
 restarts, or the budget runs out, run the same command again and it picks up where it left off.
 
-A results folder belongs to one protocol and one set of physics. You can grow a protocol (more
-flock sizes, smaller team sizes, more seeds) and it resumes into the same folder. If you change
-something that would change the trials themselves, such as a sheep parameter or the goal size,
-the folder refuses it. That keeps old and new trials from ever being mixed.
+A results folder belongs to one protocol and one physics (the settings listed in the
+[configuration guide](../docs/guides/configuration.md#protocol-overrides)). You can grow a
+protocol (more flock sizes, smaller team sizes, more seeds) and it resumes into the same folder.
+If you change something that would change the trials themselves, such as a sheep parameter or
+the goal size, the folder refuses it. That keeps old and new trials from ever being mixed.
 
 ### A routine that works
 
@@ -67,7 +72,8 @@ the folder refuses it. That keeps old and new trials from ever being mixed.
 2. `plan` the protocol. The folder should be new or say `resumes`. If it says `refused`, the
    physics changed: make a new protocol instead of editing the old one.
 3. If you added flock sizes or changed the sheep, `calibrate` first and check that R_f grows
-   smoothly with N. Otherwise skip it; `run` calibrates by itself.
+   smoothly with N. It saves nothing; `run` calibrates again and keeps that result in the
+   folder, so the verb is a check before a long run, not a step `run` depends on.
 4. `run` with no more workers than you have cores. Start long runs in the background with their
    output going to a log file. If anything stops it, run it again.
 5. Check `status` at the end. The stop reason should be "every cell decided, at max_seeds or errored" and `trial_errors`
@@ -118,9 +124,11 @@ again.
 uv run cli/dmin_report.py --protocol dmin_pilot --folder results/dmin_pilot --multiples 3 6 12
 ```
 
-A trial that finished inside a tighter deadline would have succeeded under it too, so one run
-at a loose deadline gives D_min at every tighter one without running anything new. The pilot was
-read this way to choose the grid of the main runs.
+The dogs do not know the deadline, so a trial runs the same under any of them, and one that
+finished inside a tighter deadline would have succeeded under it too. One run at a loose
+deadline therefore gives D_min at every tighter one without running anything new (a looser
+deadline cannot be read this way). The pilot was read like this to choose the grid of the main
+runs.
 
 ---
 
@@ -137,21 +145,21 @@ numbers.
 
 `pressure_replay.py` asks whether a larger team puts more pressure on the flock. It replays the
 cells at D = 1, D_min, D_sat and about twice D_sat, and records how long each sheep spends
-fleeing a dog. This is the welfare part of report section 3.7 and its Figure 9.
+fleeing a dog. This is the pressure part of [the report](../docs/report/d_min_report.md), section 3.7.
 
 ```bash
 uv run cli/diagnostics/pressure_replay.py dmin_f99_m6 --layouts wide outlier_rich --n 100 400 \
     --seeds 12 --out results/diagnostics/pressure_dmin_f99_m6.csv
 ```
 
-The cells follow the folder's current D_sat. Since the finish-time top-up, a rerun on `wide`
-adds D = 4 at N = 100 and picks D = 5 at N = 400 where the stored CSV has D = 6; the rows both
-runs share are identical.
+The cells follow the folder's current D_sat. After `dmin_f99_m6` was run again with
+`decide_finish_times` on, its D_sat moved on `wide`: a rerun now adds D = 4 at N = 100 and picks
+D = 5 at N = 400 where the stored CSV has D = 6. The rows both runs share are identical.
 
 `split_diagnostic.py` asks why more dogs slow the `split` layout. It replays `split` N = 100 and
 200 at D = 2, 4, 8 and 16 in four versions: the rule as run, a shorter dog stop distance,
 collecting dogs that take outliers far apart (the `collect_min_gap` setting, which exists only
-for this tool), and both changes together. This is the follow-up in report section 4.1.
+for this tool), and both changes together. This is section 4.1 of [the report](../docs/report/d_min_report.md).
 
 ```bash
 uv run cli/diagnostics/split_diagnostic.py --out results/diagnostics/split_diagnostic.csv
@@ -170,10 +178,10 @@ uv run cli/diagnostics/gradient_validation.py --seeds 10
 ## How the tools sit on the code
 
 The scripts here are deliberately thin. Each one reads its arguments, calls the code below it,
-and prints. The real work lives in three layers:
+and prints. The real work lives in three layers under the tools, two of them side by side:
 
 ```
-cli/            the tools in this folder; none imports another
+cli/            the tools in this folder
   |
   +-> services/   runs things: protocols, campaigns, calibration, replays of stored trials
   |     |

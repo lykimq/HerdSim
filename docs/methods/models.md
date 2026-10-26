@@ -17,7 +17,7 @@ HerdSim runs the sheep model of Strömbom et al. (2014), which the authors compa
   - [Coordinated Team Architecture: `strombom_multi`](#coordinated-team-architecture-strombom_multi)
   - [Uncoordinated Greedy Baseline: `fat`](#uncoordinated-greedy-baseline-fat)
   - [Independent Paper Shepherds: `independent`](#independent-paper-shepherds-independent)
-  - [Continuous Force Shepherds: `kubo`](#continuous-force-shepherds-kubo)
+  - [Continuous Force Shepherds: `kubo_forces` (method `kubo`)](#continuous-force-shepherds-kubo_forces-method-kubo)
   - [Local Herders: `lama_herders`](#local-herders-lama_herders)
 - [References](#references)
 
@@ -59,10 +59,10 @@ $$
 In the paper's base case $n = N - 1$, so each sheep is drawn to the centre of the whole flock.
 
 > [!NOTE]
-> **Knowing the centre of the whole flock.** With $n = N - 1$ every sheep knows where the centre of the whole flock is, which a real sheep among hundreds cannot. A sheep could estimate the direction from its nearest neighbours instead. `cli/diagnostics/gradient_validation.py` measures how far that estimate is from the true direction on the start layouts: the error shrinks as more neighbours are used and grows with $N$ (at $N = 400$ with 15 neighbours the mean error is still about 30°). The full-flock centre is therefore a simplification, not a close stand-in for local sensing.
+> **Knowing the centre of the whole flock.** With $n = N - 1$ every sheep knows where the centre of the whole flock is, which a real sheep among hundreds cannot. A sheep could estimate the direction from its nearest neighbours instead. `cli/diagnostics/gradient_validation.py` measures how far that estimate is from the true direction on the start layouts: the error shrinks as more neighbours are used and grows with $N$ (at $N = 400$ with 15 neighbours the mean error is still about 30°). The full-flock centre is therefore a simplification; a sheep sensing 15 neighbours would often head 30° off it.
 
 ##### 3. Keeping space ($\mathbf{R}_{a,i}$, weight $\rho_a = 2.0$)
-Every neighbour $j$ closer than $r_a = 2$ m pushes sheep $i$ away. This term has the largest weight:
+Every neighbour $j$ closer than $r_a = 2$ m pushes sheep $i$ away. This term has the largest weight, so that sheep never overlap:
 
 $$
 \mathbf{R}_{a,i} = \frac{\sum_{j \in \mathcal{N}_a(i)} \frac{\mathbf{x}_i - \mathbf{x}_j}{\lVert \mathbf{x}_i - \mathbf{x}_j \rVert}}{\left\lVert \sum_{j \in \mathcal{N}_a(i)} \frac{\mathbf{x}_i - \mathbf{x}_j}{\lVert \mathbf{x}_i - \mathbf{x}_j \rVert} \right\rVert}, \quad \text{where } \mathcal{N}_a(i) = \lbrace j \ne i \mid \lVert \mathbf{x}_i - \mathbf{x}_j \rVert \lt r_a\rbrace
@@ -93,7 +93,7 @@ When every dog is farther than $r_s = 65$ m, the sheep grazes: with probability 
 \end{cases}
 ```
 
-A grazing sheep gets no push from close neighbours: the paper introduces that term only for reacting sheep. A flock that no dog reaches therefore does not spread out.
+A grazing sheep gets no push from close neighbours: the paper introduces that term only for reacting sheep. A flock that no dog reaches therefore spreads only by the slow random walk of grazing.
 
 ---
 
@@ -101,9 +101,8 @@ A grazing sheep gets no push from close neighbours: the paper introduces that te
 
 Strömbom's model was written for **one dog**. With several dogs, summing their pushes would make them too strong:
 - The attraction to the flock has weight $c = 1.05$.
-- Two dogs at an angle $\theta$ apart push with a combined size of $2\cos(\theta/2)$.
-- Whenever the two dogs are less than $116^\circ$ apart, that is more than $1.05$: the dogs outweigh the attraction.
-- Two dogs would then tear the flock apart from $D = 2$ on.
+- Two dogs at an angle $\theta$ apart push with a combined size of $2\cos(\theta/2)$, more than $1.05$ whenever they are less than $116^\circ$ apart.
+- Sheep on different sides of the flock would then be pushed apart by different dogs with more than the attraction holding them together, from $D = 2$ on. The summed rule was rejected on this argument and not run.
 
 HerdSim therefore adds the unit vectors away from every dog within $r_s$ and **normalises the sum to unit length**:
 
@@ -119,7 +118,7 @@ A sheep at $(0, 5)$ with one dog at $(-3, 0)$ behind it on the left and one at $
 - After normalising, the push has the size of one dog's push and points straight forward.
 
 > [!NOTE]
-> **A modelling choice.** Normalising keeps Strömbom's weight $\rho_s = 1.0$ for any number of dogs and keeps the flock together, so the results measure how the dogs are placed, not how hard they push. Whether real sheep flee harder from several dogs than from one is a question for field data.
+> **A modelling choice.** Normalising keeps Strömbom's weight $\rho_s = 1.0$ for any number of dogs and keeps the flock together, so a larger team changes where the sheep are pushed from and never how hard. Whether real sheep flee harder from several dogs than from one is a question for field data.
 
 ---
 
@@ -130,7 +129,7 @@ For comparison, HerdSim runs the force model of [Kubo et al. (2022)](https://doi
 ![Kubo continuous force model](../../docs/figures/fig5_kubo.png)
 *Figure 2: The Kubo et al. (2022) model. Left: forces on a sheep (repulsion, attraction, flight from dogs, alignment). Middle: forces on a dog (toward the farthest sheep, away from that sheep when close, away from the goal, away from other dogs). Right: a snapshot in which the repulsion between dogs spreads them out.*
 
-- **Sheep velocity** $u = K_{s1} a + K_{s2} b + K_{s3} c + K_{s4} d$, each term a mean over the sheep or dogs within the sheep's view of $20$ m:
+- **Sheep velocity** $u = K_{s1} a + K_{s2} b + K_{s3} c + K_{s4} d$ with $K_{s1} = 10$, $K_{s2} = 0.5$, $K_{s3} = 2$, $K_{s4} = 5000$, each term a mean over the sheep or dogs within the sheep's view of $20$ m:
   1. Repulsion from neighbours, $a = \overline{(x_i - x_j)/\lVert x_i - x_j \rVert^2}$ (size $1/r$).
   2. Alignment with the neighbours' headings, $b$.
   3. Attraction to neighbours, $c = -\overline{(x_i - x_j)/\lVert x_i - x_j \rVert}$ (a unit direction).
@@ -139,9 +138,9 @@ For comparison, HerdSim runs the force model of [Kubo et al. (2022)](https://doi
   The sheep speed is capped at $5$ m/s.
 - **Differences from Strömbom:**
   - A Kubo sheep speeds up under a stronger push, up to $5$ m/s, while a Strömbom sheep always walks at $1$ m/s. So more Kubo dogs finish sooner, even on compact flocks: from about $115$ s with one dog to $29$ s with ten.
-  - The push of several dogs is a mean, not a sum, so it is not normalised as in Strömbom's model.
-  - Kubo is run on compact starts only: the scattered layouts are sized by Strömbom's collect distance, which means nothing for sheep that only see within $20$ m.
-- **Not in the paper:** the time step ($0.05$ s) and the two speed caps (sheep $5$, dogs $10$) come from a public MATLAB port of the method.
+  - The push of several dogs is a mean over the dogs in view, which already keeps its size independent of $D$, so no normalisation is needed.
+  - Kubo is run on compact starts only: a Kubo sheep attracts only within $20$ m, so a sheep that starts farther than that from every other never rejoins, and a wide start at $L = 2 N^{2/3}$ (43 m at $N = 100$) would leave sheep isolated for good.
+- **Not in the paper:** the time step ($0.05$ s) and the two speed caps (sheep $5$, dogs $10$) come from a public MATLAB port of the method (PatrickHup, Force-Based-Sheep-Herding-Algorithm).
 
 ---
 
@@ -149,7 +148,7 @@ For comparison, HerdSim runs the force model of [Kubo et al. (2022)](https://doi
 
 HerdSim runs the non-cohesive target model of [Lama & di Bernardo (2024)](https://doi.org/10.1103/PhysRevResearch.6.L032012) as the method `lama` (sheep model `lama_targets`, dog controller `lama_herders`). It runs in its own task, `gather` (see [task design](../experiments/task_design.md#6-the-gather-task-lama-and-di-bernardo-2024)).
 
-**Status:** run on the paper's grid (`lama_r50`, `lama_r50_inf`, 40,280 trials). HerdSim gives the thresholds of the paper's Table I to within one step of $\sqrt{N}$, and its maps have the same shape as the paper's Fig. 2; results in report section 3.14.
+**Why it is here:** for flocking sheep, HerdSim's log-log slope of the smallest team against $N$ is 0.27 to 0.61 depending on the deadline. The paper reports that for targets without cohesion the smallest team grows as $\sqrt{M}$ (slope 0.5), and with limited sensing only above a density threshold $M_{\mathrm{low}}$. Running the paper's model inside HerdSim puts both on one simulator and one set of statistics. The runs and their results are in [task design, section 6](../experiments/task_design.md#6-the-gather-task-lama-and-di-bernardo-2024) and the report.
 
 **Notation.** The paper writes $N$ for the number of herders and $M$ for the number of targets. HerdSim keeps its own letters everywhere: $D$ is the number of dogs (herders) and $N$ the number of sheep (targets). So the paper's $N^{\ast}(M)$ is HerdSim's smallest team on the gather task. The paper's $D$ (diffusion) is called `target_diffusion` here.
 
@@ -169,7 +168,6 @@ $$
 | Push radius | $\lambda$ | `repulsion_radius` | 2.5 |
 | Time step | $\Delta t$ | `dt` | 0.03 |
 
-- **Why it is here**: for flocking sheep, HerdSim's slope of the smallest team against $N$ is 0.27 to 0.61 depending on the deadline. The paper reports that for targets without cohesion the smallest team grows as $\sqrt{M}$ (slope 0.5), and with limited sensing only above a density threshold $M_{\mathrm{low}}$. Running the paper's model inside HerdSim puts both on one simulator and one set of statistics.
 
 ---
 
@@ -190,7 +188,7 @@ Dog controllers
 
 ### Coordinated Team Architecture: `strombom_multi`
 
-Extends Strömbom's single-dog rule to a team, so that each dog has its own target:
+Extends Strömbom's single-dog rule to a team, so that each dog has its own collect target or arc slot:
 
 ![Autonomous multi-dog coordination in strombom_multi](../../docs/figures/fig3_team_rule.png)
 *Figure 3: The team rule `strombom_multi` with* $D = 1, 2, 4, 8$ *dogs. Top row (collecting on a wide start,* $N = 200$*): the* $D$ *farthest strays are assigned one to a dog by the Hungarian algorithm (crosses mark the collect points* $P_c$*), so the dogs collect in parallel. Bottom row (driving a compact start,* $N = 200$*): the dogs spread over an arc of radius* $R$ *behind the flock (the paper's drive point* $P_d$ *in the middle), keeping their angular order so their paths do not cross.*
@@ -206,7 +204,7 @@ $$
 P_c = \mathbf{x}_o + r_a \frac{\mathbf{x}_o - \mathrm{GCM}}{\lVert \mathbf{x}_o - \mathrm{GCM} \rVert}
 $$
 
-- The $D$ farthest outliers are assigned one to a dog by the Hungarian algorithm (`scipy.optimize.linear_sum_assignment`), which minimises the dogs' total walking distance; in the plane, such an assignment has no crossing paths. Dogs left over when there are fewer outliers than dogs drive the core of the flock (the sheep within $f(N)$) from behind.
+- The $D$ farthest outliers are assigned one to a dog by the Hungarian algorithm (`scipy.optimize.linear_sum_assignment`), which minimises the total straight-line distance from the dogs to their collect points; in the plane, such an assignment has no crossing paths. The assignment is recomputed every tick, so a dog's target can change as outliers move. Dogs left over when there are fewer outliers than dogs drive the core of the flock (the sheep within $f(N)$) from behind.
 
 ![Waypoint geometry Pc and Hungarian bipartite assignment](../../docs/figures/fig_hungarian_matching.png)
 *Figure 4: Collecting. (A) A sheep outside the circle* $f(N) = r_a N^{2/3}$ *is an outlier; its collect point* $P_c$ *lies* $r_a = 2$ *m behind it on the ray from the flock centre (GCM); the drawing puts the cross four times farther out so it can be seen. (B) The Hungarian algorithm assigns dogs to collect points one to one with the least total distance, so no two paths cross (the dashed lines are a hand-drawn assignment that crosses).*
@@ -220,23 +218,24 @@ P_d = \mathrm{GCM} + r_a \sqrt{N} \frac{\mathrm{GCM} - \mathbf{x}_{\mathrm{goal}
 $$
 
 - The offset $r_a \sqrt{N}$ grows like the radius of a packed flock. With the calibrated flock it puts the dog about 2.2 flock radii behind the centre at $N = 100$ and 3.5 at $N = 400$.
-- **Above $N \approx 1056$ the drive point is out of reach.** Sheep react to a dog only within $r_s = 65$ m. Once $r_a \sqrt{N} = 2\sqrt{N} > 65$, that is $N > 1056$, the dog stands where few or no sheep react, and no team up to 12 dogs drives the flock at $N = 1131$. As a labelled HerdSim variant, `drive_offset_cap` limits the offset to $r_s - r_a = 63$ m, which brings the compact drive back (one dog at $N = 1131$, two at 1600, and 42 of 42 partial trials at 3200); on `wide` the cap gives $D_{\min} = 9$ at 1131 and no reliable team up to 12 at 1600.
-- With several dogs, they spread over an arc of radius $R$ (the distance to $P_d$) covering the flock's width, $\pm \arcsin(R_{\mathrm{flock}} / R)$. Dogs and arc slots are matched in angular order round the flock centre, so neighbours stay neighbours and no two dogs cross.
+- **Above $N \approx 1056$ the drive point is out of reach.** Sheep react to a dog only within $r_s = 65$ m. Once $r_a \sqrt{N} = 2\sqrt{N} > 65$, that is $N > 1056$, the dog at $P_d$ reaches only the rear of the flock (the front is more than 65 m away), and no team up to 12 dogs drives the flock at $N = 1131$. As a labelled HerdSim variant, `drive_offset_cap` limits the offset to $r_s - r_a = 63$ m, which brings the compact drive back (one dog at $N = 1131$, two at 1600, and 42 of 42 partial trials at 3200); on `wide` the cap gives $D_{\min} = 9$ at 1131 and no reliable team up to 12 at 1600.
+- With several dogs, they spread over an arc of radius $R$ (the distance to $P_d$) covering the flock's width, $\pm \arcsin(R_{\mathrm{flock}} / R)$, where $R_{\mathrm{flock}}$ is the flock's current radius ($\sqrt{2}$ times its RMS spread). Dogs and arc slots are matched in angular order round the flock centre, so neighbours stay neighbours and no two dogs cross.
 
 ![Driving point geometry Pd and driving arc formation](../../docs/figures/fig_driving_arc.png)
 *Figure 5: Driving. (A) The drive point* $P_d$ *lies* $r_a\sqrt{N} = 20$ *m behind the flock centre at* $N = 100$*, on the side away from the goal* $\mathbf{x}_{\mathrm{goal}}$*. (B) With several dogs the arc reaches round the flock's sides and keeps them from breaking out.*
 
 #### 4. Speed and the stop rule
 - **Speed**: $v_{\mathrm{dog}} = 1.5$ m/s, Strömbom's value ($1.5$ times the sheep speed). Field data of a dog and a flock (Jadhav et al. 2024) give a ratio of about $1.15$, which the sensitivity protocol `dmin_s_dogspeed` tests.
+- **Step**: each dog moves with Strömbom's step toward its target, with the paper's angular noise, as the baselines below do.
 - **Stop rule**: a dog closer than $3 r_a = 6$ m to any sheep stands still that tick (Strömbom's rule).
-- **The last sheep under the strict rule**: when every sheep must be in the goal, large teams often fail after 99% of the flock was already in (97% of strict failures with 6 or more dogs in the sensitivity base run). In a sample trial the dogs chasing the last stray stand between the flock and the goal and drive the flock back out. With dogs at $1.15$ m/s throughout the trial, the strict $D_{\min}$ on `outlier_rich` $N = 400$ falls from none on the grid to 6.
+- **The last sheep under the strict rule**: when every sheep must be in the goal, large teams often fail after 99% of the flock was already in, because the dogs chasing the last stray drive the flock back out; slower dogs (1.15 m/s) avoid it. The report, section 3.4, has the numbers.
 
 ---
 
 ### Uncoordinated Greedy Baseline: `fat`
 
 **Farthest-agent targeting (FAT)** tests whether coordination is needed at all:
-- **Rule**: every dog goes to the point $r_a$ behind the sheep farthest from the goal, with Strömbom's step, noise and stop rule.
+- **Rule**: every dog goes to the point $r_a$ behind the sheep farthest from the goal, on its far side from the goal, with Strömbom's step, noise and stop rule. The target is the goal-directed greedy choice (the Kubo dog's first term), where Strömbom's rule takes the sheep farthest from the flock centre.
 - **What is missing**: no assignment, no drive arc, no communication, and no collect/drive switch.
 
 ![FAT baseline clumping](../../docs/figures/fig4_fat.png)
@@ -247,17 +246,16 @@ $$
 ### Independent Paper Shepherds: `independent`
 
 Every dog runs Strömbom's single-dog rule on its own:
-- It takes the collect/drive decision on the whole flock.
-- It walks to its target with Strömbom's step, noise and stop rule.
-- It has the collect/drive switch but **no team layer**.
-- *Result*: reliable up to $N = 200$ sheep; fails at $N = 400$, where the team rule needs 3 dogs on `wide` and `outlier_rich` and has no reliable team on `split`.
+- It takes the collect/drive decision on the whole flock, aims at the sheep farthest from the flock centre or at the drive point, and walks there with Strömbom's step, noise and stop rule.
+- There is **no team layer**, and since every dog sees the same flock, all make the same choice: the controller is one dog with $D$ copies. Unlike FAT it keeps the paper's target and the collect/drive switch, which is what separates the two baselines.
+- *Result* (scattered layouts, 6 drive times, 99% rule): a reliable team exists up to $N = 200$ (2–3 dogs on `wide`, 3 on `outlier_rich`) and none up to 24 at $N = 400$, where the team rule needs 3 dogs on `wide` and `outlier_rich` and has no reliable team on `split`.
 
 ![Comparison of strombom_multi vs independent controllers](../../docs/figures/fig_independent.png)
 *Figure 7: `strombom_multi` against `independent` (*$N = 100, D = 4$*). Left (`strombom_multi`): the 4 dogs are assigned to 4 different strays and collect in parallel. Middle (`independent`, collecting): every dog sees the same flock and makes the same choice, so all 4 chase the same outlier while the other strays wait. Right (`independent`, driving): all dogs go to the same drive point* $P_d$ *instead of spreading over an arc (dotted green), so they crowd and do not cover the flock's sides.*
 
 ---
 
-### Continuous Force Shepherds: `kubo`
+### Continuous Force Shepherds: `kubo_forces` (method `kubo`)
 
 Dogs move under Kubo's forces rather than switching between modes (Figure 2). The dog's velocity is $K_{f1} A + K_{f2} B + K_{f3} C + K_{f4} D$, then capped at $10$ m/s:
 1. **Toward the target**: a unit vector toward the sheep farthest from the goal ($K_{f1} = 10$).

@@ -1,6 +1,6 @@
 # HerdSim architecture
 
-This document explains how HerdSim is put together and why it's built that way. For what the project does, how to configure it and what files it writes, see the [README](../../README.md).
+This document explains how HerdSim is put together and why it's built that way. For what the project does, see the [README](../../README.md); for how to configure a run and what it writes, the [configuration guide](../guides/configuration.md); for the commands, the [CLI reference](../guides/cli_reference.md).
 
 ## What the design has to serve
 
@@ -46,7 +46,7 @@ There are four stages:
 3. Evidence. Everything lands in a results folder that holds enough to audit the run on its own.
 4. Decide. The frontier rules read the rows and say, per curve, which values are decided and which cells still need seeds.
 
-The loop back from the rules to the runner is the adaptive part: the runner keeps adding seeds, and dog counts between neighbours, until the rules have nothing left to decide. It also stops when every open cell has reached the seed cap, or when the time budget of the run is spent. A resumed run gets a new budget.
+The loop back from the rules to the runner is the adaptive part: the runner keeps adding seeds, and dog counts between neighbours, until the rules have nothing left to decide. It also stops when every open cell has reached the seed cap, or when the time budget of the run is spent. The budget counts from the start of each run, after calibration, so a resumed run gets a new one; it bounds one sitting, not the campaign.
 
 ## Design principles
 
@@ -60,7 +60,7 @@ An experiment is described entirely by data: a protocol YAML layered over a shar
 
 ### A results folder belongs to one protocol and one physics
 
-The hash covers the task, every setting that changes a trial, each method's full parameter set and time limit, and the parts of the grid that size the field. It leaves out the strategy settings (theta, seed depth, budget) and the flock sizes and smaller dog counts. A folder records its protocol and hash, and refuses to be reused by another protocol or under different physics.
+The hash covers the task, every setting that changes a trial, each method's full parameter set and time limit, and the set of layouts and the largest dog count, because the dog start arcs must hold every dog of the largest team and so place the field and goal of every cell on the curve. It leaves out the strategy settings (theta, seed depth, budget) and the flock sizes and smaller dog counts. A folder records its protocol and hash, and refuses to be reused by another protocol or under different physics.
 
 *Why:* a campaign can then grow (more seeds, more flock sizes, intermediate dog counts) and still resume into the same folder, but a change that would make old and new trials incomparable cannot slip in.
 
@@ -74,7 +74,7 @@ The engine runs exactly one trial: one flock, one set of dogs, one seed, until s
 
 ### Layers depend only downward
 
-The code has four layers. The engine runs one trial. The campaign layer runs things: protocols, calibration, rounds, and replays of stored trials. The analysis layer reads finished results folders and turns them into decisions and tables, and never runs the model. The command-line tools sit on top; each one parses its arguments, calls the layers below and prints. A layer imports only from layers below it (the campaign layer uses the frontier rules to decide cells), and no tool imports another tool. These rules are kept by convention; nothing checks them automatically.
+The code has three layers under the tools. The engine runs one trial. Above it sit two layers side by side: the campaign layer, which runs things (protocols, calibration, rounds, and replays of stored trials), and the analysis layer, which reads finished results folders and turns them into decisions and tables and never runs the model; the campaign layer also reads the frontier rules from the analysis layer to decide cells. The command-line tools sit on top; each one parses its arguments, calls the layers below and prints. Imports point only down this order, and no tool imports another tool. These rules are kept by convention; nothing checks them automatically.
 
 *Why:* each piece can then be removed, replaced or extended on its own. Deleting a tool breaks nothing else, the analysis can be rerun without a simulation, and a rule that several tools need (how a results folder is read, how a replay is checked against its stored trial) lives in one place below them.
 
@@ -98,11 +98,11 @@ Task setup comes only from the protocol and the canonical defaults. Behaviour pa
 
 ### Lengths follow the measured flock
 
-Goal size, start spread, lost-sheep distance and drive length are multiples of the flock radius, measured per method and flock size by a short calibration: one all-seeing dog drives a compact flock for a fixed time, and the settled radius is the scale. The calibration runs when a campaign first needs a method and flock size, and is stored in the results folder and reused after that. Calibration refuses a flock size whose radius has not settled or depends on its start.
+Goal size, start spread, lost-sheep distance and drive length are multiples of the flock radius, measured per method and flock size by a short calibration: one all-seeing dog drives a compact flock for a fixed time, and the settled radius is the scale. The calibration runs when a campaign first needs a method and flock size, and is stored in the results folder and reused after that. Calibration refuses a flock size whose radius has not settled or depends on its start. It always drives a compact flock with the paper's single all-seeing dog, whatever task or dog settings the protocol runs, so protocols that share a method share its radii and differ only in what they set.
 
 *Why:* fixed lengths make the task easier or harder as N grows for reasons that have nothing to do with the dogs. Tying them to the real flock keeps "every sheep in the goal" meaning the same thing at every N and for every sheep model.
 
-*Cost:* by default each method gets a task sized to its own flock, so methods are compared on equivalent tasks, not on one shared field. That is wrong for two methods that differ only in their dog rule, because the flock one rule settles differs from the other's and so would the goal and the drive. For such a pair, one method can be calibrated with the other's dog, so both run exactly the same task. Calibration always uses the drive task, whatever task the protocol runs, and always the paper's single dog that sees every sheep, whatever the protocol sets for the dogs (sensing range, spacing, holding), so every protocol's task is sized from the same reference flock.
+*Cost:* by default each method gets a task sized to its own flock, so methods are compared on equivalent tasks, not on one shared field. That is wrong for two methods that differ only in their dog rule, because the flock one rule settles differs from the other's and so would the goal and the drive. For such a pair, one method can be calibrated with the other's dog, so both run exactly the same task.
 
 Above the largest size at which the flock settles to a radius of its own, a protocol may impose the radius instead, at the density of a calibrated size. Settings that act only through calibration hold for the whole protocol and cannot be swept as factors, because calibration runs once per protocol and a factor level would never reach it.
 
@@ -124,13 +124,13 @@ A dog count is only worth simulating if the extra dog can change something. So t
 
 *Why:* with identical dogs aimed at one point, a curve over D measures the same trial again at every D, and the campaign pays for it. Giving each dog distinct work makes the D axis a real experimental axis, and the overlap measure separates "the dogs had nothing more to do" from "the dogs got in each other's way".
 
-*Cost:* the team rule is HerdSim's, not the paper's, so multi-dog results are results about this rule. Dogs use each other's positions to share out the work, which is a form of coordination. Dogs are points by default and may stand on top of each other; a protocol can give them room instead, so that no dog steps closer than a set distance to another, which is how crowding can be tested at all.
+*Cost:* the team rule is HerdSim's, not the paper's, so multi-dog results are results about this rule. Dogs use each other's positions to share out the work, which is a form of coordination, so the results describe a team that knows where its members are, not independent dogs. Dogs are points by default and may stand on top of each other; a protocol can give them room instead, so that no dog steps closer than a set distance to another, which is how crowding can be tested at all.
 
 A second dog rule is kept on purpose as a baseline. In it every dog aims at the sheep farthest from the goal and nothing shares out the work, so all dogs choose the same sheep and become copies once they meet. Run on the same task, it shows what the D axis looks like when added dogs repeat each other's work, and the overlap measure shows it in the data. A third rule gives every dog the paper's single-dog decision on its own, with no team layer. It has the paper's switch between collecting and driving, which the farthest-sheep baseline lacks, so the two controls together separate what the switch contributes from what the team layer contributes.
 
 ### Success is stated, and both readings are kept
 
-The source papers do not agree on when a trial is won: one counts every sheep inside the goal, one states that aim but measures the flock centre and a circle round the flock, one ends the task on the flock centre. HerdSim keeps the every-sheep rule as the default and adds a reading in which a share of the sheep, 99 percent for example, is enough. The two readings are separate protocols with their own folders, run on the same grid and the same seeds, so they can be compared cell by cell.
+The source papers do not agree on when a trial is won: Strombom counts every sheep inside the goal, Kubo states that aim but measures the flock centre and a circle round the flock, and Lama and di Bernardo end the task when the herders are inside the goal and read the share of targets inside at that moment. HerdSim keeps the every-sheep rule as the default and adds a reading in which a share of the sheep, 99 percent for example, is enough. The two readings are separate protocols with their own folders, run on the same grid and the same seeds, so they can be compared cell by cell.
 
 *Why:* with an open goal, the last one or two sheep can decide a trial after the flock has arrived, and the reading used changes the dog count a result reports. Keeping both shows how much of a result belongs to the herding and how much to the definition of success.
 
@@ -138,7 +138,7 @@ The source papers do not agree on when a trial is won: one counts every sheep in
 
 A third reading asks the flock to stay: the goal counts only after the required share has been inside without a break for a set time. It is off by default, so it changes nothing unless a protocol sets it, and it comes with a step in which the dogs back off, because a dog that only stops still keeps a sheep in flight.
 
-### Conventions are tested, not argued
+### Conventions are tested
 
 Some setup choices have no rule behind them in the source papers or in field data: where the dogs stand at the start, how roomy the goal is, how fast a dog is compared with a sheep. HerdSim picks a value for each and writes down that it is a convention. The campaign then repeats one small grid with one such choice changed at a time, next to a reference run on the same seeds, under each reading of success, and a conclusion counts only where the reference and the variants agree. Where the source papers offer a second parameter set that was matched to a real flock, it is one of the variants.
 
@@ -152,15 +152,21 @@ Every trial draws its start layout, its sheep noise and its dog noise from three
 
 *Why:* a trial's result then depends only on its cell and seed, whichever worker ran it and in whatever order. Because the layout and sheep streams don't depend on the dog count, cells at different D start from the same flocks and see the same sheep draws until the dogs change what the sheep do. That pairs the finish-time comparisons, which is what lets small differences be decided with few seeds.
 
-*Cost:* the dynamics are chaotic, so results are bit-identical only on one machine and library versions. Across machines they agree within a tolerance, which is what the regression tests check.
+*Cost:* the dynamics are chaotic, so results are bit-identical only on the same machine with the same library versions. Across machines they agree within a tolerance, which is what the regression tests check.
 
 ### Spend seeds where the answer is still open
 
-There is no fixed seed depth. Every cell starts with one batch; after each round the frontier rules mark the cells whose reliability, or a finish-time comparison that could still move one of the curve's values, is undecided, and only those get another batch. Where the zone changes between two dog counts that are far apart, the count halfway between is added. A dog count between a decided cell and a cell that stays undecided at the seed cap is added too, so the undecided stretch is bracketed on both sides; a cell still below the cap may yet decide, so it waits. Comparisons that cannot change any value never ask for seeds, and a protocol can switch the finish-time comparisons off altogether when only the minimum team is asked for; the values that rest on them are then reported as undecided. Above a confirmed saturation, dog counts whose dogs were measured to be copies of each other get no more seeds either; a dog count that is slower or failing is always kept, because that is a measured harm.
+There is no fixed seed depth. Every cell starts with one batch, and after each round the frontier rules decide which cells get another:
 
-*Why:* most cells always succeed or always fail, and most comparisons are clear after one batch. Precision only matters near the boundaries, so that's where the budget goes, and the stop rule is "nothing left to decide" instead of a depth fixed before anyone saw the data.
+- A cell gets another batch while its reliability is undecided, or while a finish-time comparison that could still move one of the curve's values is undecided. Comparisons that cannot change any value never ask for seeds.
+- Where the zone changes between two dog counts that are far apart, the count halfway between is added, so the boundary is found without testing every count.
+- When a cell has reached the seed cap still undecided, the dog count between it and its nearest decided neighbour is added, so that the undecided stretch has a decided cell on each side. A cell below the cap is not bracketed yet, because it may still decide on its own.
+- A protocol can switch the finish-time comparisons off when only the minimum team is asked for; the values that rest on them are then reported as undecided.
+- Above a confirmed saturation, dog counts whose dogs were measured to be copies of each other get no more seeds, because they repeat the cell below them. A dog count that is slower or failing is always kept, because that is a measured harm.
 
-*Cost:* a cell whose true rate sits right at theta stays undecided up to the seed cap, and is reported as undecided. That is by design, but it means some values come out as intervals of "not decided" rather than a single number. Such a value is reported as a bracket, from the largest dog count known to be too small up to the smallest one that is decided.
+*Why:* most cells always fail, which one batch settles, or always succeed, which a few batches settle; only cells near the threshold need many. Precision only matters near the boundaries, so that's where the budget goes, and the stop rule is "nothing left to decide" instead of a depth fixed before anyone saw the data.
+
+*Cost:* a cell whose true rate sits right at theta stays undecided up to the seed cap. That is by design, but it means some values are reported as a range, from the largest dog count known to be too small to the smallest one decided reliable, or as a lower bound when no larger count is decided yet.
 
 ### Survive interruption
 
@@ -168,23 +174,23 @@ Only the parent process writes files, and a folder lock keeps a second campaign 
 
 *Why:* long campaigns get killed, crash or need a reboot. With append-only rows, an interruption costs at most the trials in flight, and a restart just continues.
 
-### An error is a bug, not a failure
+### An error stops its cell
 
 A trial that raises is logged, its cell gets no further seeds, and that cell is never marked reliable. The run reports which cells had errors.
 
 *Why:* the simulation is deterministic, so an exception will happen again on the same seed. Averaging it away as noise, or counting it as a plain failure, would hide a bug inside a result.
 
-### Label failures after the run, not during it
+### Failure labels are computed afterwards
 
 A trial stops on success, on the time limit, or when the task itself says the trial is over. The drive task never says so, so its failures run to the limit. The gather task ends a trial once every dog is inside the goal and none senses a target outside it, because its source paper stops there and reads the outcome at that moment; a trial ended that way is a failure unless the success rule holds at the same tick. Why a trial failed (dogs out of range, flock escaped, split, scatter, oscillation, stuck; targets lost, outnumbered) is worked out afterwards from the metric history, by rules the task provides.
 
 *Why:* the stopping rule is fixed per task and the same for every method, so trial lengths are comparable within a task. Failure categories are an interpretation, and they can be refined later without re-running anything.
 
-Metrics are recorded every tick by default; a protocol may record every k-th tick for a method whose time step is small, where the metrics would otherwise cost more than the model. The stop checks run every tick whatever the stride, and the last tick is always recorded, so outcomes do not depend on it; only the per-tick history and what is read from it (first arrivals, summaries) are coarser.
-
 ### Results are evidence; the rules only read them
 
-The campaign layer writes results. The frontier rules never run the simulation, they only read rows. Every generated text file carries a notice saying it is machine-written.
+The campaign layer writes results. The frontier rules never run the simulation, they only read rows. Every generated text file carries a notice saying it is machine-written, so that no one edits a table the next run will overwrite.
+
+Metrics are recorded every tick by default; a protocol may record every k-th tick for a method whose time step is small, where the metrics would otherwise cost more than the model. The stop checks run every tick whatever the stride, and the last tick is always recorded, so outcomes do not depend on it; only the per-tick history and what is read from it (first arrivals, summaries) are coarser.
 
 *Why:* thresholds and comparisons can then be redone in seconds without re-simulating, and the rules can never silently produce new data.
 
@@ -224,7 +230,7 @@ Workers get a small description of one trial, run it and send back its row. Beca
 | Layering by convention | Nothing stops a bad import | Small codebase, and the type checker flags import cycles |
 | Regression tests use tolerances | Small drifts go unnoticed | Bit-exact comparisons break across machines because the dynamics are chaotic |
 | Every metric recorded on every trial | Some compute per tick | Metrics we didn't plan to use have explained results before. Recording them is cheap insurance |
-| Calibration always on the drive task | A task with its own flock behaviour can't calibrate its own scale | The flock radius is a property of the sheep model under a driving dog, which every current task builds on |
+| Calibration always on the drive task | A task with its own flock behaviour can't calibrate its own scale | The flock radius is a property of the sheep model under a driving dog; a task whose agents do not flock sizes itself from its own settings instead, as the gather task does |
 | Imposed radius above the calibration edge | Results there are conditional on a chosen density | The model gives no flock size of its own there; the choice is a setting, swept in its own protocols, and the flock's real size is reported beside it |
 
 ## How it's meant to grow
@@ -238,10 +244,10 @@ The extension points follow the plugin boundaries:
 
 Some things the current design doesn't handle yet, and would need real changes:
 
-- The world has one circular goal. The drive task's layouts, field sizing and dog start arcs assume a single drive from a start toward that goal, and the gather task's assume a disc round it. Holding the flock in that goal exists (a hold time in the task, and a step in which the dogs back off beyond the sheep's reaction distance); a gate, a pen or several stages still need a more general world and its own start geometry.
-- The multi-dog collect/drive controller reads the flock's start position from the task setup, and its dogs share out the work using each other's positions. Backing off to hold is one role beyond collect and drive; others (flanking, holding a gap) would be new jobs in that layer.
+- The world has one circular goal. The drive task's layouts, field sizing and dog start arcs assume a single drive from a start toward that goal, and the gather task's assume a disc round it. Holding the flock in that goal exists; a gate, a pen or several stages still need a more general world and its own start geometry.
+- The multi-dog collect/drive controller reads the flock's start position from the task setup, and its dogs share out the work using each other's positions. Roles beyond collect, drive and back off (flanking, holding a gap) would be new jobs in that layer.
 - The paper's drive point lies r_a sqrt(N) behind the flock, which passes the sheep's reaction distance near N = 1056; above that the drive rule itself stops working, and only a capped drive point (a labelled variant) drives such flocks.
-- The sheep models and dog rules have only been run in their own pairings: the Strombom and Kubo dogs on their own flocks in the drive task, the Lama herders on Lama targets in the gather task. Crossing them (a flocking dog rule on targets that do not flock, or the other way round) needs each rule's assumptions about the other side checked first: the team rule reads a flock start and a collect distance that mean nothing without cohesion, and the herders read distances from the goal centre, which in the drive task is far from the flock.
+- The sheep models and dog rules have only been run in their own pairings: the Strombom and Kubo dogs on their own flocks in the drive task, the Lama herders on Lama targets in the gather task. Crossing them (a flocking dog rule on targets that do not flock, or the other way round) needs each rule's assumptions about the other side checked first. The team rule reads a flock start and a collect distance that mean nothing without cohesion, and the herders read distances from the goal centre, which in the drive task is far from the flock.
 - Much larger flocks would need the per-dog loops in the controllers vectorised.
 
 ## Where to look in the code

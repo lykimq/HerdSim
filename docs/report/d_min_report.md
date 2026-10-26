@@ -15,7 +15,7 @@ The first 23 protocols cover flock sizes $N = 25$ to 400, four start layouts (`c
 Main results:
 
 1. **Compact flocks need one dog.** $D_{\min} = 1$ at every flock size and deadline, and extra dogs do not shorten the drive.
-2. **Scattered flocks need few more.** $D_{\min} = 1$ up to $N = 50$ and only 2 or 3 dogs at $N = 400$ with the loose deadline. On a log-log scale the growth slope is 0.20–0.42 at 12 drive times and 0.30–0.79 at 6 (five flock sizes; 0.27–0.38 and 0.38–0.61 on nine sizes, item 8).
+2. **Scattered flocks need only a few more.** $D_{\min} = 1$ up to $N = 50$ and only 2 or 3 dogs at $N = 400$ with the loose deadline. On a log-log scale the growth slope is 0.20–0.42 at 12 drive times and 0.30–0.79 at 6 (five flock sizes; 0.27–0.38 and 0.38–0.61 on nine sizes, item 8).
 3. **The deadline matters more than the flock size.** Going from 12 to 3 drive times raises $D_{\min}$ on `wide` $N = 400$ from 2 to 5–6, more than going from $N = 100$ to 400 does.
 4. **Under the strict rule, the last sheep decides.** In 97% of strict failures with 6 or more dogs (sensitivity base run), 99% of the flock had already been in the goal. With slower dogs (1.15 m/s instead of 1.5) the strict $D_{\min}$ on `outlier_rich` $N = 400$ drops from none on the grid to 6.
 5. **The 99% rule is robust to setup choices.** Under it, $D_{\min}$ moves by about one dog at most when the dog start, the start gap, the dog speed or the sheep parameters change; only a smaller goal raises it more. Under the strict rule the same changes often move it to "none on the grid".
@@ -269,7 +269,7 @@ FAT (farthest-agent targeting) is a baseline without coordination: every dog goe
    Every dog sees every sheep and picks by the same rule, so all $D$ dogs chase the same sheep. They bunch together: at $N \ge 200$ the median share of dogs with another dog within 2 m, for teams of two or more, is 0.86 on `compact` and 0.79 on `split` (0.46 on `wide`, 0.30 on `outlier_rich`). A larger FAT team is a larger pack behind one sheep while the rest of the flock spreads out.  
    The independent shepherds of section 3.9 also have no team layer, but they keep Strömbom's collect/drive switch, and they reach a finite $D_{\min}$ up to $N = 200$. FAT fails because it has neither the team layer nor the switch.
 
-Table 5 compares FAT with `strombom_multi` at 6 drive times (FAT strict / 99%, with `strombom_multi` in brackets):
+Table 4 compares FAT with `strombom_multi` at 6 drive times (FAT strict / 99%, with `strombom_multi` in brackets):
 
 | Layout | $N = 25$ | $N = 50$ | $N = 100$ | $N = 200$ | $N = 400$ |
 | :--- | :---: | :---: | :---: | :---: | :---: |
@@ -302,7 +302,7 @@ $D_{\mathrm{sat}}$ is the smallest reliable team that no larger reliable team be
 - In all 189 reliable cells above a decided $D_{\mathrm{sat}}$ at 6 drive times, the finish time is 0.96 to 1.01 times the $D_{\mathrm{sat}}$ time: at most 4% faster, sometimes 1% slower.
 - Dog time ($D$ times the finish time) grows with $D / D_{\mathrm{sat}}$. On a compact flock of 50, 24 dogs take the same 154 s as one dog, for 24 times the dog time.
 
-Table 6 compares twice $D_{\mathrm{sat}}$ and $D = 24$ with the $D_{\mathrm{sat}}$ cell (scattered flocks, 6 drive times):
+Table 5 compares twice $D_{\mathrm{sat}}$ and $D = 24$ with the $D_{\mathrm{sat}}$ cell (scattered flocks, 6 drive times):
 
 | Layout, $N$ | $D_{\mathrm{sat}}$ | At $2 D_{\mathrm{sat}}$: finish time / dog time | At $D = 24$: finish time / dog time |
 | :--- | :---: | :---: | :---: |
@@ -321,13 +321,13 @@ A sheep flees while a dog is within 65 m ($r_s$). The replays measure how long t
 - **More of the flock flees at once.** A larger team spreads over a wider arc: the median share of the flock fleeing at a given moment rises from 68% at $D = 3$ to 84% at $D = 12$. Because the drive ends sooner, the total time each sheep spends fleeing does not rise.
 - **Dogs stay off the sheep.** The time a sheep spends within 6 m ($3 r_a$, the dog's stop distance) of a dog stays below 1.3 s per sheep (median) at every team size.
 
-#### 4. No team size makes the task fail
+#### 4. Extra dogs almost never make the task fail
 Under the 99% rule, on the five original flock sizes and up to 24 dogs, no curve becomes unreliable again once it is reliable. Point dogs therefore show no overcrowding failure. On the denser grid there is one dip (`split` $N = 141$, $D = 4$, success 0.80). Extra dogs do slow some flocks: on `split` $N = 400$ at 12 drive times, the median finish time is 950–1040 s for $D \ge 9$ against 839 s at $D = 5$, though the task still succeeds.
 
 ![Cost of dogs beyond D_sat](../figures/fig33_effort.png)
 
 **Figure 8: Cost of dogs beyond $D_{\mathrm{sat}}$ (6 drive times, 99% rule).**  
-*(Left)* Finish time relative to the $D_{\mathrm{sat}}$ cell against $D / D_{\mathrm{sat}}$ (log scale). Every curve stays between 0.96 and 1.02.  
+*(Left)* Finish time relative to the $D_{\mathrm{sat}}$ cell against $D / D_{\mathrm{sat}}$ (log scale). Every curve stays within about 0.96 to 1.01 (the largest ratio is 1.012).  
 *(Right)* Dog time ($D$ times the finish time) relative to the $D_{\mathrm{sat}}$ cell; the curves follow the diagonal $y = x$, so dog time grows in proportion to the team.  
 *Data:* [results_tables.md: Effort, dmin_f99_m6](results_tables.md#effort-dmin_f99_m6-cost-of-dogs-beyond-d_sat-relative-to-the-d_sat-cell-1).
 
@@ -356,7 +356,7 @@ To pin down the shape of $D_{\min}(N)$, the 99% grids at 12 and 6 drive times go
 3. **Steady growth and a curve that levels off fit equally well.**  
    Up to $N = 566$ the data fit a power law $D = c N^b$ and a saturating curve $D = 1 + (D_\infty - 1) N / (N + K)$ equally well (log odds 0.0). At $N = 1600$ the curves that fit allow 1.5 to 6.7 dogs at 12 drive times (3.1 to 10.4 at 6). Telling them apart needs larger flocks, which the model cannot calibrate (section 3.13).
 
-Table 7, nine flock sizes (99% rule):
+Table 6, nine flock sizes (99% rule):
 
 | $N$ | 25 | 50 | 71 | 100 | 141 | 200 | 283 | 400 | 566 |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -391,7 +391,7 @@ To separate the two, `dmin_f99_indep` runs a team of **independent paper shepher
 3. **In the Kubo model more dogs keep helping, with diminishing returns.**  
    With Kubo sheep (`dmin_f99_kubo`), one dog is enough on compact flocks of 25 to 100. Unlike Strömbom sheep, Kubo sheep walk faster under a stronger push (up to 5 m/s), so more dogs shorten the drive: at $N = 100$ the median finish time falls from 115 s with one dog to 29 s with ten, and to 25 s with 24. Ten dogs already give 95% of the gain of 24.
 
-Table 8 compares the three rules at 6 drive times (99% rule):
+Table 7 compares the three rules at 6 drive times (99% rule):
 
 | `strombom_multi` / `independent` / `fat` | $N = 200$ | $N = 400$ |
 | :--- | :---: | :---: |
@@ -405,7 +405,7 @@ Table 8 compares the three rules at 6 drive times (99% rule):
 
 ### 3.10 RQ10: When do more dogs hurt? Holding the flock, and dogs that take up room
 
-In the open drive under the 99% rule, extra point dogs never made the task fail. Two protocols test settings where extra dogs might get in each other's way:
+In the open drive under the 99% rule, extra point dogs never made the task fail (one dip aside, section 3.7). Two protocols test settings where extra dogs might get in each other's way:
 
 1. **Holding (`dmin_f99_hold`):** a trial succeeds only once 99% of the flock has stayed in the goal for one drive time. While the flock is in, the dogs withdraw to $r_s + r_a = 67$ m beyond the farthest sheep, so no sheep reacts to them and the flock grazes.
 2. **Dogs that take up room (`dmin_f99_hold_spacing`):** the same task, but no dog may come within 2 m of another. The arc behind the flock then has room for a limited number of dogs, about $D_{\mathrm{cap}} = 7, 9, 10, 11, 12$ at $N = 25$ to 400 (the arc length divided by the 2 m spacing).
@@ -441,7 +441,7 @@ Lama and di Bernardo (2024) report that the team grows as $\sqrt{N}$ for targets
    With $n = 0.5N$ the slope on `wide` becomes **0.40 to 0.70**, a range that includes the 0.5 of non-cohesive targets.  
    On `split` the weaker flock comes apart under one dog: $D_{\min}$ goes from 1 to 3–4 at $N = 200$ and from 2 to 4–5 at $N = 400$. The slow growth of $D_{\min}$ for the Strömbom flock depends on every sheep being drawn to the whole flock.
 
-Table 9, cohesion levels (`wide`, 99% rule, 12 drive times):
+Table 8, cohesion levels (`wide`, 99% rule, 12 drive times):
 
 | Cohesion (`wide`, 99%, $12\times$) | $N = 50$ | $N = 100$ | $N = 200$ | $N = 400$ | Slope |
 | :--- | :---: | :---: | :---: | :---: | :---: |
@@ -490,12 +490,12 @@ r_a \sqrt{N} > r_s \iff 2\sqrt{N} > 65 \iff N > 1056
 $$
 Above that size the dogs stand where few or no sheep react to them, and the flock is not driven. At $N = 1131$ no team up to 12 dogs succeeded in any of its 10 trials, on compact or wide.
 
-#### 2. Capping the drive point brings the flock back
+#### 2. Capping the drive point restores the drive
 With the drive offset capped at $r_s - r_a = 63$ m (`dmin_f99_big_cap`), a HerdSim variant of the paper's rule:
 - **Compact:** one dog drives flocks of 800 and 1131, two are needed at 1600. At 3200 every team from 3 to 12 dogs succeeded in all 42 trials run.
 - **Wide:** 3 dogs at $N = 800$, 5–9 at 1131 and more than 12 at 1600. A large scattered flock needs many dogs to keep its sides together.
 
-Table 10, capped drive point (99% rule, 12 drive times):
+Table 9, capped drive point (99% rule, 12 drive times):
 
 | Capped at 63 m, 99%, $12\times$ | $N = 800$ | $N = 1131$ | $N = 1600$ | $N = 3200$ (partial) |
 | :--- | :---: | :---: | :---: | :---: |
@@ -528,7 +528,7 @@ The same trials are read in two ways:
    The two rules give the same smallest team at almost every size (8 herders for 100 targets, 13 for 225, 17 for 400). The fitted exponents are **0.52** (paper's statistic) and **0.53** (HerdSim's rule).
 
 3. **With sensing radius 10 the two rules part near the threshold.**  
-   With 81 targets or fewer no team up to 25 herders is reliable; every failure there ends with targets no herder can see.  
+   With 100 targets or fewer no team up to 25 herders is reliable; up to 81 targets every failure ends with targets no herder can see.  
    Just above the threshold, from 100 to 196 targets, the two rules part:
    - At 144 targets, 11 herders gather on average 99.2% of the targets, so the paper's statistic accepts them. But only 70% of their runs end with 99% of the targets in. Runs that lose two of 144 targets (98.6%) mixed with runs that lose none still average above 0.99.
    - HerdSim's rule does not accept 11 herders; its $D_{\min}$ is the bracket 17–25.
@@ -639,7 +639,7 @@ The direct use is in robot and drone herding, where a team size has to be chosen
 Below, a *unit* is one member of the team: a dog, a robot or a drone. The number of units is the team size $D$, so "one to three units" means $D = 1$ to 3.
 
 - **Sizing a team.** At a loose deadline one to three units handle a scattered flock of up to 400, and a compact flock needs one up to $N = 1131$ (two at 1600, with the capped drive point). The deadline changes the answer more than a four times larger flock does, so fix the time available before the team size.
-- **Speed costs more than reliability.** On `wide` and `outlier_rich` the fastest team is one and a half to two and a half times the minimum (more on `split`), and units beyond it add running time with no gain (Table 6).
+- **Speed costs more than reliability.** On `wide` and `outlier_rich` the fastest team is one and a half to two and a half times the minimum (more on `split`), and units beyond it add running time with no gain (Table 5).
 - **The space each unit takes limits the useful team.** Units that cannot come closer than 2 m to each other crowd the arc behind an `outlier_rich` flock from about 9 units at $N = 400$.
 - **Share the map before adding units.** A local view costs about one unit at $N = 200$, and sharing what every unit sees won it back on `wide` (not on `split`).
 - **Back off to hold a flock.** Units must move beyond the animals' flight distance to keep a flock in place; units that only stop keep it moving.
@@ -773,5 +773,5 @@ Diagnostic replays: 164 pressure replays and 768 `split` replays, every unchange
 | Raw data | 367,150 trial rows in `results/<protocol>/trials.csv`; `trials.jsonl` holds the same rows plus the 100 uncounted $N = 3200$ trials of `dmin_f99_big_cap`. |
 | Running the study | `uv run cli/campaign.py run --protocol <id>` and `uv run cli/run_queue.py`. |
 | Tables | `cli/dmin_tables.py` builds [results_tables.md](results_tables.md) from the result folders. |
-| Tests | `make test` runs 330 unit, invariant and regression tests; `make bench` runs 23 small campaigns. |
+| Tests | `make test` runs 330 unit, invariant and regression tests; `make bench` runs 23 benchmark tests over six small campaigns. |
 | Replays | `services/replay.py`; 932 diagnostic replays reproduced their stored trials exactly. |

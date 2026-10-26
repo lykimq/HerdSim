@@ -1,6 +1,6 @@
 # Configuration and Protocol Guide
 
-This guide explains how simulation protocols and configurations are defined, customized, and saved in **HerdSim**.
+How a HerdSim experiment is written as a protocol file, which settings exist, and what a run writes. A protocol is the YAML file that describes an experiment; a run is one execution of it into a results folder.
 
 ---
 
@@ -9,14 +9,14 @@ This guide explains how simulation protocols and configurations are defined, cus
 - [1. Configuration Architecture](#1-configuration-architecture)
   - [Canonical Defaults (`canonical.yaml`)](#canonical-defaults-canonicalyaml)
   - [Protocol Overrides](#protocol-overrides)
-- [2. Follow-Up Settings and Advanced Flags](#2-follow-up-settings-and-advanced-flags)
+- [2. Settings Added by the Follow-Up Campaigns](#2-settings-added-by-the-follow-up-campaigns)
 - [3. What a Simulation Run Writes](#3-what-a-simulation-run-writes)
 
 ---
 
 ## 1. Configuration Architecture
 
-HerdSim enforces a clean, inheritance-based protocol configuration model located under [`protocols/configs/`](../../protocols/configs/):
+Protocols live under [`protocols/configs/`](../../protocols/configs/) and inherit from one canonical file:
 
 ```text
 protocols/configs/
@@ -35,8 +35,8 @@ protocols/configs/
 
 Every protocol names `protocols/configs/canonical.yaml`, directly or through the file it `extends`. It holds the task and campaign settings, each with a comment saying where its value comes from:
 - The task (`task: drive_to_goal`, or `gather` for the Lama model) and its geometry: drive distance and goal radius in flock radii, the start layouts, the gather disc.
-- Dog starts: half circles behind the flock, the first one $30\text{ m}$ beyond the farthest sheep that can start, dogs at least $5.0\text{ m}$ apart.
-- Calibration of $R_f(N)$, the seeds, the decision rules (theta $0.90$, $99$% intervals, batches of 10 up to 200 seeds) and the time budget.
+- Dog starts: half circles behind the flock; the innermost lies $30\text{ m}$ beyond the farthest sheep that can start, and dogs sit at least $5.0\text{ m}$ apart along it, overflowing to the next circle.
+- Calibration of $R_f(N)$, the seeds, the frontier rules (theta $0.90$, $99$% intervals, batches of 10 up to 200 seeds; one seed is one trial of a cell) and the time budget.
 
 The model parameters are not in this file. They live with each method in code, one table per paper, and a protocol overrides them under `params`:
 - Strömbom (`sim/methods/strombom/config.py`): sheep speed $1.0\text{ m/s}$, dog speed $1.5\text{ m/s}$, $r_a = 2.0\text{ m}$, $r_s = 65\text{ m}$, $h = 0.5$, $c = 1.05$, $\rho_a = 2.0$, $\rho_s = 1.0$, $e = 0.3$.
@@ -44,7 +44,11 @@ The model parameters are not in this file. They live with each method in code, o
 
 ### Protocol Overrides
 
-A protocol names its id, its output folder, the methods with their time limits, and the grid. It can `extends` another protocol and give only what differs. Any canonical value it names replaces the default; an unknown key stops the run at load. Two further keys appear in a few protocols: `factors` sweeps one setting over several values, each value getting its own curves (`dmin_f99_view_range.yaml`), and a method's `calibrate_as` names another method whose single dog settles the flock for the radius calibration (`dmin_fat.yaml`; it enters the physics hash).
+A protocol names its id, its output folder, the methods with their time limits, and the grid (layouts, flock sizes and `shepherd_counts`, the team sizes $D$). It can `extends` another protocol and give only what differs. A key the protocol names replaces the parent's whole value, lists and mappings included, so a protocol that changes one entry must restate the rest; that is why `lama_r50_inf` below repeats the time limit when it only changes `sensing_radius`. An unknown key stops the run at load.
+
+Two further keys appear in a few protocols. `factors` sweeps one canonical setting over several values; each value gets its own set of D curves (one curve is one layout and flock size with every team size on it). Only settings that act per trial can be swept, because calibration runs once per protocol: a method parameter, or a setting that acts through the flock radius, has to be its own protocol (`dmin_f99_view_range.yaml` sweeps `sensing_range`). A method's `calibrate_as` lets it borrow another method's dog for the calibration, so that two methods differing only in their dog rule run the same task (`dmin_fat.yaml` calibrates as `strombom_multi`); it changes the field every trial runs on, so it is part of the physics hash.
+
+A results folder records a **physics hash**: a digest of everything that changes a trial's outcome, which is the task, every setting not at its neutral value, each method's parameters and time limit, the set of layouts and the largest team size. A run whose hash differs from the folder's is refused, so trials from two different physics never share a folder. The flock sizes, the smaller team sizes and the seed rules are left out, so a protocol can grow and still resume.
 
 A full protocol (`dmin_m12.yaml`, trimmed):
 
@@ -73,7 +77,7 @@ success_fraction: 0.99          # 99% of the flock inside the goal (1.0: every s
 decide_finish_times: true       # also spend seeds until the finish-time ranking is decided
 ```
 
-The real file also lists nine flock sizes. `decide_finish_times` (canonical default false) changes where a run spends its seeds, so a rerun that leaves it out reproduces the decisions but not the seed counts.
+The example is trimmed; the real file also lists nine flock sizes. `decide_finish_times` (canonical default false) changes where a run spends its seeds: a rerun that leaves it out reproduces $D_{\min}$ but reports $D_{\mathrm{best}}$, $D_{\mathrm{sat}}$ and $D_{\mathrm{crowd}}$ as undecided, and spends fewer seeds.
 
 A protocol on the gather task with a method parameter changed (`lama_r50_inf.yaml`):
 
@@ -91,9 +95,9 @@ methods:
 
 ---
 
-## 2. Follow-Up Settings and Advanced Flags
+## 2. Settings Added by the Follow-Up Campaigns
 
-The follow-up campaigns added these settings. At their default value each one leaves every trial as the first runs had it, and it stays out of the physics hash, so the folders written before it remain resumable:
+The follow-up campaigns added these settings. At its default value each one leaves every trial as the first runs had it and stays out of the physics hash, so the folders written before it remain resumable; set to any other value it enters the hash. `0` means off throughout. `collect_drive_multi` is the dog controller of the `strombom_multi` method.
 
 | Setting | Default | What it does | Protocols |
 | :--- | :---: | :--- | :--- |
@@ -103,23 +107,23 @@ The follow-up campaigns added these settings. At their default value each one le
 | `dog_spacing` | `0` | No dog may step closer than this to another. A dog already that close walks straight away; a dog whose step would end that close does not step. | `dmin_f99_hold_spacing` |
 | `sensing_range` | `0` | Each dog of `collect_drive_multi` knows only the sheep within this range (`0`: every sheep). | `dmin_f99_view_range` |
 | `communication` | `none` | With a sensing range, what dogs share: `none`, `neighbour` (the dogs within range) or `shared` (the whole team). | `dmin_f99_view_comm` |
-| `impose_radius_above` | `0` | Above this flock size, $R_f$ is not calibrated but set from it at constant density. | `dmin_f99_big*` |
+| `impose_radius_above` | `0` | Above this flock size, $R_f$ is not calibrated but set from the calibrated radius at that size, keeping the density constant. | `dmin_f99_big*` |
 | `imposed_radius_scale`| `1.0` | Multiplies the imposed $R_f$, to vary the density. | `dmin_f99_big_dense`, `_loose` |
 | `drive_offset_cap` | `0` | Caps the drive offset $r_a\sqrt{N}$, so the drive point stays within the sheep's reaction distance ($65\text{ m}$). | `dmin_f99_big_cap` |
-| `metrics_stride` | `1` | Records the per-tick metrics every k ticks. Outcomes are unchanged (stop checks run every tick); only the history and first-arrival times are coarser. Hashed when not 1. | `lama_r50`, `lama_r50_inf` (10) |
+| `metrics_stride` | `1` | Records the per-tick metrics every k ticks. Outcomes are unchanged (stop checks run every tick); only the history and the first-arrival times (the first tick at which a given share of the flock is inside) are coarser. It is hashed all the same, because those columns must agree within a folder. | `lama_r50`, `lama_r50_inf` (10) |
 
-Settings of the gather task, read only when `task: gather` and hashed only then:
+Settings of the gather task, read only when `task: gather` and hashed only then, so adding a task leaves every existing folder's hash as it was:
 
 | Setting | Default | What it does | Protocols |
 | :--- | :---: | :--- | :--- |
-| `gather_start_radius` | `50` | Radius $R$ of the disc the sheep and dogs start on, centred on the goal. | `lama_r50`, `lama_r50_inf` |
+| `gather_start_radius` | `50` | Radius $R$ of the disc the targets and herders start on, centred on the goal. | `lama_r50`, `lama_r50_inf` |
 | `gather_goal_fraction` | `0.2` | Goal radius as a share of $R$ (the paper's $r^{\ast} = R/5$). | `lama_r50`, `lama_r50_inf` |
 
 ---
 
 ## 3. What a Simulation Run Writes
 
-Every protocol writes one folder, `results/<protocol_id>/`:
+Every run writes one folder, `results/<protocol_id>/`:
 
 ```text
 results/<protocol_id>/
@@ -129,9 +133,11 @@ results/<protocol_id>/
 ├── trials.jsonl          One line per finished trial, appended as trials finish
 ├── trials.csv            The same rows as a table, rewritten after each round
 ├── frontier_cells.csv    Per cell: success interval, reliability, finish times, zone
-├── frontier_groups.csv   Per D curve: D_min, D_min_low, D_best, D_sat, D_crowd, D_overcrowd, D_max
+├── frontier_groups.csv   Per group (one D curve): D_min, D_min_low, D_best, D_sat, D_crowd, D_overcrowd, D_max
 ├── status.json           Progress of the run: rounds, trials, open cells, why it stopped
 ├── errors.jsonl          Trials that raised (only written when one does)
 ├── .lock                 Held while a run is going, so a second run cannot write to the folder
 └── timeseries/           Per-tick Parquet histories for the first 3 seeds of every cell
 ```
+
+The D values and the zones are defined in [task design, section 5](../experiments/task_design.md#5-frontier-rules-and-zones).

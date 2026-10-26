@@ -5,15 +5,11 @@
 [![Kiểm thử](https://img.shields.io/badge/tests-330%20passed-brightgreen.svg)](tests/)
 [![Lượt mô phỏng](https://img.shields.io/badge/simulated%20trials-367%2C150-success.svg)](results/)
 
-Bạn đã bao giờ quan sát những chú chó chăn cừu làm việc trên một đồng cỏ rộng lớn chưa? Một chú chó chăn cừu kiên nhẫn làm việc một mình cuối cùng cũng có thể gom được hàng chục con cừu. Nhưng điều gì sẽ xảy ra khi đồng hồ đang đếm ngược từng giây? Hoặc khi đàn cừu bị tản mác khắp cánh đồng, tách thành nhiều cụm riêng biệt, hay chạy theo các hướng ngược nhau? Một chú chó đơn độc không thể nào chạy về bốn phương tám hướng cùng một lúc. Để hoàn thành nhiệm vụ trước khi hết giờ, chúng bắt buộc phải làm việc cùng nhau như một đội ngũ được phối hợp nhịp nhàng.
+Một con chó chăn cừu có thể tự mình gom một bầy cừu gắn kết và lùa vào chuồng. Khi cừu xuất phát rải rác, tách thành nhiều cụm hay trải trên một cánh đồng rộng, và công việc có thời hạn, một con chó không thể ở nhiều nơi cùng lúc. Câu hỏi khi đó là nhiệm vụ cần bao nhiêu chó, và thêm chó có luôn giúp ích không:
 
-Thực tế này đặt ra một câu hỏi nền tảng trong lĩnh vực hành vi tập thể và robot bầy đàn tự hành:
+> **Cần bao nhiêu chó ($D$) để gom một bầy $N$ con cừu và lùa vào đích một cách tin cậy trước thời hạn: ít nhất là bao nhiêu ($D_{\min}$), bao nhiêu thì đủ ($D_{\mathrm{sat}}$), và từ khi nào thêm chó lại gây hại?**
 
-> **Cần bao nhiêu chú chó ($D$) để gom một đàn $N$ con cừu và lùa đàn vào vùng đích một cách tin cậy trước thời hạn: tối thiểu là bao nhiêu ($D_{\min}$), bao nhiêu thì đủ ($D_{\mathrm{sat}}$), và từ khi nào thêm chó lại làm hỏng việc?**
-
-**HerdSim** là một nghiên cứu và một bộ mô phỏng mã nguồn mở được xây dựng để trả lời câu hỏi đó. Nó xác định đội tin cậy nhỏ nhất ($D_{\min}$), đội mà vượt quá nó thêm chó không còn làm việc lùa nhanh hơn ($D_{\mathrm{sat}}$), và những tình huống mà thêm chó làm nhiệm vụ thất bại.
-
-Qua **367.150 lượt mô phỏng** trong 39 protocol nghiên cứu, không có lỗi mô phỏng nào, HerdSim lập bản đồ quy mô đội tăng thế nào theo quy mô bầy từ 25 đến 566 con (với các lượt chạy đến 3.200 con), dưới các thời hạn, bố cục xuất phát, mức gắn kết và tầm cảm nhận khác nhau.
+**HerdSim** là một bộ mô phỏng mã nguồn mở và một nghiên cứu được xây dựng để trả lời câu hỏi đó. Qua **367.150 lượt mô phỏng** trong 39 protocol, không có lỗi mô phỏng nào, nó lập bản đồ đội tin cậy nhỏ nhất ($D_{\min}$), đội mà vượt quá nó thêm chó không còn làm việc lùa nhanh hơn ($D_{\mathrm{sat}}$), và những tình huống mà thêm chó làm nhiệm vụ thất bại, cho bầy từ 25 đến 566 con (với các lượt chạy đến 3.200 con) dưới các thời hạn, bố cục xuất phát, mức gắn kết và tầm cảm nhận khác nhau.
 
 ![Một lượt mô phỏng](docs/figures/fig17_trial.png)
 **Hình 1: Một lượt chạy trong HerdSim ($N = 200$ cừu, $D = 4$ chó, xuất phát `wide`, hạt giống 2026), ở các bước 0, 55, 139 và 279.**
@@ -29,7 +25,7 @@ Vòng tròn xanh lá bên phải là đích ($R_{\mathrm{goal}} = 1{,}9 R_f$). C
 - [Vận hành Chiến dịch và Quy trình Lệnh](#vận-hành-chiến-dịch-và-quy-trình-lệnh)
 - [Kiến trúc Mã nguồn Dự án](#kiến-trúc-mã-nguồn-dự-án)
 - [Bản đồ Tài liệu (Documentation Index)](#bản-đồ-tài-liệu-documentation-index)
-- [Tài liệu Tham khảo và Trích dẫn](#tài-liệu-tham-khảo-và-trích-dẫn)
+- [Tài liệu Tham khảo](#tài-liệu-tham-khảo)
 
 ---
 
@@ -45,8 +41,7 @@ Trục hoành là quy mô bầy $N$; trục tung là đội nhỏ nhất có t�
 Khi cừu xuất phát gần nhau (`compact`), **một chó là đủ ở mọi quy mô bầy đã thử ($N = 25$ đến $566$ ở 12 và 6 lần thời gian lùa, đến $400$ ở 3 lần) và mọi thời hạn**. Không con nào phải đi bắt về, nên chó chỉ việc lùa. Thêm chó cũng không làm việc lùa nhanh hơn: trong mô hình, một con cừu phản ứng với chó luôn đi $1$ m/s, nên chó đổi hướng của bầy chứ không đổi tốc độ.
 
 ### 2. Trên đồng cỏ tản mác, $D_{\min}$ tăng chậm hơn nhiều so với quy mô đàn
-Khi cừu xuất phát rải rác (`wide`, `split`, `outlier_rich`), chó phải đưa các con lạc về trước khi lùa cả bầy. Trên thang log-log ($\log_2 D_{\min}$ theo $\log_2 N$), độ dốc là **0,27 đến 0,38** ở thời hạn thong thả (12 lần thời gian lùa) và 0,38 đến 0,61 ở 6 lần, nên đội tăng chậm hơn nhiều so với bầy.  
-*Vì sao chậm như vậy?* Mỗi con cừu bị hút về bầy. Khi chó đã lùa một con lạc quay lại, nó tự đi về bầy, nên chó không phải đi bắt từng con.
+Khi cừu xuất phát rải rác (`wide`, `split`, `outlier_rich`), chó phải đưa các con lạc về trước khi lùa cả bầy. Dù vậy, trên thang log-log ($\log_2 D_{\min}$ theo $\log_2 N$), độ dốc chỉ là **0,27 đến 0,38** ở thời hạn thong thả (12 lần thời gian lùa) và 0,38 đến 0,61 ở 6 lần. Lý do là độ gắn kết: mỗi con cừu bị hút về bầy, nên khi chó đã lùa một con lạc quay lại, nó tự đi về bầy, và chó không phải đi bắt từng con.
 
 ### 3. Áp lực thời hạn đòi hỏi nhiều chó hơn là quy mô đàn cừu
 Dưới quy tắc 99%, rút thời hạn từ 12 xuống 3 lần thời gian lùa làm $D_{\min}$ trên một bầy `wide` 400 con tăng từ **2 chó lên 5–6**. Làm bầy đó lớn gấp bốn (từ $N = 100$ lên 400) ở thời hạn thong thả chỉ làm nó tăng từ 1 lên 2. Khi ít thời gian, một chó không thể đưa từng con lạc về lần lượt, nên nhiều chó phải làm cùng lúc.
@@ -54,34 +49,24 @@ Dưới quy tắc 99%, rút thời hạn từ 12 xuống 3 lần thời gian lù
 ### 4. Nếu không có tinh thần đồng đội, thêm chó chỉ vô ích
 Để kiểm tra xem có cần phối hợp không, chúng tôi chạy một đối chứng không phối hợp, **FAT (nhắm con xa nhất)**: mọi chó đi tới phía sau con cừu xa đích nhất. Mọi chó thấy cùng một bầy, nên **tất cả chọn cùng một con** và dồn thành một cụm hoạt động như một chó duy nhất. FAT không có đội tin cậy nào trên các bố cục phân tán khi $N \ge 200$: quá hai chó, tỷ lệ thành công của nó ở dưới khoảng 0,55 trên `wide` và `outlier_rich` và dưới 0,8 trên `split`, nên thêm chó không tạo ra việc làm song song.
 
-### 5. Thế nào là thành công? Con cừu cuối cùng
-Khi mọi con cừu phải ở trong đích cùng một lúc (quy tắc nghiêm ngặt), các đội lớn ($D \ge 6$) thường thất bại trên bầy lớn. Ở 6 lần thời gian lùa, trong 91% số lượt thất bại đó (97% ở lượt chạy gốc của phần độ nhạy), 99% số cừu đã từng ở trong đích trước thời hạn. Trong một lượt mẫu, các chó đuổi theo con lạc cuối cùng đứng vào giữa bầy và đích, và lùa bầy ra ngoài trở lại. Với chó chậm hơn ($1{,}15$ m/s thay vì $1{,}5$), $D_{\min}$ nghiêm ngặt trên `outlier_rich` $N = 400$ giảm từ không có trên lưới xuống 6. Tính một lượt là thành công khi **99% số cừu** vào đích sẽ tránh được vấn đề này và đo được việc cả đội làm được với bầy.
+### 5. Dưới quy tắc nghiêm ngặt, con cừu cuối cùng quyết định
+Khi mọi con cừu phải ở trong đích cùng một lúc (quy tắc nghiêm ngặt), các đội lớn ($D \ge 6$) thường thất bại trên bầy lớn dù bầy đã vào đích rồi: ở 6 lần thời gian lùa, trong 91% số lượt thất bại đó (97% ở lượt chạy gốc của phần độ nhạy), 99% số cừu đã ở trong đích trước thời hạn. Trong một lượt mẫu, các chó đuổi theo con lạc cuối cùng đứng vào giữa bầy và đích, và lùa bầy ra ngoài trở lại. Với chó chậm hơn ($1{,}15$ m/s thay vì $1{,}5$), $D_{\min}$ nghiêm ngặt trên `outlier_rich` $N = 400$ giảm từ không có trên lưới xuống 6. Tính một lượt là thành công khi **99% số cừu** vào đích loại bỏ được hiệu ứng giả này và đo được việc cả đội làm được với bầy.
 
 ### 6. Mục tiêu không gắn kết theo quy luật căn bậc hai, cả trong HerdSim
-Đàn cừu ở các phát hiện 1 đến 5 luôn bám lấy nhau. Lama & di Bernardo (2024) nghiên cứu trường hợp ngược lại: các mục tiêu hoàn toàn không hút nhau. Mỗi mục tiêu đi lang thang ngẫu nhiên và chỉ chạy ra xa khi có người chăn đến gần. Mục tiêu và người chăn xuất phát rải rác trên một hình tròn, và người chăn phải đưa 99% mục tiêu vào một đích nhỏ ở tâm. Bài báo cho thấy đội nhỏ nhất tăng theo căn bậc hai của số mục tiêu. Chúng tôi chạy mô hình của họ trong HerdSim để kiểm tra quy luật đó với cùng bộ mô phỏng và cùng quy tắc tin cậy đã dùng cho đàn cừu.
+Đàn cừu ở các phát hiện 1 đến 5 luôn bám lấy nhau. Lama & di Bernardo (2024) nghiên cứu trường hợp ngược lại: các mục tiêu hoàn toàn không hút nhau, đi lang thang ngẫu nhiên và chỉ chạy ra xa khi có người chăn đến gần. Mục tiêu và người chăn xuất phát rải rác trên một hình tròn, và người chăn phải đưa 99% mục tiêu vào một đích nhỏ ở tâm. Bài báo cho thấy đội nhỏ nhất tăng theo căn bậc hai của số mục tiêu. Chúng tôi chạy mô hình của họ trong HerdSim để kiểm tra quy luật đó với cùng bộ mô phỏng và cùng quy tắc tin cậy như với đàn cừu.
 
-Trước hết, HerdSim cho lại đúng kết quả của bài báo. Bài báo công bố bằng số một kết quả là ngưỡng trong Bảng I: với bán kính 10, đội nhỏ nhất chỉ theo quy luật căn bậc hai từ $\sqrt{N} = 8$, 9 và 11 trở lên, ứng với mức gom 90%, 95% và 99%. HerdSim cho 8, 9 và 12. Các kết quả còn lại của bài báo là bản đồ màu ([Hình 2](https://doi.org/10.1103/PhysRevResearch.6.L032012)). Đặt cạnh nhau (Hình 3), bản đồ của HerdSim và của bài báo có cùng hình dạng. Với bán kính 10, khi ít mục tiêu thì không đội nào tới 25 người chăn đạt được, rồi có một ngưỡng rõ, và trên ngưỡng là một dải đội tăng theo căn bậc hai của số mục tiêu. Khi thấy mọi thứ, dải đó kéo dài suốt cả khoảng.
+HerdSim cho lại đúng kết quả của bài báo. Bài báo nêu một kết quả dưới dạng số, là ngưỡng trong Bảng I: với bán kính cảm nhận 10, đội nhỏ nhất chỉ theo quy luật căn bậc hai từ $\sqrt{N} = 8$, 9 và 11 trở lên, ứng với mức gom 90%, 95% và 99%. HerdSim cho 8, 9 và 12. Các kết quả còn lại của bài báo là bản đồ màu ([Hình 2](https://doi.org/10.1103/PhysRevResearch.6.L032012)), và đặt cạnh nhau (Hình 3) bản đồ của HerdSim có cùng hình dạng: với bán kính 10, khi ít mục tiêu thì không đội nào tới 25 người chăn đạt được, rồi có một ngưỡng rõ, và trên ngưỡng là một dải đội tăng theo căn bậc hai của số mục tiêu; khi thấy mọi thứ, dải đó kéo dài suốt cả khoảng.
 
 ![Hình 2 của bài báo cạnh bản đồ của HerdSim](docs/figures/fig39_lama_maps.png)
-**Hình 3: Bản đồ của bài báo phía trên bản đồ của HerdSim.** Mỗi ô là tỷ lệ mục tiêu trong đích lúc kết thúc, lấy trung bình qua các lượt, cho một số mục tiêu (trục hoành, theo căn bậc hai) và một số người chăn (trục tung); đường trắng đánh dấu mức 0,99. Trái: người chăn thấy mọi thứ. Phải: người chăn thấy trong bán kính 10. Lưới của HerdSim dừng ở 400 mục tiêu ($\sqrt{N} = 20$), nên dải xám từ 21 đến 25 trên trục của bài báo không có dữ liệu. Phạm vi đã chạy đã chứa ngưỡng và đoạn tăng theo căn bậc hai phía trên ngưỡng, đủ để kiểm tra, nên năm quy mô lớn hơn không được chạy; chạy thêm sẽ làm thời gian chạy tăng gần gấp đôi. Có hai khác biệt nhỏ: với bán kính 10 và ít mục tiêu, HerdSim gom được ít hơn bài báo một chút, và đường 0,99 của HerdSim quay lên hơi xa hơn về bên phải so với của bài báo.  
+**Hình 3: Bản đồ của bài báo phía trên bản đồ của HerdSim.** Mỗi ô là tỷ lệ mục tiêu trong đích lúc kết thúc, lấy trung bình qua các lượt, cho một số mục tiêu (trục hoành, theo căn bậc hai) và một số người chăn (trục tung); đường trắng đánh dấu mức 0,99. Trái: thấy mọi thứ. Phải: bán kính cảm nhận 10. Lưới của HerdSim dừng ở 400 mục tiêu ($\sqrt{N} = 20$), nên dải xám từ 21 đến 25 trên trục của bài báo không có dữ liệu; phạm vi đã chạy đã chứa ngưỡng và đoạn tăng theo căn bậc hai phía trên ngưỡng, còn năm quy mô lớn hơn sẽ làm thời gian chạy tăng gần gấp đôi. Có hai khác biệt nhỏ: với bán kính 10 và ít mục tiêu, HerdSim gom được ít hơn bài báo một chút, và đường 0,99 của HerdSim quay lên hơi xa hơn về bên phải.  
 *Trên: Hình 2 của Lama và di Bernardo (2024), Phys. Rev. Research 6, L032012, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), đã cắt.*
 
-Khi người chăn thấy mọi thứ, quy luật căn bậc hai cũng đúng trong HerdSim: 8 người chăn cho 100 mục tiêu, 17 cho 400 (số mũ 0,52–0,53). Mức này dốc hơn 0,27–0,38 của đàn cừu gắn kết ở thời hạn thong thả.
-*Tại sao lại khác?* Ở phát hiện 2, một con cừu lạc tự chạy về đàn khi chó lùa nó quay lại. Ở đây không có gì kéo mục tiêu về, nên người chăn phải đi bắt từng con. Hai loạt chạy còn khác nhau về nhiệm vụ và quy tắc người chăn, nên phép so sánh này chỉ mang tính tham khảo.
+Khi thấy mọi thứ, quy luật này dốc hơn so với đàn cừu gắn kết: 8 người chăn cho 100 mục tiêu, 17 cho 400, số mũ 0,52–0,53 so với 0,27–0,38 của phát hiện 2. Không có gì kéo mục tiêu về khi người chăn đã lùa nó quay lại, nên người chăn phải đi bắt từng con, trong khi một con cừu lạc gắn kết tự đi về. Hai loạt chạy còn khác nhau về nhiệm vụ và quy tắc người chăn, nên phép so sánh này chỉ mang tính tham khảo.
 
-Khi người chăn chỉ thấy trong bán kính 10, xuất hiện một ngưỡng. Với 100 mục tiêu trở xuống, các mục tiêu thưa đến mức không đội nào tới 25 người chăn tìm được hết một cách tin cậy. Ngay trên ngưỡng, từ 121 đến 196 mục tiêu, cách tính của bài báo và của HerdSim tách nhau (Hình 4, khung trái). Bài báo lấy trung bình tỷ lệ gom được qua các lượt; áp dụng lên các lượt chạy của HerdSim ở 144 mục tiêu, mức trung bình đó đạt 99% với 11 người chăn. HerdSim đếm từng lượt, và với 17 đến 25 người chăn vẫn có khoảng một lượt trong mười để sót vài mục tiêu. Mức trung bình 99% có thể che đi những lượt thất bại đó; đếm từng lượt thì không, nên HerdSim cần nhiều người chăn hơn ở vùng này.
+Với bán kính cảm nhận 10 có một ngưỡng, và ngay trên ngưỡng cách tính của bài báo và của HerdSim tách nhau (Hình 4, khung trái). Bài báo coi một đội là đủ khi trung bình qua các lượt, 99% mục tiêu nằm trong đích lúc kết thúc. HerdSim coi là đủ khi ít nhất 90% số lượt kết thúc với 99% mục tiêu trong đích, với độ tin cậy 99%; đây là $D_{\min}$. Với 100 mục tiêu trở xuống, không đội nào tới 25 người chăn là tin cậy theo cả hai cách. Từ 121 đến 196 mục tiêu, mức trung bình đạt 99% với 11 đến 16 người chăn, nhưng từng lượt vẫn để sót vài mục tiêu: ở 144 mục tiêu, một lượt trong mười thất bại ngay cả với 17 đến 25 người chăn. Mức trung bình 99% che đi những lượt đó; đếm từng lượt thì không, nên HerdSim cần 14 đến 25 người chăn ở vùng này và không tìm được đội tin cậy nào ở 121.
 
 ![Mô hình Lama và di Bernardo trong HerdSim](docs/figures/fig38_lama.png)
-**Hình 4: Đội nhỏ nhất theo số mục tiêu trong mô hình Lama & di Bernardo, theo hai cách tính.** Trục hoành là căn bậc hai của số mục tiêu, trục tung là số người chăn. Khung trái: người chăn chỉ thấy trong bán kính 10. Khung phải: người chăn thấy mọi thứ.
-
-Hai cách chọn "đội nhỏ nhất" khác nhau ở chỗ lấy trung bình hay đếm lượt:
-
-- Cách của bài báo lấy trung bình: một đội là đủ khi trung bình qua các lượt, 99% mục tiêu nằm trong đích lúc kết thúc.
-- Cách của HerdSim đếm lượt: một đội là đủ khi ít nhất 90% số lượt kết thúc với 99% mục tiêu trong đích, với độ tin cậy 99%. Đây là $D_{\min}$.
-
-Hình tròn là cách của bài báo áp dụng lên các lượt chạy của HerdSim. Hình thoi là $D_{\min}$ của HerdSim. Thanh dọc là khoảng mà $D_{\min}$ còn có thể nằm trong, tam giác là cận dưới khi chưa đội nào được quyết định là tin cậy, dấu chéo ở trên cùng là không đội nào tới 25 người chăn đủ tin cậy.
-
-Khi thấy mọi thứ, hai cách gần như trùng nhau. Khi chỉ thấy trong bán kính 10, ở dải tô xám ngay trên ngưỡng, trung bình đã đạt 99% với 11 đến 16 người chăn nhưng từng lượt vẫn hay sót mục tiêu, nên cách đếm lượt cần 14 đến 25 người chăn, và ở 121 mục tiêu không tìm được đội tin cậy nào.
+**Hình 4: Đội nhỏ nhất theo số mục tiêu trong mô hình Lama & di Bernardo, theo hai cách tính.** Trục hoành: căn bậc hai của số mục tiêu; trục tung: số người chăn. Trái: bán kính cảm nhận 10 (vùng ngưỡng tô xám). Phải: thấy mọi thứ. Hình tròn là cách của bài báo áp dụng lên các lượt chạy của HerdSim. Hình thoi là $D_{\min}$ của HerdSim, với thanh dọc là khoảng mà nó còn có thể nằm trong, tam giác là cận dưới khi chưa đội nào được quyết định là tin cậy, và dấu chéo ở trên cùng là không đội nào tới 25 người chăn đủ tin cậy. Khi thấy mọi thứ, hai cách gần như trùng nhau.
 
 *Phân tích đầy đủ, các lượt chạy độ nhạy và các kết quả tiếp theo khác ở [docs/report/d_min_report_vi.md](docs/report/d_min_report_vi.md).*
 
@@ -131,16 +116,16 @@ make bench
 
 ## Vận hành Chiến dịch và Quy trình Lệnh
 
-Toàn bộ các chiến dịch mô phỏng được điều hành qua bộ công cụ dòng lệnh trong [`cli/`](cli/):
+Các chiến dịch được chạy từ bộ công cụ dòng lệnh trong [`cli/`](cli/):
 
 ```bash
-# 1. Xem trước kế hoạch thực thi của một protocol (không chạy mô phỏng)
+# 1. Xem một protocol sẽ chạy gì: các ô, hạt giống vòng đầu, phần chạy tiếp
 uv run cli/campaign.py plan --protocol dmin_m6
 
-# 2. Chạy chiến dịch protocol với 16 tiến trình xử lý song song
+# 2. Chạy một protocol với 16 tiến trình xử lý
 uv run cli/campaign.py run --protocol dmin_m6 --workers 16
 
-# 3. Kiểm tra tiến độ thời gian thực của một chiến dịch đang chạy hoặc đã xong
+# 3. Xem tiến độ của một protocol đang chạy hoặc đã xong
 uv run cli/campaign.py status --protocol dmin_m6
 
 # 4. Chạy hàng đợi 39 protocol nghiên cứu (bỏ qua protocol đã xong, chạy tiếp protocol bị dừng)
@@ -196,13 +181,11 @@ HerdSim/
 
 ---
 
-## Tài liệu Tham khảo và Trích dẫn
+## Tài liệu Tham khảo
 
-Nếu bạn sử dụng HerdSim trong nghiên cứu của mình, vui lòng trích dẫn:
+HerdSim cài đặt các mô hình của ba bài báo:
 
 1. **Strömbom, D., et al. (2014)**. *Solving the shepherding problem: heuristics for herding autonomous, interacting agents*. Journal of the Royal Society Interface, 11(100), 20140719. [DOI: 10.1098/rsif.2014.0719](https://doi.org/10.1098/rsif.2014.0719)
 2. **Kubo, M., Tashiro, M., Sato, H., Yamaguchi, A. (2022)**. *Herd guidance by multiple sheepdog agents with repulsive force*. Artificial Life and Robotics, 27, 416–427. [DOI: 10.1007/s10015-021-00726-7](https://doi.org/10.1007/s10015-021-00726-7)
 3. **Lama, A., & di Bernardo, M. (2024)**. *Shepherding control and herdability in complex multiagent systems*. Physical Review Research, 6, L032012. [DOI: 10.1103/PhysRevResearch.6.L032012](https://doi.org/10.1103/PhysRevResearch.6.L032012)
-4. **Bảng Số liệu Thực nghiệm**: [`docs/report/results_tables.md`](docs/report/results_tables.md)
-
-Danh sách đầy đủ các công trình được trích dẫn trong nghiên cứu nằm ở [phần tài liệu tham khảo của báo cáo](docs/report/d_min_report_vi.md#tài-liệu-tham-khảo).
+Các bảng đứng sau báo cáo nằm ở [`docs/report/results_tables.md`](docs/report/results_tables.md), và danh sách đầy đủ các công trình được trích dẫn trong nghiên cứu nằm ở [phần tài liệu tham khảo của báo cáo](docs/report/d_min_report_vi.md#tài-liệu-tham-khảo).

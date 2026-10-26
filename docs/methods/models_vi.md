@@ -17,7 +17,7 @@ HerdSim chạy mô hình cừu của Strömbom et al. (2014), mà các tác gi�
   - [Quy tắc đội: `strombom_multi`](#quy-tắc-đội-strombom_multi)
   - [Đối chứng không phối hợp: `fat`](#đối-chứng-không-phối-hợp-fat)
   - [Chó chăn độc lập theo bài báo: `independent`](#chó-chăn-độc-lập-theo-bài-báo-independent)
-  - [Chó theo lực liên tục: `kubo`](#chó-theo-lực-liên-tục-kubo)
+  - [Chó theo lực liên tục: `kubo_forces` (phương pháp `kubo`)](#chó-theo-lực-liên-tục-kubo_forces-phương-pháp-kubo)
   - [Người chăn cảm nhận cục bộ: `lama_herders`](#người-chăn-cảm-nhận-cục-bộ-lama_herders)
 - [Tài liệu tham khảo](#tài-liệu-tham-khảo)
 
@@ -59,10 +59,10 @@ $$
 Trong trường hợp cơ sở của bài báo $n = N - 1$, nên mỗi con cừu bị hút về tâm của cả bầy.
 
 > [!NOTE]
-> **Biết tâm của cả bầy.** Với $n = N - 1$, mọi con cừu biết tâm của cả bầy nằm đâu, điều mà một con cừu thật giữa hàng trăm con không làm được. Một con cừu có thể ước lượng hướng đó từ các hàng xóm gần nhất. `cli/diagnostics/gradient_validation.py` đo ước lượng đó lệch bao nhiêu so với hướng thật trên các bố cục xuất phát: sai số giảm khi dùng nhiều hàng xóm hơn và tăng theo $N$ (ở $N = 400$ với 15 hàng xóm, sai số trung bình vẫn khoảng 30°). Vì vậy dùng tâm cả bầy là một sự đơn giản hóa, không phải một thay thế sát cho cảm nhận cục bộ.
+> **Biết tâm của cả bầy.** Với $n = N - 1$, mọi con cừu biết tâm của cả bầy nằm đâu, điều mà một con cừu thật giữa hàng trăm con không làm được. Một con cừu có thể ước lượng hướng đó từ các hàng xóm gần nhất. `cli/diagnostics/gradient_validation.py` đo ước lượng đó lệch bao nhiêu so với hướng thật trên các bố cục xuất phát: sai số giảm khi dùng nhiều hàng xóm hơn và tăng theo $N$ (ở $N = 400$ với 15 hàng xóm, sai số trung bình vẫn khoảng 30°). Vì vậy dùng tâm cả bầy là một sự đơn giản hóa; một con cừu cảm nhận 15 hàng xóm sẽ thường đi lệch 30° so với tâm đó.
 
 ##### 3. Giữ khoảng cách ($\mathbf{R}_{a,i}$, trọng số $\rho_a = 2{,}0$)
-Mọi hàng xóm $j$ gần hơn $r_a = 2$ m đẩy cừu $i$ ra xa. Số hạng này có trọng số lớn nhất:
+Mọi hàng xóm $j$ gần hơn $r_a = 2$ m đẩy cừu $i$ ra xa. Số hạng này có trọng số lớn nhất, để cừu không bao giờ chồng lên nhau:
 
 $$
 \mathbf{R}_{a,i} = \frac{\sum_{j \in \mathcal{N}_a(i)} \frac{\mathbf{x}_i - \mathbf{x}_j}{\lVert \mathbf{x}_i - \mathbf{x}_j \rVert}}{\left\lVert \sum_{j \in \mathcal{N}_a(i)} \frac{\mathbf{x}_i - \mathbf{x}_j}{\lVert \mathbf{x}_i - \mathbf{x}_j \rVert} \right\rVert}, \quad \text{với } \mathcal{N}_a(i) = \lbrace j \ne i \mid \lVert \mathbf{x}_i - \mathbf{x}_j \rVert \lt r_a\rbrace
@@ -93,7 +93,7 @@ Khi mọi chó ở xa hơn $r_s = 65$ m, cừu gặm cỏ: với xác suất $0{
 \end{cases}
 ```
 
-Một con cừu đang gặm cỏ không bị hàng xóm gần đẩy ra: bài báo chỉ đưa số hạng đó vào cho cừu đang phản ứng. Vì vậy một bầy không có chó nào tới gần thì không tản ra.
+Một con cừu đang gặm cỏ không bị hàng xóm gần đẩy ra: bài báo chỉ đưa số hạng đó vào cho cừu đang phản ứng. Vì vậy một bầy không có chó nào tới gần chỉ tản ra theo bước đi ngẫu nhiên chậm của việc gặm cỏ.
 
 ---
 
@@ -101,9 +101,8 @@ Một con cừu đang gặm cỏ không bị hàng xóm gần đẩy ra: bài b�
 
 Mô hình của Strömbom được viết cho **một chó**. Với nhiều chó, cộng các lực đẩy lại sẽ làm chúng quá mạnh:
 - Lực hút về bầy có trọng số $c = 1{,}05$.
-- Hai chó cách nhau một góc $\theta$ đẩy với độ lớn tổng $2\cos(\theta/2)$.
-- Khi hai chó cách nhau dưới $116^\circ$, giá trị đó lớn hơn $1{,}05$: chó lấn át lực hút.
-- Hai chó khi đó xé bầy từ $D = 2$ trở lên.
+- Hai chó cách nhau một góc $\theta$ đẩy với độ lớn tổng $2\cos(\theta/2)$, lớn hơn $1{,}05$ khi chúng cách nhau dưới $116^\circ$.
+- Khi đó cừu ở hai phía của bầy sẽ bị hai chó khác nhau đẩy tách ra với lực mạnh hơn lực hút giữ chúng lại, từ $D = 2$ trở lên. Quy tắc cộng lực bị loại trên lập luận này và không được chạy.
 
 Vì vậy HerdSim cộng các vectơ đơn vị hướng ra xa mọi chó trong vòng $r_s$ rồi **chuẩn hóa tổng về độ dài một**:
 
@@ -119,7 +118,7 @@ Một con cừu ở $(0, 5)$, một chó ở $(-3, 0)$ phía sau bên trái và 
 - Sau khi chuẩn hóa, lực đẩy có độ lớn bằng lực của một chó và hướng thẳng về phía trước.
 
 > [!NOTE]
-> **Một lựa chọn mô hình.** Chuẩn hóa giữ trọng số $\rho_s = 1{,}0$ của Strömbom với bất kỳ số chó nào và giữ bầy liền, nên kết quả đo cách chó được bố trí chứ không phải chó đẩy mạnh đến đâu. Cừu thật có chạy mạnh hơn khi gặp nhiều chó hay không là câu hỏi cho dữ liệu thực địa.
+> **Một lựa chọn mô hình.** Chuẩn hóa giữ trọng số $\rho_s = 1{,}0$ của Strömbom với bất kỳ số chó nào và giữ bầy liền, nên một đội lớn hơn chỉ thay đổi cừu bị đẩy từ đâu, không bao giờ thay đổi mạnh đến đâu. Cừu thật có chạy mạnh hơn khi gặp nhiều chó hay không là câu hỏi cho dữ liệu thực địa.
 
 ---
 
@@ -130,7 +129,7 @@ Một con cừu ở $(0, 5)$, một chó ở $(-3, 0)$ phía sau bên trái và 
 ![Mô hình lực liên tục Kubo](../../docs/figures/fig5_kubo.png)
 *Hình 2: Mô hình Kubo et al. (2022). Trái: lực lên một con cừu (đẩy, hút, chạy khỏi chó, đồng hướng). Giữa: lực lên một chó (về con cừu xa nhất, ra xa con cừu đó khi gần, ra xa đích, ra xa chó khác). Phải: một khung hình mà lực đẩy giữa các chó làm chúng trải ra.*
 
-- **Vận tốc cừu** $u = K_{s1} a + K_{s2} b + K_{s3} c + K_{s4} d$, mỗi số hạng là trung bình trên các con cừu hoặc chó trong tầm nhìn $20$ m của con cừu:
+- **Vận tốc cừu** $u = K_{s1} a + K_{s2} b + K_{s3} c + K_{s4} d$ với $K_{s1} = 10$, $K_{s2} = 0{,}5$, $K_{s3} = 2$, $K_{s4} = 5000$, mỗi số hạng là trung bình trên các con cừu hoặc chó trong tầm nhìn $20$ m của con cừu:
   1. Đẩy khỏi hàng xóm, $a = \overline{(x_i - x_j)/\lVert x_i - x_j \rVert^2}$ (độ lớn $1/r$).
   2. Đồng hướng với hàng xóm, $b$.
   3. Hút về hàng xóm, $c = -\overline{(x_i - x_j)/\lVert x_i - x_j \rVert}$ (một hướng đơn vị).
@@ -139,9 +138,9 @@ Một con cừu ở $(0, 5)$, một chó ở $(-3, 0)$ phía sau bên trái và 
   Tốc độ cừu bị giới hạn ở $5$ m/s.
 - **Khác với Strömbom:**
   - Một con cừu Kubo tăng tốc khi bị đẩy mạnh hơn, đến $5$ m/s, còn cừu Strömbom luôn đi $1$ m/s. Vì vậy thêm chó Kubo thì xong sớm hơn, kể cả trên bầy tập trung: từ khoảng $115$ s với một chó xuống $29$ s với mười chó.
-  - Lực đẩy của nhiều chó là trung bình, không phải tổng, nên không được chuẩn hóa như trong mô hình Strömbom.
-  - Kubo chỉ chạy trên bố cục tập trung: các bố cục phân tán được định cỡ theo khoảng cách gom của Strömbom, vô nghĩa với cừu chỉ thấy trong vòng $20$ m.
-- **Không có trong bài báo:** bước thời gian ($0{,}05$ s) và hai giới hạn tốc độ (cừu $5$, chó $10$) lấy từ một bản chuyển thể MATLAB công khai của phương pháp.
+  - Lực đẩy của nhiều chó là trung bình trên các chó trong tầm nhìn, nên độ lớn của nó đã không phụ thuộc $D$ và không cần chuẩn hóa.
+  - Kubo chỉ chạy trên bố cục tập trung: một con cừu Kubo chỉ hút trong vòng $20$ m, nên con nào xuất phát xa hơn thế với mọi con khác sẽ không bao giờ nhập bầy, và một xuất phát `wide` ở $L = 2 N^{2/3}$ (43 m ở $N = 100$) sẽ để cừu bị cô lập mãi.
+- **Không có trong bài báo:** bước thời gian ($0{,}05$ s) và hai giới hạn tốc độ (cừu $5$, chó $10$) lấy từ một bản chuyển thể MATLAB công khai của phương pháp (PatrickHup, Force-Based-Sheep-Herding-Algorithm).
 
 ---
 
@@ -149,7 +148,7 @@ Một con cừu ở $(0, 5)$, một chó ở $(-3, 0)$ phía sau bên trái và 
 
 HerdSim chạy mô hình mục tiêu không gắn kết của [Lama & di Bernardo (2024)](https://doi.org/10.1103/PhysRevResearch.6.L032012) với phương pháp `lama` (mô hình cừu `lama_targets`, bộ điều khiển chó `lama_herders`). Nó chạy trong nhiệm vụ riêng, `gather` (xem [thiết kế nhiệm vụ](../experiments/task_design_vi.md#6-nhiệm-vụ-gom-lama-và-di-bernardo-2024)).
 
-**Trạng thái:** đã chạy trên lưới của bài báo (`lama_r50`, `lama_r50_inf`, 40.280 lượt). HerdSim cho các ngưỡng trong Bảng I của bài báo lệch không quá một bước $\sqrt{N}$, và bản đồ của HerdSim có cùng hình dạng với Hình 2 của bài báo; kết quả ở mục 3.14 của báo cáo.
+**Vì sao có ở đây:** với cừu tụ bầy, độ dốc log-log của đội nhỏ nhất theo $N$ trong HerdSim là 0,27 đến 0,61 tùy thời hạn. Bài báo công bố rằng với mục tiêu không gắn kết, đội nhỏ nhất tăng theo $\sqrt{M}$ (độ dốc 0,5), và khi tầm cảm nhận giới hạn thì chỉ trên một ngưỡng mật độ $M_{\mathrm{low}}$. Chạy mô hình của bài báo trong HerdSim đặt cả hai lên cùng một bộ mô phỏng và cùng một bộ thống kê. Các lượt chạy và kết quả ở [thiết kế nhiệm vụ, mục 6](../experiments/task_design_vi.md#6-nhiệm-vụ-gom-lama-và-di-bernardo-2024) và trong báo cáo.
 
 **Ký hiệu.** Bài báo viết $N$ cho số người chăn và $M$ cho số mục tiêu. HerdSim giữ ký hiệu của mình ở mọi nơi: $D$ là số chó (người chăn) và $N$ là số cừu (mục tiêu). Vậy $N^{\ast}(M)$ của bài báo là đội nhỏ nhất của HerdSim trên nhiệm vụ gom. $D$ của bài báo (hệ số khuếch tán) ở đây gọi là `target_diffusion`.
 
@@ -169,7 +168,6 @@ $$
 | Bán kính lực đẩy | $\lambda$ | `repulsion_radius` | 2,5 |
 | Bước thời gian | $\Delta t$ | `dt` | 0,03 |
 
-- **Vì sao có ở đây**: với cừu tụ bầy, độ dốc của đội nhỏ nhất theo $N$ trong HerdSim là 0,27 đến 0,61 tùy thời hạn. Bài báo công bố rằng với mục tiêu không gắn kết, đội nhỏ nhất tăng theo $\sqrt{M}$ (độ dốc 0,5), và khi tầm cảm nhận giới hạn thì chỉ trên một ngưỡng mật độ $M_{\mathrm{low}}$. Chạy mô hình của bài báo trong HerdSim đặt cả hai lên cùng một bộ mô phỏng và cùng một bộ thống kê.
 
 ---
 
@@ -190,7 +188,7 @@ Bộ điều khiển chó
 
 ### Quy tắc đội: `strombom_multi`
 
-Mở rộng quy tắc một chó của Strömbom cho một đội, để mỗi chó có mục tiêu riêng:
+Mở rộng quy tắc một chó của Strömbom cho một đội, để mỗi chó có mục tiêu gom hoặc vị trí trên cung của riêng nó:
 
 ![Phối hợp nhiều chó trong strombom_multi](../../docs/figures/fig3_team_rule.png)
 *Hình 3: Quy tắc đội `strombom_multi` với* $D = 1, 2, 4, 8$ *chó. Hàng trên (gom trên bố cục `wide`,* $N = 200$*):* $D$ *con lạc xa nhất được thuật toán Hungarian phân cho mỗi chó một con (dấu chéo là các điểm gom* $P_c$*), nên các chó gom song song. Hàng dưới (lùa một bầy tập trung,* $N = 200$*): các chó trải trên một cung bán kính* $R$ *sau bầy (điểm lùa* $P_d$ *của bài báo ở giữa), giữ thứ tự góc để đường đi không cắt nhau.*
@@ -206,7 +204,7 @@ $$
 P_c = \mathbf{x}_o + r_a \frac{\mathbf{x}_o - \mathrm{GCM}}{\lVert \mathbf{x}_o - \mathrm{GCM} \rVert}
 $$
 
-- $D$ con lạc xa nhất được thuật toán Hungarian (`scipy.optimize.linear_sum_assignment`) phân cho mỗi chó một con, sao cho tổng quãng đường đi của các chó nhỏ nhất; trên mặt phẳng, một phép phân công như vậy không có đường đi nào cắt nhau. Những chó thừa khi số con lạc ít hơn số chó sẽ lùa phần lõi bầy (những con trong vòng $f(N)$) từ phía sau.
+- $D$ con lạc xa nhất được thuật toán Hungarian (`scipy.optimize.linear_sum_assignment`) phân cho mỗi chó một con, sao cho tổng khoảng cách thẳng từ các chó đến điểm gom của chúng nhỏ nhất; trên mặt phẳng, một phép phân công như vậy không có đường đi nào cắt nhau. Phép phân công được tính lại mỗi bước, nên mục tiêu của một chó có thể đổi khi các con lạc di chuyển. Những chó thừa khi số con lạc ít hơn số chó sẽ lùa phần lõi bầy (những con trong vòng $f(N)$) từ phía sau.
 
 ![Hình học điểm gom Pc và phân công Hungarian](../../docs/figures/fig_hungarian_matching.png)
 *Hình 4: Gom. (A) Một con cừu ngoài vòng* $f(N) = r_a N^{2/3}$ *là con lạc; điểm gom* $P_c$ *của nó nằm sau nó* $r_a = 2$ *m trên tia từ tâm bầy (GCM); hình vẽ đặt dấu chéo xa gấp bốn lần để nhìn thấy được. (B) Thuật toán Hungarian phân chó cho các điểm gom từng cặp với tổng quãng đường nhỏ nhất, nên không có hai đường đi nào cắt nhau (nét đứt là một cách phân công vẽ tay có đường cắt nhau).*
@@ -220,23 +218,24 @@ P_d = \mathrm{GCM} + r_a \sqrt{N} \frac{\mathrm{GCM} - \mathbf{x}_{\mathrm{goal}
 $$
 
 - Khoảng $r_a \sqrt{N}$ tăng giống bán kính của một bầy chặt. Với bầy đã hiệu chỉnh, nó đặt chó sau tâm khoảng 2,2 bán kính bầy ở $N = 100$ và 3,5 ở $N = 400$.
-- **Trên $N \approx 1056$, điểm lùa nằm ngoài tầm.** Cừu chỉ phản ứng với chó trong vòng $r_s = 65$ m. Khi $r_a \sqrt{N} = 2\sqrt{N} > 65$, tức $N > 1056$, chó đứng ở nơi ít hoặc không con cừu nào phản ứng, và không đội nào đến 12 chó lùa được bầy ở $N = 1131$. Như một biến thể HerdSim có ghi rõ, `drive_offset_cap` giới hạn khoảng đó ở $r_s - r_a = 63$ m, và việc lùa bầy tập trung hoạt động trở lại (một chó ở $N = 1131$, hai ở 1600, và 42 trên 42 lượt chạy dở ở 3200); trên `wide` giới hạn này cho $D_{\min} = 9$ ở 1131 và không có đội tin cậy nào đến 12 ở 1600.
-- Với nhiều chó, chúng trải trên một cung bán kính $R$ (khoảng cách đến $P_d$) phủ hết bề rộng bầy, $\pm \arcsin(R_{\mathrm{flock}} / R)$. Chó và các vị trí trên cung được ghép theo thứ tự góc quanh tâm bầy, nên chó cạnh nhau vẫn cạnh nhau và không có hai chó nào cắt qua nhau.
+- **Trên $N \approx 1056$, điểm lùa nằm ngoài tầm.** Cừu chỉ phản ứng với chó trong vòng $r_s = 65$ m. Khi $r_a \sqrt{N} = 2\sqrt{N} > 65$, tức $N > 1056$, chó ở $P_d$ chỉ với tới phần đuôi của bầy (phần đầu cách hơn 65 m), và không đội nào đến 12 chó lùa được bầy ở $N = 1131$. Như một biến thể HerdSim có ghi rõ, `drive_offset_cap` giới hạn khoảng đó ở $r_s - r_a = 63$ m, và việc lùa bầy tập trung hoạt động trở lại (một chó ở $N = 1131$, hai ở 1600, và 42 trên 42 lượt chạy dở ở 3200); trên `wide` giới hạn này cho $D_{\min} = 9$ ở 1131 và không có đội tin cậy nào đến 12 ở 1600.
+- Với nhiều chó, chúng trải trên một cung bán kính $R$ (khoảng cách đến $P_d$) phủ hết bề rộng bầy, $\pm \arcsin(R_{\mathrm{flock}} / R)$, với $R_{\mathrm{flock}}$ là bán kính hiện tại của bầy ($\sqrt{2}$ lần độ trải RMS của nó). Chó và các vị trí trên cung được ghép theo thứ tự góc quanh tâm bầy, nên chó cạnh nhau vẫn cạnh nhau và không có hai chó nào cắt qua nhau.
 
 ![Hình học điểm lùa Pd và vòng cung lùa](../../docs/figures/fig_driving_arc.png)
 *Hình 5: Lùa. (A) Điểm lùa* $P_d$ *nằm sau tâm bầy* $r_a\sqrt{N} = 20$ *m ở* $N = 100$*, phía xa đích* $\mathbf{x}_{\mathrm{goal}}$*. (B) Với nhiều chó, vòng cung vươn ra hai bên bầy và giữ hai bên không bứt ra.*
 
 #### 4. Tốc độ và quy tắc dừng
 - **Tốc độ**: $v_{\mathrm{dog}} = 1{,}5$ m/s, giá trị của Strömbom ($1{,}5$ lần tốc độ cừu). Dữ liệu thực địa của một chó và một bầy (Jadhav et al. 2024) cho tỷ lệ khoảng $1{,}15$, được giao thức độ nhạy `dmin_s_dogspeed` thử.
+- **Bước đi**: mỗi chó di chuyển theo bước đi của Strömbom về phía mục tiêu của nó, với nhiễu góc của bài báo, như các đối chứng bên dưới.
 - **Quy tắc dừng**: một chó gần hơn $3 r_a = 6$ m với bất kỳ con cừu nào thì đứng yên bước đó (quy tắc của Strömbom).
-- **Con cừu cuối cùng dưới quy tắc nghiêm ngặt**: khi mọi con cừu phải vào đích, các đội lớn thường thất bại sau khi 99% bầy đã vào (97% số thất bại nghiêm ngặt với 6 chó trở lên ở lượt chạy cơ sở của phần độ nhạy). Trong một lượt mẫu, các chó đuổi theo con lạc cuối cùng đứng vào giữa bầy và đích, và lùa bầy ra ngoài trở lại. Với chó 1,15 m/s suốt lượt chạy, $D_{\min}$ nghiêm ngặt trên `outlier_rich` $N = 400$ giảm từ không có trên lưới xuống 6.
+- **Con cừu cuối cùng dưới quy tắc nghiêm ngặt**: khi mọi con cừu phải vào đích, các đội lớn thường thất bại sau khi 99% bầy đã vào, vì các chó đuổi theo con lạc cuối cùng lùa bầy ra ngoài trở lại; chó chậm hơn (1,15 m/s) tránh được điều đó. Số liệu ở mục 3.4 của báo cáo.
 
 ---
 
 ### Đối chứng không phối hợp: `fat`
 
 **Nhắm con xa nhất (FAT)** kiểm tra xem có cần phối hợp hay không:
-- **Quy tắc**: mọi chó đi tới điểm cách $r_a$ phía sau con cừu xa đích nhất, với bước đi, nhiễu và quy tắc dừng của Strömbom.
+- **Quy tắc**: mọi chó đi tới điểm cách $r_a$ phía sau con cừu xa đích nhất, ở phía xa đích của nó, với bước đi, nhiễu và quy tắc dừng của Strömbom. Mục tiêu là lựa chọn tham lam hướng về đích (số hạng thứ nhất của chó Kubo), trong khi quy tắc của Strömbom chọn con cừu xa tâm bầy nhất.
 - **Thiếu gì**: không phân công, không vòng cung lùa, không giao tiếp, và không có công tắc gom/lùa.
 
 ![Chó FAT dồn cục](../../docs/figures/fig4_fat.png)
@@ -247,17 +246,16 @@ $$
 ### Chó chăn độc lập theo bài báo: `independent`
 
 Mỗi chó tự chạy quy tắc một chó của Strömbom:
-- Nó quyết định gom hay lùa dựa trên cả bầy.
-- Nó đi tới mục tiêu với bước đi, nhiễu và quy tắc dừng của Strömbom.
-- Nó có công tắc gom/lùa nhưng **không có tầng đội**.
-- *Kết quả*: tin cậy đến $N = 200$ con; thất bại ở $N = 400$, nơi quy tắc đội cần 3 chó trên `wide` và `outlier_rich` và không có đội tin cậy nào trên `split`.
+- Nó quyết định gom hay lùa dựa trên cả bầy, nhắm con cừu xa tâm bầy nhất hoặc điểm lùa, và đi tới đó với bước đi, nhiễu và quy tắc dừng của Strömbom.
+- **Không có tầng đội**, và vì mọi chó thấy cùng một bầy, tất cả chọn giống nhau: bộ điều khiển là một chó với $D$ bản sao. Khác với FAT, nó giữ mục tiêu của bài báo và công tắc gom/lùa, và đó là điều phân biệt hai đối chứng.
+- *Kết quả* (bố cục phân tán, 6 lần thời gian lùa, quy tắc 99%): có đội tin cậy đến $N = 200$ (2–3 chó trên `wide`, 3 trên `outlier_rich`) và không có đội nào đến 24 ở $N = 400$, nơi quy tắc đội cần 3 chó trên `wide` và `outlier_rich` và không có đội tin cậy nào trên `split`.
 
 ![So sánh strombom_multi và independent](../../docs/figures/fig_independent.png)
 *Hình 7: `strombom_multi` so với `independent` (*$N = 100, D = 4$*). Trái (`strombom_multi`): 4 chó được phân cho 4 con lạc khác nhau và gom song song. Giữa (`independent`, gom): mọi chó thấy cùng một bầy và chọn giống nhau, nên cả 4 đuổi cùng một con lạc trong khi các con khác chờ. Phải (`independent`, lùa): mọi chó đi tới cùng điểm lùa* $P_d$ *thay vì trải trên một cung (chấm xanh lá), nên chúng chen nhau và không che được hai bên bầy.*
 
 ---
 
-### Chó theo lực liên tục: `kubo`
+### Chó theo lực liên tục: `kubo_forces` (phương pháp `kubo`)
 
 Chó di chuyển theo lực của Kubo thay vì chuyển giữa các chế độ (Hình 2). Vận tốc của chó là $K_{f1} A + K_{f2} B + K_{f3} C + K_{f4} D$, rồi giới hạn ở $10$ m/s:
 1. **Về mục tiêu**: một vectơ đơn vị về con cừu xa đích nhất ($K_{f1} = 10$).

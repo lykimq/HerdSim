@@ -1,96 +1,114 @@
-# Command-Line Interface (CLI) Reference
+# Command-Line Reference
 
-All operations in HerdSim from the command line are executed via scripts in [`cli/`](../../cli/). Each script is run from the repository root using `uv run`, and `--help` prints full usage details.
-
-For the comprehensive step-by-step CLI walkthrough, see [`cli/README.md`](../../cli/README.md).
+Every tool lives in [`cli/`](../../cli/) and is run from the repository root with `uv run`; `--help` prints the same information as the tables below. This page lists every verb and flag. For the order in which to use them, read [`cli/README.md`](../../cli/README.md).
 
 ---
 
-## 1. Core Workflow Commands
-
-### Planning and Running Campaigns (`cli/campaign.py`)
-
-A protocol defines the experimental grid. Execute single protocols using one of four verbs:
+## `cli/campaign.py`: one protocol
 
 ```bash
-# 1. Preview the execution plan without running any simulations
-uv run cli/campaign.py plan --protocol dmin_f99_m6
-
-# 2. Calibrate steady-state flock radius R_f(N) (drive task only; the gather task sizes itself)
-uv run cli/campaign.py calibrate --protocol dmin_f99_m6 --workers 20
-
-# 3. Execute the campaign with 20 parallel workers
-uv run cli/campaign.py run --protocol dmin_f99_m6 --workers 20
-
-# 4. Check real-time progress and diagnostics
-uv run cli/campaign.py status --protocol dmin_f99_m6
+uv run cli/campaign.py <verb> --protocol <id or path> [--output <folder>] [--workers <n>]
 ```
 
-The gather task runs the same way; its two protocols are also the last two of the study queue:
+| Verb | Does | Writes |
+| :--- | :--- | :--- |
+| `plan` | Prints the grid, the number of cells, the cost of the first round, and whether the results folder is new, resumes or is refused. | nothing |
+| `calibrate` | Measures the settled flock radius $R_f(N)$ per method and flock size and prints it; refuses a size that does not settle. Says there is nothing to calibrate for the gather task. | nothing |
+| `run` | Calibrates (or reuses the folder's saved radii), then runs rounds of trials until every cell is decided, every open cell is at the seed cap, or the time budget is spent. | `results/<protocol_id>/` |
+| `status` | Prints how far a run has got, whether it is running now, and why it stopped. | nothing |
 
-```bash
-uv run cli/campaign.py plan --protocol lama_r50
-uv run cli/campaign.py run  --protocol lama_r50 --workers 20
-```
-
-### Running Batch Queues (`cli/run_queue.py`)
-
-Executes multiple protocols sequentially, automatically skipping finished folders and resuming interrupted runs:
-
-```bash
-# List all protocols and their folder statuses
-uv run cli/run_queue.py --list
-
-# Execute all pending protocols across 20 workers
-uv run cli/run_queue.py --workers 20
-
-# Execute only a specific protocol via the queue runner
-uv run cli/run_queue.py --only dmin_f99_hold --workers 20
-```
+| Flag | Default | Meaning |
+| :--- | :--- | :--- |
+| `--protocol` | required | A protocol id under `protocols/configs/protocols/`, or a path to a YAML file. |
+| `--output` | the protocol's `output` | The results folder. |
+| `--workers` | the number of CPUs | Worker processes, each running one trial at a time. |
 
 ---
 
-## 2. Analysis and Reporting
-
-### Generating Tables (`cli/dmin_tables.py`)
-
-Turns the result folders into Markdown tables:
+## `cli/run_queue.py`: the study
 
 ```bash
-# Record all protocol summaries
-uv run cli/dmin_tables.py record
-
-# Generate D_min scaling tables across multiple deadline protocols
-uv run cli/dmin_tables.py dmin dmin_m12 dmin_m6 dmin_m3
-
-# Inspect completion times and effort beyond saturation
-uv run cli/dmin_tables.py effort dmin_f99_m6
-
-# The Lama gather runs: the paper's statistic beside D_min, and the growth exponent
-uv run cli/dmin_tables.py herdability lama_r50 lama_r50_inf --above 225
+uv run cli/run_queue.py [--list] [--workers <n>] [--only <id> ...]
 ```
 
-### Deadline Re-Evaluation (`cli/dmin_report.py`)
+Runs the 39 protocols of the study in the order they ran, each as `campaign.py run` would. A folder where every cell is decided is skipped, one that stopped for any other reason is resumed, and a protocol that raises is logged while the queue moves on. Each protocol appends one line to `results/queue_log.jsonl`.
 
-Inspects finished runs at tighter or alternative deadlines:
-
-```bash
-uv run cli/dmin_report.py --protocol dmin_pilot --folder results/dmin_pilot --multiples 3 6 12
-```
+| Flag | Default | Meaning |
+| :--- | :--- | :--- |
+| `--list` | off | Print the queue and the state of each folder, then exit. |
+| `--workers` | 20 | Worker processes per protocol. |
+| `--only` | the whole queue | Protocol ids to run, in the order given; ids outside the queue are refused. |
 
 ---
 
-## 3. Diagnostics (`cli/diagnostics/`)
-
-The first two run stored trials again; an unchanged replay must reproduce its stored outcome, or the tool stops. Both write their rows to `--out` and print a summary.
+## `cli/dmin_tables.py`: tables from finished runs
 
 ```bash
-# Replay cells of a finished run to measure how long each sheep spends fleeing a dog
-uv run cli/diagnostics/pressure_replay.py dmin_f99_m6 --out results/diagnostics/pressure_dmin_f99_m6.csv
-
-# Replay split-layout trials with a shorter stop distance, outliers spread apart, or both
-uv run cli/diagnostics/split_diagnostic.py --out results/diagnostics/split_diagnostic.csv
-
-# Start layouts only: how far a sheep's local estimate of the flock centre is off
-uv run cli/diagnostics/gradient_validation.py --seeds 10
+uv run cli/dmin_tables.py <verb> <folder> [<folder> ...] [flags]
 ```
+
+A folder is a protocol id under `results/` or a path. Every verb prints Markdown. Nothing here runs a simulation. An entry such as `2-3` is a range (3 is reliable, 2 still undecided), `[5]` a lower bound with no reliable team yet, and `none on grid` a curve where every tested team is unreliable.
+
+| Verb | Flags | Prints |
+| :--- | :--- | :--- |
+| `record` | none, takes no folder | Every run in `results/queue_log.jsonl`: when it finished, trials, cells, open cells, errors, hours. |
+| `dmin` | | $D_{\min}$ by layout and flock size, one table per folder. |
+| `growth` | | The range of log-log slopes of $D_{\min}$ against $N$ that the brackets allow, and whether layout or $N$ moves it more. |
+| `fits` | | A power law against a curve that levels off, fitted to $D_{\min}(N)$ per layout, and the range each shape allows at larger $N$. |
+| `dsat` | | $D_{\mathrm{sat}}$ by layout and flock size, and its growth. |
+| `effort` | | Finish time, dog time and dog path beyond $D_{\mathrm{sat}}$, relative to the $D_{\mathrm{sat}}$ cell. |
+| `zones` | | Cells where more dogs did worse (crowded, dip, collapse, recovered). |
+| `dips` | | Cells above $D_{\min}$ that are not reliable. |
+| `arrival` | `--pct {90,95,99}` | $D_{\min}$ if success had meant that share of the flock in the goal, beside the run's own rule. |
+| `compare` | `--base <folder>` | Each variant folder beside the base, curve by curve. |
+| `methods` | `--pct {90,95,99}` | $D_{\min}$, $D_{\mathrm{sat}}$, $D_{\mathrm{crowd}}$ and $D_{\max}$ per curve across folders; `--pct` relabels a strict run so every row uses one rule. |
+| `herdability` | `--above <N>` | The gather task read the paper's way (mean share in the goal at least 0.99, and at 0.90 and 0.95) beside $D_{\min}$, with the growth exponent of both above `--above` targets. |
+| `extent` | `--layout <name>` | The flock's measured size against the radius its task was sized from, per cell. |
+
+---
+
+## `cli/dmin_report.py`: a finished run at a tighter deadline
+
+```bash
+uv run cli/dmin_report.py --protocol <id> --folder <results folder> --multiples <m> [<m> ...]
+```
+
+The dogs do not know the deadline, so a trial runs the same under any of them, and one that finished inside a tighter deadline would have succeeded under it too. The tool relabels each stored trial by whether it finished inside each deadline (a multiple of the drive time) and prints $D_{\min}$, $D_{\min,\mathrm{low}}$ and $D_{\max}$ per curve. The deadlines must not be looser than the one the run used.
+
+---
+
+## `cli/diagnostics/`: replays and checks
+
+The two replay tools run stored trials again. An unchanged replay must reproduce its stored outcome and length, or the tool stops. Both write their rows to `--out` as CSV and print a per-cell summary.
+
+### `pressure_replay.py`
+
+```bash
+uv run cli/diagnostics/pressure_replay.py <folder> --out <csv> [--layouts ...] [--n ...] [--seeds <k>] [--workers <n>]
+```
+
+Replays the cells at $D = 1$, $D_{\min}$, $D_{\mathrm{sat}}$ and the smallest tested $D$ at or above $2 D_{\mathrm{sat}}$, taken from the folder's current frontier, and measures how long each sheep spends fleeing a dog and how much of the flock flees at once.
+
+| Flag | Default |
+| :--- | :--- |
+| `--layouts` | `wide outlier_rich` |
+| `--n` | `100 400` |
+| `--seeds` | 12 |
+| `--workers` | 20 |
+| `--out` | required |
+
+### `split_diagnostic.py`
+
+```bash
+uv run cli/diagnostics/split_diagnostic.py --out <csv> [--seeds <k>] [--workers <n>]
+```
+
+Replays `split` at $N = 100$ and 200, $D = 2, 4, 8, 16$, at 6 and 3 drive times, in four versions of the team rule: as run, with the dog stop distance cut from $3 r_a$ to $r_a$, with collecting dogs taking outliers at least $f(N)$ apart, and both. Defaults: 12 seeds, 8 workers.
+
+### `gradient_validation.py`
+
+```bash
+uv run cli/diagnostics/gradient_validation.py [--seeds <k>]
+```
+
+Replays nothing. Draws start flocks and prints, per layout, flock size and neighbour count, the angle between the true direction to the flock centre and the direction a sheep would get from its nearest neighbours. Default: 10 flocks per layout and size.
