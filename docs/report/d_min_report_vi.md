@@ -466,7 +466,7 @@ Bảng 9 tóm tắt độ dốc mở rộng qua các mức độ gắn kết (`w
 | **Mốc chuẩn sinh học ($c = 1{,}05$)** | 1 | 1 | 1–2 | 2 | **0,20 đến 0,30** |
 | **Gắn kết rất mạnh ($c = 1{,}3, 1{,}6, 2{,}0$)** | 1 | 1 | 1 | 2 | **0,20** |
 
-*Số liệu:* Hàng mốc chuẩn tra cứu tại [results_tables.md: dmin_f99_m12](results_tables.md#dmin_f99_m12) và [results_tables.md: Growth with N, 99 percent](results_tables.md#growth-with-n-99-percent); các biến thể độ gắn kết tại [results_tables.md: D_min, dmin_f99_c1.3](results_tables.md#d_min-dmin_f99_c13), [results_tables.md: dmin_f99_c1.6](results_tables.md#d_min-dmin_f99_c16), [results_tables.md: dmin_f99_c2.0](results_tables.md#d_min-dmin_f99_c20) và [results_tables.md: D_min, dmin_f99_k05](results_tables.md#d_min-dmin_f99_k05).
+*Số liệu:* Hàng mốc chuẩn tra cứu tại [results_tables.md: dmin_f99_m12](results_tables.md#dmin_f99_m12) và [results_tables.md: Growth with N, 99 percent](results_tables.md#growth-with-n-99-percent); các biến thể độ gắn kết tại [results_tables.md: D_min, dmin_f99_c1.3](results_tables.md#d_min-dmin_f99_c13), [results_tables.md: dmin_f99_c1.6](results_tables.md#d_min-dmin_f99_c16), [results_tables.md: dmin_f99_c2.0](results_tables.md#d_min-dmin_f99_c20) và [results_tables.md: D_min, dmin_f99_k05](results_tables.md#d_min-dmin_f99_k05); cột độ dốc tại [results_tables.md: dmin_f99_c1.3](results_tables.md#dmin_f99_c13), [results_tables.md: dmin_f99_c1.6](results_tables.md#dmin_f99_c16), [results_tables.md: dmin_f99_c2.0](results_tables.md#dmin_f99_c20) và [results_tables.md: dmin_f99_k05](results_tables.md#dmin_f99_k05) (growth).
 
 ---
 

@@ -35,21 +35,28 @@ Outcome = tuple[bool, int]  # success, total ticks
 
 
 class ReplayMismatch(RuntimeError):
-    """A replayed trial did not reproduce the stored outcome."""
+    """Raised when an unchanged replayed trial deviates from stored campaign results.
+
+    Verifying bit-identical reproduction (exact match on success and finish tick) is
+    a prerequisite for causal diagnostics. If re-running an identical configuration
+    and seed produces even a single tick difference, it signals silent code drift,
+    unseeded randomness, or environment divergence. Diagnostics tested on drifting
+    replays would produce misleading scientific conclusions about the original data.
+    """
 
 
 @dataclass(frozen=True)
 class ReplayJob:
     config: dict[str, Any]
     seed: int
-    stored: Outcome | None  # checked when given; None for a replay with a changed setting
+    stored: Outcome | None  # checked when given; None for a replay with an experimental intervention
     label: dict[str, Any]  # carried into the result row
 
 
 def replay_trial(
     job: ReplayJob, on_tick: Callable[[SimulationState], None] | None = None
 ) -> RunResult:
-    """Run the trial of ``job`` again; raises ReplayMismatch if it is not the stored trial."""
+    """Re-execute the trial of ``job``, verifying bit-identical agreement against stored results."""
     result = run_trial(job.config, job.seed, on_tick=on_tick)
     if job.stored is not None and (result.success, result.total_ticks) != job.stored:
         got = f"success={result.success} ticks={result.total_ticks}"

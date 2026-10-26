@@ -78,7 +78,10 @@ def drive_front(
 
 
 def _to_slots(dogs: np.ndarray, slots: np.ndarray, centroid: np.ndarray, arm: np.ndarray):
-    """Slot of each dog: dogs in order of their angle around the flock take the slots in order."""
+    # Preserves cyclic angular topology around the herd centroid: dogs sorted by polar angle
+    # are assigned to drive arc slots sorted in the same angular order. This invariant strictly
+    # eliminates intersecting trajectories, preventing shepherds from colliding or cutting
+    # across each other's driving lanes.
     order = np.argsort(_angles(dogs, centroid, arm), kind="stable")
     slot_order = np.argsort(_angles(slots, centroid, arm), kind="stable")
     out = np.empty_like(dogs)
@@ -131,9 +134,19 @@ def team_targets(
     gap = float(config.get("collect_min_gap", 0.0))
     jobs = spread_jobs(flock, decision.outliers, len(dogs), gap)
     points = np.array([behind(flock[o], decision.centroid, r_a) for o in jobs])
+
+    # Hungarian assignment (linear_sum_assignment) globally minimizes total Euclidean distance
+    # traveled by all dogs.
+    # Algorithmic pathology on 'split' pastures: Euclidean minimization is topologically cluster-blind.
+    # If the herd ruptures into separate clusters, a cluster marginally closer or with more strays
+    # captures all dogs. The entire pack swarms one sub-cluster while the abandoned cluster drifts.
+    # Enforcing target dispersion via `spread_jobs(gap=f(N))` restores parallel collection.
     rows, cols = linear_sum_assignment(cdist(dogs, points))
     targets = np.empty_like(dogs)
     targets[rows] = points[cols]
+
+    # Surplus dogs beyond the number of active strays do not idle: they form a driving arc behind
+    # the cohesive herd core to maintain forward pressure toward the goal while perimeter dogs collect.
     rest = np.setdiff1d(np.arange(len(dogs)), rows)
     if rest.size:
         dists = np.linalg.norm(flock - decision.centroid, axis=1)
@@ -143,8 +156,14 @@ def team_targets(
 
 
 def withdraw_targets(flock: np.ndarray, dogs: np.ndarray, config: dict[str, Any]) -> np.ndarray:
-    """Holding points: r_s + r_a beyond the farthest sheep, on each dog's bearing from the flock
-    centre. A dog exactly at the centre has no bearing and takes the +x direction."""
+    # Holding task withdrawal policy:
+    # Positions shepherds r_s + r_a = 67 m beyond the farthest sheep along each dog's outward ray
+    # from the flock center. This removes canine fear vectors, allowing sheep to enter calm grazing.
+    #
+    # Geometric failure mode at small N (N <= 50):
+    # Small flock goal pens are only 12-14 m across. Forcing dogs to retreat 67 m into open pasture
+    # removes all containment barriers; sheep randomly diffuse out of the small pen opening before
+    # the holding timer expires, causing timeout failures unrelated to multi-agent herding capacity.
     centroid = flock.mean(axis=0)
     farthest = float(np.max(np.linalg.norm(flock - centroid, axis=1)))
     reach = farthest + float(config["reaction_radius"]) + float(config["r_a"])

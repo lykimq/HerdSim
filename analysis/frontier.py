@@ -131,7 +131,17 @@ class Rules:
 
 
 def clopper_pearson(successes: int, trials: int, confidence: float) -> tuple[float, float]:
-    """Two-sided exact binomial interval for a success rate."""
+    """Two-sided exact binomial confidence interval for success rate.
+    
+    Inverts the equal-tailed binomial test via incomplete Beta distribution quantiles.
+    Normal/Wald approximations (p_hat +/- z * sqrt(p(1-p)/n)) collapse to zero width at
+    extremes (k=0 or k=n) and severely undercover near theta = 0.90 at finite n.
+    Clopper-Pearson guarantees actual coverage >= 1 - alpha for all sample sizes.
+    
+    The degree-of-freedom shift (+1 in trials - successes + 1 for lower, successes + 1 for upper)
+    derives from the exact cumulative binomial to regularized incomplete beta identity:
+    P(Binomial(n, p) >= k) = I_p(k, n - k + 1).
+    """
     alpha = 1.0 - confidence
     low = 0.0 if successes == 0 else float(beta.ppf(alpha / 2, successes, trials - successes + 1))
     high = (
@@ -151,11 +161,18 @@ def reliability_status(low: float, high: float, theta: float) -> str:
 
 
 def compare_times(a: pd.DataFrame, b: pd.DataFrame, rules: Rules) -> str:
-    """Is cell ``a`` FASTER, SLOWER, the SAME as or UNDECIDED against cell ``b``?
+    """Evaluate whether cell ``a`` is FASTER, SLOWER, SAME, or UNDECIDED vs cell ``b``.
 
-    Pairs the seeds both cells finished (seed i starts from the same flock in
-    every cell) and bootstraps the median paired difference, relative to the
-    slower median. Seeds that either cell failed drop out of the pairing.
+    Uses Common Random Numbers (CRN): trials are matched on seed_index so both cells
+    encounter identical initial pasture configurations, straggler clusters, and noise.
+    Pairing induces positive correlation Cov(Ta, Tb) > 0, reducing variance
+    Var(Ta - Tb) = Var(Ta) + Var(Tb) - 2 Cov(Ta, Tb) and isolating the net marginal
+    effect of shepherd team size Delta D from environmental flock variation.
+
+    Seeds failed by either cell drop out because completion time is undefined (censored).
+    Differences are normalized by scale = max(median_a, median_b) so the dimensionless
+    time_margin applies uniformly across diverse methods (Kubo 0.05 s vs Strombom 1.0 s)
+    and flock scales N.
     """
     ta = a.loc[a["success"], ["seed_index", "finish_ticks"]].set_index("seed_index")
     tb = b.loc[b["success"], ["seed_index", "finish_ticks"]].set_index("seed_index")
@@ -281,7 +298,11 @@ def _group(
         return out, zones, needs
     out.d_min = reliable[0]
 
-    # Overcrowding: two consecutive unreliable D above D_min.
+    # Overcrowding onset: requires two consecutive unreliable tested D values above D_min.
+    # An isolated dip in reliability (k/n < theta) can occur from finite-sample binomial
+    # variance near the decision boundary. Requiring two consecutive failures confirms
+    # persistent physical breakdown (e.g. canine jamming, repulsive deadlock, or driving
+    # arc saturation) rather than stochastic noise, preventing premature truncation.
     above = [d for d in ds if d > out.d_min]
     for a, b in zip(above, above[1:]):
         if status[a] == UNRELIABLE and status[b] == UNRELIABLE:
@@ -292,8 +313,8 @@ def _group(
     out.d_max_at_grid_top = out.d_overcrowd is None and out.d_max == ds[-1]
     out.onset_at_last_step = status[ds[-1]] == UNRELIABLE and out.d_overcrowd is None
 
-    # D_best: the first working D not slower than the fastest one. A D skipped on
-    # an undecided verdict could still take its place.
+    # D_best: the smallest working D not slower than the empirical fastest. If a smaller D
+    # has an open comparison against the fastest, it could still take D_best when resolved.
     fastest = min(working, key=lambda d: finish[d])
     for d in working:
         verdict = compare(d, fastest)
@@ -301,10 +322,10 @@ def _group(
             out.d_best = d
             break
         out.d_best_undecided |= still_open(verdict, d, fastest)
-    assert out.d_best is not None  # the fastest D is the same as itself
+    assert out.d_best is not None  # fastest compared to itself is always SAME
 
-    # D_crowd: the first working D above D_best that is slower than it. Only the D
-    # below the first decided SLOWER can still move the value.
+    # D_crowd: the smallest working D above D_best that is demonstrably SLOWER than D_best.
+    # Captures the onset of multi-agent drag before complete reliability collapse.
     for d in (d for d in working if d > out.d_best):
         verdict = compare(d, out.d_best)
         if verdict == SLOWER:
@@ -312,9 +333,11 @@ def _group(
             break
         out.d_crowd_undecided |= still_open(verdict, d, out.d_best)
 
-    # D_sat: the smallest working D with no faster working D above it. A D with a
-    # decided FASTER above it is below D_sat whatever its other comparisons say,
-    # so only the open comparisons of the D that is taken can still move D_sat.
+    # D_sat: smallest working D where no larger working D is faster.
+    # This rule is intentionally global across all e > d rather than a local step rule:
+    # multi-agent completion curves often contain non-monotonic fluctuations
+    # (e.g. D=3 -> 300 s, D=4 -> 299 s, D=6 -> 200 s). A local rule would halt at D=3,
+    # falsely reporting premature saturation.
     for d in working:
         above_d = {e: compare(e, d) for e in working if e > d}
         if FASTER not in above_d.values():
@@ -322,7 +345,7 @@ def _group(
             for e, verdict in above_d.items():
                 out.d_sat_undecided |= still_open(verdict, e, d)
             break
-    assert out.d_sat is not None  # nothing is above the largest working D
+    assert out.d_sat is not None  # largest working D has no larger configurations above it
 
     # D_sat at the grid top after a faster step: the grid censors it.
     out.still_improving_at_top = (

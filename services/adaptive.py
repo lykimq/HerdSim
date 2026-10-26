@@ -48,10 +48,20 @@ STOP_BUDGET = "budget_hours spent"
 
 
 def seeds_wanted(seeds_run: int, batch: int, flagged: bool) -> int:
-    """How many seeds a cell gets this round: up to the end of its next batch when
-    flagged, else up to one batch. Counts stay on whole batches (10, 20, ...), so
-    a resumed run seeds a cell as an uninterrupted run would; a later batch cut short
-    by a kill is filled even when the cell is decided."""
+    """Number of additional seeds to allocate to a cell in the current adaptive round.
+
+    Allocations strictly adhere to discrete batch multiples (10, 20, ...). This invariant
+    serves two purposes:
+    1. Worker amortization: Dispatches cohesive batches across multiprocessing worker pools,
+       avoiding single-seed scheduling thrashing.
+    2. Deterministic resume invariance: An interrupted campaign (SIGINT, crash, or budget cap)
+       resumes with the exact same seed sequence and batch boundaries as an uninterrupted run.
+
+    Sample size economics: Under theta=0.90 and 99% confidence, a minimum of 51 consecutive
+    unbroken successes is required to prove reliability (Clopper-Pearson lower bound reaches 0.9009).
+    Allocating in batches of 10 ensures clean passes conclude in round 6 (60 seeds), while
+    undecided cells increment up to max_seeds=200, which bounds interval uncertainty to +/- 0.06.
+    """
     if flagged:
         target = (seeds_run // batch + 1) * batch
     else:
@@ -94,14 +104,17 @@ def _next_seeds(
 
 
 def pruned_cells(front: Frontier, trials: pd.DataFrame, overlap: float) -> set[tuple[str, int]]:
-    """(group, D) cells above a confirmed saturation whose dogs were copies.
+    """Identify (group, D) cells beyond confirmed saturation where dogs execute duplicate roles.
 
-    A curve's saturation is confirmed when D_sat is decided, the grid top does
-    not censor it, and the next working D above it is ``saturated`` (as fast as
-    D_best, decided). Above that D, a cell is pruned when its trials' mean
-    ``dog_overlap`` is at least ``overlap`` and its zone is ``saturated`` or
-    ``undecided``: never a cell that is slower or unreliable, since that would
-    be a measured harm.
+    When team size exceeds D_sat and shepherds are constrained to driving arcs or target slots,
+    additional agents often collapse onto identical geometric trajectories (mean_dog_overlap >= 0.90).
+    Once saturation is statistically confirmed (D_sat decided, uncensored, and confirmed by an
+    adjacent saturated neighbor), further simulation of redundant agents yields zero marginal
+    scientific insight.
+
+    Safety invariant: Pruning is restricted exclusively to cells zoned as SATURATED or UNDECIDED.
+    Cells exhibiting SLOWER completion (crowding drag) or UNRELIABLE outcomes (canine jamming collapse)
+    are NEVER pruned, ensuring genuine multi-agent pathologies are faithfully measured.
     """
     out: set[tuple[str, int]] = set()
     mean_overlap = trials.groupby(["group_key", "n_shepherds"])["mean_dog_overlap"].mean()

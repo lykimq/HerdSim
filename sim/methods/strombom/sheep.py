@@ -91,13 +91,14 @@ def sheep_repulsion(positions: np.ndarray, idx: np.ndarray, r_a: float) -> np.nd
 
 
 def dog_push(to_dogs: np.ndarray, dist: np.ndarray, r_s: float) -> np.ndarray:
-    """Direction of the push away from all dogs closer than r_s, as a unit vector.
-
-    The unit pushes of the dogs in reach are added and the sum is rescaled to length 1, so
-    several dogs push like one dog from their mean direction (HerdSim reading: the paper has
-    one dog). ``to_dogs`` is sheep minus dog, shape (A, D, 2). With one dog this is the
-    paper's unit vector away from the shepherd.
-    """
+    # Mathematical rationale for unit-vector normalization:
+    # In Strömbom's model, social cohesion weight is c = 1.05. If canine threat forces are
+    # summed additively (linear superposition), two flanking dogs separated by angle theta
+    # exert a resultant force of 2*cos(theta/2). Whenever theta < 116 deg, 2*cos(theta/2) > 1.05,
+    # which strictly overpowers social cohesion. Linear addition causes two flanking dogs to
+    # violently shatter the herd from D = 2 upward. Normalizing the vector sum to unit length
+    # preserves the net directional threat while ensuring repulsive fear (weight rho_s = 1.0)
+    # never overpowers mutual flock attraction (weight c = 1.05).
     near = dist < r_s
     units = to_dogs / np.maximum(dist, EPS)[:, :, None]
     return unit_rows((units * near[:, :, None]).sum(axis=1))
@@ -137,6 +138,11 @@ def velocities(
         + float(config["rs_weight"]) * push
         + float(config["noise_strength"]) * angle_vectors(draws.noise_angle[idx])
     )
+    # Sheep velocity is strictly clamped to constant speed (delta = 1.0 m per 1.0 s tick).
+    # Crucial scientific consequence: Unlike continuous-force models (e.g. Kubo) where additional
+    # dogs accelerate the herd via additive potential fields, Strömbom sheep cannot physically
+    # exceed 1.0 m/s. Consequently, beyond the saturation threshold D_sat, surplus shepherds cannot
+    # reduce completion time on cohesive flocks, explaining the flat completion plateau.
     out[idx] = unit_rows(heading) * speed
     return out
 

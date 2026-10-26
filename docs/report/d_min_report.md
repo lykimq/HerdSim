@@ -482,7 +482,7 @@ Table 9 summarizes scaling slopes across cohesion regimes (`wide`, 99% arrival, 
 | **Biological Baseline ($c = 1.05$)** | 1 | 1 | 1–2 | 2 | **0.20 to 0.30** |
 | **Elevated Cohesion ($c = 1.3, 1.6, 2.0$)** | 1 | 1 | 1 | 2 | **0.20** |
 
-*Data source:* Baseline row from [results_tables.md: dmin_f99_m12](results_tables.md#dmin_f99_m12) and [results_tables.md: Growth with N, 99 percent](results_tables.md#growth-with-n-99-percent); cohesion variants from [results_tables.md: D_min, dmin_f99_c1.3](results_tables.md#d_min-dmin_f99_c13), [results_tables.md: dmin_f99_c1.6](results_tables.md#d_min-dmin_f99_c16), [results_tables.md: dmin_f99_c2.0](results_tables.md#d_min-dmin_f99_c20) and [results_tables.md: D_min, dmin_f99_k05](results_tables.md#d_min-dmin_f99_k05).
+*Data source:* Baseline row from [results_tables.md: dmin_f99_m12](results_tables.md#dmin_f99_m12) and [results_tables.md: Growth with N, 99 percent](results_tables.md#growth-with-n-99-percent); cohesion variants from [results_tables.md: D_min, dmin_f99_c1.3](results_tables.md#d_min-dmin_f99_c13), [results_tables.md: dmin_f99_c1.6](results_tables.md#d_min-dmin_f99_c16), [results_tables.md: dmin_f99_c2.0](results_tables.md#d_min-dmin_f99_c20) and [results_tables.md: D_min, dmin_f99_k05](results_tables.md#d_min-dmin_f99_k05); the slope column from [results_tables.md: dmin_f99_c1.3](results_tables.md#dmin_f99_c13), [results_tables.md: dmin_f99_c1.6](results_tables.md#dmin_f99_c16), [results_tables.md: dmin_f99_c2.0](results_tables.md#dmin_f99_c20) and [results_tables.md: dmin_f99_k05](results_tables.md#dmin_f99_k05) (growth).
 
 ---
 
