@@ -1,27 +1,15 @@
-"""Adaptive campaign: seeds and dog counts go only where the answer is still open.
+"""Adaptive campaign runner.
 
-One run, one output folder. Each round:
+Iteratively allocates seeds and shepherd counts where the outcome is still undecided:
+1. Baseline: Ensures every cell has at least one full batch of seeds.
+2. Frontier check: Evaluates Clopper-Pearson reliability bounds. Cells that are
+   still undecided get another batch of seeds, up to max_seeds.
+3. Bisection: If neighboring D values have different reliability zones and a gap
+   larger than refine_min_gap, inserts the midpoint D.
+4. Pruning: Skips adding seeds to saturated cells where dogs are redundant duplicates.
 
-1. every cell with fewer than one batch of seeds (new, or cut short by a
-   kill or the budget stop) is filled up to one batch;
-2. the frontier rules (analysis.frontier) mark the cells whose reliability
-   or finish-time comparison is still undecided; those are filled to the end
-   of their next batch, up to ``max_seeds`` (``seeds_wanted``);
-3. wherever the zone changes between two neighbouring D on a curve and they
-   are more than ``refine_min_gap`` dogs apart, the D halfway between is added.
-
-Above a confirmed saturation, a cell whose dogs were copies of each other
-gets no more seeds and no midpoints (``pruned_cells``): an added dog that only
-duplicates another cannot change the answer, so seeds there are wasted. Such
-cells are marked ``pruned`` in frontier_cells.csv.
-
-A cell with an errored trial gets no further seeds and is never reliable: an
-exception in a deterministic simulation is a bug to fix, not noise to
-average; status.json names those cells. The run stops when no cell needs
-seeds, or when ``budget_hours`` is spent; that budget counts from the start
-of this run (after calibration), so a resumed run gets a new one. Resuming
-continues from the trials already in the folder; rows of groups the protocol
-no longer lists are ignored.
+Halts when all cells are decided, reach max_seeds, or when budget_hours is exceeded.
+Can be stopped and resumed at any time from existing campaign files.
 """
 
 from __future__ import annotations
@@ -75,7 +63,7 @@ def _flock_radii(
     """R_f per method and flock size, calibrated once and kept in the folder. A task that sizes
     itself (``Scenario.calibrates`` false) has none: every cell gets NaN, and its setup ignores
     it."""
-    if not SCENARIOS[str(protocol.settings["task"])].calibrates:
+    if not SCENARIOS[protocol.settings["task"]].calibrates:
         nan = float("nan")
         return {m.name: {n: nan for n in protocol.flock_sizes} for m in protocol.methods}
     table = store.load_calibration()
@@ -155,7 +143,8 @@ def _refine(
     added = 0
     column = "reliability" if by_reliability else "zone"
     for key, cells in front.cells.groupby("group_key"):
-        if str(key) not in grid:
+        group_key = str(key)
+        if group_key not in grid:
             continue
         zones = dict(zip(cells["n_shepherds"].astype(int), cells[column]))
         d_all = cells["n_shepherds"].astype(int)
@@ -163,13 +152,13 @@ def _refine(
         waiting = set(d_all if capped is None else d_all[~capped])
         ds = sorted(zones)
         for a, b in zip(ds, ds[1:]):
-            if (str(key), a) in pruned or (str(key), b) in pruned:
+            if (group_key, a) in pruned or (group_key, b) in pruned:
                 continue
             open_ = any(zones[d] == UNDECIDED and d in waiting for d in (a, b))
             if b - a > min_gap and zones[a] != zones[b] and not open_:
                 mid = (a + b) // 2
-                if mid not in grid[str(key)]:
-                    grid[str(key)].add(mid)
+                if mid not in grid[group_key]:
+                    grid[group_key].add(mid)
                     added += 1
     return added
 
@@ -209,11 +198,11 @@ def _status(
         cells = front.cells
         # Errored and pruned cells may be undecided but get no seeds.
         open_cells = cells["needs_seeds"] & (cells["n_errors"] == 0) & ~cells["pruned"]
-        payload["cells"] = int(len(cells))
+        payload["cells"] = len(cells)
         payload["cells_pruned"] = int(cells["pruned"].sum())
         payload["cells_needing_seeds"] = int(open_cells.sum())
         payload["cells_at_max_seeds_undecided"] = int(
-            (open_cells & (cells["n_seeds"] >= int(protocol.settings["max_seeds"]))).sum()
+            (open_cells & (cells["n_seeds"] >= protocol.settings["max_seeds"])).sum()
         )
     return payload
 
@@ -240,10 +229,10 @@ def _run(
 ) -> None:
     radii = _flock_radii(protocol, store, physics_hash, workers)
     rules = Rules.from_settings(protocol.settings)
-    batch = int(protocol.settings["batch_seeds"])
-    max_seeds = int(protocol.settings["max_seeds"])
-    min_gap = int(protocol.settings["refine_min_gap"])
-    prune_overlap = float(protocol.settings["prune_overlap"])
+    batch = protocol.settings["batch_seeds"]
+    max_seeds = protocol.settings["max_seeds"]
+    min_gap = protocol.settings["refine_min_gap"]
+    prune_overlap = protocol.settings["prune_overlap"]
 
     by_key: dict[str, Group] = {g.key: g for g in groups(protocol)}
     grid: dict[str, set[int]] = {k: set(protocol.shepherd_counts) for k in by_key}
@@ -274,7 +263,7 @@ def _run(
         return configs[cell.key]
 
     started = time.time()
-    deadline = started + float(protocol.settings["budget_hours"]) * 3600.0
+    deadline = started + protocol.settings["budget_hours"] * 3600.0
     rounds = 0
     stop_reason: str | None = None
     while True:

@@ -1,8 +1,12 @@
-"""Groups, cells, trials and their run configs.
+"""Experiment decomposition: Groups, Cells, Trials, and run configs.
 
-A group is one D curve: method, layout, information factors and N. A cell is
-a group at one dog count D; a trial is one seed of a cell. Seed i of every
-cell is ``master_seed + i``, so cells share seeds and comparisons are paired.
+Decomposes a protocol's parameter grid into units of execution:
+- Group: One D curve (method, layout, swept factor levels, and flock size N).
+- Cell: A group at one shepherd count D.
+- Trial: One random seed of a cell (seed = master_seed + seed_index).
+
+Cells share the same seed sequence so comparisons across shepherd counts and methods
+are paired (Common Random Numbers).
 """
 
 from __future__ import annotations
@@ -21,8 +25,7 @@ from .protocol import MethodSpec, Protocol, drive_limit_ticks, factor_settings
 
 
 def _key_text(value: Any) -> str:
-    """A factor value as written in keys: numbers as floats, so 1 and 1.0 are one
-    cell, as they are one physics (provenance.normalise_numbers)."""
+    """Format a factor value as a normalized string representation."""
     if isinstance(value, (int, float)) and not isinstance(value, bool):
         return repr(float(value))
     return str(value)
@@ -30,6 +33,8 @@ def _key_text(value: Any) -> str:
 
 @dataclass(frozen=True)
 class Group:
+    """An experimental sweep group representing a performance curve over shepherd counts D."""
+
     method: str
     layout: str
     factors: tuple[tuple[str, Any], ...]  # sorted (name, value) pairs
@@ -43,6 +48,8 @@ class Group:
 
 @dataclass(frozen=True)
 class Cell:
+    """A specific operating cell: a Group evaluated at fixed shepherd count D."""
+
     group: Group
     n_shepherds: int
 
@@ -53,7 +60,7 @@ class Cell:
 
 @dataclass(frozen=True)
 class Trial:
-    """One seed of one cell, with everything a worker needs."""
+    """A single stochastic execution instance of a Cell with an assigned random seed."""
 
     cell: Cell
     seed_index: int
@@ -106,7 +113,7 @@ def setup_for(
     its task is sized to its own flock, so methods are compared on tasks sized that way and not
     on one shared field.
     """
-    task = SCENARIOS[str(settings["task"])]
+    task = SCENARIOS[settings["task"]]
     geometry = task.build_setup(
         settings,
         flock_radius=flock_radius,
@@ -114,16 +121,16 @@ def setup_for(
         layouts=layouts,
         max_dogs=max_dogs,
     )
-    hold = float(settings["hold_drive_multiple"])
+    hold = settings["hold_drive_multiple"]
     if hold < 0.0:
         raise ValueError("hold_drive_multiple must not be negative")
     drive = task.drive_length(geometry)
     return {
         "max_ticks": _max_ticks(method, drive),
         "hold_ticks": drive_limit_ticks(hold, drive, method.name, method.params) if hold else 0,
-        "metrics_stride": int(settings["metrics_stride"]),
-        "measurement_radius": float(settings["measurement_radius"]),
-        "dog_overlap_distance": float(settings["dog_overlap_distance"]),
+        "metrics_stride": settings["metrics_stride"],
+        "measurement_radius": settings["measurement_radius"],
+        "dog_overlap_distance": settings["dog_overlap_distance"],
         **geometry,
     }
 
@@ -148,7 +155,7 @@ def cell_config(protocol: Protocol, cell: Cell, flock_radius: float) -> dict[str
     spec = method_spec(protocol, group.method)
     settings = factor_settings(dict(group.factors), protocol.settings)
     return build_config(
-        task=str(protocol.settings["task"]),
+        task=protocol.settings["task"],
         method=group.method,
         params=dict(spec.params),
         setup=setup_for(
@@ -173,12 +180,12 @@ def make_trial(
     timeseries_dir: Path,
 ) -> Trial:
     """Trial ``seed_index`` of ``cell``; keeps its per-tick history for the first seeds."""
-    keep = seed_index < int(protocol.settings["timeseries_seeds"])
+    keep = seed_index < protocol.settings["timeseries_seeds"]
     file_name = trial_key(cell, seed_index).replace("|", "__").replace("=", "-") + ".parquet"
     return Trial(
         cell=cell,
         seed_index=seed_index,
-        seed=int(protocol.settings["master_seed"]) + seed_index,
+        seed=protocol.settings["master_seed"] + seed_index,
         config=config,
         timeseries_path=timeseries_dir / file_name if keep else None,
     )
@@ -195,7 +202,7 @@ def describe(protocol: Protocol) -> str:
     s = protocol.settings
     curves = groups(protocol)
     cells = len(curves) * len(protocol.shepherd_counts)
-    batch = int(s["batch_seeds"])
+    batch = s["batch_seeds"]
     folder = ""
     provenance = protocol.output / "provenance.json"
     if provenance.exists():
@@ -214,11 +221,11 @@ def describe(protocol: Protocol) -> str:
         "factors       " + (str(dict(protocol.factors)) if protocol.factors else "none"),
         f"D curves      {len(curves)}",
         f"cells         {cells}  (a midpoint D is added where the zone changes between"
-        + f" neighbours more than {int(s['refine_min_gap'])} dog(s) apart)",
+        + f" neighbours more than {s['refine_min_gap']} dog(s) apart)",
         f"first round   {cells * batch} trials ({batch} seeds per cell)",
-        f"seeds         up to {int(s['max_seeds'])} per undecided cell",
-        f"reliable      success rate above {float(s['reliability_theta'])}, "
-        + f"{float(s['confidence']):.0%} intervals",
-        f"budget        {float(s['budget_hours'])} h",
+        f"seeds         up to {s['max_seeds']} per undecided cell",
+        f"reliable      success rate above {s['reliability_theta']}, "
+        + f"{s['confidence']:.0%} intervals",
+        f"budget        {s['budget_hours']} h",
     ]
     return "\n".join(lines)

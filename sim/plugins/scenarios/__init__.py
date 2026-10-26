@@ -37,7 +37,7 @@ from . import drive_failures, drive_to_goal, gather, goal
 from .failures import Failure
 
 
-def never_over(state: SimulationState, config: dict[str, Any]) -> bool:
+def never_over(_state: SimulationState, _config: dict[str, Any]) -> bool:
     """A task that runs to success or the time limit."""
     return False
 

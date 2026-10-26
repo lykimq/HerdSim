@@ -1,1 +1,1 @@
-"""Paper math for each method: parameters and pure functions, no engine state."""
+"""Numerical methods and parameter configurations for herding and flocking models."""

@@ -1,10 +1,13 @@
-"""Reading finished results and deciding what they say. Nothing here runs the model.
+"""Post-simulation analysis and reporting utilities.
 
-frontier     the decision rules: reliable or not, faster or not, D_min, D_sat, zones; the
-             adaptive run uses them to choose where seeds go
-results      reading a results folder, and printing a table as Markdown
-dmin         D_min at a tighter deadline, read from the trials of one run
-dmin_tables  the tables behind the report (cli/dmin_tables.py prints them)
-growth_fits  which shape D_min(N) follows: growing without limit, or levelling off
-pressure     how long the sheep spend near a dog, measured during a replay
+Modules in this package process trial results and summary tables without re-running simulations:
+- frontier: Reliability and speed thresholds, team-size boundaries (D_min, D_sat), and zoning.
+- results: Parsing campaign outputs and rendering Markdown tables.
+- dmin: Evaluating D_min under counterfactual deadlines from existing trial data.
+- dmin_tables: Tabulation helpers for reports and CLI commands.
+- dispersion_burden: Analyzing initial spread metrics (S0 x N) and failure classifications.
+- growth_fits: Fitting power-law vs saturating models to D_min scaling curves.
+- herdability: Comparing HerdSim reliability metrics with literature herdability criteria.
+- pressure: Measuring herding pressure and flight duration during trial replays.
 """
+

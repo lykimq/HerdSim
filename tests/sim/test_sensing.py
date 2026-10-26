@@ -1,4 +1,4 @@
-"""Local views of collect_drive_multi (report section 3.12)."""
+"""Local sensing range limits and inter-shepherd communication pooling."""
 
 from __future__ import annotations
 

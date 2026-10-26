@@ -1,44 +1,14 @@
-"""Gather task: bring targets scattered over a disc into a goal at its centre.
+"""Gather task: collect targets scattered across a disc into a central goal.
 
-The task of Lama and di Bernardo 2024 (Fig. 1): sheep and dogs start uniformly distributed over
-a disc of radius R (``gather_start_radius``) centred on the goal, the goal is a disc of radius
-``gather_goal_fraction`` x R (the paper's r* = R / 5), and the dogs have to bring the share
-``success_fraction`` of the sheep inside it (the paper's chi*). No calibration: R sizes the
-task, and it is also what HerdSim's flock radius means for a uniform disc (sqrt(2) times the
-RMS radius of a uniform disc of radius R is R), so ``flock_radius`` holds R.
-
-Success (``is_success``): the share is inside the goal (chi >= chi*; the paper writes chi > chi*
-for herdability of the mean, and its level curve is at chi*) and every dog is inside it too,
-the paper's own stop ("the simulation is stopped ... when all the herders are inside Omega_G",
-SM Fig. S8d). Success is judged at that moment: a trial in which the share is reached while the
-dogs are still outside runs on until they are in, as the paper's does.
-
-End (``is_over``): a failing trial ends before the time limit when every dog is inside the goal
-and no dog senses a sheep outside it. This adds one clause to the paper's stop: read literally,
-a one-herder trial whose herder starts inside the goal (4 percent of starts at r* = R / 5)
-would end at the first step with chi near 0.04. The clause is what the paper's rule means
-physically, the moment the dogs have brought in everything they can see (SM Fig. S7c); it
-differs from the literal stop only in that start and in the ticks in which a dog inside the
-goal is walking out toward a sheep it sees. The success rule keeps the literal stop, because
-there the degenerate start cannot occur (the share is not inside at tick 0). The paper also
-stops some failing runs early on an unstated stationarity test; HerdSim runs them to the
-limit, which can only help the dogs. A trial that reaches the limit with the share inside but
-a dog still outside is a failure here, while the paper's mean would count its chi;
-``final_in_goal_fraction`` keeps chi at the end for that reading.
-
-The paper integrates both sides from the state at time t. The engine moves the sheep first
-and the dogs after (its order for every method), so the Lama herders read the targets'
-positions from the start of the tick, kept by the target step (sim/plugins/sheep/lama.py);
-reading the moved targets gave the herders a lead that lowered the team the paper reports by
-up to two herders.
-
-What a dog senses is its ``sensing_radius`` when the controller has one (the Lama herders),
-else everything (HerdSim's dogs know every sheep).
-
-Failure labels: ``targets_lost``, sheep beyond every dog's sensing at the end (the paper's
-condition (i): the herders could not sense all targets); ``outnumbered``, every sheep sensed but
-the share not reached at the time limit (condition (ii): the dogs could not balance the
-diffusion).
+Environment & Termination:
+- Setup: Agents start uniformly distributed over a disk of radius R with a central goal disk.
+- Success (`is_success`): Requires `success_fraction` of targets and all herders to be inside
+  the goal zone.
+- Early termination (`is_over`): Ends early if all herders have entered the goal and sense
+  no remaining targets outside.
+- Failure regimes (`failure_reason`):
+  - `targets_lost`: Uncollected targets are beyond all herders' sensing range.
+  - `outnumbered`: Targets are sensed, but diffusion outpaces collection before timeout.
 """
 
 from __future__ import annotations
@@ -92,8 +62,8 @@ def check(config: dict[str, Any]) -> None:
     if not 0.0 < float(config["goal_radius"]) < float(config["start_radius"]):
         raise ValueError("the goal must be smaller than the start disc")
     if float(config["sensing_range"]) > 0.0:
-        # The end rule and unseen_targets read the Lama herders' sensing_radius and treat every
-        # other dog as all-seeing; a team with a local view needs its own reading first.
+        # The gather task evaluates controller 'sensing_radius' (Lama), not team 'sensing_range'.
+        # Enforce sensing_range == 0 to prevent silent ignoring of team sensing bounds.
         raise ValueError("sensing_range is not read by the gather task's end rule; leave it 0")
     check_team(config)
 
@@ -106,9 +76,8 @@ def build_setup(
     layouts: tuple[str, ...],
     max_dogs: int,
 ) -> dict[str, Any]:
-    """Setup keys from the protocol settings: the start disc, the goal and a field that holds
-    the disc with ``field_clearance`` around it. ``flock_radius`` is ignored: the task sizes
-    itself from R and does not calibrate. The field only places the start; there is no boundary."""
+    """Setup keys for gather task; field is sized from gather_start_radius."""
+    _ = (flock_radius, n_sheep, layouts, max_dogs)
     s = settings
     radius = float(s["gather_start_radius"])
     fraction = float(s["gather_goal_fraction"])
@@ -144,8 +113,7 @@ def drive_length(setup: Mapping[str, Any]) -> float:
 def initial_positions(
     config: dict[str, Any], rng: np.random.Generator
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Sheep, then dogs, uniform over the start disc (the goal is not excluded, as in the paper).
-    The sheep are drawn first, so their start does not depend on the dog count."""
+    """Draw initial sheep and dog positions uniformly over the start disc."""
     centre = np.asarray(config["flock_center"], dtype=float)
     radius = float(config["start_radius"])
     sheep = place_uniform_disc(centre, radius, int(config["n_sheep"]), rng)
@@ -159,7 +127,7 @@ def sensing(config: Mapping[str, Any]) -> float:
 
 
 def _dogs_home(state: SimulationState) -> bool:
-    """Every dog inside the goal disc (the paper's stop: all herders inside Omega_G)."""
+    """Return True if all herders are inside the goal disc."""
     goal = state.world.goal
     inside = np.linalg.norm(state.shepherd_positions - goal.center, axis=1) < goal.radius
     return bool(inside.all())
@@ -199,15 +167,14 @@ def is_success(state: SimulationState) -> bool:
 
 
 def unseen_targets(view: TickView) -> float:
-    """Number of sheep beyond every dog's sensing (the paper's condition (i))."""
+    """Number of sheep beyond all herders' sensing range."""
     state = view.state
     unseen = _unseen(state.sheep_positions, state.shepherd_positions, sensing(view.config))
     return float(unseen.sum())
 
 
 def dog_radius(view: TickView) -> float:
-    """Mean distance of the dogs from the goal centre (the paper's <|H|>, Fig. S8). NaN without
-    dogs."""
+    """Mean distance of all herders from the goal center (NaN without dogs)."""
     state = view.state
     if state.n_shepherds == 0:
         return float("nan")

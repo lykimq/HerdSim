@@ -1,18 +1,8 @@
-"""Load and check a protocol: canonical defaults, optional ``extends`` chain, the protocol.
+"""Protocol loading, inheritance, and validation.
 
-A protocol is one experiment written as data, in protocols/configs/protocols/. It names its
-output folder, the methods with their time limits and parameter overrides, the grid (layouts,
-flock sizes, dog counts), optional factors (a sweepable canonical setting; each value is its own
-D curve), and any canonical value it changes. Everything else comes from
-protocols/configs/canonical.yaml. A protocol can ``extends`` another and change only what
-differs, which is how a variant of a finished run gets its own id and folder:
-
-    protocol_id: dmin_f99_hold_spacing
-    output: results/dmin_f99_hold_spacing
-    extends: dmin_f99_hold.yaml
-    dog_spacing: 2.0
-
-Unknown keys are errors, so a typo stops the run instead of being ignored.
+Loads experiment protocols from YAML, resolves `extends` chains against canonical
+defaults (canonical.yaml), and validates all parameter keys. Computes a deterministic
+physics hash to guarantee runs match their declared configuration.
 """
 
 from __future__ import annotations
@@ -82,8 +72,8 @@ STRATEGY_KEYS = (
 )
 
 
-# Settings added after the first runs. At their neutral value they do not change any trial, so
-# they stay out of the physics hash and the folders written before them remain resumable.
+# Settings added after early campaign runs. At default/neutral values they preserve backwards
+# compatibility without altering simulation outcomes or invalidating existing physics hashes.
 NEUTRAL_SETTINGS = {
     "success_fraction": 1.0,
     "hold_drive_multiple": 0.0,
@@ -94,23 +84,29 @@ NEUTRAL_SETTINGS = {
     "sensing_range": 0.0,
     "communication": "none",
     "imposed_radius_scale": 1.0,
-    # Hashed when not 1: it leaves the outcome of a trial as it is but changes the rows (the
-    # arrival columns, the metric summaries), which must agree within a folder.
+    # Subsampling stride for tick metrics recording (hashed when != 1).
     "metrics_stride": 1,
 }
 
 
 @dataclass(frozen=True)
 class MethodSpec:
+    """Simulation method specification and execution constraints.
+
+    Attributes:
+        name: Method identifier (e.g. 'strombom_multi', 'kubo').
+        time_limit_ticks: Fixed timeout in simulation ticks, or None if dynamically scaled.
+        params: Method-specific parameter overrides.
+        time_limit_drive_multiple: Multiplier of baseline drive time used when
+            time_limit_ticks is None.
+        calibrate_as: Reference method name for flock calibration (R_f), used when two methods
+            share the same sheep physics and should run on identical task geometries.
+    """
+
     name: str
-    # Fixed limit in ticks, or None when the limit is a multiple of the drive time
-    # (``time_limit_drive_multiple``), which depends on N and is resolved per cell.
     time_limit_ticks: int | None
     params: dict[str, Any] = field(default_factory=dict)
     time_limit_drive_multiple: float | None = None
-    # Method whose single dog drives the calibration flock, when not this one. R_f then
-    # comes from the same reference drive as that method's, so both run the same task
-    # (goal, drive, deadline). Only between methods with the same sheep model.
     calibrate_as: str | None = None
 
 
@@ -118,28 +114,25 @@ class MethodSpec:
 class Protocol:
     protocol_id: str
     output: Path
-    settings: dict[str, Any]  # canonical values after overrides
+    settings: dict[str, Any]  # Canonical values after overrides
     methods: tuple[MethodSpec, ...]
     layouts: tuple[str, ...]
     flock_sizes: tuple[int, ...]
     shepherd_counts: tuple[int, ...]
     factors: dict[str, list[Any]]
-    resolved: dict[str, Any]  # the merged file contents, archived in the results folder
+    resolved: dict[str, Any]  # Merged protocol specification archived in results folder
 
     def method_config(self) -> dict[str, dict[str, Any]]:
-        """Every parameter each method runs with: code defaults under the protocol's overrides."""
+        """Returns merged parameters for each method (defaults updated with protocol overrides)."""
         return {m.name: {**METHODS[m.name].defaults, **m.params} for m in self.methods}
 
     def physics(self) -> dict[str, Any]:
-        """Everything that changes a trial's outcome; input of the physics hash.
+        """Extracts configuration elements that influence simulation physics and outcome.
 
-        The layout set and the largest D size the field and place the goal of
-        every cell (the task's build_setup), so both are physics. The flock
-        sizes, the smaller D and the strategy keys are not, so a campaign can
-        add flock sizes, intermediate D or seeds and still resume. Settings
-        owned by another task are not read by this one, so they are left out.
+        Used to generate the physics hash. Includes task rules, layouts, maximum team size,
+        and method parameters, while omitting post-hoc evaluation settings and grid dimensions.
         """
-        task = str(self.settings["task"])
+        task = self.settings["task"]
         others = {k for name, t in SCENARIOS.items() if name != task for k in t.own_settings}
         return {
             "task": task,
@@ -208,7 +201,7 @@ def _read_chain(path: Path, seen: tuple[Path, ...] = ()) -> dict[str, Any]:
     parent = spec.pop("extends", None)
     if parent is None:
         return spec
-    return {**_read_chain((path.parent / str(parent)).resolve(), seen + (path,)), **spec}
+    return {**_read_chain((path.parent / parent).resolve(), seen + (path,)), **spec}
 
 
 def method_dt(name: str, params: Mapping[str, Any]) -> float:
@@ -235,17 +228,17 @@ def _time_limit(name: str, spec: dict[str, Any]) -> tuple[int | None, float | No
     if len(given) != 1:
         raise ValueError(f"Method {name!r}: give exactly one of {', '.join(TIME_LIMIT_KEYS)}")
     if given[0] == "time_limit_drive_multiple":
-        multiple = float(spec["time_limit_drive_multiple"])
+        multiple = spec["time_limit_drive_multiple"]
         if not multiple > 0.0:
             raise ValueError(f"Method {name!r}: time_limit_drive_multiple must be positive")
         return None, multiple
     if given[0] == "time_limit_ticks":
-        ticks = float(spec["time_limit_ticks"])
+        ticks = spec["time_limit_ticks"]
     else:
-        ticks = float(spec["time_limit_seconds"]) / method_dt(name, spec.get("params", {}))
+        ticks = spec["time_limit_seconds"] / method_dt(name, spec.get("params", {}))
     if not math.isclose(ticks, round(ticks)) or round(ticks) < 1:
         raise ValueError(f"Method {name!r}: the time limit must be a whole number of ticks >= 1")
-    return int(round(ticks)), None
+    return round(ticks), None
 
 
 def _methods(raw: dict[str, Any]) -> tuple[MethodSpec, ...]:
@@ -272,7 +265,7 @@ def _methods(raw: dict[str, Any]) -> tuple[MethodSpec, ...]:
                 )
             if set(METHODS[source].defaults) != set(METHODS[name].defaults):
                 raise ValueError(f"Method {name!r}: calibrate_as {source!r} has other parameters")
-            source = None if source == name else str(source)
+            source = None if source == name else source
         specs.append(MethodSpec(name, ticks, params, multiple, source))
     return tuple(specs)
 
@@ -291,7 +284,7 @@ def _check_shape(name: str, spec: Mapping[str, Any], settings: Mapping[str, Any]
             raise ValueError(f"{name}: {key} has repeated values")
     if not isinstance(spec["methods"], dict) or not spec["methods"]:
         raise ValueError(f"{name}: methods must name at least one method")
-    task = str(settings["task"])
+    task = settings["task"]
     if task not in SCENARIOS:
         raise ValueError(f"{name}: unknown task {task!r}; available: {sorted(SCENARIOS)}")
     layouts = SCENARIOS[task].layouts
@@ -301,11 +294,11 @@ def _check_shape(name: str, spec: Mapping[str, Any], settings: Mapping[str, Any]
     for key in ("flock_sizes", "shepherd_counts"):
         if any(not isinstance(v, int) or v < 1 for v in spec[key]):
             raise ValueError(f"{name}: {key} must be positive integers")
-    if not 0.0 < float(settings["reliability_theta"]) < 1.0:
+    if not 0.0 < settings["reliability_theta"] < 1.0:
         raise ValueError(f"{name}: reliability_theta must lie between 0 and 1")
-    if not 0.0 < float(settings["confidence"]) < 1.0:
+    if not 0.0 < settings["confidence"] < 1.0:
         raise ValueError(f"{name}: confidence must lie between 0 and 1")
-    if not 1 <= int(settings["batch_seeds"]) <= int(settings["max_seeds"]):
+    if not 1 <= settings["batch_seeds"] <= settings["max_seeds"]:
         raise ValueError(f"{name}: need 1 <= batch_seeds <= max_seeds")
 
 
@@ -320,7 +313,7 @@ def _check_layout_scale(
     """
     for m in methods:
         r_a = m.params.get("r_a", METHODS[m.name].defaults.get("r_a"))
-        if r_a is not None and abs(float(settings["separation_scale"]) - float(r_a)) > 1e-9:
+        if r_a is not None and abs(settings["separation_scale"] - r_a) > 1e-9:
             scale = settings["separation_scale"]
             raise ValueError(
                 f"{name}: separation_scale ({scale}) must equal r_a ({r_a}) of {m.name}; "
@@ -330,8 +323,8 @@ def _check_layout_scale(
 
 def _check_calibration_windows(name: str, settings: Mapping[str, Any]) -> None:
     """calibration.measure averages the last two windows of a run; both must fit."""
-    seconds = float(settings["calibration_seconds"])
-    window = float(settings["calibration_window_seconds"])
+    seconds = settings["calibration_seconds"]
+    window = settings["calibration_window_seconds"]
     if seconds < 2.0 * window:
         need = f"at least 2 x calibration_window_seconds ({window:g})"
         raise ValueError(f"{name}: calibration_seconds ({seconds:g}) must be {need}")
@@ -360,7 +353,7 @@ def load_protocol(name_or_path: str, output: Path | None = None) -> Protocol:
     spec = _read_chain(path)
     if "canonical" not in spec:
         raise ValueError(f"{path.name}: missing key 'canonical'")
-    canonical_path = REPO_ROOT / str(spec["canonical"])
+    canonical_path = REPO_ROOT / spec["canonical"]
     canonical = yaml.safe_load(canonical_path.read_text())
 
     unknown = sorted(set(spec) - set(PROTOCOL_KEYS) - set(canonical))
@@ -379,7 +372,7 @@ def load_protocol(name_or_path: str, output: Path | None = None) -> Protocol:
     _check_layout_scale(path.name, methods, settings)
 
     return Protocol(
-        protocol_id=str(spec["protocol_id"]),
+        protocol_id=spec["protocol_id"],
         output=resolve_output(output if output is not None else spec["output"]),
         settings=settings,
         methods=methods,

@@ -1,1 +1,1 @@
-"""Protocol configs and end-of-trial packaging."""
+"""Declarative protocol configurations and trial outcome packaging utilities."""

@@ -1,7 +1,7 @@
-"""Kubo force dogs (dog_controller=kubo_forces).
+"""Kubo force-based dogs (dog_controller=kubo_forces).
 
-Each dog targets the sheep farthest from the goal and moves under the eq. 8 forces, repelled
-by the other dogs within dog_repulsion_radius (every other dog by default).
+Each dog targets the sheep farthest from the goal, propelled by target attraction,
+goal repulsion, and mutual inter-dog repulsion within dog_repulsion_radius.
 """
 
 from __future__ import annotations

@@ -1,9 +1,6 @@
-"""Arena: a rectangle that places the start, and a circular goal.
+"""Simulation arena with rectangular start domain and circular goal zone.
 
-There is no boundary. Agents may leave the rectangle, as in Strombom 2014 ("the square is not
-enclosed", p.6) and Kubo 2022 (start areas and a goal, no boundary). The rectangle only
-holds the start: the layouts, the goal and the dog arcs are sized to fit it
-(``field_size`` in layouts.py).
+The arena is unbounded: agents can move freely beyond the start rectangle.
 """
 
 from __future__ import annotations

@@ -1,18 +1,7 @@
 """Regression: short real trials must reproduce frozen outcomes, and a seed must replay exactly.
 
-Any change to sheep or dog dynamics, the task setup, the config
-build or the metrics shows up here. Update the values only on an intended
-behaviour change, in the same change, with a note why.
-
-Values frozen on 2026-10-19 from the current engine.
-
-Same-machine replay is exact (the second test); the tolerances below only absorb cross-machine
-floating-point drift.
-
-The dynamics are chaotic, so the last floating-point bits (which differ
-across CPUs and NumPy builds) grow over a few hundred ticks. Values are
-whole-trial summaries compared with a tolerance; end-point positions are
-too chaotic to pin. Bit-exact replay on one machine is the second test.
+Values are whole-trial summaries compared with a tolerance; end-point positions are
+too chaotic to pin.
 """
 
 from __future__ import annotations

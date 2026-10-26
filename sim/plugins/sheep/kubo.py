@@ -1,4 +1,4 @@
-"""Kubo sheep (sheep_model=kubo): one integration step of the paper forces."""
+"""Kubo sheep dynamics integration (sheep_model=kubo)."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ def prepare(_config: dict[str, Any]) -> dict[str, Any]:
 
 
 def top_speed(config: dict[str, Any]) -> float:
-    """The speed cap of the MATLAB port (sim/methods/kubo/config.py), in units per second."""
+    """Maximum sheep speed in units per second."""
     return float(config["sheep_speed_max"])
 
 

@@ -1,28 +1,22 @@
-"""Results folder of one campaign.
+"""Campaign storage and output artifact management.
 
+Manages the filesystem layout of an experiment campaign:
     <output>/
-      protocol.yaml           merged protocol and canonical values, as run, plus
-                              method_config: every parameter each method ran with
-      provenance.json         protocol id and physics hash
-      calibration.json        R_f(N) per method, with the physics hash it belongs to
-      trials.jsonl            one JSON line per finished trial, appended as trials finish
-      errors.jsonl            one line per trial that raised
-      trials.csv              table form of trials.jsonl, rewritten after each round
-      frontier_cells.csv      per (group, D): reliability, finish times, zone, errored trials
-      frontier_groups.csv     per group: D_min, D_min_low, D_best, D_sat, D_crowd,
-                              D_overcrowd, D_max, flags
-      status.json             progress of the adaptive run
-      timeseries/             per-tick Parquet for the first seeds of every cell
+      protocol.yaml       Merged protocol and method configs as run.
+      provenance.json     Protocol ID and physics hash for reproducibility checks.
+      calibration.json    Calibrated flock radius R_f(N) per method.
+      trials.jsonl        Finished trial rows appended as workers complete them.
+      errors.jsonl        Trials that raised unexpected exceptions.
+      trials.csv          Tabular rollup of all trials, refreshed after each round.
+      frontier_cells.csv  Per-cell reliability, finish times, and zone classifications.
+      frontier_groups.csv Per-group frontier summary (D_min, D_sat, crowding metrics).
+      status.json         Round progress and campaign status.
+      timeseries/         Per-tick Parquet trajectories for inspected seeds.
 
-Concurrency and crash safety:
-- Single Writer Pattern: Multiprocessing worker processes never write directly to disk;
-  they return trial records to the master orchestrator via IPC queues. Only the master
-  process executes serial append operations, eliminating concurrent write race conditions.
-- Mutual Exclusion: `open` acquires an exclusive advisory lock via `fcntl.flock(LOCK_EX)`
-  on `.lock` for the lifespan of the run. A second process targeting the same folder
-  aborts immediately with `FolderBusy`.
-- Crash Recovery: A SIGKILL mid-write at worst truncates the final JSON line. `_read_jsonl`
-  automatically identifies and prunes partial lines (`repair=True`), ensuring clean resumptions.
+Concurrency and crash recovery:
+- Single writer: Only the main process writes to disk; workers return rows via IPC.
+- Advisory lock: Holds fcntl.flock on .lock to prevent concurrent runs in the same folder.
+- Clean resume: Truncated lines in trials.jsonl from an interrupted run are repaired on load.
 """
 
 from __future__ import annotations
@@ -74,6 +68,8 @@ def _read_jsonl(path: Path, repair: bool) -> list[dict[str, Any]]:
 
 
 class CampaignStore:
+    """Manages disk persistence, advisory file locking, and campaign result files."""
+
     def __init__(self, output: Path) -> None:
         self.root = output
         self.trials_jsonl = output / "trials.jsonl"

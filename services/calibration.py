@@ -1,33 +1,12 @@
-"""Flock radius R_f(N) per method: the size of a flock while one dog drives it.
+"""Flock radius calibration R_f(N).
 
-The goal radius, the compact spread and the lost-sheep radius are multiples of
-R_f, so they follow the real flock instead of an assumed packing. One dog drives
-a compact flock toward a goal it cannot reach, for ``calibration_seconds``
-(ticks x dt, so slow-clock methods run as long); R_f = sqrt(2) x RMS radius (the
-radius of a uniform disk with that RMS), averaged over the last window, median
-over seeds and start sizes.
+Empirically measures the steady-state flock radius R_f while driven by a single dog.
+Task geometry (goal radius, field dimensions, lost-sheep radius) is scaled from R_f
+so that models with different natural packing densities are compared fairly.
 
-R_f is the size of the flock driven by one dog: calibration always uses a single dog and no
-factor, whatever the protocol sweeps, so every factor level of a method is compared on a
-task sized to that one reference flock. A method with ``calibrate_as`` is calibrated with
-the single dog of the named method (FAT with the paper shepherd of strombom_multi), so the
-two methods are compared on the same task rather than each on its own flock size.
-
-Calibration always runs the drive task (``CALIBRATION_TASK``), whatever task
-the protocol runs: R_f is a property of the sheep model under a driving dog,
-and any task sizes itself from it. It runs in its own field, sized for a
-compact start, one dog and its long drive.
-
-R_f is only a property of the model where the flock settles to one size whatever
-size it starts from. ``calibrate`` checks both conditions and raises where they fail. For
-Strombom sheep they hold up to N = 600 (measured 2026-10-23); from about 630 a loose start
-keeps part of its size, and from 800 the check fails.
-
-Above that edge a protocol may impose the radius instead (``impose_radius_above`` = N_cal):
-N_cal is calibrated as usual, and every flock size above it gets
-R_f(N) = imposed_radius_scale x R_f(N_cal) x sqrt(N / N_cal), the density of the N_cal flock
-held constant (scaled for a sweep). Those sizes are not calibrated, since a calibration there
-would average two start-dependent sizes. Results at them are results at that imposed density.
+Runs a single dog driving a flock toward an unreachable goal, computing R_f as
+sqrt(2) * RMS radius over the final window. Checks that compact and loose initializations
+converge to the same radius before accepting the result.
 """
 
 from __future__ import annotations
@@ -77,22 +56,16 @@ def start_radius(spacing: float, n_sheep: int) -> float:
 
 
 def calibration_drive(protocol: Protocol, method: str) -> float:
-    """Length of the calibration drive: DRIVE_SPEED_MARGIN x top sheep speed x seconds."""
+    """Distance to calibration goal, placed far enough that the flock never reaches it."""
     params = method_spec(protocol, method).params
-    seconds = float(protocol.settings["calibration_seconds"])
+    seconds = protocol.settings["calibration_seconds"]
     return DRIVE_SPEED_MARGIN * sheep_speed_per_second(method, params) * seconds
 
 
 def calibration_config(
     protocol: Protocol, method: str, n_sheep: int, spacing: float
 ) -> dict[str, Any]:
-    """One global dog, a compact start of ``spacing``, a goal of radius 0 too far to reach.
-
-    The protocol's factors are not applied; the drive is set in units through
-    both drive terms so the task's max() rule returns exactly ``calibration_drive``.
-    With ``calibrate_as`` the dog of that method drives, on this method's parameters
-    (``_methods`` allows it only between methods with the same sheep and parameter names).
-    """
+    """Build a calibration trial config with one dog and an unreachable goal."""
     spec = method_spec(protocol, method)
     driver = spec.calibrate_as or method
     s = protocol.settings
@@ -100,13 +73,10 @@ def calibration_config(
     drive = calibration_drive(protocol, method)
     far = {
         **s,
-        # R_f is the flock driven by the paper's one dog, which sees every sheep: the settings of
-        # the team rule and the task that a protocol changes are set back for calibration.
         **PAPER_DOG,
         "task": CALIBRATION_TASK,
         "drive_distance_multiple": drive / radius,
         "drive_distance_min": drive,
-        # measure() averages windows counted in ticks, so every tick is recorded.
         "metrics_stride": 1,
     }
     setup = setup_for(
@@ -118,7 +88,7 @@ def calibration_config(
         max_dogs=1,
     )
     setup["goal_radius"] = 0.0
-    setup["max_ticks"] = math.ceil(float(s["calibration_seconds"]) / method_dt(method, spec.params))
+    setup["max_ticks"] = math.ceil(s["calibration_seconds"] / method_dt(method, spec.params))
     return build_config(
         task=CALIBRATION_TASK,
         method=driver,
@@ -131,11 +101,10 @@ def calibration_config(
 
 
 def measure(job: tuple[dict[str, Any], int, int]) -> tuple[float, float]:
-    """(R_f over the last window, R_f over the window before) from one calibration trial.
+    """Measure late and early steady-state R_f windows from one trial.
 
-    Raises CalibrationError when the flock centre came within
-    GOAL_CLEARANCE_RADII x the measured radius of the goal during either window:
-    the run then measured a flock at the goal, not a driven one.
+    Raises CalibrationError if the flock came too close to the goal disc, which
+    invalidates the assumption of an unreached steady drive.
     """
     config, seed, window = job
     history = run_trial(config, seed).history
@@ -153,7 +122,7 @@ def measure(job: tuple[dict[str, Any], int, int]) -> tuple[float, float]:
 def summarise(
     label: str, runs: list[tuple[float, tuple[float, float]]], settings: dict[str, Any]
 ) -> tuple[float, list[str]]:
-    """(R_f, problems) from the runs of one flock size: (start spacing, (late, early)) each."""
+    """Compute median R_f across runs and check settlement and start-agreement tolerances."""
     starts = sorted({spacing for spacing, _ in runs})
     late = float(np.median([v[0] for _, v in runs]))
     early = float(np.median([v[1] for _, v in runs]))
@@ -161,9 +130,9 @@ def summarise(
     drift = abs(late - early) / early
     spread = (max(by_start) - min(by_start)) / late
     problems = []
-    if drift > float(settings["settled_tolerance"]):
+    if drift > settings["settled_tolerance"]:
         problems.append(f"{label}: radius still changing ({drift:.0%} between windows)")
-    if spread > float(settings["start_agreement"]):
+    if spread > settings["start_agreement"]:
         problems.append(f"{label}: radius depends on the start size ({spread:.0%})")
     return late, problems
 
@@ -176,12 +145,12 @@ def calibrate(protocol: Protocol, workers: int) -> dict[str, dict[int, float]]:
     task sizes itself (``Scenario.calibrates`` false) has nothing to calibrate and is refused.
     """
     s = protocol.settings
-    task = str(s["task"])
+    task = s["task"]
     if not SCENARIOS[task].calibrates:
         raise ValueError(f"task {task!r} sizes itself from its own settings; no R_f to calibrate")
-    seeds = [int(s["master_seed"]) + i for i in range(int(s["calibration_seeds"]))]
-    starts = [float(x) for x in s["calibration_starts"]]
-    above = int(s["impose_radius_above"])
+    seeds = [s["master_seed"] + i for i in range(s["calibration_seeds"])]
+    starts = list(s["calibration_starts"])
+    above = s["impose_radius_above"]
     measured = sorted(
         {n for n in protocol.flock_sizes if not above or n <= above} | ({above} if above else set())
     )
@@ -189,7 +158,7 @@ def calibrate(protocol: Protocol, workers: int) -> dict[str, dict[int, float]]:
     jobs, owners = [], []
     for method, n in keys:
         window = round(
-            float(s["calibration_window_seconds"])
+            s["calibration_window_seconds"]
             / method_dt(method, method_spec(protocol, method).params)
         )
         for spacing in starts:
@@ -210,7 +179,7 @@ def calibrate(protocol: Protocol, workers: int) -> dict[str, dict[int, float]]:
     if failures:
         raise CalibrationError("; ".join(failures))
     if above:
-        scale = float(s["imposed_radius_scale"])
+        scale = s["imposed_radius_scale"]
         for radii in table.values():
             for n in (n for n in protocol.flock_sizes if n > above):
                 radii[n] = scale * radii[above] * math.sqrt(n / above)

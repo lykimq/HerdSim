@@ -1,17 +1,9 @@
-"""Replaying stored trials of a finished run, for diagnostics that need more than the trial rows.
+"""Replay stored trials for diagnostics and analysis.
 
-    run = open_run("dmin_f99_m6")
-    job = ReplayJob(run.config(method, layout, n, d), run.master_seed + i, stored, label)
-    rows = run_replays(worker, jobs, workers, describe)
-
-The tools in cli/diagnostics/ are built this way: ``open_run`` gives the protocol, radii and
-trial rows of a folder, each job is one seed of one cell, and ``run_replays`` runs a
-module-level worker over the jobs in a pool.
-
-A trial is deterministic in its config and seed, so running it again gives the same trial. A
-diagnostic either replays it unchanged with extra measures, or changes one setting and compares.
-An unchanged replay is checked against the stored outcome and raises when it differs, because a
-replay that is not the stored trial says nothing about the stored results.
+Re-runs trials from finished campaigns with identical configs and seeds. Because the
+simulation engine is deterministic, replaying an unchanged trial reproduces the exact
+same outcome, allowing diagnostics to inspect detailed per-tick states or test counterfactual
+parameter tweaks without storing timeseries for every trial.
 """
 
 from __future__ import annotations
@@ -35,14 +27,12 @@ Outcome = tuple[bool, int]  # success, total ticks
 
 
 class ReplayMismatch(RuntimeError):
-    """Raised when an unchanged replayed trial deviates from stored campaign results.
+    """Raised when an unchanged replay deviates from stored trial results.
 
-    Verifying bit-identical reproduction (exact match on success and finish tick) is
-    a prerequisite for causal diagnostics. If re-running an identical configuration
-    and seed produces even a single tick difference, it signals silent code drift,
-    unseeded randomness, or environment divergence. Diagnostics tested on drifting
-    replays would produce misleading scientific conclusions about the original data.
+    Replays must match stored outcomes exactly. Any discrepancy indicates
+    code drift, unseeded PRNG state, or environment divergence.
     """
+
 
 
 @dataclass(frozen=True)
@@ -76,7 +66,7 @@ class StoredRun:
 
     @property
     def master_seed(self) -> int:
-        return int(self.protocol.settings["master_seed"])
+        return self.protocol.settings["master_seed"]
 
     def config(self, method: str, layout: str, n: int, d: int) -> dict[str, Any]:
         """Run config of a cell without factors, as the campaign built it."""

@@ -1,10 +1,7 @@
-"""Settings of the dog team that every task passes through to the controllers.
+"""Dog team configuration forwarded to controllers.
 
-Dog spacing, the local view and its sharing, the holding step and the drive cap are canonical
-settings read by the dog controllers (collect_drive_multi, and ``move_dogs`` for the spacing),
-not by any task. Each task carries them from the protocol into the run config the same way,
-so they live here once: ``KEYS`` names them, ``setup`` copies them, ``check`` refuses the
-combinations no controller can honour.
+Manages team settings (spacing, sensing range, communication pooling, withdrawal,
+offset caps) and validates controller compatibility.
 """
 
 from __future__ import annotations

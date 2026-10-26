@@ -21,10 +21,11 @@ install:
 	$(UV) sync --extra dev
 
 test:
-	$(UV) run python -m tests.run test
+	$(UV) run pytest
 
 bench:
-	$(UV) run python -m tests.run bench
+	$(UV) run pytest -m bench -rP
+
 
 lint:
 	$(UV) run ruff check .

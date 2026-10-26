@@ -1,9 +1,4 @@
-"""What tasks with a circular goal share: the world, the goal metrics, the arrival columns.
-
-Each metric takes a TickView and returns one float; a task records the ones that mean something
-for it next to the generic metrics. ``arrival_columns`` reads the first arrival of a share of the
-flock from a history.
-"""
+"""Circular goal zone setup, spatial metrics, and arrival time tracking."""
 
 from __future__ import annotations
 
@@ -15,8 +10,8 @@ import pandas as pd
 from sim.core.world.arena import GoalZone, World
 from sim.plugins.metrics.view import TickView
 
-# Fractions of the flock whose first full arrival is recorded in every trial row, so a
-# weaker success rule than the task's own can be read afterwards.
+# Flock arrival fractions for which time-to-arrival metrics (seconds_to_<pct>pct_in_goal)
+# are logged in trial results to enable post-hoc analysis under relaxed success thresholds.
 ARRIVAL_FRACTIONS = (0.90, 0.95, 0.99)
 
 
@@ -40,11 +35,7 @@ def gcm_goal(view: TickView) -> float:
 
 
 def gcm_in_goal(view: TickView) -> float:
-    """1.0 if the flock centroid is inside the goal, else 0.0.
-
-    Lets Strombom's GCM criterion be read from the history; success itself
-    stays the task's rule.
-    """
+    """Return 1.0 if the flock centroid is inside the goal zone, else 0.0."""
     return float(view.state.world.goal.contains(view.centroid[None, :])[0])
 
 
@@ -55,11 +46,7 @@ def sheep_in_goal(view: TickView) -> float:
 
 
 def dogs_goal_side(view: TickView) -> float:
-    """Fraction of dogs on the goal side of the flock, where they push it backwards.
-
-    NaN without dogs. Noise once the centroid is at the goal centre, where the
-    direction to the goal is undefined.
-    """
+    """Fraction of dogs positioned between flock centroid and goal (NaN if no dogs)."""
     state = view.state
     if state.n_shepherds == 0:
         return float("nan")
@@ -69,11 +56,7 @@ def dogs_goal_side(view: TickView) -> float:
 
 
 def arrival_columns(config: dict[str, Any], history: pd.DataFrame) -> dict[str, float]:
-    """Model seconds until a fraction of the sheep first stood in the goal (NaN if never).
-
-    Reads the first tick at which ``sheep_in_goal`` reached the fraction of N. These are
-    first arrivals, not held ones: a sheep may leave again before the trial ends.
-    """
+    """Compute elapsed seconds to reach flock arrival thresholds (unheld first arrivals)."""
     dt = float(config["dt"])
     n = int(config["n_sheep"])
     inside = history["sheep_in_goal"].to_numpy(dtype=float)

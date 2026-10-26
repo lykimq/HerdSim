@@ -1,11 +1,13 @@
-"""Run a batch of trials in worker processes.
+"""Batch trial execution across multiprocessing workers.
 
-Workers run one trial each and return its row; they write their own
-per-tick Parquet when the trial keeps one. The parent appends each row as it
-arrives. A trial that raises is logged in errors.jsonl and the batch goes on.
-A worker that dies (killed, out of memory) breaks the whole pool: that is not
-a trial error, so nothing is logged and the batch stops; a resumed run reruns
-the trials that were in flight.
+Runs trials in parallel using a worker pool. Workers execute one trial at a time,
+saving timeseries Parquet files directly to disk if configured, and returning summary
+rows back to the parent process.
+
+Queue management and fault isolation:
+- At most QUEUE_PER_WORKER trials are queued per worker to keep memory usage bounded.
+- Individual trial exceptions are logged to errors.jsonl and skipped so the batch continues.
+- Process crashes (e.g. OOM) break the pool and halt the run so it can be resumed cleanly.
 """
 
 from __future__ import annotations
@@ -23,20 +25,14 @@ from .cells import Trial
 from .pool import worker_pool
 from .store import CampaignStore
 
-# Trials queued per worker; keeps memory bounded and lets a stop take effect soon.
+# Trials queued per worker; bounds memory and keeps cancellation responsive.
 QUEUE_PER_WORKER = 4
 
 
 def identity(trial: Trial) -> dict[str, Any]:
-    """Columns that say which trial a row is and what it ran with; the task adds the
-    geometry it ran in (``Scenario.row_columns``).
-
-    Factor values come from the group itself (the protocol's levels), not from
-    the run config: a swept setting such as drive_distance_multiple reaches the
-    config only through its products.
-    """
+    """Base columns identifying a trial (group, cell, layout, seed, limits)."""
     cell, group, config = trial.cell, trial.cell.group, trial.config
-    dt = float(config["dt"])
+    dt = config["dt"]
     columns: dict[str, Any] = {
         "trial_key": trial.key,
         "cell_key": cell.key,
@@ -50,7 +46,7 @@ def identity(trial: Trial) -> dict[str, Any]:
         "seed": trial.seed,
         "flock_radius": config["flock_radius"],
         "time_limit_ticks": config["max_ticks"],
-        "time_limit_seconds": int(config["max_ticks"]) * dt,
+        "time_limit_seconds": config["max_ticks"] * dt,
         "dt": dt,
     }
     for name, value in group.factors:
@@ -59,8 +55,8 @@ def identity(trial: Trial) -> dict[str, Any]:
 
 
 def execute(trial: Trial) -> dict[str, Any]:
-    """Worker entry: run one trial and return its row."""
-    columns = identity(trial)  # before the run, so a bad column fails fast
+    """Run one trial, save timeseries if configured, and return its summary row."""
+    columns = identity(trial)
     result = run_trial(trial.config, trial.seed)
     if trial.timeseries_path is not None:
         result.history.to_parquet(trial.timeseries_path, index=False)
@@ -75,7 +71,7 @@ def run_batch(
     deadline: float,
     on_row: Callable[[dict[str, Any]], None],
 ) -> None:
-    """Run ``trials``; stop queueing new ones after ``deadline`` (time.time())."""
+    """Run trials across workers in parallel, stopping submissions after deadline."""
     queue = iter(trials)
     running: dict[Future[dict[str, Any]], Trial] = {}
     with worker_pool(workers) as pool:

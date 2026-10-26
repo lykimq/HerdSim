@@ -1,4 +1,4 @@
-"""Holding (hold time, withdrawal) and dog spacing: the rules behind report section 3.10."""
+"""Goal holding duration, standoff withdrawal at goal, and inter-dog spacing constraints."""
 
 from __future__ import annotations
 

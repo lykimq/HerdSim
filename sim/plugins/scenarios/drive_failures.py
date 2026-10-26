@@ -1,15 +1,8 @@
-"""Why a failed drive trial failed, read from its metric history after the run.
+"""Drive failure classification based on trial metric history.
 
-These are the drive task's rules (``Scenario.classify_failure``): progress is
-the flock centre's distance to the goal (``gcm_goal``). A task with other
-stages brings its own rules and may reuse the flock and dog ones here.
-
-Most rules look at the second half of the trial (the late window); FLOCK_ESCAPED
-compares that window with the start, and OSCILLATION and STUCK compare the two
-halves. Lengths are relative to the trial's own goal radius and flock radius, and
-time windows are in model seconds (converted with the method's dt), so the
-labels mean the same thing at every N, D and method. When several rules match, the
-first in ``PRIORITY`` is the label; all matches are kept as hints.
+Evaluates late-window metrics relative to goal and flock geometry. When multiple
+failure conditions trigger, the first in `PRIORITY` is assigned as the primary mode,
+while all matching conditions are preserved in `Failure.hints`.
 """
 
 from __future__ import annotations
@@ -37,23 +30,18 @@ PRIORITY = (
     STUCK,
 )
 
-# Rule thresholds.
-# Coverage below this means the dogs are out of the sheep's reach. 0.1 suits Strombom,
-# where a working drive has coverage 1.0 (measured, N = 100, four layouts). A working
-# Kubo drive sits at 0.1-0.2 (measured, N = 25-100): the flee term K_s4 / d^2 is 12.5 at
-# d = 20, above the sheep speed cap 5, so sheep keep the dogs at the edge of the 20-unit
-# view. Kubo therefore sets its own value (config key low_coverage), and for it the
-# dogs_out_of_range label is a weak hint.
+# Coverage threshold below which dogs are considered disconnected from the flock.
+# Kubo overrides this via `low_coverage` because its stronger flee force keeps dogs further.
 LOW_COVERAGE = 0.1
 SPLIT_FRACTION = 0.55
 SCATTER_FLOCK_RADII = 2.0
-SMOOTH_SECONDS = 200.0  # HerdSim choice; 200 Strombom ticks, 4000 Kubo ticks
+# Rolling window duration (in simulation seconds) for trajectory oscillation detection.
+SMOOTH_SECONDS = 200.0
 MIN_SWINGS = 3
 
 
 def smooth_window(dt: float, stride: int = 1) -> int:
-    """Rows in the smoothing window of the oscillation rule: SMOOTH_SECONDS of model time, with
-    one row every ``stride`` ticks of ``dt``."""
+    """Number of history rows corresponding to SMOOTH_SECONDS given dt and metrics stride."""
     return max(1, round(SMOOTH_SECONDS / (dt * stride)))
 
 

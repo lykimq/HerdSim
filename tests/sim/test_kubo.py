@@ -14,7 +14,7 @@ EPS = 1e-6
 
 
 def _reference(positions, velocities, dogs, cfg):
-    """Per-sheep loop of eqs. 2-6, one sheep at a time."""
+    """Unvectorized reference combining repulsion, alignment, cohesion, and dog avoidance."""
     radius = cfg["sheep_radius"]
     out = np.zeros_like(positions)
     for i, x in enumerate(positions):

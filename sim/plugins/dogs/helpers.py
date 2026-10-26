@@ -13,19 +13,8 @@ from sim.core.vectors import unit
 def spaced(
     dogs: np.ndarray, velocities: np.ndarray, spacing: float, speed: float, dt: float
 ) -> np.ndarray:
-    # Physical agent footprint model (dog_spacing, canonical 2.0 m):
-    # Shepherds possess finite spatial exclusion buffers rather than dimensionless points.
-    # Collisions resolve sequentially in index order:
-    # 1. Agents already violating the buffer (dist < spacing) repel radially outward at cruising
-    #    speed.
-    # 2. Agents whose projected step would enter an existing buffer halt immediately (velocity = 0).
-    #
-    # Overcrowding collapse mechanism (D_overcrowd):
-    # A herd of N sheep presents a driving arc with finite perimeter length. At N = 400,
-    # the driving arc physically accommodates at most D_cap ~ 12 dogs at 2.0 m spacing.
-    # When D >= 9 on dispersed pastures ('outlier_rich'), spatial contention causes lateral
-    # deadlocks, preventing shepherds from maneuvering to intercept breakaways and dropping
-    # reliability to 0.50.
+    # Inter-dog spacing: dogs closer than spacing push apart; steps that would
+    # violate spacing are halted.
     if spacing <= 0.0 or len(dogs) < 2:
         return velocities
     out = velocities.copy()

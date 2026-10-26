@@ -1,13 +1,15 @@
-"""Bench: miniature real campaigns, read for sense.
+"""Bench: miniature real campaigns.
 
-Run with ``make bench``. Each fixture runs a small protocol through the real pipeline
-(calibration, rounds, worker pool, store, frontier rules) and the tests read its tables.
-Nothing here is pinned to a number from an earlier run. The checks are either bounds
-that follow from the model (sheep cannot move faster than their top speed), properties of
-the machinery (a rerun adds nothing, the worker count changes nothing), or orderings the
-design is meant to produce (a compact flock needs no collecting, a tight deadline asks a
-scattered flock for more dogs than a loose one). A failure means a human should look at the
-numbers it prints, not that a stored value moved.
+Run with ``make bench``.
+
+Each fixture runs a small protocol through the real pipeline
+(calibration, rounds, worker pool, store, frontier rules).
+
+Checks are either bounds that follow from:
+- the model (sheep cannot move faster than their top speed),
+- properties of the machinery (a rerun adds nothing, the worker count changes nothing),
+- or orderings the design is meant to produce (a compact flock needs no collecting,
+a tight deadline asks a scattered flock for more dogs than a loose one).
 """
 
 from __future__ import annotations

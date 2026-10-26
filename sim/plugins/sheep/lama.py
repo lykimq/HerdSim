@@ -1,16 +1,8 @@
-"""Lama targets (sheep_model=lama_targets): one Euler-Maruyama step of eq. 1.
+"""Target dynamics under stochastic repulsion (Lama & di Bernardo 2024).
 
-The stored velocity is the displacement of the step over dt, push and noise together, so
-positions minus the previous positions equal dt x velocity as for the other models. The model
-checks the whole parameter set here (``prepare``), including the herders' side, because a
-method's parameters are one table and the paper's assumption v_H > v_T ties the two sides.
-
-The paper integrates targets (Euler-Maruyama) and herders (forward Euler) from the same state at
-time t. HerdSim's engine moves the sheep first and the dogs after, so the step keeps the targets'
-positions from before it moved them in ``state.metadata[TARGETS_AT_TICK_START]``, and the Lama
-herders read those: both sides then see the state at t, as in the paper. Measured at the
-paper's boundary (2026-10-25, sensing infinite, 50 seeds): with herders that saw the moved
-targets, 16 herders gathered 400 targets (the paper needs 18); with the paper's order, 17.
+Integrates target motion via Euler-Maruyama with herder repulsion and Gaussian noise.
+Stores pre-step positions in `state.metadata[TARGETS_AT_TICK_START]` to ensure herders
+evaluate synchronous state snapshots.
 """
 
 from __future__ import annotations
@@ -23,14 +15,16 @@ from sim.methods.lama.dynamics import TARGETS_AT_TICK_START, noise_step, target_
 
 
 def prepare(config: dict[str, Any]) -> dict[str, Any]:
-    """Check the paper's assumptions on the parameters; no derived keys."""
+    """Validate parameters (ensuring positive values and herder_speed > target_top_speed).
+
+    Returns an empty dict as this model produces no derived configuration keys.
+    """
     lama.check(config)
     return {}
 
 
 def top_speed(config: dict[str, Any]) -> float:
-    """v_T = beta lambda, the paper's maximum escaping speed from one herder. Two herders can
-    push harder and the noise is unbounded; v_T is the paper's own speed scale."""
+    """Target speed scale v_T = beta * lambda."""
     return lama.target_top_speed(config)
 
 

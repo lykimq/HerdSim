@@ -1,15 +1,7 @@
-"""Drive task: herd every sheep into a circular goal.
+"""Drive task: herd sheep into a circular goal zone.
 
-Success rule (``is_success``): every sheep is inside the goal disk (or the share
-``success_fraction``), and with a hold time it has stayed inside without a break for
-``hold_ticks`` ticks. This is a
-HerdSim choice and differs from both papers. Strombom 2014 ends the task when
-the flock's centre of mass (GCM) is within a certain distance of the target
-(p.7, distance unstated); Kubo 2022 asks for the flock centre inside the target
-and the whole flock fitting on a circle of radius 10 (section 4.1; its introduction states the
-aim as all sheep in the goal at the same time). Strombom's
-rule can be read afterwards from the per-tick ``gcm_in_goal``; Kubo's cannot,
-since ``extent`` is an RMS radius and no metric records the farthest sheep.
+Success requires that at least `success_fraction` of the flock stays continuously
+inside the goal zone for `hold_ticks` ticks.
 """
 
 from __future__ import annotations
@@ -99,12 +91,7 @@ def initial_positions(
 
 
 def is_success(state: SimulationState) -> bool:
-    """Every sheep is inside the goal, or the share ``success_fraction`` of them when that is
-    below 1, and has been for the goal's ``hold_ticks`` (HerdSim rule; see the module docstring).
-
-    The tick at which the goal was last reached is kept in ``state.metadata``; leaving the goal
-    clears it, so the hold has to start again.
-    """
+    """Return True if the goal condition has held continuously for hold_ticks."""
     goal = state.world.goal
     if not goal.reached(state.sheep_positions):
         state.metadata.pop("reached_since", None)
@@ -121,23 +108,13 @@ def build_setup(
     layouts: tuple[str, ...],
     max_dogs: int,
 ) -> dict[str, Any]:
-    """Setup keys of one flock size, from the protocol settings and the flock radius R_f.
+    """Compute task geometry and field dimensions for a given flock size and method.
 
-    The drive is max(``drive_distance_multiple`` x R_f, ``drive_distance_min``,
-    reach + goal radius + R_f), where reach is the farthest start sheep of every
-    layout in ``layouts``, so the goal never overlaps a start. The third term
-    grows like the separation distance N^(2/3) while R_f grows more slowly, so
-    in a protocol with scattered layouts the drive is longer than the multiple
-    from about N = 200 on, for its compact cells too: computed with the
-    calibrated R_f, 13.4 R_f at N = 200 and 18.1 R_f at N = 400 with all four
-    layouts in the protocol (17.2 at N = 400 with wide only), against 13 R_f in
-    a compact-only protocol.
-    The drive length is recorded per trial, so analyses can condition on it.
-
-    The field is sized for ``layouts`` and ``max_dogs`` (the protocol's largest
-    D), so all cells of a protocol at one N and one method share one field and
-    one goal (R_f is calibrated per method); the drive axis runs along x
-    (mirrored for a negative ``drive_distance_multiple``).
+    Computes drive distance and field boundaries to ensure:
+    - Drive distance scales with flock radius R_f while enforcing non-overlap
+      with the widest initial layout extent.
+    - Field dimensions accommodate all specified layouts, maximum dog count,
+      and clearance buffers around the goal and starting positions.
     """
     s = settings
     if not 0.0 < float(s["success_fraction"]) <= 1.0:

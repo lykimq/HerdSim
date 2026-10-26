@@ -1,34 +1,12 @@
-"""Strombom et al. 2014 sheep heading, vectorised over the flock.
+"""Vectorized Strömböm et al. 2014 sheep heading and flock dynamics.
 
-A sheep farther than r_s from every dog grazes: it stays put, or with
-probability p takes one step in a random direction. A sheep closer than r_s
-to a dog (p.7: "shorter than r_s"; a sheep at exactly r_s grazes) takes the
-heading of eq. 4.2,
-
+Sheep state machine:
+- Grazing (no dog within r_s): Sheep remains stationary, or steps with probability p
+  in a uniform random direction. No neighbor repulsion applies during grazing.
+- Reacting (dog within r_s): Computes normalized heading vector:
     H' = h H + c C + rho_a R_a + rho_s R_s + e eps
-
-with every term a unit vector: H the previous heading, C toward the centre
-of its n nearest neighbours, R_a away from neighbours closer than r_a
-(eq. 4.1), R_s away from the dogs, eps random. It then moves sheep_speed
-along H' (eq. 4.3). Only the dog term R_s is extended for several dogs, see
-``dog_push``.
-
-Three readings of the paper, which gives no rule for any of them:
-
-- A grazing sheep (no dog within r_s) gets no repulsion from its neighbours: the paper
-  introduces the repulsion R_a (eq. 4.1) inside the description of the reacting
-  heading, and says of grazing only that agents "exhibit small random movements".
-  A flock that is not being herded therefore does not spread out. The alternative,
-  u(rho_a R_a + eps) while grazing, would change every trial that has a sheep out of reach
-  of the dogs, so it is a physics change and needs a new results folder.
-- A grazing step has length delta (Table 1 defines delta as the displacement
-  per time step without restricting it to the reacting case, and eq. 4.3 is
-  the only displacement rule) in a direction drawn uniformly on [0, 2 pi);
-  the direction distribution is not stated in the paper.
-- The previous heading H is the last stored velocity, so it is zero after a
-  tick in which a sheep did not move (a stationary grazing tick, or tick 0);
-  the paper defines H only as "the previous direction" (Table 1) and is
-  silent on a stationary agent.
+  combining inertia (H), neighbor attraction (C), neighbor repulsion (R_a),
+  dog repulsion (R_s), and angular noise (eps).
 """
 
 from __future__ import annotations
@@ -73,11 +51,7 @@ def neighbour_centres(positions: np.ndarray, idx: np.ndarray, k: int) -> np.ndar
 
 
 def sheep_repulsion(positions: np.ndarray, idx: np.ndarray, r_a: float) -> np.ndarray:
-    """Eq. 4.1: sum of unit vectors away from every sheep closer than r_a.
-
-    Close pairs come from a KD-tree, so the cost grows with the number of
-    close pairs rather than N^2.
-    """
+    """Compute unit repulsion vectors from all neighbors within distance r_a using KD-tree."""
     pairs = cKDTree(positions).query_pairs(r_a, output_type="ndarray")
     total = np.zeros_like(positions, dtype=float)
     if pairs.size:
@@ -91,14 +65,9 @@ def sheep_repulsion(positions: np.ndarray, idx: np.ndarray, r_a: float) -> np.nd
 
 
 def dog_push(to_dogs: np.ndarray, dist: np.ndarray, r_s: float) -> np.ndarray:
-    # Mathematical rationale for unit-vector normalization:
-    # In Strömbom's model, social cohesion weight is c = 1.05. If canine threat forces are
-    # summed additively (linear superposition), two flanking dogs separated by angle theta
-    # exert a resultant force of 2*cos(theta/2). Whenever theta < 116 deg, 2*cos(theta/2) > 1.05,
-    # which strictly overpowers social cohesion. Linear addition causes two flanking dogs to
-    # violently shatter the herd from D = 2 upward. Normalizing the vector sum to unit length
-    # preserves the net directional threat while ensuring repulsive fear (weight rho_s = 1.0)
-    # never overpowers mutual flock attraction (weight c = 1.05).
+    # Normalize combined dog push to unit length.
+    # Linear addition would overpower sheep cohesion (c = 1.05): two dogs flanking
+    # at theta < 116 deg produce 2*cos(theta/2) > 1.05, tearing the herd apart at D >= 2.
     near = dist < r_s
     units = to_dogs / np.maximum(dist, EPS)[:, :, None]
     return unit_rows((units * near[:, :, None]).sum(axis=1))
@@ -138,11 +107,10 @@ def velocities(
         + float(config["rs_weight"]) * push
         + float(config["noise_strength"]) * angle_vectors(draws.noise_angle[idx])
     )
-    # Sheep velocity is strictly clamped to constant speed (delta = 1.0 m per 1.0 s tick).
-    # Crucial scientific consequence: Unlike continuous-force models (e.g. Kubo) where additional
-    # dogs accelerate the herd via additive potential fields, Strömbom sheep cannot physically
-    # exceed 1.0 m/s. Consequently, beyond the saturation threshold D_sat, surplus shepherds cannot
-    # reduce completion time on cohesive flocks, explaining the flat completion plateau.
+    # Sheep speed is fixed at 1.0 m/s.
+    # Unlike continuous models (e.g. Kubo), adding more dogs cannot push sheep
+    # faster than 1 m/s, which creates the flat completion time plateau at D_sat.
+
     out[idx] = unit_rows(heading) * speed
     return out
 

@@ -1,12 +1,7 @@
-"""Farthest-agent targeting (dog_controller=fat).
+"""Farthest-agent targeting controller (FAT).
 
-Each dog independently pushes the sheep farthest from the goal: it aims r_a behind that sheep
-relative to the goal and moves with the Strombom shepherd step (noise and stop rule); the
-dogs do not coordinate. Every dog sees every sheep, so they all choose the same sheep and
-become copies of each other once they meet, which the ``dog_overlap`` metric shows.
-
-This is a HerdSim construction: it borrows the target choice of Kubo 2022's
-farthest-individual rule (FIT) but not its forces or speeds, so it is not FIT.
+Each dog targets a position distance r_a behind the sheep farthest from the goal,
+stepping via Strömböm shepherd dynamics without inter-dog coordination.
 """
 
 from __future__ import annotations
