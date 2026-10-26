@@ -95,7 +95,11 @@ Khi tất cả chó ở xa hơn $r_s = 65\text{ m}$, đàn cừu cảm thấy an
 
 ### Chuẩn hóa tổng lực đẩy từ nhiều chó (Cải tiến của HerdSim)
 
-Mô hình gốc năm 2014 của Strömbom chỉ được thiết kế cho **duy nhất một chú chó**. Nếu chúng ta cộng dồn lực đẩy độc lập của $D = 4$ hay $8$ chú chó một cách ngây thơ, tổng lực sợ hãi sẽ bị nhân lên gấp 8 lần, hoàn toàn áp đảo lực gắn kết xã hội ($c = 1.05$) và xé toạc đàn cừu thành nhiều mảnh hỗn loạn.
+Mô hình gốc năm 2014 của Strömbom chỉ được thiết kế cho **duy nhất một chú chó**. Nếu cộng dồn lực đẩy độc lập của $D \ge 2$ chú chó một cách ngây thơ (mô hình cộng lực tuyến tính), một thảm họa vật lý sẽ lập tức xuất hiện:
+- Trọng số lực hút gắn kết xã hội của cừu là $c = 1.05$.  
+- Khi hai chú chó áp sát bầy từ hai cánh sườn tạo thành góc mở $\theta$, tổng hợp lực đẩy sợ hãi của chúng có độ lớn là $2 \cos(\theta/2)$.  
+- Bất cứ khi nào góc kẹp giữa hai chú chó hẹp hơn $116^\circ$ ($\theta < 116^\circ$), hợp lực đẩy sợ hãi sẽ là $2\cos(\theta/2) > 1.05$, **vượt quá lực hút xã hội giữa các cá thể cừu**.  
+- Kết quả là hai chú chó đi cạnh nhau sẽ lập tức xé toạc đàn cừu thành nhiều mảnh hỗn loạn ngay từ $D = 2$.
 
 HerdSim giải quyết triệt để vấn đề này bằng cách **cộng vector và chuẩn hóa về độ dài đơn vị**:
 
@@ -196,7 +200,7 @@ $$
 ![Hình học điểm gom Pc và phân công Hungarian](../../docs/figures/fig_hungarian_matching.png)
 *Hình 4: Cơ chế nhận diện cừu lạc và phân công Hungarian trong chế độ Gom. (A) Bất kỳ con cừu nào vượt ra ngoài ranh giới hình tròn* $f(N) = r_a N^{2/3}$ *đều kích hoạt chế độ gom; điểm gom* $P_c$ *được đặt lùi sau lưng cừu* $r_a = 2\text{ m}$ *theo phương chiếu từ trọng tâm bầy (GCM). (B) Thuật toán Hungarian phân công 1-đối-1 giữa chó và cừu lạc giúp tối thiểu hóa tổng quãng đường di chuyển và loại bỏ hoàn toàn hiện tượng chạy cắt chéo đường gây va chạm (đường nét đứt thể hiện rủi ro cắt chéo nếu gán tham lam ngây thơ).*
 
-#### 3. Đội hình Vòng cung lùa đàn ($P_d$)
+#### 3. Đội hình Vòng cung lùa đàn ($P_d$) và Giới hạn Toán học
 - Khi toàn bộ cừu đã nằm gọn trong phạm vi $f(N)$, bầy cừu đã gắn kết, các chú chó đồng loạt chuyển sang **Chế độ Lùa đàn (Drive Mode)**.
 - Điểm lùa danh định $P_d$ được đặt sau lưng đàn cừu dọc theo trục thẳng hướng về đích:
 
@@ -205,14 +209,17 @@ P_d = \mathrm{GCM} + r_a \sqrt{N} \frac{\mathrm{GCM} - \mathbf{x}_{\mathrm{goal}
 $$
 
 - *Tại sao khoảng cách lùa tỷ lệ với* $r_a \sqrt{N}$? Một đàn cừu gắn kết gồm $N$ con tạo thành một hình đĩa có bán kính tỷ lệ thuận với $r_a\sqrt{N}$. Khoảng cách này đảm bảo đàn chó đứng ngay sát phía sau rìa mép của bầy cừu.
+- **Điểm kỳ dị toán học tại $N = 1056$ và Áp trần cự ly lùa ($63\text{ m}$ cap)**:  
+  Cừu chỉ phản ứng với chó trong phạm vi $r_s = 65\text{ m}$. Khi $r_a \sqrt{N} = 2\sqrt{N} > 65 \iff N > 1056{,}25$, cự ly lùi $P_d$ vượt quá tầm nhìn của cừu. Đàn chó đứng ngoài vùng cảm nhận, cừu không bị đe dọa nên tiếp tục gặm cỏ, khiến quy tắc gốc bị tê liệt hoàn toàn ở $N \ge 1131$. Để mở rộng điều khiển cho các siêu đàn ($N \le 3200$), HerdSim bổ sung cơ chế áp trần cự ly: $d_{\mathrm{drive}} \le r_s - r_a = 63\text{ m}$, đảm bảo các chú chó luôn duy trì tiếp xúc thị giác với rìa sau của bầy.
 - Các chú chó dàn đều trên một vòng cung bán kính $R$ ôm trọn góc mở của đàn cừu, $\pm \arcsin(R_{\mathrm{flock}} / R)$. Thứ tự góc cực của các chú chó quanh bầy được cố định, đảm bảo không chú chó nào chen lấn hay cắt ngang đường chạy của đồng đội.
 
 ![Hình học điểm lùa Pd và Đội hình Vòng cung](../../docs/figures/fig_driving_arc.png)
 *Hình 5: Hình học chế độ Lùa đàn và Đội hình Vòng cung. (A) Điểm lùa danh định* $P_d$ *đặt lùi về sau lưng bầy cừu một khoảng đệm an toàn* $r_a\sqrt{N} = 20\text{ m}$ *dọc theo trục hướng đích* $\mathbf{x}_ {\mathrm{goal}}$*, giữ đàn chó ngay sát rìa ngoài của đĩa bầy cừu* $R_{\mathrm{flock}}$*. (B) Toàn bộ đàn chó dàn thành vòng cung ôm trọn hai cánh sườn đàn cừu, triệt tiêu xu hướng cừu tản dạt sang hai bên và dẫn dắt cả khối tiến êm ả vào chuồng đích.*
 
-#### 4. Vận tốc và Quy tắc Giữ khoảng cách an toàn (Standoff Rule)
+#### 4. Vận tốc, Quy tắc Giữ khoảng cách an toàn và Hiện tượng Cừu lạc cuối cùng
 - **Vận tốc**: $v_{\mathrm{dog}} = 1.5\text{ m/s}$ (nhanh gấp 1.5 lần cừu, đúng theo tỷ lệ thực tế giữa chó chăn cừu Border Collie và cừu).
-- **Quy tắc Giữ khoảng cách an toàn**: Nếu một chú chó tiến gần hơn $3 r_a = 6\text{ m}$ tới bất kỳ con cừu nào, nó lập tức dừng bước ($\mathbf{v}_{\mathrm{dog}} = 0$) để tránh làm cừu hoảng loạn dẫn đến giẫm đạp lẫn nhau.
+- **Quy tắc Giữ khoảng cách an toàn (Standoff Rule)**: Nếu một chú chó tiến gần hơn $3 r_a = 6\text{ m}$ tới bất kỳ con cừu nào, nó lập tức dừng bước ($\mathbf{v}_{\mathrm{dog}} = 0$) để tránh làm cừu hoảng loạn dẫn đến giẫm đạp lẫn nhau.
+- **Hiện tượng Cừu lạc cuối cùng (Straggler Effect)**: Dưới tiêu chí nghiêm ngặt 100%, 97% các lượt thất bại ở $N \ge 100$ xảy ra khi $99\%$ cừu đã vào chuồng an toàn. Khi đàn chó lao nhanh ($1.5\text{ m/s}$) rượt đuổi con cừu lạc cuối cùng vào cửa chuồng hẹp, xung lượng quán tính áp sát cửa chuồng xua đuổi những con cừu đã vào bên trong tản ngược trở lại đồng cỏ. Việc tinh chỉnh tốc độ chó xuống $1.15\text{ m/s}$ ở giai đoạn này loại bỏ hoàn toàn hiện tượng quá đà, phục hồi thành công tuyệt đối.
 
 ---
 

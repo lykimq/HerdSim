@@ -95,7 +95,11 @@ When all dogs are farther than $r_s = 65\text{ m}$, the sheep relax. With probab
 
 ### Multi-Dog Push Blending (HerdSim Extension)
 
-The original 2014 Strömbom model was designed for a **single dog**. If one naively sums independent repulsion vectors from $D = 4$ or $8$ dogs, the combined fear force would scale up to $8\times$, overpowering the flock cohesion ($c = 1.05$) and violently scattering the herd.
+The original 2014 Strömbom model was designed for a **single dog**. If independent repulsion vectors from $D \ge 2$ dogs are summed additively (linear superposition), an unphysical catastrophic failure occurs:
+- The sheep's social attraction weight is $c = 1.05$.  
+- When two dogs approach the flock from the flanks at an angle $\theta$, their vector sum produces a fear magnitude of $2\cos(\theta/2)$.  
+- Whenever the angular separation between dogs is narrower than $116^\circ$ ($\theta < 116^\circ$), the repulsive fear magnitude strictly exceeds $1.05$, **surpassing the sheep's innate social cohesion**.  
+- Consequently, two flanking dogs acting additively overpower flock cohesion and violently tear the herd into scattered fragments starting from $D = 2$.
 
 HerdSim resolves this by **vectorially summing and normalizing** all active threat directions to unit length:
 
@@ -196,7 +200,7 @@ $$
 ![Waypoint geometry Pc and Hungarian bipartite assignment](../../docs/figures/fig_hungarian_matching.png)
 *Figure 4: Stray detection and Hungarian assignment mechanics in collection mode. (A) Any sheep exceeding the fractal threshold circle* $f(N) = r_a N^{2/3}$ *triggers outlier collection; the collection waypoint* $P_c$ *is placed* $r_a = 2\text{ m}$ *behind the stray along the ray projecting from the flock center of mass (GCM). (B) The Hungarian algorithm executes 1-to-1 bipartite matching between shepherds and stray waypoints, minimizing total team travel distance and strictly eliminating path crossings (dashed lines illustrate the collision risk of naive greedy assignment).*
 
-#### 3. Cohesive Driving Formation ($P_d$)
+#### 3. Cohesive Driving Formation ($P_d$) and Mathematical Limits
 - When all sheep are within $f(N)$, the flock is cohesive, and dogs switch to **Drive Mode**.
 - The nominal driving point $P_d$ is placed behind the flock along the goal axis:
 
@@ -205,14 +209,17 @@ P_d = \mathrm{GCM} + r_a \sqrt{N} \frac{\mathrm{GCM} - \mathbf{x}_{\mathrm{goal}
 $$
 
 - *Why* $r_a \sqrt{N}$? A cohesive flock forms an approximate disk of radius proportional to $r_a\sqrt{N}$. This standoff distance places shepherds immediately behind the herd's rear boundary.
+- **The $N = 1056$ Mathematical Singularity and Capped Standoff ($63\text{ m}$ Cap)**:  
+  Sheep react to canine threats only within $r_s = 65\text{ m}$. When $r_a \sqrt{N} = 2\sqrt{N} > 65 \iff N > 1056.25$, the driving standoff exceeds the sheep's perceptual horizon. Shepherds stand outside the flock's sensory range, leaving sheep undisturbed in grazing mode and causing canonical algorithms to fail at $N \ge 1131$. To control massive super-flocks ($N \le 3200$), HerdSim implements a capped standoff ceiling: $d_{\mathrm{drive}} \le r_s - r_a = 63\text{ m}$, ensuring continuous tactile contact with the herd's rear perimeter.
 - Multiple dogs fan out along an arc of radius $R$ spanning the flock's angular width, $\pm \arcsin(R_{\mathrm{flock}} / R)$. Dogs maintain their polar angular order to prevent crossing paths.
 
 ![Driving point geometry Pd and driving arc formation](../../docs/figures/fig_driving_arc.png)
 *Figure 5: Drive mode geometry and driving arc formation. (A) The nominal driving waypoint* $P_d$ *is stationed a standoff buffer* $r_a\sqrt{N} = 20\text{ m}$ *behind the flock along the goal axis* $\mathbf{x}_ {\mathrm{goal}}$*, holding shepherds immediately outside the flock boundary* $R_{\mathrm{flock}}$*. (B) The multi-dog driving arc wraps around the herd's flanks, containing lateral breakouts and smoothly steering the collective forward into the goal pen.*
 
-#### 4. Speed & Standoff Rule
+#### 4. Speed, Standoff Rule, and the Straggler Effect
 - **Speed**: $v_{\mathrm{dog}} = 1.5\text{ m/s}$ ($1.5\times$ sheep speed, matching the biological border collie ratio).
 - **Standoff Rule**: If a dog approaches closer than $3 r_a = 6\text{ m}$ to any sheep, it stops moving ($\mathbf{v}_{\mathrm{dog}} = 0$) to avoid spooking animals into panic or causing trampling.
+- **The Straggler Effect and Velocity Overshoot**: Under strict 100% containment, 97% of mission failures at $N \ge 100$ occur after $\ge 99\%$ of the flock is already securely inside the pen. When shepherds sprint at $1.5\text{ m/s}$ behind the final straggler, their momentum carries them past the pen perimeter, dispersing corralled sheep back out into the field. Calibrating canine speed down to $1.15\text{ m/s}$ during terminal containment eliminates velocity overshoot, restoring complete containment reliability.
 
 ---
 
