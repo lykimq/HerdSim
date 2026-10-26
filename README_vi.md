@@ -163,14 +163,18 @@ HerdSim/
 
 HerdSim duy trì hệ thống tài liệu chuyên sâu được phân loại rõ ràng theo từng chủ đề:
 
-| Tài liệu | Mô tả |
-| :--- | :--- |
-| **Báo cáo Khoa học Đầy đủ**<br>[`docs/report/d_min_report_vi.md`](docs/report/d_min_report_vi.md) ([EN](docs/report/d_min_report.md)) | Chuyên khảo nghiên cứu toàn diện: tất cả 12 phát hiện, bảng số liệu, đường cong tăng trưởng và thảo luận. |
-| **Mô hình Tác tử & Thuật toán**<br>[`docs/methods/models_vi.md`](docs/methods/models_vi.md) ([EN](docs/methods/models.md)) | Công thức toán học của cừu, thuật toán phối hợp đa chó Hungarian matching, vòng cung lùa, các mô hình đối chứng, và hai mô hình Kubo và Lama. |
-| **Thiết kế Thực nghiệm & Vì sao chọn $N, D$**<br>[`docs/experiments/task_design_vi.md`](docs/experiments/task_design_vi.md) ([EN](docs/experiments/task_design.md)) | Tính bất biến quy mô $R_f(N)$, chuẩn hóa deadline $T_{\mathrm{drive}}$, lấy mẫu thích ứng và cơ sở lựa chọn các giới hạn $N, D$, và nhiệm vụ gom. |
-| **Hướng dẫn Cấu hình & Protocol**<br>[`docs/guides/configuration.md`](docs/guides/configuration.md) | Cơ chế kế thừa file YAML, giải thích các cờ tham số mở rộng và cấu trúc thư mục lưu trữ kết quả. |
-| **Sổ tay Dòng lệnh CLI**<br>[`docs/guides/cli_reference.md`](docs/guides/cli_reference.md) | Hướng dẫn sử dụng các lệnh CLI để lập kế hoạch, chạy chiến dịch và thực thi replay chẩn đoán. |
-| **Kiến trúc Mã nguồn Phần mềm**<br>[`docs/codes/architecture.md`](docs/codes/architecture.md) | Hướng dẫn chuyên sâu về thiết kế codebase, hệ sinh thái plugin và cách mở rộng các bộ điều khiển mới. |
+- **Báo cáo Khoa học Đầy đủ** ([`docs/report/d_min_report_vi.md`](docs/report/d_min_report_vi.md) · [EN](docs/report/d_min_report.md))  
+  Chuyên khảo nghiên cứu toàn diện: tất cả 12 phát hiện, bảng số liệu, đường cong tăng trưởng và thảo luận.
+- **Mô hình Tác tử & Thuật toán** ([`docs/methods/models_vi.md`](docs/methods/models_vi.md) · [EN](docs/methods/models.md))  
+  Công thức toán học của cừu, thuật toán phối hợp đa chó Hungarian matching, vòng cung lùa, các mô hình đối chứng, và hai mô hình Kubo và Lama.
+- **Thiết kế Thực nghiệm & Vì sao chọn $N, D$** ([`docs/experiments/task_design_vi.md`](docs/experiments/task_design_vi.md) · [EN](docs/experiments/task_design.md))  
+  Tính bất biến quy mô $R_f(N)$, chuẩn hóa deadline $T_{\mathrm{drive}}$, lấy mẫu thích ứng và cơ sở lựa chọn các giới hạn $N, D$, và nhiệm vụ gom.
+- **Hướng dẫn Cấu hình & Protocol** ([`docs/guides/configuration.md`](docs/guides/configuration.md))  
+  Cơ chế kế thừa file YAML, giải thích các cờ tham số mở rộng và cấu trúc thư mục lưu trữ kết quả.
+- **Sổ tay Dòng lệnh CLI** ([`docs/guides/cli_reference.md`](docs/guides/cli_reference.md))  
+  Hướng dẫn sử dụng các lệnh CLI để lập kế hoạch, chạy chiến dịch và thực thi replay chẩn đoán.
+- **Kiến trúc Mã nguồn Phần mềm** ([`docs/codes/architecture.md`](docs/codes/architecture.md))  
+  Hướng dẫn chuyên sâu về thiết kế codebase, hệ sinh thái plugin và cách mở rộng các bộ điều khiển mới.
 
 ---
 

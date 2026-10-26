@@ -163,14 +163,18 @@ HerdSim/
 
 HerdSim maintains structured documentation categorized by audience and topic:
 
-| Document | Description |
-| :--- | :--- |
-| **Scientific Report**<br>[`docs/report/d_min_report.md`](docs/report/d_min_report.md) | Full research monograph: all 12 findings, empirical analysis, scaling fits, and discussion. |
-| **Agent Models & Algorithms**<br>[`docs/methods/models.md`](docs/methods/models.md) | Mathematical formulation of sheep flocking, multi-dog coordination, Hungarian matching, baselines, and the Kubo and Lama models. |
-| **Task Design & Grid Rationale**<br>[`docs/experiments/task_design.md`](docs/experiments/task_design.md) | Scale invariance, arena geometry $R_f(N)$, normalized deadlines $T_{\mathrm{drive}}$, why $N$ and $D$ stop where they do, and the gather task. |
-| **Configuration Guide**<br>[`docs/guides/configuration.md`](docs/guides/configuration.md) | How YAML protocols inherit, explanation of follow-up flags, and output folder structure. |
-| **CLI & Workflow Reference**<br>[`docs/guides/cli_reference.md`](docs/guides/cli_reference.md) | Command-line guide for planning, executing campaigns, and running diagnostic replays. |
-| **Software Architecture**<br>[`docs/codes/architecture.md`](docs/codes/architecture.md) | Deep dive into codebase design, plugin registry, and extension patterns for developers. |
+- **Scientific Report** ([`docs/report/d_min_report.md`](docs/report/d_min_report.md))  
+  Full research monograph: all 12 findings, empirical analysis, scaling fits, and discussion.
+- **Agent Models & Algorithms** ([`docs/methods/models.md`](docs/methods/models.md))  
+  Mathematical formulation of sheep flocking, multi-dog coordination, Hungarian matching, baselines, and the Kubo and Lama models.
+- **Task Design & Grid Rationale** ([`docs/experiments/task_design.md`](docs/experiments/task_design.md))  
+  Scale invariance, arena geometry $R_f(N)$, normalized deadlines $T_{\mathrm{drive}}$, why $N$ and $D$ stop where they do, and the gather task.
+- **Configuration Guide** ([`docs/guides/configuration.md`](docs/guides/configuration.md))  
+  How YAML protocols inherit, explanation of follow-up flags, and output folder structure.
+- **CLI & Workflow Reference** ([`docs/guides/cli_reference.md`](docs/guides/cli_reference.md))  
+  Command-line guide for planning, executing campaigns, and running diagnostic replays.
+- **Software Architecture** ([`docs/codes/architecture.md`](docs/codes/architecture.md))  
+  Deep dive into codebase design, plugin registry, and extension patterns for developers.
 
 ---
 
