@@ -802,5 +802,5 @@ Nhằm đảm bảo tính trung thực học thuật và cho phép chuyên gia p
 | **Dữ liệu Thô (Raw Data)** | `Verified` | Đầy đủ 367.150 bản ghi tại `results/<protocol>/trials.jsonl` và tệp tổng kết `trials.csv`. |
 | **Quy trình Thực thi (Command)**| `Verified` | Chuỗi lệnh duy nhất: `uv run cli/campaign.py run --protocol <id>` và `uv run cli/run_queue.py`. |
 | **Mã Phân tích Bảng** | `Verified` | `cli/dmin_tables.py` xuất tự động toàn bộ số liệu sang [results_tables.md](results_tables.md). |
-| **Kiểm thử Tự động (Tests)** | `Verified` | `make test` thực thi 28 bộ kiểm thử đơn vị, kiểm thử tầng phân cấp kiến trúc (`tests/test_layers.py`). |
+| **Kiểm thử Tự động (Tests)** | `Verified` | `make test` chạy 330 kiểm thử đơn vị, bất biến và hồi quy; `make bench` chạy 23 chiến dịch thu nhỏ. |
 | **Kiểm chứng Replay Bit-Identical**| `Verified` | `services/replay.py` kiểm định 932 lượt chạy lại; xác nhận trùng khớp trạng thái từng tích tắc 100%. |

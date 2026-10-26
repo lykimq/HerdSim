@@ -1,7 +1,8 @@
-# The slower dog (dmin_s_dogspeed.yaml) with success at 99 percent of the flock in the goal.
-# With the strict rule the slower dog needs fewer dogs than the base at large N although both
-# bring 99 percent of the flock in at the same time; this run asks whether that gap is left once
-# a straggler cannot decide a trial. Compare with dmin_f99_s_base.
+# The slower dog (dmin_s_dogspeed) with the 99 percent rule. Compare with dmin_f99_s_base.
+#
+# Under the strict rule the slower dog needs fewer dogs than the base at large N, though
+# both bring 99 percent of the flock in at the same time. Does that gap stay once a
+# straggler cannot decide a trial?
 
 protocol_id: dmin_f99_s_dogspeed
 output: results/dmin_f99_s_dogspeed

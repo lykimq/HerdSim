@@ -31,31 +31,31 @@ class Method:
 
 
 METHODS: dict[str, Method] = {
-    # Strömböm flock with multi-dog collect/drive heuristic.
+    # Strombom sheep, multi-dog collect/drive built on the paper's shepherd rule.
     "strombom_multi": Method(
         sheep_model="strombom",
         dog_controller="collect_drive_multi",
         defaults={**strombom.PAPER, **strombom.SHEPHERD_EXTENSIONS},
     ),
-    # Strömböm flock with independent farthest-agent targeting dogs.
+    # Strombom sheep, independent farthest-agent dogs.
     "fat": Method(
         sheep_model="strombom",
         dog_controller="fat",
         defaults={**strombom.PAPER, **strombom.SHEPHERD_EXTENSIONS},
     ),
-    # Strömböm flock with independent single-agent dogs (no team coordination layer).
+    # Strombom sheep, every dog an independent copy of the paper's shepherd (no team layer).
     "independent": Method(
         sheep_model="strombom",
         dog_controller="independent",
         defaults={**strombom.PAPER, **strombom.SHEPHERD_EXTENSIONS},
     ),
-    # Kubo force-based sheep and dog dynamics.
+    # Kubo sheep and Kubo force dogs.
     "kubo": Method(
         sheep_model="kubo",
         dog_controller="kubo_forces",
         defaults={**kubo.PAPER, **kubo.NOT_IN_PAPER},
     ),
-    # Lama & di Bernardo distributed herding with stochastic targets.
+    # Lama and di Bernardo 2024: Brownian targets with no cohesion, herders with local sensing.
     "lama": Method(
         sheep_model="lama_targets",
         dog_controller="lama_herders",

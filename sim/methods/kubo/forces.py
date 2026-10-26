@@ -1,8 +1,24 @@
-"""Vectorized force calculations for the Kubo et al. 2022 herding model.
+"""Kubo et al. 2022 force terms, vectorised.
 
-Computes sheep velocity components (repulsion, alignment, attraction, flee)
-and dog velocity components (target approach, target standoff, goal repulsion,
-and inter-dog repulsion).
+Sheep (eqs. 2-6): u = K_s1 a + K_s2 b + K_s3 c + K_s4 d, with means over the sheep and
+dogs inside the sheep field of view:
+    a = mean (x_i - x_j) / |x_i - x_j|^2      repulsion
+    b = mean v_j / |v_j|                      alignment (previous velocities)
+    c = -mean (x_i - x_j) / |x_i - x_j|       attraction
+    d = mean (x_i - X_j) / |x_i - X_j|^3      flee from dogs
+
+Dog (eqs. 8-12): v = K_f1 A + K_f2 B + K_f3 C + K_f4 D, with T the target sheep:
+    A = -(X - T) / |X - T|                    toward the target
+    B = (X - T) / |X - T|^3                   keep off the target
+    C = (X - G) / |X - G|                     keep away from the goal
+    D = mean (X_i - X_j) / |X_i - X_j|^3      repulsion from other dogs
+
+The alignment mean b runs over the moving sheep in view only: a sheep at rest has no
+heading, so it is left out of both the sum and the count. Only at tick 0 does that differ
+from the paper's mean over every sheep, and then b = 0 either way.
+
+Eq. 11 is printed with a minus sign, but the text ("keep away from goal G") and the
+stability analysis (eq. 14) need the plus sign used here.
 """
 
 from __future__ import annotations
@@ -74,7 +90,7 @@ def dog_velocity(
     other_dogs: np.ndarray,
     config: dict[str, Any],
 ) -> np.ndarray:
-    """Calculate net velocity force vector for a single dog toward its assigned target."""
+    """Unclamped velocity of one dog (eq. 8); ``target`` is the sheep farthest from the goal."""
     to_target = dog - target
     d_t = max(float(np.linalg.norm(to_target)), FLOOR)
     to_goal = dog - goal

@@ -1,4 +1,4 @@
-"""Goal holding duration, standoff withdrawal at goal, and inter-dog spacing constraints."""
+"""Holding (hold time, withdrawal) and dog spacing."""
 
 from __future__ import annotations
 

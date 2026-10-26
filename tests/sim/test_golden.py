@@ -1,7 +1,13 @@
 """Regression: short real trials must reproduce frozen outcomes, and a seed must replay exactly.
 
-Values are whole-trial summaries compared with a tolerance; end-point positions are
-too chaotic to pin.
+Any change to the sheep or dog dynamics, the task setup, the config build or the metrics
+shows up here. Update the values only on an intended behaviour change, in the same change,
+with a note why.
+
+The dynamics are chaotic, so the last floating-point bits (which differ across CPUs and
+NumPy builds) grow over a few hundred ticks. Values are whole-trial summaries compared with
+a tolerance; end-point positions are too chaotic to pin. Bit-exact replay on one machine is
+the second test.
 """
 
 from __future__ import annotations

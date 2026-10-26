@@ -184,7 +184,7 @@ sim/            the model: one trial, tick by tick
 | `diagnostics/pressure_replay.py` | `services/replay.py`, `analysis/pressure.py` |
 | `diagnostics/split_diagnostic.py` | `services/replay.py` |
 
-`tests/test_layers.py` checks that the arrows only point down, so these changes stay small:
+Imports only point down the arrows, so these changes stay small:
 
 - To remove a tool, delete its file and its section on this page. Nothing else depends on it.
 - To add a table, write the function in `analysis/` and add a verb to `dmin_tables.py`.

@@ -268,5 +268,4 @@ Some things the current design doesn't handle yet, and would need real changes:
 | Pressure on the flock in a replay | `analysis/pressure.py`, `cli/diagnostics/pressure_replay.py` |
 | Diagnostic replays of the split layout | `cli/diagnostics/split_diagnostic.py` |
 | Command-line entry points | `cli/` (see `cli/README.md`) |
-| Layer rules | `tests/test_layers.py` |
 | Regression tests | `tests/sim/test_golden.py` |

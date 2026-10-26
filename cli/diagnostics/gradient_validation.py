@@ -1,160 +1,121 @@
-"""Validates how accurately Local Density Gradients approximate Global Center of Mass (GCM).
+"""How well a sheep could find the flock centre from its nearest neighbours alone.
 
-In canonical Strömbom dynamics, sheep compute social cohesion attracted to the GCM of
-the whole flock (LCM with n = N - 1). This diagnostic evaluates whether individuals can
-estimate the flock centroid direction purely from local density gradients over their
-k-nearest topological neighbors, without requiring omniscient global sensing.
+    uv run cli/diagnostics/gradient_validation.py --seeds 10
 
-For each sheep i:
-1. True GCM direction: v_GCM = (GCM - x_i) / ||GCM - x_i||
-2. Local density gradient: g_local = sum_{j in N_k(i)} (x_j - x_i) / ||x_j - x_i||
-3. Angular error: theta_err = arccos(clip(v_GCM . (g_local / ||g_local||), -1, 1))
-
-Outputs the mean and median angular errors (in degrees) across k for each layout.
+Strombom 2014 attracts a sheep toward the centre of its n nearest neighbours, which with
+n = N - 1 is the centre of the whole flock. This asks how far off a sheep would be with a
+small n: for each sheep in the outer half of a start layout, the angle between the direction
+to the flock centroid and the sum of unit vectors toward its k nearest neighbours. Start
+layouts only, no dynamics. Prints the mean, median and spread of that angle per layout, N
+and k.
 """
 
 from __future__ import annotations
 
 import argparse
+import sys
+from pathlib import Path
 from typing import Any
 
 import numpy as np
 from scipy.spatial import cKDTree
 
-from sim.core.world.layouts import LAYOUTS, place_flock
-from tests.helpers import config_for
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from services.cells import Cell, Group, cell_config  # noqa: E402
+from services.protocol import load_protocol  # noqa: E402
+from sim.core.world.layouts import LAYOUTS, place_flock  # noqa: E402
+
+# Flock radii R_f as calibrated for the main runs; they only size the compact layout here.
+FLOCK_RADIUS = {25: 6.2, 100: 9.08, 400: 11.4}
+PROTOCOL = "dmin_pilot"  # any drive protocol with the four layouts; only its settings are used
+FLOCK_SIZES = (25, 100, 400)
+K_VALUES = (3, 5, 7, 10, 15)
 
 
 def evaluate_flock_gradient_error(
-    positions: np.ndarray,
-    k_neighbors: int,
-    *,
-    outer_only: bool = True,
+    positions: np.ndarray, k_neighbors: int, *, outer_only: bool = True
 ) -> np.ndarray:
-    """Computes angular error (in degrees) between local density gradient and GCM for sheep.
+    """Angle in degrees, per evaluated sheep, between the direction to the centroid and the
+    sum of unit vectors toward its ``k_neighbors`` nearest neighbours.
 
-    Parameters
-    ----------
-    positions:
-        Array of shape (N, 2) containing sheep coordinates.
-    k_neighbors:
-        Number of nearest topological neighbors to include in density gradient.
-    outer_only:
-        If True, only evaluate sheep farther than median distance from centroid,
-        where heading toward the flock center is physically meaningful.
-
-    Returns
-    -------
-    Array of angular errors in degrees for the evaluated sheep.
+    With ``outer_only`` only the sheep beyond the median distance from the centroid are
+    evaluated, where "toward the centre" has a meaning. A sheep whose neighbour sum is zero
+    is skipped. One zero for a flock too small to have k neighbours.
     """
     n = len(positions)
     if n <= k_neighbors:
         return np.array([0.0])
-
     centroid = positions.mean(axis=0)
-    dists_to_centroid = np.linalg.norm(positions - centroid, axis=1)
-
-    if outer_only:
-        mask = dists_to_centroid >= np.median(dists_to_centroid)
-    else:
-        mask = np.ones(n, dtype=bool)
-
-    if not mask.any():
+    to_centroid = centroid - positions
+    radius = np.linalg.norm(to_centroid, axis=1)
+    chosen = radius >= np.median(radius) if outer_only else np.ones(n, dtype=bool)
+    if not chosen.any():
         return np.array([0.0])
 
-    tree = cKDTree(positions)
-    # Query k + 1 neighbors (first neighbor is self at distance 0)
-    _, indices = tree.query(positions[mask], k=k_neighbors + 1)
+    _, neighbours = cKDTree(positions).query(positions[chosen], k=k_neighbors + 1)
+    neighbours = neighbours[:, 1:]  # the first neighbour is the sheep itself
+    offsets = positions[neighbours] - positions[chosen][:, None, :]  # (m, k, 2)
+    lengths = np.linalg.norm(offsets, axis=2, keepdims=True)
+    gradient = (offsets / np.maximum(lengths, 1e-12)).sum(axis=1)
 
-    eval_positions = positions[mask]
-    to_gcm = centroid - eval_positions
-    norm_to_gcm = np.linalg.norm(to_gcm, axis=1, keepdims=True)
-    norm_to_gcm[norm_to_gcm == 0] = 1.0
-    u_gcm = to_gcm / norm_to_gcm
+    gradient_length = np.linalg.norm(gradient, axis=1)
+    ok = gradient_length > 0.0
+    unit_centroid = to_centroid[chosen][ok] / np.maximum(radius[chosen][ok], 1e-12)[:, None]
+    unit_gradient = gradient[ok] / gradient_length[ok][:, None]
+    cosine = np.clip(np.sum(unit_centroid * unit_gradient, axis=1), -1.0, 1.0)
+    return np.degrees(np.arccos(cosine))
 
-    angular_errors: list[float] = []
-    for i, row in enumerate(indices):
-        neighbor_idx = row[1:]  # Exclude self
-        rel_vectors = positions[neighbor_idx] - eval_positions[i]
-        dists = np.linalg.norm(rel_vectors, axis=1, keepdims=True)
-        dists[dists == 0] = 1.0
-        # Local density gradient points toward average neighbor direction
-        g_local = np.sum(rel_vectors / dists, axis=0)
-        norm_g = np.linalg.norm(g_local)
-        if norm_g == 0:
-            continue
-        u_local = g_local / norm_g
-        dot_prod = float(np.clip(np.dot(u_gcm[i], u_local), -1.0, 1.0))
-        angle_deg = float(np.degrees(np.arccos(dot_prod)))
-        angular_errors.append(angle_deg)
 
-    return np.array(angular_errors)
+def _start_config(protocol: Any, n: int, layout: str) -> dict[str, Any]:
+    cell = Cell(Group("strombom_multi", layout, (), n), 1)
+    return cell_config(protocol, cell, FLOCK_RADIUS[n])
 
 
 def run_gradient_validation(
     *,
-    flock_sizes: tuple[int, ...] = (25, 100, 400),
+    flock_sizes: tuple[int, ...] = FLOCK_SIZES,
     layouts: tuple[str, ...] = LAYOUTS,
-    k_values: tuple[int, ...] = (3, 5, 7, 10, 15),
+    k_values: tuple[int, ...] = K_VALUES,
     n_seeds: int = 10,
 ) -> dict[str, Any]:
-    """Runs density gradient benchmark across flock sizes, layouts, and neighbor counts."""
+    """results[layout][n][k] = mean, median and standard deviation of the angle in degrees
+    over ``n_seeds`` start flocks."""
+    protocol = load_protocol(PROTOCOL)
     results: dict[str, Any] = {}
-
     for layout in layouts:
         results[layout] = {}
         for n in flock_sizes:
+            config = _start_config(protocol, n, layout)
+            flocks = [place_flock(config, np.random.default_rng(2026 + s)) for s in range(n_seeds)]
             results[layout][n] = {}
             for k in k_values:
                 if k >= n:
                     continue
-                errors: list[float] = []
-                for seed in range(n_seeds):
-                    rng = np.random.default_rng(2026 + seed)
-                    config = config_for("strombom_multi", n=n, layout=layout)
-                    positions = place_flock(config, rng)
-                    errs = evaluate_flock_gradient_error(positions, k)
-                    errors.extend(errs.tolist())
-
+                errors = np.concatenate([evaluate_flock_gradient_error(f, k) for f in flocks])
                 results[layout][n][k] = {
-                    "mean_deg": float(np.mean(errors)),
+                    "mean_deg": float(errors.mean()),
                     "median_deg": float(np.median(errors)),
-                    "std_deg": float(np.std(errors)),
+                    "std_deg": float(errors.std()),
                 }
-
     return results
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Validate Local Density Gradient vs GCM.")
-    parser.add_argument("--seeds", type=int, default=10, help="Number of random seeds per cell.")
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    parser.add_argument("--seeds", type=int, default=10, help="start flocks per layout and N")
     args = parser.parse_args()
 
-    print("=" * 80)
-    print("HerdSim Diagnostic: Local Density Gradient vs Global Center of Mass (GCM)")
-    print("=" * 80)
-    print(
-        f"Sampling {args.seeds} seeds per layout across N in [25, 100, 400] and k in [3..15]...\n"
-    )
-
     results = run_gradient_validation(n_seeds=args.seeds)
-
-
     for layout in LAYOUTS:
-        print(f"\n--- Layout: {layout.upper()} ---")
-        print(f"{'N':>5} | {'k':>4} | {'Mean Error':>12} | {'Median Error':>14} | {'Std Dev':>10}")
-        print("-" * 55)
-        for n in (25, 100, 400):
-            for k in (3, 5, 7, 10, 15):
-                if k not in results[layout][n]:
-                    continue
-                stats = results[layout][n][k]
-                line = (
-                    f"{n:5d} | {k:4d} | {stats['mean_deg']:10.1f} deg | "
-                    + f"{stats['median_deg']:12.1f} deg | {stats['std_deg']:8.1f} deg"
-                )
-                print(line)
-
+        print(f"\n{layout}")
+        print(f"{'N':>5} {'k':>4} {'mean':>8} {'median':>8} {'sd':>8}  (degrees)")
+        for n in FLOCK_SIZES:
+            for k, stats in sorted(results[layout][n].items()):
+                line = f"{n:5d} {k:4d} {stats['mean_deg']:8.1f} {stats['median_deg']:8.1f}"
+                print(line + f" {stats['std_deg']:8.1f}")
 
 
 if __name__ == "__main__":

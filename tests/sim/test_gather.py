@@ -97,8 +97,8 @@ def test_failure_labels_lost_targets_and_outnumbered():
 def test_a_real_trial_runs_to_an_end_and_its_row_reads_the_paper_quantities():
     """Five herders that see everything gather 20 targets from a disc of radius 20 (measured:
     seed 2026 succeeds at tick 1823, 55 model seconds); the row keeps chi at the end and the
-    unseen count. Frozen 2026-10-25, after the herders were made to read the targets at the
-    start of the tick; a same-machine replay is exact."""
+    unseen count. The tick count assumes the herders read the targets at the start of the
+    tick; a same-machine replay is exact."""
     cfg = gather_config(n=20, d=5, ticks=8000, params={"sensing_radius": float("inf")})
     result = run_trial(cfg, 2026)
     assert result.success and result.stop_reason == STOP_SUCCESS

@@ -1,4 +1,4 @@
-"""Trial result serialization and row aggregation utilities."""
+"""One trial's history turned into one trials table row."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ from sim.plugins.scenarios import SCENARIOS
 
 
 def _stats(values: np.ndarray) -> tuple[float, float, float]:
-    """Compute (mean, min, max) of finite values, returning NaNs if empty."""
+    """(mean, min, max) ignoring NaN; all NaN when the series has no values."""
     finite = values[np.isfinite(values)]
     if finite.size == 0:
         return float("nan"), float("nan"), float("nan")
@@ -20,7 +20,8 @@ def _stats(values: np.ndarray) -> tuple[float, float, float]:
 
 
 def outcome_fields(result: RunResult, n_shepherds: int, dt: float) -> dict[str, Any]:
-    """Calculate trial outcome metrics, translating simulation ticks into physical seconds."""
+    """Outcome columns. Ticks are the method's steps; seconds multiply by dt (Strombom 1 s,
+    Kubo 0.05 s), so times are comparable across methods only in seconds."""
     path = float(result.history.iloc[-1]["shepherd_path"])
     return {
         "success": result.success,
@@ -35,7 +36,7 @@ def outcome_fields(result: RunResult, n_shepherds: int, dt: float) -> dict[str, 
 
 
 def metric_fields(history: pd.DataFrame) -> dict[str, float]:
-    """Compute summary statistics (mean, min, max) for all tracked time series metrics."""
+    """mean_, min_ and max_ over the whole trial for every recorded metric."""
     out: dict[str, float] = {}
     for name in history.columns.drop("tick"):
         mean, low, high = _stats(history[name].to_numpy(dtype=float))
@@ -46,7 +47,7 @@ def metric_fields(history: pd.DataFrame) -> dict[str, float]:
 def build_row(
     identity: dict[str, Any], result: RunResult, config: dict[str, Any]
 ) -> dict[str, Any]:
-    """Assemble trial identity, scenario columns, metrics, and failure classifications."""
+    """Identity columns, the task's columns, outcome, metric summaries and failure label."""
     scenario = SCENARIOS[config["scenario_id"]]
     failure = scenario.classify_failure(result.history, success=result.success, config=config)
     return {

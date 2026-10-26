@@ -1,12 +1,24 @@
-"""Flock radius calibration R_f(N).
+"""Flock radius R_f(N) per method: the size of a flock while one dog drives it.
 
-Empirically measures the steady-state flock radius R_f while driven by a single dog.
-Task geometry (goal radius, field dimensions, lost-sheep radius) is scaled from R_f
-so that models with different natural packing densities are compared fairly.
+The goal radius, the compact spread and the lost-sheep radius are multiples of R_f, so they
+follow the real flock instead of an assumed packing. One dog drives a compact flock toward
+a goal it cannot reach, for ``calibration_seconds``; R_f = sqrt(2) x RMS radius (the radius
+of a uniform disc with that RMS), averaged over the last window, median over seeds and
+start sizes.
 
-Runs a single dog driving a flock toward an unreachable goal, computing R_f as
-sqrt(2) * RMS radius over the final window. Checks that compact and loose initializations
-converge to the same radius before accepting the result.
+Calibration always uses a single dog, no factor and the paper's dog settings, whatever the
+protocol sweeps, so every factor level of a method is compared on a task sized to that one
+reference flock. A method with ``calibrate_as`` is calibrated with the single dog of the
+named method (FAT with the paper shepherd of strombom_multi), so the two methods run the
+same task. It always runs the drive task, whatever task the protocol runs: R_f is a
+property of the sheep model under a driving dog.
+
+R_f is only a property of the model where the flock settles to one size whatever size it
+starts from. ``calibrate`` checks both and raises where they fail; for Strombom sheep they
+hold up to N = 600. Above that edge a protocol may impose the radius instead
+(``impose_radius_above`` = N_cal): N_cal is calibrated as usual, and every flock size above
+it gets R_f(N) = imposed_radius_scale x R_f(N_cal) x sqrt(N / N_cal), the density of the
+N_cal flock held constant. Results at those sizes are results at that imposed density.
 """
 
 from __future__ import annotations
@@ -36,13 +48,12 @@ PAPER_DOG = {
     "drive_offset_cap": 0.0,
 }
 
-# The calibration goal lies this many times farther than the sheep could travel at
-# their top speed during the whole run, so no flock reaches it (HerdSim choice: a flock
-# that reaches the goal is measured turning at it, not being driven).
+# The calibration goal lies this many times farther than the sheep could travel at their
+# top speed during the whole run, so no flock reaches it: a flock that reaches the goal is
+# measured turning at it, not being driven.
 DRIVE_SPEED_MARGIN = 1.5
-# measure() raises when the flock centre comes closer to the goal than this many
-# measured radii inside the measured windows (HerdSim choice: a flock within two of its
-# own radii of the goal is being turned at it, not driven).
+# measure() raises when the flock centre comes closer to the goal than this many measured
+# radii inside the measured windows, for the same reason.
 GOAL_CLEARANCE_RADII = 2.0
 
 
@@ -56,7 +67,7 @@ def start_radius(spacing: float, n_sheep: int) -> float:
 
 
 def calibration_drive(protocol: Protocol, method: str) -> float:
-    """Distance to calibration goal, placed far enough that the flock never reaches it."""
+    """Length of the calibration drive: DRIVE_SPEED_MARGIN x top sheep speed x seconds."""
     params = method_spec(protocol, method).params
     seconds = protocol.settings["calibration_seconds"]
     return DRIVE_SPEED_MARGIN * sheep_speed_per_second(method, params) * seconds
@@ -65,7 +76,12 @@ def calibration_drive(protocol: Protocol, method: str) -> float:
 def calibration_config(
     protocol: Protocol, method: str, n_sheep: int, spacing: float
 ) -> dict[str, Any]:
-    """Build a calibration trial config with one dog and an unreachable goal."""
+    """One global dog, a compact start of ``spacing``, a goal of radius 0 too far to reach.
+
+    The protocol's factors are not applied; the drive is set through both drive terms so
+    the task's max() rule returns exactly ``calibration_drive``. With ``calibrate_as`` the
+    dog of that method drives, on this method's parameters.
+    """
     spec = method_spec(protocol, method)
     driver = spec.calibrate_as or method
     s = protocol.settings
@@ -77,7 +93,7 @@ def calibration_config(
         "task": CALIBRATION_TASK,
         "drive_distance_multiple": drive / radius,
         "drive_distance_min": drive,
-        "metrics_stride": 1,
+        "metrics_stride": 1,  # measure() counts windows in ticks, so every tick is recorded
     }
     setup = setup_for(
         far,
@@ -101,10 +117,11 @@ def calibration_config(
 
 
 def measure(job: tuple[dict[str, Any], int, int]) -> tuple[float, float]:
-    """Measure late and early steady-state R_f windows from one trial.
+    """(R_f over the last window, R_f over the window before) from one calibration trial.
 
-    Raises CalibrationError if the flock came too close to the goal disc, which
-    invalidates the assumption of an unreached steady drive.
+    Raises CalibrationError when the flock centre came within GOAL_CLEARANCE_RADII x the
+    measured radius of the goal during either window: the run then measured a flock at the
+    goal, not a driven one.
     """
     config, seed, window = job
     history = run_trial(config, seed).history
@@ -122,7 +139,12 @@ def measure(job: tuple[dict[str, Any], int, int]) -> tuple[float, float]:
 def summarise(
     label: str, runs: list[tuple[float, tuple[float, float]]], settings: dict[str, Any]
 ) -> tuple[float, list[str]]:
-    """Compute median R_f across runs and check settlement and start-agreement tolerances."""
+    """(R_f, problems) from the runs of one flock size: (start spacing, (late, early)) each.
+
+    R_f is the median of the late windows. A problem is a drift between the two windows
+    above ``settled_tolerance``, or a spread between the start sizes above
+    ``start_agreement``.
+    """
     starts = sorted({spacing for spacing, _ in runs})
     late = float(np.median([v[0] for _, v in runs]))
     early = float(np.median([v[1] for _, v in runs]))
@@ -137,31 +159,33 @@ def summarise(
     return late, problems
 
 
+def _measured_sizes(protocol: Protocol, above: int) -> list[int]:
+    """The flock sizes that are calibrated: all of them, or those up to N_cal plus N_cal."""
+    if not above:
+        return sorted(protocol.flock_sizes)
+    return sorted({n for n in protocol.flock_sizes if n <= above} | {above})
+
+
 def calibrate(protocol: Protocol, workers: int) -> dict[str, dict[int, float]]:
     """R_f for every method and flock size; raises where a calibrated size is not settled.
 
-    With ``impose_radius_above`` the sizes above it are imposed from N_cal (module docstring),
-    and the table also holds N_cal itself, the size they are imposed from. A protocol whose
-    task sizes itself (``Scenario.calibrates`` false) has nothing to calibrate and is refused.
+    With ``impose_radius_above`` the sizes above it are imposed from N_cal (module
+    docstring), and the table also holds N_cal itself. A protocol whose task sizes itself
+    (``Scenario.calibrates`` false) has nothing to calibrate and is refused.
     """
     s = protocol.settings
     task = s["task"]
     if not SCENARIOS[task].calibrates:
         raise ValueError(f"task {task!r} sizes itself from its own settings; no R_f to calibrate")
     seeds = [s["master_seed"] + i for i in range(s["calibration_seeds"])]
-    starts = list(s["calibration_starts"])
     above = s["impose_radius_above"]
-    measured = sorted(
-        {n for n in protocol.flock_sizes if not above or n <= above} | ({above} if above else set())
-    )
-    keys = [(m.name, n) for m in protocol.methods for n in measured]
+    keys = [(m.name, n) for m in protocol.methods for n in _measured_sizes(protocol, above)]
+
     jobs, owners = [], []
     for method, n in keys:
-        window = round(
-            s["calibration_window_seconds"]
-            / method_dt(method, method_spec(protocol, method).params)
-        )
-        for spacing in starts:
+        dt = method_dt(method, method_spec(protocol, method).params)
+        window = round(s["calibration_window_seconds"] / dt)
+        for spacing in s["calibration_starts"]:
             config = calibration_config(protocol, method, n, spacing)
             for seed in seeds:
                 jobs.append((config, seed, window))

@@ -1,192 +1,159 @@
-# ==============================================================================================
-# Canonical Experiment Configuration Defaults
-# ==============================================================================================
-# Base configuration defaults shared by all experimental protocols.
+# Default settings of every campaign. A protocol overrides a value by naming it; a name that
+# is not here and not a protocol key is rejected.
 #
-# Protocols override specific values by explicitly defining them in their protocol YAML file.
-# Any key specified in a protocol that is not defined here or in the protocol schema is rejected.
+# Units: Strombom 2014 is dimensionless, read here as 1 unit = 1 m and one tick = 1 s.
+# Kubo 2022 and Lama 2024 give no length unit and are read the same way, with their own
+# ticks of 0.05 s and 0.03 s, so times are compared in seconds.
 #
-# Coordinate and Physical Unit Conventions:
-# - Length: 1 unit = 1 meter.
-# - Time: 1 tick = 1 model second by default (dt = 1.0 s for Strömböm, 0.05 s for Kubo,
-#   0.03 s for Lama). Multi-model comparisons are evaluated in physical seconds.
-# - R_f: Characteristic driven flock radius for a given flock size N, determined empirically
-#   at the start of each campaign via the single-herder calibration routine.
-# ==============================================================================================
+# "R_f" is the flock radius: the radius of the flock while one dog drives it, measured per
+# method and N by the calibration at the start of a run (see Calibration below).
 
 task: drive_to_goal
 
-# ----------------------------------------------------------------------------------------------
-# Task Scenario: Drive to Goal
-# ----------------------------------------------------------------------------------------------
-# Multiplier specifying distance from flock initial centroid to the goal center in units of R_f.
-# Sizing is bounded below by drive_distance_min and start-layout extent. Negative values mirror
-# the drive along the horizontal axis.
+# --- Task: drive the flock into a goal -----------------------------------------------------
+# The goal lies this many flock radii from the flock start, and never closer than the minimum
+# (in units) or closer than the widest start layout plus the goal plus one flock radius.
+# The sign gives the direction; a negative value mirrors the drive.
 drive_distance_multiple: 13.0
 drive_distance_min: 80.0
-
-# Radius of the destination goal disc, expressed in multiples of calibrated flock radius R_f.
+# Goal radius in flock radii.
 goal_radius_multiple: 1.9
-
-# Fraction of the flock required inside the goal simultaneously for a trial to succeed.
-# 1.0 requires every sheep (strict success); lower values (e.g. 0.99) tolerate stray outliers.
+# Share of the sheep that must be inside the goal at one tick for a trial to succeed. 1 is
+# every sheep, as Kubo et al. 2022 state their aim. Below 1 (0.99), one or two stragglers no
+# longer decide a trial: with the strict rule a flock can reach the goal with 99% inside and
+# then be driven past it.
 success_fraction: 1.0
-
-# Required holding duration inside the goal disc (in multiples of expected drive time).
-# 0.0 indicates immediate success upon entry without requiring a holding period.
+# Holding. The goal counts as reached only after the share above has been inside without a
+# break for hold_drive_multiple drive times (0: at the first such tick, the D_min rule). With
+# hold_withdraw true, the dogs of collect_drive_multi withdraw while it is inside, to r_s + r_a
+# beyond the farthest sheep, so the flock grazes: a Strombom sheep flees while any dog is
+# closer than r_s, so dogs that only stop would push it through the goal.
 hold_drive_multiple: 0.0
-
-# Whether shepherds withdraw to a standoff distance (r_s + r_a) once the flock enters the goal.
-# Allows the flock to settle without shepherds pushing them through or out of the goal area.
 hold_withdraw: false
-
-# Minimum inter-shepherd clearance distance. Shepherds cannot move within this distance of
-# each other. 0.0 treats shepherds as point agents without collision or volume constraints.
+# Dogs that take up room: no dog steps to within dog_spacing of another. Dogs move one after
+# another; a dog already that close walks straight away at its speed, and a dog whose step
+# would end that close does not step this tick. 0: dogs are points, as in the papers. Not for
+# the Kubo and Lama dogs, which keep apart on their own.
 dog_spacing: 0.0
-
-# Local perception range of shepherds. 0.0 gives global vision of all sheep in the world.
+# What a dog of collect_drive_multi knows. sensing_range 0: every sheep, the paper's shepherd.
+# Above 0: the sheep closer than that to the dog, and with communication also what other dogs
+# see: none (its own view only), neighbour (plus the dogs within sensing_range of it), shared
+# (every dog's view, planned once for the team). Dog positions are known to every dog. A dog
+# that knows no sheep walks to the flock centre it last knew (at first the flock's start).
 sensing_range: 0.0
-
-# Inter-shepherd communication strategy:
-# - 'none': Each shepherd acts solely on local observations.
-# - 'neighbour': Shepherds pool observations with peers within their sensing_range.
-# - 'shared': Global perception pooling across all active shepherds.
 communication: none
-
-# Standoff offset distance cap behind the flock center during drive mode. 0.0 leaves the
-# model's standard scaling uncapped (r_a * sqrt(N)).
+# Cap on the Strombom drive offset r_a sqrt(N). The paper's offset passes the sheep reaction
+# distance r_s at N = (r_s / r_a)^2 = 1056, so above that the dog stands where few sheep feel
+# it and no team drives the flock. A cap of r_s - r_a keeps the drive point within reach; it
+# changes the paper rule, so it is a labelled variant. 0 is off.
 drive_offset_cap: 0.0
-
-# Clearance margin (in meters) surrounding initial agent positions to prevent arena collisions.
+# Free margin around the start, in units (a little more than the sheep reaction distance 65).
+# The field only places the start; there is no boundary, as in the papers.
 field_clearance: 80.0
 
-# ----------------------------------------------------------------------------------------------
-# Task Scenario: Gather
-# ----------------------------------------------------------------------------------------------
-# Initial dispersion radius of targets and shepherds uniformly distributed around the goal.
+# --- Task: gather targets scattered over a disc into a goal at its centre ---------------------
+# The task of Lama and di Bernardo 2024 (task: gather). Sheep and dogs start uniform over a
+# disc of radius gather_start_radius (the paper's R, 50 in its main figure) centred on the
+# goal, a disc of gather_goal_fraction x R (the paper's r* = R / 5). Success is the share
+# success_fraction inside (the paper's chi*, 0.99). The task sizes itself from R and does not
+# calibrate. Read only by the gather task, and in the physics hash only when it runs.
 gather_start_radius: 50.0
-
-# Radius of the central collection goal, expressed as a fraction of gather_start_radius.
 gather_goal_fraction: 0.2
 
-# ----------------------------------------------------------------------------------------------
-# Flock Initial Spatial Formations
-# ----------------------------------------------------------------------------------------------
-# Gaussian standard deviation multiplier for the compact layout: sigma = compact_spread * R_f.
+# --- Start layouts -------------------------------------------------------------------------
+# compact: a Gaussian with sigma = compact_spread x R_f, cut at 3 sigma.
 compact_spread: 0.5
-
-# Base scaling factor for dispersed layouts: L = separation_scale * N^(2/3).
+# The scattered layouts are sized by L = separation_scale x N^(2/3), the distance from the
+# flock centre beyond which Strombom 2014 collects (r_a N^(2/3), r_a = 2).
 separation_scale: 2.0
-
-# Gaussian standard deviation multiplier for the wide layout: sigma = wide_sigma * L.
+# wide: a Gaussian with sigma = wide_sigma x L, cut at 3 sigma.
 wide_sigma: 0.5
-
-# Radius of the ring on which cluster centers are placed in the split layout (in units of L).
+# split: 3 compact clusters (2 when N < 12) on a ring of split_ring x L around the centre.
 split_ring: 1.0
-
-# Fraction of flock placed as distant outlier agents in the outlier_rich layout.
+# outlier_rich: outlier_fraction of the sheep at outlier_near to outlier_far x L from a
+# compact core.
 outlier_fraction: 0.2
-
-# Inner and outer radial boundaries (in units of L) for outlier placement in outlier_rich.
 outlier_near: 1.1
 outlier_far: 1.6
 
-# ----------------------------------------------------------------------------------------------
-# Shepherd Initial Staging and Formations
-# ----------------------------------------------------------------------------------------------
-# Initial spatial deployment pattern for shepherds at tick 0:
-# - 'arcs': Concentric semi-circular arcs positioned behind the flock away from the goal.
-# - 'ring': Circular ring surrounding the flock, excluding the goal-facing cone.
-# - 'handler': Single staging point positioned behind the flock on the drive axis.
+# --- Dogs ----------------------------------------------------------------------------------
+# Where the dogs stand at tick 0, a convention with no real-world rule behind it (a real dog
+# starts at the handler, far from the sheep, and runs out round the flock).
+# arcs: half circles behind the flock, spread evenly (the base).
+# ring: circles round the flock, goal side included, leaving out the cone that holds the goal.
+# handler: every dog at one point straight behind the flock, as if released from a post.
+# The first circle is dog_start_gap beyond the farthest sheep that can start. A circle holds
+# as many dogs as fit dog_start_spacing apart; more dogs go on the next one, dog_start_spacing
+# farther out. The gap and the spacing are conventions; the sensitivity protocols sweep them.
 dog_start: arcs
-
-# Radial clearance distance from the outermost sheep boundary to the first shepherd arc.
 dog_start_gap: 30.0
-
-# Arc distance between adjacent shepherd stations along a deployment ring or arc.
 dog_start_spacing: 5.0
-
-# Proximity threshold below which two shepherds are considered redundant duplicate agents.
+# A dog with another dog closer than this has a twin (dog_overlap metric). The adaptive run
+# uses it to stop spending seeds on copies of a dog. 2 is the Strombom interaction distance r_a.
 dog_overlap_distance: 2.0
 
-# ----------------------------------------------------------------------------------------------
-# Measurement Metrics and Trajectory Logging
-# ----------------------------------------------------------------------------------------------
-# Inter-sheep distance threshold for clustering agents into connected sub-flocks.
+# --- Metrics -------------------------------------------------------------------------------
+# Sheep closer than measurement_radius are in the same group (fragmentation). Sheep farther
+# than lost_radius_multiple x R_f from the centroid count as lost.
 measurement_radius: 5.0
-
-# Radial distance from the centroid in multiples of R_f beyond which a sheep is considered lost.
 lost_radius_multiple: 2.5
-
-# Step interval for logging metric snapshots. 1 logs every simulation tick.
+# Metrics are recorded at tick 0, every metrics_stride ticks and at the last tick; success and
+# the end of a trial are checked every tick whatever the stride. 1 records every tick. A method
+# with a small time step (Lama, dt 0.03) records every 10th tick, because the metrics cost more
+# per tick than the model and a failing trial runs 166,667 ticks. A first arrival is then read
+# from the recorded ticks, so the arrival times of a strided run are never earlier than the
+# exact ones. Calibration always records every tick.
 metrics_stride: 1
 
-# ----------------------------------------------------------------------------------------------
-# Flock Radius Calibration Parameters (R_f)
-# ----------------------------------------------------------------------------------------------
-# Number of independent random seeds evaluated per calibration condition.
+# --- Calibration of R_f --------------------------------------------------------------------
+# One dog drives a compact flock toward a goal it cannot reach for calibration_seconds. R_f is
+# sqrt(2) x the RMS radius over the last calibration_window_seconds, median over seeds and
+# over the start sizes (spacings, so a start has radius spacing x sqrt(N / pi)).
 calibration_seeds: 3
-
-# Simulated duration in seconds for driving the flock during steady-state calibration.
 calibration_seconds: 300.0
-
-# Final time window in seconds over which steady-state root-mean-square radius is calculated.
 calibration_window_seconds: 90.0
-
-# Initial flock density spacings tested to verify convergence across different initial spreads.
 calibration_starts: [1.0, 3.0]
-
-# Maximum allowable fractional drift in R_f between consecutive evaluation windows.
+# Calibration raises when R_f changed by more than settled_tolerance between the last two
+# windows, or differs by more than start_agreement between the start sizes. Strombom sheep
+# settle up to N = 600; from about 630 a loose start keeps part of its size.
 settled_tolerance: 0.15
-
-# Maximum allowable fractional discrepancy in R_f across different initial spacings.
 start_agreement: 0.25
-
-# Flock size N above which R_f is analytically scaled rather than simulated. 0 disables this.
+# Above the edge a protocol may impose R_f instead: with impose_radius_above = N_cal, every N
+# above it gets imposed_radius_scale x R_f(N_cal) x sqrt(N / N_cal), the density of the N_cal
+# flock held constant. 0 is off.
 impose_radius_above: 0
-
-# Multiplier applied when using analytical constant-density scaling R_f(N) ~ sqrt(N).
 imposed_radius_scale: 1.0
 
-# ----------------------------------------------------------------------------------------------
-# Experiment Random Seeds and Adaptive Refinement
-# ----------------------------------------------------------------------------------------------
-# Base random seed. Individual trial seed for seed_index i is master_seed + i.
+# --- Seeds and decisions -------------------------------------------------------------------
+# Seed i of every cell is master_seed + i, so cells share start flocks.
 master_seed: 2026
-
-# Success rate threshold theta for classifying an operational cell as reliable.
+# A cell is reliable when the confidence interval of its success rate lies at or above theta,
+# unreliable when it lies below, undecided otherwise. At theta 0.90 and 99% confidence a cell
+# needs 51 straight successes to be reliable.
 reliability_theta: 0.90
-
-# Statistical confidence level (1 - alpha) used for Clopper-Pearson binomial tests.
 confidence: 0.99
-
-# Number of trial seeds evaluated per batch increment in an adaptive refinement round.
+# Seeds are added in batches until every open cell is decided or has max_seeds.
 batch_seeds: 10
-
-# Maximum number of seeds allocated to an individual cell before sampling stops.
 max_seeds: 200
-
-# Fractional threshold for considering two completion times statistically indistinguishable.
+# Two finish times are the same when their paired median difference is within time_margin of
+# the slower median (paired bootstrap, bootstrap_resamples draws). min_pairs is the fewest
+# shared finished seeds a comparison accepts.
 time_margin: 0.05
-
-# Minimum paired successful seeds required to perform paired bootstrap completion comparisons.
 min_pairs: 5
-
-# Number of bootstrap resamples used for paired time difference confidence intervals.
 bootstrap_resamples: 4000
-
-# Minimum shepherd gap between adjacent D points required before inserting an intermediate D.
+# A dog count is added halfway between two neighbours more than refine_min_gap apart whose
+# zones differ (whose reliability differs, when decide_finish_times is false).
 refine_min_gap: 1
-
-# Whether adaptive rounds allocate seeds to resolve completion time comparisons (D_sat, D_best).
-# false resolves only reliability (D_min); true also resolves saturation and completion speeds.
+# false: seeds are spent only to decide reliability, so D_min. An open finish-time comparison
+# (D_best, D_sat, D_crowd) asks for no seeds; those values stay in the tables, flagged
+# undecided. true: also decide them, which cost 5 to 38 percent more trials on the 99 percent
+# grids. Runs that ask for D_sat set it true.
 decide_finish_times: false
-
-# Overlap threshold above which saturated cells with redundant shepherds are pruned.
+# Above a confirmed saturation, a cell whose dogs were copies (mean dog_overlap at least
+# this) and that is neither slower nor unreliable gets no more seeds. Above 1 turns it off.
 prune_overlap: 0.9
-
-# Number of initial seeds per cell that save complete per-tick trajectory histories as Parquet.
+# The first timeseries_seeds seeds of every cell keep their per-tick history as Parquet.
 timeseries_seeds: 3
-
-# Maximum execution time budget in hours before stopping new batch dispatches.
+# A run starts no new batch after this many hours (calibration not counted). Trials are saved
+# as they finish and a rerun continues where it stopped.
 budget_hours: 72.0

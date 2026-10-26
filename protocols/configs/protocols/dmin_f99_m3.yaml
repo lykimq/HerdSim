@@ -1,5 +1,4 @@
-# D_min with success at 99 percent of the flock in the goal, deadline 3 drive times. Same as
-# dmin_f99_m12.yaml except for the deadline.
+# dmin_f99_m12 at 3 drive times (extends dmin_m3); only the deadline differs.
 
 protocol_id: dmin_f99_m3
 output: results/dmin_f99_m3
@@ -7,7 +6,5 @@ extends: dmin_m3.yaml
 
 success_fraction: 0.99
 
-# Resumed on 2026-10-23 with decide_finish_times true (report section 3.8): the earlier
-# rounds ran with false, so the seeds added after that date go to the finish-time comparisons
-# that decide D_sat, D_best and D_crowd. Reliability decisions already made do not change.
+# Finish-time seeds on, so D_sat, D_best and D_crowd get decided as well as D_min.
 decide_finish_times: true

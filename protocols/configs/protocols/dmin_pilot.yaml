@@ -1,11 +1,9 @@
 # D_min pilot: where does the deadline make D_min vary?
 #
-# One run at a loose deadline (12 drive times, the drive time being the drive length over the
-# sheep speed). Every trial that finishes inside a tighter deadline also succeeds under it, so
-# the trials of this run are read at tighter deadlines with cli/dmin_report.py. Ten seeds per
-# cell, one batch, so cells are mostly undecided at the real thresholds; the pilot reads
-# success rates and the pattern of D_min across layouts, N and deadline, and fixes the
-# deadlines and the D grid of the main protocol.
+# Four layouts, N 50 to 400, D 1 to 16, one batch of 10 seeds per cell. One run at a loose
+# deadline (12 drive times) answers every tighter one, since a trial that finishes inside a
+# tighter deadline succeeds under it too (cli/dmin_report.py). Cells stay mostly undecided;
+# the pilot fixed the deadlines and D grid of the main runs.
 
 protocol_id: dmin_pilot
 output: results/dmin_pilot

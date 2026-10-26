@@ -78,14 +78,9 @@ def coverage(view: TickView) -> float:
 
 
 def collect_mode(view: TickView) -> float:
-    """Returns 1.0 if any sheep is outside the collection boundary f(N) = r_a * N^(2/3),
-    indicating that the flock requires active outlier gathering, and 0.0 otherwise.
-
-    When averaged over trial history, this yields the fraction of time spent in
-    the gathering/collecting phase versus the cohesive driving phase.
-    """
-    r_a = float(view.config.get("r_a", 2.0))
-    n_sheep = int(view.config.get("n_sheep", view.state.n_sheep))
-    threshold = r_a * (float(n_sheep) ** (2.0 / 3.0))
+    """1.0 when some sheep is beyond Strombom's collect distance f(N) = r_a N^(2/3) from the
+    centroid, so a paper shepherd would be collecting, else 0.0. Its mean over a history is
+    the share of the trial spent collecting. Strombom sheep only (reads ``r_a``); not in the
+    generic table, so a Kubo trial never evaluates it."""
+    threshold = float(view.config["r_a"]) * view.state.n_sheep ** (2.0 / 3.0)
     return float(np.any(view.distances_to_centroid > threshold))
-

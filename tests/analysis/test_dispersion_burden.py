@@ -1,4 +1,6 @@
-"""Unit tests for dispersion burden and failure regime analysis."""
+"""Failure regimes and the start spread, on hand-made trial rows."""
+
+from __future__ import annotations
 
 import pandas as pd
 import pytest
@@ -6,31 +8,33 @@ import pytest
 from analysis.dispersion_burden import analyze_failure_regimes, compute_dispersion_burdens
 
 
-def test_analyze_failure_regimes_synthetic():
-    df = pd.DataFrame({
-        "success": [True, False, False, False],
-        "final_gcm_goal": [5.0, 15.0, 80.0, 120.0],
-        "goal_radius": [10.0, 10.0, 10.0, 10.0],
-    })
+def test_failed_trials_split_at_two_goal_radii():
+    df = pd.DataFrame(
+        {
+            "success": [True, False, False, False],
+            "final_gcm_goal": [5.0, 15.0, 80.0, 120.0],
+            "goal_radius": [10.0, 10.0, 10.0, 10.0],
+        }
+    )
     stats = analyze_failure_regimes(df)
     assert stats["total_failed"] == 3
-    # final_gcm_goal <= 20.0 (15.0) -> boundary
-    assert stats["boundary"] == 1
-    # final_gcm_goal > 20.0 (80.0, 120.0) -> structural
+    assert stats["boundary"] == 1  # 15 is within 2 x 10 of the goal
     assert stats["structural"] == 2
-    assert stats["pct_structural"] == pytest.approx(66.666666, rel=1e-3)
+    assert stats["pct_structural"] == pytest.approx(200 / 3)
 
 
-def test_compute_dispersion_burdens_synthetic():
-    df = pd.DataFrame({
-        "initial_layout": ["compact", "compact", "wide"],
-        "n_sheep": [25, 25, 100],
-        "min_extent": [3.0, 4.0, 6.0],
-        "success": [True, True, False],
-    })
-    res = compute_dispersion_burdens(df)
+def test_burden_is_the_start_extent_times_n():
+    df = pd.DataFrame(
+        {
+            "initial_layout": ["compact", "compact", "wide"],
+            "n_sheep": [25, 25, 100],
+            "max_extent": [3.0, 4.0, 60.0],
+            "success": [True, True, False],
+        }
+    )
+    res = compute_dispersion_burdens(df).set_index("layout")
     assert len(res) == 2
-    compact_row = res[res["layout"] == "compact"].iloc[0]
-    assert compact_row["s0"] == pytest.approx(3.5)
-    assert compact_row["dispersion_burden"] == pytest.approx(3.5 * 25)
-    assert compact_row["overall_sr"] == pytest.approx(1.0)
+    assert res.loc["compact", "s0"] == pytest.approx(3.5)
+    assert res.loc["compact", "dispersion_burden"] == pytest.approx(3.5 * 25)
+    assert res.loc["compact", "overall_sr"] == pytest.approx(1.0)
+    assert res.loc["wide", "dispersion_burden"] == pytest.approx(6000.0)

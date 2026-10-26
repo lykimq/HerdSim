@@ -1,10 +1,14 @@
-"""Flock pressure metrics evaluated during trial replays.
+"""Pressure on the flock in a replayed trial: how long the sheep spend near a dog.
 
-Computes how long sheep spend in proximity to herders during a simulation:
-- Flight share: Fraction of sheep within reaction distance (r_s) to any dog.
-- Close proximity share: Fraction of sheep within dog stopping distance (e.g. 3 * r_a).
-Integrated over simulation ticks, these yield the average flight and close-contact
-seconds experienced per sheep.
+The trial rows keep summaries of the tick metrics, and none of them says how close the dogs
+come to the sheep, so these measures are taken while a stored trial is replayed
+(services/replay.py, cli/diagnostics/pressure_replay.py).
+
+Two shares are recorded per tick: the share of sheep closer than the reaction radius to
+some dog (for Strombom sheep, the sheep in flight), and the share closer than ``close``
+(the Strombom dog's stop distance 3 r_a by default, as close as the dog rule lets a dog
+get). Summed over the ticks and multiplied by dt they give the seconds a sheep spends in
+each, on average.
 """
 
 from __future__ import annotations
@@ -19,7 +23,7 @@ from scipy.spatial.distance import cdist
 def near_shares(
     sheep: np.ndarray, dogs: np.ndarray, reach: float, close: float
 ) -> tuple[float, float]:
-    """Computes the fraction of sheep within ``reach`` and within ``close`` distance of any dog."""
+    """(share of sheep strictly closer than ``reach`` to some dog, share closer than ``close``)."""
     if len(dogs) == 0 or len(sheep) == 0:
         return 0.0, 0.0
     nearest = cdist(sheep, dogs).min(axis=1)
@@ -28,7 +32,7 @@ def near_shares(
 
 @dataclass
 class Pressure:
-    """Accumulates per-tick flock proximity shares for a single trial."""
+    """The two shares of every tick of one trial, and their summary."""
 
     reach: float
     close: float
@@ -36,13 +40,11 @@ class Pressure:
     near: list[float] = field(default_factory=list)
 
     def add(self, sheep: np.ndarray, dogs: np.ndarray) -> None:
-        """Records sheep proximity shares for the current tick."""
         a, b = near_shares(sheep, dogs, self.reach, self.close)
         self.flight.append(a)
         self.near.append(b)
 
     def summary(self, dt: float) -> dict[str, float]:
-        """Calculates integrated flight seconds and mean/peak proximity shares."""
         return {
             "flight_seconds_per_sheep": float(np.sum(self.flight)) * dt,
             "close_seconds_per_sheep": float(np.sum(self.near)) * dt,
@@ -51,8 +53,12 @@ class Pressure:
         }
 
 
+def _median_of_done(done: pd.DataFrame, column: str) -> float:
+    return float(done[column].median()) if len(done) else float("nan")
+
+
 def pressure_table(rows: pd.DataFrame) -> pd.DataFrame:
-    """Aggregates median pressure metrics across successful seeds for each (layout, N, D) cell."""
+    """Per cell: success and the medians of the pressure measures over its successful seeds."""
     out = []
     for _, part in rows.groupby(["layout", "n", "d"], sort=True):
         first = part.iloc[0]
@@ -62,19 +68,13 @@ def pressure_table(rows: pd.DataFrame) -> pd.DataFrame:
                 "layout": first["layout"],
                 "n": int(first["n"]),
                 "d": int(first["d"]),
-                "role": part["role"].iloc[0],
+                "role": first["role"],
                 "seeds": len(part),
                 "success": round(float(part["success"].mean()), 2),
-                "finish_s": done["finish_seconds"].median() if len(done) else float("nan"),
-                "flight_s_per_sheep": done["flight_seconds_per_sheep"].median()
-                if len(done)
-                else float("nan"),
-                "close_s_per_sheep": done["close_seconds_per_sheep"].median()
-                if len(done)
-                else float("nan"),
-                "mean_flight_share": done["mean_flight_share"].median()
-                if len(done)
-                else float("nan"),
+                "finish_s": _median_of_done(done, "finish_seconds"),
+                "flight_s_per_sheep": _median_of_done(done, "flight_seconds_per_sheep"),
+                "close_s_per_sheep": _median_of_done(done, "close_seconds_per_sheep"),
+                "mean_flight_share": _median_of_done(done, "mean_flight_share"),
             }
         )
     return pd.DataFrame(out)

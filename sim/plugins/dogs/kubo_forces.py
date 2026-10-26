@@ -1,7 +1,7 @@
-"""Kubo force-based dogs (dog_controller=kubo_forces).
+"""Kubo force dogs (dog_controller=kubo_forces): eqs. 8 to 12 of Kubo et al. 2022.
 
-Each dog targets the sheep farthest from the goal, propelled by target attraction,
-goal repulsion, and mutual inter-dog repulsion within dog_repulsion_radius.
+Every dog chases the sheep farthest from the goal, pushed by the paper's four force terms
+(sim/methods/kubo/forces.py), and its speed is clamped to ``dog_speed_max``.
 """
 
 from __future__ import annotations

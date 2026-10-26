@@ -1,7 +1,7 @@
-# Sharing what dogs see (report section 3.12): at a sensing range of 65 (the
-# sheep's reaction distance r_s), no sharing, sharing with the dogs in range, and sharing with
-# the whole team. Same field, seeds and grid as dmin_f99_view_range, whose range-65 and range-0
-# curves are the no-sharing and global rows beside these.
+# Sharing what dogs see: at sensing range 65 (the sheep's reaction distance r_s), sharing
+# with the dogs in range or with the whole team. Field, seeds and grid of
+# dmin_f99_view_range, whose range-65 and range-0 curves are the no-sharing and global rows
+# beside these.
 
 protocol_id: dmin_f99_view_comm
 output: results/dmin_f99_view_comm

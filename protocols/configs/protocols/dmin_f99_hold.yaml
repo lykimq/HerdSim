@@ -1,9 +1,10 @@
-# Holding task (report section 3.10): the goal counts as reached only after
-# 99 percent of the sheep have stayed inside for one drive time, and while it is reached the
-# dogs withdraw beyond r_s so the flock grazes (hold_withdraw). Same field, seeds and deadline as
-# dmin_f99_m6 (6 drive times, which now include the hold). The D grid adds 7, 9, 10, 11, 13
-# around the drive-arc capacity D_cap = 7 to 12 (section 4.3). Five flock sizes 25 to 400.
-# Finish-time seeds off: D_overcrowd and D_max are decided on reliability alone.
+# Holding task: the goal counts as reached only after 99 percent of the sheep have stayed
+# inside for one drive time, and meanwhile the dogs withdraw beyond r_s so the flock grazes
+# (hold_withdraw). Field, seeds and deadline of dmin_f99_m6; the 6 drive times now include
+# the hold.
+#
+# N 25 to 400. D adds 7, 9, 10, 11 and 13 around the drive-arc capacity D_cap = 7 to 12.
+# Finish-time seeds off: D_overcrowd and D_max rest on reliability alone.
 
 protocol_id: dmin_f99_hold
 output: results/dmin_f99_hold

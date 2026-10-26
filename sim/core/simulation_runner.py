@@ -30,13 +30,13 @@ class RunResult:
 
 
 def initial_state(config: dict[str, Any], seed: int) -> SimulationState:
-    """Initialize agents with independent random streams via SeedSequence.spawn(3).
+    """State at tick 0: agents placed by the task, with one random stream per use.
 
-    Spawns three generators: layout_rng, sheep_rng, dog_rng. Decoupling them ensures
-    that changing dog count D only draws from dog_rng, leaving sheep positions
-    and noise identical across paired runs (Common Random Numbers).
+    The seed spawns three independent generators: one for the start positions, one for
+    the sheep and one for the dogs. Changing the dog count only draws from the dogs'
+    stream, so two cells with the same seed start from the same flock and the sheep
+    see the same noise until the dogs act differently (paired comparisons).
     """
-
     layout_rng, sheep_rng, dog_rng = (
         np.random.default_rng(child) for child in np.random.SeedSequence(seed).spawn(3)
     )
@@ -60,23 +60,12 @@ def run_trial(
     seed: int,
     on_tick: Callable[[SimulationState], None] | None = None,
 ) -> RunResult:
-    """Execute a single simulation trial until success, task termination, or timeout.
+    """Run one trial until success, the task's own end rule, or the time limit.
 
-    Tick sequence:
-    1. Sheep kinematic step (`sheep_model.step`).
-    2. Shepherd controller step (`dog_controller.step`).
-    3. Accumulated shepherd path update (|v| * dt sum over all dogs).
-    4. Metric logging (tick 0, every `metrics_stride` ticks, and the terminating tick).
-    5. Optional post-tick callback (`on_tick`).
-    6. Stop checks: `scenario.is_success`, `scenario.is_over`, or `max_ticks` reached.
-
-    Args:
-        config: Simulation configuration parameters.
-        seed: Master random seed for reproducible initialization.
-        on_tick: Optional hook invoked with the simulation state after each tick.
-
-    Returns:
-        RunResult containing success flag, tick count, stop reason, and metric history.
+    Each tick the sheep move, then the dogs, then the metrics are recorded and the stop
+    rules checked. ``shepherd_path`` sums |v| dt over every dog. Metrics are recorded at
+    tick 0, every ``metrics_stride`` ticks and at the last tick; the stop rules run every
+    tick. ``on_tick`` sees the state after each tick (tests use it to check invariants).
     """
     scenario = SCENARIOS[config["scenario_id"]]
     sheep_step = SHEEP_MODELS[config["sheep_model"]].step

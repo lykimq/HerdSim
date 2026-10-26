@@ -1,7 +1,9 @@
-"""Assemble and validate flat trial configuration dictionaries.
+"""Build the flat run config of one trial and check it before anything runs.
 
-Integrates method defaults, parameter overrides, scenario setup parameters, and agent
-counts, delegating domain validation to respective scenario and agent model plugins.
+The checks here are the engine's own. Each plugin checks its own settings: the task its
+layouts and start geometry, the sheep model its parameters (and it derives keys such as
+Strombom's neighbour count), so a new plugin brings its checks along instead of editing
+this file.
 """
 
 from __future__ import annotations
@@ -12,7 +14,8 @@ from sim.core.methods import METHODS
 from sim.plugins.scenarios import SCENARIOS
 from sim.plugins.sheep import SHEEP_MODELS
 
-# Core simulation runner and metric evaluation configuration keys.
+# Setup keys the engine itself reads, on top of the task's own: the run loop and the
+# constants the generic metrics read every tick.
 ENGINE_KEYS = (
     "max_ticks",
     "metrics_stride",
@@ -35,23 +38,11 @@ def build_config(
     n_shepherds: int,
     initial_layout: str,
 ) -> dict[str, Any]:
-    """Assemble a validated trial configuration dictionary.
+    """Method defaults, overridden by ``params``, plus the task ``setup`` and agent counts.
 
-    Merges method defaults, parameter overrides, scenario setup keys, and agent counts.
-    Validates required keys against engine and scenario schemas, invokes plugin
-    preparation hooks, and attaches derived properties (e.g. `reaction_radius`).
-
-    Args:
-        task: Scenario identifier (e.g., 'drive_to_goal', 'gather').
-        method: Method bundle identifier (e.g., 'strombom', 'lama', 'kubo').
-        params: Explicit parameter overrides for the method bundle.
-        setup: Environmental and scenario setup parameters.
-        n_sheep: Number of sheep agents.
-        n_shepherds: Number of shepherd agents.
-        initial_layout: Starting spatial layout identifier.
-
-    Returns:
-        Fully assembled and validated configuration dictionary for one trial.
+    ``setup`` must hold every key the task and the engine read; there are no defaults
+    for them here. The sheep model adds the keys it derives, and ``reaction_radius`` (how
+    close a dog must be for a sheep to react) is added for the coverage metric.
     """
     bundle = METHODS[method]
     unknown = sorted(set(params) - set(bundle.defaults))
@@ -82,7 +73,7 @@ def build_config(
 
 
 def _check(config: dict[str, Any]) -> None:
-    """Validate core engine bounds and speed parameters."""
+    """The engine's own bounds: counts, time limit, stride, time step and speeds."""
     if int(config["n_sheep"]) < 1:
         raise ValueError("n_sheep must be at least 1")
     if int(config["max_ticks"]) < 1:

@@ -1,13 +1,13 @@
-"""Physics integrity hashing and provenance tracking for campaign output directories.
+"""Physics hash and provenance.json of a campaign folder.
 
-A physics hash captures all configuration parameters that alter simulation dynamics:
-- The scenario task and method parameter definitions.
-- Environmental field bounds and layout sets.
-- Maximum shepherd count (which dictates field sizing and clearance).
-
-Non-physical parameters (such as stopping rules, sample seed counts, and intermediate
-shepherd counts) are excluded so campaigns can be resumed or deepened without altering
-the physics hash. Output directories with mismatched physics hashes are rejected.
+The physics hash covers everything that changes a trial's outcome: the task, every
+canonical setting that is not a stopping rule, each method's full resolved configuration
+(code defaults under the protocol's overrides) and time limit, the protocol's layout set
+and its largest dog count. The last two size the field and place the goal of every cell,
+so adding a layout or a D above the old maximum changes the physics and needs a new
+folder. The flock sizes, the smaller D and the stopping rules are not hashed, so a campaign
+can add flock sizes, intermediate D or seeds and still resume. A folder whose hash differs
+from the protocol is refused.
 """
 
 from __future__ import annotations
@@ -22,7 +22,11 @@ from .generated_notice import with_json_notice
 
 
 def normalise_numbers(value: Any) -> Any:
-    """Recursively cast all integers to floats to ensure equivalent numeric hashing."""
+    """``value`` with every int turned into a float (bools kept), recursively.
+
+    YAML reads ``13`` as an int and ``13.0`` as a float; both run the same physics, so
+    they must hash the same.
+    """
     if isinstance(value, bool):
         return value
     if isinstance(value, int):
@@ -35,13 +39,13 @@ def normalise_numbers(value: Any) -> Any:
 
 
 def stable_hash(payload: Any) -> str:
-    """Generate a 16-character SHA-256 hash invariant to key order and numeric types."""
+    """Short SHA256 of a JSON-serialisable value, independent of key order and of whether a
+    number was written as an int or a float."""
     text = json.dumps(normalise_numbers(payload), sort_keys=True, default=str)
     return hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
 
 
 def write_provenance(path: Path, *, protocol_id: str, physics_hash: str) -> None:
-    """Record protocol provenance and physics hash to a JSON file with an auto-generated notice."""
     payload = {
         "protocol_id": protocol_id,
         "physics_hash": physics_hash,
@@ -51,6 +55,6 @@ def write_provenance(path: Path, *, protocol_id: str, physics_hash: str) -> None
 
 
 def read_provenance(path: Path) -> dict[str, str]:
-    """Read protocol_id and physics_hash metadata from an existing provenance file."""
+    """protocol_id and physics_hash of a folder."""
     data = json.loads(path.read_text())
     return {"protocol_id": str(data["protocol_id"]), "physics_hash": str(data["physics_hash"])}

@@ -1,15 +1,13 @@
-"""Bench: miniature real campaigns.
+"""Bench: miniature real campaigns, read for sense.
 
-Run with ``make bench``.
-
-Each fixture runs a small protocol through the real pipeline
-(calibration, rounds, worker pool, store, frontier rules).
-
-Checks are either bounds that follow from:
-- the model (sheep cannot move faster than their top speed),
-- properties of the machinery (a rerun adds nothing, the worker count changes nothing),
-- or orderings the design is meant to produce (a compact flock needs no collecting,
-a tight deadline asks a scattered flock for more dogs than a loose one).
+Run with ``make bench``. Each fixture runs a small protocol through the real pipeline
+(calibration, rounds, worker pool, store, frontier rules) and the tests read its tables.
+Nothing here is pinned to a number from an earlier run. The checks are either bounds that
+follow from the model (sheep cannot move faster than their top speed), properties of the
+machinery (a rerun adds nothing, the worker count changes nothing), or orderings the design
+is meant to produce (a compact flock needs no collecting, a tight deadline asks a scattered
+flock for more dogs than a loose one). A failure means a human should look at the numbers
+it prints, not that a stored value moved.
 """
 
 from __future__ import annotations
@@ -18,6 +16,7 @@ import json
 import os
 from dataclasses import dataclass
 from pathlib import Path
+from typing import cast
 
 import pandas as pd
 import pytest
@@ -210,9 +209,10 @@ def test_scattered_starts_need_at_least_as_many_dogs_as_compact(dmin: Run):
     """D_min is NaN where no D on the grid is reliable; D_min_low is the smallest D that
     could still be."""
     g = dmin.groups.set_index("group_key")
-    base = g.loc["strombom_multi|compact|N=200", "d_min_low"]
+    base = float(cast(float, g.loc["strombom_multi|compact|N=200", "d_min_low"]))
     for layout in ("wide", "outlier_rich"):
-        assert g.loc[f"strombom_multi|{layout}|N=200", "d_min_low"] >= base
+        scattered = float(cast(float, g.loc[f"strombom_multi|{layout}|N=200", "d_min_low"]))
+        assert scattered >= base
     print(
         g.loc[
             [f"strombom_multi|{x}|N=200" for x in ("compact", "wide", "outlier_rich")],

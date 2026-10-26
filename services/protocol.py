@@ -1,8 +1,18 @@
-"""Protocol loading, inheritance, and validation.
+"""Load and check a protocol: canonical defaults, optional ``extends`` chain, the protocol.
 
-Loads experiment protocols from YAML, resolves `extends` chains against canonical
-defaults (canonical.yaml), and validates all parameter keys. Computes a deterministic
-physics hash to guarantee runs match their declared configuration.
+A protocol is one experiment written as data, in protocols/configs/protocols/. It names its
+output folder, the methods with their time limits and parameter overrides, the grid
+(layouts, flock sizes, dog counts), optional factors (a sweepable canonical setting; each
+value is its own D curve), and any canonical value it changes. Everything else comes from
+protocols/configs/canonical.yaml. A protocol can ``extends`` another and change only what
+differs, which is how a variant of a finished run gets its own id and folder:
+
+    protocol_id: dmin_f99_hold_spacing
+    output: results/dmin_f99_hold_spacing
+    extends: dmin_f99_hold.yaml
+    dog_spacing: 2.0
+
+Unknown keys are errors, so a typo stops the run instead of being ignored.
 """
 
 from __future__ import annotations
@@ -38,9 +48,9 @@ PROTOCOL_KEYS = (*REQUIRED_KEYS, "factors")
 TIME_LIMIT_KEYS = ("time_limit_ticks", "time_limit_seconds", "time_limit_drive_multiple")
 METHOD_KEYS = (*TIME_LIMIT_KEYS, "params", "calibrate_as")
 
-# Canonical values that hold for the whole protocol, so they cannot be swept as
-# factors: the task, the seed list, and the calibration of R_f, which runs once
-# per method and flock size whatever the factors.
+# Canonical values that hold for the whole protocol, so they cannot be swept as factors:
+# the task, the seed list, and the calibration of R_f, which runs once per method and
+# flock size whatever the factors.
 WHOLE_PROTOCOL_KEYS = (
     "task",
     "master_seed",
@@ -54,8 +64,8 @@ WHOLE_PROTOCOL_KEYS = (
     "imposed_radius_scale",
 )
 
-# Canonical values that only steer the adaptive run; they do not change any
-# trial, so they stay out of the physics hash and cannot be swept either.
+# Canonical values that only steer the adaptive run; they do not change any trial, so they
+# stay out of the physics hash and cannot be swept either.
 STRATEGY_KEYS = (
     "reliability_theta",
     "confidence",
@@ -71,9 +81,9 @@ STRATEGY_KEYS = (
     "decide_finish_times",
 )
 
-
-# Settings added after early campaign runs. At default/neutral values they preserve backwards
-# compatibility without altering simulation outcomes or invalidating existing physics hashes.
+# Settings added after the first runs. At their neutral value they do not change any
+# trial, so they stay out of the physics hash and the folders written before them remain
+# resumable.
 NEUTRAL_SETTINGS = {
     "success_fraction": 1.0,
     "hold_drive_multiple": 0.0,
@@ -84,29 +94,23 @@ NEUTRAL_SETTINGS = {
     "sensing_range": 0.0,
     "communication": "none",
     "imposed_radius_scale": 1.0,
-    # Subsampling stride for tick metrics recording (hashed when != 1).
+    # Hashed when not 1: it leaves the outcome of a trial as it is but changes the rows
+    # (the arrival columns, the metric summaries), which must agree within a folder.
     "metrics_stride": 1,
 }
 
 
 @dataclass(frozen=True)
 class MethodSpec:
-    """Simulation method specification and execution constraints.
-
-    Attributes:
-        name: Method identifier (e.g. 'strombom_multi', 'kubo').
-        time_limit_ticks: Fixed timeout in simulation ticks, or None if dynamically scaled.
-        params: Method-specific parameter overrides.
-        time_limit_drive_multiple: Multiplier of baseline drive time used when
-            time_limit_ticks is None.
-        calibrate_as: Reference method name for flock calibration (R_f), used when two methods
-            share the same sheep physics and should run on identical task geometries.
-    """
-
     name: str
+    # Fixed limit in ticks, or None when the limit is a multiple of the drive time
+    # (``time_limit_drive_multiple``), which depends on N and is resolved per cell.
     time_limit_ticks: int | None
     params: dict[str, Any] = field(default_factory=dict)
     time_limit_drive_multiple: float | None = None
+    # Method whose single dog drives the calibration flock, when not this one. R_f then
+    # comes from the same reference drive as that method's, so both run the same task.
+    # Only between methods with the same sheep model and parameter names.
     calibrate_as: str | None = None
 
 
@@ -114,23 +118,25 @@ class MethodSpec:
 class Protocol:
     protocol_id: str
     output: Path
-    settings: dict[str, Any]  # Canonical values after overrides
+    settings: dict[str, Any]  # canonical values after overrides
     methods: tuple[MethodSpec, ...]
     layouts: tuple[str, ...]
     flock_sizes: tuple[int, ...]
     shepherd_counts: tuple[int, ...]
     factors: dict[str, list[Any]]
-    resolved: dict[str, Any]  # Merged protocol specification archived in results folder
+    resolved: dict[str, Any]  # the merged file contents, archived in the results folder
 
     def method_config(self) -> dict[str, dict[str, Any]]:
-        """Returns merged parameters for each method (defaults updated with protocol overrides)."""
+        """Every parameter each method runs with: code defaults under the protocol's overrides."""
         return {m.name: {**METHODS[m.name].defaults, **m.params} for m in self.methods}
 
     def physics(self) -> dict[str, Any]:
-        """Extracts configuration elements that influence simulation physics and outcome.
+        """Everything that changes a trial's outcome; input of the physics hash.
 
-        Used to generate the physics hash. Includes task rules, layouts, maximum team size,
-        and method parameters, while omitting post-hoc evaluation settings and grid dimensions.
+        The layout set and the largest D size the field and place the goal of every cell
+        (the task's build_setup), so both are physics. The flock sizes, the smaller D and
+        the strategy keys are not, so a campaign can add flock sizes, intermediate D or
+        seeds and still resume. Settings owned by another task are left out.
         """
         task = self.settings["task"]
         others = {k for name, t in SCENARIOS.items() if name != task for k in t.own_settings}
@@ -157,8 +163,8 @@ class Protocol:
 
 
 def sweepable(settings: Mapping[str, Any]) -> list[str]:
-    """Canonical settings a protocol may sweep as factors: every one that changes a
-    trial and is set per D curve (so not a whole-protocol or strategy key)."""
+    """Canonical settings a protocol may sweep as factors: every one that changes a trial
+    and is set per D curve (so not a whole-protocol or strategy key)."""
     fixed = set(WHOLE_PROTOCOL_KEYS) | set(STRATEGY_KEYS)
     return sorted(k for k in settings if k not in fixed)
 
@@ -166,10 +172,10 @@ def sweepable(settings: Mapping[str, Any]) -> list[str]:
 def factor_settings(factors: Mapping[str, Any], settings: Mapping[str, Any]) -> dict[str, Any]:
     """The canonical settings a factor assignment sets.
 
-    A factor is a sweepable canonical setting. A method parameter is refused: R_f is calibrated
-    once per method without factors, so a sheep-side parameter would run every level on the
-    radius of the default flock. Run each level of a method parameter as its own protocol,
-    which calibrates on its own.
+    A factor is a sweepable canonical setting. A method parameter is refused: R_f is
+    calibrated once per method without factors, so a sheep-side parameter would run every
+    level on the radius of the default flock. Run each level of a method parameter as its
+    own protocol, which calibrates on its own.
     """
     swept = sweepable(settings)
     unknown = sorted(set(factors) - set(swept))
@@ -241,6 +247,19 @@ def _time_limit(name: str, spec: dict[str, Any]) -> tuple[int | None, float | No
     return round(ticks), None
 
 
+def _calibrate_as(name: str, source: str | None) -> str | None:
+    """The reference method of ``calibrate_as``, checked; None when it is the method itself."""
+    if source is None or source == name:
+        return None
+    if source not in METHODS:
+        raise ValueError(f"Method {name!r}: calibrate_as {source!r} is not a method")
+    if METHODS[source].sheep_model != METHODS[name].sheep_model:
+        raise ValueError(f"Method {name!r}: calibrate_as {source!r} has another sheep model")
+    if set(METHODS[source].defaults) != set(METHODS[name].defaults):
+        raise ValueError(f"Method {name!r}: calibrate_as {source!r} has other parameters")
+    return source
+
+
 def _methods(raw: dict[str, Any]) -> tuple[MethodSpec, ...]:
     specs = []
     for name, spec in raw.items():
@@ -255,17 +274,7 @@ def _methods(raw: dict[str, Any]) -> tuple[MethodSpec, ...]:
         if bad:
             raise ValueError(f"Method {name!r} has no parameters {bad}")
         ticks, multiple = _time_limit(name, spec)
-        source = spec.get("calibrate_as")
-        if source is not None:
-            if source not in METHODS:
-                raise ValueError(f"Method {name!r}: calibrate_as {source!r} is not a method")
-            if METHODS[source].sheep_model != METHODS[name].sheep_model:
-                raise ValueError(
-                    f"Method {name!r}: calibrate_as {source!r} has another sheep model"
-                )
-            if set(METHODS[source].defaults) != set(METHODS[name].defaults):
-                raise ValueError(f"Method {name!r}: calibrate_as {source!r} has other parameters")
-            source = None if source == name else source
+        source = _calibrate_as(name, spec.get("calibrate_as"))
         specs.append(MethodSpec(name, ticks, params, multiple, source))
     return tuple(specs)
 
@@ -308,8 +317,8 @@ def _check_layout_scale(
     """The scattered layouts are sized by the collect distance r_a N^(2/3), so
     ``separation_scale`` must equal r_a of every Strombom method in the protocol.
 
-    A protocol that changes r_a (the field-matched sheep set) must change the scale with it,
-    or its scattered starts stop meaning "beyond the distance where the dogs collect".
+    A protocol that changes r_a must change the scale with it, or its scattered starts stop
+    meaning "beyond the distance where the dogs collect".
     """
     for m in methods:
         r_a = m.params.get("r_a", METHODS[m.name].defaults.get("r_a"))

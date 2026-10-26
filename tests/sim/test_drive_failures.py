@@ -95,4 +95,3 @@ def test_failure_regime_classification():
     # Stalled near goal (15m <= 2 * 10m) -> boundary temporal failure
     near = history(gcm_goal=np.full(TICKS, 15.0))
     assert ft.classify_failure_regime(near, success=False, config=CONFIG) == ft.BOUNDARY_TEMPORAL
-

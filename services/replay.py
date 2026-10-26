@@ -1,9 +1,18 @@
-"""Replay stored trials for diagnostics and analysis.
+"""Replaying stored trials of a finished run, for diagnostics that need more than the rows.
 
-Re-runs trials from finished campaigns with identical configs and seeds. Because the
-simulation engine is deterministic, replaying an unchanged trial reproduces the exact
-same outcome, allowing diagnostics to inspect detailed per-tick states or test counterfactual
-parameter tweaks without storing timeseries for every trial.
+    run = open_run("dmin_f99_m6")
+    job = ReplayJob(run.config(method, layout, n, d), run.master_seed + i, stored, label)
+    rows = run_replays(worker, jobs, workers, describe)
+
+The tools in cli/diagnostics/ are built this way: ``open_run`` gives the protocol, radii
+and trial rows of a folder, each job is one seed of one cell, and ``run_replays`` runs a
+module-level worker over the jobs in a pool.
+
+A trial is deterministic in its config and seed, so running it again gives the same trial.
+A diagnostic either replays it unchanged with extra measures, or changes one setting and
+compares. An unchanged replay is checked against the stored outcome and raises when it
+differs, because a replay that is not the stored trial says nothing about the stored
+results.
 """
 
 from __future__ import annotations
@@ -27,12 +36,8 @@ Outcome = tuple[bool, int]  # success, total ticks
 
 
 class ReplayMismatch(RuntimeError):
-    """Raised when an unchanged replay deviates from stored trial results.
-
-    Replays must match stored outcomes exactly. Any discrepancy indicates
-    code drift, unseeded PRNG state, or environment divergence.
-    """
-
+    """An unchanged replay gave another success or tick count than the stored trial: the
+    code, a seed or the environment has drifted since the run."""
 
 
 @dataclass(frozen=True)
@@ -47,7 +52,8 @@ class ReplayJob:
 def replay_trial(
     job: ReplayJob, on_tick: Callable[[SimulationState], None] | None = None
 ) -> RunResult:
-    """Re-execute the trial of ``job``, verifying bit-identical agreement against stored results."""
+    """Run the trial of ``job`` again; raises ReplayMismatch when it has a stored outcome and
+    does not reproduce it."""
     result = run_trial(job.config, job.seed, on_tick=on_tick)
     if job.stored is not None and (result.success, result.total_ticks) != job.stored:
         got = f"success={result.success} ticks={result.total_ticks}"

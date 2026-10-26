@@ -1,8 +1,10 @@
-"""Formatting and header notices for machine-generated files.
+"""Notice marking machine-written files.
 
-Marks output files (YAML, CSV, JSON, JSONL) with non-editable provenance notices:
-- Text formats (YAML, CSV, JSONL): Prefixed with `# AUTO-GENERATED: ...`
-- Structured JSON: Includes `_auto_generated_notice` as the leading key.
+- YAML, CSV, JSONL: first line ``# AUTO-GENERATED: ...``
+- JSON: first field ``_auto_generated_notice``
+- Parquet: binary, no notice
+
+Read CSVs written here with ``pd.read_csv(path, skiprows=1)`` so the notice line is skipped.
 """
 
 from __future__ import annotations
@@ -20,12 +22,12 @@ JSON_NOTICE_KEY = "_auto_generated_notice"
 
 
 def with_json_notice(payload: dict[str, Any]) -> dict[str, Any]:
-    """Prepend auto-generated notice metadata to a dictionary before JSON serialization."""
+    """New dict with the notice as its first key."""
     return {JSON_NOTICE_KEY: AUTO_GENERATED_NOTICE, **payload}
 
 
 def write_csv(df: pd.DataFrame, path: Path) -> None:
-    """Atomically write DataFrame to CSV with an auto-generated header notice."""
+    """Write ``df`` with the notice as the first line, atomically (temp file, then rename)."""
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(path.suffix + ".tmp")
     with tmp.open("w", newline="") as f:

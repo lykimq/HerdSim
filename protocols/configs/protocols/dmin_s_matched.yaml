@@ -1,12 +1,11 @@
-# Sensitivity: the field-matched sheep set. Strombom et al. (2014) compared the model with a
-# real flock (their figure 5) using r_a = 1, angular noise 0.1 and reaction distance 75
-# instead of the Table 1 values 2, 0.3 and 65. A smaller r_a gives a tighter flock (measured:
-# flock radius 6.6 against 9.1 at N = 100, density 0.73 against 0.39 per m2, the real 14-sheep
-# flock being about 1.4), halves the drive distance r_a sqrt(N) and the dog stop distance 3
-# r_a, which are far larger than a real dog's working distance of 1 to 4 m. The layouts are
-# sized by the collect distance r_a N^(2/3), so separation_scale follows r_a, and so does the
-# distance at which two dogs count as twins.
-# Same grid and deadline as dmin_s_base.yaml; only the change below differs.
+# Sensitivity: the field-matched sheep set of Strombom 2014 (their figure 5): r_a 1, noise
+# 0.1 and reaction distance 75 instead of Table 1's 2, 0.3 and 65. Grid and deadline of
+# dmin_s_base.
+#
+# A smaller r_a gives a tighter flock (radius 6.6 against 9.1 at N = 100) and halves the
+# drive offset r_a sqrt(N) and the stop distance 3 r_a, both far larger than a real dog's
+# working distance. The layouts are sized by r_a N^(2/3), so separation_scale follows r_a,
+# and so does the twin distance of the dog_overlap metric.
 
 protocol_id: dmin_s_matched
 output: results/dmin_s_matched

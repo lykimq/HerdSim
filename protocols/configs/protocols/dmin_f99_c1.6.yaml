@@ -1,10 +1,5 @@
-# Cohesion level c = 1.6 (report section 3.11): the sheep attraction weight of
-# Strombom 2014 (1.05 in the paper) raised to 1.6. Everything else as dmin_f99_m12 (12 drive times,
-# 99 percent rule, four layouts, seeds), on the five flock sizes 25 to 400 of the main runs, so
-# the slope of D_min against N compares with dmin_f99_m12 on the same sizes. R_f is calibrated
-# for this level (each level drives its own flock size). The probe of 2026-10-23 found this
-# level calibrates cleanly; c below 1 does not (one dog breaks the flock), so no weaker c is run.
-# Finish-time seeds off: only D_min is compared across levels.
+# Cohesion c = 1.6: Strombom's attraction weight raised from the paper's 1.05.
+# Otherwise as dmin_f99_c1.3.
 
 protocol_id: dmin_f99_c1.6
 output: results/dmin_f99_c1.6

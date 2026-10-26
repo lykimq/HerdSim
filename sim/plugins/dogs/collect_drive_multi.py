@@ -1,14 +1,31 @@
-"""Multi-dog collect/drive controller.
+"""Multi-dog collect/drive (dog_controller=collect_drive_multi).
 
-Coordinates D dogs using Strömböm collect/drive heuristics:
-- Collect: Matches dogs to outliers via minimum-distance bipartite matching. Surplus dogs
-  drive the flock core from behind.
-- Drive: Spreads dogs along an arc behind the flock covering its width. Dogs are assigned
-  slots by angle around the flock center to prevent trajectory crossing.
-- Goal withdrawal (`hold_withdraw`): Standoff at distance r_s + r_a once the flock is inside
-  the goal zone to let sheep settle.
-- Partial observability (`sensing_range`, `communication`): Plans targets from individual,
-  shared, or pooled views; dogs with no visible targets recall the last known flock center.
+The dogs take the Strombom 2014 decision (``heuristics.decide``) on the whole flock. With
+one dog that is the whole rule: the dog goes to the paper's collect point Pc or drive point
+Pd. With more dogs a team layer gives every dog its own target, so an added dog does not
+repeat the target of one that is already there:
+
+- collect: the D farthest outliers each get one dog, matched by the assignment with the
+  least total walk (``linear_sum_assignment``). Dogs left over when there are fewer
+  outliers than dogs drive the core of the flock (the sheep within f(N)) from behind;
+- drive: the dogs stand on an arc behind the flock at the paper's drive distance, spread
+  over the angle that covers the flock's width (half-angle asin(R_flock / R)), so each dog
+  works its own stretch of the flock's back edge. The middle of the arc is Pd.
+
+Dogs are matched to drive slots by their angle around the flock centre, so neighbours stay
+neighbours and no two dogs cross to swap places. Every dog knows every sheep and every
+other dog, so the team is planned once per tick from the true state.
+
+With ``hold_withdraw`` (a HerdSim holding step), while the goal is reached every dog walks
+to the point r_s + r_a beyond the farthest sheep on its own bearing from the flock centre,
+so no dog is within r_s of a sheep and the flock grazes. When the goal is no longer reached
+the team rule takes over again.
+
+With ``sensing_range`` above 0 a dog knows only the sheep within that range, plus what
+other dogs see under ``communication``: with shared, the team is planned once from the
+pooled view; with none or neighbour, each dog plans the team from its own view and takes
+its own target from that plan. f(N) and the drive offset use the true N. A dog that knows
+no sheep walks to the flock centre it last knew, kept per dog in ``state.metadata``.
 """
 
 from __future__ import annotations
@@ -46,8 +63,8 @@ def drive_front(
 ) -> np.ndarray:
     """``n`` drive slots behind the flock, in increasing angle; the middle one is ``target``.
 
-    Spread over the half-angle asin(flock_radius / R) that covers the flock's width, where R is
-    the distance from the centroid to ``target``.
+    Spread over the half-angle asin(flock_radius / R) that covers the flock's width, where R
+    is the distance from the centroid to ``target``.
     """
     arm = target - centroid
     radius = float(np.linalg.norm(arm))
@@ -58,7 +75,8 @@ def drive_front(
 
 
 def _to_slots(dogs: np.ndarray, slots: np.ndarray, centroid: np.ndarray, arm: np.ndarray):
-    # Match dogs to arc slots by angular order around flock center to avoid crossing paths.
+    """Each dog's slot: dogs and slots sorted by angle round the centroid are paired in order,
+    so no two dogs cross on their way."""
     order = np.argsort(_angles(dogs, centroid, arm), kind="stable")
     slot_order = np.argsort(_angles(slots, centroid, arm), kind="stable")
     out = np.empty_like(dogs)
@@ -77,10 +95,12 @@ def _drive(
 
 
 def spread_jobs(flock: np.ndarray, outliers: np.ndarray, count: int, gap: float) -> np.ndarray:
-    """Select outlier sheep positions for collecting dogs.
+    """The outliers the collecting dogs take: the ``count`` farthest, or with ``gap`` > 0 the
+    farthest first but none closer than ``gap`` to one already taken, so the dogs do not all
+    go to one cluster; the rest are filled in farthest first if too few are that far apart.
 
-    When gap > 0, enforces minimum spacing between selected outliers to prevent
-    dogs from converging on the same sub-cluster.
+    ``gap`` is a diagnostic hook (``collect_min_gap`` in a config, not a protocol setting;
+    cli/diagnostics/split_diagnostic.py), 0 in every campaign.
     """
     if gap <= 0.0:
         return outliers[:count]
@@ -112,12 +132,12 @@ def team_targets(
     jobs = spread_jobs(flock, decision.outliers, len(dogs), gap)
     points = np.array([behind(flock[o], decision.centroid, r_a) for o in jobs])
 
-    # Assign dogs to outlier targets minimizing total travel distance.
+    # One dog per collect point, with the least total walk.
     rows, cols = linear_sum_assignment(cdist(dogs, points))
     targets = np.empty_like(dogs)
     targets[rows] = points[cols]
 
-    # Dogs not assigned to outliers drive the core flock toward the goal.
+    # Dogs left without an outlier drive the core from behind.
     rest = np.setdiff1d(np.arange(len(dogs)), rows)
     if rest.size:
         dists = np.linalg.norm(flock - decision.centroid, axis=1)
@@ -127,7 +147,8 @@ def team_targets(
 
 
 def withdraw_targets(flock: np.ndarray, dogs: np.ndarray, config: dict[str, Any]) -> np.ndarray:
-    """Position dogs beyond sheep reaction distance (r_s + r_a) when goal is reached."""
+    """Holding targets: r_s + r_a beyond the farthest sheep, on each dog's own bearing from the
+    flock centre, so no sheep reacts to a dog and the flock grazes in the goal."""
     centroid = flock.mean(axis=0)
     farthest = float(np.max(np.linalg.norm(flock - centroid, axis=1)))
     reach = farthest + float(config["reaction_radius"]) + float(config["r_a"])
@@ -140,7 +161,9 @@ def withdraw_targets(flock: np.ndarray, dogs: np.ndarray, config: dict[str, Any]
 
 
 def known_sheep(sheep: np.ndarray, dogs: np.ndarray, config: dict[str, Any]) -> np.ndarray:
-    """Determine visible sheep per dog based on sensing range and communication mode."""
+    """Which sheep each dog knows, shape (D, N): within ``sensing_range`` of it, and under
+    ``communication`` also what the dogs it hears see (neighbour: dogs within the range;
+    shared: every dog)."""
     reach = float(config["sensing_range"])
     sees = cdist(dogs, sheep) < reach
     mode = str(config["communication"])

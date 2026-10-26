@@ -17,6 +17,7 @@ CONFIG = {
     "lost_radius": 10.0,
     "dog_overlap_distance": 2.0,
     "reaction_radius": 5.0,
+    "r_a": 2.0,
 }
 
 
@@ -104,14 +105,7 @@ def test_coverage_counts_outer_sheep_within_reaction_radius():
 
 
 def test_collect_mode_detects_outliers():
-    # 4 sheep in tight square at origin: distances to centroid are sqrt(2) ~ 1.41
-    # f(4) = 2.0 * 4^(2/3) ~ 5.04
-    tight = view(SQUARE, [[10.0, 10.0]])
-    assert dogs.collect_mode(tight) == 0.0
-
-    # Add a distant stray at (30, 0)
+    # The square's sheep are sqrt(2) from the centroid, inside f(4) = 2 x 4^(2/3) = 5.04.
+    assert dogs.collect_mode(view(SQUARE, [[10.0, 10.0]])) == 0.0
     stray = [[0.0, 0.0], [2.0, 0.0], [0.0, 2.0], [30.0, 0.0]]
-    scattered = view(stray, [[10.0, 10.0]])
-    assert dogs.collect_mode(scattered) == 1.0
-
-
+    assert dogs.collect_mode(view(stray, [[10.0, 10.0]])) == 1.0

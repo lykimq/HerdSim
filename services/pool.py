@@ -1,7 +1,8 @@
-"""Worker pool factory using forkserver.
+"""Worker pool shared by calibration and campaign batches.
 
-Uses Python's forkserver context rather than standard fork to avoid deadlocks
-with multi-threaded BLAS libraries (NumPy/OpenBLAS) and ensure workers start clean.
+Workers start from a fork server, not by forking the parent: forking a process that
+already runs threads can deadlock, and fresh workers read the single-thread BLAS settings
+from the environment at import.
 """
 
 from __future__ import annotations
@@ -11,7 +12,6 @@ from concurrent.futures import ProcessPoolExecutor
 
 
 def worker_pool(workers: int) -> ProcessPoolExecutor:
-    """Create a ProcessPoolExecutor using the forkserver start method."""
     return ProcessPoolExecutor(
         max_workers=max(1, workers), mp_context=multiprocessing.get_context("forkserver")
     )

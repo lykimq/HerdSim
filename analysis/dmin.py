@@ -1,10 +1,20 @@
-"""Counterfactual deadline and arrival threshold re-analysis.
+"""D_min at a tighter deadline, read from the trials of one run, without new trials.
 
-Re-evaluates existing simulation trials under counterfactual conditions without
-re-running the model:
-- Counterfactual deadlines: Relabels trials under tighter deadline multiples.
-- Partial arrival thresholds: Relabels success based on the timestamp when at least
-  X% of the flock first entered the goal area.
+Used by cli/dmin_report.py (D_min at several deadlines) and by the ``arrival`` and
+``methods`` verbs of cli/dmin_tables.py (success read at a share of the flock instead of
+every sheep).
+
+A trial that succeeds at time t also succeeds under every deadline at or above t and fails
+under every deadline below it, and a failed trial ran to its own limit. So the trials of a
+run made with a loose deadline answer every tighter one: ``at_deadline`` relabels each
+trial by whether it finished inside the tighter deadline, and ``dmin_table`` runs the
+frontier rules on each relabelled table. The deadline is a multiple of the drive time, the
+drive length over the top sheep speed, as in ``time_limit_drive_multiple``.
+
+The seeds of an adaptive run were allocated to decide the run's own deadline. A tighter
+deadline read from the same trials has the same paired seeds but no extra ones where its
+boundary lies, so its cells may stay undecided; run that deadline as its own protocol when
+that matters.
 """
 
 from __future__ import annotations
@@ -22,7 +32,7 @@ DMIN_COLUMNS = ("d_min", "d_min_low", "d_max", "d_best", "d_sat")
 def deadline_seconds(
     trials: pd.DataFrame, multiple: float, speed: Mapping[str, float]
 ) -> pd.Series:
-    """Calculates model-second deadlines as ``multiple * drive_distance / sheep_speed``."""
+    """Deadline of every trial in model seconds: ``multiple`` x drive distance / sheep speed."""
     top = trials["method"].map(speed)
     if top.isna().any():
         raise ValueError(f"no sheep speed for methods {sorted(set(trials['method'][top.isna()]))}")
@@ -30,9 +40,10 @@ def deadline_seconds(
 
 
 def at_deadline(trials: pd.DataFrame, multiple: float, speed: Mapping[str, float]) -> pd.DataFrame:
-    """Relabels trial outcomes under a tighter deadline multiple of drive time.
+    """The trials as they would have come out under a deadline of ``multiple`` drive times.
 
-    Raises ValueError if requested deadline is looser than the trial's time limit.
+    Raises when a trial ran with a deadline tighter than the one asked for: it stopped
+    before that time, so what would have happened later is unknown.
     """
     deadline = deadline_seconds(trials, multiple, speed)
     ran = trials["time_limit_seconds"].astype(float)
@@ -55,7 +66,8 @@ def dmin_table(
     multiples: Sequence[float],
     speed: Mapping[str, float],
 ) -> pd.DataFrame:
-    """Evaluates frontier boundaries across multiple counterfactual deadlines."""
+    """One row per D curve and deadline: the D values of the frontier rules plus
+    ``cells_undecided``, the number of cells of the curve whose reliability is still open."""
     rows = []
     for multiple in multiples:
         front = frontier(at_deadline(trials, multiple, speed), rules)
@@ -72,7 +84,13 @@ def dmin_table(
 
 
 def at_arrival(trials: pd.DataFrame, pct: int) -> pd.DataFrame:
-    """Relabels trials with success defined as at least ``pct``% of the flock reaching the goal."""
+    """The trials with success redefined as ``pct`` percent of the flock having reached the
+    goal.
+
+    Uses the first-arrival column ``seconds_to_<pct>pct_in_goal`` (NaN when never reached).
+    A trial succeeds when that time is within its own time limit, and its finish time
+    becomes the arrival time. First arrival, not held: a sheep may leave again afterwards.
+    """
     seconds = trials[f"seconds_to_{pct}pct_in_goal"].astype(float)
     limit = trials["time_limit_seconds"].astype(float)
     ok = seconds.notna() & (seconds <= limit + 1e-9)
@@ -84,6 +102,6 @@ def at_arrival(trials: pd.DataFrame, pct: int) -> pd.DataFrame:
 
 
 def arrival_groups(trials: pd.DataFrame, rules: Rules, pct: int) -> pd.DataFrame:
-    """Computes frontier metrics where success is defined as ``pct``% goal arrival."""
+    """The frontier's D values per D curve when success means ``pct`` percent arrival."""
     front = frontier(at_arrival(trials, pct), rules)
     return front.groups[["group_key", *DMIN_COLUMNS, "d_min_above_grid"]].copy()

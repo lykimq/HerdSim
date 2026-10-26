@@ -1,13 +1,11 @@
-# D_min for the Kubo 2022 force model (sheep and dogs), compact start.
+# D_min for the Kubo 2022 force model (sheep and dogs): does the growth with N seen for
+# strombom_multi hold for another sheep model?
 #
-# Transfer check: do the layouts and the growth with N seen for strombom_multi hold for a
-# different sheep model? Kubo is run on compact starts only, because the scattered layouts are
-# sized by Strombom's collect distance, which means nothing for sheep that attract each other
-# within 20. N stops at 100: the Kubo flock packs to a radius of about 5.8 at any N, so
-# larger N is not a field flock. The model has no noise, so seeds change only the start.
-#
-# The deadline is 500 s, the paper's window (section 4.1), as the drive time of a Kubo flock
-# is set by a speed cap that the sheep rarely reach.
+# Compact start only, N 25 to 100, D 1 to 10, deadline 500 s (the paper's window). The
+# scattered layouts are sized by Strombom's collect distance, which means nothing for sheep
+# that attract within 20. N stops at 100 because the Kubo flock packs to a radius of about
+# 5.8 at any N. The model has no noise, so seeds change only the start. The deadline is in
+# seconds because the Kubo drive time is set by a speed cap the sheep rarely reach.
 
 protocol_id: dmin_kubo
 output: results/dmin_kubo

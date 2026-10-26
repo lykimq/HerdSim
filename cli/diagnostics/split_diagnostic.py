@@ -5,7 +5,7 @@
 On a flock that starts in three clusters, adding dogs past a few makes the drive slower. Two
 causes were suspected: the collecting dogs all go to the same cluster, and dogs near a cluster
 stand still under the paper's stop rule. This replays the stored trials with each cause
-removed, and both, and compares. It backs the follow-up in report section 4.1.
+removed, and both, and compares.
 
 It covers split N = 100 and 200, D = 2, 4, 8, 16, at 6 and 3 drive times (dmin_f99_m6,
 dmin_f99_m3, 99 percent rule), 12 stored seeds per cell, in four versions of the team rule:

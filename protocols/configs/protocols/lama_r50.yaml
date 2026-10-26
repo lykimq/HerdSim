@@ -1,11 +1,11 @@
-# Lama and di Bernardo 2024 in HerdSim: the paper's main case (Fig. 2b, Fig. S8a, Table I row 1).
-# Targets with no cohesion, herders that sense within 10, start disc R = 50, goal r* = 10, and the
-# 99 percent share. In the paper's letters the flock sizes are M (targets) and the dog counts N
-# (herders); the grid follows its axes, sqrt(M) = 1 to 20 and N = 1 to 25. The time limit is the
-# paper's t_max = 5000 at dt 0.03, rounded up to whole ticks (166666.67).
+# Lama and di Bernardo 2024 in HerdSim: the paper's main case (Fig. 2b, Table I row 1).
+# Targets with no cohesion, herders sensing within 10, start disc R = 50, goal r* = 10,
+# 99 percent share.
 #
-# Validation (design_lama.md section 1): N* about 0.85 sqrt(M) above the threshold, sqrt(M_low)
-# = 11, no N up to 25 at sqrt(M) <= 6. Finish-time seeds off: D_min is the question.
+# The grid follows the paper's axes, sqrt(M) = 1 to 20 targets and N = 1 to 25 herders
+# (HerdSim's N and D). The time limit is the paper's t_max = 5000 at dt 0.03, rounded up to
+# whole ticks. The paper reports N* about 0.85 sqrt(M) above the threshold, sqrt(M_low) = 11,
+# and no N up to 25 at sqrt(M) <= 6. Finish-time seeds off: D_min is the question.
 
 protocol_id: lama_r50
 output: results/lama_r50

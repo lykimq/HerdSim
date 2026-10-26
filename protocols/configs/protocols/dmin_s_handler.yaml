@@ -1,8 +1,6 @@
-# Sensitivity: every dog starts at one point straight behind the flock, as if released from a
-# handler's post, instead of on arcs. The team rule then sends each dog to its own target.
-# Real dogs start at the handler and run out round the flock; this is the nearest simple
-# version.
-# Same grid and deadline as dmin_s_base.yaml; only the change below differs.
+# Sensitivity: every dog starts at one point straight behind the flock, as if released from
+# a handler's post, instead of on arcs; the team rule then sends each dog to its own target.
+# The nearest simple version of a real start. Grid and deadline of dmin_s_base.
 
 protocol_id: dmin_s_handler
 output: results/dmin_s_handler

@@ -1,12 +1,8 @@
-"""Experiment decomposition: Groups, Cells, Trials, and run configs.
+"""Groups, cells, trials and their run configs.
 
-Decomposes a protocol's parameter grid into units of execution:
-- Group: One D curve (method, layout, swept factor levels, and flock size N).
-- Cell: A group at one shepherd count D.
-- Trial: One random seed of a cell (seed = master_seed + seed_index).
-
-Cells share the same seed sequence so comparisons across shepherd counts and methods
-are paired (Common Random Numbers).
+A group is one D curve: method, layout, factor levels and N. A cell is a group at one dog
+count D; a trial is one seed of a cell. Seed i of every cell is ``master_seed + i``, so
+cells share seeds and comparisons between them are paired.
 """
 
 from __future__ import annotations
@@ -25,7 +21,8 @@ from .protocol import MethodSpec, Protocol, drive_limit_ticks, factor_settings
 
 
 def _key_text(value: Any) -> str:
-    """Format a factor value as a normalized string representation."""
+    """A factor value as written in keys: numbers as floats, so 1 and 1.0 are one cell, as
+    they are one physics (provenance.normalise_numbers)."""
     if isinstance(value, (int, float)) and not isinstance(value, bool):
         return repr(float(value))
     return str(value)
@@ -33,7 +30,7 @@ def _key_text(value: Any) -> str:
 
 @dataclass(frozen=True)
 class Group:
-    """An experimental sweep group representing a performance curve over shepherd counts D."""
+    """One D curve."""
 
     method: str
     layout: str
@@ -48,7 +45,7 @@ class Group:
 
 @dataclass(frozen=True)
 class Cell:
-    """A specific operating cell: a Group evaluated at fixed shepherd count D."""
+    """A group at one dog count."""
 
     group: Group
     n_shepherds: int
@@ -60,7 +57,7 @@ class Cell:
 
 @dataclass(frozen=True)
 class Trial:
-    """A single stochastic execution instance of a Cell with an assigned random seed."""
+    """One seed of one cell, with everything a worker needs."""
 
     cell: Cell
     seed_index: int
@@ -108,10 +105,9 @@ def setup_for(
 ) -> dict[str, Any]:
     """Setup of one method, flock size and flock radius: engine keys plus the task's own.
 
-    The geometry (drive length, goal radius, lost radius, field) is per method
-    because R_f is per method: each method's flock has its own driven size, so
-    its task is sized to its own flock, so methods are compared on tasks sized that way and not
-    on one shared field.
+    The geometry (drive length, goal radius, lost radius, field) is per method because R_f
+    is per method: each method's flock has its own driven size, so its task is sized to
+    its own flock rather than to one shared field.
     """
     task = SCENARIOS[settings["task"]]
     geometry = task.build_setup(
@@ -136,12 +132,12 @@ def setup_for(
 
 
 def _max_ticks(method: MethodSpec, drive: float) -> int:
-    """Time limit of a cell in ticks: the method's fixed limit, or its multiple of the drive time.
+    """Time limit of a cell in ticks: the method's fixed limit, or its multiple of the drive
+    time.
 
-    The drive time is the task's length (``Scenario.drive_length``: the goal distance from the
-    flock start in the drive task, which depends on N and on the layouts of the protocol) over
-    the top sheep speed, so a deadline written as a multiple asks the same of every N: how many
-    dogs finish in m times what the sheep need.
+    The drive time is the task's length (``Scenario.drive_length``) over the top sheep
+    speed, so a deadline written as a multiple asks the same of every N: how many dogs
+    finish in m times what the sheep need.
     """
     if method.time_limit_ticks is not None:
         return method.time_limit_ticks
@@ -197,23 +193,26 @@ def _limit_text(m: MethodSpec) -> str:
     return f"{m.time_limit_drive_multiple:g} x drive time"
 
 
+def _folder_note(protocol: Protocol) -> str:
+    """Whether the output folder is new, resumes this protocol, or belongs to another."""
+    provenance = protocol.output / "provenance.json"
+    if not provenance.exists():
+        return ""
+    found = read_provenance(provenance)
+    same = found["protocol_id"] == protocol.protocol_id
+    same = same and found["physics_hash"] == stable_hash(protocol.physics())
+    return " (exists: resumes)" if same else " (exists with another protocol or physics: refused)"
+
+
 def describe(protocol: Protocol) -> str:
     """What a run of ``protocol`` would do, without running anything."""
     s = protocol.settings
     curves = groups(protocol)
     cells = len(curves) * len(protocol.shepherd_counts)
     batch = s["batch_seeds"]
-    folder = ""
-    provenance = protocol.output / "provenance.json"
-    if provenance.exists():
-        found = read_provenance(provenance)
-        same = found["protocol_id"] == protocol.protocol_id
-        same = same and found["physics_hash"] == stable_hash(protocol.physics())
-        refused = " (exists with another protocol or physics: refused)"
-        folder = " (exists: resumes)" if same else refused
     lines = [
         f"protocol      {protocol.protocol_id}",
-        f"output        {protocol.output}{folder}",
+        f"output        {protocol.output}{_folder_note(protocol)}",
         "methods       " + ", ".join(f"{m.name} ({_limit_text(m)})" for m in protocol.methods),
         f"layouts       {', '.join(protocol.layouts)}",
         f"N             {list(protocol.flock_sizes)}",

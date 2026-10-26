@@ -1,7 +1,11 @@
-"""Drive task: herd sheep into a circular goal zone.
+"""Drive task: herd the flock into a circular goal.
 
-Success requires that at least `success_fraction` of the flock stays continuously
-inside the goal zone for `hold_ticks` ticks.
+Success (``is_success``): every sheep is inside the goal disc (or the share
+``success_fraction``), and with a hold time it has stayed inside without a break for
+``hold_ticks``. This is a HerdSim rule and differs from both papers. Strombom 2014 ends the
+task when the flock's centre of mass is within an unstated distance of the target; Kubo
+2022 asks for the flock centre inside the target and the whole flock within a circle of
+radius 10. Strombom's rule can be read afterwards from the per-tick ``gcm_in_goal``.
 """
 
 from __future__ import annotations
@@ -25,8 +29,8 @@ from .team_settings import setup as team_setup
 # The start layouts of this task: the flock shapes sized by R_f and the separation distance.
 LAYOUTS = layouts.LAYOUTS
 
-# Setup keys this task reads from the run config (agent counts and the layout
-# name are set by build_config itself).
+# Setup keys this task reads from the run config (agent counts and the layout name are set
+# by build_config itself).
 REQUIRED_KEYS = (
     "world_width",
     "world_height",
@@ -91,7 +95,11 @@ def initial_positions(
 
 
 def is_success(state: SimulationState) -> bool:
-    """Return True if the goal condition has held continuously for hold_ticks."""
+    """The share ``success_fraction`` is inside the goal and has been for ``hold_ticks``.
+
+    The tick at which the goal was last reached is kept in ``state.metadata``; leaving the
+    goal clears it, so the hold has to start again.
+    """
     goal = state.world.goal
     if not goal.reached(state.sheep_positions):
         state.metadata.pop("reached_since", None)
@@ -100,31 +108,18 @@ def is_success(state: SimulationState) -> bool:
     return state.tick - since >= goal.hold_ticks
 
 
-def build_setup(
-    settings: Mapping[str, Any],
-    *,
-    flock_radius: float,
-    n_sheep: int,
-    layouts: tuple[str, ...],
-    max_dogs: int,
-) -> dict[str, Any]:
-    """Compute task geometry and field dimensions for a given flock size and method.
-
-    Computes drive distance and field boundaries to ensure:
-    - Drive distance scales with flock radius R_f while enforcing non-overlap
-      with the widest initial layout extent.
-    - Field dimensions accommodate all specified layouts, maximum dog count,
-      and clearance buffers around the goal and starting positions.
-    """
-    s = settings
+def _check_settings(s: Mapping[str, Any]) -> None:
     if not 0.0 < float(s["success_fraction"]) <= 1.0:
         raise ValueError("success_fraction must be in (0, 1]")
     if float(s["dog_start_spacing"]) <= 0.0:
         raise ValueError("dog_start_spacing must be positive")
-    multiple = float(s["drive_distance_multiple"])
-    if multiple == 0.0:
+    if float(s["drive_distance_multiple"]) == 0.0:
         raise ValueError("drive_distance_multiple must not be 0 (its sign is the drive direction)")
-    setup: dict[str, Any] = {
+
+
+def _typed_setup(s: Mapping[str, Any], flock_radius: float, n_sheep: int) -> dict[str, Any]:
+    """The setup keys that are plain copies or multiples of the settings."""
+    return {
         "goal_radius": float(s["goal_radius_multiple"]) * flock_radius,
         "success_fraction": float(s["success_fraction"]),
         "flock_radius": flock_radius,
@@ -142,11 +137,37 @@ def build_setup(
         "field_clearance": float(s["field_clearance"]),
         **team_setup(s),
     }
+
+
+def build_setup(
+    settings: Mapping[str, Any],
+    *,
+    flock_radius: float,
+    n_sheep: int,
+    layouts: tuple[str, ...],
+    max_dogs: int,
+) -> dict[str, Any]:
+    """Setup keys of one flock size, from the protocol settings and the flock radius R_f.
+
+    The drive is max(``drive_distance_multiple`` x R_f, ``drive_distance_min``, reach +
+    goal radius + R_f), where reach is the farthest start sheep of every layout in
+    ``layouts``, so the goal never overlaps a start. The third term grows like the
+    separation distance N^(2/3) while R_f grows more slowly, so with scattered layouts in
+    the protocol the drive is longer than the multiple from about N = 200 on, for the
+    compact cells too. The drive length is recorded per trial.
+
+    The field is sized for ``layouts`` and ``max_dogs``, so all cells of a protocol at one
+    N and one method share one field and one goal; the drive axis runs along x, mirrored
+    for a negative ``drive_distance_multiple``.
+    """
+    _check_settings(settings)
+    setup = _typed_setup(settings, flock_radius, n_sheep)
+    multiple = float(settings["drive_distance_multiple"])
     sizing = {**setup, "n_sheep": n_sheep, "n_shepherds": max_dogs}
     reach = max(layout_extent({**sizing, "initial_layout": name}) for name in layouts)
     length = max(
         abs(multiple) * flock_radius,
-        float(s["drive_distance_min"]),
+        float(settings["drive_distance_min"]),
         reach + setup["goal_radius"] + flock_radius,
     )
     width, height, start_x = field_size(sizing, layouts, length)

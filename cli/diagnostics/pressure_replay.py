@@ -5,7 +5,7 @@
 
 The trial rows don't say how close the dogs came to the sheep, so this runs the trials again
 and measures it on every tick (analysis/pressure.py): how long each sheep spends fleeing a dog,
-and how much of the flock flees at once. It backs the welfare part of report section 3.7.
+and how much of the flock flees at once.
 
 For each layout and N it replays the cells at D = 1, D_min, D_sat and the smallest tested D at
 or above 2 D_sat, taken from the folder's current frontier (where D_sat is still a range, its

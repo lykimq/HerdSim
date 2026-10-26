@@ -1,10 +1,9 @@
-# Sensitivity reference: the base setting on the grid that the sensitivity protocols share.
+# Sensitivity reference: the base setting on the grid the dmin_s_* protocols share.
 #
-# The dmin_s_* protocols each change one thing of the base setting and are compared with this
-# run, cell by cell, on the same seeds. Grid: the two scattered layouts where D matters,
-# N 100, 200 and 400, D 1 to 16, deadline 6 drive times, canonical theta 0.90 at 99%.
-# A claim from the main protocols (dmin_m12, dmin_m6, dmin_m3) stands where this run and the
-# sensitivity runs agree; where they differ, both are reported.
+# Wide and outlier_rich starts (where D matters), N 100 to 400, D 1 to 16, 6 drive times.
+# Each dmin_s_* run changes one thing and is compared with this one cell by cell on the
+# same seeds. A claim from the main runs stands where this run and the sensitivity runs
+# agree; where they differ, both are reported.
 
 protocol_id: dmin_s_base
 output: results/dmin_s_base

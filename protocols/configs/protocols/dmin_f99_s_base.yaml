@@ -1,7 +1,6 @@
-# Sensitivity reference with success at 99 percent of the flock in the goal: dmin_s_base.yaml with
-# the rule of dmin_f99_m12.yaml. The strict runs of the sensitivities hit a ceiling in some
-# settings (success near 0.9 whatever D, because a straggler left outside the goal fails the
-# trial), so the settings where that matters are repeated with this rule.
+# dmin_s_base with the 99 percent rule. The strict sensitivities hit a success ceiling near
+# 0.9 in some settings (a straggler left outside fails the trial), so those settings are
+# repeated under this rule.
 
 protocol_id: dmin_f99_s_base
 output: results/dmin_f99_s_base

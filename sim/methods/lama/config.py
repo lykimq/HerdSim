@@ -1,4 +1,13 @@
-"""Default parameters for the Lama & di Bernardo 2024 distributed herding model."""
+"""Lama and di Bernardo 2024 parameters (Phys. Rev. Research 6, L032012).
+
+The paper writes N for the herders and M for the targets, the reverse of HerdSim, where D
+is the dog count (``n_shepherds``) and N the flock size (``n_sheep``). Code, settings and
+rows use HerdSim's names; the paper's letters appear only in the comments below. The
+paper's D is the targets' diffusion coefficient and is called ``target_diffusion`` here.
+
+Values are the main text's (p. 5), with xi = 10 the sensing radius of its main figure
+(Fig. 2b, R = 50). The supplement also uses xi = 20, 40, 80 and infinity.
+"""
 
 from __future__ import annotations
 
@@ -21,12 +30,13 @@ PAPER: dict[str, Any] = {
 
 
 def target_top_speed(config: dict[str, Any]) -> float:
-    """Calculate maximum target escaping speed v_T = beta * lambda."""
+    """v_T = beta lambda, the paper's maximum escaping speed of a target from one herder."""
     return float(config["repulsion_strength"]) * float(config["repulsion_radius"])
 
 
 def check(config: dict[str, Any]) -> None:
-    """Validate parameter bounds: herder_speed must exceed target top speed (v_H > v_T)."""
+    """The paper's standing assumptions: positive lengths, strengths and speeds, and
+    v_H > v_T (p. 2: slower herders form stable chasing patterns, a different regime)."""
     for key in ("repulsion_strength", "repulsion_radius", "herder_speed", "herder_gain"):
         if float(config[key]) <= 0.0:
             raise ValueError(f"{key} must be positive")
@@ -38,5 +48,5 @@ def check(config: dict[str, Any]) -> None:
         raise ValueError("chase_offset must not be negative")
     if float(config["herder_speed"]) <= target_top_speed(config):
         raise ValueError(
-            "herder_speed must exceed targets' top speed (repulsion_strength * repulsion_radius)"
+            "herder_speed must exceed the targets' top speed repulsion_strength x repulsion_radius"
         )

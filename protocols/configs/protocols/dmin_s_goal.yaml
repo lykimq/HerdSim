@@ -1,7 +1,6 @@
-# Sensitivity: a tighter goal, 1.5 flock radii instead of 1.9, nearer to a pen than the open
-# circle. Success still needs every sheep inside. Below about 1.5 the settled flock does not
-# fit, even for one dog on a compact start, so 1.5 is the tightest usable value.
-# Same grid and deadline as dmin_s_base.yaml; only the change below differs.
+# Sensitivity: a tighter goal, 1.5 flock radii instead of 1.9, nearer to a pen. Below about
+# 1.5 the settled flock does not fit even for one dog on a compact start. Grid and deadline
+# of dmin_s_base.
 
 protocol_id: dmin_s_goal
 output: results/dmin_s_goal

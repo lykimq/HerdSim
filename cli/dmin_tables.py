@@ -6,8 +6,8 @@
     uv run cli/dmin_tables.py extent  dmin_f99_big --layout compact
 
 Each verb takes one or more folders (a protocol id under results/, or a path) and prints a table
-ready to paste; docs/report/results_tables.md was made this way. Nothing here runs a simulation:
-the tables are read from the files a run wrote, and the calculations live in analysis/.
+ready to paste. Nothing here runs a simulation: the tables are read from the files a run
+wrote, and the calculations live in analysis/.
 
 The runs
   record     every run: when it finished, trials, cells, open cells, errors, hours

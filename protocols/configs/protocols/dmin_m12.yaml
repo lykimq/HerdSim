@@ -1,18 +1,14 @@
-# D_min, deadline 12 drive times (the drive time is the drive length over the sheep speed).
-# The loosest of three deadlines (dmin_m12, dmin_m6, dmin_m3 differ only in it): the deadline at
-# which a start that needs collecting is slow but not hopeless for one dog.
+# D_min at 12 drive times, the loosest of the three main deadlines (dmin_m6 and dmin_m3
+# differ only in the deadline). A drive time is the drive length over the sheep speed.
 #
-# Strombom 2014 sheep and the multi-dog shepherd rule, point dogs, global observation, four
-# layouts, N 25 to 400 (400 was the largest size calibrated when this ran; the flock was later
-# measured to settle up to N = 600, and dmin_f99_m12 adds 71, 141, 283 and 566). Drive limit is the paper rule. Reliability is the
-# canonical theta 0.90 at 99% confidence.
+# Strombom sheep and the multi-dog rule, point dogs, global view, four layouts, N 25 to 400
+# (dmin_f99_m12 adds more sizes), D 1 to 24 (the hardest cells may need more than the
+# pilot's 16; a midpoint D is added where the zone changes), theta 0.90 at 99 percent
+# confidence.
 #
-# The D grid reaches 24 because the hardest cells (scattered starts at N = 400) may need more
-# dogs than the pilot's 16 (dmin_pilot.yaml); a midpoint D is added where the zone changes.
+# This run was made with decide_finish_times true; the canonical default is false. Add
+# decide_finish_times: true to reproduce its seed allocation exactly.
 
-# Note: this run was made with decide_finish_times true, so seeds were also spent on the
-# finish-time comparisons between team sizes; the shipped default (canonical.yaml) is false.
-# To reproduce its seed allocation exactly, add decide_finish_times: true to this protocol.
 protocol_id: dmin_m12
 output: results/dmin_m12
 canonical: protocols/configs/canonical.yaml

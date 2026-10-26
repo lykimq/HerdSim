@@ -1,8 +1,15 @@
-"""Drive failure classification based on trial metric history.
+"""Why a failed drive trial failed, read from its metric history after the run.
 
-Evaluates late-window metrics relative to goal and flock geometry. When multiple
-failure conditions trigger, the first in `PRIORITY` is assigned as the primary mode,
-while all matching conditions are preserved in `Failure.hints`.
+These are the drive task's rules (``Scenario.classify_failure``): progress is the flock
+centre's distance to the goal (``gcm_goal``). Most rules look at the second half of the
+trial (the late window); FLOCK_ESCAPED compares that window with the start, OSCILLATION and
+STUCK compare the two halves. Lengths are relative to the trial's own goal radius and flock
+radius, and time windows are in model seconds (converted with the method's dt), so the
+labels mean the same thing at every N, D and method. When several rules match, the first
+in ``PRIORITY`` is the label; all matches are kept as hints.
+
+``classify_failure_regime`` is a coarser, two-way reading used by analysis/dispersion_burden.py:
+did the flock get near the goal at all.
 """
 
 from __future__ import annotations
@@ -30,18 +37,26 @@ PRIORITY = (
     STUCK,
 )
 
-# Coverage threshold below which dogs are considered disconnected from the flock.
-# Kubo overrides this via `low_coverage` because its stronger flee force keeps dogs further.
+# Coverage below this means the dogs are out of the sheep's reach. 0.1 suits Strombom,
+# where a working drive has coverage 1.0. A working Kubo drive sits at 0.1 to 0.2 (the
+# sheep hold the dogs at the edge of their view), so Kubo sets its own value with the
+# config key low_coverage, and for it the label is a weak hint.
 LOW_COVERAGE = 0.1
 SPLIT_FRACTION = 0.55
 SCATTER_FLOCK_RADII = 2.0
-# Rolling window duration (in simulation seconds) for trajectory oscillation detection.
-SMOOTH_SECONDS = 200.0
+SMOOTH_SECONDS = 200.0  # smoothing window of the oscillation rule, in model seconds
 MIN_SWINGS = 3
+
+# Regimes of classify_failure_regime: a flock that ended within this many goal radii of the
+# goal centre got there and lost on time or stragglers; one farther away never arrived.
+NEAR_GOAL_RADII = 2.0
+STRUCTURAL_GATHER = "structural_gather"
+BOUNDARY_TEMPORAL = "boundary_temporal"
 
 
 def smooth_window(dt: float, stride: int = 1) -> int:
-    """Number of history rows corresponding to SMOOTH_SECONDS given dt and metrics stride."""
+    """Rows in the smoothing window: SMOOTH_SECONDS of model time, one row per ``stride``
+    ticks of ``dt``."""
     return max(1, round(SMOOTH_SECONDS / (dt * stride)))
 
 
@@ -63,17 +78,24 @@ def swings(series: np.ndarray, amplitude: float) -> int:
     return count
 
 
+def _oscillates(gcm: np.ndarray, goal_radius: float, config: dict[str, Any]) -> bool:
+    """At least MIN_SWINGS swings of a goal radius in the smoothed distance to the goal."""
+    window = smooth_window(float(config["dt"]), int(config["metrics_stride"]))
+    smooth = pd.Series(gcm).rolling(window, min_periods=1).mean().to_numpy()
+    return swings(smooth, goal_radius) >= MIN_SWINGS
+
+
 def classify_failure(history: pd.DataFrame, *, success: bool, config: dict[str, Any]) -> Failure:
     if success:
         return Failure(NONE, ())
     goal_radius = float(config["goal_radius"])
-    late = history.iloc[len(history) // 2 :]
-    early = history.iloc[: len(history) // 2]
+    half = len(history) // 2
+    early, late = history.iloc[:half], history.iloc[half:]
     gcm = history["gcm_goal"].to_numpy(dtype=float)
     progress = float(early["gcm_goal"].mean() - late["gcm_goal"].mean())
+    low_coverage = float(config.get("low_coverage", LOW_COVERAGE))
 
     matched: list[str] = []
-    low_coverage = float(config.get("low_coverage", LOW_COVERAGE))
     if late["coverage"].mean() < low_coverage and late["lost_sheep"].mean() < 1.0:
         matched.append(DOGS_OUT_OF_RANGE)
     if late["gcm_goal"].mean() > gcm[0]:
@@ -82,38 +104,21 @@ def classify_failure(history: pd.DataFrame, *, success: bool, config: dict[str, 
         matched.append(SPLIT)
     if late["extent"].mean() > SCATTER_FLOCK_RADII * float(config["flock_radius"]):
         matched.append(SCATTER)
-    smooth = (
-        pd.Series(gcm)
-        .rolling(smooth_window(float(config["dt"]), int(config["metrics_stride"])), min_periods=1)
-        .mean()
-        .to_numpy()
-    )
-    if swings(smooth, goal_radius) >= MIN_SWINGS and abs(progress) < goal_radius:
-        matched.append(OSCILLATION)
     if abs(progress) < goal_radius:
+        if _oscillates(gcm, goal_radius, config):
+            matched.append(OSCILLATION)
         matched.append(STUCK)
 
     mode = next((label for label in PRIORITY if label in matched), TIMEOUT)
     return Failure(mode, tuple(matched))
 
 
-STRUCTURAL_GATHER = "structural_gather"
-BOUNDARY_TEMPORAL = "boundary_temporal"
-
-
-def classify_failure_regime(
-    history: pd.DataFrame, *, success: bool, config: dict[str, Any]
-) -> str:
-    """Classifies a failed trial into Structural Gathering vs Boundary/Temporal failure.
-
-    - Structural Gather: The flock stalled during collection or early transit, ending far
-      from the goal (> 2x goal_radius). Extending the deadline cannot rescue the trial.
-    - Boundary/Temporal: The flock reached the goal vicinity (<= 2x goal_radius) with the
-      majority contained, failing due to deadline expiry or marginal stragglers.
-    """
+def classify_failure_regime(history: pd.DataFrame, *, success: bool, config: dict[str, Any]) -> str:
+    """BOUNDARY_TEMPORAL when the flock ended within NEAR_GOAL_RADII goal radii of the goal
+    centre (more time or a looser share might have rescued it), STRUCTURAL_GATHER when it
+    ended farther away (it was never gathered and driven there); "none" for a success."""
     if success or history.empty:
         return "none"
-    goal_radius = float(config.get("goal_radius", 10.0))
-    final_dist = float(history["gcm_goal"].iloc[-1])
-    return BOUNDARY_TEMPORAL if final_dist <= 2.0 * goal_radius else STRUCTURAL_GATHER
-
+    final = float(history["gcm_goal"].iloc[-1])
+    near = final <= NEAR_GOAL_RADII * float(config["goal_radius"])
+    return BOUNDARY_TEMPORAL if near else STRUCTURAL_GATHER

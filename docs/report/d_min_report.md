@@ -824,5 +824,5 @@ To maintain intellectual honesty and allow independent peer reviewers to verify 
 | **Raw Simulation Corpus** | `Verified` | Complete 367,150 trial records stored in `results/<protocol>/trials.jsonl` and aggregated in `trials.csv`. |
 | **Execution Pipeline** | `Verified` | Headless CLI commands: `uv run cli/campaign.py run --protocol <id>` and `uv run cli/run_queue.py`. |
 | **Automated Table Generation** | `Verified` | `cli/dmin_tables.py` reads raw data directly into [results_tables.md](results_tables.md). |
-| **Automated Test Suite** | `Verified` | `make test` executes 28 unit and integration suites, enforcing architectural layering (`tests/test_layers.py`). |
+| **Automated Test Suite** | `Verified` | `make test` runs 330 unit, invariant and regression tests; `make bench` runs 23 miniature campaigns. |
 | **Bit-Identical Replay Audit** | `Verified` | `services/replay.py` verifies 932 diagnostic replays matching stored tick-by-tick records bit-for-bit. |

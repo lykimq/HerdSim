@@ -13,8 +13,13 @@ from sim.core.vectors import unit
 def spaced(
     dogs: np.ndarray, velocities: np.ndarray, spacing: float, speed: float, dt: float
 ) -> np.ndarray:
-    # Inter-dog spacing: dogs closer than spacing push apart; steps that would
-    # violate spacing are halted.
+    """Velocities that keep every dog at least ``spacing`` from the others.
+
+    Dogs move one after another, in index order. A dog already closer than ``spacing`` to
+    another walks straight away from the dogs crowding it, at ``speed``. A dog whose step
+    would end that close to another does not step this tick. ``spacing`` 0 leaves the
+    velocities alone: the dogs are points, as in the papers.
+    """
     if spacing <= 0.0 or len(dogs) < 2:
         return velocities
     out = velocities.copy()
