@@ -28,6 +28,10 @@ from sim.core.vectors import rotate, unit
 
 LAYOUTS = ("compact", "wide", "split", "outlier_rich")
 
+# The gather task's layout: agents uniform over a disc round the goal (Lama and di Bernardo
+# 2024, Fig. 1a), sized by the disc radius, not by R_f.
+UNIFORM = "uniform"
+
 # Agents start at least this far inside the field edge.
 EDGE_MARGIN = 1.0
 # Radius of the Gaussian layouts in sigmas (HerdSim choice). An uncut 2-D Gaussian
@@ -140,6 +144,17 @@ def place_flock(config: dict[str, Any], rng: np.random.Generator) -> np.ndarray:
 
         return np.vstack([core, _draw_n(n_out, outlier_ring, config)])
     raise ValueError(f"Unknown initial_layout {layout!r}; expected one of {LAYOUTS}")
+
+
+def place_uniform_disc(
+    centre: np.ndarray, radius: float, n: int, rng: np.random.Generator
+) -> np.ndarray:
+    """``n`` points uniform over the disc of ``radius`` round ``centre`` (radius sqrt(u) R,
+    angle uniform), shape (n, 2). Two draws per point, radii first, so the result for a given
+    ``n`` is a prefix of the result for a larger one only up to the interleaving."""
+    r = radius * np.sqrt(rng.random(n))
+    angle = rng.uniform(0.0, 2.0 * np.pi, n)
+    return centre + np.stack([r * np.cos(angle), r * np.sin(angle)], axis=1)
 
 
 def layout_extent(config: dict[str, Any]) -> float:

@@ -53,6 +53,15 @@ drive_offset_cap: 0.0
 # The field only places the start; there is no boundary, as in both papers.
 field_clearance: 80.0
 
+# --- Task: gather targets scattered over a disc into a goal at its centre ---------------------
+# The task of Lama and di Bernardo 2024 (task: gather). Sheep and dogs start uniform over a disc of
+# radius gather_start_radius (the paper's R, 50 in its main figure) centred on the goal, a disc of
+# gather_goal_fraction x R (the paper's r* = R / 5). Success is the share success_fraction inside
+# (the paper's chi*, 0.99). The task sizes itself from R and does not calibrate. Read only by the
+# gather task, and in the physics hash only when it runs.
+gather_start_radius: 50.0
+gather_goal_fraction: 0.2
+
 # --- Start layouts -------------------------------------------------------------------------
 # compact: a Gaussian with sigma = compact_spread x R_f, cut at 3 sigma.
 compact_spread: 0.5
@@ -90,6 +99,14 @@ dog_overlap_distance: 2.0
 # than lost_radius_multiple x R_f from the centroid count as lost.
 measurement_radius: 5.0
 lost_radius_multiple: 2.5
+# Metrics are recorded at tick 0, every metrics_stride ticks and at the last tick; success and
+# the end of a trial are checked every tick whatever the stride. 1 records every tick. A method
+# with a small time step (Lama, dt 0.03) records every 10th tick, 0.3 model seconds, because the
+# metrics cost more per tick than the model (1.1 against 0.7 ms at N = 400, D = 25) and a failing
+# trial runs 166,667 ticks. A first arrival is then read from the recorded ticks: a share that is
+# reached between two records and lost again before the next is missed, so the arrival times of
+# a strided run are never earlier than the exact ones. Calibration always records every tick.
+metrics_stride: 1
 
 # --- Calibration of R_f --------------------------------------------------------------------
 # One dog drives a compact flock toward a goal it cannot reach for calibration_seconds. R_f is

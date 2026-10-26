@@ -8,7 +8,7 @@ import pytest
 
 from sim.plugins.scenarios import drive_failures as ft
 
-CONFIG = {"goal_radius": 10.0, "flock_radius": 5.0, "dt": 1.0}
+CONFIG = {"goal_radius": 10.0, "flock_radius": 5.0, "dt": 1.0, "metrics_stride": 1}
 TICKS = 1000
 
 
@@ -75,6 +75,7 @@ def test_swings(series, expected):
 def test_oscillation_window_is_in_model_seconds():
     assert ft.smooth_window(1.0) == 200  # Strombom: 1 s per tick
     assert ft.smooth_window(0.05) == 4000  # Kubo: the same 200 s of model time
+    assert ft.smooth_window(0.05, 10) == 400  # one row per 10 ticks: the same 200 s
 
 
 def test_per_method_coverage_threshold():

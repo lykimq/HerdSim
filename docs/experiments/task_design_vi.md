@@ -8,7 +8,7 @@ Tài liệu này trình bày chi tiết về phương pháp luận thực nghi�
 
 - [1. Hình học Nhiệm vụ và Tính Bất biến theo Quy mô](#1-hình-học-nhiệm-vụ-và-tính-bất-biến-theo-quy-mô)
   - [Sai lầm chí tử của việc cố định kích thước bãi cỏ](#sai-lầm-chí-tử-của-việc-cố-định-kích-thước-bãi-cỏ)
-  - [Quy chuẩn theo Bán kính Bầy tự nhiên $R_f(N)$](#quy-chuẩn-theo-bán-kính-bầy-tự-nhiên-r_fn)
+  - [Quy chuẩn theo Bán kính Bầy tự nhiên *R*<sub>f</sub>(*N*)](#quy-chuẩn-theo-bán-kính-bầy-tự-nhiên-r_fn)
   - [Thời hạn Chuẩn hóa và Thời gian Lùa đặc trưng](#thời-hạn-chuẩn-hóa-và-thời-gian-lùa-đặc-trưng)
 - [2. Cấu hình Xuất phát Ban đầu](#2-cấu-hình-xuất-phát-ban-đầu)
   - [4 Bố cục phân bố cừu ban đầu](#4-bố-cục-phân-bố-cừu-ban-đầu)
@@ -21,8 +21,8 @@ Tài liệu này trình bày chi tiết về phương pháp luận thực nghi�
   - [Cặp dòng ngẫu nhiên dùng chung (Common Random Numbers)](#cặp-dòng-ngẫu-nhiên-dùng-chung-common-random-numbers)
   - [Ghi đĩa an toàn và khả năng tiếp tục chạy (Resume)](#ghi-đĩa-an-toàn-và-khả-năng-tiếp-tục-chạy-resume)
 - [4. Vì sao Lưới Dừng ở những Giới hạn này? (Cơ sở chọn tham số)](#4-vì-sao-lưới-dừng-ở-những-giới-hạn-này-cơ-sở-chọn-tham-số)
-  - [Quy mô đàn cừu $N$](#quy-mô-đàn-cừu-n)
-  - [Số lượng chó $D$](#số-lượng-chó-d)
+  - [Quy mô đàn cừu *N*](#quy-mô-đàn-cừu-n)
+  - [Số lượng chó *D*](#số-lượng-chó-d)
   - [Số hạt giống trên mỗi ô (Mức trần 200)](#số-hạt-giống-trên-mỗi-ô-mức-trần-200)
   - [Thời hạn và Tiêu chí đánh giá thành công](#thời-hạn-và-tiêu-chí-đánh-giá-thành-công)
 - [5. Các Quy tắc Ranh giới Thống kê và Vùng Hành vi](#5-các-quy-tắc-ranh-giới-thống-kê-và-vùng-hành-vi)
@@ -43,7 +43,7 @@ Một sai lầm rất phổ biến trong các mô phỏng bầy đàn động v�
 HerdSim thiết lập **tính bất biến quy mô thực sự (physical scale invariance)** bằng cách mở rộng kích thước trường chạy tỷ lệ thuận với kích thước tự nhiên của đàn cừu.
 
 ![Hình học nhiệm vụ](../../docs/figures/fig6_task_geometry.png)
-*Hình 1: Hình học nhiệm vụ được vẽ theo đúng tỷ lệ vật lý. Trái: Bố trí đấu trường ở $N = 200$ cừu. Giữa: Cách cự ly lùa $l$ co giãn theo quy mô đàn. Phải: Bán kính bầy tự nhiên $R_f(N)$ và bán kính chuồng đích trên các quy mô đàn, đảm bảo mật độ bầy và độ khó lùa luôn tương đương nhau.*
+*Hình 1: Hình học nhiệm vụ được vẽ theo đúng tỷ lệ vật lý. Trái: Bố trí đấu trường ở* $N = 200$ *cừu. Giữa: Cách cự ly lùa* $l$ *co giãn theo quy mô đàn. Phải: Bán kính bầy tự nhiên* $R_f(N)$ *và bán kính chuồng đích trên các quy mô đàn, đảm bảo mật độ bầy và độ khó lùa luôn tương đương nhau.*
 
 ### Quy chuẩn theo Bán kính Bầy tự nhiên $R_f(N)$
 
@@ -52,7 +52,7 @@ Toàn bộ kích thước hình học được neo vào **bán kính bầy trạ
 | Tham số | Quy tắc Toán học | Ý nghĩa Vật lý |
 | :--- | :--- | :--- |
 | **Bán kính bầy** $R_f(N)$ | Hiệu chuẩn thực nghiệm ($6.2\text{ m}$ tại $N=25$; $11.4\text{ m}$ tại $N=400$) | Bán kính trạng thái dừng tự nhiên của đàn $N$ cừu dưới áp lực lùa ổn định. |
-| **Khoảng cách lùa** $l$ | $\max(13 \cdot R_f(N),\, 80,\, l_{\mathrm{reach}} + R_{\mathrm{goal}} + R_f)$ | Đảm bảo đàn cừu lớn phải đi quãng đường dài hơn tương ứng để bảo toàn tỷ lệ quy mô. |
+| **Khoảng cách lùa** $l$ | $\max(13 \cdot R_f(N),\thinspace 80,\thinspace l_{\mathrm{reach}} + R_{\mathrm{goal}} + R_f)$ | Đảm bảo đàn cừu lớn phải đi quãng đường dài hơn tương ứng để bảo toàn tỷ lệ quy mô. |
 | **Bán kính chuồng đích** $R_{\mathrm{goal}}$ | $1.9 \cdot R_f(N)$ | Giữ nguyên mật độ chứa đàn và độ khó khi lùa vào cửa chuồng cho mọi quy mô đàn. |
 | **Khoảng đệm biên** | $80\text{ m}$ tính từ vị trí tác tử xa nhất | Ngăn chặn hiện tượng tác tử chạm mép tọa độ. |
 | **Biên giới mở** | **Không có tường hay biên phản xạ** | Đồng cỏ tự nhiên không có tường bóng bàn. Tác tử tự do di chuyển ra ngoài mà không bị dội ngược lại. |
@@ -89,7 +89,7 @@ Một đàn cừu tập trung được lùa bởi 1 chú chó thông thường s
 HerdSim cung cấp 4 cấu hình xuất phát chuẩn hóa để tách bạch giai đoạn gom cừu lạc khỏi giai đoạn lùa bầy:
 
 ![4 bố cục bầy ban đầu](../../docs/figures/fig7_layouts.png)
-*Hình 2: Bốn bố cục bầy ban đầu tại $N = 200$ cừu với $D = 4$ chó (vẽ theo cùng một tỷ lệ xích). Vòng tròn đứt nét đánh dấu biên giới gom $f(N) = r_a N^{2/3}$. Bất kỳ con cừu nào nằm ngoài vòng này sẽ kích hoạt hành vi gom cừu lạc.*
+*Hình 2: Bốn bố cục bầy ban đầu tại* $N = 200$ *cừu với* $D = 4$ *chó (vẽ theo cùng một tỷ lệ xích). Vòng tròn đứt nét đánh dấu biên giới gom* $f(N) = r_a N^{2/3}$*. Bất kỳ con cừu nào nằm ngoài vòng này sẽ kích hoạt hành vi gom cừu lạc.*
 
 1. **`compact`**: Cừu lấy mẫu từ phân phối Gaussian hẹp ($\sigma = 0.5 \cdot R_f$). Toàn bộ cừu nằm trong $f(N)$; đàn chó lập tức vào chế độ lùa bầy.
 2. **`wide`**: Cừu phân tán trên diện rộng ($\sigma = 0.5 \cdot 2 N^{2/3}$), đòi hỏi các chú chó phải đi vòng rộng để bao quát chu vi.
@@ -101,7 +101,7 @@ HerdSim cung cấp 4 cấu hình xuất phát chuẩn hóa để tách bạch gi
 Đàn chó xuất phát cách đàn cừu $30\text{ m}$ về phía sau theo một trong 3 hình học:
 
 ![Bố trí thả chó](../../docs/figures/fig8_dog_starts.png)
-*Hình 3: Các dạng bố trí thả chó xuất phát. Trên: Vòng cung đồng tâm mặc định cho $D = 1$ đến $64$ phía sau đàn $N = 100$. Dưới: So sánh trực tiếp giữa thả vòng cung (`arcs`), thả bao vây (`ring`) và thả từ một cọc (`handler`) tại $N = 200$ với $D = 8$ chó.*
+*Hình 3: Các dạng bố trí thả chó xuất phát. Trên: Vòng cung đồng tâm mặc định cho* $D = 1$ *đến* $64$ *phía sau đàn* $N = 100$*. Dưới: So sánh trực tiếp giữa thả vòng cung (`arcs`), thả bao vây (`ring`) và thả từ một cọc (`handler`) tại* $N = 200$ *với* $D = 8$ *chó.*
 
 - **`arcs` (Mặc định)**: Các vòng cung đồng tâm phía sau đàn cừu. Chó đơn lẻ đứng ngay trục lùa; các chú chó thêm vào sẽ đứng cánh đối xứng.
 - **`ring`**: Chó phân bố đều trên một vòng tròn hở bao quanh đàn cừu (chừa một lối mở hướng về phía đích).
@@ -132,7 +132,7 @@ flowchart TD
 ### Dừng sớm bằng khoảng tin cậy Clopper-Pearson 99%
 
 Mỗi ô tham số bắt đầu với một lô nhỏ gồm 10 hạt giống. Sau mỗi lô, hệ thống tính khoảng tin cậy 2 phía chính xác 99% Clopper-Pearson $[L, U]$ cho xác suất thành công thực sự:
-- **Dừng sớm khi chắc chắn thất bại**: Nếu cận trên $U < 0.90$, đội hình này chắc chắn không đạt chuẩn tin cậy. Quá trình thử nghiệm dừng ngay lập tức.
+- **Dừng sớm khi chắc chắn thất bại**: Nếu cận trên $U \lt 0.90$, đội hình này chắc chắn không đạt chuẩn tin cậy. Quá trình thử nghiệm dừng ngay lập tức.
 - **Dừng sớm khi chắc chắn thành công**: Nếu một đội thắng liên tiếp 60 lượt (không thua lượt nào), cận dưới $L \ge 0.90$. Hệ thống chắc chắn ô này đạt tin cậy; thử nghiệm dừng sớm.
 - **Các ô ranh giới**: Chỉ những ô mấp mé ngưỡng tin cậy 90% mới được cấp thêm các lô 10 hạt giống tiếp theo, tối đa lên tới 200 hạt giống.
 
@@ -144,7 +144,7 @@ Mỗi ô tham số bắt đầu với một lô nhỏ gồm 10 hạt giống. Sa
 Nếu hai giá trị số chó liền kề có bước nhảy về vùng hành vi (ví dụ: $D = 2$ thất bại nhưng $D = 4$ thành công), động cơ sẽ tự động đưa điểm giữa ($D = 3$) vào vòng chạy tiếp theo. Điều này giúp định vị chính xác $D_{\min}$ mà không cần chạy quét toàn bộ các số.
 
 ![Chèn điểm giữa](../../docs/figures/fig_adaptive_2_densification.png)
-*Hình 5: Tự động chèn điểm giữa. Sự chuyển tiếp vùng hành vi giữa $D = 2$ và $D = 4$ tự động kích hoạt lượt đánh giá cho $D = 3$.*
+*Hình 5: Tự động chèn điểm giữa. Sự chuyển tiếp vùng hành vi giữa* $D = 2$ *và* $D = 4$ *tự động kích hoạt lượt đánh giá cho* $D = 3$.
 
 ### Tỉa ô bão hòa và trùng lặp (Saturation & Overlap Pruning)
 
@@ -217,8 +217,8 @@ Quá trình phân loại thống kê được quản lý bởi [`analysis/fronti
 | **$D_{\min}$** | Đội hình chó nhỏ nhất đạt độ tin cậy ($L \ge 0.90$). |
 | **$D_{\mathrm{sat}}$** | Đội hình chó nhỏ nhất mà từ đó thêm chó không làm tăng tốc độ có ý nghĩa thống kê. |
 | **$D_{\mathrm{best}}$** | Đội hình nhỏ nhất không chậm hơn đội hình nhanh nhất trên đường cong. |
-| **$D_{\mathrm{crowd}}$** | Đội hình nhỏ nhất $> D_{\mathrm{best}}$ bị chậm đi rõ rệt do ùn ứ, cản trở lẫn nhau. |
-| **$D_{\mathrm{overcrowd}}$** | Số chó nhỏ nhất $> D_{\min}$ mà tại đó và các mức cao hơn bị rớt khỏi ngưỡng tin cậy (suy sụp). |
+| **$D_{\mathrm{crowd}}$** | Đội hình nhỏ nhất $\gt D_{\mathrm{best}}$ bị chậm đi rõ rệt do ùn ứ, cản trở lẫn nhau. |
+| **$D_{\mathrm{overcrowd}}$** | Số chó nhỏ nhất $\gt D_{\min}$ mà tại đó và các mức cao hơn bị rớt khỏi ngưỡng tin cậy (suy sụp). |
 | **$D_{\max}$** | Đội hình tin cậy lớn nhất nằm ngay dưới $D_{\mathrm{overcrowd}}$. |
 
 ### Phân loại các vùng hành vi
@@ -235,16 +235,16 @@ Quá trình phân loại thống kê được quản lý bởi [`analysis/fronti
 
 Mọi phần ở trên mô tả nhiệm vụ lùa (`drive_to_goal`), dùng cho mọi giao thức Strömbom và Kubo. Phương pháp `lama` chạy trong một nhiệm vụ thứ hai, `gather`, tái hiện bối cảnh của [Lama & di Bernardo (2024)](https://doi.org/10.1103/PhysRevResearch.6.L032012) (mô hình: [`docs/methods/models_vi.md`](../methods/models_vi.md#mô-hình-mục-tiêu-brownian-không-liên-kết-lama-2024)). Giao thức chọn nó bằng `task: gather`.
 
-**Trạng thái:** đã cài đặt và kiểm thử. Đang chạy kiểm chứng với kết quả của bài báo; chưa có kết quả nào được báo cáo.
+**Trạng thái:** đã kiểm chứng với Hình 2 của bài báo và chạy trên lưới của bài báo (40.280 lượt); kết quả ở mục 3.14 của báo cáo.
 
 ### Hình học: một đĩa quanh đích
 
 | Tham số | Quy tắc | Nguồn |
 | :--- | :--- | :--- |
 | **Đĩa xuất phát** $R$ | `gather_start_radius`, $50$ | Trường hợp chính của bài báo (Hình 2) |
-| **Bán kính đích** | `gather_goal_fraction` $\times R$ $= R/5 = 10$ | $r^* = R/5$ của bài báo |
+| **Bán kính đích** | `gather_goal_fraction` $\times R$ $= R/5 = 10$ | $r^{\ast} = R/5$ của bài báo |
 | **Xuất phát** (bố cục `uniform`) | Cừu và chó phân bố đều trong đĩa, kể cả vùng đích | $\Omega_0$ của bài báo |
-| **Tỷ lệ cần đạt** | `success_fraction` $= 0{,}99$ | $\chi^* = 0{,}99$ của bài báo |
+| **Tỷ lệ cần đạt** | `success_fraction` $= 0{,}99$ | $\chi^{\ast} = 0{,}99$ của bài báo |
 | **Giới hạn thời gian** | $166.667$ tick $= 5000$ s với $\Delta t = 0{,}03$ | $t_{\max}$ của bài báo (Hình S8) |
 | **Biên mở** | Không có tường | Như nhiệm vụ lùa |
 

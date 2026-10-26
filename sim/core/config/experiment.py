@@ -17,13 +17,14 @@ from sim.plugins.sheep import SHEEP_MODELS
 # loop and the per-trial constants the generic metrics read every tick.
 ENGINE_KEYS = (
     "max_ticks",
+    "metrics_stride",
     "measurement_radius",
     "lost_radius",
     "dog_overlap_distance",
 )
 
 # Speeds a method may define; none may be negative.
-SPEED_KEYS = ("sheep_speed", "shepherd_speed", "sheep_speed_max", "dog_speed_max")
+SPEED_KEYS = ("sheep_speed", "shepherd_speed", "sheep_speed_max", "dog_speed_max", "herder_speed")
 
 
 def build_config(
@@ -76,6 +77,8 @@ def _check(config: dict[str, Any]) -> None:
         raise ValueError("n_sheep must be at least 1")
     if int(config["max_ticks"]) < 1:
         raise ValueError("max_ticks must be at least 1")
+    if int(config["metrics_stride"]) < 1:
+        raise ValueError("metrics_stride must be at least 1")
     if float(config["dt"]) <= 0.0:
         raise ValueError("dt must be positive")
     for key in SPEED_KEYS:

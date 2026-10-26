@@ -1068,3 +1068,184 @@ Generated 2026-10-24 07:04 by cli/dmin_tables.py. Holding: 99 percent inside for
 | compact | 3200 | 8 | 28.11 | 0.96 |
 | compact | 3200 | 12 | 28.11 | 0.93 |
 
+
+## Lama and di Bernardo (2024): gather task
+
+Generated 2026-10-26 10:36 by `uv run cli/dmin_tables.py herdability lama_r50 lama_r50_inf` (the exponent tables with `--above 225` for sensing 10 and `--above 100` for infinite sensing). N is the number of targets (the paper's M) and D the number of herders (the paper's N). "paper N*" is the paper's statistic computed from HerdSim's own trials: the smallest D from which every larger D has a mean share of targets in the goal at the end of at least 0.99. "HerdSim D_min" is the reliability rule of every other table here.
+
+### Runs
+
+| protocol | finished | trials | cells | cells_needing_seeds | cells_at_max_seeds_undecided | trial_errors | hours | workers | outcome |
+|---|---|---|---|---|---|---|---|---|---|
+| lama_r50 | 2026-10-26 04:06:38 | 17660 | 500 | 23 | 23 | 0 | 6.529 | 20 | ran |
+| lama_r50_inf | 2026-10-26 10:34:34 | 22620 | 500 | 1 | 1 | 0 | 6.466 | 20 | ran |
+
+### lama_r50 (sensing radius 10): the paper's N* beside HerdSim's D_min
+
+| N (targets) | sqrt N | paper N* (mean share >= 0.99) | HerdSim D_min | best mean share |
+|---|---|---|---|---|
+| 1 | 1.0 |  | none on grid | 0.837 |
+| 4 | 2.0 |  | none on grid | 0.85 |
+| 9 | 3.0 |  | none on grid | 0.811 |
+| 16 | 4.0 |  | none on grid | 0.856 |
+| 25 | 5.0 |  | none on grid | 0.84 |
+| 36 | 6.0 |  | none on grid | 0.889 |
+| 49 | 7.0 |  | none on grid | 0.951 |
+| 64 | 8.0 |  | none on grid | 0.969 |
+| 81 | 9.0 |  | none on grid | 0.973 |
+| 100 | 10.0 | 19.0 | none on grid | 0.992 |
+| 121 | 11.0 | 16.0 | [20] | 0.996 |
+| 144 | 12.0 | 11.0 | 17-25 | 0.998 |
+| 169 | 13.0 | 11.0 | 14-20 | 0.999 |
+| 196 | 14.0 | 12.0 | 13-15 | 0.999 |
+| 225 | 15.0 | 13.0 | 13 | 1.0 |
+| 256 | 16.0 | 14.0 | 14 | 1.0 |
+| 289 | 17.0 | 15.0 | 15 | 1.0 |
+| 324 | 18.0 | 16.0 | 15 | 1.0 |
+| 361 | 19.0 | 16.0 | 16 | 1.0 |
+| 400 | 20.0 | 17.0 | 17 | 1.0 | 
+
+### lama_r50 (sensing radius 10): the paper's N* at its three levels
+
+| n | sqrt_n | nstar_0.90 | first_0.90 | nstar_0.95 | first_0.95 | nstar_0.99 | first_0.99 | best_mean_share |
+|---|---|---|---|---|---|---|---|---|
+| 1 | 1.0 |  |  |  |  |  |  | 0.837 |
+| 4 | 2.0 |  |  |  |  |  |  | 0.85 |
+| 9 | 3.0 |  |  |  |  |  |  | 0.811 |
+| 16 | 4.0 |  |  |  |  |  |  | 0.856 |
+| 25 | 5.0 |  |  |  |  |  |  | 0.84 |
+| 36 | 6.0 |  |  |  |  |  |  | 0.889 |
+| 49 | 7.0 | 22.0 | 13.0 | 25.0 | 25.0 |  |  | 0.951 |
+| 64 | 8.0 | 7.0 | 7.0 | 24.0 | 17.0 |  |  | 0.969 |
+| 81 | 9.0 | 7.0 | 7.0 | 9.0 | 9.0 |  |  | 0.973 |
+| 100 | 10.0 | 8.0 | 8.0 | 8.0 | 8.0 | 19.0 | 19.0 | 0.992 |
+| 121 | 11.0 | 10.0 | 10.0 | 10.0 | 10.0 | 16.0 | 16.0 | 0.996 |
+| 144 | 12.0 | 10.0 | 10.0 | 10.0 | 10.0 | 11.0 | 11.0 | 0.998 |
+| 169 | 13.0 | 11.0 | 11.0 | 11.0 | 11.0 | 11.0 | 11.0 | 0.999 |
+| 196 | 14.0 | 12.0 | 12.0 | 12.0 | 12.0 | 12.0 | 12.0 | 0.999 |
+| 225 | 15.0 | 13.0 | 13.0 | 13.0 | 13.0 | 13.0 | 13.0 | 1.0 |
+| 256 | 16.0 | 14.0 | 14.0 | 14.0 | 14.0 | 14.0 | 14.0 | 1.0 |
+| 289 | 17.0 | 15.0 | 15.0 | 15.0 | 15.0 | 15.0 | 15.0 | 1.0 |
+| 324 | 18.0 | 15.0 | 15.0 | 15.0 | 15.0 | 16.0 | 16.0 | 1.0 |
+| 361 | 19.0 | 16.0 | 16.0 | 16.0 | 16.0 | 16.0 | 16.0 | 1.0 |
+| 400 | 20.0 | 17.0 | 17.0 | 17.0 | 17.0 | 17.0 | 17.0 | 1.0 | 
+
+### lama_r50 (sensing radius 10): power-law exponent for N >= 225
+
+| reading | points | exponent_b |
+|---|---|---|
+| paper N* | 6 | 0.42 |
+| HerdSim D_min | 6 | 0.41 | 
+
+### lama_r50_inf (infinite sensing): the paper's N* beside HerdSim's D_min
+
+| N (targets) | sqrt N | paper N* (mean share >= 0.99) | HerdSim D_min | best mean share |
+|---|---|---|---|---|
+| 1 | 1.0 | 1 | 1 | 1.0 |
+| 4 | 2.0 | 1 | 1 | 1.0 |
+| 9 | 3.0 | 2 | 2 | 1.0 |
+| 16 | 4.0 | 3 | 3 | 1.0 |
+| 25 | 5.0 | 3 | 3 | 1.0 |
+| 36 | 6.0 | 4 | 4 | 1.0 |
+| 49 | 7.0 | 5 | 5 | 1.0 |
+| 64 | 8.0 | 6 | 6 | 1.0 |
+| 81 | 9.0 | 7 | 7 | 1.0 |
+| 100 | 10.0 | 8 | 8 | 1.0 |
+| 121 | 11.0 | 9 | 9 | 1.0 |
+| 144 | 12.0 | 10 | 10 | 1.0 |
+| 169 | 13.0 | 11 | 11 | 1.0 |
+| 196 | 14.0 | 12 | 12 | 1.0 |
+| 225 | 15.0 | 13 | 13 | 1.0 |
+| 256 | 16.0 | 14 | 14 | 1.0 |
+| 289 | 17.0 | 15 | 14-15 | 1.0 |
+| 324 | 18.0 | 15 | 15 | 1.0 |
+| 361 | 19.0 | 16 | 16 | 1.0 |
+| 400 | 20.0 | 17 | 17 | 1.0 | 
+
+### lama_r50_inf (infinite sensing): the paper's N* at its three levels
+
+| n | sqrt_n | nstar_0.90 | first_0.90 | nstar_0.95 | first_0.95 | nstar_0.99 | first_0.99 | best_mean_share |
+|---|---|---|---|---|---|---|---|---|
+| 1 | 1.0 | 1 | 1 | 1 | 1 | 1 | 1 | 1.0 |
+| 4 | 2.0 | 1 | 1 | 1 | 1 | 1 | 1 | 1.0 |
+| 9 | 3.0 | 2 | 2 | 2 | 2 | 2 | 2 | 1.0 |
+| 16 | 4.0 | 3 | 3 | 3 | 3 | 3 | 3 | 1.0 |
+| 25 | 5.0 | 3 | 3 | 3 | 3 | 3 | 3 | 1.0 |
+| 36 | 6.0 | 4 | 4 | 4 | 4 | 4 | 4 | 1.0 |
+| 49 | 7.0 | 5 | 5 | 5 | 5 | 5 | 5 | 1.0 |
+| 64 | 8.0 | 6 | 6 | 6 | 6 | 6 | 6 | 1.0 |
+| 81 | 9.0 | 7 | 7 | 7 | 7 | 7 | 7 | 1.0 |
+| 100 | 10.0 | 8 | 8 | 8 | 8 | 8 | 8 | 1.0 |
+| 121 | 11.0 | 9 | 9 | 9 | 9 | 9 | 9 | 1.0 |
+| 144 | 12.0 | 10 | 10 | 10 | 10 | 10 | 10 | 1.0 |
+| 169 | 13.0 | 11 | 11 | 11 | 11 | 11 | 11 | 1.0 |
+| 196 | 14.0 | 12 | 12 | 12 | 12 | 12 | 12 | 1.0 |
+| 225 | 15.0 | 13 | 13 | 13 | 13 | 13 | 13 | 1.0 |
+| 256 | 16.0 | 14 | 14 | 14 | 14 | 14 | 14 | 1.0 |
+| 289 | 17.0 | 14 | 14 | 14 | 14 | 15 | 15 | 1.0 |
+| 324 | 18.0 | 15 | 15 | 15 | 15 | 15 | 15 | 1.0 |
+| 361 | 19.0 | 16 | 16 | 16 | 16 | 16 | 16 | 1.0 |
+| 400 | 20.0 | 17 | 17 | 17 | 17 | 17 | 17 | 1.0 | 
+
+### lama_r50_inf (infinite sensing): power-law exponent for N >= 100
+
+| reading | points | exponent_b |
+|---|---|---|
+| paper N* | 11 | 0.52 |
+| HerdSim D_min | 11 | 0.53 | 
+
+## Capped drive offset, and growth of the cohesion runs, 99 percent
+
+Generated 2026-10-26 12:03 by `uv run cli/dmin_tables.py dmin dmin_f99_big_cap` and `uv run cli/dmin_tables.py growth dmin_f99_c1.3 dmin_f99_c1.6 dmin_f99_c2.0 dmin_f99_k05`. dmin_f99_big_cap caps the drive offset at r_s - r_a = 63 m (12 drive times); the 100 trials at N = 3200 were dropped before the run finished and are not in the table.
+
+### dmin_f99_big_cap
+
+| layout | 800 | 1131 | 1600 |
+|---|---|---|---|
+| compact | 1 | 1 | 2 |
+| wide | 3 | 5-9 | none on grid | 
+
+### dmin_f99_c1.3
+
+| layout | slope_range | n_used | note |
+|---|---|---|---|
+| compact | 0 (flat) | 25 50 100 200 400 | D_min = 1 throughout |
+| outlier_rich | 0.30 to 0.30 | 25 50 100 200 400 |  |
+| split | 0.00 to 0.20 | 25 50 100 200 400 |  |
+| wide | 0.20 to 0.20 | 25 50 100 200 400 |  | 
+
+Spread of D_min in doublings: between layouts at one N 0.40, between N at one layout 0.62.
+
+### dmin_f99_c1.6
+
+| layout | slope_range | n_used | note |
+|---|---|---|---|
+| compact | 0 (flat) | 25 50 100 200 400 | D_min = 1 throughout |
+| outlier_rich | 0.20 to 0.20 | 25 50 100 200 400 |  |
+| split | 0 (flat) | 25 50 100 200 400 | D_min = 1 throughout |
+| wide | 0.20 to 0.20 | 25 50 100 200 400 |  | 
+
+Spread of D_min in doublings: between layouts at one N 0.20, between N at one layout 0.50.
+
+### dmin_f99_c2.0
+
+| layout | slope_range | n_used | note |
+|---|---|---|---|
+| compact | 0 (flat) | 25 50 100 200 400 | D_min = 1 throughout |
+| outlier_rich | 0.20 to 0.20 | 25 50 100 200 400 |  |
+| split | 0.20 to 0.20 | 25 50 100 200 400 |  |
+| wide | 0.20 to 0.20 | 25 50 100 200 400 |  | 
+
+Spread of D_min in doublings: between layouts at one N 0.20, between N at one layout 0.75.
+
+### dmin_f99_k05
+
+| layout | slope_range | n_used | note |
+|---|---|---|---|
+| compact | 0 (flat) | 50 100 200 400 | D_min = 1 throughout |
+| outlier_rich | 0.30 to 0.30 | 50 100 200 400 |  |
+| split | 0.06 to 0.90 | 50 100 200 400 |  |
+| wide | 0.40 to 0.70 | 50 100 200 400 |  | 
+
+Spread of D_min in doublings: between layouts at one N 1.49, between N at one layout 1.04.
+

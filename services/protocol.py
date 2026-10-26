@@ -26,7 +26,8 @@ from typing import Any
 import yaml
 
 from sim.core.methods import METHODS
-from sim.core.world.layouts import LAYOUTS
+from sim.plugins.scenarios import SCENARIOS
+from sim.plugins.sheep import SHEEP_MODELS
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 RESULTS_ROOT = REPO_ROOT / "results"
@@ -93,6 +94,9 @@ NEUTRAL_SETTINGS = {
     "sensing_range": 0.0,
     "communication": "none",
     "imposed_radius_scale": 1.0,
+    # Hashed when not 1: it leaves the outcome of a trial as it is but changes the rows (the
+    # arrival columns, the metric summaries), which must agree within a folder.
+    "metrics_stride": 1,
 }
 
 
@@ -132,16 +136,19 @@ class Protocol:
         The layout set and the largest D size the field and place the goal of
         every cell (the task's build_setup), so both are physics. The flock
         sizes, the smaller D and the strategy keys are not, so a campaign can
-        add flock sizes, intermediate D or seeds and still resume.
+        add flock sizes, intermediate D or seeds and still resume. Settings
+        owned by another task are not read by this one, so they are left out.
         """
+        task = str(self.settings["task"])
+        others = {k for name, t in SCENARIOS.items() if name != task for k in t.own_settings}
         return {
-            "task": str(self.settings["task"]),
+            "task": task,
             "layouts": sorted(set(self.layouts)),
             "max_dogs": max(self.shepherd_counts),
             "settings": {
                 k: v
                 for k, v in self.settings.items()
-                if k not in STRATEGY_KEYS and NEUTRAL_SETTINGS.get(k) != v
+                if k not in STRATEGY_KEYS and k not in others and NEUTRAL_SETTINGS.get(k) != v
             },
             "methods": {
                 m.name: {
@@ -210,17 +217,10 @@ def method_dt(name: str, params: Mapping[str, Any]) -> float:
 
 
 def sheep_speed_per_second(method: str, params: Mapping[str, Any]) -> float:
-    """Fastest a sheep of ``method`` can move, in units per model second.
-
-    Strombom sheep have a heading of length ``sheep_speed`` and move dt x heading
-    per tick (Table 1, delta = 1 at dt = 1), so sheep_speed is already per
-    second; Kubo sheep are capped at ``sheep_speed_max`` per second (taken from
-    the MATLAB port, see sim/methods/kubo/config.py).
-    """
-    config = {**METHODS[method].defaults, **params}
-    if "sheep_speed_max" in config:
-        return float(config["sheep_speed_max"])
-    return float(config["sheep_speed"])
+    """Fastest a sheep of ``method`` can move, in units per model second: the sheep model's
+    ``top_speed`` on the method's parameters under the protocol's overrides."""
+    bundle = METHODS[method]
+    return SHEEP_MODELS[bundle.sheep_model].top_speed({**bundle.defaults, **params})
 
 
 def drive_limit_ticks(multiple: float, drive: float, method: str, params: Mapping[str, Any]) -> int:
@@ -291,9 +291,13 @@ def _check_shape(name: str, spec: Mapping[str, Any], settings: Mapping[str, Any]
             raise ValueError(f"{name}: {key} has repeated values")
     if not isinstance(spec["methods"], dict) or not spec["methods"]:
         raise ValueError(f"{name}: methods must name at least one method")
-    unknown = sorted(set(spec["layouts"]) - set(LAYOUTS))
+    task = str(settings["task"])
+    if task not in SCENARIOS:
+        raise ValueError(f"{name}: unknown task {task!r}; available: {sorted(SCENARIOS)}")
+    layouts = SCENARIOS[task].layouts
+    unknown = sorted(set(spec["layouts"]) - set(layouts))
     if unknown:
-        raise ValueError(f"{name}: unknown layouts {unknown}; available: {LAYOUTS}")
+        raise ValueError(f"{name}: unknown layouts {unknown} for task {task!r}; its are {layouts}")
     for key in ("flock_sizes", "shepherd_counts"):
         if any(not isinstance(v, int) or v < 1 for v in spec[key]):
             raise ValueError(f"{name}: {key} must be positive integers")

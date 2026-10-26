@@ -1,0 +1,22 @@
+# AUTO-GENERATED: do not modify. Re-run the producing command to refresh this file.
+group_key,d_min,d_min_low,d_best,d_sat,d_crowd,d_overcrowd,d_max,d_min_above_grid,d_max_at_grid_top,still_improving_at_top,onset_at_last_step,d_best_undecided,d_sat_undecided,d_crowd_undecided,group_undecided
+lama|uniform|N=1,1,1,10,4,,,25,False,True,False,False,True,True,True,False
+lama|uniform|N=100,8,8,25,24,,,25,False,True,False,False,True,True,False,False
+lama|uniform|N=121,9,9,25,24,,,25,False,True,False,False,True,True,False,False
+lama|uniform|N=144,10,10,25,24,,,25,False,True,False,False,True,True,False,False
+lama|uniform|N=16,3,3,24,12,,,25,False,True,False,False,True,True,False,False
+lama|uniform|N=169,11,11,25,25,,,25,False,True,True,False,False,False,False,False
+lama|uniform|N=196,12,12,25,25,,,25,False,True,True,False,False,False,False,False
+lama|uniform|N=225,13,13,25,25,,,25,False,True,True,False,False,False,False,False
+lama|uniform|N=25,3,3,25,13,,,25,False,True,False,False,True,True,False,False
+lama|uniform|N=256,14,14,25,25,,,25,False,True,True,False,False,False,False,False
+lama|uniform|N=289,15,14,25,25,,,25,False,True,True,False,False,False,False,True
+lama|uniform|N=324,15,15,25,25,,,25,False,True,True,False,False,False,False,False
+lama|uniform|N=36,4,4,22,15,,,25,False,True,False,False,True,True,True,False
+lama|uniform|N=361,16,16,25,25,,,25,False,True,True,False,False,False,False,False
+lama|uniform|N=4,1,1,15,6,,,25,False,True,False,False,True,True,True,False
+lama|uniform|N=400,17,17,25,25,,,25,False,True,True,False,False,False,False,False
+lama|uniform|N=49,5,5,22,16,,,25,False,True,False,False,True,True,True,False
+lama|uniform|N=64,6,6,23,20,,,25,False,True,False,False,True,True,True,False
+lama|uniform|N=81,7,7,25,23,,,25,False,True,False,False,True,True,False,False
+lama|uniform|N=9,2,2,24,11,,,25,False,True,False,False,True,True,False,False

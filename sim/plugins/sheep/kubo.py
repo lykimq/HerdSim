@@ -13,6 +13,11 @@ def prepare(_config: dict[str, Any]) -> dict[str, Any]:
     return {}
 
 
+def top_speed(config: dict[str, Any]) -> float:
+    """The speed cap of the MATLAB port (sim/methods/kubo/config.py), in units per second."""
+    return float(config["sheep_speed_max"])
+
+
 def step(state: SimulationState, config: dict[str, Any]) -> SimulationState:
     velocities = sheep_velocities(
         state.sheep_positions, state.sheep_velocities, state.shepherd_positions, config

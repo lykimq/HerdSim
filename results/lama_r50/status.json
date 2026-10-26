@@ -1,0 +1,24 @@
+{
+  "_auto_generated_notice": "AUTO-GENERATED: do not modify. Re-run the producing command to refresh this file.",
+  "protocol_id": "lama_r50",
+  "physics_hash": "3bd1875fd043d84b",
+  "running": false,
+  "stop_reason": "every cell decided, at max_seeds or errored",
+  "rounds": 20,
+  "trials_done": 17660,
+  "trials_ignored": 0,
+  "trials_this_run": 17660,
+  "round_trials": 0,
+  "trial_errors": 0,
+  "cells_with_errors": {
+    "count": 0,
+    "keys": []
+  },
+  "hours_this_run": 6.529,
+  "trials_per_hour": 2704.9,
+  "cells": 500,
+  "cells_pruned": 0,
+  "cells_needing_seeds": 23,
+  "cells_at_max_seeds_undecided": 23,
+  "updated_at": "2026-10-26T03:06:38.064128+00:00"
+}

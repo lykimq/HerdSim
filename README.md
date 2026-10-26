@@ -2,8 +2,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-340%20passed-brightgreen.svg)](tests/)
-[![Trials](https://img.shields.io/badge/simulated%20trials-326%2C870-success.svg)](results/)
+[![Tests](https://img.shields.io/badge/tests-343%20passed-brightgreen.svg)](tests/)
+[![Trials](https://img.shields.io/badge/simulated%20trials-367%2C150-success.svg)](results/)
 
 Have you ever watched sheepdogs work a flock across an open field? A single border collie working patiently can eventually round up dozens of sheep. But what happens when the clock is ticking? Or when sheep are scattered across a vast pasture, split into separate groups, or wandering in opposite directions? A single dog simply cannot run in multiple directions at once. To gather the flock before time runs out, dogs must work together as a coordinated team.
 
@@ -13,7 +13,7 @@ That raises a fundamental question in collective animal behavior and autonomous 
 
 **HerdSim** is a dual-purpose scientific study and open-source simulation laboratory built to answer that question. We map the minimum reliable team size ($D_{\min}$), the saturation team size beyond which adding dogs yields no speedup ($D_{\mathrm{sat}}$), and the conditions under which overcrowding causes missions to fail. 
 
-Across **326,870 simulation trials** evaluated with zero execution errors, HerdSim establishes the scaling laws of multi-agent shepherding across flock sizes from 25 to 566 sheep (extended to 3,200), under varying deadline pressures, pasture layouts, flock cohesion levels, and sensing ranges.
+Across **367,150 simulation trials** evaluated with zero execution errors, HerdSim establishes the scaling laws of multi-agent shepherding across flock sizes from 25 to 566 sheep (extended to 3,200), under varying deadline pressures, pasture layouts, flock cohesion levels, and sensing ranges.
 
 ![One simulation trial](docs/figures/fig17_trial.png)
 **Figure 1: Live simulation trial in HerdSim ($N = 200$ sheep, $D = 4$ dogs, wide start layout, seed 2026).**
@@ -39,23 +39,29 @@ The complete scientific monograph and empirical datasets are available in [`docs
 
 ![D_min against flock size across deadlines and layouts](docs/figures/fig20_dmin_vs_n.png)
 **Figure 2: Minimum reliable team size $D_{\min}$ as a function of flock size $N$ across deadlines and layouts.**
-*How to read this figure:* The horizontal axis is flock size $N$; the vertical axis is the smallest team size $D_{\min}$ achieving $\ge 90\%$ reliability. Columns separate pasture layouts (`compact`, `split`, `wide`, `outlier_rich`); rows represent deadline pressures (relaxed $12\times$, intermediate $6\times$, urgent $3\times$). Solid lines show strict 100% containment; dashed lines show practical 99% arrival. Notice how `compact` starts remain flat at $D_{\min} = 1$ across all conditions, while urgent deadlines dramatically lift the curves on scattered pastures.
+*How to read this figure:* The horizontal axis is flock size $N$; the vertical axis is the smallest team size $D_{\min}$ achieving $\ge 90$% reliability. Columns separate pasture layouts (`compact`, `split`, `wide`, `outlier_rich`); rows represent deadline pressures (relaxed $12\times$, intermediate $6\times$, urgent $3\times$). Solid lines show strict 100% containment; dashed lines show practical 99% arrival. Notice how `compact` starts remain flat at $D_{\min} = 1$ across all conditions, while urgent deadlines dramatically lift the curves on scattered pastures.
 
 ### 1. Cohesive flocks only ever need one dog ($D_{\min} = 1$)
 When sheep start close together in a neat cluster (`compact`), **a single dog is sufficient across all tested flock sizes ($N = 25$ to $400$) and all deadlines ($12\times$ down to $3\times$ drive times)**. Because no sheep are wandering off, the dog never wastes time gathering strays—its role is purely steering. Furthermore, adding more dogs behind a walking flock does not accelerate the drive: sheep cruise at their natural walking speed ($1\text{ m/s}$), and extra dogs behind them cannot push them faster without causing panic.
 
 ### 2. On scattered pastures, $D_{\min}$ grows much slower than flock size
-When sheep start scattered (`wide`, `split`, `outlier_rich`), dogs must round up strays before driving the collective. In log-log space ($\log_2 D_{\min}$ vs. $\log_2 N$), the scaling slope falls between **0.27 and 0.50** (sub-linear growth). 
+When sheep start scattered (`wide`, `split`, `outlier_rich`), dogs must round up strays before driving the collective. In log-log space ($\log_2 D_{\min}$ vs. $\log_2 N$), the scaling slope falls between **0.27 and 0.38** at relaxed deadlines ($12\times$) and 0.38 to 0.61 at $6\times$ (sub-linear growth). 
 *Why does it scale so favorably?* Sheep possess natural social attraction. Once a dog nudges a stray toward the center, the stray spots its flock-mates and runs back to join them on its own. The flock's biological cohesion does half the rounding work for free!
 
 ### 3. Tight deadlines demand more dogs than larger flocks
 Time pressure is a far stronger multiplier than flock size. Under practical arrival rules, cutting the deadline from relaxed ($12\times$) to urgent ($3\times$) raises $D_{\min}$ on large scattered flocks ($N = 400$) from **2 dogs to 5–6 dogs**. In contrast, quadrupling the flock size (from $N = 100$ to $400$) under a relaxed deadline only raises the requirement from 1 dog to 2 dogs. Urgency prevents sequential gathering; dogs must divide and conquer in parallel.
 
 ### 4. Without teamwork, extra dogs are useless
-To test whether coordination algorithms are truly necessary, we evaluated an uncoordinated greedy baseline called **FAT (Farthest-Agent Targeting)**, where each dog independently chases whichever sheep is farthest from the goal. Because every dog has the same view, **all dogs pick the exact same stray**, collapsing into a tight pack that acts like a single clumsy dog. FAT fails completely on scattered pastures at $N \ge 200$ (0% success), proving that adding uncoordinated agents provides zero scaling benefit.
+To test whether coordination algorithms are truly necessary, we evaluated an uncoordinated greedy baseline called **FAT (Farthest-Agent Targeting)**, where each dog independently chases whichever sheep is farthest from the goal. Because every dog has the same view, **all dogs pick the exact same stray**, collapsing into a tight pack that acts like a single clumsy dog. FAT has no reliable team size on scattered pastures at $N \ge 200$: past two dogs its success stays near or below 0.5, so extra dogs add no parallel work.
 
 ### 5. What counts as success? The "Straggler Effect"
-Under strict 100% containment (every single sheep inside the pen simultaneously), large dog packs ($D \ge 6$) paradoxically fail on large flocks. Why? In 95% of those failed trials, the dogs had already penned 99% of the sheep with ample time to spare. But when one stubborn stray remained outside, the pack broke formation to chase it, charged past the unfenced entrance, and accidentally flushed the penned flock back out. Slower, calmer dogs ($v_{\mathrm{dog}} = 1.15\text{ m/s}$) or evaluating practical **99% arrival** isolates genuine coordination ability from boundary penning noise.
+Under strict 100% containment (every single sheep inside the pen simultaneously), large dog packs ($D \ge 6$) paradoxically fail on large flocks. Why? In 97% of those failed trials, the dogs had already brought 99% of the sheep into the goal before the deadline. In a sample trace, the dogs chasing the last stray end up between the flock and the goal and drive the penned flock back out. Slower, calmer dogs ($v_{\mathrm{dog}} = 1.15\text{ m/s}$) or evaluating practical **99% arrival** isolates genuine coordination ability from boundary penning noise.
+
+### 6. Targets without cohesion follow the square-root law, in HerdSim too
+Run inside HerdSim on its own gather task, the non-cohesive model of Lama & di Bernardo (2024) reproduces the paper's map cell by cell (median difference 0.034 in the share of targets gathered with sensing radius 10, 0.003 with infinite sensing). With herders that see everything, the smallest team grows as $\sqrt{N}$ (exponent 0.52–0.53 over 100 to 400 targets): 8 herders for 100 targets, 17 for 400. That is steeper than the 0.27–0.38 of the cohesive Strömbom flock at relaxed deadlines, though the two runs also differ in task and herder rule. With a sensing radius of 10, no team up to 25 herders gathers 81 targets or fewer reliably; just above that threshold the paper's average reaches 99% while runs that lose a target or two remain common, so HerdSim's reliability rule needs many more herders there (17–25 instead of 11 at 144 targets).
+
+![The Lama and di Bernardo model in HerdSim](docs/figures/fig38_lama.png)
+**Figure 3: The smallest team per number of targets in the Lama & di Bernardo model, against the paper's Fig. 2.** Squares are the paper's values, circles the paper's statistic on HerdSim's trials, diamonds HerdSim's $D_{\min}$ (bars are brackets; crosses mean no reliable team up to 25). Left: sensing radius 10. Right: infinite sensing.
 
 👉 *Read the full scientific analysis, sensitivity sweeps, and theoretical derivations in [docs/report/d_min_report.md](docs/report/d_min_report.md).*
 
@@ -76,7 +82,7 @@ HerdSim is built from the ground up as a high-performance, deterministic researc
 5. **Deterministic & Crash-Safe**:
    Dedicated common random number streams isolate starting conditions, ensuring bit-identical reproducibility. All trials append immediately to disk (`trials.jsonl`) with crash-safe interrupt and resume capabilities.
 6. **Three Source Models, Two Tasks**:
-   Besides the Strömbom flock, HerdSim runs the continuous force model of Kubo et al. (2022) on the same drive task, and the non-cohesive targets and local herders of Lama & di Bernardo (2024) on their own gather task (sheep and dogs start scattered over a disc and the dogs bring the targets into its centre). The Lama model is there to test the published $\sqrt{N}$ law inside the same simulator and statistics; its validation against the paper is running and no results are reported yet.
+   Besides the Strömbom flock, HerdSim runs the continuous force model of Kubo et al. (2022) on the same drive task, and the non-cohesive targets and local herders of Lama & di Bernardo (2024) on their own gather task (sheep and dogs start scattered over a disc and the dogs bring the targets into its centre). The Lama model is there to test the published $\sqrt{N}$ law inside the same simulator and statistics (finding 6).
 
 ---
 
@@ -94,7 +100,7 @@ cd HerdSim
 # Install development environment and dependencies
 make install     # uv sync --extra dev
 
-# Run comprehensive checks (Ruff linter + type checking + 340 tests)
+# Run comprehensive checks (Ruff linter + type checking + 343 tests)
 make check
 
 # Execute miniature verification benchmark campaigns (~1 minute)
@@ -147,7 +153,7 @@ HerdSim/
 ├── protocols/configs/      # Protocol definitions (canonical defaults + overrides)
 ├── cli/                    # Command-line tools (campaign.py, run_queue.py, dmin_tables.py)
 ├── docs/                   # Scientific monographs, technical guides, and figures
-├── results/                # Archived empirical datasets (326,870 trials)
+├── results/                # Archived empirical datasets (367,150 trials)
 └── tests/                  # Unit tests and floating-point golden regression suites
 ```
 
@@ -176,3 +182,5 @@ If you use HerdSim in your research, please cite:
 2. **Kubo, M., Tashiro, M., Sato, H., Yamaguchi, A. (2022)**. *Herd guidance by multiple sheepdog agents with repulsive force*. Artificial Life and Robotics, 27, 416–427. [DOI: 10.1007/s10015-021-00726-7](https://doi.org/10.1007/s10015-021-00726-7)
 3. **Lama, A., & di Bernardo, M. (2024)**. *Shepherding control and herdability in complex multiagent systems*. Physical Review Research, 6, L032012. [DOI: 10.1103/PhysRevResearch.6.L032012](https://doi.org/10.1103/PhysRevResearch.6.L032012)
 4. **Empirical Results Tables**: [`docs/report/results_tables.md`](docs/report/results_tables.md)
+
+The full list of works cited in the study is in the [report's references](docs/report/d_min_report.md#references).

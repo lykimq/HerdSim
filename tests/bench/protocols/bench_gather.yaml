@@ -1,0 +1,28 @@
+# Bench campaign: the gather task with the lama method through the real pipeline (no
+# calibration, the end rule, the paper's quantities in the rows). A small disc (R = 20) with the
+# paper's sensing radius 10, so a lone herder can lose targets and end a trial early, and four
+# herders are expected to succeed more often than one.
+protocol_id: bench_gather
+output: results/bench_gather
+canonical: protocols/configs/canonical.yaml
+task: gather
+
+methods:
+  lama:
+    time_limit_ticks: 10000
+
+layouts: [uniform]
+flock_sizes: [10, 20]
+shepherd_counts: [1, 2, 4]
+
+success_fraction: 0.99
+gather_start_radius: 20.0
+gather_goal_fraction: 0.2
+metrics_stride: 10
+
+reliability_theta: 0.5
+confidence: 0.9
+batch_seeds: 5
+max_seeds: 5
+timeseries_seeds: 0
+budget_hours: 0.5

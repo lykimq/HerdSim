@@ -881,10 +881,74 @@ def fig_view() -> None:
     plt.close(fig)
 
 
+# The paper's N* at sqrt(M) = 2 to 20 (Lama and di Bernardo 2024, Fig. 2b and 2a, R = 50,
+# chi* = 0.99), read cell by cell from the figure's embedded raster through its own colour bar:
+# the smallest N from which every larger N has chi >= 0.99. None: no N up to 25 reaches it, or
+# (sqrt(M) = 11 at sensing 10) the column is covered by the drawn M_low line. Its grid starts at
+# N = 2, so a 2 there means "2 or fewer".
+PAPER_NSTAR = {
+    "lama_r50": [None, None, None, None, None, None, None, None, 19, None, 11, 12, 13, 14, 15, 16,
+                 17, 17, 18],
+    "lama_r50_inf": [2, 3, 4, 5, 6, 6, 7, 8, 9, 10, 11, 12, 12, 13, 14, 15, 16, 17, 18],
+}
+
+
+def fig_lama() -> None:
+    """The Lama and di Bernardo model in HerdSim against the paper: the smallest team per number
+    of targets, under the paper's statistic and under HerdSim's reliability rule."""
+    if not have("lama_r50", "lama_r50_inf"):
+        return
+    from analysis.dmin_tables import bracket
+    from analysis.herdability import paper_nstar
+
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.4), sharey=True)
+    for ax, name, title in ((axes[0], "lama_r50", "sensing radius 10"),
+                            (axes[1], "lama_r50_inf", "sensing infinite")):
+        k = np.arange(2, 21)
+        paper = PAPER_NSTAR[name]
+        ax.plot([x for x, v in zip(k, paper) if v], [v for v in paper if v], marker="s", ls="",
+                mfc=SURFACE, mec=INK, ms=7, label="paper, Fig. 2 (mean share >= 0.99)")
+        ours = paper_nstar(trials(name), (0.99,))
+        ok = ours["nstar_0.99"].notna()
+        ax.plot(ours.loc[ok, "sqrt_n"] - 0.12, ours.loc[ok, "nstar_0.99"], marker="o", ls="",
+                color=BLUE, ms=5, label="HerdSim, the paper's statistic")
+        g = groups_table(RESULTS / name)
+        for _, row in g.iterrows():
+            x = np.sqrt(int(row["n"])) + 0.12
+            b = bracket(row)
+            if b and b[0] != b[1]:
+                ax.plot([x, x], b, color=ORANGE, lw=3)
+            if b:
+                ax.plot(x, b[1], marker="D", color=ORANGE, ls="", ms=4)
+            elif pd.notna(row["d_min_low"]):
+                ax.plot(x, float(row["d_min_low"]), marker="^", ls="", mfc=SURFACE, mec=ORANGE)
+            else:
+                ax.plot(x, 26, marker="x", ls="", color=ORANGE)
+        ax.plot([], [], marker="D", color=ORANGE, lw=3,
+                label="HerdSim D_min (theta 0.90, 99%; bar: bracket, x: none up to 25)")
+        if name == "lama_r50":
+            ax.axvspan(10.5, 13.5, color=GRID, alpha=0.6, lw=0)
+            ax.text(12, 1.0, "threshold\nregion", ha="center", fontsize=8, color=MUTED)
+        ax.set_xlim(0.5, 20.5)
+        ax.set_ylim(0, 27)
+        ax.set_xticks([1, 4, 8, 12, 16, 20])
+        ax.set_xlabel("sqrt(number of targets)")
+        ax.set_title(title, fontsize=10)
+        ax.grid(color=GRID, lw=0.6)
+    axes[0].set_ylabel("smallest team (herders)")
+    axes[1].legend(frameon=False, fontsize=8, loc="upper left")
+    fig.tight_layout(rect=(0, 0.05, 1, 1))
+    fig.text(0.5, 0.01, "lama_r50 and lama_r50_inf: gather task, R = 50, goal R/5, 99 percent of the "
+             "targets, 5000 s. Paper values read from its Fig. 2 raster.", ha="center", fontsize=8,
+             color=MUTED)
+    fig.savefig(OUT / "fig38_lama.png", dpi=150)
+    plt.close(fig)
+
+
 def main() -> None:
     for draw in (fig_dmin_vs_n, fig_deadline, fig_straggler, fig_strict_vs_99, fig_split_curves,
                  fig_sensitivity, fig_fat, fig_metrics, fig_compact, fig_design, fig_effort,
-                 fig_pressure, fig_growth_fits, fig_spacing, fig_view):
+                 fig_pressure, fig_growth_fits, fig_spacing, fig_view, fig_lama):
         draw()
 
 

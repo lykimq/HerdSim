@@ -1,0 +1,23 @@
+# Protocol the unit tests load for the gather task and the lama method. Tests never run it
+# as a campaign and never write to its output folder. Small disc, so hand-made checks are quick.
+
+protocol_id: unit_gather
+output: results/unit_gather
+canonical: protocols/configs/canonical.yaml
+task: gather
+
+methods:
+  lama:
+    time_limit_ticks: 2000
+
+layouts: [uniform]
+flock_sizes: [10, 40]
+shepherd_counts: [1, 2, 4]
+
+success_fraction: 0.99
+gather_start_radius: 20.0
+gather_goal_fraction: 0.2
+
+batch_seeds: 5
+max_seeds: 5
+budget_hours: 1.0

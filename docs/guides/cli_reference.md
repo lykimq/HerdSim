@@ -26,7 +26,7 @@ uv run cli/campaign.py run --protocol dmin_f99_m6 --workers 20
 uv run cli/campaign.py status --protocol dmin_f99_m6
 ```
 
-The gather task runs the same way. Its protocols are not in the study queue yet, so run them directly:
+The gather task runs the same way; its two protocols are also the last two of the study queue:
 
 ```bash
 uv run cli/campaign.py plan --protocol lama_r50
@@ -65,6 +65,9 @@ uv run cli/dmin_tables.py dmin dmin_m12 dmin_m6 dmin_m3
 
 # Inspect completion times and effort beyond saturation
 uv run cli/dmin_tables.py effort dmin_f99_m6
+
+# The Lama gather runs: the paper's statistic beside D_min, and the growth exponent
+uv run cli/dmin_tables.py herdability lama_r50 lama_r50_inf --above 225
 ```
 
 ### Deadline Re-Evaluation (`cli/dmin_report.py`)

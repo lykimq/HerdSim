@@ -1,0 +1,27 @@
+# Lama and di Bernardo 2024 in HerdSim: the paper's main case (Fig. 2b, Fig. S8a, Table I row 1).
+# Targets with no cohesion, herders that sense within 10, start disc R = 50, goal r* = 10, and the
+# 99 percent share. In the paper's letters the flock sizes are M (targets) and the dog counts N
+# (herders); the grid follows its axes, sqrt(M) = 1 to 20 and N = 1 to 25. The time limit is the
+# paper's t_max = 5000 at dt 0.03, rounded up to whole ticks (166666.67).
+#
+# Validation (design_lama.md section 1): N* about 0.85 sqrt(M) above the threshold, sqrt(M_low)
+# = 11, no N up to 25 at sqrt(M) <= 6. Finish-time seeds off: D_min is the question.
+
+protocol_id: lama_r50
+output: results/lama_r50
+canonical: protocols/configs/canonical.yaml
+task: gather
+
+methods:
+  lama:
+    time_limit_ticks: 166667
+
+layouts: [uniform]
+flock_sizes: [1, 4, 9, 16, 25, 36, 49, 64, 81, 100, 121, 144, 169, 196, 225, 256, 289, 324, 361, 400]
+shepherd_counts: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+
+success_fraction: 0.99
+gather_start_radius: 50.0
+gather_goal_fraction: 0.2
+metrics_stride: 10
+decide_finish_times: false

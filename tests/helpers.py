@@ -15,10 +15,12 @@ from services.protocol import Protocol, load_protocol
 from sim.core.simulation_state import SimulationState
 from sim.core.world.arena import GoalZone, World
 
-UNIT_YAML = (
-    Path(__file__).parent / "protocols" / "unit.yaml"
-)  # canonical setup and every method
-BASE_PROTOCOL = load_protocol(str(UNIT_YAML), output=Path(tempfile.gettempdir()) / "herdsim-tests")
+PROTOCOLS = Path(__file__).parent / "protocols"
+TEST_OUTPUT = Path(tempfile.gettempdir()) / "herdsim-tests"
+# Canonical setup and every drive-task method.
+BASE_PROTOCOL = load_protocol(str(PROTOCOLS / "unit.yaml"), output=TEST_OUTPUT)
+# The gather task with the lama method.
+GATHER_PROTOCOL = load_protocol(str(PROTOCOLS / "gather.yaml"), output=TEST_OUTPUT)
 
 
 def protocol_with(
@@ -27,17 +29,16 @@ def protocol_with(
     ticks: int = 300,
     settings: dict[str, Any] | None = None,
     params: dict[str, Any] | None = None,
+    base: Protocol = BASE_PROTOCOL,
 ) -> Protocol:
-    """The unit protocol with one method's time limit and parameters, and settings, replaced."""
+    """``base`` with one method's time limit and parameters, and settings, replaced."""
     methods = tuple(
         replace(m, time_limit_ticks=ticks, params={**m.params, **(params or {})})
         if m.name == method
         else m
-        for m in BASE_PROTOCOL.methods
+        for m in base.methods
     )
-    return replace(
-        BASE_PROTOCOL, settings={**BASE_PROTOCOL.settings, **(settings or {})}, methods=methods
-    )
+    return replace(base, settings={**base.settings, **(settings or {})}, methods=methods)
 
 
 def config_for(
@@ -65,6 +66,25 @@ def config_for(
     )
     group = Group(method, layout, tuple(sorted((factors or {}).items())), n)
     return cell_config(protocol, Cell(group, d), flock_radius)
+
+
+def gather_config(
+    *,
+    n: int = 20,
+    d: int = 2,
+    ticks: int = 2000,
+    settings: dict[str, Any] | None = None,
+    params: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Run config of one gather cell with the lama method (no calibration: the task sizes
+    itself from ``gather_start_radius``, 20 in the test protocol)."""
+    protocol = replace(
+        protocol_with(
+            method="lama", ticks=ticks, settings=settings, params=params, base=GATHER_PROTOCOL
+        ),
+        shepherd_counts=(d,),
+    )
+    return cell_config(protocol, Cell(Group("lama", "uniform", (), n), d), float("nan"))
 
 
 def make_world(

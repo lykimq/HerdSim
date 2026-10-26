@@ -22,15 +22,16 @@ import numpy as np
 import pandas as pd
 
 from sim.core.simulation_state import SimulationState
-from sim.core.world.arena import GoalZone, World
-from sim.core.world.layouts import (
-    DOG_STARTS,
-    LAYOUTS,
-    field_size,
-    layout_extent,
-    place_dogs,
-    place_flock,
-)
+from sim.core.world import layouts
+from sim.core.world.layouts import DOG_STARTS, field_size, layout_extent, place_dogs, place_flock
+
+from .goal import arrival_columns
+from .team_settings import KEYS as TEAM_KEYS
+from .team_settings import check as check_team
+from .team_settings import setup as team_setup
+
+# The start layouts of this task: the flock shapes sized by R_f and the separation distance.
+LAYOUTS = layouts.LAYOUTS
 
 # Setup keys this task reads from the run config (agent counts and the layout
 # name are set by build_config itself).
@@ -55,19 +56,8 @@ REQUIRED_KEYS = (
     # Read only at setup time (field_size), but part of the setup record.
     "field_clearance",
     "hold_ticks",
-    "hold_withdraw",
-    "dog_spacing",
-    "sensing_range",
-    "communication",
-    "drive_offset_cap",
+    *TEAM_KEYS,
 )
-
-# Fractions of the flock whose first full arrival is recorded in every trial row, so a
-# weaker success rule than "every sheep" (both papers use one) can be read afterwards.
-ARRIVAL_FRACTIONS = (0.90, 0.95, 0.99)
-
-# What dogs share when they see only part of the flock (collect_drive_multi).
-COMMUNICATION = ("none", "neighbour", "shared")
 
 
 def check(config: dict[str, Any]) -> None:
@@ -76,19 +66,14 @@ def check(config: dict[str, Any]) -> None:
         raise ValueError(f"dog_start {config['dog_start']!r} not in {DOG_STARTS}")
     if config["initial_layout"] not in LAYOUTS:
         raise ValueError(f"initial_layout {config['initial_layout']!r} not in {LAYOUTS}")
-    if int(config["hold_ticks"]) < 0 or float(config["dog_spacing"]) < 0.0:
-        raise ValueError("hold_ticks and dog_spacing must not be negative")
-    if config["hold_withdraw"] and config["dog_controller"] != "collect_drive_multi":
-        raise ValueError("hold_withdraw is a step of the collect_drive_multi team rule only")
-    if float(config["dog_spacing"]) > 0.0 and config["dog_controller"] == "kubo_forces":
-        raise ValueError("dog_spacing is not for the Kubo dogs, which repel each other already")
-    if config["communication"] not in COMMUNICATION:
-        raise ValueError(f"communication {config['communication']!r} not in {COMMUNICATION}")
-    if float(config["sensing_range"]) > 0.0:
-        if config["dog_controller"] != "collect_drive_multi":
-            raise ValueError("sensing_range is a setting of the collect_drive_multi team rule only")
-        if config["hold_withdraw"]:
-            raise ValueError("hold_withdraw judges the goal from the true flock; not with sensing")
+    if int(config["hold_ticks"]) < 0:
+        raise ValueError("hold_ticks must not be negative")
+    check_team(config)
+
+
+def drive_length(setup: Mapping[str, Any]) -> float:
+    """The drive: the distance from the flock's start centre to the goal centre."""
+    return abs(float(setup["goal_center"][0]) - float(setup["flock_center"][0]))
 
 
 def row_columns(config: dict[str, Any], history: pd.DataFrame) -> dict[str, Any]:
@@ -98,42 +83,12 @@ def row_columns(config: dict[str, Any], history: pd.DataFrame) -> dict[str, Any]
         **arrival_columns(config, history),
         "goal_radius": float(config["goal_radius"]),
         "success_fraction": float(config["success_fraction"]),
-        "drive_distance": abs(float(config["goal_center"][0]) - float(config["flock_center"][0])),
+        "drive_distance": drive_length(config),
         "world_width": float(config["world_width"]),
         "world_height": float(config["world_height"]),
         "final_gcm_goal": float(final["gcm_goal"]),
         "final_sheep_in_goal": float(final["sheep_in_goal"]),
     }
-
-
-def arrival_columns(config: dict[str, Any], history: pd.DataFrame) -> dict[str, float]:
-    """Model seconds until a fraction of the sheep first stood in the goal (NaN if never).
-
-    Reads the first tick at which ``sheep_in_goal`` reached the fraction of N. These are
-    first arrivals, not held ones: a sheep may leave again before the trial ends.
-    """
-    dt = float(config["dt"])
-    n = int(config["n_sheep"])
-    inside = history["sheep_in_goal"].to_numpy(dtype=float)
-    out: dict[str, float] = {}
-    for fraction in ARRIVAL_FRACTIONS:
-        hit = np.flatnonzero(inside >= fraction * n)
-        ticks = float(history["tick"].to_numpy()[hit[0]]) if hit.size else float("nan")
-        out[f"seconds_to_{round(fraction * 100)}pct_in_goal"] = ticks * dt
-    return out
-
-
-def create_world(config: dict[str, Any]) -> World:
-    return World(
-        width=float(config["world_width"]),
-        height=float(config["world_height"]),
-        goal=GoalZone(
-            center=np.asarray(config["goal_center"], dtype=float),
-            radius=float(config["goal_radius"]),
-            required_fraction=float(config["success_fraction"]),
-            hold_ticks=int(config["hold_ticks"]),
-        ),
-    )
 
 
 def initial_positions(
@@ -208,11 +163,7 @@ def build_setup(
         "dog_start_gap": float(s["dog_start_gap"]),
         "dog_start_spacing": float(s["dog_start_spacing"]),
         "field_clearance": float(s["field_clearance"]),
-        "hold_withdraw": bool(s["hold_withdraw"]),
-        "dog_spacing": float(s["dog_spacing"]),
-        "sensing_range": float(s["sensing_range"]),
-        "communication": str(s["communication"]),
-        "drive_offset_cap": float(s["drive_offset_cap"]),
+        **team_setup(s),
     }
     sizing = {**setup, "n_sheep": n_sheep, "n_shepherds": max_dogs}
     reach = max(layout_extent({**sizing, "initial_layout": name}) for name in layouts)

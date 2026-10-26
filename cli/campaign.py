@@ -39,6 +39,7 @@ from services.calibration import calibrate  # noqa: E402
 from services.cells import describe  # noqa: E402
 from services.protocol import load_protocol  # noqa: E402
 from services.store import CampaignStore, progress  # noqa: E402
+from sim.plugins.scenarios import SCENARIOS  # noqa: E402
 
 
 def main() -> None:
@@ -59,6 +60,9 @@ def main() -> None:
     elif args.verb == "plan":
         print(describe(protocol))
     elif args.verb == "calibrate":
+        task = str(protocol.settings["task"])
+        if not SCENARIOS[task].calibrates:
+            raise SystemExit(f"task {task!r} sizes itself from its settings; nothing to calibrate")
         for method, table in calibrate(protocol, args.workers).items():
             for n, radius in sorted(table.items()):
                 print(f"{method:16s} N={n:5d}  R_f={radius:7.2f}")

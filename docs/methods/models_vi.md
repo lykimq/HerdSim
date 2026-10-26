@@ -30,14 +30,14 @@ HerdSim kết nối giữa nghiên cứu hành vi động vật thực nghiệm 
 Dựa trên dữ liệu định vị GPS tần số cao thu được từ các đàn cừu thực tế bị rượt đuổi bởi chó chăn cừu giống Border Collie ([Strömbom et al. 2014](https://doi.org/10.1098/rsif.2014.0719)), các nhà khoa học nhận thấy cừu không có một kế hoạch tổng thể phức tạp. Thay vào đó, mỗi cá thể cừu $i$ tự cân bằng **5 bản năng sinh học cạnh tranh nhau** tại mỗi bước thời gian rời rạc ($t \to t+1$, với 1 tick = 1 giây).
 
 ![Năm bản năng cạnh tranh của cừu](../../docs/figures/fig_sheep_forces.png)
-*Hình 1: Mô hình hành vi cá thể cừu theo Strömbom et al. (2014). (A) Hình học tương tác trên đồng cỏ: cừu $i$ phát hiện bạn cùng đàn, láng giềng xâm lấn không gian cá nhân ($r_a = 2\text{ m}$), chó nằm trong cự ly đe dọa ($r_s = 65\text{ m}$) và trọng tâm cục bộ $\mathrm{LCM}_i$. (B) Phân rã 5 vector bản năng: Lực đẩy tránh va chạm mang trọng số lớn nhất ($\rho_a = 2.0$) ngăn ngừa giẫm đạp; lực gắn kết bầy ($c = 1.05$) kéo về $\mathrm{LCM}_i$; lực né chó ($\rho_s = 1.0$) đẩy ra xa kẻ săn mồi; cùng quán tính ($h = 0.5$) và nhiễu ngẫu nhiên ($e = 0.3$) tổng hợp thành hướng di chuyển mong muốn $\mathbf{H}_i'$.*
+*Hình 1: Mô hình hành vi cá thể cừu theo Strömbom et al. (2014). (A) Hình học tương tác trên đồng cỏ: cừu* $i$ *phát hiện bạn cùng đàn, láng giềng xâm lấn không gian cá nhân (*$r_a = 2\text{ m}$*), chó nằm trong cự ly đe dọa (*$r_s = 65\text{ m}$*) và trọng tâm cục bộ* $\mathrm{LCM}_i$*. (B) Phân rã 5 vector bản năng: Lực đẩy tránh va chạm mang trọng số lớn nhất (*$\rho_a = 2.0$*) ngăn ngừa giẫm đạp; lực gắn kết bầy (*$c = 1.05$*) kéo về* $\mathrm{LCM}_i$*; lực né chó (*$\rho_s = 1.0$*) đẩy ra xa kẻ săn mồi; cùng quán tính (*$h = 0.5$*) và nhiễu ngẫu nhiên (*$e = 0.3$*) tổng hợp thành hướng di chuyển mong muốn* $\mathbf{H}_i'$.
 
-#### Trạng thái chạy trốn chủ động (Khoảng cách tới chó $< r_s$)
+#### Trạng thái chạy trốn chủ động (Khoảng cách tới chó $\lt r_s$)
 
 Khi bất kỳ chú chó nào tiến vào cự ly đe dọa $r_s = 65\text{ m}$ (tầm nhìn phát hiện nguy hiểm tự nhiên của loài cừu), cừu $i$ phát hiện mối đe dọa và chuyển sang **trạng thái chạy trốn chủ động**. Hướng di chuyển mong muốn $\mathbf{H}_i'$ được tính bằng tổng có trọng số của 5 vector đơn vị:
 
 $$
-\mathbf{H}_i' = h\,\mathbf{H}_i + c\,\mathbf{C}_i + \rho_a\,\mathbf{R}_{a,i} + \rho_s\,\mathbf{R}_{s,i} + e\,\mathbf{\epsilon}_i
+\mathbf{H}_i' = h\thinspace \mathbf{H}_i + c\thinspace \mathbf{C}_i + \rho_a\thinspace \mathbf{R}_{a,i} + \rho_s\thinspace \mathbf{R}_{s,i} + e\thinspace \mathbf{\epsilon}_i
 $$
 
 ##### 1. Quán tính di chuyển ($\mathbf{H}_i$, trọng số $h = 0.5$)
@@ -63,7 +63,7 @@ Trong mô hình chuẩn, $n = N - 1$ (tương tác với toàn bộ thành viên
 - Bất kỳ cá thể láng giềng $j$ nào ở cự ly gần hơn không gian cá nhân $r_a = 2\text{ m}$ sẽ tạo ra một lực đẩy né tránh:
 
 $$
-\mathbf{R}_{a,i} = \frac{\sum_{j \in \mathcal{N}_a(i)} \frac{\mathbf{x}_i - \mathbf{x}_j}{\lVert \mathbf{x}_i - \mathbf{x}_j \rVert}}{\left\lVert \sum_{j \in \mathcal{N}_a(i)} \frac{\mathbf{x}_i - \mathbf{x}_j}{\lVert \mathbf{x}_i - \mathbf{x}_j \rVert} \right\rVert}, \quad \text{với } \mathcal{N}_a(i) = \{j \ne i \mid \lVert \mathbf{x}_i - \mathbf{x}_j \rVert < r_a\}
+\mathbf{R}_{a,i} = \frac{\sum_{j \in \mathcal{N}_a(i)} \frac{\mathbf{x}_i - \mathbf{x}_j}{\lVert \mathbf{x}_i - \mathbf{x}_j \rVert}}{\left\lVert \sum_{j \in \mathcal{N}_a(i)} \frac{\mathbf{x}_i - \mathbf{x}_j}{\lVert \mathbf{x}_i - \mathbf{x}_j \rVert} \right\rVert}, \quad \text{với } \mathcal{N}_a(i) = \lbrace j \ne i \mid \lVert \mathbf{x}_i - \mathbf{x}_j \rVert \lt r_a\rbrace
 $$
 
 ##### 4. Trốn chạy kẻ săn mồi ($\mathbf{R}_{s,i}$, trọng số $\rho_s = 1.0$)
@@ -76,7 +76,7 @@ $$
 Tại mỗi giây ($1\text{ tick}$), cừu $i$ tiến về phía trước một khoảng $\delta = 1\text{ m}$ theo hướng chuyển động chuẩn hóa:
 
 $$
-\mathbf{x}_i^{t+1} = \mathbf{x}_i^t + \delta\,\frac{\mathbf{H}_i'}{\lVert \mathbf{H}_i' \rVert}
+\mathbf{x}_i^{t+1} = \mathbf{x}_i^t + \delta\thinspace \frac{\mathbf{H}_i'}{\lVert \mathbf{H}_i' \rVert}
 $$
 
 Quy tắc này giới hạn vận tốc tối đa của cừu ở mức $1.0\text{ m/s}$.
@@ -84,12 +84,12 @@ Quy tắc này giới hạn vận tốc tối đa của cừu ở mức $1.0\tex
 #### Trạng thái gặm cỏ (Khoảng cách tới chó $\ge r_s$)
 Khi tất cả chó ở xa hơn $r_s = 65\text{ m}$, đàn cừu cảm thấy an toàn và chuyển sang **gặm cỏ**: 95% thời gian chúng đứng yên, và 5% thời gian ($p = 0.05$) chúng bước một bước ngẫu nhiên:
 
-$$
-\mathbf{x}_i^{t+1} = \begin{cases} 
-\mathbf{x}_i^t + \delta\,\mathbf{\epsilon}_{\mathrm{graze}}, & \text{với xác suất } 0.05 \\ 
-\mathbf{x}_i^t, & \text{với xác suất } 0.95 
+```math
+\mathbf{x}_i^{t+1} = \begin{cases}
+\mathbf{x}_i^t + \delta\thinspace \mathbf{\epsilon}_{\mathrm{graze}}, & \text{với xác suất } 0.05 \\
+\mathbf{x}_i^t, & \text{với xác suất } 0.95
 \end{cases}
-$$
+```
 
 ---
 
@@ -100,7 +100,7 @@ Mô hình gốc năm 2014 của Strömbom chỉ được thiết kế cho **duy 
 HerdSim giải quyết triệt để vấn đề này bằng cách **cộng vector và chuẩn hóa về độ dài đơn vị**:
 
 $$
-\mathbf{R}_{s,i} = \frac{\sum_{j \in \mathrm{threat}} \frac{\mathbf{x}_i - \mathbf{y}_j}{\lVert \mathbf{x}_i - \mathbf{y}_j \rVert}}{\left\lVert \sum_{j \in \mathrm{threat}} \frac{\mathbf{x}_i - \mathbf{y}_j}{\lVert \mathbf{x}_i - \mathbf{y}_j \rVert} \right\rVert}, \quad \text{với } \mathrm{threat} = \{j \mid \lVert \mathbf{x}_i - \mathbf{y}_j \rVert < r_s\}
+\mathbf{R}_{s,i} = \frac{\sum_{j \in \mathrm{threat}} \frac{\mathbf{x}_i - \mathbf{y}_j}{\lVert \mathbf{x}_i - \mathbf{y}_j \rVert}}{\left\lVert \sum_{j \in \mathrm{threat}} \frac{\mathbf{x}_i - \mathbf{y}_j}{\lVert \mathbf{x}_i - \mathbf{y}_j \rVert} \right\rVert}, \quad \text{với } \mathrm{threat} = \lbrace j \mid \lVert \mathbf{x}_i - \mathbf{y}_j \rVert \lt r_s\rbrace
 $$
 
 #### Ví dụ trực quan về thế gọng kìm (Flanking)
@@ -134,14 +134,14 @@ Giả sử một con cừu ở tọa độ $(0, 5)$ đang bị kẹp giữa hai 
 
 HerdSim tích hợp mô hình mục tiêu không gắn kết từ bài báo của [Lama & di Bernardo (2024)](https://doi.org/10.1103/PhysRevResearch.6.L032012) thành phương pháp `lama` (mô hình cừu `lama_targets`, bộ điều khiển chó `lama_herders`). Nó chạy trong nhiệm vụ riêng, `gather` (xem [thiết kế nhiệm vụ](../experiments/task_design_vi.md#6-nhiệm-vụ-gom-lama-và-di-bernardo-2024)).
 
-**Trạng thái:** đã cài đặt và kiểm thử; đang chạy kiểm chứng với kết quả của chính bài báo. Chưa có kết quả nào từ mô hình này được báo cáo.
+**Trạng thái:** đã kiểm chứng với Hình 2 của bài báo và chạy trên lưới của bài báo (`lama_r50`, `lama_r50_inf`, 40.280 lượt); kết quả ở mục 3.14 của báo cáo (kiểm chứng với bài báo, quy luật căn bậc hai theo cả hai thống kê, ngưỡng).
 
-**Ký hiệu.** Bài báo viết $N$ cho số người chăn và $M$ cho số mục tiêu. HerdSim giữ chữ cái của mình ở mọi nơi: $D$ là số chó (người chăn) và $N$ là số cừu (mục tiêu). Vì vậy $N^*(M)$ của bài báo là $D_{\min}(N)$ của HerdSim trên nhiệm vụ gom. $D$ (hệ số khuếch tán) của bài báo ở đây gọi là `target_diffusion`.
+**Ký hiệu.** Bài báo viết $N$ cho số người chăn và $M$ cho số mục tiêu. HerdSim giữ chữ cái của mình ở mọi nơi: $D$ là số chó (người chăn) và $N$ là số cừu (mục tiêu). Vì vậy $N^{\ast}(M)$ của bài báo là $D_{\min}(N)$ của HerdSim trên nhiệm vụ gom. $D$ (hệ số khuếch tán) của bài báo ở đây gọi là `target_diffusion`.
 
 - **Mục tiêu (đóng vai trò "cừu")**: các hạt chuyển động Brown **không gắn kết, không đồng hướng, không giới hạn tốc độ**. Mỗi mục tiêu di chuyển theo nhiễu riêng cộng với lực đẩy của các người chăn trong bán kính $\lambda$ (phương trình 1 của bài báo):
 
 $$
-\dot{\mathbf{x}}_a = \sqrt{2D_T}\,\boldsymbol{\xi}_a + \beta \sum_{i:\ \lVert \mathbf{x}_a - \mathbf{y}_i \rVert \le \lambda} \left(\lambda - \lVert \mathbf{x}_a - \mathbf{y}_i \rVert\right) \frac{\mathbf{x}_a - \mathbf{y}_i}{\lVert \mathbf{x}_a - \mathbf{y}_i \rVert}
+\dot{\mathbf{x}}_a = \sqrt{2D_T}\thinspace \boldsymbol{\xi}_a + \beta \sum_{i:\ \lVert \mathbf{x}_a - \mathbf{y}_i \rVert \le \lambda} \left(\lambda - \lVert \mathbf{x}_a - \mathbf{y}_i \rVert\right) \frac{\mathbf{x}_a - \mathbf{y}_i}{\lVert \mathbf{x}_a - \mathbf{y}_i \rVert}
 $$
 
 - **Phản ứng trốn chạy**: lực đẩy hướng ra xa người chăn, bằng $\beta\lambda$ khi chạm và giảm tuyến tính về 0 tại $\lambda$. Lực đẩy của nhiều người chăn **cộng lại**, khác với lực đẩy Strömbom đã chuẩn hóa ở trên. Tốc độ chạy trốn tối đa khỏi một người chăn là $v_T = \beta\lambda = 7{,}5$.
@@ -154,7 +154,7 @@ $$
 | Bán kính đẩy | $\lambda$ | `repulsion_radius` | 2,5 |
 | Bước thời gian | $\Delta t$ | `dt` | 0,03 |
 
-- **Mục đích**: báo cáo so sánh độ dốc của $D_{\min}$ theo $N$ cho cừu tụ bầy (0,27 đến 0,50) với quy luật của bài báo cho mục tiêu không gắn kết ($N^* \propto \sqrt{M}$, chỉ đúng trên một ngưỡng mật độ $M_{\mathrm{low}}$ khi người chăn có tầm cảm nhận giới hạn). Chạy mô hình của bài báo ngay trong HerdSim đặt cả hai lên cùng một mô phỏng và cùng một lớp thống kê.
+- **Mục đích**: báo cáo so sánh độ dốc của $D_{\min}$ theo $N$ cho cừu tụ bầy (0,27 đến 0,50) với quy luật của bài báo cho mục tiêu không gắn kết ($N^{\ast} \propto \sqrt{M}$, chỉ đúng trên một ngưỡng mật độ $M_{\mathrm{low}}$ khi người chăn có tầm cảm nhận giới hạn). Chạy mô hình của bài báo ngay trong HerdSim đặt cả hai lên cùng một mô phỏng và cùng một lớp thống kê.
 
 ---
 
@@ -178,10 +178,10 @@ Các bộ điều khiển chó
 Mở rộng các quy tắc kinh nghiệm của Strömbom thành một đội đa tác tử tự hành, có ý thức tránh va chạm:
 
 ![Cơ chế phối hợp đa chó trong strombom_multi](../../docs/figures/fig3_team_rule.png)
-*Hình 3: Cơ chế phối hợp đội hình tự hành `strombom_multi` từ 1 chó đến 8 chó ($D = 1, 2, 4, 8$). Hàng trên (Gom cừu lạc trên bãi cỏ tản mác `wide`, $N = 200$): Thuật toán Hungarian gán 1-đối-1 từng con cừu lạc xa nhất cho từng chú chó (dấu $\times$ là điểm gom $P_c$), tối thiểu hóa tổng quãng đường chạy và gom song song. Hàng dưới (Lùa đàn trên bãi cỏ tập trung `compact`, $N = 200$): Toàn bộ đàn chó tự động dàn đều trên một vòng cung bán kính $R$ ôm trọn bề rộng bầy cừu (với điểm lùa danh định $P_d$ ở chính giữa), chia đều góc cực để đẩy cả bầy tiến về đích mà không cắt mặt nhau.*
+*Hình 3: Cơ chế phối hợp đội hình tự hành `strombom_multi` từ 1 chó đến 8 chó (*$D = 1, 2, 4, 8$*). Hàng trên (Gom cừu lạc trên bãi cỏ tản mác `wide`,* $N = 200$*): Thuật toán Hungarian gán 1-đối-1 từng con cừu lạc xa nhất cho từng chú chó (dấu* $\times$ *là điểm gom* $P_c$*), tối thiểu hóa tổng quãng đường chạy và gom song song. Hàng dưới (Lùa đàn trên bãi cỏ tập trung `compact`,* $N = 200$*): Toàn bộ đàn chó tự động dàn đều trên một vòng cung bán kính* $R$ *ôm trọn bề rộng bầy cừu (với điểm lùa danh định* $P_d$ *ở chính giữa), chia đều góc cực để đẩy cả bầy tiến về đích mà không cắt mặt nhau.*
 
 #### 1. Ngưỡng phát hiện cá thể lạc đàn ($f(N) = r_a N^{2/3}$)
-- *Tại sao là $r_a N^{2/3}$?* Khi xếp chặt các hình tròn bán kính $r_a$ trong mặt phẳng 2D, bán kính cụm tăng theo $\sim N^{1/2}$. Trong không gian 3D, bán kính tăng theo $\sim N^{1/3}$. Trên đồng cỏ mở, cừu phân tán theo cụm dạng fractal tự nhiên, nên biên giới tự nhiên nơi một cá thể bị xem là "lạc đàn" tăng theo hàm $N^{2/3}$.
+- *Tại sao là* $r_a N^{2/3}$? Khi xếp chặt các hình tròn bán kính $r_a$ trong mặt phẳng 2D, bán kính cụm tăng theo $\sim N^{1/2}$. Trong không gian 3D, bán kính tăng theo $\sim N^{1/3}$. Trên đồng cỏ mở, cừu phân tán theo cụm dạng fractal tự nhiên, nên biên giới tự nhiên nơi một cá thể bị xem là "lạc đàn" tăng theo hàm $N^{2/3}$.
 - Nếu có bất kỳ con cừu nào nằm xa hơn $f(N)$ tính từ Trọng tâm Toàn cục ($\mathrm{GCM} = \frac{1}{N} \sum_k \mathbf{x}_k$), bầy cừu được xem là bị phân tán, kích hoạt **Chế độ Gom cừu lạc (Outlier Collection Mode)**.
 
 #### 2. Phân công mục tiêu gom bằng thuật toán Hungarian
@@ -194,7 +194,7 @@ $$
 - $D$ con cừu lạc xa nhất được phân công tương ứng 1-đối-1 cho $D$ chú chó sẵn sàng thông qua thuật toán Hungarian (`scipy.optimize.linear_sum_assignment`). Thuật toán này tối thiểu hóa tổng quãng đường chạy của toàn đội và ngăn ngừa tình trạng các chú chó chạy chéo đường cắt mặt nhau. Chó dư thừa sẽ tham gia đội hình lùa phía sau.
 
 ![Hình học điểm gom Pc và phân công Hungarian](../../docs/figures/fig_hungarian_matching.png)
-*Hình 4: Cơ chế nhận diện cừu lạc và phân công Hungarian trong chế độ Gom. (A) Bất kỳ con cừu nào vượt ra ngoài ranh giới hình tròn $f(N) = r_a N^{2/3}$ đều kích hoạt chế độ gom; điểm gom $P_c$ được đặt lùi sau lưng cừu $r_a = 2\text{ m}$ theo phương chiếu từ trọng tâm bầy (GCM). (B) Thuật toán Hungarian phân công 1-đối-1 giữa chó và cừu lạc giúp tối thiểu hóa tổng quãng đường di chuyển và loại bỏ hoàn toàn hiện tượng chạy cắt chéo đường gây va chạm (đường nét đứt thể hiện rủi ro cắt chéo nếu gán tham lam ngây thơ).*
+*Hình 4: Cơ chế nhận diện cừu lạc và phân công Hungarian trong chế độ Gom. (A) Bất kỳ con cừu nào vượt ra ngoài ranh giới hình tròn* $f(N) = r_a N^{2/3}$ *đều kích hoạt chế độ gom; điểm gom* $P_c$ *được đặt lùi sau lưng cừu* $r_a = 2\text{ m}$ *theo phương chiếu từ trọng tâm bầy (GCM). (B) Thuật toán Hungarian phân công 1-đối-1 giữa chó và cừu lạc giúp tối thiểu hóa tổng quãng đường di chuyển và loại bỏ hoàn toàn hiện tượng chạy cắt chéo đường gây va chạm (đường nét đứt thể hiện rủi ro cắt chéo nếu gán tham lam ngây thơ).*
 
 #### 3. Đội hình Vòng cung lùa đàn ($P_d$)
 - Khi toàn bộ cừu đã nằm gọn trong phạm vi $f(N)$, bầy cừu đã gắn kết, các chú chó đồng loạt chuyển sang **Chế độ Lùa đàn (Drive Mode)**.
@@ -204,11 +204,11 @@ $$
 P_d = \mathrm{GCM} + r_a \sqrt{N} \frac{\mathrm{GCM} - \mathbf{x}_{\mathrm{goal}}}{\lVert \mathrm{GCM} - \mathbf{x}_{\mathrm{goal}} \rVert}
 $$
 
-- *Tại sao khoảng cách lùa tỷ lệ với $r_a \sqrt{N}$?* Một đàn cừu gắn kết gồm $N$ con tạo thành một hình đĩa có bán kính tỷ lệ thuận với $r_a\sqrt{N}$. Khoảng cách này đảm bảo đàn chó đứng ngay sát phía sau rìa mép của bầy cừu.
-- Các chú chó dàn đều trên một vòng cung bán kính $R$ ôm trọn góc mở của đàn cừu ($\pm \arcsin(R_{\mathrm{flock}} / R)$). Thứ tự góc cực của các chú chó quanh bầy được cố định, đảm bảo không chú chó nào chen lấn hay cắt ngang đường chạy của đồng đội.
+- *Tại sao khoảng cách lùa tỷ lệ với* $r_a \sqrt{N}$? Một đàn cừu gắn kết gồm $N$ con tạo thành một hình đĩa có bán kính tỷ lệ thuận với $r_a\sqrt{N}$. Khoảng cách này đảm bảo đàn chó đứng ngay sát phía sau rìa mép của bầy cừu.
+- Các chú chó dàn đều trên một vòng cung bán kính $R$ ôm trọn góc mở của đàn cừu, $\pm \arcsin(R_{\mathrm{flock}} / R)$. Thứ tự góc cực của các chú chó quanh bầy được cố định, đảm bảo không chú chó nào chen lấn hay cắt ngang đường chạy của đồng đội.
 
 ![Hình học điểm lùa Pd và Đội hình Vòng cung](../../docs/figures/fig_driving_arc.png)
-*Hình 5: Hình học chế độ Lùa đàn và Đội hình Vòng cung. (A) Điểm lùa danh định $P_d$ đặt lùi về sau lưng bầy cừu một khoảng đệm an toàn $r_a\sqrt{N} = 20\text{ m}$ dọc theo trục hướng đích $\mathbf{x}_{\mathrm{goal}}$, giữ đàn chó ngay sát rìa ngoài của đĩa bầy cừu $R_{\mathrm{flock}}$. (B) Toàn bộ đàn chó dàn thành vòng cung ôm trọn hai cánh sườn đàn cừu, triệt tiêu xu hướng cừu tản dạt sang hai bên và dẫn dắt cả khối tiến êm ả vào chuồng đích.*
+*Hình 5: Hình học chế độ Lùa đàn và Đội hình Vòng cung. (A) Điểm lùa danh định* $P_d$ *đặt lùi về sau lưng bầy cừu một khoảng đệm an toàn* $r_a\sqrt{N} = 20\text{ m}$ *dọc theo trục hướng đích* $\mathbf{x}_ {\mathrm{goal}}$*, giữ đàn chó ngay sát rìa ngoài của đĩa bầy cừu* $R_{\mathrm{flock}}$*. (B) Toàn bộ đàn chó dàn thành vòng cung ôm trọn hai cánh sườn đàn cừu, triệt tiêu xu hướng cừu tản dạt sang hai bên và dẫn dắt cả khối tiến êm ả vào chuồng đích.*
 
 #### 4. Vận tốc và Quy tắc Giữ khoảng cách an toàn (Standoff Rule)
 - **Vận tốc**: $v_{\mathrm{dog}} = 1.5\text{ m/s}$ (nhanh gấp 1.5 lần cừu, đúng theo tỷ lệ thực tế giữa chó chăn cừu Border Collie và cừu).
@@ -223,7 +223,7 @@ Bộ điều khiển **FAT** được thiết kế để kiểm chứng xem kh�
 - **Điểm khiếm khuyết**: Hoàn toàn không có thuật toán Hungarian, không có vòng cung lùa, không có giao tiếp và không tránh va chạm giữa các chú chó.
 
 ![FAT clumping](../../docs/figures/fig4_fat.png)
-*Hình 6: Hiện tượng co cụm của thuật toán FAT. Trái: Quy tắc 1 chó chuẩn của Strömbom nhắm vào con cừu xa trọng tâm bầy (GCM) nhất. Giữa: Thuật toán FAT với 1 chó nhắm vào con cừu xa đích nhất. Phải: Khi tăng lên 4 chó ($D = 4$), vì không có cơ chế phân công nhiệm vụ, toàn bộ đàn chó đều chọn chung một con cừu xa nhất, dồn vào thành một đám đông hỗn loạn hoạt động vụng về như một con chó duy nhất. Thêm nhiều chó không mang lại bất kỳ lợi ích mở rộng nào.*
+*Hình 6: Hiện tượng co cụm của thuật toán FAT. Trái: Quy tắc 1 chó chuẩn của Strömbom nhắm vào con cừu xa trọng tâm bầy (GCM) nhất. Giữa: Thuật toán FAT với 1 chó nhắm vào con cừu xa đích nhất. Phải: Khi tăng lên 4 chó (*$D = 4$*), vì không có cơ chế phân công nhiệm vụ, toàn bộ đàn chó đều chọn chung một con cừu xa nhất, dồn vào thành một đám đông hỗn loạn hoạt động vụng về như một con chó duy nhất. Thêm nhiều chó không mang lại bất kỳ lợi ích mở rộng nào.*
 
 ---
 
@@ -236,7 +236,7 @@ Mỗi chú chó độc lập thực thi quy tắc một-chó nguyên bản của
 - *Kết quả*: Hoạt động ổn định trên đàn nhỏ lên đến $N = 200$ cừu; nhưng thất bại hoàn toàn ở $N = 400$ nơi sự phối hợp phân tán là bắt buộc.
 
 ![So sánh cơ chế hoạt động giữa strombom_multi và independent](../../docs/figures/fig_independent.png)
-*Hình 7: So sánh cơ chế hoạt động giữa `strombom_multi` và `independent` ($N = 100, D = 4$). Trái (`strombom_multi`): Phân công Hungarian 1-đối-1 giúp 4 chú chó tỏa ra 4 mục tiêu cừu lạc khác nhau, gom song song toàn bộ đàn. Giữa (`independent` Gom): Mỗi chú chó thực thi độc lập thuật toán một-chó cổ điển; vì tất cả nhìn thấy cùng trạng thái toàn cục, cả 4 chú chó cùng lao vào con cừu xa nhất từ GCM, biến thành một bầy rượt đuổi tuần tự từng con một và bỏ rơi các con cừu lạc còn lại. Phải (`independent` Lùa): Khi chuyển sang lùa đàn, đàn chó dồn về cùng một điểm danh định $P_d$ duy nhất thay vì dàn thành vòng cung (đường chấm xanh), gây chèn ép cục bộ và không kiểm soát được hai bên sườn đàn cừu.*
+*Hình 7: So sánh cơ chế hoạt động giữa `strombom_multi` và `independent` (*$N = 100, D = 4$*). Trái (`strombom_multi`): Phân công Hungarian 1-đối-1 giúp 4 chú chó tỏa ra 4 mục tiêu cừu lạc khác nhau, gom song song toàn bộ đàn. Giữa (`independent` Gom): Mỗi chú chó thực thi độc lập thuật toán một-chó cổ điển; vì tất cả nhìn thấy cùng trạng thái toàn cục, cả 4 chú chó cùng lao vào con cừu xa nhất từ GCM, biến thành một bầy rượt đuổi tuần tự từng con một và bỏ rơi các con cừu lạc còn lại. Phải (`independent` Lùa): Khi chuyển sang lùa đàn, đàn chó dồn về cùng một điểm danh định* $P_d$ *duy nhất thay vì dàn thành vòng cung (đường chấm xanh), gây chèn ép cục bộ và không kiểm soát được hai bên sườn đàn cừu.*
 
 ---
 
@@ -261,7 +261,7 @@ Quy tắc người chăn của Lama & di Bernardo (2024), phương trình 2 đ�
 3. **Đứng ở đâu**: cách mục tiêu $\delta = \lambda/2 = 1{,}25$ về phía ngoài trên tia từ tâm đích, để lực đẩy đưa mục tiêu vào trong. Nó di chuyển tới điểm đó với hệ số $\alpha = 5$, tối đa $v_H = 8$ mỗi giây:
 
 $$
-\dot{\mathbf{y}}_i = \left[\,-\alpha\left(\mathbf{y}_i - \mathbf{x}^*_i - \delta\,\hat{\mathbf{x}}^*_i\right)\right]_{v_H}
+\dot{\mathbf{y}}_i = \left[\thinspace -\alpha\left(\mathbf{y}_i - \mathbf{x}^{\ast}_i - \delta\thinspace \hat{\mathbf{x}}^{\ast}_i\right)\right]_{v_H}
 $$
 
 4. **Khi không có gì để đuổi**: đi thẳng về tâm đích với tốc độ $v_H$ và đứng yên khi đã vào trong đích.
@@ -274,7 +274,7 @@ $$
 | Hệ số khuếch đại | $\alpha$ | `herder_gain` | 5 |
 | Khoảng đứng sau mục tiêu | $\delta$ | `chase_offset` | 1,25 |
 
-Ở những chỗ bài báo không nói rõ, cách đọc của HerdSim được ghi trong docstring của mã: dấu của lực đẩy trong [`sim/methods/lama/dynamics.py`](../../sim/methods/lama/dynamics.py), còn khi nào một lượt chạy kết thúc và thứ tự tick trong [`sim/plugins/scenarios/gather.py`](../../sim/plugins/scenarios/gather.py).
+Người chăn và mục tiêu được tích phân từ cùng một trạng thái ở đầu mỗi bước, như các sơ đồ tường minh của bài báo; khi người chăn đọc vị trí mục tiêu đã di chuyển, lần kiểm chứng đầu cần ít hơn bài báo tới hai người chăn. Ở những chỗ bài báo không nói rõ, cách đọc của HerdSim được ghi trong docstring của mã: dấu của lực đẩy trong [`sim/methods/lama/dynamics.py`](../../sim/methods/lama/dynamics.py), còn khi nào một lượt chạy kết thúc và thứ tự tick trong [`sim/plugins/scenarios/gather.py`](../../sim/plugins/scenarios/gather.py).
 
 ---
 

@@ -36,7 +36,7 @@ protocols/configs/
 Every protocol names `protocols/configs/canonical.yaml`, directly or through the file it `extends`. It holds the task and campaign settings, each with a comment saying where its value comes from:
 - The task (`task: drive_to_goal`, or `gather` for the Lama model) and its geometry: drive distance and goal radius in flock radii, the start layouts, the gather disc.
 - Release geometry: concentric arcs behind the flock, gap $30\text{ m}$, start spacing $5.0\text{ m}$.
-- Calibration of $R_f(N)$, the seeds, the decision rules (theta $0.90$, $99\%$ intervals, batches of 10 up to 200 seeds) and the time budget.
+- Calibration of $R_f(N)$, the seeds, the decision rules (theta $0.90$, $99$% intervals, batches of 10 up to 200 seeds) and the time budget.
 
 The model parameters are not in this file. They live with each method in code, one table per paper, and a protocol overrides them under `params`:
 - Strömbom (`sim/methods/strombom/config.py`): sheep speed $1.0\text{ m/s}$, dog speed $1.5\text{ m/s}$, $r_a = 2.0\text{ m}$, $r_s = 65\text{ m}$, $h = 0.5$, $c = 1.05$, $\rho_a = 2.0$, $\rho_s = 1.0$, $e = 0.3$.
@@ -109,7 +109,7 @@ Settings of the gather task, read only when `task: gather` and hashed only then:
 | Setting | Default | What it does | Protocols |
 | :--- | :---: | :--- | :--- |
 | `gather_start_radius` | `50` | Radius $R$ of the disc the sheep and dogs start on, centred on the goal. | `lama_r50`, `lama_r50_inf` |
-| `gather_goal_fraction` | `0.2` | Goal radius as a share of $R$ (the paper's $r^* = R/5$). | `lama_r50`, `lama_r50_inf` |
+| `gather_goal_fraction` | `0.2` | Goal radius as a share of $R$ (the paper's $r^{\ast} = R/5$). | `lama_r50`, `lama_r50_inf` |
 
 ---
 

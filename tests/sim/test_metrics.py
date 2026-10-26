@@ -7,7 +7,7 @@ import pytest
 
 from sim.plugins.metrics import dogs, flock
 from sim.plugins.metrics.view import TickView
-from sim.plugins.scenarios import drive_metrics as goal
+from sim.plugins.scenarios import goal
 from tests.helpers import make_state, make_world
 
 SQUARE = [[0.0, 0.0], [2.0, 0.0], [0.0, 2.0], [2.0, 2.0]]

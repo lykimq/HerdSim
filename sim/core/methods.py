@@ -14,6 +14,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from sim.methods.kubo import config as kubo
+from sim.methods.lama import config as lama
 from sim.methods.strombom import config as strombom
 from sim.plugins.dogs import DOG_CONTROLLERS
 from sim.plugins.sheep import SHEEP_MODELS
@@ -53,6 +54,12 @@ METHODS: dict[str, Method] = {
         sheep_model="kubo",
         dog_controller="kubo_forces",
         defaults={**kubo.PAPER, **kubo.NOT_IN_PAPER},
+    ),
+    # Lama and di Bernardo 2024: Brownian targets with no cohesion, herders with local sensing.
+    "lama": Method(
+        sheep_model="lama_targets",
+        dog_controller="lama_herders",
+        defaults=dict(lama.PAPER),
     ),
 }
 

@@ -33,6 +33,11 @@ Comparing rules, variants and methods
   methods    D_min, D_sat, D_crowd and D_max per curve across folders; --pct relabels a strict
              run (such as dmin_kubo) so every row uses one success rule
 
+The gather task (Lama and di Bernardo 2024)
+  herdability  per number of targets: the paper's N* (mean share in the goal at the end at least
+             0.99, and at 0.90 and 0.95) beside HerdSim's D_min, and the power-law exponent of
+             both above --above targets (the paper's M_low, 121 at sensing 10)
+
 Checks
   extent     the flock's own size against the R_f its task was sized from, per cell; above the
              calibration edge R_f is imposed, and this shows how well it matches (--layout)
@@ -74,6 +79,8 @@ from analysis.dmin_tables import (  # noqa: E402
 from analysis.frontier import Rules, frontier  # noqa: E402
 from analysis.growth_fits import compare as compare_shapes  # noqa: E402
 from analysis.growth_fits import interval_of  # noqa: E402
+from analysis.herdability import growth as herd_growth  # noqa: E402
+from analysis.herdability import paper_nstar, side_by_side  # noqa: E402
 from analysis.results import (  # noqa: E402
     flock_radii,
     markdown,
@@ -195,6 +202,18 @@ def cmd_fits(args: argparse.Namespace) -> None:
         print(markdown(pd.DataFrame(rows)), "\n")
 
 
+def cmd_herdability(args: argparse.Namespace) -> None:
+    for name in args.folders:
+        folder = results_folder(name)
+        trials, groups = read_trials(folder), groups_table(folder)
+        print(f"### {name}: the paper's N* beside HerdSim's D_min\n")
+        print(markdown(side_by_side(trials, groups)), "\n")
+        print(f"### {name}: the paper's N* at its three levels\n")
+        print(markdown(paper_nstar(trials)), "\n")
+        print(f"### {name}: power-law exponent for N >= {args.above}\n")
+        print(markdown(herd_growth(trials, groups, args.above)), "\n")
+
+
 def cmd_extent(args: argparse.Namespace) -> None:
     for name in args.folders:
         folder = results_folder(name)
@@ -232,6 +251,10 @@ def main() -> None:
     p.add_argument("folders", nargs="+")
     p.add_argument("--layout", default=None)
     p.set_defaults(run=cmd_extent)
+    p = sub.add_parser("herdability")
+    p.add_argument("folders", nargs="+")
+    p.add_argument("--above", type=int, default=121)
+    p.set_defaults(run=cmd_herdability)
     p = sub.add_parser("fits")
     p.add_argument("folders", nargs="+")
     p.set_defaults(run=cmd_fits)

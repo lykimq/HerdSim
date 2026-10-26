@@ -1,0 +1,124 @@
+# AUTO-GENERATED: do not modify. Re-run the producing command to refresh this file.
+protocol_id: lama_r50
+output: results/lama_r50
+canonical: protocols/configs/canonical.yaml
+task: gather
+methods:
+  lama:
+    time_limit_ticks: 166667
+layouts:
+- uniform
+flock_sizes:
+- 1
+- 4
+- 9
+- 16
+- 25
+- 36
+- 49
+- 64
+- 81
+- 100
+- 121
+- 144
+- 169
+- 196
+- 225
+- 256
+- 289
+- 324
+- 361
+- 400
+shepherd_counts:
+- 1
+- 2
+- 3
+- 4
+- 5
+- 6
+- 7
+- 8
+- 9
+- 10
+- 11
+- 12
+- 13
+- 14
+- 15
+- 16
+- 17
+- 18
+- 19
+- 20
+- 21
+- 22
+- 23
+- 24
+- 25
+success_fraction: 0.99
+gather_start_radius: 50.0
+gather_goal_fraction: 0.2
+metrics_stride: 10
+decide_finish_times: false
+canonical_values:
+  task: drive_to_goal
+  drive_distance_multiple: 13.0
+  drive_distance_min: 80.0
+  goal_radius_multiple: 1.9
+  success_fraction: 1.0
+  hold_drive_multiple: 0.0
+  hold_withdraw: false
+  dog_spacing: 0.0
+  sensing_range: 0.0
+  communication: none
+  drive_offset_cap: 0.0
+  field_clearance: 80.0
+  gather_start_radius: 50.0
+  gather_goal_fraction: 0.2
+  compact_spread: 0.5
+  separation_scale: 2.0
+  wide_sigma: 0.5
+  split_ring: 1.0
+  outlier_fraction: 0.2
+  outlier_near: 1.1
+  outlier_far: 1.6
+  dog_start: arcs
+  dog_start_gap: 30.0
+  dog_start_spacing: 5.0
+  dog_overlap_distance: 2.0
+  measurement_radius: 5.0
+  lost_radius_multiple: 2.5
+  metrics_stride: 1
+  calibration_seeds: 3
+  calibration_seconds: 300.0
+  calibration_window_seconds: 90.0
+  calibration_starts:
+  - 1.0
+  - 3.0
+  settled_tolerance: 0.15
+  start_agreement: 0.25
+  impose_radius_above: 0
+  imposed_radius_scale: 1.0
+  master_seed: 2026
+  reliability_theta: 0.9
+  confidence: 0.99
+  batch_seeds: 10
+  max_seeds: 200
+  time_margin: 0.05
+  min_pairs: 5
+  bootstrap_resamples: 4000
+  refine_min_gap: 1
+  decide_finish_times: false
+  prune_overlap: 0.9
+  timeseries_seeds: 3
+  budget_hours: 72.0
+method_config:
+  lama:
+    target_diffusion: 1.0
+    repulsion_strength: 3.0
+    repulsion_radius: 2.5
+    sensing_radius: 10.0
+    herder_speed: 8.0
+    herder_gain: 5.0
+    chase_offset: 1.25
+    dt: 0.03

@@ -106,7 +106,7 @@ uv run cli/dmin_tables.py effort dmin_f99_m6                  # what dogs beyond
 uv run cli/dmin_tables.py extent dmin_f99_big --layout compact
 ```
 
-The other verbs are `growth`, `dips`, `arrival`, `compare`, `zones`, `methods` and `fits`; the
+The other verbs are `growth`, `dips`, `arrival`, `compare`, `zones`, `methods`, `fits` and `herdability` (the Lama gather runs: the paper's statistic beside D_min); the
 top of the file says what each one prints. A cell that is still open after 200 seeds shows up as
 a range ("2-3") or a lower bound ("[5]"), never as a single number. The tables in
 `docs/report/results_tables.md` were made with these commands; to update one, run its command

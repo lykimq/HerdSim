@@ -39,6 +39,7 @@ import numpy as np
 
 from sim.core.config.experiment import build_config
 from sim.core.simulation_runner import run_trial
+from sim.plugins.scenarios import SCENARIOS
 
 from .cells import method_spec, setup_for
 from .pool import worker_pool
@@ -105,6 +106,8 @@ def calibration_config(
         "task": CALIBRATION_TASK,
         "drive_distance_multiple": drive / radius,
         "drive_distance_min": drive,
+        # measure() averages windows counted in ticks, so every tick is recorded.
+        "metrics_stride": 1,
     }
     setup = setup_for(
         far,
@@ -169,9 +172,13 @@ def calibrate(protocol: Protocol, workers: int) -> dict[str, dict[int, float]]:
     """R_f for every method and flock size; raises where a calibrated size is not settled.
 
     With ``impose_radius_above`` the sizes above it are imposed from N_cal (module docstring),
-    and the table also holds N_cal itself, the size they are imposed from.
+    and the table also holds N_cal itself, the size they are imposed from. A protocol whose
+    task sizes itself (``Scenario.calibrates`` false) has nothing to calibrate and is refused.
     """
     s = protocol.settings
+    task = str(s["task"])
+    if not SCENARIOS[task].calibrates:
+        raise ValueError(f"task {task!r} sizes itself from its own settings; no R_f to calibrate")
     seeds = [int(s["master_seed"]) + i for i in range(int(s["calibration_seeds"]))]
     starts = [float(x) for x in s["calibration_starts"]]
     above = int(s["impose_radius_above"])

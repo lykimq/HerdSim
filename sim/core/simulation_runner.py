@@ -18,13 +18,14 @@ from sim.plugins.sheep import SHEEP_MODELS
 
 STOP_SUCCESS = "success"
 STOP_TIMEOUT = "timeout"
+STOP_ENDED = "ended"  # the task ended the trial before the time limit, without success
 
 
 @dataclass
 class RunResult:
     success: bool
     total_ticks: int
-    stop_reason: str  # STOP_SUCCESS or STOP_TIMEOUT
+    stop_reason: str  # STOP_SUCCESS, STOP_ENDED or STOP_TIMEOUT
     history: pd.DataFrame  # one row per tick, tick 0 included
 
 
@@ -60,22 +61,31 @@ def run_trial(
     seed: int,
     on_tick: Callable[[SimulationState], None] | None = None,
 ) -> RunResult:
-    """Run one trial until success or the time limit.
+    """Run one trial until success, the task's end rule or the time limit.
 
     Tick order: sheep move, dogs move, metrics are recorded, then the stop checks. A trial
-    stops only on success or at ``max_ticks``; a failure runs to the limit. Every dog knows
-    every sheep and every other dog. ``shepherd_path`` sums the commanded displacement
-    |v| dt of every dog. ``on_tick`` sees the state after each tick; tests use it to check
-    invariants.
+    stops on success, when the task says it is over (``Scenario.is_over``, a failure; the
+    drive task never does) or at ``max_ticks``; otherwise a failure runs to the limit. Every
+    dog knows every sheep and every other dog. ``shepherd_path`` sums the commanded displacement
+    |v| dt of every dog. Metrics are recorded at tick 0, every ``metrics_stride`` ticks and at
+    the last tick (1: every tick); the stop checks run every tick. ``on_tick`` sees the state
+    after each tick; tests use it to check invariants.
     """
     scenario = SCENARIOS[config["scenario_id"]]
     sheep_step = SHEEP_MODELS[config["sheep_model"]].step
     dog_step = DOG_CONTROLLERS[config["dog_controller"]]
     max_ticks = int(config["max_ticks"])
     dt = float(config["dt"])
+    stride = int(config["metrics_stride"])
 
     def metrics(state: SimulationState) -> dict[str, float]:
         return {"tick": state.tick, **record(TickView(state, config), scenario.metrics)}
+
+    def finish(state: SimulationState, success: bool, reason: str) -> RunResult:
+        # The last tick is always in the history, whatever the stride.
+        if state.tick % stride:
+            history.append(metrics(state))
+        return RunResult(success, state.tick, reason, pd.DataFrame(history))
 
     state = initial_state(config, seed)
     history = [metrics(state)]
@@ -86,11 +96,14 @@ def run_trial(
             np.linalg.norm(state.shepherd_velocities, axis=1).sum()
         )
         state.tick += 1
-        history.append(metrics(state))
+        if state.tick % stride == 0:
+            history.append(metrics(state))
         if on_tick is not None:
             on_tick(state)
 
         if scenario.is_success(state):
-            return RunResult(True, state.tick, STOP_SUCCESS, pd.DataFrame(history))
+            return finish(state, True, STOP_SUCCESS)
+        if scenario.is_over(state, config):
+            return finish(state, False, STOP_ENDED)
         if state.tick >= max_ticks:
-            return RunResult(False, state.tick, STOP_TIMEOUT, pd.DataFrame(history))
+            return finish(state, False, STOP_TIMEOUT)

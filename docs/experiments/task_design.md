@@ -8,7 +8,7 @@ This document details the experimental methodology, task geometry, statistical d
 
 - [1. Task Geometry and Scale Invariance](#1-task-geometry-and-scale-invariance)
   - [The Fatal Flaw of Fixed Arenas](#the-fatal-flaw-of-fixed-arenas)
-  - [Anchoring to Calibrated Flock Radius $R_f(N)$](#anchoring-to-calibrated-flock-radius-r_fn)
+  - [Anchoring to Calibrated Flock Radius *R*<sub>f</sub>(*N*)](#anchoring-to-calibrated-flock-radius-r_fn)
   - [Normalized Deadlines and Drive Time](#normalized-deadlines-and-drive-time)
 - [2. Initial Pasture and Shepherd Configurations](#2-initial-pasture-and-shepherd-configurations)
   - [Flock Starting Layouts](#flock-starting-layouts)
@@ -21,8 +21,8 @@ This document details the experimental methodology, task geometry, statistical d
   - [Paired Common Random Streams](#paired-common-random-streams)
   - [Crash-Safe Appending and Resumption](#crash-safe-appending-and-resumption)
 - [4. Why the Grid Stops Where It Does (Parameter Sizing Rationale)](#4-why-the-grid-stops-where-it-does-parameter-sizing-rationale)
-  - [Flock Size $N$](#flock-size-n)
-  - [Dog Pack Size $D$](#dog-pack-size-d)
+  - [Flock Size *N*](#flock-size-n)
+  - [Dog Pack Size *D*](#dog-pack-size-d)
   - [Seeds per Cell (Cap of 200)](#seeds-per-cell-cap-of-200)
   - [Deadlines and Success Criteria](#deadlines-and-success-criteria)
 - [5. Statistical Frontier Rules and Behavioral Zones](#5-statistical-frontier-rules-and-behavioral-zones)
@@ -43,7 +43,7 @@ A common pitfall in animal flocking and swarm robotics simulations is evaluating
 HerdSim enforces rigorous **physical scale invariance** by expanding the arena dimensions proportionally to the natural size of the flock.
 
 ![Task geometry and physical scaling](../../docs/figures/fig6_task_geometry.png)
-*Figure 1: Task geometry drawn to physical scale. Left: Arena layout at $N = 200$ sheep. Middle: How drive distance $l$ scales relative to flock radius. Right: Calibrated flock radius $R_f(N)$ and goal radius across flock sizes, ensuring identical packing density and steering challenge.*
+*Figure 1: Task geometry drawn to physical scale. Left: Arena layout at* $N = 200$ *sheep. Middle: How drive distance* $l$ *scales relative to flock radius. Right: Calibrated flock radius* $R_f(N)$ *and goal radius across flock sizes, ensuring identical packing density and steering challenge.*
 
 ### Anchoring to Calibrated Flock Radius $R_f(N)$
 
@@ -52,7 +52,7 @@ All geometric dimensions are mathematically tied to the **calibrated steady-stat
 | Parameter | Mathematical Rule | Physical Meaning |
 | :--- | :--- | :--- |
 | **Flock Radius** $R_f(N)$ | Empirical calibration (e.g., $6.2\text{ m}$ at $N=25$; $11.4\text{ m}$ at $N=400$) | Natural steady-state radius of an $N$-sheep flock under steady driving. |
-| **Drive Distance** $l$ | $\max(13 \cdot R_f(N),\, 80,\, l_{\mathrm{reach}} + R_{\mathrm{goal}} + R_f)$ | Ensures larger flocks travel proportionally farther to maintain realistic scale. |
+| **Drive Distance** $l$ | $\max(13 \cdot R_f(N),\thinspace 80,\thinspace l_{\mathrm{reach}} + R_{\mathrm{goal}} + R_f)$ | Ensures larger flocks travel proportionally farther to maintain realistic scale. |
 | **Goal Radius** $R_{\mathrm{goal}}$ | $1.9 \cdot R_f(N)$ | Maintains consistent containment density and entry difficulty across flock sizes. |
 | **Field Clearance** | $80\text{ m}$ beyond the farthest possible starting agent | Prevents boundary clipping. |
 | **Open Boundary** | **No walls or reflecting boundaries** | Animals roam freely without bouncing off artificial edges. |
@@ -89,7 +89,7 @@ A compact flock driven smoothly by a single dog completes the drive in approxima
 HerdSim provides four standardized starting distributions to isolate the transition from stray gathering to flock steering:
 
 ![The four starting flock layouts at N = 200](../../docs/figures/fig7_layouts.png)
-*Figure 2: The four starting flock layouts evaluated at $N = 200$ with $D = 4$ dogs (drawn to identical physical scale). The dashed circle marks the analytical collection boundary $f(N) = r_a N^{2/3}$. Any sheep starting outside this circle triggers active outlier collection.*
+*Figure 2: The four starting flock layouts evaluated at* $N = 200$ *with* $D = 4$ *dogs (drawn to identical physical scale). The dashed circle marks the analytical collection boundary* $f(N) = r_a N^{2/3}$*. Any sheep starting outside this circle triggers active outlier collection.*
 
 1. **`compact`**: Flocks sampled from a tight 2D Gaussian ($\sigma = 0.5 \cdot R_f$). All sheep start within $f(N)$; dogs immediately enter drive mode.
 2. **`wide`**: Flocks sampled from a broad Gaussian ($\sigma = 0.5 \cdot 2 N^{2/3}$). Sheep scatter widely, requiring extensive perimeter rounding.
@@ -101,7 +101,7 @@ HerdSim provides four standardized starting distributions to isolate the transit
 Dogs begin $30\text{ m}$ behind the flock in one of three release geometries:
 
 ![Shepherd release configurations](../../docs/figures/fig8_dog_starts.png)
-*Figure 3: Shepherd release geometries. Top: Default concentric arcs for $D = 1$ to $64$ behind an $N = 100$ flock. Bottom: Direct comparison of arcs, ring, and handler release at $N = 200$ with $D = 8$ dogs.*
+*Figure 3: Shepherd release geometries. Top: Default concentric arcs for* $D = 1$ *to* $64$ *behind an* $N = 100$ *flock. Bottom: Direct comparison of arcs, ring, and handler release at* $N = 200$ *with* $D = 8$ *dogs.*
 
 - **`arcs` (default)**: Concentric arcs behind the flock. Single dogs start on the drive axis; additional dogs take balanced flanking stations.
 - **`ring`**: Dogs distributed along an open circle surrounding the flock (leaving an opening toward the goal).
@@ -132,7 +132,7 @@ flowchart TD
 ### Exact 99% Clopper-Pearson Early Stopping
 
 Each cell evaluates an initial batch of 10 seeds. After each batch, HerdSim computes the exact two-sided 99% Clopper-Pearson confidence interval $[L, U]$ for the true success probability:
-- **Early Failure Halt**: If the upper bound $U < 0.90$, the team is mathematically proven underpowered with 99% confidence. Testing halts immediately.
+- **Early Failure Halt**: If the upper bound $U \lt 0.90$, the team is mathematically proven underpowered with 99% confidence. Testing halts immediately.
 - **Early Success Halt**: If a team achieves 60 wins in a row with zero failures, the lower bound crosses $L \ge 0.90$. We are certain it meets reliability; testing halts early.
 - **Borderline Cells**: Only cells hovering near the 90% reliability threshold receive additional batches of 10 seeds, up to a cap of 200 seeds.
 
@@ -144,14 +144,14 @@ Each cell evaluates an initial batch of 10 seeds. After each batch, HerdSim comp
 When adjacent dog counts span a behavioral boundary (e.g., $D = 2$ fails and $D = 4$ succeeds), the engine automatically inserts the midpoint ($D = 3$) into the next evaluation round. This pinpoints $D_{\min}$ without exhaustive search.
 
 ![Adaptive Grid Densification](../../docs/figures/fig_adaptive_2_densification.png)
-*Figure 5: Midpoint densification. A detected zone transition between $D = 2$ and $D = 4$ automatically schedules $D = 3$ for evaluation in the following round.*
+*Figure 5: Midpoint densification. A detected zone transition between* $D = 2$ *and* $D = 4$ *automatically schedules* $D = 3$ *for evaluation in the following round.*
 
 ### Saturation and Overlap Pruning
 
 Once completion speed plateaus ($D_{\mathrm{sat}}$), if larger dog packs show that additional dogs simply copy existing dogs (mean pairwise overlap $\ge 0.90$) without accelerating the drive, the engine marks the cell as **pruned** and halts further testing.
 
 ![Saturation and Overlap Pruning](../../docs/figures/fig_adaptive_3_pruning.png)
-*Figure 6: Saturation pruning. Once drive time plateaus, cells exhibiting high dog overlap ($\ge 0.90$) are pruned to save compute.*
+*Figure 6: Saturation pruning. Once drive time plateaus, cells exhibiting high dog overlap (*$\ge 0.90$*) are pruned to save compute.*
 
 ### Paired Common Random Streams
 
@@ -160,7 +160,7 @@ Every seed $i$ uses `master_seed + i` (e.g., $2026 + i$). Initial flock coordina
 When comparing $D = 2$ dogs against $D = 4$ dogs, both teams face the **identical starting sheep coordinates and identical stochastic sheep reactions**, eliminating pasture luck from the comparison.
 
 ![Deterministic Paired Comparisons](../../docs/figures/fig_adaptive_4_paired_seeds.png)
-*Figure 7: Paired random seeds. Seed 2026 generates the identical initial sheep coordinates across all tested dog counts $D$, isolating the true algorithmic effect of team size.*
+*Figure 7: Paired random seeds. Seed 2026 generates the identical initial sheep coordinates across all tested dog counts* $D$*, isolating the true algorithmic effect of team size.*
 
 ### Crash-Safe Appending and Resumption
 
@@ -208,7 +208,7 @@ Every simulation campaign must bound its search space. Below are the physical an
 Statistical classifications are governed by [`analysis/frontier.py`](../../analysis/frontier.py):
 
 ![Behavioral zones and frontier classification](../../docs/figures/def_D_zones.png)
-*Figure 8: Behavioral zone classification along the dog count axis $D$. Cells are segmented into distinct regimes based on Clopper-Pearson reliability bounds and paired bootstrap speed comparisons.*
+*Figure 8: Behavioral zone classification along the dog count axis* $D$*. Cells are segmented into distinct regimes based on Clopper-Pearson reliability bounds and paired bootstrap speed comparisons.*
 
 ### Frontier Metric Definitions
 
@@ -217,8 +217,8 @@ Statistical classifications are governed by [`analysis/frontier.py`](../../analy
 | **$D_{\min}$** | Smallest reliable dog count $D$ ($L \ge 0.90$). |
 | **$D_{\mathrm{sat}}$** | Smallest reliable $D$ such that adding more dogs yields no statistically significant speedup. |
 | **$D_{\mathrm{best}}$** | Smallest reliable $D$ that is not slower than the fastest reliable team size on the curve. |
-| **$D_{\mathrm{crowd}}$** | Smallest reliable $D > D_{\mathrm{best}}$ that is measurably slower due to congestion. |
-| **$D_{\mathrm{overcrowd}}$** | Smallest $D > D_{\min}$ where it and subsequent counts fail reliability (collapse). |
+| **$D_{\mathrm{crowd}}$** | Smallest reliable $D \gt D_{\mathrm{best}}$ that is measurably slower due to congestion. |
+| **$D_{\mathrm{overcrowd}}$** | Smallest $D \gt D_{\min}$ where it and subsequent counts fail reliability (collapse). |
 | **$D_{\max}$** | Largest reliable dog count below $D_{\mathrm{overcrowd}}$. |
 
 ### Behavioral Zones
@@ -235,16 +235,16 @@ Statistical classifications are governed by [`analysis/frontier.py`](../../analy
 
 Everything above describes the drive task (`drive_to_goal`), used by every Strömbom and Kubo protocol. The `lama` method runs in a second task, `gather`, which reproduces the setting of [Lama & di Bernardo (2024)](https://doi.org/10.1103/PhysRevResearch.6.L032012) instead (models: [`docs/methods/models.md`](../methods/models.md#lama--di-bernardo-2024-non-cohesive-targets)). It is selected in a protocol with `task: gather`.
 
-**Status:** implemented and tested. The validation against the paper's results is running; no results are reported yet.
+**Status:** validated against the paper's Fig. 2 and run on the paper's grid (40,280 trials); results in report section 3.14.
 
 ### Geometry: a disc round the goal
 
 | Parameter | Rule | Source |
 | :--- | :--- | :--- |
 | **Start disc** $R$ | `gather_start_radius`, $50$ | The paper's main case (Fig. 2) |
-| **Goal radius** | `gather_goal_fraction` $\times R$ $= R/5 = 10$ | The paper's $r^* = R/5$ |
+| **Goal radius** | `gather_goal_fraction` $\times R$ $= R/5 = 10$ | The paper's $r^{\ast} = R/5$ |
 | **Start** (layout `uniform`) | Sheep and dogs uniform over the disc, goal included | The paper's $\Omega_0$ |
-| **Required share** | `success_fraction` $= 0.99$ | The paper's $\chi^* = 0.99$ |
+| **Required share** | `success_fraction` $= 0.99$ | The paper's $\chi^{\ast} = 0.99$ |
 | **Time limit** | $166{,}667$ ticks $= 5000$ s at $\Delta t = 0.03$ | The paper's $t_{\max}$ (Fig. S8) |
 | **Open boundary** | No walls | As in the drive task |
 

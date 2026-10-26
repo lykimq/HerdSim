@@ -14,20 +14,19 @@ first in ``PRIORITY`` is the label; all matches are kept as hints.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
 import pandas as pd
 
-NONE = "none"
+from .failures import NONE, TIMEOUT, Failure
+
 DOGS_OUT_OF_RANGE = "dogs_out_of_range"  # dogs too far for the sheep to react
 FLOCK_ESCAPED = "flock_escaped"  # flock ended farther from the goal than it started
 SPLIT = "split"  # flock broke into groups
 SCATTER = "scatter"  # flock stayed spread out
 OSCILLATION = "oscillation"  # flock swung toward and away from the goal
 STUCK = "stuck"  # flock barely moved relative to the goal
-TIMEOUT = "timeout"  # none of the above
 
 PRIORITY = (
     DOGS_OUT_OF_RANGE,
@@ -52,15 +51,10 @@ SMOOTH_SECONDS = 200.0  # HerdSim choice; 200 Strombom ticks, 4000 Kubo ticks
 MIN_SWINGS = 3
 
 
-@dataclass(frozen=True)
-class Failure:
-    mode: str
-    hints: tuple[str, ...]
-
-
-def smooth_window(dt: float) -> int:
-    """Ticks in the smoothing window of the oscillation rule: SMOOTH_SECONDS of model time."""
-    return max(1, round(SMOOTH_SECONDS / dt))
+def smooth_window(dt: float, stride: int = 1) -> int:
+    """Rows in the smoothing window of the oscillation rule: SMOOTH_SECONDS of model time, with
+    one row every ``stride`` ticks of ``dt``."""
+    return max(1, round(SMOOTH_SECONDS / (dt * stride)))
 
 
 def swings(series: np.ndarray, amplitude: float) -> int:
@@ -101,7 +95,10 @@ def classify_failure(history: pd.DataFrame, *, success: bool, config: dict[str, 
     if late["extent"].mean() > SCATTER_FLOCK_RADII * float(config["flock_radius"]):
         matched.append(SCATTER)
     smooth = (
-        pd.Series(gcm).rolling(smooth_window(float(config["dt"])), min_periods=1).mean().to_numpy()
+        pd.Series(gcm)
+        .rolling(smooth_window(float(config["dt"]), int(config["metrics_stride"])), min_periods=1)
+        .mean()
+        .to_numpy()
     )
     if swings(smooth, goal_radius) >= MIN_SWINGS and abs(progress) < goal_radius:
         matched.append(OSCILLATION)

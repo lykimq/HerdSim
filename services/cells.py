@@ -117,27 +117,28 @@ def setup_for(
     hold = float(settings["hold_drive_multiple"])
     if hold < 0.0:
         raise ValueError("hold_drive_multiple must not be negative")
-    drive = abs(float(geometry["goal_center"][0]) - float(geometry["flock_center"][0]))
+    drive = task.drive_length(geometry)
     return {
-        "max_ticks": _max_ticks(method, geometry),
+        "max_ticks": _max_ticks(method, drive),
         "hold_ticks": drive_limit_ticks(hold, drive, method.name, method.params) if hold else 0,
+        "metrics_stride": int(settings["metrics_stride"]),
         "measurement_radius": float(settings["measurement_radius"]),
         "dog_overlap_distance": float(settings["dog_overlap_distance"]),
         **geometry,
     }
 
 
-def _max_ticks(method: MethodSpec, geometry: Mapping[str, Any]) -> int:
+def _max_ticks(method: MethodSpec, drive: float) -> int:
     """Time limit of a cell in ticks: the method's fixed limit, or its multiple of the drive time.
 
-    The drive time is the drive length (goal distance from the flock start, which depends on
-    N and on the layouts of the protocol) over the top sheep speed, so a deadline written as a
-    multiple asks the same of every N: how many dogs finish in m times what the sheep need.
+    The drive time is the task's length (``Scenario.drive_length``: the goal distance from the
+    flock start in the drive task, which depends on N and on the layouts of the protocol) over
+    the top sheep speed, so a deadline written as a multiple asks the same of every N: how many
+    dogs finish in m times what the sheep need.
     """
     if method.time_limit_ticks is not None:
         return method.time_limit_ticks
     assert method.time_limit_drive_multiple is not None
-    drive = abs(float(geometry["goal_center"][0]) - float(geometry["flock_center"][0]))
     return drive_limit_ticks(method.time_limit_drive_multiple, drive, method.name, method.params)
 
 

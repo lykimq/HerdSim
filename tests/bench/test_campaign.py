@@ -242,7 +242,30 @@ def test_no_method_beats_its_own_speed_limit(methods: Run):
         assert (rows["finish_seconds"] >= floor - 1e-9).all(), name
 
 
-# --- the dog starts and the field-matched sheep set ----------------------------------------
+# --- the gather task -----------------------------------------------------------------------
+
+
+@pytest.fixture(scope="module")
+def gather(tmp_path_factory) -> Run:
+    return execute("bench_gather", tmp_path_factory.mktemp("bench_gather"))
+
+
+def test_gather_runs_without_calibration_and_reads_the_paper_quantities(gather: Run):
+    assert gather.status["trial_errors"] == 0
+    assert not (gather.folder() / "calibration.json").exists()
+    t = gather.trials
+    assert (t["flock_radius"] == 20.0).all() and (t["start_radius"] == 20.0).all()
+    assert t["goal_radius"].to_numpy() == pytest.approx(4.0)
+    assert t["final_in_goal_fraction"].between(0.0, 1.0).all()
+    # The end rule: a failing trial ends early only once every target the herders could see is
+    # in, so an early end always leaves targets out of sight and is labelled so.
+    ended = t[t["stop_reason"] == "ended"]
+    assert (ended["final_unseen_targets"] > 0).all()
+    assert (ended["failure_mode"] == "targets_lost").all()
+    assert (t[t["success"]]["stop_reason"] == "success").all()
+    rate = t.groupby("n_shepherds")["success"].mean()
+    print("\ngather success by herders:", rate.round(2).to_dict(), f"ended early: {len(ended)}")
+    assert rate.loc[4] >= rate.loc[1]
 
 
 @pytest.fixture(scope="module")

@@ -35,6 +35,7 @@ import pandas as pd
 
 from analysis.frontier import SATURATED, UNDECIDED, Frontier, Rules, frontier
 from protocols.packaging.provenance import stable_hash
+from sim.plugins.scenarios import SCENARIOS
 
 from .calibration import CalibrationError, calibrate
 from .cells import Cell, Group, Trial, cell_config, groups, make_trial, trial_key
@@ -61,6 +62,12 @@ def seeds_wanted(seeds_run: int, batch: int, flagged: bool) -> int:
 def _flock_radii(
     protocol: Protocol, store: CampaignStore, physics_hash: str, workers: int
 ) -> dict[str, dict[int, float]]:
+    """R_f per method and flock size, calibrated once and kept in the folder. A task that sizes
+    itself (``Scenario.calibrates`` false) has none: every cell gets NaN, and its setup ignores
+    it."""
+    if not SCENARIOS[str(protocol.settings["task"])].calibrates:
+        nan = float("nan")
+        return {m.name: {n: nan for n in protocol.flock_sizes} for m in protocol.methods}
     table = store.load_calibration()
     needed = {(m.name, n) for m in protocol.methods for n in protocol.flock_sizes}
     if table is None or any(n not in table.get(m, {}) for m, n in needed):
