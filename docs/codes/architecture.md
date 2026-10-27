@@ -19,11 +19,11 @@ This document describes how HerdSim is built and why: its parts, the data they e
 
 HerdSim runs controlled experiments: many short simulations whose results are compared with each other and turned into claims about team size. The design serves five goals, in this order of priority:
 
-1. Fair comparisons. Two cells that differ only in team size must differ only in team size: same field, same parameters, same start flocks.
-2. Traceable results. Months later it must be possible to tell what produced a number, including the settings and the code.
-3. Long campaigns that survive interruption. A campaign is thousands of trials over hours or days; a kill, crash or restart must not cost finished trials.
-4. Methods and tasks that change. Sheep models, dog rules and tasks are swapped often, without rewriting the engine or the campaign code.
-5. Analysis that changes. Thresholds and summaries are redefined long after the simulations ran, without running them again.
+1. Fair comparisons: two cells that differ only in team size must differ only in team size, with the same field, the same parameters and the same start flocks.
+2. Traceable results: months later it must be possible to tell what produced a number, including the settings and the code.
+3. Long campaigns that survive interruption: a campaign is thousands of trials over hours or days; a kill, crash or restart must not cost finished trials.
+4. Methods and tasks that change: sheep models, dog rules and tasks are swapped often, without rewriting the engine or the campaign code.
+5. Analysis that changes: thresholds and summaries are redefined long after the simulations ran, without running them again.
 
 The constraints are those of a research codebase. Everything runs on one machine, in Python, with a pool of worker processes. Results are exact only on the same machine with the same library versions. Results folders are committed to git, so no committed file may pass GitHub's 100 MB limit.
 
@@ -38,7 +38,7 @@ flowchart TB
         campaign["Protocols, calibration,<br/>rounds, store, replay"]
     end
     analysis["Analysis layer<br/>frontier rules, tables"]
-    packaging["Packaging<br/>trial row, provenance"]
+    records["Records<br/>trial row, provenance"]
     subgraph engine["Engine"]
         core["Core<br/>tick loop, state, world"]
         plugins["Plugins by name<br/>sheep, dogs, tasks, metrics"]
@@ -48,13 +48,13 @@ flowchart TB
     tools --> analysis
     tools --> engine
     campaign --> analysis
-    campaign --> packaging
+    campaign --> records
     campaign --> engine
-    packaging --> engine
+    records --> engine
 ```
 
 - The engine runs one trial. Its core holds the tick loop, the state, the world and start layouts, the assembly of a trial's config and the catalog of methods. The plugins are the sheep models, dog controllers, tasks and metrics, each registered under a name. The paper formulas are the equations of each source paper, kept apart from the plugins that call them so that they can be checked against the paper on their own. The engine imports nothing outside itself.
-- Packaging turns one trial's result into one table row and computes the hashes that tie a results folder to its settings and code.
+- Records turns one trial's result into one table row and computes the hashes that tie a results folder to its settings and code.
 - The analysis layer reads results folders and decides: reliability, comparisons, the team-size values and zones, and the tables. It imports nothing else in the project and works on the files alone, so every rule can be rerun without the simulator.
 - The campaign layer runs things: it loads protocols, calibrates, plans rounds, runs trials in workers, owns the results folder, and replays stored trials. It uses the analysis layer's rules to decide which cells need more seeds.
 - The tools parse arguments, call the layers below and print. No tool imports another.
@@ -251,7 +251,7 @@ Most changes follow the plugin boundaries. Each needs a few steps that are easy 
 
 The design does not yet handle:
 
-- More than one goal. The world has one circular goal; gates, pens or several stages need a more general world and start geometry.
+- More than one goal: the world has one circular goal; gates, pens or several stages need a more general world and start geometry.
 - Roles beyond collecting, driving and backing off, such as flanking or holding a gap; they would be new jobs in the team layer.
 - Much larger flocks, which would need the per-dog loops vectorised. Research limits of the drive rule at large flocks are in the [report](../report/d_min_report.md).
 
@@ -286,7 +286,7 @@ Table 4 maps each concern to the code that holds it.
 | Tasks and what they share | `sim/plugins/scenarios/drive_to_goal.py` with its failure rules in `drive_failures.py`, `gather.py`; shared `goal.py`, `failures.py`, `team_settings.py` |
 | Trial config assembly and checks | `sim/core/config/experiment.py` |
 | Canonical defaults and protocol files | `protocols/configs/` |
-| Trial row, physics hash, code identity | `protocols/packaging/` |
+| Trial row, physics hash, code identity | `records/` |
 | Protocol loading and checks | `services/protocol.py` |
 | Groups, cells, trial configs | `services/cells.py` |
 | The text keys of groups, cells and trials | `analysis/keys.py` |

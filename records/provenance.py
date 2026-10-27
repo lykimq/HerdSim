@@ -1,16 +1,28 @@
 """Physics hash and provenance.json of a campaign folder.
 
-The physics hash covers everything that changes a trial's outcome: the task, every
-canonical setting that is not a stopping rule, each method's full resolved configuration
-(code defaults under the protocol's overrides) and time limit, the protocol's layout set
-and its largest dog count. The last two size the field and place the goal of every cell,
-so adding a layout or a D above the old maximum changes the physics and needs a new
-folder. The flock sizes, the smaller D and the stopping rules are not hashed, so a campaign
-can add flock sizes, intermediate D or seeds and still resume. A folder whose hash differs
-from the protocol is refused.
+The physics hash covers everything that changes a trial's outcome:
 
-The hash says nothing about the code. ``code_identity`` records that per run sitting, so a
-resume after a change to the trial code is logged and can be traced.
+- the task and every canonical setting except the sampling strategy;
+- each method's full parameter set (code defaults under the protocol's overrides) and its
+  time limit;
+- the set of layouts and the largest dog count, because they size the field and place the
+  goal of every cell.
+
+It leaves out what a campaign may add or change without changing a trial:
+
+- the flock sizes, the smaller dog counts and the factor levels;
+- the sampling strategy (theta, seed batches, budget);
+- settings still at their neutral value, so folders written before a setting existed keep
+  their hash.
+
+What follows from that:
+
+- more flock sizes, intermediate dog counts or seeds resume into the same folder;
+- a new layout or a dog count above the old maximum changes the hash and needs a new folder;
+- a folder whose hash differs from the protocol is refused.
+
+The hash says nothing about the code: ``code_identity`` records the code of each run
+sitting, so a resume after a change to the trial code is logged and can be traced.
 """
 
 from __future__ import annotations
@@ -26,13 +38,13 @@ from typing import Any
 
 from .generated_notice import with_json_notice
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[1]
 # The source that decides a trial's outcome and its row: the engine, the row packaging,
 # the cell config and calibration that size each trial's task, the protocol code that sets
 # its time limit, and the runner that adds the identity columns to the row.
 TRIAL_CODE = (
     "sim",
-    "protocols/packaging",
+    "records",
     "services/cells.py",
     "services/calibration.py",
     "services/protocol.py",

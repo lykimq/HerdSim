@@ -33,7 +33,7 @@ import pandas as pd
 
 from analysis import keys
 from analysis.frontier import SATURATED, UNDECIDED, Frontier, Rules, frontier
-from protocols.packaging.provenance import stable_hash
+from records.provenance import stable_hash
 from sim.plugins.scenarios import SCENARIOS
 
 from .calibration import CalibrationError, calibrate

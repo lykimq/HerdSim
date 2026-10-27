@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any
 
 from analysis import keys
-from protocols.packaging.provenance import read_provenance, stable_hash
+from records.provenance import read_provenance, stable_hash
 from sim.core.config.experiment import build_config
 from sim.plugins.scenarios import SCENARIOS
 

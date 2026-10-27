@@ -15,7 +15,7 @@ from concurrent.futures import FIRST_COMPLETED, Future, wait
 from concurrent.futures.process import BrokenProcessPool
 from typing import Any
 
-from protocols.packaging.trial_row import build_row
+from records.trial_row import build_row
 from sim.core.simulation_runner import run_trial
 
 from .cells import Trial

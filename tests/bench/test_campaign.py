@@ -21,7 +21,7 @@ from typing import cast
 import pandas as pd
 import pytest
 
-from protocols.packaging.provenance import stable_hash
+from records.provenance import stable_hash
 from services.adaptive import run_campaign
 from services.protocol import Protocol, load_protocol, sheep_speed_per_second
 from tests.helpers import config_for

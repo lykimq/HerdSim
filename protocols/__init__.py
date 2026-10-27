@@ -1,1 +1,1 @@
-"""Protocol files (configs/) and what a finished trial is packaged into (packaging/)."""
+"""Protocol files: canonical defaults, the protocols of the study and the study queue (configs/)."""

@@ -15,7 +15,7 @@ from __future__ import annotations
 import pandas as pd
 import pytest
 
-from protocols.packaging.trial_row import build_row
+from records.trial_row import build_row
 from sim.core.simulation_runner import run_trial
 from tests.helpers import config_for
 

@@ -27,7 +27,7 @@ dev = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["sim*", "services*", "protocols*", "analysis*"]
+include = ["sim*", "services*", "protocols*", "analysis*", "records*"]
 
 [tool.ruff]
 line-length = 100

@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 import yaml
 
-from protocols.packaging.trial_row import build_row
+from records.trial_row import build_row
 from services.protocol import load_protocol
 from sim.core.simulation_runner import STOP_ENDED, STOP_SUCCESS, run_trial
 from sim.core.world.arena import GoalZone, World

@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from protocols.packaging.provenance import stable_hash
+from records.provenance import stable_hash
 from services.cells import Cell, Group, cell_config, groups
 from services.protocol import PROTOCOLS_DIR, load_protocol
 from sim.core.methods import METHODS

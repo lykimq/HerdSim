@@ -26,7 +26,7 @@ from typing import Any
 import pandas as pd
 
 from analysis.results import flock_radii, read_trials
-from protocols.packaging.provenance import read_provenance, stable_hash
+from records.provenance import read_provenance, stable_hash
 from sim.core.simulation_runner import RunResult, run_trial
 from sim.core.simulation_state import SimulationState
 

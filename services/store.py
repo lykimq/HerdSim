@@ -42,8 +42,8 @@ import pandas as pd
 import yaml
 
 from analysis import keys
-from protocols.packaging.generated_notice import NOTICE_LINE, with_json_notice, write_csv
-from protocols.packaging.provenance import code_identity, read_provenance, write_provenance
+from records.generated_notice import NOTICE_LINE, with_json_notice, write_csv
+from records.provenance import code_identity, read_provenance, write_provenance
 
 from .protocol import Protocol
 
