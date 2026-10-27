@@ -1,6 +1,6 @@
 """The start spread of the flock times N, and how the failed drives failed.
 
-    uv run python -m analysis.dispersion_burden
+    uv run cli/dmin_tables.py dispersion
 
 Two readings of finished drive runs, both from trials.csv:
 
@@ -11,21 +11,18 @@ Two readings of finished drive runs, both from trials.csv:
 - Which of two regimes a failed trial belongs to: boundary or temporal when the flock
   ended within ``NEAR_GOAL_RADII`` goal radii of the goal centre (it got there and lost on
   time or stragglers), structural when it ended farther away (it was never gathered and
-  driven there). The same rule, per trial, is ``classify_failure_regime`` in
-  sim/plugins/scenarios/drive_failures.py; analysis cannot import sim, so the constant is
-  repeated here.
+  driven there).
 """
 
 from __future__ import annotations
 
-import argparse
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any, cast
 
 import pandas as pd
 
-from .results import markdown, read_trials
+from .results import read_trials
 
 RESULTS_DIR = Path(__file__).resolve().parent.parent / "results"
 NEAR_GOAL_RADII = 2.0
@@ -134,18 +131,3 @@ def format_dispersion_table(disp_df: pd.DataFrame) -> pd.DataFrame:
             "Success rate": disp_df["overall_sr"].map(lambda v: f"{v * 100:.1f}%"),
         }
     )
-
-
-def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.parse_args()
-    failure_df, disp_df = run_full_dispersion_analysis()
-    print("### Failure regimes per run\n")
-    print(markdown(format_failure_table(failure_df)), "\n")
-    if not disp_df.empty:
-        print(f"### Dispersion burden S0 x N by layout and flock size ({BURDEN_CAMPAIGN})\n")
-        print(markdown(format_dispersion_table(disp_df)), "\n")
-
-
-if __name__ == "__main__":
-    main()

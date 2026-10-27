@@ -31,6 +31,7 @@ from typing import Any
 
 import pandas as pd
 
+from analysis import keys
 from analysis.frontier import SATURATED, UNDECIDED, Frontier, Rules, frontier
 from protocols.packaging.provenance import stable_hash
 from sim.plugins.scenarios import SCENARIOS
@@ -127,11 +128,12 @@ def _refine(
     front: Frontier,
     min_gap: int,
     pruned: frozenset[CellId] | None = None,
-    by_reliability: bool = False,
+    column: str = "zone",
     max_seeds: int | None = None,
 ) -> int:
-    """Add the midpoint D wherever the zone changes between neighbouring D more than
-    ``min_gap`` apart, unless either is ``pruned``. Groups the grid does not list are
+    """Add the midpoint D wherever ``column`` (the zone, or the reliability when finish times
+    are not decided) changes between neighbouring D more than ``min_gap`` apart, unless
+    either is ``pruned``. Groups the grid does not list are
     skipped. Returns how many.
 
     An undecided neighbour below ``max_seeds`` may yet decide, so it waits. One at the cap
@@ -141,7 +143,6 @@ def _refine(
     """
     pruned = pruned or frozenset()
     added = 0
-    column = "reliability" if by_reliability else "zone"
     for key, cells in front.cells.groupby("group_key"):
         group_key = str(key)
         if group_key not in grid:
@@ -203,7 +204,7 @@ class _Ledger:
         """Errored trial keys and counts per cell, of the groups the protocol lists."""
 
         def listed(key: str) -> bool:
-            return key.rsplit("|D=", 1)[0] in self.grid
+            return keys.group_of_cell(key) in self.grid
 
         self.errored = {k for k in store.error_keys() if listed(k)}
         self.error_cells = {k: n for k, n in store.error_cells().items() if listed(k)}
@@ -320,21 +321,10 @@ def run_campaign(
     return store
 
 
-def _run(
-    protocol: Protocol,
-    store: CampaignStore,
-    physics_hash: str,
-    workers: int,
-    log: Callable[[str], None],
-) -> None:
-    radii = _flock_radii(protocol, store, physics_hash, workers)
-    s = protocol.settings
-    rules = Rules.from_settings(s)
-    ledger = _Ledger.load(protocol, store)
-    if ledger.rows_ignored:
-        log(f"ignored {ledger.rows_ignored} trials of groups the protocol no longer lists")
-    rows_at_start = len(ledger.rows)
-
+def _config_builder(
+    protocol: Protocol, radii: dict[str, dict[int, float]]
+) -> Callable[[Cell], dict[str, Any]]:
+    """The run config of a cell, built once per cell and reused across rounds."""
     configs: dict[str, dict[str, Any]] = {}
 
     def config_of(cell: Cell) -> dict[str, Any]:
@@ -343,30 +333,67 @@ def _run(
             configs[cell.key] = cell_config(protocol, cell, radius)
         return configs[cell.key]
 
+    return config_of
+
+
+def _decide(
+    ledger: _Ledger,
+    rules: Rules,
+    settings: dict[str, Any],
+    store: CampaignStore,
+    log: Callable[[str], None],
+) -> Frontier | None:
+    """Decide every cell from the rows so far, write the tables, and add the midpoint D the
+    rules ask for. Without decided finish times the midpoints follow reliability alone."""
+    front, pruned = _assess(ledger, rules, settings["prune_overlap"], store)
+    if front is not None:
+        column = "zone" if rules.decide_finish_times else "reliability"
+        added = _refine(
+            ledger.grid,
+            front,
+            settings["refine_min_gap"],
+            frozenset(pruned),
+            column,
+            settings["max_seeds"],
+        )
+        if added:
+            log(f"added {added} intermediate dog counts")
+    return front
+
+
+def _stop_reason(plan: list[Trial], deadline: float) -> str | None:
+    if not plan:
+        return STOP_DECIDED
+    if time.time() >= deadline:
+        return STOP_BUDGET
+    return None
+
+
+def _run(
+    protocol: Protocol,
+    store: CampaignStore,
+    physics_hash: str,
+    workers: int,
+    log: Callable[[str], None],
+) -> None:
+    """Rounds until nothing is planned or the budget is spent: decide, plan, run."""
+    radii = _flock_radii(protocol, store, physics_hash, workers)
+    s = protocol.settings
+    rules = Rules.from_settings(s)
+    ledger = _Ledger.load(protocol, store)
+    if ledger.rows_ignored:
+        log(f"ignored {ledger.rows_ignored} trials of groups the protocol no longer lists")
+    rows_at_start = len(ledger.rows)
+    config_of = _config_builder(protocol, radii)
+
     started = time.time()
     deadline = started + s["budget_hours"] * 3600.0
     rounds = 0
     while True:
-        front, pruned = _assess(ledger, rules, s["prune_overlap"], store)
-        if front is not None:
-            added = _refine(
-                ledger.grid,
-                front,
-                s["refine_min_gap"],
-                frozenset(pruned),
-                not rules.decide_finish_times,
-                s["max_seeds"],
-            )
-            if added:
-                log(f"added {added} intermediate dog counts")
+        front = _decide(ledger, rules, s, store, log)
         needs = _cells_needing_seeds(front)
         plan = _plan_round(protocol, ledger, needs, config_of, store.timeseries_dir)
-
-        stop_reason = None
-        if not plan:
-            stop_reason = STOP_DECIDED
-        elif time.time() >= deadline:
-            stop_reason = STOP_BUDGET
+        stop_reason = _stop_reason(plan, deadline)
         store.write_status(
             _status(
                 protocol,
@@ -382,7 +409,6 @@ def _run(
         )
         if stop_reason is not None:
             break
-
         rounds += 1
         log(f"round {rounds}: {len(plan)} trials on {len({t.cell.key for t in plan})} cells")
         run_batch(plan, store, workers=workers, deadline=deadline, on_row=ledger.keep)

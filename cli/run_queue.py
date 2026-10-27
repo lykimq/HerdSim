@@ -29,56 +29,17 @@ import traceback  # noqa: E402
 from datetime import datetime  # noqa: E402
 from pathlib import Path  # noqa: E402
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO))
+
+import yaml  # noqa: E402
 
 from services.adaptive import STOP_DECIDED, run_campaign  # noqa: E402
 from services.protocol import RESULTS_ROOT, load_protocol  # noqa: E402
 
-# The order the study ran in: the first study (main grids, sensitivities, Kubo, FAT), then the
-# follow-ups, then the Lama and di Bernardo (2024) model on its gather task, then the goal and
-# share that hold a small flock.
-QUEUE = (
-    "dmin_m12",
-    "dmin_m6",
-    "dmin_m3",
-    "dmin_s_base",
-    "dmin_s_matched",
-    "dmin_s_handler",
-    "dmin_s_ring",
-    "dmin_s_goal",
-    "dmin_s_dogspeed",
-    "dmin_s_gap",
-    "dmin_kubo",
-    "dmin_f99_m6",
-    "dmin_f99_m3",
-    "dmin_f99_m12",
-    "dmin_f99_s_base",
-    "dmin_f99_s_matched",
-    "dmin_f99_s_dogspeed",
-    "dmin_f99_s_handler",
-    "dmin_f99_s_ring",
-    "dmin_f99_s_goal",
-    "dmin_f99_s_gap",
-    "dmin_fat",
-    "dmin_f99_fat",
-    "dmin_f99_indep",
-    "dmin_f99_kubo",
-    "dmin_f99_c1.3",
-    "dmin_f99_c1.6",
-    "dmin_f99_c2.0",
-    "dmin_f99_k05",
-    "dmin_f99_hold",
-    "dmin_f99_hold_spacing",
-    "dmin_f99_view_range",
-    "dmin_f99_view_comm",
-    "dmin_f99_big",
-    "dmin_f99_big_dense",
-    "dmin_f99_big_loose",
-    "dmin_f99_big_cap",
-    "lama_r50",
-    "lama_r50_inf",
-    "dmin_f99_hold_goal",
-    "dmin_f99_hold_share",
+# The study's protocols in the order they ran (protocols/configs/study_queue.yaml).
+QUEUE: tuple[str, ...] = tuple(
+    yaml.safe_load((REPO / "protocols/configs/study_queue.yaml").read_text())["queue"]
 )
 LOG = RESULTS_ROOT / "queue_log.jsonl"
 

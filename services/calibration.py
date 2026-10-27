@@ -31,6 +31,7 @@ import numpy as np
 from sim.core.config.experiment import build_config
 from sim.core.simulation_runner import run_trial
 from sim.plugins.scenarios import SCENARIOS
+from sim.plugins.scenarios.team_settings import OFF as TEAM_OFF
 
 from .cells import method_spec, setup_for
 from .pool import worker_pool
@@ -38,15 +39,9 @@ from .protocol import Protocol, method_dt, sheep_speed_per_second
 
 CALIBRATION_TASK = "drive_to_goal"
 
-# Settings that change the dogs or the end of the task, at the values of the paper's dog.
-PAPER_DOG = {
-    "sensing_range": 0.0,
-    "communication": "none",
-    "dog_spacing": 0.0,
-    "hold_drive_multiple": 0.0,
-    "hold_withdraw": False,
-    "drive_offset_cap": 0.0,
-}
+# Settings that change the dogs or the end of the task, at the values of the paper's dog:
+# every team setting off, and no hold at the goal.
+PAPER_DOG = {**TEAM_OFF, "hold_drive_multiple": 0.0}
 
 # The calibration goal lies this many times farther than the sheep could travel at their
 # top speed during the whole run, so no flock reaches it: a flock that reaches the goal is

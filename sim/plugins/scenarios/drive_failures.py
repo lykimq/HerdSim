@@ -7,9 +7,6 @@ STUCK compare the two halves. Lengths are relative to the trial's own goal radiu
 radius, and time windows are in model seconds (converted with the method's dt), so the
 labels mean the same thing at every N, D and method. When several rules match, the first
 in ``PRIORITY`` is the label; all matches are kept as hints.
-
-``classify_failure_regime`` is a coarser, two-way reading used by analysis/dispersion_burden.py:
-did the flock get near the goal at all.
 """
 
 from __future__ import annotations
@@ -46,12 +43,6 @@ SPLIT_FRACTION = 0.55
 SCATTER_FLOCK_RADII = 2.0
 SMOOTH_SECONDS = 200.0  # smoothing window of the oscillation rule, in model seconds
 MIN_SWINGS = 3
-
-# Regimes of classify_failure_regime: a flock that ended within this many goal radii of the
-# goal centre got there and lost on time or stragglers; one farther away never arrived.
-NEAR_GOAL_RADII = 2.0
-STRUCTURAL_GATHER = "structural_gather"
-BOUNDARY_TEMPORAL = "boundary_temporal"
 
 
 def smooth_window(dt: float, stride: int = 1) -> int:
@@ -111,14 +102,3 @@ def classify_failure(history: pd.DataFrame, *, success: bool, config: dict[str, 
 
     mode = next((label for label in PRIORITY if label in matched), TIMEOUT)
     return Failure(mode, tuple(matched))
-
-
-def classify_failure_regime(history: pd.DataFrame, *, success: bool, config: dict[str, Any]) -> str:
-    """BOUNDARY_TEMPORAL when the flock ended within NEAR_GOAL_RADII goal radii of the goal
-    centre (more time or a looser share might have rescued it), STRUCTURAL_GATHER when it
-    ended farther away (it was never gathered and driven there); "none" for a success."""
-    if success or history.empty:
-        return "none"
-    final = float(history["gcm_goal"].iloc[-1])
-    near = final <= NEAR_GOAL_RADII * float(config["goal_radius"])
-    return BOUNDARY_TEMPORAL if near else STRUCTURAL_GATHER

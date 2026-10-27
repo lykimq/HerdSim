@@ -83,15 +83,3 @@ def test_per_method_coverage_threshold():
     assert ft.classify_failure(low, success=False, config=CONFIG).mode == ft.DOGS_OUT_OF_RANGE
     kubo_like = {**CONFIG, "low_coverage": 0.05}
     assert ft.classify_failure(low, success=False, config=kubo_like).mode == ft.STUCK
-
-
-def test_failure_regime_classification():
-    assert ft.classify_failure_regime(history(), success=True, config=CONFIG) == "none"
-
-    # Stalled far from goal (100m, goal_radius=10m) -> structural gather failure
-    far = history(gcm_goal=np.full(TICKS, 100.0))
-    assert ft.classify_failure_regime(far, success=False, config=CONFIG) == ft.STRUCTURAL_GATHER
-
-    # Stalled near goal (15m <= 2 * 10m) -> boundary temporal failure
-    near = history(gcm_goal=np.full(TICKS, 15.0))
-    assert ft.classify_failure_regime(near, success=False, config=CONFIG) == ft.BOUNDARY_TEMPORAL

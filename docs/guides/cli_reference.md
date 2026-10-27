@@ -2,13 +2,15 @@
 
 Every tool lives in [`cli/`](../../cli/) and is run from the repository root with `uv run`; `--help` prints the same information as the tables below. This page lists every verb and flag. For the order in which to use them, read [`cli/README.md`](../../cli/README.md).
 
----
-
 ## `cli/campaign.py`: one protocol
 
 ```bash
 uv run cli/campaign.py <verb> --protocol <id or path> [--output <folder>] [--workers <n>]
 ```
+
+Table 1 lists the verbs and Table 2 the flags:
+
+**Table 1: Verbs of `campaign.py`.**
 
 | Verb | Does | Writes |
 | :--- | :--- | :--- |
@@ -17,13 +19,13 @@ uv run cli/campaign.py <verb> --protocol <id or path> [--output <folder>] [--wor
 | `run` | Calibrates (or reuses the folder's saved radii), then runs rounds of trials until every cell is decided, every open cell is at the seed cap, or the time budget is spent. | `results/<protocol_id>/` |
 | `status` | Prints how far a run has got, whether it is running now, and why it stopped. | nothing |
 
+**Table 2: Flags of `campaign.py`.**
+
 | Flag | Default | Meaning |
 | :--- | :--- | :--- |
 | `--protocol` | required | A protocol id under `protocols/configs/protocols/`, or a path to a YAML file. |
 | `--output` | the protocol's `output` | The results folder. |
 | `--workers` | the number of CPUs | Worker processes, each running one trial at a time. |
-
----
 
 ## `cli/run_queue.py`: the study
 
@@ -31,7 +33,9 @@ uv run cli/campaign.py <verb> --protocol <id or path> [--output <folder>] [--wor
 uv run cli/run_queue.py [--list] [--workers <n>] [--only <id> ...]
 ```
 
-Runs the 41 protocols of the study in the order they ran, each as `campaign.py run` would. A folder where every cell is decided is skipped, one that stopped for any other reason is resumed, and a protocol that raises is logged while the queue moves on. Each protocol appends one line to `results/queue_log.jsonl`.
+Runs the 41 protocols of the study in the order they ran, as listed in `protocols/configs/study_queue.yaml`, each as `campaign.py run` would. A folder where every cell is decided is skipped, one that stopped for any other reason is resumed, and a protocol that raises is logged while the queue moves on. Each protocol appends one line to `results/queue_log.jsonl`. Table 3 lists the flags:
+
+**Table 3: Flags of `run_queue.py`.**
 
 | Flag | Default | Meaning |
 | :--- | :--- | :--- |
@@ -39,19 +43,20 @@ Runs the 41 protocols of the study in the order they ran, each as `campaign.py r
 | `--workers` | 20 | Worker processes per protocol. |
 | `--only` | the whole queue | Protocol ids to run, in the order given; ids outside the queue are refused. |
 
----
-
 ## `cli/dmin_tables.py`: tables from finished runs
 
 ```bash
 uv run cli/dmin_tables.py <verb> <folder> [<folder> ...] [flags]
 ```
 
-A folder is a protocol id under `results/` or a path. Every verb prints Markdown. Nothing here runs a simulation. An entry such as `2-3` is a range (3 is reliable, 2 still undecided), `[5]` a lower bound with no reliable team yet, and `none on grid` a curve where every tested team is unreliable.
+A folder is a protocol id under `results/` or a path. Every verb prints Markdown. Nothing here runs a simulation. An entry such as `2-3` is a range (3 is reliable, 2 still undecided), `[5]` a lower bound with no reliable team yet, and `none on grid` a curve where every tested team is unreliable. Table 4 lists the verbs:
+
+**Table 4: Verbs of `dmin_tables.py`.**
 
 | Verb | Flags | Prints |
 | :--- | :--- | :--- |
 | `record` | none, takes no folder | Every run in `results/queue_log.jsonl`: when it finished, trials, cells, open cells, errors, hours. |
+| `dispersion` | none, takes no folder | The start spread times $N$ per layout (`dmin_m6`), and where the failed drives of the main runs ended: near the goal or never there. |
 | `dmin` | | $D_{\min}$ by layout and flock size, one table per folder. |
 | `growth` | | The range of log-log slopes of $D_{\min}$ against $N$ that the brackets allow, and whether layout or $N$ moves it more. |
 | `fits` | | A power law against a curve that levels off, fitted to $D_{\min}(N)$ per layout, and the range each shape allows at larger $N$. |
@@ -65,8 +70,6 @@ A folder is a protocol id under `results/` or a path. Every verb prints Markdown
 | `herdability` | `--above <N>` | The gather task read the paper's way (mean share in the goal at least 0.99, and at 0.90 and 0.95) beside $D_{\min}$, with the growth exponent of both above `--above` targets. |
 | `extent` | `--layout <name>` | The flock's measured size against the radius its task was sized from, per cell. |
 
----
-
 ## `cli/dmin_report.py`: a finished run at a tighter deadline
 
 ```bash
@@ -74,8 +77,6 @@ uv run cli/dmin_report.py --protocol <id> --folder <results folder> --multiples 
 ```
 
 The dogs do not know the deadline, so a trial runs the same under any of them, and one that finished inside a tighter deadline would have succeeded under it too. The tool relabels each stored trial by whether it finished inside each deadline (a multiple of the drive time) and prints $D_{\min}$, $D_{\min,\mathrm{low}}$ and $D_{\max}$ per curve. The deadlines must not be looser than the one the run used.
-
----
 
 ## `cli/diagnostics/`: replays and checks
 
@@ -87,7 +88,9 @@ The three replay tools run stored trials again. An unchanged replay must reprodu
 uv run cli/diagnostics/pressure_replay.py <folder> --out <csv> [--layouts ...] [--n ...] [--seeds <k>] [--workers <n>]
 ```
 
-Replays the cells at $D = 1$, $D_{\min}$, $D_{\mathrm{sat}}$ and the smallest tested $D$ at or above $2 D_{\mathrm{sat}}$, taken from the folder's current frontier, and measures how long each sheep spends fleeing a dog and how much of the flock flees at once.
+Replays the cells at $D = 1$, $D_{\min}$, $D_{\mathrm{sat}}$ and the smallest tested $D$ at or above $2 D_{\mathrm{sat}}$, taken from the folder's current frontier, and measures how long each sheep spends fleeing a dog and how much of the flock flees at once. Table 5 lists the flags:
+
+**Table 5: Flags of `pressure_replay.py`.**
 
 | Flag | Default |
 | :--- | :--- |
@@ -111,7 +114,9 @@ Replays `split` at $N = 100$ and 200, $D = 2, 4, 8, 16$, at 6 and 3 drive times,
 uv run cli/diagnostics/hold_walk.py --out <csv> [--goal <multiple>] [--layouts ...] [--n ...] [--d ...] [--seeds <k>] [--workers <n>]
 ```
 
-Replays `dmin_f99_hold_goal` at one goal level and measures, from the first tick with the share inside to the first tick no dog is within $r_s$, the walk of the flock centre, its duration and the distance of the farthest sheep from the centre. The summary adds the goal radius that walk calls for, $w/2$ plus that distance (medians per $N$ and per $N$ and $D$).
+Replays `dmin_f99_hold_goal` at one goal level and measures, from the first tick with the share inside to the first tick no dog is within $r_s$, the walk of the flock centre, its duration and the distance of the farthest sheep from the centre. The summary adds the goal radius that walk calls for, $w/2$ plus that distance (medians per $N$ and per $N$ and $D$). Table 6 lists the flags:
+
+**Table 6: Flags of `hold_walk.py`.**
 
 | Flag | Default |
 | :--- | :--- |

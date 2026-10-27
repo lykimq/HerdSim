@@ -26,7 +26,8 @@ from services.cells import Cell, Group, cell_config  # noqa: E402
 from services.protocol import load_protocol  # noqa: E402
 from sim.core.world.layouts import LAYOUTS, place_flock  # noqa: E402
 
-# Flock radii R_f as calibrated for the main runs; they only size the compact layout here.
+# Flock radii R_f of results/dmin_m12/calibration.json, rounded; they only size the compact
+# layout here, so the check does not need that folder.
 FLOCK_RADIUS = {25: 6.2, 100: 9.08, 400: 11.4}
 PROTOCOL = "dmin_pilot"  # any drive protocol with the four layouts; only its settings are used
 FLOCK_SIZES = (25, 100, 400)

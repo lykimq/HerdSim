@@ -12,6 +12,8 @@ wrote, and the calculations live in analysis/.
 The runs
   record     every run: when it finished, trials, cells, open cells, errors, hours
              (from results/queue_log.jsonl; takes no folder)
+  dispersion the start spread times N per layout, and where the failed drives of the main
+             runs ended (near the goal or never there); takes no folder
 
 How many dogs are needed
   dmin      D_min by layout and flock size, one table per folder
@@ -56,6 +58,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import pandas as pd  # noqa: E402
 
+from analysis.dispersion_burden import (  # noqa: E402
+    BURDEN_CAMPAIGN,
+    format_dispersion_table,
+    format_failure_table,
+    run_full_dispersion_analysis,
+)
 from analysis.dmin import (
     arrival_groups,  # noqa: E402
     at_arrival,  # noqa: E402
@@ -72,13 +80,11 @@ from analysis.dmin_tables import (  # noqa: E402
     growth_table,
     layout_against_n,
     layout_by_n,
-    run_record,
+    shape_table,
     split_group_key,
     unusual_zones,
 )
 from analysis.frontier import Rules, frontier  # noqa: E402
-from analysis.growth_fits import compare as compare_shapes  # noqa: E402
-from analysis.growth_fits import interval_of  # noqa: E402
 from analysis.herdability import growth as herd_growth  # noqa: E402
 from analysis.herdability import paper_nstar, side_by_side  # noqa: E402
 from analysis.results import (  # noqa: E402
@@ -87,10 +93,13 @@ from analysis.results import (  # noqa: E402
     read_cells,
     read_groups,
     read_trials,
+    run_record,
 )
 from services.protocol import RESULTS_ROOT, load_protocol, results_folder  # noqa: E402
+from sim.plugins.scenarios import SCENARIOS  # noqa: E402
 
-LAYOUTS = ("compact", "wide", "split", "outlier_rich")
+# Row order of the tables: the drive task's start layouts.
+LAYOUTS = tuple(SCENARIOS["drive_to_goal"].layouts)
 
 
 def cmd_record(_: argparse.Namespace) -> None:
@@ -189,17 +198,17 @@ def cmd_methods(args: argparse.Namespace) -> None:
 def cmd_fits(args: argparse.Namespace) -> None:
     for name in args.folders:
         table = groups_table(results_folder(name))
-        rows = []
-        for layout in ("wide", "outlier_rich"):
-            part = table[table["layout"] == layout].sort_values("n")
-            points = []
-            for _, r in part.iterrows():
-                found = interval_of(float(r["d_min"]), float(r["d_min_low"]))
-                if found is not None:
-                    points.append((int(r["n"]), found))
-            rows.append({"layout": layout, **compare_shapes(points)})
         print(f"### {name}: D_min(N), power law against saturating curve\n")
-        print(markdown(pd.DataFrame(rows)), "\n")
+        print(markdown(shape_table(table)), "\n")
+
+
+def cmd_dispersion(_: argparse.Namespace) -> None:
+    failure_df, disp_df = run_full_dispersion_analysis()
+    print("### Failure regimes per run\n")
+    print(markdown(format_failure_table(failure_df)), "\n")
+    if not disp_df.empty:
+        print(f"### Dispersion burden S0 x N by layout and flock size ({BURDEN_CAMPAIGN})\n")
+        print(markdown(format_dispersion_table(disp_df)), "\n")
 
 
 def cmd_herdability(args: argparse.Namespace) -> None:
@@ -231,6 +240,7 @@ def main() -> None:
     )
     sub = parser.add_subparsers(dest="verb", required=True)
     sub.add_parser("record").set_defaults(run=cmd_record)
+    sub.add_parser("dispersion").set_defaults(run=cmd_dispersion)
     for verb, run in (("dmin", cmd_dmin), ("growth", cmd_growth), ("dips", cmd_dips)):
         p = sub.add_parser(verb)
         p.add_argument("folders", nargs="+")

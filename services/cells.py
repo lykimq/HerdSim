@@ -13,19 +13,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from analysis import keys
 from protocols.packaging.provenance import read_provenance, stable_hash
 from sim.core.config.experiment import build_config
 from sim.plugins.scenarios import SCENARIOS
 
 from .protocol import MethodSpec, Protocol, drive_limit_ticks, factor_settings
-
-
-def _key_text(value: Any) -> str:
-    """A factor value as written in keys: numbers as floats, so 1 and 1.0 are one cell, as
-    they are one physics (provenance.normalise_numbers)."""
-    if isinstance(value, (int, float)) and not isinstance(value, bool):
-        return repr(float(value))
-    return str(value)
 
 
 @dataclass(frozen=True)
@@ -39,8 +32,7 @@ class Group:
 
     @property
     def key(self) -> str:
-        parts = [self.method, self.layout, *(f"{k}={_key_text(v)}" for k, v in self.factors)]
-        return "|".join([*parts, f"N={self.n_sheep}"])
+        return keys.group_key(self.method, self.layout, self.factors, self.n_sheep)
 
 
 @dataclass(frozen=True)
@@ -52,7 +44,7 @@ class Cell:
 
     @property
     def key(self) -> str:
-        return f"{self.group.key}|D={self.n_shepherds}"
+        return keys.cell_key(self.group.key, self.n_shepherds)
 
 
 @dataclass(frozen=True)
@@ -71,7 +63,7 @@ class Trial:
 
 
 def trial_key(cell: Cell, seed_index: int) -> str:
-    return f"{cell.key}|seed={seed_index}"
+    return keys.trial_key(cell.key, seed_index)
 
 
 def groups(protocol: Protocol) -> list[Group]:

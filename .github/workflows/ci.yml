@@ -1,11 +1,11 @@
 name: CI/CD Pipeline
 
-# Cheap gates for the scaling-cli branch: tests, lint, typecheck.
+# Cheap gates for the scaling-cli-d-min-max branch: tests, lint, typecheck.
 # Do not run stress sims or long campaign grids here.
 
 on:
   push:
-    branches: [ main, scaling-cli ]
+    branches: [ main, scaling-cli-d-min-max ]
   pull_request:
     branches: [ main, scaling-cli ]
 

@@ -15,37 +15,40 @@ slopes the brackets allow.
 from __future__ import annotations
 
 import itertools
-import json
 import math
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 import pandas as pd
 
+from .frontier import COLLAPSE, CROWDED, RECOVERED, RELIABLE, UNRELIABLE, UNRELIABLE_DIP
+from .growth_fits import compare as compare_shapes
+from .growth_fits import interval_of
+from .keys import join_group, split_group
 from .results import read_groups
 
+# Zones of a cell where more dogs did worse.
+WORSE_ZONES = (CROWDED, UNRELIABLE_DIP, COLLAPSE, RECOVERED)
 
-def parse_group_key(key: str) -> dict[str, Any]:
-    """'strombom_multi|wide|dog_start_gap=15.0|N=200' -> method, layout, factors, n."""
-    parts = key.split("|")
-    return {
-        "method": parts[0],
-        "layout": parts[1],
-        "factors": "|".join(parts[2:-1]),
-        "n": int(parts[-1].removeprefix("N=")),
-    }
+Bracket = tuple[float, float]
+
+# ------------------------------------------------------------------- reading a finished run
 
 
 def split_group_key(frame: pd.DataFrame) -> pd.DataFrame:
     """``frame`` with its group_key column replaced by method, layout, factors and n."""
-    keys = pd.DataFrame([parse_group_key(k) for k in frame["group_key"]], index=frame.index)
+    keys = pd.DataFrame([split_group(k) for k in frame["group_key"]], index=frame.index)
     return pd.concat([keys, frame.drop(columns=["group_key"])], axis=1)
 
 
 def groups_table(folder: Path) -> pd.DataFrame:
     """One row per D curve: method, layout, factors, n and the D values."""
     return split_group_key(read_groups(folder))
+
+
+# -------------------------------------------------------------------- D_min as text and bracket
 
 
 def dmin_text(row: pd.Series) -> str:
@@ -99,6 +102,9 @@ def bracket(row: pd.Series) -> tuple[float, float] | None:
     return float(row["d_min_low"]), float(row["d_min"])
 
 
+# ------------------------------------------------------------------------------- growth with N
+
+
 def slope_range(points: list[tuple[int, float, float]]) -> tuple[float, float] | None:
     """Range of the least-squares slope of log2 D against log2 N over the brackets.
 
@@ -122,6 +128,21 @@ def _slope_text(result: tuple[float, float] | None) -> str:
     return "-" if result is None else f"{result[0]:.2f} to {result[1]:.2f}"
 
 
+def _brackets_by_n(
+    part: pd.DataFrame, bracket_of: Callable[[pd.Series], Bracket | None]
+) -> tuple[list[tuple[int, float, float]], list[pd.Series]]:
+    """For one layout, in order of N: (N, low, high) of every curve ``bracket_of`` can
+    bracket, and the rows it cannot."""
+    points, rest = [], []
+    for _, row in part.sort_values("n").iterrows():
+        b = bracket_of(row)
+        if b:
+            points.append((int(row["n"]), b[0], b[1]))
+        else:
+            rest.append(row)
+    return points, rest
+
+
 def growth_table(table: pd.DataFrame) -> pd.DataFrame:
     """Per layout: the slope range, the N values used, and the N values left out and why.
 
@@ -131,16 +152,9 @@ def growth_table(table: pd.DataFrame) -> pd.DataFrame:
     """
     rows = []
     for layout, part in one_level(table).groupby("layout", sort=False):
-        used, above, open_ = [], [], []
-        for _, row in part.sort_values("n").iterrows():
-            b = bracket(row)
-            if b:
-                used.append((int(row["n"]), b))
-            elif bool(row.get("d_min_above_grid", False)):
-                above.append(int(row["n"]))
-            else:
-                open_.append(int(row["n"]))
-        points = [(n, b[0], b[1]) for n, b in used]
+        points, rest = _brackets_by_n(part, bracket)
+        above = [int(r["n"]) for r in rest if bool(r.get("d_min_above_grid", False))]
+        open_ = [int(r["n"]) for r in rest if not bool(r.get("d_min_above_grid", False))]
         flat = bool(points) and all(p[1] == 1.0 and p[2] == 1.0 for p in points)
         notes = []
         if flat and not above and not open_:
@@ -161,11 +175,30 @@ def growth_table(table: pd.DataFrame) -> pd.DataFrame:
             {
                 "layout": layout,
                 "slope_range": slope,
-                "n_used": " ".join(str(n) for n, _ in used) or "-",
+                "n_used": " ".join(str(p[0]) for p in points) or "-",
                 "note": "; ".join(notes),
             }
         )
     return pd.DataFrame(rows)
+
+
+def shape_table(
+    table: pd.DataFrame, layouts: tuple[str, ...] = ("wide", "outlier_rich")
+) -> pd.DataFrame:
+    """Per layout: a power law against a curve that levels off, fitted to D_min(N) over the
+    brackets. split is not fitted by default: its success does not rise with D at N >= 200."""
+    rows = []
+    for layout in layouts:
+        points = []
+        for _, r in table[table["layout"] == layout].sort_values("n").iterrows():
+            found = interval_of(float(r["d_min"]), float(r["d_min_low"]))
+            if found is not None:
+                points.append((int(r["n"]), found))
+        rows.append({"layout": layout, **compare_shapes(points)})
+    return pd.DataFrame(rows)
+
+
+# ------------------------------------------------------------------------------------ D_sat
 
 
 def dsat_bracket(row: pd.Series) -> tuple[float, float] | None:
@@ -204,13 +237,8 @@ def dsat_growth(table: pd.DataFrame) -> pd.DataFrame:
     """Per layout: the range of slopes of log2 D_sat against log2 N over the D_sat brackets."""
     rows = []
     for layout, part in one_level(table).groupby("layout", sort=False):
-        points, left_out = [], []
-        for _, row in part.sort_values("n").iterrows():
-            b = dsat_bracket(row)
-            if b:
-                points.append((int(row["n"]), b[0], b[1]))
-            else:
-                left_out.append(int(row["n"]))
+        points, rest = _brackets_by_n(part, dsat_bracket)
+        left_out = [int(r["n"]) for r in rest]
         if points and all(p[1] == p[2] == 1.0 for p in points):
             slope = "0 (flat)"
         else:
@@ -226,9 +254,12 @@ def dsat_growth(table: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+# ---------------------------------------------------------------- cost, zones and checks
+
+
 def _cell_medians(cells: pd.DataFrame, key: str) -> dict[int, tuple[float, float, float]]:
     """Per reliable D of the curve ``key``: (median finish, median dog ticks, total dog path)."""
-    mine = cells[(cells["group_key"] == key) & (cells["reliability"] == "reliable")]
+    mine = cells[(cells["group_key"] == key) & (cells["reliability"] == RELIABLE)]
     return {
         int(c["n_shepherds"]): (
             float(c["median_finish"]),
@@ -237,6 +268,11 @@ def _cell_medians(cells: pd.DataFrame, key: str) -> dict[int, tuple[float, float
         )
         for _, c in mine.iterrows()
     }
+
+
+def _ratios(values: tuple[float, ...], base: tuple[float, ...]) -> dict[str, float]:
+    """Finish time, dog time and dog path of one cell relative to the D_sat cell."""
+    return dict(zip(("time", "dog_time", "path"), (v / b for v, b in zip(values, base))))
 
 
 def effort_table(cells: pd.DataFrame, table: pd.DataFrame) -> pd.DataFrame:
@@ -255,19 +291,12 @@ def effort_table(cells: pd.DataFrame, table: pd.DataFrame) -> pd.DataFrame:
         sat, top = int(curve["d_sat"]), int(curve["d_max"])
         if top <= sat:
             continue
-        factors = [str(curve["factors"])] if curve.get("factors") else []
-        key = "|".join([str(curve["method"]), str(curve["layout"]), *factors, f"N={curve['n']}"])
+        factors = str(curve["factors"]) if curve.get("factors") else ""
+        key = join_group(str(curve["method"]), str(curve["layout"]), factors, int(curve["n"]))
         medians = _cell_medians(cells, key)
         if sat not in medians:
             continue
         working = [d for d in medians if sat <= d <= top]
-        base = medians[sat]
-
-        def ratios(d: int) -> dict[str, float]:
-            return dict(
-                zip(("time", "dog_time", "path"), (v / b for v, b in zip(medians[d], base)))
-            )
-
         double = next((d for d in sorted(working) if d >= 2 * sat), None)
         row: dict[str, Any] = {
             "layout": curve["layout"],
@@ -276,7 +305,7 @@ def effort_table(cells: pd.DataFrame, table: pd.DataFrame) -> pd.DataFrame:
             "d_double": double if double is not None else "-",
         }
         for label, d in (("double", double), ("top", top)):
-            r = ratios(d) if d is not None else {}
+            r = _ratios(medians[d], medians[sat]) if d is not None else {}
             for name in ("time", "dog_time", "path"):
                 row[f"{name}_{label}"] = round(r[name], 2) if name in r else "-"
         row["d_top"] = top
@@ -290,16 +319,16 @@ def unusual_zones(cells: pd.DataFrame) -> pd.DataFrame:
     """Curves with a cell where more dogs did worse: crowded (slower than D_best), an
     unreliable dip, a collapse or a recovery. One row per such cell, with the median finish
     of the curve's fastest reliable D beside it for scale."""
-    flagged = cells[cells["zone"].isin(["crowded", "unreliable_dip", "collapse", "recovered"])]
+    flagged = cells[cells["zone"].isin(WORSE_ZONES)]
     rows = []
     for key, part in flagged.groupby("group_key", sort=True):
         curve = cells[cells["group_key"] == key]
-        reliable = curve[curve["reliability"] == "reliable"].sort_values("median_finish")
+        reliable = curve[curve["reliability"] == RELIABLE].sort_values("median_finish")
         fastest = reliable.iloc[0] if len(reliable) else None
         for _, cell in part.iterrows():
             rows.append(
                 {
-                    **{k: v for k, v in parse_group_key(str(key)).items() if k != "factors"},
+                    **{k: v for k, v in split_group(str(key)).items() if k != "factors"},
                     "d": int(cell["n_shepherds"]),
                     "zone": cell["zone"],
                     "success_rate": round(float(cell["success_rate"]), 2),
@@ -341,7 +370,7 @@ def extent_check(trials: pd.DataFrame, radii: dict[str, dict[str, float]]) -> pd
     """
     rows = []
     for _, part in trials.groupby(["group_key", "n_shepherds"], sort=True):
-        info = parse_group_key(str(part["group_key"].iloc[0]))
+        info = split_group(str(part["group_key"].iloc[0]))
         d = part["n_shepherds"].iloc[0]
         radius = radii[info["method"]][str(info["n"])]
         ratio = np.sqrt(2.0) * part["mean_extent"].astype(float) / radius
@@ -355,6 +384,9 @@ def extent_check(trials: pd.DataFrame, radii: dict[str, dict[str, float]]) -> pd
             }
         )
     return pd.DataFrame(rows).sort_values(["layout", "n", "d"], ignore_index=True)
+
+
+# -------------------------------------------------------------------------- comparing runs
 
 
 def midpoint(row: pd.Series) -> float | None:
@@ -421,8 +453,8 @@ def dips(cells: pd.DataFrame, groups: pd.DataFrame) -> pd.DataFrame:
         floor = d_min.get(cell["group_key"])
         if floor is None or pd.isna(floor):
             continue
-        if cell["n_shepherds"] > floor and cell["reliability"] == "unreliable":
-            key = parse_group_key(cell["group_key"])
+        if cell["n_shepherds"] > floor and cell["reliability"] == UNRELIABLE:
+            key = split_group(cell["group_key"])
             rows.append(
                 {
                     "layout": key["layout"],
@@ -435,43 +467,3 @@ def dips(cells: pd.DataFrame, groups: pd.DataFrame) -> pd.DataFrame:
                 }
             )
     return pd.DataFrame(rows)
-
-
-def run_record(queue_log: Path, results_root: Path | None = None) -> pd.DataFrame:
-    """The table of runs: the last queue_log entry of each protocol.
-
-    With ``results_root``, the counts come from each folder's status.json where it exists,
-    so a folder resumed outside the queue (a top-up run) shows its current trials and
-    cells; the finish time and hours stay those of the queue run.
-    """
-    if not queue_log.exists():
-        return pd.DataFrame()
-    entries = [json.loads(line) for line in queue_log.read_text().splitlines() if line.strip()]
-    last: dict[str, dict[str, Any]] = {}
-    for entry in entries:
-        last[entry["protocol"]] = entry
-    current = {
-        "trials": "trials_done",
-        "cells": "cells",
-        "cells_needing_seeds": "cells_needing_seeds",
-        "cells_at_max_seeds_undecided": "cells_at_max_seeds_undecided",
-        "trial_errors": "trial_errors",
-    }
-    for protocol, entry in last.items():
-        status = results_root / protocol / "status.json" if results_root else None
-        if status is not None and status.exists():
-            found = json.loads(status.read_text())
-            last[protocol] = {**entry, **{k: found[v] for k, v in current.items() if v in found}}
-    cols = [
-        "protocol",
-        "finished",
-        "trials",
-        "cells",
-        "cells_needing_seeds",
-        "cells_at_max_seeds_undecided",
-        "trial_errors",
-        "hours",
-        "workers",
-        "outcome",
-    ]
-    return pd.DataFrame([{c: e.get(c, "") for c in cols} for e in last.values()])

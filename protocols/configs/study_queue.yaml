@@ -1,0 +1,46 @@
+# The protocols of the study, in the order they ran: the first study (main grids,
+# sensitivities, Kubo, FAT), then the follow-ups, then the Lama and di Bernardo (2024) model
+# on its gather task, then the goal and share that hold a small flock. cli/run_queue.py runs
+# them in this order; a new protocol of the study is added here.
+queue:
+  - dmin_m12
+  - dmin_m6
+  - dmin_m3
+  - dmin_s_base
+  - dmin_s_matched
+  - dmin_s_handler
+  - dmin_s_ring
+  - dmin_s_goal
+  - dmin_s_dogspeed
+  - dmin_s_gap
+  - dmin_kubo
+  - dmin_f99_m6
+  - dmin_f99_m3
+  - dmin_f99_m12
+  - dmin_f99_s_base
+  - dmin_f99_s_matched
+  - dmin_f99_s_dogspeed
+  - dmin_f99_s_handler
+  - dmin_f99_s_ring
+  - dmin_f99_s_goal
+  - dmin_f99_s_gap
+  - dmin_fat
+  - dmin_f99_fat
+  - dmin_f99_indep
+  - dmin_f99_kubo
+  - dmin_f99_c1.3
+  - dmin_f99_c1.6
+  - dmin_f99_c2.0
+  - dmin_f99_k05
+  - dmin_f99_hold
+  - dmin_f99_hold_spacing
+  - dmin_f99_view_range
+  - dmin_f99_view_comm
+  - dmin_f99_big
+  - dmin_f99_big_dense
+  - dmin_f99_big_loose
+  - dmin_f99_big_cap
+  - lama_r50
+  - lama_r50_inf
+  - dmin_f99_hold_goal
+  - dmin_f99_hold_share

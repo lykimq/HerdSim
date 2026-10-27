@@ -75,12 +75,3 @@ def coverage(view: TickView) -> float:
     reach = float(view.config["reaction_radius"])
     to_dogs = state.sheep_positions[outer][:, None, :] - state.shepherd_positions[None, :, :]
     return float(np.mean((np.linalg.norm(to_dogs, axis=2) < reach).any(axis=1)))
-
-
-def collect_mode(view: TickView) -> float:
-    """1.0 when some sheep is beyond Strombom's collect distance f(N) = r_a N^(2/3) from the
-    centroid, so a paper shepherd would be collecting, else 0.0. Its mean over a history is
-    the share of the trial spent collecting. Strombom sheep only (reads ``r_a``); not in the
-    generic table, so a Kubo trial never evaluates it."""
-    threshold = float(view.config["r_a"]) * view.state.n_sheep ** (2.0 / 3.0)
-    return float(np.any(view.distances_to_centroid > threshold))

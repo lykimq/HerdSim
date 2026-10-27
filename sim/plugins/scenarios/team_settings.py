@@ -2,8 +2,10 @@
 
 Dog spacing, the local view and its sharing, the holding step and the drive cap are read
 by the dog controllers, not by any task. Each task carries them from the protocol into the
-run config the same way, so they live here once: ``KEYS`` names them, ``setup`` copies
-them, ``check`` refuses the combinations no controller can honour.
+run config the same way, so they live here once. ``TEAM`` gives each its type and its off
+value, the value at which the paper's dog runs; the setup keys, the neutral values of the
+physics hash and the dog that calibration uses are all read from it. ``check`` refuses the
+combinations no controller can honour.
 """
 
 from __future__ import annotations
@@ -11,13 +13,16 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 
-KEYS = (
-    "dog_spacing",
-    "sensing_range",
-    "communication",
-    "hold_withdraw",
-    "drive_offset_cap",
-)
+# name: (type, off value)
+TEAM: dict[str, tuple[type, Any]] = {
+    "dog_spacing": (float, 0.0),
+    "sensing_range": (float, 0.0),
+    "communication": (str, "none"),
+    "hold_withdraw": (bool, False),
+    "drive_offset_cap": (float, 0.0),
+}
+KEYS = tuple(TEAM)
+OFF = {name: off for name, (_, off) in TEAM.items()}
 
 # What dogs share when they see only part of the flock (collect_drive_multi).
 COMMUNICATION = ("none", "neighbour", "shared")
@@ -25,13 +30,7 @@ COMMUNICATION = ("none", "neighbour", "shared")
 
 def setup(settings: Mapping[str, Any]) -> dict[str, Any]:
     """The team settings of a protocol, typed, as setup keys."""
-    return {
-        "dog_spacing": float(settings["dog_spacing"]),
-        "sensing_range": float(settings["sensing_range"]),
-        "communication": str(settings["communication"]),
-        "hold_withdraw": bool(settings["hold_withdraw"]),
-        "drive_offset_cap": float(settings["drive_offset_cap"]),
-    }
+    return {name: kind(settings[name]) for name, (kind, _) in TEAM.items()}
 
 
 def check(config: dict[str, Any]) -> None:

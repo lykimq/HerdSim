@@ -1,4 +1,5 @@
-"""What tasks with a circular goal share: the world, the goal metrics, the arrival columns.
+"""What tasks with a circular goal share: the world, the goal metrics, the arrival columns
+and the hold of the success condition.
 
 Each metric takes a TickView and returns one float; a task records the ones that mean
 something for it next to the generic metrics. ``arrival_columns`` reads the first arrival of
@@ -12,12 +13,28 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
+from sim.core.simulation_state import SimulationState
 from sim.core.world.arena import GoalZone, World
 from sim.plugins.metrics.view import TickView
 
 # Fractions of the flock whose first arrival is recorded in every trial row, so a weaker
 # success rule than the task's own can be read afterwards (analysis/dmin.py).
 ARRIVAL_FRACTIONS = (0.90, 0.95, 0.99)
+
+
+# The tick the success condition last became true, kept in state.metadata between ticks.
+REACHED_SINCE = "reached_since"
+
+
+def held_for(state: SimulationState, condition: bool, hold_ticks: int) -> bool:
+    """Whether ``condition`` has held without a break for ``hold_ticks`` ticks. A break
+    clears the start, so the hold has to begin again; with ``hold_ticks`` 0 the first tick
+    the condition holds is enough."""
+    if not condition:
+        state.metadata.pop(REACHED_SINCE, None)
+        return False
+    since = state.metadata.setdefault(REACHED_SINCE, state.tick)
+    return state.tick - since >= hold_ticks
 
 
 def create_world(config: dict[str, Any]) -> World:

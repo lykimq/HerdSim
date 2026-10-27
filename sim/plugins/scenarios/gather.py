@@ -43,7 +43,7 @@ from sim.core.world.layouts import UNIFORM, place_uniform_disc
 from sim.plugins.metrics.view import TickView
 
 from .failures import NONE, TIMEOUT, Failure
-from .goal import arrival_columns
+from .goal import arrival_columns, held_for
 from .team_settings import KEYS as TEAM_KEYS
 from .team_settings import check as check_team
 from .team_settings import setup as team_setup
@@ -182,11 +182,8 @@ def is_success(state: SimulationState) -> bool:
     """The share ``success_fraction`` is inside the goal, held for ``hold_ticks``, and every dog
     is inside it (module docstring)."""
     goal = state.world.goal
-    if not (goal.reached(state.sheep_positions) and _dogs_home(state)):
-        state.metadata.pop("reached_since", None)
-        return False
-    since = state.metadata.setdefault("reached_since", state.tick)
-    return state.tick - since >= goal.hold_ticks
+    inside = goal.reached(state.sheep_positions) and _dogs_home(state)
+    return held_for(state, inside, goal.hold_ticks)
 
 
 def unseen_targets(view: TickView) -> float:

@@ -21,7 +21,7 @@ from sim.core.simulation_state import SimulationState
 from sim.core.world import layouts
 from sim.core.world.layouts import DOG_STARTS, field_size, layout_extent, place_dogs, place_flock
 
-from .goal import arrival_columns
+from .goal import arrival_columns, held_for
 from .team_settings import KEYS as TEAM_KEYS
 from .team_settings import check as check_team
 from .team_settings import setup as team_setup
@@ -101,11 +101,7 @@ def is_success(state: SimulationState) -> bool:
     goal clears it, so the hold has to start again.
     """
     goal = state.world.goal
-    if not goal.reached(state.sheep_positions):
-        state.metadata.pop("reached_since", None)
-        return False
-    since = state.metadata.setdefault("reached_since", state.tick)
-    return state.tick - since >= goal.hold_ticks
+    return held_for(state, goal.reached(state.sheep_positions), goal.hold_ticks)
 
 
 def _check_settings(s: Mapping[str, Any]) -> None:

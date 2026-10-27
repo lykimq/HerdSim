@@ -69,7 +69,7 @@ An experiment is a protocol: a YAML file layered over the canonical defaults. It
 
 ### Keys
 
-Every trial has a text key built from its group (method, layout, factor levels, flock size), its team size and its seed index. A cell key is the trial key without the seed; a group key is the cell key without the team size. The key is built in one place and parsed by string operations in several others.
+Every trial has a text key built from its group (method, layout, factor levels, flock size), its team size and its seed index. A cell key is the trial key without the seed; a group key is the cell key without the team size. One module defines the format, building and splitting every key; the campaign and the analysis both go through it, since the format is stored in every results folder. A factor value containing the separator would still break it.
 
 ### Trial row
 
@@ -108,7 +108,7 @@ flowchart LR
     sheep["Sheep react to<br/>flock and dogs"] --> dogs["Dogs decide<br/>and move"]
     dogs --> metrics["Metrics recorded"]
     metrics --> done{"Task done or<br/>out of time?"}
-    done -- "no" --> sheep
+    done -. "no" .-> sheep
 ```
 
 Sheep move first, reacting to where the dogs were; then the dogs decide and move. Under the default team rule each dog knows every sheep and every other dog, and a protocol can limit a dog to the sheep within a range and say whether dogs share what they see; the gather task's herders sense within a radius their method sets. Metrics are recorded on the new state, and the task decides whether the trial is over: on success, on the time limit, or when the task's own end rule fires.
@@ -125,13 +125,13 @@ flowchart TB
     assess --> plan["Plan round:<br/>cells needing seeds"]
     plan --> stop{"Anything planned<br/>and time left?"}
     stop -- "yes" --> pool["Workers run trials,<br/>parent appends rows"]
-    pool --> assess
+    pool -.-> assess
     stop -- "no" --> close["Pack trial log,<br/>release lock"]
 ```
 
 1. The folder is locked, so a second campaign on it is refused, and its physics hash is compared with the protocol's.
 2. The sitting is recorded with its code identity and merged protocol. If the trial code changed since the last sitting, the run logs a warning.
-3. If any flock size lacks a calibrated radius, every size is calibrated again and the stored radii are replaced; Table 3 lists this as a risk.
+3. If any flock size lacks a calibrated radius, every size is calibrated again and the stored radii are replaced, a known risk listed below.
 4. Each round starts by deciding every cell from the rows so far, adding midpoint team sizes where the rules ask for them, and writing the tables and the status.
 5. The round's trials are planned: new cells and cells that still need seeds. The sitting stops when nothing is planned (every cell decided, at the seed cap or errored) or when its time budget is spent. The budget counts from the end of calibration, so a resumed sitting gets a new one.
 6. Otherwise the trials go to the pool. Each worker gets a small description of one trial, runs it and returns its row; only the parent writes the log and the tables. The parent keeps a few trials queued per worker and stops queueing at the deadline.
@@ -187,7 +187,7 @@ The engine runs one trial and knows nothing of grids, seeds, workers or tables. 
 
 The goal radius, the compact start spread and the drive length are multiples of the flock radius, measured per method and flock size by a short calibration in which one all-seeing dog drives a compact flock; the drive has a floor of 80 m, and the scattered layouts are sized by the paper's collect distance. Fixed lengths would make the task easier or harder as the flock grows for reasons that have nothing to do with the dogs. Calibration refuses a flock size whose radius does not settle.
 
-Calibration uses the paper's single dog for the canonical dog settings, but a method's own dog parameters do reach it, so a method variant with a different dog is calibrated on that dog. Two methods that should share one task can be calibrated with the same dog. Above the largest size that settles, a protocol may impose the radius. A task whose agents do not flock, such as the gather task, sizes itself from its own settings and skips calibration. The details are in [task_design.md](../experiments/task_design.md#sizing-by-the-calibrated-flock-radius-r_fn).
+Calibration uses the paper's single dog for the canonical dog settings, but a method's own dog parameters do reach it, so a method variant with a different dog is calibrated on that dog. Two methods that should share one task can be calibrated with the same dog. Above the largest size that settles, a protocol may impose the radius. A task whose agents do not flock, such as the gather task, sizes itself from its own settings and skips calibration. The details are in [task_design.md](../experiments/task_design.md#sizing-by-the-calibrated-flock-radius).
 
 ### Open field and time limit
 
@@ -233,9 +233,8 @@ Table 2 lists the trade-offs the design accepts; Table 3 lists known risks, each
 | Risk | Effect | Way out |
 | :--- | :--- | :--- |
 | Adding a flock size recalibrates every size and overwrites the stored radii | Existing cells could get a new task size within one folder | Calibrate only the missing sizes |
-| A new canonical setting must be sorted by hand into the hash, strategy and calibration lists | A miss changes every folder's hash or leaks a dog setting into calibration | One category tag per setting, lists derived from it |
-| The key format is parsed by string operations in several places | A factor value with a separator breaks the parsers | Build and parse keys in one module |
-| One failure rule exists in both the engine and the analysis | The two can drift | Keep one, as a row column |
+| A new canonical setting must be sorted by hand into the hash and strategy lists (dog team settings come from one table) | A miss changes every folder's hash | One category tag per setting, lists derived from it |
+| Keys are plain text with a separator | A factor value with the separator breaks them | Refuse such values when a protocol loads |
 | The trial table of a large protocol approaches the 100 MB limit | A push is refused, as happened with the trial log | Compress it like the log, or stop committing it |
 | Some archived folders have no protocol file left | They cannot be replayed | Keep their protocol, or mark them archived |
 | Single-threaded numeric libraries are set only by the campaign tools | Replay pools may oversubscribe the CPU | Set it in the pool |
@@ -247,7 +246,7 @@ Most changes follow the plugin boundaries. Each needs a few steps that are easy 
 - A new dog rule or sheep model is a plugin plus a method entry that pairs them, with default parameters. The catalog is checked at load, so a missing plugin or setting fails before any run. Decide whether its dog parameters should reach calibration, and add a regression test only if results will rest on it.
 - A new task is one plugin with its setup, checks, success rule, end rule, metrics, row columns and failure rules, registered by name. Decide whether it calibrates or sizes itself; its own settings are hashed only when it runs.
 - A new metric is registered once and adds a mean, minimum and maximum column to every later row. Older rows in a resumed folder lack those columns while the hash stays the same.
-- A new setting goes into the canonical defaults with a note on its source, and into the right lists: physics or strategy, swept or whole-protocol, whether it is neutral for the hash, and, for a dog setting, whether calibration uses the paper's value.
+- A new setting goes into the canonical defaults with a note on its source, and into the right lists: physics or strategy, swept or whole-protocol, whether it is neutral for the hash, and, for a dog team setting, an entry in the team settings table, which gives its type and the off value calibration and the hash use.
 - A new experiment on existing settings is a new protocol file. Any canonical setting that changes a trial can be swept as a factor, except the task, the base seed and settings that act only through calibration.
 
 The design does not yet handle:
@@ -289,7 +288,8 @@ Table 4 maps each concern to the code that holds it.
 | Canonical defaults and protocol files | `protocols/configs/` |
 | Trial row, physics hash, code identity | `protocols/packaging/` |
 | Protocol loading and checks | `services/protocol.py` |
-| Groups, cells, keys, trial configs | `services/cells.py` |
+| Groups, cells, trial configs | `services/cells.py` |
+| The text keys of groups, cells and trials | `analysis/keys.py` |
 | Calibration | `services/calibration.py` |
 | Rounds, worker batches, pool, results folder | `services/adaptive.py`, `services/runner.py`, `services/pool.py`, `services/store.py` |
 | Replays of stored trials | `services/replay.py` |
@@ -299,6 +299,6 @@ Table 4 maps each concern to the code that holds it.
 | Start spread and where failed drives ended | `analysis/dispersion_burden.py` |
 | Diagnostics built on replays | `cli/diagnostics/` (`pressure_replay.py`, `split_diagnostic.py`, `hold_walk.py`), `analysis/pressure.py` |
 | Check of the local flock-centre estimate on start layouts (no replay) | `cli/diagnostics/gradient_validation.py` |
-| One protocol, the study queue | `cli/campaign.py`, `cli/run_queue.py` |
+| One protocol, the study queue | `cli/campaign.py`, `cli/run_queue.py`, `protocols/configs/study_queue.yaml` |
 | Command-line entry points | `cli/` (see `cli/README.md`) |
 | Regression tests | `tests/sim/test_golden.py` |

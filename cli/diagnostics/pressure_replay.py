@@ -29,7 +29,14 @@ from analysis.dmin_tables import groups_table  # noqa: E402
 from analysis.pressure import Pressure, pressure_table  # noqa: E402
 from analysis.results import markdown  # noqa: E402
 from services.protocol import results_folder  # noqa: E402
-from services.replay import ReplayJob, open_run, replay_trial, run_replays  # noqa: E402
+from services.replay import (  # noqa: E402
+    ReplayJob,
+    describe_cell_seed,
+    open_run,
+    replay_trial,
+    run_replays,
+    write_replays,
+)
 
 METHOD = "strombom_multi"
 
@@ -86,20 +93,10 @@ def main() -> None:
         for n in args.n:
             tested = run.tested(METHOD, layout, n)
             for d, role in cells_to_replay(curves.loc[(layout, n)], tested).items():
-                config = run.config(METHOD, layout, n, d)
-                outcome = run.outcomes(METHOD, layout, n, d)
-                for i in [i for i in range(args.seeds) if i in outcome]:
-                    label = {"layout": layout, "n": n, "d": d, "role": role, "seed_index": i}
-                    jobs.append(ReplayJob(config, run.master_seed + i, outcome[i], label))
-
-    table = run_replays(
-        measure,
-        jobs,
-        args.workers,
-        lambda r: f"{r['layout']} N={r['n']} D={r['d']} seed {r['seed_index']}",
-    ).sort_values(["layout", "n", "d", "seed_index"])
-    args.out.parent.mkdir(parents=True, exist_ok=True)
-    table.to_csv(args.out, index=False)
+                jobs += run.jobs(METHOD, layout, n, d, args.seeds, role=role)
+    table = run_replays(measure, jobs, args.workers, describe_cell_seed)
+    table = table.sort_values(["layout", "n", "d", "seed_index"])
+    write_replays(table, args.out)
     print(markdown(pressure_table(table).round(2)))
 
 

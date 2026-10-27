@@ -102,10 +102,3 @@ def test_coverage_counts_outer_sheep_within_reaction_radius():
     sheep = [[0.0, 0.0], [1.0, 0.0], [-1.0, 0.0], [20.0, 0.0], [-20.0, 0.0]]
     v = view(sheep, [[22.0, 0.0]])
     assert dogs.coverage(v) == pytest.approx(0.5)  # outer: the two at +-20; one is within 5
-
-
-def test_collect_mode_detects_outliers():
-    # The square's sheep are sqrt(2) from the centroid, inside f(4) = 2 x 4^(2/3) = 5.04.
-    assert dogs.collect_mode(view(SQUARE, [[10.0, 10.0]])) == 0.0
-    stray = [[0.0, 0.0], [2.0, 0.0], [0.0, 2.0], [30.0, 0.0]]
-    assert dogs.collect_mode(view(stray, [[10.0, 10.0]])) == 1.0

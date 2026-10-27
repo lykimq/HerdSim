@@ -3,7 +3,9 @@
 Everything you do with HerdSim from the terminal goes through the scripts in this folder. You
 run an experiment, watch it, turn its results into tables, and, now and then, replay a few
 trials to look closer at something odd. Each script is run from the repository root with
-`uv run`, and `--help` prints its full usage.
+`uv run`, and `--help` prints its full usage. Table 1 lists the tools.
+
+**Table 1: Tools and what each one is for.**
 
 | I want to... | Tool |
 | :--- | :--- |
@@ -14,8 +16,6 @@ trials to look closer at something odd. Each script is run from the repository r
 | replay stored trials to answer a question the tables cannot | `diagnostics/` |
 
 The rest of this page follows an experiment from start to finish.
-
----
 
 ## 1. Running an experiment
 
@@ -32,7 +32,9 @@ uv run cli/campaign.py run       --protocol dmin_f99_m6 --workers 20
 uv run cli/campaign.py status    --protocol dmin_f99_m6
 ```
 
-Only `run` produces results. The other three help you get there safely.
+Only `run` produces results. The other three help you get there safely, as Table 2 shows:
+
+**Table 2: The four verbs of `campaign.py`.**
 
 | Verb | What it does | Writes |
 | :--- | :--- | :--- |
@@ -92,12 +94,10 @@ uv run cli/run_queue.py --workers 20                  # every protocol that is n
 uv run cli/run_queue.py --only dmin_f99_hold --workers 20
 ```
 
-The queue lists the 41 protocols of the study in the order they ran (the one-batch `dmin_pilot` is not in it). Finished folders are skipped, stopped
+The queue lists the 41 protocols of the study in the order they ran (`protocols/configs/study_queue.yaml`) (the one-batch `dmin_pilot` is not in it). Finished folders are skipped, stopped
 ones are resumed, and a protocol that fails is logged while the queue moves on. Each protocol
 adds a line to `results/queue_log.jsonl` (when it ran, how long, trials, errors, open cells).
 With this one command the whole study can be run again from scratch.
-
----
 
 ## 2. Reading the results
 
@@ -130,8 +130,6 @@ deadline therefore gives D_min at every tighter one without running anything new
 deadline cannot be read this way). The pilot was read like this to choose the grid of the main
 runs.
 
----
-
 ## 3. Looking closer: the diagnostics
 
 Some questions can't be answered from the stored results, because a trial row keeps only a
@@ -145,7 +143,7 @@ numbers.
 
 `pressure_replay.py` asks whether a larger team puts more pressure on the flock. It replays the
 cells at D = 1, D_min, D_sat and about twice D_sat, and records how long each sheep spends
-fleeing a dog. This is the pressure part of [the report](../docs/report/d_min_report.md), section 3.7.
+fleeing a dog. This is the pressure part of [section 3.7 of the report](../docs/report/d_min_report.md#37-rq7-beyond-d_min-enough-dogs-cost-and-pressure-on-the-flock).
 
 ```bash
 uv run cli/diagnostics/pressure_replay.py dmin_f99_m6 --layouts wide outlier_rich --n 100 400 \
@@ -159,7 +157,7 @@ D = 5 at N = 400 where the stored CSV has D = 6. The rows both runs share are id
 `split_diagnostic.py` asks why more dogs slow the `split` layout. It replays `split` N = 100 and
 200 at D = 2, 4, 8 and 16 in four versions: the rule as run, a shorter dog stop distance,
 collecting dogs that take outliers far apart (the `collect_min_gap` setting, which exists only
-for this tool), and both changes together. This is section 4.1 of [the report](../docs/report/d_min_report.md).
+for this tool), and both changes together. This is [section 4.1 of the report](../docs/report/d_min_report.md#41-why-more-dogs-do-not-help-on-split).
 
 ```bash
 uv run cli/diagnostics/split_diagnostic.py --out results/diagnostics/split_diagnostic.csv
@@ -168,7 +166,7 @@ uv run cli/diagnostics/split_diagnostic.py --out results/diagnostics/split_diagn
 `hold_walk.py` asks how far a flock walks while the dogs withdraw in the holding task. It
 replays `dmin_f99_hold_goal` at a goal of 3.0 R_f, N = 25, 50 and 100, D = 1, 2, 4 and 8, five
 seeds per cell, and measures the walk of the flock centre until no dog is within r_s, with the
-goal that walk calls for. This is section 3.10 of [the report](../docs/report/d_min_report.md).
+goal that walk calls for. This is [section 3.10 of the report](../docs/report/d_min_report.md#310-rq10-when-do-more-dogs-hurt-holding-the-flock-and-dogs-that-take-up-room).
 
 ```bash
 uv run cli/diagnostics/hold_walk.py --out results/diagnostics/hold_walk.csv
@@ -182,14 +180,12 @@ centre (the note on the sheep model in `docs/methods/models.md`).
 uv run cli/diagnostics/gradient_validation.py --seeds 10
 ```
 
----
-
 ## How the tools sit on the code
 
 The scripts here are deliberately thin. Each one reads its arguments, calls the code below it,
 and prints. The real work lives in three layers under the tools, two of them side by side:
 
-```
+```text
 cli/            the tools in this folder
   |
   +-> services/   runs things: protocols, campaigns, calibration, replays of stored trials
@@ -199,6 +195,10 @@ cli/            the tools in this folder
   v     v
 sim/            the model: one trial, tick by tick
 ```
+
+Table 3 lists the modules each tool calls.
+
+**Table 3: Main modules used by each tool.**
 
 | Tool | Main modules used |
 | :--- | :--- |

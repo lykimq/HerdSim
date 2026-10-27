@@ -27,6 +27,7 @@ import yaml
 
 from sim.core.methods import METHODS
 from sim.plugins.scenarios import SCENARIOS
+from sim.plugins.scenarios.team_settings import OFF as TEAM_OFF
 from sim.plugins.sheep import SHEEP_MODELS
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -85,14 +86,10 @@ STRATEGY_KEYS = (
 # trial, so they stay out of the physics hash and the folders written before them remain
 # resumable.
 NEUTRAL_SETTINGS = {
+    **TEAM_OFF,  # the dog team settings, off
     "success_fraction": 1.0,
     "hold_drive_multiple": 0.0,
-    "hold_withdraw": False,
-    "dog_spacing": 0.0,
     "impose_radius_above": 0,
-    "drive_offset_cap": 0.0,
-    "sensing_range": 0.0,
-    "communication": "none",
     "imposed_radius_scale": 1.0,
     # Hashed when not 1: it leaves the outcome of a trial as it is but changes the rows
     # (the arrival columns, the metric summaries), which must agree within a folder.
@@ -281,6 +278,12 @@ def _methods(raw: dict[str, Any]) -> tuple[MethodSpec, ...]:
 
 def _check_shape(name: str, spec: Mapping[str, Any], settings: Mapping[str, Any]) -> None:
     """Grid and decision values a run could not use; caught here, not after calibration."""
+    _check_grid(name, spec, settings)
+    _check_decisions(name, settings)
+
+
+def _check_grid(name: str, spec: Mapping[str, Any], settings: Mapping[str, Any]) -> None:
+    """The keys, lists, methods, task and layouts that define the cells."""
     missing = [k for k in REQUIRED_KEYS if k not in spec]
     if missing:
         raise ValueError(f"{name}: missing keys {missing}")
@@ -299,10 +302,15 @@ def _check_shape(name: str, spec: Mapping[str, Any], settings: Mapping[str, Any]
     layouts = SCENARIOS[task].layouts
     unknown = sorted(set(spec["layouts"]) - set(layouts))
     if unknown:
-        raise ValueError(f"{name}: unknown layouts {unknown} for task {task!r}; its are {layouts}")
+        known = f"its layouts are {layouts}"
+        raise ValueError(f"{name}: unknown layouts {unknown} for task {task!r}; {known}")
     for key in ("flock_sizes", "shepherd_counts"):
         if any(not isinstance(v, int) or v < 1 for v in spec[key]):
             raise ValueError(f"{name}: {key} must be positive integers")
+
+
+def _check_decisions(name: str, settings: Mapping[str, Any]) -> None:
+    """The reliability rule and the seed batches."""
     if not 0.0 < settings["reliability_theta"] < 1.0:
         raise ValueError(f"{name}: reliability_theta must lie between 0 and 1")
     if not 0.0 < settings["confidence"] < 1.0:

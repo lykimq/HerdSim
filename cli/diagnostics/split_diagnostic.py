@@ -30,7 +30,13 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from analysis.results import markdown  # noqa: E402
-from services.replay import ReplayJob, open_run, replay_trial, run_replays  # noqa: E402
+from services.replay import (  # noqa: E402
+    ReplayJob,
+    open_run,
+    replay_trial,
+    run_replays,
+    write_replays,
+)
 from sim.methods.strombom.heuristics import collect_threshold  # noqa: E402
 
 METHOD = "strombom_multi"
@@ -86,8 +92,7 @@ def main() -> None:
         args.workers,
         lambda r: f"{r['deadline']} N={r['n']} D={r['d']} {r['version']}",
     )
-    args.out.parent.mkdir(parents=True, exist_ok=True)
-    table.to_csv(args.out, index=False)
+    write_replays(table, args.out)
     summary = (
         table.groupby(["deadline", "n", "d", "version"], sort=True)
         .agg(

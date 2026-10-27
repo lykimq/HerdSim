@@ -20,6 +20,7 @@ from __future__ import annotations
 from collections.abc import Callable, Iterable
 from concurrent.futures import as_completed
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 import pandas as pd
@@ -82,7 +83,9 @@ class StoredRun:
         """Run config of a cell, as the campaign built it. ``factors`` are the sorted
         (name, value) pairs of a factor protocol, empty otherwise."""
         cell = Cell(Group(method, layout, factors, n), d)
-        return cell_config(self.protocol, cell, self.radii[method][str(n)])
+        # A task that sizes itself (the gather task) has no calibrated radius, as in the run.
+        radius = self.radii.get(method, {}).get(str(n), float("nan"))
+        return cell_config(self.protocol, cell, radius)
 
     def curve(self, method: str, layout: str, n: int, factors: Factors = ()) -> pd.DataFrame:
         """Trial rows of a D curve."""
@@ -104,6 +107,41 @@ class StoredRun:
             for _, t in mine.iterrows()
         }
 
+    def jobs(
+        self,
+        method: str,
+        layout: str,
+        n: int,
+        d: int,
+        seeds: int,
+        factors: Factors = (),
+        **label: Any,
+    ) -> list[ReplayJob]:
+        """Unchanged replays of the first ``seeds`` stored seeds of a cell, each checked
+        against its stored outcome. The row label is layout, n, d, ``label``, seed_index."""
+        config = self.config(method, layout, n, d, factors)
+        stored = self.outcomes(method, layout, n, d, factors)
+        return [
+            ReplayJob(
+                config,
+                self.master_seed + i,
+                stored[i],
+                {"layout": layout, "n": n, "d": d, **label, "seed_index": i},
+            )
+            for i in range(seeds)
+            if i in stored
+        ]
+
+
+def describe_cell_seed(row: dict[str, Any]) -> str:
+    """The progress line of a replay labelled by ``StoredRun.jobs``."""
+    return f"{row['layout']} N={row['n']} D={row['d']} seed {row['seed_index']}"
+
+
+def write_replays(table: pd.DataFrame, out: Path) -> None:
+    out.parent.mkdir(parents=True, exist_ok=True)
+    table.to_csv(out, index=False)
+
 
 def open_run(name: str) -> StoredRun:
     """A finished run by protocol id or folder path.
@@ -117,7 +155,8 @@ def open_run(name: str) -> StoredRun:
     now = stable_hash(protocol.physics())
     if ran != now:
         raise ReplayMismatch(f"{folder} ran with physics {ran}, the protocol now gives {now}")
-    return StoredRun(protocol, flock_radii(folder), read_trials(folder))
+    radii = flock_radii(folder) if (folder / "calibration.json").exists() else {}
+    return StoredRun(protocol, radii, read_trials(folder))
 
 
 def run_replays(

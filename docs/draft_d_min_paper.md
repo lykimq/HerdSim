@@ -1,7 +1,5 @@
 # Sizing Shepherding Teams by Reliability: How the Minimum Team Grows with Flock Size, Deadline and the Success Rule
 
-*Draft for Swarm Intelligence (Springer). Structure follows the journal's research article format: abstract of 150 to 250 words, 4 to 6 keywords, numbered sections, a Declarations section and author–year references. Items marked TODO must be done before submission.*
-
 [Author names and affiliations — TODO]
 
 ---
@@ -10,7 +8,7 @@
 
 How many shepherding agents does it take to drive a flock into a goal? Published answers rest on success rates averaged over a fixed number of runs. We define the minimum team $D_{\min}$ as the smallest team whose success rate is at least 0.90 with 99% confidence, from an exact Clopper–Pearson interval, and estimate it with an adaptive sampler that adds runs only where the answer is still open. With the sheep model of Strömbom et al. (2014) and a coordinated multi-dog controller, we map $D_{\min}$ over flock sizes from 25 to 566, four start layouts and three deadlines, in 29 protocols and 299,740 simulated trials. A compact flock needs one dog at every size. On scattered flocks $D_{\min}$ grows sublinearly, with log-log slopes of 0.27–0.38 at a loose deadline and 0.38–0.61 at a tighter one, and halving the deadline from 6 to 3 drive times raises it more than quadrupling the flock does. The success rule changes the answer: when every sheep must be inside, large teams fail on the last sheep, and $D_{\min}$ reacts to setup choices that leave it almost unchanged when 99% must be inside. Ablations show that the collect/drive switch carries an uncoordinated team to 200 sheep and that outlier assignment is needed at 400. Run in the same simulator, the non-cohesive targets of Lama and di Bernardo (2024) follow their square-root law, but near their sensing threshold an average of 0.99 accepts a team that succeeds in only 21 of 30 runs.
 
-**Keywords:** shepherding · multi-agent systems · swarm robotics · team size · sequential testing · scaling laws
+**Keywords:** shepherding, multi-agent systems, swarm robotics, team size, sequential testing, scaling laws.
 
 ---
 
@@ -34,13 +32,13 @@ Every trial is stored with its configuration and seed and can be replayed exactl
 
 ## 2 Related work
 
-*TODO: extend this section with the shepherding and swarm-guidance literature (control-theoretic herding, learning-based shepherding, drone shepherding). Keep the unpublished work discussed during the study out of the citations.*
+Strömbom et al. (2014) proposed a heuristic for one dog, fitted to GPS data of a sheepdog and a flock: the dog collects the sheep farthest from the flock centre while any sheep lies beyond a distance $f(N) = r_a N^{2/3}$, and otherwise drives the flock from a point behind it. Their model is the base of much later work on shepherding, reviewed by Long et al. (2020). Field studies measure how real sheep respond to a herder; Jadhav et al. (2024) tracked a flock responding to a border collie.
 
-Strömbom et al. (2014) proposed a heuristic for one dog, fitted to GPS data of a sheepdog and a flock: the dog collects the sheep farthest from the flock centre while any sheep lies beyond a distance $f(N) = r_a N^{2/3}$, and otherwise drives the flock from a point behind it. Their model is the base of much later work on shepherding, reviewed by Long et al. (2020).
+Robotic shepherding began with rule-based planners. Lien et al. (2004) steered a flock along roadmaps and regrouped members that had separated, and Lien et al. (2005) let several shepherds cooperate without communication. Control-theoretic work then proved convergence for herds of non-cooperative agents: Pierson and Schwager (2015, 2018) for a herd driven by several robots, Licitra et al. (2019) for one herder that regulates several targets with uncertain dynamics, and Sebastián et al. (2022) for a team of robots that herds heterogeneous evaders with an adaptive implicit controller. Auletta et al. (2022) and Lama and di Bernardo (2024) gave herders local rules for collecting and containing non-flocking stochastic targets.
 
-Several authors extended shepherding to teams. Pierson and Schwager (2015) controlled several robots herding non-cooperative agents. Kubo et al. (2022) gave multiple sheepdog agents repulsive forces between them and studied fixed team sizes. Auletta et al. (2021) combined local control rules with online target selection for herding stochastic agents. Lama and di Bernardo (2024) studied how the smallest sufficient team scales with the number of non-cohesive, randomly moving targets, and found a square-root law above a density threshold when herders sense only locally.
+Learning-based shepherding trains the herder instead of designing it. Go et al. (2016) reproduced the Strömbom behaviour with SARSA, Zhi and Lien (2021) trained shepherds to herd among obstacles with deep reinforcement learning, and Hussein et al. (2022) used a curriculum and report a success rate of about 96%. Hasan et al. (2022) trained coordinated shepherds for flock navigation, and Napolitano et al. (2026) learned a hierarchical policy for the targets of Lama and di Bernardo. Aerial work moves the herder into the air: Paranjape et al. (2018) herded a flock of birds out of an airspace with one unmanned aerial vehicle, Wang et al. (2024) coordinated several drones with multi-task reinforcement learning, and Yaxley et al. (2021) measured how drone approach parameters affect the stress and movement of sheep. Li et al. (2025) showed that swarm shepherding can work from bearing-only measurements.
 
-Field studies measure how real sheep respond to a herder. Jadhav et al. (2024) tracked a flock responding to a border collie; Yaxley et al. (2021) measured how drone approach parameters affect stress and movement of sheep.
+Few studies ask how many herders a task needs. Kubo et al. (2022) gave several sheepdog agents repulsive forces between them and compared fixed team sizes. El-Fiqi et al. (2020) varied the number of sheepdogs as one of four factors of task difficulty and found that the obstacle density at which reactive shepherding breaks down rises from 0.2% for one shepherd to 5% for ten. Hasan et al. (2022) and Li et al. (2023, 2025) report that performance improves as shepherds are added, and Hasan et al. see diminishing returns beyond three to four shepherds on a flock of 100. Lama and di Bernardo (2024) are, as far as we know, the only authors to state a scaling law: above a density threshold, the smallest sufficient team for non-cohesive targets grows as the square root of their number. Each of these studies judges a team by an average or a trend over runs; none sizes it by a success rate with a confidence bound.
 
 Our work differs from these in what is measured. We do not propose a new controller. We measure, for given models and a given controller, the smallest team that is reliable at a stated confidence, and how that answer depends on the flock, the deadline and the success rule.
 
@@ -285,9 +283,17 @@ Each protocol is a YAML file; each run stores every trial and every cell decisio
 
 ## References
 
-Auletta F, Fiore D, Richardson MJ, di Bernardo M (2021) Herding stochastic autonomous agents via local control rules and online global target selection strategies. arXiv:2010.00386
+Auletta F, Fiore D, Richardson MJ, di Bernardo M (2022) Herding stochastic autonomous agents via local control rules and online target selection strategies. Autonomous Robots 46(3):469–481. https://doi.org/10.1007/s10514-021-10033-6
 
 Clopper CJ, Pearson ES (1934) The use of confidence or fiducial limits illustrated in the case of the binomial. Biometrika 26(4):404–413
+
+El-Fiqi H, Campbell B, Elsayed S, Perry A, Singh HK, Hunjet R, Abbass HA (2020) The limits of reactive shepherding approaches for swarm guidance. IEEE Access 8:214658–214671. https://doi.org/10.1109/ACCESS.2020.3037325
+
+Go CK, Lao B, Yoshimoto J, Ikeda K (2016) A reinforcement learning approach to the shepherding task using SARSA. In: International Joint Conference on Neural Networks (IJCNN), pp 3833–3836. https://doi.org/10.1109/IJCNN.2016.7727694
+
+Hasan Y, Baxter JEG, Salcedo CA, Delgado E, Tapia L (2022) Flock navigation by coordinated shepherds via reinforcement learning. In: Algorithmic Foundations of Robotics XV (WAFR 2022). Springer Proceedings in Advanced Robotics, pp 454–469. https://doi.org/10.1007/978-3-031-21090-7_27 TODO: confirm the third author's name and the volume number.
+
+Hussein A, Petraki E, Elsawah S, Abbass HA (2022) Autonomous swarm shepherding using curriculum-based reinforcement learning. In: Proceedings of the 21st International Conference on Autonomous Agents and Multiagent Systems (AAMAS), pp 633–641
 
 Jadhav V, Pasqua R, Zanon C, Roy M, Tredan G, Bon R, Guttal V, Theraulaz G (2024) Collective responses of flocking sheep (*Ovis aries*) to a herding dog (border collie). Communications Biology 7:1543
 
@@ -295,12 +301,34 @@ Kubo M, Tashiro M, Sato H, Yamaguchi A (2022) Herd guidance by multiple sheepdog
 
 Kuhn HW (1955) The Hungarian method for the assignment problem. Naval Research Logistics Quarterly 2(1–2):83–97
 
-Lama A, di Bernardo M (2024) Shepherding control and herdability in complex multiagent systems. Physical Review Research 6:L032012
+Lama A, di Bernardo M (2024) Shepherding and herdability in complex multiagent systems. Physical Review Research 6(3):L032012. https://doi.org/10.1103/PhysRevResearch.6.L032012
 
-Long NK, Sammut K, Sgarioto D, Garratt M, Abbass HA (2020) A comprehensive review of shepherding as a bio-inspired swarm-robotics guidance approach. IEEE Transactions on Emerging Topics in Computational Intelligence 4(4):523–537. TODO: verify details.
+Li A, Ogura M, Wakamiya N (2023) Communication-free shepherding navigation with multiple steering agents. Frontiers in Control Engineering 4:989232. https://doi.org/10.3389/fcteg.2023.989232
+
+Li A, Ogura M, Wakamiya N (2025) Swarm shepherding using bearing-only measurements. Philosophical Transactions of the Royal Society A 383(2289):20240145. https://doi.org/10.1098/rsta.2024.0145
+
+Licitra RA, Bell ZI, Dixon WE (2019) Single-agent indirect herding of multiple targets with uncertain dynamics. IEEE Transactions on Robotics 35(4):847–860. https://doi.org/10.1109/TRO.2019.2911799
+
+Lien J-M, Bayazit OB, Sowell RT, Rodriguez S, Amato NM (2004) Shepherding behaviors. In: IEEE International Conference on Robotics and Automation (ICRA), pp 4159–4164. https://doi.org/10.1109/ROBOT.2004.1308924
+
+Lien J-M, Rodriguez S, Malric J-P, Amato NM (2005) Shepherding behaviors with multiple shepherds. In: IEEE International Conference on Robotics and Automation (ICRA), pp 3402–3407. https://doi.org/10.1109/ROBOT.2005.1570636
+
+Long NK, Sammut K, Sgarioto D, Garratt M, Abbass HA (2020) A comprehensive review of shepherding as a bio-inspired swarm-robotics guidance approach. IEEE Transactions on Emerging Topics in Computational Intelligence 4(4):523–537. https://doi.org/10.1109/TETCI.2020.2992778
+
+Napolitano I, Covone S, Lama A, De Lellis F, di Bernardo M (2026) Hierarchical learning-based control for multiagent shepherding of stochastic autonomous agents. IEEE Transactions on Control Systems Technology 34(5):2179–2190. https://doi.org/10.1109/TCST.2026.3691156
+
+Paranjape AA, Chung S-J, Kim K, Shim DH (2018) Robotic herding of a flock of birds using an unmanned aerial vehicle. IEEE Transactions on Robotics 34(4):901–915. https://doi.org/10.1109/TRO.2018.2853610
 
 Pierson A, Schwager M (2015) Bio-inspired non-cooperative multi-robot herding. In: IEEE International Conference on Robotics and Automation (ICRA)
 
+Pierson A, Schwager M (2018) Controlling noncooperative herds with robotic herders. IEEE Transactions on Robotics 34(2):517–525. https://doi.org/10.1109/TRO.2017.2776308
+
+Sebastián E, Montijano E, Sagüés C (2022) Adaptive multirobot implicit control of heterogeneous herds. IEEE Transactions on Robotics 38(6):3622–3635. https://doi.org/10.1109/TRO.2022.3183537
+
 Strömbom D, Mann RP, Wilson AM, Hailes S, Morton AJ, Sumpter DJT, King AJ (2014) Solving the shepherding problem: heuristics for herding autonomous, interacting agents. Journal of the Royal Society Interface 11(100):20140719
 
+Wang G, Peng J, Guan C, Chen J, Guo B (2024) Multi-drone collaborative shepherding through multi-task reinforcement learning. IEEE Robotics and Automation Letters 9(11):10311–10318. https://doi.org/10.1109/LRA.2024.3468155
+
 Yaxley KJ, Joiner KF, Abbass H (2021) Drone approach parameters leading to lower stress sheep flocking and movement: sky shepherding. Scientific Reports 11:7803
+
+Zhi J, Lien J-M (2021) Learning to herd agents amongst obstacles: training robust shepherding behaviors using deep reinforcement learning. IEEE Robotics and Automation Letters 6(2):4163–4168. https://doi.org/10.1109/LRA.2021.3068955

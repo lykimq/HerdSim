@@ -32,7 +32,14 @@ import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
 from analysis.results import markdown  # noqa: E402
-from services.replay import ReplayJob, open_run, replay_trial, run_replays  # noqa: E402
+from services.replay import (  # noqa: E402
+    ReplayJob,
+    describe_cell_seed,
+    open_run,
+    replay_trial,
+    run_replays,
+    write_replays,
+)
 from sim.core.simulation_state import SimulationState  # noqa: E402
 
 METHOD = "strombom_multi"
@@ -107,24 +114,16 @@ def main() -> None:
 
     run = open_run(FOLDER)
     factors = (("goal_radius_multiple", args.goal),)
-    jobs = []
-    for layout in args.layouts:
-        for n in args.n:
-            for d in args.d:
-                config = run.config(METHOD, layout, n, d, factors)
-                outcome = run.outcomes(METHOD, layout, n, d, factors)
-                for i in [i for i in range(args.seeds) if i in outcome]:
-                    label = {"layout": layout, "n": n, "d": d, "seed_index": i}
-                    jobs.append(ReplayJob(config, run.master_seed + i, outcome[i], label))
-
-    table = run_replays(
-        measure,
-        jobs,
-        args.workers,
-        lambda r: f"{r['layout']} N={r['n']} D={r['d']} seed {r['seed_index']}",
-    ).sort_values(["layout", "n", "d", "seed_index"])
-    args.out.parent.mkdir(parents=True, exist_ok=True)
-    table.to_csv(args.out, index=False)
+    jobs = [
+        job
+        for layout in args.layouts
+        for n in args.n
+        for d in args.d
+        for job in run.jobs(METHOD, layout, n, d, args.seeds, factors)
+    ]
+    table = run_replays(measure, jobs, args.workers, describe_cell_seed)
+    table = table.sort_values(["layout", "n", "d", "seed_index"])
+    write_replays(table, args.out)
     print(markdown(summary(table, ["n"])))
     print()
     print(markdown(summary(table, ["n", "d"])))

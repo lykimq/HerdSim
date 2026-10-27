@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 
@@ -51,3 +52,43 @@ def markdown(frame: pd.DataFrame, index: bool = False) -> str:
     for row in frame.itertuples(index=False):
         lines.append("| " + " | ".join(text(v) for v in row) + " |")
     return "\n".join(lines)
+
+
+def run_record(queue_log: Path, results_root: Path | None = None) -> pd.DataFrame:
+    """The table of runs: the last queue_log entry of each protocol.
+
+    With ``results_root``, the counts come from each folder's status.json where it exists,
+    so a folder resumed outside the queue (a top-up run) shows its current trials and
+    cells; the finish time and hours stay those of the queue run.
+    """
+    if not queue_log.exists():
+        return pd.DataFrame()
+    entries = [json.loads(line) for line in queue_log.read_text().splitlines() if line.strip()]
+    last: dict[str, dict[str, Any]] = {}
+    for entry in entries:
+        last[entry["protocol"]] = entry
+    current = {
+        "trials": "trials_done",
+        "cells": "cells",
+        "cells_needing_seeds": "cells_needing_seeds",
+        "cells_at_max_seeds_undecided": "cells_at_max_seeds_undecided",
+        "trial_errors": "trial_errors",
+    }
+    for protocol, entry in last.items():
+        status = results_root / protocol / "status.json" if results_root else None
+        if status is not None and status.exists():
+            found = json.loads(status.read_text())
+            last[protocol] = {**entry, **{k: found[v] for k, v in current.items() if v in found}}
+    cols = [
+        "protocol",
+        "finished",
+        "trials",
+        "cells",
+        "cells_needing_seeds",
+        "cells_at_max_seeds_undecided",
+        "trial_errors",
+        "hours",
+        "workers",
+        "outcome",
+    ]
+    return pd.DataFrame([{c: e.get(c, "") for c in cols} for e in last.values()])

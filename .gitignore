@@ -89,6 +89,7 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 docs/science/
+docs/vi
 
 # --- Unused framework leftovers (safe to keep ignored) ---
 local_settings.py

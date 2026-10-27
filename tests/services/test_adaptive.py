@@ -204,7 +204,7 @@ def test_refine_by_reliability_adds_a_midpoint_across_the_d_min_boundary_only():
     front = Frontier(cells=cells, groups=pd.DataFrame())
     grid = {"g": {1, 4, 8, 16}}
     assert _refine(grid, front, min_gap=1) == 0  # by zone: the reliable cells are undecided
-    assert _refine(grid, front, min_gap=1, by_reliability=True) == 1
+    assert _refine(grid, front, min_gap=1, column="reliability") == 1
     assert grid["g"] == {1, 4, 6, 8, 16}  # 6 lies between the unreliable 4 and the reliable 8
 
 
@@ -237,9 +237,9 @@ def test_refine_fills_the_bracket_below_d_min_once_the_open_cell_is_at_the_cap()
         return Frontier(cells=cells, groups=pd.DataFrame())
 
     grid = {"g": {4, 6, 8, 12}}
-    assert _refine(grid, front(120), 1, by_reliability=True, max_seeds=200) == 0
-    assert _refine(grid, front(200), 1, by_reliability=True) == 0  # no cap given: waits
-    assert _refine(grid, front(200), 1, by_reliability=True, max_seeds=200) == 2  # 5 and 7
+    assert _refine(grid, front(120), 1, column="reliability", max_seeds=200) == 0
+    assert _refine(grid, front(200), 1, column="reliability") == 0  # no cap given: waits
+    assert _refine(grid, front(200), 1, column="reliability", max_seeds=200) == 2  # 5 and 7
     assert grid["g"] == {4, 5, 6, 7, 8, 12}
 
 

@@ -2,19 +2,7 @@
 
 How a HerdSim experiment is written as a protocol file, which settings exist, and what a run writes. A protocol is the YAML file that describes an experiment; a run is one execution of it into a results folder.
 
----
-
-## Table of Contents
-
-- [1. Configuration Architecture](#1-configuration-architecture)
-  - [Canonical Defaults (`canonical.yaml`)](#canonical-defaults-canonicalyaml)
-  - [Protocol Overrides](#protocol-overrides)
-- [2. Settings Added by the Follow-Up Campaigns](#2-settings-added-by-the-follow-up-campaigns)
-- [3. What a Simulation Run Writes](#3-what-a-simulation-run-writes)
-
----
-
-## 1. Configuration Architecture
+## 1. Configuration architecture
 
 Protocols live under [`protocols/configs/`](../../protocols/configs/) and inherit from one canonical file:
 
@@ -22,16 +10,16 @@ Protocols live under [`protocols/configs/`](../../protocols/configs/) and inheri
 protocols/configs/
 ├── canonical.yaml             # Baseline physics and defaults
 └── protocols/                 # Individual research experiment definitions
-    ├── dmin_m12.yaml          # Relaxed deadline (12x drive time)
-    ├── dmin_m6.yaml           # Intermediate deadline (6x drive time)
-    ├── dmin_m3.yaml           # Urgent deadline (3x drive time)
+    ├── dmin_m12.yaml          # Relaxed deadline (12× drive time)
+    ├── dmin_m6.yaml           # Intermediate deadline (6× drive time)
+    ├── dmin_m3.yaml           # Urgent deadline (3× drive time)
     ├── dmin_fat.yaml          # Uncoordinated FAT baseline
     ├── lama_r50.yaml          # Lama & di Bernardo (2024), gather task, sensing radius 10
     ├── lama_r50_inf.yaml      # The same with infinite sensing
     └── ...
 ```
 
-### Canonical Defaults (`canonical.yaml`)
+### Canonical defaults (`canonical.yaml`)
 
 Every protocol names `protocols/configs/canonical.yaml`, directly or through the file it `extends`. It holds the task and campaign settings, each with a comment saying where its value comes from:
 - The task (`task: drive_to_goal`, or `gather` for the Lama model) and its geometry: drive distance and goal radius in flock radii, the start layouts, the gather disc.
@@ -42,7 +30,7 @@ The model parameters are not in this file. They live with each method in code, o
 - Strömbom (`sim/methods/strombom/config.py`): sheep speed $1.0\text{ m/s}$, dog speed $1.5\text{ m/s}$, $r_a = 2.0\text{ m}$, $r_s = 65\text{ m}$, $h = 0.5$, $c = 1.05$, $\rho_a = 2.0$, $\rho_s = 1.0$, $e = 0.3$.
 - Kubo (`sim/methods/kubo/config.py`) and Lama (`sim/methods/lama/config.py`): their papers' tables, under HerdSim names.
 
-### Protocol Overrides
+### Protocol overrides
 
 A protocol names its id, its output folder, the methods with their time limits, and the grid (layouts, flock sizes and `shepherd_counts`, the team sizes $D$). It can `extends` another protocol and give only what differs. A key the protocol names replaces the parent's whole value, lists and mappings included, so a protocol that changes one entry must restate the rest; that is why `lama_r50_inf` below repeats the time limit when it only changes `sensing_radius`. An unknown key stops the run at load.
 
@@ -93,11 +81,11 @@ methods:
       sensing_radius: .inf
 ```
 
----
+## 2. Settings added by the follow-up campaigns
 
-## 2. Settings Added by the Follow-Up Campaigns
+The follow-up campaigns added the settings in Table 1. At its default value each one leaves every trial as the first runs had it and stays out of the physics hash, so the folders written before it remain resumable; set to any other value it enters the hash. `0` means off throughout. `collect_drive_multi` is the dog controller of the `strombom_multi` method.
 
-The follow-up campaigns added these settings. At its default value each one leaves every trial as the first runs had it and stays out of the physics hash, so the folders written before it remain resumable; set to any other value it enters the hash. `0` means off throughout. `collect_drive_multi` is the dog controller of the `strombom_multi` method.
+**Table 1: Settings added by the follow-up campaigns.**
 
 | Setting | Default | What it does | Protocols |
 | :--- | :---: | :--- | :--- |
@@ -112,16 +100,16 @@ The follow-up campaigns added these settings. At its default value each one leav
 | `drive_offset_cap` | `0` | Caps the drive offset $r_a\sqrt{N}$, so the drive point stays within the sheep's reaction distance ($65\text{ m}$). | `dmin_f99_big_cap` |
 | `metrics_stride` | `1` | Records the per-tick metrics every k ticks. Outcomes are unchanged (stop checks run every tick); only the history and the first-arrival times (the first tick at which a given share of the flock is inside) are coarser. It is hashed all the same, because those columns must agree within a folder. | `lama_r50`, `lama_r50_inf` (10) |
 
-Settings of the gather task, read only when `task: gather` and hashed only then, so adding a task leaves every existing folder's hash as it was:
+Table 2 lists the settings of the gather task, which are read only when `task: gather` and hashed only then, so adding a task leaves every existing folder's hash as it was:
+
+**Table 2: Gather task settings.**
 
 | Setting | Default | What it does | Protocols |
 | :--- | :---: | :--- | :--- |
 | `gather_start_radius` | `50` | Radius $R$ of the disc the targets and herders start on, centred on the goal. | `lama_r50`, `lama_r50_inf` |
 | `gather_goal_fraction` | `0.2` | Goal radius as a share of $R$ (the paper's $r^{\ast} = R/5$). | `lama_r50`, `lama_r50_inf` |
 
----
-
-## 3. What a Simulation Run Writes
+## 3. What a simulation run writes
 
 Every run writes one folder, `results/<protocol_id>/`:
 

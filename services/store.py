@@ -41,6 +41,7 @@ from typing import IO, Any
 import pandas as pd
 import yaml
 
+from analysis import keys
 from protocols.packaging.generated_notice import NOTICE_LINE, with_json_notice, write_csv
 from protocols.packaging.provenance import code_identity, read_provenance, write_provenance
 
@@ -76,6 +77,16 @@ def _read_jsonl(path: Path, repair: bool) -> list[dict[str, Any]]:
             if repair:
                 path.write_text("\n".join(lines[:-1]) + "\n")
     return rows
+
+
+def _append_jsonl(path: Path, record: dict[str, Any]) -> None:
+    """Append one JSON line, starting a new file with the generated-file notice. NaN is
+    written as NaN, as Python's json reads it back."""
+    new = not path.exists()
+    with path.open("a") as f:
+        if new:
+            f.write(NOTICE_LINE + "\n")
+        f.write(json.dumps(record, default=str, allow_nan=True) + "\n")
 
 
 def _archive(protocol: Protocol) -> dict[str, Any]:
@@ -178,18 +189,14 @@ class CampaignStore:
         its code. Folders from before this log have no previous sitting.
         """
         path = self.root / "runs.jsonl"
-        new = not path.exists()
-        earlier = [] if new else _read_jsonl(path, repair=True)
+        earlier = _read_jsonl(path, repair=True) if path.exists() else []
         sitting = {
             "started_at": datetime.now(UTC).isoformat(),
             "trials_before": len(self.load_rows()),
             **code_identity(),
             "protocol": _archive(protocol),
         }
-        with path.open("a") as f:
-            if new:
-                f.write(NOTICE_LINE + "\n")
-            f.write(json.dumps(sitting, default=str) + "\n")
+        _append_jsonl(path, sitting)
         return (earlier[-1] if earlier else None), sitting
 
     def is_running(self) -> bool:
@@ -239,18 +246,10 @@ class CampaignStore:
         return rows
 
     def append_row(self, row: dict[str, Any]) -> None:
-        new = not self.trials_jsonl.exists()
-        with self.trials_jsonl.open("a") as f:
-            if new:
-                f.write(NOTICE_LINE + "\n")
-            f.write(json.dumps(row, default=str, allow_nan=True) + "\n")
+        _append_jsonl(self.trials_jsonl, row)
 
     def append_error(self, trial_key: str, message: str) -> None:
-        new = not self.errors_jsonl.exists()
-        with self.errors_jsonl.open("a") as f:
-            if new:
-                f.write(NOTICE_LINE + "\n")
-            f.write(json.dumps({"trial_key": trial_key, "error": message}) + "\n")
+        _append_jsonl(self.errors_jsonl, {"trial_key": trial_key, "error": message})
 
     def error_keys(self) -> set[str]:
         """Keys of the trials that raised. A cut last line is dropped from the file (that
@@ -263,7 +262,7 @@ class CampaignStore:
         """Errored trials per cell key, parsed from the trial keys (``<cell>|seed=<i>``)."""
         counts: dict[str, int] = {}
         for key in self.error_keys():
-            cell_key = key.rsplit("|seed=", 1)[0]
+            cell_key = keys.cell_of_trial(key)
             counts[cell_key] = counts.get(cell_key, 0) + 1
         return counts
 

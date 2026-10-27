@@ -32,8 +32,8 @@ include = ["sim*", "services*", "protocols*", "analysis*"]
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-# Figure scripts under docs/ are not project code.
-extend-exclude = ["docs"]
+# The figure scripts in docs/figures are linted like the rest of the code, so their
+# structure does not drift. Gitignored local folders are skipped, as ruff respects .gitignore.
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "W", "UP"]

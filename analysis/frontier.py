@@ -51,13 +51,14 @@ on a comparison that cannot change a value or a zone.
 
 from __future__ import annotations
 
-from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any, cast
 
 import numpy as np
 import pandas as pd
 from scipy.stats import beta
+
+from .keys import cell_key
 
 RELIABLE = "reliable"
 UNRELIABLE = "unreliable"
@@ -231,8 +232,33 @@ class GroupFrontier:
     group_undecided: bool = False
 
 
-Compare = Callable[[int, int], str]
-StillOpen = Callable[..., bool]
+class _Comparisons:
+    """Finish-time verdicts within one group, and the cells they leave needing seeds.
+
+    Each ordered pair is bootstrapped once. ``still_open`` both answers whether a verdict is
+    undecided and records its cells in ``needs``, because an open comparison that could
+    move a value is exactly what more seeds should settle. With ``decide_finish_times`` off
+    the comparison stays open but asks for no seeds.
+    """
+
+    def __init__(self, by_d: dict[int, pd.DataFrame], rules: Rules, needs: set[int]) -> None:
+        self.by_d = by_d
+        self.rules = rules
+        self.needs = needs
+        self._verdicts: dict[tuple[int, int], str] = {}
+
+    def verdict(self, a: int, b: int) -> str:
+        """Verdict of ``a`` against ``b``."""
+        if a == b:
+            return SAME
+        if (a, b) not in self._verdicts:
+            self._verdicts[(a, b)] = compare_times(self.by_d[a], self.by_d[b], self.rules)
+        return self._verdicts[(a, b)]
+
+    def still_open(self, verdict: str, *cells_of_pair: int) -> bool:
+        if verdict == UNDECIDED and self.rules.decide_finish_times:
+            self.needs.update(cells_of_pair)
+        return verdict == UNDECIDED
 
 
 def _overcrowding_onset(ds: list[int], status: dict[int, str], d_min: int) -> int | None:
@@ -248,22 +274,59 @@ def _overcrowding_onset(ds: list[int], status: dict[int, str], d_min: int) -> in
     return None
 
 
+def _d_best(working: list[int], finish: dict[int, float], cmp: _Comparisons) -> tuple[int, bool]:
+    """The smallest working D not slower than the fastest, and whether a smaller D with an
+    open comparison against the fastest could still take it."""
+    fastest = min(working, key=lambda d: finish[d])
+    undecided = False
+    for d in working:
+        verdict = cmp.verdict(d, fastest)
+        if verdict in (SAME, FASTER):
+            return d, undecided
+        undecided |= cmp.still_open(verdict, d, fastest)
+    raise AssertionError("the fastest compared to itself is SAME")
+
+
+def _d_crowd(working: list[int], d_best: int, cmp: _Comparisons) -> tuple[int | None, bool]:
+    """The smallest working D above D_best that is slower than D_best, and whether an open
+    comparison below it could still be slower."""
+    undecided = False
+    for d in (d for d in working if d > d_best):
+        verdict = cmp.verdict(d, d_best)
+        if verdict == SLOWER:
+            return d, undecided
+        undecided |= cmp.still_open(verdict, d, d_best)
+    return None, undecided
+
+
+def _d_sat(working: list[int], cmp: _Comparisons) -> tuple[int, bool]:
+    """The smallest working D that no larger working D is faster than, and whether a larger
+    D is still open against it."""
+    for d in working:
+        above_d = {e: cmp.verdict(e, d) for e in working if e > d}
+        if FASTER not in above_d.values():
+            undecided = False
+            for e, verdict in above_d.items():
+                undecided |= cmp.still_open(verdict, e, d)
+            return d, undecided
+    raise AssertionError("the largest working D has nothing above it")
+
+
 def _zones(
     ds: list[int],
     status: dict[int, str],
     working: list[int],
     out: GroupFrontier,
-    compare: Compare,
-    still_open: StillOpen,
+    cmp: _Comparisons,
 ) -> dict[int, str]:
     """The zone of every tested D (module docstring), once the group's D values are known."""
     assert out.d_min is not None and out.d_best is not None and out.d_sat is not None
     zones: dict[int, str] = {}
     for d in working:
-        against_best = compare(d, out.d_best) if d > out.d_best else SAME
+        against_best = cmp.verdict(d, out.d_best) if d > out.d_best else SAME
         if against_best == SLOWER:
             zones[d] = CROWDED
-        elif still_open(against_best, d, out.d_best):
+        elif cmp.still_open(against_best, d, out.d_best):
             zones[d] = UNDECIDED
         elif d < out.d_sat:
             zones[d] = IMPROVING
@@ -291,30 +354,14 @@ def _group(
 
     ``cells`` arrive sorted by D (cell_stats groups with sort=True).
     """
-    key = str(cells["group_key"].iloc[0])
     ds = [int(d) for d in cells["n_shepherds"]]
     status = dict(zip(ds, cells["reliability"]))
     upper = dict(zip(ds, cells["rate_high"]))
     finish = dict(zip(ds, cells["median_finish"]))
-    by_d = {int(cast(int, d)): g for d, g in trials.groupby("n_shepherds")}
-    out = GroupFrontier(key)
     needs = {d for d in ds if status[d] == UNDECIDED}
-    verdicts: dict[tuple[int, int], str] = {}
-
-    def compare(a: int, b: int) -> str:
-        """Verdict of ``a`` against ``b``, bootstrapped once per ordered pair."""
-        if a == b:
-            return SAME
-        if (a, b) not in verdicts:
-            verdicts[(a, b)] = compare_times(by_d[a], by_d[b], rules)
-        return verdicts[(a, b)]
-
-    def still_open(verdict: str, *cells_of_pair: int) -> bool:
-        """Mark the cells of an undecided comparison as needing seeds; True if it was.
-        With ``decide_finish_times`` off the comparison stays open but asks for no seeds."""
-        if verdict == UNDECIDED and rules.decide_finish_times:
-            needs.update(cells_of_pair)
-        return verdict == UNDECIDED
+    by_d = {int(cast(int, d)): g for d, g in trials.groupby("n_shepherds")}
+    cmp = _Comparisons(by_d, rules, needs)
+    out = GroupFrontier(str(cells["group_key"].iloc[0]))
 
     reliable = [d for d in ds if status[d] == RELIABLE]
     out.d_min_low = next((d for d in ds if upper[d] >= rules.theta), None)
@@ -331,39 +378,14 @@ def _group(
     out.d_max_at_grid_top = out.d_overcrowd is None and out.d_max == ds[-1]
     out.onset_at_last_step = status[ds[-1]] == UNRELIABLE and out.d_overcrowd is None
 
-    # D_best: the smallest working D not slower than the fastest. A smaller D with an
-    # open comparison against the fastest could still take it.
-    fastest = min(working, key=lambda d: finish[d])
-    for d in working:
-        verdict = compare(d, fastest)
-        if verdict in (SAME, FASTER):
-            out.d_best = d
-            break
-        out.d_best_undecided |= still_open(verdict, d, fastest)
-    assert out.d_best is not None  # the fastest compared to itself is SAME
-
-    # D_crowd: the smallest working D above D_best that is slower than D_best.
-    for d in (d for d in working if d > out.d_best):
-        verdict = compare(d, out.d_best)
-        if verdict == SLOWER:
-            out.d_crowd = d
-            break
-        out.d_crowd_undecided |= still_open(verdict, d, out.d_best)
-
-    # D_sat: the smallest working D that no larger working D is faster than.
-    for d in working:
-        above_d = {e: compare(e, d) for e in working if e > d}
-        if FASTER not in above_d.values():
-            out.d_sat = d
-            for e, verdict in above_d.items():
-                out.d_sat_undecided |= still_open(verdict, e, d)
-            break
-    assert out.d_sat is not None  # the largest working D has nothing above it
+    out.d_best, out.d_best_undecided = _d_best(working, finish, cmp)
+    out.d_crowd, out.d_crowd_undecided = _d_crowd(working, out.d_best, cmp)
+    out.d_sat, out.d_sat_undecided = _d_sat(working, cmp)
     out.still_improving_at_top = (
         out.d_max_at_grid_top and len(working) > 1 and out.d_sat == working[-1]
     )
 
-    zones = _zones(ds, status, working, out, compare, still_open)
+    zones = _zones(ds, status, working, out, cmp)
     out.group_undecided = bool(needs)
     return out, zones, needs
 
@@ -385,7 +407,7 @@ def frontier(trials: pd.DataFrame, rules: Rules, errors: dict[str, int] | None =
     stats = cell_stats(trials, rules)
     counts = errors or {}
     stats["n_errors"] = [
-        counts.get(f"{key}|D={d}", 0)
+        counts.get(cell_key(key, d), 0)
         for key, d in zip(stats["group_key"].astype(str), stats["n_shepherds"].astype(int))
     ]
     stats.loc[(stats["n_errors"] > 0) & (stats["reliability"] == RELIABLE), "reliability"] = (
@@ -394,8 +416,9 @@ def frontier(trials: pd.DataFrame, rules: Rules, errors: dict[str, int] | None =
     group_rows = []
     zone: dict[tuple[str, int], str] = {}
     needs: set[tuple[str, int]] = set()
+    trials_of = {str(k): g for k, g in trials.groupby("group_key", sort=False)}
     for key, cells in stats.groupby("group_key", sort=True):
-        result, zones, undecided = _group(cells, trials.loc[trials["group_key"] == key], rules)
+        result, zones, undecided = _group(cells, trials_of[str(key)], rules)
         group_rows.append(vars(result))
         zone.update({(str(key), d): z for d, z in zones.items()})
         needs.update((str(key), d) for d in undecided)
