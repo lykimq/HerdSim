@@ -2,16 +2,15 @@
 
     uv run cli/dmin_tables.py dispersion
 
-Two readings of finished drive runs, both from trials.csv:
+Two readings of the finished main drive runs, both from trials.csv:
 
-- S0 x N, the dispersion burden of a layout at one flock size. S0 is the flock's extent
-  (RMS radius) at the start, read from the ``max_extent`` column: the dogs only gather the
-  flock after the start, so the largest extent of a trial is its start extent on every
-  layout. The burden grows with N on the scattered layouts and barely on the compact one.
-- Which of two regimes a failed trial belongs to: boundary or temporal when the flock
-  ended within ``NEAR_GOAL_RADII`` goal radii of the goal centre (it got there and lost on
-  time or stragglers), structural when it ended farther away (it was never gathered and
-  driven there).
+- S0 x N, the dispersion burden of a layout at one flock size: S0 is the flock's extent (RMS
+  radius) at the start, read from the ``max_extent`` column, because the dogs only gather the
+  flock after the start, so the largest extent of a trial is its start extent on every layout;
+  the burden grows with N on the scattered layouts and barely on the compact one
+- which of two regimes a failed trial belongs to: boundary or temporal when the flock ended
+  within ``NEAR_GOAL_RADII`` goal radii of the goal centre (it got there and lost on time or
+  stragglers), structural when it ended farther away (it was never gathered and driven there)
 """
 
 from __future__ import annotations

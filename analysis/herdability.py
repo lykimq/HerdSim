@@ -2,18 +2,19 @@
 
     uv run cli/dmin_tables.py herdability lama_r50 lama_r50_inf
 
-Lama and di Bernardo (2024) call M targets herdable by N herders when the share of targets
-in the goal at the end of a run, averaged over the runs, is at least chi*; their N*(M) is
-the smallest such N, the chi* level curve of their Fig. 2. HerdSim's D_min asks more of a
-team: its success rate (the share of runs that end with chi* inside) must lie at or above
-theta with the protocol's confidence. Both are read here from the same trial rows, with
-HerdSim's letters: N is the number of targets (the paper's M) and D the number of herders
-(the paper's N).
+Both readings come from the same trial rows, with HerdSim's letters (N targets, the paper's M,
+and D herders, the paper's N):
+
+- the paper's N*: Lama and di Bernardo (2024) call N targets herdable by D herders when the
+  share of targets in the goal at the end of a run, averaged over the runs, is at least chi*; N*
+  is the smallest such D, the chi* level curve of their Fig. 2
+- HerdSim's D_min asks more of a team: its success rate (the share of runs that end with chi*
+  inside) must lie at or above theta with the protocol's confidence
 
 Near a threshold the mean share can sit on a plateau just around chi*, so the first D that
-reaches chi* may be followed by one that does not. ``paper_nstar`` reports the smallest D
-from which every larger D tested also reaches chi*, the reading a level curve drawn
-through the cells gives, and keeps the first D that reaches it beside it.
+reaches chi* may be followed by one that does not. ``paper_nstar`` reports the smallest D from
+which every larger D tested also reaches chi*, the reading a level curve drawn through the cells
+gives, and keeps the first D that reaches it beside it.
 """
 
 from __future__ import annotations

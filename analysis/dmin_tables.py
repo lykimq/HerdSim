@@ -1,15 +1,31 @@
 """Summary tables of finished runs: D_min, D_sat, their growth with N, cost, zones, comparisons.
 
-Each function takes what a finished run wrote (frontier_groups.csv, frontier_cells.csv,
-trials.csv, the queue log) and returns a DataFrame; cli/dmin_tables.py has one verb per
-table and prints it as Markdown. Nothing here runs a simulation, so every table can be
-redone in seconds after a rule or a run changes.
+    uv run cli/dmin_tables.py dmin dmin_f99_m12 dmin_f99_m6
+    uv run cli/dmin_tables.py growth dmin_f99_m6
+    uv run cli/dmin_tables.py --help                  # every table, one verb each
 
-A D curve has two numbers. ``d_min`` is the smallest D decided reliable. ``d_min_low`` is
-the smallest D whose success interval still reaches theta. The true D_min lies in
-[d_min_low, d_min] when d_min exists, and at or above d_min_low when it does not (no D on
-the grid is decided reliable yet). Growth with N is therefore reported as the range of
-slopes the brackets allow.
+Each function takes what a finished run wrote (frontier_groups.csv, frontier_cells.csv,
+trials.csv) and returns a DataFrame; cli/dmin_tables.py has one verb per table and prints it as
+Markdown. Nothing here runs a simulation, so every table can be redone in seconds after a rule
+or a run changes.
+
+The file has five sections:
+
+- reading a finished run: the groups table with method, layout, factors and N split out of the
+  key
+- D_min as text and bracket: '4', '2-4', '[2]' or 'none on grid', and the bracket behind each
+- growth with N: the range of log-log slopes the brackets allow, and the shape fits
+- D_sat: its text, bracket and growth
+- cost, zones, checks and comparisons: effort beyond D_sat, cells where more dogs did worse, the
+  flock's size against R_f, and one run beside another
+
+A D curve has two numbers, so growth is a range:
+
+- ``d_min``: the smallest D decided reliable
+- ``d_min_low``: the smallest D whose success interval still reaches theta
+- the true D_min lies in [d_min_low, d_min] when d_min exists, and at or above d_min_low when it
+  does not (no D on the grid is decided reliable yet); the slope of D_min against N is reported
+  as the range the brackets allow
 """
 
 from __future__ import annotations

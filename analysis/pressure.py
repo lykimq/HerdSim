@@ -1,14 +1,18 @@
 """Pressure on the flock in a replayed trial: how long the sheep spend near a dog.
 
-The trial rows keep summaries of the tick metrics, and none of them says how close the dogs
-come to the sheep, so these measures are taken while a stored trial is replayed
-(services/replay.py, cli/diagnostics/pressure_replay.py).
+    uv run cli/diagnostics/pressure_replay.py dmin_f99_m6 --out <csv>
 
-Two shares are recorded per tick: the share of sheep closer than the reaction radius to
-some dog (for Strombom sheep, the sheep in flight), and the share closer than ``close``
-(the Strombom dog's stop distance 3 r_a by default, as close as the dog rule lets a dog
-get). Summed over the ticks and multiplied by dt they give the seconds a sheep spends in
-each, on average.
+The trial rows keep summaries of the tick metrics, and none of them says how close the dogs come
+to the sheep, so these measures are taken while a stored trial is replayed (services/replay.py).
+Two shares are recorded per tick:
+
+- the share of sheep closer than the reaction radius to some dog, for Strombom sheep the sheep
+  in flight
+- the share closer than ``close``, by default the Strombom dog's stop distance 3 r_a, as close
+  as the dog rule lets a dog get
+
+Summed over the ticks and multiplied by dt, they give the seconds a sheep spends in each, on
+average; ``pressure_table`` summarises them per cell.
 """
 
 from __future__ import annotations

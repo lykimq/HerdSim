@@ -1,20 +1,24 @@
-"""D_min at a tighter deadline, read from the trials of one run, without new trials.
+"""D_min at a tighter deadline, or at a share of the flock, read from the trials of one run.
 
-Used by cli/dmin_report.py (D_min at several deadlines) and by the ``arrival`` and
-``methods`` verbs of cli/dmin_tables.py (success read at a share of the flock instead of
-every sheep).
+    uv run cli/dmin_report.py --protocol dmin_m12 --folder results/dmin_m12 --multiples 6 3
+    uv run cli/dmin_tables.py arrival dmin_m6 --pct 99
 
-A trial that succeeds at time t also succeeds under every deadline at or above t and fails
-under every deadline below it, and a failed trial ran to its own limit. So the trials of a
-run made with a loose deadline answer every tighter one: ``at_deadline`` relabels each
-trial by whether it finished inside the tighter deadline, and ``dmin_table`` runs the
-frontier rules on each relabelled table. The deadline is a multiple of the drive time, the
-drive length over the top sheep speed, as in ``time_limit_drive_multiple``.
+No new trial is run: the trials of a run made with a loose deadline and the strict rule already
+answer the tighter and the looser questions. The relabelling works because:
 
-The seeds of an adaptive run were allocated to decide the run's own deadline. A tighter
-deadline read from the same trials has the same paired seeds but no extra ones where its
-boundary lies, so its cells may stay undecided; run that deadline as its own protocol when
-that matters.
+- a trial that succeeds at time t also succeeds under every deadline at or above t and fails
+  under every one below it, and a failed trial ran to its own limit; ``at_deadline`` relabels
+  each trial by whether it finished inside the tighter deadline, a multiple of the drive time
+  (the drive length over the top sheep speed, as in ``time_limit_drive_multiple``)
+- every trial row keeps the first time a share of the flock reached the goal; ``at_arrival``
+  relabels a trial as a success when that share arrived within its limit (first arrival, not
+  held)
+- ``dmin_table`` and ``arrival_groups`` then run the frontier rules on each relabelled table
+
+The limit of the method: the seeds of an adaptive run were allocated to decide the run's own
+question. A tighter deadline read from the same trials has the same paired seeds but no extra
+ones where its boundary lies, so its cells may stay undecided; run that deadline as its own
+protocol when that matters.
 """
 
 from __future__ import annotations

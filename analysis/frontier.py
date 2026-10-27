@@ -1,52 +1,60 @@
 """The decision rules: which team sizes work, which are faster, and where the zones lie.
 
-This is the one place that turns trial outcomes into answers. The adaptive run calls it
-after every round to see which cells still need seeds, and every table and figure reads
-its output (frontier_cells.csv, frontier_groups.csv). Changing a rule here and rereading
-the trials redoes every answer without running a simulation.
+    uv run cli/dmin_tables.py dmin dmin_f99_m6       # the tables read what it decides
+    uv run cli/campaign.py run --protocol <id>       # the adaptive run calls it every round
 
-A D curve is every cell of one group (method, layout, factors, N) ordered by dog count D.
-For each cell this module decides:
+This is the one place that turns trial outcomes into answers. The adaptive run calls it after
+every round to see which cells still need seeds, and every table and figure reads its output
+(frontier_cells.csv, frontier_groups.csv). Changing a rule here and rereading the trials redoes
+every answer without running a simulation.
 
-- reliability: ``reliable`` when the Clopper-Pearson interval of its success rate lies at
-  or above theta, ``unreliable`` when it lies below, else ``undecided``;
-- finish time against another cell: ``faster``, ``slower``, ``same`` or ``undecided``,
-  from the bootstrap interval of the paired difference in finish time (seeds are shared,
-  so seed i of two cells starts from the same flock), relative to the slower median and
-  the equivalence ``time_margin``.
+A D curve is every cell of one group (method, layout, factors, N), ordered by dog count D. Each
+cell gets two decisions:
 
-A cell with an errored trial is never reliable: the error is a bug, and the seeds it lost
-may be the hard ones.
+- reliability: ``reliable`` when the Clopper-Pearson interval of its success rate lies at or
+  above theta, ``unreliable`` when it lies below, else ``undecided``; a cell with an errored
+  trial is never reliable, because the error is a bug and the seeds it lost may be the hard ones
+- finish time against another cell: ``faster``, ``slower``, ``same`` or ``undecided``, from the
+  bootstrap interval of the paired difference in finish time, relative to the slower median and
+  the equivalence ``time_margin``; seeds are shared, so seed i of two cells starts from the same
+  flock
 
-From those decisions, per group:
+Each group gets three values over every tested D:
 
-- D_min: smallest reliable D (D_min_low: smallest D whose upper bound reaches theta)
-- D_overcrowd: smallest D above D_min where it and the next tested D are both unreliable.
-  "Next" is next in the grid as it stands, so an undecided cell between two unreliable
-  ones holds the value back until it is decided.
-- D_max: largest reliable D below D_overcrowd (or the largest reliable D)
+- D_min: the smallest reliable D, with D_min_low the smallest D whose upper bound reaches theta
+- D_overcrowd: the smallest D above D_min where it and the next tested D are both unreliable;
+  "next" is next in the grid as it stands, so an undecided cell between two unreliable ones
+  holds the value back
+- D_max: the largest reliable D below D_overcrowd, or the largest reliable D
 
-The finish-time values use the working range only, the reliable D from D_min to D_max; a
-reliable D above D_overcrowd is reported but not used:
+and three over the working range only, the reliable D from D_min to D_max (a reliable D above
+D_overcrowd is reported but not used):
 
-- D_best: smallest reliable D that is not slower than the fastest reliable D
-- D_sat: smallest reliable D that no larger reliable D is faster than. The rule is global,
-  not a step rule, so a dip followed by a drop (3: 300, 4: 299, 6: 200) does not stop at
-  3. The largest reliable D always qualifies, so D_sat exists whenever D_min does.
-- D_crowd: smallest reliable D above D_best that is slower than D_best
+- D_best: the smallest reliable D that is not slower than the fastest reliable D
+- D_sat: the smallest reliable D that no larger reliable D is faster than; the rule is global,
+  not a step rule, so a dip followed by a drop (3: 300, 4: 299, 6: 200) does not stop at 3, and
+  since the largest reliable D always qualifies, D_sat exists whenever D_min does
+- D_crowd: the smallest reliable D above D_best that is slower than D_best
 
-and a zone per cell: too_few (unreliable, below D_min), improving (reliable, below D_sat),
-saturated (reliable, from D_sat up, not slower than D_best), crowded (reliable, slower
-than D_best), unreliable_dip (unreliable between D_min and D_overcrowd), collapse
-(unreliable from D_overcrowd up), recovered (reliable above D_overcrowd) or undecided
-(its reliability, or its comparison with D_best, is still open).
-``still_improving_at_top`` says D_sat is the top of the grid and faster than the reliable
-D below it, so the true D_sat may lie above the grid.
+Each cell then gets a zone:
 
-D_best, D_sat and D_crowd carry an ``_undecided`` flag: True when a comparison that could
-still move that value was undecided. Only the cells of such comparisons, and cells of
-undecided reliability, are marked as needing seeds, so the adaptive run never spends seeds
-on a comparison that cannot change a value or a zone.
+- too_few: unreliable, below D_min
+- improving: reliable, below D_sat
+- saturated: reliable, from D_sat up, not slower than D_best
+- crowded: reliable, slower than D_best
+- unreliable_dip: unreliable between D_min and D_overcrowd
+- collapse: unreliable from D_overcrowd up
+- recovered: reliable above D_overcrowd
+- undecided: its reliability, or its comparison with D_best, is still open
+
+Two kinds of flag say what is still open:
+
+- ``still_improving_at_top``: D_sat is the top of the grid and faster than the reliable D below
+  it, so the true D_sat may lie above the grid
+- ``d_best_undecided``, ``d_sat_undecided``, ``d_crowd_undecided``: a comparison that could
+  still move that value is undecided; only the cells of such comparisons, and cells of undecided
+  reliability, are marked as needing seeds, so the adaptive run never spends seeds on a
+  comparison that cannot change a value or a zone
 """
 
 from __future__ import annotations

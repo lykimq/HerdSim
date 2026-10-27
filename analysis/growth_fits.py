@@ -1,24 +1,27 @@
-"""Which shape D_min(N) follows: a power law that grows without limit, or a curve that
-levels off.
+"""Which shape D_min(N) follows: a power law that grows without limit, or a curve that levels off.
 
     uv run cli/dmin_tables.py fits dmin_f99_m12 dmin_f99_m6
 
-The answer decides what a larger flock would need: a power law keeps adding dogs, a
-saturating curve stops. Over the flock sizes run so far both fit the data about equally
-well, and this module says how far apart their predictions lie beyond them.
+The answer decides what a larger flock would need: a power law keeps adding dogs, a saturating
+curve stops. Over the flock sizes run so far both fit the data about equally well, and this
+module says how far apart their predictions lie beyond them.
 
-Each D curve gives D_min at every N only as an interval, because D is an integer and some
-cells stay undecided: a decided D_min d says the true value lies in [d - 0.5, d + 0.5], a
-bracket lo-hi in [lo - 0.5, hi + 0.5], and a curve with no reliable D yet (a lower bound
-lo) in [lo - 0.5, infinity). Two curves with two parameters each are fitted to these
-intervals by maximum likelihood, with a log-normal scatter sigma around the curve:
+Each D curve gives D_min at every N only as an interval, because D is an integer and some cells
+stay undecided:
 
-- power law: D(N) = max(1, c N^b), which grows without limit for b > 0;
-- saturating: D(N) = 1 + (D_inf - 1) N / (N + K), which starts at 1 and levels off at D_inf.
+- a decided D_min d lies in [d - 0.5, d + 0.5]
+- a bracket lo-hi lies in [lo - 0.5, hi + 0.5]
+- a curve with no reliable D yet (a lower bound lo) lies in [lo - 0.5, infinity)
 
-Both have three free numbers (two shape parameters and sigma), so their log likelihoods
-compare directly: exp(logL_a - logL_b) is the odds of one shape against the other on these
-data. With five to nine flock sizes the odds are weak evidence and are reported as such.
+Two curves with two parameters each are fitted to these intervals by maximum likelihood, with a
+log-normal scatter sigma around the curve:
+
+- power law: D(N) = max(1, c N^b), which grows without limit for b > 0
+- saturating: D(N) = 1 + (D_inf - 1) N / (N + K), which starts at 1 and levels off at D_inf
+
+Both have three free numbers (two shape parameters and sigma), so their log likelihoods compare
+directly: exp(logL_a - logL_b) is the odds of one shape against the other on these data. With
+five to nine flock sizes the odds are weak evidence and are reported as such.
 """
 
 from __future__ import annotations
