@@ -1,36 +1,26 @@
-name: CI/CD Pipeline
+name: CI
 
-# Cheap gates for the scaling-cli-d-min-max branch: tests, lint, typecheck.
-# Do not run stress sims or long campaign grids here.
+# The checks a change must pass before it is merged: lint and format, types, the test suite,
+# then the benchmarks, which run small real campaigns end to end. Campaign grids and long
+# simulations never run here.
 
 on:
   push:
     branches: [ main, scaling-cli-d-min-max ]
   pull_request:
-    branches: [ main, scaling-cli ]
+    branches: [ main, scaling-cli-d-min-max ]
 
 # The jobs only read the code; a read-only token limits what a compromised action could do.
 permissions:
   contents: read
 
-jobs:
-  tests:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          python-version: "3.12"
-      - name: Sync Python deps
-        run: uv sync --extra dev
-      - name: Lint
-        run: make lint
-      - name: Run test suite
-        run: make test
+# A newer push to the same branch or pull request makes the older run pointless.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
-  python-typecheck:
+jobs:
+  lint:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -39,7 +29,58 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           python-version: "3.12"
+          enable-cache: true
+      - name: Sync Python deps (the lock file must match pyproject.toml)
+        run: uv sync --extra dev --locked
+      - name: Lint
+        run: make lint
+      - name: Format
+        run: uv run ruff format --check .
+
+  typecheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+          enable-cache: true
       - name: Sync Python deps
-        run: uv sync --extra dev
-      - name: Typecheck Python
+        run: uv sync --extra dev --locked
+      - name: Typecheck
         run: make typecheck
+
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - name: Sync Python deps
+        run: uv sync --extra dev --locked
+      - name: Unit, invariant and regression tests
+        run: make test
+
+  # The benchmarks run real adaptive campaigns in worker processes, so they only start once
+  # the fast checks pass.
+  bench:
+    needs: [ lint, typecheck, test ]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - name: Sync Python deps
+        run: uv sync --extra dev --locked
+      - name: Benchmark campaigns
+        run: make bench
