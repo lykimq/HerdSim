@@ -15,6 +15,8 @@ calibrate  the radius R_f(N) a driven flock settles to, per method and N. It siz
 run        the adaptive campaign into results/<protocol_id>/. Every trial is written as it
            finishes, so the same command resumes after Ctrl+C, a crash or the time budget.
 status     how far a run has got, whether it is running now, and why it stopped.
+refresh    decide every cell again from the stored trials and rewrite the folder's tables,
+           after a change to the decision rules. Runs no trial and adds no dog count.
 
 Run `make test` and `make bench` before a long session. cli/README.md has the full routine.
 """
@@ -34,7 +36,7 @@ from pathlib import Path  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from services.adaptive import run_campaign  # noqa: E402
+from services.adaptive import refresh_tables, run_campaign  # noqa: E402
 from services.calibration import calibrate  # noqa: E402
 from services.cells import describe  # noqa: E402
 from services.protocol import load_protocol  # noqa: E402
@@ -46,7 +48,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
-    parser.add_argument("verb", choices=("run", "calibrate", "plan", "status"))
+    parser.add_argument("verb", choices=("run", "calibrate", "plan", "status", "refresh"))
     parser.add_argument("--protocol", required=True, help="protocol id or path to a YAML file")
     parser.add_argument(
         "--output", type=Path, default=None, help="results folder (default: protocol output)"
@@ -57,6 +59,8 @@ def main() -> None:
     protocol = load_protocol(args.protocol, output=args.output)
     if args.verb == "run":
         run_campaign(protocol, args.workers)
+    elif args.verb == "refresh":
+        print(f"tables rewritten in {refresh_tables(protocol).root}")
     elif args.verb == "plan":
         print(describe(protocol))
     elif args.verb == "calibrate":

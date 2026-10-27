@@ -95,9 +95,10 @@ def test_campaign_runs_every_cell_to_a_decision_without_errors(dmin: Run):
     for _, cells in dmin.cells.groupby("group_key"):
         counts = sorted(int(d) for d in cells["n_shepherds"])
         assert set(grid) <= set(counts)
-        # max_seeds is the batch size, so every cell is at the cap; a midpoint is added next
-        # to an undecided one, and nothing else.
-        midpoints = {(a + b) // 2 for a, b in zip(grid, grid[1:])}
+        # max_seeds is the batch size, so every cell is at the cap and an undecided one gets a
+        # midpoint next to it; that midpoint can call for another, so added D are midpoints of
+        # tested D, at any depth, and nothing else.
+        midpoints = {(a + b) // 2 for a in counts for b in counts if a < b}
         assert set(counts) - set(grid) <= midpoints
     assert dmin.cells["group_key"].nunique() == 3 * 2  # layouts x N
     assert (dmin.cells["n_seeds"] == 10).all()

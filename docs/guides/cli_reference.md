@@ -1,6 +1,6 @@
 # Command-Line Reference
 
-Every tool lives in [`cli/`](../../cli/) and is run from the repository root with `uv run`; `--help` prints the same information as the tables below. This page lists every verb and flag. For the order in which to use them, read [`cli/README.md`](../../cli/README.md).
+Every tool lives in [`cli/`](../../cli/) and is run from the repository root with `uv run`; `--help` prints the same information as the tables below. This page lists every verb and flag. For the order in which to use them, read [`cli/README.md`](../../cli/README.md). Terms such as cell, curve, bracket, the zones and $D_{\min}$ are defined in the [glossary](../glossary.md).
 
 ## `cli/campaign.py`: one protocol
 
@@ -18,6 +18,7 @@ Table 1 lists the verbs and Table 2 the flags:
 | `calibrate` | Measures the settled flock radius $R_f(N)$ per method and flock size and prints it; refuses a size that does not settle. Says there is nothing to calibrate for the gather task. | nothing |
 | `run` | Calibrates (or reuses the folder's saved radii), then runs rounds of trials until every cell is decided, every open cell is at the seed cap, or the time budget is spent. | `results/<protocol_id>/` |
 | `status` | Prints how far a run has got, whether it is running now, and why it stopped. | nothing |
+| `refresh` | Decides every cell again from the stored trials, after a change to the decision rules in `analysis/frontier.py`. Runs no trial and adds no dog count. | rewrites `trials.csv`, `frontier_cells.csv` and `frontier_groups.csv` |
 
 **Table 2: Flags of `campaign.py`.**
 
@@ -63,6 +64,14 @@ A folder is a protocol id under `results/` or a path. Every verb prints Markdown
 | `dsat` | | $D_{\mathrm{sat}}$ by layout and flock size, and its growth. |
 | `effort` | | Finish time, dog time and dog path beyond $D_{\mathrm{sat}}$, relative to the $D_{\mathrm{sat}}$ cell. |
 | `zones` | | Cells where more dogs did worse (crowded, dip, collapse, recovered). |
+| `upper` | | The upper end of every curve: how often $D_{\max}$ is only the grid top, and the curves with $D_{\max}$ below it, a $D_{\mathrm{crowd}}$ or a $D_{\mathrm{overcrowd}}$. |
+| `tail` | `--layout`, `--n` | Per $D$, over successful trials: the median time from 90 to 99 percent of the flock in the goal, the share of trials where it exceeds a minute, and the median finish. |
+| `endings` | `--min-d` | How failed trials ended: with no sheep in the goal, or after 99 percent had been in; and the time from 99 percent in to the finish in successes. |
+| `spread` | `--layout`, `--n` | Quartiles of the finish time per $D$, to spot finish times in two groups. |
+| `nested` | (two folders) | Whether the shorter of two deadlines only cuts the longer one's trials short. |
+| `curve` | `--layout`, `--n` | One curve cell by cell across folders: successes out of trials, reliability, median finish. |
+| `labels` | | Failed trials per layout by the failure label the task gives them (for example a plain timeout, `stuck`, `flock_escaped`). |
+| `pace` | `--layout`, `--n` | Per $D$, over successful trials: the median dog speed (path over finish time) and the median share of dogs standing still. |
 | `dips` | | Cells above $D_{\min}$ that are not reliable. |
 | `arrival` | `--pct {90,95,99}` | $D_{\min}$ if success had meant that share of the flock in the goal, beside the run's own rule. |
 | `compare` | `--base <folder>` | Each variant folder beside the base, curve by curve. |

@@ -26,6 +26,8 @@ How many are enough, and when more hurt
   dsat       D_sat (the team beyond which the drive gets no faster) by layout and N
   effort     finish time, dog time and dog path beyond D_sat, relative to the D_sat cell
   zones      cells where more dogs did worse (crowded, dip, collapse, recovered)
+  upper      the upper end of every curve: how often D_max is only the grid top, and the
+             curves with D_max below it, a D_crowd (slower than D_best) or a D_overcrowd
   dips       cells above D_min that are not reliable
 
 Comparing rules, variants and methods
@@ -40,8 +42,19 @@ The gather task (Lama and di Bernardo 2024)
              0.99, and at 0.90 and 0.95) beside HerdSim's D_min, and the power-law exponent of
              both above --above targets (the paper's M_low, 121 at sensing 10)
 
+Single trials (analysis/trial_measures.py)
+  tail       time from 90 to 99 percent of the flock in the goal, per D (--layout, --n)
+  endings    how failed trials ended: none in the goal at the end, 99 percent in at some tick
+             (--min-d); and the time from 99 percent in to the finish in successes
+  spread     quartiles of the finish time per D, to spot two groups of finish times
+  nested     two runs that differ only in the deadline: is the shorter one a cut of the longer?
+  curve      one curve (--layout, --n) cell by cell across folders: successes, reliability,
+             median finish
+  labels     failed trials per layout by failure label (the task's heuristic rules)
+  pace       median dog speed (path over finish time) and share of dogs standing still
+
 Checks
-  extent     the flock's own size against the R_f its task was sized from, per cell; above the
+  extent    the flock's own size against the R_f its task was sized from, per cell; above the
              calibration edge R_f is imposed, and this shows how well it matches (--layout)
 
 An entry such as "2-3" is a bracket (D = 3 is reliable, D = 2 still undecided), "[5]" a lower
@@ -83,6 +96,7 @@ from analysis.dmin_tables import (  # noqa: E402
     shape_table,
     split_group_key,
     unusual_zones,
+    upper_values,
 )
 from analysis.frontier import Rules, frontier  # noqa: E402
 from analysis.herdability import growth as herd_growth  # noqa: E402
@@ -94,6 +108,15 @@ from analysis.results import (  # noqa: E402
     read_groups,
     read_trials,
     run_record,
+)
+from analysis.trial_measures import (  # noqa: E402
+    arrival_tail,
+    curve_across,
+    dog_pace,
+    failure_endings,
+    failure_labels,
+    finish_spread,
+    nested_deadlines,
 )
 from services.protocol import RESULTS_ROOT, load_protocol, results_folder  # noqa: E402
 from sim.plugins.scenarios import SCENARIOS  # noqa: E402
@@ -177,6 +200,62 @@ def cmd_zones(args: argparse.Namespace) -> None:
         print(markdown(found), "\n")
 
 
+def cmd_upper(args: argparse.Namespace) -> None:
+    summary, flagged = [], []
+    for name in args.folders:
+        folder = results_folder(name)
+        counts, rows = upper_values(groups_table(folder), read_cells(folder))
+        summary.append({"folder": name, **counts})
+        if len(rows):  # an empty frame would turn the integer columns into floats
+            flagged.append(rows.assign(folder=name))
+    print("### Upper end of the curves: D_max, D_crowd and D_overcrowd\n")
+    print(markdown(pd.DataFrame(summary)), "\n")
+    print("### Curves with D_max below the grid top, a D_crowd or a D_overcrowd\n")
+    print(markdown(pd.concat(flagged, ignore_index=True)), "\n")
+
+
+def cmd_tail(args: argparse.Namespace) -> None:
+    for name in args.folders:
+        print(f"### {name}: time from 90 to 99 percent of the flock in the goal\n")
+        print(markdown(arrival_tail(read_trials(results_folder(name)), args.layout, args.n)), "\n")
+
+
+def cmd_endings(args: argparse.Namespace) -> None:
+    for name in args.folders:
+        print(f"### {name}: how failed trials with D >= {args.min_d} ended\n")
+        print(markdown(failure_endings(read_trials(results_folder(name)), args.min_d)), "\n")
+
+
+def cmd_spread(args: argparse.Namespace) -> None:
+    for name in args.folders:
+        print(f"### {name}: quartiles of the finish time\n")
+        print(markdown(finish_spread(read_trials(results_folder(name)), args.layout, args.n)), "\n")
+
+
+def cmd_nested(args: argparse.Namespace) -> None:
+    longer, shorter = (read_trials(results_folder(name)) for name in (args.longer, args.shorter))
+    print(f"### {args.longer} against {args.shorter}: the shorter deadline as a cut\n")
+    print(markdown(pd.DataFrame([nested_deadlines(longer, shorter)])), "\n")
+
+
+def cmd_labels(args: argparse.Namespace) -> None:
+    for name in args.folders:
+        print(f"### {name}: failed trials by failure label\n")
+        print(markdown(failure_labels(read_trials(results_folder(name)))), "\n")
+
+
+def cmd_pace(args: argparse.Namespace) -> None:
+    for name in args.folders:
+        print(f"### {name}: dog speed and dogs standing still\n")
+        print(markdown(dog_pace(read_trials(results_folder(name)), args.layout, args.n)), "\n")
+
+
+def cmd_curve(args: argparse.Namespace) -> None:
+    cells = {name: read_cells(results_folder(name)) for name in args.folders}
+    print(f"### {args.layout}, N = {args.n}: cell by cell across folders\n")
+    print(markdown(curve_across(cells, args.layout, args.n)), "\n")
+
+
 def cmd_methods(args: argparse.Namespace) -> None:
     rows = []
     for name in args.folders:
@@ -249,7 +328,12 @@ def main() -> None:
     p.add_argument("folders", nargs="+")
     p.add_argument("--pct", type=int, default=99, choices=(90, 95, 99))
     p.set_defaults(run=cmd_arrival)
-    for verb, run in (("dsat", cmd_dsat), ("effort", cmd_effort), ("zones", cmd_zones)):
+    for verb, run in (
+        ("dsat", cmd_dsat),
+        ("effort", cmd_effort),
+        ("zones", cmd_zones),
+        ("upper", cmd_upper),
+    ):
         p = sub.add_parser(verb)
         p.add_argument("folders", nargs="+")
         p.set_defaults(run=run)
@@ -268,6 +352,28 @@ def main() -> None:
     p = sub.add_parser("fits")
     p.add_argument("folders", nargs="+")
     p.set_defaults(run=cmd_fits)
+    for verb, run in (("tail", cmd_tail), ("spread", cmd_spread), ("pace", cmd_pace)):
+        p = sub.add_parser(verb)
+        p.add_argument("folders", nargs="+")
+        p.add_argument("--layout", default=None)
+        p.add_argument("--n", type=int, default=None)
+        p.set_defaults(run=run)
+    p = sub.add_parser("endings")
+    p.add_argument("folders", nargs="+")
+    p.add_argument("--min-d", type=int, default=1)
+    p.set_defaults(run=cmd_endings)
+    p = sub.add_parser("labels")
+    p.add_argument("folders", nargs="+")
+    p.set_defaults(run=cmd_labels)
+    p = sub.add_parser("nested")
+    p.add_argument("longer")
+    p.add_argument("shorter")
+    p.set_defaults(run=cmd_nested)
+    p = sub.add_parser("curve")
+    p.add_argument("folders", nargs="+")
+    p.add_argument("--layout", required=True)
+    p.add_argument("--n", type=int, required=True)
+    p.set_defaults(run=cmd_curve)
     p = sub.add_parser("compare")
     p.add_argument("variants", nargs="+")
     p.add_argument("--base", default="dmin_s_base")

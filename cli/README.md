@@ -3,7 +3,9 @@
 Everything you do with HerdSim from the terminal goes through the scripts in this folder. You
 run an experiment, watch it, turn its results into tables, and, now and then, replay a few
 trials to look closer at something odd. Each script is run from the repository root with
-`uv run`, and `--help` prints its full usage. Table 1 lists the tools.
+`uv run`, and `--help` prints its full usage. Table 1 lists the tools. Terms such as
+layout, cell, drive time, $D_{\min}$, $D_{\mathrm{sat}}$ and the protocol ids are defined in the
+[glossary](../docs/glossary.md).
 
 **Table 1: Tools and what each one is for.**
 
@@ -143,7 +145,7 @@ numbers.
 
 `pressure_replay.py` asks whether a larger team puts more pressure on the flock. It replays the
 cells at D = 1, D_min, D_sat and about twice D_sat, and records how long each sheep spends
-fleeing a dog. This is the pressure part of [section 3.7 of the report](../docs/report/d_min_report.md#37-rq7-beyond-d_min-enough-dogs-cost-and-pressure-on-the-flock).
+fleeing a dog. This is the pressure part of [section 3.7 of the report](../docs/report/part3_beyond_dmin.md#37-rq7-beyond-d_min-enough-dogs-cost-and-pressure-on-the-flock).
 
 ```bash
 uv run cli/diagnostics/pressure_replay.py dmin_f99_m6 --layouts wide outlier_rich --n 100 400 \
@@ -157,7 +159,7 @@ D = 5 at N = 400 where the stored CSV has D = 6. The rows both runs share are id
 `split_diagnostic.py` asks why more dogs slow the `split` layout. It replays `split` N = 100 and
 200 at D = 2, 4, 8 and 16 in four versions: the rule as run, a shorter dog stop distance,
 collecting dogs that take outliers far apart (the `collect_min_gap` setting, which exists only
-for this tool), and both changes together. This is [section 4.1 of the report](../docs/report/d_min_report.md#41-why-more-dogs-do-not-help-on-split).
+for this tool), and both changes together. This is [section 4.1 of the report](../docs/report/part5_failures.md#41-why-more-dogs-do-not-help-on-split).
 
 ```bash
 uv run cli/diagnostics/split_diagnostic.py --out results/diagnostics/split_diagnostic.csv
@@ -166,7 +168,7 @@ uv run cli/diagnostics/split_diagnostic.py --out results/diagnostics/split_diagn
 `hold_walk.py` asks how far a flock walks while the dogs withdraw in the holding task. It
 replays `dmin_f99_hold_goal` at a goal of 3.0 R_f, N = 25, 50 and 100, D = 1, 2, 4 and 8, five
 seeds per cell, and measures the walk of the flock centre until no dog is within r_s, with the
-goal that walk calls for. This is [section 3.10 of the report](../docs/report/d_min_report.md#310-rq10-when-do-more-dogs-hurt-holding-the-flock-and-dogs-that-take-up-room).
+goal that walk calls for. This is [section 3.10 of the report](../docs/report/part3_beyond_dmin.md#310-rq10-when-do-more-dogs-hurt-holding-the-flock-and-dogs-that-take-up-room).
 
 ```bash
 uv run cli/diagnostics/hold_walk.py --out results/diagnostics/hold_walk.csv

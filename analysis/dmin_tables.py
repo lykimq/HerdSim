@@ -101,8 +101,9 @@ def _by_layout_and_n(
     table = one_level(table)
     shown = table.assign(text=table.apply(text, axis=1))
     wide = shown.pivot_table(index="layout", columns="n", values="text", aggfunc="first")
-    if layouts is not None:
-        wide = wide.reindex([layout for layout in layouts if layout in wide.index])
+    kept = [layout for layout in layouts or () if layout in wide.index]
+    if kept:  # a task with its own layouts (the gather task's uniform) keeps them all
+        wide = wide.reindex(kept)
     return wide.fillna("-")
 
 
@@ -354,6 +355,44 @@ def unusual_zones(cells: pd.DataFrame) -> pd.DataFrame:
                 }
             )
     return pd.DataFrame(rows)
+
+
+def upper_values(table: pd.DataFrame, cells: pd.DataFrame) -> tuple[dict[str, int], pd.DataFrame]:
+    """The upper end of every curve: counts of curves by what bounds them from above, and one
+    row per curve whose D_max lies below the grid top or that has a D_crowd or D_overcrowd.
+
+    A D_max at the grid top is a lower bound, not a value: the top cell is reliable and the
+    curve has no D_overcrowd, so the count of such curves says how often no upper limit was
+    found (cells below the top may still be undecided)."""
+    top = cells.groupby("group_key")["n_shepherds"].max()
+    has_min = table["d_min"].notna()
+    below = has_min & ~table["d_max_at_grid_top"].astype(bool)
+    counts = {
+        "curves": len(table),
+        "with D_min": int(has_min.sum()),
+        "D_max at grid top": int((has_min & ~below).sum()),
+        "D_max below grid top": int(below.sum()),
+        "with D_crowd": int(table["d_crowd"].notna().sum()),
+        "with D_overcrowd": int(table["d_overcrowd"].notna().sum()),
+    }
+    flagged = table[below | table["d_crowd"].notna() | table["d_overcrowd"].notna()]
+    rows = []
+    for _, curve in flagged.iterrows():
+        group = join_group(curve["method"], curve["layout"], curve["factors"], int(curve["n"]))
+        rows.append(
+            {
+                "method": curve["method"],
+                "layout": curve["layout"],
+                "factors": curve["factors"] or "-",
+                "n": int(curve["n"]),
+                "d_min": dmin_text(curve),
+                "d_max": "-" if pd.isna(curve["d_max"]) else int(curve["d_max"]),
+                "grid_top": int(top[group]) if group in top else "-",
+                "d_crowd": "-" if pd.isna(curve["d_crowd"]) else int(curve["d_crowd"]),
+                "d_overcrowd": "-" if pd.isna(curve["d_overcrowd"]) else int(curve["d_overcrowd"]),
+            }
+        )
+    return counts, pd.DataFrame(rows)
 
 
 def frontier_values(table: pd.DataFrame) -> pd.DataFrame:

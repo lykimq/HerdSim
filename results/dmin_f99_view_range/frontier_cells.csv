@@ -11,13 +11,13 @@ strombom_multi|split|sensing_range=0.0|N=100,16,60,60,1.0,0.9154813472667045,1.0
 strombom_multi|split|sensing_range=0.0|N=200,1,200,169,0.845,0.7684668222390035,0.9045022666821769,undecided,420.0,499.0000000000001,420.0,499.0000000000001,420.0,604.5,0,undecided,True,False
 strombom_multi|split|sensing_range=0.0|N=200,2,200,186,0.93,0.8701062821515833,0.9683034782375852,undecided,357.0,675.0,357.0,675.0,714.0,465.75,0,undecided,True,False
 strombom_multi|split|sensing_range=0.0|N=200,3,200,176,0.88,0.8091232726508748,0.93202786297416,undecided,564.0,720.0,564.0,720.0,1692.0,682.75,0,undecided,True,False
-strombom_multi|split|sensing_range=0.0|N=200,4,150,123,0.82,0.7261028162762544,0.8928332244773285,unreliable,602.0,756.8,602.0,756.8,2408.0,671.625,0,too_few,False,False
+strombom_multi|split|sensing_range=0.0|N=200,4,150,123,0.82,0.7261028162762544,0.8928332244773285,unreliable,602.0,756.8,602.0,756.8,2408.0,671.625,0,unreliable_dip,False,False
 strombom_multi|split|sensing_range=0.0|N=200,5,200,186,0.93,0.8701062821515833,0.9683034782375852,undecided,647.0,744.0,647.0,744.0,3235.0,743.7,0,undecided,True,False
 strombom_multi|split|sensing_range=0.0|N=200,6,200,173,0.865,0.7915388857710604,0.9203976507787127,undecided,644.0,759.2,644.0,759.2,3864.0,723.75,0,undecided,True,False
 strombom_multi|split|sensing_range=0.0|N=200,7,200,172,0.86,0.7857331667947511,0.916462902070219,undecided,658.5,751.7,658.5,751.7,4609.5,754.2857142857142,0,undecided,True,False
-strombom_multi|split|sensing_range=0.0|N=200,8,100,81,0.81,0.690162112253299,0.8991826697383024,unreliable,678.0,750.0,678.0,750.0,5424.0,771.375,0,too_few,False,False
-strombom_multi|split|sensing_range=0.0|N=200,12,90,72,0.8,0.6712832730220281,0.8957773187453408,unreliable,696.5,790.1,696.5,790.1,8358.0,786.625,0,too_few,False,False
-strombom_multi|split|sensing_range=0.0|N=200,16,130,107,0.823076923076923,0.7216752375474431,0.899905460204627,unreliable,680.0,792.6,680.0,792.6,10880.0,770.4375,0,too_few,False,False
+strombom_multi|split|sensing_range=0.0|N=200,8,100,81,0.81,0.690162112253299,0.8991826697383024,unreliable,678.0,750.0,678.0,750.0,5424.0,771.375,0,collapse,False,False
+strombom_multi|split|sensing_range=0.0|N=200,12,90,72,0.8,0.6712832730220281,0.8957773187453408,unreliable,696.5,790.1,696.5,790.1,8358.0,786.625,0,collapse,False,False
+strombom_multi|split|sensing_range=0.0|N=200,16,130,107,0.823076923076923,0.7216752375474431,0.899905460204627,unreliable,680.0,792.6,680.0,792.6,10880.0,770.4375,0,collapse,False,False
 strombom_multi|split|sensing_range=0.0|N=50,1,60,60,1.0,0.9154813472667045,1.0,reliable,161.0,164.0,161.0,164.0,161.0,241.5,0,saturated,False,False
 strombom_multi|split|sensing_range=0.0|N=50,2,90,88,0.9777777777777777,0.9010320373006957,0.9988442860335379,reliable,165.0,192.3,165.0,192.3,330.0,234.0,0,saturated,False,False
 strombom_multi|split|sensing_range=0.0|N=50,3,60,60,1.0,0.9154813472667045,1.0,reliable,161.0,164.0,161.0,164.0,483.0,232.5,0,saturated,False,False

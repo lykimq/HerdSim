@@ -83,9 +83,9 @@ strombom_multi|compact|goal_radius_multiple=2.1|success_fraction=0.9|N=100,24,60
 strombom_multi|compact|goal_radius_multiple=2.1|success_fraction=0.9|N=25,1,200,190,0.95,0.8960378442460176,0.9811645116951908,undecided,195.0,198.0,195.0,198.0,195.0,274.5,0,undecided,True,False
 strombom_multi|compact|goal_radius_multiple=2.1|success_fraction=0.9|N=25,2,200,182,0.91,0.8451895008038118,0.9543480243302374,undecided,193.0,196.0,193.0,196.0,386.0,231.75,0,undecided,True,False
 strombom_multi|compact|goal_radius_multiple=2.1|success_fraction=0.9|N=25,3,200,175,0.875,0.8032326018614196,0.9281815725881097,undecided,193.0,196.0,193.0,196.0,579.0,243.0,0,undecided,True,False
-strombom_multi|compact|goal_radius_multiple=2.1|success_fraction=0.9|N=25,4,70,55,0.7857142857142857,0.6351334637419668,0.8960231599878115,unreliable,194.0,197.0,194.0,197.0,776.0,245.25,0,too_few,False,False
-strombom_multi|compact|goal_radius_multiple=2.1|success_fraction=0.9|N=25,8,50,37,0.74,0.5526362368971522,0.8803209983873805,unreliable,193.0,196.4,193.0,196.4,1544.0,250.125,0,too_few,False,False
-strombom_multi|compact|goal_radius_multiple=2.1|success_fraction=0.9|N=25,24,50,35,0.7,0.5100168196813192,0.8508791027802868,unreliable,194.0,196.0,194.0,196.0,4656.0,247.5625,0,too_few,False,False
+strombom_multi|compact|goal_radius_multiple=2.1|success_fraction=0.9|N=25,4,70,55,0.7857142857142857,0.6351334637419668,0.8960231599878115,unreliable,194.0,197.0,194.0,197.0,776.0,245.25,0,collapse,False,False
+strombom_multi|compact|goal_radius_multiple=2.1|success_fraction=0.9|N=25,8,50,37,0.74,0.5526362368971522,0.8803209983873805,unreliable,193.0,196.4,193.0,196.4,1544.0,250.125,0,collapse,False,False
+strombom_multi|compact|goal_radius_multiple=2.1|success_fraction=0.9|N=25,24,50,35,0.7,0.5100168196813192,0.8508791027802868,unreliable,194.0,196.0,194.0,196.0,4656.0,247.5625,0,collapse,False,False
 strombom_multi|compact|goal_radius_multiple=2.1|success_fraction=0.9|N=50,1,60,60,1.0,0.9154813472667045,1.0,reliable,247.0,249.0,247.0,249.0,247.0,370.5,0,saturated,False,False
 strombom_multi|compact|goal_radius_multiple=2.1|success_fraction=0.9|N=50,2,60,60,1.0,0.9154813472667045,1.0,reliable,245.0,248.0,245.0,248.0,490.0,366.0,0,saturated,False,False
 strombom_multi|compact|goal_radius_multiple=2.1|success_fraction=0.9|N=50,4,60,60,1.0,0.9154813472667045,1.0,reliable,246.0,249.0,246.0,249.0,984.0,367.6875,0,saturated,False,False
@@ -255,7 +255,7 @@ strombom_multi|outlier_rich|goal_radius_multiple=2.1|success_fraction=0.99|N=25,
 strombom_multi|outlier_rich|goal_radius_multiple=2.1|success_fraction=0.99|N=50,1,200,182,0.91,0.8451895008038118,0.9543480243302374,undecided,261.0,298.8,261.0,298.8,261.0,391.5,0,undecided,True,False
 strombom_multi|outlier_rich|goal_radius_multiple=2.1|success_fraction=0.99|N=50,2,200,176,0.88,0.8091232726508748,0.93202786297416,undecided,254.0,261.0,254.0,261.0,508.0,376.5,0,undecided,True,False
 strombom_multi|outlier_rich|goal_radius_multiple=2.1|success_fraction=0.99|N=50,3,200,184,0.92,0.8575430227155767,0.9614377338903107,undecided,255.0,263.70000000000005,255.0,263.70000000000005,765.0,376.5,0,undecided,True,False
-strombom_multi|outlier_rich|goal_radius_multiple=2.1|success_fraction=0.99|N=50,4,120,97,0.8083333333333333,0.7000917960833168,0.8911932865345219,unreliable,254.0,261.0,254.0,261.0,1016.0,377.625,0,too_few,False,False
+strombom_multi|outlier_rich|goal_radius_multiple=2.1|success_fraction=0.99|N=50,4,120,97,0.8083333333333333,0.7000917960833168,0.8911932865345219,unreliable,254.0,261.0,254.0,261.0,1016.0,377.625,0,unreliable_dip,False,False
 strombom_multi|outlier_rich|goal_radius_multiple=2.1|success_fraction=0.99|N=50,5,200,174,0.87,0.7973716057471729,0.9243043319934027,undecided,256.0,425.4000000000024,256.0,425.4000000000024,1280.0,378.9,0,undecided,True,False
 strombom_multi|outlier_rich|goal_radius_multiple=2.1|success_fraction=0.99|N=50,6,200,175,0.875,0.8032326018614196,0.9281815725881097,undecided,256.0,262.0,256.0,262.0,1536.0,379.0,0,undecided,True,False
 strombom_multi|outlier_rich|goal_radius_multiple=2.1|success_fraction=0.99|N=50,8,200,171,0.855,0.7799532824061848,0.9125013391298407,undecided,255.0,261.0,255.0,261.0,2040.0,378.5625,0,undecided,True,False
@@ -633,7 +633,7 @@ strombom_multi|wide|goal_radius_multiple=2.1|success_fraction=0.99|N=25,24,10,0,
 strombom_multi|wide|goal_radius_multiple=2.1|success_fraction=0.99|N=50,1,200,187,0.935,0.876478504803248,0.9716389594580143,undecided,253.0,259.4,253.0,259.4,253.0,379.5,0,undecided,True,False
 strombom_multi|wide|goal_radius_multiple=2.1|success_fraction=0.99|N=50,2,200,185,0.925,0.8637962328174857,0.9649010661707841,undecided,252.0,257.6,252.0,257.6,504.0,375.75,0,undecided,True,False
 strombom_multi|wide|goal_radius_multiple=2.1|success_fraction=0.99|N=50,3,200,188,0.94,0.8829192062752051,0.9749003588584978,undecided,252.0,259.0,252.0,259.0,756.0,375.75,0,undecided,True,False
-strombom_multi|wide|goal_radius_multiple=2.1|success_fraction=0.99|N=50,4,190,159,0.8368421052631579,0.7568786866273665,0.8993085630438646,unreliable,253.0,259.0,253.0,259.0,1012.0,376.875,0,too_few,False,False
+strombom_multi|wide|goal_radius_multiple=2.1|success_fraction=0.99|N=50,4,190,159,0.8368421052631579,0.7568786866273665,0.8993085630438646,unreliable,253.0,259.0,253.0,259.0,1012.0,376.875,0,unreliable_dip,False,False
 strombom_multi|wide|goal_radius_multiple=2.1|success_fraction=0.99|N=50,5,200,178,0.89,0.8209999567429571,0.9396207504677304,undecided,253.0,259.0,253.0,259.0,1265.0,378.0,0,undecided,True,False
 strombom_multi|wide|goal_radius_multiple=2.1|success_fraction=0.99|N=50,6,200,169,0.845,0.7684668222390035,0.9045022666821769,undecided,254.0,259.20000000000005,254.0,259.20000000000005,1524.0,378.0,0,undecided,True,False
 strombom_multi|wide|goal_radius_multiple=2.1|success_fraction=0.99|N=50,8,200,175,0.875,0.8032326018614196,0.9281815725881097,undecided,253.0,259.0,253.0,259.0,2024.0,378.5625,0,undecided,True,False
@@ -645,10 +645,10 @@ strombom_multi|wide|goal_radius_multiple=2.1|success_fraction=0.9|N=100,8,60,60,
 strombom_multi|wide|goal_radius_multiple=2.1|success_fraction=0.9|N=100,24,60,60,1.0,0.9154813472667045,1.0,reliable,315.5,321.0,315.5,321.0,7572.0,470.75,0,saturated,False,False
 strombom_multi|wide|goal_radius_multiple=2.1|success_fraction=0.9|N=25,1,200,189,0.945,0.8894359326215144,0.9780790577852108,undecided,194.0,198.20000000000002,194.0,198.20000000000002,194.0,279.0,0,undecided,True,False
 strombom_multi|wide|goal_radius_multiple=2.1|success_fraction=0.9|N=25,2,200,182,0.91,0.8451895008038118,0.9543480243302374,undecided,194.0,199.0,194.0,199.0,388.0,245.25,0,undecided,True,False
-strombom_multi|wide|goal_radius_multiple=2.1|success_fraction=0.9|N=25,3,170,140,0.8235294117647058,0.7365042185534705,0.8917775456333986,unreliable,195.0,199.0,195.0,199.0,585.0,253.0,0,too_few,False,False
-strombom_multi|wide|goal_radius_multiple=2.1|success_fraction=0.9|N=25,4,150,123,0.82,0.7261028162762544,0.8928332244773285,unreliable,194.0,197.0,194.0,197.0,776.0,255.0,0,too_few,False,False
-strombom_multi|wide|goal_radius_multiple=2.1|success_fraction=0.9|N=25,8,100,81,0.81,0.690162112253299,0.8991826697383024,unreliable,194.0,199.0,194.0,199.0,1552.0,257.0625,0,too_few,False,False
-strombom_multi|wide|goal_radius_multiple=2.1|success_fraction=0.9|N=25,24,10,5,0.5,0.12831055393508328,0.8716894460649167,unreliable,192.0,195.4,192.0,195.4,4608.0,256.5,0,too_few,False,False
+strombom_multi|wide|goal_radius_multiple=2.1|success_fraction=0.9|N=25,3,170,140,0.8235294117647058,0.7365042185534705,0.8917775456333986,unreliable,195.0,199.0,195.0,199.0,585.0,253.0,0,collapse,False,False
+strombom_multi|wide|goal_radius_multiple=2.1|success_fraction=0.9|N=25,4,150,123,0.82,0.7261028162762544,0.8928332244773285,unreliable,194.0,197.0,194.0,197.0,776.0,255.0,0,collapse,False,False
+strombom_multi|wide|goal_radius_multiple=2.1|success_fraction=0.9|N=25,8,100,81,0.81,0.690162112253299,0.8991826697383024,unreliable,194.0,199.0,194.0,199.0,1552.0,257.0625,0,collapse,False,False
+strombom_multi|wide|goal_radius_multiple=2.1|success_fraction=0.9|N=25,24,10,5,0.5,0.12831055393508328,0.8716894460649167,unreliable,192.0,195.4,192.0,195.4,4608.0,256.5,0,collapse,False,False
 strombom_multi|wide|goal_radius_multiple=2.1|success_fraction=0.9|N=50,1,60,60,1.0,0.9154813472667045,1.0,reliable,251.0,254.1,251.0,254.1,251.0,376.5,0,saturated,False,False
 strombom_multi|wide|goal_radius_multiple=2.1|success_fraction=0.9|N=50,2,60,60,1.0,0.9154813472667045,1.0,reliable,248.0,253.1,248.0,253.1,496.0,370.5,0,saturated,False,False
 strombom_multi|wide|goal_radius_multiple=2.1|success_fraction=0.9|N=50,4,60,60,1.0,0.9154813472667045,1.0,reliable,249.5,254.0,249.5,254.0,998.0,371.0625,0,saturated,False,False

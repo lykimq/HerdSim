@@ -24,7 +24,8 @@ Each group gets three values over every tested D:
 - D_min: the smallest reliable D, with D_min_low the smallest D whose upper bound reaches theta
 - D_overcrowd: the smallest D above D_min where it and the next tested D are both unreliable;
   "next" is next in the grid as it stands, so an undecided cell between two unreliable ones
-  holds the value back
+  holds the value back. A curve with no reliable D yet looks above D_min_low instead, so
+  teams that fail above an undecided one count as too many dogs, not too few
 - D_max: the largest reliable D below D_overcrowd, or the largest reliable D
 
 and three over the working range only, the reliable D from D_min to D_max (a reliable D above
@@ -38,11 +39,11 @@ D_overcrowd is reported but not used):
 
 Each cell then gets a zone:
 
-- too_few: unreliable, below D_min
+- too_few: unreliable, below D_min (below D_min_low on a curve with no reliable D)
 - improving: reliable, below D_sat
 - saturated: reliable, from D_sat up, not slower than D_best
 - crowded: reliable, slower than D_best
-- unreliable_dip: unreliable between D_min and D_overcrowd
+- unreliable_dip: unreliable between D_min (or D_min_low) and D_overcrowd
 - collapse: unreliable from D_overcrowd up
 - recovered: reliable above D_overcrowd
 - undecided: its reliability, or its comparison with D_best, is still open
@@ -269,17 +270,28 @@ class _Comparisons:
         return verdict == UNDECIDED
 
 
-def _overcrowding_onset(ds: list[int], status: dict[int, str], d_min: int) -> int | None:
-    """The first of two consecutive unreliable tested D above D_min, or None.
+def _overcrowding_onset(ds: list[int], status: dict[int, str], start: int) -> int | None:
+    """The first of two consecutive unreliable tested D above ``start`` (D_min, or D_min_low
+    on a curve with no reliable D), or None.
 
     One unreliable cell can be a sampling dip near the boundary; two in a row say the
     team has really stopped working.
     """
-    above = [d for d in ds if d > d_min]
+    above = [d for d in ds if d > start]
     for a, b in zip(above, above[1:]):
         if status[a] == UNRELIABLE and status[b] == UNRELIABLE:
             return a
     return None
+
+
+def _unreliable_zone(d: int, start: int | None, d_overcrowd: int | None) -> str:
+    """Zone of an unreliable D: too few below ``start`` (D_min, or D_min_low when no D is
+    reliable), collapse from D_overcrowd up, a dip in between."""
+    if start is None or d < start:
+        return TOO_FEW
+    if d_overcrowd is not None and d >= d_overcrowd:
+        return COLLAPSE
+    return UNRELIABLE_DIP
 
 
 def _d_best(working: list[int], finish: dict[int, float], cmp: _Comparisons) -> tuple[int, bool]:
@@ -344,12 +356,7 @@ def _zones(
         if status[d] == RELIABLE and d not in working:
             zones[d] = RECOVERED
         elif status[d] == UNRELIABLE:
-            if d < out.d_min:
-                zones[d] = TOO_FEW
-            elif out.d_overcrowd is not None and d >= out.d_overcrowd:
-                zones[d] = COLLAPSE
-            else:
-                zones[d] = UNRELIABLE_DIP
+            zones[d] = _unreliable_zone(d, out.d_min, out.d_overcrowd)
         elif status[d] == UNDECIDED:
             zones[d] = UNDECIDED
     return zones
@@ -376,7 +383,12 @@ def _group(
     out.d_min_above_grid = not reliable and not needs
     out.group_undecided = bool(needs)
     if not reliable:
-        zones = {d: TOO_FEW if status[d] == UNRELIABLE else UNDECIDED for d in ds}
+        start = out.d_min_low
+        out.d_overcrowd = None if start is None else _overcrowding_onset(ds, status, start)
+        zones = {
+            d: _unreliable_zone(d, start, out.d_overcrowd) if status[d] == UNRELIABLE else UNDECIDED
+            for d in ds
+        }
         return out, zones, needs
     out.d_min = reliable[0]
 

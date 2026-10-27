@@ -5,53 +5,56 @@
 [![Tests](https://img.shields.io/badge/tests-332%20passed-brightgreen.svg)](tests/)
 [![Trials](https://img.shields.io/badge/simulated%20trials-439%2C120-success.svg)](results/)
 
-A single sheepdog can gather a cohesive flock and drive it into a pen on its own. When the sheep start scattered, split into groups or spread over a wide field, and the job has a deadline, one dog cannot be in several places at once. The question is then how many dogs the task needs, and whether more dogs always help:
+A single sheepdog can gather a cohesive flock and drive it into a pen. When the sheep start scattered and the job has a deadline, one dog cannot be everywhere at once. How many dogs does such a task need, and do more dogs always help?
 
-> **How many dogs ($D$) does it take to gather a flock of $N$ sheep and drive it into a goal reliably before a deadline: how few will do ($D_{\min}$), how many are enough ($D_{\mathrm{sat}}$), and when do more dogs start to hurt?**
+HerdSim is an open-source simulator and a study built to answer that. It runs the sheep model of Strombom et al. (2014) with a team of dogs and counts how often a team of $D$ dogs brings a flock of $N$ sheep into a goal before a deadline. In 439,120 simulated trials over 41 protocols, with no simulation errors, it covers flocks of 25 to 566 sheep (with runs up to 3200), four start layouts, three deadlines, and variants of the dogs and the sheep. Four numbers describe how success and finish time change with the team size:
 
-**HerdSim** is an open-source simulator and a study built to answer that question. Over **439,120 simulated trials** in 41 protocols, with no simulation errors, it maps the smallest reliable team ($D_{\min}$), the team beyond which more dogs no longer speed up the drive ($D_{\mathrm{sat}}$), and the settings in which more dogs make the task fail, for flocks of 25 to 566 sheep (with runs up to 3,200) under different deadlines, start layouts, cohesion levels and sensing ranges. Figure 1 shows one trial.
+- $D_{\min}$: the smallest team that succeeds in at least 90% of trials, with 99% confidence.
+- $D_{\mathrm{sat}}$: the team beyond which more dogs no longer make the drive faster.
+- $D_{\max}$: the largest team that is still reliable.
+- $D_{\mathrm{overcrowd}}$: the team from which two tested team sizes in a row are unreliable.
+
+Figure 1 shows one trial. Other terms (start layouts such as `wide`, drive times, the strict and 99% rules, protocol ids such as `dmin_f99_m6`) are defined in the [glossary](docs/glossary.md).
 
 ![One simulation trial](docs/figures/fig17_trial.png)
-**Figure 1: One trial in HerdSim ($N = 200$ sheep, $D = 4$ dogs, `wide` start, seed 2026), at ticks 0, 55, 139 and 279.** The green circle on the right is the goal ($R_{\mathrm{goal}} = 1.9 R_f$). The dogs (orange triangles, with their tracks) start on an arc behind the scattered flock and close in from several sides while the flock gathers. Once it is together they drive it from behind into the goal.
+**Figure 1: One trial in HerdSim ($N = 200$ sheep, $D = 4$ dogs, `wide` start, random seed 2026), at ticks 0, 55, 139 and 279.** The dogs first gather the scattered flock from several sides, then drive it from behind into the goal.
+
+- Marks: the green circle on the right is the goal ($R_{\mathrm{goal}} = 1.9 R_f$); orange triangles are the dogs, with their tracks; blue dots are sheep.
+- Panels: the four ticks in a 2 x 2 grid, read left to right, then top to bottom. The dogs start on an arc behind the flock and close in while it gathers.
+
+![One trial, animated](docs/gifs/one_trial.gif)
+
+**Animation 1: One trial from start to goal (`wide` start, N = 200, D = 4, seed 0, 99 percent rule, 6 drive times).** The dogs first collect the outliers of a scattered start, then drive the gathered flock into the goal. It is a replay of a stored trial of `dmin_f99_m6`.
+
+- Marks: blue dots are sheep, orange triangles dogs, and the green circle the goal.
 
 ## Key scientific findings
 
-[The full report](docs/report/d_min_report.md), and [the tables](docs/report/results_tables.md) behind it. The main results, with the minimum team size in Figure 2:
+The [report](docs/report/d_min_report.md) holds the full analysis in six parts by topic, with its figures, and [the tables](docs/report/results_tables.md) behind it. Each finding below links to the section with its evidence.
 
-![D_min against flock size across deadlines and layouts](docs/figures/fig20_dmin_vs_n.png)
-**Figure 2: Minimum reliable team size $D_{\min}$ as a function of flock size $N$ across deadlines and layouts.** Flock size $N$ is on the horizontal axis; the vertical axis is the smallest team whose success rate is at least 0.90 with 99% confidence. The three panels are the deadlines (12, 6 and 3 drive times); colours are the start layouts (`compact`, `wide`, `split`, `outlier_rich`). Solid lines: every sheep must be in the goal (strict); dashed lines: 99% of the sheep. `compact` starts stay at $D_{\min} = 1$ everywhere, while tight deadlines raise the curves of the scattered layouts.
+### 1. A flock that starts together needs one dog
+When the sheep start close together (`compact`), one dog is reliable at every size of the main grids: $N = 25$ to 400 under both rules and every deadline, and 566 under the 99% rule at 12 and 6 drive times. More dogs do not make the drive faster there, likely because in the model a sheep that reacts to a dog walks at 1 m/s whatever the dogs do ([report, section 3.1](docs/report/part1_growth.md#31-rq1-how-does-d_min-grow-with-n)).
 
-### 1. Cohesive flocks only ever need one dog
-When the sheep start close together (`compact`), **one dog is enough at every flock size tested ($N = 25$ to $566$ at 12 and 6 drive times, to $400$ at 3) and every deadline**. No sheep has to be fetched, so the dog only drives. More dogs do not make the drive faster either: in the model a sheep that reacts to a dog always walks at $1$ m/s, so dogs change the flock's direction but not its speed.
+### 2. At the loose deadline the team grows much slower than the flock
+When the sheep start scattered (`wide`, `split`, `outlier_rich`), the dogs must first bring the strays back. Even so, at 12 drive times under the 99% rule, $D_{\min}$ grows with a log-log slope of 0.27-0.38 on `wide` and 0.28-0.38 on `outlier_rich` (nine flock sizes); a slope of 0.5 would mean twice the dogs for four times the sheep. This may be because every sheep is drawn to the whole flock, so a stray that a dog turns back walks to the flock by itself; weakening that pull raised the slope on `wide` but not on `outlier_rich` ([report, sections 3.8 and 3.11](docs/report/part1_growth.md#38-rq8-growth-with-n-on-a-denser-grid-d_sat-and-the-shape-of-the-curve)).
 
-### 2. On scattered pastures, the smallest team grows much slower than flock size
-When the sheep start scattered (`wide`, `split`, `outlier_rich`), the dogs must bring the strays back before they can drive the flock. Even so, on a log-log scale ($\log_2 D_{\min}$ against $\log_2 N$) the slope is only **0.27 to 0.38** at the loose deadline (12 drive times) and 0.38 to 0.61 at 6. The reason is cohesion: every sheep is drawn toward the flock, so once a dog turns a stray back it walks to the flock by itself, and the dogs do not have to fetch each sheep.
+### 3. A tight deadline can cost more dogs than a larger flock
+Under the 99% rule, cutting the deadline from 12 to 3 drive times raises $D_{\min}$ on a `wide` flock of 400 from 2 dogs to 5-6. Making that flock four times larger (from $N = 100$ to 400) at 12 drive times raises it only from 1 dog to 2 ([report, section 3.3](docs/report/part1_growth.md#33-rq3-how-does-the-deadline-change-d_min)).
 
-### 3. Tight deadlines demand more dogs than larger flocks
-Under the 99% rule, cutting the deadline from 12 to 3 drive times raises $D_{\min}$ on a `wide` flock of 400 from **2 dogs to 5-6**. Making that flock four times larger (from $N = 100$ to 400) at the loose deadline only raises it from 1 dog to 2. With little time, one dog cannot bring the strays back one after another, so several dogs must work at once.
+### 4. Without coordination, extra dogs do not help on large flocks
+In the baseline FAT every dog goes behind the sheep farthest from the goal, so all dogs pick the same sheep. At 6 drive times under the 99% rule FAT has no reliable team at $N \ge 200$ on any scattered layout, where the team rule needs 2 or 3 dogs on `wide` and `outlier_rich`. On those two layouts Strombom's switch between collecting and driving carries a team to $N = 200$ on its own; at $N = 400$ the team layer that assigns dogs to strays is also needed ([report, sections 3.6 and 3.9](docs/report/part4_coordination.md#36-rq6-do-dogs-without-a-team-rule-reach-a-finite-d_min)).
 
-### 4. Without teamwork, extra dogs are useless
-To test whether coordination is needed, we ran a baseline without it, **FAT (farthest-agent targeting)**: every dog goes behind the sheep farthest from the goal. Every dog sees the same flock, so **all dogs pick the same sheep** and bunch into one pack that works like a single dog. FAT has no reliable team on scattered layouts at $N \ge 200$: beyond two dogs its success stays below about 0.55 on `wide` and `outlier_rich` and below 0.8 on `split`, so extra dogs add no parallel work.
+### 5. With large teams, requiring every sheep in the goal mostly measures the last few sheep
+When every sheep must be in the goal at once (strict rule), large teams (6 or more dogs) on large flocks mostly fail after the flock has been gathered: at 6 drive times, in 97% of strict failures with 6 or more dogs in the sensitivity base run, 99% of the flock had already been in the goal. Counting a trial as a success when 99% of the sheep are in avoids this, and under that rule (6 drive times, `wide` and `outlier_rich`, $N = 100$ to 400) $D_{\min}$ moves by about one dog at most when the setup changes, except for a smaller goal ([report, sections 3.4 and 3.5](docs/report/part2_success_rule.md#34-rq4-the-success-rule-and-the-last-sheep)).
 
-### 5. Under the strict rule, the last sheep decides
-When every sheep must be in the goal at the same moment (strict rule), large teams ($D \ge 6$) often fail on large flocks even though the flock was already in: at 6 drive times, in 91% of those failed trials (97% in the sensitivity base run) 99% of the sheep had been in the goal before the deadline. In a sample trial the dogs chasing the last stray end up between the flock and the goal and drive the flock back out. With slower dogs ($1.15$ m/s instead of $1.5$) the strict $D_{\min}$ on `outlier_rich` $N = 400$ drops from none on the grid to 6. Counting a trial as a success when **99% of the sheep** are in removes this artefact and measures what the team does with the flock.
+### 6. Beyond a few dogs, more dogs cost time but rarely hurt
+Under the 99% rule at 6 drive times, dogs beyond $D_{\mathrm{sat}}$ make the drive at most about 4% faster (on the 27 curves where $D_{\mathrm{sat}}$ is decided), while the dog time grows with the team. In the three 99% main runs $D_{\max}$ is the top of the grid, 24 dogs, on 84 of the 85 curves that have a $D_{\min}$, so no upper limit was found below 24 dogs. More dogs do hurt in a few follow-up settings, most clearly when the dogs keep 2 m apart and must hold a flock of 400 `outlier_rich` sheep in the goal: success falls from 0.87-0.94 with 3 to 8 dogs (200 trials each) to 0.50-0.77 from 9 dogs up (10 to 70 trials per cell) ([report, sections 3.7 and 3.10](docs/report/part3_beyond_dmin.md#37-rq7-beyond-d_min-enough-dogs-cost-and-pressure-on-the-flock)).
 
-### 6. Targets without cohesion follow the square-root law, in HerdSim too
-The sheep in findings 1 to 5 stick together. Lama & di Bernardo (2024) study the opposite case: targets that do not attract each other at all, wander at random, and move away only when a herder comes close. Targets and herders start scattered over a disc, and the herders must bring 99% of the targets into a small goal at its centre. The paper reports that the smallest team grows as the square root of the number of targets. We ran their model inside HerdSim to check that law with the same simulator and the same reliability rule as for the sheep.
+### 7. Whether the team levels off for very large flocks is still open
+Under the 99% rule up to $N = 566$, a curve that keeps growing and one that levels off at a largest team fit $D_{\min}$ on `wide` and `outlier_rich` equally well. This model cannot settle it with larger flocks: above about 600 sheep one flock radius no longer describes the flock, and above about 1056 Strombom's drive rule puts the dog out of the sheep's reach. With the drive point capped (99% rule, 12 drive times, flock radius set at the density of the 566 flock), a `wide` flock needs 3 dogs at $N = 800$, 5-9 at 1131 and more than 12 at 1600 ([report, sections 3.8 and 3.13](docs/report/part1_growth.md#38-rq8-growth-with-n-on-a-denser-grid-d_sat-and-the-shape-of-the-curve)).
 
-HerdSim reproduces the paper. The paper states one result as numbers, the threshold in its Table I: with sensing radius 10, the smallest team follows the square-root law only from $\sqrt{N} = 8$, 9 and 11 upward, at the 90%, 95% and 99% levels. HerdSim gives 8, 9 and 12. The paper's other results are colour maps ([Fig. 2](https://doi.org/10.1103/PhysRevResearch.6.L032012)), and side by side (Figure 3) HerdSim's maps have the same shape: with radius 10, no team up to 25 herders succeeds with few targets, then comes a sharp threshold, and above it a band of teams that grows with the square root of the number of targets; with full sight that band runs over the whole range.
-
-![The paper's Fig. 2 beside HerdSim's maps](docs/figures/fig39_lama_maps.png)
-**Figure 3: The paper's map above HerdSim's.** Each cell is the share of targets in the goal at the end, averaged over runs, for one number of targets (x, as its square root) and one number of herders (y); the white line marks 0.99. Left: full sight; right: sensing radius 10. HerdSim's grid stops at 400 targets ($\sqrt{N} = 20$), so the grey band from 21 to 25 on the paper's axis has no data; that range already holds the threshold and the square-root rise above it, and the five larger sizes would about double the run time. Two small differences show: at radius 10 with few targets HerdSim gathers a little less than the paper, and its 0.99 line bends a little farther to the right. The top map is Fig. 2 of Lama and di Bernardo (2024), Phys. Rev. Research 6, L032012, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), cropped.
-
-With full sight the law is steeper than for the cohesive flock: 8 herders for 100 targets, 17 for 400, an exponent of 0.52-0.53 against the 0.27-0.38 of [finding 2](#2-on-scattered-pastures-the-smallest-team-grows-much-slower-than-flock-size). Nothing pulls a target back once a herder turns it, so the herders must fetch every one, where a cohesive stray walks back on its own. The two runs also differ in task and herder rule, so the comparison is indicative only.
-
-With sensing radius 10 there is a threshold, and just above it the paper's rule and HerdSim's rule part ways (Figure 4, left). The paper calls a team enough when, averaged over runs, 99% of the targets end in the goal. HerdSim calls it enough when at least 90% of the runs end with 99% of the targets in, at 99% confidence; this is $D_{\min}$. With 100 targets or fewer no team up to 25 herders is reliable under either rule. From 121 to 196 targets the average reaches 99% with 11 to 16 herders, but single runs still lose a few targets: at 144 targets one run in ten fails even with 17 to 25 herders. An average of 99% hides those runs; counting them does not, so HerdSim asks for 14 to 25 herders there and finds no reliable team at 121.
-
-![The Lama and di Bernardo model in HerdSim](docs/figures/fig38_lama.png)
-**Figure 4: The smallest team for each number of targets in the Lama & di Bernardo model, counted two ways.** x: the square root of the number of targets; y: herders. Left: sensing radius 10 (threshold region shaded); right: full sight. Circles apply the paper's rule to HerdSim's runs. Diamonds are HerdSim's $D_{\min}$, with a bar for the range it can still lie in, a triangle for a lower bound where no team is decided reliable yet, and a cross at the top where no team up to 25 herders is reliable. With full sight the two rules almost agree.
-
-The full analysis, the sensitivity runs and the other follow-up results are in [docs/report/d_min_report.md](docs/report/d_min_report.md).
+### 8. With full sight, targets without cohesion follow the square-root law, in HerdSim too
+Lama and di Bernardo (2024) study targets that do not attract each other at all. Run inside HerdSim, their model comes close to the threshold in Table I of the paper's Supplementary Material for $R = 50$ and sensing radius 10 ($\sqrt{N} = 8$, 9 and 12 at the 90%, 95% and 99% levels, against the paper's 8, 9 and 11). With full sight its smallest team grows as the square root of the number of targets (exponent 0.52-0.53, $N \ge 100$), steeper than the slopes of finding 2, though the two differ in task, herder rule, flock sizes and how the slope is fitted. With sensing radius 10 the paper's average and HerdSim's count of runs part just above the threshold: at 144 targets the average accepts 11 herders, yet 9 of their 30 runs lose two to four targets (21 of 30 succeed, 99% interval 0.45-0.89), and HerdSim's $D_{\min}$ is the bracket 17-25 ([report, section 3.14](docs/report/part6_square_root_law.md#314-rq14-targets-without-cohesion-the-square-root-law-of-lama-and-di-bernardo-2024)).
 
 ## The HerdSim simulation engine
 
@@ -66,7 +69,7 @@ The full analysis, the sensitivity runs and the other follow-up results are in [
 - Reproducible and safe to stop:
    Each trial has its own random streams for the start, the sheep and the dogs, so a trial replays exactly from its config and seed on the same machine. Every finished trial is written to disk (`trials.jsonl`) at once, so a run can be stopped and resumed.
 - Three source models, two tasks:
-   Besides the Strombom flock, HerdSim runs the continuous force model of Kubo et al. (2022) on the same drive task, and the non-cohesive targets and local herders of Lama & di Bernardo (2024) on their own gather task (sheep and dogs start scattered over a disc and the dogs bring the targets into its centre). The Lama model is there to test the published $\sqrt{N}$ law inside the same simulator and statistics ([finding 6](#6-targets-without-cohesion-follow-the-square-root-law-in-herdsim-too)).
+   Besides the Strombom flock, HerdSim runs the continuous force model of Kubo et al. (2022) on the same drive task, and the non-cohesive targets and local herders of Lama & di Bernardo (2024) on their own gather task (sheep and dogs start scattered over a disc and the dogs bring the targets into its centre). The Lama model is there to test the published $\sqrt{N}$ law inside the same simulator and statistics ([finding 8](#8-with-full-sight-targets-without-cohesion-follow-the-square-root-law-in-herdsim-too)).
 
 ## Quick start & reproducibility
 
@@ -89,7 +92,7 @@ make check
 make bench
 ```
 
-To run the full campaigns again or check that a trial replays exactly, see the [reproducibility appendix](docs/report/d_min_report.md#appendix-c-reproducibility) and the [results tables](docs/report/results_tables.md).
+To run the full campaigns again or check that a trial replays exactly, see the [reproducibility appendix](docs/report/appendix_run_record.md#appendix-c-reproducibility) and the [results tables](docs/report/results_tables.md).
 
 ## Running campaigns and workflows
 
@@ -133,7 +136,7 @@ HerdSim/
 |-- analysis/               # Decision rules (frontier) and the result tables
 |-- protocols/configs/      # Protocols (canonical defaults + overrides)
 |-- cli/                    # Command-line tools (campaign.py, run_queue.py, dmin_tables.py)
-|-- docs/                   # Report, method notes, guides and figures
+|-- docs/                   # Report, method notes, guides, figures and animations
 |-- results/                # Result folders (439,120 trials in the study protocols)
 `-- tests/                  # Unit, invariant and regression tests
 ```
@@ -143,13 +146,15 @@ HerdSim/
 ### Research
 
 - [Report](docs/report/d_min_report.md):
-  The study: all 13 results, the analysis behind them, the curve fits and the discussion.
+  The study: abstract, questions, decision rules, discussion and conclusions. Its section 3 links the results, in six parts by topic, and the run record.
 - [Result tables](docs/report/results_tables.md):
   Every table behind the report, generated from the stored runs.
 - [Models](docs/methods/models.md):
   The sheep model, the team rule, the Hungarian assignment, the baselines, and the Kubo and Lama models.
 - [Task design](docs/experiments/task_design.md):
   Field and goal sized by $R_f(N)$, deadlines in drive times, why $N$ and $D$ stop where they do, and the gather task.
+- [Glossary](docs/glossary.md):
+  One short definition of every term the docs use, with a link to where it is explained in full.
 
 ### Code
 

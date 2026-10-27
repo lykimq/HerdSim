@@ -2,7 +2,7 @@
 
 This doc summarises the ten papers kept in this folder: what each one asks, how it answers, what it finds, and what part of it matters for counting herders. A last section lists, more briefly, other work found while reading whose files are not here.
 
-Numbers below are the ones the papers state in their text or tables. Where a result is only shown in a figure, the summary describes its shape and gives no value. Notes marked "for HerdSim" are our reading, not the authors' claims.
+Numbers below are the ones the papers state in their text or tables. Where a result is only shown in a figure, the summary describes its shape and gives no value. Notes marked "for HerdSim" are our reading, not the authors' claims. HerdSim's own terms in those notes (the team rule, FAT, layouts such as `wide`, point dogs, the holding and gather tasks, protocol ids) are defined in the [glossary](../glossary.md).
 
 ## Contents
 

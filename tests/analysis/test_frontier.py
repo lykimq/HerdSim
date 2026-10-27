@@ -191,6 +191,21 @@ def test_hard_failure_is_censored_above_the_grid():
     assert pd.isna(g.d_min) and g.d_min_above_grid
 
 
+def test_failures_above_an_undecided_team_are_collapse_without_a_d_min():
+    """Spaced dogs holding a large flock: no team is reliable yet, but the larger teams fail
+    above one that may be; they are too many dogs, not too few."""
+    spec = {1: (0.0, np.nan), 3: (0.9, 200.0), 9: (0.0, np.nan), 10: (0.0, np.nan)}
+    front = fr.frontier(curve(spec), RULES)
+    g = front.groups.iloc[0]
+    assert pd.isna(g.d_min) and pd.isna(g.d_max) and (g.d_min_low, g.d_overcrowd) == (3, 9)
+    assert zones_of(front) == {
+        1: fr.TOO_FEW,
+        3: fr.UNDECIDED,
+        9: fr.COLLAPSE,
+        10: fr.COLLAPSE,
+    }
+
+
 def test_open_finish_time_comparisons_ask_for_no_seeds_when_switched_off():
     """D_min does not depend on finish-time comparisons, so a run may stop paying for them."""
     rows = curve({1: (1.0, 200.0), 2: (1.0, 190.0)})

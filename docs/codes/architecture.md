@@ -1,6 +1,6 @@
 # HerdSim architecture
 
-This document describes how HerdSim is built and why: its parts, the data they exchange, what happens when a campaign runs, and the decisions behind it. It is written for someone who will change the code, for example to add a herding method, a metric or a task. What the project studies is in the [README](../../README.md); the models in [models.md](../methods/models.md); the task, sampling and frontier rules in [task_design.md](../experiments/task_design.md); settings and output files in the [configuration guide](../guides/configuration.md); commands in the [CLI reference](../guides/cli_reference.md).
+This document describes how HerdSim is built and why: its parts, the data they exchange, what happens when a campaign runs, and the decisions behind it. It is written for someone who will change the code, for example to add a herding method, a metric or a task. What the project studies is in the [README](../../README.md); the models in [models.md](../methods/models.md); the task, sampling and frontier rules in [task_design.md](../experiments/task_design.md); settings and output files in the [configuration guide](../guides/configuration.md); commands in the [CLI reference](../guides/cli_reference.md). The design terms used below (cell, calibration, round, sitting, batch) are defined in this doc's [glossary](#glossary) at the end, and the study's terms in the [project glossary](../glossary.md).
 
 ## Contents
 
@@ -53,7 +53,7 @@ flowchart TB
     records --> engine
 ```
 
-- The engine runs one trial. Its core holds the tick loop, the state, the world and start layouts, the assembly of a trial's config and the catalog of methods. The plugins are the sheep models, dog controllers, tasks and metrics, each registered under a name. The paper formulas are the equations of each source paper, kept apart from the plugins that call them so that they can be checked against the paper on their own. The engine imports nothing outside itself.
+- The engine runs one trial. Its core holds the tick loop, the state, the world and start layouts, the assembly of a trial's config and the catalog of methods. The plugins are the sheep models, dog controllers, tasks and metrics, each registered under a name. The paper formulas are the equations of each source paper, kept apart from the plugins that call them so that they can be checked against the published models on their own. The engine imports nothing outside itself.
 - Records turns one trial's result into one table row and computes the hashes that tie a results folder to its settings and code.
 - The analysis layer reads results folders and decides: reliability, comparisons, the team-size values and zones, and the tables. It imports nothing else in the project and works on the files alone, so every rule can be rerun without the simulator.
 - The campaign layer runs things: it loads protocols, calibrates, plans rounds, runs trials in workers, owns the results folder, and replays stored trials. It uses the analysis layer's rules to decide which cells need more seeds.
@@ -185,9 +185,9 @@ The engine runs one trial and knows nothing of grids, seeds, workers or tables. 
 
 ### Lengths follow the measured flock
 
-The goal radius, the compact start spread and the drive length are multiples of the flock radius, measured per method and flock size by a short calibration in which one all-seeing dog drives a compact flock; the drive has a floor of 80 m, and the scattered layouts are sized by the paper's collect distance. Fixed lengths would make the task easier or harder as the flock grows for reasons that have nothing to do with the dogs. Calibration refuses a flock size whose radius does not settle.
+The goal radius, the compact start spread and the drive length are multiples of the flock radius, measured per method and flock size by a short calibration in which one all-seeing dog drives a compact flock; the drive has a floor of 80 m, and the scattered layouts are sized by Strömbom's collect distance. Fixed lengths would make the task easier or harder as the flock grows for reasons that have nothing to do with the dogs. Calibration refuses a flock size whose radius does not settle.
 
-Calibration uses the paper's single dog for the canonical dog settings, but a method's own dog parameters do reach it, so a method variant with a different dog is calibrated on that dog. Two methods that should share one task can be calibrated with the same dog. Above the largest size that settles, a protocol may impose the radius. A task whose agents do not flock, such as the gather task, sizes itself from its own settings and skips calibration. The details are in [task_design.md](../experiments/task_design.md#sizing-by-the-calibrated-flock-radius).
+Calibration uses Strömbom's single dog for the canonical dog settings, but a method's own dog parameters do reach it, so a method variant with a different dog is calibrated on that dog. Two methods that should share one task can be calibrated with the same dog. Above the largest size that settles, a protocol may impose the radius. A task whose agents do not flock, such as the gather task, sizes itself from its own settings and skips calibration. The details are in [task_design.md](../experiments/task_design.md#sizing-by-the-calibrated-flock-radius).
 
 ### Open field and time limit
 
@@ -195,7 +195,7 @@ The source papers have no boundary, so HerdSim has none: a wall would stop sheep
 
 ### Each added dog has its own work
 
-The default team rule gives every dog its own target, and a per-tick measure records how often two dogs end up on top of each other. With identical dogs aimed at one point, every team size would repeat the same trial. Two simpler rules are kept as baselines on the same task: one in which every dog chases the same sheep, and one in which every dog follows the paper's single-dog rule alone. Together they separate what the paper's collect-and-drive switch contributes from what the team layer contributes. The rules are described in [models.md](../methods/models.md#2-shepherd-controllers).
+The default team rule gives every dog its own target, and a per-tick measure records how often two dogs end up on top of each other. With identical dogs aimed at one point, every team size would repeat the same trial. Two simpler rules are kept as baselines on the same task: one in which every dog chases the same sheep, and one in which every dog follows Strömbom's single-dog rule alone. Together they separate what the paper's collect-and-drive switch contributes from what the team layer contributes. The rules are described in [models.md](../methods/models.md#2-shepherd-controllers).
 
 ### Success readings are kept apart
 
@@ -253,7 +253,7 @@ The design does not yet handle:
 
 - More than one goal: the world has one circular goal; gates, pens or several stages need a more general world and start geometry.
 - Roles beyond collecting, driving and backing off, such as flanking or holding a gap; they would be new jobs in the team layer.
-- Much larger flocks, which would need the per-dog loops vectorised. Research limits of the drive rule at large flocks are in the [report](../report/d_min_report.md).
+- Much larger flocks, which would need the per-dog loops vectorised. Research limits of the drive rule at large flocks are in the [report](../report/part1_growth.md#313-rq13-very-large-flocks-and-a-limit-of-the-drive-rule).
 
 ## Glossary
 
@@ -295,10 +295,11 @@ Table 4 maps each concern to the code that holds it.
 | Replays of stored trials | `services/replay.py` |
 | Frontier rules | `analysis/frontier.py` |
 | Reading a results folder, Markdown tables | `analysis/results.py` |
-| D_min and its tables, growth fits, the paper's herdability reading | `analysis/dmin.py`, `analysis/dmin_tables.py`, `analysis/growth_fits.py`, `analysis/herdability.py` |
+| D_min and its tables, growth fits, the herdability reading of Lama and di Bernardo (2024) | `analysis/dmin.py`, `analysis/dmin_tables.py`, `analysis/growth_fits.py`, `analysis/herdability.py` |
 | Start spread and where failed drives ended | `analysis/dispersion_burden.py` |
 | Diagnostics built on replays | `cli/diagnostics/` (`pressure_replay.py`, `split_diagnostic.py`, `hold_walk.py`), `analysis/pressure.py` |
 | Check of the local flock-centre estimate on start layouts (no replay) | `cli/diagnostics/gradient_validation.py` |
 | One protocol, the study queue | `cli/campaign.py`, `cli/run_queue.py`, `protocols/configs/study_queue.yaml` |
 | Command-line entry points | `cli/` (see `cli/README.md`) |
+| Figures and animated GIFs of stored trials | `docs/figures/` (`figstyle.py`, `make_figures.py`, `make_result_figures.py`), `docs/gifs/make_gifs.py` |
 | Regression tests | `tests/sim/test_golden.py` |

@@ -3,7 +3,7 @@ group_key,d_min,d_min_low,d_best,d_sat,d_crowd,d_overcrowd,d_max,d_min_above_gri
 fat|compact|N=100,1,1,1,1,,,24,False,True,False,False,False,False,False,False
 fat|compact|N=200,1,1,1,1,,,24,False,True,False,False,False,False,False,False
 fat|compact|N=25,1,1,1,1,,,24,False,True,False,False,False,False,False,False
-fat|compact|N=400,,12,,,,,,False,False,False,False,False,False,False,True
+fat|compact|N=400,,12,,,,13,,False,False,False,False,False,False,False,True
 fat|compact|N=50,1,1,1,1,,,24,False,True,False,False,False,False,False,False
 fat|outlier_rich|N=100,2,2,3,2,,,24,False,True,False,False,True,True,False,False
 fat|outlier_rich|N=200,,,,,,,,True,False,False,False,False,False,False,False

@@ -1,6 +1,6 @@
 # Configuration and Protocol Guide
 
-How a HerdSim experiment is written as a protocol file, which settings exist, and what a run writes. A protocol is the YAML file that describes an experiment; a run is one execution of it into a results folder.
+How a HerdSim experiment is written as a protocol file, which settings exist, and what a run writes. A protocol is the YAML file that describes an experiment; a run is one execution of it into a results folder. Terms of the study (layouts, drive times, cells, curves, $R_f$, $D_{\min}$, $D_{\mathrm{sat}}$, the zones, FAT, the gather task) are defined in the [glossary](../glossary.md).
 
 ## 1. Configuration architecture
 

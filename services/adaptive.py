@@ -321,6 +321,23 @@ def run_campaign(
     return store
 
 
+def refresh_tables(protocol: Protocol) -> CampaignStore:
+    """Decide every cell again from the stored trials and rewrite the folder's tables, without
+    running a trial or adding a dog count. A change to the frontier rules reaches a finished
+    run this way, with no simulation."""
+    if not (protocol.output / "provenance.json").exists():
+        raise FileNotFoundError(f"no results to refresh in {protocol.output}")
+    store = CampaignStore(protocol.output)
+    store.open(protocol, stable_hash(protocol.physics()))
+    try:
+        ledger = _Ledger.load(protocol, store)
+        s = protocol.settings
+        _assess(ledger, Rules.from_settings(s), s["prune_overlap"], store)
+    finally:
+        store.close()
+    return store
+
+
 def _config_builder(
     protocol: Protocol, radii: dict[str, dict[int, float]]
 ) -> Callable[[Cell], dict[str, Any]]:

@@ -1,6 +1,6 @@
 # Result tables (generated)
 
-Generated 2026-10-22 15:04 by cli/dmin_tables.py from results/, with later sections dated where they were added. Do not edit by hand; rerun the commands. Entries are D_min as decided; "3-8" means D = 8 is the smallest reliable D but a D from 3 up is still undecided, so the true D_min lies in [3, 8]; [n] is a curve with no reliable D yet whose D_min_low is n; "none on grid" means every D up to the grid top is decided unreliable. Strict = every sheep inside the goal; f99 = 99 percent of the sheep inside (ceil(0.99 N), so the two rules coincide at N <= 71). The Runs table was regenerated on 2026-10-26. The dmin_f99_m12 and dmin_f99_m6 tables in this first section are from 2026-10-22, on the five original flock sizes, before those two folders were resumed with four added sizes; their current tables are in the section "Finish-time top-up, densified N, independent shepherds, Kubo to D = 24, 99 percent" below, and the D_min values of the five original sizes did not change. The dmin_f99_m6 dips table and the dmin_f99_m3 D_sat table were regenerated on 2026-10-26.
+Generated 2026-10-22 15:04 by cli/dmin_tables.py from results/, with later sections dated where they were added. Do not edit by hand; rerun the commands. Entries are D_min as decided; "3-8" means D = 8 is the smallest reliable D but a D from 3 up is still undecided, so the true D_min lies in [3, 8]; [n] is a curve with no reliable D yet whose D_min_low is n; "none on grid" means every D up to the grid top is decided unreliable. Strict = every sheep inside the goal; f99 = 99 percent of the sheep inside (ceil(0.99 N), so the two rules coincide at N <= 71). The Runs table was regenerated on 2026-10-26. The dmin_f99_m12 and dmin_f99_m6 tables in this first section are from 2026-10-22, on the five original flock sizes, before those two folders were resumed with four added sizes; their current tables are in the section "Finish-time top-up, densified N, independent shepherds, Kubo to D = 24, 99 percent" below, and the D_min values of the five original sizes did not change. The dmin_f99_m6 dips table and the dmin_f99_m3 D_sat table were regenerated on 2026-10-26. The zones tables of dmin_f99_m3, dmin_f99_fat, dmin_f99_m6 (its current section), dmin_f99_hold and dmin_f99_hold_spacing were regenerated on 2026-10-27, after the overcrowding rule was extended to curves with no reliable D (`campaign.py refresh`); only D_overcrowd and the zones changed, on curves with no reliable D. The earlier dmin_f99_m6 zones table (2026-10-23, five original sizes) was computed with the old rule and is kept as a record.
 
 ## Runs
 
@@ -483,20 +483,30 @@ Generated 2026-10-23 13:46 by cli/dmin_tables.py (verbs dsat, effort, zones, met
 
 (no rows) 
 
-### Zones, dmin_f99_m3: 0 cells where more dogs did worse
-
-(no rows) 
-
-### Zones, dmin_f99_fat: 6 cells where more dogs did worse
+### Zones, dmin_f99_m3: 5 cells where more dogs did worse
 
 | method | layout | n | d | zone | success_rate | median_finish | fastest_d | fastest_finish |
 |---|---|---|---|---|---|---|---|---|
+| strombom_multi | outlier_rich | 400 | 7 | collapse | 0.76 | 459.5 | - | - |
+| strombom_multi | outlier_rich | 400 | 8 | collapse | 0.83 | 452.5 | - | - |
+| strombom_multi | outlier_rich | 400 | 12 | collapse | 0.6 | 448.5 | - | - |
+| strombom_multi | outlier_rich | 400 | 16 | collapse | 0.74 | 444.0 | - | - |
+| strombom_multi | outlier_rich | 400 | 24 | collapse | 0.77 | 444.0 | - | - |
+
+### Zones, dmin_f99_fat: 10 cells where more dogs did worse
+
+| method | layout | n | d | zone | success_rate | median_finish | fastest_d | fastest_finish |
+|---|---|---|---|---|---|---|---|---|
+| fat | compact | 400 | 13 | collapse | 0.78 | 437.0 | - | - |
+| fat | compact | 400 | 14 | collapse | 0.75 | 439.0 | - | - |
+| fat | compact | 400 | 16 | collapse | 0.76 | 439.0 | - | - |
+| fat | compact | 400 | 24 | collapse | 0.75 | 441.0 | - | - |
 | fat | split | 100 | 4 | crowded | 1.0 | 219.0 | 1 | 205.0 |
 | fat | split | 100 | 6 | crowded | 1.0 | 222.5 | 1 | 205.0 |
 | fat | split | 100 | 8 | crowded | 1.0 | 223.5 | 1 | 205.0 |
 | fat | split | 100 | 12 | crowded | 1.0 | 223.0 | 1 | 205.0 |
 | fat | split | 100 | 16 | crowded | 1.0 | 223.0 | 1 | 205.0 |
-| fat | split | 100 | 24 | crowded | 1.0 | 224.0 | 1 | 205.0 | 
+| fat | split | 100 | 24 | crowded | 1.0 | 224.0 | 1 | 205.0 |
 
 ### Methods at 99 percent, deadline 6 drive times (Kubo: compact only, 500 s limit, relabelled from its strict run)
 
@@ -766,11 +776,25 @@ Spread of D_min in doublings: between layouts at one N 1.13, between N at one la
 | strombom_multi | split | 566 | 24 | crowded | 1.0 | 1328.0 | 3 | 1160.5 |
 | strombom_multi | split | 71 | 2 | crowded | 0.96 | 209.0 | 1 | 186.0 | 
 
-### Zones, dmin_f99_m6: 1 cells where more dogs did worse
+### Zones, dmin_f99_m6: 15 cells where more dogs did worse
 
 | method | layout | n | d | zone | success_rate | median_finish | fastest_d | fastest_finish |
 |---|---|---|---|---|---|---|---|---|
-| strombom_multi | split | 141 | 4 | unreliable_dip | 0.8 | 264.5 | 24 | 233.5 | 
+| strombom_multi | split | 141 | 4 | unreliable_dip | 0.8 | 264.5 | 24 | 233.5 |
+| strombom_multi | split | 200 | 4 | collapse | 0.76 | 341.0 | - | - |
+| strombom_multi | split | 200 | 6 | collapse | 0.65 | 652.0 | - | - |
+| strombom_multi | split | 200 | 12 | collapse | 0.76 | 699.0 | - | - |
+| strombom_multi | split | 200 | 16 | collapse | 0.79 | 703.0 | - | - |
+| strombom_multi | split | 200 | 24 | collapse | 0.6 | 676.5 | - | - |
+| strombom_multi | split | 283 | 15 | collapse | 0.7 | 807.0 | - | - |
+| strombom_multi | split | 283 | 16 | collapse | 0.79 | 845.0 | - | - |
+| strombom_multi | split | 283 | 20 | collapse | 0.83 | 835.0 | - | - |
+| strombom_multi | split | 283 | 22 | collapse | 0.82 | 861.5 | - | - |
+| strombom_multi | split | 400 | 10 | collapse | 0.83 | 948.0 | - | - |
+| strombom_multi | split | 400 | 12 | collapse | 0.83 | 1004.0 | - | - |
+| strombom_multi | split | 400 | 14 | collapse | 0.7 | 977.0 | - | - |
+| strombom_multi | split | 400 | 20 | collapse | 0.72 | 990.0 | - | - |
+| strombom_multi | split | 400 | 24 | collapse | 0.79 | 953.0 | - | - |
 
 ### Zones, dmin_f99_indep: 0 cells where more dogs did worse
 
@@ -1014,15 +1038,47 @@ Generated 2026-10-24 07:04 by cli/dmin_tables.py. Holding: 99 percent inside for
 |---|---|---|
 | wide | 2-3 | 3 | 
 
-### Zones, dmin_f99_hold: 0 cells where more dogs did worse
-
-(no rows) 
-
-### Zones, dmin_f99_hold_spacing: 1 cells where more dogs did worse
+### Zones, dmin_f99_hold: 12 cells where more dogs did worse
 
 | method | layout | n | d | zone | success_rate | median_finish | fastest_d | fastest_finish |
 |---|---|---|---|---|---|---|---|---|
-| strombom_multi | outlier_rich | 200 | 4 | unreliable_dip | 0.81 | 423.0 | 24 | 412.0 | 
+| strombom_multi | split | 200 | 3 | collapse | 0.75 | 721.0 | - | - |
+| strombom_multi | split | 200 | 4 | collapse | 0.5 | 748.5 | - | - |
+| strombom_multi | split | 200 | 6 | collapse | 0.5 | 792.0 | - | - |
+| strombom_multi | split | 200 | 7 | collapse | 0.63 | 773.0 | - | - |
+| strombom_multi | split | 200 | 8 | collapse | 0.55 | 785.0 | - | - |
+| strombom_multi | split | 200 | 9 | collapse | 0.3 | 790.0 | - | - |
+| strombom_multi | split | 200 | 10 | collapse | 0.6 | 773.5 | - | - |
+| strombom_multi | split | 200 | 11 | collapse | 0.4 | 793.5 | - | - |
+| strombom_multi | split | 200 | 12 | collapse | 0.1 | 775.0 | - | - |
+| strombom_multi | split | 200 | 13 | collapse | 0.4 | 823.0 | - | - |
+| strombom_multi | split | 200 | 16 | collapse | 0.2 | 614.0 | - | - |
+| strombom_multi | split | 200 | 24 | collapse | 0.4 | 738.5 | - | - |
+
+### Zones, dmin_f99_hold_spacing: 20 cells where more dogs did worse
+
+| method | layout | n | d | zone | success_rate | median_finish | fastest_d | fastest_finish |
+|---|---|---|---|---|---|---|---|---|
+| strombom_multi | outlier_rich | 200 | 4 | unreliable_dip | 0.81 | 423.0 | 24 | 412.0 |
+| strombom_multi | outlier_rich | 400 | 9 | collapse | 0.77 | 660.0 | - | - |
+| strombom_multi | outlier_rich | 400 | 10 | collapse | 0.76 | 662.0 | - | - |
+| strombom_multi | outlier_rich | 400 | 11 | collapse | 0.65 | 654.0 | - | - |
+| strombom_multi | outlier_rich | 400 | 12 | collapse | 0.65 | 658.0 | - | - |
+| strombom_multi | outlier_rich | 400 | 13 | collapse | 0.6 | 660.0 | - | - |
+| strombom_multi | outlier_rich | 400 | 16 | collapse | 0.5 | 648.0 | - | - |
+| strombom_multi | outlier_rich | 400 | 24 | collapse | 0.63 | 651.0 | - | - |
+| strombom_multi | split | 200 | 3 | collapse | 0.7 | 476.0 | - | - |
+| strombom_multi | split | 200 | 4 | collapse | 0.4 | 470.5 | - | - |
+| strombom_multi | split | 200 | 6 | collapse | 0.1 | 817.0 | - | - |
+| strombom_multi | split | 200 | 7 | collapse | 0.1 | 798.0 | - | - |
+| strombom_multi | split | 200 | 8 | collapse | 0.1 | 429.0 | - | - |
+| strombom_multi | split | 200 | 9 | collapse | 0.0 |  | - | - |
+| strombom_multi | split | 200 | 10 | collapse | 0.0 |  | - | - |
+| strombom_multi | split | 200 | 11 | collapse | 0.0 |  | - | - |
+| strombom_multi | split | 200 | 12 | collapse | 0.0 |  | - | - |
+| strombom_multi | split | 200 | 13 | collapse | 0.0 |  | - | - |
+| strombom_multi | split | 200 | 16 | collapse | 0.1 | 422.0 | - | - |
+| strombom_multi | split | 200 | 24 | collapse | 0.0 |  | - | - |
 
 ### Views: sensing range (no sharing), base row = range 0 (global)
 
@@ -1323,4 +1379,870 @@ Generated 2026-10-26 by `uv run cli/diagnostics/hold_walk.py --out results/diagn
 | 100 | 2 | 20 | 20 | 13.2 | 26.0 | 12.3 | 18.9 |
 | 100 | 4 | 20 | 20 | 13.2 | 26.0 | 10.4 | 17.0 |
 | 100 | 8 | 20 | 20 | 13.2 | 26.0 | 10.5 | 17.0 |
+
+
+## The upper end of the curves: D_max, D_crowd and D_overcrowd
+
+Generated 2026-10-27 by `uv run cli/dmin_tables.py upper dmin_m12 dmin_m6 dmin_m3 dmin_f99_m12 dmin_f99_m6 dmin_f99_m3 dmin_fat dmin_f99_fat dmin_f99_indep dmin_f99_hold dmin_f99_hold_spacing dmin_f99_hold_goal dmin_f99_hold_share dmin_f99_view_range dmin_f99_view_comm dmin_f99_k05 dmin_f99_c1.3 dmin_f99_c2.0 dmin_f99_big dmin_f99_big_cap lama_r50 lama_r50_inf`, after `campaign.py refresh` of every folder that has a current protocol file, with the overcrowding rule extended to curves with no reliable D (dmin_pilot, dmin_f99_hold_spacing_soft and dmin_s_ring_dog_in_goal were not refreshed). A D_max at the grid top is a lower bound: the top cell is reliable and the curve has no D_overcrowd, so no upper limit was found; cells between D_min and the top may still be undecided.
+
+### Upper end of the curves: D_max, D_crowd and D_overcrowd
+
+| folder | curves | with D_min | D_max at grid top | D_max below grid top | with D_crowd | with D_overcrowd |
+|---|---|---|---|---|---|---|
+| dmin_m12 | 20 | 20 | 20 | 0 | 0 | 0 |
+| dmin_m6 | 20 | 15 | 14 | 1 | 0 | 0 |
+| dmin_m3 | 20 | 14 | 13 | 1 | 0 | 1 |
+| dmin_f99_m12 | 36 | 36 | 36 | 0 | 6 | 0 |
+| dmin_f99_m6 | 36 | 32 | 31 | 1 | 0 | 3 |
+| dmin_f99_m3 | 20 | 17 | 17 | 0 | 0 | 1 |
+| dmin_fat | 20 | 13 | 12 | 1 | 1 | 0 |
+| dmin_f99_fat | 20 | 13 | 13 | 0 | 1 | 1 |
+| dmin_f99_indep | 20 | 17 | 17 | 0 | 0 | 0 |
+| dmin_f99_hold | 20 | 10 | 9 | 1 | 0 | 1 |
+| dmin_f99_hold_spacing | 20 | 9 | 9 | 0 | 0 | 2 |
+| dmin_f99_hold_goal | 36 | 28 | 24 | 4 | 0 | 0 |
+| dmin_f99_hold_share | 144 | 110 | 103 | 7 | 0 | 4 |
+| dmin_f99_view_range | 36 | 31 | 31 | 0 | 4 | 1 |
+| dmin_f99_view_comm | 12 | 12 | 11 | 1 | 2 | 1 |
+| dmin_f99_k05 | 16 | 16 | 14 | 2 | 2 | 0 |
+| dmin_f99_c1.3 | 20 | 20 | 20 | 0 | 1 | 0 |
+| dmin_f99_c2.0 | 20 | 20 | 20 | 0 | 2 | 0 |
+| dmin_f99_big | 12 | 4 | 4 | 0 | 0 | 0 |
+| dmin_f99_big_cap | 6 | 5 | 5 | 0 | 0 | 0 |
+| lama_r50 | 20 | 9 | 9 | 0 | 0 | 0 |
+| lama_r50_inf | 20 | 20 | 20 | 0 | 0 | 0 | 
+
+### Curves with D_max below the grid top, a D_crowd or a D_overcrowd
+
+| method | layout | factors | n | d_min | d_max | grid_top | d_crowd | d_overcrowd | folder |
+|---|---|---|---|---|---|---|---|---|---|
+| strombom_multi | wide | - | 200 | 3 | 16 | 24 | - | - | dmin_m6 |
+| strombom_multi | split | - | 100 | 1 | 1 | 24 | - | 2 | dmin_m3 |
+| strombom_multi | outlier_rich | - | 566 | 2-3 | 24 | 24 | 15 | - | dmin_f99_m12 |
+| strombom_multi | split | - | 200 | 1 | 24 | 24 | 5 | - | dmin_f99_m12 |
+| strombom_multi | split | - | 283 | 2 | 24 | 24 | 14 | - | dmin_f99_m12 |
+| strombom_multi | split | - | 400 | 2 | 24 | 24 | 9 | - | dmin_f99_m12 |
+| strombom_multi | split | - | 566 | 3 | 24 | 24 | 4 | - | dmin_f99_m12 |
+| strombom_multi | split | - | 71 | 1 | 24 | 24 | 2 | - | dmin_f99_m12 |
+| strombom_multi | outlier_rich | - | 566 | 3-6 | 12 | 24 | - | - | dmin_f99_m6 |
+| strombom_multi | split | - | 200 | [1] | - | 24 | - | 4 | dmin_f99_m6 |
+| strombom_multi | split | - | 283 | [5] | - | 24 | - | 15 | dmin_f99_m6 |
+| strombom_multi | split | - | 400 | [5] | - | 24 | - | 10 | dmin_f99_m6 |
+| strombom_multi | outlier_rich | - | 400 | [6] | - | 24 | - | 7 | dmin_f99_m3 |
+| fat | compact | - | 200 | 1 | 16 | 24 | - | - | dmin_fat |
+| fat | split | - | 100 | 1 | 24 | 24 | 4 | - | dmin_fat |
+| fat | compact | - | 400 | [12] | - | 24 | - | 13 | dmin_f99_fat |
+| fat | split | - | 100 | 1 | 24 | 24 | 4 | - | dmin_f99_fat |
+| strombom_multi | outlier_rich | - | 400 | 3-4 | 6 | 24 | - | - | dmin_f99_hold |
+| strombom_multi | split | - | 200 | [2] | - | 24 | - | 3 | dmin_f99_hold |
+| strombom_multi | outlier_rich | - | 400 | [3] | - | 24 | - | 9 | dmin_f99_hold_spacing |
+| strombom_multi | split | - | 200 | [2] | - | 24 | - | 3 | dmin_f99_hold_spacing |
+| strombom_multi | compact | goal_radius_multiple=2.5 | 25 | 1 | 3 | 24 | - | - | dmin_f99_hold_goal |
+| strombom_multi | outlier_rich | goal_radius_multiple=2.5 | 25 | 1-3 | 6 | 24 | - | - | dmin_f99_hold_goal |
+| strombom_multi | split | goal_radius_multiple=2.5 | 25 | 1 | 3 | 24 | - | - | dmin_f99_hold_goal |
+| strombom_multi | wide | goal_radius_multiple=2.5 | 25 | 1-2 | 4 | 24 | - | - | dmin_f99_hold_goal |
+| strombom_multi | compact | goal_radius_multiple=2.1\|success_fraction=0.9 | 25 | [1] | - | 24 | - | 4 | dmin_f99_hold_share |
+| strombom_multi | compact | goal_radius_multiple=2.5\|success_fraction=0.99 | 25 | 1 | 1 | 24 | - | - | dmin_f99_hold_share |
+| strombom_multi | outlier_rich | goal_radius_multiple=2.1\|success_fraction=0.9 | 25 | 1 | 1 | 24 | - | 5 | dmin_f99_hold_share |
+| strombom_multi | outlier_rich | goal_radius_multiple=2.5\|success_fraction=0.99 | 25 | 1-3 | 6 | 24 | - | - | dmin_f99_hold_share |
+| strombom_multi | split | goal_radius_multiple=2.1\|success_fraction=0.9 | 25 | 1 | 1 | 24 | - | 7 | dmin_f99_hold_share |
+| strombom_multi | split | goal_radius_multiple=2.3\|success_fraction=0.95 | 25 | 1 | 19 | 24 | - | - | dmin_f99_hold_share |
+| strombom_multi | split | goal_radius_multiple=2.5\|success_fraction=0.99 | 25 | 1 | 3 | 24 | - | - | dmin_f99_hold_share |
+| strombom_multi | wide | goal_radius_multiple=2.1\|success_fraction=0.9 | 25 | [1] | - | 24 | - | 3 | dmin_f99_hold_share |
+| strombom_multi | wide | goal_radius_multiple=2.5\|success_fraction=0.99 | 25 | 1-2 | 4 | 24 | - | - | dmin_f99_hold_share |
+| strombom_multi | split | sensing_range=0.0 | 200 | [1] | - | 16 | - | 8 | dmin_f99_view_range |
+| strombom_multi | split | sensing_range=30.0 | 100 | 1 | 16 | 16 | 4 | - | dmin_f99_view_range |
+| strombom_multi | split | sensing_range=45.0 | 100 | 1 | 16 | 16 | 4 | - | dmin_f99_view_range |
+| strombom_multi | split | sensing_range=65.0 | 100 | 1 | 16 | 16 | 2 | - | dmin_f99_view_range |
+| strombom_multi | split | sensing_range=65.0 | 200 | 3 | 16 | 16 | 4 | - | dmin_f99_view_range |
+| strombom_multi | split | communication=neighbour | 100 | 1 | 16 | 16 | 2 | - | dmin_f99_view_comm |
+| strombom_multi | split | communication=shared | 100 | 1 | 16 | 16 | 2 | - | dmin_f99_view_comm |
+| strombom_multi | split | communication=shared | 200 | 3 | 3 | 16 | - | 4 | dmin_f99_view_comm |
+| strombom_multi | split | - | 100 | 1-2 | 7 | 24 | - | - | dmin_f99_k05 |
+| strombom_multi | split | - | 200 | 3-4 | 20 | 24 | 16 | - | dmin_f99_k05 |
+| strombom_multi | split | - | 400 | 4-5 | 24 | 24 | 16 | - | dmin_f99_k05 |
+| strombom_multi | split | - | 100 | 1 | 24 | 24 | 2 | - | dmin_f99_c1.3 |
+| strombom_multi | outlier_rich | - | 200 | 1 | 24 | 24 | 6 | - | dmin_f99_c2.0 |
+| strombom_multi | outlier_rich | - | 400 | 2 | 24 | 24 | 6 | - | dmin_f99_c2.0 | 
+
+
+## Single trials and curves across folders
+
+Generated 2026-10-27 by the commands named under each heading (the single-trial verbs read `trials.csv`, see analysis/trial_measures.py).
+
+`uv run cli/dmin_tables.py tail dmin_f99_m6 --layout split`
+
+### dmin_f99_m6: time from 90 to 99 percent of the flock in the goal
+
+| layout | n | d | trials | median_90_to_99_s | share_gap_over_60_s | median_finish_s |
+|---|---|---|---|---|---|---|
+| split | 25 | 1 | 60 | 2.0 | 0.0 | 122.0 |
+| split | 25 | 2 | 60 | 2.0 | 0.0 | 121.0 |
+| split | 25 | 3 | 60 | 2.0 | 0.0 | 121.0 |
+| split | 25 | 4 | 60 | 2.0 | 0.0 | 121.0 |
+| split | 25 | 6 | 60 | 2.0 | 0.0 | 121.0 |
+| split | 25 | 8 | 60 | 2.0 | 0.0 | 121.0 |
+| split | 25 | 12 | 60 | 2.0 | 0.0 | 121.0 |
+| split | 25 | 16 | 60 | 2.0 | 0.0 | 121.0 |
+| split | 25 | 24 | 60 | 2.0 | 0.0 | 121.0 |
+| split | 50 | 1 | 60 | 4.0 | 0.0 | 161.0 |
+| split | 50 | 2 | 126 | 3.0 | 0.04 | 163.0 |
+| split | 50 | 3 | 60 | 4.0 | 0.0 | 161.0 |
+| split | 50 | 4 | 60 | 3.5 | 0.0 | 161.0 |
+| split | 50 | 6 | 60 | 4.0 | 0.0 | 161.0 |
+| split | 50 | 8 | 60 | 3.0 | 0.0 | 161.0 |
+| split | 50 | 12 | 60 | 4.0 | 0.0 | 162.0 |
+| split | 50 | 16 | 60 | 3.0 | 0.0 | 161.0 |
+| split | 50 | 24 | 60 | 4.0 | 0.0 | 161.0 |
+| split | 71 | 1 | 60 | 5.0 | 0.0 | 186.0 |
+| split | 71 | 2 | 186 | 5.0 | 0.13 | 209.0 |
+| split | 71 | 3 | 60 | 4.0 | 0.0 | 186.0 |
+| split | 71 | 4 | 60 | 4.0 | 0.0 | 187.0 |
+| split | 71 | 6 | 60 | 4.0 | 0.0 | 187.0 |
+| split | 71 | 8 | 60 | 4.0 | 0.0 | 186.0 |
+| split | 71 | 12 | 60 | 4.0 | 0.0 | 187.5 |
+| split | 71 | 16 | 60 | 5.0 | 0.0 | 187.0 |
+| split | 71 | 24 | 60 | 4.0 | 0.0 | 186.0 |
+| split | 100 | 1 | 60 | 4.0 | 0.0 | 229.0 |
+| split | 100 | 2 | 90 | 5.0 | 0.0 | 223.0 |
+| split | 100 | 3 | 60 | 5.0 | 0.07 | 226.5 |
+| split | 100 | 4 | 90 | 4.0 | 0.0 | 210.0 |
+| split | 100 | 6 | 90 | 4.0 | 0.0 | 208.0 |
+| split | 100 | 8 | 90 | 4.0 | 0.0 | 208.0 |
+| split | 100 | 12 | 90 | 4.0 | 0.0 | 208.0 |
+| split | 100 | 16 | 90 | 4.0 | 0.0 | 208.0 |
+| split | 100 | 24 | 90 | 4.0 | 0.0 | 207.0 |
+| split | 141 | 1 | 60 | 6.0 | 0.0 | 280.5 |
+| split | 141 | 2 | 88 | 7.0 | 0.06 | 264.5 |
+| split | 141 | 3 | 154 | 24.5 | 0.47 | 283.0 |
+| split | 141 | 4 | 88 | 24.0 | 0.44 | 264.5 |
+| split | 141 | 5 | 188 | 10.0 | 0.32 | 250.5 |
+| split | 141 | 6 | 180 | 23.0 | 0.46 | 261.0 |
+| split | 141 | 7 | 117 | 8.0 | 0.18 | 242.0 |
+| split | 141 | 8 | 135 | 7.0 | 0.09 | 239.0 |
+| split | 141 | 12 | 88 | 6.0 | 0.02 | 235.0 |
+| split | 141 | 16 | 89 | 6.0 | 0.0 | 234.0 |
+| split | 141 | 24 | 90 | 6.0 | 0.0 | 233.5 |
+| split | 200 | 1 | 183 | 7.0 | 0.08 | 425.0 |
+| split | 200 | 2 | 190 | 7.0 | 0.21 | 365.5 |
+| split | 200 | 3 | 184 | 248.5 | 0.51 | 578.5 |
+| split | 200 | 4 | 38 | 22.0 | 0.47 | 341.0 |
+| split | 200 | 6 | 13 | 358.0 | 0.77 | 652.0 |
+| split | 200 | 7 | 178 | 368.5 | 0.84 | 657.5 |
+| split | 200 | 8 | 180 | 383.5 | 0.88 | 677.0 |
+| split | 200 | 10 | 176 | 389.5 | 0.96 | 676.0 |
+| split | 200 | 11 | 176 | 412.5 | 0.94 | 703.0 |
+| split | 200 | 12 | 38 | 407.5 | 0.95 | 699.0 |
+| split | 200 | 16 | 55 | 418.0 | 0.95 | 703.0 |
+| split | 200 | 24 | 12 | 406.0 | 0.92 | 676.5 |
+| split | 283 | 1 | 1 | 21.0 | 0.0 | 750.0 |
+| split | 283 | 2 | 12 | 17.0 | 0.42 | 693.5 |
+| split | 283 | 3 | 71 | 349.0 | 0.69 | 801.0 |
+| split | 283 | 4 | 81 | 355.0 | 0.74 | 735.0 |
+| split | 283 | 5 | 175 | 405.0 | 0.92 | 797.0 |
+| split | 283 | 6 | 185 | 415.0 | 0.85 | 780.0 |
+| split | 283 | 8 | 176 | 431.5 | 0.97 | 816.5 |
+| split | 283 | 12 | 180 | 449.0 | 0.99 | 842.0 |
+| split | 283 | 14 | 175 | 468.0 | 1.0 | 861.0 |
+| split | 283 | 15 | 21 | 439.0 | 1.0 | 807.0 |
+| split | 283 | 16 | 63 | 449.0 | 1.0 | 845.0 |
+| split | 283 | 20 | 124 | 445.0 | 1.0 | 835.0 |
+| split | 283 | 22 | 98 | 476.0 | 1.0 | 861.5 |
+| split | 283 | 23 | 172 | 450.5 | 1.0 | 837.0 |
+| split | 283 | 24 | 181 | 455.0 | 1.0 | 843.0 |
+| split | 400 | 2 | 29 | 13.0 | 0.24 | 858.0 |
+| split | 400 | 3 | 20 | 280.0 | 0.65 | 880.0 |
+| split | 400 | 4 | 81 | 274.0 | 0.51 | 730.0 |
+| split | 400 | 5 | 184 | 335.5 | 0.55 | 807.0 |
+| split | 400 | 6 | 176 | 418.5 | 0.84 | 938.5 |
+| split | 400 | 8 | 178 | 442.5 | 0.89 | 938.0 |
+| split | 400 | 9 | 177 | 448.0 | 0.78 | 929.0 |
+| split | 400 | 10 | 149 | 430.0 | 0.79 | 948.0 |
+| split | 400 | 12 | 167 | 480.0 | 0.97 | 1004.0 |
+| split | 400 | 14 | 21 | 452.0 | 1.0 | 977.0 |
+| split | 400 | 15 | 178 | 457.0 | 1.0 | 985.5 |
+| split | 400 | 16 | 172 | 461.5 | 0.99 | 993.0 |
+| split | 400 | 18 | 180 | 473.5 | 1.0 | 999.5 |
+| split | 400 | 19 | 175 | 461.0 | 1.0 | 995.0 |
+| split | 400 | 20 | 29 | 449.0 | 1.0 | 990.0 |
+| split | 400 | 24 | 55 | 417.0 | 1.0 | 953.0 |
+| split | 566 | 2 | 2 | 44.5 | 0.5 | 1153.5 |
+| split | 566 | 3 | 38 | 21.0 | 0.37 | 1006.0 |
+| split | 566 | 4 | 5 | 523.0 | 1.0 | 1189.0 |
+| split | 566 | 6 | 21 | 474.0 | 0.9 | 1166.0 |
+| split | 566 | 8 | 13 | 540.0 | 1.0 | 1130.0 |
+| split | 566 | 12 | 133 | 502.0 | 0.91 | 1200.0 |
+| split | 566 | 16 | 46 | 538.0 | 1.0 | 1256.0 |
+| split | 566 | 24 | 149 | 534.0 | 1.0 | 1285.0 | 
+
+`uv run cli/dmin_tables.py tail dmin_f99_m12 --layout split`
+
+### dmin_f99_m12: time from 90 to 99 percent of the flock in the goal
+
+| layout | n | d | trials | median_90_to_99_s | share_gap_over_60_s | median_finish_s |
+|---|---|---|---|---|---|---|
+| split | 25 | 1 | 60 | 2.0 | 0.0 | 122.0 |
+| split | 25 | 2 | 60 | 2.0 | 0.0 | 121.0 |
+| split | 25 | 3 | 60 | 2.0 | 0.0 | 121.0 |
+| split | 25 | 4 | 60 | 2.0 | 0.0 | 121.0 |
+| split | 25 | 6 | 60 | 2.0 | 0.0 | 121.0 |
+| split | 25 | 8 | 60 | 2.0 | 0.0 | 121.0 |
+| split | 25 | 12 | 60 | 2.0 | 0.0 | 121.0 |
+| split | 25 | 16 | 60 | 2.0 | 0.0 | 121.0 |
+| split | 25 | 24 | 60 | 2.0 | 0.0 | 121.0 |
+| split | 50 | 1 | 60 | 4.0 | 0.0 | 161.0 |
+| split | 50 | 2 | 60 | 4.0 | 0.1 | 163.0 |
+| split | 50 | 3 | 60 | 4.0 | 0.0 | 161.0 |
+| split | 50 | 4 | 60 | 3.5 | 0.0 | 161.0 |
+| split | 50 | 6 | 60 | 4.0 | 0.0 | 161.0 |
+| split | 50 | 8 | 60 | 3.0 | 0.0 | 161.0 |
+| split | 50 | 12 | 60 | 4.0 | 0.0 | 162.0 |
+| split | 50 | 16 | 60 | 3.0 | 0.0 | 161.0 |
+| split | 50 | 24 | 60 | 4.0 | 0.0 | 161.0 |
+| split | 71 | 1 | 60 | 5.0 | 0.0 | 186.0 |
+| split | 71 | 2 | 135 | 5.0 | 0.16 | 209.0 |
+| split | 71 | 3 | 60 | 4.0 | 0.0 | 186.0 |
+| split | 71 | 4 | 60 | 4.0 | 0.0 | 187.0 |
+| split | 71 | 6 | 60 | 4.0 | 0.0 | 187.0 |
+| split | 71 | 8 | 60 | 4.0 | 0.0 | 186.0 |
+| split | 71 | 12 | 60 | 4.0 | 0.0 | 187.5 |
+| split | 71 | 16 | 60 | 5.0 | 0.0 | 187.0 |
+| split | 71 | 24 | 60 | 4.0 | 0.0 | 186.0 |
+| split | 100 | 1 | 60 | 4.0 | 0.0 | 229.0 |
+| split | 100 | 2 | 90 | 5.0 | 0.0 | 223.0 |
+| split | 100 | 3 | 70 | 5.0 | 0.07 | 227.0 |
+| split | 100 | 4 | 90 | 4.0 | 0.0 | 210.0 |
+| split | 100 | 6 | 90 | 4.0 | 0.0 | 208.0 |
+| split | 100 | 8 | 90 | 4.0 | 0.0 | 208.0 |
+| split | 100 | 12 | 90 | 4.0 | 0.0 | 208.0 |
+| split | 100 | 16 | 90 | 4.0 | 0.0 | 208.0 |
+| split | 100 | 24 | 90 | 4.0 | 0.0 | 207.0 |
+| split | 141 | 1 | 60 | 6.0 | 0.0 | 280.5 |
+| split | 141 | 2 | 60 | 7.0 | 0.1 | 263.0 |
+| split | 141 | 3 | 60 | 15.0 | 0.4 | 269.0 |
+| split | 141 | 4 | 60 | 24.0 | 0.45 | 270.0 |
+| split | 141 | 6 | 60 | 23.0 | 0.47 | 259.5 |
+| split | 141 | 7 | 90 | 8.0 | 0.22 | 242.0 |
+| split | 141 | 8 | 60 | 7.0 | 0.12 | 239.0 |
+| split | 141 | 12 | 80 | 6.0 | 0.05 | 235.0 |
+| split | 141 | 16 | 90 | 6.0 | 0.01 | 234.0 |
+| split | 141 | 24 | 90 | 6.0 | 0.0 | 233.5 |
+| split | 200 | 1 | 60 | 7.0 | 0.12 | 424.5 |
+| split | 200 | 2 | 200 | 7.0 | 0.25 | 368.5 |
+| split | 200 | 3 | 200 | 293.5 | 0.55 | 614.0 |
+| split | 200 | 4 | 200 | 317.5 | 0.56 | 617.0 |
+| split | 200 | 5 | 60 | 365.0 | 0.87 | 662.0 |
+| split | 200 | 6 | 90 | 367.0 | 0.77 | 665.0 |
+| split | 200 | 8 | 60 | 400.0 | 0.9 | 695.0 |
+| split | 200 | 12 | 60 | 428.5 | 0.97 | 713.0 |
+| split | 200 | 16 | 60 | 465.0 | 0.97 | 744.0 |
+| split | 200 | 24 | 60 | 441.0 | 0.87 | 720.5 |
+| split | 283 | 1 | 3 | 10.0 | 0.0 | 1048.0 |
+| split | 283 | 2 | 197 | 342.0 | 0.59 | 823.0 |
+| split | 283 | 3 | 200 | 387.0 | 0.78 | 842.0 |
+| split | 283 | 4 | 200 | 382.0 | 0.82 | 772.0 |
+| split | 283 | 5 | 200 | 421.5 | 0.93 | 813.5 |
+| split | 283 | 6 | 200 | 434.0 | 0.86 | 794.5 |
+| split | 283 | 8 | 200 | 442.0 | 0.97 | 828.0 |
+| split | 283 | 12 | 200 | 463.5 | 1.0 | 855.0 |
+| split | 283 | 13 | 200 | 459.0 | 1.0 | 840.5 |
+| split | 283 | 14 | 200 | 491.5 | 1.0 | 878.0 |
+| split | 283 | 16 | 200 | 471.5 | 1.0 | 853.5 |
+| split | 283 | 20 | 200 | 476.5 | 1.0 | 863.0 |
+| split | 283 | 21 | 200 | 473.0 | 1.0 | 856.5 |
+| split | 283 | 22 | 200 | 486.5 | 1.0 | 868.5 |
+| split | 283 | 23 | 200 | 466.0 | 1.0 | 854.0 |
+| split | 283 | 24 | 200 | 470.5 | 1.0 | 853.5 |
+| split | 400 | 2 | 192 | 16.0 | 0.4 | 919.5 |
+| split | 400 | 3 | 200 | 316.0 | 0.61 | 951.5 |
+| split | 400 | 4 | 200 | 374.5 | 0.62 | 852.5 |
+| split | 400 | 5 | 200 | 369.0 | 0.58 | 839.0 |
+| split | 400 | 6 | 200 | 445.0 | 0.86 | 957.5 |
+| split | 400 | 7 | 200 | 471.0 | 0.84 | 993.5 |
+| split | 400 | 8 | 200 | 459.0 | 0.9 | 950.5 |
+| split | 400 | 9 | 200 | 464.0 | 0.8 | 951.5 |
+| split | 400 | 10 | 200 | 477.0 | 0.83 | 987.5 |
+| split | 400 | 12 | 200 | 518.5 | 0.98 | 1043.0 |
+| split | 400 | 16 | 200 | 493.0 | 1.0 | 1022.5 |
+| split | 400 | 24 | 170 | 495.5 | 1.0 | 1022.0 |
+| split | 566 | 2 | 71 | 29.0 | 0.42 | 1627.0 |
+| split | 566 | 3 | 200 | 37.5 | 0.48 | 1160.5 |
+| split | 566 | 4 | 170 | 633.5 | 0.92 | 1469.5 |
+| split | 566 | 5 | 140 | 694.0 | 0.94 | 1374.0 |
+| split | 566 | 6 | 200 | 480.0 | 0.84 | 1172.5 |
+| split | 566 | 8 | 200 | 511.0 | 0.91 | 1206.0 |
+| split | 566 | 12 | 200 | 549.0 | 0.92 | 1237.5 |
+| split | 566 | 14 | 200 | 553.5 | 0.94 | 1293.5 |
+| split | 566 | 15 | 120 | 547.5 | 0.96 | 1283.0 |
+| split | 566 | 16 | 120 | 548.5 | 1.0 | 1292.0 |
+| split | 566 | 24 | 120 | 574.5 | 1.0 | 1328.0 | 
+
+`uv run cli/dmin_tables.py tail dmin_f99_m12 --layout outlier_rich --n 566`
+
+### dmin_f99_m12: time from 90 to 99 percent of the flock in the goal
+
+| layout | n | d | trials | median_90_to_99_s | share_gap_over_60_s | median_finish_s |
+|---|---|---|---|---|---|---|
+| outlier_rich | 566 | 2 | 175 | 12.0 | 0.09 | 2387.0 |
+| outlier_rich | 566 | 3 | 60 | 13.0 | 0.07 | 1317.0 |
+| outlier_rich | 566 | 4 | 60 | 12.0 | 0.22 | 1057.5 |
+| outlier_rich | 566 | 6 | 80 | 11.0 | 0.06 | 797.5 |
+| outlier_rich | 566 | 7 | 200 | 11.0 | 0.1 | 711.5 |
+| outlier_rich | 566 | 8 | 200 | 12.0 | 0.2 | 669.0 |
+| outlier_rich | 566 | 10 | 200 | 14.0 | 0.34 | 628.0 |
+| outlier_rich | 566 | 11 | 200 | 15.0 | 0.43 | 634.0 |
+| outlier_rich | 566 | 12 | 200 | 464.5 | 0.61 | 1058.5 |
+| outlier_rich | 566 | 14 | 200 | 557.0 | 0.72 | 1146.0 |
+| outlier_rich | 566 | 15 | 60 | 578.0 | 0.82 | 1172.0 |
+| outlier_rich | 566 | 16 | 130 | 543.5 | 0.76 | 1129.5 |
+| outlier_rich | 566 | 24 | 100 | 559.5 | 0.81 | 1142.0 | 
+
+`uv run cli/dmin_tables.py tail dmin_f99_m12 --layout outlier_rich --n 283`
+
+### dmin_f99_m12: time from 90 to 99 percent of the flock in the goal
+
+| layout | n | d | trials | median_90_to_99_s | share_gap_over_60_s | median_finish_s |
+|---|---|---|---|---|---|---|
+| outlier_rich | 283 | 1 | 2 | 8.5 | 0.0 | 1554.0 |
+| outlier_rich | 283 | 2 | 60 | 8.0 | 0.07 | 758.0 |
+| outlier_rich | 283 | 3 | 60 | 8.0 | 0.03 | 594.0 |
+| outlier_rich | 283 | 4 | 60 | 8.0 | 0.13 | 436.5 |
+| outlier_rich | 283 | 5 | 200 | 380.0 | 0.58 | 739.0 |
+| outlier_rich | 283 | 6 | 200 | 12.0 | 0.42 | 367.0 |
+| outlier_rich | 283 | 8 | 200 | 330.0 | 0.5 | 680.0 |
+| outlier_rich | 283 | 12 | 200 | 10.0 | 0.34 | 357.0 |
+| outlier_rich | 283 | 16 | 200 | 9.0 | 0.25 | 353.0 |
+| outlier_rich | 283 | 24 | 200 | 9.0 | 0.11 | 349.0 | 
+
+`uv run cli/dmin_tables.py tail dmin_f99_m12 --layout wide --n 400`
+
+### dmin_f99_m12: time from 90 to 99 percent of the flock in the goal
+
+| layout | n | d | trials | median_90_to_99_s | share_gap_over_60_s | median_finish_s |
+|---|---|---|---|---|---|---|
+| wide | 400 | 2 | 60 | 9.0 | 0.02 | 898.5 |
+| wide | 400 | 3 | 60 | 9.0 | 0.05 | 719.0 |
+| wide | 400 | 4 | 60 | 9.0 | 0.08 | 561.5 |
+| wide | 400 | 5 | 130 | 9.0 | 0.06 | 442.0 |
+| wide | 400 | 6 | 60 | 9.0 | 0.02 | 432.0 |
+| wide | 400 | 8 | 70 | 9.0 | 0.0 | 429.0 |
+| wide | 400 | 12 | 90 | 8.0 | 0.01 | 427.0 |
+| wide | 400 | 16 | 90 | 8.0 | 0.0 | 426.0 |
+| wide | 400 | 24 | 130 | 9.0 | 0.0 | 423.0 | 
+
+`uv run cli/dmin_tables.py endings dmin_s_base dmin_m6 --min-d 6`
+
+### dmin_s_base: how failed trials with D >= 6 ended
+
+| layout | n | failed | ended_with_none_in | had_99_percent_in | median_99_to_finish_s |
+|---|---|---|---|---|---|
+| outlier_rich | 100 | 3 | 1 | 3 | 1.0 |
+| outlier_rich | 200 | 136 | 95 | 125 | 338.0 |
+| outlier_rich | 400 | 41 | 33 | 40 | 471.0 |
+| wide | 100 | 1 | 0 | 1 | 1.0 |
+| wide | 200 | 66 | 48 | 66 | 2.0 |
+| wide | 400 | 132 | 109 | 132 | 460.5 | 
+
+### dmin_m6: how failed trials with D >= 6 ended
+
+| layout | n | failed | ended_with_none_in | had_99_percent_in | median_99_to_finish_s |
+|---|---|---|---|---|---|
+| outlier_rich | 100 | 5 | 1 | 5 | 1.0 |
+| outlier_rich | 200 | 162 | 111 | 150 | 26.0 |
+| outlier_rich | 400 | 48 | 38 | 46 | 475.5 |
+| split | 200 | 44 | 34 | 13 | 2.0 |
+| split | 400 | 34 | 32 | 28 | 4.0 |
+| wide | 100 | 1 | 0 | 1 | 1.0 |
+| wide | 200 | 106 | 76 | 106 | 2.0 |
+| wide | 400 | 150 | 127 | 150 | 457.5 | 
+
+`uv run cli/dmin_tables.py nested dmin_f99_m12 dmin_f99_m6`
+
+### dmin_f99_m12 against dmin_f99_m6: the shorter deadline as a cut
+
+| shared_trials | outcome_as_cut_long_trial | both_succeed | same_finish_when_both_succeed |
+|---|---|---|---|
+| 26620 | 1.0 | 25553 | 1.0 | 
+
+`uv run cli/dmin_tables.py nested dmin_f99_m6 dmin_f99_m3`
+
+### dmin_f99_m6 against dmin_f99_m3: the shorter deadline as a cut
+
+| shared_trials | outcome_as_cut_long_trial | both_succeed | same_finish_when_both_succeed |
+|---|---|---|---|
+| 10760 | 1.0 | 10236 | 1.0 | 
+
+`uv run cli/dmin_tables.py nested dmin_m12 dmin_m6`
+
+### dmin_m12 against dmin_m6: the shorter deadline as a cut
+
+| shared_trials | outcome_as_cut_long_trial | both_succeed | same_finish_when_both_succeed |
+|---|---|---|---|
+| 10500 | 1.0 | 9852 | 1.0 | 
+
+`uv run cli/dmin_tables.py spread dmin_f99_m6 --layout outlier_rich --n 283`
+
+### dmin_f99_m6: quartiles of the finish time
+
+| layout | n | d | trials | q25_s | median_s | q75_s |
+|---|---|---|---|---|---|---|
+| outlier_rich | 283 | 2 | 181 | 673.0 | 733.0 | 835.0 |
+| outlier_rich | 283 | 3 | 60 | 559.0 | 594.0 | 645.2 |
+| outlier_rich | 283 | 4 | 60 | 394.0 | 436.5 | 493.2 |
+| outlier_rich | 283 | 5 | 195 | 367.0 | 725.0 | 799.0 |
+| outlier_rich | 283 | 6 | 185 | 353.0 | 364.0 | 774.0 |
+| outlier_rich | 283 | 8 | 188 | 356.0 | 375.0 | 794.0 |
+| outlier_rich | 283 | 10 | 188 | 350.0 | 361.0 | 814.8 |
+| outlier_rich | 283 | 11 | 190 | 350.2 | 358.0 | 795.2 |
+| outlier_rich | 283 | 12 | 198 | 349.0 | 357.0 | 779.8 |
+| outlier_rich | 283 | 16 | 192 | 348.0 | 352.0 | 366.0 |
+| outlier_rich | 283 | 24 | 198 | 344.0 | 348.5 | 353.0 | 
+
+`uv run cli/dmin_tables.py curve dmin_f99_m3 --layout wide --n 400`
+
+### wide, N = 400: cell by cell across folders
+
+| folder | group | d | successes | rate | reliability | median_finish_s |
+|---|---|---|---|---|---|---|
+| dmin_f99_m3 | strombom_multi\|wide\|N=400 | 1 | 0/10 | 0.0 | unreliable |  |
+| dmin_f99_m3 | strombom_multi\|wide\|N=400 | 2 | 0/10 | 0.0 | unreliable |  |
+| dmin_f99_m3 | strombom_multi\|wide\|N=400 | 3 | 2/10 | 0.2 | unreliable | 541.0 |
+| dmin_f99_m3 | strombom_multi\|wide\|N=400 | 4 | 45/60 | 0.75 | unreliable | 543.0 |
+| dmin_f99_m3 | strombom_multi\|wide\|N=400 | 5 | 189/200 | 0.94 | undecided | 441.0 |
+| dmin_f99_m3 | strombom_multi\|wide\|N=400 | 6 | 79/80 | 0.99 | reliable | 432.0 |
+| dmin_f99_m3 | strombom_multi\|wide\|N=400 | 8 | 60/60 | 1.0 | reliable | 429.0 |
+| dmin_f99_m3 | strombom_multi\|wide\|N=400 | 12 | 60/60 | 1.0 | reliable | 427.0 |
+| dmin_f99_m3 | strombom_multi\|wide\|N=400 | 16 | 60/60 | 1.0 | reliable | 425.0 |
+| dmin_f99_m3 | strombom_multi\|wide\|N=400 | 24 | 60/60 | 1.0 | reliable | 424.0 |
+
+`uv run cli/dmin_tables.py curve dmin_f99_m3 --layout outlier_rich --n 400`
+
+### outlier_rich, N = 400: cell by cell across folders
+
+| folder | group | d | successes | rate | reliability | median_finish_s |
+|---|---|---|---|---|---|---|
+| dmin_f99_m3 | strombom_multi\|outlier_rich\|N=400 | 1 | 0/10 | 0.0 | unreliable |  |
+| dmin_f99_m3 | strombom_multi\|outlier_rich\|N=400 | 2 | 0/10 | 0.0 | unreliable |  |
+| dmin_f99_m3 | strombom_multi\|outlier_rich\|N=400 | 3 | 0/10 | 0.0 | unreliable |  |
+| dmin_f99_m3 | strombom_multi\|outlier_rich\|N=400 | 4 | 0/10 | 0.0 | unreliable |  |
+| dmin_f99_m3 | strombom_multi\|outlier_rich\|N=400 | 5 | 37/50 | 0.74 | unreliable | 553.0 |
+| dmin_f99_m3 | strombom_multi\|outlier_rich\|N=400 | 6 | 172/200 | 0.86 | undecided | 473.5 |
+| dmin_f99_m3 | strombom_multi\|outlier_rich\|N=400 | 7 | 38/50 | 0.76 | unreliable | 459.5 |
+| dmin_f99_m3 | strombom_multi\|outlier_rich\|N=400 | 8 | 124/150 | 0.83 | unreliable | 452.5 |
+| dmin_f99_m3 | strombom_multi\|outlier_rich\|N=400 | 12 | 12/20 | 0.6 | unreliable | 448.5 |
+| dmin_f99_m3 | strombom_multi\|outlier_rich\|N=400 | 16 | 37/50 | 0.74 | unreliable | 444.0 |
+| dmin_f99_m3 | strombom_multi\|outlier_rich\|N=400 | 24 | 46/60 | 0.77 | unreliable | 444.0 |
+
+`uv run cli/dmin_tables.py tail dmin_f99_m12 --layout outlier_rich --n 400`
+
+### dmin_f99_m12: time from 90 to 99 percent of the flock in the goal
+
+| layout | n | d | trials | median_90_to_99_s | share_gap_over_60_s | median_finish_s |
+|---|---|---|---|---|---|---|
+| outlier_rich | 400 | 2 | 60 | 8.5 | 0.05 | 1264.0 |
+| outlier_rich | 400 | 3 | 60 | 8.0 | 0.02 | 804.0 |
+| outlier_rich | 400 | 4 | 60 | 9.0 | 0.07 | 722.5 |
+| outlier_rich | 400 | 5 | 60 | 9.0 | 0.02 | 571.5 |
+| outlier_rich | 400 | 6 | 200 | 10.0 | 0.14 | 478.5 |
+| outlier_rich | 400 | 8 | 60 | 10.0 | 0.17 | 456.5 |
+| outlier_rich | 400 | 12 | 190 | 13.0 | 0.4 | 458.0 |
+| outlier_rich | 400 | 16 | 200 | 11.0 | 0.23 | 451.0 |
+| outlier_rich | 400 | 24 | 200 | 11.0 | 0.22 | 447.0 |
+
+`uv run cli/dmin_tables.py nested dmin_f99_m12 dmin_f99_m3`
+
+### dmin_f99_m12 against dmin_f99_m3: the shorter deadline as a cut
+
+| shared_trials | outcome_as_cut_long_trial | both_succeed | same_finish_when_both_succeed |
+|---|---|---|---|
+| 10360 | 1.0 | 9882 | 1.0 |
+
+`uv run cli/dmin_tables.py spread dmin_f99_m6 --layout outlier_rich --n 566`
+
+### dmin_f99_m6: quartiles of the finish time
+
+| layout | n | d | trials | q25_s | median_s | q75_s |
+|---|---|---|---|---|---|---|
+| outlier_rich | 566 | 3 | 174 | 1195.5 | 1281.5 | 1372.2 |
+| outlier_rich | 566 | 4 | 170 | 997.8 | 1041.5 | 1112.2 |
+| outlier_rich | 566 | 5 | 185 | 885.0 | 924.0 | 977.0 |
+| outlier_rich | 566 | 6 | 80 | 746.0 | 797.5 | 860.2 |
+| outlier_rich | 566 | 7 | 198 | 682.2 | 711.0 | 755.8 |
+| outlier_rich | 566 | 8 | 197 | 642.0 | 669.0 | 719.0 |
+| outlier_rich | 566 | 10 | 196 | 597.0 | 627.0 | 1066.5 |
+| outlier_rich | 566 | 11 | 197 | 594.0 | 634.0 | 1144.0 |
+| outlier_rich | 566 | 12 | 192 | 609.0 | 1047.5 | 1160.0 |
+| outlier_rich | 566 | 16 | 188 | 617.8 | 1111.0 | 1204.0 |
+| outlier_rich | 566 | 24 | 189 | 1023.0 | 1138.0 | 1228.0 | 
+
+`uv run cli/dmin_tables.py spread dmin_f99_big_cap --layout compact`
+
+### dmin_f99_big_cap: quartiles of the finish time
+
+| layout | n | d | trials | q25_s | median_s | q75_s |
+|---|---|---|---|---|---|---|
+| compact | 800 | 1 | 60 | 581.0 | 585.0 | 587.0 |
+| compact | 800 | 2 | 60 | 554.0 | 557.0 | 560.0 |
+| compact | 800 | 3 | 60 | 552.0 | 555.0 | 558.0 |
+| compact | 800 | 4 | 60 | 551.0 | 553.0 | 558.0 |
+| compact | 800 | 6 | 60 | 549.0 | 552.0 | 556.0 |
+| compact | 800 | 8 | 60 | 549.0 | 551.5 | 554.2 |
+| compact | 800 | 12 | 60 | 548.0 | 550.0 | 553.0 |
+| compact | 1131 | 1 | 60 | 3808.2 | 3837.5 | 3860.0 |
+| compact | 1131 | 2 | 60 | 1362.8 | 1367.0 | 1372.0 |
+| compact | 1131 | 3 | 60 | 1345.0 | 1349.5 | 1355.0 |
+| compact | 1131 | 4 | 60 | 1330.0 | 1334.0 | 1339.2 |
+| compact | 1131 | 6 | 60 | 1299.0 | 1304.0 | 1308.0 |
+| compact | 1131 | 8 | 60 | 1276.0 | 1282.0 | 1288.0 |
+| compact | 1131 | 12 | 60 | 1248.0 | 1255.0 | 1264.0 |
+| compact | 1600 | 1 | 4 | 5543.2 | 5570.0 | 5597.2 |
+| compact | 1600 | 2 | 60 | 1773.8 | 1781.0 | 1788.2 |
+| compact | 1600 | 3 | 60 | 1758.5 | 1766.0 | 1771.2 |
+| compact | 1600 | 4 | 60 | 1741.0 | 1749.0 | 1754.2 |
+| compact | 1600 | 6 | 60 | 1704.5 | 1711.5 | 1720.0 |
+| compact | 1600 | 8 | 60 | 1680.0 | 1687.5 | 1693.0 |
+| compact | 1600 | 12 | 60 | 1639.2 | 1647.5 | 1657.2 | 
+
+`uv run cli/dmin_tables.py dsat dmin_f99_big_cap`
+
+### dmin_f99_big_cap: D_sat
+
+| layout | 800 | 1131 | 1600 |
+|---|---|---|---|
+| compact | 2 | 6 | 6 |
+| wide | [12] | 10-12 | - | 
+
+| layout | slope_range | n_used | n_left_out |
+|---|---|---|---|
+| compact | 1.58 to 1.58 | 800 1131 1600 | - |
+| wide | - | 1131 | 800 1600 | 
+
+`uv run cli/dmin_tables.py spread lama_r50_inf --n 400`
+
+### lama_r50_inf: quartiles of the finish time
+
+| layout | n | d | trials | q25_s | median_s | q75_s |
+|---|---|---|---|---|---|---|
+| uniform | 400 | 17 | 60 | 1148.7 | 1231.7 | 1331.8 |
+| uniform | 400 | 18 | 60 | 723.8 | 773.2 | 806.2 |
+| uniform | 400 | 19 | 60 | 541.4 | 564.9 | 605.3 |
+| uniform | 400 | 20 | 60 | 436.2 | 451.3 | 477.8 |
+| uniform | 400 | 21 | 60 | 361.3 | 373.5 | 389.9 |
+| uniform | 400 | 22 | 60 | 311.0 | 323.0 | 333.5 |
+| uniform | 400 | 23 | 60 | 272.6 | 281.0 | 289.0 |
+| uniform | 400 | 24 | 60 | 238.8 | 248.6 | 257.1 |
+| uniform | 400 | 25 | 60 | 214.0 | 221.8 | 227.7 | 
+
+`uv run cli/dmin_tables.py dsat lama_r50_inf lama_r50`
+
+### lama_r50_inf: D_sat
+
+| layout | 1 | 4 | 9 | 16 | 25 | 36 | 49 | 64 | 81 | 100 | 121 | 144 | 169 | 196 | 225 | 256 | 289 | 324 | 361 | 400 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| uniform | 4-25 | 6-25 | 11-25 | 12-25 | 13-25 | 15-25 | 16-25 | 20-25 | 23-25 | 24-25 | 24-25 | 24-25 | [25] | [25] | [25] | [25] | [25] | [25] | [25] | [25] | 
+
+| layout | slope_range | n_used | n_left_out |
+|---|---|---|---|
+| uniform | -0.03 to 0.41 | 1 4 9 16 25 36 49 64 81 100 121 144 | 169 196 225 256 289 324 361 400 | 
+
+### lama_r50: D_sat
+
+| layout | 1 | 4 | 9 | 16 | 25 | 36 | 49 | 64 | 81 | 100 | 121 | 144 | 169 | 196 | 225 | 256 | 289 | 324 | 361 | 400 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| uniform | - | - | - | - | - | - | - | - | - | - | - | 25 | 24-25 | [25] | [25] | [25] | [25] | [25] | [25] | [25] | 
+
+| layout | slope_range | n_used | n_left_out |
+|---|---|---|---|
+| uniform | -0.26 to 0.00 | 144 169 | 1 4 9 16 25 36 49 64 81 100 121 196 225 256 289 324 361 400 | 
+
+`uv run cli/dmin_tables.py curve dmin_f99_m6 dmin_f99_indep dmin_f99_view_range dmin_f99_view_comm --layout split --n 200`
+
+### split, N = 200: cell by cell across folders
+
+| folder | group | d | successes | rate | reliability | median_finish_s |
+|---|---|---|---|---|---|---|
+| dmin_f99_m6 | strombom_multi\|split\|N=200 | 1 | 183/200 | 0.92 | undecided | 425.0 |
+| dmin_f99_m6 | strombom_multi\|split\|N=200 | 2 | 190/200 | 0.95 | undecided | 365.5 |
+| dmin_f99_m6 | strombom_multi\|split\|N=200 | 3 | 184/200 | 0.92 | undecided | 578.5 |
+| dmin_f99_m6 | strombom_multi\|split\|N=200 | 4 | 38/50 | 0.76 | unreliable | 341.0 |
+| dmin_f99_m6 | strombom_multi\|split\|N=200 | 6 | 13/20 | 0.65 | unreliable | 652.0 |
+| dmin_f99_m6 | strombom_multi\|split\|N=200 | 7 | 178/200 | 0.89 | undecided | 657.5 |
+| dmin_f99_m6 | strombom_multi\|split\|N=200 | 8 | 180/200 | 0.9 | undecided | 677.0 |
+| dmin_f99_m6 | strombom_multi\|split\|N=200 | 10 | 176/200 | 0.88 | undecided | 676.0 |
+| dmin_f99_m6 | strombom_multi\|split\|N=200 | 11 | 176/200 | 0.88 | undecided | 703.0 |
+| dmin_f99_m6 | strombom_multi\|split\|N=200 | 12 | 38/50 | 0.76 | unreliable | 699.0 |
+| dmin_f99_m6 | strombom_multi\|split\|N=200 | 16 | 55/70 | 0.79 | unreliable | 703.0 |
+| dmin_f99_m6 | strombom_multi\|split\|N=200 | 24 | 12/20 | 0.6 | unreliable | 676.5 |
+| dmin_f99_indep | independent\|split\|N=200 | 1 | 183/200 | 0.92 | undecided | 425.0 |
+| dmin_f99_indep | independent\|split\|N=200 | 2 | 188/200 | 0.94 | undecided | 423.0 |
+| dmin_f99_indep | independent\|split\|N=200 | 3 | 182/190 | 0.96 | reliable | 295.0 |
+| dmin_f99_indep | independent\|split\|N=200 | 4 | 79/80 | 0.99 | reliable | 299.0 |
+| dmin_f99_indep | independent\|split\|N=200 | 5 | 196/200 | 0.98 | reliable | 278.0 |
+| dmin_f99_indep | independent\|split\|N=200 | 6 | 194/200 | 0.97 | reliable | 286.0 |
+| dmin_f99_indep | independent\|split\|N=200 | 8 | 199/200 | 0.99 | reliable | 276.0 |
+| dmin_f99_indep | independent\|split\|N=200 | 12 | 200/200 | 1.0 | reliable | 266.0 |
+| dmin_f99_indep | independent\|split\|N=200 | 16 | 198/200 | 0.99 | reliable | 265.0 |
+| dmin_f99_indep | independent\|split\|N=200 | 24 | 200/200 | 1.0 | reliable | 265.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=0.0\|N=200 | 1 | 169/200 | 0.84 | undecided | 420.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=0.0\|N=200 | 2 | 186/200 | 0.93 | undecided | 357.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=0.0\|N=200 | 3 | 176/200 | 0.88 | undecided | 564.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=0.0\|N=200 | 4 | 123/150 | 0.82 | unreliable | 602.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=0.0\|N=200 | 5 | 186/200 | 0.93 | undecided | 647.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=0.0\|N=200 | 6 | 173/200 | 0.86 | undecided | 644.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=0.0\|N=200 | 7 | 172/200 | 0.86 | undecided | 658.5 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=0.0\|N=200 | 8 | 81/100 | 0.81 | unreliable | 678.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=0.0\|N=200 | 12 | 72/90 | 0.8 | unreliable | 696.5 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=0.0\|N=200 | 16 | 107/130 | 0.82 | unreliable | 680.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=100.0\|N=200 | 1 | 189/200 | 0.94 | undecided | 366.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=100.0\|N=200 | 2 | 4/10 | 0.4 | unreliable | 622.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=100.0\|N=200 | 3 | 186/200 | 0.93 | undecided | 566.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=100.0\|N=200 | 4 | 131/160 | 0.82 | unreliable | 626.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=100.0\|N=200 | 5 | 60/60 | 1.0 | reliable | 251.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=100.0\|N=200 | 6 | 60/60 | 1.0 | reliable | 250.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=100.0\|N=200 | 8 | 88/90 | 0.98 | reliable | 259.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=100.0\|N=200 | 12 | 79/80 | 0.99 | reliable | 258.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=100.0\|N=200 | 16 | 60/60 | 1.0 | reliable | 257.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=15.0\|N=200 | 1 | 0/10 | 0.0 | unreliable |  |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=15.0\|N=200 | 2 | 5/10 | 0.5 | unreliable | 641.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=15.0\|N=200 | 3 | 182/200 | 0.91 | undecided | 249.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=15.0\|N=200 | 4 | 171/200 | 0.85 | undecided | 266.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=15.0\|N=200 | 6 | 187/200 | 0.94 | undecided | 259.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=15.0\|N=200 | 8 | 182/200 | 0.91 | undecided | 261.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=15.0\|N=200 | 12 | 185/200 | 0.93 | undecided | 264.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=15.0\|N=200 | 16 | 188/200 | 0.94 | undecided | 264.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=30.0\|N=200 | 1 | 0/10 | 0.0 | unreliable |  |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=30.0\|N=200 | 2 | 186/200 | 0.93 | undecided | 378.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=30.0\|N=200 | 3 | 60/60 | 1.0 | reliable | 350.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=30.0\|N=200 | 4 | 60/60 | 1.0 | reliable | 241.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=30.0\|N=200 | 6 | 60/60 | 1.0 | reliable | 245.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=30.0\|N=200 | 8 | 60/60 | 1.0 | reliable | 249.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=30.0\|N=200 | 12 | 60/60 | 1.0 | reliable | 253.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=30.0\|N=200 | 16 | 60/60 | 1.0 | reliable | 254.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=45.0\|N=200 | 1 | 0/10 | 0.0 | unreliable |  |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=45.0\|N=200 | 2 | 0/10 | 0.0 | unreliable |  |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=45.0\|N=200 | 3 | 60/60 | 1.0 | reliable | 243.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=45.0\|N=200 | 4 | 60/60 | 1.0 | reliable | 237.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=45.0\|N=200 | 6 | 60/60 | 1.0 | reliable | 256.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=45.0\|N=200 | 8 | 60/60 | 1.0 | reliable | 255.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=45.0\|N=200 | 12 | 60/60 | 1.0 | reliable | 256.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=45.0\|N=200 | 16 | 60/60 | 1.0 | reliable | 256.5 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=65.0\|N=200 | 1 | 3/10 | 0.3 | unreliable | 790.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=65.0\|N=200 | 2 | 4/10 | 0.4 | unreliable | 322.5 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=65.0\|N=200 | 3 | 60/60 | 1.0 | reliable | 244.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=65.0\|N=200 | 4 | 60/60 | 1.0 | reliable | 259.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=65.0\|N=200 | 6 | 60/60 | 1.0 | reliable | 260.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=65.0\|N=200 | 8 | 60/60 | 1.0 | reliable | 260.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=65.0\|N=200 | 12 | 60/60 | 1.0 | reliable | 259.0 |
+| dmin_f99_view_range | strombom_multi\|split\|sensing_range=65.0\|N=200 | 16 | 60/60 | 1.0 | reliable | 260.0 |
+| dmin_f99_view_comm | strombom_multi\|split\|communication=neighbour\|N=200 | 1 | 3/10 | 0.3 | unreliable | 790.0 |
+| dmin_f99_view_comm | strombom_multi\|split\|communication=neighbour\|N=200 | 2 | 11/20 | 0.55 | unreliable | 589.0 |
+| dmin_f99_view_comm | strombom_multi\|split\|communication=neighbour\|N=200 | 3 | 88/90 | 0.98 | reliable | 556.0 |
+| dmin_f99_view_comm | strombom_multi\|split\|communication=neighbour\|N=200 | 4 | 60/60 | 1.0 | reliable | 259.0 |
+| dmin_f99_view_comm | strombom_multi\|split\|communication=neighbour\|N=200 | 5 | 60/60 | 1.0 | reliable | 259.0 |
+| dmin_f99_view_comm | strombom_multi\|split\|communication=neighbour\|N=200 | 6 | 81/100 | 0.81 | unreliable | 608.0 |
+| dmin_f99_view_comm | strombom_multi\|split\|communication=neighbour\|N=200 | 7 | 60/60 | 1.0 | reliable | 267.5 |
+| dmin_f99_view_comm | strombom_multi\|split\|communication=neighbour\|N=200 | 8 | 88/90 | 0.98 | reliable | 260.5 |
+| dmin_f99_view_comm | strombom_multi\|split\|communication=neighbour\|N=200 | 12 | 60/60 | 1.0 | reliable | 259.0 |
+| dmin_f99_view_comm | strombom_multi\|split\|communication=neighbour\|N=200 | 16 | 60/60 | 1.0 | reliable | 261.0 |
+| dmin_f99_view_comm | strombom_multi\|split\|communication=shared\|N=200 | 1 | 3/10 | 0.3 | unreliable | 790.0 |
+| dmin_f99_view_comm | strombom_multi\|split\|communication=shared\|N=200 | 2 | 5/10 | 0.5 | unreliable | 492.0 |
+| dmin_f99_view_comm | strombom_multi\|split\|communication=shared\|N=200 | 3 | 88/90 | 0.98 | reliable | 565.0 |
+| dmin_f99_view_comm | strombom_multi\|split\|communication=shared\|N=200 | 4 | 13/20 | 0.65 | unreliable | 551.0 |
+| dmin_f99_view_comm | strombom_multi\|split\|communication=shared\|N=200 | 6 | 27/40 | 0.68 | unreliable | 645.0 |
+| dmin_f99_view_comm | strombom_multi\|split\|communication=shared\|N=200 | 8 | 107/130 | 0.82 | unreliable | 659.0 |
+| dmin_f99_view_comm | strombom_multi\|split\|communication=shared\|N=200 | 9 | 55/70 | 0.79 | unreliable | 669.0 |
+| dmin_f99_view_comm | strombom_multi\|split\|communication=shared\|N=200 | 10 | 170/200 | 0.85 | undecided | 676.0 |
+| dmin_f99_view_comm | strombom_multi\|split\|communication=shared\|N=200 | 12 | 171/200 | 0.85 | undecided | 688.0 |
+| dmin_f99_view_comm | strombom_multi\|split\|communication=shared\|N=200 | 13 | 29/40 | 0.72 | unreliable | 704.0 |
+| dmin_f99_view_comm | strombom_multi\|split\|communication=shared\|N=200 | 14 | 131/160 | 0.82 | unreliable | 678.0 |
+| dmin_f99_view_comm | strombom_multi\|split\|communication=shared\|N=200 | 16 | 72/90 | 0.8 | unreliable | 689.0 | 
+
+`uv run cli/dmin_tables.py curve dmin_f99_hold dmin_f99_hold_spacing --layout split --n 200`
+
+### split, N = 200: cell by cell across folders
+
+| folder | group | d | successes | rate | reliability | median_finish_s |
+|---|---|---|---|---|---|---|
+| dmin_f99_hold | strombom_multi\|split\|N=200 | 1 | 98/120 | 0.82 | unreliable | 563.5 |
+| dmin_f99_hold | strombom_multi\|split\|N=200 | 2 | 171/200 | 0.85 | undecided | 504.0 |
+| dmin_f99_hold | strombom_multi\|split\|N=200 | 3 | 45/60 | 0.75 | unreliable | 721.0 |
+| dmin_f99_hold | strombom_multi\|split\|N=200 | 4 | 10/20 | 0.5 | unreliable | 748.5 |
+| dmin_f99_hold | strombom_multi\|split\|N=200 | 6 | 5/10 | 0.5 | unreliable | 792.0 |
+| dmin_f99_hold | strombom_multi\|split\|N=200 | 7 | 19/30 | 0.63 | unreliable | 773.0 |
+| dmin_f99_hold | strombom_multi\|split\|N=200 | 8 | 11/20 | 0.55 | unreliable | 785.0 |
+| dmin_f99_hold | strombom_multi\|split\|N=200 | 9 | 3/10 | 0.3 | unreliable | 790.0 |
+| dmin_f99_hold | strombom_multi\|split\|N=200 | 10 | 12/20 | 0.6 | unreliable | 773.5 |
+| dmin_f99_hold | strombom_multi\|split\|N=200 | 11 | 4/10 | 0.4 | unreliable | 793.5 |
+| dmin_f99_hold | strombom_multi\|split\|N=200 | 12 | 1/10 | 0.1 | unreliable | 775.0 |
+| dmin_f99_hold | strombom_multi\|split\|N=200 | 13 | 4/10 | 0.4 | unreliable | 823.0 |
+| dmin_f99_hold | strombom_multi\|split\|N=200 | 16 | 2/10 | 0.2 | unreliable | 614.0 |
+| dmin_f99_hold | strombom_multi\|split\|N=200 | 24 | 4/10 | 0.4 | unreliable | 738.5 |
+| dmin_f99_hold_spacing | strombom_multi\|split\|N=200 | 1 | 98/120 | 0.82 | unreliable | 563.5 |
+| dmin_f99_hold_spacing | strombom_multi\|split\|N=200 | 2 | 170/200 | 0.85 | undecided | 504.0 |
+| dmin_f99_hold_spacing | strombom_multi\|split\|N=200 | 3 | 21/30 | 0.7 | unreliable | 476.0 |
+| dmin_f99_hold_spacing | strombom_multi\|split\|N=200 | 4 | 4/10 | 0.4 | unreliable | 470.5 |
+| dmin_f99_hold_spacing | strombom_multi\|split\|N=200 | 6 | 1/10 | 0.1 | unreliable | 817.0 |
+| dmin_f99_hold_spacing | strombom_multi\|split\|N=200 | 7 | 1/10 | 0.1 | unreliable | 798.0 |
+| dmin_f99_hold_spacing | strombom_multi\|split\|N=200 | 8 | 1/10 | 0.1 | unreliable | 429.0 |
+| dmin_f99_hold_spacing | strombom_multi\|split\|N=200 | 9 | 0/10 | 0.0 | unreliable |  |
+| dmin_f99_hold_spacing | strombom_multi\|split\|N=200 | 10 | 0/10 | 0.0 | unreliable |  |
+| dmin_f99_hold_spacing | strombom_multi\|split\|N=200 | 11 | 0/10 | 0.0 | unreliable |  |
+| dmin_f99_hold_spacing | strombom_multi\|split\|N=200 | 12 | 0/10 | 0.0 | unreliable |  |
+| dmin_f99_hold_spacing | strombom_multi\|split\|N=200 | 13 | 0/10 | 0.0 | unreliable |  |
+| dmin_f99_hold_spacing | strombom_multi\|split\|N=200 | 16 | 1/10 | 0.1 | unreliable | 422.0 |
+| dmin_f99_hold_spacing | strombom_multi\|split\|N=200 | 24 | 0/10 | 0.0 | unreliable |  | 
+
+`uv run cli/dmin_tables.py curve dmin_f99_hold --layout split --n 400`
+
+### split, N = 400: cell by cell across folders
+
+| folder | group | d | successes | rate | reliability | median_finish_s |
+|---|---|---|---|---|---|---|
+| dmin_f99_hold | strombom_multi\|split\|N=400 | 1 | 0/10 | 0.0 | unreliable |  |
+| dmin_f99_hold | strombom_multi\|split\|N=400 | 2 | 10/20 | 0.5 | unreliable | 1054.0 |
+| dmin_f99_hold | strombom_multi\|split\|N=400 | 3 | 5/10 | 0.5 | unreliable | 884.0 |
+| dmin_f99_hold | strombom_multi\|split\|N=400 | 4 | 12/20 | 0.6 | unreliable | 996.0 |
+| dmin_f99_hold | strombom_multi\|split\|N=400 | 6 | 35/50 | 0.7 | unreliable | 1090.0 |
+| dmin_f99_hold | strombom_multi\|split\|N=400 | 7 | 19/30 | 0.63 | unreliable | 1067.0 |
+| dmin_f99_hold | strombom_multi\|split\|N=400 | 8 | 5/10 | 0.5 | unreliable | 1103.0 |
+| dmin_f99_hold | strombom_multi\|split\|N=400 | 9 | 12/20 | 0.6 | unreliable | 1089.0 |
+| dmin_f99_hold | strombom_multi\|split\|N=400 | 10 | 5/10 | 0.5 | unreliable | 1116.0 |
+| dmin_f99_hold | strombom_multi\|split\|N=400 | 11 | 4/10 | 0.4 | unreliable | 1121.5 |
+| dmin_f99_hold | strombom_multi\|split\|N=400 | 12 | 11/20 | 0.55 | unreliable | 1159.0 |
+| dmin_f99_hold | strombom_multi\|split\|N=400 | 13 | 3/10 | 0.3 | unreliable | 1189.0 |
+| dmin_f99_hold | strombom_multi\|split\|N=400 | 16 | 10/20 | 0.5 | unreliable | 1176.5 |
+| dmin_f99_hold | strombom_multi\|split\|N=400 | 24 | 4/10 | 0.4 | unreliable | 1114.0 | 
+
+`uv run cli/dmin_tables.py curve dmin_f99_c2.0 --layout outlier_rich --n 200`
+
+### outlier_rich, N = 200: cell by cell across folders
+
+| folder | group | d | successes | rate | reliability | median_finish_s |
+|---|---|---|---|---|---|---|
+| dmin_f99_c2.0 | strombom_multi\|outlier_rich\|N=200 | 1 | 60/60 | 1.0 | reliable | 792.5 |
+| dmin_f99_c2.0 | strombom_multi\|outlier_rich\|N=200 | 2 | 60/60 | 1.0 | reliable | 406.0 |
+| dmin_f99_c2.0 | strombom_multi\|outlier_rich\|N=200 | 3 | 60/60 | 1.0 | reliable | 468.5 |
+| dmin_f99_c2.0 | strombom_multi\|outlier_rich\|N=200 | 4 | 60/60 | 1.0 | reliable | 462.5 |
+| dmin_f99_c2.0 | strombom_multi\|outlier_rich\|N=200 | 6 | 60/60 | 1.0 | reliable | 499.0 |
+| dmin_f99_c2.0 | strombom_multi\|outlier_rich\|N=200 | 8 | 60/60 | 1.0 | reliable | 512.0 |
+| dmin_f99_c2.0 | strombom_multi\|outlier_rich\|N=200 | 12 | 60/60 | 1.0 | reliable | 529.5 |
+| dmin_f99_c2.0 | strombom_multi\|outlier_rich\|N=200 | 16 | 60/60 | 1.0 | reliable | 508.0 |
+| dmin_f99_c2.0 | strombom_multi\|outlier_rich\|N=200 | 24 | 60/60 | 1.0 | reliable | 524.5 | 
+
+`uv run cli/dmin_tables.py curve dmin_f99_c2.0 --layout outlier_rich --n 400`
+
+### outlier_rich, N = 400: cell by cell across folders
+
+| folder | group | d | successes | rate | reliability | median_finish_s |
+|---|---|---|---|---|---|---|
+| dmin_f99_c2.0 | strombom_multi\|outlier_rich\|N=400 | 1 | 2/10 | 0.2 | unreliable | 2221.0 |
+| dmin_f99_c2.0 | strombom_multi\|outlier_rich\|N=400 | 2 | 60/60 | 1.0 | reliable | 894.0 |
+| dmin_f99_c2.0 | strombom_multi\|outlier_rich\|N=400 | 3 | 60/60 | 1.0 | reliable | 637.0 |
+| dmin_f99_c2.0 | strombom_multi\|outlier_rich\|N=400 | 4 | 60/60 | 1.0 | reliable | 516.5 |
+| dmin_f99_c2.0 | strombom_multi\|outlier_rich\|N=400 | 6 | 60/60 | 1.0 | reliable | 673.5 |
+| dmin_f99_c2.0 | strombom_multi\|outlier_rich\|N=400 | 8 | 60/60 | 1.0 | reliable | 692.0 |
+| dmin_f99_c2.0 | strombom_multi\|outlier_rich\|N=400 | 12 | 60/60 | 1.0 | reliable | 702.5 |
+| dmin_f99_c2.0 | strombom_multi\|outlier_rich\|N=400 | 16 | 60/60 | 1.0 | reliable | 725.5 |
+| dmin_f99_c2.0 | strombom_multi\|outlier_rich\|N=400 | 24 | 60/60 | 1.0 | reliable | 710.0 | 
+
+`uv run cli/dmin_tables.py labels dmin_m12 dmin_m6 dmin_m3 dmin_f99_m12 dmin_f99_m6 dmin_f99_m3`
+
+### dmin_m12: failed trials by failure label
+
+| layout | flock_escaped | oscillation | scatter | stuck | timeout | failed |
+|---|---|---|---|---|---|---|
+| outlier_rich | 33 | 12 | 6 | 2 | 31 | 84 |
+| split | 9 | 39 | 5 | 4 | 43 | 100 |
+| wide | 8 | 6 | 0 | 2 | 35 | 51 | 
+
+### dmin_m6: failed trials by failure label
+
+| layout | flock_escaped | oscillation | scatter | stuck | timeout | failed |
+|---|---|---|---|---|---|---|
+| outlier_rich | 42 | 11 | 9 | 43 | 230 | 335 |
+| split | 14 | 11 | 0 | 58 | 133 | 216 |
+| wide | 36 | 38 | 4 | 25 | 235 | 338 | 
+
+### dmin_m3: failed trials by failure label
+
+| layout | flock_escaped | scatter | split | stuck | timeout | failed |
+|---|---|---|---|---|---|---|
+| compact | 0 | 0 | 0 | 0 | 1 | 1 |
+| outlier_rich | 16 | 22 | 0 | 8 | 232 | 278 |
+| split | 2 | 24 | 0 | 0 | 199 | 225 |
+| wide | 11 | 12 | 4 | 7 | 172 | 206 | 
+
+### dmin_f99_m12: failed trials by failure label
+
+| layout | flock_escaped | oscillation | scatter | split | stuck | timeout | failed |
+|---|---|---|---|---|---|---|---|
+| outlier_rich | 66 | 2 | 15 | 0 | 1 | 29 | 113 |
+| split | 17 | 4 | 25 | 1 | 6 | 9 | 62 |
+| wide | 22 | 2 | 16 | 2 | 3 | 15 | 60 | 
+
+### dmin_f99_m6: failed trials by failure label
+
+| layout | flock_escaped | oscillation | scatter | split | stuck | timeout | failed |
+|---|---|---|---|---|---|---|---|
+| outlier_rich | 53 | 0 | 29 | 0 | 39 | 231 | 352 |
+| split | 57 | 7 | 12 | 4 | 207 | 728 | 1015 |
+| wide | 24 | 1 | 11 | 8 | 10 | 90 | 144 | 
+
+### dmin_f99_m3: failed trials by failure label
+
+| layout | flock_escaped | scatter | split | stuck | timeout | failed |
+|---|---|---|---|---|---|---|
+| outlier_rich | 16 | 22 | 0 | 12 | 256 | 306 |
+| split | 2 | 24 | 0 | 0 | 160 | 186 |
+| wide | 13 | 12 | 4 | 9 | 54 | 92 | 
+
+`uv run cli/dmin_tables.py pace dmin_f99_m6 --n 400`
+
+### dmin_f99_m6: dog speed and dogs standing still
+
+| layout | n | d | trials | median_dog_speed | median_share_stopped |
+|---|---|---|---|---|---|
+| compact | 400 | 1 | 60 | 1.5 | 0.0 |
+| compact | 400 | 2 | 60 | 1.5 | 0.0 |
+| compact | 400 | 3 | 60 | 1.5 | 0.0 |
+| compact | 400 | 4 | 60 | 1.5 | 0.0 |
+| compact | 400 | 6 | 60 | 1.5 | 0.0 |
+| compact | 400 | 8 | 60 | 1.5 | 0.0 |
+| compact | 400 | 12 | 60 | 1.5 | 0.0 |
+| compact | 400 | 16 | 60 | 1.5 | 0.0 |
+| compact | 400 | 24 | 60 | 1.5 | 0.0 |
+| outlier_rich | 400 | 2 | 4 | 1.49 | 0.01 |
+| outlier_rich | 400 | 3 | 88 | 1.47 | 0.02 |
+| outlier_rich | 400 | 4 | 79 | 1.45 | 0.03 |
+| outlier_rich | 400 | 5 | 79 | 1.44 | 0.04 |
+| outlier_rich | 400 | 6 | 196 | 1.46 | 0.03 |
+| outlier_rich | 400 | 8 | 198 | 1.47 | 0.02 |
+| outlier_rich | 400 | 12 | 186 | 1.47 | 0.02 |
+| outlier_rich | 400 | 16 | 198 | 1.48 | 0.02 |
+| outlier_rich | 400 | 24 | 198 | 1.47 | 0.02 |
+| split | 400 | 2 | 29 | 1.4 | 0.07 |
+| split | 400 | 3 | 20 | 1.34 | 0.11 |
+| split | 400 | 4 | 81 | 1.33 | 0.12 |
+| split | 400 | 5 | 184 | 1.29 | 0.14 |
+| split | 400 | 6 | 176 | 1.24 | 0.18 |
+| split | 400 | 8 | 178 | 1.22 | 0.19 |
+| split | 400 | 9 | 177 | 1.21 | 0.19 |
+| split | 400 | 10 | 149 | 1.22 | 0.19 |
+| split | 400 | 12 | 167 | 1.2 | 0.2 |
+| split | 400 | 14 | 21 | 1.21 | 0.2 |
+| split | 400 | 15 | 178 | 1.2 | 0.2 |
+| split | 400 | 16 | 172 | 1.2 | 0.2 |
+| split | 400 | 18 | 180 | 1.2 | 0.2 |
+| split | 400 | 19 | 175 | 1.2 | 0.2 |
+| split | 400 | 20 | 29 | 1.2 | 0.2 |
+| split | 400 | 24 | 55 | 1.2 | 0.2 |
+| wide | 400 | 2 | 187 | 1.48 | 0.02 |
+| wide | 400 | 3 | 60 | 1.45 | 0.03 |
+| wide | 400 | 4 | 79 | 1.45 | 0.04 |
+| wide | 400 | 5 | 127 | 1.48 | 0.02 |
+| wide | 400 | 6 | 79 | 1.49 | 0.01 |
+| wide | 400 | 8 | 60 | 1.49 | 0.01 |
+| wide | 400 | 12 | 60 | 1.49 | 0.01 |
+| wide | 400 | 16 | 90 | 1.49 | 0.01 |
+| wide | 400 | 24 | 100 | 1.49 | 0.01 | 
 
