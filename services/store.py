@@ -4,6 +4,9 @@
       protocol.yaml           merged protocol and canonical values, as run, plus
                               method_config: every parameter each method ran with
       provenance.json         protocol id and physics hash
+      runs.jsonl              one line per run sitting: when, the code it ran (hash, commit,
+                              library versions) and the merged protocol of that sitting, since
+                              protocol.yaml stays as the folder was created
       calibration.json        R_f(N) per method, with the physics hash it belongs to
       trials.jsonl            one JSON line per finished trial, appended as trials finish
       trials.jsonl.gz         the committed copy of trials.jsonl, which can pass GitHub's
@@ -17,7 +20,8 @@
       status.json             progress of the adaptive run
       timeseries/             per-tick Parquet for the first seeds of every cell
 
-Only the campaign process writes here; workers return their rows to it. ``open`` takes an
+Only the campaign process writes here, except the per-trial Parquet files, which each worker
+writes under its trial's own name; workers return their rows to it. ``open`` takes an
 advisory lock on .lock for the whole run, so a second campaign on the folder is refused. A
 kill in the middle of a write leaves at worst a cut last line, which is dropped on the next
 load.
@@ -38,7 +42,7 @@ import pandas as pd
 import yaml
 
 from protocols.packaging.generated_notice import NOTICE_LINE, with_json_notice, write_csv
-from protocols.packaging.provenance import read_provenance, write_provenance
+from protocols.packaging.provenance import code_identity, read_provenance, write_provenance
 
 from .protocol import Protocol
 
@@ -72,6 +76,11 @@ def _read_jsonl(path: Path, repair: bool) -> list[dict[str, Any]]:
             if repair:
                 path.write_text("\n".join(lines[:-1]) + "\n")
     return rows
+
+
+def _archive(protocol: Protocol) -> dict[str, Any]:
+    """The merged protocol and every method parameter it runs with."""
+    return {**protocol.resolved, "method_config": protocol.method_config()}
 
 
 def _pack(plain: Path, packed: Path) -> None:
@@ -156,10 +165,32 @@ class CampaignStore:
                 raise PhysicsMismatch(f"{ran}, {now}. Use a new output folder for changed physics.")
             return
         self.timeseries_dir.mkdir(exist_ok=True)
-        archive = {**protocol.resolved, "method_config": protocol.method_config()}
-        body = yaml.safe_dump(archive, sort_keys=False)
+        body = yaml.safe_dump(_archive(protocol), sort_keys=False)
         (self.root / "protocol.yaml").write_text(f"{NOTICE_LINE}\n{body}")
         write_provenance(provenance, protocol_id=protocol.protocol_id, physics_hash=physics_hash)
+
+    def record_sitting(self, protocol: Protocol) -> tuple[dict[str, Any] | None, dict[str, Any]]:
+        """Append this sitting to runs.jsonl and return (previous sitting, this one).
+
+        A folder grows across sittings (more flock sizes, a changed strategy, edited code)
+        while protocol.yaml keeps its first form, so each sitting is recorded here. Trials are
+        appended in order, so the log lines a sitting starts after tell which trials ran on
+        its code. Folders from before this log have no previous sitting.
+        """
+        path = self.root / "runs.jsonl"
+        new = not path.exists()
+        earlier = [] if new else _read_jsonl(path, repair=True)
+        sitting = {
+            "started_at": datetime.now(UTC).isoformat(),
+            "trials_before": len(self.load_rows()),
+            **code_identity(),
+            "protocol": _archive(protocol),
+        }
+        with path.open("a") as f:
+            if new:
+                f.write(NOTICE_LINE + "\n")
+            f.write(json.dumps(sitting, default=str) + "\n")
+        return (earlier[-1] if earlier else None), sitting
 
     def is_running(self) -> bool:
         """Whether a campaign process holds the folder's lock right now."""

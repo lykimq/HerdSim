@@ -106,6 +106,17 @@ def test_a_clone_with_only_the_packed_trials_keeps_them(tmp_path):
     assert clone.trials_gz.read_bytes() == packed  # same trials, same bytes: no git churn
 
 
+def test_each_sitting_records_its_code_and_protocol(tmp_path, monkeypatch):
+    """The physics hash ignores code, so a resume on edited trial code must leave a trace."""
+    store = _store(tmp_path)
+    first, _ = store.record_sitting(protocol_with())
+    monkeypatch.setattr("services.store.code_identity", lambda: {"code_hash": "edited"})
+    before, now = store.record_sitting(protocol_with())
+    assert first is None
+    assert before is not None and before["code_hash"] != now["code_hash"] == "edited"
+    assert "flock_sizes" in now["protocol"]
+
+
 def test_reopening_with_other_physics_or_protocol_is_refused(tmp_path):
     _store(tmp_path, "abc").close()
     with pytest.raises(PhysicsMismatch, match="physics"):

@@ -48,7 +48,7 @@ A protocol names its id, its output folder, the methods with their time limits, 
 
 Two further keys appear in a few protocols. `factors` sweeps canonical settings over several values; two or more are crossed (`dmin_f99_hold_share.yaml` runs every pair of `goal_radius_multiple` and `success_fraction`), and each value or pair gets its own set of D curves (one curve is one layout and flock size with every team size on it). Only settings that act per trial can be swept, because calibration runs once per protocol: a method parameter, or a setting that acts through the flock radius, has to be its own protocol (`dmin_f99_view_range.yaml` sweeps `sensing_range`). A method's `calibrate_as` lets it borrow another method's dog for the calibration, so that two methods differing only in their dog rule run the same task (`dmin_fat.yaml` calibrates as `strombom_multi`); it changes the field every trial runs on, so it is part of the physics hash.
 
-A results folder records a **physics hash**: a digest of everything that changes a trial's outcome, which is the task, every setting not at its neutral value, each method's parameters and time limit, the set of layouts and the largest team size. A run whose hash differs from the folder's is refused, so trials from two different physics never share a folder. The flock sizes, the smaller team sizes and the seed rules are left out, so a protocol can grow and still resume.
+A results folder records a **physics hash**: a digest of everything that changes a trial's outcome, which is the task, every setting not at its neutral value, each method's parameters and time limit, the set of layouts and the largest team size. A run whose hash differs from the folder's is refused, so trials from two different physics never share a folder. The flock sizes, the smaller team sizes, the factor levels and the seed rules are left out, so a protocol can grow and still resume. The hash covers settings only; the code each run used is recorded in `runs.jsonl`, and a resume after a change to the trial code prints a warning.
 
 A full protocol (`dmin_m12.yaml`, trimmed):
 
@@ -127,12 +127,13 @@ Every run writes one folder, `results/<protocol_id>/`:
 
 ```text
 results/<protocol_id>/
-├── protocol.yaml         The protocol as run (canonical defaults + overrides), and every method parameter
+├── protocol.yaml         The protocol as first run (canonical defaults + overrides), and every method parameter
 ├── provenance.json       Protocol id, physics hash and creation time
+├── runs.jsonl            One line per run sitting: start time, trials already in the log, code hash, commit, library versions, merged protocol
 ├── calibration.json      Calibrated flock radius R_f(N) per method (not written for the gather task)
 ├── trials.jsonl          One line per finished trial, appended as trials finish (local, not in git)
 ├── trials.jsonl.gz       The copy git keeps, packed when a run ends and unpacked when a clone has only it
-├── trials.csv            The same rows as a table, rewritten after each round
+├── trials.csv            The rows of the groups the protocol lists, as a table, rewritten after each round
 ├── frontier_cells.csv    Per cell: success interval, reliability, finish times, zone
 ├── frontier_groups.csv   Per group (one D curve): D_min, D_min_low, D_best, D_sat, D_crowd, D_overcrowd, D_max
 ├── status.json           Progress of the run: rounds, trials, open cells, why it stopped

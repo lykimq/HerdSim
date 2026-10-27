@@ -25,6 +25,7 @@ from typing import Any
 import pandas as pd
 
 from analysis.results import flock_radii, read_trials
+from protocols.packaging.provenance import read_provenance, stable_hash
 from sim.core.simulation_runner import RunResult, run_trial
 from sim.core.simulation_state import SimulationState
 
@@ -105,9 +106,18 @@ class StoredRun:
 
 
 def open_run(name: str) -> StoredRun:
-    """A finished run by protocol id or folder path."""
+    """A finished run by protocol id or folder path.
+
+    Configs are rebuilt from today's protocol file, so the run is refused when that file now
+    gives other physics than the folder ran: its replays would be other trials.
+    """
     folder = results_folder(name)
-    return StoredRun(load_protocol(name, output=folder), flock_radii(folder), read_trials(folder))
+    protocol = load_protocol(name, output=folder)
+    ran = read_provenance(folder / "provenance.json")["physics_hash"]
+    now = stable_hash(protocol.physics())
+    if ran != now:
+        raise ReplayMismatch(f"{folder} ran with physics {ran}, the protocol now gives {now}")
+    return StoredRun(protocol, flock_radii(folder), read_trials(folder))
 
 
 def run_replays(

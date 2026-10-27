@@ -8,17 +8,38 @@ so adding a layout or a D above the old maximum changes the physics and needs a 
 folder. The flock sizes, the smaller D and the stopping rules are not hashed, so a campaign
 can add flock sizes, intermediate D or seeds and still resume. A folder whose hash differs
 from the protocol is refused.
+
+The hash says nothing about the code. ``code_identity`` records that per run sitting, so a
+resume after a change to the trial code is logged and can be traced.
 """
 
 from __future__ import annotations
 
 import hashlib
 import json
+import platform
+import subprocess
 from datetime import UTC, datetime
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import Any
 
 from .generated_notice import with_json_notice
+
+REPO = Path(__file__).resolve().parents[2]
+# The source that decides a trial's outcome and its row: the engine, the row packaging,
+# the cell config and calibration that size each trial's task, the protocol code that sets
+# its time limit, and the runner that adds the identity columns to the row.
+TRIAL_CODE = (
+    "sim",
+    "protocols/packaging",
+    "services/cells.py",
+    "services/calibration.py",
+    "services/protocol.py",
+    "services/runner.py",
+)
+# Libraries whose numerics or output reach a trial or its row.
+LIBRARIES = ("numpy", "scipy", "pandas", "pyarrow")
 
 
 def normalise_numbers(value: Any) -> Any:
@@ -43,6 +64,44 @@ def stable_hash(payload: Any) -> str:
     number was written as an int or a float."""
     text = json.dumps(normalise_numbers(payload), sort_keys=True, default=str)
     return hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+
+
+def code_identity() -> dict[str, Any]:
+    """The code a run sitting used. The physics hash covers configuration only, so without
+    this a change to a dog or sheep rule would resume into an old folder unseen.
+
+    ``code_hash`` hashes the trial code itself, so it also catches uncommitted edits; the
+    commit, the dirty flag and the library versions are for a person tracing a result.
+    """
+    files = sorted(
+        p
+        for part in TRIAL_CODE
+        for p in ([REPO / part] if part.endswith(".py") else (REPO / part).rglob("*.py"))
+    )
+    digest = hashlib.sha256()
+    for path in files:
+        digest.update(str(path.relative_to(REPO)).encode())
+        digest.update(path.read_bytes())
+
+    def git(*args: str) -> str | None:
+        done = subprocess.run(["git", *args], cwd=REPO, capture_output=True, text=True, check=False)
+        return done.stdout.strip() if done.returncode == 0 else None
+
+    def installed(name: str) -> str | None:
+        try:
+            return version(name)
+        except PackageNotFoundError:
+            return None
+
+    commit = git("rev-parse", "HEAD")
+    changes = git("status", "--porcelain", "--", *TRIAL_CODE)
+    return {
+        "code_hash": digest.hexdigest()[:16],
+        "commit": commit,
+        "code_dirty": None if changes is None else bool(changes),
+        "python": platform.python_version(),
+        **{name: installed(name) for name in LIBRARIES},
+    }
 
 
 def write_provenance(path: Path, *, protocol_id: str, physics_hash: str) -> None:

@@ -308,6 +308,12 @@ def run_campaign(
     store = CampaignStore(protocol.output)
     store.open(protocol, physics_hash)
     try:
+        before, now = store.record_sitting(protocol)
+        if before is not None and before.get("code_hash") != now["code_hash"]:
+            # Warn, not refuse: a refactor changes the hash too. Each sitting records its code
+            # and how many trials came before it, so a reader can tell which ran on which code.
+            change = f"{before.get('code_hash')} -> {now['code_hash']}"
+            log(f"warning: the trial code changed since the last run of this folder ({change})")
         _run(protocol, store, physics_hash, workers, log)
     finally:
         store.close()

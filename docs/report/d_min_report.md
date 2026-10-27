@@ -534,7 +534,7 @@ Table 10, capped drive point (99% rule, 12 drive times):
 
 ### 3.14 RQ14: Targets without cohesion: the square-root law of Lama and di Bernardo (2024)
 
-To compare the Strömbom flock with targets that do not flock, we ran the model of Lama and di Bernardo (2024) in HerdSim as method `lama` on task `gather` ([model](../methods/models.md#lama--di-bernardo-2024-non-cohesive-targets), [task](../experiments/task_design.md#6-the-gather-task-lama-and-di-bernardo-2024)). Each target wanders at random and is pushed away by herders within $\lambda = 2.5$; each herder chases the target farthest from the goal among those it senses. Targets and herders start uniform over a disc of radius $R = 50$ round a goal of radius $R/5$. HerdSim stops a run at 5000 s; the paper runs until the share in the goal is stationary.
+To compare the Strömbom flock with targets that do not flock, we ran the model of Lama and di Bernardo (2024) in HerdSim as method `lama` on task `gather` ([model](../methods/models.md#lama--di-bernardo-2024-non-cohesive-targets), [task](../experiments/task_design.md#6-the-gather-task-lama-and-di-bernardo-2024)). Each target wanders at random and is pushed away by herders within $\lambda = 2.5$; each herder chases the target farthest from the goal among those it senses. Targets and herders start uniform over a disc of radius $R = 50$ round a goal of radius $R/5$. A run lasts at most 5000 s, the maximum time the paper's Supplementary Fig. S8 gives for $R = 50$ and sensing radius 10; its main text runs each case until the share in the goal is stationary.
 
 #### 1. Two ways to call a team enough
 The same trials are read in two ways:
