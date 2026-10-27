@@ -129,6 +129,7 @@ HerdSim/
 |   |-- adaptive.py         # The adaptive campaign: rounds of seeds until every cell is decided
 |   |-- calibration.py      # The flock radius R_f(N)
 |   `-- runner.py           # Running a batch of trials in worker processes
+|-- records/                # A trial as a table row; the physics hash and code identity of a folder
 |-- analysis/               # Decision rules (frontier) and the result tables
 |-- protocols/configs/      # Protocols (canonical defaults + overrides)
 |-- cli/                    # Command-line tools (campaign.py, run_queue.py, dmin_tables.py)
@@ -160,4 +161,4 @@ HerdSim implements the models of three papers:
 2. Kubo, M., Tashiro, M., Sato, H., Yamaguchi, A. (2022). *Herd guidance by multiple sheepdog agents with repulsive force*. Artificial Life and Robotics, 27, 416-427. [DOI: 10.1007/s10015-021-00726-7](https://doi.org/10.1007/s10015-021-00726-7)
 3. Lama, A., & di Bernardo, M. (2024). *Shepherding and herdability in complex multiagent systems*. Physical Review Research, 6, L032012. [DOI: 10.1103/PhysRevResearch.6.L032012](https://doi.org/10.1103/PhysRevResearch.6.L032012)
 
-The tables behind the report are in [`docs/report/results_tables.md`](docs/report/results_tables.md), and the full list of works cited in the study is in the [report's references](docs/report/d_min_report.md#references).
+The tables behind [the report](docs/report/results_tables.md), and the full list of works cited in the study is in the [report's references](docs/report/d_min_report.md#references).

@@ -9,6 +9,7 @@ Protocols live under [`protocols/configs/`](../../protocols/configs/) and inheri
 ```text
 protocols/configs/
 ├── canonical.yaml             # Baseline physics and defaults
+├── study_queue.yaml           # The study's protocols in the order they ran (cli/run_queue.py)
 └── protocols/                 # Individual research experiment definitions
     ├── dmin_m12.yaml          # Relaxed deadline (12× drive time)
     ├── dmin_m6.yaml           # Intermediate deadline (6× drive time)

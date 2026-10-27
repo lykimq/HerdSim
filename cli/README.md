@@ -183,17 +183,18 @@ uv run cli/diagnostics/gradient_validation.py --seeds 10
 ## How the tools sit on the code
 
 The scripts here are deliberately thin. Each one reads its arguments, calls the code below it,
-and prints. The real work lives in three layers under the tools, two of them side by side:
+and prints. The real work lives in four layers under the tools; each line names what a layer
+may call:
 
 ```text
-cli/            the tools in this folder
-  |
-  +-> services/   runs things: protocols, campaigns, calibration, replays of stored trials
-  |     |
-  +-> analysis/   reads finished results: frontier rules, D_min tables, fits, pressure
-  |     |          (never runs the model)
-  v     v
-sim/            the model: one trial, tick by tick
+cli/        the tools in this folder               calls services, analysis, sim
+services/   runs things: protocols, campaigns,     calls records, analysis, sim
+            calibration, replays of stored trials
+records/    a trial as a table row; the physics    calls sim
+            hash and code identity of a folder
+analysis/   reads finished results: frontier       calls nothing else in the project
+            rules, D_min tables, fits, pressure    (never runs the model)
+sim/        the model: one trial, tick by tick     calls nothing outside sim
 ```
 
 Table 3 lists the modules each tool calls.
