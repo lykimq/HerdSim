@@ -140,18 +140,27 @@ HerdSim/
 
 ## Documentation index
 
+### Research
+
 - [Report](docs/report/d_min_report.md):
   The study: all 13 results, the analysis behind them, the curve fits and the discussion.
+- [Result tables](docs/report/results_tables.md):
+  Every table behind the report, generated from the stored runs.
 - [Models](docs/methods/models.md):
   The sheep model, the team rule, the Hungarian assignment, the baselines, and the Kubo and Lama models.
 - [Task design](docs/experiments/task_design.md):
   Field and goal sized by $R_f(N)$, deadlines in drive times, why $N$ and $D$ stop where they do, and the gather task.
+
+### Code
+
+- [Architecture](docs/codes/architecture.md):
+  How the code is organised and how to add a model, a controller or a task.
 - [Configuration](docs/guides/configuration.md):
   How protocols inherit from each other, the follow-up settings, and the result folders.
 - [CLI reference](docs/guides/cli_reference.md):
   Planning and running campaigns, and the diagnostic replays.
-- [Architecture](docs/codes/architecture.md):
-  How the code is organised and how to add a model, a controller or a task.
+- [Command-line tools](cli/README.md):
+  Which tool to use for which task, in the order a study uses them.
 
 ## References
 
