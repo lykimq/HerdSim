@@ -83,7 +83,7 @@ The scattered layouts grow as $N^{2/3}$ while $R_f(N)$ grows much slower, so fro
 
 ### The Holding Task
 
-Two follow-up protocols (`dmin_f99_hold`, `dmin_f99_hold_spacing`) change the end of the drive: a trial succeeds only once 99% of the flock has stayed inside the goal for one drive time. While the flock is in, the dogs withdraw to $r_s + r_a = 67$ m beyond the farthest sheep, so no sheep reacts to them and the flock grazes; a dog that only stopped would keep the nearest sheep in flight and push it through the goal. Holding small flocks fails for a geometric reason: at $N \le 50$ the goal has a radius of only 12 to 14 m, and the grazing sheep wander out of it before the hold time is over, whatever the team size.
+Two follow-up protocols (`dmin_f99_hold`, `dmin_f99_hold_spacing`) change the end of the drive: a trial succeeds only once 99% of the flock has stayed inside the goal for one drive time. While the flock is in, the dogs withdraw to $r_s + r_a = 67$ m beyond the farthest sheep, so no sheep reacts to them and the flock grazes; a dog that only stopped would keep the nearest sheep in flight and push it through the goal. While the dogs withdraw they stay within $r_s$ of some sheep for 26 to 29 s, and the flock, which entered at the near edge, keeps walking: 13 to 17 m. At $N \le 50$ the goal of $1.9\,R_f$ (12 to 14 m) is too small for that walk, and below $N = 100$ the 99% share is every sheep, so the first sheep out ends the hold and calls the dogs back. Two more protocols (`dmin_f99_hold_goal`, `dmin_f99_hold_share`) sweep the goal from 1.9 to $3.0\,R_f$ and the share from 99% to 90% at $N \le 100$; a goal of about 16 to 19 m holds a small flock with one dog, and near that threshold extra dogs make holding fail (report, section 3.10).
 
 ---
 
@@ -191,7 +191,7 @@ So seed $i$ gives $D = 2$ and $D = 4$ the same start flock and the same sheep no
 
 ### Saving Trials and Resuming
 
-Every finished trial is appended to `trials.jsonl` at once. A run can be stopped at any time (`Ctrl+C`) and resumed with the same command without losing trials. A lock on the folder stops a second run from writing to it at the same time.
+Every finished trial is appended to `trials.jsonl` at once. A run can be stopped at any time (`Ctrl+C`) and resumed with the same command without losing trials. A lock on the folder stops a second run from writing to it at the same time. Git keeps a gzip copy, `trials.jsonl.gz`, because the plain file of a large protocol passes GitHub's 100 MB limit; a run writes it when it ends, and a fresh clone unpacks it the first time the folder is opened.
 
 ---
 
@@ -213,10 +213,11 @@ Every finished trial is appended to `trials.jsonl` at once. A run can be stopped
 - **Main grids ($1, 2, 3, 4, 6, 8, 12, 16, 24$):** steps of about $1.5\times$, so at least two counts per doubling. $D = 24$ is well above every decided $D_{\min}$ of the main grids.
 - **Gather task ($1$ to $25$, every count):** the paper's grid, at its resolution of one herder.
 - **Holding with dog spacing (adds $7, 9, 10, 11, 13$):** the arc behind the flock holds about $7, 9, 10, 11, 12$ dogs 2 m apart at $N = 25$ to $400$; testing around those counts shows where crowding starts.
+- **Holding small flocks, goal and share (`dmin_f99_hold_share`, $1, 2, 4, 8, 24$):** the question is the goal and the share, so the team grid is thinned; the largest $D$ stays 24 so the dog starts match `dmin_f99_hold`. `dmin_f99_hold_goal` keeps the grid of `dmin_f99_hold` up to 24.
 
 ### Seeds per Cell (Cap of 200)
 
-- **Why 200:** at 200 seeds a cell is decided only if its success rate is at least $0.955$ or at most $0.835$. Doubling to 400 narrows that band only to $0.94$ and $0.86$, for twice the trials. Over the 39 protocols, 324 of 5,773 cells (5.6%) ended open at the cap. A curve whose $D_{\min}$ depends on an open cell is reported as a bracket (for example `2-3`).
+- **Why 200:** at 200 seeds a cell is decided only if its success rate is at least $0.955$ or at most $0.835$. Doubling to 400 narrows that band only to $0.94$ and $0.86$, for twice the trials. Over the 41 protocols, 411 of 6,845 cells (6.0%) ended open at the cap. A curve whose $D_{\min}$ depends on an open cell is reported as a bracket (for example `2-3`).
 
 ### Success Rules
 

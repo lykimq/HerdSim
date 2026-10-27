@@ -51,9 +51,9 @@ asks for that with `decide_finish_times`), gets 10 more, up to 200. Where the an
 between two team sizes, say D = 2 fails and D = 4 succeeds, the run adds D = 3 by itself. The
 run ends when nothing is left to decide, or when its time budget (`budget_hours`) is spent.
 
-The seeds go where the answer is still open. Across the 37 drive-task protocols (the 39 of the
-study less the two gather runs), 4,773 cells took 326,870 trials; giving every cell 200 seeds
-would have taken 954,600.
+The seeds go where the answer is still open. Across the 39 drive-task protocols (the 41 of the
+study less the two gather runs), 5,845 cells took 398,840 trials; giving every cell 200 seeds
+would have taken 1,169,000.
 
 ### Stopping and resuming
 
@@ -92,7 +92,7 @@ uv run cli/run_queue.py --workers 20                  # every protocol that is n
 uv run cli/run_queue.py --only dmin_f99_hold --workers 20
 ```
 
-The queue lists the 39 protocols of the study in the order they ran (the one-batch `dmin_pilot` is not in it). Finished folders are skipped, stopped
+The queue lists the 41 protocols of the study in the order they ran (the one-batch `dmin_pilot` is not in it). Finished folders are skipped, stopped
 ones are resumed, and a protocol that fails is logged while the queue moves on. Each protocol
 adds a line to `results/queue_log.jsonl` (when it ran, how long, trials, errors, open cells).
 With this one command the whole study can be run again from scratch.
@@ -135,7 +135,7 @@ runs.
 ## 3. Looking closer: the diagnostics
 
 Some questions can't be answered from the stored results, because a trial row keeps only a
-summary. Two tools in `diagnostics/` run stored trials again, either with extra measurements
+summary. Three tools in `diagnostics/` run stored trials again, either with extra measurements
 or with one rule changed. Because a trial is fully determined by its settings and seed, an
 unchanged replay is the same trial. The tools check that it gives the same outcome and length as
 the stored one and stop if it doesn't, which is what lets the report say every replay matched.
@@ -165,7 +165,16 @@ for this tool), and both changes together. This is section 4.1 of [the report](.
 uv run cli/diagnostics/split_diagnostic.py --out results/diagnostics/split_diagnostic.csv
 ```
 
-The third tool, `gradient_validation.py`, replays nothing. It draws start flocks and measures
+`hold_walk.py` asks how far a flock walks while the dogs withdraw in the holding task. It
+replays `dmin_f99_hold_goal` at a goal of 3.0 R_f, N = 25, 50 and 100, D = 1, 2, 4 and 8, five
+seeds per cell, and measures the walk of the flock centre until no dog is within r_s, with the
+goal that walk calls for. This is section 3.10 of [the report](../docs/report/d_min_report.md).
+
+```bash
+uv run cli/diagnostics/hold_walk.py --out results/diagnostics/hold_walk.csv
+```
+
+The last tool, `gradient_validation.py`, replays nothing. It draws start flocks and measures
 how far a sheep's estimate of the flock centre from its nearest neighbours is from the true
 centre (the note on the sheep model in `docs/methods/models.md`).
 
@@ -199,6 +208,7 @@ sim/            the model: one trial, tick by tick
 | `dmin_report.py` | `analysis/dmin.py`, `analysis/results.py` |
 | `diagnostics/pressure_replay.py` | `services/replay.py`, `analysis/pressure.py` |
 | `diagnostics/split_diagnostic.py` | `services/replay.py` |
+| `diagnostics/hold_walk.py` | `services/replay.py` |
 | `diagnostics/gradient_validation.py` | `services/protocol.py`, `services/cells.py`, `sim/core/world/layouts.py` |
 
 Imports only point down the arrows, so these changes stay small:

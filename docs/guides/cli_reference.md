@@ -31,7 +31,7 @@ uv run cli/campaign.py <verb> --protocol <id or path> [--output <folder>] [--wor
 uv run cli/run_queue.py [--list] [--workers <n>] [--only <id> ...]
 ```
 
-Runs the 39 protocols of the study in the order they ran, each as `campaign.py run` would. A folder where every cell is decided is skipped, one that stopped for any other reason is resumed, and a protocol that raises is logged while the queue moves on. Each protocol appends one line to `results/queue_log.jsonl`.
+Runs the 41 protocols of the study in the order they ran, each as `campaign.py run` would. A folder where every cell is decided is skipped, one that stopped for any other reason is resumed, and a protocol that raises is logged while the queue moves on. Each protocol appends one line to `results/queue_log.jsonl`.
 
 | Flag | Default | Meaning |
 | :--- | :--- | :--- |
@@ -79,7 +79,7 @@ The dogs do not know the deadline, so a trial runs the same under any of them, a
 
 ## `cli/diagnostics/`: replays and checks
 
-The two replay tools run stored trials again. An unchanged replay must reproduce its stored outcome and length, or the tool stops. Both write their rows to `--out` as CSV and print a per-cell summary.
+The three replay tools run stored trials again. An unchanged replay must reproduce its stored outcome and length, or the tool stops. Each writes their rows to `--out` as CSV and print a per-cell summary.
 
 ### `pressure_replay.py`
 
@@ -104,6 +104,24 @@ uv run cli/diagnostics/split_diagnostic.py --out <csv> [--seeds <k>] [--workers 
 ```
 
 Replays `split` at $N = 100$ and 200, $D = 2, 4, 8, 16$, at 6 and 3 drive times, in four versions of the team rule: as run, with the dog stop distance cut from $3 r_a$ to $r_a$, with collecting dogs taking outliers at least $f(N)$ apart, and both. Defaults: 12 seeds, 8 workers.
+
+### `hold_walk.py`
+
+```bash
+uv run cli/diagnostics/hold_walk.py --out <csv> [--goal <multiple>] [--layouts ...] [--n ...] [--d ...] [--seeds <k>] [--workers <n>]
+```
+
+Replays `dmin_f99_hold_goal` at one goal level and measures, from the first tick with the share inside to the first tick no dog is within $r_s$, the walk of the flock centre, its duration and the distance of the farthest sheep from the centre. The summary adds the goal radius that walk calls for, $w/2$ plus that distance (medians per $N$ and per $N$ and $D$).
+
+| Flag | Default |
+| :--- | :--- |
+| `--goal` | 3.0 |
+| `--layouts` | all four |
+| `--n` | `25 50 100` |
+| `--d` | `1 2 4 8` |
+| `--seeds` | 5 |
+| `--workers` | 20 |
+| `--out` | required |
 
 ### `gradient_validation.py`
 

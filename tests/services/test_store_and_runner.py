@@ -90,6 +90,22 @@ def test_resetting_an_empty_folder_drops_its_calibration(tmp_path):
     assert store.load_calibration() is None
 
 
+def test_a_clone_with_only_the_packed_trials_keeps_them(tmp_path):
+    """Git holds trials.jsonl.gz only; without unpacking, the folder would be reset as empty."""
+    store = _store(tmp_path)
+    store.append_row({"trial_key": "a", "x": 1})
+    store.close()
+    packed = store.trials_gz.read_bytes()
+    store.trials_jsonl.unlink()
+
+    clone = CampaignStore(tmp_path)
+    assert not clone.discard_if_empty()
+    assert [r["trial_key"] for r in clone.load_rows()] == ["a"]
+    clone.trials_gz.unlink()
+    clone.pack_trials()
+    assert clone.trials_gz.read_bytes() == packed  # same trials, same bytes: no git churn
+
+
 def test_reopening_with_other_physics_or_protocol_is_refused(tmp_path):
     _store(tmp_path, "abc").close()
     with pytest.raises(PhysicsMismatch, match="physics"):

@@ -218,7 +218,7 @@ P_d = \mathrm{GCM} + r_a \sqrt{N} \frac{\mathrm{GCM} - \mathbf{x}_{\mathrm{goal}
 $$
 
 - Khoảng $r_a \sqrt{N}$ tăng giống bán kính của một bầy chặt. Với bầy đã hiệu chỉnh, nó đặt chó sau tâm khoảng 2,2 bán kính bầy ở $N = 100$ và 3,5 ở $N = 400$.
-- **Trên $N \approx 1056$, điểm lùa nằm ngoài tầm.** Cừu chỉ phản ứng với chó trong vòng $r_s = 65$ m. Khi $r_a \sqrt{N} = 2\sqrt{N} > 65$, tức $N > 1056$, chó ở $P_d$ chỉ với tới phần đuôi của bầy (phần đầu cách hơn 65 m), và không đội nào đến 12 chó lùa được bầy ở $N = 1131$. Như một biến thể HerdSim có ghi rõ, `drive_offset_cap` giới hạn khoảng đó ở $r_s - r_a = 63$ m, và việc lùa bầy tập trung hoạt động trở lại (một chó ở $N = 1131$, hai ở 1600, và 42 trên 42 lượt chạy dở ở 3200); trên `wide` giới hạn này cho $D_{\min} = 9$ ở 1131 và không có đội tin cậy nào đến 12 ở 1600.
+- **Trên $N \approx 1056$, điểm lùa nằm ngoài tầm.** Cừu chỉ phản ứng với chó trong vòng $r_s = 65$ m. Khi $r_a \sqrt{N} = 2\sqrt{N} > 65$, tức $N > 1056$, chó ở $P_d$ chỉ với tới phần đuôi của bầy (phần đầu cách hơn 65 m), và không đội nào đến 12 chó lùa được bầy ở $N = 1131$. Như một biến thể HerdSim có ghi rõ, `drive_offset_cap` giới hạn khoảng đó ở $r_s - r_a = 63$ m, và việc lùa bầy tập trung hoạt động trở lại (một chó ở $N = 1131$, hai ở 1600, và 42 trên 42 lượt chạy dở ở 3200); trên `wide` giới hạn này cho $D_{\min} = 5$–9 ở 1131 và không có đội tin cậy nào đến 12 ở 1600.
 - Với nhiều chó, chúng trải trên một cung bán kính $R$ (khoảng cách đến $P_d$) phủ hết bề rộng bầy, $\pm \arcsin(R_{\mathrm{flock}} / R)$, với $R_{\mathrm{flock}}$ là bán kính hiện tại của bầy ($\sqrt{2}$ lần độ trải RMS của nó). Chó và các vị trí trên cung được ghép theo thứ tự góc quanh tâm bầy, nên chó cạnh nhau vẫn cạnh nhau và không có hai chó nào cắt qua nhau.
 
 ![Hình học điểm lùa Pd và vòng cung lùa](../../docs/figures/fig_driving_arc.png)
@@ -248,7 +248,7 @@ $$
 Mỗi chó tự chạy quy tắc một chó của Strömbom:
 - Nó quyết định gom hay lùa dựa trên cả bầy, nhắm con cừu xa tâm bầy nhất hoặc điểm lùa, và đi tới đó với bước đi, nhiễu và quy tắc dừng của Strömbom.
 - **Không có tầng đội**, và vì mọi chó thấy cùng một bầy, tất cả chọn giống nhau: bộ điều khiển là một chó với $D$ bản sao. Khác với FAT, nó giữ mục tiêu của bài báo và công tắc gom/lùa, và đó là điều phân biệt hai đối chứng.
-- *Kết quả* (bố cục phân tán, 6 lần thời gian lùa, quy tắc 99%): có đội tin cậy đến $N = 200$ (2–3 chó trên `wide`, 3 trên `outlier_rich`) và không có đội nào đến 24 ở $N = 400$, nơi quy tắc đội cần 3 chó trên `wide` và `outlier_rich` và không có đội tin cậy nào trên `split`.
+- *Kết quả* (bố cục phân tán, 6 lần thời gian lùa, quy tắc 99%): có đội tin cậy đến $N = 200$ (2–3 chó trên `wide`, 3 trên `outlier_rich`) và không có đội nào đến 24 ở $N = 400$, nơi quy tắc đội cần 2–3 chó trên `wide` và 3 trên `outlier_rich` và không có đội tin cậy nào trên `split`.
 
 ![So sánh strombom_multi và independent](../../docs/figures/fig_independent.png)
 *Hình 7: `strombom_multi` so với `independent` (*$N = 100, D = 4$*). Trái (`strombom_multi`): 4 chó được phân cho 4 con lạc khác nhau và gom song song. Giữa (`independent`, gom): mọi chó thấy cùng một bầy và chọn giống nhau, nên cả 4 đuổi cùng một con lạc trong khi các con khác chờ. Phải (`independent`, lùa): mọi chó đi tới cùng điểm lùa* $P_d$ *thay vì trải trên một cung (chấm xanh lá), nên chúng chen nhau và không che được hai bên bầy.*

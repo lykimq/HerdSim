@@ -1,6 +1,6 @@
 # Result tables (generated)
 
-Generated 2026-10-22 15:04 by cli/dmin_tables.py from results/. Do not edit by hand; rerun the commands. Entries are D_min as decided; "3-8" means D = 8 is the smallest reliable D but a D from 3 up is still undecided, so the true D_min lies in [3, 8]; [n] is a curve with no reliable D yet whose D_min_low is n; "none on grid" means every D up to the grid top is decided unreliable. Strict = every sheep inside the goal; f99 = 99 percent of the sheep inside (ceil(0.99 N), so the two rules coincide at N <= 71). The Runs table was regenerated on 2026-10-26. The dmin_f99_m12 and dmin_f99_m6 tables in this first section are from 2026-10-22, on the five original flock sizes, before those two folders were resumed with four added sizes; their current tables are in the section "Finish-time top-up, densified N, independent shepherds, Kubo to D = 24, 99 percent" below, and the D_min values of the five original sizes did not change. The dmin_f99_m6 dips table and the dmin_f99_m3 D_sat table were regenerated on 2026-10-26.
+Generated 2026-10-22 15:04 by cli/dmin_tables.py from results/, with later sections dated where they were added. Do not edit by hand; rerun the commands. Entries are D_min as decided; "3-8" means D = 8 is the smallest reliable D but a D from 3 up is still undecided, so the true D_min lies in [3, 8]; [n] is a curve with no reliable D yet whose D_min_low is n; "none on grid" means every D up to the grid top is decided unreliable. Strict = every sheep inside the goal; f99 = 99 percent of the sheep inside (ceil(0.99 N), so the two rules coincide at N <= 71). The Runs table was regenerated on 2026-10-26. The dmin_f99_m12 and dmin_f99_m6 tables in this first section are from 2026-10-22, on the five original flock sizes, before those two folders were resumed with four added sizes; their current tables are in the section "Finish-time top-up, densified N, independent shepherds, Kubo to D = 24, 99 percent" below, and the D_min values of the five original sizes did not change. The dmin_f99_m6 dips table and the dmin_f99_m3 D_sat table were regenerated on 2026-10-26.
 
 ## Runs
 
@@ -44,8 +44,10 @@ Generated 2026-10-22 15:04 by cli/dmin_tables.py from results/. Do not edit by h
 | dmin_f99_big_loose | 2026-10-24 01:59:38 | 830 | 14 | 1 | 1 | 0 | 0.261 | 20 | ran |
 | lama_r50 | 2026-10-26 04:06:38 | 17660 | 500 | 23 | 23 | 0 | 6.529 | 20 | ran |
 | lama_r50_inf | 2026-10-26 10:34:34 | 22620 | 500 | 1 | 1 | 0 | 6.466 | 20 | ran |
+| dmin_f99_hold_goal | 2026-10-26 20:58:58 | 21800 | 326 | 30 | 30 | 0 | 0.357 | 20 | ran |
+| dmin_f99_hold_share | 2026-10-26 21:53:50 | 50170 | 746 | 57 | 57 | 0 | 0.908 | 20 | ran |
 
-Trial and cell counts are the folders' totals as of 2026-10-26; "finished" is the end of the first run of each protocol, so the three resumed folders (dmin_f99_m12 and dmin_f99_m6 on 2026-10-23, dmin_f99_m3 on 2026-10-24) show their final counts beside their first finish. Four folders in results/ are not in the queue and so not in this table: dmin_pilot (a one-batch pilot before the study), dmin_s_ring_dog_in_goal (the first dmin_s_ring run, kept as it was), dmin_f99_hold_spacing_soft (the archived soft spacing rule, see the follow-up section) and dmin_f99_big_cap (run outside the queue, its tables are in the last section). results/diagnostics holds the CSVs of the two replay tools.
+Trial and cell counts are the folders' totals as of 2026-10-26; "finished" is the end of the first run of each protocol, so the three resumed folders (dmin_f99_m12 and dmin_f99_m6 on 2026-10-23, dmin_f99_m3 on 2026-10-24) show their final counts beside their first finish. Four folders in results/ are not in the queue and so not in this table: dmin_pilot (a one-batch pilot before the study), dmin_s_ring_dog_in_goal (the first dmin_s_ring run, kept as it was), dmin_f99_hold_spacing_soft (the archived soft spacing rule, see the follow-up section) and dmin_f99_big_cap (run outside the queue, its tables are in the last section). results/diagnostics holds the CSVs of the three replay tools.
 
 ## D_min by layout and N, strict success
 
@@ -1267,4 +1269,58 @@ Spread of D_min in doublings: between layouts at one N 0.20, between N at one la
 | wide | 0.40 to 0.70 | 50 100 200 400 |  | 
 
 Spread of D_min in doublings: between layouts at one N 1.49, between N at one layout 1.04.
+
+## Holding small flocks: goal size and the share held
+
+Generated 2026-10-26 22:10 by `uv run cli/dmin_tables.py compare dmin_f99_hold_goal --base dmin_f99_hold` and `uv run cli/dmin_tables.py compare dmin_f99_hold_share --base dmin_f99_hold`. Each entry is D_min in dmin_f99_hold (the base: goal 1.9 R_f, 99 percent held) / D_min in the variant at the row's factor levels, holding for one drive time at 6 drive times. goal_radius_multiple is the goal radius in flock radii (R_f = 6.2, 7.6, 9.1 m at N = 25, 50, 100); success_fraction is the share that must enter and stay in. The cells at the base levels, and those the two variants share at goal 2.5 R_f and 99 percent, reproduced each other's trials exactly.
+
+### dmin_f99_hold_goal: dmin_f99_hold / dmin_f99_hold_goal
+
+| row | compact N=100 | compact N=25 | compact N=50 | outlier_rich N=100 | outlier_rich N=25 | outlier_rich N=50 | split N=100 | split N=25 | split N=50 | wide N=100 | wide N=25 | wide N=50 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| goal_radius_multiple=1.9 | 1 / 1 | none on grid / none on grid | none on grid / none on grid | 3 / 3 | none on grid / none on grid | none on grid / none on grid | 1 / 1 | none on grid / none on grid | none on grid / none on grid | 1 / 1 | none on grid / none on grid | none on grid / none on grid |
+| goal_radius_multiple=2.5 | 1 / 1 | none on grid / 1 | none on grid / 1 | 3 / 2 | none on grid / 1-3 | none on grid / 1 | 1 / 1 | none on grid / 1 | none on grid / 1 | 1 / 1 | none on grid / 1-2 | none on grid / 1 |
+| goal_radius_multiple=3.0 | 1 / 1 | none on grid / 1 | none on grid / 1 | 3 / 2 | none on grid / 1 | none on grid / 1 | 1 / 1 | none on grid / 1 | none on grid / 1 | 1 / 1 | none on grid / 1 | none on grid / 1 | 
+
+### dmin_f99_hold_share: dmin_f99_hold / dmin_f99_hold_share
+
+| row | compact N=100 | compact N=25 | compact N=50 | outlier_rich N=100 | outlier_rich N=25 | outlier_rich N=50 | split N=100 | split N=25 | split N=50 | wide N=100 | wide N=25 | wide N=50 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| goal_radius_multiple=1.9\|success_fraction=0.9 | 1 / 1 | none on grid / none on grid | none on grid / 1 | 3 / 2 | none on grid / none on grid | none on grid / 1 | 1 / 1 | none on grid / none on grid | none on grid / 1 | 1 / 1 | none on grid / none on grid | none on grid / 1 |
+| goal_radius_multiple=1.9\|success_fraction=0.95 | 1 / 1 | none on grid / none on grid | none on grid / 1 | 3 / 2 | none on grid / none on grid | none on grid / 1 | 1 / 1 | none on grid / none on grid | none on grid / 1 | 1 / 1 | none on grid / none on grid | none on grid / 1 |
+| goal_radius_multiple=1.9\|success_fraction=0.99 | 1 / 1 | none on grid / none on grid | none on grid / none on grid | 3 / 3 | none on grid / none on grid | none on grid / none on grid | 1 / 1 | none on grid / none on grid | none on grid / none on grid | 1 / 1 | none on grid / none on grid | none on grid / none on grid |
+| goal_radius_multiple=2.1\|success_fraction=0.9 | 1 / 1 | none on grid / [1] | none on grid / 1 | 3 / 2 | none on grid / 1 | none on grid / 1 | 1 / 1 | none on grid / 1 | none on grid / 1 | 1 / 1 | none on grid / [1] | none on grid / 1 |
+| goal_radius_multiple=2.1\|success_fraction=0.95 | 1 / 1 | none on grid / none on grid | none on grid / 1 | 3 / 2 | none on grid / none on grid | none on grid / 1 | 1 / 1 | none on grid / none on grid | none on grid / 1 | 1 / 1 | none on grid / none on grid | none on grid / 1 |
+| goal_radius_multiple=2.1\|success_fraction=0.99 | 1 / 1 | none on grid / none on grid | none on grid / [1] | 3 / 2 | none on grid / none on grid | none on grid / [1] | 1 / 1 | none on grid / none on grid | none on grid / [1] | 1 / 1 | none on grid / none on grid | none on grid / [1] |
+| goal_radius_multiple=2.3\|success_fraction=0.9 | 1 / 1 | none on grid / 1 | none on grid / 1 | 3 / 2 | none on grid / 1 | none on grid / 1 | 1 / 1 | none on grid / 1 | none on grid / 1 | 1 / 1 | none on grid / 1 | none on grid / 1 |
+| goal_radius_multiple=2.3\|success_fraction=0.95 | 1 / 1 | none on grid / 1 | none on grid / 1 | 3 / 2 | none on grid / 1 | none on grid / 1 | 1 / 1 | none on grid / 1 | none on grid / 1 | 1 / 1 | none on grid / 1 | none on grid / 1 |
+| goal_radius_multiple=2.3\|success_fraction=0.99 | 1 / 1 | none on grid / none on grid | none on grid / 1 | 3 / 2 | none on grid / none on grid | none on grid / 1 | 1 / 1 | none on grid / none on grid | none on grid / 1 | 1 / 1 | none on grid / none on grid | none on grid / 1 |
+| goal_radius_multiple=2.5\|success_fraction=0.9 | 1 / 1 | none on grid / 1 | none on grid / 1 | 3 / 2 | none on grid / 1 | none on grid / 1 | 1 / 1 | none on grid / 1 | none on grid / 1 | 1 / 1 | none on grid / 1 | none on grid / 1 |
+| goal_radius_multiple=2.5\|success_fraction=0.95 | 1 / 1 | none on grid / 1 | none on grid / 1 | 3 / 2 | none on grid / 1 | none on grid / 1 | 1 / 1 | none on grid / 1 | none on grid / 1 | 1 / 1 | none on grid / 1 | none on grid / 1 |
+| goal_radius_multiple=2.5\|success_fraction=0.99 | 1 / 1 | none on grid / 1 | none on grid / 1 | 3 / 2 | none on grid / 1-3 | none on grid / 1 | 1 / 1 | none on grid / 1 | none on grid / 1 | 1 / 1 | none on grid / 1-2 | none on grid / 1 | 
+
+### Walk while the dogs withdraw, dmin_f99_hold_goal at 3.0 R_f (replay of 5 stored seeds per cell; every replay reproduced its stored trial)
+
+Generated 2026-10-26 by `uv run cli/diagnostics/hold_walk.py --out results/diagnostics/hold_walk.csv`, all four layouts. walk = distance the flock centre moves from the first tick with 99 percent inside to the first tick no dog is within r_s = 65; seconds = time between the two; farthest = distance of the farthest sheep from the centre at the second tick; goal_needed = walk / 2 + farthest. cleared = replays whose dogs got beyond r_s. Medians over the cleared replays.
+
+| n | replays | cleared | walk | seconds | farthest | goal_needed |
+|---|---|---|---|---|---|---|
+| 25 | 80 | 80 | 17.4 | 29.0 | 5.6 | 14.3 |
+| 50 | 80 | 80 | 15.4 | 28.0 | 7.9 | 15.7 |
+| 100 | 80 | 79 | 13.1 | 26.0 | 10.7 | 17.2 |
+
+| n | d | replays | cleared | walk | seconds | farthest | goal_needed |
+|---|---|---|---|---|---|---|---|
+| 25 | 1 | 20 | 20 | 16.6 | 27.5 | 5.7 | 14.0 |
+| 25 | 2 | 20 | 20 | 17.5 | 29.0 | 5.9 | 14.6 |
+| 25 | 4 | 20 | 20 | 17.6 | 29.5 | 5.5 | 14.2 |
+| 25 | 8 | 20 | 20 | 17.8 | 29.0 | 5.4 | 14.4 |
+| 50 | 1 | 20 | 20 | 14.8 | 27.0 | 8.9 | 16.4 |
+| 50 | 2 | 20 | 20 | 15.5 | 28.0 | 7.8 | 15.5 |
+| 50 | 4 | 20 | 20 | 15.4 | 28.0 | 7.8 | 15.4 |
+| 50 | 8 | 20 | 20 | 15.7 | 28.0 | 7.8 | 15.6 |
+| 100 | 1 | 20 | 19 | 12.7 | 25.0 | 11.0 | 17.1 |
+| 100 | 2 | 20 | 20 | 13.2 | 26.0 | 12.3 | 18.9 |
+| 100 | 4 | 20 | 20 | 13.2 | 26.0 | 10.4 | 17.0 |
+| 100 | 8 | 20 | 20 | 13.2 | 26.0 | 10.5 | 17.0 |
 

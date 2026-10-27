@@ -820,6 +820,57 @@ def fig_spacing() -> None:
     plt.close(fig)
 
 
+# ---------------------------------------------------------------------------------- figure 40
+def fig_hold_goal() -> None:
+    """Holding task: success against the goal radius in metres, for each share that must stay
+    in. If the flock's walk past the goal while the dogs withdraw sets the limit, the curves
+    of the three flock sizes cross theta at about the same radius in metres."""
+    if not have("dmin_f99_hold_share", "dmin_f99_hold_goal"):
+        return
+    from analysis.results import flock_radii
+
+    radius = {int(n): r for n, r in flock_radii(RESULTS / "dmin_f99_hold_share")["strombom_multi"].items()}
+    share = cells("dmin_f99_hold_share")
+    share["g"] = share["factors"].str.extract(r"goal_radius_multiple=([\d.]+)")[0].astype(float)
+    share["f"] = share["factors"].str.extract(r"success_fraction=([\d.]+)")[0].astype(float)
+    goal = cells("dmin_f99_hold_goal")
+    goal["g"] = goal["factors"].str.extract(r"goal_radius_multiple=([\d.]+)")[0].astype(float)
+    goal["f"] = 0.99
+    # the D of the share protocol's grid only, leaving out the midpoints the adaptive run added,
+    # so every point averages the same 20 cells; the 3.0 level exists only in dmin_f99_hold_goal
+    grid = [1, 2, 4, 8, 24]
+    extra = goal[goal["g"] == 3.0]
+    t = pd.concat([share, extra], ignore_index=True)
+    t = t[t["d"].isin(grid)]
+    t["goal_m"] = t["g"] * t["n"].map(radius)
+
+    fig, axes = plt.subplots(1, 3, figsize=(13, 4.2), sharey=True)
+    colors = {25: BLUE, 50: ORANGE, 100: AQUA}
+    for ax, f in zip(axes, (0.90, 0.95, 0.99)):
+        for n, color in colors.items():
+            part = t[(t["f"] == f) & (t["n"] == n)]
+            # equal weight per cell (layout x D), so cells that drew more seeds count once
+            per = part.groupby("goal_m")["success_rate"].agg(["mean", "min", "max"]).reset_index()
+            ax.vlines(per["goal_m"], per["min"], per["max"], color=color, lw=4, alpha=0.18)
+            ax.plot(per["goal_m"], per["mean"], color=color, marker="o", ms=5, lw=1.2, label=f"N = {n}")
+            default = per[np.isclose(per["goal_m"], 1.9 * radius[n])]
+            ax.plot(default["goal_m"], default["mean"], ls="", marker="o", ms=9, mfc="none", mec=INK, mew=1.0)
+        ax.axhline(0.9, color=INK, lw=0.8, ls="--")
+        ax.set_ylim(0, 1.02)
+        ax.set_xlabel("goal radius (m)")
+        kept = {0.90: "two of 25, five of 50", 0.95: "one of 25, two of 50", 0.99: "none below N = 100"}[f]
+        ax.set_title(f"{int(round(f * 100))} percent must stay in (out: {kept})", fontsize=10)
+        ax.grid(color=GRID, lw=0.6)
+    axes[0].set_ylabel("success rate, mean over layouts and D")
+    axes[0].legend(frameon=False, fontsize=8, loc="lower right")
+    fig.tight_layout(rect=(0, 0.08, 1, 1))
+    fig.text(0.5, 0.01, "dmin_f99_hold_share (goal 1.9 to 2.5 R_f) and dmin_f99_hold_goal (3.0 R_f, 99 percent), "
+             "holding for one drive time at 6 drive times. Bars: range over the cells (4 layouts x D = 1, 2, 4, 8, 24).\n"
+             "Ringed: the default goal of 1.9 R_f. Dashed: theta = 0.90.", ha="center", fontsize=8, color=MUTED)
+    fig.savefig(OUT / "fig40_hold_goal.png", dpi=150)
+    plt.close(fig)
+
+
 # ---------------------------------------------------------------------------------- figure 37
 def fig_view() -> None:
     """D_min against what a dog sees: sensing range, and sharing at range 65."""
@@ -1007,7 +1058,8 @@ def fig_lama_maps() -> None:
 def main() -> None:
     for draw in (fig_dmin_vs_n, fig_deadline, fig_straggler, fig_strict_vs_99, fig_split_curves,
                  fig_sensitivity, fig_fat, fig_metrics, fig_compact, fig_design, fig_effort,
-                 fig_pressure, fig_growth_fits, fig_spacing, fig_view, fig_lama, fig_lama_maps):
+                 fig_pressure, fig_growth_fits, fig_spacing, fig_hold_goal, fig_view, fig_lama,
+                 fig_lama_maps):
         draw()
 
 

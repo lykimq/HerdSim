@@ -1,0 +1,28 @@
+# Holding small flocks: goal size against the share that must stay in. Two factors on the
+# holding task of dmin_f99_hold, crossed, on the same seeds:
+#
+# goal_radius_multiple 1.9, 2.1, 2.3, 2.5: finer steps below the 2.5 R_f that already holds
+# flocks of 25 and 50 in dmin_f99_hold_goal, to find the smallest goal that holds. If the
+# flock's walk past the goal centre while the dogs withdraw sets the limit, that goal is
+# about the same in metres at every N, not in flock radii.
+#
+# success_fraction 0.90, 0.95, 0.99: the share that must be inside to start the hold and to
+# keep it. At N = 25 the 99 percent share is every sheep, 95 percent lets one sheep stay out
+# and 90 percent two, so this asks how much goal one straggler is worth.
+#
+# The level (1.9, 0.99) is dmin_f99_hold itself, so its cells must come out as there on the
+# shared seeds. Team size barely matters when holding a small flock, so D is thinned; the
+# largest D stays 24 so the dog starts are the same as in dmin_f99_hold. A larger goal also
+# widens the drawn field beyond the goal; the flock start and the goal centre do not move,
+# and nothing in a trial reads the field size.
+
+protocol_id: dmin_f99_hold_share
+output: results/dmin_f99_hold_share
+extends: dmin_f99_hold.yaml
+
+flock_sizes: [25, 50, 100]
+shepherd_counts: [1, 2, 4, 8, 24]
+
+factors:
+  goal_radius_multiple: [1.9, 2.1, 2.3, 2.5]
+  success_fraction: [0.90, 0.95, 0.99]

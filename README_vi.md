@@ -2,14 +2,14 @@
 
 [![Giấy phép: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Kiểm thử](https://img.shields.io/badge/tests-330%20passed-brightgreen.svg)](tests/)
-[![Lượt mô phỏng](https://img.shields.io/badge/simulated%20trials-367%2C150-success.svg)](results/)
+[![Kiểm thử](https://img.shields.io/badge/tests-332%20passed-brightgreen.svg)](tests/)
+[![Lượt mô phỏng](https://img.shields.io/badge/simulated%20trials-439%2C120-success.svg)](results/)
 
 Một con chó chăn cừu có thể tự mình gom một bầy cừu gắn kết và lùa vào chuồng. Khi cừu xuất phát rải rác, tách thành nhiều cụm hay trải trên một cánh đồng rộng, và công việc có thời hạn, một con chó không thể ở nhiều nơi cùng lúc. Câu hỏi khi đó là nhiệm vụ cần bao nhiêu chó, và thêm chó có luôn giúp ích không:
 
 > **Cần bao nhiêu chó ($D$) để gom một bầy $N$ con cừu và lùa vào đích một cách tin cậy trước thời hạn: ít nhất là bao nhiêu ($D_{\min}$), bao nhiêu thì đủ ($D_{\mathrm{sat}}$), và từ khi nào thêm chó lại gây hại?**
 
-**HerdSim** là một bộ mô phỏng mã nguồn mở và một nghiên cứu được xây dựng để trả lời câu hỏi đó. Qua **367.150 lượt mô phỏng** trong 39 protocol, không có lỗi mô phỏng nào, nó lập bản đồ đội tin cậy nhỏ nhất ($D_{\min}$), đội mà vượt quá nó thêm chó không còn làm việc lùa nhanh hơn ($D_{\mathrm{sat}}$), và những tình huống mà thêm chó làm nhiệm vụ thất bại, cho bầy từ 25 đến 566 con (với các lượt chạy đến 3.200 con) dưới các thời hạn, bố cục xuất phát, mức gắn kết và tầm cảm nhận khác nhau.
+**HerdSim** là một bộ mô phỏng mã nguồn mở và một nghiên cứu được xây dựng để trả lời câu hỏi đó. Qua **439.120 lượt mô phỏng** trong 41 protocol, không có lỗi mô phỏng nào, nó lập bản đồ đội tin cậy nhỏ nhất ($D_{\min}$), đội mà vượt quá nó thêm chó không còn làm việc lùa nhanh hơn ($D_{\mathrm{sat}}$), và những tình huống mà thêm chó làm nhiệm vụ thất bại, cho bầy từ 25 đến 566 con (với các lượt chạy đến 3.200 con) dưới các thời hạn, bố cục xuất phát, mức gắn kết và tầm cảm nhận khác nhau.
 
 ![Một lượt mô phỏng](docs/figures/fig17_trial.png)
 **Hình 1: Một lượt chạy trong HerdSim ($N = 200$ cừu, $D = 4$ chó, xuất phát `wide`, hạt giống 2026), ở các bước 0, 55, 139 và 279.**
@@ -103,7 +103,7 @@ cd HerdSim
 # Cài đặt môi trường phát triển và toàn bộ phụ thuộc
 make install     # uv sync --extra dev
 
-# Kiểm tra lint, kiểu và chạy 330 bài kiểm thử
+# Kiểm tra lint, kiểu và chạy 332 bài kiểm thử
 make check
 
 # Chạy 23 bài kiểm tra benchmark, sáu chiến dịch thu nhỏ trọn vẹn (khoảng 1,5 phút)
@@ -128,7 +128,7 @@ uv run cli/campaign.py run --protocol dmin_m6 --workers 16
 # 3. Xem tiến độ của một protocol đang chạy hoặc đã xong
 uv run cli/campaign.py status --protocol dmin_m6
 
-# 4. Chạy hàng đợi 39 protocol nghiên cứu (bỏ qua protocol đã xong, chạy tiếp protocol bị dừng)
+# 4. Chạy hàng đợi 41 protocol nghiên cứu (bỏ qua protocol đã xong, chạy tiếp protocol bị dừng)
 uv run cli/run_queue.py --workers 20
 
 # 5. Dựng các bảng kết quả Markdown từ các thư mục kết quả
@@ -158,7 +158,7 @@ HerdSim/
 ├── protocols/configs/      # Các protocol (giá trị mặc định canonical + phần ghi đè)
 ├── cli/                    # Công cụ dòng lệnh (campaign.py, run_queue.py, dmin_tables.py)
 ├── docs/                   # Báo cáo, ghi chú phương pháp, hướng dẫn và hình
-├── results/                # Các thư mục kết quả (367.150 lượt chạy trong các protocol nghiên cứu)
+├── results/                # Các thư mục kết quả (439.120 lượt chạy trong các protocol nghiên cứu)
 └── tests/                  # Kiểm thử đơn vị, bất biến và hồi quy
 ```
 

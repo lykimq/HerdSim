@@ -46,7 +46,7 @@ The model parameters are not in this file. They live with each method in code, o
 
 A protocol names its id, its output folder, the methods with their time limits, and the grid (layouts, flock sizes and `shepherd_counts`, the team sizes $D$). It can `extends` another protocol and give only what differs. A key the protocol names replaces the parent's whole value, lists and mappings included, so a protocol that changes one entry must restate the rest; that is why `lama_r50_inf` below repeats the time limit when it only changes `sensing_radius`. An unknown key stops the run at load.
 
-Two further keys appear in a few protocols. `factors` sweeps one canonical setting over several values; each value gets its own set of D curves (one curve is one layout and flock size with every team size on it). Only settings that act per trial can be swept, because calibration runs once per protocol: a method parameter, or a setting that acts through the flock radius, has to be its own protocol (`dmin_f99_view_range.yaml` sweeps `sensing_range`). A method's `calibrate_as` lets it borrow another method's dog for the calibration, so that two methods differing only in their dog rule run the same task (`dmin_fat.yaml` calibrates as `strombom_multi`); it changes the field every trial runs on, so it is part of the physics hash.
+Two further keys appear in a few protocols. `factors` sweeps canonical settings over several values; two or more are crossed (`dmin_f99_hold_share.yaml` runs every pair of `goal_radius_multiple` and `success_fraction`), and each value or pair gets its own set of D curves (one curve is one layout and flock size with every team size on it). Only settings that act per trial can be swept, because calibration runs once per protocol: a method parameter, or a setting that acts through the flock radius, has to be its own protocol (`dmin_f99_view_range.yaml` sweeps `sensing_range`). A method's `calibrate_as` lets it borrow another method's dog for the calibration, so that two methods differing only in their dog rule run the same task (`dmin_fat.yaml` calibrates as `strombom_multi`); it changes the field every trial runs on, so it is part of the physics hash.
 
 A results folder records a **physics hash**: a digest of everything that changes a trial's outcome, which is the task, every setting not at its neutral value, each method's parameters and time limit, the set of layouts and the largest team size. A run whose hash differs from the folder's is refused, so trials from two different physics never share a folder. The flock sizes, the smaller team sizes and the seed rules are left out, so a protocol can grow and still resume.
 
@@ -101,9 +101,9 @@ The follow-up campaigns added these settings. At its default value each one leav
 
 | Setting | Default | What it does | Protocols |
 | :--- | :---: | :--- | :--- |
-| `success_fraction` | `1.0` | Share of the sheep that must be in the goal at one tick for a trial to succeed (`1.0`: every sheep). | `dmin_f99_*` (0.99), `lama_*` (0.99) |
-| `hold_drive_multiple` | `0` | The goal counts as reached only once that share has stayed inside for this many drive times. | `dmin_f99_hold`, `dmin_f99_hold_spacing` |
-| `hold_withdraw` | `false` | While the goal is reached, the dogs of `collect_drive_multi` withdraw to $r_s + r_a = 67\text{ m}$ beyond the farthest sheep, so the flock grazes. | `dmin_f99_hold`, `dmin_f99_hold_spacing` |
+| `success_fraction` | `1.0` | Share of the sheep that must be in the goal at one tick for a trial to succeed (`1.0`: every sheep). | `dmin_f99_*` (0.99), `lama_*` (0.99), `dmin_f99_hold_share` (0.90, 0.95, 0.99) |
+| `hold_drive_multiple` | `0` | The goal counts as reached only once that share has stayed inside for this many drive times. | `dmin_f99_hold*` |
+| `hold_withdraw` | `false` | While the goal is reached, the dogs of `collect_drive_multi` withdraw to $r_s + r_a = 67\text{ m}$ beyond the farthest sheep, so the flock grazes. | `dmin_f99_hold*` |
 | `dog_spacing` | `0` | No dog may step closer than this to another. A dog already that close walks straight away; a dog whose step would end that close does not step. | `dmin_f99_hold_spacing` |
 | `sensing_range` | `0` | Each dog of `collect_drive_multi` knows only the sheep within this range (`0`: every sheep). | `dmin_f99_view_range` |
 | `communication` | `none` | With a sensing range, what dogs share: `none`, `neighbour` (the dogs within range) or `shared` (the whole team). | `dmin_f99_view_comm` |
@@ -130,7 +130,8 @@ results/<protocol_id>/
 ├── protocol.yaml         The protocol as run (canonical defaults + overrides), and every method parameter
 ├── provenance.json       Protocol id, physics hash and creation time
 ├── calibration.json      Calibrated flock radius R_f(N) per method (not written for the gather task)
-├── trials.jsonl          One line per finished trial, appended as trials finish
+├── trials.jsonl          One line per finished trial, appended as trials finish (local, not in git)
+├── trials.jsonl.gz       The copy git keeps, packed when a run ends and unpacked when a clone has only it
 ├── trials.csv            The same rows as a table, rewritten after each round
 ├── frontier_cells.csv    Per cell: success interval, reliability, finish times, zone
 ├── frontier_groups.csv   Per group (one D curve): D_min, D_min_low, D_best, D_sat, D_crowd, D_overcrowd, D_max

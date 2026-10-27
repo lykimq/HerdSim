@@ -83,7 +83,7 @@ Các bố cục phân tán lớn theo $N^{2/3}$ còn $R_f(N)$ lớn chậm hơn 
 
 ### Nhiệm vụ giữ bầy
 
-Hai giao thức tiếp theo (`dmin_f99_hold`, `dmin_f99_hold_spacing`) thay đổi phần cuối của việc lùa: một lượt chỉ thành công khi 99% bầy đã ở trong đích liên tục trong một lần thời gian lùa. Khi bầy đã vào, chó lùi ra $r_s + r_a = 67$ m ngoài con cừu xa nhất, để không con cừu nào phản ứng với chúng và bầy gặm cỏ; một chó chỉ đứng lại sẽ giữ con cừu gần nhất trong trạng thái chạy trốn và đẩy nó xuyên qua đích. Giữ bầy nhỏ thất bại vì lý do hình học: ở $N \le 50$ đích chỉ có bán kính 12 đến 14 m, và cừu đang gặm cỏ lang thang ra khỏi đích trước khi hết thời gian giữ, dù đội lớn bao nhiêu.
+Hai giao thức tiếp theo (`dmin_f99_hold`, `dmin_f99_hold_spacing`) thay đổi phần cuối của việc lùa: một lượt chỉ thành công khi 99% bầy đã ở trong đích liên tục trong một lần thời gian lùa. Khi bầy đã vào, chó lùi ra $r_s + r_a = 67$ m ngoài con cừu xa nhất, để không con cừu nào phản ứng với chúng và bầy gặm cỏ; một chó chỉ đứng lại sẽ giữ con cừu gần nhất trong trạng thái chạy trốn và đẩy nó xuyên qua đích. Trong lúc lùi ra, chó vẫn ở trong vòng $r_s$ của một số con cừu trong 26 đến 29 s, và bầy, vốn vào đích ở mép gần, tiếp tục đi: 13 đến 17 m. Ở $N \le 50$, đích $1{,}9\,R_f$ (12 đến 14 m) quá nhỏ cho quãng đi đó, và dưới $N = 100$ tỷ lệ 99% là mọi con cừu, nên con đầu tiên ra ngoài là kết thúc việc giữ và gọi chó quay lại. Hai giao thức nữa (`dmin_f99_hold_goal`, `dmin_f99_hold_share`) quét đích từ 1,9 đến $3{,}0\,R_f$ và tỷ lệ từ 99% xuống 90% ở $N \le 100$; một đích khoảng 16 đến 19 m giữ được bầy nhỏ với một chó, và gần ngưỡng đó thêm chó làm việc giữ bầy thất bại (báo cáo, mục 3.10).
 
 ---
 
@@ -191,7 +191,7 @@ Vì vậy hạt giống $i$ cho $D = 2$ và $D = 4$ cùng một bầy xuất ph�
 
 ### Lưu lượt chạy và chạy tiếp
 
-Mỗi lượt xong được ghi ngay vào `trials.jsonl`. Một lần chạy có thể dừng bất cứ lúc nào (`Ctrl+C`) và chạy tiếp bằng cùng lệnh mà không mất lượt nào. Một khóa trên thư mục ngăn lần chạy thứ hai ghi vào cùng lúc.
+Mỗi lượt xong được ghi ngay vào `trials.jsonl`. Một lần chạy có thể dừng bất cứ lúc nào (`Ctrl+C`) và chạy tiếp bằng cùng lệnh mà không mất lượt nào. Một khóa trên thư mục ngăn lần chạy thứ hai ghi vào cùng lúc. Git giữ một bản nén gzip, `trials.jsonl.gz`, vì file gốc của một giao thức lớn vượt giới hạn 100 MB của GitHub; lần chạy ghi bản nén khi kết thúc, và một bản clone mới giải nén nó ở lần đầu mở thư mục.
 
 ---
 
@@ -213,10 +213,11 @@ Mỗi lượt xong được ghi ngay vào `trials.jsonl`. Một lần chạy có
 - **Lưới chính ($1, 2, 3, 4, 6, 8, 12, 16, 24$):** các bước khoảng $1{,}5\times$, nên có ít nhất hai số chó cho mỗi lần gấp đôi. $D = 24$ nằm cao hơn hẳn mọi $D_{\min}$ đã quyết định của các lưới chính.
 - **Nhiệm vụ gom ($1$ đến $25$, mọi số):** lưới của bài báo, với độ phân giải một người chăn.
 - **Giữ bầy với chó giãn cách (thêm $7, 9, 10, 11, 13$):** vòng cung sau bầy chứa khoảng $7, 9, 10, 11, 12$ chó cách nhau 2 m ở $N = 25$ đến $400$; thử quanh các số đó cho thấy chỗ bắt đầu chật.
+- **Giữ bầy nhỏ, đích và tỷ lệ (`dmin_f99_hold_share`, $1, 2, 4, 8, 24$):** câu hỏi là đích và tỷ lệ, nên lưới đội được làm thưa; $D$ lớn nhất vẫn là 24 để vị trí xuất phát của chó giống `dmin_f99_hold`. `dmin_f99_hold_goal` giữ lưới của `dmin_f99_hold` đến 24.
 
 ### Số hạt giống mỗi ô (trần 200)
 
-- **Vì sao 200:** ở 200 hạt giống, một ô chỉ được quyết định nếu tỷ lệ thành công ít nhất $0{,}955$ hoặc nhiều nhất $0{,}835$. Tăng gấp đôi lên 400 chỉ thu hẹp dải đó còn $0{,}94$ và $0{,}86$, với gấp đôi số lượt. Trên 39 giao thức, 324 trên 5.773 ô (5,6%) kết thúc còn mở ở mức trần. Một đường cong mà $D_{\min}$ phụ thuộc một ô còn mở được ghi dưới dạng khoảng (ví dụ `2-3`).
+- **Vì sao 200:** ở 200 hạt giống, một ô chỉ được quyết định nếu tỷ lệ thành công ít nhất $0{,}955$ hoặc nhiều nhất $0{,}835$. Tăng gấp đôi lên 400 chỉ thu hẹp dải đó còn $0{,}94$ và $0{,}86$, với gấp đôi số lượt. Trên 41 giao thức, 411 trên 6.845 ô (6,0%) kết thúc còn mở ở mức trần. Một đường cong mà $D_{\min}$ phụ thuộc một ô còn mở được ghi dưới dạng khoảng (ví dụ `2-3`).
 
 ### Quy tắc thành công
 

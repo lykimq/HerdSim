@@ -33,6 +33,7 @@ from .pool import worker_pool
 from .protocol import Protocol, load_protocol, results_folder
 
 Outcome = tuple[bool, int]  # success, total ticks
+Factors = tuple[tuple[str, Any], ...]
 
 
 class ReplayMismatch(RuntimeError):
@@ -74,22 +75,28 @@ class StoredRun:
     def master_seed(self) -> int:
         return self.protocol.settings["master_seed"]
 
-    def config(self, method: str, layout: str, n: int, d: int) -> dict[str, Any]:
-        """Run config of a cell without factors, as the campaign built it."""
-        cell = Cell(Group(method, layout, (), n), d)
+    def config(
+        self, method: str, layout: str, n: int, d: int, factors: Factors = ()
+    ) -> dict[str, Any]:
+        """Run config of a cell, as the campaign built it. ``factors`` are the sorted
+        (name, value) pairs of a factor protocol, empty otherwise."""
+        cell = Cell(Group(method, layout, factors, n), d)
         return cell_config(self.protocol, cell, self.radii[method][str(n)])
 
-    def curve(self, method: str, layout: str, n: int) -> pd.DataFrame:
-        """Trial rows of a D curve without factors."""
-        return self.trials[self.trials["group_key"] == Group(method, layout, (), n).key]
+    def curve(self, method: str, layout: str, n: int, factors: Factors = ()) -> pd.DataFrame:
+        """Trial rows of a D curve."""
+        return self.trials[self.trials["group_key"] == Group(method, layout, factors, n).key]
 
-    def tested(self, method: str, layout: str, n: int) -> list[int]:
+    def tested(self, method: str, layout: str, n: int, factors: Factors = ()) -> list[int]:
         """The D values the run tested on a curve."""
-        return sorted(int(d) for d in self.curve(method, layout, n)["n_shepherds"].unique())
+        rows = self.curve(method, layout, n, factors)
+        return sorted(int(d) for d in rows["n_shepherds"].unique())
 
-    def outcomes(self, method: str, layout: str, n: int, d: int) -> dict[int, Outcome]:
-        """Stored (success, ticks) per seed index of a cell without factors."""
-        rows = self.curve(method, layout, n)
+    def outcomes(
+        self, method: str, layout: str, n: int, d: int, factors: Factors = ()
+    ) -> dict[int, Outcome]:
+        """Stored (success, ticks) per seed index of a cell."""
+        rows = self.curve(method, layout, n, factors)
         mine = rows[rows["n_shepherds"] == d]
         return {
             int(t["seed_index"]): (bool(t["success"]), int(t["total_ticks"]))

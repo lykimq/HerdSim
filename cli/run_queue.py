@@ -35,7 +35,8 @@ from services.adaptive import STOP_DECIDED, run_campaign  # noqa: E402
 from services.protocol import RESULTS_ROOT, load_protocol  # noqa: E402
 
 # The order the study ran in: the first study (main grids, sensitivities, Kubo, FAT), then the
-# follow-ups, then the Lama and di Bernardo (2024) model on its gather task.
+# follow-ups, then the Lama and di Bernardo (2024) model on its gather task, then the goal and
+# share that hold a small flock.
 QUEUE = (
     "dmin_m12",
     "dmin_m6",
@@ -76,6 +77,8 @@ QUEUE = (
     "dmin_f99_big_cap",
     "lama_r50",
     "lama_r50_inf",
+    "dmin_f99_hold_goal",
+    "dmin_f99_hold_share",
 )
 LOG = RESULTS_ROOT / "queue_log.jsonl"
 

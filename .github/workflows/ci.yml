@@ -9,6 +9,10 @@ on:
   pull_request:
     branches: [ main, scaling-cli ]
 
+# The jobs only read the code; a read-only token limits what a compromised action could do.
+permissions:
+  contents: read
+
 jobs:
   tests:
     runs-on: ubuntu-latest

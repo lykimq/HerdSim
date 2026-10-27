@@ -2,14 +2,14 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-330%20passed-brightgreen.svg)](tests/)
-[![Trials](https://img.shields.io/badge/simulated%20trials-367%2C150-success.svg)](results/)
+[![Tests](https://img.shields.io/badge/tests-332%20passed-brightgreen.svg)](tests/)
+[![Trials](https://img.shields.io/badge/simulated%20trials-439%2C120-success.svg)](results/)
 
 A single sheepdog can gather a cohesive flock and drive it into a pen on its own. When the sheep start scattered, split into groups or spread over a wide field, and the job has a deadline, one dog cannot be in several places at once. The question is then how many dogs the task needs, and whether more dogs always help:
 
 > **How many dogs ($D$) does it take to gather a flock of $N$ sheep and drive it into a goal reliably before a deadline: how few will do ($D_{\min}$), how many are enough ($D_{\mathrm{sat}}$), and when do more dogs start to hurt?**
 
-**HerdSim** is an open-source simulator and a study built to answer that question. Over **367,150 simulated trials** in 39 protocols, with no simulation errors, it maps the smallest reliable team ($D_{\min}$), the team beyond which more dogs no longer speed up the drive ($D_{\mathrm{sat}}$), and the settings in which more dogs make the task fail, for flocks of 25 to 566 sheep (with runs up to 3,200) under different deadlines, start layouts, cohesion levels and sensing ranges.
+**HerdSim** is an open-source simulator and a study built to answer that question. Over **439,120 simulated trials** in 41 protocols, with no simulation errors, it maps the smallest reliable team ($D_{\min}$), the team beyond which more dogs no longer speed up the drive ($D_{\mathrm{sat}}$), and the settings in which more dogs make the task fail, for flocks of 25 to 566 sheep (with runs up to 3,200) under different deadlines, start layouts, cohesion levels and sensing ranges.
 
 ![One simulation trial](docs/figures/fig17_trial.png)
 **Figure 1: One trial in HerdSim ($N = 200$ sheep, $D = 4$ dogs, `wide` start, seed 2026), at ticks 0, 55, 139 and 279.**
@@ -103,7 +103,7 @@ cd HerdSim
 # Install development environment and dependencies
 make install     # uv sync --extra dev
 
-# Lint, type check and run the 330 tests
+# Lint, type check and run the 332 tests
 make check
 
 # Run the 23 benchmark tests, six small campaigns end to end (about 1.5 minutes)
@@ -128,7 +128,7 @@ uv run cli/campaign.py run --protocol dmin_m6 --workers 16
 # 3. Show the progress of a running or finished protocol
 uv run cli/campaign.py status --protocol dmin_m6
 
-# 4. Run the queue of 39 research protocols (finished ones skipped, stopped ones resumed)
+# 4. Run the queue of 41 research protocols (finished ones skipped, stopped ones resumed)
 uv run cli/run_queue.py --workers 20
 
 # 5. Build Markdown result tables from the result folders
@@ -158,7 +158,7 @@ HerdSim/
 |-- protocols/configs/      # Protocols (canonical defaults + overrides)
 |-- cli/                    # Command-line tools (campaign.py, run_queue.py, dmin_tables.py)
 |-- docs/                   # Report, method notes, guides and figures
-|-- results/                # Result folders (367,150 trials in the study protocols)
+|-- results/                # Result folders (439,120 trials in the study protocols)
 `-- tests/                  # Unit, invariant and regression tests
 ```
 

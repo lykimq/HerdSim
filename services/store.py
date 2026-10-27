@@ -6,6 +6,9 @@
       provenance.json         protocol id and physics hash
       calibration.json        R_f(N) per method, with the physics hash it belongs to
       trials.jsonl            one JSON line per finished trial, appended as trials finish
+      trials.jsonl.gz         the committed copy of trials.jsonl, which can pass GitHub's
+                              100 MB file limit; packed when a campaign closes the folder
+                              and unpacked when a clone has only the .gz
       errors.jsonl            one line per trial that raised
       trials.csv              table form of trials.jsonl, rewritten after each round
       frontier_cells.csv      per (group, D): reliability, finish times, zone, errored trials
@@ -23,7 +26,10 @@ load.
 from __future__ import annotations
 
 import fcntl
+import gzip
 import json
+import os
+import shutil
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import IO, Any
@@ -68,13 +74,54 @@ def _read_jsonl(path: Path, repair: bool) -> list[dict[str, Any]]:
     return rows
 
 
+def _pack(plain: Path, packed: Path) -> None:
+    """gzip with no name or time in the header, so the same trials give the same bytes
+    and git sees no change when nothing ran. The .gz takes the mtime of its source,
+    which is how ``pack_trials`` tells that it is current."""
+    tmp = packed.with_suffix(".gz.tmp")
+    with plain.open("rb") as src, tmp.open("wb") as raw:
+        with gzip.GzipFile(fileobj=raw, mode="wb", compresslevel=6, mtime=0, filename="") as dst:
+            shutil.copyfileobj(src, dst)
+    tmp.replace(packed)
+    stat = plain.stat()
+    os.utime(packed, ns=(stat.st_atime_ns, stat.st_mtime_ns))
+
+
+def _unpack(packed: Path, plain: Path) -> None:
+    """The unpacked file takes the .gz's mtime, so a folder that runs nothing is not repacked."""
+    tmp = plain.with_suffix(".jsonl.tmp")
+    with gzip.open(packed, "rb") as src, tmp.open("wb") as dst:
+        shutil.copyfileobj(src, dst)
+    tmp.replace(plain)
+    stat = packed.stat()
+    os.utime(plain, ns=(stat.st_atime_ns, stat.st_mtime_ns))
+
+
 class CampaignStore:
     def __init__(self, output: Path) -> None:
+        """A clone holds only trials.jsonl.gz. It is unpacked here, before anything reads
+        the folder, because a folder with provenance.json and no trials.jsonl counts as
+        empty and ``discard_if_empty`` would reset it. An existing trials.jsonl is never
+        overwritten: it may hold trials the .gz does not have yet."""
         self.root = output
         self.trials_jsonl = output / "trials.jsonl"
+        self.trials_gz = output / "trials.jsonl.gz"
         self.errors_jsonl = output / "errors.jsonl"
         self.timeseries_dir = output / "timeseries"
         self._lock: IO[str] | None = None
+        if self.trials_gz.exists() and not self.trials_jsonl.exists():
+            _unpack(self.trials_gz, self.trials_jsonl)
+
+    def pack_trials(self) -> None:
+        """Write trials.jsonl.gz unless it already matches trials.jsonl."""
+        if not self.trials_jsonl.exists():
+            return
+        if (
+            self.trials_gz.exists()
+            and self.trials_gz.stat().st_mtime_ns == self.trials_jsonl.stat().st_mtime_ns
+        ):
+            return
+        _pack(self.trials_jsonl, self.trials_gz)
 
     def open(self, protocol: Protocol, physics_hash: str) -> None:
         """Lock the folder, then create it or check that it ran the same protocol and physics.
@@ -128,8 +175,10 @@ class CampaignStore:
             return False
 
     def close(self) -> None:
-        """Release the folder's lock."""
+        """Pack the trials while the lock is still held, then release it. Packing here,
+        not after every round, costs a few seconds once per run instead of per round."""
         if self._lock is not None:
+            self.pack_trials()
             self._lock.close()
             self._lock = None
 

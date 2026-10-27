@@ -37,13 +37,17 @@ def flock_radii(folder: Path) -> dict[str, dict[str, float]]:
 
 
 def markdown(frame: pd.DataFrame, index: bool = False) -> str:
-    """A Markdown table; no extra dependency."""
+    """A Markdown table; no extra dependency. A "|" inside a cell is escaped, because a row of
+    several factors is labelled "a=1|b=2" and would otherwise split into two cells."""
     if frame.empty:
         return "(no rows)"
     frame = frame.reset_index() if index else frame
-    columns = [str(c) for c in frame.columns]
+
+    def text(v: object) -> str:
+        return "" if isinstance(v, float) and pd.isna(v) else str(v).replace("|", "\\|")
+
+    columns = [text(c) for c in frame.columns]
     lines = ["| " + " | ".join(columns) + " |", "|" + "|".join("---" for _ in columns) + "|"]
     for row in frame.itertuples(index=False):
-        cells = ("" if isinstance(v, float) and pd.isna(v) else str(v) for v in row)
-        lines.append("| " + " | ".join(cells) + " |")
+        lines.append("| " + " | ".join(text(v) for v in row) + " |")
     return "\n".join(lines)

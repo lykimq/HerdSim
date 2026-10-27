@@ -1,7 +1,7 @@
 # Team Size for Driving a Simulated Sheep Flock: Minimum, Enough and Too Many Dogs
 
 *HerdSim research report*  
-*39 protocols and 367,150 trials, with no simulation errors: 23 protocols of the first study (164,740 trials), 14 follow-up protocols and three resumed runs (162,130 trials), and two protocols of the non-cohesive model of Lama and di Bernardo (2024) (40,280 trials).*  
+*41 protocols and 439,120 trials, with no simulation errors: 23 protocols of the first study (164,740 trials), 16 follow-up protocols and three resumed runs (234,100 trials), and two protocols of the non-cohesive model of Lama and di Bernardo (2024) (40,280 trials).*  
 *The models and the team rule are described in [docs/methods/models.md](../methods/models.md), the task geometry and the sampling in [docs/experiments/task_design.md](../experiments/task_design.md). This report gives the results.*
 
 ---
@@ -21,9 +21,9 @@ Main results:
 5. **The 99% rule is robust to setup choices.** Under it, $D_{\min}$ moves by about one dog at most when the dog start, the start gap, the dog speed or the sheep parameters change; only a smaller goal raises it more. Under the strict rule the same changes often move it to "none on the grid".
 6. **Dogs without a team rule do not scale.** With FAT, where every dog chases the same sheep, no team is reliable at $N \ge 200$ on any scattered layout, nor on compact $N = 400$.
 7. **Beyond $D_{\mathrm{sat}}$ extra dogs cost but do not hurt** (section 3.7). The finish time stays at 0.96–1.01 of the $D_{\mathrm{sat}}$ time while dog time grows with $D$, and the time each sheep spends fleeing does not rise. Under the 99% rule no team up to 24 dogs makes the task fail on the five original sizes (one dip on the denser grid); extra dogs slow mainly `split` flocks.
-8. **Denser grid** (section 3.8): on nine flock sizes $D_{\min}$ grows with slope 0.27–0.38 at 12 drive times and 0.38–0.61 at 6, and $D_{\mathrm{sat}}$ about one and a half to two times as fast. Up to $N = 566$ a power law and a curve that levels off fit equally well.
+8. **Denser grid** (section 3.8): on nine flock sizes $D_{\min}$ grows with slope 0.27–0.38 at 12 drive times and 0.38–0.61 at 6, and $D_{\mathrm{sat}}$ about 1.6 times as fast (1.15 to 2.4 over the brackets). Up to $N = 566$ a power law and a curve that levels off fit equally well.
 9. **Which part of the team rule matters** (section 3.9): the paper's collect/drive switch alone carries a team of independent dogs to $N = 200$; the team layer is needed at $N = 400$.
-10. **Too many dogs** (section 3.10): with dogs that keep 2 m apart, `outlier_rich` $N = 400$ fails from $D = 9$ on; point dogs stay undecided at 0.85–0.92 there, never decided unreliable.
+10. **Too many dogs** (section 3.10): with dogs that keep 2 m apart, `outlier_rich` $N = 400$ fails from $D = 9$ on; point dogs stay undecided at 0.85–0.92 there, never decided unreliable. Holding fails on flocks of 25 and 50 with the default goal: the flock walks about 15 to 17 m while the dogs withdraw. A goal of about 16 to 19 m holds them with one dog, letting one or two sheep stay out lowers it, and near that threshold extra dogs make holding fail.
 11. **Cohesion and sensing** (sections 3.11, 3.12): weaker cohesion makes $D_{\min}$ grow faster, toward the 0.5 of non-cohesive targets; a local view costs about one dog at $N = 200$, and sharing what every dog sees wins it back.
 12. **A limit of the drive rule** (section 3.13): above $N \approx 1056$ the paper's drive point lies beyond the distance at which sheep react to a dog, and no team up to 12 dogs moves the flock. With the drive point capped within reach, a scattered flock needs 3 dogs at $N = 800$, 5–9 at 1131 and more than 12 at 1600.
 13. **Targets without cohesion** (section 3.14): HerdSim reproduces the threshold Lama and di Bernardo report in their Table I, and its maps have the same shape as theirs. With infinite sensing the smallest team grows as the square root of the number of targets (exponent 0.52–0.53) under both the paper's statistic and HerdSim's. With sensing radius 10 the two part near the threshold: at 144 targets the paper's average reaches 0.99 with 11 herders, while 17 to 25 herders still lose a target in about one run in ten.
@@ -46,7 +46,7 @@ The follow-up runs (99% rule throughout) add seven more:
 
 - **RQ8 (denser grid):** on nine flock sizes up to $N = 566$, how fast do $D_{\min}$ and $D_{\mathrm{sat}}$ grow, and can steady growth be told from a curve that levels off?
 - **RQ9 (parts of the rule):** what do the collect/drive switch and the team layer each add, and how does a model whose finish time falls with $D$ (Kubo) saturate?
-- **RQ10 (too many dogs):** does holding the flock in the goal, or dogs that take up room, make extra dogs harmful?
+- **RQ10 (too many dogs):** does holding the flock in the goal, or dogs that take up room, make extra dogs harmful, and what goal does holding a small flock need?
 - **RQ11 (cohesion):** how does the growth of $D_{\min}$ change with the strength of cohesion?
 - **RQ12 (what a dog sees):** how many dogs does a limited sensing range cost, and does sharing what dogs see make up for it?
 - **RQ13 (large N):** what happens above the size at which the model's flock still has a size of its own?
@@ -92,7 +92,7 @@ The first study has 23 protocols (164,740 trials, 20 workers, no errors):
 - **Kubo model (1 run):** `dmin_kubo` on compact flocks of 25 to 100.
 - **Sensitivity (14 runs):** at 6 drive times, a base and six variants (dogs released from one point, dogs on a ring, start gap 15 and 60 instead of 30, goal radius $1.5 R_f$, the field-matched sheep parameters, dog speed 1.15), each under both rules.
 
-The follow-up adds 14 protocols and resumes the three 99% grids (162,130 trials, no errors, 99% rule only); they are listed with RQ8–RQ13 and in the appendix. Two protocols of the Lama and di Bernardo model (40,280 trials, no errors) answer RQ14.
+The follow-up adds 16 protocols and resumes the three 99% grids (234,100 trials, no errors, 99% rule only, with 90% and 95% added in one holding protocol); they are listed with RQ8–RQ13 and in the appendix. Two protocols of the Lama and di Bernardo model (40,280 trials, no errors) answer RQ14.
 
 ---
 
@@ -350,7 +350,7 @@ To pin down the shape of $D_{\min}(N)$, the 99% grids at 12 and 6 drive times go
 1. **The slopes narrow.**  
    On nine sizes the slope of $D_{\min}$ against $N$ is **0.27 to 0.38** on `wide` and **0.28 to 0.38** on `outlier_rich` at 12 drive times, and **0.38 to 0.61** at 6 drive times. At the loose deadline it stays below 0.5.
 
-2. **$D_{\mathrm{sat}}$ grows about one and a half to two times as fast as $D_{\min}$.**  
+2. **$D_{\mathrm{sat}}$ grows about 1.6 times as fast as $D_{\min}$ (1.15 to 2.4 over the brackets).**  
    On `wide` at 6 drive times $D_{\mathrm{sat}}$ is 1, 1, 1, 2, 3, 3, 4, 5 dogs from $N = 25$ to 400, and 7–24 at 566 (slope **0.70 to 0.91**). The gap between the team that is reliable and the team that is fastest widens as the flock grows.
 
 3. **Steady growth and a curve that levels off fit equally well.**  
@@ -409,12 +409,13 @@ In the open drive under the 99% rule, extra point dogs never made the task fail 
 
 1. **Holding (`dmin_f99_hold`):** a trial succeeds only once 99% of the flock has stayed in the goal for one drive time. While the flock is in, the dogs withdraw to $r_s + r_a = 67$ m beyond the farthest sheep, so no sheep reacts to them and the flock grazes.
 2. **Dogs that take up room (`dmin_f99_hold_spacing`):** the same task, but no dog may come within 2 m of another. The arc behind the flock then has room for a limited number of dogs, about $D_{\mathrm{cap}} = 7, 9, 10, 11, 12$ at $N = 25$ to 400 (the arc length divided by the 2 m spacing).
+3. **The goal that holds a small flock (`dmin_f99_hold_goal`, `dmin_f99_hold_share`):** the holding task at $N = 25$, 50 and 100 with the goal radius raised from $1.9 R_f$ to 2.1, 2.3 and $2.5 R_f$, crossed with the share that must stay in (99%, 95%, 90%), and to $3.0 R_f$ at 99%, on the seeds of `dmin_f99_hold`.
 
 #### Results
 
-1. **Holding fails on small flocks for a geometric reason.**  
+1. **Holding fails on small flocks because the flock walks out of a small goal.**  
    On larger flocks ($N \ge 100$) holding works on `wide` and `compact`, with the same $D_{\min}$ as the open drive or one more (1, 2 and 3 dogs on `wide` at $N = 100$, 200, 400).  
-   On small flocks ($N \le 50$) no team holds the flock. The goal there has a radius of only 12–14 m, while the dogs must withdraw 67 m. Once the dogs are gone, the grazing sheep wander out of the small goal before the hold time is over. The failure comes from the size of the goal, not from too few dogs.
+   On small flocks ($N \le 50$) no team holds the flock, and 72% of the failed trials end with no sheep in the goal. The flock enters the goal at its near edge with the dogs behind it. While the dogs withdraw they stay within 65 m of some sheep for 26 to 29 s, and the flock keeps walking: its centre moves a median 17 m at $N = 25$, 15 m at $N = 50$ and 13 m at $N = 100$ (`cli/diagnostics/hold_walk.py`: 239 of 240 replays of stored trials with a goal of $3.0 R_f$, large enough not to cut the walk short; in one the dogs never cleared). A goal of $1.9 R_f$ is 11.8 m at $N = 25$ and 14.4 m at $N = 50$, so the leading sheep cross the far edge. Below $N = 100$ the 99% share is every sheep, so the first sheep out ends the hold; the dogs come back, drive the flock from the far side and push it farther out. The failure comes from the goal size against that walk, not from too few dogs.
 
 2. **Dogs that take up room make extra dogs harmful on `outlier_rich` $N = 400$.**  
    - With 3 to 6 dogs the success rate is 0.925–0.94, undecided.  
@@ -427,6 +428,31 @@ In the open drive under the 99% rule, extra point dogs never made the task fail 
 **Figure 11: Holding at $N = 400$, point dogs against dogs kept 2 m apart.**  
 Left: `wide`; right: `outlier_rich`; success against $D$ (log scale). Dotted grey: point dogs; solid blue: dogs 2 m apart; orange band: arc capacity ($D_{\mathrm{cap}} \approx 10$–12); dashed line: $\theta = 0.90$. On `wide` the extra spaced dogs stay behind and success holds; on `outlier_rich` it falls from $D = 9$.  
 *Data:* [results_tables.md: D_min, dmin_f99_hold](results_tables.md#d_min-dmin_f99_hold) and [results_tables.md: D_min, dmin_f99_hold_spacing](results_tables.md#d_min-dmin_f99_hold_spacing).
+
+3. **A goal of about 16 to 19 m holds a small flock with one dog.**  
+   Table 8 gives, for each share, the smallest goal tested from which one dog is decided reliable on every layout; a range means one dog is still undecided at the smaller goal.
+   - With 99% held, the threshold is $2.5$–$3.0 R_f$ (15.5–18.6 m) at $N = 25$ and $2.1$–$2.3 R_f$ (16.0–17.5 m) at $N = 50$. At $N = 100$ the default $1.9 R_f$ (17.3 m) already holds the flock with one dog on three layouts; it is an upper bound, since no smaller goal was tested. In metres the thresholds are close to each other, while in flock radii they fall from about 2.5 to 1.9. The walk predicts this. A flock that enters with its last sheep at the near edge and walks $w$ keeps every sheep in only if the goal radius exceeds about $w/2$ plus the distance of its farthest sheep from the centre: 14.3, 15.7 and 17.2 m at $N = 25$, 50 and 100 (medians over the replays), at or just below the thresholds observed. This agreement is consistent with the walk being the cause; the walk itself was not varied.
+   - Letting sheep stay out lowers the goal needed. At $N = 25$ one sheep out (95%) lowers it by one step of the tested grid, from 15.5 to 14.3 m, and a second (90%) by up to one more step, to 13.0–14.3 m. At $N = 50$ two sheep out (95%) are enough for the default goal of 14.4 m, at least 1.6 m below the 99% threshold.
+   - Near the threshold extra dogs hurt. Where a goal holds the flock with margin, one dog does and larger teams do as well. At a goal just short of that, one dog does best: at $N = 25$, 90%, $2.1 R_f$, one dog is reliable on `split` and `outlier_rich`, while on every layout teams from 3 to 7 dogs upward are decided unreliable (success down to 0.50); at $N = 50$, 99%, $2.1 R_f$, 4 dogs are decided unreliable on `wide` and `outlier_rich`. *A likely reason:* the flock walks about a metre farther during the withdrawal with two or more dogs than with one (16.6 m against 17.5–17.8 m at $N = 25$), enough to tip a marginal goal.
+   - At $N = 100$ only `outlier_rich` needs more than one dog: 3 at the default goal with 99% held, 2 with any larger goal or smaller share.
+   - The cells the three holding protocols share (the default goal at 99%, and $2.5 R_f$ at 99%) reproduced each other's trials exactly: 2,410, 3,750 and 7,420 shared trials, with the same outcome and length.
+
+Table 8, smallest goal tested from which one dog is decided reliable on every layout (holding for one drive time, 6 drive times; "≤" where the default $1.9 R_f$, the smallest goal tested, already holds):
+
+| Share that must stay in | $N = 25$ | $N = 50$ | $N = 100$ |
+| :--- | :---: | :---: | :---: |
+| 99% (out: none below $N = 100$, one at 100) | $2.5$–$3.0 R_f$ = 15.5–18.6 m | $2.1$–$2.3 R_f$ = 16.0–17.5 m | ≤ $1.9 R_f$ = 17.3 m (`outlier_rich` 3) |
+| 95% (out: one of 25, two of 50, five of 100) | $2.3 R_f$ = 14.3 m | ≤ $1.9 R_f$ = 14.4 m | ≤ $1.9 R_f$ = 17.3 m (`outlier_rich` 2) |
+| 90% (out: two of 25, five of 50, ten of 100) | $2.1$–$2.3 R_f$ = 13.0–14.3 m | ≤ $1.9 R_f$ = 14.4 m | ≤ $1.9 R_f$ = 17.3 m (`outlier_rich` 2) |
+
+At $N = 25$ and 99%, $2.5 R_f$ holds `compact` and `split` with one dog while `wide` (1–2) and `outlier_rich` (1–3) are still open; at $N = 25$ and 90%, $2.1 R_f$ holds `split` and `outlier_rich` with one dog while `compact` and `wide` are still bounds ([1]); at $N = 50$ and 99%, one dog at $2.1 R_f$ is undecided on every layout (success 0.90–0.94 over 200 seeds).  
+*Data:* [results_tables.md: dmin_f99_hold_goal](results_tables.md#dmin_f99_hold_goal-dmin_f99_hold--dmin_f99_hold_goal), [results_tables.md: dmin_f99_hold_share](results_tables.md#dmin_f99_hold_share-dmin_f99_hold--dmin_f99_hold_share) and [results_tables.md: walk while the dogs withdraw](results_tables.md#walk-while-the-dogs-withdraw-dmin_f99_hold_goal-at-30-r_f-replay-of-5-stored-seeds-per-cell-every-replay-reproduced-its-stored-trial).
+
+![Holding a small flock: success against the goal radius](../figures/fig40_hold_goal.png)
+
+**Figure 12: Holding success against the goal radius in metres, for each share that must stay in.**  
+Left to right: 90%, 95% and 99% of the flock must stay in the goal for one drive time. Each point is the mean success rate over the 20 cells of one flock size and goal (4 layouts × $D = 1, 2, 4, 8, 24$, each cell counted once; the midpoints the adaptive run added are left out); the bar is the range over those cells, and its low end near the threshold is the larger teams. Blue $N = 25$, orange $N = 50$, green $N = 100$; ringed points are the default goal of $1.9 R_f$; dashed line $\theta = 0.90$. With 99% held the curves of $N = 25$ and 50 rise between about 13 and 17.5 m, and $N = 100$ is already above $\theta$ at its default 17.3 m; letting one or two sheep out moves the rise of the small flocks to smaller goals. At $N = 100$ the low end of the bars is `outlier_rich` with one dog.  
+*Data:* `results/dmin_f99_hold_share` and `results/dmin_f99_hold_goal` (the $3.0 R_f$ points).
 
 ---
 
@@ -441,7 +467,7 @@ Lama and di Bernardo (2024) report that the team grows as $\sqrt{N}$ for targets
    With $n = 0.5N$ the slope on `wide` becomes **0.40 to 0.70**, a range that includes the 0.5 of non-cohesive targets.  
    On `split` the weaker flock comes apart under one dog: $D_{\min}$ goes from 1 to 3–4 at $N = 200$ and from 2 to 4–5 at $N = 400$. The slow growth of $D_{\min}$ for the Strömbom flock depends on every sheep being drawn to the whole flock.
 
-Table 8, cohesion levels (`wide`, 99% rule, 12 drive times):
+Table 9, cohesion levels (`wide`, 99% rule, 12 drive times):
 
 | Cohesion (`wide`, 99%, $12\times$) | $N = 50$ | $N = 100$ | $N = 200$ | $N = 400$ | Slope |
 | :--- | :---: | :---: | :---: | :---: | :---: |
@@ -468,7 +494,7 @@ Real dogs, robots and drones do not see the whole field. Here each dog sees only
 
 ![D_min against sensing range, and sharing](../figures/fig37_view.png)
 
-**Figure 12: $D_{\min}$ against sensing range, and the effect of sharing.**  
+**Figure 13: $D_{\min}$ against sensing range, and the effect of sharing.**  
 Left: $D_{\min}$ against the range for `wide` (circles) and `split` (squares) at $N = 100$ (faded) and $N = 200$; the dashed line marks 65 m, the distance at which a sheep reacts. Below 30 m `wide` fails.  
 Right: success against $D$ on `wide` $N = 200$ at a range of 65 m: no sharing (dotted blue), sharing with dogs in range (dashed blue), sharing with the whole team (solid blue), and full sight (solid black). Sharing with the whole team matches full sight.  
 *Data:* [results_tables.md: Views: sensing range](results_tables.md#views-sensing-range-no-sharing-base-row--range-0-global) and [results_tables.md: Views: sharing at range 65](results_tables.md#views-sharing-at-range-65-beside-the-no-sharing-rows-of-dmin_f99_view_range).
@@ -495,7 +521,7 @@ With the drive offset capped at $r_s - r_a = 63$ m (`dmin_f99_big_cap`), a HerdS
 - **Compact:** one dog drives flocks of 800 and 1131, two are needed at 1600. At 3200 every team from 3 to 12 dogs succeeded in all 42 trials run.
 - **Wide:** 3 dogs at $N = 800$, 5–9 at 1131 and more than 12 at 1600. A large scattered flock needs many dogs to keep its sides together.
 
-Table 9, capped drive point (99% rule, 12 drive times):
+Table 10, capped drive point (99% rule, 12 drive times):
 
 | Capped at 63 m, 99%, $12\times$ | $N = 800$ | $N = 1131$ | $N = 1600$ | $N = 3200$ (partial) |
 | :--- | :---: | :---: | :---: | :---: |
@@ -508,7 +534,7 @@ Table 9, capped drive point (99% rule, 12 drive times):
 
 ### 3.14 RQ14: Targets without cohesion: the square-root law of Lama and di Bernardo (2024)
 
-To compare the Strömbom flock with targets that do not flock, we ran the model of Lama and di Bernardo (2024) in HerdSim as method `lama` on task `gather` ([model](../methods/models.md#lama--di-bernardo-2024-non-cohesive-targets), [task](../experiments/task_design.md#6-the-gather-task-lama-and-di-bernardo-2024)). Each target wanders at random and is pushed away by herders within $\lambda = 2.5$; each herder chases the target farthest from the goal among those it senses. Targets and herders start uniform over a disc of radius $R = 50$ round a goal of radius $R/5$, and a run lasts at most 5000 s.
+To compare the Strömbom flock with targets that do not flock, we ran the model of Lama and di Bernardo (2024) in HerdSim as method `lama` on task `gather` ([model](../methods/models.md#lama--di-bernardo-2024-non-cohesive-targets), [task](../experiments/task_design.md#6-the-gather-task-lama-and-di-bernardo-2024)). Each target wanders at random and is pushed away by herders within $\lambda = 2.5$; each herder chases the target farthest from the goal among those it senses. Targets and herders start uniform over a disc of radius $R = 50$ round a goal of radius $R/5$. HerdSim stops a run at 5000 s; the paper runs until the share in the goal is stationary.
 
 #### 1. Two ways to call a team enough
 The same trials are read in two ways:
@@ -517,11 +543,11 @@ The same trials are read in two ways:
 
 #### 2. Results
 1. **HerdSim reproduces the paper.**  
-   The paper gives one result as numbers, the threshold in its Table I: with sensing radius 10, the smallest team follows the square-root law only from $\sqrt{N} = 8$, 9 and 11 up, at the 90%, 95% and 99% levels. HerdSim gives 8, 9 and 12, reading the threshold as the first $\sqrt{N}$ from which the smallest team joins the square-root band. Its other results are colour maps ([Fig. 2](https://doi.org/10.1103/PhysRevResearch.6.L032012)). Side by side (Figure 13), HerdSim's maps and the paper's have the same shape: with radius 10, no team up to 25 succeeds with few targets, then comes a sharp threshold, and above it a band of teams that grows with the square root of the number of targets; with infinite sensing that band runs over the whole range. Two small differences show: at radius 10 with few targets HerdSim gathers a little less than the paper, and its 0.99 line bends a little farther to the right than the paper's.
+   The paper gives one result as numbers, the threshold in Table I of its Supplementary Material: with $R = 50$ and sensing radius 10, the smallest team follows the square-root law only from $\sqrt{N} = 8$, 9 and 11 up, at the 90%, 95% and 99% levels. HerdSim gives 8, 9 and 12, reading the threshold as the first $\sqrt{N}$ from which the smallest team joins the square-root band. Its other results are colour maps ([Fig. 2](https://doi.org/10.1103/PhysRevResearch.6.L032012)). Side by side (Figure 14), HerdSim's maps and the paper's have the same shape: with radius 10, no team up to 25 succeeds with few targets, then comes a sharp threshold, and above it a band of teams that grows with the square root of the number of targets; with infinite sensing that band runs over the whole range. Two small differences show: at radius 10 with few targets HerdSim gathers a little less than the paper, and its 0.99 line bends a little farther to the right than the paper's.
 
    ![The paper's Fig. 2 beside HerdSim's maps](../figures/fig39_lama_maps.png)
 
-   **Figure 13: The paper's map above HerdSim's.** Each cell is the share of targets in the goal at the end, averaged over runs, for one number of targets (x, as its square root) and one number of herders (y); the white line marks 0.99. Left: infinite sensing; right: sensing radius 10. HerdSim's grid stops at 400 targets ($\sqrt{N} = 20$), so the grey band from 21 to 25 on the paper's axis has no data. That range already holds the threshold and the square-root rise above it, which is enough for the check, so the five larger sizes were left out; they would about double the run time. The grid has 10 to 200 runs per cell, the paper 50.  
+   **Figure 14: The paper's map above HerdSim's.** Each cell is the share of targets in the goal at the end, averaged over runs, for one number of targets (x, as its square root) and one number of herders (y); the white line marks 0.99. Left: infinite sensing; right: sensing radius 10. HerdSim's grid stops at 400 targets ($\sqrt{N} = 20$), so the grey band from 21 to 25 on the paper's axis has no data. That range already holds the threshold and the square-root rise above it, which is enough for the check, so the five larger sizes were left out; they would about double the run time. The grid has 10 to 200 runs per cell, the paper 50.  
    *Top: Fig. 2 of Lama and di Bernardo (2024), Phys. Rev. Research 6, L032012, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), cropped. Bottom: `lama_r50_inf` and `lama_r50`.*
 
 2. **With infinite sensing both rules give the square-root law.**  
@@ -530,13 +556,13 @@ The same trials are read in two ways:
 3. **With sensing radius 10 the two rules part near the threshold.**  
    With 100 targets or fewer no team up to 25 herders is reliable; up to 81 targets every failure ends with targets no herder can see.  
    Just above the threshold, from 100 to 196 targets, the two rules part:
-   - At 144 targets, 11 herders gather on average 99.2% of the targets, so the paper's statistic accepts them. But only 70% of their runs end with 99% of the targets in. Runs that lose two of 144 targets (98.6%) mixed with runs that lose none still average above 0.99.
+   - At 144 targets, 11 herders gather on average 99.2% of the targets, so the paper's statistic accepts them. But only 21 of their 30 runs end with 99% of the targets in (99% interval 0.45–0.89). The 9 failed runs lose two to four of the 144 targets; mixed with runs that lose one or none they still average above 0.99.
    - HerdSim's rule does not accept 11 herders; its $D_{\min}$ is the bracket 17–25.
    - An average can hide runs that fail. Counting runs does not, so near the threshold the two answers differ, by 6 to 14 herders at 144 targets and less above.
 
 ![The Lama and di Bernardo model in HerdSim](../figures/fig38_lama.png)
 
-**Figure 14: The smallest team for each number of targets in the model of Lama and di Bernardo (2024).**  
+**Figure 15: The smallest team for each number of targets in the model of Lama and di Bernardo (2024).**  
 Left: sensing radius 10 (the threshold region shaded); right: infinite sensing. Circles apply the paper's statistic to HerdSim's runs; diamonds are HerdSim's $D_{\min}$ (bars are brackets, a triangle a lower bound, a cross no reliable team up to 25). With infinite sensing the two statistics agree. Near the threshold at radius 10, the average accepts 11 herders at 144 targets while HerdSim's rule needs 17–25.  
 *Data:* [results_tables.md: Lama and di Bernardo (2024): gather task](results_tables.md#lama-and-di-bernardo-2024-gather-task).
 
@@ -558,7 +584,7 @@ Replays of stored trials (`cli/diagnostics/split_diagnostic.py`, 12 seeds per ce
 
 ![Split Curves and Metric Diagnoses](../figures/fig23_split_curves.png)
 
-**Figure 15: Success on `split` flocks against team size (6 drive times).**  
+**Figure 16: Success on `split` flocks against team size (6 drive times).**  
 Panels show `split` at $N = 100$, 200 and 400 and `wide` at $N = 400$ for comparison, with 99% Clopper–Pearson intervals against $D$ (log scale). Blue circles: strict rule; orange squares: 99% rule; dotted line: $\theta = 0.90$. On `wide` success rises to 1; on `split` at $N = 200$ and 400 it levels off below the threshold ($N = 100$ is reliable under both rules).  
 *Data:* `results/dmin_m6` and `results/dmin_f99_m6`; values in [results_tables.md: dmin_m6](results_tables.md#dmin_m6) and [results_tables.md: dmin_f99_m6](results_tables.md#dmin_f99_m6).
 
@@ -570,7 +596,7 @@ Panels show `split` at $N = 100$, 200 and 400 and `wide` at $N = 400$ for compar
 
 ![Per-Trial Metrics](../figures/fig27_metrics.png)
 
-**Figure 16: Per-tick measures at 6 drive times.**  
+**Figure 17: Per-tick measures at 6 drive times.**  
 (a) Mean flock spread (RMS distance to the centroid) against success rate, one point per cell (rank correlation $-0.76$ strict, $-0.71$ at 99%).  
 (b) Median share of dogs standing still against $D$ at $N = 200$ (99% rule) for `wide`, `split` and `outlier_rich`. On `split` about a quarter of the dogs stand still under the 6 m stop rule.  
 (c) Median share of dogs with another dog within 2 m against $D$.  
@@ -623,14 +649,14 @@ Section 3.14 gives the non-cohesive side inside HerdSim. The paper's model repro
 
 1. **A decided map of team sizes.** $D_{\min}$ and $D_{\mathrm{sat}}$ across flock sizes ($N \le 566$, with runs to 3200), layouts and deadlines, each cell decided at 99% confidence or reported as a bracket.
 2. **The success rule changes the answer.** Under the strict rule the last sheep often decides a trial; the 99% rule measures what the team can do with the flock.
-3. **Reliable and fast are different teams.** The fastest team grows about one and a half to two times as fast with $N$ as the smallest reliable one, and dogs beyond it add cost but no speed.
+3. **Reliable and fast are different teams.** The fastest team grows about 1.6 times as fast with $N$ as the smallest reliable one (1.15 to 2.4 over the brackets), and dogs beyond it add cost but no speed.
 4. **Which part of the team rule matters.** The collect/drive switch carries a team without coordination to $N = 200$; assignment is needed at $N = 400$.
 5. **When more dogs hurt.** Point dogs never made the task fail on `wide` or `outlier_rich` (one dip on `split` on the denser grid); dogs that keep 2 m apart do, on `outlier_rich` $N = 400$ from about 9 dogs.
 6. **Cohesion and the square-root law.** The Strömbom flock grows below $\sqrt{N}$ at the loose deadline, and weaker cohesion moves it toward 0.5.
 7. **A limit of the drive rule.** Above $N \approx 1056$ Strömbom's drive point is beyond the sheep's reaction distance; capping it restores the drive.
 8. **Sensing and sharing.** A local view costs about one dog at $N = 200$, and sharing with the whole team wins it back on `wide` (not on `split`).
 9. **How failures end.** Most failed drives end far from the goal.
-10. **A reproducible simulator.** Every trial can be replayed from its config and seed; 932 diagnostic replays reproduced their stored trials exactly.
+10. **A reproducible simulator.** Every trial can be replayed from its config and seed; 1,172 diagnostic replays reproduced their stored trials exactly.
 
 ### 5.4 Possible uses
 
@@ -642,7 +668,7 @@ Below, a *unit* is one member of the team: a dog, a robot or a drone. The number
 - **Speed costs more than reliability.** On `wide` and `outlier_rich` the fastest team is one and a half to two and a half times the minimum (more on `split`), and units beyond it add running time with no gain (Table 5).
 - **The space each unit takes limits the useful team.** Units that cannot come closer than 2 m to each other crowd the arc behind an `outlier_rich` flock from about 9 units at $N = 400$.
 - **Share the map before adding units.** A local view costs about one unit at $N = 200$, and sharing what every unit sees won it back on `wide` (not on `split`).
-- **Back off to hold a flock.** Units must move beyond the animals' flight distance to keep a flock in place; units that only stop keep it moving.
+- **Back off to hold a flock, and size the holding area for it.** Units must move beyond the animals' flight distance to keep a flock in place; units that only stop keep it moving. While they back off the flock keeps walking (13 to 17 m here), so the holding area must take that walk plus the flock's own reach.
 - **Large flocks need a closer drive point.** A controller using Strömbom's drive rule must cap its standoff at the flight distance for flocks above about a thousand animals.
 - **Welfare.** In the model the time each sheep spends fleeing does not rise with more units. This is a hypothesis for field tests in the spirit of Yaxley et al. (2021), not a finding about animals.
 
@@ -654,9 +680,9 @@ Below, a *unit* is one member of the team: a dog, a robot or a drone. The number
 2. **No fences.** Real fields have fences that help dogs hold strays; the model has none.
 3. **Brackets.** Cells whose true success rate is near 0.90 stay undecided at 200 seeds, so some answers are brackets.
 4. **Full view in most runs.** Apart from section 3.12, dogs know where every sheep is. Section 3.12 limits the range but still gives exact positions within it; sensing only directions is not modelled.
-5. **HerdSim choices in the follow-up.** The withdrawal rule for holding, the 2 m dog spacing and the capped drive point are HerdSim's choices, not observations of real dogs.
+5. **HerdSim choices in the follow-up.** The withdrawal rule for holding, the 2 m dog spacing and the capped drive point are HerdSim's choices, not observations of real dogs. The goal sizes that hold a small flock (section 3.10) belong to this withdrawal rule: with dogs that back off sooner or slower, the flock's walk and so the goal needed would change.
 6. **The calibration edge.** Above about $N = 600$ the Strömbom flock does not settle to one size, so results at larger $N$ are at an imposed density. At $N = 800$ to 1131 the compact flock in a trial is 0.5–0.8 times the imposed radius (`cli/dmin_tables.py extent`).
-7. **Small diagnostic samples.** The pressure and `split` replays use 12 seeds per cell. They show directions, not tight bounds.
+7. **Small diagnostic samples.** The pressure and `split` replays use 12 seeds per cell, the holding-walk replays 5. They show directions, not tight bounds.
 8. **Several dogs pushing one sheep.** Strömbom's model defines the push of one dog. HerdSim normalises the summed push of all dogs within 65 m to the size of one dog's push. Summed without normalising, two dogs less than 116° apart would push harder than the flock's attraction ($c = 1.05$) and tear it apart from $D = 2$ on. This is a modelling choice; whether real sheep flee harder from several dogs is a question for field data.
 9. **Sheep speed.** A reacting Strömbom sheep always walks at 1 m/s, so the flat finish time beyond $D_{\mathrm{sat}}$ follows from the model. Kubo sheep speed up under a stronger push (up to 5 m/s), which is why more Kubo dogs keep shortening the drive.
 10. **Reproducibility across machines.** Replays are exact on the same machine, with the locked dependencies (`uv.lock`) and one BLAS thread per process. On another CPU the last floating-point bits can differ, which may change the outcome of rare trials that end right at the deadline.
@@ -667,16 +693,28 @@ Below, a *unit* is one member of the team: a dog, a robot or a drone. The number
 
 ## 7. Conclusions and Future Work
 
-Over 367,150 trials in 39 protocols, HerdSim maps the smallest reliable team $D_{\min}$, the team beyond which more dogs stop helping ($D_{\mathrm{sat}}$), and the settings in which more dogs hurt. A compact flock needs one dog up to $N = 1131$ (with the capped drive point above 1056). On scattered flocks the smallest team grows slower than the flock, with slopes of 0.27–0.38 at 12 drive times and 0.38–0.61 at 6, while the fastest team grows about one and a half to two times as fast. Under the strict rule the last sheep decides; under the 99% rule the answers hold when the setup changes. Coordination matters at large flocks. Extra point dogs never made the task fail on `wide` or `outlier_rich` but slowed `split`, while dogs that take up room do cause failures. Strömbom's drive rule itself stops working above about a thousand sheep. Run in the same simulator, the non-cohesive targets of Lama and di Bernardo follow their square-root law, also under HerdSim's reliability rule, except near their threshold, where an average of 0.99 hides runs that lose a target.
+Over 439,120 trials in 41 protocols, HerdSim maps the smallest reliable team $D_{\min}$, the team beyond which more dogs stop helping ($D_{\mathrm{sat}}$), and the settings in which more dogs hurt. A compact flock needs one dog up to $N = 1131$ (with the capped drive point above 1056). On scattered flocks the smallest team grows slower than the flock, with slopes of 0.27–0.38 at 12 drive times and 0.38–0.61 at 6, while the fastest team grows about 1.6 times as fast. Under the strict rule the last sheep decides; under the 99% rule the answers hold when the setup changes. Coordination matters at large flocks. Extra point dogs never made the task fail on `wide` or `outlier_rich` but slowed `split`, while dogs that take up room do cause failures. Holding a small flock fails on the goal size, not for want of dogs: the flock walks on while the dogs withdraw, and a goal of about 16 to 19 m holds it with one dog. Strömbom's drive rule itself stops working above about a thousand sheep. Run in the same simulator, the non-cohesive targets of Lama and di Bernardo follow their square-root law, also under HerdSim's reliability rule, except near their threshold, where an average of 0.99 hides runs that lose a target.
 
 ### Future work
 
-1. **Assignment that sees clusters.** On `split`, assign dogs so that each cluster gets some, instead of by total walking distance alone.
-2. **Holding with a gate.** Test holding with a closed pen instead of dogs withdrawing into the open, to see whether small flocks can then be held.
-3. **Sensing directions only.** Let dogs sense the direction to a sheep but not its distance, as a camera on a drone would.
-4. **Crossing the two models on one task.** Run the Strömbom team rule on Lama's targets in the gather task, and Lama's herders on Strömbom sheep, so that the gap between the exponents of section 3.14 can be split into the part due to cohesion and the part due to the herder rule and the task. Each rule reads quantities the other side lacks (the team rule a collect distance that means nothing without cohesion, the herders distances to a goal that in the drive task lies far from the flock), so each crossing needs its own design first.
-5. **Field data with several dogs.** Work with livestock researchers to collect GPS data from herding with several dogs or drones, to test whether real sheep flee harder from more dogs.
-6. **A local estimate of the flock centre.** Replace the sheep's knowledge of the whole flock's centre with the direction toward its nearest neighbours. `cli/diagnostics/gradient_validation.py` measures how far off that direction is on the start layouts; at $N = 400$ with 15 neighbours the mean error is still about 30°.
+1. **Assignment that sees clusters.** On `split`, assign dogs so that each cluster gets some, instead of by total walking distance alone. The rule that makes collecting dogs pick outliers far apart already exists and was only replayed on 12 seeds per cell; a protocol on the `split` grid is the first step.  
+   *Why:* `split` is the one layout where extra point dogs slow the drive, and the replays trace it to two causes, the assignment and dogs held still by the stop rule (section 4.1).  
+   *What it adds:* it tests on the full grid whether that slowdown belongs to the assignment rule and not to team size, and whether a better rule lowers $D_{\min}$ at 3 drive times, where neither replayed change was enough.
+2. **A local estimate of the flock centre.** Replace the sheep's knowledge of the whole flock's centre with the direction toward its nearest neighbours. `cli/diagnostics/gradient_validation.py` measures how far off that direction is on the start layouts; at $N = 400$ with 15 neighbours the mean error is still about 30°. Only the sheep rule changes, but the main grids must be run again.  
+   *Why:* the low slope of $D_{\min}$ rests on every sheep being drawn to the whole flock, so a stray walks back by itself (section 3.1). Real sheep see only their neighbours.  
+   *What it adds:* it shows how much of the gap between the flock's slope (0.27–0.61) and the square-root law of non-cohesive targets comes from that global knowledge.
+3. **Sensing directions only.** Let dogs sense the direction to a sheep but not its distance, as a camera on a drone would. The team rule chooses outliers and drive points by distance, so it must be redesigned first.  
+   *Why:* the dogs here know where every sheep within range is; a drone with one camera does not.  
+   *What it adds:* it measures how much of $D_{\min}$ is owed to distance information, and whether more dogs can make up for its loss.
+4. **Crossing the two models on one task.** Run the Strömbom team rule on Lama's targets in the gather task, and Lama's herders on Strömbom sheep. Each rule reads quantities the other side lacks (the team rule a collect distance that means nothing without cohesion, the herders distances to a goal that in the drive task lies far from the flock), so each crossing needs its own design first.  
+   *Why:* section 3.14 compares two models that differ in the targets, the herder rule and the task at once.  
+   *What it adds:* it splits the gap between the exponents into the part due to cohesion and the part due to the herder rule and the task.
+5. **Holding with a gate.** A larger goal already holds small flocks (section 3.10). A closed pen needs fences that act on the sheep, a gate, a start geometry round it and a drive rule that aims at the gate, none of which the world has now.  
+   *Why:* on a farm a flock is held in a pen, not in an open circle larger than its walk.  
+   *What it adds:* it tests whether fences remove the need to size the holding area for the walk, and what team a pen needs.
+6. **Field data with several dogs.** Work with livestock researchers to collect GPS data from herding with several dogs or drones. This needs partners, animals and permits outside the simulator.  
+   *Why:* in the Strömbom model the push of several dogs is normalised to that of one, so the flat finish time beyond $D_{\mathrm{sat}}$ follows from the model (section 6, limitation 9).  
+   *What it adds:* it tests whether real sheep flee harder from more dogs, which decides whether $D_{\mathrm{sat}}$ exists in practice.
 
 ---
 
@@ -730,6 +768,8 @@ Follow-up runs (99% rule; hours at 20 workers):
 | `dmin_f99_kubo` | 3,260 | 38 | 6 | 0 | 0.18 |
 | `dmin_f99_hold` | 14,280 | 280 | 18 | 0 | 0.74 |
 | `dmin_f99_hold_spacing` (rerun with the hard spacing rule) | 13,930 | 283 | 19 | 0 | 0.70 |
+| `dmin_f99_hold_goal` (holding, goal 1.9, 2.5, 3.0 $R_f$, $N \le 100$) | 21,800 | 326 | 30 | 0 | 0.36 |
+| `dmin_f99_hold_share` (holding, goal 1.9 to 2.5 $R_f$ × share 90, 95, 99%) | 50,170 | 746 | 57 | 0 | 0.91 |
 | `dmin_f99_c1.3`, `_c1.6`, `_c2.0` | 10,800 / 10,830 / 10,780 | 180 each | 1 / 0 / 0 | 0 | 0.31 / 0.29 / 0.41 |
 | `dmin_f99_k05` | 11,630 | 149 | 14 | 0 | 2.29 |
 | `dmin_f99_view_range` | 21,040 | 293 | 27 | 0 | 0.53 |
@@ -740,7 +780,7 @@ Follow-up runs (99% rule; hours at 20 workers):
 | `lama_r50` (gather task, sensing radius 10) | 17,660 | 500 | 23 | 0 | 6.53 |
 | `lama_r50_inf` (gather task, infinite sensing) | 22,620 | 500 | 1 | 0 | 6.47 |
 
-Diagnostic replays: 164 pressure replays and 768 `split` replays, every unchanged replay identical to its stored trial. Two validation passes of the Lama model (8,200 trials, scratch folders not kept) came before `lama_r50`; the second fixed the order in which herders and targets are moved (section 6, item 12).
+Diagnostic replays: 164 pressure replays, 768 `split` replays and 240 holding-walk replays, every unchanged replay identical to its stored trial. Two validation passes of the Lama model (8,200 trials, scratch folders not kept) came before `lama_r50`; the second fixed the order in which herders and targets are moved (section 6, item 12).
 
 ---
 
@@ -757,7 +797,8 @@ Diagnostic replays: 164 pressure replays and 768 `split` replays, every unchange
 | 7 | Above $N \approx 1056$ Strömbom's drive point is beyond the sheep's reaction distance. | Derived and measured | $2\sqrt{N} > 65$; uncapped, 0 of 10 trials succeed at $N = 1131$ for every $D$; capped, compact succeeds at 800, 1131, 1600 and 42 of 42 at 3200. | Assumes the reaction distance $r_s = 65$ m. |
 | 8 | Dogs kept 2 m apart make extra dogs harmful on `outlier_rich` $N = 400$. | Measured | `dmin_f99_hold_spacing`: success 0.94 at $D = 6$, 0.77 at 9, 0.50 at 16; every $D \ge 9$ unreliable. | Not seen on `wide` or `compact`. |
 | 9 | A local view costs about one dog at $N = 200$; sharing with the whole team wins it back. | Measured | `dmin_f99_view_range`, `dmin_f99_view_comm`. | Sharing is instant and error-free in the model. |
-| 10 | Near the threshold, an average of 0.99 accepts teams that fail one run in three. | Measured | `lama_r50`: at 144 targets 11 herders average 0.992 but succeed in 70% of runs; HerdSim's $D_{\min}$ is 17–25. | Targets without cohesion on a disc. |
+| 10 | Near the threshold, an average of 0.99 accepts teams that fail in 9 of 30 runs. | Measured | `lama_r50`: at 144 targets 11 herders average 0.992 but succeed in 21 of 30 runs (99% interval 0.45–0.89); HerdSim's $D_{\min}$ is 17–25. | Targets without cohesion on a disc. |
+| 11 | Holding small flocks fails with the default goal; a goal of about 16 to 19 m holds them with one dog. The flock's walk while the dogs withdraw is the likely cause. | Thresholds and walk measured; cause consistent, not tested | `dmin_f99_hold_goal`, `dmin_f99_hold_share`: one dog decided reliable on every layout from 18.6 m ($N = 25$) and 17.5 m ($N = 50$) at 99%, with brackets down to 15.5 and 16.0 m. `hold_walk` replays: the flock centre walks a median 17, 15 and 13 m at $N = 25$, 50, 100. | Goal levels in steps of $0.2 R_f$; tied to the withdrawal rule; the walk was not varied directly. |
 
 ---
 
@@ -770,8 +811,8 @@ Diagnostic replays: 164 pressure replays and 768 `split` replays, every unchange
 | Start layouts | `sim/core/world/layouts.py` (`compact`, `wide`, `split`, `outlier_rich`). |
 | Random streams | Seed $i$ of every cell is `master_seed + i`; each trial has separate streams for the start layout, the sheep and the dogs, so cells with the same seed start from the same flock. |
 | Hardware | Linux workstation, 20 workers (`--workers 20`). |
-| Raw data | 367,150 trial rows in `results/<protocol>/trials.csv`; `trials.jsonl` holds the same rows plus the 100 uncounted $N = 3200$ trials of `dmin_f99_big_cap`. |
+| Raw data | 439,120 trial rows in `results/<protocol>/trials.csv`; `trials.jsonl` (in git as `trials.jsonl.gz`) holds the same rows plus the 100 uncounted $N = 3200$ trials of `dmin_f99_big_cap`. |
 | Running the study | `uv run cli/campaign.py run --protocol <id>` and `uv run cli/run_queue.py`. |
 | Tables | `cli/dmin_tables.py` builds [results_tables.md](results_tables.md) from the result folders. |
-| Tests | `make test` runs 330 unit, invariant and regression tests; `make bench` runs 23 benchmark tests over six small campaigns. |
-| Replays | `services/replay.py`; 932 diagnostic replays reproduced their stored trials exactly. |
+| Tests | `make test` runs 332 unit, invariant and regression tests; `make bench` runs 23 benchmark tests over six small campaigns. |
+| Replays | `services/replay.py`; 1,172 diagnostic replays reproduced their stored trials exactly. |
