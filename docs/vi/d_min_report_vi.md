@@ -171,7 +171,7 @@ Qua 439.120 lượt trong 41 giao thức, HerdSim lập bản đồ đội tin c
 
 ## Dữ liệu và mã
 
-Mọi lượt chạy và quyết định của từng ô được lưu trong `results/<protocol>/`. Các bảng chứa số liệu của báo cáo này nằm trong [results_tables.md](../report/results_tables.md); mỗi khối ghi lệnh đã tạo ra nó. Cách chạy lại nghiên cứu và tạo lại các bảng: xem [cli/README.md](../../cli/README.md) và [tài liệu tham chiếu CLI](../guides/cli_reference.md).
+Mọi lượt chạy và quyết định của từng ô được lưu trong `results/<protocol>/`. Các bảng chứa số liệu của báo cáo này nằm trong [results_tables.md](../report/results_tables.md); mỗi khối ghi lệnh đã tạo ra nó. [Tổng quan kết quả](summary_results_vi.md) liệt kê mọi giao thức và quy mô đội của mọi đường cong ở cùng một chỗ. Cách chạy lại nghiên cứu và tạo lại các bảng: xem [cli/README.md](../../cli/README.md) và [tài liệu tham chiếu CLI](../guides/cli_reference.md).
 
 ## Tài liệu tham khảo
 

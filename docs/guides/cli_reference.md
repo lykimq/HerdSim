@@ -76,6 +76,7 @@ A folder is a protocol id under `results/` or a path. Every verb prints Markdown
 | `arrival` | `--pct {90,95,99}` | $D_{\min}$ if success had meant that share of the flock in the goal, beside the run's own rule. |
 | `compare` | `--base <folder>` | Each variant folder beside the base, curve by curve. |
 | `methods` | `--pct {90,95,99}` | $D_{\min}$, $D_{\mathrm{sat}}$, $D_{\mathrm{crowd}}$ and $D_{\max}$ per curve across folders; `--pct` relabels a strict run so every row uses one rule. |
+| `overview` | | Every folder in one view: what each protocol changes from the canonical settings, then one row per method, layout and variant with $D_{\min}$, $D_{\mathrm{sat}}$, $D_{\max}$ and $D_{\mathrm{overcrowd}}$ per $N$, in tables split by success rule ([summary_results.md](../report/summary_results.md)). |
 | `herdability` | `--above <N>` | The gather task read the paper's way (mean share in the goal at least 0.99, and at 0.90 and 0.95) beside $D_{\min}$, with the growth exponent of both above `--above` targets. |
 | `extent` | `--layout <name>` | The flock's measured size against the radius its task was sized from, per cell. |
 

@@ -149,6 +149,8 @@ HerdSim/
   Nghiên cứu: tóm tắt, câu hỏi, quy tắc quyết định, thảo luận và kết luận. Mục 3 của nó dẫn tới các kết quả, chia thành sáu phần theo chủ đề, và nhật ký chạy.
 - Bảng kết quả ([`docs/report/results_tables.md`](../report/results_tables.md)):
   Mọi bảng đứng sau báo cáo, sinh ra từ các lượt chạy đã lưu.
+- Tổng quan kết quả ([`summary_results_vi.md`](summary_results_vi.md), [EN](../report/summary_results.md)):
+  Mọi giao thức trong một cái nhìn: giao thức thay đổi gì, cùng D_min, D_sat, D_max và D_overcrowd của từng đường cong, trong các bảng tách theo quy tắc thành công.
 - Mô hình ([`models_vi.md`](models_vi.md), [EN](../methods/models.md)):
   Mô hình cừu, quy tắc đội, phân công Hungarian, các đối chứng, và hai mô hình Kubo và Lama.
 - Thiết kế nhiệm vụ ([`task_design_vi.md`](task_design_vi.md), [EN](../experiments/task_design.md)):
