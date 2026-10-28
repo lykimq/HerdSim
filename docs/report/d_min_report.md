@@ -171,7 +171,7 @@ Over 439,120 trials in 41 protocols, HerdSim maps the smallest reliable team $D_
 
 ## Data and code
 
-Every trial and cell decision is stored under `results/<protocol>/`. The tables behind the numbers in this report are in [results_tables.md](results_tables.md); each block names the command that made it. To run the study again and rebuild the tables, see [cli/README.md](../../cli/README.md) and the [CLI reference](../guides/cli_reference.md).
+Every trial and cell decision is stored under `results/<protocol>/`. The tables behind the numbers in this report are in [results_tables.md](results_tables.md); each block names the command that made it. [summary_results.md](summary_results.md) lists every protocol and the team sizes of every curve in one place. To run the study again and rebuild the tables, see [cli/README.md](../../cli/README.md) and the [CLI reference](../guides/cli_reference.md).
 
 ## References
 
