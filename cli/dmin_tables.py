@@ -36,6 +36,9 @@ Comparing rules, variants and methods
              (e.g. compare dmin_s_matched dmin_s_handler --base dmin_s_base)
   methods    D_min, D_sat, D_crowd and D_max per curve across folders; --pct relabels a strict
              run (such as dmin_kubo) so every row uses one success rule
+  overview   every folder in one view: one row per layout and variant, one column per N, with
+             D_min ('2-3 (max 6)' adds D_max below the grid top, '(over 9)' D_overcrowd) or
+             D_sat (--value d_sat); one table per success rule, --transpose puts N in rows
 
 The gather task (Lama and di Bernardo 2024)
   herdability  per number of targets: the paper's N* (mean share in the goal at the end at least
@@ -86,6 +89,7 @@ from analysis.dmin_tables import (  # noqa: E402
     dips,
     dsat_by_n,
     dsat_growth,
+    dsat_text,
     effort_table,
     extent_check,
     frontier_values,
@@ -93,6 +97,10 @@ from analysis.dmin_tables import (  # noqa: E402
     growth_table,
     layout_against_n,
     layout_by_n,
+    n_columns,
+    overview,
+    overview_cell,
+    rule_text,
     shape_table,
     split_group_key,
     unusual_zones,
@@ -123,6 +131,9 @@ from sim.plugins.scenarios import SCENARIOS  # noqa: E402
 
 # Row order of the tables: the drive task's start layouts.
 LAYOUTS = tuple(SCENARIOS["drive_to_goal"].layouts)
+
+# What an overview cell shows, by --value.
+OVERVIEW_CELLS = {"d_min": overview_cell, "d_sat": dsat_text}
 
 
 def cmd_record(_: argparse.Namespace) -> None:
@@ -264,7 +275,7 @@ def cmd_methods(args: argparse.Namespace) -> None:
         fraction = float(protocol.settings["success_fraction"])
         if fraction < 1.0 or args.pct is None:
             table = groups_table(folder)
-            rule = "strict" if fraction == 1.0 else f"{round(fraction * 100)} percent"
+            rule = rule_text(fraction)
         else:
             trials = read_trials(folder)
             front = frontier(at_arrival(trials, args.pct), Rules.from_settings(protocol.settings))
@@ -272,6 +283,37 @@ def cmd_methods(args: argparse.Namespace) -> None:
             rule = f"{args.pct} percent (relabelled)"
         rows.append(frontier_values(table).assign(folder=name, rule=rule))
     print(markdown(pd.concat(rows, ignore_index=True)))
+
+
+def _transposed(rows: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
+    """N as rows and one column per curve, for runs with many flock sizes (the gather task).
+    A column is named by its protocol, and by layout and variant only where they vary."""
+    parts = ["protocol"] + [c for c in ("layout", "variant") if rows[c].nunique() > 1]
+    labels = rows[parts].apply(lambda r: " ".join(v for v in r if v), axis=1)
+    wide = rows[columns].set_axis(labels).T
+    wide.index = [c.removeprefix("N=") for c in wide.index]
+    return wide.rename_axis("N")
+
+
+def cmd_overview(args: argparse.Namespace) -> None:
+    curves: list[pd.DataFrame] = []
+    for name in args.folders:
+        folder = results_folder(name)
+        protocol = load_protocol(name, output=folder)
+        fraction = float(protocol.settings["success_fraction"])
+        cell = OVERVIEW_CELLS[args.value]
+        table = overview(groups_table(folder), fraction, protocol.layouts, cell)
+        curves.append(table.assign(protocol=name))
+    every = pd.concat(curves, ignore_index=True).fillna("")
+    for share in sorted({float(s) for s in every["share"]}, reverse=True):
+        rows = every[every["share"] == share]
+        kept = [c for c in n_columns(rows) if (rows[c] != "").any()]
+        print(f"### {args.value}, {rule_text(share)}\n")
+        if args.transpose:
+            print(markdown(_transposed(rows, kept), index=True), "\n")
+            continue
+        labels = ["protocol", "layout"] + (["variant"] if (rows["variant"] != "").any() else [])
+        print(markdown(rows[labels + kept]), "\n")
 
 
 def cmd_fits(args: argparse.Namespace) -> None:
@@ -341,6 +383,11 @@ def main() -> None:
     p.add_argument("folders", nargs="+")
     p.add_argument("--pct", type=int, default=None, choices=(90, 95, 99))
     p.set_defaults(run=cmd_methods)
+    p = sub.add_parser("overview")
+    p.add_argument("folders", nargs="+")
+    p.add_argument("--value", default="d_min", choices=tuple(OVERVIEW_CELLS))
+    p.add_argument("--transpose", action="store_true")
+    p.set_defaults(run=cmd_overview)
     p = sub.add_parser("extent")
     p.add_argument("folders", nargs="+")
     p.add_argument("--layout", default=None)

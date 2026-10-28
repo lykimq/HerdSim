@@ -42,7 +42,7 @@ import pandas as pd
 from .frontier import COLLAPSE, CROWDED, RECOVERED, RELIABLE, UNRELIABLE, UNRELIABLE_DIP
 from .growth_fits import compare as compare_shapes
 from .growth_fits import interval_of
-from .keys import join_group, split_group
+from .keys import SEP, join_group, split_group
 from .results import read_groups
 
 # Zones of a cell where more dogs did worse.
@@ -411,6 +411,101 @@ def frontier_values(table: pd.DataFrame) -> pd.DataFrame:
             }
         )
     return pd.DataFrame(rows).sort_values(["method", "layout", "n"], ignore_index=True)
+
+
+def rule_text(fraction: float) -> str:
+    """'strict' when every sheep must be in the goal, else the share, as '99 percent'."""
+    return "strict" if fraction == 1.0 else f"{round(fraction * 100)} percent"
+
+
+# Short labels of the factors a protocol sweeps, as the overview tables show them.
+FACTOR_LABELS = {
+    "goal_radius_multiple": "goal {} R_f",
+    "dog_start_gap": "gap {} m",
+    "sensing_range": "range {} m",
+    "communication": "{}",
+}
+
+
+def _number_text(value: str) -> str:
+    """'15.0' -> '15', '2.5' -> '2.5'; text stays as it is."""
+    try:
+        return f"{float(value):g}"
+    except ValueError:
+        return value
+
+
+def variant_label(factors: list[str]) -> str:
+    """'goal_radius_multiple=2.1' -> 'goal 2.1 R_f'; empty without factors."""
+    labels = []
+    for item in factors:
+        name, _, value = item.partition("=")
+        if name not in FACTOR_LABELS:
+            raise ValueError(f"no overview label for factor {name!r}; add one to FACTOR_LABELS")
+        labels.append(FACTOR_LABELS[name].format(_number_text(value)))
+    return ", ".join(labels)
+
+
+def overview_cell(row: pd.Series) -> str:
+    """D_min, with D_max when it lies below the grid top and D_overcrowd when the curve has
+    one: '3', '2-3 (max 6)', '[5] (over 15)', 'none'."""
+    text = "none" if bool(row.get("d_min_above_grid", False)) else dmin_text(row)
+    notes = []
+    if pd.notna(row["d_max"]) and not bool(row["d_max_at_grid_top"]):
+        notes.append(f"max {int(row['d_max'])}")
+    if pd.notna(row["d_overcrowd"]):
+        notes.append(f"over {int(row['d_overcrowd'])}")
+    return f"{text} ({', '.join(notes)})" if notes else text
+
+
+def _level_order(factors: list[str]) -> tuple[tuple[str, float | str], ...]:
+    """Sort key of a factor level: numbers by value, so 15.0 comes before 100.0."""
+    key = []
+    for part in factors:
+        name, _, value = part.partition("=")
+        try:
+            key.append((name, float(value)))
+        except ValueError:
+            key.append((name, value))
+    return tuple(key)
+
+
+def overview(
+    table: pd.DataFrame,
+    success_fraction: float,
+    layouts: tuple[str, ...],
+    cell: Callable[[pd.Series], str] = overview_cell,
+) -> pd.DataFrame:
+    """One row per layout and factor level of a run, one column per N ('N=25') holding
+    ``cell(curve)``, blank where that N was not run.
+
+    A swept success_fraction is taken out of the label into the share column, so a table per
+    share never mixes two rules; otherwise the share is the run's ``success_fraction``. A run
+    with several methods is refused: its rows would carry the same labels."""
+    if table["method"].nunique() > 1:
+        raise ValueError(f"several methods {sorted(table['method'].unique())} in one run")
+    order = {layout: i for i, layout in enumerate(layouts)}
+    rows = []
+    for _, part in table.groupby(["layout", "factors"]):
+        layout, factors = (str(part[c].iloc[0]) for c in ("layout", "factors"))
+        share, kept = success_fraction, []
+        for item in factors.split(SEP) if factors else []:
+            name, _, value = item.partition("=")
+            if name == "success_fraction":
+                share = float(value)
+            else:
+                kept.append(item)
+        row = {"share": share, "layout": layout, "variant": variant_label(kept)}
+        row |= {f"N={int(c['n'])}": cell(c) for _, c in part.iterrows()}
+        rows.append(((order.get(layout, len(order)), layout, _level_order(kept)), row))
+    rows.sort(key=lambda pair: pair[0])
+    frame = pd.DataFrame([row for _, row in rows])
+    return frame[["share", "layout", "variant", *n_columns(frame)]].fillna("")
+
+
+def n_columns(frame: pd.DataFrame) -> list[str]:
+    """The 'N=25' columns of an overview table, in the order of N."""
+    return sorted((c for c in frame.columns if c.startswith("N=")), key=lambda c: int(c[2:]))
 
 
 def extent_check(trials: pd.DataFrame, radii: dict[str, dict[str, float]]) -> pd.DataFrame:

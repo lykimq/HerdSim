@@ -149,6 +149,8 @@ HerdSim/
   The study: abstract, questions, decision rules, discussion and conclusions. Its section 3 links the results, in six parts by topic, and the run record.
 - [Result tables](docs/report/results_tables.md):
   Every table behind the report, generated from the stored runs.
+- [Results overview](docs/report/summary_results.md):
+  Every protocol in one view: what it changes, and D_min, D_sat, D_max and D_overcrowd per curve, in tables split by success rule.
 - [Models](docs/methods/models.md):
   The sheep model, the team rule, the Hungarian assignment, the baselines, and the Kubo and Lama models.
 - [Task design](docs/experiments/task_design.md):
