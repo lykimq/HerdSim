@@ -49,20 +49,20 @@ The deadline is 12, 6 or 3 drive times, a drive time being the time a sheep walk
 | `fat` | Strombom et al. (2014) | `fat`: every dog goes behind the sheep farthest from the goal; no assignment, no arc, no collect/drive switch | drive | Baseline without coordination ([report, part 4](docs/report/part4_coordination.md)) |
 | `independent` | Strombom et al. (2014) | `independent`: every dog runs Strombom's single-dog rule on the whole flock, with no team layer | drive | Separates the collect/drive switch from the team layer ([report, part 4](docs/report/part4_coordination.md)) |
 | `kubo` | Kubo et al. (2022): smooth forces; sheep speed up under a stronger push, up to 5 m/s | `kubo_forces`: Kubo's forces, with repulsion between dogs | drive, compact starts only | A model where more dogs do shorten the drive ([report, part 1](docs/report/part1_growth.md)) |
-| `lama` | Lama and di Bernardo (2024): random walkers with no cohesion | `lama_herders`: each herder chases the farthest target it senses, leaving targets closer to another herder | gather | Test of the published $\sqrt{N}$ law ([report, part 6](docs/report/part6_square_root_law.md)) |
+| `lama` | Lama and di Bernardo (2024): random walkers with no cohesion | `lama_herders`: each herder chases the farthest target it senses, leaving targets closer to another herder | gather | Test of the published square-root law ([report, part 6](docs/report/part6_square_root_law.md)) |
 
 ## Research report
 
 For detailed scientific analysis, empirical findings, and decision rules, see the full [Research Report](docs/report/d_min_report.md).
 
 - [Report Overview](docs/report/d_min_report.md): Synthesis of findings, research questions, statistical decision rules, and discussion.
-- [Part 1: Team Growth](docs/report/part1_growth.md): Scaling of $D_{\min}$ with flock size $N$, deadlines, and initial start layouts.
+- [Part 1: Team Growth](docs/report/part1_growth.md): Scaling of D_min with flock size N, deadlines, and initial start layouts.
 - [Part 2: Success Criteria](docs/report/part2_success_rule.md): Strict all-sheep vs. 99% flock share rules and the straggler effect.
-- [Part 3: Beyond $D_{\min}$](docs/report/part3_beyond_dmin.md): Team saturation ($D_{\mathrm{sat}}$), diminishing returns, and dog spacing constraints.
+- [Part 3: Beyond D_min](docs/report/part3_beyond_dmin.md): Team saturation (D_sat), diminishing returns, and dog spacing constraints.
 - [Part 4: Multi-Dog Coordination](docs/report/part4_coordination.md): The team coordination layer compared to uncoordinated baselines (`fat`, `independent`).
 - [Part 5: Failure Modes](docs/report/part5_failures.md): Root-cause breakdown of failed drives (lost sheep, timeouts, flock splits).
-- [Part 6: Square-Root Scaling](docs/report/part6_square_root_law.md): Validation of the $\sqrt{N}$ law on targets without cohesion (Lama & di Bernardo).
-- [Summary Results](docs/report/summary_results.md) *(auto-generated)*: Quick cross-protocol comparison tables of $D_{\min}$ across all 41 experiments.
+- [Part 6: Square-Root Scaling](docs/report/part6_square_root_law.md): Validation of the square-root law on targets without cohesion (Lama & di Bernardo).
+- [Summary Results](docs/report/summary_results.md) *(auto-generated)*: Quick cross-protocol comparison tables of D_min across all 41 experiments.
 - [Complete Data Tables](docs/report/results_tables.md) *(auto-generated)*: Full 2,200-line archival reference containing granular per-protocol breakdown tables.
 - [Run Record & Appendix](docs/report/appendix_run_record.md): Dataset provenance, protocol audits, and replication instructions.
 
