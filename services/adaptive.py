@@ -75,7 +75,11 @@ def _flock_radii(
     needed = {(m.name, n) for m in protocol.methods for n in protocol.flock_sizes}
     if table is None or any(n not in table.get(m, {}) for m, n in needed):
         try:
-            table = calibrate(protocol, workers)
+            table = (
+                calibrate(protocol, workers, existing=table)
+                if table is not None
+                else calibrate(protocol, workers)
+            )
         except CalibrationError:
             # No trial ran: let a corrected protocol reopen this folder.
             store.discard_if_empty()

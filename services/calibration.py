@@ -161,12 +161,15 @@ def _measured_sizes(protocol: Protocol, above: int) -> list[int]:
     return sorted({n for n in protocol.flock_sizes if n <= above} | {above})
 
 
-def calibrate(protocol: Protocol, workers: int) -> dict[str, dict[int, float]]:
+def calibrate(
+    protocol: Protocol, workers: int, existing: dict[str, dict[int, float]] | None = None
+) -> dict[str, dict[int, float]]:
     """R_f for every method and flock size; raises where a calibrated size is not settled.
 
     With ``impose_radius_above`` the sizes above it are imposed from N_cal (module
     docstring), and the table also holds N_cal itself. A protocol whose task sizes itself
-    (``Scenario.calibrates`` false) has nothing to calibrate and is refused.
+    (``Scenario.calibrates`` false) has nothing to calibrate and is refused. If ``existing``
+    is provided, already-calibrated sizes are preserved and only missing sizes are measured.
     """
     s = protocol.settings
     task = s["task"]
@@ -174,32 +177,43 @@ def calibrate(protocol: Protocol, workers: int) -> dict[str, dict[int, float]]:
         raise ValueError(f"task {task!r} sizes itself from its own settings; no R_f to calibrate")
     seeds = [s["master_seed"] + i for i in range(s["calibration_seeds"])]
     above = s["impose_radius_above"]
-    keys = [(m.name, n) for m in protocol.methods for n in _measured_sizes(protocol, above)]
+    all_keys = [(m.name, n) for m in protocol.methods for n in _measured_sizes(protocol, above)]
+    keys = [
+        (m, n) for m, n in all_keys
+        if existing is None or n not in existing.get(m, {})
+    ]
 
-    jobs, owners = [], []
-    for method, n in keys:
-        dt = method_dt(method, method_spec(protocol, method).params)
-        window = round(s["calibration_window_seconds"] / dt)
-        for spacing in s["calibration_starts"]:
-            config = calibration_config(protocol, method, n, spacing)
-            for seed in seeds:
-                jobs.append((config, seed, window))
-                owners.append((method, n, spacing))
-    with worker_pool(workers) as pool:
-        values = list(pool.map(measure, jobs))
+    table: dict[str, dict[int, float]] = (
+        {m: dict(radii) for m, radii in existing.items()} if existing else {}
+    )
 
-    table: dict[str, dict[int, float]] = {}
-    failures: list[str] = []
-    for method, n in keys:
-        mine = [(o[2], v) for o, v in zip(owners, values) if o[:2] == (method, n)]
-        radius, problems = summarise(f"{method} N={n}", mine, s)
-        table.setdefault(method, {})[n] = radius
-        failures += problems
-    if failures:
-        raise CalibrationError("; ".join(failures))
+    if keys:
+        jobs, owners = [], []
+        for method, n in keys:
+            dt = method_dt(method, method_spec(protocol, method).params)
+            window = round(s["calibration_window_seconds"] / dt)
+            for spacing in s["calibration_starts"]:
+                config = calibration_config(protocol, method, n, spacing)
+                for seed in seeds:
+                    jobs.append((config, seed, window))
+                    owners.append((method, n, spacing))
+        with worker_pool(workers) as pool:
+            values = list(pool.map(measure, jobs))
+
+        failures: list[str] = []
+        for method, n in keys:
+            mine = [(o[2], v) for o, v in zip(owners, values) if o[:2] == (method, n)]
+            radius, problems = summarise(f"{method} N={n}", mine, s)
+            table.setdefault(method, {})[n] = radius
+            failures += problems
+        if failures:
+            raise CalibrationError("; ".join(failures))
+
     if above:
         scale = s["imposed_radius_scale"]
         for radii in table.values():
-            for n in (n for n in protocol.flock_sizes if n > above):
-                radii[n] = scale * radii[above] * math.sqrt(n / above)
+            if above in radii:
+                for n in (n for n in protocol.flock_sizes if n > above):
+                    if n not in radii:
+                        radii[n] = scale * radii[above] * math.sqrt(n / above)
     return table

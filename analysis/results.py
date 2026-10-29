@@ -27,7 +27,13 @@ def read_table(path: Path) -> pd.DataFrame:
 
 
 def read_trials(folder: Path) -> pd.DataFrame:
-    return read_table(folder / "trials.csv")
+    csv = folder / "trials.csv"
+    csv_gz = folder / "trials.csv.gz"
+    if csv.exists():
+        return read_table(csv)
+    if csv_gz.exists():
+        return read_table(csv_gz)
+    return read_table(csv)
 
 
 def read_cells(folder: Path) -> pd.DataFrame:

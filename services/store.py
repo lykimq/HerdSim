@@ -109,7 +109,7 @@ def _pack(plain: Path, packed: Path) -> None:
 
 def _unpack(packed: Path, plain: Path) -> None:
     """The unpacked file takes the .gz's mtime, so a folder that runs nothing is not repacked."""
-    tmp = plain.with_suffix(".jsonl.tmp")
+    tmp = plain.with_name(f"{plain.name}.tmp")
     with gzip.open(packed, "rb") as src, tmp.open("wb") as dst:
         shutil.copyfileobj(src, dst)
     tmp.replace(plain)
@@ -119,29 +119,37 @@ def _unpack(packed: Path, plain: Path) -> None:
 
 class CampaignStore:
     def __init__(self, output: Path) -> None:
-        """A clone holds only trials.jsonl.gz. It is unpacked here, before anything reads
-        the folder, because a folder with provenance.json and no trials.jsonl counts as
-        empty and ``discard_if_empty`` would reset it. An existing trials.jsonl is never
-        overwritten: it may hold trials the .gz does not have yet."""
+        """A clone holds only trials.jsonl.gz (and optional trials.csv.gz). Unpacked here,
+        before anything reads the folder, because a folder with provenance.json and no
+        trials.jsonl counts as empty and ``discard_if_empty`` would reset it. An existing
+        trials.jsonl is never overwritten: it may hold trials the .gz does not have yet."""
         self.root = output
         self.trials_jsonl = output / "trials.jsonl"
         self.trials_gz = output / "trials.jsonl.gz"
+        self.trials_csv = output / "trials.csv"
+        self.trials_csv_gz = output / "trials.csv.gz"
         self.errors_jsonl = output / "errors.jsonl"
         self.timeseries_dir = output / "timeseries"
         self._lock: IO[str] | None = None
         if self.trials_gz.exists() and not self.trials_jsonl.exists():
             _unpack(self.trials_gz, self.trials_jsonl)
+        if self.trials_csv_gz.exists() and not self.trials_csv.exists():
+            _unpack(self.trials_csv_gz, self.trials_csv)
 
     def pack_trials(self) -> None:
-        """Write trials.jsonl.gz unless it already matches trials.jsonl."""
-        if not self.trials_jsonl.exists():
-            return
-        if (
-            self.trials_gz.exists()
-            and self.trials_gz.stat().st_mtime_ns == self.trials_jsonl.stat().st_mtime_ns
-        ):
-            return
-        _pack(self.trials_jsonl, self.trials_gz)
+        """Write trials.jsonl.gz and trials.csv.gz unless they already match their uncompressed source."""
+        if self.trials_jsonl.exists():
+            if not (
+                self.trials_gz.exists()
+                and self.trials_gz.stat().st_mtime_ns == self.trials_jsonl.stat().st_mtime_ns
+            ):
+                _pack(self.trials_jsonl, self.trials_gz)
+        if self.trials_csv.exists():
+            if not (
+                self.trials_csv_gz.exists()
+                and self.trials_csv_gz.stat().st_mtime_ns == self.trials_csv.stat().st_mtime_ns
+            ):
+                _pack(self.trials_csv, self.trials_csv_gz)
 
     def open(self, protocol: Protocol, physics_hash: str) -> None:
         """Lock the folder, then create it or check that it ran the same protocol and physics.
