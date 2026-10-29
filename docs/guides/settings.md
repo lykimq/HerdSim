@@ -1,0 +1,118 @@
+# Settings
+
+> AUTO-GENERATED: do not modify. Re-run the producing command to refresh this file. Command: `uv run python docs/make_docs.py`. Source: `protocols/configs/canonical.yaml` and its comments.
+
+Every canonical setting, with its default and the note written beside it in `protocols/configs/canonical.yaml`. A protocol changes a setting by naming it ([configuration](configuration.md#protocol-overrides)). The model parameters ($r_a$, $c$, the Kubo and Lama constants) are not canonical settings: they live with each method and are listed in [models](../methods/models.md).
+
+The kind of a setting says where it may change:
+
+- per trial: it can differ between curves of one protocol, as a factor;
+- whole protocol: it is fixed for every curve of a protocol, because calibration or the seeds depend on it;
+- sampling: it only steers the adaptive run, so it stays out of the physics hash and a folder can resume after it changes.
+
+A blank note means the key shares the note of the key above it.
+
+## Task
+
+**Table 1: Task.**
+
+| Setting | Default | Kind | Note |
+|---|---|---|---|
+| `task` | drive_to_goal | whole protocol | The task every trial of a protocol runs: drive_to_goal, or gather for the model of Lama and di Bernardo 2024. Each task reads only its own section below. |
+
+## Task: drive the flock into a goal
+
+**Table 2: Task: drive the flock into a goal.**
+
+| Setting | Default | Kind | Note |
+|---|---|---|---|
+| `drive_distance_multiple` | 13 | per trial | The goal lies this many flock radii from the flock start, and never closer than the minimum (in units) or closer than the widest start layout plus the goal plus one flock radius. The sign gives the direction; a negative value mirrors the drive. |
+| `drive_distance_min` | 80 | per trial |  |
+| `goal_radius_multiple` | 1.9 | per trial | Goal radius in flock radii. |
+| `success_fraction` | 1 | per trial | Share of the sheep that must be inside the goal at one tick for a trial to succeed. 1 is every sheep, as Kubo et al. 2022 state their aim. Below 1 (0.99), one or two stragglers no longer decide a trial: with the strict rule a flock can reach the goal with 99% inside and then be driven past it. |
+| `hold_drive_multiple` | 0 | per trial | Holding. The goal counts as reached only after the share above has been inside without a break for hold_drive_multiple drive times (0: at the first such tick, the D_min rule). With hold_withdraw true, the dogs of collect_drive_multi withdraw while it is inside, to r_s + r_a beyond the farthest sheep, so the flock grazes: a Strombom sheep flees while any dog is closer than r_s, so dogs that only stop would push it through the goal. |
+| `hold_withdraw` | false | per trial |  |
+| `dog_spacing` | 0 | per trial | Dogs that take up room: no dog steps to within dog_spacing of another. Dogs move one after another; a dog already that close walks straight away at its speed, and a dog whose step would end that close does not step this tick. 0: dogs are points, as in the papers. Not for the Kubo and Lama dogs, which keep apart on their own. |
+| `sensing_range` | 0 | per trial | What a dog of collect_drive_multi knows. sensing_range 0: every sheep, the paper's shepherd. Above 0: the sheep closer than that to the dog, and with communication also what other dogs see: none (its own view only), neighbour (plus the dogs within sensing_range of it), shared (every dog's view, planned once for the team). Dog positions are known to every dog. A dog that knows no sheep walks to the flock centre it last knew (at first the flock's start). |
+| `communication` | none | per trial |  |
+| `drive_offset_cap` | 0 | per trial | Cap on the Strombom drive offset r_a sqrt(N). The paper's offset passes the sheep reaction distance r_s at N = (r_s / r_a)^2 = 1056, so above that the dog stands where few sheep feel it and no team drives the flock. A cap of r_s - r_a keeps the drive point within reach; it changes the paper rule, so it is a labelled variant. 0 is off. |
+| `field_clearance` | 80 | per trial | Free margin around the start, in units (a little more than the sheep reaction distance 65). The field only places the start; there is no boundary, as in the papers. |
+
+## Task: gather targets scattered over a disc into a goal at its centre
+
+**Table 3: Task: gather targets scattered over a disc into a goal at its centre.**
+
+| Setting | Default | Kind | Note |
+|---|---|---|---|
+| `gather_start_radius` | 50 | per trial | The task of Lama and di Bernardo 2024 (task: gather). Sheep and dogs start uniform over a disc of radius gather_start_radius (the paper's R, 50 in its main figure) centred on the goal, a disc of gather_goal_fraction x R (the paper's r* = R / 5). Success is the share success_fraction inside (the paper's chi*, 0.99). The task sizes itself from R and does not calibrate. Read only by the gather task, and in the physics hash only when it runs. |
+| `gather_goal_fraction` | 0.2 | per trial |  |
+
+## Start layouts
+
+**Table 4: Start layouts.**
+
+| Setting | Default | Kind | Note |
+|---|---|---|---|
+| `compact_spread` | 0.5 | per trial | compact: a Gaussian with sigma = compact_spread x R_f, cut at 3 sigma. |
+| `separation_scale` | 2 | per trial | The scattered layouts are sized by L = separation_scale x N^(2/3), the distance from the flock centre beyond which Strombom 2014 collects (r_a N^(2/3), r_a = 2). |
+| `wide_sigma` | 0.5 | per trial | wide: a Gaussian with sigma = wide_sigma x L, cut at 3 sigma. |
+| `split_ring` | 1 | per trial | split: 3 compact clusters (2 when N < 12) on a ring of split_ring x L around the centre. |
+| `outlier_fraction` | 0.2 | per trial | outlier_rich: outlier_fraction of the sheep at outlier_near to outlier_far x L from a compact core. |
+| `outlier_near` | 1.1 | per trial |  |
+| `outlier_far` | 1.6 | per trial |  |
+
+## Dogs
+
+**Table 5: Dogs.**
+
+| Setting | Default | Kind | Note |
+|---|---|---|---|
+| `dog_start` | arcs | per trial | Where the dogs stand at tick 0, a convention with no real-world rule behind it (a real dog starts at the handler, far from the sheep, and runs out round the flock). arcs: half circles behind the flock, spread evenly (the base). ring: circles round the flock, goal side included, leaving out the cone that holds the goal. handler: every dog at one point straight behind the flock, as if released from a post. The first circle is dog_start_gap beyond the farthest sheep that can start. A circle holds as many dogs as fit dog_start_spacing apart; more dogs go on the next one, dog_start_spacing farther out. The gap and the spacing are conventions; the sensitivity protocols sweep them. |
+| `dog_start_gap` | 30 | per trial |  |
+| `dog_start_spacing` | 5 | per trial |  |
+| `dog_overlap_distance` | 2 | per trial | A dog with another dog closer than this has a twin (dog_overlap metric). The adaptive run uses it to stop spending seeds on copies of a dog. 2 is the Strombom interaction distance r_a. |
+
+## Metrics
+
+**Table 6: Metrics.**
+
+| Setting | Default | Kind | Note |
+|---|---|---|---|
+| `measurement_radius` | 5 | per trial | Sheep closer than measurement_radius are in the same group (fragmentation). Sheep farther than lost_radius_multiple x R_f from the centroid count as lost. |
+| `lost_radius_multiple` | 2.5 | per trial |  |
+| `metrics_stride` | 1 | per trial | Metrics are recorded at tick 0, every metrics_stride ticks and at the last tick; success and the end of a trial are checked every tick whatever the stride. 1 records every tick. A method with a small time step (Lama, dt 0.03) records every 10th tick, because the metrics cost more per tick than the model and a failing trial runs 166,667 ticks. A first arrival is then read from the recorded ticks, so the arrival times of a strided run are never earlier than the exact ones. Calibration always records every tick. |
+
+## Calibration of R_f
+
+**Table 7: Calibration of R_f.**
+
+| Setting | Default | Kind | Note |
+|---|---|---|---|
+| `calibration_seeds` | 3 | whole protocol | One dog drives a compact flock toward a goal it cannot reach for calibration_seconds. R_f is sqrt(2) x the RMS radius over the last calibration_window_seconds, median over seeds and over the start sizes (spacings, so a start has radius spacing x sqrt(N / pi)). |
+| `calibration_seconds` | 300 | whole protocol |  |
+| `calibration_window_seconds` | 90 | whole protocol |  |
+| `calibration_starts` | 1, 3 | whole protocol |  |
+| `settled_tolerance` | 0.15 | whole protocol | Calibration raises when R_f changed by more than settled_tolerance between the last two windows, or differs by more than start_agreement between the start sizes. Strombom sheep settle up to N = 600; from about 630 a loose start keeps part of its size. |
+| `start_agreement` | 0.25 | whole protocol |  |
+| `impose_radius_above` | 0 | whole protocol | Above the edge a protocol may impose R_f instead: with impose_radius_above = N_cal, every N above it gets imposed_radius_scale x R_f(N_cal) x sqrt(N / N_cal), the density of the N_cal flock held constant. 0 is off. |
+| `imposed_radius_scale` | 1 | whole protocol |  |
+
+## Seeds and decisions
+
+**Table 8: Seeds and decisions.**
+
+| Setting | Default | Kind | Note |
+|---|---|---|---|
+| `master_seed` | 2026 | whole protocol | Seed i of every cell is master_seed + i, so cells share start flocks. |
+| `reliability_theta` | 0.9 | sampling | A cell is reliable when the confidence interval of its success rate lies at or above theta, unreliable when it lies below, undecided otherwise. At theta 0.90 and 99% confidence a cell needs 51 straight successes to be reliable. |
+| `confidence` | 0.99 | sampling |  |
+| `batch_seeds` | 10 | sampling | Seeds are added in batches until every open cell is decided or has max_seeds. |
+| `max_seeds` | 200 | sampling |  |
+| `time_margin` | 0.05 | sampling | Two finish times are the same when their paired median difference is within time_margin of the slower median (paired bootstrap, bootstrap_resamples draws). min_pairs is the fewest shared finished seeds a comparison accepts. |
+| `min_pairs` | 5 | sampling |  |
+| `bootstrap_resamples` | 4000 | sampling |  |
+| `refine_min_gap` | 1 | sampling | A dog count is added halfway between two neighbours more than refine_min_gap apart whose zones differ (whose reliability differs, when decide_finish_times is false). |
+| `decide_finish_times` | false | sampling | false: seeds are spent only to decide reliability, so D_min. An open finish-time comparison (D_best, D_sat, D_crowd) asks for no seeds; those values stay in the tables, flagged undecided. true: also decide them, which cost 5 to 38 percent more trials on the 99 percent grids. Runs that ask for D_sat set it true. |
+| `prune_overlap` | 0.9 | sampling | Above a confirmed saturation, a cell whose dogs were copies (mean dog_overlap at least this) and that is neither slower nor unreliable gets no more seeds. Above 1 turns it off. |
+| `timeseries_seeds` | 3 | sampling | The first timeseries_seeds seeds of every cell keep their per-tick history as Parquet. |
+| `budget_hours` | 72 | sampling | A run starts no new batch after this many hours (calibration not counted). Trials are saved as they finish and a rerun continues where it stopped. |

@@ -33,6 +33,7 @@ from sim.plugins.sheep import SHEEP_MODELS
 REPO_ROOT = Path(__file__).resolve().parents[1]
 RESULTS_ROOT = REPO_ROOT / "results"
 PROTOCOLS_DIR = REPO_ROOT / "protocols" / "configs" / "protocols"
+STUDY_QUEUE = REPO_ROOT / "protocols" / "configs" / "study_queue.yaml"
 
 # Keys a protocol file must set, and the optional ones, besides canonical values
 # (``extends`` is resolved by _read_chain before these are checked).
@@ -45,7 +46,7 @@ REQUIRED_KEYS = (
     "flock_sizes",
     "shepherd_counts",
 )
-PROTOCOL_KEYS = (*REQUIRED_KEYS, "factors")
+PROTOCOL_KEYS = (*REQUIRED_KEYS, "factors", "description")
 TIME_LIMIT_KEYS = ("time_limit_ticks", "time_limit_seconds", "time_limit_drive_multiple")
 METHOD_KEYS = (*TIME_LIMIT_KEYS, "params", "calibrate_as")
 
@@ -122,6 +123,8 @@ class Protocol:
     shepherd_counts: tuple[int, ...]
     factors: dict[str, list[Any]]
     resolved: dict[str, Any]  # the merged file contents, archived in the results folder
+    # One line on what the protocol tests, for the protocol catalogue; never physics.
+    description: str | None = None
 
     def method_config(self) -> dict[str, dict[str, Any]]:
         """Every parameter each method runs with: code defaults under the protocol's overrides."""
@@ -194,8 +197,17 @@ def find_protocol(name_or_path: str) -> Path:
     raise FileNotFoundError(f"Protocol {name_or_path!r} not found under {PROTOCOLS_DIR}")
 
 
+def study_queue() -> tuple[str, ...]:
+    """The study's protocol ids in the order they ran."""
+    return tuple(yaml.safe_load(STUDY_QUEUE.read_text())["queue"])
+
+
 def _read_chain(path: Path, seen: tuple[Path, ...] = ()) -> dict[str, Any]:
-    """The file merged over its ``extends`` parent (child keys win)."""
+    """The file merged over its ``extends`` parent (child keys win).
+
+    The parent's ``description`` is dropped: it says what the parent tests, so a child that
+    inherited it would be catalogued under the wrong question.
+    """
     if path in seen:
         raise ValueError(f"extends cycle: {' -> '.join(map(str, seen + (path,)))}")
     spec = yaml.safe_load(path.read_text()) or {}
@@ -204,7 +216,9 @@ def _read_chain(path: Path, seen: tuple[Path, ...] = ()) -> dict[str, Any]:
     parent = spec.pop("extends", None)
     if parent is None:
         return spec
-    return {**_read_chain((path.parent / parent).resolve(), seen + (path,)), **spec}
+    inherited = _read_chain((path.parent / parent).resolve(), seen + (path,))
+    inherited.pop("description", None)
+    return {**inherited, **spec}
 
 
 def method_dt(name: str, params: Mapping[str, Any]) -> float:
@@ -378,6 +392,9 @@ def load_protocol(name_or_path: str, output: Path | None = None) -> Protocol:
         raise ValueError(f"{path.name}: unknown keys {unknown}")
     settings = {**canonical, **{k: v for k, v in spec.items() if k in canonical}}
     _check_shape(path.name, spec, settings)
+    description = spec.get("description")
+    if description is not None and not (isinstance(description, str) and description.strip()):
+        raise ValueError(f"{path.name}: description must be non-empty text, got {description!r}")
 
     factors = dict(spec.get("factors") or {})
     methods = _methods(spec["methods"])
@@ -398,4 +415,5 @@ def load_protocol(name_or_path: str, output: Path | None = None) -> Protocol:
         shepherd_counts=tuple(sorted(spec["shepherd_counts"])),
         factors=factors,
         resolved={**spec, "canonical_values": canonical},
+        description=description,
     )

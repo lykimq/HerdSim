@@ -1,18 +1,6 @@
 # Glossary
 
-The terms HerdSim's docs use, one short definition each, with a link to the section that explains it in full. The other docs link here at a term's first use instead of repeating its definition. See also [README](../README.md) for an overview of the study.
-
-## Contents
-
-- [Trials and experiments](#trials-and-experiments)
-- [The drive task](#the-drive-task)
-- [Start layouts and dog starts](#start-layouts-and-dog-starts)
-- [Success and reliability](#success-and-reliability)
-- [Team sizes](#team-sizes)
-- [Sheep models and dog rules](#sheep-models-and-dog-rules)
-- [Variants](#variants)
-- [The gather task](#the-gather-task)
-- [Records](#records)
+The terms HerdSim's docs use, one short definition each, with a link to the section that explains it in full. The other docs link here at a term's first use instead of repeating its definition; this includes the design terms of [architecture](codes/architecture.md). See also [README](../README.md) for an overview of the study.
 
 ## Trials and experiments
 
@@ -24,9 +12,14 @@ The terms HerdSim's docs use, one short definition each, with a link to the sect
 - Protocol: one experiment, written as a YAML file in `protocols/configs/protocols/`. It fixes the methods, layouts, flock sizes, team sizes, success rule and deadline.
 - Protocol id: the protocol's name, built from parts. `dmin` is the $D_{\min}$ study on the drive task; `f99` the 99% rule (no `f99` means the strict rule); `m12`, `m6` and `m3` the deadline in drive times; `s_` a sensitivity variant; the last part names the variant (`fat`, `kubo`, `indep`, `hold`, `big`, `view`, `k05`, `c1.3` and so on). `lama_r50` is the gather task on a start disc of radius 50, `lama_r50_inf` the same with infinite sensing.
 - Campaign: running a protocol into its results folder, `results/<protocol id>/`, in rounds that add seeds where cells are still undecided ([adaptive sampling](experiments/task_design.md#3-adaptive-sequential-sampling-engine)).
+- Round: one pass of a sitting that plans the seeds each undecided cell still needs and runs them ([sampling loop](experiments/task_design.md#the-adaptive-sampling-loop)).
 - Batch: the 10 seeds a cell gets at a time.
+- Seed cap: the most seeds a cell can get, 200.
+- Calibration: the short run at the start of a campaign that measures the flock radius $R_f$ for one method and flock size.
+- Method: a sheep model paired with a dog controller, such as `strombom_multi` (Strömbom sheep with the team rule) or `lama`.
+- Factor: a canonical setting that a protocol sweeps over several values, each value giving its own curves.
 - Cell: one method, layout, flock size $N$ and team size $D$ (with any factor levels) within one protocol, which fixes the deadline and the rule. Each cell gets 10 to 200 trials.
-- Curve: the cells of one method, layout, factor levels and $N$ across the tested team sizes.
+- Curve (or group, in the code): the cells of one method, layout, factor levels and $N$ across the tested team sizes.
 - Grid: the layouts, flock sizes and team sizes a protocol tests.
 - Main runs: the three strict and three 99% protocols at 12, 6 and 3 drive times, on $N = 25$ to 400 and $D = 1$ to 24; the 99% grids at 12 and 6 drive times were later extended to nine flock sizes up to 566.
 - Top-up: a later sitting that adds finish-time seeds to existing 99% grids, so that $D_{\mathrm{sat}}$ can be decided.
@@ -68,6 +61,7 @@ The terms HerdSim's docs use, one short definition each, with a link to the sect
 - $\theta$: the reliability threshold, 0.90.
 - Reliable cell: the 99% Clopper–Pearson interval of its success rate lies at or above $\theta$; unreliable: it lies below; undecided: it straddles $\theta$ ([stopping early](experiments/task_design.md#stopping-early-with-the-99-clopper-pearson-interval)).
 - Open: still undecided when the cell reached its cap of 200 trials.
+- Frontier rules: the rules that decide reliability, the finish-time comparisons and the team-size values below from the stored trials ([frontier rules](experiments/task_design.md#5-frontier-rules-and-zones)).
 
 ## Team sizes
 
@@ -79,7 +73,8 @@ The terms HerdSim's docs use, one short definition each, with a link to the sect
 - $D_{\mathrm{sat}}$: the smallest reliable team that no larger reliable team beats on finish time by more than 5% with 99% confidence ([frontier values](experiments/task_design.md#frontier-values)).
 - $D_{\max}$: the largest reliable team below $D_{\mathrm{overcrowd}}$, or the largest reliable team. At the top of the grid it is only a lower bound: no upper limit was found.
 - $D_{\mathrm{overcrowd}}$: the first team from which two tested team sizes in a row are unreliable, looked for above $D_{\min}$ (above $D_{\min,\mathrm{low}}$ on a curve with no reliable team).
-- $D_{\mathrm{best}}$ and $D_{\mathrm{crowd}}$: the smallest team as fast as the fastest, and the first reliable team above $D_{\mathrm{best}}$ that is slower than $D_{\mathrm{best}}$. With the zones (improving, saturated, crowded, collapse and the rest) they are explained in [zones](experiments/task_design.md#zones).
+- $D_{\mathrm{best}}$ and $D_{\mathrm{crowd}}$: the smallest team as fast as the fastest, and the first reliable team above $D_{\mathrm{best}}$ that is slower than $D_{\mathrm{best}}$.
+- Zone: the label of a cell along its curve (improving, saturated, crowded, collapse and the rest), explained in [zones](experiments/task_design.md#zones).
 
 ## Sheep models and dog rules
 

@@ -6,6 +6,7 @@
 # is run. Finish-time seeds off: only D_min is compared across levels.
 
 protocol_id: dmin_f99_c1.3
+description: "Cohesion c = 1.3 instead of the paper's 1.05, on the five main flock sizes at 12 drive times (RQ11)."
 output: results/dmin_f99_c1.3
 extends: dmin_f99_m12.yaml
 

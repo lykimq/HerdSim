@@ -1,5 +1,7 @@
 # Results overview: every protocol in one view
 
+> AUTO-GENERATED: do not modify. Re-run the producing command to refresh this file. Command: `uv run python docs/make_docs.py`. Source: the stored runs in `results/`.
+
 The smallest reliable team for every curve of the 41 HerdSim protocols, in tables only. The interpretation is in the [report](d_min_report.md) and the terms in the [glossary](../glossary.md).
 
 ## Contents
@@ -352,7 +354,7 @@ The gather task of Lama and di Bernardo (2024) ([gather task](../glossary.md#the
 
 ## 4. Commands
 
-The tables are printed by `cli/dmin_tables.py overview` from the stored runs in `results/` (generated on 2026-10-28); do not edit them by hand. Each command prints one table per success rule; the command with `dmin_f99_hold_share` also prints Tables 12 and 13:
+Each table is also printed by one of the commands below, which print one table per success rule; the command with `dmin_f99_hold_share` also prints Tables 12 and 13:
 
 ```bash
 uv run cli/dmin_tables.py overview dmin_m12 dmin_m6 dmin_m3 dmin_s_base dmin_s_matched dmin_s_handler dmin_s_ring dmin_s_goal dmin_s_dogspeed dmin_s_gap dmin_fat dmin_kubo

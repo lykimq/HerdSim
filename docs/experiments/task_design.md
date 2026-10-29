@@ -39,6 +39,11 @@ Every length of the drive task is a multiple of the **calibrated flock radius $R
 | Field clearance | $80$ m around everything placed at the start (flock, dog stations, goal) | Only sizes the field; nothing stops the animals there. |
 | Boundary | None | Animals can move anywhere, as in Strömbom et al. (2014) and Kubo et al. (2022). |
 
+### Success rules
+
+- Strict: every sheep inside the goal at the same tick. Large teams often fail on the last sheep ([report, section 3.4](../report/part2_success_rule.md#34-rq4-the-success-rule-and-the-last-sheep)).
+- 99%: at least $\lceil 0.99\,N \rceil$ sheep inside at the same tick, so the two rules coincide below $N = 100$; from $N = 100$ one straggler is allowed, and four at $N = 400$.
+
 ### Deadlines in drive times
 
 A fixed 5-minute limit for every flock size would be unfair to large flocks, which are driven over 200 m against 80 m for small ones.
@@ -67,7 +72,7 @@ The scattered layouts grow as $N^{2/3}$ while $R_f(N)$ grows much slower, so fro
 
 ### The holding task
 
-Two follow-up protocols (`dmin_f99_hold`, `dmin_f99_hold_spacing`) change the end of the drive: a trial succeeds only once 99% of the flock has stayed inside the goal for one drive time. While the flock is in, the dogs withdraw to $r_s + r_a = 67$ m beyond the farthest sheep, so no sheep reacts to them and the flock grazes; a dog that only stopped would keep the nearest sheep in flight and push it through the goal. Two more protocols (`dmin_f99_hold_goal`, `dmin_f99_hold_share`) sweep the goal from 1.9 to $3.0\,R_f$ and the share from 99% to 90% at $N \le 100$. The flock keeps walking while the dogs withdraw, and a larger goal holds a small flock; the measurements, and why the walk is a likely but untested cause, are in [report, section 3.10](../report/part3_beyond_dmin.md#310-rq10-when-do-more-dogs-hurt-holding-the-flock-and-dogs-that-take-up-room).
+Two follow-up protocols (`dmin_f99_hold`, `dmin_f99_hold_spacing`) change the end of the drive: a trial succeeds only once 99% of the flock has stayed inside the goal for one drive time. While the flock is in, the dogs withdraw to $r_s + r_a = 67$ m beyond the farthest sheep, so no sheep reacts to them and the flock grazes; a dog that only stopped would keep the nearest sheep in flight and push it through the goal. Two more protocols (`dmin_f99_hold_goal`, `dmin_f99_hold_share`) sweep the goal from 1.9 to $3.0\,R_f$ and the share from 99% to 90% at $N \le 100$. The flock keeps walking while the dogs withdraw, and a larger goal holds a small flock; the measurements, and why the walk may be the cause though we have not tested it, are in [report, section 3.10](../report/part3_beyond_dmin.md#310-rq10-when-do-more-dogs-hurt-holding-the-flock-and-dogs-that-take-up-room).
 
 ![Animation of a small flock held in two goal sizes](../gifs/holding.gif)
 
@@ -104,7 +109,7 @@ The scattered layouts are sized by Strömbom's collect distance $L = f(N) = 2\,N
 
 ### Why the layouts are not ordered by spread
 
-The layouts are sized by the collect distance rather than by how spread out the flock starts, because spread alone does not order them: at $N = 400$ `outlier_rich` starts less spread out than `wide`, yet at 6 drive times it succeeds less often (55% of the trials over all team sizes, against 84%). Where the strays lie matters as well as how far out they are. The start spreads and the analysis are in [report, section 5.2](../report/part5_failures.md#52-how-failed-trials-end-and-the-start-spread).
+The layouts are sized by the collect distance rather than by how spread out the flock starts, because spread alone does not order them: at $N = 400$ `outlier_rich` starts less spread out than `wide`, yet at 6 drive times it succeeds less often (55% of the trials over all team sizes, against 84%). Where the strays lie matters as well as how far out they are. The start spreads and the analysis are in [report, section 4.3](../report/part5_failures.md#43-how-failed-trials-end-and-the-start-spread).
 
 ### Dog starts
 
@@ -229,12 +234,7 @@ Table 3 gives the range of flock sizes $N$ for each setting and the reason it st
 
 ### Seeds per cell (cap of 200)
 
-The cap is 200 because at 200 seeds a cell is decided only if its success rate is at least $0.955$ or at most $0.835$. Doubling to 400 narrows that band only to $0.94$ and $0.86$, for twice the trials. Over the 41 protocols, 411 of 6,845 cells (6.0%) ended open at the cap. A curve whose $D_{\min}$ depends on an open cell is reported as a bracket (for example `2-3`).
-
-### Success rules
-
-- Strict: every sheep inside the goal at the same tick. Large teams often fail on the last sheep ([report, section 3.4](../report/part2_success_rule.md#34-rq4-the-success-rule-and-the-last-sheep)).
-- 99%: at least $\lceil 0.99\,N \rceil$ sheep inside at the same tick, so the two rules coincide below $N = 100$; from $N = 100$ one straggler is allowed, and four at $N = 400$.
+The cap is 200 because at 200 seeds a cell is decided only if its success rate is at least $0.955$ or at most $0.835$. Doubling to 400 narrows that band only to $0.94$ and $0.86$, for twice the trials. Over the 41 protocols, 411 of 6,845 cells (6.0%) ended undecided on reliability at the cap. The run record counts more open cells (499) because, in runs that decide finish times, it also counts cells whose finish-time comparison is still open ([appendix A](../report/appendix_run_record.md#appendix-a-protocol-run-record)). A curve whose $D_{\min}$ depends on a cell undecided on reliability is reported as a bracket (for example `2-3`).
 
 ## 5. Frontier rules and zones
 
@@ -279,7 +279,7 @@ A reliable cell slower than $D_{\mathrm{best}}$ is `crowded` wherever it lies; `
 
 ### How failed trials end
 
-Failed drive trials are split by where the flock ended, far from the goal or near it (`analysis/dispersion_burden.py`); the definition and the counts are in [report, section 5.2](../report/part5_failures.md#52-how-failed-trials-end-and-the-start-spread).
+Failed drive trials are split by where the flock ended, far from the goal or near it (`analysis/dispersion_burden.py`); the definition and the counts are in [report, section 4.3](../report/part5_failures.md#43-how-failed-trials-end-and-the-start-spread).
 
 ### Crowding with dogs that take up room
 
@@ -310,7 +310,7 @@ Table 5 lists the geometry of the gather task:
 | Goal radius | `gather_goal_fraction` $\times R = R/5 = 10$ | The paper's $r^{\ast} = R/5$ |
 | Start (layout `uniform`) | Sheep and dogs uniform over the disc, goal included | The paper's $\Omega_0$ |
 | Required share | `success_fraction` $= 0.99$ | The paper's $\chi^{\ast} = 0.99$ |
-| Time limit | $166{,}667$ ticks $= 5000$ s at $\Delta t = 0.03$ | The paper's $t_{\max}$ (Fig. S8) |
+| Time limit | $166{,}667$ ticks $= 5000$ s at $\Delta t = 0.03$ | The paper's $t_{\max} = 5.0 \times 10^3$ (Fig. S8), given with no unit and read as seconds |
 | Boundary | None | As in the drive task |
 
 The targets do not flock, so there is no driven flock radius to calibrate: the task is sized by $R$. Targets are drawn before herders, so a seed gives the same targets whatever the team size, and cells at different $D$ stay paired as in the drive task.

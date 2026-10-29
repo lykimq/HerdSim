@@ -4,6 +4,7 @@
 # protocol and a factor cannot change it.
 
 protocol_id: dmin_f99_big_loose
+description: "dmin_f99_big at N 566 and 800 with the imposed flock radius scaled by sqrt(2), a looser flock (RQ13)."
 output: results/dmin_f99_big_loose
 extends: dmin_f99_big.yaml
 

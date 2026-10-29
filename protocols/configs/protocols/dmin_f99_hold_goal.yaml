@@ -10,6 +10,7 @@
 # Otherwise as dmin_f99_hold; the largest D is kept at 24 so the field is the same.
 
 protocol_id: dmin_f99_hold_goal
+description: "Holding small flocks: goal radius 1.9, 2.5 and 3.0 R_f at N 25 to 100 (RQ10)."
 output: results/dmin_f99_hold_goal
 extends: dmin_f99_hold.yaml
 

@@ -1,4 +1,4 @@
-"""Reading a finished results folder, and printing a table as Markdown.
+"""Reading a finished results folder and the run log.
 
     uv run cli/dmin_tables.py record                  # the run log, read here
 
@@ -10,8 +10,6 @@ line are known in one place. They read:
 - the calibrated flock radii in calibration.json
 - the queue log results/queue_log.jsonl, one entry per finished protocol, with each folder's
   status.json for the current counts
-
-``markdown`` prints any of these tables ready to paste into a document.
 """
 
 from __future__ import annotations
@@ -43,23 +41,6 @@ def read_groups(folder: Path) -> pd.DataFrame:
 def flock_radii(folder: Path) -> dict[str, dict[str, float]]:
     """Calibrated R_f per method, keyed by N as text."""
     return json.loads((folder / "calibration.json").read_text())["flock_radius"]
-
-
-def markdown(frame: pd.DataFrame, index: bool = False) -> str:
-    """A Markdown table; no extra dependency. A "|" inside a cell is escaped, because a row of
-    several factors is labelled "a=1|b=2" and would otherwise split into two cells."""
-    if frame.empty:
-        return "(no rows)"
-    frame = frame.reset_index() if index else frame
-
-    def text(v: object) -> str:
-        return "" if isinstance(v, float) and pd.isna(v) else str(v).replace("|", "\\|")
-
-    columns = [text(c) for c in frame.columns]
-    lines = ["| " + " | ".join(columns) + " |", "|" + "|".join("---" for _ in columns) + "|"]
-    for row in frame.itertuples(index=False):
-        lines.append("| " + " | ".join(text(v) for v in row) + " |")
-    return "\n".join(lines)
 
 
 def run_record(queue_log: Path, results_root: Path | None = None) -> pd.DataFrame:

@@ -1,21 +1,22 @@
 # Coordination and what the dogs see
 
-Part 4 of the HerdSim report on team size. The [overview](d_min_report.md) holds the abstract, the research questions, the [decision rules](d_min_report.md#2-decision-rules) that define $D_{\min}$, its brackets and lower bounds, the discussion and the [references](d_min_report.md#references). Terms are defined in the [glossary](../glossary.md).
+Part 4 of the HerdSim report on team size. The [overview](d_min_report.md) holds the abstract, the research questions, the [decision rules](d_min_report.md#2-decision-rules-and-setup) that define $D_{\min}$, its brackets and lower bounds, the [start layouts and dog rules](d_min_report.md#22-start-layouts-dog-rules-and-protocols), the discussion and the [references](d_min_report.md#references). Terms are defined in the [glossary](../glossary.md).
+
+The three sections of this part change the dogs and keep the sheep: dogs without coordination (3.6), dogs with only part of the team rule (3.9), and dogs that see only part of the flock (3.12).
 
 ## 3.6 RQ6: Do dogs without a team rule reach a finite D_min?
 
-FAT (farthest-agent targeting) is a baseline without coordination: every dog goes behind the sheep farthest from the goal. It is compared with the team rule `strombom_multi`, which switches each dog between collecting strays and driving the flock and has a team layer that assigns dogs to strays ([section 3.9](#39-rq9-which-part-of-the-team-rule-matters)).
+The team rule `strombom_multi` has two parts. The first is Strömbom's switch: while any sheep is beyond the collect distance the dogs collect strays, otherwise they drive the flock. The second is the team layer, which assigns each dog its own stray (Hungarian assignment) and spreads the dogs on an arc behind the flock in angular order. FAT (farthest-agent targeting) is a baseline with neither: every dog goes behind the sheep farthest from the goal.
 
-Can dogs that do not coordinate do the job if there are enough of them? Not on large flocks: from $N = 200$ FAT has no reliable team on any scattered layout, and adding dogs does not help (item 1). Its dogs end up close together behind the same sheep (item 2).
+Dogs that do not coordinate cannot do the job on large flocks, however many there are: from $N = 200$ FAT has no reliable team on any scattered layout, and adding dogs does not help (item 1). Its dogs end up close together behind the same sheep (item 2).
 
-1. FAT fails on large flocks.  
-   FAT is reliable on small flocks ($N \le 100$) but has no reliable team at $N \ge 200$ on any scattered layout, and none on compact $N = 400$, where the team rule needs one dog. Adding dogs does not help (Figure 1).
+1. FAT fails on large flocks: it is reliable on small flocks ($N \le 100$) but has no reliable team at $N \ge 200$ on any scattered layout, and none on compact $N = 400$, where the team rule needs one dog. Adding dogs does not help (Figure 1).
 
-2. Why.  
-   Every dog sees every sheep and picks by the same rule, so all $D$ dogs chase the same sheep. They bunch together: at $N \ge 200$ the median share of dogs with another dog within 2 m, for teams of two or more, is 0.86 on `compact` and 0.79 on `split` (0.46 on `wide`, 0.30 on `outlier_rich`). A larger FAT team is a larger pack behind one sheep while the rest of the flock spreads out.  
+2. FAT dogs bunch behind one sheep: every dog sees every sheep and picks by the same rule, so all $D$ dogs chase the same sheep. At $N \ge 200$ the median share of dogs with another dog within 2 m, for teams of two or more, is 0.86 on `compact` and 0.79 on `split` (0.46 on `wide`, 0.30 on `outlier_rich`). With more FAT dogs, more dogs stand behind the same sheep while the rest of the flock spreads out.
+
    The independent shepherds of [section 3.9](#39-rq9-which-part-of-the-team-rule-matters) also have no team layer, but they keep Strömbom's collect/drive switch, and they reach a finite $D_{\min}$ up to $N = 200$. FAT may fail because it has neither the team layer nor the switch; no run gave FAT the switch alone.
 
-Table 1 compares FAT with `strombom_multi` at 6 drive times (FAT strict / 99%, with `strombom_multi` in brackets):
+Table 1 compares FAT with `strombom_multi` at 6 drive times (FAT strict / 99%, with `strombom_multi` in parentheses):
 
 **Table 1: FAT against `strombom_multi` at 6 drive times, strict / 99% rule.**
 
@@ -30,7 +31,7 @@ Table 1 compares FAT with `strombom_multi` at 6 drive times (FAT strict / 99%, w
 
 ![FAT against the coordinated team rule](../figures/fig26_fat.png)
 
-**Figure 1: Success against team size for `strombom_multi` and FAT at 6 drive times.** Beyond two dogs FAT never reaches $\theta$, while `strombom_multi` becomes reliable on `wide` and `outlier_rich`.
+**Figure 1: Success against team size for `strombom_multi` and FAT at 6 drive times, $N = 200$ and 400.** In these cells FAT never reaches $\theta$ beyond two dogs, while `strombom_multi` becomes reliable on `wide` and `outlier_rich`.
 
 - Marks: blue is `strombom_multi`, orange FAT; solid lines are the strict rule, dashed the 99% rule, and the dotted line is $\theta = 0.90$. Each marker is one cell; hollow markers are cells with fewer than 30 trials, decided early and so less certain.
 - Panels: `compact` $N = 400$, `wide` $N = 200$ and 400, `outlier_rich` $N = 200$, and `split` $N = 200$. FAT stays below about 0.55 on `wide` and `outlier_rich`, and below 0.9 on `compact` $N = 400$ and `split` $N = 200$.
@@ -41,20 +42,15 @@ Animation 7 in [models](../methods/models.md#independent-paper-shepherds-indepen
 
 ## 3.9 RQ9: Which part of the team rule matters?
 
-Which part of the team rule makes a team work: Strömbom's switch between collecting and driving, or the team layer that assigns dogs to strays? Each matters at a different size: the switch alone carries a team to $N = 200$, and the team layer is needed at $N = 400$ (items 1 and 2, Table 2). On `split` $N = 200$ the order reverses (item 2).
+Strömbom's switch and the team layer matter at different flock sizes: dogs with the switch alone are reliable up to $N = 200$, and the team layer is needed at $N = 400$ (items 1 and 2, Table 2). On `split` $N = 200$ the order reverses (item 2).
 
-FAT ([section 3.6](#36-rq6-do-dogs-without-a-team-rule-reach-a-finite-d_min)) lacks two things the team rule has: (1) Strömbom's switch between collecting outliers and driving the flock, and (2) the team layer, which assigns dogs to outliers (Hungarian assignment) and spreads them on an arc behind the flock in angular order.
+To separate the two parts, `dmin_f99_indep` runs a team of independent shepherds: each dog runs Strömbom's single-dog rule on the whole flock, with the switch but no assignment and no arc.
 
-To separate the two, `dmin_f99_indep` runs a team of independent paper shepherds: each dog runs Strömbom's single-dog rule on the whole flock, with no assignment and no arc.
+1. Independent shepherds are reliable up to $N = 200$: on every scattered layout up to $N = 200$, where FAT fails, they need 2–3 dogs on `wide` and 3 on `outlier_rich`. FAT differs from them in the sheep it aims at as well as in lacking the switch, so the gain cannot be put on the switch alone. This may be because switching to driving once the flock is gathered keeps it together, even when the dogs chase the same outlier; we have not tested it.
 
-1. The switch alone is enough up to $N = 200$.  
-   Independent shepherds are reliable on every scattered layout up to $N = 200$, where FAT fails: 2–3 dogs on `wide`, 3 on `outlier_rich`. This may be because switching to driving once the flock is gathered keeps it together, even when the dogs chase the same outlier; we have not tested it.
+2. At $N = 400$ the team layer is needed: independent shepherds have no reliable team up to 24 dogs at $N = 400$, where the team rule needs 2–3 dogs on `wide` and 3 on `outlier_rich`. This may be because, without assignment, the dogs keep going after the same sheep while other parts of a large flock spread; we have not tested it. On `split` $N = 200$ the order reverses: independent shepherds are reliable from 3 dogs, while the team rule has no reliable team ([section 4.1](part5_failures.md#41-why-more-dogs-do-not-help-on-split)).
 
-2. At $N = 400$ the team layer is needed.  
-   Independent shepherds have no reliable team up to 24 dogs at $N = 400$. The team rule needs 2–3 dogs on `wide` and 3 on `outlier_rich`. This may be because, without assignment, the dogs keep going after the same sheep while other parts of a large flock spread; we have not tested it. On `split` $N = 200$ the order reverses: independent shepherds are reliable from 3 dogs, while the team rule has no reliable team ([section 4.1](part5_failures.md#41-why-more-dogs-do-not-help-on-split)).
-
-3. In the Kubo model more dogs keep helping, with diminishing returns.  
-   With Kubo sheep (`dmin_f99_kubo`), one dog is enough on compact flocks of 25 to 100. Unlike Strömbom sheep, Kubo sheep walk faster under a stronger push (up to 5 m/s), so more dogs shorten the drive: at $N = 100$ the median finish time falls from 115 s with one dog to 29 s with ten, and to 25 s with 24. Ten dogs already give 95% of the gain of 24, but $D_{\mathrm{sat}}$ is still open: it is at least 16 or 17 dogs (16–24 at $N = 25$ and 100, 17–24 at 50).
+3. In the Kubo model more dogs keep helping, with diminishing returns: with Kubo sheep (`dmin_f99_kubo`), one dog is enough on compact flocks of 25 to 100. Unlike Strömbom sheep, Kubo sheep walk faster under a stronger push (up to 5 m/s), so more dogs shorten the drive: at $N = 100$ the median finish time falls from 115 s with one dog to 29 s with ten, and to 25 s with 24. Ten dogs already give 95% of the gain of 24, but $D_{\mathrm{sat}}$ is still open: it is at least 16 or 17 dogs (16–24 at $N = 25$ and 100, 17–24 at 50).
 
 Table 2 compares the three rules at 6 drive times (99% rule):
 
@@ -70,18 +66,17 @@ Table 2 compares the three rules at 6 drive times (99% rule):
 
 ## 3.12 RQ12: What a dog sees, and sharing it
 
-Real dogs, robots and drones do not see the whole field. Here each dog sees only the sheep within a sensing range (15, 30, 45, 65 or 100 m), and dogs share what they see in one of three ways: not at all (`none`), with the dogs in range (`neighbour`), or with the whole team (`shared`).
+Real dogs, robots and drones do not see the whole field. Here each dog sees only the sheep within a sensing range (15, 30, 45, 65 or 100 m), and dogs share what they see in one of three ways: not at all (`none`), with the dogs in range (`neighbour`), or with the whole team (`shared`, so the team plans once on every sheep any dog sees).
 
-How much does a limited view cost, and does sharing make up for it? On `wide` $N = 200$ a range of 30 to 65 m costs about one dog, and at 65 m sharing with the whole team brings $D_{\min}$ back to its full-sight value; at 15 m far more dogs are needed (items 1 to 3, Figure 2). On `split` $N = 200$ the result reverses (item 3).
+On `wide` $N = 200$ a range of 30 to 65 m costs about one dog, and at 65 m sharing with the whole team brings $D_{\min}$ back to its full-sight value; at 15 m far more dogs are needed (items 1 to 3, Figure 2). On `split` $N = 200$ the result reverses (item 3).
 
-1. A realistic range costs about one dog.  
-   On `wide` $N = 200$, dogs that see everything need 2. With a range of 30 to 65 m they need 3 (3–4 at 45 m). On flocks of 100 or fewer a range of 30 m or more costs nothing (Figure 2).
+1. A range of 30 to 65 m costs about one dog: on `wide` $N = 200$, dogs that see everything need 2. With a range of 30 to 65 m they need 3 (3–4 at 45 m). On flocks of 100 or fewer a range of 30 m or more costs nothing (Figure 2).
 
-2. At 15 m far more dogs are needed.  
-   With a range of 15 m on `wide`, no team up to 16 is reliable at $N = 50$, and at $N = 100$ at least 6 dogs are needed. This may be because, once the range is shorter than the gaps between strays, the dogs lose sight of the outer sheep; we have not measured those gaps.
+2. At 15 m far more dogs are needed: with a range of 15 m on `wide`, no team up to 16 is reliable at $N = 50$, and at $N = 100$ at least 6 dogs are needed. This may be because, once the range is shorter than the gaps between strays, the dogs lose sight of the outer sheep; we have not measured those gaps.
 
-3. Sharing with the whole team wins the dog back.  
-   At 65 m on `wide` $N = 200$, dogs that do not share need 3. Sharing with the whole team brings $D_{\min}$ back to 2, as with full sight. Sharing only with the dogs in range does not help (still 3): a dog far away has to learn about a stray it cannot see. On `split` $N = 200$ the order reverses: dogs that see everything have no reliable team ([1], a lower bound), while dogs that see 30 to 65 m and do not share succeed in 60 of 60 trials at every team from 3 to 16 dogs. Sharing with the whole team is reliable with 3 dogs but fails from 4 up ([section 3.7](part3_beyond_dmin.md#37-rq7-beyond-d_min-enough-dogs-cost-and-pressure-on-the-flock)). Why the full view hurts on `split` was not tested.
+3. Sharing with the whole team brings $D_{\min}$ back to full sight on `wide`: at 65 m on `wide` $N = 200$, dogs that do not share need 3, and sharing with the whole team brings $D_{\min}$ back to 2, as with full sight. With two dogs the cell succeeds in 3 of 10 trials without sharing (99% interval 0.04–0.74) and in 88 of 90 with sharing (0.90–1.00; Animation 1). Sharing only with the dogs in range does not help (still 3): a dog far away has to learn about a stray it cannot see.
+
+   On `split` $N = 200$ the order reverses: dogs that see everything have no reliable team ([1], a lower bound), while dogs that see 30 to 65 m and do not share succeed in 60 of 60 trials at every team from 3 to 16 dogs. Sharing with the whole team is reliable with 3 dogs but fails from 4 up ([section 3.7](part3_beyond_dmin.md#37-rq7-beyond-d_min-enough-dogs-cost-and-pressure-on-the-flock)). This may be related to the `split` failures of [section 4.1](part5_failures.md#41-why-more-dogs-do-not-help-on-split), where collecting dogs that plan on the whole flock crowd one cluster; we have not tested it.
 
 ![D_min against sensing range, and sharing](../figures/fig37_view.png)
 
@@ -94,7 +89,7 @@ How much does a limited view cost, and does sharing make up for it? On `wide` $N
 
 ![Animation of two dogs with a 65 m range, without and with sharing](../gifs/sight_sharing.gif)
 
-**Animation 1: Two dogs that see 65 m, without and with sharing, replayed (`wide`, $N = 200$, $D = 2$, seed 0, 99% rule, 6 drive times).** Sharing what each dog sees turns a failed trial into a success. Without sharing this cell succeeds in 3 of 10 trials (99% interval 0.04–0.74); with sharing in 88 of 90 (0.90–1.00), which makes 2 dogs reliable. Each replay reproduces its stored trial (`dmin_f99_view_range`, `dmin_f99_view_comm`).
+**Animation 1: Two dogs that see 65 m, without and with sharing, replayed (`wide`, $N = 200$, $D = 2$, seed 0, 99% rule, 6 drive times).** Sharing what each dog sees turns a failed trial into a success. Each replay reproduces its stored trial (`dmin_f99_view_range`, `dmin_f99_view_comm`).
 
 - Marks: dashed circles are each dog's sensing range; hollow dots are sheep that no dog sees.
 - Left: without sharing each dog plans on its own view. The two dogs end up on either side of a long, thin flock, a few strays at its ends stay unseen, and the trial runs out of time at 817 s.

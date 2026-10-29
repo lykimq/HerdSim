@@ -5,6 +5,7 @@
 # straggler cannot decide a trial?
 
 protocol_id: dmin_f99_s_matched
+description: "dmin_s_matched (field-matched sheep) under the 99 percent rule (RQ5)."
 output: results/dmin_f99_s_matched
 extends: dmin_s_matched.yaml
 

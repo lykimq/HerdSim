@@ -64,6 +64,13 @@ def split_group(key: str) -> dict[str, Any]:
     }
 
 
+def split_factors(factors: str) -> list[tuple[str, str]]:
+    """'goal_radius_multiple=2.5|success_fraction=0.9' -> [(name, value text), ...]; empty
+    text gives no pairs."""
+    parts = [item.partition("=") for item in factors.split(SEP)] if factors else []
+    return [(name, value) for name, _, value in parts]
+
+
 def join_group(method: str, layout: str, factors: str, n: int) -> str:
     """The inverse of ``split_group``: a group key from its parts, factors as one text."""
     return SEP.join([method, layout, *([factors] if factors else []), f"N={n}"])

@@ -8,6 +8,8 @@
 # "R_f" is the flock radius: the radius of the flock while one dog drives it, measured per
 # method and N by the calibration at the start of a run (see Calibration below).
 
+# The task every trial of a protocol runs: drive_to_goal, or gather for the model of Lama and
+# di Bernardo 2024. Each task reads only its own section below.
 task: drive_to_goal
 
 # --- Task: drive the flock into a goal -----------------------------------------------------

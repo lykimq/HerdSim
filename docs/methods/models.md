@@ -140,6 +140,8 @@ For comparison, HerdSim runs the force model of [Kubo et al. (2022)](https://doi
 
 - Marks: every dog (triangle) heads for the sheep farthest from the goal. The flock stretches into an arc facing the dogs and flows into the goal.
 
+The Kubo sheep, as HerdSim runs them:
+
 - Sheep velocity: $u = K_{s1} a + K_{s2} b + K_{s3} c + K_{s4} d$ with $K_{s1} = 10$, $K_{s2} = 0.5$, $K_{s3} = 2$, $K_{s4} = 5000$, each term a mean over the sheep or dogs within the sheep's view of $20$ m:
   1. Repulsion from neighbours, $a = \overline{(x_i - x_j)/\lVert x_i - x_j \rVert^2}$ (size $1/r$).
   2. Alignment with the neighbours' headings, $b$.
@@ -190,15 +192,15 @@ Table 1 lists the parameters of the target model.
 
 ## 2. Shepherd controllers
 
-HerdSim has five dog controllers:
+HerdSim has five dog controllers. Each is paired with a sheep model as a method, and the protocols and the report name the method:
 
 ```text
-Dog controllers
-├── strombom_multi   (team rule: assignment of outliers + drive arc)
-├── fat              (no coordination: every dog behind the sheep farthest from the goal)
-├── independent      (Strömbom's single-dog rule for every dog, no team layer)
-├── kubo_forces      (Kubo's forces, with repulsion between dogs)
-└── lama_herders     (local sensing, chase the farthest target; gather task only)
+Method           Dog controller
+strombom_multi   collect_drive_multi  (team rule: assignment of outliers + drive arc)
+fat              fat                  (no coordination: every dog behind the sheep farthest from the goal)
+independent      independent          (Strömbom's single-dog rule for every dog, no team layer)
+kubo             kubo_forces          (Kubo's forces, with repulsion between dogs)
+lama             lama_herders         (local sensing, chase the farthest target; gather task only)
 ```
 
 ### Coordinated team architecture: `strombom_multi`

@@ -17,6 +17,7 @@
 # and nothing in a trial reads the field size.
 
 protocol_id: dmin_f99_hold_share
+description: "Holding small flocks: goal radius 1.9 to 2.5 R_f crossed with a share of 90, 95 or 99 percent (RQ10)."
 output: results/dmin_f99_hold_share
 extends: dmin_f99_hold.yaml
 

@@ -7,6 +7,7 @@
 # the R_f of dmin_m6, so only the dog rule differs.
 
 protocol_id: dmin_fat
+description: "FAT dogs (every dog behind the sheep farthest from the goal, no coordination) on the dmin_m6 grid (RQ6)."
 output: results/dmin_fat
 extends: dmin_m6.yaml
 

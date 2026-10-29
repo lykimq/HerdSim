@@ -4,6 +4,7 @@
 # D from N = 200. Grid and deadline of dmin_s_base.
 
 protocol_id: dmin_s_ring
+description: "Sensitivity: dogs start on full circles round the flock, leaving out the cone that holds the goal (RQ5)."
 output: results/dmin_s_ring
 extends: dmin_s_base.yaml
 

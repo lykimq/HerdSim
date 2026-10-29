@@ -7,6 +7,7 @@
 # (the cap does not act there: r_a sqrt(800) = 56.6).
 
 protocol_id: dmin_f99_big_cap
+description: "dmin_f99_big at N 800 to 1600 with the drive offset capped at 63 m, a HerdSim variant of the paper rule (RQ13)."
 output: results/dmin_f99_big_cap
 extends: dmin_f99_big.yaml
 

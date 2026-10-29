@@ -1,6 +1,7 @@
 # The ring start (dmin_s_ring) with the 99 percent rule. Compare with dmin_f99_s_base.
 
 protocol_id: dmin_f99_s_ring
+description: "dmin_s_ring (dogs start on full circles) under the 99 percent rule (RQ5)."
 output: results/dmin_f99_s_ring
 extends: dmin_s_ring.yaml
 

@@ -40,7 +40,7 @@ def deadline_seconds(
     top = trials["method"].map(speed)
     if top.isna().any():
         raise ValueError(f"no sheep speed for methods {sorted(set(trials['method'][top.isna()]))}")
-    return multiple * trials["drive_distance"] / top
+    return trials["drive_distance"] * multiple / top
 
 
 def at_deadline(trials: pd.DataFrame, multiple: float, speed: Mapping[str, float]) -> pd.DataFrame:

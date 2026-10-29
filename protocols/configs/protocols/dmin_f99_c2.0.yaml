@@ -2,6 +2,7 @@
 # Otherwise as dmin_f99_c1.3.
 
 protocol_id: dmin_f99_c2.0
+description: "Cohesion c = 2.0 instead of the paper's 1.05, otherwise as dmin_f99_c1.3 (RQ11)."
 output: results/dmin_f99_c2.0
 extends: dmin_f99_m12.yaml
 

@@ -6,6 +6,7 @@
 # this file only in the deadline.
 
 protocol_id: dmin_f99_m12
+description: "dmin_m12 under the 99 percent rule, with N 71, 141, 283 and 566 added and finish times decided (RQ4, RQ7, RQ8)."
 output: results/dmin_f99_m12
 extends: dmin_m12.yaml
 

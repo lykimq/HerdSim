@@ -1,4 +1,4 @@
-# Configuration and Protocol Guide
+# Configuration and protocol guide
 
 How a HerdSim experiment is written as a protocol file, which settings exist, and what a run writes. A protocol is the YAML file that describes an experiment; a run is one execution of it into a results folder. Terms of the study (layouts, drive times, cells, curves, $R_f$, $D_{\min}$, $D_{\mathrm{sat}}$, the zones, FAT, the gather task) are defined in the [glossary](../glossary.md).
 
@@ -22,7 +22,7 @@ protocols/configs/
 
 ### Canonical defaults (`canonical.yaml`)
 
-Every protocol names `protocols/configs/canonical.yaml`, directly or through the file it `extends`. It holds the task and campaign settings, each with a comment saying where its value comes from:
+Every protocol names `protocols/configs/canonical.yaml`, directly or through the file it `extends`. It holds the task and campaign settings, each with a comment saying where its value comes from; the [settings reference](settings.md), generated from that file, lists every setting with its default and note. In short:
 - The task (`task: drive_to_goal`, or `gather` for the Lama model) and its geometry: drive distance and goal radius in flock radii, the start layouts, the gather disc.
 - Dog starts: half circles behind the flock; the innermost lies $30\text{ m}$ beyond the farthest sheep that can start, and dogs sit at least $5.0\text{ m}$ apart along it, overflowing to the next circle.
 - Calibration of $R_f(N)$, the seeds, the frontier rules (theta $0.90$, $99$% intervals, batches of 10 up to 200 seeds; one seed is one trial of a cell) and the time budget.
@@ -34,6 +34,8 @@ The model parameters are not in this file. They live with each method in code, o
 ### Protocol overrides
 
 A protocol names its id, its output folder, the methods with their time limits, and the grid (layouts, flock sizes and `shepherd_counts`, the team sizes $D$). It can `extends` another protocol and give only what differs. A key the protocol names replaces the parent's whole value, lists and mappings included, so a protocol that changes one entry must restate the rest; that is why `lama_r50_inf` below repeats the time limit when it only changes `sensing_radius`. An unknown key stops the run at load.
+
+Every study protocol also has a one-line `description` of what it tests. It is not physics and is not inherited through `extends`, so each protocol states its own question. The [protocol catalogue](protocols.md), generated from these files, lists the description, grid and changed settings of every protocol in the study queue.
 
 Two further keys appear in a few protocols. `factors` sweeps canonical settings over several values; two or more are crossed (`dmin_f99_hold_share.yaml` runs every pair of `goal_radius_multiple` and `success_fraction`), and each value or pair gets its own set of D curves (one curve is one layout and flock size with every team size on it). Only settings that act per trial can be swept, because calibration runs once per protocol: a method parameter, or a setting that acts through the flock radius, has to be its own protocol (`dmin_f99_view_range.yaml` sweeps `sensing_range`). A method's `calibrate_as` lets it borrow another method's dog for the calibration, so that two methods differing only in their dog rule run the same task (`dmin_fat.yaml` calibrates as `strombom_multi`); it changes the field every trial runs on, so it is part of the physics hash.
 

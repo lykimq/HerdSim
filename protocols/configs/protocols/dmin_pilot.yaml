@@ -6,6 +6,7 @@
 # the pilot fixed the deadlines and D grid of the main runs.
 
 protocol_id: dmin_pilot
+description: "Pilot: one batch of 10 seeds per cell at 12 drive times, read at tighter deadlines to choose the grid of the main runs."
 output: results/dmin_pilot
 canonical: protocols/configs/canonical.yaml
 

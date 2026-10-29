@@ -8,6 +8,7 @@
 # and so does the twin distance of the dog_overlap metric.
 
 protocol_id: dmin_s_matched
+description: "Sensitivity: the field-matched sheep of Strombom 2014 (r_a 1, noise 0.1, r_s 75) instead of their Table 1 values (RQ5)."
 output: results/dmin_s_matched
 extends: dmin_s_base.yaml
 

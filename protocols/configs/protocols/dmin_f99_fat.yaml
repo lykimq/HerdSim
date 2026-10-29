@@ -1,6 +1,7 @@
 # dmin_fat with the 99 percent rule. Compare with dmin_f99_m6.
 
 protocol_id: dmin_f99_fat
+description: "dmin_fat under the 99 percent rule (RQ6)."
 output: results/dmin_f99_fat
 extends: dmin_fat.yaml
 

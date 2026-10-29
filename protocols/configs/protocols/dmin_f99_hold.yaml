@@ -7,6 +7,7 @@
 # Finish-time seeds off: D_overcrowd and D_max rest on reliability alone.
 
 protocol_id: dmin_f99_hold
+description: "Holding: 99 percent of the flock must stay in the goal for one drive time while the dogs withdraw (RQ10)."
 output: results/dmin_f99_hold
 extends: dmin_f99_m6.yaml
 

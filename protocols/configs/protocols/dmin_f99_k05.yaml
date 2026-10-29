@@ -5,6 +5,7 @@
 # (0.25N and below come apart).
 
 protocol_id: dmin_f99_k05
+description: "Weaker cohesion: each sheep is attracted to its nearest half of the flock (n_neighbors 0.5N) at 12 drive times (RQ11)."
 output: results/dmin_f99_k05
 extends: dmin_f99_m12.yaml
 

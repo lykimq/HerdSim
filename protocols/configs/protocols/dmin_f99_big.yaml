@@ -11,6 +11,7 @@
 # `cli/dmin_tables.py extent` compares each cell's flock with it.
 
 protocol_id: dmin_f99_big
+description: "Above the calibration edge: N 566 to 3200 at 12 drive times, with R_f imposed above 566 at the density of the 566 flock (RQ13)."
 output: results/dmin_f99_big
 canonical: protocols/configs/canonical.yaml
 

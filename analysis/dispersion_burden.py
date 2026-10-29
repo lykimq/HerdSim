@@ -101,32 +101,3 @@ def run_full_dispersion_analysis(
         if campaign == BURDEN_CAMPAIGN:
             burdens = compute_dispersion_burdens(df)
     return pd.DataFrame(failure_rows), burdens
-
-
-def format_failure_table(failure_df: pd.DataFrame) -> pd.DataFrame:
-    if failure_df.empty:
-        return pd.DataFrame()
-    return pd.DataFrame(
-        {
-            "Protocol": failure_df["campaign"],
-            "Rule": failure_df["description"],
-            "Failed": failure_df["total_failed"],
-            "Structural": failure_df["structural"],
-            "Boundary": failure_df["boundary"],
-            "% Structural": failure_df["pct_structural"].map(lambda v: f"{v:.1f}%"),
-        }
-    )
-
-
-def format_dispersion_table(disp_df: pd.DataFrame) -> pd.DataFrame:
-    if disp_df.empty:
-        return pd.DataFrame()
-    return pd.DataFrame(
-        {
-            "Layout": disp_df["layout"],
-            "N": disp_df["n"],
-            "S0 (m)": disp_df["s0"].map(lambda v: f"{v:.2f}"),
-            "Burden S0 x N": disp_df["dispersion_burden"].map(lambda v: f"{v:.1f}"),
-            "Success rate": disp_df["overall_sr"].map(lambda v: f"{v * 100:.1f}%"),
-        }
-    )

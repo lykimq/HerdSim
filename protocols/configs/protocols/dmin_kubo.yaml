@@ -8,6 +8,7 @@
 # seconds because the Kubo drive time is set by a speed cap the sheep rarely reach.
 
 protocol_id: dmin_kubo
+description: "The Kubo 2022 force model on compact starts with a 500 s limit: does another sheep model need the same teams? (RQ1)"
 output: results/dmin_kubo
 canonical: protocols/configs/canonical.yaml
 

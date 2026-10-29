@@ -3,6 +3,7 @@
 # so the cells pair with dmin_kubo. Finish-time seeds on, so D_sat is decided too.
 
 protocol_id: dmin_f99_kubo
+description: "dmin_kubo under the 99 percent rule with D up to 24, to decide D_sat of the Kubo model (RQ9)."
 output: results/dmin_f99_kubo
 extends: dmin_kubo.yaml
 

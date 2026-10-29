@@ -7,6 +7,7 @@
 # D_sat is decided too.
 
 protocol_id: dmin_f99_indep
+description: "Independent shepherds: every dog runs Strombom's single-dog rule, with no team layer, on the task of dmin_f99_fat (RQ9)."
 output: results/dmin_f99_indep
 extends: dmin_f99_fat.yaml
 

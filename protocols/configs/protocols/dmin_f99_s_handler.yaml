@@ -1,6 +1,7 @@
 # The handler start (dmin_s_handler) with the 99 percent rule. Compare with dmin_f99_s_base.
 
 protocol_id: dmin_f99_s_handler
+description: "dmin_s_handler (dogs start at one point) under the 99 percent rule (RQ5)."
 output: results/dmin_f99_s_handler
 extends: dmin_s_handler.yaml
 

@@ -3,6 +3,7 @@
 # dmin_s_base.
 
 protocol_id: dmin_s_dogspeed
+description: "Sensitivity: dogs at 1.15 times the sheep speed instead of 1.5, the ratio in field data (RQ5)."
 output: results/dmin_s_dogspeed
 extends: dmin_s_base.yaml
 

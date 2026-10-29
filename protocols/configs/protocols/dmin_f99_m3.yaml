@@ -1,6 +1,7 @@
 # dmin_f99_m12 at 3 drive times (extends dmin_m3); only the deadline differs.
 
 protocol_id: dmin_f99_m3
+description: "dmin_m3 under the 99 percent rule, with finish times decided (RQ4, RQ7)."
 output: results/dmin_f99_m3
 extends: dmin_m3.yaml
 

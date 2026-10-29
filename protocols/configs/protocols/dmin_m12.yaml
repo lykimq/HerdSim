@@ -10,6 +10,7 @@
 # decide_finish_times: true to reproduce its seed allocation exactly.
 
 protocol_id: dmin_m12
+description: "Main grid at 12 drive times, strict rule: D_min against N on four start layouts (RQ1 to RQ3)."
 output: results/dmin_m12
 canonical: protocols/configs/canonical.yaml
 

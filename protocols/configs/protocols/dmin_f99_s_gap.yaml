@@ -1,6 +1,7 @@
 # The start gap sweep (dmin_s_gap) with the 99 percent rule. Compare with dmin_f99_s_base.
 
 protocol_id: dmin_f99_s_gap
+description: "dmin_s_gap (start gap 15, 30 and 60 m) under the 99 percent rule (RQ5)."
 output: results/dmin_f99_s_gap
 extends: dmin_s_gap.yaml
 

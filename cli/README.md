@@ -25,7 +25,7 @@ A protocol is the YAML file in `protocols/configs/protocols/` that describes an 
 which flock sizes, layouts, team sizes (`shepherd_counts`, the D of the tables) and deadlines to
 test. A campaign, or run, is one execution of it into a results folder. You never write code to
 start a new one. You give `campaign.py` the protocol's id (or a path to the file), and one of
-four verbs:
+five verbs:
 
 ```bash
 uv run cli/campaign.py plan      --protocol dmin_f99_m6
@@ -34,9 +34,10 @@ uv run cli/campaign.py run       --protocol dmin_f99_m6 --workers 20
 uv run cli/campaign.py status    --protocol dmin_f99_m6
 ```
 
-Only `run` produces results. The other three help you get there safely, as Table 2 shows:
+Only `run` produces trials. `refresh` decides a finished folder again, and the other three help
+you get there safely, as Table 2 shows:
 
-**Table 2: The four verbs of `campaign.py`.**
+**Table 2: The five verbs of `campaign.py`.**
 
 | Verb | What it does | Writes |
 | :--- | :--- | :--- |
@@ -44,6 +45,7 @@ Only `run` produces results. The other three help you get there safely, as Table
 | `calibrate` | Lets one dog drive a compact flock at each size and measures the radius it settles to, R_f(N). That radius sizes the goal, the drive and the deadline. Fails if a size never settles. The gather task sizes itself from its start disc instead, so for it this verb says there is nothing to calibrate | nothing (prints) |
 | `run` | The campaign itself: calibrates (or reuses the saved radii), then runs rounds of trials until every cell is decided | `results/<protocol_id>/` |
 | `status` | Shows how far a run has got, whether it is running right now, and why it stopped | nothing |
+| `refresh` | Decides every cell again from the stored trials, after a change to the decision rules; runs no trial | rewrites `trials.csv`, `frontier_cells.csv` and `frontier_groups.csv` |
 
 ### What happens during `run`
 
@@ -96,10 +98,12 @@ uv run cli/run_queue.py --workers 20                  # every protocol that is n
 uv run cli/run_queue.py --only dmin_f99_hold --workers 20
 ```
 
-The queue lists the 41 protocols of the study in the order they ran (`protocols/configs/study_queue.yaml`) (the one-batch `dmin_pilot` is not in it). Finished folders are skipped, stopped
-ones are resumed, and a protocol that fails is logged while the queue moves on. Each protocol
-adds a line to `results/queue_log.jsonl` (when it ran, how long, trials, errors, open cells).
-With this one command the whole study can be run again from scratch.
+The queue file `protocols/configs/study_queue.yaml` lists the 41 protocols of the study in the
+order they ran; the one-batch `dmin_pilot` is not in it. Finished folders are skipped, stopped
+ones are resumed, and a protocol that fails is logged while the queue moves on. Each protocol the
+queue runs adds a line to `results/queue_log.jsonl` (when it ran, how long, trials, errors, open
+cells). `dmin_f99_big_cap` is in the queue file but was run by hand, so the log has no line for
+it. With this one command the whole study can be run again from scratch.
 
 ## 2. Reading the results
 
@@ -107,18 +111,22 @@ A finished folder holds every trial and the decision for every cell. `dmin_table
 those into Markdown tables, one question per verb:
 
 ```bash
-uv run cli/dmin_tables.py record                              # every run: trials, cells, hours
+uv run cli/dmin_tables.py record                              # every run in the queue log
 uv run cli/dmin_tables.py dmin   dmin_f99_m12 dmin_f99_m6     # D_min by layout and flock size
 uv run cli/dmin_tables.py dsat   dmin_f99_m6                  # D_sat, and how fast it grows
 uv run cli/dmin_tables.py effort dmin_f99_m6                  # what dogs beyond D_sat cost
 uv run cli/dmin_tables.py extent dmin_f99_big --layout compact
 ```
 
-The other verbs are `growth`, `dips`, `arrival`, `compare`, `zones`, `methods`, `overview` (every protocol in one view, as in `docs/report/summary_results.md`), `fits` and `herdability` (the Lama gather runs: the paper's statistic beside D_min); the
-top of the file says what each one prints. A cell that is still open after 200 seeds shows up as
-a range ("2-3") or a lower bound ("[5]"), never as a single number. The tables in
+Every verb, with its flags, is in Table 4 of the
+[CLI reference](../docs/guides/cli_reference.md#clidmin_tablespy-tables-from-finished-runs), and
+the top of the file says what each one prints. A cell that is still open after 200 seeds shows
+up as a range ("2-3") or a lower bound ("[5]"), never as a single number. The tables in
 `docs/report/results_tables.md` were made with these commands; to update one, run its command
-again.
+again. Three pages are written whole by a separate script, `docs/make_docs.py`: the protocol
+catalogue `docs/guides/protocols.md`, the settings reference `docs/guides/settings.md` and
+`docs/report/summary_results.md`. After a run or a protocol change, rerun
+`uv run python docs/make_docs.py`; with `--check` it lists the pages that are out of date.
 
 `dmin_report.py` answers a different question: what would D_min have been with less time?
 
@@ -185,17 +193,19 @@ uv run cli/diagnostics/gradient_validation.py --seeds 10
 ## How the tools sit on the code
 
 The scripts here are deliberately thin. Each one reads its arguments, calls the code below it,
-and prints. The real work lives in four layers under the tools; each line names what a layer
+and prints. The real work lives in five layers under the tools; each line names what a layer
 may call:
 
 ```text
-cli/        the tools in this folder               calls services, analysis, sim
+cli/        the tools in this folder               calls report, services, analysis, sim
+report/     writes results as the tables and text  calls services, analysis
+            of the docs; decides no value
 services/   runs things: protocols, campaigns,     calls records, analysis, sim
             calibration, replays of stored trials
 records/    a trial as a table row; the physics    calls sim
             hash and code identity of a folder
 analysis/   reads finished results: frontier       calls nothing else in the project
-            rules, D_min tables, fits, pressure    (never runs the model)
+            rules, D_min values, fits, pressure    (never runs the model)
 sim/        the model: one trial, tick by tick     calls nothing outside sim
 ```
 
@@ -207,8 +217,8 @@ Table 3 lists the modules each tool calls.
 | :--- | :--- |
 | `campaign.py` | `services/protocol.py`, `services/calibration.py`, `services/adaptive.py`, `services/store.py` |
 | `run_queue.py` | `services/protocol.py`, `services/adaptive.py` |
-| `dmin_tables.py` | `analysis/dmin_tables.py`, `analysis/dmin.py`, `analysis/results.py`, `analysis/growth_fits.py`, `analysis/herdability.py`, `analysis/frontier.py` |
-| `dmin_report.py` | `analysis/dmin.py`, `analysis/results.py` |
+| `dmin_tables.py` | `report/tables.py`, `report/overview.py`, `report/text.py`, `analysis/curves.py`, `analysis/dmin.py`, `analysis/results.py`, `analysis/trial_measures.py`, `analysis/herdability.py`, `analysis/dispersion_burden.py`, `analysis/frontier.py`, `services/protocol.py` |
+| `dmin_report.py` | `analysis/dmin.py`, `analysis/results.py`, `analysis/frontier.py`, `services/protocol.py` |
 | `diagnostics/pressure_replay.py` | `services/replay.py`, `analysis/pressure.py` |
 | `diagnostics/split_diagnostic.py` | `services/replay.py` |
 | `diagnostics/hold_walk.py` | `services/replay.py` |
@@ -217,7 +227,8 @@ Table 3 lists the modules each tool calls.
 Imports only point down the arrows, so these changes stay small:
 
 - To remove a tool, delete its file and its section on this page. Nothing else depends on it.
-- To add a table, write the function in `analysis/` and add a verb to `dmin_tables.py`.
+- To add a table, compute its values in `analysis/`, write them as text in `report/` if the
+  cells need it, and add a verb to `dmin_tables.py`.
 - To add a diagnostic, put it in `diagnostics/` and use `services/replay.py` to open a finished
   run and replay its trials.
 - Anything two tools need belongs in `services/` or `analysis/`, never in a tool.

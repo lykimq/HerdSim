@@ -6,11 +6,13 @@ failed trial ends, how finish times spread, and how two deadlines relate.
     uv run cli/dmin_tables.py spread   dmin_f99_m6 --layout outlier_rich --n 566
     uv run cli/dmin_tables.py nested   dmin_f99_m12 dmin_f99_m6
     uv run cli/dmin_tables.py curve    dmin_f99_m6 dmin_f99_indep --layout split --n 200
+    uv run cli/dmin_tables.py extent   dmin_f99_big --layout compact
 
 The frontier tables say whether a team is reliable; these say what the trials behind that
-answer looked like. Every value comes from columns the runner stores per trial
-(records/trial_row.py): the first second at which 90, 95 and 99 percent of the flock were in
-the goal, the sheep in the goal at the end and at most, and the finish time.
+answer looked like, and how large the flock was against the R_f its task was sized from. Every
+value comes from columns the runner stores per trial (records/trial_row.py): the first second at
+which 90, 95 and 99 percent of the flock were in the goal, the sheep in the goal at the end and
+at most, the flock's mean extent, and the finish time.
 """
 
 from __future__ import annotations
@@ -19,6 +21,8 @@ import math
 
 import numpy as np
 import pandas as pd
+
+from .keys import split_group
 
 TAIL_LONG_S = 60.0  # a 90-to-99 percent gap above a minute is a flock arriving in two parts
 
@@ -175,3 +179,31 @@ def curve_across(cells: dict[str, pd.DataFrame], layout: str, n: int) -> pd.Data
                 }
             )
     return pd.DataFrame(rows)
+
+
+def extent_check(trials: pd.DataFrame, radii: dict[str, dict[str, float]]) -> pd.DataFrame:
+    """Per cell: the flock's own size during the trial against the R_f its task was sized
+    from.
+
+    sqrt(2) x mean_extent is the radius of a uniform disc with the flock's RMS spread, the
+    same measure R_f is (services/calibration.py). Above the calibration edge R_f is
+    imposed, so a ratio far from 1 says the imposed size does not match the flock the model
+    forms there. The mean runs over the whole trial, so on scattered layouts it also holds
+    the spread before the flock is gathered; compact starts give the clean comparison.
+    """
+    rows = []
+    for _, part in trials.groupby(["group_key", "n_shepherds"], sort=True):
+        info = split_group(str(part["group_key"].iloc[0]))
+        d = part["n_shepherds"].iloc[0]
+        radius = radii[info["method"]][str(info["n"])]
+        ratio = np.sqrt(2.0) * part["mean_extent"].astype(float) / radius
+        rows.append(
+            {
+                "layout": info["layout"],
+                "n": info["n"],
+                "d": int(d),
+                "r_f": round(radius, 2),
+                "extent_over_r_f": round(float(ratio.median()), 2),
+            }
+        )
+    return pd.DataFrame(rows).sort_values(["layout", "n", "d"], ignore_index=True)

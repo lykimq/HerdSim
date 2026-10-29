@@ -1,6 +1,6 @@
 # HerdSim architecture
 
-This document describes how HerdSim is built and why: its parts, the data they exchange, what happens when a campaign runs, and the decisions behind it. It is written for someone who will change the code, for example to add a herding method, a metric or a task. What the project studies is in the [README](../../README.md); the models in [models.md](../methods/models.md); the task, sampling and frontier rules in [task_design.md](../experiments/task_design.md); settings and output files in the [configuration guide](../guides/configuration.md); commands in the [CLI reference](../guides/cli_reference.md). The design terms used below (cell, calibration, round, sitting, batch) are defined in this doc's [glossary](#glossary) at the end, and the study's terms in the [project glossary](../glossary.md).
+This document describes how HerdSim is built and why: its parts, the data they exchange, what happens when a campaign runs, and the decisions behind it. It is written for someone who will change the code, for example to add a herding method, a metric or a task. What the project studies is in the [README](../../README.md); the models in [models.md](../methods/models.md); the task, sampling and frontier rules in [task_design.md](../experiments/task_design.md); settings and output files in the [configuration guide](../guides/configuration.md); commands in the [CLI reference](../guides/cli_reference.md). The design terms used below (cell, calibration, round, sitting, batch) and the study's terms are defined in the [glossary](../glossary.md).
 
 ## Contents
 
@@ -12,8 +12,7 @@ This document describes how HerdSim is built and why: its parts, the data they e
 6. [Design decisions](#design-decisions)
 7. [Trade-offs and known risks](#trade-offs-and-known-risks)
 8. [Extension points and limits](#extension-points-and-limits)
-9. [Glossary](#glossary)
-10. [Where to look in the code](#where-to-look-in-the-code)
+9. [Where to look in the code](#where-to-look-in-the-code)
 
 ## Goals and constraints
 
@@ -29,24 +28,28 @@ The constraints are those of a research codebase. Everything runs on one machine
 
 ## Building blocks
 
-The code is in five layers. The diagram shows them and the direction of every import between them.
+The code is in six layers. The diagram shows them and the direction of every import between them.
 
 ```mermaid
 flowchart TB
     tools["Command-line tools"]
+    report["Report layer<br/>tables and text for the docs"]
     subgraph run["Campaign layer"]
         campaign["Protocols, calibration,<br/>rounds, store, replay"]
     end
-    analysis["Analysis layer<br/>frontier rules, tables"]
+    analysis["Analysis layer<br/>frontier rules, curve values"]
     records["Records<br/>trial row, provenance"]
     subgraph engine["Engine"]
         core["Core<br/>tick loop, state, world"]
         plugins["Plugins by name<br/>sheep, dogs, tasks, metrics"]
         formulas["Paper formulas"]
     end
+    tools --> report
     tools --> campaign
     tools --> analysis
     tools --> engine
+    report --> campaign
+    report --> analysis
     campaign --> analysis
     campaign --> records
     campaign --> engine
@@ -55,7 +58,8 @@ flowchart TB
 
 - The engine runs one trial. Its core holds the tick loop, the state, the world and start layouts, the assembly of a trial's config and the catalog of methods. The plugins are the sheep models, dog controllers, tasks and metrics, each registered under a name. The paper formulas are the equations of each source paper, kept apart from the plugins that call them so that they can be checked against the published models on their own. The engine imports nothing outside itself.
 - Records turns one trial's result into one table row and computes the hashes that tie a results folder to its settings and code.
-- The analysis layer reads results folders and decides: reliability, comparisons, the team-size values and zones, and the tables. It imports nothing else in the project and works on the files alone, so every rule can be rerun without the simulator.
+- The analysis layer reads results folders and decides: reliability, comparisons, the team-size values and zones, their brackets, growth and fits. It imports nothing else in the project and works on the files alone, so every rule can be rerun without the simulator.
+- The report layer writes those values as the tables and text the docs show: a team size as `4`, `2-4` or `[5]`, the success rule, the overview of every run, a table as Markdown. It decides no value, so a change to how a table reads cannot change a result, and the analysis never depends on how its output is written.
 - The campaign layer runs things: it loads protocols, calibrates, plans rounds, runs trials in workers, owns the results folder, and replays stored trials. It uses the analysis layer's rules to decide which cells need more seeds.
 - The tools parse arguments, call the layers below and print. No tool imports another.
 
@@ -65,7 +69,7 @@ Between layers, imports point only downward in the diagram; inside the engine, t
 
 ### Protocol
 
-An experiment is a protocol: a YAML file layered over the canonical defaults. It names the methods with their time limits, the task, the grid (layouts, flock sizes, team sizes), optional factors (canonical settings swept over several values), the sampling strategy and the output folder. A protocol may extend another; a key the child names replaces the parent's whole value, lists and mappings included. A time limit is given in exactly one form. Unknown keys stop the load. The full list of settings is in the [configuration guide](../guides/configuration.md#1-configuration-architecture).
+An experiment is a protocol: a YAML file layered over the canonical defaults. It names the methods with their time limits, the task, the grid (layouts, flock sizes, team sizes), optional factors (canonical settings swept over several values), the sampling strategy and the output folder. A protocol may extend another; a key the child names replaces the parent's whole value, lists and mappings included. The one-line description of what a protocol tests is the exception: it is never inherited, so a variant cannot be catalogued under its parent's question. A time limit is given in exactly one form. Unknown keys stop the load. The full list of settings is in the [settings reference](../guides/settings.md), and how protocols use them in the [configuration guide](../guides/configuration.md#1-configuration-architecture).
 
 ### Keys
 
@@ -213,6 +217,10 @@ Why a failed trial failed is computed when the trial ends, from its per-tick his
 
 The campaign writes results and the rules only read rows, so thresholds and comparisons can be redone in seconds and the rules can never produce new data. Metrics are recorded every tick by default; a method with a small time step may record every k-th tick, while the stop checks still run every tick.
 
+### Generated doc pages
+
+The protocol list, the settings reference and the results overview are written by a script from the protocol files, the canonical defaults with the comment above each setting, and the stored runs. Each opens with a line saying it is machine-written. Values copied between docs by hand drift: a table keeps an old number after a rerun, or a setting's default after the canonical file changes. Each protocol states what it tests in its own file, so the list needs no second copy to keep in step. The cost is that a page is only as current as the last run of the script. The script can also list the pages that no longer match the data, but nothing runs that check automatically ([Table 3](#trade-offs-and-known-risks)).
+
 ## Trade-offs and known risks
 
 Table 2 lists the trade-offs the design accepts; Table 3 lists known risks, each with a way out.
@@ -238,6 +246,7 @@ Table 2 lists the trade-offs the design accepts; Table 3 lists known risks, each
 | The trial table of a large protocol approaches the 100 MB limit | A push is refused, as happened with the trial log | Compress it like the log, or stop committing it |
 | Some archived folders have no protocol file left | They cannot be replayed | Keep their protocol, or mark them archived |
 | Single-threaded numeric libraries are set only by the campaign tools | Replay pools may oversubscribe the CPU | Set it in the pool |
+| Generated doc pages are checked against the data only when someone runs the script's check by hand | A page keeps old values after a run, a protocol change or a change to the canonical defaults | Run that check with the checks that already run on every change and in CI |
 
 ## Extension points and limits
 
@@ -255,22 +264,6 @@ The design does not yet handle:
 - Roles beyond collecting, driving and backing off, such as flanking or holding a gap; they would be new jobs in the team layer.
 - Much larger flocks, which would need the per-dog loops vectorised. Research limits of the drive rule at large flocks are in the [report](../report/part1_growth.md#313-rq13-very-large-flocks-and-a-limit-of-the-drive-rule).
 
-## Glossary
-
-- Batch: the number of seeds a cell gets at a time.
-- Calibration: the short run that measures the flock radius for a method and flock size.
-- Cell: one method, layout, factor levels, flock size and team size; it collects one trial per seed.
-- Curve or group: the cells of one method, layout, factor levels and flock size, over team size.
-- D: the team size, the number of dogs or herders.
-- Factor: a canonical setting a protocol sweeps over several values.
-- Frontier rules: the rules that decide reliability, comparisons and the team-size values from the rows.
-- Layout: how the flock starts (compact, wide, split, outlier-rich, or a task's own).
-- Round: one pass of planning and running trials in a sitting.
-- Seed cap: the most seeds a cell can get.
-- Sitting: one run of the campaign command on a folder.
-- Theta: the success rate a cell must reach, at the stated confidence, to be reliable.
-- Zone: the label of a cell along its curve (for example improving, saturated or crowded); defined in [task_design.md](../experiments/task_design.md#zones).
-
 ## Where to look in the code
 
 Table 4 maps each concern to the code that holds it.
@@ -286,7 +279,7 @@ Table 4 maps each concern to the code that holds it.
 | Tasks and what they share | `sim/plugins/scenarios/drive_to_goal.py` with its failure rules in `drive_failures.py`, `gather.py`; shared `goal.py`, `failures.py`, `team_settings.py` |
 | Trial config assembly and checks | `sim/core/config/experiment.py` |
 | Canonical defaults and protocol files | `protocols/configs/` |
-| Trial row, physics hash, code identity | `records/` |
+| Trial row, physics hash, code identity, the notice on generated files | `records/` (`generated_notice.py` for the notice) |
 | Protocol loading and checks | `services/protocol.py` |
 | Groups, cells, trial configs | `services/cells.py` |
 | The text keys of groups, cells and trials | `analysis/keys.py` |
@@ -294,12 +287,15 @@ Table 4 maps each concern to the code that holds it.
 | Rounds, worker batches, pool, results folder | `services/adaptive.py`, `services/runner.py`, `services/pool.py`, `services/store.py` |
 | Replays of stored trials | `services/replay.py` |
 | Frontier rules | `analysis/frontier.py` |
-| Reading a results folder, Markdown tables | `analysis/results.py` |
-| D_min and its tables, growth fits, the herdability reading of Lama and di Bernardo (2024) | `analysis/dmin.py`, `analysis/dmin_tables.py`, `analysis/growth_fits.py`, `analysis/herdability.py` |
+| Reading a results folder | `analysis/results.py` |
+| D_min and D_sat brackets, growth slopes and fits, the herdability reading of Lama and di Bernardo (2024) | `analysis/dmin.py`, `analysis/curves.py`, `analysis/growth_fits.py`, `analysis/herdability.py` |
+| Tables and text for the docs, Markdown, the overview of every run | `report/` (`text.py`, `tables.py`, `overview.py`) |
 | Start spread and where failed drives ended | `analysis/dispersion_burden.py` |
+| Single-trial measures (arrival tail, endings, finish spread, dog pace, failure labels) | `analysis/trial_measures.py` |
 | Diagnostics built on replays | `cli/diagnostics/` (`pressure_replay.py`, `split_diagnostic.py`, `hold_walk.py`), `analysis/pressure.py` |
 | Check of the local flock-centre estimate on start layouts (no replay) | `cli/diagnostics/gradient_validation.py` |
 | One protocol, the study queue | `cli/campaign.py`, `cli/run_queue.py`, `protocols/configs/study_queue.yaml` |
 | Command-line entry points | `cli/` (see `cli/README.md`) |
 | Figures and animated GIFs of stored trials | `docs/figures/` (`figstyle.py`, `make_figures.py`, `make_result_figures.py`), `docs/gifs/make_gifs.py` |
+| Generated doc pages (protocol catalogue, results overview) | `docs/make_docs.py` |
 | Regression tests | `tests/sim/test_golden.py` |

@@ -48,8 +48,9 @@ from figstyle import (  # noqa: E402
     save,
 )
 
-from analysis.dmin_tables import dmin_text, groups_table, split_group_key  # noqa: E402
+from analysis.curves import bracket, groups_table, split_group_key  # noqa: E402
 from analysis.results import read_cells, read_trials  # noqa: E402
+from report.text import dmin_text  # noqa: E402
 
 # ------------------------------------------------------------------------------------ settings
 
@@ -1280,7 +1281,6 @@ def fig_view() -> None:
     """D_min against what a dog sees: sensing range, and sharing at range 65."""
     if not have("dmin_f99_view_range", "dmin_f99_view_comm"):
         return
-    from analysis.dmin_tables import bracket
 
     ranges = [15.0, 30.0, 45.0, 65.0, 100.0]
     reaction = 65  # r_s, the distance at which a sheep reacts to a dog
@@ -1364,7 +1364,6 @@ def fig_lama() -> None:
     compared by eye in fig_lama_maps."""
     if not have("lama_r50", "lama_r50_inf"):
         return
-    from analysis.dmin_tables import bracket
     from analysis.herdability import paper_nstar
 
     panels = (("lama_r50", "sensing radius 10"), ("lama_r50_inf", "sensing infinite"))

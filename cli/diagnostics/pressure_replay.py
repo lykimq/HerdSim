@@ -25,9 +25,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import pandas as pd  # noqa: E402
 
-from analysis.dmin_tables import groups_table  # noqa: E402
+from analysis.curves import groups_table  # noqa: E402
 from analysis.pressure import Pressure, pressure_table  # noqa: E402
-from analysis.results import markdown  # noqa: E402
+from report.text import markdown  # noqa: E402
 from services.protocol import results_folder  # noqa: E402
 from services.replay import (  # noqa: E402
     ReplayJob,

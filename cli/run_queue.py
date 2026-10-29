@@ -32,15 +32,11 @@ from pathlib import Path  # noqa: E402
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
-import yaml  # noqa: E402
-
 from services.adaptive import STOP_DECIDED, run_campaign  # noqa: E402
-from services.protocol import RESULTS_ROOT, load_protocol  # noqa: E402
+from services.protocol import RESULTS_ROOT, load_protocol, study_queue  # noqa: E402
 
 # The study's protocols in the order they ran (protocols/configs/study_queue.yaml).
-QUEUE: tuple[str, ...] = tuple(
-    yaml.safe_load((REPO / "protocols/configs/study_queue.yaml").read_text())["queue"]
-)
+QUEUE: tuple[str, ...] = study_queue()
 LOG = RESULTS_ROOT / "queue_log.jsonl"
 
 

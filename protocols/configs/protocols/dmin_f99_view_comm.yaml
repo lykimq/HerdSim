@@ -4,6 +4,7 @@
 # beside these.
 
 protocol_id: dmin_f99_view_comm
+description: "Sharing what dogs see at a sensing range of 65 m, with the dogs in range or with the whole team (RQ12)."
 output: results/dmin_f99_view_comm
 extends: dmin_f99_view_range.yaml
 

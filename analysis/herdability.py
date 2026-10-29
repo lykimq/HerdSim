@@ -24,7 +24,6 @@ from collections.abc import Sequence
 
 import pandas as pd
 
-from .dmin_tables import dmin_text
 from .growth_fits import Interval, interval_of
 from .growth_fits import compare as compare_shapes
 
@@ -63,24 +62,6 @@ def paper_nstar(trials: pd.DataFrame, levels: Sequence[float] = LEVELS) -> pd.Da
         row["best_mean_share"] = round(float(part["mean_share"].max()), 3)
         rows.append(row)
     return pd.DataFrame(rows)
-
-
-def side_by_side(trials: pd.DataFrame, groups: pd.DataFrame, level: float = 0.99) -> pd.DataFrame:
-    """Per flock size: the paper's N* at ``level`` and HerdSim's D_min (with its brackets)."""
-    paper = paper_nstar(trials, (level,)).set_index("n")
-    out = []
-    for _, g in groups.sort_values("n").iterrows():
-        n = int(g["n"])
-        out.append(
-            {
-                "N (targets)": n,
-                "sqrt N": round(math.sqrt(n), 2),
-                f"paper N* (mean share >= {level:g})": paper.loc[n, f"nstar_{level:.2f}"],
-                "HerdSim D_min": dmin_text(g),
-                "best mean share": paper.loc[n, "best_mean_share"],
-            }
-        )
-    return pd.DataFrame(out)
 
 
 def growth(

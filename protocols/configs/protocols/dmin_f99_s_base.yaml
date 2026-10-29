@@ -3,6 +3,7 @@
 # repeated under this rule.
 
 protocol_id: dmin_f99_s_base
+description: "dmin_s_base under the 99 percent rule, the reference of the dmin_f99_s_* runs (RQ5)."
 output: results/dmin_f99_s_base
 extends: dmin_s_base.yaml
 

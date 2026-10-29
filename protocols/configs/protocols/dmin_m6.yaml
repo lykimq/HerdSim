@@ -2,6 +2,7 @@
 # so this run costs less than the looser one.
 
 protocol_id: dmin_m6
+description: "Main grid at 6 drive times, strict rule, on the layouts, flock sizes and teams of dmin_m12 (RQ1 to RQ3)."
 output: results/dmin_m6
 extends: dmin_m12.yaml
 

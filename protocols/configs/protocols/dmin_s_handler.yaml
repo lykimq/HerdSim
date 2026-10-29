@@ -3,6 +3,7 @@
 # The nearest simple version of a real start. Grid and deadline of dmin_s_base.
 
 protocol_id: dmin_s_handler
+description: "Sensitivity: every dog starts at one point straight behind the flock instead of on arcs (RQ5)."
 output: results/dmin_s_handler
 extends: dmin_s_base.yaml
 

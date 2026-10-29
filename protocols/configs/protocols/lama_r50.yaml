@@ -10,6 +10,7 @@
 # at sqrt(M_low) = 11 for the 99 percent share. Finish-time seeds off: D_min is the question.
 
 protocol_id: lama_r50
+description: "Lama and di Bernardo 2024 on their gather task: start disc of radius 50, sensing radius 10 (RQ14)."
 output: results/lama_r50
 canonical: protocols/configs/canonical.yaml
 task: gather

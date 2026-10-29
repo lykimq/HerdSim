@@ -1,6 +1,6 @@
-# Command-Line Reference
+# Command-line reference
 
-Every tool lives in [`cli/`](../../cli/) and is run from the repository root with `uv run`; `--help` prints the same information as the tables below. This page lists every verb and flag. For the order in which to use them, read [`cli/README.md`](../../cli/README.md). Terms such as cell, curve, bracket, the zones and $D_{\min}$ are defined in the [glossary](../glossary.md).
+Every tool lives in [`cli/`](../../cli/), apart from the doc-page and figure scripts in `docs/` at the end, and is run from the repository root with `uv run`; `--help` prints the same information as the tables below. This page lists every verb and flag. For the order in which to use them, read [`cli/README.md`](../../cli/README.md). Terms such as cell, curve, bracket, the zones and $D_{\min}$ are defined in the [glossary](../glossary.md).
 
 ## `cli/campaign.py`: one protocol
 
@@ -56,7 +56,7 @@ A folder is a protocol id under `results/` or a path. Every verb prints Markdown
 
 | Verb | Flags | Prints |
 | :--- | :--- | :--- |
-| `record` | none, takes no folder | Every run in `results/queue_log.jsonl`: when it finished, trials, cells, open cells, errors, hours. |
+| `record` | none, takes no folder | Every run in `results/queue_log.jsonl` (40 of the 41 protocols; `dmin_f99_big_cap` was run by hand): when it finished, trials, cells, open cells, errors, hours, with the counts of each folder's current `status.json`. |
 | `dispersion` | none, takes no folder | The start spread times $N$ per layout (`dmin_m6`), and where the failed drives of the main runs ended: near the goal or never there. |
 | `dmin` | | $D_{\min}$ by layout and flock size, one table per folder. |
 | `growth` | | The range of log-log slopes of $D_{\min}$ against $N$ that the brackets allow, and whether layout or $N$ moves it more. |
@@ -65,28 +65,28 @@ A folder is a protocol id under `results/` or a path. Every verb prints Markdown
 | `effort` | | Finish time, dog time and dog path beyond $D_{\mathrm{sat}}$, relative to the $D_{\mathrm{sat}}$ cell. |
 | `zones` | | Cells where more dogs did worse (crowded, dip, collapse, recovered). |
 | `upper` | | The upper end of every curve: how often $D_{\max}$ is only the grid top, and the curves with $D_{\max}$ below it, a $D_{\mathrm{crowd}}$ or a $D_{\mathrm{overcrowd}}$. |
-| `tail` | `--layout`, `--n` | Per $D$, over successful trials: the median time from 90 to 99 percent of the flock in the goal, the share of trials where it exceeds a minute, and the median finish. |
-| `endings` | `--min-d` | How failed trials ended: with no sheep in the goal, or after 99 percent had been in; and the time from 99 percent in to the finish in successes. |
-| `spread` | `--layout`, `--n` | Quartiles of the finish time per $D$, to spot finish times in two groups. |
-| `nested` | (two folders) | Whether the shorter of two deadlines only cuts the longer one's trials short. |
-| `curve` | `--layout`, `--n` | One curve cell by cell across folders: successes out of trials, reliability, median finish. |
+| `tail` | `--layout`, `--n` (optional; every layout and $N$ by default) | Per $D$, over successful trials: the median time from 90 to 99 percent of the flock in the goal, the share of trials where it exceeds a minute, and the median finish. |
+| `endings` | `--min-d` (default 1) | How failed trials ended: with no sheep in the goal, or after 99 percent had been in; and the time from 99 percent in to the finish in successes. |
+| `spread` | `--layout`, `--n` (optional) | Quartiles of the finish time per $D$, to spot finish times in two groups. |
+| `nested` | two folders, the longer deadline first: `nested <longer> <shorter>` | Whether the shorter of two deadlines only cuts the longer one's trials short. |
+| `curve` | `--layout`, `--n` (both required) | One curve cell by cell across folders: successes out of trials, reliability, median finish. |
 | `labels` | | Failed trials per layout by the failure label the task gives them (for example a plain timeout, `stuck`, `flock_escaped`). |
-| `pace` | `--layout`, `--n` | Per $D$, over successful trials: the median dog speed (path over finish time) and the median share of dogs standing still. |
+| `pace` | `--layout`, `--n` (optional) | Per $D$, over successful trials: the median dog speed (path over finish time) and the median share of dogs standing still. |
 | `dips` | | Cells above $D_{\min}$ that are not reliable. |
-| `arrival` | `--pct {90,95,99}` | $D_{\min}$ if success had meant that share of the flock in the goal, beside the run's own rule. |
-| `compare` | `--base <folder>` | Each variant folder beside the base, curve by curve. |
-| `methods` | `--pct {90,95,99}` | $D_{\min}$, $D_{\mathrm{sat}}$, $D_{\mathrm{crowd}}$ and $D_{\max}$ per curve across folders; `--pct` relabels a strict run so every row uses one rule. |
-| `overview` | `--value {d_min,d_sat}`, `--transpose` | Every folder in one view: one row per layout and variant, one column per $N$, with $D_{\min}$ (and $D_{\max}$ when it lies below the grid top, $D_{\mathrm{overcrowd}}$ when the curve has one) or $D_{\mathrm{sat}}$; one table per success rule, and `--transpose` puts $N$ in rows ([summary_results.md](../report/summary_results.md)). |
-| `herdability` | `--above <N>` | The gather task read the paper's way (mean share in the goal at least 0.99, and at 0.90 and 0.95) beside $D_{\min}$, with the growth exponent of both above `--above` targets. |
-| `extent` | `--layout <name>` | The flock's measured size against the radius its task was sized from, per cell. |
+| `arrival` | `--pct {90,95,99}` (default 99) | $D_{\min}$ if success had meant that share of the flock in the goal, beside the run's own rule. |
+| `compare` | `--base <folder>` (default `dmin_s_base`) | Each variant folder beside the base, curve by curve. |
+| `methods` | `--pct {90,95,99}` (default: each run's own rule) | $D_{\min}$, $D_{\mathrm{sat}}$, $D_{\mathrm{crowd}}$ and $D_{\max}$ per curve across folders; `--pct` relabels a strict run so every row uses one rule. |
+| `overview` | `--value {d_min,d_sat}` (default `d_min`), `--transpose` | Every folder in one view: one row per layout and variant, one column per $N$, with $D_{\min}$ (and $D_{\max}$ when it lies below the grid top, $D_{\mathrm{overcrowd}}$ when the curve has one) or $D_{\mathrm{sat}}$; one table per success rule, and `--transpose` puts $N$ in rows ([summary_results.md](../report/summary_results.md)). |
+| `herdability` | `--above <N>` (default 121) | The gather task read the paper's way (mean share in the goal at least 0.99, and at 0.90 and 0.95) beside $D_{\min}$, with the growth exponent of both above `--above` targets. |
+| `extent` | `--layout <name>` (optional) | The flock's measured size against the radius its task was sized from, per cell. |
 
 ## `cli/dmin_report.py`: a finished run at a tighter deadline
 
 ```bash
-uv run cli/dmin_report.py --protocol <id> --folder <results folder> --multiples <m> [<m> ...]
+uv run cli/dmin_report.py --protocol <id> --folder <results folder> [--multiples <m> ...]
 ```
 
-The dogs do not know the deadline, so a trial runs the same under any of them, and one that finished inside a tighter deadline would have succeeded under it too. The tool relabels each stored trial by whether it finished inside each deadline (a multiple of the drive time) and prints $D_{\min}$, $D_{\min,\mathrm{low}}$ and $D_{\max}$ per curve. The deadlines must not be looser than the one the run used.
+`--protocol` and `--folder` are required; `--multiples` defaults to 2, 3, 5 and 8 drive times. The dogs do not know the deadline, so a trial runs the same under any of them, and one that finished inside a tighter deadline would have succeeded under it too. The tool relabels each stored trial by whether it finished inside each deadline (a multiple of the drive time) and prints $D_{\min}$, $D_{\min,\mathrm{low}}$ and $D_{\max}$ per curve. The deadlines must not be looser than the one the run used.
 
 ## `cli/diagnostics/`: replays and checks
 
@@ -145,3 +145,17 @@ uv run cli/diagnostics/gradient_validation.py [--seeds <k>]
 ```
 
 Replays nothing. Draws start flocks and prints, per layout, flock size and neighbour count, the angle between the true direction to the flock centre and the direction a sheep would get from its nearest neighbours. Default: 10 flocks per layout and size.
+
+## Generated doc pages and figures
+
+These scripts write files under `docs/` from the protocol files and the stored runs; they run no simulation.
+
+```bash
+uv run python docs/make_docs.py                                  # rewrite the generated pages
+uv run python docs/make_docs.py --check                          # list the pages that are out of date
+uv run --with matplotlib python docs/figures/make_figures.py     # figures of the models and the task
+uv run --with matplotlib python docs/figures/make_result_figures.py  # figures of the results
+uv run --with matplotlib python docs/gifs/make_gifs.py           # every animation, from stored trials
+```
+
+`make_docs.py` writes the [protocol catalogue](protocols.md), the [settings reference](settings.md) and the [results overview](../report/summary_results.md); `--check` exits with 1 while any of them differs from what the script would write. The figure scripts need matplotlib, which the command adds for that run only.
