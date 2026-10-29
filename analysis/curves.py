@@ -9,7 +9,7 @@ A D curve has two numbers for its smallest reliable team:
   does not (no D on the grid is decided reliable yet); the slope of D_min against N is the range
   the brackets allow
 
-How these numbers are written in the docs ('2-4', '[2]') is in report/text.py.
+How these numbers are written in the docs ('2-4', '[2]') is in docs/generate_docs/report/text.py.
 """
 
 from __future__ import annotations

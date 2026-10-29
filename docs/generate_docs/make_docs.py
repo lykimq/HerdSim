@@ -1,7 +1,7 @@
 """The generated pages of the docs, written from the protocol files and the stored runs.
 
-    uv run python docs/make_docs.py            # rewrite every page
-    uv run python docs/make_docs.py --check    # list the pages that are out of date
+    uv run python docs/generate_docs/make_docs.py            # rewrite every page
+    uv run python docs/generate_docs/make_docs.py --check    # list the pages that are out of date
 
 Pages:
 
@@ -28,15 +28,15 @@ from functools import cache
 from pathlib import Path
 from typing import Any
 
-REPO = Path(__file__).resolve().parents[1]
+REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO))
 
 import pandas as pd  # noqa: E402
 import yaml  # noqa: E402
 
+from docs.generate_docs.report.overview import overview_run, overview_tables  # noqa: E402
+from docs.generate_docs.report.text import markdown, rule_text  # noqa: E402
 from records.generated_notice import AUTO_GENERATED_NOTICE  # noqa: E402
-from report.overview import overview_run, overview_tables  # noqa: E402
-from report.text import markdown, rule_text  # noqa: E402
 from services.protocol import (  # noqa: E402
     STRATEGY_KEYS,
     WHOLE_PROTOCOL_KEYS,
@@ -48,7 +48,7 @@ from services.protocol import (  # noqa: E402
 )
 from sim.core.methods import METHODS  # noqa: E402
 
-COMMAND = "uv run python docs/make_docs.py"
+COMMAND = "uv run python docs/generate_docs/make_docs.py"
 
 
 @dataclass(frozen=True)

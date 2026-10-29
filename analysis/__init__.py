@@ -1,6 +1,6 @@
 """Reading finished results and deciding what they say. Nothing here runs the model. The text
 forms the docs use (a team size as '2-4' or '[5]', the success rule, factor labels, Markdown)
-are written in report/, which reads these values; nothing here imports it.
+are written in docs/generate_docs/report/, which reads these values; nothing here imports it.
 
     uv run cli/dmin_tables.py --help                  # the tables, one verb each
     uv run cli/dmin_report.py --help                  # D_min at a tighter deadline

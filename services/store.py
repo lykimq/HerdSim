@@ -137,7 +137,8 @@ class CampaignStore:
             _unpack(self.trials_csv_gz, self.trials_csv)
 
     def pack_trials(self) -> None:
-        """Write trials.jsonl.gz and trials.csv.gz unless they already match their uncompressed source."""
+        """Write trials.jsonl.gz and trials.csv.gz unless they already match
+        their uncompressed source."""
         if self.trials_jsonl.exists():
             if not (
                 self.trials_gz.exists()

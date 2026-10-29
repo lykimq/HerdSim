@@ -1,6 +1,6 @@
 # Protocols
 
-> AUTO-GENERATED: do not modify. Re-run the producing command to refresh this file. Command: `uv run python docs/make_docs.py`. Source: the protocol files in `protocols/configs/` and the study queue.
+> AUTO-GENERATED: do not modify. Re-run the producing command to refresh this file. Command: `uv run python docs/generate_docs/make_docs.py`. Source: the protocol files in `protocols/configs/` and the study queue.
 
 Every protocol of the study in the order it ran (41 protocols): what it tests, its model, task, success rule and deadline, its grid, and every setting it changes from `protocols/configs/canonical.yaml`. Terms (layouts, drive times, the success rules) are in the [glossary](../glossary.md) and the models in [models](../methods/models.md); the results of each protocol are in the [results overview](../report/summary_results.md), and its trials and hours in the [run record](../report/appendix_run_record.md#appendix-a-protocol-run-record).
 

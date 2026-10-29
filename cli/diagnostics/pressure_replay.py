@@ -27,7 +27,7 @@ import pandas as pd  # noqa: E402
 
 from analysis.curves import groups_table  # noqa: E402
 from analysis.pressure import Pressure, pressure_table  # noqa: E402
-from report.text import markdown  # noqa: E402
+from docs.generate_docs.report.text import markdown  # noqa: E402
 from services.protocol import results_folder  # noqa: E402
 from services.replay import (  # noqa: E402
     ReplayJob,

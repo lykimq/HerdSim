@@ -65,7 +65,7 @@ HerdSim is structured into **six architectural layers**. Dependencies flow stric
 ```mermaid
 flowchart TB
     tools["1. Command-Line Tools (cli/)<br/>Entry points, argument parsing, commands"]
-    report["2. Report Layer (report/)<br/>Markdown tables, documentation text formatting"]
+    report["2. Report Layer (docs/generate_docs/)<br/>Markdown tables, documentation text formatting"]
     campaign["3. Campaign Layer (services/)<br/>Adaptive scheduler, calibration, worker pool, storage"]
     analysis["4. Analysis Layer (analysis/)<br/>Frontier classification, D_min estimation, curve fits"]
     records["5. Records Layer (records/)<br/>Row schemas, physics hashing, code provenance"]
@@ -92,7 +92,7 @@ flowchart TB
 | Layer | Primary Packages | Key Responsibilities | Architectural Rules |
 | :--- | :--- | :--- | :--- |
 | **1. CLI Tools** | [`cli/`](../../cli/) | Parses command-line flags, dispatches commands, and prints progress. | No CLI tool may import another CLI tool. |
-| **2. Report** | [`report/`](../../report/) | Formats analysis values into Markdown tables and documentation figures. | Never computes experimental outcomes; acts strictly as a presentation formatter. |
+| **2. Report** | [`docs/generate_docs/`](../generate_docs/) | Formats analysis values into Markdown tables and text (`report/`), and writes the generated pages, figures and GIFs. | Never computes experimental outcomes; acts strictly as a presentation formatter. |
 | **3. Campaign** | [`services/`](../../services/) | Manages adaptive rounds, calibration, worker pooling, and folder locks. | Decides which seeds/cells to run next using rules from the Analysis layer. |
 | **4. Analysis** | [`analysis/`](../../analysis/) | Determines success rates, reliability frontiers, $D_{\min}$ brackets, and fits. | Operates purely on stored result files; completely independent of the simulation engine. |
 | **5. Records** | [`records/`](../../records/) | Serializes trial rows, calculates the physics hash, and records git commit hashes. | Bridges the raw simulation output to long-term filesystem storage. |

@@ -1,6 +1,6 @@
 """Figures of the results (README findings, report), drawn from the runs in results/.
 
-    uv run --with matplotlib python docs/figures/make_result_figures.py
+    uv run --with matplotlib python docs/generate_docs/make_result_figures.py
 
 Needs matplotlib. Every figure reads frontier_groups.csv, frontier_cells.csv, trials.csv or the
 kept per-tick files of a folder under results/ and is skipped when its folder is missing.
@@ -50,7 +50,7 @@ from figstyle import (  # noqa: E402
 
 from analysis.curves import bracket, groups_table, split_group_key  # noqa: E402
 from analysis.results import read_cells, read_trials  # noqa: E402
-from report.text import dmin_text  # noqa: E402
+from docs.generate_docs.report.text import dmin_text  # noqa: E402
 
 # ------------------------------------------------------------------------------------ settings
 

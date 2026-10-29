@@ -123,10 +123,10 @@ Every verb, with its flags, is in Table 4 of the
 the top of the file says what each one prints. A cell that is still open after 200 seeds shows
 up as a range ("2-3") or a lower bound ("[5]"), never as a single number. The tables in
 `docs/report/results_tables.md` were made with these commands; to update one, run its command
-again. Three pages are written whole by a separate script, `docs/make_docs.py`: the protocol
+again. Three pages are written whole by a separate script, `docs/generate_docs/make_docs.py`: the protocol
 catalogue `docs/guides/protocols.md`, the settings reference `docs/guides/settings.md` and
 `docs/report/summary_results.md`. After a run or a protocol change, rerun
-`uv run python docs/make_docs.py`; with `--check` it lists the pages that are out of date.
+`uv run python docs/generate_docs/make_docs.py`; with `--check` it lists the pages that are out of date.
 
 `dmin_report.py` answers a different question: what would D_min have been with less time?
 
@@ -189,46 +189,3 @@ centre (the note on the sheep model in `docs/methods/models.md`).
 ```bash
 uv run cli/diagnostics/gradient_validation.py --seeds 10
 ```
-
-## How the tools sit on the code
-
-The scripts here are deliberately thin. Each one reads its arguments, calls the code below it,
-and prints. The real work lives in five layers under the tools; each line names what a layer
-may call:
-
-```text
-cli/        the tools in this folder               calls report, services, analysis, sim
-report/     writes results as the tables and text  calls services, analysis
-            of the docs; decides no value
-services/   runs things: protocols, campaigns,     calls records, analysis, sim
-            calibration, replays of stored trials
-records/    a trial as a table row; the physics    calls sim
-            hash and code identity of a folder
-analysis/   reads finished results: frontier       calls nothing else in the project
-            rules, D_min values, fits, pressure    (never runs the model)
-sim/        the model: one trial, tick by tick     calls nothing outside sim
-```
-
-Table 3 lists the modules each tool calls.
-
-**Table 3: Main modules used by each tool.**
-
-| Tool | Main modules used |
-| :--- | :--- |
-| `campaign.py` | `services/protocol.py`, `services/calibration.py`, `services/adaptive.py`, `services/store.py` |
-| `run_queue.py` | `services/protocol.py`, `services/adaptive.py` |
-| `dmin_tables.py` | `report/tables.py`, `report/overview.py`, `report/text.py`, `analysis/curves.py`, `analysis/dmin.py`, `analysis/results.py`, `analysis/trial_measures.py`, `analysis/herdability.py`, `analysis/dispersion_burden.py`, `analysis/frontier.py`, `services/protocol.py` |
-| `dmin_report.py` | `analysis/dmin.py`, `analysis/results.py`, `analysis/frontier.py`, `services/protocol.py` |
-| `diagnostics/pressure_replay.py` | `services/replay.py`, `analysis/pressure.py` |
-| `diagnostics/split_diagnostic.py` | `services/replay.py` |
-| `diagnostics/hold_walk.py` | `services/replay.py` |
-| `diagnostics/gradient_validation.py` | `services/protocol.py`, `services/cells.py`, `sim/core/world/layouts.py` |
-
-Imports only point down the arrows, so these changes stay small:
-
-- To remove a tool, delete its file and its section on this page. Nothing else depends on it.
-- To add a table, compute its values in `analysis/`, write them as text in `report/` if the
-  cells need it, and add a verb to `dmin_tables.py`.
-- To add a diagnostic, put it in `diagnostics/` and use `services/replay.py` to open a finished
-  run and replay its trials.
-- Anything two tools need belongs in `services/` or `analysis/`, never in a tool.

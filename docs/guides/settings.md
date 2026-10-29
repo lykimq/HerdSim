@@ -1,6 +1,6 @@
 # Settings
 
-> AUTO-GENERATED: do not modify. Re-run the producing command to refresh this file. Command: `uv run python docs/make_docs.py`. Source: `protocols/configs/canonical.yaml` and its comments.
+> AUTO-GENERATED: do not modify. Re-run the producing command to refresh this file. Command: `uv run python docs/generate_docs/make_docs.py`. Source: `protocols/configs/canonical.yaml` and its comments.
 
 Every canonical setting, with its default and the note written beside it in `protocols/configs/canonical.yaml`. A protocol changes a setting by naming it ([configuration](configuration.md#protocol-overrides)). The model parameters ($r_a$, $c$, the Kubo and Lama constants) are not canonical settings: they live with each method and are listed in [models](../methods/models.md).
 

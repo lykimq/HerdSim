@@ -3,7 +3,7 @@ column per N, one table per success rule.
 
     uv run cli/dmin_tables.py overview dmin_m12 dmin_m6 --value d_sat
 
-docs/make_docs.py writes docs/report/summary_results.md from these tables, and the
+docs/generate_docs/make_docs.py writes docs/report/summary_results.md from these tables, and the
 ``overview`` verb of cli/dmin_tables.py prints them.
 """
 

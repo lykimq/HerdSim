@@ -3,7 +3,7 @@ value: D_min, D_sat, brackets, slopes and fits come from analysis/, and these mo
 how they read.
 
     uv run cli/dmin_tables.py --help                  # print the tables, one verb each
-    uv run python docs/make_docs.py                   # write the generated pages
+    uv run python docs/generate_docs/make_docs.py     # write the generated pages
 
 The modules:
 

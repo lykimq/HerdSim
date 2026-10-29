@@ -1,6 +1,6 @@
 # Results overview: every protocol in one view
 
-> AUTO-GENERATED: do not modify. Re-run the producing command to refresh this file. Command: `uv run python docs/make_docs.py`. Source: the stored runs in `results/`.
+> AUTO-GENERATED: do not modify. Re-run the producing command to refresh this file. Command: `uv run python docs/generate_docs/make_docs.py`. Source: the stored runs in `results/`.
 
 The smallest reliable team for every curve of the 41 HerdSim protocols, in tables only. The interpretation is in the [report](d_min_report.md) and the terms in the [glossary](../glossary.md).
 

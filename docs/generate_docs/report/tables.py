@@ -3,7 +3,7 @@ text by layout and N, their growth, the cost beyond D_sat, the upper end of the 
 methods side by side, the gather task read two ways, and the failure and spread tables.
 
 Each function takes what analysis/ computed from a finished run and returns a DataFrame;
-report.text.markdown prints it. The values themselves (brackets, slopes, fits, zones) are
+text.markdown prints it. The values themselves (brackets, slopes, fits, zones) are
 decided in analysis/, so a change here changes how a table reads, never a result.
 """
 

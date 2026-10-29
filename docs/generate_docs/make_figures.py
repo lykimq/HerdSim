@@ -1,10 +1,10 @@
 """Figures of the model and the task in the README, drawn from the real code.
 
-    uv run --with matplotlib python docs/figures/make_figures.py
+    uv run --with matplotlib python docs/generate_docs/make_figures.py
 
 Needs matplotlib (not a project dependency). Every picture calls the same functions a campaign
 uses (start layouts, dog arcs, the team rule, a real trial), so if the code changes, running
-this script redraws them. The pictures are written next to this script. Flock radii come from
+this script redraws them. The pictures are written to docs/figures. Flock radii come from
 the calibration of the finished runs. The results figures are drawn by make_result_figures.py.
 
 The file has three parts: the shared settings (seed, flock radii), helpers that draw the

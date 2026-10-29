@@ -1,11 +1,11 @@
 """Animated GIFs of stored trials, for the dynamics a still figure cannot show.
 
-    uv run --with matplotlib python docs/gifs/make_gifs.py              # every GIF
-    uv run --with matplotlib python docs/gifs/make_gifs.py last_sheep   # one, by name
+    uv run --with matplotlib python docs/generate_docs/make_gifs.py              # every GIF
+    uv run --with matplotlib python docs/generate_docs/make_gifs.py last_sheep   # one, by name
 
 Every animation replays trials that a study protocol stored (services/replay.py), and each
 replay is checked against its stored outcome, so what moves on screen is the trial behind
-the reported numbers. The GIFs are written next to this script.
+the reported numbers. The GIFs are written to docs/gifs.
 
 The file has three parts:
 
@@ -16,7 +16,7 @@ The file has three parts:
   each herder's sensing range), computed with the model's own functions
 - one function per GIF, which lists its shots, its overlay and the note under the panels
 
-Colours and matplotlib defaults come from docs/figures/figstyle.py, so the animations look
+Colours and matplotlib defaults come from figstyle.py, so the animations look
 like the still figures. Agents being herded are dots and herders are triangles, so the two
 differ by shape as well as colour. Captions are in the documents that show the GIFs.
 """
@@ -28,20 +28,15 @@ import sys
 import textwrap
 from collections.abc import Callable
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Any
 
 import numpy as np
-
-HERE = Path(__file__).parent
-sys.path.insert(0, str(HERE.parent / "figures"))
-
-from figstyle import AQUA, BLUE, INK, MUTED, ORANGE, REPO, SURFACE  # noqa: E402
-from matplotlib import pyplot as plt  # noqa: E402
-from matplotlib.animation import FuncAnimation, PillowWriter  # noqa: E402
-from matplotlib.collections import LineCollection  # noqa: E402
-from matplotlib.patches import Circle  # noqa: E402
-from scipy.spatial.distance import cdist  # noqa: E402
+from figstyle import AQUA, BLUE, GIF_OUT, INK, MUTED, ORANGE, REPO, SURFACE
+from matplotlib import pyplot as plt
+from matplotlib.animation import FuncAnimation, PillowWriter
+from matplotlib.collections import LineCollection
+from matplotlib.patches import Circle
+from scipy.spatial.distance import cdist
 
 sys.path.insert(0, str(REPO))
 
@@ -272,9 +267,9 @@ def animate(
         return []
 
     animation = FuncAnimation(fig, draw, frames=len(ticks))
-    animation.save(HERE / file, writer=PillowWriter(fps=FPS), dpi=DPI)
+    animation.save(GIF_OUT / file, writer=PillowWriter(fps=FPS), dpi=DPI)
     plt.close(fig)
-    print(file, f"{(HERE / file).stat().st_size / 1e6:.1f} MB")
+    print(file, f"{(GIF_OUT / file).stat().st_size / 1e6:.1f} MB")
 
 
 # ------------------------------------------------------------------------------------ overlays

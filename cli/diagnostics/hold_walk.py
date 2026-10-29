@@ -31,7 +31,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
-from report.text import markdown  # noqa: E402
+from docs.generate_docs.report.text import markdown  # noqa: E402
 from services.replay import (  # noqa: E402
     ReplayJob,
     describe_cell_seed,

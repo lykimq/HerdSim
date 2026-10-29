@@ -45,22 +45,11 @@ The deadline is 12, 6 or 3 drive times, a drive time being the time a sheep walk
 
 | Method | Sheep model | Dog controller | Task | Used for |
 | :--- | :--- | :--- | :--- | :--- |
-| `strombom_multi` | Strombom et al. (2014) | `collect_drive_multi`: the team rule below | drive | Every main run and follow-up |
+| `strombom_multi` | Strombom et al. (2014) | `collect_drive_multi`: Hungarian outlier assignment and driving arc ([methods](docs/methods/models.md#coordinated-team-architecture-strombom_multi)) | drive | Every main run and follow-up |
 | `fat` | Strombom et al. (2014) | `fat`: every dog goes behind the sheep farthest from the goal; no assignment, no arc, no collect/drive switch | drive | Baseline without coordination ([report, part 4](docs/report/part4_coordination.md)) |
 | `independent` | Strombom et al. (2014) | `independent`: every dog runs Strombom's single-dog rule on the whole flock, with no team layer | drive | Separates the collect/drive switch from the team layer ([report, part 4](docs/report/part4_coordination.md)) |
 | `kubo` | Kubo et al. (2022): smooth forces; sheep speed up under a stronger push, up to 5 m/s | `kubo_forces`: Kubo's forces, with repulsion between dogs | drive, compact starts only | A model where more dogs do shorten the drive ([report, part 1](docs/report/part1_growth.md)) |
 | `lama` | Lama and di Bernardo (2024): random walkers with no cohesion | `lama_herders`: each herder chases the farthest target it senses, leaving targets closer to another herder | gather | Test of the published $\sqrt{N}$ law ([report, part 6](docs/report/part6_square_root_law.md)) |
-
-- The sheep model of Strombom et al. (2014):
-   Each sheep weighs its previous heading, attraction to the flock, keeping space from close neighbours, running from dogs, and noise. The authors compared the model with GPS data from a real flock and dog ([Strombom et al. 2014](https://doi.org/10.1098/rsif.2014.0719)).
-- A team rule for several dogs:
-   Strombom's single-dog rule extended to a team. While any sheep is beyond the collect distance the dogs collect, each assigned its own outlier by the Hungarian algorithm; otherwise they drive from positions spread on an arc behind the flock in angular order. The push of several dogs on a sheep is normalised to the size of one dog's push.
-- Tasks sized to the flock:
-   There are no walls, and the drive distance, goal radius and deadline are scaled from the calibrated flock radius $R_f(N)$, so a large flock is not helped or hindered by a field that is too small.
-- Adaptive sampling:
-   After every batch of 10 seeds, each cell's 99% Clopper-Pearson interval decides whether it needs more. Clear cells stop after 10 to 60 seeds; only cells near the threshold continue, up to 200.
-- Reproducible and safe to stop:
-   Each trial has its own random streams for the start, the sheep and the dogs, so a trial replays exactly from its config and seed on the same machine. Every finished trial is written to disk (`trials.jsonl`) at once, so a run can be stopped and resumed.
 
 ## Research report
 
@@ -73,8 +62,8 @@ For detailed scientific analysis, empirical findings, and decision rules, see th
 - [Part 4: Multi-Dog Coordination](docs/report/part4_coordination.md): The team coordination layer compared to uncoordinated baselines (`fat`, `independent`).
 - [Part 5: Failure Modes](docs/report/part5_failures.md): Root-cause breakdown of failed drives (lost sheep, timeouts, flock splits).
 - [Part 6: Square-Root Scaling](docs/report/part6_square_root_law.md): Validation of the $\sqrt{N}$ law on targets without cohesion (Lama & di Bernardo).
-- [Result Tables](docs/report/results_tables.md): Comprehensive statistical result tables generated from all stored runs.
-- [Summary Results](docs/report/summary_results.md): High-level overview of $D_{\min}$ and $D_{\mathrm{sat}}$ across all 41 protocols.
+- [Summary Results](docs/report/summary_results.md) *(auto-generated)*: Quick cross-protocol comparison tables of $D_{\min}$ across all 41 experiments.
+- [Complete Data Tables](docs/report/results_tables.md) *(auto-generated)*: Full 2,200-line archival reference containing granular per-protocol breakdown tables.
 - [Run Record & Appendix](docs/report/appendix_run_record.md): Dataset provenance, protocol audits, and replication instructions.
 
 ## Quick start & reproducibility
@@ -122,7 +111,7 @@ uv run cli/dmin_tables.py record
 uv run cli/dmin_tables.py dmin dmin_m12 dmin_m6 dmin_m3
 
 # 6. Rewrite the generated doc pages (protocol catalogue, results overview)
-uv run python docs/make_docs.py
+uv run python docs/generate_docs/make_docs.py
 ```
 
 For detailed command options and diagnostic replay scripts, see [`docs/guides/cli_reference.md`](docs/guides/cli_reference.md).
@@ -143,49 +132,26 @@ HerdSim/
 |   `-- runner.py           # Running a batch of trials in worker processes
 |-- records/                # A trial as a table row; the physics hash and code identity of a folder
 |-- analysis/               # Decision rules (frontier) and the values read from results
-|-- report/                 # Writing those values as the tables and text of the docs
 |-- protocols/configs/      # Protocols (canonical defaults + overrides)
 |-- cli/                    # Command-line tools (campaign.py, run_queue.py, dmin_tables.py)
 |-- docs/                   # Report, method notes, guides, figures and animations
+|   `-- generate_docs/      # Code that writes the docs: tables and text, pages, figures, GIFs
 |-- results/                # Result folders (439,120 trials in the study protocols)
 `-- tests/                  # Unit, invariant and regression tests
 ```
 
-The full layer map and the code map are in [architecture](docs/codes/architecture.md).
-
 ## Documentation index
 
-### Research
-
-- [Report](docs/report/d_min_report.md):
-  The study: abstract, questions, decision rules, discussion and conclusions. Its section 3 introduces the results, in six parts by topic, and the run record.
-- [Result tables](docs/report/results_tables.md):
-  Every table behind the report, generated from the stored runs.
-- [Results overview](docs/report/summary_results.md):
-  Every protocol in one view: D_min, D_max and D_overcrowd per curve, and D_sat where decided, in tables split by success rule.
-- [Paper draft](docs/draft_d_min_paper.md):
-  A manuscript draft on the minimum team, built from part of the study.
-- [Models](docs/methods/models.md):
-  The sheep model, the team rule, the Hungarian assignment, the baselines, and the Kubo and Lama models.
-- [Task design](docs/experiments/task_design.md):
-  Field and goal sized by $R_f(N)$, deadlines in drive times, why $N$ and $D$ stop where they do, and the gather task.
-- [Glossary](docs/glossary.md):
-  One short definition of every term the docs use, with a link to where it is explained in full.
-
-### Code
+Additional documentation and technical guides:
 
 - [Architecture](docs/codes/architecture.md):
   How the code is organised and how to add a model, a controller or a task.
-- [Protocols](docs/guides/protocols.md):
-  Every protocol of the study: what it tests, its model, rule, deadline, grid and changed settings. Generated from the protocol files.
-- [Settings](docs/guides/settings.md):
-  Every canonical setting with its default and note. Generated from `canonical.yaml`.
+- [Task design](docs/experiments/task_design.md):
+  Field and goal sized by $R_f(N)$, deadlines in drive times, why $N$ and $D$ stop where they do, and the gather task.
 - [Configuration](docs/guides/configuration.md):
   How protocols inherit from each other, the settings added by the follow-up campaigns, and the result folders.
-- [CLI reference](docs/guides/cli_reference.md):
-  Planning and running campaigns, the tables, the generated doc pages and the diagnostic replays.
-- [Command-line tools](cli/README.md):
-  Which tool to use for which task, in the order a study uses them.
+- [Settings](docs/guides/settings.md):
+  Every canonical setting with its default and note. Generated from `canonical.yaml`.
 
 ## References
 

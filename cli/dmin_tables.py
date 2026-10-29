@@ -106,8 +106,12 @@ from analysis.trial_measures import (  # noqa: E402
     finish_spread,
     nested_deadlines,
 )
-from report.overview import OVERVIEW_CELLS, overview_run, overview_tables  # noqa: E402
-from report.tables import (  # noqa: E402
+from docs.generate_docs.report.overview import (  # noqa: E402
+    OVERVIEW_CELLS,
+    overview_run,
+    overview_tables,
+)
+from docs.generate_docs.report.tables import (  # noqa: E402
     compare,
     dispersion_table,
     dsat_by_n,
@@ -120,7 +124,7 @@ from report.tables import (  # noqa: E402
     side_by_side,
     upper_values,
 )
-from report.text import markdown, rule_text  # noqa: E402
+from docs.generate_docs.report.text import markdown, rule_text  # noqa: E402
 from services.protocol import RESULTS_ROOT, load_protocol, results_folder  # noqa: E402
 from sim.plugins.scenarios import SCENARIOS  # noqa: E402
 

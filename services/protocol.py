@@ -315,7 +315,9 @@ def _check_grid(name: str, spec: Mapping[str, Any], settings: Mapping[str, Any])
         raise ValueError(f"{name}: unknown task {task!r}; available: {sorted(SCENARIOS)}")
     for layout in spec.get("layouts", []):
         if any(c in str(layout) for c in ("|", "=", "\n")):
-            raise ValueError(f"{name}: layout {layout!r} cannot contain key delimiters ('|', '=', newline)")
+            raise ValueError(
+                f"{name}: layout {layout!r} cannot contain key delimiters ('|', '=', newline)"
+            )
     layouts = SCENARIOS[task].layouts
     unknown = sorted(set(spec["layouts"]) - set(layouts))
     if unknown:
@@ -326,11 +328,14 @@ def _check_grid(name: str, spec: Mapping[str, Any], settings: Mapping[str, Any])
             raise ValueError(f"{name}: {key} must be positive integers")
     for factor_name, factor_values in (spec.get("factors") or {}).items():
         if any(c in str(factor_name) for c in ("|", "=", "\n")):
-            raise ValueError(f"{name}: factor name {factor_name!r} cannot contain key delimiters ('|', '=', newline)")
+            raise ValueError(
+                f"{name}: factor name {factor_name!r} cannot contain delimiters ('|', '=', newline)"
+            )
         for fv in factor_values:
             if any(c in str(fv) for c in ("|", "=", "\n")):
                 raise ValueError(
-                    f"{name}: factor {factor_name} value {fv!r} cannot contain key delimiters ('|', '=', newline)"
+                    f"{name}: factor {factor_name} value {fv!r} cannot contain "
+                    + "key delimiters ('|', '=', newline)"
                 )
 
 

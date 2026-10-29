@@ -27,12 +27,12 @@ dev = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["sim*", "services*", "protocols*", "analysis*", "records*", "report*"]
+include = ["sim*", "services*", "protocols*", "analysis*", "records*"]
 
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-# The figure scripts in docs/figures are linted like the rest of the code, so their
+# The doc generators in docs/generate_docs are linted like the rest of the code, so their
 # structure does not drift. Gitignored local folders are skipped, as ruff respects .gitignore.
 
 [tool.ruff.lint]

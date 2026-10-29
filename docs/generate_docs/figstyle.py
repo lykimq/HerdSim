@@ -1,7 +1,7 @@
 """The look every figure shares: colours, matplotlib defaults, where figures go, and saving.
 
-Both figure scripts import this module, so a colour, a default or the resolution changes in
-one place. The captions are in the report and README, so a figure carries no caption text;
+The figure and GIF scripts import this module, so a colour, a default or the resolution changes
+in one place. The captions are in the report and README, so a figure carries no caption text;
 ``save`` lays it out, adds an optional source note under the panels and writes the PNG.
 """
 
@@ -17,7 +17,8 @@ from matplotlib.axes import Axes  # noqa: E402
 from matplotlib.figure import Figure  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[2]
-OUT = Path(__file__).parent
+OUT = REPO / "docs" / "figures"
+GIF_OUT = REPO / "docs" / "gifs"
 DPI = 150
 
 SURFACE, INK, MUTED, GRID = "#fcfcfb", "#0b0b0b", "#52514e", "#e4e3df"

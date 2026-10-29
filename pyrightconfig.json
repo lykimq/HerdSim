@@ -9,7 +9,8 @@
     "**/__pycache__",
     ".venv",
     "results",
-    "docs",
+    "docs/science",
+    "docs/generate_docs/*.py",
     "tests"
   ],
   "reportExplicitAny": "none",

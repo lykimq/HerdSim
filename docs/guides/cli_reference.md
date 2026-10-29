@@ -148,14 +148,14 @@ Replays nothing. Draws start flocks and prints, per layout, flock size and neigh
 
 ## Generated doc pages and figures
 
-These scripts write files under `docs/` from the protocol files and the stored runs; they run no simulation.
+These scripts are in `docs/generate_docs/`, with the `report/` package that writes the values of `analysis/` as table cells and text. They write files under `docs/` from the protocol files and the stored runs; they start no campaign. The figures go to `docs/figures/` and the GIFs to `docs/gifs/`.
 
 ```bash
-uv run python docs/make_docs.py                                  # rewrite the generated pages
-uv run python docs/make_docs.py --check                          # list the pages that are out of date
-uv run --with matplotlib python docs/figures/make_figures.py     # figures of the models and the task
-uv run --with matplotlib python docs/figures/make_result_figures.py  # figures of the results
-uv run --with matplotlib python docs/gifs/make_gifs.py           # every animation, from stored trials
+uv run python docs/generate_docs/make_docs.py                                # rewrite the generated pages
+uv run python docs/generate_docs/make_docs.py --check                        # list the pages that are out of date
+uv run --with matplotlib python docs/generate_docs/make_figures.py           # figures of the models and the task
+uv run --with matplotlib python docs/generate_docs/make_result_figures.py    # figures of the results
+uv run --with matplotlib python docs/generate_docs/make_gifs.py              # every animation, from stored trials
 ```
 
 `make_docs.py` writes the [protocol catalogue](protocols.md), the [settings reference](settings.md) and the [results overview](../report/summary_results.md); `--check` exits with 1 while any of them differs from what the script would write. The figure scripts need matplotlib, which the command adds for that run only.

@@ -29,7 +29,7 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from report.text import markdown  # noqa: E402
+from docs.generate_docs.report.text import markdown  # noqa: E402
 from services.replay import (  # noqa: E402
     ReplayJob,
     open_run,
