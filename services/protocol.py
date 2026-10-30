@@ -198,7 +198,7 @@ def find_protocol(name_or_path: str) -> Path:
 
 
 def study_queue() -> tuple[str, ...]:
-    """The study's protocol ids in the order they ran."""
+    """The study's protocol ids in the order the queue runs them."""
     return tuple(yaml.safe_load(STUDY_QUEUE.read_text())["queue"])
 
 

@@ -5,12 +5,15 @@
 Two readings of the finished main drive runs, both from trials.csv:
 
 - S0 x N, the dispersion burden of a layout at one flock size: S0 is the flock's extent (RMS
-  radius) at the start, read from the ``max_extent`` column, because the dogs only gather the
-  flock after the start, so the largest extent of a trial is its start extent on every layout;
-  the burden grows with N on the scattered layouts and barely on the compact one
-- which of two regimes a failed trial belongs to: boundary or temporal when the flock ended
-  within ``NEAR_GOAL_RADII`` goal radii of the goal centre (it got there and lost on time or
-  stragglers), structural when it ended farther away (it was never gathered and driven there)
+  radius) at the start, read from the ``max_extent`` column as the start extent. That holds
+  where the dogs only gather the flock; on compact the flock first spreads, so the maximum
+  is above the start (1.08 times on average, up to 1.26, over the 135 stored dmin_m6 compact
+  histories; at N = 400 the start is 7.92 m and the maximum 8.30 m). The burden grows with N
+  on the scattered layouts and barely on the compact one
+- which of two regimes a failed trial belongs to, by where the flock ended only: boundary or
+  temporal when it ended within ``NEAR_GOAL_RADII`` goal radii of the goal centre, structural
+  when it ended farther away. The rule does not say whether the flock was ever gathered: in
+  dmin_f99_m6, 881 of 1067 far failures had 90% or more of the flock in the goal at some tick
 """
 
 from __future__ import annotations

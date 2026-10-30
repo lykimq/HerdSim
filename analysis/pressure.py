@@ -82,3 +82,17 @@ def pressure_table(rows: pd.DataFrame) -> pd.DataFrame:
             }
         )
     return pd.DataFrame(out)
+
+
+def cells_to_replay(curve: pd.Series, tested: list[int]) -> dict[int, str]:
+    """D -> role, for D = 1, D_min, D_sat and the smallest tested D at or above 2 D_sat."""
+    roles: dict[int, list[str]] = {1: ["1"]}
+    if pd.notna(curve["d_min"]):
+        roles.setdefault(int(curve["d_min"]), []).append("D_min")
+    if pd.notna(curve["d_sat"]):
+        sat = int(curve["d_sat"])
+        roles.setdefault(sat, []).append("D_sat" + (" (open)" if curve["d_sat_undecided"] else ""))
+        double = next((d for d in sorted(tested) if d >= 2 * sat), None)
+        if double is not None:
+            roles.setdefault(double, []).append("2 D_sat")
+    return {d: ", ".join(r) for d, r in sorted(roles.items())}

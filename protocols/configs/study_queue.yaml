@@ -1,4 +1,4 @@
-# The protocols of the study, in the order they ran: the first study (main grids,
+# The protocols of the study, in the order the queue runs them: the first study (main grids,
 # sensitivities, Kubo, FAT), then the follow-ups, then the Lama and di Bernardo (2024) model
 # on its gather task, then the goal and share that hold a small flock. cli/run_queue.py runs
 # them in this order; a new protocol of the study is added here.

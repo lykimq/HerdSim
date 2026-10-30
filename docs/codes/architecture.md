@@ -28,7 +28,7 @@ The steps are:
 2. Campaign: the manager that spends extra seeds on undecided cells. A cell is one team size on one setup, and a seed is the number that fixes the random streams of one run of it. After each round (one pass that plans and runs the seeds still needed) the campaign checks the results. A team is reliable when the lower end of a two-sided 99% Clopper-Pearson interval on its success rate is at least 0.90, the default. That takes at least 51 straight successes, so a cell that always succeeds soon needs no more seeds while a borderline one can get up to 200.
 3. Engine: a sandbox that runs one trial and knows nothing of campaigns. Each tick (one time step) the sheep model moves the sheep, the dog controller moves the dogs and the task checks whether the trial has ended. The field is continuous with no walls, and there is no pathfinding. There is no collision step either, except that a dog cannot step within the optional dog spacing of another when that setting is above its default of 0.
 4. Trial rows: the worker process turns each finished trial into one summary row (which trial it was, its outcome, the mean, minimum and maximum of each metric, and a [failure label](../glossary.md) for how it ended), and the campaign process appends the row to the folder's trial log.
-5. Analysis and reports: analysis reads stored files and never runs the model. It finds the smallest reliable team ($D_{\min}$) and the smallest reliable team that no larger reliable team beats on finish time by more than 5% ($D_{\mathrm{sat}}$). A changed rule can be recomputed in seconds with no new simulation, though some cells may then need more seeds, because the seeds were spent under the old rule.
+5. Analysis and reports: analysis reads stored files and never runs the model. It finds the smallest reliable team ($D_{\min}$) and the smallest [working team](../glossary.md#team-sizes) that no larger working team beats on finish time by more than 5% ($D_{\mathrm{sat}}$). A changed rule can be recomputed in seconds with no new simulation, though some cells may then need more seeds, because the seeds were spent under the old rule.
 
 ## Goals and constraints
 
@@ -184,6 +184,7 @@ Table 1 maps each part of the design to its place in the repository.
 | Diagnostic tools and replay | [`cli/diagnostics/`](../../cli/diagnostics/), [`services/replay.py`](../../services/replay.py) |
 | Report tables and text | [`docs/generate_docs/report/`](../generate_docs/report/) |
 | Generated pages, figures and GIFs | [`docs/generate_docs/`](../generate_docs/) |
+| Sections and commands of the result tables page | [`docs/generate_docs/report/results_page.py`](../generate_docs/report/results_page.py) |
 | Campaign rounds | [`services/adaptive.py`](../../services/adaptive.py) |
 | Worker pool and batches | [`services/pool.py`](../../services/pool.py), [`services/runner.py`](../../services/runner.py) |
 | Calibration | [`services/calibration.py`](../../services/calibration.py) |

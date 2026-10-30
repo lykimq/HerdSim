@@ -66,7 +66,7 @@ The strict rule needs every sheep in the goal, the 99 percent rule at least 99% 
 | dmin_fat | outlier_rich |  | 1 | 1 | 2 | none | none |
 | dmin_kubo | compact |  | 1 | 1 | 1 |  |  |
 
-Table 2 gives $D_{\mathrm{sat}}$, the smallest reliable team that no larger reliable team beats on finish time by more than 5% with 99% confidence, for `dmin_m12`, the one strict run that added seeds to decide finish times. `5-24` means a larger team may still turn out faster, `-` that no team is reliable.
+Table 2 gives $D_{\mathrm{sat}}$, the smallest working team that no larger working team beats on finish time by more than 5% with 99% confidence, for `dmin_m12`, the one strict run that added seeds to decide finish times. `5-24` means a larger team may still turn out faster, `-` that no team is reliable.
 
 **Table 2: Team beyond which more dogs stop helping, strict rule, 12 drive times.**
 

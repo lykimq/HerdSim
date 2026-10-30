@@ -1,7 +1,7 @@
 # Default settings of every campaign. A protocol overrides a value by naming it; a name that
 # is not here and not a protocol key is rejected.
 #
-# Units: Strombom 2014 is dimensionless, read here as 1 unit = 1 m and one tick = 1 s.
+# Units: Strombom 2014 (Table 1) gives m and m per time step, no time unit; one tick = 1 s.
 # Kubo 2022 and Lama 2024 give no length unit and are read the same way, with their own
 # ticks of 0.05 s and 0.03 s, so times are compared in seconds.
 #

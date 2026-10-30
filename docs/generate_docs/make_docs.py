@@ -11,6 +11,8 @@ Pages:
   protocols/configs/canonical.yaml and its comments
 - docs/report/summary_results.md: D_min and D_sat of every run in overview tables, read from
   the results folders
+- docs/report/results_tables.md: the tables of cli/dmin_tables.py and the replay summaries, in
+  the sections listed in docs/generate_docs/report/results_page.py
 
 The file has three parts: the settings of each page (its text and tables), small helpers, and
 one function per page. After a run or a protocol change, rerun this script; ``--check`` lists
@@ -35,6 +37,7 @@ import pandas as pd  # noqa: E402
 import yaml  # noqa: E402
 
 from docs.generate_docs.report.overview import overview_run, overview_tables  # noqa: E402
+from docs.generate_docs.report.results_page import page_blocks  # noqa: E402
 from docs.generate_docs.report.text import markdown, rule_text  # noqa: E402
 from records.generated_notice import AUTO_GENERATED_NOTICE  # noqa: E402
 from services.protocol import (  # noqa: E402
@@ -99,6 +102,11 @@ depend on it;
 can resume after it changes.
 
 A blank note means the key shares the note of the key above it."""
+
+# --- Settings: docs/report/results_tables.md ---------------------------------------------------
+
+RESULTS_TABLES_PAGE = REPO / "docs" / "report" / "results_tables.md"
+RESULTS_TABLES_TITLE = "# Result tables"
 
 # --- Settings: docs/report/summary_results.md --------------------------------------------------
 
@@ -171,7 +179,7 @@ SUMMARY_BLOCKS: tuple[str | Overview, ...] = (
     "circle, `goal` a goal of radius $1.5 R_f$, `dogspeed` dogs at 1.15 m/s, `gap` the start gap. "
     "`dmin_fat` uses FAT dogs and `dmin_kubo` the Kubo model with a 500 s limit (Table 1).",
     Overview("Smallest reliable team, strict rule.", STRICT_RUNS, 1.0),
-    "Table 2 gives $D_{\\mathrm{sat}}$, the smallest reliable team that no larger reliable team "
+    "Table 2 gives $D_{\\mathrm{sat}}$, the smallest working team that no larger working team "
     "beats on finish time by more than 5% with 99% confidence, for `dmin_m12`, the one strict run "
     "that added seeds to decide finish times. `5-24` means a larger team may still turn out "
     "faster, `-` that no team is reliable.",
@@ -484,12 +492,19 @@ def summary_page() -> str:
     return _joined(blocks)
 
 
+def results_tables_page() -> str:
+    """The tables of cli/dmin_tables.py and the replay summaries, section by section."""
+    source = "the stored runs in `results/` and the replay CSVs in `results/diagnostics/`"
+    return _joined([RESULTS_TABLES_TITLE, notice(source), *page_blocks()])
+
+
 # --- Main --------------------------------------------------------------------------------------
 
 PAGES: dict[Path, Callable[[], str]] = {
     PROTOCOLS_PAGE: protocols_page,
     SETTINGS_PAGE: settings_page,
     SUMMARY_PAGE: summary_page,
+    RESULTS_TABLES_PAGE: results_tables_page,
 }
 
 

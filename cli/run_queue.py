@@ -4,7 +4,8 @@
     uv run cli/run_queue.py --workers 20              every protocol that is not finished
     uv run cli/run_queue.py --only dmin_m12 dmin_m6   just these, in this order
 
-This is how the whole study is run again with one command. Each protocol runs as
+The queue lists the protocols in the order it runs them. A fresh pass would not reproduce the
+stored seed allocation (see appendix A of the run record). Each protocol runs as
 `cli/campaign.py run` would, into its own folder results/<protocol_id>. A folder where every
 cell is decided is skipped, one that stopped for any other reason is resumed, and a protocol
 that raises is logged while the queue moves on. After each protocol one line goes to
@@ -35,7 +36,7 @@ sys.path.insert(0, str(REPO))
 from services.adaptive import STOP_DECIDED, run_campaign  # noqa: E402
 from services.protocol import RESULTS_ROOT, load_protocol, study_queue  # noqa: E402
 
-# The study's protocols in the order they ran (protocols/configs/study_queue.yaml).
+# The study's protocols in the order the queue runs them (protocols/configs/study_queue.yaml).
 QUEUE: tuple[str, ...] = study_queue()
 LOG = RESULTS_ROOT / "queue_log.jsonl"
 

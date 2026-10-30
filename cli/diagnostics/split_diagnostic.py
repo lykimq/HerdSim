@@ -29,6 +29,7 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from docs.generate_docs.report.replay_tables import split_summary  # noqa: E402
 from docs.generate_docs.report.text import markdown  # noqa: E402
 from services.replay import (  # noqa: E402
     ReplayJob,
@@ -93,17 +94,7 @@ def main() -> None:
         lambda r: f"{r['deadline']} N={r['n']} D={r['d']} {r['version']}",
     )
     write_replays(table, args.out)
-    summary = (
-        table.groupby(["deadline", "n", "d", "version"], sort=True)
-        .agg(
-            success=("success", "mean"),
-            median_finish=("finish_seconds", "median"),
-            stopped=("dogs_stopped", "mean"),
-        )
-        .round(2)
-        .reset_index()
-    )
-    print(markdown(summary))
+    print(markdown(split_summary(table)))
 
 
 if __name__ == "__main__":

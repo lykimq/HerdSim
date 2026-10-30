@@ -29,8 +29,8 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import numpy as np  # noqa: E402
-import pandas as pd  # noqa: E402
 
+from docs.generate_docs.report.replay_tables import walk_summary  # noqa: E402
 from docs.generate_docs.report.text import markdown  # noqa: E402
 from services.replay import (  # noqa: E402
     ReplayJob,
@@ -86,17 +86,6 @@ def measure(job: ReplayJob) -> dict[str, Any]:
     return {**job.label, "success": result.success, **walk.summary(float(job.config["dt"]))}
 
 
-def summary(table: pd.DataFrame, by: list[str]) -> pd.DataFrame:
-    """Medians per group over the replays whose dogs cleared r_s."""
-    cleared = table.dropna(subset=["walk"]).assign(
-        goal_needed=lambda t: t["walk"] / 2 + t["farthest"]
-    )
-    out = cleared.groupby(by)[["walk", "seconds", "farthest", "goal_needed"]].median()
-    out.insert(0, "cleared", cleared.groupby(by).size())
-    out.insert(0, "replays", table.groupby(by).size())
-    return out.round(1).reset_index()
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -124,9 +113,9 @@ def main() -> None:
     table = run_replays(measure, jobs, args.workers, describe_cell_seed)
     table = table.sort_values(["layout", "n", "d", "seed_index"])
     write_replays(table, args.out)
-    print(markdown(summary(table, ["n"])))
+    print(markdown(walk_summary(table, ["n"])))
     print()
-    print(markdown(summary(table, ["n", "d"])))
+    print(markdown(walk_summary(table, ["n", "d"])))
 
 
 if __name__ == "__main__":

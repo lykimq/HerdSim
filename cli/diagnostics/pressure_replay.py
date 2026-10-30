@@ -23,10 +23,8 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-import pandas as pd  # noqa: E402
-
 from analysis.curves import groups_table  # noqa: E402
-from analysis.pressure import Pressure, pressure_table  # noqa: E402
+from analysis.pressure import Pressure, cells_to_replay, pressure_table  # noqa: E402
 from docs.generate_docs.report.text import markdown  # noqa: E402
 from services.protocol import results_folder  # noqa: E402
 from services.replay import (  # noqa: E402
@@ -39,20 +37,6 @@ from services.replay import (  # noqa: E402
 )
 
 METHOD = "strombom_multi"
-
-
-def cells_to_replay(curve: pd.Series, tested: list[int]) -> dict[int, str]:
-    """D -> role, for D = 1, D_min, D_sat and the smallest tested D at or above 2 D_sat."""
-    roles: dict[int, list[str]] = {1: ["1"]}
-    if pd.notna(curve["d_min"]):
-        roles.setdefault(int(curve["d_min"]), []).append("D_min")
-    if pd.notna(curve["d_sat"]):
-        sat = int(curve["d_sat"])
-        roles.setdefault(sat, []).append("D_sat" + (" (open)" if curve["d_sat_undecided"] else ""))
-        double = next((d for d in sorted(tested) if d >= 2 * sat), None)
-        if double is not None:
-            roles.setdefault(double, []).append("2 D_sat")
-    return {d: ", ".join(r) for d, r in sorted(roles.items())}
 
 
 def measure(job: ReplayJob) -> dict[str, Any]:
