@@ -5,17 +5,17 @@ Part 5 of the HerdSim report on team size. The [overview](d_min_report.md) holds
 ## 4. A closer look: the `split` layout and per-tick measures
 
 ### 4.1 Why more dogs do not help on `split`
-On `split` flocks, which start as three separate clusters, more dogs do not raise success from $N = 200$: at 6 drive times under the 99% rule it stays between 0.60 and 0.92 for every $D \ge 4$ at $N = 200$ and 400 (0.10–0.76 under the strict rule), and at 3 drive times it falls toward zero (Figure 1).
+On `split` flocks, which start as three separate clusters, more dogs do not raise success from $N = 200$: at 6 drive times under the 99% rule it stays between 0.60 and 0.92 for every $D \ge 4$ at $N = 200$ and 400 (0.10-0.76 under the strict rule), and at 3 drive times it falls toward zero (Figure 1).
 
 Two measures over all stored trials show where the time goes ([single-trial tables](results_tables.md#single-trials-and-curves-across-folders)):
 - The flock arrives in two parts: at 6 drive times on `split` $N = 200$, one or two dogs take a median 7 s from 90% to 99% of the flock in the goal; 3 dogs and teams from 6 up take 249 to 418 s, 43% to 60% of their finish time (4 dogs take 22 s, over only 38 successes). At $N = 283$ and 400 teams from 3 dogs take 274 to 480 s, and at $N = 566$ teams from 4 dogs take 474 to 540 s.
-- Simpler rules do better than the team rule: on `split` $N = 200$ (6 drive times, 99% rule) the team rule stays at 0.60–0.95 with median finishes of 341–703 s, and sharing with the whole team fails from 4 dogs. Independent shepherds are reliable from 3 dogs (median 265–299 s), and dogs that see 30 to 65 m and do not share succeed in all 60 trials of every team from 3 to 16 dogs (median 237–350 s). Independent shepherds also plan on the whole flock, so what they lack is the team layer: the assignment of dogs to strays and the arc they drive from ([dog rules](d_min_report.md#22-start-layouts-dog-rules-and-protocols)). Why that helps on `split` was not tested; it fits the first cause below.
+- Simpler rules do better than the team rule: on `split` $N = 200$ (6 drive times, 99% rule) the team rule stays at 0.60-0.95 with median finishes of 341-703 s, and sharing with the whole team fails from 4 dogs. Independent shepherds are reliable from 3 dogs (median 265-299 s), and dogs that see 30 to 65 m and do not share succeed in all 60 trials of every team from 3 to 16 dogs (median 237-350 s). Independent shepherds also plan on the whole flock, so what they lack is the team layer: the assignment of dogs to strays and the arc they drive from ([dog rules](d_min_report.md#22-start-layouts-dog-rules-and-protocols)). Why that helps on `split` was not tested; it fits the first cause below.
 
 Replays of stored trials (`cli/diagnostics/split_diagnostic.py`, 12 seeds per cell, $N = 200$) point to two causes. Each change below made the drive faster at the team sizes given, at 6 drive times; at $D = 2$, spreading the collecting dogs slowed it (median 365 s to 393.5 s).
 
 1. All collecting dogs go to one cluster ($D = 4$): the team rule assigns dogs to outliers by the least total walking distance. That ignores which cluster an outlier belongs to, so when the flock is in separate clusters, the nearer or more scattered cluster can take every dog while another drifts. When the collecting dogs were made to pick outliers at least $f(N) = r_a N^{2/3}$ apart, the median finish time at $D = 4$ fell from 631 s to 318 s.
 
-2. Many dogs stand still under the stop rule ($D \ge 4$): Strömbom's dog stops while any sheep is within $3 r_a = 6$ m. On `wide` and `outlier_rich` that holds 1% to 7% of the dogs still. On `split` about 25% of the dogs stand still, held next to one cluster on their way to another. With the stop distance cut to $r_a = 2$ m, the drive was 21–24% faster at $D = 8$ and 16, and $D = 16$ succeeded in all 12 seeds.
+2. Many dogs stand still under the stop rule ($D \ge 4$): Strömbom's dog stops while any sheep is within $3 r_a = 6$ m. On `wide` and `outlier_rich` that holds 1% to 7% of the dogs still. On `split` about 25% of the dogs stand still, held next to one cluster on their way to another. With the stop distance cut to $r_a = 2$ m, the drive was 21-24% faster at $D = 8$ and 16, and $D = 16$ succeeded in all 12 seeds.
 
 At 3 drive times neither change made `split` reliable in these replays: at 4, 8 and 16 dogs no version succeeded in more than 7 of 12 seeds, few enough for the 99% interval to rule out reliability.
 
@@ -23,7 +23,7 @@ At 3 drive times neither change made `split` reliable in these replays: at 4, 8 
 
 **Figure 1: Success on `split` flocks against team size (6 drive times).** On `wide` success rises to 1; on `split` at $N = 200$ and 400 it levels off below the threshold, and $N = 100$ is reliable under both rules.
 
-- Marks: blue circles are the strict rule and orange squares the 99% rule, each with its 99% Clopper–Pearson interval, against $D$ on a log scale. The dotted line is $\theta = 0.90$.
+- Marks: blue circles are the strict rule and orange squares the 99% rule, each with its 99% Clopper-Pearson interval, against $D$ on a log scale. The dotted line is $\theta = 0.90$.
 - Panels: `split` at $N = 100$, 200 and 400, and `wide` at $N = 400$ for comparison.
 
 *Data:* `results/dmin_m6` and `results/dmin_f99_m6`; values in [results_tables.md: dmin_m6](results_tables.md#dmin_m6) and [results_tables.md: dmin_f99_m6](results_tables.md#dmin_f99_m6).
@@ -39,7 +39,7 @@ At 3 drive times neither change made `split` reliable in these replays: at 4, 8 
 Two measures were recorded at every tick, the simulation step, of every trial:
 
 - Flock spread and success: across cells with at least 20 seeds at 6 drive times, the rank correlation (Spearman) between the mean flock spread (RMS distance to the centroid) and the success rate is $-0.76$ under the strict rule and $-0.71$ under the 99% rule ($-0.57$ to $-0.68$ at 3 drive times; Figure 2). The spread is averaged over the whole trial and failed trials end spread out, so the correlation does not show which comes first.
-- How close the dogs come to each other: with `strombom_multi` at $N = 200$ (99% rule), no dog has another within 2 m up to $D = 6$ on `wide`; at $D = 16$ the share is 0.45–0.59 across the scattered layouts. With FAT (`dmin_f99_fat`) it is 0.45–0.66 at $D = 2$ and 0.72–0.90 at $D = 16$ (medians over all $N$), as expected when every dog chases the same sheep.
+- How close the dogs come to each other: with `strombom_multi` at $N = 200$ (99% rule), no dog has another within 2 m up to $D = 6$ on `wide`; at $D = 16$ the share is 0.45-0.59 across the scattered layouts. With FAT (`dmin_f99_fat`) it is 0.45-0.66 at $D = 2$ and 0.72-0.90 at $D = 16$ (medians over all $N$), as expected when every dog chases the same sheep.
 
 ![Per-trial metrics](../figures/fig27_metrics.png)
 
@@ -63,12 +63,12 @@ Most failed trials end with the flock still far from the goal (item 1, Table 1).
 
 | Protocol | Rule | Failed trials | Far from goal | Near goal | Share far |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| `dmin_m12` | strict, 12× | 235 | 180 | 55 | 76.6% |
-| `dmin_m6` | strict, 6× | 889 | 639 | 250 | 71.9% |
-| `dmin_m3` | strict, 3× | 710 | 571 | 139 | 80.4% |
-| `dmin_f99_m12` | 99%, 12× | 235 | 213 | 22 | 90.6% |
-| `dmin_f99_m6` | 99%, 6× | 1511 | 1067 | 444 | 70.6% |
-| `dmin_f99_m3` | 99%, 3× | 584 | 457 | 127 | 78.3% |
+| `dmin_m12` | strict, 12x | 235 | 180 | 55 | 76.6% |
+| `dmin_m6` | strict, 6x | 889 | 639 | 250 | 71.9% |
+| `dmin_m3` | strict, 3x | 710 | 571 | 139 | 80.4% |
+| `dmin_f99_m12` | 99%, 12x | 235 | 213 | 22 | 90.6% |
+| `dmin_f99_m6` | 99%, 6x | 1511 | 1067 | 444 | 70.6% |
+| `dmin_f99_m3` | 99%, 3x | 584 | 457 | 127 | 78.3% |
 
 *Data:* the command below, on the six main protocols.
 

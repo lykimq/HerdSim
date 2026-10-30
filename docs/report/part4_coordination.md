@@ -23,9 +23,9 @@ Table 1 compares FAT with `strombom_multi` at 6 drive times (FAT strict / 99%, w
 | Layout | $N = 25$ | $N = 50$ | $N = 100$ | $N = 200$ | $N = 400$ |
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | `compact` | 1 / 1 (1 / 1) | 1 / 1 (1 / 1) | 1 / 1 (1 / 1) | 1 / 1 (1 / 1) | none / [12] (1 / 1) |
-| `wide` | 1 / 1 (1 / 1) | 1 / 1 (1 / 1) | 1 / 1 (1 / 1) | none / none (3 / 2) | none / none ([9] / 2–3) |
+| `wide` | 1 / 1 (1 / 1) | 1 / 1 (1 / 1) | 1 / 1 (1 / 1) | none / none (3 / 2) | none / none ([9] / 2-3) |
 | `split` | 1 / 1 (1 / 1) | 1 / 1 (1 / 1) | 1 / 1 (1 / 1) | none / none (none / [1]) | none / none (none / [5]) |
-| `outlier_rich` | 1 / 1 (1 / 1) | 1 / 1 (1 / 1) | 2 / 2 (3 / 2) | none / none ([12] / 2–3) | none / none (none / 3) |
+| `outlier_rich` | 1 / 1 (1 / 1) | 1 / 1 (1 / 1) | 2 / 2 (3 / 2) | none / none ([12] / 2-3) | none / none (none / 3) |
 
 *Data:* [results_tables.md: FAT dog rule, deadline 6](results_tables.md#fat-dog-rule-deadline-6-strict-then-99-percent) (`dmin_fat`, `dmin_f99_fat`); `strombom_multi` in [results_tables.md: strict success](results_tables.md#d_min-by-layout-and-n-strict-success) and [results_tables.md: success at 99 percent](results_tables.md#d_min-by-layout-and-n-success-at-99-percent).
 
@@ -46,11 +46,11 @@ Strömbom's switch and the team layer matter at different flock sizes: dogs with
 
 To separate the two parts, `dmin_f99_indep` runs a team of independent shepherds: each dog runs Strömbom's single-dog rule on the whole flock, with the switch but no assignment and no arc.
 
-1. Independent shepherds are reliable up to $N = 200$: on every scattered layout up to $N = 200$, where FAT fails, they need 2–3 dogs on `wide` and 3 on `outlier_rich`. FAT differs from them in the sheep it aims at as well as in lacking the switch, so the gain cannot be put on the switch alone. This may be because switching to driving once the flock is gathered keeps it together, even when the dogs chase the same outlier; we have not tested it.
+1. Independent shepherds are reliable up to $N = 200$: on every scattered layout up to $N = 200$, where FAT fails, they need 2-3 dogs on `wide` and 3 on `outlier_rich`. FAT differs from them in the sheep it aims at as well as in lacking the switch, so the gain cannot be put on the switch alone. This may be because switching to driving once the flock is gathered keeps it together, even when the dogs chase the same outlier; we have not tested it.
 
-2. At $N = 400$ the team layer is needed: independent shepherds have no reliable team up to 24 dogs at $N = 400$, where the team rule needs 2–3 dogs on `wide` and 3 on `outlier_rich`. This may be because, without assignment, the dogs keep going after the same sheep while other parts of a large flock spread; we have not tested it. On `split` $N = 200$ the order reverses: independent shepherds are reliable from 3 dogs, while the team rule has no reliable team ([section 4.1](part5_failures.md#41-why-more-dogs-do-not-help-on-split)).
+2. At $N = 400$ the team layer is needed: independent shepherds have no reliable team up to 24 dogs at $N = 400$, where the team rule needs 2-3 dogs on `wide` and 3 on `outlier_rich`. This may be because, without assignment, the dogs keep going after the same sheep while other parts of a large flock spread; we have not tested it. On `split` $N = 200$ the order reverses: independent shepherds are reliable from 3 dogs, while the team rule has no reliable team ([section 4.1](part5_failures.md#41-why-more-dogs-do-not-help-on-split)).
 
-3. In the Kubo model more dogs keep helping, with diminishing returns: with Kubo sheep (`dmin_f99_kubo`), one dog is enough on compact flocks of 25 to 100. Unlike Strömbom sheep, Kubo sheep walk faster under a stronger push (up to 5 m/s), so more dogs shorten the drive: at $N = 100$ the median finish time falls from 115 s with one dog to 29 s with ten, and to 25 s with 24. Ten dogs already give 95% of the gain of 24, but $D_{\mathrm{sat}}$ is still open: it is at least 16 or 17 dogs (16–24 at $N = 25$ and 100, 17–24 at 50).
+3. In the Kubo model more dogs keep helping, with diminishing returns: with Kubo sheep (`dmin_f99_kubo`), one dog is enough on compact flocks of 25 to 100. Unlike Strömbom sheep, Kubo sheep walk faster under a stronger push (up to 5 m/s), so more dogs shorten the drive: at $N = 100$ the median finish time falls from 115 s with one dog to 29 s with ten, and to 25 s with 24. Ten dogs already give 95% of the gain of 24, but $D_{\mathrm{sat}}$ is still open: it is at least 16 or 17 dogs (16-24 at $N = 25$ and 100, 17-24 at 50).
 
 Table 2 compares the three rules at 6 drive times (99% rule):
 
@@ -58,9 +58,9 @@ Table 2 compares the three rules at 6 drive times (99% rule):
 
 | `strombom_multi` / `independent` / `fat` | $N = 200$ | $N = 400$ |
 | :--- | :---: | :---: |
-| `wide` | 2 / 2–3 / none | 2–3 / none / none |
-| `outlier_rich` | 2–3 / 3 / none | 3 / none / none |
-| `split` | [1] / 1–3 / none | [5] / none / none |
+| `wide` | 2 / 2-3 / none | 2-3 / none / none |
+| `outlier_rich` | 2-3 / 3 / none | 3 / none / none |
+| `split` | [1] / 1-3 / none | [5] / none / none |
 
 *Data:* [results_tables.md: Methods at 99 percent, 6 drive times](results_tables.md#methods-at-99-percent-6-drive-times-team-rule-independent-paper-shepherds-fat) and [results_tables.md: Kubo, compact, D to 24](results_tables.md#kubo-compact-d-to-24-99-percent); Kubo finish times from `results/dmin_f99_kubo`.
 
@@ -70,11 +70,11 @@ Real dogs, robots and drones do not see the whole field. Here each dog sees only
 
 On `wide` $N = 200$ a range of 30 to 65 m costs about one dog, and at 65 m sharing with the whole team brings $D_{\min}$ back to its full-sight value; at 15 m far more dogs are needed (items 1 to 3, Figure 2). On `split` $N = 200$ the result reverses (item 3).
 
-1. A range of 30 to 65 m costs about one dog: on `wide` $N = 200$, dogs that see everything need 2. With a range of 30 to 65 m they need 3 (3–4 at 45 m). On flocks of 100 or fewer a range of 30 m or more costs nothing (Figure 2).
+1. A range of 30 to 65 m costs about one dog: on `wide` $N = 200$, dogs that see everything need 2. With a range of 30 to 65 m they need 3 (3-4 at 45 m). On flocks of 100 or fewer a range of 30 m or more costs nothing (Figure 2).
 
 2. At 15 m far more dogs are needed: with a range of 15 m on `wide`, no team up to 16 is reliable at $N = 50$, and at $N = 100$ at least 6 dogs are needed. This may be because, once the range is shorter than the gaps between strays, the dogs lose sight of the outer sheep; we have not measured those gaps.
 
-3. Sharing with the whole team brings $D_{\min}$ back to full sight on `wide`: at 65 m on `wide` $N = 200$, dogs that do not share need 3, and sharing with the whole team brings $D_{\min}$ back to 2, as with full sight. With two dogs the cell succeeds in 3 of 10 trials without sharing (99% interval 0.04–0.74) and in 88 of 90 with sharing (0.90–1.00; Animation 1). Sharing only with the dogs in range does not help (still 3): a dog far away has to learn about a stray it cannot see.
+3. Sharing with the whole team brings $D_{\min}$ back to full sight on `wide`: at 65 m on `wide` $N = 200$, dogs that do not share need 3, and sharing with the whole team brings $D_{\min}$ back to 2, as with full sight. With two dogs the cell succeeds in 3 of 10 trials without sharing (99% interval 0.04-0.74) and in 88 of 90 with sharing (0.90-1.00; Animation 1). Sharing only with the dogs in range does not help (still 3): a dog far away has to learn about a stray it cannot see.
 
    On `split` $N = 200$ the order reverses: dogs that see everything have no reliable team ([1], a lower bound), while dogs that see 30 to 65 m and do not share succeed in 60 of 60 trials at every team from 3 to 16 dogs. Sharing with the whole team is reliable with 3 dogs but fails from 4 up ([section 3.7](part3_beyond_dmin.md#37-rq7-beyond-d_min-enough-dogs-cost-and-pressure-on-the-flock)). This may be related to the `split` failures of [section 4.1](part5_failures.md#41-why-more-dogs-do-not-help-on-split), where collecting dogs that plan on the whole flock crowd one cluster; we have not tested it.
 

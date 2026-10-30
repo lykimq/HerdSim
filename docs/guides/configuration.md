@@ -11,9 +11,9 @@ protocols/configs/
 ├── canonical.yaml             # Baseline physics and defaults
 ├── study_queue.yaml           # The study's protocols in the order they ran (cli/run_queue.py)
 └── protocols/                 # Individual research experiment definitions
-    ├── dmin_m12.yaml          # Relaxed deadline (12× drive time)
-    ├── dmin_m6.yaml           # Intermediate deadline (6× drive time)
-    ├── dmin_m3.yaml           # Urgent deadline (3× drive time)
+    ├── dmin_m12.yaml          # Relaxed deadline (12x drive time)
+    ├── dmin_m6.yaml           # Intermediate deadline (6x drive time)
+    ├── dmin_m3.yaml           # Urgent deadline (3x drive time)
     ├── dmin_fat.yaml          # Uncoordinated FAT baseline
     ├── lama_r50.yaml          # Lama & di Bernardo (2024), gather task, sensing radius 10
     ├── lama_r50_inf.yaml      # The same with infinite sensing

@@ -170,7 +170,7 @@ The interval is recomputed after each batch (Figure 4), so the 99% is the confid
 
 **Figure 4: Stopping early.** Clear failures stop after 10 to 20 seeds; clear successes once 51 successes in a row are in, at the end of the 60-trial batch; only cells near the threshold continue toward 200.
 
-- Marks: an illustration, not drawn from stored runs. The red curve is the upper bound of the 99% Clopper–Pearson interval when no trial succeeds, the green curve the lower bound when every trial succeeds, and the blue points an undecided cell with its interval after each batch of 10. The dashed line is $\theta = 0.90$.
+- Marks: an illustration, not drawn from stored runs. The red curve is the upper bound of the 99% Clopper-Pearson interval when no trial succeeds, the green curve the lower bound when every trial succeeds, and the blue points an undecided cell with its interval after each batch of 10. The dashed line is $\theta = 0.90$.
 
 ### Midpoint densification
 

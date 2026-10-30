@@ -53,7 +53,7 @@ The deadline is 12, 6 or 3 drive times, a drive time being the time a sheep walk
 
 ## Research report
 
-For detailed scientific analysis, empirical findings, and decision rules, see the full [Research Report](docs/report/d_min_report.md).
+For detailed scientific analysis, empirical findings, and decision rules.
 
 - [Report Overview](docs/report/d_min_report.md): Synthesis of findings, research questions, statistical decision rules, and discussion.
 - [Part 1: Team Growth](docs/report/part1_growth.md): Scaling of D_min with flock size N, deadlines, and initial start layouts.

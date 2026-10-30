@@ -50,7 +50,7 @@ $$
 In the paper's base case $n = N - 1$, so each sheep is drawn to the centre of the whole flock.
 
 > [!NOTE]
-> Knowing the centre of the whole flock: with $n = N - 1$ every sheep knows where the centre of the whole flock is, which a real sheep among hundreds cannot. A sheep could estimate the direction from its nearest neighbours instead. `cli/diagnostics/gradient_validation.py` measures how far that estimate is from the true direction on the start layouts: the error shrinks as more neighbours are used and grows with $N$ (at $N = 400$ with 15 neighbours the mean error is still about 30°). The full-flock centre is therefore a simplification; a sheep sensing 15 neighbours would often head 30° off it.
+> Knowing the centre of the whole flock: with $n = N - 1$ every sheep knows where the centre of the whole flock is, which a real sheep among hundreds cannot. A sheep could estimate the direction from its nearest neighbours instead. `cli/diagnostics/gradient_validation.py` measures how far that estimate is from the true direction on the start layouts: the error shrinks as more neighbours are used and grows with $N$ (at $N = 400$ with 15 neighbours the mean error is still about 30 deg). The full-flock centre is therefore a simplification; a sheep sensing 15 neighbours would often head 30 deg off it.
 
 #### 3. Keeping space
 The separation term $\mathbf{R}_{a,i}$ has weight $\rho_a = 2.0$. Every neighbour $j$ closer than $r_a = 2$ m pushes sheep $i$ away. This term has the largest weight, so that sheep never overlap:
@@ -368,6 +368,6 @@ Herders and targets are moved from the same state at the start of each step, as 
 ## References
 
 1. Strömbom, D., et al. (2014). *Solving the shepherding problem: heuristics for herding autonomous, interacting agents*. Journal of the Royal Society Interface, 11(100), 20140719. [DOI: 10.1098/rsif.2014.0719](https://doi.org/10.1098/rsif.2014.0719)
-2. Kubo, M., Tashiro, M., Sato, H., Yamaguchi, A. (2022). *Herd guidance by multiple sheepdog agents with repulsive force*. Artificial Life and Robotics, 27, 416–427. [DOI: 10.1007/s10015-021-00726-7](https://doi.org/10.1007/s10015-021-00726-7)
+2. Kubo, M., Tashiro, M., Sato, H., Yamaguchi, A. (2022). *Herd guidance by multiple sheepdog agents with repulsive force*. Artificial Life and Robotics, 27, 416-427. [DOI: 10.1007/s10015-021-00726-7](https://doi.org/10.1007/s10015-021-00726-7)
 3. Lama, A., & di Bernardo, M. (2024). *Shepherding and herdability in complex multiagent systems*. Physical Review Research, 6, L032012. [DOI: 10.1103/PhysRevResearch.6.L032012](https://doi.org/10.1103/PhysRevResearch.6.L032012)
 4. Jadhav, V., et al. (2024). *Collective responses of flocking sheep (Ovis aries) to a herding dog (border collie)*. Communications Biology, 7, 1543.

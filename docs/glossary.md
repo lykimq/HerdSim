@@ -59,7 +59,7 @@ The terms HerdSim's docs use, one short definition each, with a link to the sect
 - 99% rule: a trial succeeds when at least 99% of the sheep are inside at one tick.
 - Holding task: a trial succeeds only once 99% of the flock has stayed inside the goal for one drive time, while the dogs withdraw ([holding](experiments/task_design.md#the-holding-task)).
 - $\theta$: the reliability threshold, 0.90.
-- Reliable cell: the 99% Clopper–Pearson interval of its success rate lies at or above $\theta$; unreliable: it lies below; undecided: it straddles $\theta$ ([stopping early](experiments/task_design.md#stopping-early-with-the-99-clopper-pearson-interval)).
+- Reliable cell: the 99% Clopper-Pearson interval of its success rate lies at or above $\theta$; unreliable: it lies below; undecided: it straddles $\theta$ ([stopping early](experiments/task_design.md#stopping-early-with-the-99-clopper-pearson-interval)).
 - Open: still undecided when the cell reached its cap of 200 trials.
 - Frontier rules: the rules that decide reliability, the finish-time comparisons and the team-size values below from the stored trials ([frontier rules](experiments/task_design.md#5-frontier-rules-and-zones)).
 

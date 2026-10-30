@@ -36,7 +36,7 @@ Table 2 lists the follow-up runs (99% rule; hours at 20 workers):
 | `dmin_f99_hold` | 14,280 | 280 | 18 | 0 | 0.74 |
 | `dmin_f99_hold_spacing` (rerun with the hard spacing rule: a dog whose step would end within 2 m of another does not step) | 13,930 | 283 | 19 | 0 | 0.70 |
 | `dmin_f99_hold_goal` (holding, goal 1.9, 2.5, 3.0 $R_f$, $N \le 100$) | 21,800 | 326 | 30 | 0 | 0.36 |
-| `dmin_f99_hold_share` (holding, goal 1.9 to 2.5 $R_f$ × share 90, 95, 99%) | 50,170 | 746 | 57 | 0 | 0.91 |
+| `dmin_f99_hold_share` (holding, goal 1.9 to 2.5 $R_f$ x share 90, 95, 99%) | 50,170 | 746 | 57 | 0 | 0.91 |
 | `dmin_f99_c1.3`, `_c1.6`, `_c2.0` | 10,800 / 10,830 / 10,780 | 180 each | 1 / 0 / 0 | 0 | 0.31 / 0.29 / 0.41 |
 | `dmin_f99_k05` | 11,630 | 149 | 14 | 0 | 2.29 |
 | `dmin_f99_view_range` | 21,040 | 293 | 27 | 0 | 0.53 |
@@ -59,14 +59,14 @@ Table 3 lists each claim with the evidence behind it and its limits.
 | :---: | :--- | :--- | :--- | :--- |
 | 1 | A compact flock needs one dog ($D_{\min} = 1$) up to $N = 1131$. | Measured | `dmin_m12`, `dmin_m6`, `dmin_m3`, `dmin_f99_*` up to $N = 566$; `dmin_f99_big_cap` at 800 and 1131. | Above 1056 only with the capped drive point. |
 | 2 | Up to $N = 50$ one dog is enough on every layout and deadline. | Measured | All $N \le 50$ cells of the 23 base protocols decided at $D = 1$. | The reason given in [section 3.1](part1_growth.md#31-rq1-how-does-d_min-grow-with-n) has not been tested. |
-| 3 | On scattered flocks $D_{\min}$ grows with slope 0.27–0.38 on `wide` and 0.28–0.38 on `outlier_rich` at 12 drive times, and 0.38–0.61 and 0.40–0.58 at 6 (99% rule). | Measured | Slope ranges over the brackets of nine flock sizes ($N = 25$–566), `dmin_f99_m12`, `dmin_f99_m6`. | Only up to the calibration edge; `split` is left out. |
+| 3 | On scattered flocks $D_{\min}$ grows with slope 0.27-0.38 on `wide` and 0.28-0.38 on `outlier_rich` at 12 drive times, and 0.38-0.61 and 0.40-0.58 at 6 (99% rule). | Measured | Slope ranges over the brackets of nine flock sizes ($N = 25$-566), `dmin_f99_m12`, `dmin_f99_m6`. | Only up to the calibration edge; `split` is left out. |
 | 4 | Under the strict rule large teams fail on the last sheep. | Measured | 97% of strict failures with $D \ge 6$ had 99% of the flock in (`dmin_s_base`); with slower dogs (`dmin_s_dogspeed`) strict $D_{\min}$ on `outlier_rich` $N = 400$ goes from none to 6. | Applies to the strict rule with an open goal. |
-| 5 | On `split`, collecting dogs crowd one cluster and many stand still. | Measured in replays | `split_diagnostic` replays: spreading the outliers halves the finish time at $D = 4$; a shorter stop distance makes the drive 21–24% faster at $D = 8$, 16. | 12 seeds per cell; neither change fixes 3 drive times. |
-| 6 | Weaker cohesion makes $D_{\min}$ grow faster, toward 0.5. | Measured | `dmin_f99_k05` slope 0.40–0.70 on `wide`; `dmin_f99_c*` 0.20. | One weaker level only; weaker flocks do not calibrate. |
+| 5 | On `split`, collecting dogs crowd one cluster and many stand still. | Measured in replays | `split_diagnostic` replays: spreading the outliers halves the finish time at $D = 4$; a shorter stop distance makes the drive 21-24% faster at $D = 8$, 16. | 12 seeds per cell; neither change fixes 3 drive times. |
+| 6 | Weaker cohesion makes $D_{\min}$ grow faster, toward 0.5. | Measured | `dmin_f99_k05` slope 0.40-0.70 on `wide`; `dmin_f99_c*` 0.20. | One weaker level only; weaker flocks do not calibrate. |
 | 7 | Above $N \approx 1056$ Strömbom's drive point is beyond the sheep's reaction distance. | Derived and measured | $2\sqrt{N} > 65$; uncapped, 0 of 10 trials succeed at $N = 1131$ for every $D$; capped, compact succeeds at 800, 1131, 1600 and 42 of 42 at 3200. | Assumes the reaction distance $r_s = 65$ m. |
 | 8 | Dogs kept 2 m apart make extra dogs harmful on `outlier_rich` $N = 400$. | Measured | `dmin_f99_hold_spacing`: 186 of 200 at $D = 6$, 54 of 70 at 9, 5 of 10 at 16; every $D \ge 9$ unreliable. | Not seen on `wide` or `compact`. |
 | 9 | On `wide` $N = 200$ a local view costs about one dog and sharing with the whole team brings $D_{\min}$ back to its full-sight value; on `split` $N = 200$ a local view of 30 to 65 m does better than full sight. | Measured | `dmin_f99_view_range`, `dmin_f99_view_comm`. | Sharing is instant and error-free in the model. |
-| 10 | Near the threshold, an average of 0.99 accepts teams that fail in 9 of 30 runs. | Measured | `lama_r50`: at 144 targets 11 herders average 0.992 but succeed in 21 of 30 runs (99% interval 0.45–0.89); HerdSim's $D_{\min}$ is 17–25. | Targets without cohesion on a disc. |
+| 10 | Near the threshold, an average of 0.99 accepts teams that fail in 9 of 30 runs. | Measured | `lama_r50`: at 144 targets 11 herders average 0.992 but succeed in 21 of 30 runs (99% interval 0.45-0.89); HerdSim's $D_{\min}$ is 17-25. | Targets without cohesion on a disc. |
 | 11 | Holding small flocks fails with the default goal; a goal of about 16 to 19 m holds them with one dog. The flock's walk while the dogs withdraw may be the cause. | Thresholds and walk measured; cause consistent, not tested | `dmin_f99_hold_goal`, `dmin_f99_hold_share`: one dog decided reliable on every layout from 18.6 m ($N = 25$) and 17.5 m ($N = 50$) at 99%, with brackets down to 15.5 and 16.0 m. `hold_walk` replays: the flock centre walks a median 17, 15 and 13 m at $N = 25$, 50, 100. | Goal levels in steps of $0.2 R_f$; tied to the withdrawal rule; the walk was not varied directly. |
 
 ## Appendix C: Reproducibility
