@@ -22,6 +22,13 @@ from services.protocol import load_protocol, results_folder
 
 from .text import dmin_text, dsat_text, number_or_text, variant_label
 
+# The main grids at 12, 6 and 3 drive times, strict rule and 99 percent rule. Pages and figures
+# name them to compare deadlines.
+STRICT_MAIN = ("dmin_m12", "dmin_m6", "dmin_m3")
+F99_MAIN = ("dmin_f99_m12", "dmin_f99_m6", "dmin_f99_m3")
+# The flock sizes of the first study; later runs add 71, 141, 283 and 566.
+ORIGINAL_NS = (25, 50, 100, 200, 400)
+
 
 class OverviewRun(NamedTuple):
     """One run of an overview: its folder, and the success share and layouts of its protocol."""

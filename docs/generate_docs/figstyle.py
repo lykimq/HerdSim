@@ -8,6 +8,7 @@ in one place. The captions are in the report and README, so a figure carries no 
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Literal
 
 import matplotlib
 
@@ -45,7 +46,7 @@ plt.rcParams.update(
 )
 
 
-def grid(ax: Axes, axis: str = "both") -> None:
+def grid(ax: Axes, axis: Literal["both", "x", "y"] = "both") -> None:
     ax.grid(axis=axis, color=GRID, lw=0.6)
 
 

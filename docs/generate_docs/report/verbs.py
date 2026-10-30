@@ -224,7 +224,7 @@ def upper(folders: Sequence[str]) -> list[Part]:
         _part("Upper end of the curves: D_max, D_crowd and D_overcrowd", pd.DataFrame(summary)),
         _part(
             "Curves with D_max below the grid top, a D_crowd or a D_overcrowd",
-            pd.concat(flagged, ignore_index=True),
+            pd.concat(flagged, ignore_index=True) if flagged else pd.DataFrame(),
         ),
     ]
 

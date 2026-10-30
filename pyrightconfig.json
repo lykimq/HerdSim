@@ -10,7 +10,6 @@
     ".venv",
     "results",
     "docs/science",
-    "docs/generate_docs/*.py",
     "tests"
   ],
   "reportExplicitAny": "none",

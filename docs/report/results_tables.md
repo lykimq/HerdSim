@@ -614,7 +614,7 @@ The heading's 12 seeds per cell hold except for `outlier_rich` N = 400 at D = 1 
 
 ## Finish-time top-up, densified N, independent shepherds, Kubo to D = 24, 99 percent
 
-dmin_f99_m12, dmin_f99_m6 and dmin_f99_m3 were resumed with finish-time seeds, and the first two also with the flock sizes 71, 141, 283, 566 added (N above 50 is then spaced by sqrt 2; every added size calibrates cleanly, the edge of the model lies between 600 and 630). The [run record](appendix_run_record.md#appendix-a-protocol-run-record) lists the added trials; it does not record the `decide_finish_times` setting of the sittings on 2026-10-22 for dmin_f99_m6 and dmin_f99_m3. D_sat entries as in the D_sat, effort, zones and methods section. Fits: interval-censored maximum likelihood of a power law and a saturating curve to the D_min brackets; the last two columns give the range of D that every curve of each shape passing through all the brackets allows at N = 1600 and 3200.
+dmin_f99_m12, dmin_f99_m6 and dmin_f99_m3 were resumed with finish-time seeds, and the first two also with the flock sizes 71, 141, 283, 566 added (N above 50 is then spaced by sqrt 2; every added size calibrates cleanly, the edge of the model lies between 600 and 630). The [run record](appendix_run_record.md#appendix-a-protocol-run-record) lists the added trials. D_sat entries as in the D_sat, effort, zones and methods section. Fits: interval-censored maximum likelihood of a power law and a saturating curve to the D_min brackets; the last two columns give the range of D that every curve of each shape passing through all the brackets allows at N = 1600 and 3200.
 
 ### D_min, dmin_f99_m12
 

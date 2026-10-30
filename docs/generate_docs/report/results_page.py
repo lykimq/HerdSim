@@ -20,7 +20,7 @@ import pandas as pd
 from analysis.curves import groups_table
 from analysis.pressure import cells_to_replay, pressure_table
 from analysis.results import read_cells, run_record
-from docs.generate_docs.report import verbs
+from docs.generate_docs.report import overview, verbs
 from docs.generate_docs.report.replay_tables import split_summary, walk_summary
 from docs.generate_docs.report.text import dmin_text, dsat_text, markdown
 from services.protocol import RESULTS_ROOT, results_folder
@@ -151,8 +151,7 @@ TOP_UP_INTRO = (
     "first two also with the flock sizes 71, 141, 283, 566 added (N above 50 is then spaced by "
     "sqrt 2; every added size calibrates cleanly, the edge of the model lies between 600 and "
     "630). The [run record](appendix_run_record.md#appendix-a-protocol-run-record) lists the "
-    "added trials; it does not record the `decide_finish_times` setting of the sittings on "
-    "2026-10-22 for dmin_f99_m6 and dmin_f99_m3. D_sat entries as in the D_sat, "
+    "added trials. D_sat entries as in the D_sat, "
     "effort, zones and methods section. Fits: interval-censored maximum likelihood of a power "
     "law and a saturating curve to the D_min brackets; the last two columns give the range of D "
     "that every curve of each shape passing through all the brackets allows at N = 1600 and "
@@ -234,9 +233,9 @@ SINGLE_INTRO = (
 
 # --- Commands ----------------------------------------------------------------------------------
 
-STRICT_MAIN = "dmin_m12 dmin_m6 dmin_m3"
-F99_MAIN = "dmin_f99_m12 dmin_f99_m6 dmin_f99_m3"
-ORIGINAL_SIZES = "25 50 100 200 400"
+STRICT_MAIN = " ".join(overview.STRICT_MAIN)
+F99_MAIN = " ".join(overview.F99_MAIN)
+ORIGINAL_SIZES = " ".join(map(str, overview.ORIGINAL_NS))
 SPLIT_200_RUNS = "dmin_f99_m6 dmin_f99_indep dmin_f99_view_range dmin_f99_view_comm"
 SENSITIVITY_VARIANTS = "matched handler ring goal dogspeed gap"
 
@@ -552,8 +551,8 @@ def pressure_notes(rows: pd.DataFrame) -> str:
 def pressure_block() -> str:
     rows = _read_diagnostic(f"pressure_{PRESSURE_RUN}.csv")
     heading = (
-        f"Pressure, {PRESSURE_RUN} (replay of 12 stored seeds per cell; every replay "
-        "reproduced its stored trial)"
+        f"Pressure, {PRESSURE_RUN} (replay of {PRESSURE_SEEDS_ASKED} stored seeds per cell; "
+        "every replay reproduced its stored trial)"
     )
     return _titled(
         heading,

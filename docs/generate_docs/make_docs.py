@@ -36,7 +36,12 @@ sys.path.insert(0, str(REPO))
 import pandas as pd  # noqa: E402
 import yaml  # noqa: E402
 
-from docs.generate_docs.report.overview import overview_run, overview_tables  # noqa: E402
+from docs.generate_docs.report.overview import (  # noqa: E402
+    F99_MAIN,
+    STRICT_MAIN,
+    overview_run,
+    overview_tables,
+)
 from docs.generate_docs.report.results_page import page_blocks  # noqa: E402
 from docs.generate_docs.report.text import markdown, rule_text  # noqa: E402
 from records.generated_notice import AUTO_GENERATED_NOTICE  # noqa: E402
@@ -112,9 +117,7 @@ RESULTS_TABLES_TITLE = "# Result tables"
 
 SUMMARY_PAGE = REPO / "docs" / "report" / "summary_results.md"
 STRICT_RUNS = (
-    "dmin_m12",
-    "dmin_m6",
-    "dmin_m3",
+    *STRICT_MAIN,
     "dmin_s_base",
     "dmin_s_matched",
     "dmin_s_handler",
@@ -125,7 +128,6 @@ STRICT_RUNS = (
     "dmin_fat",
     "dmin_kubo",
 )
-F99_MAIN = ("dmin_f99_m12", "dmin_f99_m6", "dmin_f99_m3")
 F99_SENSITIVITY = (
     "dmin_f99_s_base",
     "dmin_f99_s_matched",
@@ -173,16 +175,22 @@ protocol of the same name, apart from the rule."""
 # The page in order: text, or an overview table numbered in the order it appears.
 SUMMARY_BLOCKS: tuple[str | Overview, ...] = (
     "## 1. Strict rule",
-    "`dmin_m12`, `dmin_m6` and `dmin_m3` have deadlines of 12, 6 and 3 drive times. The "
-    "`dmin_s_*` runs are at 6 drive times, a base run and one change each: `matched` the "
-    "field-matched sheep, `handler` all dogs start at one point, `ring` dogs start on a full "
-    "circle, `goal` a goal of radius $1.5 R_f$, `dogspeed` dogs at 1.15 m/s, `gap` the start gap. "
-    "`dmin_fat` uses FAT dogs and `dmin_kubo` the Kubo model with a 500 s limit (Table 1).",
+    (
+        "`dmin_m12`, `dmin_m6` and `dmin_m3` have deadlines of 12, 6 and 3 drive times. The "
+        "`dmin_s_*` runs are at 6 drive times, a base run and one change each: `matched` the "
+        "field-matched sheep, `handler` all dogs start at one point, `ring` dogs start on a full "
+        "circle, `goal` a goal of radius $1.5 R_f$, `dogspeed` dogs at 1.15 m/s, `gap` the start "
+        "gap. "
+        "`dmin_fat` uses FAT dogs and `dmin_kubo` the Kubo model with a 500 s limit (Table 1)."
+    ),
     Overview("Smallest reliable team, strict rule.", STRICT_RUNS, 1.0),
-    "Table 2 gives $D_{\\mathrm{sat}}$, the smallest working team that no larger working team "
-    "beats on finish time by more than 5% with 99% confidence, for `dmin_m12`, the one strict run "
-    "that added seeds to decide finish times. `5-24` means a larger team may still turn out "
-    "faster, `-` that no team is reliable.",
+    (
+        "Table 2 gives $D_{\\mathrm{sat}}$, the smallest working team that no larger working team "
+        "beats on finish time by more than 5% with 99% confidence, for `dmin_m12`, the one strict "
+        "run "
+        "that added seeds to decide finish times. `5-24` means a larger team may still turn out "
+        "faster, `-` that no team is reliable."
+    ),
     Overview(
         "Team beyond which more dogs stop helping, strict rule, 12 drive times.",
         ("dmin_m12",),
@@ -191,8 +199,11 @@ SUMMARY_BLOCKS: tuple[str | Overview, ...] = (
     ),
     "## 2. The 99 percent rule",
     "### 2.1 Main grids",
-    "The main grids at 12, 6 and 3 drive times (Table 3), and $D_{\\mathrm{sat}}$ for the five 99 "
-    "percent runs that decided finish times (Table 4).",
+    (
+        "The main grids at 12, 6 and 3 drive times (Table 3), and $D_{\\mathrm{sat}}$ for the "
+        "five 99 "
+        "percent runs that decided finish times (Table 4)."
+    ),
     Overview("Smallest reliable team on the main grids, 99 percent rule.", F99_MAIN, 0.99),
     Overview(
         "Team beyond which more dogs stop helping, 99 percent rule.",
@@ -201,57 +212,78 @@ SUMMARY_BLOCKS: tuple[str | Overview, ...] = (
         value="d_sat",
     ),
     "### 2.2 Other dog rules",
-    "FAT dogs, independent dogs (each runs Strömbom's single-dog rule, with no team layer) at 6 "
-    "drive times, and the Kubo model with a 500 s limit (Table 5).",
+    (
+        "FAT dogs, independent dogs (each runs Strömbom's single-dog rule, with no team layer) at "
+        "6 "
+        "drive times, and the Kubo model with a 500 s limit (Table 5)."
+    ),
     Overview(
         "Smallest reliable team for FAT, independent dogs and Kubo, 99 percent rule.",
         ("dmin_f99_fat", "dmin_f99_indep", "dmin_f99_kubo"),
         0.99,
     ),
     "### 2.3 Changes to the setup",
-    "The sensitivity runs at 6 drive times, with the changes listed in "
-    "[section 1](#1-strict-rule) (Table 6).",
+    (
+        "The sensitivity runs at 6 drive times, with the changes listed in "
+        "[section 1](#1-strict-rule) (Table 6)."
+    ),
     Overview(
         "Smallest reliable team in the sensitivity runs, 99 percent rule.", F99_SENSITIVITY, 0.99
     ),
     "### 2.4 Holding the flock",
-    "The holding task ([holding](../glossary.md#success-and-reliability)): 99% of the flock must "
-    "stay in the goal for one drive time while the dogs withdraw. `dmin_f99_hold_spacing` keeps "
-    "the dogs 2 m apart; the variant is the goal radius in flock radii $R_f$ (Table 7).",
+    (
+        "The holding task ([holding](../glossary.md#success-and-reliability)): 99% of the flock "
+        "must "
+        "stay in the goal for one drive time while the dogs withdraw. `dmin_f99_hold_spacing` "
+        "keeps "
+        "the dogs 2 m apart; the variant is the goal radius in flock radii $R_f$ (Table 7)."
+    ),
     Overview(HOLD_CAPTION.format("99 percent"), HOLD_RUNS, 0.99),
     "### 2.5 Cohesion",
-    "At 12 drive times: the attraction weight $c$ raised from the 1.05 of Strömbom et al. (2014) "
-    "to 1.3, 1.6 and 2.0, and each sheep drawn to half the flock instead of all of it "
-    "(`dmin_f99_k05`) (Table 8).",
+    (
+        "At 12 drive times: the attraction weight $c$ raised from the 1.05 of Strömbom et al. "
+        "(2014) "
+        "to 1.3, 1.6 and 2.0, and each sheep drawn to half the flock instead of all of it "
+        "(`dmin_f99_k05`) (Table 8)."
+    ),
     Overview(
         "Smallest reliable team with changed cohesion, 99 percent rule.",
         ("dmin_f99_c1.3", "dmin_f99_c1.6", "dmin_f99_c2.0", "dmin_f99_k05"),
         0.99,
     ),
     "### 2.6 Limited sensing",
-    "At 6 drive times: dogs that see only the sheep within a range (`range 0 m` is the full "
-    "view), and at 65 m, sharing what they see with the dogs in range (`neighbour`) or the whole "
-    "team (`shared`) (Table 9).",
+    (
+        "At 6 drive times: dogs that see only the sheep within a range (`range 0 m` is the full "
+        "view), and at 65 m, sharing what they see with the dogs in range (`neighbour`) or the "
+        "whole "
+        "team (`shared`) (Table 9)."
+    ),
     Overview(
         "Smallest reliable team with a limited view, 99 percent rule.",
         ("dmin_f99_view_range", "dmin_f99_view_comm"),
         0.99,
     ),
     "### 2.7 Large flocks",
-    "At 12 drive times, with $R_f$ imposed above $N = 566$ at the density of the 566 flock. "
-    "`dmin_f99_big_dense` and `_loose` scale the imposed radius by $1/\\sqrt{2}$ and $\\sqrt{2}$ "
-    "(from $N = 800$; their $N = 566$ rows run the same flock as `dmin_f99_big`). "
-    "`dmin_f99_big_cap` caps the drive point at 63 m behind the flock (Table 10).",
+    (
+        "At 12 drive times, with $R_f$ imposed above $N = 566$ at the density of the 566 flock. "
+        "`dmin_f99_big_dense` and `_loose` scale the imposed radius by $1/\\sqrt{2}$ and "
+        "$\\sqrt{2}$ "
+        "(from $N = 800$; their $N = 566$ rows run the same flock as `dmin_f99_big`). "
+        "`dmin_f99_big_cap` caps the drive point at 63 m behind the flock (Table 10)."
+    ),
     Overview(
         "Smallest reliable team for large flocks, 99 percent rule.",
         ("dmin_f99_big", "dmin_f99_big_dense", "dmin_f99_big_loose", "dmin_f99_big_cap"),
         0.99,
     ),
     "### 2.8 Targets without cohesion",
-    "The gather task of Lama and di Bernardo (2024) ([gather task](../glossary.md#the-gather-task)"
-    "): $N$ is the number of targets and a cell the smallest reliable number of herders, with "
-    "sensing radius 10 (`lama_r50`) and infinite sensing (`lama_r50_inf`). Success also needs "
-    "every herder inside the goal (Table 11).",
+    (
+        "The gather task of Lama and di Bernardo (2024) ([gather "
+        "task](../glossary.md#the-gather-task)"
+        "): $N$ is the number of targets and a cell the smallest reliable number of herders, with "
+        "sensing radius 10 (`lama_r50`) and infinite sensing (`lama_r50_inf`). Success also needs "
+        "every herder inside the goal (Table 11)."
+    ),
     Overview(
         "Smallest reliable number of herders for the gather task, 99 percent rule.",
         ("lama_r50", "lama_r50_inf"),
@@ -259,8 +291,11 @@ SUMMARY_BLOCKS: tuple[str | Overview, ...] = (
         transpose=True,
     ),
     "## 3. Holding at 95 and 90 percent",
-    "`dmin_f99_hold_share` also runs the holding task with 95% and 90% of the flock required in "
-    "the goal; at $N = 25$ that lets one and two sheep stay out (Tables 12 and 13).",
+    (
+        "`dmin_f99_hold_share` also runs the holding task with 95% and 90% of the flock required "
+        "in "
+        "the goal; at $N = 25$ that lets one and two sheep stay out (Tables 12 and 13)."
+    ),
     Overview(HOLD_CAPTION.format("95 percent"), HOLD_RUNS, 0.95),
     Overview(HOLD_CAPTION.format("90 percent"), HOLD_RUNS, 0.90),
 )
@@ -510,7 +545,7 @@ PAGES: dict[Path, Callable[[], str]] = {
 
 def stale_pages() -> list[Path]:
     """The committed pages that differ from what this script writes."""
-    return [path for path, page in PAGES.items() if path.read_text() != page()]
+    return [path for path, page in PAGES.items() if path.read_text(encoding="utf-8") != page()]
 
 
 def main() -> None:
@@ -523,7 +558,7 @@ def main() -> None:
             print(f"out of date: {path.relative_to(REPO)}")
         sys.exit(1 if stale else 0)
     for path, page in PAGES.items():
-        path.write_text(page())
+        path.write_text(page(), encoding="utf-8")
         print(f"wrote {path.relative_to(REPO)}")
 
 

@@ -1,7 +1,7 @@
 """Animated GIFs of stored trials, for the dynamics a still figure cannot show.
 
-    uv run --with matplotlib python docs/generate_docs/make_gifs.py              # every GIF
-    uv run --with matplotlib python docs/generate_docs/make_gifs.py last_sheep   # one, by name
+    uv run python docs/generate_docs/make_gifs.py              # every GIF
+    uv run python docs/generate_docs/make_gifs.py last_sheep   # one, by name
 
 Every animation replays trials that a study protocol stored (services/replay.py), and each
 replay is checked against its stored outcome, so what moves on screen is the trial behind
@@ -28,19 +28,30 @@ import sys
 import textwrap
 from collections.abc import Callable
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 import numpy as np
-from figstyle import AQUA, BLUE, GIF_OUT, INK, MUTED, ORANGE, REPO, SURFACE
 from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation, PillowWriter
+from matplotlib.axes import Axes
 from matplotlib.collections import LineCollection
 from matplotlib.patches import Circle
 from scipy.spatial.distance import cdist
 
-sys.path.insert(0, str(REPO))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from docs.generate_docs.figstyle import (  # noqa: E402
+    AQUA,
+    BLUE,
+    GIF_OUT,
+    INK,
+    MUTED,
+    ORANGE,
+    SURFACE,
+)
 from services.replay import open_run, replay_trial  # noqa: E402
+from sim.core.simulation_state import SimulationState  # noqa: E402
 from sim.methods.strombom.heuristics import COLLECT, collect_threshold, decide  # noqa: E402
 from sim.plugins.dogs.collect_drive_multi import known_sheep, team_targets  # noqa: E402
 
@@ -54,6 +65,8 @@ MARGIN = 12.0  # length units around everything that moves, so no agent touches 
 NOTE_CHARS = 72  # note characters per panel width before it wraps
 NOTE_LINE = 0.16  # inches per extra note line
 PANEL_WIDTH = 4.6  # inches per panel; the height follows the view, so no space is wasted
+
+View = tuple[tuple[float, float], tuple[float, float]]  # x limits and y limits of a panel
 
 # ------------------------------------------------------------------------------------- helpers
 
@@ -128,7 +141,7 @@ def replay(shot: Shot, every: int, capture: Capture | None) -> Replayed:
     kept: list[tuple[int, np.ndarray, np.ndarray, Any]] = []
     last: list[tuple[int, np.ndarray, np.ndarray, Any]] = []
 
-    def keep(state) -> None:
+    def keep(state: SimulationState) -> None:
         if state.tick > end:
             return
         extra = capture(state) if capture is not None else None
@@ -161,7 +174,7 @@ def replay(shot: Shot, every: int, capture: Capture | None) -> Replayed:
     )
 
 
-def window(trials: list[Replayed]) -> tuple[tuple[float, float], tuple[float, float]]:
+def window(trials: list[Replayed]) -> View:
     """One view for every panel: everything that moves in any trial, and the goals."""
     points = np.vstack(
         [np.vstack([t.herd.reshape(-1, 2), t.herders.reshape(-1, 2)]) for t in trials]
@@ -187,7 +200,7 @@ class Panel:
     status: Any
 
 
-def draw_panel(ax, trial: Replayed, title: str, view, dot: float) -> Panel:
+def draw_panel(ax: Axes, trial: Replayed, title: str, view: View, dot: float) -> Panel:
     ax.set_aspect("equal")
     ax.set_xlim(*view[0])
     ax.set_ylim(*view[1])
@@ -259,7 +272,7 @@ def animate(
     fig.tight_layout(rect=(0, (0.35 + extra_height) / size[1], 1, 1))
     ticks = list(range(0, longest, every)) + [longest] * (1 + round(HOLD_SECONDS * FPS))
 
-    def draw(k: int) -> list:
+    def draw(k: int) -> list[Any]:
         for panel in panels:
             update_panel(panel, ticks[k], noun)
         for panel, update in zip(panels, extras):
@@ -275,7 +288,7 @@ def animate(
 # ------------------------------------------------------------------------------------ overlays
 
 
-def corner_text(ax) -> Any:
+def corner_text(ax: Axes) -> Any:
     """A second status line, top right, for what an overlay counts; the time and outcome
     line takes the bottom left."""
     return ax.text(
@@ -291,7 +304,7 @@ def fill_herd(panel: Panel, filled: np.ndarray) -> None:
     panel.herd.set_edgecolors([BLUE] * len(filled))
 
 
-def dashed_rings(ax, count: int, radius: float) -> list[Circle]:
+def dashed_rings(ax: Axes, count: int, radius: float) -> list[Circle]:
     """One dashed circle per agent, for a sensing range; ``move_rings`` places them."""
     rings = [Circle((0.0, 0.0), radius, fc="none", ec=MUTED, lw=0.5, ls="--") for _ in range(count)]
     for ring in rings:
@@ -304,7 +317,7 @@ def move_rings(rings: list[Circle], centres: np.ndarray) -> None:
         ring.set_center(tuple(centre))
 
 
-def reacting(ax, panel: Panel) -> Callable[[int], None]:
+def reacting(ax: Axes, panel: Panel) -> Callable[[int], None]:
     """Sheep within r_s of a dog react (filled); the others graze (hollow)."""
     trial = panel.trial
     r_s = float(trial.config["r_s"])
@@ -318,7 +331,7 @@ def reacting(ax, panel: Panel) -> Callable[[int], None]:
     return update
 
 
-def sight(ax, panel: Panel) -> Callable[[int], None]:
+def sight(ax: Axes, panel: Panel) -> Callable[[int], None]:
     """Each dog's sensing range (dashed) and the sheep no dog sees (hollow), from the
     controller's own ``known_sheep``. The team plans only on the sheep it sees; how it shares
     them (none or shared) is what differs between panels."""
@@ -335,7 +348,7 @@ def sight(ax, panel: Panel) -> Callable[[int], None]:
     return update
 
 
-def team_rule(ax, panel: Panel) -> Callable[[int], None]:
+def team_rule(ax: Axes, panel: Panel) -> Callable[[int], None]:
     """What the team rule decides at each frame, from the positions shown: the mode, the
     collect distance f(N) round the flock centre, and each dog's target (cross) with a line
     from the dog to it. Computed with the controller's own ``team_targets``."""
@@ -361,7 +374,7 @@ def team_rule(ax, panel: Panel) -> Callable[[int], None]:
     return update
 
 
-def herder_view(ax, panel: Panel) -> Callable[[int], None]:
+def herder_view(ax: Axes, panel: Panel) -> Callable[[int], None]:
     """Each herder's sensing circle and a ring round the target it chases (none when it
     senses nothing and walks home), from the choice the model stored in the state. A herder
     stands only 1.25 beyond its target, so a line to it would be too short to see."""
@@ -380,7 +393,7 @@ def herder_view(ax, panel: Panel) -> Callable[[int], None]:
     return update
 
 
-def chosen_targets(state) -> np.ndarray:
+def chosen_targets(state: SimulationState) -> np.ndarray:
     """The target index each Lama herder chases this tick (-1 for none)."""
     return np.asarray(state.metadata.get("herder_target", []), dtype=int).copy()
 
@@ -413,8 +426,10 @@ def controllers() -> None:
             Shot("dmin_f99_fat", "fat", *cell, "FAT"),
         ],
         "controllers.gif",
-        "wide, N = 400, D = 4, seed 0, 99 percent rule, 6 drive times "
-        "(dmin_f99_m6, dmin_f99_indep, dmin_f99_fat)",
+        (
+            "wide, N = 400, D = 4, seed 0, 99 percent rule, 6 drive times "
+            "(dmin_f99_m6, dmin_f99_indep, dmin_f99_fat)"
+        ),
     )
 
 
@@ -450,8 +465,10 @@ def holding() -> None:
             Shot("dmin_f99_hold_goal", *cell, "goal 3.0 R_f (18.6 m)", three),
         ],
         "holding.gif",
-        "compact, N = 25, D = 1, seed 0, 99 percent held for one drive time, 6 drive times "
-        "(dmin_f99_hold, dmin_f99_hold_goal)",
+        (
+            "compact, N = 25, D = 1, seed 0, 99 percent held for one drive time, 6 drive times "
+            "(dmin_f99_hold, dmin_f99_hold_goal)"
+        ),
     )
 
 
@@ -486,8 +503,10 @@ def sheep_reaction() -> None:
             )
         ],
         "sheep_reaction.gif",
-        "wide, N = 200, D = 4, seed 0, first 120 s (dmin_f99_m6); "
-        "filled: within r_s of a dog, hollow: grazing",
+        (
+            "wide, N = 200, D = 4, seed 0, first 120 s (dmin_f99_m6); "
+            "filled: within r_s of a dog, hollow: grazing"
+        ),
         overlay=reacting,
     )
 
@@ -535,8 +554,10 @@ def drive_cap() -> None:
             Shot("dmin_f99_big_cap", *cell, "drive point capped at 63 m"),
         ],
         "drive_cap.gif",
-        "compact, N = 1131, D = 1, seed 0, 99 percent rule, 12 drive times "
-        "(dmin_f99_big, dmin_f99_big_cap); filled: within r_s of the dog, hollow: grazing",
+        (
+            "compact, N = 1131, D = 1, seed 0, 99 percent rule, 12 drive times "
+            "(dmin_f99_big, dmin_f99_big_cap); filled: within r_s of the dog, hollow: grazing"
+        ),
         dot=3,
         overlay=reacting,
     )
@@ -549,8 +570,10 @@ def flock_pressure() -> None:
     animate(
         [Shot("dmin_f99_m6", *cell, 3, 0, "3 dogs"), Shot("dmin_f99_m6", *cell, 12, 0, "12 dogs")],
         "flock_pressure.gif",
-        "wide, N = 400, seed 0, 99 percent rule, 6 drive times (dmin_f99_m6); "
-        "filled: within r_s of a dog, hollow: grazing",
+        (
+            "wide, N = 400, seed 0, 99 percent rule, 6 drive times (dmin_f99_m6); "
+            "filled: within r_s of a dog, hollow: grazing"
+        ),
         dot=6,
         overlay=reacting,
     )
@@ -568,8 +591,11 @@ def sight_sharing() -> None:
             Shot("dmin_f99_view_comm", *cell, "range 65 m, shared", (("communication", "shared"),)),
         ],
         "sight_sharing.gif",
-        "wide, N = 200, D = 2, seed 0, 99 percent rule, 6 drive times "
-        "(dmin_f99_view_range, dmin_f99_view_comm); dashed: sensing range, hollow: seen by no dog",
+        (
+            "wide, N = 200, D = 2, seed 0, 99 percent rule, 6 drive times "
+            "(dmin_f99_view_range, dmin_f99_view_comm); dashed: sensing range, hollow: seen by no "
+            "dog"
+        ),
         overlay=sight,
         frames=130,  # two 200-sheep panels whose fill changes every frame; 200 frames pass 2 MB
     )
@@ -581,8 +607,10 @@ def team_rule_at_work() -> None:
     animate(
         [Shot("dmin_f99_m6", "strombom_multi", "outlier_rich", 200, 4, 0, "the team rule, 4 dogs")],
         "team_rule.gif",
-        "outlier_rich, N = 200, D = 4, seed 0 (dmin_f99_m6); "
-        "crosses: each dog's target, dashed: f(N)",
+        (
+            "outlier_rich, N = 200, D = 4, seed 0 (dmin_f99_m6); "
+            "crosses: each dog's target, dashed: f(N)"
+        ),
         overlay=team_rule,
     )
 
@@ -593,8 +621,10 @@ def lama_herders() -> None:
     animate(
         [Shot("lama_r50", "lama", "uniform", 144, 11, 0, "11 herders, sensing radius 10")],
         "lama_herders.gif",
-        "gather task, 144 targets, seed 0 (lama_r50); "
-        "dashed: sensing range, orange rings: the targets being chased",
+        (
+            "gather task, 144 targets, seed 0 (lama_r50); "
+            "dashed: sensing range, orange rings: the targets being chased"
+        ),
         noun="targets",
         dot=12,
         capture=chosen_targets,
@@ -626,8 +656,10 @@ def dog_starts() -> None:
             Shot("dmin_s_handler", *cell, "handler"),
         ],
         "dog_starts.gif",
-        "wide, N = 200, D = 8, seed 0, strict rule, 6 drive times "
-        "(dmin_s_base, dmin_s_ring, dmin_s_handler)",
+        (
+            "wide, N = 200, D = 8, seed 0, strict rule, 6 drive times "
+            "(dmin_s_base, dmin_s_ring, dmin_s_handler)"
+        ),
     )
 
 
@@ -641,8 +673,10 @@ def crowding() -> None:
             Shot("dmin_f99_hold_spacing", *cell, "dogs 2 m apart"),
         ],
         "crowding.gif",
-        "outlier_rich, N = 400, D = 12, seed 0, 99 percent held for one drive time, "
-        "6 drive times (dmin_f99_hold, dmin_f99_hold_spacing)",
+        (
+            "outlier_rich, N = 400, D = 12, seed 0, 99 percent held for one drive time, "
+            "6 drive times (dmin_f99_hold, dmin_f99_hold_spacing)"
+        ),
         dot=6,
     )
 
