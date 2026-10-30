@@ -82,7 +82,7 @@ Table 4 lists what is needed to run the study again.
 | Start layouts | `sim/core/world/layouts.py` (`compact`, `wide`, `split`, `outlier_rich`). |
 | Random streams | Cells with the same seed start from the same flock ([paired random streams](../experiments/task_design.md#paired-random-streams)). |
 | Hardware | Linux workstation, 20 workers (`--workers 20`). |
-| Raw data | 439,120 trial rows in `results/<protocol>/trials.csv`; `trials.jsonl` (in git as `trials.jsonl.gz`) holds the same rows plus the 100 uncounted $N = 3200$ trials of `dmin_f99_big_cap`. Three other folders in `results/` are not part of the study: `dmin_pilot`, `dmin_s_ring_dog_in_goal` (the first ring run, which put a dog in the goal) and `dmin_f99_hold_spacing_soft` (the first spacing run, with a soft spacing rule). |
+| Raw data | 439,120 trial rows in `results/<protocol>/trials.csv`; `trials.jsonl` (in git as `trials.jsonl.gz`) holds the same rows plus the 100 uncounted $N = 3200$ trials of `dmin_f99_big_cap`. One other folder in `results/` is not part of the study: `dmin_pilot`. Two earlier runs were also left out and are no longer in `results/`, only in git history: the first ring run, which put a dog in the goal, and the first spacing run, with a soft spacing rule. |
 | Running the study | `uv run cli/campaign.py run --protocol <id>` and `uv run cli/run_queue.py`. |
 | Tables | `cli/dmin_tables.py` builds [results_tables.md](results_tables.md) from the result folders. |
 | Tests | `make test` runs the unit, invariant and regression tests; `make bench` runs the benchmark tests, six small campaigns end to end. |

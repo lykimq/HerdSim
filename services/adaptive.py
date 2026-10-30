@@ -2,8 +2,8 @@
 
 One run, one output folder. Each round:
 
-1. every cell with fewer than one batch of seeds (new, or cut short by a kill or the
-   budget stop) is filled up to one batch;
+1. every new or partial cell (cut short by a kill or the budget stop) is filled up to a
+   whole batch;
 2. the frontier rules (analysis.frontier) mark the cells whose reliability or finish-time
    comparison is still undecided; those get their next batch, up to ``max_seeds``;
 3. wherever the zone changes between two neighbouring D on a curve more than
@@ -51,7 +51,7 @@ CellId = tuple[str, int]  # (group key, D)
 def seeds_wanted(seeds_run: int, batch: int, flagged: bool) -> int:
     """Seeds to add to a cell this round, keeping its count at whole batches.
 
-    A cell that is not flagged is only filled up to one batch (a new cell, or one cut
+    A cell that is not flagged is only filled up to a whole batch (a new cell, or one cut
     short by a kill); a flagged cell gets its next batch. Whole batches keep a resumed run
     on the same seed boundaries as an uninterrupted one.
     """

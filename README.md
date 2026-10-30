@@ -145,7 +145,7 @@ HerdSim/
 Additional documentation and technical guides:
 
 - [Architecture](docs/codes/architecture.md):
-  How the code is organised and how to add a model, a controller or a task.
+  How the code is organised and why.
 - [Task design](docs/experiments/task_design.md):
   Field and goal sized by $R_f(N)$, deadlines in drive times, why $N$ and $D$ stop where they do, and the gather task.
 - [Configuration](docs/guides/configuration.md):

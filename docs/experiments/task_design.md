@@ -147,6 +147,7 @@ Terms used below ([glossary](../glossary.md#trials-and-experiments)): a cell is 
 The diagram shows one run: the flock radius is calibrated once, then rounds repeat until no cell is both undecided and under 200 seeds:
 
 ```mermaid
+%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#1f5f99", "primaryTextColor": "#ffffff", "primaryBorderColor": "#4a90d9", "lineColor": "#75808f", "tertiaryTextColor": "#75808f", "titleColor": "#75808f", "clusterBkg": "transparent", "clusterBorder": "#75808f", "edgeLabelBackground": "transparent"}}}%%
 flowchart TB
     proto["Protocol (YAML)"] --> calib["Calibrate the flock radius R_f(N)"]
     calib --> round["Round: plan the seeds each cell still needs"]

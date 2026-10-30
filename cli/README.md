@@ -63,8 +63,10 @@ would have taken 1,169,000.
 
 ### Stopping and resuming
 
-Every trial is written to disk the moment it finishes. If you press Ctrl+C, the machine
-restarts, or the budget runs out, run the same command again and it picks up where it left off.
+Every trial is appended to the trial log the moment it finishes. If you press Ctrl+C, the
+process is killed, or the budget runs out, run the same command again and it picks up where it
+left off. A power cut can also lose finished rows the operating system had not yet written to
+disk; those trials run again. We reasoned this from the code and have not tested it.
 
 A results folder belongs to one protocol and one physics (the settings listed in the
 [configuration guide](../docs/guides/configuration.md#protocol-overrides)). You can grow a

@@ -1,84 +1,67 @@
-# HerdSim Architecture
+# HerdSim architecture
 
-HerdSim is a research platform built to answer a simple question: **How many shepherd dogs ($D$) do you actually need to herd a flock of sheep ($N$) into a pen before time runs out?**
+HerdSim answers one question: how many herding dogs ($D$) does it take to bring a flock of $N$ sheep into a goal before a deadline, reliably? This doc explains how the code is organized and why, for a developer or researcher who wants to change it or add to it and knows Python but not herding models. See also the [README](../../README.md) for the study, the [glossary](../glossary.md) for terms, [models](../methods/models.md) for the sheep and dog rules, [task design](../experiments/task_design.md) for the task and decision rules, the [configuration guide](../guides/configuration.md) for settings and the [CLI reference](../guides/cli_reference.md) for commands.
 
-If you're reading this, you're probably looking to understand how the code is organized, change how something works, or add your own features. This guide walks you through the big picture, how the parts fit together, and why things are built the way they are.
+## System overview
 
----
+HerdSim does two jobs that meet at the stored trial rows:
 
-## Quick Navigation
+1. Running simulations: it moves sheep and dogs step by step on a 2D field.
+2. Managing large experiments: it runs thousands of simulations across CPU cores, stores each result as it finishes and works out the answers afterwards.
 
-- [1. System Overview & Mental Model](#1-system-overview--mental-model)
-- [2. Architectural Goals & Constraints](#2-architectural-goals--constraints)
-- [3. Building Blocks & Layer Hierarchy](#3-building-blocks--layer-hierarchy)
-- [4. Data Hierarchy & Storage Contracts](#4-data-hierarchy--storage-contracts)
-- [5. Runtime Lifecycles](#5-runtime-lifecycles)
-
----
-
-## 1. System Overview & Mental Model
-
-Think of HerdSim as doing two main jobs that meet in the middle:
-1. **Running physics simulations:** moving sheep and dogs around a 2D field step by step.
-2. **Managing large experiments:** running thousands of simulation runs efficiently, keeping clean logs, and crunching the numbers at the end.
-
-Here is the entire journey of an experiment from start to finish:
+This diagram follows one experiment from start to finish:
 
 ```mermaid
+%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#1f5f99", "primaryTextColor": "#ffffff", "primaryBorderColor": "#4a90d9", "lineColor": "#75808f", "tertiaryTextColor": "#75808f", "titleColor": "#75808f", "clusterBkg": "transparent", "clusterBorder": "#75808f", "edgeLabelBackground": "transparent"}}}%%
 flowchart LR
-    Protocol["Protocol (YAML)<br/>Experiment recipe"] --> Campaign["Campaign Layer<br/>Smart experiment manager"]
-    Campaign --> Workers["Worker Pool<br/>Parallel simulation workers"]
-    Workers --> Engine["Simulation Engine<br/>Tick loop: sheep & dogs"]
-    Engine --> Rows["Trial Rows (JSONL)<br/>Results & stats per run"]
-    Rows --> Analysis["Analysis Layer<br/>Curve fitting & math"]
-    Analysis --> Reports["Reports & Tables<br/>Human-readable summaries"]
+    protocol["Protocol (YAML)<br/>Experiment recipe"] --> campaign["Campaign<br/>Experiment manager"]
+    campaign --> workers["Worker pool<br/>Parallel processes"]
+    workers --> engine["Engine<br/>One trial, tick by tick"]
+    engine --> rows["Trial rows (JSONL)<br/>One row per trial"]
+    rows --> analysis["Analysis<br/>Decision rules and fits"]
+    analysis --> reports["Reports and tables<br/>Text for readers"]
 ```
 
-### The Step-by-Step Flow
+The steps are:
 
-1. **Protocol (`YAML`)**: This is the experiment's recipe book. You describe what you want to test-which sheep and dog behaviors to use, the field layout, which parameter values to sweep, and when to stop.
-2. **Campaign Orchestrator**: The smart manager. Instead of blindly running 100 trials for every single case, it checks results as it goes. If a test case is obvious (say, 10 dogs easily herding 5 sheep), it doesn't waste CPU time there. It directs extra runs to the tricky, borderline cases where the outcome is still uncertain.
-3. **Engine**: The sandbox. It runs one single simulation run at a time in isolation. It handles sheep flocking and panicking, dog pathfinding, teamwork, and collision physics on a continuous 2D field.
-4. **Trial Results**: Whenever a run finishes, the engine spits out a single summary row (did they succeed? how long did it take? summary statistics) and appends it to an immutable log file.
-5. **Analysis & Reporting**: Once runs are recorded, downstream tools read the log files to find the tipping points - like the minimum number of dogs needed ($D_{\min}$) or where adding more dogs stops helping ($D_{\mathrm{sat}}$). You can tweak your analysis and redraw graphs anytime in seconds without having to rerun the simulations.
+1. Protocol: the recipe of an experiment, written as a YAML file. It names the task (the drive task brings a flock into a goal, the gather task follows Lama and di Bernardo 2024), the methods (a method is a sheep model paired with a dog controller), the layouts (how the flock is placed at the start), the flock sizes and team sizes to try, and when to stop.
+2. Campaign: the manager that spends extra seeds on undecided cells. A cell is one team size on one setup, and a seed is the number that fixes the random streams of one run of it. After each round (one pass that plans and runs the seeds still needed) the campaign checks the results. A team is reliable when the lower end of a two-sided 99% Clopper-Pearson interval on its success rate is at least 0.90, the default. That takes at least 51 straight successes, so a cell that always succeeds soon needs no more seeds while a borderline one can get up to 200.
+3. Engine: a sandbox that runs one trial and knows nothing of campaigns. Each tick (one time step) the sheep model moves the sheep, the dog controller moves the dogs and the task checks whether the trial has ended. The field is continuous with no walls, and there is no pathfinding. There is no collision step either, except that a dog cannot step within the optional dog spacing of another when that setting is above its default of 0.
+4. Trial rows: the worker process turns each finished trial into one summary row (which trial it was, its outcome, the mean, minimum and maximum of each metric, and a [failure label](../glossary.md) for how it ended), and the campaign process appends the row to the folder's trial log.
+5. Analysis and reports: analysis reads stored files and never runs the model. It finds the smallest reliable team ($D_{\min}$) and the smallest reliable team that no larger reliable team beats on finish time by more than 5% ($D_{\mathrm{sat}}$). A changed rule can be recomputed in seconds with no new simulation, though some cells may then need more seeds, because the seeds were spent under the old rule.
 
----
+## Goals and constraints
 
-## 2. Architectural Goals & Constraints
+Five goals shape the design:
 
-Five simple rules guide how HerdSim is built:
+1. Fair comparisons: when you compare 2 dogs with 3 dogs, everything else must match. Cells of one group (one setup across team sizes) share the field, the goal and the task, and seed $i$ of every cell starts from the same flock. The sheep also see the same random noise until the dogs start to act differently, which reduces the part luck plays in a comparison but does not remove it.
+2. A record of each run: a folder records the physics settings (everything that changes a trial's outcome) it ran on and, if it has a run log, the code. That limits how far a result can be traced ([what a folder records](#what-a-folder-records)).
+3. Surviving interruptions: a protocol can run tens of thousands of trials over hours, and the default budget allows 72 hours. An interruption costs little, and the same command resumes the run ([recovery](#recovery-after-an-interruption)).
+4. Replaceable parts: a new sheep model, dog controller, method (such as Strömbom, Kubo or Lama) or task is new code plus one entry in a table. The tick loop and the campaign scheduler do not change.
+5. Analysis at any time: the simulations take hours and the analysis takes seconds. The stored rows can be reread under a changed threshold, decision rule or curve fit without simulating. Only the first 3 seeds of each cell keep the per-tick history by default, so failure labels cannot be recomputed for the rest.
 
-1. **Fair comparisons above all else**: If you are comparing 2 dogs vs. 3 dogs, everything else must be identical - the field size, the physics, and where the sheep start. Otherwise, you can't be sure if the extra dog made the difference or just luck.
-2. **Clear paper trail (provenance)**: If you look at a chart six months from now, you should be able to trace it back to the exact git commit, python libraries, and config settings that generated it.
-3. **Crash resilience**: Experiments often run tens of thousands of trials over several days. If a power cut happens or someone kills the process, HerdSim should pick up right where it left off. Finished work is never lost or corrupted.
-4. **Plug-and-play components**: Want to test a new sheep behavior model (like Strömbom, Kubo, or Lama) or a new dog steering strategy? You can drop it in as a plugin without touching the campaign scheduler or the core physics loop.
-5. **Analyze anytime without re-simulating**: Running the physics takes hours or days; analyzing the numbers takes seconds. The data you save is rich enough that you can change your threshold definitions or curve-fitting math later without re-running simulations.
+### Working constraints
 
-### Working Realities (Constraints)
+- One machine, many cores: trials run in a pool of worker processes on one workstation or server. A single campaign defaults to one worker per CPU core and the queue of protocols to 20. Workers share no memory and each uses one numeric-library thread.
+- File sizes that suit git: results folders are tracked in git, and GitHub refuses files over 100 MB. The uncompressed trial log can pass that limit, so git tracks its compressed copy instead. The per-tick histories stay out of git altogether, so a fresh clone cannot use them.
+- Reproducible numbers: the same seed on the same machine with the same Python and library versions gives the same trial, bit for bit. Across CPUs and NumPy builds the last floating-point bits differ, and they grow over a few hundred ticks because the dynamics are chaotic. The regression tests therefore compare whole-trial summaries with small tolerances per field.
 
-- **One machine, multiple cores**: HerdSim uses Python's `multiprocessing` to run trials across all CPU cores on a single workstation or server. Workers don't share memory, keeping things clean and crash-safe.
-- **Git-friendly file sizes**: Experiment folders are saved directly in git repositories. We keep logs compressed and records compact so files stay well under GitHub's 100 MB limit.
-- **Reproducible numbers**: Give the simulator the same random seed, Python version, and library versions (NumPy/SciPy), and you'll get the exact same run every time. Across different CPU chips, floating-point math can vary slightly, so we account for small numerical tolerances.
+## Layers
 
----
-
-## 3. Building Blocks & Layer Hierarchy
-
-HerdSim is organized like a tall building with **six distinct floors (layers)**. 
-
-The most important rule here: **you can only look down, never up**. A higher layer can use the layers below it, but a lower layer never knows what's above it.
+HerdSim has six layers. A layer may import only higher-numbered layers, and analysis imports none. This diagram shows the layers and who imports whom:
 
 ```mermaid
+%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#1f5f99", "primaryTextColor": "#ffffff", "primaryBorderColor": "#4a90d9", "lineColor": "#75808f", "tertiaryTextColor": "#75808f", "titleColor": "#75808f", "clusterBkg": "transparent", "clusterBorder": "#75808f", "edgeLabelBackground": "transparent"}}}%%
 flowchart TB
-    tools["1. Command-Line Tools (cli/)<br/>Entry points & terminal commands"]
-    report["2. Report Layer (docs/generate_docs/)<br/>Formats output into Markdown, charts, & GIFs"]
-    campaign["3. Campaign Layer (services/)<br/>Runs rounds, manages worker pools, saves data"]
-    analysis["4. Analysis Layer (analysis/)<br/>Calculates success rates, frontiers, & curves"]
-    records["5. Records Layer (records/)<br/>Defines data formats, hashes physics, checks git"]
-    subgraph engine ["6. Engine Layer (sim/)"]
-        core["sim/core/<br/>Clock tick, world state, boundary physics"]
-        plugins["sim/plugins/<br/>Sheep behaviors, dog controllers, tasks"]
-        formulas["sim/methods/<br/>Math formulas & paper references"]
+    tools["1. Command-line tools<br/>Terminal commands"]
+    report["2. Report<br/>Tables, text, figures, GIFs"]
+    campaign["3. Campaign<br/>Rounds, workers, storage"]
+    analysis["4. Analysis<br/>Reliability, curves, fits"]
+    records["5. Records<br/>Row, hashes, code identity"]
+    subgraph engine ["6. Engine"]
+        core["Core<br/>Tick loop, state, field"]
+        plugins["Plugins<br/>Sheep, dogs, tasks, metrics"]
+        formulas["Formulas<br/>From the papers"]
     end
 
     tools --> report
@@ -87,80 +70,134 @@ flowchart TB
     tools --> engine
     report --> campaign
     report --> analysis
+    report --> records
+    report --> engine
     campaign --> analysis
     campaign --> records
     campaign --> engine
     records --> engine
 ```
 
-### What Each Layer Does
+Each layer has one job and one rule ([Table 1](#where-to-look-in-the-code) says where each one lives):
 
-| Layer | Where to find it | What it's responsible for | Golden Rule |
-| :--- | :--- | :--- | :--- |
-| **1. CLI Tools** | [`cli/`](../../cli/) | Reads command-line arguments, runs commands, and shows progress bars in your terminal. | Keep commands independent: one CLI tool never imports another CLI tool. |
-| **2. Report** | [`docs/generate_docs/`](../generate_docs/) | Takes analyzed data and turns it into clean Markdown tables, summary text, graphs, and visual GIFs. | Strictly formats presentation. It never calculates experimental outcomes. |
-| **3. Campaign** | [`services/`](../../services/) | The coordinator. Manages worker processes, schedules rounds, checks file locks, and decides which simulation runs to do next. | Uses the Analysis layer to decide what to run; never contains physics logic. |
-| **4. Analysis** | [`analysis/`](../../analysis/) | The mathematician. Reads finished trial logs to figure out success percentages, find reliability boundaries, and calculate $D_{\min}$. | Works strictly on saved data files. It never calls or runs the simulator. |
-| **5. Records** | [`records/`](../../records/) | The clerk. Formats trial data rows, checks git commit hashes, and hashes physics settings to detect accidental parameter drift. | Connects live simulation data to long-term storage on disk. |
-| **6. Engine** | [`sim/`](../../sim/) | The sandbox. Advances time tick-by-tick, calculates agent movement, runs controllers, and detects goals or timeouts. | Completely self-contained. It only imports from inside `sim/`. It has no idea campaigns or batches even exist. |
+1. Command-line tools: they read arguments, run commands and print progress as plain text lines, and the status command says how far a run has got and whether it is still running. They import the engine for its table of tasks and, in the diagnostics, its layouts and dog rules. One tool never imports another.
+2. Report: it writes analysis values as Markdown tables and text, and produces the generated pages, figures and GIFs. The command-line tools import its tables and text, so the terminal and the docs show the same cells. It never decides a result. Some figures run trials and the GIFs replay stored ones to draw them, but no stored result comes from these scripts.
+3. Campaign: it runs the rounds, the worker pool, calibration and the replays, and writes the results folder. It holds a lock on the folder for the whole run, so a second campaign on it is refused. It uses the analysis layer to decide what to run next, and no sheep or dog rule lives here.
+4. Analysis: it works out success rates, reliable teams, $D_{\min}$ and curve fits from trial rows. It imports nothing from the other layers and never runs the model.
+5. Records: it builds the trial row from a finished trial, hashes the physics settings, records the code identity and writes the notice on generated files. It connects engine output to what is stored; the campaign layer does the writing of rows.
+6. Engine: it advances time tick by tick, moves the agents, and detects success, the task's own end rule and the time limit. It imports only from inside its own folder, apart from third-party libraries such as NumPy, and has no idea that campaigns or batches exist.
 
-> [!IMPORTANT]
-> **Strict layer boundaries**:
-> The **Engine** only cares about sheep and dogs moving right now - it has no clue it is running inside a campaign. Similarly, the **Analysis** layer only looks at numbers in files - it never launches a simulation. Keeping them apart makes the codebase much easier to maintain, test, and debug.
+The engine only deals with the sheep and dogs of the current trial, and analysis only sees rows of numbers. During a campaign, analysis receives the rows so far from the campaign layer after each round and decides which cells still need seeds.
 
----
+## Data levels and storage
 
-## 4. Data Hierarchy & Storage Contracts
+### How an experiment is broken down
 
-### How Experiments Are Broken Down
-
-Whenever you run an experiment, data is organized into four levels, from the biggest picture down to an individual run:
+Data has four levels, from the whole experiment down to one run:
 
 ```mermaid
-flowchart TD
-    Protocol["Protocol: The overall experiment plan (e.g., dmin_m12.yaml)"]
-    Group["Group: A specific setup (flock size N, layout, sheep model)"]
-    Cell["Cell: That setup + a specific team size (number of dogs D)"]
-    Trial["Trial: One run with a specific random seed (i)"]
+%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#1f5f99", "primaryTextColor": "#ffffff", "primaryBorderColor": "#4a90d9", "lineColor": "#75808f", "tertiaryTextColor": "#75808f", "titleColor": "#75808f", "clusterBkg": "transparent", "clusterBorder": "#75808f", "edgeLabelBackground": "transparent"}}}%%
+flowchart TB
+    protocol["Protocol<br/>One experiment plan"]
+    group["Group<br/>One setup"]
+    cell["Cell<br/>Setup plus team size"]
+    trial["Trial<br/>Cell plus one seed"]
 
-    Protocol --> Group
-    Group --> Cell
-    Cell --> Trial
+    protocol --> group
+    group --> cell
+    cell --> trial
 ```
 
-1. **Protocol**: The full study blueprint (e.g., [`dmin_m12.yaml`](../../protocols/configs/protocols/dmin_m12.yaml)). It lists all the methods, field layouts, parameter ranges, and stopping rules.
-2. **Group**: A specific physical setup: `(method, layout, settings, flock size N)`. Before herding begins, we calibrate things like how much space a flock of size $N$ naturally occupies at this level.
-3. **Cell**: A specific question to answer: `Group + team size (D)`. For example: *"Can 3 dogs reliably herd 40 sheep under setup X?"* Decisions like "is this condition reliable enough to stop testing?" happen at the cell level.
-4. **Trial**: One single simulation run: `Cell + random seed index (i)`. This gives sheep and dogs their starting positions, runs until success or timeout, and produces exactly one row of data.
+1. Protocol: one experiment plan, such as `dmin_m12`, the main run with a deadline of 12 [drive times](../experiments/task_design.md#deadlines-in-drive-times). It lists the methods, layouts, flock sizes, team sizes and stopping rules.
+2. Group: one setup, given by the method, the layout, any swept settings (settings a protocol tries at several values) and the flock size $N$. The group's cells form one curve of results against team size.
+3. Cell: one team size on one setup, which asks a question such as "can 3 dogs herd 200 sheep in this setup?". Decisions such as "is this team reliable?" are made per cell.
+4. Trial: one run of that cell with one seed. The seed sets where the sheep start and the random noise of the sheep and dogs. On the drive task the dog starts are fixed by the setup and team size; only the gather task draws them from the seed. The run goes until success, the task's own end rule or the time limit, and produces exactly one row.
 
-### Inside a Results Folder
+### Calibration
 
-Every time a protocol runs, it creates a dedicated folder under `results/`. Here is what lives inside:
+Calibration is a short run at the start of a campaign that sizes the task, per method and flock size. On the drive task, one dog drives a tight flock toward a goal it cannot reach, and the radius the flock settles to, $R_f(N)$, then sizes the goal and the drive. It uses one dog and no swept settings, so every level of a method is compared on a task sized to the same reference flock. The gather task sizes itself and has no calibration, and a protocol may impose the radius above a chosen flock size.
+
+### Results folder
+
+Each protocol writes to its own folder, unless the command names another place. The files are:
 
 ```text
-results/<protocol_name>/
-├── protocol.yaml              # Exact copy of the experiment protocol used
-├── physics.hash               # A fingerprint of all physics settings (detects accidental changes)
-├── sittings.jsonl             # Log of every run session (who ran it, when, git commit, machine info)
-├── calibration.json           # Measurements like natural flock size Rf(N) before dogs enter
-├── trial_log.jsonl            # The main log: every finished trial appends a line here
-├── trial_log.jsonl.gz         # A compressed archive of the trial log created when a sitting ends
-├── trials.parquet             # Clean, fast-to-read table of all active trials (updated every round)
-├── cell_decisions.parquet     # Verdict per cell (is it reliable, unreliable, or still needs more runs?)
-├── errors.jsonl               # Error tracebacks if any trial crashed unexpectedly
-└── progress.json              # Live snapshot of current round, percent done, and why things stopped
+results/<protocol_id>/
+|-- protocol.yaml         merged protocol as the folder was created, with every method parameter
+|-- provenance.json       protocol id, physics hash and creation time, checked at every start
+|-- runs.jsonl            one line per sitting: time, code identity, merged protocol (newer folders only)
+|-- calibration.json      R_f(N) per method, with the physics hash it belongs to (not for the gather task)
+|-- trials.jsonl          the trial log: one line per finished trial, appended as trials finish (not in git)
+|-- trials.jsonl.gz       compressed copy for git, written when a campaign closes the folder
+|-- trials.csv            the rows of the groups the protocol lists, rewritten after each round
+|-- trials.csv.gz         compressed copy, written when a campaign closes the folder
+|-- frontier_cells.csv    per cell: reliability, finish times, zone, errored trials, whether it needs seeds
+|-- frontier_groups.csv   per group: D_min, D_sat and the other team sizes, with flags
+|-- errors.jsonl          one line per trial that raised an exception (only if one did)
+|-- status.json           the run's progress and why it stopped
+|-- timeseries/           per-tick history of the first seeds of each cell (not in git)
+|   `-- <method>__<layout>__N-<N>__D-<D>__seed-<seed>.parquet
+`-- .lock                 the lock a running campaign holds (not in git)
 ```
 
----
+### What a folder records
 
-## 5. Runtime Lifecycles
+The physics hash covers the task, the default settings other than sampling, each method's parameters and time limit, the set of layouts and the largest team size. A later start with different physics in the same folder is refused, while more flock sizes, smaller or intermediate team sizes, or more seeds can be added.
 
-### Crash Recovery & Replays
+The protocol copy holds the merged protocol (the protocol file over its default settings) as the folder was created. It does not always show the settings a later run used, and neither it nor the hash can separate runs on different code.
 
-Two design choices ensure you never lose sleep over a long-running campaign:
+A sitting is one start of a campaign on a folder, and each sitting appends to the run log. The log holds the start time, the trial count so far, the merged protocol, a hash of the trial code that catches uncommitted edits, the git commit, whether the trial code had uncommitted changes, and the versions of Python, NumPy, SciPy, pandas and PyArrow. If the code hash differs from the last sitting the campaign warns and carries on, because a refactor changes the hash too. Folders last run before this log existed have none.
 
-- **Picking up after an interruption**:
-  If your computer shuts down or you press `Ctrl+C`, don't worry. Trials are saved one line at a time to an append-only file (`trial_log.jsonl`). The worst that can happen is the very last line was cut off mid-write. When you restart the campaign, HerdSim automatically drops that broken half-line, checks what's missing, finishes any partially completed rounds, and picks right back up.
+## Runtime behaviour
 
-- **Replaying any run exactly**:
-  Notice a weird or interesting trial in your results? You can replay that exact trial visually using [`cli/diagnostics/`](../../cli/diagnostics/). The replay tool re-runs the simulation with the recorded seed and verifies that every single tick and outcome matches the historical record bit-for-bit before opening up visual debuggers.
+### One campaign round
+
+Each round does three things:
+
+1. It fills every new or partial cell up to a whole batch. A batch is 10 seeds by default, and a cell is left partial by an interrupted run or the budget.
+2. It gives each cell the rules mark as undecided its next batch, up to the maximum (200 seeds by default). By default the rules decide reliability only. A protocol can also ask them to decide finish-time comparisons (whether one team is faster than another on the same seeds).
+3. It adds the team size halfway between two tested sizes whose answers differ and that are more than a set gap apart.
+
+Some cells far above $D_{\mathrm{sat}}$ stop early, because an added dog that duplicates another cannot change the answer. Such a cell lies above the first larger team that also counts as saturated, is itself saturated or undecided, and has dogs that are copies of each other. It is still filled to a whole batch but gets no further batches.
+
+A trial that raises an exception is logged and the batch goes on, but its cell gets no more seeds and is never reliable, because an exception in a deterministic simulation is a bug. The run stops when no cell needs seeds or when the time budget is spent.
+
+### Recovery after an interruption
+
+Only the campaign process appends to the trial log, one line at a time, so a killed process leaves at worst a cut last line. On restart that line is dropped and its trial runs again, as do the trials that were in progress. The campaign then tops each cell up to a whole batch and continues, so a resumed run stays on the same seed boundaries as an uninterrupted one. A worker that dies also stops the batch, and the same resume applies. A resumed run gets a new time budget.
+
+Appends are not forced to disk, so a power cut can also lose finished rows still in the operating system's cache, and those trials then run again. We reasoned this from the code and have not tested it.
+
+### Replaying a trial
+
+A trial depends only on its configuration and seed, so it can be run again. The replay tools rebuild the configuration from the protocol file and refuse the run if that file is gone or now gives different physics. An unchanged replay is compared with the stored row on success and tick count, and raises an error if they differ, because a replay that is a different trial says nothing about the stored results. A diagnostic either replays a trial unchanged to take extra measures or changes one setting and compares. Three of the four diagnostic tools work this way; the fourth looks only at start layouts. The GIFs are drawn from replays too.
+
+## Where to look in the code
+
+Table 1 maps each part of the design to its place in the repository.
+
+**Table 1: Where each part lives.**
+
+| Part | Location |
+| :--- | :--- |
+| Command-line tools | [`cli/`](../../cli/) |
+| Diagnostic tools and replay | [`cli/diagnostics/`](../../cli/diagnostics/), [`services/replay.py`](../../services/replay.py) |
+| Report tables and text | [`docs/generate_docs/report/`](../generate_docs/report/) |
+| Generated pages, figures and GIFs | [`docs/generate_docs/`](../generate_docs/) |
+| Campaign rounds | [`services/adaptive.py`](../../services/adaptive.py) |
+| Worker pool and batches | [`services/pool.py`](../../services/pool.py), [`services/runner.py`](../../services/runner.py) |
+| Calibration | [`services/calibration.py`](../../services/calibration.py) |
+| Protocol loading, groups, cells and seeds | [`services/protocol.py`](../../services/protocol.py), [`services/cells.py`](../../services/cells.py) |
+| Results folder, lock and resume | [`services/store.py`](../../services/store.py) |
+| Analysis | [`analysis/`](../../analysis/) |
+| Decision rules | [`analysis/frontier.py`](../../analysis/frontier.py) |
+| Trial row | [`records/trial_row.py`](../../records/trial_row.py) |
+| Physics hash and code identity | [`records/provenance.py`](../../records/provenance.py) |
+| Generated-file notice | [`records/generated_notice.py`](../../records/generated_notice.py) |
+| Engine | [`sim/`](../../sim/) |
+| Tick loop, state and field | [`sim/core/`](../../sim/core/) |
+| Table of methods | [`sim/core/methods.py`](../../sim/core/methods.py) |
+| Sheep models, dog controllers, tasks and metrics | [`sim/plugins/`](../../sim/plugins/) |
+| Formulas from the papers | [`sim/methods/`](../../sim/methods/) |
+| Protocol files | [`protocols/configs/protocols/`](../../protocols/configs/protocols/) |
+| Regression test for trials | [`tests/sim/test_golden.py`](../../tests/sim/test_golden.py) |
