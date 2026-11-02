@@ -6,17 +6,6 @@ How HerdSim is built: the layers, the levels an experiment is split into, and ho
 
 HerdSim moves sheep and dogs tick by tick on a 2D field and runs thousands of trials across CPU cores. Each trial is stored as it finishes, and the answers are worked out afterwards from the stored rows.
 
-```mermaid
-%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#1f5f99", "primaryTextColor": "#ffffff", "primaryBorderColor": "#4a90d9", "lineColor": "#75808f", "tertiaryTextColor": "#75808f", "titleColor": "#75808f", "clusterBkg": "transparent", "clusterBorder": "#75808f", "edgeLabelBackground": "transparent"}}}%%
-flowchart LR
-    protocol["Protocol"] --> campaign["Campaign"]
-    campaign --> workers["Worker pool"]
-    workers --> engine["Engine"]
-    engine --> rows["Trial rows"]
-    rows --> analysis["Analysis"]
-    analysis --> reports["Reports and tables"]
-```
-
 ## Goals and constraints
 
 1) Paired comparisons: the cells of one curve share the field, goal and task, and seed $i$ of every cell starts from the same flock. This lowers the part luck plays in a comparison but does not remove it.
@@ -60,10 +49,7 @@ flowchart TB
 
 ## How an experiment is broken down
 
-1) Protocol: the recipe of one experiment, a YAML file naming the task, method, start layouts, flock and team sizes, and when to stop.
-2) Curve: one setup (method, layout, flock size $N$) tested across team sizes.
-3) Cell: one team size on one setup, asking "can 3 dogs herd 200 sheep in this setup?". Reliability is decided per cell.
-4) Trial: one run of a cell with one seed, which sets the sheep starts and the noise of sheep and dogs. It ends at success, the task's own end rule or the time limit, and gives one row.
+A protocol, the recipe of one experiment, splits into curves (one setup tested across team sizes), cells (one team size on one setup) and trials (one cell with one seed). Reliability is decided per cell. The [glossary](../glossary.md#trials-and-experiments) defines each level.
 
 ## Results folder
 
@@ -71,13 +57,13 @@ Each protocol writes to its own folder. The [configuration guide](../guides/conf
 
 1) Provenance record: the physics hash, which covers every setting that changes an outcome. A start with different physics in the same folder is refused.
 2) Protocol copy: the merged protocol as the folder was created. It is written once, so it may not show what a later run used.
-3) Run log: one line per sitting (one start of a campaign on the folder) with the start time, the trial count so far, the merged protocol and the code identity: a hash of the trial code, the commit and the library versions. A changed code hash gives a warning and the run goes on, because a refactor changes the hash too.
-4) Trial log: one line per finished trial, appended as it finishes. Git tracks only its compressed copy, written when a campaign closes the folder; a fresh clone unpacks it the first time a command opens the folder.
+3) Run log: one line per sitting (one start of a campaign on the folder) with the code identity, so runs on different code can be told apart.
+4) Trial log: one line per finished trial, appended as it finishes.
 5) Lock: held by a running campaign, so a second campaign on the folder is refused.
 
 ## How a campaign runs
 
-The campaign calibrates the flock radius $R_f(N)$ once, then runs rounds until every open cell has 200 seeds or the time budget (72 h by default) is spent. A round also adds team sizes where neighbouring answers differ. [Task design](../experiments/task_design.md#3-adaptive-sampling) gives the rules.
+The campaign calibrates the flock radius $R_f(N)$ once, then runs rounds until every open cell has 200 seeds or the time budget (72 h by default) is spent. [Task design](../experiments/task_design.md#3-adaptive-sampling) gives the rules.
 
 ```mermaid
 %%{init: {"theme": "base", "themeVariables": {"primaryColor": "#1f5f99", "primaryTextColor": "#ffffff", "primaryBorderColor": "#4a90d9", "lineColor": "#75808f", "tertiaryTextColor": "#75808f", "titleColor": "#75808f", "clusterBkg": "transparent", "clusterBorder": "#75808f", "edgeLabelBackground": "transparent"}}}%%
@@ -94,7 +80,7 @@ flowchart TB
 
 ### Recovery after an interruption
 
-Only the campaign process appends to the trial log, one line at a time, so a killed process, including one stopped with `Ctrl+C`, leaves at worst a cut last line. On restart with the same command that line is dropped, and that trial and the ones in progress run again. Each cell is then topped up to a whole batch, so a resumed run keeps the seed boundaries of an uninterrupted one. A dead worker stops the batch, with the same resume. A resumed run gets a new time budget.
+Only the campaign process appends to the trial log, one line at a time, so a killed process, including one stopped with `Ctrl+C`, leaves at worst a cut last line. On restart with the same command that line is dropped, and that trial and the ones in progress run again. Each cell is then topped up to a whole batch, so a resumed run keeps the seed boundaries of an uninterrupted one. A dead worker stops the batch, with the same resume.
 
 A trial that raises an exception gives no row, only a line in the error log, and the batch goes on. Its cell gets no more seeds and is never reliable, because an exception in a deterministic simulation is a bug.
 

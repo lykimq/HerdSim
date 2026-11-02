@@ -44,23 +44,6 @@ def seeds_wanted(seeds_run: int, batch: int, flagged: bool) -> int:
     return max(0, target - seeds_run)
 
 
-def _flock_radii(
-    protocol: Protocol, store: CampaignStore, physics_hash: str, workers: int
-) -> dict[str, dict[int, float]]:
-    """R_f per method and flock size, calibrated once and kept in the folder."""
-    table = store.load_calibration()
-    needed = {(m.name, n) for m in protocol.methods for n in protocol.flock_sizes}
-    if table is None or any(n not in table.get(m, {}) for m, n in needed):
-        try:
-            table = calibrate(protocol, workers, existing=table)
-        except CalibrationError:
-            # No trial ran: let a corrected protocol reopen this folder.
-            store.discard_if_empty()
-            raise
-        store.save_calibration(physics_hash, table)
-    return table
-
-
 def _next_seeds(cell: Cell, done: set[str], batch: int, max_seeds: int) -> list[int]:
     """The next ``batch`` seed indices of ``cell`` that have not run."""
     todo = [i for i in range(max_seeds) if trial_key(cell, i) not in done]
@@ -87,11 +70,23 @@ def pruned_cells(front: Frontier, trials: pd.DataFrame, overlap: float) -> set[C
         confirm = next((d for d in sorted(zones) if d > d_sat and zones[d] == SATURATED), None)
         if confirm is None:
             continue
-        for d in (d for d in sorted(zones) if d > confirm):
+        for d in (d for d in sorted(zones) if d > confirm):  # only above the confirming D
             copies = float(mean_overlap.get((key, d), 0.0)) >= overlap
             if copies and zones[d] in (SATURATED, UNDECIDED):
                 out.add((key, d))
     return out
+
+
+def _midpoint_to_add(
+    a: int, b: int, values: dict[int, str], may_still_decide: set[int], min_gap: int
+) -> int | None:
+    """The D between neighbours ``a`` and ``b`` when their value changes across more than
+    ``min_gap``, unless one is undecided and may still decide; otherwise None."""
+    if b - a <= min_gap or values[a] == values[b]:
+        return None
+    if any(values[d] == UNDECIDED and d in may_still_decide for d in (a, b)):
+        return None
+    return (a + b) // 2
 
 
 def refine(
@@ -115,18 +110,17 @@ def refine(
         group_key = str(key)
         if group_key not in grid:
             continue
-        zones = dict(zip(cells["n_shepherds"].astype(int), cells[column]))
-        waiting = set(cells["n_shepherds"].astype(int)[cells["n_seeds"] < max_seeds])
-        ds = sorted(zones)
+        ds_of_cells = cells["n_shepherds"].astype(int)
+        values = dict(zip(ds_of_cells, cells[column]))
+        may_still_decide = set(ds_of_cells[cells["n_seeds"] < max_seeds])
+        ds = sorted(values)
         for a, b in zip(ds, ds[1:]):
             if (group_key, a) in pruned or (group_key, b) in pruned:
                 continue
-            open_ = any(zones[d] == UNDECIDED and d in waiting for d in (a, b))
-            if b - a > min_gap and zones[a] != zones[b] and not open_:
-                mid = (a + b) // 2
-                if mid not in grid[group_key]:
-                    grid[group_key].add(mid)
-                    added += 1
+            mid = _midpoint_to_add(a, b, values, may_still_decide, min_gap)
+            if mid is not None and mid not in grid[group_key]:
+                grid[group_key].add(mid)
+                added += 1
     return added
 
 
@@ -188,6 +182,31 @@ def _assess(
     return front, pruned
 
 
+def _decide(
+    ledger: _Ledger,
+    rules: Rules,
+    settings: dict[str, Any],
+    store: CampaignStore,
+    log: Callable[[str], None],
+) -> Frontier | None:
+    """Decide every cell from the rows so far, write the tables, and add the midpoint D the
+    rules ask for. Without decided finish times the midpoints follow reliability alone."""
+    front, pruned = _assess(ledger, rules, settings["prune_overlap"], store)
+    if front is not None:
+        column = "zone" if rules.decide_finish_times else "reliability"
+        added = refine(
+            ledger.grid,
+            front,
+            settings["refine_min_gap"],
+            frozenset(pruned),
+            column,
+            settings["max_seeds"],
+        )
+        if added:
+            log(f"added {added} intermediate dog counts")
+    return front
+
+
 def _cells_needing_seeds(front: Frontier | None) -> set[CellId]:
     if front is None:
         return set()
@@ -220,6 +239,38 @@ def _plan_round(
                 plan.append(make_trial(protocol, cell, i, config_of(cell), timeseries_dir))
     plan.sort(key=lambda t: (-t.cell.group.n_sheep, -t.cell.n_shepherds, t.seed_index))
     return plan
+
+
+def _flock_radii(
+    protocol: Protocol, store: CampaignStore, physics_hash: str, workers: int
+) -> dict[str, dict[int, float]]:
+    """R_f per method and flock size, calibrated once and kept in the folder."""
+    table = store.load_calibration()
+    needed = {(m.name, n) for m in protocol.methods for n in protocol.flock_sizes}
+    if table is None or any(n not in table.get(m, {}) for m, n in needed):
+        try:
+            table = calibrate(protocol, workers, existing=table)
+        except CalibrationError:
+            # No trial ran: let a corrected protocol reopen this folder.
+            store.discard_if_empty()
+            raise
+        store.save_calibration(physics_hash, table)
+    return table
+
+
+def _config_builder(
+    protocol: Protocol, radii: dict[str, dict[int, float]]
+) -> Callable[[Cell], dict[str, Any]]:
+    """The run config of a cell, built once per cell and reused across rounds."""
+    configs: dict[str, dict[str, Any]] = {}
+
+    def config_of(cell: Cell) -> dict[str, Any]:
+        if cell.key not in configs:
+            radius = radii[cell.group.method][cell.group.n_sheep]
+            configs[cell.key] = cell_config(protocol, cell, radius)
+        return configs[cell.key]
+
+    return config_of
 
 
 def _status(
@@ -262,65 +313,6 @@ def _status(
             (open_cells & (cells["n_seeds"] >= protocol.settings["max_seeds"])).sum()
         )
     return payload
-
-
-def run_campaign(
-    protocol: Protocol, workers: int, log: Callable[[str], None] = print
-) -> CampaignStore:
-    physics_hash = protocol.physics_hash()
-    store = CampaignStore(protocol.output)
-    store.open(protocol, physics_hash)
-    try:
-        before, now = store.record_sitting(protocol)
-        if before is not None and before.get("code_hash") != now["code_hash"]:
-            # Warn, not refuse: a refactor changes the hash too. Each sitting records its code
-            # and how many trials came before it, so a reader can tell which ran on which code.
-            change = f"{before.get('code_hash')} -> {now['code_hash']}"
-            log(f"warning: the trial code changed since the last run of this folder ({change})")
-        _run(protocol, store, physics_hash, workers, log)
-    finally:
-        store.close()
-    return store
-
-
-def _config_builder(
-    protocol: Protocol, radii: dict[str, dict[int, float]]
-) -> Callable[[Cell], dict[str, Any]]:
-    """The run config of a cell, built once per cell and reused across rounds."""
-    configs: dict[str, dict[str, Any]] = {}
-
-    def config_of(cell: Cell) -> dict[str, Any]:
-        if cell.key not in configs:
-            radius = radii[cell.group.method][cell.group.n_sheep]
-            configs[cell.key] = cell_config(protocol, cell, radius)
-        return configs[cell.key]
-
-    return config_of
-
-
-def _decide(
-    ledger: _Ledger,
-    rules: Rules,
-    settings: dict[str, Any],
-    store: CampaignStore,
-    log: Callable[[str], None],
-) -> Frontier | None:
-    """Decide every cell from the rows so far, write the tables, and add the midpoint D the
-    rules ask for. Without decided finish times the midpoints follow reliability alone."""
-    front, pruned = _assess(ledger, rules, settings["prune_overlap"], store)
-    if front is not None:
-        column = "zone" if rules.decide_finish_times else "reliability"
-        added = refine(
-            ledger.grid,
-            front,
-            settings["refine_min_gap"],
-            frozenset(pruned),
-            column,
-            settings["max_seeds"],
-        )
-        if added:
-            log(f"added {added} intermediate dog counts")
-    return front
 
 
 def _stop_reason(plan: list[Trial], deadline: float) -> str | None:
@@ -380,3 +372,20 @@ def _run(
             f"{len(ledger.error_cells)} cells had errors and got no further seeds; see errors.jsonl"
         )
     log(f"stopped: {stop_reason}; {len(ledger.rows)} trials in {protocol.output}")
+
+
+def run_campaign(
+    protocol: Protocol, workers: int, log: Callable[[str], None] = print
+) -> CampaignStore:
+    physics_hash = protocol.physics_hash()
+    store = CampaignStore(protocol.output)
+    store.open(protocol, physics_hash)
+    try:
+        before, now = store.record_sitting(protocol)
+        if before is not None and before.get("code_hash") != now["code_hash"]:
+            change = f"{before.get('code_hash')} -> {now['code_hash']}"
+            log(f"warning: the trial code changed since the last run of this folder ({change})")
+        _run(protocol, store, physics_hash, workers, log)
+    finally:
+        store.close()
+    return store

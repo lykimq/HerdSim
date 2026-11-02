@@ -170,6 +170,7 @@ class _Comparisons:
         return self._verdicts[(a, b)]
 
     def still_open(self, verdict: str, *cells_of_pair: int) -> bool:
+        """True when ``verdict`` is undecided; the pair's cells then also ask for seeds."""
         if verdict == UNDECIDED and self.rules.decide_finish_times:
             self.needs.update(cells_of_pair)
         return verdict == UNDECIDED
@@ -271,6 +272,34 @@ def _zones_without_reliable(
     }
 
 
+def _zones_with_reliable(
+    ds: list[int],
+    status: dict[int, str],
+    finish: dict[int, float],
+    out: GroupFrontier,
+    cmp: _Comparisons,
+) -> dict[int, str]:
+    """Zones of a group with a reliable D; sets all its frontier values on ``out``.
+
+    The working D are the reliable ones below overcrowding; the finish-time values D_best,
+    D_crowd and D_sat are found among them.
+    """
+    reliable = [d for d in ds if status[d] == RELIABLE]
+    out.d_min = reliable[0]
+    out.d_overcrowd = _overcrowding_onset(ds, status, out.d_min)
+    working = [d for d in reliable if out.d_overcrowd is None or d < out.d_overcrowd]
+    out.d_max = working[-1]
+    out.d_max_at_grid_top = out.d_overcrowd is None and out.d_max == ds[-1]
+
+    out.d_best, out.d_best_undecided = _d_best(working, finish, cmp)
+    out.d_crowd, out.d_crowd_undecided = _d_crowd(working, out.d_best, cmp)
+    out.d_sat, out.d_sat_undecided = _d_sat(working, cmp)
+    out.still_improving_at_top = (
+        out.d_max_at_grid_top and len(working) > 1 and out.d_sat == working[-1]
+    )
+    return _zones(ds, status, working, out, cmp)
+
+
 def _group(
     cells: pd.DataFrame, trials: pd.DataFrame, rules: Rules
 ) -> tuple[GroupFrontier, dict[int, str], set[int]]:
@@ -283,29 +312,14 @@ def _group(
     by_d = {int(cast(int, d)): g for d, g in trials.groupby("n_shepherds")}
     cmp = _Comparisons(by_d, rules, needs)
     out = GroupFrontier(str(cells["group_key"].iloc[0]))
-
-    reliable = [d for d in ds if status[d] == RELIABLE]
     out.d_min_low = next((d for d in ds if upper[d] >= rules.theta), None)
-    out.d_min_above_grid = not reliable and not needs
-    out.group_undecided = bool(needs)
-    if not reliable:
-        return out, _zones_without_reliable(ds, status, out), needs
-    out.d_min = reliable[0]
 
-    out.d_overcrowd = _overcrowding_onset(ds, status, out.d_min)
-    working = [d for d in reliable if out.d_overcrowd is None or d < out.d_overcrowd]
-    out.d_max = working[-1]
-    out.d_max_at_grid_top = out.d_overcrowd is None and out.d_max == ds[-1]
-
-    out.d_best, out.d_best_undecided = _d_best(working, finish, cmp)
-    out.d_crowd, out.d_crowd_undecided = _d_crowd(working, out.d_best, cmp)
-    out.d_sat, out.d_sat_undecided = _d_sat(working, cmp)
-    out.still_improving_at_top = (
-        out.d_max_at_grid_top and len(working) > 1 and out.d_sat == working[-1]
-    )
-
-    zones = _zones(ds, status, working, out, cmp)
-    out.group_undecided = bool(needs)
+    if any(status[d] == RELIABLE for d in ds):
+        zones = _zones_with_reliable(ds, status, finish, out, cmp)
+    else:
+        out.d_min_above_grid = not needs
+        zones = _zones_without_reliable(ds, status, out)
+    out.group_undecided = bool(needs)  # after the comparisons, which may add to ``needs``
     return out, zones, needs
 
 

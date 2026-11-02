@@ -32,6 +32,12 @@ def layout_by_n(table: pd.DataFrame, layouts: tuple[str, ...] | None = None) -> 
     return wide.fillna("-")
 
 
+def reach_table(table: pd.DataFrame, layouts: tuple[str, ...]) -> pd.DataFrame:
+    """Reach of one dog: layout rows in ``layouts`` order, N columns."""
+    wide = table.pivot_table(index="layout", columns="n", values="reach", aggfunc="first")
+    return wide.reindex([layout for layout in layouts if layout in wide.index]).map("{:.2f}".format)
+
+
 def growth_table(table: pd.DataFrame) -> pd.DataFrame:
     """Per layout: slope range, N used, and notes for undecided sizes."""
     rows = []

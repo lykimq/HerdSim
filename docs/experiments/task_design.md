@@ -30,7 +30,7 @@ In the middle and right panels each dot is one of the five main flock sizes.
 
 The radius of a flock is $\sqrt{2}$ times the RMS (root mean square) distance of its sheep from the flock centre, the radius of a uniform disc with that RMS. Calibration measures $R_f(N)$ once per $N$ when a campaign starts. One dog that knows where every sheep is drives the flock for 300 s toward a goal too far away to reach. The flock starts as a Gaussian with $\sigma = 0.5\,s\sqrt{N/\pi}$ cut at $3\sigma$, for a spacing $s$ between sheep of 1 m and of 3 m (each sheep then has about $s^2$ of ground). $R_f$ is the radius averaged over the last 90 s, the median over 3 seeds and both spacings.
 
-If the radius still changes by more than 15% between the last two 90 s windows, or differs by more than 25% between the two spacings, the campaign stops with an error, because the flock has no single size to scale the task by ([calibration settings](../guides/settings.md#calibration-of-r_f)).
+If the radius still changes by more than 15% between the last two 90 s windows, differs by more than 25% between the two spacings, or the flock centre comes within $2 R_f$ of the goal during those windows, the campaign stops with an error: the flock has no single size to scale the task by, or it reached the goal instead of being driven ([calibration settings](../guides/settings.md#calibration-of-r_f)).
 
 **Table 1: Lengths of the drive task.** $l_{\mathrm{reach}}$ is the farthest any sheep can start from the flock centre, over every [start layout](#flock-start-layouts) of the protocol.
 
@@ -50,7 +50,7 @@ A trial succeeds when enough sheep are in the goal at the same tick. Under the s
 
 A fixed 5-minute limit would be unfair to large flocks, driven over 200 m against 80 m for small ones. Deadlines are therefore given in drive times $T_{\mathrm{drive}} = l / v_{\mathrm{sheep,max}}$, the time a sheep walking straight at top speed needs for the drive. A Strombom sheep has one speed, 1.0 m/s, so $T_{\mathrm{drive}}$ in s equals $l$ in m.
 
-The study uses 3, 6 and 12 drive times, each double the one before. At 12 drive times one dog has time to collect [outliers](../methods/strombom_multi.md#when-to-collect) one after another, and at 3 the team needed grows ([report, section 3.3](../report/d_min_report.md#33-rq3-how-does-the-deadline-change-d_min)). Each deadline is rounded up to whole 1 s ticks from the unrounded drive distance, so it can be 1 s above the multiple shown ($3 \times 98.8 = 296.4$ s gives 297 s at $N = 50$).
+The study uses 3, 6 and 12 drive times, each double the one before. At 12 drive times one dog has time to collect outliers one after another, and at 3 the team needed grows ([report, section 3.3](../report/d_min_report.md#33-rq3-how-does-the-deadline-change-d_min)). Each deadline is rounded up to whole 1 s ticks from the unrounded drive distance, so it can be 1 s above the multiple shown ($3 \times 98.8 = 296.4$ s gives 297 s at $N = 50$).
 
 **Table 2: Deadlines at the five main flock sizes.**
 
@@ -96,7 +96,7 @@ The study uses `arcs`: half circles on the side away from the goal, with the dog
 
 ## 3. Adaptive sampling
 
-A cell asks "can 3 dogs herd 200 sheep in this setup?", and each seed gives it one trial. Most cells need far fewer than the cap of 200 seeds (one dog against 400 scattered sheep at a tight deadline, or twelve dogs on 25 compact sheep), so HerdSim adds trials only to the open cells, those whose answer is still undecided. In the end each cell gets a zone, which says what its place on the curve means ([section 5](#5-frontier-rules-and-zones)). How the rounds, the time budget and resuming work is in the [architecture](../codes/architecture.md#how-a-campaign-runs).
+Most [cells](../glossary.md#trials-and-experiments) need far fewer than the cap of 200 seeds (one dog against 400 scattered sheep at a tight deadline, or twelve dogs on 25 compact sheep), so HerdSim adds trials only to the open cells, those whose answer is still undecided. In the end each cell gets a zone, which says what its place on the curve means ([section 5](#5-frontier-rules-and-zones)). How the rounds, the time budget and resuming work is in the [architecture](../codes/architecture.md#how-a-campaign-runs). Figures 4 to 7 are illustrations, not stored runs.
 
 ### Stopping early with the 99% Clopper-Pearson interval
 
@@ -110,7 +110,7 @@ The exact interval is conservative for one look. Repeated looks are not correcte
 
 ![Sequential refinement and early stopping](../figures/fig_adaptive_1_refinement.png)
 
-**Figure 4: Stopping early.** Clear failures stop after 10 to 20 trials, clear successes at 60 trials, and only cells near the threshold go on toward 200. This is an illustration, not stored runs. Red is the interval's upper bound when no trial succeeds, green its lower bound when all succeed and blue an undecided cell after each batch of 10; the dashed line is $\theta = 0.90$.
+**Figure 4: Stopping early.** Clear failures stop after 10 to 20 trials, clear successes at 60 trials, and only cells near the threshold go on toward 200. Red is the interval's upper bound when no trial succeeds, green its lower bound when all succeed and blue an undecided cell after each batch of 10; the dashed line is $\theta = 0.90$.
 
 ### Midpoint densification
 
@@ -122,7 +122,7 @@ The protocol lists a coarse set of team sizes, and HerdSim fills in counts where
 
 ![Adaptive grid densification](../figures/fig_adaptive_2_densification.png)
 
-**Figure 5: Midpoint densification.** A change of zone between $D = 2$ and $D = 4$ adds $D = 3$ to the next round. This is an illustration, not stored runs. Dots are tested $D$, coloured by zone; the top row is the first round and the bottom row the next, with the added $D = 3$ as a star.
+**Figure 5: Midpoint densification.** A change of zone between $D = 2$ and $D = 4$ adds $D = 3$ to the next round. Dots are tested $D$, coloured by zone; the top row is the first round and the bottom row the next, with the added $D = 3$ as a star.
 
 ### Pruning above saturation
 
@@ -136,15 +136,15 @@ A pruned cell is filled to a whole batch, then gets no more seeds and adds no mi
 
 ![Saturation and overlap pruning](../figures/fig_adaptive_3_pruning.png)
 
-**Figure 6: Pruning.** Above a confirmed saturation, [saturated](#zones) or undecided cells get no more seeds once their dog overlap is at least 0.90. This is an illustration, not stored runs. Blue is the median finish time (left axis) and orange the mean dog overlap (right axis), the share of dogs with another dog within 2 m averaged over ticks and trials; the dotted line is 0.90 overlap and the shaded region is pruned.
+**Figure 6: Pruning.** Above a confirmed saturation, [saturated](#zones) or undecided cells get no more seeds once their dog overlap is at least 0.90. Blue is the median finish time (left axis) and orange the mean dog overlap (right axis), the share of dogs with another dog within 2 m averaged over ticks and trials; the dotted line is 0.90 overlap and the shaded region is pruned.
 
 ### Paired random streams
 
-To compare 2 dogs with 4 fairly, both teams should face the same flock. Seed $i$ of every cell is `master_seed + i` (for example $2026 + i$), and a trial draws the start positions and the random choices of sheep and dogs from three separate streams. Seed $i$ thus gives every team the same start flock (Figure 7) and the same sheep noise until the dogs act differently, so the finish-time difference at a seed, which the [paired bootstrap](#frontier-values) compares, is mostly the team's effect. A shorter deadline only cuts the same trial short, as the stored runs confirm ([report, section 3.3](../report/d_min_report.md#33-rq3-how-does-the-deadline-change-d_min)).
+To compare 2 dogs with 4 fairly, both teams should face the same flock. Seed $i$ of every cell is `master_seed + i` (for example $2026 + i$), and a trial draws the start positions and the random choices of sheep and dogs from three separate streams. Seed $i$ thus gives every team the same start flock (Figure 7) and the same sheep noise until the dogs act differently, so the finish-time difference at a seed, which the [paired bootstrap](#frontier-values) compares, is mostly the team's effect. A shorter deadline only cuts the same trial short, as the stored runs confirm.
 
 ![Deterministic paired comparisons](../figures/fig_adaptive_4_paired_seeds.png)
 
-**Figure 7: Paired seeds.** Seed 2026 gives the same start flock at every team size $D$. This is an illustration, not stored runs; columns are seeds 2026 to 2028 and rows team sizes 2 to 4.
+**Figure 7: Paired seeds.** Seed 2026 gives the same start flock at every team size $D$. Columns are seeds 2026 to 2028 and rows team sizes 2 to 4.
 
 ## 4. Flock and team sizes tested
 

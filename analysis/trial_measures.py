@@ -6,6 +6,18 @@ import math
 
 import pandas as pd
 
+from . import keys
+
+
+def reach_by_n(trials: pd.DataFrame) -> pd.DataFrame:
+    """Reach of a single dog per layout and flock size: the median, over the one-dog trials,
+    of each trial's mean ``coverage`` (the share of the outer half of the flock within the
+    reaction radius of the dog). Columns: layout, n, trials, reach."""
+    one = trials[trials["n_shepherds"] == 1]
+    grouped = one.groupby(["initial_layout", "n_sheep"])["mean_coverage"]
+    table = grouped.agg(trials="size", reach="median").reset_index()
+    return table.rename(columns={"initial_layout": "layout", "n_sheep": "n"})
+
 
 def nested_deadlines(longer: pd.DataFrame, shorter: pd.DataFrame) -> dict[str, float]:
     """Compare two runs that differ only in deadline, matched on trial_key."""
@@ -25,12 +37,16 @@ def nested_deadlines(longer: pd.DataFrame, shorter: pd.DataFrame) -> dict[str, f
     }
 
 
+def _is_curve(group_key: str, layout: str, n: int) -> bool:
+    group = keys.split_group(group_key)
+    return group["layout"] == layout and group["n"] == n
+
+
 def curve_across(cells: dict[str, pd.DataFrame], layout: str, n: int) -> pd.DataFrame:
     """One layout-and-N curve from several folders, side by side per D."""
     rows = []
     for name, frame in cells.items():
-        keys = frame["group_key"].astype(str)
-        part = frame[keys.str.contains(f"|{layout}|", regex=False) & keys.str.endswith(f"|N={n}")]
+        part = frame[[_is_curve(key, layout, n) for key in frame["group_key"].astype(str)]]
         for _, cell in part.sort_values(["group_key", "n_shepherds"]).iterrows():
             rows.append(
                 {

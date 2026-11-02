@@ -232,7 +232,7 @@ def _methods(raw: dict[str, Any]) -> tuple[MethodSpec, ...]:
 
 
 def _check_shape(name: str, spec: Mapping[str, Any], settings: Mapping[str, Any]) -> None:
-    """Grid and decision values a run could not use; caught here, not after calibration."""
+    """The grid a run could not use; caught here, not after calibration."""
     missing = [k for k in REQUIRED_KEYS if k not in spec]
     if missing:
         raise ValueError(f"{name}: missing keys {missing}")
@@ -244,18 +244,19 @@ def _check_shape(name: str, spec: Mapping[str, Any], settings: Mapping[str, Any]
             raise ValueError(f"{name}: {key} has repeated values")
     if not isinstance(spec["methods"], dict) or not spec["methods"]:
         raise ValueError(f"{name}: methods must name at least one method")
-    task = settings["task"]
-    if task != drive_task.TASK:
-        raise ValueError(f"{name}: unknown task {task!r}; available: {[drive_task.TASK]}")
-    layouts = LAYOUTS
-    unknown = sorted(set(spec["layouts"]) - set(layouts))
-    if unknown:
-        known = f"its layouts are {layouts}"
-        raise ValueError(f"{name}: unknown layouts {unknown} for task {task!r}; {known}")
+    _check_task_and_layouts(name, spec["layouts"], settings["task"])
     for key in ("flock_sizes", "shepherd_counts"):
         if any(not isinstance(v, int) or v < 1 for v in spec[key]):
             raise ValueError(f"{name}: {key} must be positive integers")
-    _check_decisions(name, settings)
+
+
+def _check_task_and_layouts(name: str, layouts: list[str], task: str) -> None:
+    if task != drive_task.TASK:
+        raise ValueError(f"{name}: unknown task {task!r}; available: {[drive_task.TASK]}")
+    unknown = sorted(set(layouts) - set(LAYOUTS))
+    if unknown:
+        known = f"its layouts are {LAYOUTS}"
+        raise ValueError(f"{name}: unknown layouts {unknown} for task {task!r}; {known}")
 
 
 def _check_decisions(name: str, settings: Mapping[str, Any]) -> None:
@@ -327,6 +328,7 @@ def load_protocol(name_or_path: str, output: Path | None = None) -> Protocol:
         raise ValueError(f"{path.name}: unknown keys {unknown}")
     settings = {**canonical, **{k: v for k, v in spec.items() if k in canonical}}
     _check_shape(path.name, spec, settings)
+    _check_decisions(path.name, settings)
     description = spec.get("description")
     if description is not None and not (isinstance(description, str) and description.strip()):
         raise ValueError(f"{path.name}: description must be non-empty text, got {description!r}")

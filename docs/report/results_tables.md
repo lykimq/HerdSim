@@ -12,9 +12,10 @@ The tables behind the [report](d_min_report.md), for readers who want the values
 4) [D_min by layout and N, success at 99 percent](#d_min-by-layout-and-n-success-at-99-percent)
 5) [Growth with N, strict](#growth-with-n-strict)
 6) [Growth with N, 99 percent](#growth-with-n-99-percent)
-7) [Nine flock sizes, 99 percent](#nine-flock-sizes-99-percent)
-8) [The shorter deadline as a cut](#the-shorter-deadline-as-a-cut)
-9) [N = 400 at three deadlines, 99 percent](#n--400-at-three-deadlines-99-percent)
+7) [Reach of one dog, 99 percent](#reach-of-one-dog-99-percent)
+8) [Nine flock sizes, 99 percent](#nine-flock-sizes-99-percent)
+9) [The shorter deadline as a cut](#the-shorter-deadline-as-a-cut)
+10) [N = 400 at three deadlines, 99 percent](#n--400-at-three-deadlines-99-percent)
 
 ## How to read the tables
 
@@ -170,6 +171,37 @@ Spread of D_min in doublings: between layouts at one N 0.92, between N at one la
 | wide | 0.62 to 0.68 | 25 50 100 200 400 |  |
 
 Spread of D_min in doublings: between layouts at one N 1.25, between N at one layout 1.28.
+
+## Reach of one dog, 99 percent
+
+Reach is the share of the outer half of the flock, the sheep farther than the median distance from the flock centre, that is within the reaction radius $r_s$ = 65 m of a dog (the distance within which a sheep reacts to a dog), averaged over the ticks of a trial. Each entry is the median of that average over the trials of one dog, 99 percent rule, for a layout and a flock size, rounded to two decimals (so 1.00 can be slightly below 1). A failed trial runs to the deadline, so its average covers the whole run.
+
+### dmin_f99_m12
+
+| layout | 25 | 50 | 71 | 100 | 141 | 200 | 283 | 400 | 566 |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| compact | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| wide | 0.99 | 0.94 | 0.90 | 0.84 | 0.68 | 0.69 | 0.59 | 0.35 | 0.03 |
+| split | 1.00 | 0.93 | 0.87 | 0.80 | 0.77 | 0.71 | 0.67 | 0.49 | 0.15 |
+| outlier_rich | 0.99 | 0.94 | 0.90 | 0.87 | 0.71 | 0.59 | 0.49 | 0.07 | 0.03 |
+
+### dmin_f99_m6
+
+| layout | 25 | 50 | 71 | 100 | 141 | 200 | 283 | 400 | 566 |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| compact | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| wide | 0.99 | 0.94 | 0.90 | 0.84 | 0.69 | 0.59 | 0.48 | 0.14 | 0.03 |
+| split | 1.00 | 0.93 | 0.87 | 0.80 | 0.77 | 0.72 | 0.63 | 0.41 | 0.08 |
+| outlier_rich | 0.99 | 0.94 | 0.90 | 0.86 | 0.73 | 0.61 | 0.27 | 0.06 | 0.03 |
+
+### dmin_f99_m3
+
+| layout | 25 | 50 | 100 | 200 | 400 |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| compact | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| wide | 0.99 | 0.94 | 0.84 | 0.45 | 0.09 |
+| split | 1.00 | 0.93 | 0.80 | 0.70 | 0.28 |
+| outlier_rich | 0.99 | 0.94 | 0.83 | 0.38 | 0.05 |
 
 ## Nine flock sizes, 99 percent
 

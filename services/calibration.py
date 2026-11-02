@@ -133,45 +133,56 @@ def summarise(
     return late, problems
 
 
+def measure_sizes(
+    protocol: Protocol, sizes: list[tuple[str, int]], workers: int
+) -> dict[tuple[str, int], list[tuple[float, tuple[float, float]]]]:
+    """Every start spacing and seed of every (method, N) in ``sizes``, measured in parallel.
+
+    The result maps each (method, N) to its (start spacing, (late, early)) runs.
+    """
+    s = protocol.settings
+    seeds = [s["master_seed"] + i for i in range(s["calibration_seeds"])]
+    owners: list[tuple[str, int, float]] = []
+    jobs = []
+    for method, n in sizes:
+        window = round(
+            s["calibration_window_seconds"] / method_dt(method_spec(protocol, method).params)
+        )
+        for spacing in s["calibration_starts"]:
+            config = calibration_config(protocol, method, n, spacing)
+            for seed in seeds:
+                owners.append((method, n, spacing))
+                jobs.append((config, seed, window))
+    with worker_pool(workers) as pool:
+        values = list(pool.map(measure, jobs))
+    runs: dict[tuple[str, int], list[tuple[float, tuple[float, float]]]] = {}
+    for (method, n, spacing), value in zip(owners, values, strict=True):
+        runs.setdefault((method, n), []).append((spacing, value))
+    return runs
+
+
 def calibrate(
     protocol: Protocol, workers: int, existing: dict[str, dict[int, float]] | None = None
 ) -> dict[str, dict[int, float]]:
     """R_f for every method and flock size; raises where a size is not settled.
 
-    If ``existing`` is provided, already-calibrated sizes are preserved and only missing
-    sizes are measured.
+    Sizes already in ``existing`` are kept as they are; only the missing ones are measured.
     """
-    s = protocol.settings
-    seeds = [s["master_seed"] + i for i in range(s["calibration_seeds"])]
-    all_keys = [(m.name, n) for m in protocol.methods for n in sorted(protocol.flock_sizes)]
-    keys = [(m, n) for m, n in all_keys if existing is None or n not in existing.get(m, {})]
-
-    table: dict[str, dict[int, float]] = (
-        {m: dict(radii) for m, radii in existing.items()} if existing else {}
-    )
-
-    if keys:
-        jobs = []
-        owners: list[tuple[str, int, float]] = []
-        for method, n in keys:
-            dt = method_dt(method_spec(protocol, method).params)
-            window = round(s["calibration_window_seconds"] / dt)
-            for spacing in s["calibration_starts"]:
-                config = calibration_config(protocol, method, n, spacing)
-                for seed in seeds:
-                    jobs.append((config, seed, window))
-                    owners.append((method, n, spacing))
-        with worker_pool(workers) as pool:
-            values = list(pool.map(measure, jobs))
-
-        runs: dict[tuple[str, int], list[tuple[float, tuple[float, float]]]] = {}
-        for (method, n, spacing), value in zip(owners, values, strict=True):
-            runs.setdefault((method, n), []).append((spacing, value))
-        failures: list[str] = []
-        for method, n in keys:
-            radius, problems = summarise(f"{method} N={n}", runs[method, n], s)
-            table.setdefault(method, {})[n] = radius
-            failures += problems
-        if failures:
-            raise CalibrationError("; ".join(failures))
+    table = {method: dict(radii) for method, radii in (existing or {}).items()}
+    missing = [
+        (m.name, n)
+        for m in protocol.methods
+        for n in sorted(protocol.flock_sizes)
+        if n not in table.get(m.name, {})
+    ]
+    if not missing:
+        return table
+    runs = measure_sizes(protocol, missing, workers)
+    failures: list[str] = []
+    for method, n in missing:
+        radius, problems = summarise(f"{method} N={n}", runs[method, n], protocol.settings)
+        table.setdefault(method, {})[n] = radius
+        failures += problems
+    if failures:
+        raise CalibrationError("; ".join(failures))
     return table

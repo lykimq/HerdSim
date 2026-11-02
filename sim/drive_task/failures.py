@@ -15,13 +15,6 @@ import pandas as pd
 NONE = "none"  # the trial succeeded
 TIMEOUT = "timeout"  # none of the rules matched
 
-
-@dataclass(frozen=True)
-class Failure:
-    mode: str
-    hints: tuple[str, ...]  # every rule that matched, the first in PRIORITY is the mode
-
-
 DOGS_OUT_OF_RANGE = "dogs_out_of_range"  # dogs too far for the sheep to react
 FLOCK_ESCAPED = "flock_escaped"  # flock ended farther from the goal than it started
 SPLIT = "split"  # flock broke into groups
@@ -47,23 +40,36 @@ SMOOTH_SECONDS = 200.0  # smoothing window of the oscillation rule, in model sec
 MIN_SWINGS = 3
 
 
+@dataclass(frozen=True)
+class Failure:
+    mode: str
+    hints: tuple[str, ...]  # every rule that matched, the first in PRIORITY is the mode
+
+
 def smooth_window(dt: float) -> int:
     """Rows in the smoothing window: SMOOTH_SECONDS of model time, one row per tick of ``dt``."""
     return max(1, round(SMOOTH_SECONDS / dt))
 
 
 def swings(series: np.ndarray, amplitude: float) -> int:
-    """Number of direction reversals of ``series`` whose swing exceeds ``amplitude``."""
+    """Number of direction reversals of ``series`` whose swing exceeds ``amplitude``.
+
+    ``anchor`` is the last turning point, then the furthest value reached in the current
+    direction; a move of more than ``amplitude`` back from it turns the direction. The first
+    turn only sets the direction, so it is not counted.
+    """
     count = 0
     anchor = series[0]
-    direction = 0
+    direction = 0  # 1 rising, -1 falling, 0 not known yet
     for value in series[1:]:
         move = value - anchor
         if direction >= 0 and move < -amplitude:
-            count += direction > 0
+            if direction > 0:
+                count += 1
             direction, anchor = -1, value
         elif direction <= 0 and move > amplitude:
-            count += direction < 0
+            if direction < 0:
+                count += 1
             direction, anchor = 1, value
         elif (direction > 0 and value > anchor) or (direction < 0 and value < anchor):
             anchor = value

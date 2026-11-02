@@ -21,15 +21,21 @@ import pandas as pd
 
 from analysis.curves import groups_table, layout_against_n, shape_table
 from analysis.results import read_cells, read_trials, resumed_protocols, run_record
-from analysis.trial_measures import curve_across, nested_deadlines
+from analysis.trial_measures import curve_across, nested_deadlines, reach_by_n
 from docs.generate_docs.format import DMIN_KEY, markdown
 from docs.generate_docs.tables import F99_MAIN as F99_MAIN_FOLDERS
-from docs.generate_docs.tables import ORIGINAL_NS, growth_table, layout_by_n
+from docs.generate_docs.tables import ORIGINAL_NS, growth_table, layout_by_n, reach_table
 from docs.generate_docs.tables import STRICT_MAIN as STRICT_MAIN_FOLDERS
 from services.protocol import RESULTS_ROOT, results_folder
 from sim.drive_task.layouts import LAYOUTS
 
+QUEUE_LOG = RESULTS_ROOT / "queue_log.jsonl"
 SIZES_HELP = "only these flock sizes (a folder resumed with more sizes, shown at its first ones)"
+# Shown above a table when show_command is set.
+DMIN_TABLES = "uv run python -m docs.generate_docs.page"
+
+
+# --- Parts and shared helpers ------------------------------------------------------------------
 
 
 class Part(NamedTuple):
@@ -55,9 +61,12 @@ def _groups(name: str, sizes: Sequence[int] | None = None) -> pd.DataFrame:
     return table if sizes is None else table[table["n"].isin(sizes)].reset_index(drop=True)
 
 
+# --- Verbs: each returns the parts of its tables -----------------------------------------------
+
+
 def record() -> list[Part]:
     """One row per finished protocol from results/queue_log.jsonl."""
-    return [_part(None, run_record(RESULTS_ROOT / "queue_log.jsonl", RESULTS_ROOT))]
+    return [_part(None, run_record(QUEUE_LOG, RESULTS_ROOT))]
 
 
 def dmin(folders: Sequence[str], sizes: Sequence[int] | None) -> list[Part]:
@@ -79,6 +88,16 @@ def growth(folders: Sequence[str], sizes: Sequence[int] | None) -> list[Part]:
                 + f"between N at one layout {by_n:.2f}.",
             ),
         ]
+    return parts
+
+
+def reach(folders: Sequence[str], sizes: Sequence[int] | None) -> list[Part]:
+    parts = []
+    for name in folders:
+        table = reach_by_n(read_trials(results_folder(name)))
+        if sizes is not None:
+            table = table[table["n"].isin(sizes)]
+        parts.append(_part(name, reach_table(table, LAYOUTS), index=True))
     return parts
 
 
@@ -130,7 +149,7 @@ def build_parser(description: str | None = None) -> argparse.ArgumentParser:
 
     sub.add_parser("record").set_defaults(run=lambda _: record())
     on_folders("fits", lambda args: fits(args.folders))
-    for verb, run in (("dmin", dmin), ("growth", growth)):
+    for verb, run in (("dmin", dmin), ("growth", growth), ("reach", reach)):
         on_folders(verb, lambda args, run=run: run(args.folders, args.sizes)).add_argument(
             "--sizes", nargs="+", type=int, default=None, help=SIZES_HELP
         )
@@ -154,25 +173,7 @@ def main() -> None:
     print(render(run_command(sys.argv[1:], __doc__)), end="")
 
 
-# --- results_tables.md page -----------------------------------------------------
-
-QUEUE_LOG = RESULTS_ROOT / "queue_log.jsonl"
-# Shown above a table when show_command is set.
-DMIN_TABLES = "uv run python -m docs.generate_docs.page"
-
-
-@dataclass(frozen=True)
-class Query:
-    """One verb command and how its tables are headed."""
-
-    command: str
-    prefix: str = ""
-    show_command: bool = False
-
-
-Block = str | Query | Callable[[], str]
-
-# --- Page text ---------------------------------------------------------------------------------
+# --- results_tables.md page: text --------------------------------------------------------------
 
 PURPOSE = (
     "The tables behind the [report](d_min_report.md), for readers who want the values of a "
@@ -229,12 +230,33 @@ NESTED_INTRO = (
     "the same second."
 )
 
+REACH_INTRO = (
+    "Reach is the share of the outer half of the flock, the sheep farther than the median "
+    "distance from the flock centre, that is within the reaction radius $r_s$ = 65 m of a dog "
+    "(the distance within which a sheep reacts to a dog), averaged over the ticks of a trial. "
+    "Each entry is the median of that average over the trials of one dog, 99 percent rule, for "
+    "a layout and a flock size, rounded to two decimals (so 1.00 can be slightly below 1). A "
+    "failed trial runs to the deadline, so its average covers the whole run."
+)
+
 CURVE_INTRO = (
     "The cells of one curve at the three deadlines, 99 percent rule: successes out of trials, "
     "the reliability decision and the median finish in seconds."
 )
 
-# --- Commands ----------------------------------------------------------------------------------
+# --- results_tables.md page: commands and section list -----------------------------------------
+
+
+@dataclass(frozen=True)
+class Query:
+    """One verb command and how its tables are headed."""
+
+    command: str
+    prefix: str = ""
+    show_command: bool = False
+
+
+Block = str | Query | Callable[[], str]
 
 STRICT_MAIN_ARGS = " ".join(STRICT_MAIN_FOLDERS)
 F99_MAIN_ARGS = " ".join(F99_MAIN_FOLDERS)
@@ -253,38 +275,7 @@ def _single(command: str) -> Query:
     return Query(command, show_command=True)
 
 
-SECTIONS: tuple[Block, ...] = (
-    PURPOSE,
-    lambda: contents_block(),
-    "## How to read the tables",
-    INTRO,
-    "## Runs",
-    lambda: runs_block(),
-    "## D_min by layout and N, strict success",
-    Query(f"dmin {STRICT_MAIN_ARGS}"),
-    "## D_min by layout and N, success at 99 percent",
-    ORIGINAL_SIZES_NOTE,
-    Query(f"dmin {F99_MAIN_ARGS} --sizes {ORIGINAL_SIZES}"),
-    "## Growth with N, strict",
-    Query(f"growth {STRICT_MAIN_ARGS}"),
-    "## Growth with N, 99 percent",
-    ORIGINAL_SIZES_NOTE,
-    Query(f"growth {F99_MAIN_ARGS} --sizes {ORIGINAL_SIZES}"),
-    "## Nine flock sizes, 99 percent",
-    NINE_SIZES_INTRO,
-    Query("dmin dmin_f99_m12 dmin_f99_m6", prefix="D_min, "),
-    Query("growth dmin_f99_m12 dmin_f99_m6", prefix="Growth, "),
-    Query("fits dmin_f99_m12 dmin_f99_m6", prefix="Fits, "),
-    "## The shorter deadline as a cut",
-    NESTED_INTRO,
-    *(_single(f"nested {longer} {shorter}") for longer, shorter in NESTED_PAIRS),
-    "## N = 400 at three deadlines, 99 percent",
-    CURVE_INTRO,
-    _single(f"curve {F99_MAIN_ARGS} --layout wide --n 400"),
-    _single(f"curve {F99_MAIN_ARGS} --layout outlier_rich --n 400"),
-)
-
-# --- Helpers -----------------------------------------------------------------------------------
+# --- results_tables.md page: blocks ------------------------------------------------------------
 
 
 def github_anchor(heading: str) -> str:
@@ -299,6 +290,16 @@ def contents_block() -> str:
     ]
     lines = [f"{i}) [{h}](#{github_anchor(h)})" for i, h in enumerate(headings, start=1)]
     return "## Contents\n\n" + "\n".join(lines)
+
+
+def runs_block() -> str:
+    """Run record plus a note on folders resumed after their queue run."""
+    grew = resumed_protocols(QUEUE_LOG, RESULTS_ROOT)
+    names = ", ".join(f"`{p}`" for p in grew)
+    paragraphs = [RUNS_HEAD, markdown(run_record(QUEUE_LOG, RESULTS_ROOT))]
+    if grew:
+        paragraphs.append(RUNS_GREW.format(count=len(grew), names=names))
+    return "\n\n".join(paragraphs)
 
 
 def query_block(query: Query) -> str:
@@ -318,19 +319,44 @@ def block_text(block: Block) -> str:
     return block()
 
 
+SECTIONS: tuple[Block, ...] = (
+    PURPOSE,
+    contents_block,
+    "## How to read the tables",
+    INTRO,
+    "## Runs",
+    runs_block,
+    "## D_min by layout and N, strict success",
+    Query(f"dmin {STRICT_MAIN_ARGS}"),
+    "## D_min by layout and N, success at 99 percent",
+    ORIGINAL_SIZES_NOTE,
+    Query(f"dmin {F99_MAIN_ARGS} --sizes {ORIGINAL_SIZES}"),
+    "## Growth with N, strict",
+    Query(f"growth {STRICT_MAIN_ARGS}"),
+    "## Growth with N, 99 percent",
+    ORIGINAL_SIZES_NOTE,
+    Query(f"growth {F99_MAIN_ARGS} --sizes {ORIGINAL_SIZES}"),
+    "## Reach of one dog, 99 percent",
+    REACH_INTRO,
+    Query(f"reach {F99_MAIN_ARGS}"),
+    "## Nine flock sizes, 99 percent",
+    NINE_SIZES_INTRO,
+    Query("dmin dmin_f99_m12 dmin_f99_m6", prefix="D_min, "),
+    Query("growth dmin_f99_m12 dmin_f99_m6", prefix="Growth, "),
+    Query("fits dmin_f99_m12 dmin_f99_m6", prefix="Fits, "),
+    "## The shorter deadline as a cut",
+    NESTED_INTRO,
+    *(_single(f"nested {longer} {shorter}") for longer, shorter in NESTED_PAIRS),
+    "## N = 400 at three deadlines, 99 percent",
+    CURVE_INTRO,
+    _single(f"curve {F99_MAIN_ARGS} --layout wide --n 400"),
+    _single(f"curve {F99_MAIN_ARGS} --layout outlier_rich --n 400"),
+)
+
+
 def page_blocks() -> list[str]:
     """Every SECTIONS block as text, in order."""
     return [block_text(block) for block in SECTIONS]
-
-
-def runs_block() -> str:
-    """Run record plus a note on folders resumed after their queue run."""
-    grew = resumed_protocols(QUEUE_LOG, RESULTS_ROOT)
-    names = ", ".join(f"`{p}`" for p in grew)
-    paragraphs = [RUNS_HEAD, markdown(run_record(QUEUE_LOG, RESULTS_ROOT))]
-    if grew:
-        paragraphs.append(RUNS_GREW.format(count=len(grew), names=names))
-    return "\n\n".join(paragraphs)
 
 
 if __name__ == "__main__":

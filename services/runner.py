@@ -37,7 +37,7 @@ def identity(trial: Trial) -> dict[str, Any]:
     """
     cell, group, config = trial.cell, trial.cell.group, trial.config
     dt = config["dt"]
-    columns: dict[str, Any] = {
+    return {
         "trial_key": trial.key,
         "cell_key": cell.key,
         "group_key": group.key,
@@ -53,7 +53,6 @@ def identity(trial: Trial) -> dict[str, Any]:
         "time_limit_seconds": config["max_ticks"] * dt,
         "dt": dt,
     }
-    return columns
 
 
 def execute(trial: Trial) -> dict[str, Any]:

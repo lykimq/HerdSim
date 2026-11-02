@@ -4,22 +4,51 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from typing import TypeGuard
 
 import numpy as np
 from scipy.optimize import minimize
 from scipy.stats import norm
 
 Interval = tuple[float, float]  # (low, high) of the true D_min; high may be math.inf
+Points = list[tuple[int, Interval]]  # (N, interval) of each flock size
+
+HALF_DOG = 0.5  # a whole D stands for the true D_min within half a dog of it
+
+AHEAD = (1600, 3200)  # flock sizes beyond the data at which the two shapes are compared
+# Starting parameters of the fit, per shape (the parameters are described at the shapes below).
+STARTS = {
+    "power law": [np.array([math.log(0.2), 0.4]), np.array([math.log(0.02), 0.8])],
+    "saturating": [np.array([math.log(3.0), math.log(200.0)]), np.array([0.0, math.log(30.0)])],
+}
+# Parameter grids of the two shapes, wide enough to hold every curve with D from 1 to about
+# 50 over N = 25 to 3200: (log c, b) for the power law, (log(D_inf - 1), log K) for the other.
+GRIDS = {
+    "power law": (np.linspace(math.log(0.002), math.log(3.0), 240), np.linspace(0.0, 1.5, 240)),
+    "saturating": (np.linspace(math.log(0.01), math.log(100.0), 240), np.linspace(0.0, 11.5, 240)),
+}
+
+
+def _known(value: float | None) -> TypeGuard[float]:
+    return value is not None and not math.isnan(value)
 
 
 def interval_of(d_min: float | None, d_min_low: float | None) -> Interval | None:
     """The interval a curve gives at one N, from its d_min and d_min_low (NaN as None)."""
-    if d_min is not None and not math.isnan(d_min):
-        low = d_min_low if d_min_low is not None and not math.isnan(d_min_low) else d_min
-        return min(low, d_min) - 0.5, d_min + 0.5
-    if d_min_low is not None and not math.isnan(d_min_low):
-        return d_min_low - 0.5, math.inf
+    if _known(d_min):
+        low = d_min_low if _known(d_min_low) else d_min
+        return min(low, d_min) - HALF_DOG, d_min + HALF_DOG
+    if _known(d_min_low):
+        return d_min_low - HALF_DOG, math.inf
     return None
+
+
+def _arrays(points: Points) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """N, interval low and interval high of ``points`` as arrays."""
+    n = np.array([p[0] for p in points], dtype=float)
+    low = np.array([p[1][0] for p in points])
+    high = np.array([p[1][1] for p in points])
+    return n, low, high
 
 
 def power_law(n: np.ndarray, p: np.ndarray) -> np.ndarray:
@@ -33,11 +62,6 @@ def saturating(n: np.ndarray, p: np.ndarray) -> np.ndarray:
 
 
 SHAPES = {"power law": power_law, "saturating": saturating}
-AHEAD = (1600, 3200)  # flock sizes beyond the data at which the two shapes are compared
-STARTS = {
-    "power law": [np.array([math.log(0.2), 0.4]), np.array([math.log(0.02), 0.8])],
-    "saturating": [np.array([math.log(3.0), math.log(200.0)]), np.array([0.0, math.log(30.0)])],
-}
 
 
 @dataclass(frozen=True)
@@ -55,11 +79,9 @@ def log_likelihood(low: np.ndarray, high: np.ndarray, d: np.ndarray, sigma: floa
     return float(np.sum(np.log(np.maximum(hi - lo, 1e-300))))
 
 
-def fit(points: list[tuple[int, Interval]], shape: str) -> Fit:
+def fit(points: Points, shape: str) -> Fit:
     """Maximum-likelihood fit of one shape to (N, interval) points, from a few starts."""
-    n = np.array([p[0] for p in points], dtype=float)
-    low = np.array([p[1][0] for p in points])
-    high = np.array([p[1][1] for p in points])
+    n, low, high = _arrays(points)
     curve = SHAPES[shape]
 
     def cost(x: np.ndarray) -> float:
@@ -80,22 +102,10 @@ def fit(points: list[tuple[int, Interval]], shape: str) -> Fit:
     return Fit(shape, tuple(float(v) for v in best.x[:2]), math.exp(best.x[2]), -float(best.fun))
 
 
-# Parameter grids of the two shapes, wide enough to hold every curve with D from 1 to about
-# 50 over N = 25 to 3200: (log c, b) for the power law, (log(D_inf - 1), log K) for the other.
-GRIDS = {
-    "power law": (np.linspace(math.log(0.002), math.log(3.0), 240), np.linspace(0.0, 1.5, 240)),
-    "saturating": (np.linspace(math.log(0.01), math.log(100.0), 240), np.linspace(0.0, 11.5, 240)),
-}
-
-
-def consistent_range(
-    points: list[tuple[int, Interval]], shape: str, size: int
-) -> tuple[float, float]:
+def consistent_range(points: Points, shape: str, size: int) -> tuple[float, float]:
     """Smallest and largest D at ``size`` over every curve of ``shape`` on its grid that passes
     through all the intervals; (nan, nan) when none does."""
-    n = np.array([p[0] for p in points], dtype=float)
-    low = np.array([p[1][0] for p in points])
-    high = np.array([p[1][1] for p in points])
+    n, low, high = _arrays(points)
     grid = np.array(np.meshgrid(*GRIDS[shape], indexing="ij")).reshape(2, -1)
     curve = SHAPES[shape]
     d = curve(n[:, None], grid[:, None, :])  # (points, grid)
@@ -106,7 +116,7 @@ def consistent_range(
     return float(ahead.min()), float(ahead.max())
 
 
-def compare(points: list[tuple[int, Interval]]) -> dict[str, object]:
+def compare(points: Points) -> dict[str, object]:
     """Both fits, the odds of the power law against the saturating curve, and the range each
     shape allows at the sizes ``AHEAD``. Where both shapes pass through every interval the
     data cannot tell them apart (odds 1); the ranges then say at which N a run could, which

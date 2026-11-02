@@ -225,8 +225,8 @@ class CampaignStore:
         if not self.trials_jsonl.exists():
             return []
         rows = _read_jsonl(self.trials_jsonl, repair)
-        keys = [r["trial_key"] for r in rows]
-        if len(keys) != len(set(keys)):
+        trial_keys = [r["trial_key"] for r in rows]
+        if len(trial_keys) != len(set(trial_keys)):
             raise RuntimeError(f"{self.trials_jsonl} has duplicate trial keys")
         return rows
 
@@ -295,16 +295,20 @@ def progress(store: CampaignStore) -> str:
     status["running"] = store.is_running()
     started = datetime.fromisoformat(status["updated_at"])
     in_file = len(store.load_rows(repair=False))
-    done = in_file - int(status["trials_done"]) - int(status.get("trials_ignored", 0))
+    done_this_round = in_file - int(status["trials_done"]) - int(status.get("trials_ignored", 0))
     planned = int(status["round_trials"])
     lines = [json.dumps(status, indent=2)]
     if status["running"] and planned > 0:
         seconds = (datetime.now(UTC) - started).total_seconds()
-        rate = done / seconds if seconds > 0 and done > 0 else 0.0
-        eta = (
-            f"about {(planned - done) / rate / 60:.0f} min left in this round"
-            if rate
-            else "no rate yet"
+        lines.append(
+            f"round {status['rounds']}: {done_this_round}/{planned} trials done, "
+            + _time_left(planned - done_this_round, done_this_round, seconds)
         )
-        lines.append(f"round {status['rounds']}: {done}/{planned} trials done, {eta}")
     return "\n".join(lines)
+
+
+def _time_left(remaining: int, done: int, seconds: float) -> str:
+    """Minutes left in the round at the rate of the ``done`` trials in ``seconds``."""
+    if seconds <= 0 or done <= 0:
+        return "no rate yet"
+    return f"about {remaining / (done / seconds) / 60:.0f} min left in this round"

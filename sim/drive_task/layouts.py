@@ -21,6 +21,10 @@ DOG_STARTS = ("arcs", "ring", "handler")
 EDGE_MARGIN = 1.0
 # Hard edge of Gaussian layouts (2-D Gaussian keeps ~98.9% of mass inside 3 sigma).
 CUT_SIGMAS = 3.0
+# Split layout: two clusters for a small flock, three from this many sheep, at these angles.
+SPLIT_THREE_FROM_N = 12
+SPLIT_TWO_ANGLES = (np.pi / 2.0, -np.pi / 2.0)
+SPLIT_THREE_ANGLES = (0.0, 2.0 * np.pi / 3.0, -2.0 * np.pi / 3.0)
 
 Draw = Callable[[int], np.ndarray]
 
@@ -66,71 +70,93 @@ def _truncated_gaussian(center: np.ndarray, sigma: float, rng: np.random.Generat
     return draw
 
 
-def _split_params(config: dict[str, Any]) -> tuple[int, float, float]:
-    """(k, cluster sigma, ring radius): same density as compact, past the collect distance."""
-    n = int(config["n_sheep"])
-    k = 2 if n < 12 else 3
-    sigma = float(config["compact_spread"]) * float(config["flock_radius"]) / np.sqrt(k)
+def _compact_sigma(config: dict[str, Any]) -> float:
+    return float(config["compact_spread"]) * float(config["flock_radius"])
+
+
+def _wide_sigma(config: dict[str, Any]) -> float:
+    return float(config["wide_sigma"]) * float(config["separation_distance"])
+
+
+def _split_params(config: dict[str, Any]) -> tuple[tuple[float, ...], float, float]:
+    """(cluster angles, cluster sigma, ring radius): same density as compact, past the collect
+    distance. The angles are from the direction away from the goal."""
+    angles = SPLIT_TWO_ANGLES if int(config["n_sheep"]) < SPLIT_THREE_FROM_N else SPLIT_THREE_ANGLES
+    sigma = _compact_sigma(config) / np.sqrt(len(angles))
     ring = float(config["split_ring"]) * float(config["separation_distance"])
-    return k, sigma, ring
+    return angles, sigma, ring
+
+
+def _place_compact(config: dict[str, Any], rng: np.random.Generator) -> np.ndarray:
+    center = np.asarray(config["flock_center"], dtype=float)
+    draw = _truncated_gaussian(center, _compact_sigma(config), rng)
+    return _draw_n(int(config["n_sheep"]), draw, config)
+
+
+def _place_wide(config: dict[str, Any], rng: np.random.Generator) -> np.ndarray:
+    center = np.asarray(config["flock_center"], dtype=float)
+    draw = _truncated_gaussian(center, _wide_sigma(config), rng)
+    return _draw_n(int(config["n_sheep"]), draw, config)
+
+
+def _place_split(config: dict[str, Any], rng: np.random.Generator) -> np.ndarray:
+    """Clusters in turn; the remainder of N / k goes to the first clusters."""
+    n = int(config["n_sheep"])
+    center = np.asarray(config["flock_center"], dtype=float)
+    angles, sigma, ring = _split_params(config)
+    back = unit(center - np.asarray(config["goal_center"], dtype=float))
+    centres = np.array([center + ring * rotate(back, angle) for angle in angles])
+    counts = np.full(len(angles), n // len(angles), dtype=int)
+    counts[: n % len(angles)] += 1
+    parts = [
+        _draw_n(int(count), _truncated_gaussian(centre, sigma, rng), config)
+        for centre, count in zip(centres, counts, strict=True)
+    ]
+    return np.vstack(parts)
+
+
+def _place_outlier_rich(config: dict[str, Any], rng: np.random.Generator) -> np.ndarray:
+    """A compact core plus outliers on a ring between ``outlier_near`` and ``outlier_far``."""
+    n = int(config["n_sheep"])
+    center = np.asarray(config["flock_center"], dtype=float)
+    n_out = round(float(config["outlier_fraction"]) * n)
+    core = _draw_n(n - n_out, _truncated_gaussian(center, _compact_sigma(config), rng), config)
+    reach = float(config["separation_distance"])
+    near = float(config["outlier_near"])
+    far = float(config["outlier_far"])
+
+    def outlier_ring(k: int) -> np.ndarray:
+        angle = rng.uniform(0.0, 2.0 * np.pi, k)
+        radius = reach * rng.uniform(near, far, k)
+        return center + radius[:, None] * angle_vectors(angle)
+
+    return np.vstack([core, _draw_n(n_out, outlier_ring, config)])
+
+
+_PLACERS: dict[str, Callable[[dict[str, Any], np.random.Generator], np.ndarray]] = {
+    "compact": _place_compact,
+    "wide": _place_wide,
+    "split": _place_split,
+    "outlier_rich": _place_outlier_rich,
+}
 
 
 def place_flock(config: dict[str, Any], rng: np.random.Generator) -> np.ndarray:
     """Sheep positions for the configured layout around the flock start centre."""
     layout = str(config["initial_layout"])
-    n = int(config["n_sheep"])
-    center = np.asarray(config["flock_center"], dtype=float)
-    compact_sigma = float(config["compact_spread"]) * float(config["flock_radius"])
-
-    if layout == "compact":
-        return _draw_n(n, _truncated_gaussian(center, compact_sigma, rng), config)
-
-    if layout == "wide":
-        sigma = float(config["wide_sigma"]) * float(config["separation_distance"])
-        return _draw_n(n, _truncated_gaussian(center, sigma, rng), config)
-
-    if layout == "split":
-        # Clusters in turn; remainder of N / k goes to the first clusters.
-        k, sigma, ring = _split_params(config)
-        back = unit(center - np.asarray(config["goal_center"], dtype=float))
-        if k == 3:
-            angles = (0.0, 2.0 * np.pi / 3.0, -2.0 * np.pi / 3.0)
-        else:
-            angles = (np.pi / 2.0, -np.pi / 2.0)
-        centres = np.array([center + ring * rotate(back, angle) for angle in angles])
-        counts = np.full(k, n // k, dtype=int)
-        counts[: n % k] += 1
-        parts = [
-            _draw_n(int(count), _truncated_gaussian(centre, sigma, rng), config)
-            for centre, count in zip(centres, counts, strict=True)
-        ]
-        return np.vstack(parts)
-
-    if layout == "outlier_rich":
-        n_out = round(float(config["outlier_fraction"]) * n)
-        core = _draw_n(n - n_out, _truncated_gaussian(center, compact_sigma, rng), config)
-        reach = float(config["separation_distance"])
-        near = float(config["outlier_near"])
-        far = float(config["outlier_far"])
-
-        def outlier_ring(k: int) -> np.ndarray:
-            angle = rng.uniform(0.0, 2.0 * np.pi, k)
-            radius = reach * rng.uniform(near, far, k)
-            return center + radius[:, None] * angle_vectors(angle)
-
-        return np.vstack([core, _draw_n(n_out, outlier_ring, config)])
-
-    raise ValueError(f"Unknown initial_layout {layout!r}; expected one of {LAYOUTS}")
+    if layout not in _PLACERS:
+        raise ValueError(f"Unknown initial_layout {layout!r}; expected one of {LAYOUTS}")
+    return _PLACERS[layout](config, rng)
 
 
 def layout_extent(config: dict[str, Any]) -> float:
     """Largest distance a sheep can start from the flock centre (exact per layout)."""
     layout = str(config["initial_layout"])
-    compact_cut = CUT_SIGMAS * float(config["compact_spread"]) * float(config["flock_radius"])
+    compact_cut = CUT_SIGMAS * _compact_sigma(config)
     if layout == "compact":
         return compact_cut
     if layout == "wide":
-        return CUT_SIGMAS * float(config["wide_sigma"]) * float(config["separation_distance"])
+        return CUT_SIGMAS * _wide_sigma(config)
     if layout == "split":
         _, sigma, ring = _split_params(config)
         return ring + CUT_SIGMAS * sigma

@@ -96,4 +96,4 @@ A run writes everything to `results/<protocol_id>/`:
 | `status.json` | Progress and why the run stopped |
 | `errors.jsonl`, `.lock`, `timeseries/` | Trials that raised, the lock held during a run, and per-tick histories of seeds 0-2 of every cell |
 
-The stored folders in git keep only the packed `trials.jsonl.gz`, `trials.csv`, the frontier files, `protocol.yaml`, `provenance.json`, `calibration.json` and `status.json`. When a clone has only the packed files, `campaign.py run`, `refresh` and `status` unpack them.
+The stored folders in git keep only the packed `trials.jsonl.gz`, `trials.csv`, the frontier files, `protocol.yaml`, `provenance.json`, `calibration.json` and `status.json`. When a clone has only the packed files, `campaign.py run` and `status` unpack them.

@@ -26,14 +26,14 @@ uv run cli/campaign.py plan dmin_f99_m6
 
 ### `run`
 
-Calibrates, or reuses saved radii (see [Calibration](#calibration)), then adds seeds round by round until every cell is decided, the seed cap is reached or the time budget is spent. Trials are written as they finish, so `run` resumes after Ctrl+C, a crash or the end of the budget. Writes `results/<protocol_id>/`. A power cut can lose rows the operating system had not yet written to disk; those trials run again (reasoned from the code, not tested). A results folder belongs to one protocol and one physics ([physics hash](configuration.md#physics-hash)); if the physics changed the folder refuses `run`, and the fix is a new protocol that `extends` the old one, with its own id and folder.
+Calibrates, or reuses saved radii (see [Calibration](#calibration)), then adds seeds round by round until every cell is decided, the seed cap is reached or the time budget is spent. Trials are written as they finish, so `run` resumes after Ctrl+C, a crash or the end of the budget. Writes `results/<protocol_id>/`. A results folder belongs to one protocol and one physics ([physics hash](configuration.md#physics-hash)); if the physics changed the folder refuses `run`.
 
 ```bash
 uv run cli/campaign.py run dmin_f99_m6 --workers 20   # one protocol
 uv run cli/campaign.py run --workers 20               # the whole study, which takes hours
 ```
 
-Protocols run one after another. The whole study skips a folder with every cell decided; a protocol named on the command line always runs, so one whose grid was edited adds the new cells. A protocol that raises is reported and the next one goes on, and the command exits with 1 at the end. Each protocol of the study adds a line to `results/queue_log.jsonl` (when it ran, how long, trials, errors, open cells), which is the source of the run record.
+Protocols run one after another. The whole study skips a folder with every cell decided; a protocol named on the command line always runs, so one whose grid was edited adds the new cells. A protocol that raises is reported and the next one goes on, and the command exits with 1 at the end. Each protocol of the study adds a line to `results/queue_log.jsonl`.
 
 ### `status`
 
@@ -43,9 +43,7 @@ Before a long run, run `make test` and `plan` (the folder should be new or say `
 
 ### Calibration
 
-Calibration measures $R_f$, which sizes the field, the goal and the drive. One dog drives a compact flock toward an unreachable goal for 300 s (`calibration_seconds`). $R_f$ is $\sqrt{2}$ times the flock's RMS radius over the last 90 s (`calibration_window_seconds`), as a median over seeds and start sizes.
-
-`run` stops with a `CalibrationError` naming $N$ when the radius is still changing (over 15% between the last two 90 s windows), when it depends on the start size (over 25%), or when the flock centre came within $2 R_f$ of the goal during those windows. The folder is then cleared for a corrected protocol. Strombom sheep settle up to about $N = 600$.
+Calibration measures $R_f$, which sizes the field, the goal and the drive; the procedure and its limits are in [task design](../experiments/task_design.md#sizing-by-the-calibrated-flock-radius). `run` stops with a `CalibrationError` naming $N$ when the radius is not settled. The folder is then cleared for a corrected protocol.
 
 ## `docs/generate_docs/page.py`: tables from finished runs
 
@@ -74,6 +72,10 @@ Prints $D_{\min}$ per layout and $N$.
 ### `growth [--sizes <N> ...]`
 
 Prints the log-log slopes of $D_{\min}$ against $N$ that the brackets allow, and whether layout or $N$ moves $D_{\min}$ more.
+
+### `reach [--sizes <N> ...]`
+
+Prints how much of the flock one dog reaches per layout and $N$: the median, over the one-dog trials, of the share of the outer half of the flock within $r_s$ of the dog, averaged over the ticks of a trial.
 
 ### `fits`
 
