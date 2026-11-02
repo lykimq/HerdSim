@@ -11,7 +11,7 @@ from sim.core.world.arena import GoalZone, World
 from sim.plugins.metrics.view import TickView
 
 # Fractions of the flock whose first arrival is recorded in every trial row, so a weaker
-# success rule than the task's own can be read afterwards (analysis/dmin.py).
+# success rule than the task's own can be read afterwards from the stored rows.
 ARRIVAL_FRACTIONS = (0.90, 0.95, 0.99)
 
 

@@ -11,6 +11,7 @@ import pandas as pd
 
 from sim.core.simulation_state import SimulationState
 from sim.core.world.arena import World
+from sim.core.world.layouts import LAYOUTS
 from sim.plugins.metrics import Metric
 
 from . import drive_failures, drive_to_goal, goal
@@ -38,7 +39,7 @@ class Scenario:
 
 SCENARIOS: dict[str, Scenario] = {
     "drive_to_goal": Scenario(
-        layouts=drive_to_goal.LAYOUTS,
+        layouts=LAYOUTS,
         required_keys=drive_to_goal.REQUIRED_KEYS,
         build_setup=drive_to_goal.build_setup,
         drive_length=drive_to_goal.drive_length,

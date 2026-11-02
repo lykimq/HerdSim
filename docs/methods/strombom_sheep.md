@@ -33,7 +33,7 @@ $$
 In the paper's base case $n = N - 1$, the whole flock. The model parameter `n_neighbors` ([setting it in a protocol](../guides/configuration.md#model-parameters)) sets $n$: the default -1 means $N - 1$, and `0.25N` means $\lceil 0.25 N \rceil$.
 
 > [!NOTE]
-> A real sheep among hundreds cannot know where the whole flock's centre is. The study keeps the paper's $n = N - 1$; a local centre is one of the [open questions](../report/d_min_report.md#4-limitations-and-future-work).
+> A real sheep among hundreds cannot know where the whole flock's centre is. The study keeps the paper's $n = N - 1$; a local centre is one of the [limitations](../report/d_min_report.md#4-limitations).
 
 ## Keeping space
 
@@ -88,7 +88,7 @@ $$
 
 For example, a sheep at $(0, 5)$ has dogs behind it at $(-3, 0)$ and $(3, 0)$. Their sideways pushes cancel and the forward parts add, so after normalising the push points straight ahead ($+y$) with the size of one dog's push.
 
-Normalising is HerdSim's choice, and we have not tested what part it plays; whether real sheep flee harder from several dogs needs field data. A reacting sheep always moves 1 m per tick, so more dogs cannot make it walk faster ([report, section 4](../report/d_min_report.md#4-limitations-and-future-work)). Animation 2 shows one dog and eight dogs on the same flock.
+Normalising is HerdSim's choice, and we have not tested what part it plays; whether real sheep flee harder from several dogs needs field data. A reacting sheep always moves 1 m per tick, so more dogs cannot make it walk faster ([report, section 4](../report/d_min_report.md#4-limitations)). Animation 2 shows one dog and eight dogs on the same flock.
 
 ![Animation of one dog and eight dogs driving the same flock](../gifs/push_blending.gif)
 

@@ -36,6 +36,7 @@ from sim.core.simulation_runner import initial_state, run_trial
 from sim.core.simulation_state import SimulationState
 from sim.core.vectors import unit
 from sim.core.world.layouts import layout_extent, place_dogs, place_flock
+from sim.methods.strombom.config import PAPER
 from sim.methods.strombom.heuristics import collect_threshold, drive_point, radius_of
 from sim.plugins.dogs.collect_drive_multi import team_targets
 from tests.helpers import config_for
@@ -44,21 +45,19 @@ from tests.helpers import config_for
 Config = dict[str, Any]  # a run config, as cell_config and config_for build it
 Point = Sequence[float] | np.ndarray
 
+R_S = PAPER["r_s"]
 SEED = 2026  # every scene starts from the same flock
 RED = "#d9534f"  # the one extra colour: personal space and the crossing assignment
 
 
-def calibrated(protocol: str, fallback: dict[int, float]) -> dict[int, float]:
-    """Flock radii from results/<protocol>/calibration.json, else ``fallback``."""
-    folder = REPO / "results" / protocol
-    if not (folder / "calibration.json").exists():
-        return fallback
-    radii = flock_radii(folder)["strombom_multi"]
+def calibrated(protocol: str) -> dict[int, float]:
+    """Flock radii from results/<protocol>/calibration.json."""
+    radii = flock_radii(REPO / "results" / protocol)["strombom_multi"]
     return {int(n): float(r) for n, r in radii.items()}
 
 
-# Calibrated flock radii of the strombom sheep, from the main run when it is present.
-RF = calibrated("dmin_m12", {25: 6.2, 50: 7.6, 100: 9.08, 200: 10.47, 400: 11.4})
+# Calibrated flock radii of the Strombom sheep, from the main run.
+RF = calibrated("dmin_m12")
 
 
 def cfg(layout: str, n: int, d: int, **kw: Any) -> Config:
@@ -194,7 +193,9 @@ def fig_sheep_forces() -> None:
     dog = np.array([-25.0, -20.0])
     lcm = np.vstack([flock_neighbors, close_neighbor]).mean(axis=0)
     # the paper's weights, and the unit vector each one multiplies
-    h, c, rho_a, rho_s, e = 0.5, 1.05, 2.0, 1.0, 0.3
+    h, c, rho_a, rho_s, e = (
+        PAPER[k] for k in ("inertia", "c", "rho_a", "rs_weight", "noise_strength")
+    )
     H_i = unit(np.array([0.5, 0.85]))
     C_i = unit(lcm - focal)
     R_a = unit(focal - close_neighbor)
@@ -208,13 +209,13 @@ def fig_sheep_forces() -> None:
     ax0.add_patch(
         Circle(
             (0, 0),
-            65,
+            R_S,
             fc=ORANGE,
             alpha=0.04,
             ec=ORANGE,
             lw=1.0,
             ls="--",
-            label="Threat detection $r_s = 65$ m",
+            label=f"Threat detection $r_s = {R_S:g}$ m",
         )
     )
     ax0.add_patch(

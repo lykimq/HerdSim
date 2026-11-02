@@ -68,7 +68,7 @@ uv run cli/run_queue.py --only dmin_m12 dmin_m6 --workers 20
 
 `protocols/configs/study_queue.yaml` lists the six protocols in the order the queue runs them. Each time the queue runs a protocol it adds one line to `results/queue_log.jsonl` with the folder's totals at that moment.
 
-A fresh pass of the queue would not reproduce the stored seed allocation of every folder. Five folders gained trials after their line was written, when they were resumed. `dmin_m12` ran with `decide_finish_times` on, which its file does not set (its header says so). The [run record](../docs/report/d_min_report.md#5-run-record) gives the details.
+A fresh pass of the queue would not reproduce the stored seed allocation of every folder. Five folders gained trials after their line was written, when they were resumed. `dmin_m12` ran with `decide_finish_times` on, which its file does not set. The [run record](../docs/report/d_min_report.md#5-run-record) gives the details.
 
 ## 2. Reading the results
 

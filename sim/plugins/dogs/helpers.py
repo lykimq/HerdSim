@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
+
 import numpy as np
 
 from sim.core.simulation_state import SimulationState
@@ -9,7 +11,8 @@ from sim.core.simulation_state import SimulationState
 
 def move_dogs(state: SimulationState, velocities: np.ndarray, dt: float) -> SimulationState:
     """Advance every dog by ``dt * velocity`` and store the velocities."""
-    return state.copy_with(
+    return replace(
+        state,
         shepherd_positions=state.shepherd_positions + dt * velocities,
         shepherd_velocities=velocities,
     )

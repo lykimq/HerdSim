@@ -8,7 +8,7 @@ extends: dmin_m12.yaml
 
 success_fraction: 0.99
 
-# Finish-time seeds on, as in the resumes of this folder (its first pass ran without them).
+# Gives seeds to cells whose finish time is still being compared with a neighbour.
 decide_finish_times: true
 # The log midpoints 71, 141, 283 and 566 = 400 sqrt(2) give D_min(N) more points to fit.
 # The flock has no settled size above about 600, so no larger N.

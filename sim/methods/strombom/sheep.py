@@ -109,8 +109,3 @@ def velocities(
     # speed, so more dogs cannot drive a flock faster than one sheep walks.
     out[idx] = unit_rows(heading) * speed
     return out
-
-
-def reaction_radius(config: dict[str, Any]) -> float:
-    """Distance at which a sheep reacts to a dog."""
-    return float(config["r_s"])

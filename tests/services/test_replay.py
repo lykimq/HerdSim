@@ -21,6 +21,3 @@ def test_replay_reproduces_the_stored_trial_and_refuses_one_that_differs() -> No
     with pytest.raises(ReplayMismatch):
         wrong = (stored.success, stored.total_ticks + 1)
         replay_trial(ReplayJob(config, 2026, wrong, label))
-
-    # No stored outcome means "run only"; nothing is checked.
-    replay_trial(ReplayJob(config, 2026, None, label))

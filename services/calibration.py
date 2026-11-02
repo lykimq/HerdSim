@@ -23,6 +23,7 @@ import numpy as np
 
 from sim.core.config.experiment import build_config
 from sim.core.simulation_runner import run_trial
+from sim.core.vectors import FLOCK_RADIUS_FACTOR
 
 from .cells import method_spec, setup_for
 from .pool import worker_pool
@@ -104,8 +105,8 @@ def measure(job: tuple[dict[str, Any], int, int]) -> tuple[float, float]:
     config, seed, window = job
     history = run_trial(config, seed).history
     extent = history["extent"].to_numpy()
-    late = math.sqrt(2.0) * extent[-window:].mean()
-    early = math.sqrt(2.0) * extent[-2 * window : -window].mean()
+    late = FLOCK_RADIUS_FACTOR * extent[-window:].mean()
+    early = FLOCK_RADIUS_FACTOR * extent[-2 * window : -window].mean()
     closest = float(history["gcm_goal"].to_numpy()[-2 * window :].min())
     if closest < GOAL_CLEARANCE_RADII * late:
         who = f"{config['method']} N={config['n_sheep']} seed {seed}"
@@ -155,7 +156,8 @@ def calibrate(
     )
 
     if keys:
-        jobs, owners = [], []
+        jobs = []
+        owners: list[tuple[str, int, float]] = []
         for method, n in keys:
             dt = method_dt(method, method_spec(protocol, method).params)
             window = round(s["calibration_window_seconds"] / dt)
@@ -167,10 +169,12 @@ def calibrate(
         with worker_pool(workers) as pool:
             values = list(pool.map(measure, jobs))
 
+        runs: dict[tuple[str, int], list[tuple[float, tuple[float, float]]]] = {}
+        for (method, n, spacing), value in zip(owners, values, strict=True):
+            runs.setdefault((method, n), []).append((spacing, value))
         failures: list[str] = []
         for method, n in keys:
-            mine = [(o[2], v) for o, v in zip(owners, values) if o[:2] == (method, n)]
-            radius, problems = summarise(f"{method} N={n}", mine, s)
+            radius, problems = summarise(f"{method} N={n}", runs[method, n], s)
             table.setdefault(method, {})[n] = radius
             failures += problems
         if failures:

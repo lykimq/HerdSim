@@ -63,6 +63,6 @@ def coverage(view: TickView) -> float:
     outer = dist > np.median(dist)
     if not outer.any():
         outer = np.ones(state.n_sheep, dtype=bool)
-    reach = float(view.config["reaction_radius"])
+    reach = float(view.config["r_s"])
     to_dogs = state.sheep_positions[outer][:, None, :] - state.shepherd_positions[None, :, :]
     return float(np.mean((np.linalg.norm(to_dogs, axis=2) < reach).any(axis=1)))

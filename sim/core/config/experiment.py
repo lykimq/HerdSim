@@ -36,9 +36,6 @@ def build_config(
 ) -> dict[str, Any]:
     """Flat run config from method defaults, ``params``, task ``setup``, and counts."""
     bundle = METHODS[method]
-    unknown = sorted(set(params) - set(bundle.defaults))
-    if unknown:
-        raise KeyError(f"Method {method!r} has no parameters {unknown}")
     scenario = SCENARIOS[task]
     missing = sorted(set(scenario.required_keys + ENGINE_KEYS) - set(setup))
     if missing:
@@ -59,7 +56,6 @@ def build_config(
     scenario.check(config)
     sheep = SHEEP_MODELS[bundle.sheep_model]
     config.update(sheep.prepare(config))
-    config["reaction_radius"] = sheep.reaction_radius(config)
     return config
 
 

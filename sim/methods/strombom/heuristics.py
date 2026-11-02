@@ -11,7 +11,7 @@ from typing import Any
 
 import numpy as np
 
-from sim.core.vectors import behind, unit
+from sim.core.vectors import FLOCK_RADIUS_FACTOR, angle_vectors, behind, unit
 
 COLLECT = "collect"
 DRIVE = "drive"
@@ -34,7 +34,7 @@ def collect_threshold(n_sheep: int, r_a: float) -> float:
 
 def radius_of(flock: np.ndarray, centroid: np.ndarray) -> float:
     """Flock radius sqrt(2) x RMS distance to the centroid, the same measure as R_f."""
-    return float(np.sqrt(2.0 * np.mean(np.sum((flock - centroid) ** 2, axis=1))))
+    return float(FLOCK_RADIUS_FACTOR * np.sqrt(np.mean(np.sum((flock - centroid) ** 2, axis=1))))
 
 
 def drive_point(flock: np.ndarray, goal: np.ndarray, config: dict[str, Any]) -> np.ndarray:
@@ -70,5 +70,5 @@ def step_toward(
     stop_distance = float(config["shepherd_stop_multiple"]) * r_a
     if sheep.shape[0] and float(np.min(np.linalg.norm(sheep - dog, axis=1))) < stop_distance:
         return np.zeros(2)
-    noise = float(config["noise_strength"]) * np.array([np.cos(noise_angle), np.sin(noise_angle)])
+    noise = float(config["noise_strength"]) * angle_vectors(np.asarray(noise_angle))
     return unit(unit(target - dog) + noise) * float(config["shepherd_speed"])

@@ -23,6 +23,7 @@ UNDECIDED_FLAGS = ["d_best_undecided", "d_sat_undecided", "d_crowd_undecided", "
 
 class Cell(NamedTuple):
     """Success rate and median finish time (ticks) for one dog count."""
+
     rate: float
     finish: float
 

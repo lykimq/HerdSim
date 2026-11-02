@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from typing import Any
 
 from sim.core.simulation_state import SimulationState
@@ -15,8 +16,7 @@ def prepare(config: dict[str, Any]) -> dict[str, Any]:
 
 
 def top_speed(config: dict[str, Any]) -> float:
-    """A heading of length ``sheep_speed`` moves dt x heading per tick (delta = 1 at dt = 1),
-    so sheep_speed is already units per second."""
+    """Units per second: one heading of length ``sheep_speed`` is walked per tick at dt = 1."""
     return float(config["sheep_speed"])
 
 
@@ -31,7 +31,8 @@ def step(state: SimulationState, config: dict[str, Any]) -> SimulationState:
         config,
         int(config["k_neighbors"]),
     )
-    return state.copy_with(
+    return replace(
+        state,
         sheep_positions=state.sheep_positions + float(config["dt"]) * velocities,
         sheep_velocities=velocities,
     )

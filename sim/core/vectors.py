@@ -25,6 +25,10 @@ def unit_rows(vecs: np.ndarray) -> np.ndarray:
     return out
 
 
+# R_f = sqrt(2) x RMS distance to the centroid (Strombom et al. 2014 flock radius).
+FLOCK_RADIUS_FACTOR = float(np.sqrt(2.0))
+
+
 def angle_vectors(angles: np.ndarray) -> np.ndarray:
     """Unit vectors for an array of angles in radians, shape (n, 2)."""
     return np.stack([np.cos(angles), np.sin(angles)], axis=-1)
@@ -33,11 +37,6 @@ def angle_vectors(angles: np.ndarray) -> np.ndarray:
 def behind(point: np.ndarray, reference: np.ndarray, distance: float) -> np.ndarray:
     """Point ``distance`` past ``point`` on the ray from ``reference`` through ``point``."""
     return point + unit(point - reference) * distance
-
-
-def farthest_from(points: np.ndarray, reference: np.ndarray) -> np.ndarray:
-    """The row of ``points`` farthest from ``reference``."""
-    return points[int(np.argmax(np.linalg.norm(points - reference, axis=1)))]
 
 
 def rotate(vec: np.ndarray, angle: float) -> np.ndarray:

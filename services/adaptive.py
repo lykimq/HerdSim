@@ -23,6 +23,7 @@ longer lists are ignored.
 
 from __future__ import annotations
 
+import math
 import time
 from collections import Counter
 from collections.abc import Callable
@@ -57,7 +58,7 @@ def seeds_wanted(seeds_run: int, batch: int, flagged: bool) -> int:
     if flagged:
         target = (seeds_run // batch + 1) * batch
     else:
-        target = max(batch, -(-seeds_run // batch) * batch)
+        target = max(batch, math.ceil(seeds_run / batch) * batch)
     return max(0, target - seeds_run)
 
 
@@ -69,11 +70,7 @@ def _flock_radii(
     needed = {(m.name, n) for m in protocol.methods for n in protocol.flock_sizes}
     if table is None or any(n not in table.get(m, {}) for m, n in needed):
         try:
-            table = (
-                calibrate(protocol, workers, existing=table)
-                if table is not None
-                else calibrate(protocol, workers)
-            )
+            table = calibrate(protocol, workers, existing=table)
         except CalibrationError:
             # No trial ran: let a corrected protocol reopen this folder.
             store.discard_if_empty()

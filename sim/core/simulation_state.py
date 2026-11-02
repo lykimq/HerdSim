@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field, replace
+from dataclasses import dataclass, field
 from typing import Any
 
 import numpy as np
@@ -31,7 +31,3 @@ class SimulationState:
     @property
     def n_shepherds(self) -> int:
         return self.shepherd_positions.shape[0]
-
-    def copy_with(self, **kwargs: Any) -> SimulationState:
-        """New state with the given fields replaced."""
-        return replace(self, **kwargs)

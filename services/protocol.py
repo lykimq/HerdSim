@@ -258,17 +258,26 @@ def _methods(raw: dict[str, Any]) -> tuple[MethodSpec, ...]:
 
 def _check_shape(name: str, spec: Mapping[str, Any], settings: Mapping[str, Any]) -> None:
     """Grid and decision values a run could not use; caught here, not after calibration."""
-    _check_grid(name, spec, settings)
-    _check_decisions(name, settings)
-
-
-def _check_grid(name: str, spec: Mapping[str, Any], settings: Mapping[str, Any]) -> None:
-    """The keys, lists, methods, task and layouts that define the cells."""
     missing = [k for k in REQUIRED_KEYS if k not in spec]
     if missing:
         raise ValueError(f"{name}: missing keys {missing}")
+    factors = spec.get("factors") or {}
+    _check_lists(name, spec, factors)
+    _check_layouts(name, spec["layouts"], settings["task"])
+    for key in ("flock_sizes", "shepherd_counts"):
+        if any(not isinstance(v, int) or v < 1 for v in spec[key]):
+            raise ValueError(f"{name}: {key} must be positive integers")
+    for factor_name, values in factors.items():
+        for label, text in [(f"factor name {factor_name!r}", factor_name)] + [
+            (f"factor {factor_name} value {v!r}", v) for v in values
+        ]:
+            _check_no_delimiters(name, label, text)
+    _check_decisions(name, settings)
+
+
+def _check_lists(name: str, spec: Mapping[str, Any], factors: Mapping[str, Any]) -> None:
     lists = {k: spec[k] for k in ("layouts", "flock_sizes", "shepherd_counts")}
-    lists.update({f"factor {k}": v for k, v in (spec.get("factors") or {}).items()})
+    lists.update({f"factor {k}": v for k, v in factors.items()})
     for key, value in lists.items():
         if not isinstance(value, list) or not value:
             raise ValueError(f"{name}: {key} must be a non-empty list")
@@ -276,33 +285,24 @@ def _check_grid(name: str, spec: Mapping[str, Any], settings: Mapping[str, Any])
             raise ValueError(f"{name}: {key} has repeated values")
     if not isinstance(spec["methods"], dict) or not spec["methods"]:
         raise ValueError(f"{name}: methods must name at least one method")
-    task = settings["task"]
+
+
+def _check_layouts(name: str, chosen: list[Any], task: str) -> None:
     if task not in SCENARIOS:
         raise ValueError(f"{name}: unknown task {task!r}; available: {sorted(SCENARIOS)}")
-    for layout in spec.get("layouts", []):
-        if any(c in str(layout) for c in ("|", "=", "\n")):
-            raise ValueError(
-                f"{name}: layout {layout!r} cannot contain key delimiters ('|', '=', newline)"
-            )
+    for layout in chosen:
+        _check_no_delimiters(name, f"layout {layout!r}", layout)
     layouts = SCENARIOS[task].layouts
-    unknown = sorted(set(spec["layouts"]) - set(layouts))
+    unknown = sorted(set(chosen) - set(layouts))
     if unknown:
         known = f"its layouts are {layouts}"
         raise ValueError(f"{name}: unknown layouts {unknown} for task {task!r}; {known}")
-    for key in ("flock_sizes", "shepherd_counts"):
-        if any(not isinstance(v, int) or v < 1 for v in spec[key]):
-            raise ValueError(f"{name}: {key} must be positive integers")
-    for factor_name, factor_values in (spec.get("factors") or {}).items():
-        if any(c in str(factor_name) for c in ("|", "=", "\n")):
-            raise ValueError(
-                f"{name}: factor name {factor_name!r} cannot contain delimiters ('|', '=', newline)"
-            )
-        for fv in factor_values:
-            if any(c in str(fv) for c in ("|", "=", "\n")):
-                raise ValueError(
-                    f"{name}: factor {factor_name} value {fv!r} cannot contain "
-                    + "key delimiters ('|', '=', newline)"
-                )
+
+
+def _check_no_delimiters(name: str, label: str, value: Any) -> None:
+    """Layouts and factors are joined into group keys with these characters."""
+    if any(c in str(value) for c in ("|", "=", "\n")):
+        raise ValueError(f"{name}: {label} cannot contain key delimiters ('|', '=', newline)")
 
 
 def _check_decisions(name: str, settings: Mapping[str, Any]) -> None:

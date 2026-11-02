@@ -4,9 +4,7 @@ from analysis import keys
 
 
 def test_keys_keep_the_stored_format_and_split_back() -> None:
-    group = keys.group_key(
-        "strombom_multi", "wide", [("dog_start_gap", 15), ("x", "a")], 200
-    )
+    group = keys.group_key("strombom_multi", "wide", [("dog_start_gap", 15), ("x", "a")], 200)
     assert group == "strombom_multi|wide|dog_start_gap=15.0|x=a|N=200"
 
     cell = keys.cell_key(group, 4)

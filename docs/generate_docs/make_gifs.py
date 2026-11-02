@@ -56,6 +56,7 @@ METHOD = "strombom_multi"
 
 View = tuple[tuple[float, float], tuple[float, float]]  # x limits and y limits of a panel
 
+
 # ----- helpers -----
 @dataclass(frozen=True)
 class Shot:

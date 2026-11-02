@@ -14,13 +14,16 @@ import numpy as np
 import pandas as pd
 
 from sim.core.simulation_state import SimulationState
-from sim.core.world import layouts
-from sim.core.world.layouts import DOG_STARTS, field_size, layout_extent, place_dogs, place_flock
+from sim.core.world.layouts import (
+    DOG_STARTS,
+    LAYOUTS,
+    field_size,
+    layout_extent,
+    place_dogs,
+    place_flock,
+)
 
 from .goal import arrival_columns
-
-# The start layouts of this task: the flock shapes sized by R_f and the separation distance.
-LAYOUTS = layouts.LAYOUTS
 
 # Setup keys this task reads from the run config (agent counts and the layout name are set
 # by build_config itself).

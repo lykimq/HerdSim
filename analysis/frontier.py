@@ -146,7 +146,6 @@ class GroupFrontier:
     d_min_above_grid: bool = False
     d_max_at_grid_top: bool = False
     still_improving_at_top: bool = False
-    onset_at_last_step: bool = False
     d_best_undecided: bool = False
     d_sat_undecided: bool = False
     d_crowd_undecided: bool = False
@@ -259,6 +258,19 @@ def _zones(
     return zones
 
 
+def _zones_without_reliable(
+    ds: list[int], status: dict[int, str], out: GroupFrontier
+) -> dict[int, str]:
+    """Zones of a group with no reliable D; sets its D_overcrowd from the first D that could
+    still be reliable."""
+    start = out.d_min_low
+    out.d_overcrowd = None if start is None else _overcrowding_onset(ds, status, start)
+    return {
+        d: _unreliable_zone(d, start, out.d_overcrowd) if status[d] == UNRELIABLE else UNDECIDED
+        for d in ds
+    }
+
+
 def _group(
     cells: pd.DataFrame, trials: pd.DataFrame, rules: Rules
 ) -> tuple[GroupFrontier, dict[int, str], set[int]]:
@@ -277,20 +289,13 @@ def _group(
     out.d_min_above_grid = not reliable and not needs
     out.group_undecided = bool(needs)
     if not reliable:
-        start = out.d_min_low
-        out.d_overcrowd = None if start is None else _overcrowding_onset(ds, status, start)
-        zones = {
-            d: _unreliable_zone(d, start, out.d_overcrowd) if status[d] == UNRELIABLE else UNDECIDED
-            for d in ds
-        }
-        return out, zones, needs
+        return out, _zones_without_reliable(ds, status, out), needs
     out.d_min = reliable[0]
 
     out.d_overcrowd = _overcrowding_onset(ds, status, out.d_min)
     working = [d for d in reliable if out.d_overcrowd is None or d < out.d_overcrowd]
     out.d_max = working[-1]
     out.d_max_at_grid_top = out.d_overcrowd is None and out.d_max == ds[-1]
-    out.onset_at_last_step = status[ds[-1]] == UNRELIABLE and out.d_overcrowd is None
 
     out.d_best, out.d_best_undecided = _d_best(working, finish, cmp)
     out.d_crowd, out.d_crowd_undecided = _d_crowd(working, out.d_best, cmp)

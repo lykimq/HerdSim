@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 import re
 import shlex
 from collections.abc import Callable, Sequence
@@ -13,7 +12,7 @@ from typing import NamedTuple
 import pandas as pd
 
 from analysis.curves import groups_table, layout_against_n, shape_table
-from analysis.results import read_cells, read_trials, run_record
+from analysis.results import read_cells, read_trials, resumed_protocols, run_record
 from analysis.trial_measures import curve_across, nested_deadlines
 from docs.generate_docs.format import DMIN_KEY, markdown
 from docs.generate_docs.tables import F99_MAIN as F99_MAIN_FOLDERS
@@ -228,7 +227,7 @@ CURVE_INTRO = (
 
 # --- Commands ----------------------------------------------------------------------------------
 
-STRICT_MAIN = " ".join(STRICT_MAIN_FOLDERS)
+STRICT_MAIN_ARGS = " ".join(STRICT_MAIN_FOLDERS)
 F99_MAIN = " ".join(F99_MAIN_FOLDERS)
 ORIGINAL_SIZES = " ".join(map(str, ORIGINAL_NS))
 NESTED_PAIRS = (
@@ -253,12 +252,12 @@ SECTIONS: tuple[Block, ...] = (
     "## Runs",
     lambda: runs_block(),
     "## D_min by layout and N, strict success",
-    Query(f"dmin {STRICT_MAIN}"),
+    Query(f"dmin {STRICT_MAIN_ARGS}"),
     "## D_min by layout and N, success at 99 percent",
     ORIGINAL_SIZES_NOTE,
     Query(f"dmin {F99_MAIN} --sizes {ORIGINAL_SIZES}"),
     "## Growth with N, strict",
-    Query(f"growth {STRICT_MAIN}"),
+    Query(f"growth {STRICT_MAIN_ARGS}"),
     "## Growth with N, 99 percent",
     ORIGINAL_SIZES_NOTE,
     Query(f"growth {F99_MAIN} --sizes {ORIGINAL_SIZES}"),
@@ -317,10 +316,7 @@ def page_blocks() -> list[str]:
 
 def runs_block() -> str:
     """Run record plus a note on folders resumed after their queue run."""
-    entries = [json.loads(line) for line in QUEUE_LOG.read_text().splitlines() if line.strip()]
-    last = {e["protocol"]: e for e in entries}
-    status = {p: json.loads((RESULTS_ROOT / p / "status.json").read_text()) for p in last}
-    grew = [p for p, e in last.items() if status[p]["trials_done"] > e["trials"]]
+    grew = resumed_protocols(QUEUE_LOG, RESULTS_ROOT)
     names = ", ".join(f"`{p}`" for p in grew)
     paragraphs = [RUNS_HEAD, markdown(run_record(QUEUE_LOG, RESULTS_ROOT))]
     if grew:

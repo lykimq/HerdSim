@@ -20,21 +20,16 @@ THREAD_LIMIT_VARS = (
 )
 
 
-def _init_worker() -> None:
+def limit_threads() -> None:
     for var in THREAD_LIMIT_VARS:
         os.environ[var] = "1"
 
 
-# Ensure environment is set in the parent process before starting any forkserver or workers
-for _var in THREAD_LIMIT_VARS:
-    os.environ[_var] = "1"
-
-
 def worker_pool(workers: int) -> ProcessPoolExecutor:
-    for _var in THREAD_LIMIT_VARS:
-        os.environ[_var] = "1"
+    # Set in the parent too: the fork server reads its environment at start.
+    limit_threads()
     return ProcessPoolExecutor(
         max_workers=max(1, workers),
         mp_context=multiprocessing.get_context("forkserver"),
-        initializer=_init_worker,
+        initializer=limit_threads,
     )

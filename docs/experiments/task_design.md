@@ -99,7 +99,7 @@ A campaign runs in rounds. Each gives every open cell, one whose reliability is 
 
 A cell gets its trials in batches of 10 seeds. After each batch (a look) HerdSim computes the exact two-sided 99% Clopper-Pearson interval of the success rate, with lower bound $L$ and upper bound $U$, and compares it with the threshold $\theta = 0.90$ (Figure 4). If $U < 0.90$ the cell is unreliable and gets no more seeds, usually after 10 to 20 trials. If $L \ge 0.90$ it is reliable, a success rate of at least 0.90 at 99% confidence; that needs at least 51 straight successes, and looks come every 10 trials, so the earliest decision is 60 of 60. Otherwise it is undecided and gets another batch of 10, up to 200.
 
-The exact interval is conservative for one look. Repeated looks are not corrected for, and the false-decision rate has not been measured ([report, limitations](../report/d_min_report.md#4-limitations-and-future-work)).
+The exact interval is conservative for one look. Repeated looks are not corrected for, and the false-decision rate has not been measured ([report, limitations](../report/d_min_report.md#4-limitations)).
 
 ![Sequential refinement and early stopping](../figures/fig_adaptive_1_refinement.png)
 

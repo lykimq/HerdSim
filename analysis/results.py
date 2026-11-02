@@ -19,9 +19,7 @@ def read_trials(folder: Path) -> pd.DataFrame:
     csv_gz = folder / "trials.csv.gz"
     if csv.exists():
         return read_table(csv)
-    if csv_gz.exists():
-        return read_table(csv_gz)
-    return read_table(csv)
+    return read_table(csv_gz if csv_gz.exists() else csv)
 
 
 def read_cells(folder: Path) -> pd.DataFrame:
@@ -37,6 +35,21 @@ def flock_radii(folder: Path) -> dict[str, dict[str, float]]:
     return json.loads((folder / "calibration.json").read_text())["flock_radius"]
 
 
+def last_queue_entries(queue_log: Path) -> dict[str, dict[str, Any]]:
+    """The last queue_log line of each protocol; empty when there is no log."""
+    if not queue_log.exists():
+        return {}
+    entries = [json.loads(line) for line in queue_log.read_text().splitlines() if line.strip()]
+    return {entry["protocol"]: entry for entry in entries}
+
+
+def resumed_protocols(queue_log: Path, results_root: Path) -> list[str]:
+    """Protocols whose folder holds more trials than their queue line recorded."""
+    last = last_queue_entries(queue_log)
+    status = {p: json.loads((results_root / p / "status.json").read_text()) for p in last}
+    return [p for p, e in last.items() if status[p]["trials_done"] > e["trials"]]
+
+
 def run_record(queue_log: Path, results_root: Path | None = None) -> pd.DataFrame:
     """The table of runs: the last queue_log entry of each protocol.
 
@@ -44,12 +57,9 @@ def run_record(queue_log: Path, results_root: Path | None = None) -> pd.DataFram
     so a folder resumed outside the queue (a top-up run) shows its current trials and
     cells; the finish time and hours stay those of the queue run.
     """
-    if not queue_log.exists():
+    last = last_queue_entries(queue_log)
+    if not last:
         return pd.DataFrame()
-    entries = [json.loads(line) for line in queue_log.read_text().splitlines() if line.strip()]
-    last: dict[str, dict[str, Any]] = {}
-    for entry in entries:
-        last[entry["protocol"]] = entry
     current = {
         "trials": "trials_done",
         "cells": "cells",

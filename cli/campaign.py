@@ -18,7 +18,7 @@ status     how far a run has got, whether it is running now, and why it stopped.
 refresh    decide every cell again from the stored trials and rewrite the folder's tables,
            after a change to the decision rules. Runs no trial and adds no dog count.
 
-Run `make test` before a long session. cli/README.md has the full routine.
+cli/README.md has the full routine.
 """
 
 from __future__ import annotations

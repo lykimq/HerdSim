@@ -131,26 +131,24 @@ class CampaignStore:
         self.errors_jsonl = output / "errors.jsonl"
         self.timeseries_dir = output / "timeseries"
         self._lock: IO[str] | None = None
-        if self.trials_gz.exists() and not self.trials_jsonl.exists():
-            _unpack(self.trials_gz, self.trials_jsonl)
-        if self.trials_csv_gz.exists() and not self.trials_csv.exists():
-            _unpack(self.trials_csv_gz, self.trials_csv)
+        for plain, packed in self._packed_pairs():
+            if packed.exists() and not plain.exists():
+                _unpack(packed, plain)
+
+    def _packed_pairs(self) -> tuple[tuple[Path, Path], ...]:
+        return (
+            (self.trials_jsonl, self.trials_gz),
+            (self.trials_csv, self.trials_csv_gz),
+        )
 
     def pack_trials(self) -> None:
         """Write trials.jsonl.gz and trials.csv.gz unless they already match
         their uncompressed source."""
-        if self.trials_jsonl.exists():
-            if not (
-                self.trials_gz.exists()
-                and self.trials_gz.stat().st_mtime_ns == self.trials_jsonl.stat().st_mtime_ns
-            ):
-                _pack(self.trials_jsonl, self.trials_gz)
-        if self.trials_csv.exists():
-            if not (
-                self.trials_csv_gz.exists()
-                and self.trials_csv_gz.stat().st_mtime_ns == self.trials_csv.stat().st_mtime_ns
-            ):
-                _pack(self.trials_csv, self.trials_csv_gz)
+        for plain, packed in self._packed_pairs():
+            if not plain.exists():
+                continue
+            if not packed.exists() or packed.stat().st_mtime_ns != plain.stat().st_mtime_ns:
+                _pack(plain, packed)
 
     def open(self, protocol: Protocol, physics_hash: str) -> None:
         """Lock the folder, then create it or check that it ran the same protocol and physics.

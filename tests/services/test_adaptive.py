@@ -163,7 +163,7 @@ def test_seed_counts_stay_on_whole_batches(seeds_run: int, flagged: bool, wanted
 def test_calibration_failure_leaves_the_folder_reusable(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    def refuse(_protocol: Protocol, _workers: int) -> None:
+    def refuse(_protocol: Protocol, _workers: int, existing: object = None) -> None:
         raise CalibrationError("no settled radius")
 
     monkeypatch.setattr("services.adaptive.calibrate", refuse)

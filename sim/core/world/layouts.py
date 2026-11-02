@@ -12,7 +12,7 @@ from typing import Any
 
 import numpy as np
 
-from sim.core.vectors import rotate, unit
+from sim.core.vectors import angle_vectors, rotate, unit
 
 LAYOUTS = ("compact", "wide", "split", "outlier_rich")
 DOG_STARTS = ("arcs", "ring", "handler")
@@ -53,7 +53,7 @@ def _truncated_gaussian(center: np.ndarray, sigma: float, rng: np.random.Generat
     cut = CUT_SIGMAS * sigma
 
     def draw(k: int) -> np.ndarray:
-        # Same draw size each round so the RNG stream matches the previous implementation.
+        # Same draw size each round keeps the RNG stream, and so the stored trials, identical.
         chunks: list[np.ndarray] = []
         filled = 0
         while filled < k:
@@ -116,7 +116,7 @@ def place_flock(config: dict[str, Any], rng: np.random.Generator) -> np.ndarray:
         def outlier_ring(k: int) -> np.ndarray:
             angle = rng.uniform(0.0, 2.0 * np.pi, k)
             radius = reach * rng.uniform(near, far, k)
-            return center + radius[:, None] * np.stack([np.cos(angle), np.sin(angle)], axis=1)
+            return center + radius[:, None] * angle_vectors(angle)
 
         return np.vstack([core, _draw_n(n_out, outlier_ring, config)])
 

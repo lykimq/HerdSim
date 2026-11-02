@@ -52,7 +52,6 @@ flowchart TB
     tools --> report
     tools --> campaign
     tools --> analysis
-    tools --> engine
     report --> campaign
     report --> analysis
     report --> records
@@ -65,7 +64,7 @@ flowchart TB
 
 Each layer has one job ([Table 1](#where-to-look-in-the-code) says where each lives):
 
-1) Command-line tools: start protocols and other commands and print progress as plain lines; the status command says how far a run has got and whether it is still running. From the engine they import only its table of tasks. No tool imports another.
+1) Command-line tools: start protocols and other commands and print progress as plain lines; the status command says how far a run has got and whether it is still running. They import the campaign and report layers only. No tool imports another.
 2) Report: writes analysis values as Markdown tables and text, and produces the generated pages, figures and GIFs. The tools use its tables, so the terminal and the docs show the same table values. Figures and GIFs may run or replay trials, but no stored result comes from them.
 3) Campaign: the manager that spends extra [seeds](#how-an-experiment-is-broken-down) on undecided [cells](#how-an-experiment-is-broken-down). It runs the rounds, calibration and replays, sends trials to the worker pool, separate processes that run trials in parallel, and writes the [results folder](#results-folder). After each round it hands the rows so far to analysis, which decides which cells still need seeds; no sheep or dog rule lives here.
 4) Analysis: reads stored files and never runs the model. From the trial rows it works out success rates, reliable teams, $D_{\min}$ (the smallest reliable team), $D_{\mathrm{sat}}$ and the other [team sizes](../glossary.md#team-sizes), and curve fits.

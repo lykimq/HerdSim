@@ -28,7 +28,7 @@ Among curves that have a reliable team, flock size moves $D_{\min}$ at least as 
 1) [The question](#1-the-question)
 2) [Method](#2-method)
 3) [Results](#3-results)
-4) [Limitations and future work](#4-limitations-and-future-work)
+4) [Limitations](#4-limitations)
 5) [Run record](#5-run-record)
 
 ## 1. The question
@@ -222,7 +222,7 @@ A shorter deadline cuts the same trial short. In every pair of runs in Table 7, 
 
 *Data:* `uv run cli/dmin_tables.py nested <longer> <shorter>`, with the longer-deadline folder first.
 
-## 4. Limitations and future work
+## 4. Limitations
 
 These results rest on HerdSim's choices:
 
@@ -232,8 +232,9 @@ These results rest on HerdSim's choices:
 4) Cells whose true success rate is near 0.90 stay open at 200 seeds, so some answers are brackets. Reliability is checked after every batch of 10 seeds, up to 20 looks per cell, with no correction for the repeated looks, and we have not measured the false-decision rate this causes.
 5) The flock sizes stop at 566, below the calibration edge, so the shape of the curve beyond it is open.
 6) Replays are exact on the same machine with `uv.lock` and one thread of the linear-algebra library (BLAS) per process. On another CPU, rare trials that end right at the deadline may change.
-
-Three studies would extend this one. Larger flocks need a change to the drive first: above $(65/2)^2 \approx 1056$ sheep the drive point, $2\sqrt{N}$ m behind the flock centre, lies beyond the 65 m at which sheep react, so a driving dog reaches only the rear of the flock. Sheep that steer toward their neighbours instead of the whole flock's centre would test whether cohesion keeps the growth slow. And on `split`, where the flock starts in three clusters and no team is reliable from $N = 200$ at the tighter deadlines, an assignment that gives each cluster some dogs may help.
+7) Above $(65/2)^2 \approx 1056$ sheep the drive point, $2\sqrt{N}$ m behind the flock centre, lies beyond the 65 m at which sheep react, so a driving dog reaches only the rear of the flock. Results for larger flocks would need a different drive.
+8) Each sheep steers toward the centre of the whole flock ($n = N - 1$). We have not tested whether a local neighbourhood changes how fast $D_{\min}$ grows.
+9) On `split`, where the flock starts in three clusters, no team is reliable from $N = 200$ at the tighter deadlines. All dogs follow one shared collect and drive rule; this may be because no dog stays with a cluster, and we have not tested it.
 
 ## 5. Run record
 
