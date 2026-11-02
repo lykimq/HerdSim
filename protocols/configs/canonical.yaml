@@ -13,23 +13,23 @@
 task: drive_to_goal
 
 # --- Task: drive the flock into a goal -----------------------------------------------------
-# The goal lies this many flock radii from the flock start, and never closer than the minimum
-# (in units) or closer than the widest start layout plus the goal plus one flock radius.
-# The sign gives the direction; a negative value mirrors the drive.
+# The goal lies this many flock radii from the flock start. It is never closer than the minimum
+# (in m) or closer than the widest start layout plus the goal plus one flock radius. The sign
+# gives the direction; a negative value mirrors the drive.
 drive_distance_multiple: 13.0
 drive_distance_min: 80.0
 # Goal radius in flock radii.
 goal_radius_multiple: 1.9
 # Share of the sheep that must be inside the goal at one tick for a trial to succeed. 1 is
-# every sheep, as Kubo et al. 2022 state their aim. Below 1 (0.99), one or two stragglers no
-# longer decide a trial: with the strict rule a flock can reach the goal with 99% inside and
-# then be driven past it.
+# every sheep, the aim of Kubo et al. 2022. Below 1 (0.99), one or two late sheep no longer
+# decide a trial: with the strict rule a flock can reach the goal with 99% inside and then be
+# driven past it.
 success_fraction: 1.0
-# Holding. The goal counts as reached only after the share above has been inside without a
-# break for hold_drive_multiple drive times (0: at the first such tick, the D_min rule). With
-# hold_withdraw true, the dogs of collect_drive_multi withdraw while it is inside, to r_s + r_a
-# beyond the farthest sheep, so the flock grazes: a Strombom sheep flees while any dog is
-# closer than r_s, so dogs that only stop would push it through the goal.
+# Holding task. The goal counts as reached only after the share above has stayed inside
+# without a break for hold_drive_multiple drive times (0: at the first such tick, the D_min
+# rule). With hold_withdraw true, the dogs of collect_drive_multi withdraw while the share is
+# inside, to r_s + r_a beyond the farthest sheep. A Strombom sheep flees while any dog is
+# closer than r_s, so dogs that only stopped would keep pushing the flock through the goal.
 hold_drive_multiple: 0.0
 hold_withdraw: false
 # Dogs that take up room: no dog steps to within dog_spacing of another. Dogs move one after
@@ -37,23 +37,24 @@ hold_withdraw: false
 # would end that close does not step this tick. 0: dogs are points, as in the papers. Not for
 # the Kubo and Lama dogs, which keep apart on their own.
 dog_spacing: 0.0
-# What a dog of collect_drive_multi knows. sensing_range 0: every sheep, the paper's shepherd.
-# Above 0: the sheep closer than that to the dog, and with communication also what other dogs
-# see: none (its own view only), neighbour (plus the dogs within sensing_range of it), shared
-# (every dog's view, planned once for the team). Dog positions are known to every dog. A dog
-# that knows no sheep walks to the flock centre it last knew (at first the flock's start).
+# What a dog of collect_drive_multi knows. With sensing_range 0 it knows every sheep, as the
+# paper's shepherd does. Above 0 it knows the sheep closer than that range, and communication
+# sets what it learns from other dogs: none (its own view only), neighbour (also the views of
+# the dogs within sensing_range of it), shared (every dog's view, planned once for the team).
+# Every dog knows the dog positions. A dog that knows no sheep walks to the flock centre it
+# last knew (at first the flock's start).
 sensing_range: 0.0
 communication: none
 # Cap on the Strombom drive offset r_a sqrt(N). The paper's offset passes the sheep reaction
 # distance r_s at N = (r_s / r_a)^2 = 1056, so above that the dog stands where few sheep feel
-# it and no team drives the flock. A cap of r_s - r_a keeps the drive point within reach; it
-# changes the paper rule, so it is a labelled variant. 0 is off.
+# it and no team size can drive the flock. A cap of r_s - r_a keeps the drive point within
+# reach. It changes the paper rule, so it is a labelled variant. 0 is off.
 drive_offset_cap: 0.0
-# Free margin around the start, in units (a little more than the sheep reaction distance 65).
+# Free margin around the start, in m (a little more than the sheep reaction distance 65).
 # The field only places the start; there is no boundary, as in the papers.
 field_clearance: 80.0
 
-# --- Task: gather targets scattered over a disc into a goal at its centre ---------------------
+# --- Task: gather -------------------------------------------------------------------------
 # The task of Lama and di Bernardo 2024 (task: gather). Sheep and dogs start uniform over a
 # disc of radius gather_start_radius (the paper's R, 50 in its main figure) centred on the
 # goal, a disc of gather_goal_fraction x R (the paper's r* = R / 5). Success is the share
@@ -101,8 +102,8 @@ measurement_radius: 5.0
 lost_radius_multiple: 2.5
 # Metrics are recorded at tick 0, every metrics_stride ticks and at the last tick; success and
 # the end of a trial are checked every tick whatever the stride. 1 records every tick. A method
-# with a small time step (Lama, dt 0.03) records every 10th tick, because the metrics cost more
-# per tick than the model and a failing trial runs 166,667 ticks. A first arrival is then read
+# with a small time step (Lama, dt 0.03) records every 10th tick, because a failing trial runs
+# 166,667 ticks and the metrics cost more per tick than the model. A first arrival is then read
 # from the recorded ticks, so the arrival times of a strided run are never earlier than the
 # exact ones. Calibration always records every tick.
 metrics_stride: 1
@@ -110,7 +111,7 @@ metrics_stride: 1
 # --- Calibration of R_f --------------------------------------------------------------------
 # One dog drives a compact flock toward a goal it cannot reach for calibration_seconds. R_f is
 # sqrt(2) x the RMS radius over the last calibration_window_seconds, median over seeds and
-# over the start sizes (spacings, so a start has radius spacing x sqrt(N / pi)).
+# over the start sizes in calibration_starts (a start of s has radius s x sqrt(N / pi) m).
 calibration_seeds: 3
 calibration_seconds: 300.0
 calibration_window_seconds: 90.0
@@ -131,7 +132,7 @@ imposed_radius_scale: 1.0
 master_seed: 2026
 # A cell is reliable when the confidence interval of its success rate lies at or above theta,
 # unreliable when it lies below, undecided otherwise. At theta 0.90 and 99% confidence a cell
-# needs 51 straight successes to be reliable.
+# needs 51 successes in a row to be reliable.
 reliability_theta: 0.90
 confidence: 0.99
 # Seeds are added in batches until every open cell is decided or has max_seeds.
@@ -146,10 +147,9 @@ bootstrap_resamples: 4000
 # A dog count is added halfway between two neighbours more than refine_min_gap apart whose
 # zones differ (whose reliability differs, when decide_finish_times is false).
 refine_min_gap: 1
-# false: seeds are spent only to decide reliability, so D_min. An open finish-time comparison
-# (D_best, D_sat, D_crowd) asks for no seeds; those values stay in the tables, flagged
-# undecided. true: also decide them, which cost 5 to 38 percent more trials on the 99 percent
-# grids. Runs that ask for D_sat set it true.
+# Off, seeds are spent only to decide reliability (D_min), and the finish-time values D_best,
+# D_sat and D_crowd stay in the tables flagged undecided. On, seeds also decide them, which
+# costs more trials. Runs that ask for D_sat turn it on.
 decide_finish_times: false
 # Above a confirmed saturation, a cell whose dogs were copies (mean dog_overlap at least
 # this) and that is neither slower nor unreliable gets no more seeds. Above 1 turns it off.

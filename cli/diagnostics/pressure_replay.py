@@ -25,7 +25,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from analysis.curves import groups_table  # noqa: E402
 from analysis.pressure import Pressure, cells_to_replay, pressure_table  # noqa: E402
-from docs.generate_docs.report.text import markdown  # noqa: E402
+from docs.generate_docs.format import markdown  # noqa: E402
 from services.protocol import results_folder  # noqa: E402
 from services.replay import (  # noqa: E402
     ReplayJob,

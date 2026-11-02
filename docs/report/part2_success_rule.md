@@ -1,58 +1,85 @@
 # The success rule and changes to the setup
 
-Part 2 of the HerdSim report on team size. The [overview](d_min_report.md) holds the abstract, the research questions, the [decision rules](d_min_report.md#2-decision-rules-and-setup) that define $D_{\min}$, its brackets and lower bounds, the [start layouts and dog rules](d_min_report.md#22-start-layouts-dog-rules-and-protocols), the discussion and the [references](d_min_report.md#references). Terms are defined in the [glossary](../glossary.md).
-
 ## 3.4 RQ4: The success rule and the last sheep
 
-In the main runs the 99% rule never needs more dogs than the strict rule, and on six large-flock curves it has a reliable team where the strict rule has none or only a lower bound. Under the strict rule large teams mostly fail on the last few sheep, after 99% of the flock has been in the goal. The strict rule needs every sheep in the goal at the same tick, the 99% rule 99% of them ([success and reliability](../glossary.md#success-and-reliability)). `none` means no team up to the top of the grid is reliable, a decided outcome; a bracket such as `3-8` and a lower bound such as `[9]` are still open ([section 2.1](d_min_report.md#21-when-a-team-is-reliable)).
+[RQ4](d_min_report.md#1-research-questions) asks how the strict and 99% [success rules](../glossary.md#success-and-reliability) differ, and why large teams fail under the strict one. In the main runs the 99% rule never needs more dogs, and on six large-flock curves it has a reliable team where the strict rule has none or only a lower bound (Table 1). Large teams fail the strict rule mostly on the last few sheep.
 
-The main runs compare `dmin_m12`, `dmin_m6` and `dmin_m3` with `dmin_f99_m12`, `dmin_f99_m6` and `dmin_f99_m3` at $N = 25$-400. In all 34 scattered curves where both rules give a reliable team, the 99% rule needs the same or fewer dogs. 18 of the 34 are at $N = 25$ and 50, where 99% of the flock rounds up to every sheep. Where both are decided and differ, the saving is exactly one dog. Six large-flock curves have no reliable team under the strict rule but one under the 99% rule: four are `none` under the strict rule, and two are lower bounds at 6 drive times, `wide` $N = 400$ at [9] and `outlier_rich` $N = 200$ at [12], whose cells stay undecided at 200 seeds with success rates of 0.84-0.91. All six have a reliable team under the 99% rule (two decided, three narrow brackets and one wide one, 4-10). Figure 1 compares the two rules cell by cell on the same seeds.
+$D_{\min}$ is the smallest reliable team on a curve, one layout and $N$; [section 2.1](d_min_report.md#21-when-a-team-is-reliable) defines reliable, decided and undecided cells, brackets and lower bounds, and the [glossary](../glossary.md#trials-and-experiments) curves, cells, seeds and protocol ids. The main runs compared are `dmin_m12`, `dmin_m6`, `dmin_m3` against `dmin_f99_m12`, `dmin_f99_m6`, `dmin_f99_m3` (12, 6 and 3 drive times).
+
+**Table 1: Scattered curves of the main runs by outcome under each rule ($N = 25$-400, 12, 6 and 3 drive times).**
+
+| Curves | Count | Strict rule | 99% rule |
+| :--- | :---: | :--- | :--- |
+| Both reliable, $N = 25$ and 50 | 18 | reliable | the same $D_{\min}$ |
+| Both reliable, $N \ge 100$ | 16 | reliable | the same on 6, one dog fewer on 6, a bracket on 4 |
+| Reliable only under 99% | 6 | `none` on four, a lower bound on two | two decided, three narrow brackets, one wide (4-10) |
+| Total | 40 of 45 | | |
+
+The other 5 have no reliable team under either rule (`split` at 6 and 3 drive times, $N = 200$ and 400; `outlier_rich` at 3 drive times, $N = 400$). At $N = 25$ and 50 the rules are the same, as 99% of the flock rounds up to every sheep ($0.99 \times 25 = 24.75$, $0.99 \times 50 = 49.5$). The two strict lower bounds, at 6 drive times, are `wide` $N = 400$ at [9] and `outlier_rich` $N = 200$ at [12]; their cells stay undecided after 200 seeds with success rates of 0.84-0.91. Figure 1 compares the rules cell by cell.
 
 ![Strict against 99% success rates](../figures/fig30_strict_vs_99.png)
 
-**Figure 1: Strict against 99% success, cell by cell, on the same seeds.** In 40 cells (32 at $N \ge 200$) the 99% success rate is at or above 0.90 while the strict rate is below it. In those cells, whether the last 1% of the flock gets in decides the strict result.
+**Figure 1: Strict against 99% success, cell by cell on the same seeds (scattered layouts, $N \ge 100$, 12, 6 and 3 drive times).** In 40 cells (32 at $N \ge 200$) the 99% success rate is at or above 0.90 while the strict rate is below it. There the last 1% of the flock decides the strict result.
 
-- Marks: each point is one cell (one layout, $N$ and $D$), coloured by layout, with the strict success rate across and the 99% success rate up. The diagonal is $y = x$, and no point lies below it, because a trial that brings every sheep in also meets the 99% rule. The shaded upper left holds the 40 cells above.
-- Panels: one per deadline (12, 6 and 3 drive times), scattered layouts at $N \ge 100$, with 80, 57 and 33 shared cells that have at least 20 seeds.
+- Marks: each point is one cell (one layout, $N$ and $D$), coloured by layout, with the strict success rate across and the 99% success rate up. The diagonal is $y = x$; no point lies below it, because a trial that brings every sheep in also meets the 99% rule. These 40 cells are shaded.
+- Panels: one per deadline (12, 6 and 3 drive times), with 80, 57 and 33 shared cells that have at least 20 seeds.
 
 *Data:* `results/dmin_m12`, `dmin_m6` and `dmin_m3`; values in [results_tables.md: strict success](results_tables.md#d_min-by-layout-and-n-strict-success) and [results_tables.md: success at 99 percent](results_tables.md#d_min-by-layout-and-n-success-at-99-percent).
 
-Large teams fail under the strict rule on the last sheep. In the sensitivity base run `dmin_s_base` (`wide` and `outlier_rich`, $N = 100$-400, $D$ up to 16, 6 drive times), 99% of the flock had been in the goal before the deadline in 367 of 379 strict failures with 6 or more dogs (97%; Figure 2). At the tick with the most sheep in, 362 of these 367 had one or two sheep outside and 5 had three or four. In the main run `dmin_m6` (four layouts, $N = 25$-400, $D$ up to 24) the share is 499 of 550 (91%); it includes `split`, where 41 of 78 strict failures had 99% in, and without `split` it is 458 of 472 (97%). In the traced trial of Figure 2 (`wide` $N = 400$, 16 dogs, seed 2) the dogs go after the last sheep, end up between the flock and the goal, and drive the flock that was already in back out of it, twice. Of the 379 failures, 286 (75%) end with no sheep in the goal at the end of the trial. In the traced trial the flock is driven back out of the goal (Animation 1 replays it); we have not checked whether the other trials end the same way.
+In 97% of the strict failures with 6 or more dogs (367 of 379), 99% of the flock had already been in the goal before the deadline (Figure 2), in the [sensitivity](#35-rq5-which-results-survive-changes-to-the-setup) base run `dmin_s_base` (`wide` and `outlier_rich`, $N = 100$-400, up to 16 dogs, 6 drive times). At the [tick](../glossary.md#trials-and-experiments) (1 s) with the most sheep in, 362 of these 367 had one or two sheep outside and 5 had three or four. The main run `dmin_m6` (four layouts, $N = 25$-400, $D$ up to 24) gives 499 of 550 (91%), lower because only 41 of its 78 `split` failures had 99% in; without `split` it is 458 of 472 (97%).
 
-Slower dogs avoid most of these failures. With dogs at 1.15 m/s instead of 1.5 (`dmin_s_dogspeed`), 1.15 times the sheep's 1 m/s, the ratio of the dog's mean speed of 1.5 m/s to the mean speed of the sheep, 1.3 m/s, in the field data of Jadhav et al. (2024, Fig. 2f), the strict $D_{\min}$ at $N = 400$ drops from none on the grid to 6 on `outlier_rich` and from [9] to 5 on `wide`. Under the 99% rule the base run is already at 3 on `outlier_rich` $N = 400$ and the same slow dogs (`dmin_f99_s_dogspeed`) also give 3, so slower dogs change nothing there. The slower dogs also differ during gathering, so this variant supports the reading that the strict failures arise at the goal without proving it.
+Of the 379 strict failures, 286 (75%) end with no sheep in the goal. In the trial of Figure 2 (right) and Animation 1 the dogs drive the flock back out of the goal while they chase the last sheep; we have not checked whether other trials end the same way.
 
-![The straggler mechanism](../figures/fig22_straggler.png)
+Slower dogs avoid most of these failures. Jadhav et al. (2024) measured in the field a dog with "a mean speed of 1.5 ms-1, slightly higher than the mean speed of sheep, 1.3 ms-1" (main text, p. 4, Fig. 2f), 1.15 times as fast. The variant `dmin_s_dogspeed` keeps that ratio with the sheep at 1 m/s, so its dogs run at 1.15 m/s, not the default 1.5 m/s. The strict $D_{\min}$ at $N = 400$ then drops from none on the grid to 6 on `outlier_rich` and from [9] to 5 on `wide`. Under the 99% rule `outlier_rich` $N = 400$ stays at 3 with slow dogs (`dmin_f99_s_dogspeed`). This fits failures at the goal but does not prove it, since slower dogs change the whole drive.
 
-**Figure 2: Where strict failures arise, with 6 or more dogs.** With dogs at 1.5 m/s the flock arrives but the last sheep often does not. With dogs at 1.15 m/s nearly every trial brings every sheep in.
+![Where strict failures arise](../figures/fig22_straggler.png)
 
-- Left: share of trials with 6 or more dogs, one group of bars per layout and $N$, in which every sheep got in (dark blue), in which 99% of the sheep were in at some tick (hatched), and in which every sheep got in with dogs at 1.15 m/s (orange). With dogs at 1.5 m/s the first two bars differ by 0.4, 5.8 and 15.2 percentage points on `wide` $N = 100$, 200 and 400, and by 1.0, 15.6 and 30.8 points on `outlier_rich`. Over the six groups together they differ by 10.5 points (367 of 3480 trials).
-- Right: one trial (`wide` $N = 400$, 16 dogs, seed 2), with the distance from the flock centre to the goal (top) and the sheep outside the goal on a symmetric log scale, linear near zero (bottom). Fast dogs (blue) bring 399 sheep in, then drive the flock back out twice while chasing the last one. Slower dogs (orange) finish in one pass.
+**Figure 2: Where strict failures arise with 6 or more dogs (`dmin_s_base` against `dmin_s_dogspeed`, `wide` and `outlier_rich`, $N = 100$-400, strict rule, 6 drive times).** At 1.5 m/s, 99% of the flock got in but not every sheep in 367 of the 3480 trials with 6 or more dogs (10.5 percentage points pooled; Table 2 gives each group). At 1.15 m/s nearly every trial brings every sheep in.
+
+- Left: per layout and $N$, the share of trials where every sheep got in (dark blue), 99% were in at some tick (hatched), and every sheep got in with dogs at 1.15 m/s (orange).
+- Right: the trial of Animation 1 (`wide` $N = 400$, 16 dogs, seed 2), with the distance from the flock centre to the goal (top) and the sheep outside the goal on a symmetric log scale, linear near zero (bottom); blue for dogs at 1.5 m/s, orange for 1.15 m/s.
 
 *Data:* `results/dmin_s_base` and `results/dmin_s_dogspeed`; values in [results_tables.md: Sensitivity, strict: base / variant](results_tables.md#sensitivity-strict-base--variant).
 
+**Table 2: Percentage points of trials in which 99% of the flock got in but not every sheep (`dmin_s_base`, 6 or more dogs, strict rule, 6 drive times).**
+
+| Layout | $N = 100$ | $N = 200$ | $N = 400$ |
+| :--- | :---: | :---: | :---: |
+| `wide` | 0.4 | 5.8 | 15.2 |
+| `outlier_rich` | 1.0 | 15.6 | 30.8 |
+
 ![Animation of one start flock driven by fast and by slow dogs](../gifs/last_sheep.gif)
 
-**Animation 1: The last sheep, replayed (`wide`, $N = 400$, 16 dogs, seed 2, strict rule, 6 drive times).** Fast dogs lose the last sheep and the flock with it, and slower dogs finish in one pass. Both start from the same flock, and each replay reproduces its stored trial.
+**Animation 1: The last sheep, replayed (`wide`, $N = 400$, 16 dogs, seed 2, strict rule, 6 drive times).** Dogs at 1.5 m/s bring 399 sheep into the goal, then drive the flock back out twice while chasing the last one, and run out of time. Dogs at 1.15 m/s bring every sheep in on the first pass. Both start from the same flock, and each [replay](../glossary.md#trials-and-experiments) reproduces its stored trial.
 
-- Left: dogs at 1.5 m/s bring the flock to the goal with a sheep or two missing, drive it out again while chasing them, and run out of time.
-- Right: dogs at 1.15 m/s bring every sheep in on the first pass.
+- Left: dogs at 1.5 m/s.
+- Right: dogs at 1.15 m/s.
 
 ## 3.5 RQ5: Which results survive changes to the setup?
 
-Some setup choices have no real-world value, such as where the dogs start. Apart from the goal size, changing one of them moves the 99% $D_{\min}$ by at most one dog for certain, except that the [field-matched sheep](../glossary.md#variants) may lower it by two on one curve. Under the strict rule the same changes move $D_{\min}$ a lot, in both directions. The [sensitivity runs](../glossary.md#trials-and-experiments) are 14 protocols at 6 drive times, a base run and six variants under each rule, each variant changing one choice on the seeds of its base (Figure 3).
+Some setup choices have no measured value, such as where the dogs start. Apart from the goal size, changing one moves the 99% $D_{\min}$ by at most one dog, for any outcome of the open brackets, except that the field-matched sheep may take `outlier_rich` $N = 200$ from 2-3 to 1. Under the strict rule the same changes move $D_{\min}$ a lot, in both directions (Table 3, Figure 3).
 
-Under the 99% rule, releasing the dogs from one point (`handler`) or a ring round the flock (`ring`), a start gap of 15 or 60 m instead of 30 m between the flock and the first dogs (the "start gap"), or dogs at 1.15 m/s move $D_{\min}$ by at most one dog for certain. With the [field-matched sheep](../glossary.md#variants), the parameters Strömbom et al. (2014) set to mimic real sheep, $D_{\min}$ on `outlier_rich` $N = 200$ may drop by two, from 2-3 to 1, and on the other five curves it moves by at most one dog.
+The [sensitivity runs](../glossary.md#trials-and-experiments) are 14 protocols at 6 drive times: under each rule a base run and six variants on its seeds. The variants make seven changes, as the start-gap protocols (`dmin_s_gap`, `dmin_f99_s_gap`) run gaps of 15 and 60 m beside the base 30 m.
 
-The goal size moves the 99% $D_{\min}$ more, at $N = 400$ only. With a goal radius of $1.5 R_f$ instead of $1.9 R_f$ ($R_f$ is the calibrated flock radius, [the drive task](../glossary.md#the-drive-task)), `wide` $N = 400$ goes from 2-3 to 5-6 dogs and `outlier_rich` $N = 400$ from 3 to none; at $N = 100$ and 200 it does not change. Under the strict rule the smaller goal leaves `outlier_rich` $N = 100$ at 3 and takes `wide` $N = 100$ from 1 to 1-3. This may be because a settled flock only just fits in the smaller goal; we have not tested it.
+**Table 3: How each setup change moves $D_{\min}$ from the base run (sensitivity runs, `wide` and `outlier_rich`, $N = 100$-400, 6 drive times).**
 
-Under the strict rule the changes go both ways. `wide` $N = 200$ goes from 3 to none with the field-matched sheep and to [3] with a start gap of 15 m. A start gap of 60 m brings `wide` $N = 400$ from [9] to 6-7 and `outlier_rich` $N = 200$ from [12] to 5, and slower dogs bring `outlier_rich` $N = 200$ from [12] to 4. This may be because small changes in the setup change how the last sheep comes in; we have not tested it.
+| Change | 99% rule | Strict rule |
+| :--- | :--- | :--- |
+| [Dog start](../glossary.md#start-layouts-and-dog-starts) `handler` (one point) or `ring` (round the flock) instead of arcs behind it | at most one dog each | Figure 3 only |
+| [Start gap](../glossary.md#start-layouts-and-dog-starts) 15 m instead of 30 m | at most one dog | `wide` $N = 200$: 3 to [3] |
+| Start gap 60 m | at most one dog | `wide` $N = 400$: [9] to 6-7; `outlier_rich` $N = 200$: [12] to 5 |
+| Dogs at 1.15 m/s ([section 3.4](#34-rq4-the-success-rule-and-the-last-sheep)) | at most one dog | `outlier_rich` $N = 200$: [12] to 4 |
+| [Field-matched sheep](../glossary.md#variants) of Strömbom et al. (2014) | `outlier_rich` $N = 200$: 2-3 to 1; others at most one dog | `wide` $N = 200$: 3 to none |
+| Goal radius $1.5 R_f$ instead of $1.9 R_f$ ([$R_f$](../glossary.md#the-drive-task)) | $N = 400$: `wide` 2-3 to 5-6, `outlier_rich` 3 to none; $N = 100$ and 200 unchanged | `outlier_rich` $N = 100$ stays 3; `wide` $N = 100$: 1 to 1-3 |
+
+A settled flock of 400 may only just fit in the smaller goal; we have not tested that. The strict swings may come from how the last sheep comes in, as the slower dogs suggest; no run tests that for the other changes.
 
 ![Sensitivity analysis heatmap](../figures/fig24_sensitivity.png)
 
-**Figure 3: $D_{\min}$ for each setup change at 6 drive times.** Under the 99% rule most changes match the base within one dog. Under the strict rule many do not.
+**Figure 3: $D_{\min}$ for each setup change (sensitivity runs, `wide` and `outlier_rich`, $N = 100$-400, 6 drive times, both rules).** Under the 99% rule most changes match the base within one dog. Under the strict rule many do not.
 
-- Marks: each cell gives $D_{\min}$ in the forms of [section 2.1](d_min_report.md#21-when-a-team-is-reliable), a single value, a bracket such as `2-3`, or a lower bound such as `[9]`. Darker blue is a larger team. Brackets and lower bounds are drawn faded because they are still open. Hatched cells marked "none" have no reliable team up to 16, the top of these grids.
-- Rows: the base, then the changes, the field-matched sheep, dog start (`handler`, `ring`), goal radius $1.5 R_f$, start gap 15 and 60 m, and dog speed 1.15 m/s. The top half uses the strict rule, the bottom half the 99% rule.
+- Marks: each cell gives $D_{\min}$ in the forms of [section 2.1](d_min_report.md#21-when-a-team-is-reliable); darker blue is a larger team, and the still open brackets and lower bounds are faded. Hatched cells marked "none" have no reliable team up to 16, the top of these grids.
+- Rows: the base, then one row per change of Table 3; strict rule in the top half, 99% rule in the bottom half.
 - Columns: layout and flock size ($N = 100, 200, 400$).
 
 *Data:* [results_tables.md: Sensitivity, strict: base / variant](results_tables.md#sensitivity-strict-base--variant) and [results_tables.md: Sensitivity, 99 percent: base / variant](results_tables.md#sensitivity-99-percent-base--variant).

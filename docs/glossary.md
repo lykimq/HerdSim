@@ -5,10 +5,10 @@ A definition for each term HerdSim's docs use, with a link to the section that e
 ## Trials and experiments
 
 - $N$ and $D$: the number of sheep (flock size) and of dogs (team size). The code and protocol files call a dog a shepherd (`shepherd_counts` lists the team sizes); the [gather task](#the-gather-task) calls it a herder.
-- Protocol: the recipe of one experiment, a YAML file in `protocols/configs/protocols/` that fixes the methods, layouts, flock sizes, team sizes, [success rule](#success-and-reliability) and [deadline](#the-drive-task). A protocol with `extends:` changes only what it names in its parent. A setting the protocol does not name (a canonical setting) keeps its default from `protocols/configs/canonical.yaml`.
-- Protocol id: the protocol's name, built from parts: `dmin` the [$D_{\min}$](#team-sizes) study on the [drive task](#the-drive-task), `f99` the [99% rule](#success-and-reliability) (absent for the strict rule), `m12`, `m6` or `m3` the deadline in [drive times](#the-drive-task), `s_` a sensitivity variant, and a last part naming the variant (such as `fat`, `hold` or `big`). `lama_r50` is the [gather task](#the-gather-task) on a start disc of radius 50, `lama_r50_inf` the same with infinite sensing.
+- Protocol: the recipe of one experiment, a YAML file in `protocols/configs/protocols/` that fixes the methods, layouts, flock sizes, team sizes, [success rule](#success-and-reliability) and [deadline](#the-drive-task). How a protocol inherits from a parent and from the canonical defaults is in the [configuration guide](guides/configuration.md#protocol-overrides).
+- Protocol id: the protocol's name, built from parts. `dmin` the [$D_{\min}$](#team-sizes) study on the [drive task](#the-drive-task), `f99` the [99% rule](#success-and-reliability) (absent for the strict rule), `m12`, `m6` or `m3` the deadline in [drive times](#the-drive-task), `s_` a sensitivity variant, and a last part naming the variant (such as `fat`, `hold` or `big`). `lama_r50` is the [gather task](#the-gather-task) on a start disc of radius 50, `lama_r50_inf` the same with infinite sensing.
 - Method: a sheep model paired with a dog controller, such as `strombom_multi` (Strömbom sheep with the team rule); see [sheep models and dog rules](#sheep-models-and-dog-rules).
-- Factor: a canonical setting a protocol sweeps over several values (levels), each giving its own curves, such as `dog_start_gap` in `dmin_s_gap`. A method parameter cannot be a factor, because [$R_f$](#the-drive-task) is calibrated once per method.
+- Factor: a canonical setting a protocol sweeps over several values (levels), each giving its own curves, such as `dog_start_gap` in `dmin_s_gap`. Which settings can be factors is in the [configuration guide](guides/configuration.md#factors).
 - Cell: the question "can 3 dogs herd 200 sheep in this setup?" for one method, layout, $N$, $D$ and set of factor levels within one protocol. It gets trials in batches of 10, up to 200; a cell with an errored trial stops earlier.
 - Group: one setup, meaning one method, layout, set of factor levels and flock size $N$, in which the team sizes are compared.
 - Curve: the cells of one group, one per tested team size.
@@ -36,7 +36,7 @@ A definition for each term HerdSim's docs use, with a link to the section that e
 - Goal: a circle of radius $1.9 R_f$ by default.
 - Drive distance $l$: from the flock's start centre to the goal centre, $13 R_f$ by default, but at least 80 m and at least the farthest any sheep can start (over the protocol's layouts) plus the goal radius plus $R_f$.
 - Drive time $T_{\mathrm{drive}}$: the time a sheep walking straight at 1 m/s needs to cover the drive distance ([deadlines](experiments/task_design.md#deadlines-in-drive-times)).
-- Deadline: a trial's time limit; 12, 6 or 3 drive times on the drive task, a fixed 500 s in the [Kubo](#sheep-models-and-dog-rules) runs and a time limit of 5000 s (166,667 ticks of 0.03 s, stored as 5000.01 s) on the gather task.
+- Deadline: a trial's time limit; 12, 6 or 3 drive times on the drive task, a fixed 500 s in the [Kubo](#sheep-models-and-dog-rules) runs and a time limit of 5000 s (166,667 ticks of 0.03 s, about 5000 s) on the gather task.
 - Finish time: the time a successful trial takes.
 - Dog time: $D$ times the finish time.
 
@@ -76,13 +76,13 @@ A definition for each term HerdSim's docs use, with a link to the section that e
 
 ## Sheep models and dog rules
 
-- Strömbom model: the sheep model of Strömbom et al. (2014), HerdSim's default ([models](methods/models.md#1-sheep-flocking-models)).
+- Strömbom model: the sheep model of Strömbom et al. (2014), HerdSim's default ([Strömbom sheep](methods/strombom_sheep.md)).
 - $r_a$: 2 m, the distance below which sheep push each other apart.
 - $r_s$: 65 m, the distance within which a sheep reacts to a dog; with no dog that close it grazes.
 - GCM and $\mathrm{LCM}_i$: the global centre of mass (mean position of the flock) and the local centre of mass of sheep $i$ (mean position of its nearest neighbours, by default all other sheep, `n_neighbors`).
 - Collect distance $f(N) = r_a N^{2/3}$: a sheep farther than this from the GCM is an outlier, the one term the docs use for it. The dogs collect while any sheep is that far out, and drive otherwise.
-- Collect point $P_c$ and drive point $P_d$: where a dog aims to collect an outlier or to drive. $P_d$ lies $r_a \sqrt{N}$ behind the flock centre ([team rule](methods/models.md#coordinated-team-architecture-strombom_multi)).
-- Team rule: HerdSim's multi-dog controller `collect_drive_multi`, run with Strömbom sheep as `strombom_multi`. While collecting, the $D$ farthest outliers each get one dog (Hungarian algorithm, least total walk) and spare dogs drive the core from behind; while driving, the dogs spread over an arc through $P_d$ ([driving](methods/models.md#3-driving-and-its-limit-for-large-flocks)).
+- Collect point $P_c$ and drive point $P_d$: where a dog aims to collect an outlier or to drive. $P_d$ lies $r_a \sqrt{N}$ behind the flock centre ([team rule](methods/strombom_multi.md#coordinated-team-architecture-strombom_multi)).
+- Team rule: HerdSim's multi-dog controller `collect_drive_multi`, run with Strömbom sheep as `strombom_multi`. While collecting, the $D$ farthest outliers each get one dog (Hungarian algorithm, least total walk) and spare dogs drive the core from behind; while driving, the dogs spread over an arc through $P_d$ ([driving](methods/strombom_multi.md#driving-and-its-limit-for-large-flocks)).
 - `independent`: every dog runs Strömbom's single-dog rule on its own, with no team layer.
 - FAT (farthest-agent targeting, method `fat`): every dog goes behind the sheep farthest from the goal, with no assignment and no collect/drive switch.
 - Kubo model (`kubo`): the force model of Kubo et al. (2022), whose sheep speed up under a stronger push.
@@ -93,18 +93,18 @@ A definition for each term HerdSim's docs use, with a link to the section that e
 
 ## Variants
 
-- Drive offset cap: a HerdSim variant (`drive_offset_cap`) that keeps the drive point at most $r_s - r_a = 63$ m behind the flock centre. It acts from about 992 sheep, where $r_a \sqrt{N}$ reaches 63 m; above about 1056 the uncapped point would leave the sheep's reaction distance ([drive limit](methods/models.md#3-driving-and-its-limit-for-large-flocks)).
-- Sensing range and sharing: team-rule dogs see only the sheep within `sensing_range` (0 for all sheep), and `communication` sets whom they share them with: no one (`none`), dogs in range (`neighbour`) or the whole team (`shared`). Every dog knows where the other dogs are. The gather task uses its own sensing radius ([gather task](#the-gather-task)).
-- Field-matched sheep: the values Strömbom et al. (2014) set to mimic real sheep and sheepdogs, $r_a$ = 1 m, noise 0.1 and $r_s$ = 75 m instead of 2 m, 0.3 and 65 m. HerdSim has one noise setting (`noise_strength`), so the dogs get 0.1 too; the paper's Table 1 lists the shepherd's noise (0.3) apart, and its Fig. 5 caption gives one value, $e$ = 0.1. These runs (`dmin_s_matched`, `dmin_f99_s_matched`) also halve `separation_scale` (the spread of the scattered layouts) and `dog_overlap_distance`, from 2.0 to 1.0.
+- Drive offset cap: a HerdSim variant (`drive_offset_cap`) that keeps the drive point at most $r_s - r_a = 63$ m behind the flock centre. It acts from about 992 sheep, where $r_a \sqrt{N}$ reaches 63 m; above about 1056 the uncapped point would leave the sheep's reaction distance ([drive limit](methods/strombom_multi.md#driving-and-its-limit-for-large-flocks)).
+- Sensing range and sharing: team-rule dogs see only the sheep within `sensing_range` (0 for all sheep), and `communication` sets whom they share them with, which is no one (`none`), dogs in range (`neighbour`) or the whole team (`shared`). Every dog knows where the other dogs are. The gather task uses its own sensing radius ([gather task](#the-gather-task)).
+- Field-matched sheep: the values Strömbom et al. (2014) set to mimic real sheep and sheepdogs, $r_a$ = 1 m, noise 0.1 and $r_s$ = 75 m instead of 2 m, 0.3 and 65 m. HerdSim has one noise setting (`noise_strength`), so the dogs get 0.1 too, which follows the paper's text ("The shepherd experiences the same noise as the agents"); its Fig. 5 caption gives one value, $e$ = 0.1. These runs (`dmin_s_matched`, `dmin_f99_s_matched`) also halve `separation_scale` (the spread of the scattered layouts) and `dog_overlap_distance`, from 2.0 to 1.0.
 
 ## The gather task
 
-- Gather task: the task of Lama and di Bernardo (2024). Targets and herders start over a disc of radius 50, and the herders bring the targets into a goal of radius 10 at its centre ([gather task](experiments/task_design.md#6-the-gather-task-lama-and-di-bernardo-2024)).
+- Gather task: the task of Lama and di Bernardo (2024). Targets and herders start over a disc of radius 50, and the herders bring the targets into a goal of radius 10 at its centre ([gather task](experiments/task_design.md#7-the-gather-task-lama-and-di-bernardo-2024)).
 - Targets and herders: the gather task's sheep and dogs. Targets do not flock.
 - Sensing radius $\xi$: the distance within which a herder senses targets and other herders, 10 or infinite; the `sensing_radius` parameter of `lama`, unrelated to the team rule's `sensing_range`.
-- `targets_lost`: a failure in which some targets were out of every herder's sight at the end; `outnumbered`: every target was seen, but too few were in the goal in time.
+- `targets_lost` and `outnumbered`: the two failure labels of the gather task. In `targets_lost` some targets were out of every herder's sight at the end; in `outnumbered` every target was seen, but too few were in the goal in time.
 
 ## Records
 
-- Physics hash: a digest of every setting that changes a trial; a folder whose hash differs from its protocol is refused ([architecture](codes/architecture.md), [physics hash](guides/configuration.md#physics-hash)). Flock sizes, smaller team sizes and factor levels stay out, so a run can be extended. `metrics_stride` is in it when not 1, because it changes the stored metric columns, though no outcome.
+- Physics hash: a digest of every setting that changes a trial; a folder whose hash differs from its protocol is refused (the [configuration guide](guides/configuration.md#physics-hash) says what it covers and leaves out).
 - Code identity: the trial-code hash, git commit, uncommitted-edit flag and Python and library versions, recorded for each sitting. A changed code hash between sittings gives a warning, and the run goes on.

@@ -1,101 +1,329 @@
 # Run record, claims and reproducibility
 
-Appendix of the HerdSim report on team size. The [overview](d_min_report.md) holds the abstract, the research questions, the [decision rules](d_min_report.md#2-decision-rules-and-setup) that define $D_{\min}$, its brackets and lower bounds, the discussion and the [references](d_min_report.md#references). Terms are defined in the [glossary](../glossary.md).
+Reference for the stored runs of the study: the fields of a run record, one record per protocol, one entry per claim, and what is needed to run the study again. Every entry is self-contained and uses the protocol ids that name the folders in `results/`.
+
+## Contents
+
+- [Appendix A: Protocol run record](#appendix-a-protocol-run-record)
+- [Appendix B: Claims and evidence](#appendix-b-claims-and-evidence)
+- [Appendix C: Reproducibility](#appendix-c-reproducibility)
 
 ## Appendix A: Protocol run record
 
-The study holds 439,120 trials in 41 protocols. A protocol is one experiment plan, and a trial is one run of one cell with one seed ([glossary](../glossary.md#trials-and-experiments)). The trials fall into three groups:
+### Fields
 
-- First study: 162,420 trials in 23 protocols, the [main runs](../glossary.md#trials-and-experiments), the [sensitivity runs](../glossary.md#trials-and-experiments), `dmin_fat`, `dmin_f99_fat` and `dmin_kubo` (Table 1).
-- Drive-task follow-up: 236,420 trials, 195,330 in 16 new drive-task protocols and 41,090 added to the three 99% main grids when they were resumed (Table 2).
-- Gather-task follow-up: 40,280 trials in the two protocols of the Lama and di Bernardo model (Table 2).
+Table 1 defines the fields used in the records below.
 
-The first two groups together are the 398,840 trials of the 39 drive-task protocols. Both tables follow these conventions:
+**Table 1: Fields of a protocol record.**
 
-- Counts: trials, cells and open cells are those of the folder's `results/<protocol>/status.json` now. The exception is the three 99% main grids, `dmin_f99_m12`, `dmin_f99_m6` and `dmin_f99_m3`. Table 1 shows their first queue pass, as `results/queue_log.jsonl` records it. Table 2 shows their current counts after they were resumed with finish-time seeds and, at 12 and 6 [drive times](../glossary.md#the-drive-task), four more flock sizes.
-- Hours: those of the run in the queue log. Fourteen first-study folders grew in later [sittings](../glossary.md#trials-and-experiments), so they hold more trials than the log records; [results_tables.md](results_tables.md) lists them. Their trials are counted in Table 1 only.
-- Open at 200 seeds: cells still undecided at the [seed cap](../glossary.md#trials-and-experiments) of 200, on reliability or, in a sitting that decides finish times, on a finish-time comparison ([open cell](../glossary.md#success-and-reliability)). [Pruned cells](../experiments/task_design.md#pruning-above-saturation) and cells with an error are never open.
-- Decided: the cells minus those open, so pruned cells count as decided. There are 4 in each main-grid row and in `dmin_f99_fat`, and 5 in `dmin_fat`.
-- `dmin_m12`: Table 1 counts the 4 cells open on reliability. The queue log records 36 because it also counts finish-time comparisons; counted that way the row would be 147 decided and 36 open, and the totals 2198 decided and 204 open.
+| Field | Meaning |
+| :--- | :--- |
+| Protocol | Id of one experiment plan; its results are in `results/<id>/` |
+| Trial | One simulation run of one cell with one seed |
+| Cell | One setup (flock size, layout, deadline, rule) with the question "is a team of $D$ dogs reliable here?" |
+| Decided | A cell that is not open, including pruned cells: cells above a confirmed $D_{\mathrm{sat}}$ that the campaign does not run |
+| Open | A cell still undecided at the seed cap of 200, on reliability or, in a sitting that decides finish times, on a finish-time comparison |
+| Errors | Trials that ended in a simulation error; cells with an error are never open |
+| Sitting | One run of the campaign command on a results folder |
+| Hours | Wall-clock hours at 20 workers, from the queue log `results/queue_log.jsonl`, one line per finished protocol run |
 
-**Table 1: Run record of the first-study protocols.**
+A record reads `Record: <trials> trials, <cells> cells (<decided> decided, <open> open), <errors> errors, <hours> h`; the follow-up records omit the decided count.
 
-| Protocol | Trials | Cells | Decided | Open at 200 seeds | Errors | Hours |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| `dmin_m12` | 17,220 | 183 | 179 | 4 | 0 | 1.24 |
-| `dmin_m6` | 13,470 | 191 | 170 | 21 | 0 | 0.28 |
-| `dmin_m3` | 9530 | 183 | 178 | 5 | 0 | 0.17 |
-| `dmin_f99_m12` | 11,100 | 180 | 178 | 2 | 0 | 0.41 |
-| `dmin_f99_m6` | 12,390 | 180 | 171 | 9 | 0 | 0.49 |
-| `dmin_f99_m3` | 10,670 | 181 | 174 | 7 | 0 | 0.27 |
-| `dmin_fat` | 8660 | 181 | 179 | 2 | 0 | 0.22 |
-| `dmin_f99_fat` | 8670 | 184 | 183 | 1 | 0 | 0.23 |
-| `dmin_kubo` | 1080 | 18 | 18 | 0 | 0 | 0.08 |
-| Sensitivity protocols (14 runs) | 69,630 | 921 | 800 | 121 | 0 | 3.27 |
-| Total | 162,420 | 2402 | 2230 | 172 | 0 | about 6.7 |
+### Totals
 
-Table 2 lists the follow-up runs. The drive-task runs use the [99% rule](../glossary.md#success-and-reliability) unless the row says otherwise. Hours are at 20 workers and come from the queue log. The resumed grids have no single log line, so their 4.285 h adds up the sittings we could find, and the real total may be a little higher. `dmin_f99_big_cap` is not in the log; its hours are from `status.json` and leave out its 100 trials at $N = 3200$.
+Table 2 counts the protocols and trials of the study; none had a simulation error.
 
-**Table 2: Run record of the follow-up runs.**
+**Table 2: Protocols and trials of the study.**
 
-| Protocol | Trials | Cells | Open at 200 seeds | Errors | Hours |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| `dmin_f99_m12`, `dmin_f99_m6`, `dmin_f99_m3`, resumed (current counts; added trials in parentheses) | 31,590 / 31,920 / 11,740 (+20,490 / +19,530 / +1070) | 349 / 354 / 185 | 53 / 58 / 10 | 0 | 4.285 (recorded sittings) |
-| `dmin_f99_indep` | 12,990 | 181 | 18 | 0 | 0.30 |
-| `dmin_f99_kubo` | 3260 | 38 | 6 | 0 | 0.18 |
-| `dmin_f99_hold` | 14,280 | 280 | 18 | 0 | 0.74 |
-| `dmin_f99_hold_spacing` (rerun with the hard 2 m spacing rule) | 13,930 | 283 | 19 | 0 | 0.70 |
-| `dmin_f99_hold_goal` (holding, goal 1.9, 2.5, 3.0 $R_f$, $N \le 100$) | 21,800 | 326 | 30 | 0 | 0.36 |
-| `dmin_f99_hold_share` (holding, goal 1.9 to 2.5 $R_f$ x share 90, 95, 99%) | 50,170 | 746 | 57 | 0 | 0.91 |
-| `dmin_f99_c1.3`, `_c1.6`, `_c2.0` | 10,800 / 10,830 / 10,780 | 180 each | 1 / 0 / 0 | 0 | 0.31 / 0.29 / 0.41 |
-| `dmin_f99_k05` | 11,630 | 149 | 14 | 0 | 2.29 |
-| `dmin_f99_view_range` | 21,040 | 293 | 27 | 0 | 0.53 |
-| `dmin_f99_view_comm` | 6890 | 102 | 3 | 0 | 0.20 |
-| `dmin_f99_big` | 2230 | 84 | 1 | 0 | 3.12 |
-| `dmin_f99_big_dense`, `_loose` | 1320 / 830 | 15 / 14 | 2 / 1 | 0 | 0.73 / 0.26 |
-| `dmin_f99_big_cap` | 2550 (+100 at $N = 3200$, not counted) | 45 | 3 | 0 | 5.5 |
-| `lama_r50` (gather task, sensing radius 10) | 17,660 | 500 | 23 | 0 | 6.53 |
-| `lama_r50_inf` (gather task, infinite sensing) | 22,620 | 500 | 1 | 0 | 6.47 |
+| Part of the study | Protocols | Trials |
+| :--- | :---: | :---: |
+| First study (drive task) | 23 | 162,420 |
+| Follow-up, drive task | 16 new, 3 resumed | 236,420 |
+| Follow-up, gather task of Lama and di Bernardo (2024) | 2 | 40,280 |
+| Total | 41 | 439,120 |
 
-Across the 41 protocols the folders hold 6,845 cells, and 499 of them are open at 200 seeds. Tables 1 and 2 add up to 7,386 cells and 517 open; the totals count the three 99% main grids once, at their Table 2 counts, which removes their first-pass rows (541 cells, 18 open). The 499 uses each folder's last-sitting count, so `dmin_m12` adds 4.
+- The 3 resumed runs are first-study protocols, so the total is 23 + 16 + 2 = 41.
+- Eleven first-study protocols use the 99% rule, under which a team is reliable when its success is shown at 99% confidence.
+- The follow-up's drive-task trials are 195,330 in 16 new protocols (four of them on the holding task) and 41,090 added to the three 99% main runs when resumed. The 39 drive-task protocols hold 398,840.
+- The drive task is a drive of the flock to a goal by the dogs; the holding task is to keep the flock inside the goal; the gather task is the one of Lama and di Bernardo (2024).
 
-The diagnostic tools [replayed](../glossary.md#trials-and-experiments) 1172 stored trials. In 596 of them the trial ran unchanged (164 pressure, 192 base `split` and 240 holding-walk replays), and every one gave the stored success and tick count. The other 576 are `split` replays with a changed team rule, 192 for each of three changes (collecting dogs spread over the clusters, a shorter stop distance, both), so there is no stored result to compare with. Before `lama_r50`, two validation passes of the Lama model ran 8200 trials in scratch folders that were not kept. The second pass fixed the order in which herders and targets move ([section 6](d_min_report.md#6-limitations), item 12).
+### First-study protocols
+
+Each entry gives the record of one protocol, with its decided and open cells.
+
+#### `dmin_m12`
+
+- Record: 17,220 trials, 183 cells (179 decided, 4 open), 0 errors, 1.24 h
+
+#### `dmin_m6`
+
+- Record: 13,470 trials, 191 cells (170 decided, 21 open), 0 errors, 0.28 h
+
+#### `dmin_m3`
+
+- Record: 9530 trials, 183 cells (178 decided, 5 open), 0 errors, 0.17 h
+
+#### `dmin_f99_m12`
+
+- Record: 11,100 trials, 180 cells (178 decided, 2 open), 0 errors, 0.41 h
+- Note: first pass; the resumed run is in the follow-up protocols
+
+#### `dmin_f99_m6`
+
+- Record: 12,390 trials, 180 cells (171 decided, 9 open), 0 errors, 0.49 h
+- Note: first pass; the resumed run is in the follow-up protocols
+
+#### `dmin_f99_m3`
+
+- Record: 10,670 trials, 181 cells (174 decided, 7 open), 0 errors, 0.27 h
+- Note: first pass; the resumed run is in the follow-up protocols
+
+#### `dmin_fat`
+
+- Record: 8660 trials, 181 cells (179 decided, 2 open), 0 errors, 0.22 h
+
+#### `dmin_f99_fat`
+
+- Record: 8670 trials, 184 cells (183 decided, 1 open), 0 errors, 0.23 h
+
+#### `dmin_kubo`
+
+- Record: 1080 trials, 18 cells (18 decided, 0 open), 0 errors, 0.08 h
+
+#### Sensitivity protocols (14 runs)
+
+- Record: 69,630 trials, 921 cells (800 decided, 121 open), 0 errors, 3.27 h
+
+#### First-study total
+
+- Record: 162,420 trials, 2402 cells (2230 decided, 172 open), 0 errors, about 6.7 h
+
+Notes on the first-study records:
+
+- Counts are each folder's current state, except the three 99% main runs (`dmin_f99_m12`, `dmin_f99_m6`, `dmin_f99_m3`), shown at their first pass as the queue log records it; the follow-up records give them after the top-up, the resumed run that adds trials.
+- Fourteen other first-study folders (`dmin_m6`, `dmin_m3`, `dmin_fat`, `dmin_f99_fat` and ten sensitivity runs) hold more trials than their last log line, added in later sittings and counted here only.
+- Pruned cells in Decided: 4 in each main-run record and in `dmin_f99_fat`, 5 in `dmin_fat`.
+
+### Follow-up protocols
+
+Each entry gives the research question (RQ) the protocol answers, its setting where it differs from the base run, and its record. All use the 99% rule unless the entry says otherwise.
+
+#### `dmin_f99_m12`, resumed
+
+- Question: RQ4, RQ7, RQ8, finish times at nine sizes
+- Record: 31,590 trials (20,490 added by the resumption), 349 cells (53 open), 0 errors, hours not recorded per sitting
+
+#### `dmin_f99_m6`, resumed
+
+- Question: RQ4, RQ7, RQ8, finish times at nine sizes
+- Record: 31,920 trials (19,530 added by the resumption), 354 cells (58 open), 0 errors, hours not recorded per sitting
+
+#### `dmin_f99_m3`, resumed
+
+- Question: RQ4, RQ7, finish times
+- Record: 11,740 trials (1070 added by the resumption), 185 cells (10 open), 0 errors, hours not recorded per sitting
+
+#### `dmin_f99_indep`
+
+- Question: RQ9, dogs without a team layer
+- Record: 12,990 trials, 181 cells (18 open), 0 errors, 0.30 h
+
+#### `dmin_f99_kubo`
+
+- Question: RQ9, $D_{\mathrm{sat}}$ of Kubo's model
+- Record: 3260 trials, 38 cells (6 open), 0 errors, 0.18 h
+
+#### `dmin_f99_hold`
+
+- Question: RQ10, holding while dogs withdraw
+- Record: 14,280 trials, 280 cells (18 open), 0 errors, 0.74 h
+
+#### `dmin_f99_hold_spacing`
+
+- Question: RQ10, dogs that take up room
+- Setting: rerun with the hard 2 m spacing rule
+- Record: 13,930 trials, 283 cells (19 open), 0 errors, 0.70 h
+
+#### `dmin_f99_hold_goal`
+
+- Question: RQ10, holding small flocks
+- Setting: goal 1.9, 2.5 and 3.0 $R_f$, $N \le 100$
+- Record: 21,800 trials, 326 cells (30 open), 0 errors, 0.36 h
+
+#### `dmin_f99_hold_share`
+
+- Question: RQ10, holding small flocks
+- Setting: goal 1.9 to 2.5 $R_f$ x share 90, 95 and 99%
+- Record: 50,170 trials, 746 cells (57 open), 0 errors, 0.91 h
+
+#### `dmin_f99_c1.3`
+
+- Question: RQ11, stronger cohesion
+- Record: 10,800 trials, 180 cells (1 open), 0 errors, 0.31 h
+
+#### `dmin_f99_c1.6`
+
+- Question: RQ11, stronger cohesion
+- Record: 10,830 trials, 180 cells (0 open), 0 errors, 0.29 h
+
+#### `dmin_f99_c2.0`
+
+- Question: RQ11, stronger cohesion
+- Record: 10,780 trials, 180 cells (0 open), 0 errors, 0.41 h
+
+#### `dmin_f99_k05`
+
+- Question: RQ11, weaker cohesion
+- Record: 11,630 trials, 149 cells (14 open), 0 errors, 2.29 h
+
+#### `dmin_f99_view_range`
+
+- Question: RQ12, limited sight, no sharing
+- Record: 21,040 trials, 293 cells (27 open), 0 errors, 0.53 h
+
+#### `dmin_f99_view_comm`
+
+- Question: RQ12, sharing what dogs see
+- Record: 6890 trials, 102 cells (3 open), 0 errors, 0.20 h
+
+#### `dmin_f99_big`
+
+- Question: RQ13, above the calibration edge
+- Record: 2230 trials, 84 cells (1 open), 0 errors, 3.12 h
+
+#### `dmin_f99_big_dense`
+
+- Question: RQ13, denser imposed flock
+- Record: 1320 trials, 15 cells (2 open), 0 errors, 0.73 h
+
+#### `dmin_f99_big_loose`
+
+- Question: RQ13, looser imposed flock
+- Record: 830 trials, 14 cells (1 open), 0 errors, 0.26 h
+
+#### `dmin_f99_big_cap`
+
+- Question: RQ13, drive point capped
+- Record: 2550 trials, 45 cells (3 open), 0 errors, 5.5 h
+- Note: 100 more trials at $N = 3200$ from a run stopped early are left out of the trials, every total and the hours (taken from `status.json`, as they are not in the log)
+
+#### `lama_r50`
+
+- Question: RQ14, Lama and di Bernardo (2024)
+- Setting: gather task, sensing radius 10
+- Record: 17,660 trials, 500 cells (23 open), 0 errors, 6.53 h
+
+#### `lama_r50_inf`
+
+- Question: RQ14, as `lama_r50`
+- Setting: gather task, infinite sensing
+- Record: 22,620 trials, 500 cells (1 open), 0 errors, 6.47 h
+
+Notes on the follow-up records:
+
+- $R_f$ is the flock radius calibrated under one driving dog; goals are given in multiples of it.
+- The three resumed grids have no single log line, and their hours are not recorded per sitting; the sittings we could find add up to 4.285 h for the three, perhaps a little low.
+- The 41 folders hold 6845 cells, 499 of them open. The first-study and follow-up records sum to 7386 and 517 because they also count the first-pass records of the three 99% main runs (541 cells, 18 open).
+
+### Runs outside the study
+
+- `dmin_pilot`: a one-batch pilot.
+- The first `ring` dog-start and spacing runs, kept only in git history.
+- Two validation passes of the Lama model before `lama_r50`: 8200 trials in scratch folders, not kept. The second fixed the order in which herders and targets move.
 
 ## Appendix B: Claims and evidence
 
-Table 3 lists each claim with the evidence behind it and its limits. The [glossary](../glossary.md) defines the terms it uses: the [layouts](../glossary.md#start-layouts-and-dog-starts) `compact`, `wide`, `split` and `outlier_rich`, the [strict and 99% rules](../glossary.md#success-and-reliability), and [$D_{\min}$ and its brackets](../glossary.md#team-sizes).
+Every claim rests on protocol runs except claim 5, which rests on replays, and claim 7, a formula checked against runs. Each entry gives the claim, the runs behind it and its limits.
 
-**Table 3: Claims and evidence.**
+### Claim 1
 
-| # | Claim | Kind | Evidence | Limits |
-| :---: | :--- | :--- | :--- | :--- |
-| 1 | A compact flock needs one dog ($D_{\min} = 1$) up to $N = 1131$. | Measured | The team rule in the main grids `dmin_m12`, `dmin_m6`, `dmin_m3` and `dmin_f99_m3` up to $N = 400$, and `dmin_f99_m12` and `dmin_f99_m6` up to $N = 566$; `dmin_f99_big_cap` at 800 and 1131. | Team rule on the drive task only: with FAT, `dmin_f99_fat` has no reliable team on compact $N = 400$ (lower bound [12]), and the holding runs have none on compact $N = 25$ and 50. Above 1056 only with the capped drive point. |
-| 2 | Up to $N = 50$ one dog is enough on every layout and deadline. | Measured | All $N \le 50$ cells of the 23 base protocols decided at $D = 1$. | The reason given in [section 3.1](part1_growth.md#31-rq1-how-does-d_min-grow-with-n) has not been tested. |
-| 3 | On scattered flocks $D_{\min}$ grows with slope 0.27-0.38 on `wide` and 0.28-0.38 on `outlier_rich` at 12 drive times, and 0.38-0.61 and 0.40-0.58 at 6 (99% rule). | Measured | Slope ranges over the brackets of nine flock sizes ($N = 25$-566), `dmin_f99_m12`, `dmin_f99_m6`. | Only up to the calibration edge; `split` is left out. |
-| 4 | Under the strict rule large teams fail on the last sheep. | Measured | 97% of strict failures with $D \ge 6$ had 99% of the flock in (`dmin_s_base`); with slower dogs (`dmin_s_dogspeed`) strict $D_{\min}$ on `outlier_rich` $N = 400$ goes from none to 6. | Applies to the strict rule with an open goal. |
-| 5 | On `split` $N = 200$ at 6 drive times, collecting dogs crowd one cluster and many stand still. | Measured in replays | `split_diagnostic` replays, 99% rule: spreading the collecting dogs over the outliers halves the median finish time at $D = 4$ (631 s to 317.5 s); a shorter stop distance makes the drive 21-24% faster at $D = 8$ and 16 (678.5 s to 536 s, 724 s to 550.5 s). The medians are over successful replays only; at $D = 4$, 11 of 12 base and 10 of 12 spread replays succeeded. | 12 seeds per cell. At $N = 100$ the medians move by at most 10 s. At 3 drive times neither change makes `split` reliable. |
-| 6 | Weaker cohesion makes $D_{\min}$ grow faster on `wide`, toward 0.5. | Measured | 99% rule, 12 drive times, `wide`: `dmin_f99_k05` slope 0.40-0.70, `dmin_f99_c*` 0.20. On `outlier_rich` `dmin_f99_k05` gives 0.30, the same as with Strömbom's cohesion. | One weaker level only ($n = 0.5N$). `dmin_f99_k05` is fitted on four sizes ($N = 50$-400) and `dmin_f99_c*` on five (25-400). Its first start failed calibration at $N = 25$ (radius still changing); no stored run tests weaker levels. |
-| 7 | Above $N \approx 1056$ Strömbom's drive point is beyond the sheep's reaction distance. | Derived and measured | $2\sqrt{N} > 65$; uncapped, 0 of 10 trials succeed at $N = 1131$ for every $D$; capped, compact succeeds at 800, 1131 and 1600, and in 42 of 42 trials at 3200 (teams of 3 to 12 dogs). | Assumes the reaction distance $r_s = 65$ m. The 3200 result is partial: the 42 trials are among the 100 $N = 3200$ trials of a run stopped early, which are not counted in the totals. |
-| 8 | Dogs kept 2 m apart make extra dogs harmful on `outlier_rich` $N = 400$. | Measured | `dmin_f99_hold_spacing`: 186 of 200 at $D = 6$, 54 of 70 at 9, 5 of 10 at 16; every $D \ge 9$ unreliable. | Not seen on `wide` or `compact`. |
-| 9 | On `wide` $N = 200$ a sensing range of 30 to 65 m costs about one dog, and at 65 m sharing with the whole team brings $D_{\min}$ back to its full-sight value; on `split` $N = 200$ a range of 30 to 65 m does better than full sight. | Measured | 99% rule, 6 drive times. `dmin_f99_view_range` on `wide` $N = 200$: $D_{\min}$ 2 with full sight, 3 at 30 and 65 m, 3-4 at 45 m, 2-3 at 100 m, and no reliable team at 15 m (lower bound [7]). `dmin_f99_view_comm`: 2 with sharing at 65 m. | Sharing tested at 65 m only. Sharing is instant and error-free in the model. |
-| 10 | Near the threshold, an average of 0.99 accepts teams that fail in 9 of 30 runs. | Measured | `lama_r50`: at 144 targets 11 herders average 0.992 but succeed in 21 of 30 runs (99% interval 0.45-0.89); HerdSim's $D_{\min}$ is 17-25. | Targets without cohesion on a disc. |
-| 11 | Holding small flocks fails with the default goal; a goal of about 16 to 19 m holds them with one dog. This may be because the flock walks while the dogs withdraw; we have not tested it. | Thresholds and walk measured; cause consistent, not tested | `dmin_f99_hold_goal`, `dmin_f99_hold_share`: one dog decided reliable on every layout from 18.6 m ($N = 25$) and 17.5 m ($N = 50$) at 99%, with brackets down to 15.5 and 16.0 m. `hold_walk` replays: the flock centre walks a median 17, 15 and 13 m at $N = 25$, 50, 100. | Goal levels in steps of $0.2 R_f$; tied to the withdrawal rule; the walk was not varied directly. |
+- Claim: a compact flock needs one dog ($D_{\min} = 1$) up to $N = 1131$.
+- Runs: team rule on `compact` in `dmin_m12`, `dmin_m6`, `dmin_m3` and `dmin_f99_m3` up to $N = 400$, `dmin_f99_m12` and `dmin_f99_m6` up to 566, and `dmin_f99_big_cap` at 800 and 1131.
+- Limits: drive task and team rule only. FAT has no reliable team on compact $N = 400$ (`dmin_f99_fat`, lower bound 12), and the holding runs have none on compact $N = 25$ and 50. Above 1056 it holds only with the capped drive point (claim 7).
+
+### Claim 2
+
+- Claim: up to $N = 50$ one dog is enough on every layout and deadline.
+- Runs: every $N \le 50$ cell of the 23 first-study protocols is decided at $D = 1$.
+- Limits: the reason for it is untested.
+
+### Claim 3
+
+- Claim: on scattered flocks $D_{\min}$ grows with log-log slope 0.27-0.38 on `wide` and 0.28-0.38 on `outlier_rich` at 12 drive times, and 0.38-0.61 and 0.40-0.58 at 6 (99% rule).
+- Runs: slopes over the brackets of nine sizes ($N = 25$-566) in `dmin_f99_m12` and `dmin_f99_m6`.
+- Limits: valid up to about $N = 600$, where the flock stops settling to one size. `split` is left out.
+
+### Claim 4
+
+- Claim: under the strict rule large teams fail on the last sheep.
+- Runs: the strict failures with $D \ge 6$ in the sensitivity base run `dmin_s_base` (`wide` and `outlier_rich`, $N = 100$-400, 6 drive times). With slower dogs (`dmin_s_dogspeed`) strict $D_{\min}$ on `outlier_rich` $N = 400$ goes from none to 6.
+- Limits: strict rule with an open goal.
+
+### Claim 5
+
+- Claim: on `split` $N = 200$ at 6 drive times, two changes to the team rule speed up the drive but make no team reliable; the cause of the slowdown is open.
+- Runs: `split_diagnostic` replays of stored trials with a changed team rule, 99% rule, 12 seeds per cell; medians over the successful replays only.
+- Limits: at $N = 100$ the medians move by at most 10 s. At 3 drive times the replays rule out reliability only at $N = 200$ with 4, 8 and 16 dogs.
+
+### Claim 6
+
+- Claim: weaker cohesion makes $D_{\min}$ grow faster on `wide`, toward 0.5.
+- Runs: `dmin_f99_k05` and `dmin_f99_c*`, 99% rule, 12 drive times.
+- Limits: one weaker level only ($n = 0.5N$ neighbours), fitted on four sizes ($N = 50$-400) against five (25-400) for `dmin_f99_c*`. At $N = 25$ the weaker level's $R_f$ still changed by 62% between the 90 s windows that calibration compares; weaker settings ($n = 0.25N$ and below, $c = 0.8$ and 0.9) never settled to one flock size, so those checks are not stored. No stored run tests weaker levels.
+
+### Claim 7
+
+- Claim: above $N \approx 1056$ Strömbom's drive point is beyond the sheep's reaction distance.
+- Runs: uncapped, 0 of 10 trials succeed at $N = 1131$ for every $D$. Capped (`dmin_f99_big_cap`), `compact` succeeds at 800, 1131 and 1600, and in 42 of 42 trials at 3200 (teams of 3 to 12 dogs).
+- Limits: assumes the reaction distance $r_s = 65$ m. The 3200 result is partial, from the 100 uncounted $N = 3200$ trials of a run stopped early.
+
+### Claim 8
+
+- Claim: dogs kept 2 m apart make extra dogs harmful on `outlier_rich` $N = 400$.
+- Runs: `dmin_f99_hold_spacing` succeeds in 186 of 200 trials at $D = 6$, 54 of 70 at 9 and 5 of 10 at 16; every $D \ge 9$ is unreliable.
+- Limits: not seen on `wide` or `compact`.
+
+### Claim 9
+
+- Claim: at $N = 200$ a sensing range of 30 to 65 m costs `wide` one or two dogs, which whole-team sharing at 65 m wins back, and does better than full sight on `split`.
+- Runs: `dmin_f99_view_range` and `dmin_f99_view_comm`, `wide` and `split` $N = 200$, 99% rule, 6 drive times.
+- Limits: sharing was tested at 65 m only, and is instant and error-free in the model.
+
+### Claim 10
+
+- Claim: near the threshold, an average success of 0.99 accepts teams that fail in 9 of 30 runs.
+- Runs: `lama_r50`, sensing radius 10, 144 targets and 11 herders (average share 0.992).
+- Limits: targets without cohesion on a disc.
+
+### Claim 11
+
+- Claim: holding small flocks fails with the default goal; a goal of about 16 to 19 m holds them with one dog.
+- Runs: `dmin_f99_hold_goal` and `dmin_f99_hold_share`: one dog decided reliable on every layout from 18.6 m ($N = 25$) and 17.5 m ($N = 50$) at 99%, with brackets down to 15.5 and 16.0 m. In the `hold_walk` replays the flock centre walks a median 17, 15 and 13 m at $N = 25$, 50 and 100 while the dogs withdraw.
+- Limits: goal levels in steps of $0.2 R_f$, tied to the withdrawal rule. The walk was never varied directly, so whether it causes the failures is open.
 
 ## Appendix C: Reproducibility
 
-Table 4 lists what is needed to run the study again.
+Table 3 lists what is needed to run the study again.
 
-**Table 4: Reproducibility items.**
+**Table 3: Reproducibility items.**
 
 | Item | Where |
 | :--- | :--- |
-| Code | Repository `HerdSim`, branch `scaling-cli-d-min-max`. |
-| Environment | `uv`, Python 3.11 or later; versions locked in `pyproject.toml` and `uv.lock`. |
-| Start layouts | `sim/core/world/layouts.py` (`compact`, `wide`, `split`, `outlier_rich`). |
-| Random streams | Cells with the same seed start from the same flock ([paired random streams](../experiments/task_design.md#paired-random-streams)). |
-| Hardware | Linux workstation, 20 workers (`--workers 20`). |
-| Raw data | 439,120 trial rows in `results/<protocol>/trials.csv`; `trials.jsonl` (in git as `trials.jsonl.gz`) holds the same rows plus the 100 uncounted $N = 3200$ trials of `dmin_f99_big_cap`. `results/diagnostics/` holds the CSVs of the three replay tools. `dmin_pilot` and two earlier runs (the first ring run and the first spacing run, kept only in git history) are not part of the study. |
-| Running the study | `uv run cli/campaign.py run --protocol <id>` and `uv run cli/run_queue.py`. |
-| Tables | `docs/generate_docs/make_docs.py` writes [results_tables.md](results_tables.md) from the result folders, with the same verbs as `cli/dmin_tables.py`. |
-| Tests | `make test` runs the unit, invariant and regression tests; `make bench` runs the benchmark tests, six small campaigns end to end. |
-| Replays | `services/replay.py`; of the 1172 diagnostic replays, the 596 unchanged ones reproduced the success and tick count of their stored trials. |
+| Code | Repository `HerdSim`, branch `scaling-cli-d-min-max` at the time of writing; the result folders record no commit |
+| Environment | `uv`, Python 3.11 or later; versions locked in `pyproject.toml` and `uv.lock`; one BLAS thread per process; the CPU is not recorded |
+| Start layouts | `sim/core/world/layouts.py` (`compact`, `wide`, `split`, `outlier_rich`) |
+| Random streams | Cells with the same seed start from the same flock |
+| Hardware | Linux workstation, 20 workers (`--workers 20`) |
+| Raw data | 439,120 trial rows in `results/<protocol>/trials.csv`; `trials.jsonl` (in git as `trials.jsonl.gz`) holds the same rows plus the 100 uncounted $N = 3200$ trials of `dmin_f99_big_cap`; `results/diagnostics/` holds the CSVs of the three replay tools |
+| Running the study | `uv run cli/campaign.py run --protocol <id>` and `uv run cli/run_queue.py` |
+| Tables | `docs/generate_docs/make_docs.py` writes `docs/report/results_tables.md` from the result folders, with the same verbs as `cli/dmin_tables.py` |
+| Tests | `make test` runs the unit, invariant and regression tests; `make bench` runs the benchmark tests, six small campaigns end to end |
+| Replays | `services/replay.py`; results below |
+
+### Replay check
+
+The diagnostic tools ran 1172 replays, each rerunning a stored trial from its settings and seed.
+
+- Unchanged replays: 596 (164 pressure, 192 base `split` and 240 holding-walk). 590 had a stored trial to compare with, and all gave its success and tick count on the same machine with one BLAS thread per process.
+- Unchanged replays with nothing to compare: 6 base `split` replays at 3 drive times ($N = 200$, $D = 4$, 8 and 16, seeds 10 and 11), which `dmin_f99_m3` does not store.
+- Changed-rule replays: 576, the same 192 `split` seeds for each of three changes (collecting dogs spread over the clusters, a shorter stop distance, both), with no stored result to compare with.

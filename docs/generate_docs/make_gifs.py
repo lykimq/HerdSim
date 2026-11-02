@@ -1,24 +1,10 @@
-"""Animated GIFs of stored trials, for the dynamics a still figure cannot show.
+"""Animated GIFs of stored trials, for dynamics a still figure cannot show.
 
     uv run python docs/generate_docs/make_gifs.py              # every GIF
     uv run python docs/generate_docs/make_gifs.py last_sheep   # one, by name
 
-Every animation replays trials that a study protocol stored (services/replay.py), and each
-replay is checked against its stored outcome, so what moves on screen is the trial behind
-the reported numbers. The GIFs are written to docs/gifs.
-
-The file has three parts:
-
-- settings: the frame rate, the number of frames, the size of a panel
-- helpers: a ``Shot`` names one stored trial, ``replay`` records it at the ticks a frame
-  shows, ``animate`` draws shots side by side on one view and writes the GIF
-- overlays: what a GIF draws on top of the agents (which sheep react, each dog's target,
-  each herder's sensing range), computed with the model's own functions
-- one function per GIF, which lists its shots, its overlay and the note under the panels
-
-Colours and matplotlib defaults come from figstyle.py, so the animations look
-like the still figures. Agents being herded are dots and herders are triangles, so the two
-differ by shape as well as colour. Captions are in the documents that show the GIFs.
+Replays study trials via services/replay.py (checked against stored outcomes) into docs/gifs/.
+Layout: settings, helpers, overlays, then one function per GIF. Style from figstyle.py.
 """
 
 from __future__ import annotations
@@ -73,7 +59,7 @@ View = tuple[tuple[float, float], tuple[float, float]]  # x limits and y limits 
 
 @dataclass(frozen=True)
 class Shot:
-    """One stored trial to show, and the title of its panel."""
+    """One stored trial and its panel title."""
 
     run: str
     method: str
@@ -83,12 +69,12 @@ class Shot:
     seed_index: int
     title: str
     factors: tuple[tuple[str, Any], ...] = ()
-    until: int | None = None  # show only the first ticks, for the start of a trial
+    until: int | None = None  # first ticks only (trial start)
 
 
 @dataclass
 class Replayed:
-    """A replayed trial, kept at the ticks the frames show."""
+    """Replayed trial at the ticks the frames show."""
 
     ticks: np.ndarray  # tick number of each kept frame, ascending
     herd: np.ndarray  # (frames, N, 2) positions of the sheep or targets
@@ -97,10 +83,10 @@ class Replayed:
     goal_radius: float
     dt: float
     success: bool
-    timed_out: bool  # False when the task ended the trial itself (gather: herders home)
+    timed_out: bool  # False when the task ended the trial (e.g. herders home)
     config: dict[str, Any]
-    extra: list[Any]  # what ``capture`` read from the state at each kept frame
-    cut: bool  # shown only up to Shot.until, so the last frame is not the trial's end
+    extra: list[Any]  # ``capture`` values at each kept frame
+    cut: bool  # True when shown only up to Shot.until
 
     @property
     def ending(self) -> str:
@@ -121,8 +107,7 @@ Capture = Callable[[Any], Any]
 
 
 def shown_ticks(shot: Shot) -> int:
-    """The ticks the GIF shows: the stored trial's length, read from its row before anything
-    is replayed, or ``until`` when that is shorter."""
+    """Stored trial length, or ``until`` if shorter."""
     run = open_run(shot.run)
     outcome = run.outcomes(shot.method, shot.layout, shot.n, shot.d, shot.factors)
     stored = outcome[shot.seed_index][1]
@@ -130,10 +115,11 @@ def shown_ticks(shot: Shot) -> int:
 
 
 def replay(shot: Shot, every: int, capture: Capture | None) -> Replayed:
-    """Replay one stored trial, keeping every ``every``-th tick up to the last tick shown, so a
-    long trial (the gather task runs about 15,000 ticks) needs no more memory than a short
-    one. The whole trial is replayed even when only its start is shown, so it is still
-    checked against the stored outcome; it raises when the two differ."""
+    """Replay one stored trial, keeping every ``every``-th tick.
+
+    The full trial is always replayed (and checked against the stored outcome) even when
+    ``until`` cuts what is shown.
+    """
     run = open_run(shot.run)
     jobs = run.jobs(shot.method, shot.layout, shot.n, shot.d, shot.seed_index + 1, shot.factors)
     job = next(j for j in jobs if j.label["seed_index"] == shot.seed_index)
@@ -175,7 +161,7 @@ def replay(shot: Shot, every: int, capture: Capture | None) -> Replayed:
 
 
 def window(trials: list[Replayed]) -> View:
-    """One view for every panel: everything that moves in any trial, and the goals."""
+    """Shared view covering every trial's agents and goals."""
     points = np.vstack(
         [np.vstack([t.herd.reshape(-1, 2), t.herders.reshape(-1, 2)]) for t in trials]
     )
@@ -183,7 +169,7 @@ def window(trials: list[Replayed]) -> View:
     radius = max(t.goal_radius for t in trials)
     lo = np.minimum(points.min(axis=0), goals.min(axis=0) - radius)
     hi = np.maximum(points.max(axis=0), goals.max(axis=0) + radius)
-    margin = max(MARGIN, 0.04 * float((hi - lo).max()))  # a few percent on wide views
+    margin = max(MARGIN, 0.04 * float((hi - lo).max()))
     return (float(lo[0] - margin), float(hi[0] + margin)), (
         float(lo[1] - margin),
         float(hi[1] + margin),
@@ -192,7 +178,7 @@ def window(trials: list[Replayed]) -> View:
 
 @dataclass
 class Panel:
-    """The artists of one trial's panel, updated frame by frame."""
+    """Artists for one trial panel."""
 
     trial: Replayed
     herd: Any
@@ -220,7 +206,7 @@ def draw_panel(ax: Axes, trial: Replayed, title: str, view: View, dot: float) ->
 
 
 def update_panel(panel: Panel, tick: int, noun: str) -> None:
-    """Show the panel at ``tick``, or at the trial's end once it has ended."""
+    """Show the panel at ``tick`` (or the last frame after the trial ends)."""
     trial = panel.trial
     i = trial.at(tick)
     panel.herd.set_offsets(trial.herd[i])
@@ -248,12 +234,11 @@ def animate(
     overlay: Overlay | None = None,
     frames: int = FRAMES,
 ) -> None:
-    """Replay ``shots`` and draw them side by side on one view, as a looping GIF.
+    """Replay ``shots`` side by side on one shared clock as a looping GIF.
 
-    All panels share one clock: each frame is the same tick in every panel, and a trial that
-    has ended stays on its last state, so the panels can be compared moment by moment.
-    ``capture`` reads extra values from the state at each kept tick; ``overlay`` sets up
-    artists on a panel and returns the function that updates them for a kept frame."""
+    ``capture`` stores extra state per kept tick; ``overlay`` adds artists and returns
+    their per-frame updater.
+    """
     longest = max(shown_ticks(s) for s in shots)
     every = max(1, math.ceil(longest / frames))
     trials = [replay(s, every, capture) for s in shots]
@@ -261,7 +246,7 @@ def animate(
     aspect = (view[1][1] - view[1][0]) / (view[0][1] - view[0][0])
     lines = textwrap.wrap(note, NOTE_CHARS * len(shots), break_on_hyphens=False)
     extra_height = NOTE_LINE * (len(lines) - 1)
-    size = (PANEL_WIDTH * len(shots), PANEL_WIDTH * aspect + 0.9 + extra_height)  # titles, note
+    size = (PANEL_WIDTH * len(shots), PANEL_WIDTH * aspect + 0.9 + extra_height)
     fig, axes = plt.subplots(1, len(shots), figsize=size)
     panels = [
         draw_panel(ax, t, s.title, view, dot)
@@ -289,23 +274,21 @@ def animate(
 
 
 def corner_text(ax: Axes) -> Any:
-    """A second status line, top right, for what an overlay counts; the time and outcome
-    line takes the bottom left."""
+    """Top-right status line for overlay counts (time stays bottom left)."""
     return ax.text(
         0.98, 0.97, "", transform=ax.transAxes, ha="right", va="top", fontsize=9, color=INK
     )
 
 
 def fill_herd(panel: Panel, filled: np.ndarray) -> None:
-    """Sheep drawn filled where ``filled`` holds and hollow elsewhere, so two groups differ by
-    fill and not by colour alone."""
+    """Fill sheep where ``filled`` is true; hollow elsewhere."""
     panel.herd.set_linewidths(0.8)
     panel.herd.set_facecolors([BLUE if f else SURFACE for f in filled])
     panel.herd.set_edgecolors([BLUE] * len(filled))
 
 
 def dashed_rings(ax: Axes, count: int, radius: float) -> list[Circle]:
-    """One dashed circle per agent, for a sensing range; ``move_rings`` places them."""
+    """Dashed sensing-range circles; ``move_rings`` places them."""
     rings = [Circle((0.0, 0.0), radius, fc="none", ec=MUTED, lw=0.5, ls="--") for _ in range(count)]
     for ring in rings:
         ax.add_patch(ring)
@@ -318,7 +301,7 @@ def move_rings(rings: list[Circle], centres: np.ndarray) -> None:
 
 
 def reacting(ax: Axes, panel: Panel) -> Callable[[int], None]:
-    """Sheep within r_s of a dog react (filled); the others graze (hollow)."""
+    """Fill sheep within r_s of a dog; hollow sheep are grazing."""
     trial = panel.trial
     r_s = float(trial.config["r_s"])
     label = corner_text(ax)
@@ -332,9 +315,7 @@ def reacting(ax: Axes, panel: Panel) -> Callable[[int], None]:
 
 
 def sight(ax: Axes, panel: Panel) -> Callable[[int], None]:
-    """Each dog's sensing range (dashed) and the sheep no dog sees (hollow), from the
-    controller's own ``known_sheep``. The team plans only on the sheep it sees; how it shares
-    them (none or shared) is what differs between panels."""
+    """Dashed sensing ranges and hollow sheep no dog sees (via ``known_sheep``)."""
     trial = panel.trial
     rings = dashed_rings(ax, len(trial.herders[0]), float(trial.config["sensing_range"]))
     label = corner_text(ax)
@@ -349,9 +330,7 @@ def sight(ax: Axes, panel: Panel) -> Callable[[int], None]:
 
 
 def team_rule(ax: Axes, panel: Panel) -> Callable[[int], None]:
-    """What the team rule decides at each frame, from the positions shown: the mode, the
-    collect distance f(N) round the flock centre, and each dog's target (cross) with a line
-    from the dog to it. Computed with the controller's own ``team_targets``."""
+    """Mode, f(N) ring, and each dog's target from ``team_targets``."""
     trial = panel.trial
     config = trial.config
     f_n = collect_threshold(int(config["n_sheep"]), float(config["r_a"]))
@@ -375,9 +354,7 @@ def team_rule(ax: Axes, panel: Panel) -> Callable[[int], None]:
 
 
 def herder_view(ax: Axes, panel: Panel) -> Callable[[int], None]:
-    """Each herder's sensing circle and a ring round the target it chases (none when it
-    senses nothing and walks home), from the choice the model stored in the state. A herder
-    stands only 1.25 beyond its target, so a line to it would be too short to see."""
+    """Sensing circles and a ring on each chased target (from stored herder choices)."""
     trial = panel.trial
     rings = dashed_rings(ax, len(trial.herders[0]), float(trial.config["sensing_radius"]))
     chased = ax.scatter([], [], s=70, fc="none", ec=ORANGE, lw=1.3, zorder=4)
@@ -394,7 +371,7 @@ def herder_view(ax: Axes, panel: Panel) -> Callable[[int], None]:
 
 
 def chosen_targets(state: SimulationState) -> np.ndarray:
-    """The target index each Lama herder chases this tick (-1 for none)."""
+    """Target index each Lama herder chases this tick (-1 for none)."""
     return np.asarray(state.metadata.get("herder_target", []), dtype=int).copy()
 
 
@@ -402,8 +379,7 @@ def chosen_targets(state: SimulationState) -> np.ndarray:
 
 
 def last_sheep() -> None:
-    """The same start flock of 400 on `wide`, 16 dogs, strict rule: fast dogs bring the flock
-    in with a sheep or two missing and drive it out again; slower dogs finish in one pass."""
+    """Wide N=400, D=16: fast dogs leave stragglers; slower dogs finish in one pass."""
     cell = ("strombom_multi", "wide", 400, 16, 2)
     animate(
         [
@@ -416,8 +392,7 @@ def last_sheep() -> None:
 
 
 def controllers() -> None:
-    """Three dog rules on the same start flock of 400 on `wide`, 4 dogs: the team rule
-    finishes, the independent dogs move as one, FAT spreads the flock."""
+    """Wide N=400, D=4: team rule vs independent vs FAT."""
     cell = ("wide", 400, 4, 0)
     animate(
         [
@@ -434,8 +409,7 @@ def controllers() -> None:
 
 
 def one_trial() -> None:
-    """One trial from start to goal: the dogs collect the outliers of a scattered start, then
-    drive the gathered flock."""
+    """One wide trial: collect outliers, then drive to the goal."""
     animate(
         [Shot("dmin_f99_m6", "strombom_multi", "wide", 200, 4, 0, "the team rule, 4 dogs")],
         "one_trial.gif",
@@ -444,8 +418,7 @@ def one_trial() -> None:
 
 
 def split_layout() -> None:
-    """Two seeds of one `split` cell with 16 dogs: one brings the clusters together quickly, the
-    other runs out of time with the flock short of the goal."""
+    """Split N=200, D=16: one seed gathers; the other runs out of time."""
     cell = ("strombom_multi", "split", 200, 16)
     animate(
         [Shot("dmin_f99_m6", *cell, 4, "seed 4"), Shot("dmin_f99_m6", *cell, 8, "seed 8")],
@@ -455,8 +428,7 @@ def split_layout() -> None:
 
 
 def holding() -> None:
-    """Holding a flock of 25 with one dog, from the same start: the flock keeps walking while
-    the dog withdraws, out of a goal of 1.9 R_f but not out of one of 3.0 R_f."""
+    """Hold N=25, D=1: flock walks out of 1.9 R_f but stays in 3.0 R_f."""
     cell = ("strombom_multi", "compact", 25, 1, 0)
     three = (("goal_radius_multiple", 3.0),)
     animate(
@@ -473,9 +445,7 @@ def holding() -> None:
 
 
 def gather() -> None:
-    """The Lama and di Bernardo model at 144 targets and 11 herders that sense within 10:
-    one run gathers all but one target; in the other the herders go home with two targets
-    out of sight, and the run fails the 99 percent rule."""
+    """Lama gather, 144 targets, 11 herders: one seed nearly finishes; the other fails 99%."""
     cell = ("lama", "uniform", 144, 11)
     animate(
         [Shot("lama_r50", *cell, 0, "seed 0"), Shot("lama_r50", *cell, 1, "seed 1")],
@@ -487,8 +457,7 @@ def gather() -> None:
 
 
 def sheep_reaction() -> None:
-    """The first two minutes of a trial on `wide`: sheep react only once a dog is within r_s,
-    so a front of reacting sheep spreads from the dogs through a grazing flock."""
+    """Wide start, first 120 s: reacting front spreads through a grazing flock."""
     animate(
         [
             Shot(
@@ -512,8 +481,7 @@ def sheep_reaction() -> None:
 
 
 def push_blending() -> None:
-    """One dog against eight on the same compact flock: the push of several dogs is
-    normalised to that of one, so the flock walks at the same speed and arrives together."""
+    """Compact N=100: 1 vs 8 dogs; normalised push keeps the same walk speed."""
     cell = ("strombom_multi", "compact", 100)
     animate(
         [Shot("dmin_f99_m6", *cell, 1, 0, "1 dog"), Shot("dmin_f99_m6", *cell, 8, 0, "8 dogs")],
@@ -523,8 +491,7 @@ def push_blending() -> None:
 
 
 def kubo_ring() -> None:
-    """The Kubo model with 4 dogs: their mutual repulsion spreads them round the flock while
-    each chases the sheep farthest from the goal."""
+    """Kubo N=50, D=4: dogs ring the flock while chasing the farthest sheep."""
     animate(
         [Shot("dmin_kubo", "kubo", "compact", 50, 4, 0, "Kubo sheep and dogs, 4 dogs")],
         "kubo_ring.gif",
@@ -534,8 +501,7 @@ def kubo_ring() -> None:
 
 
 def kubo_speed() -> None:
-    """One Kubo dog against ten on the same flock: a Kubo sheep speeds up under a stronger
-    push, so more dogs finish sooner, where Strömbom's sheep keep 1 m/s."""
+    """Kubo N=100: 1 vs 10 dogs; sheep speed up under a stronger push."""
     cell = ("kubo", "compact", 100)
     animate(
         [Shot("dmin_kubo", *cell, 1, 0, "1 dog"), Shot("dmin_kubo", *cell, 10, 0, "10 dogs")],
@@ -545,8 +511,7 @@ def kubo_speed() -> None:
 
 
 def drive_cap() -> None:
-    """One dog driving 1131 sheep, from the paper's drive point and from the capped one: at
-    r_a sqrt(N) = 67 m behind the centre the dog reaches only the rear of the flock."""
+    """N=1131, D=1: paper drive point (67 m) vs capped (63 m)."""
     cell = ("strombom_multi", "compact", 1131, 1, 0)
     animate(
         [
@@ -564,8 +529,7 @@ def drive_cap() -> None:
 
 
 def flock_pressure() -> None:
-    """3 dogs against 12 on the same `wide` flock of 400: more dogs spread over a wider arc, so
-    more of the flock flees at once, but the drive ends sooner."""
+    """Wide N=400: 3 vs 12 dogs; a wider arc puts more sheep in flight."""
     cell = ("strombom_multi", "wide", 400)
     animate(
         [Shot("dmin_f99_m6", *cell, 3, 0, "3 dogs"), Shot("dmin_f99_m6", *cell, 12, 0, "12 dogs")],
@@ -580,8 +544,7 @@ def flock_pressure() -> None:
 
 
 def sight_sharing() -> None:
-    """Two dogs that see 65 m, without and with sharing: without it each dog plans on its own
-    view; shared, the team plans once on everything any dog sees."""
+    """Wide N=200, D=2, range 65 m: private views vs shared sensing."""
     cell = ("strombom_multi", "wide", 200, 2, 0)
     animate(
         [
@@ -597,13 +560,12 @@ def sight_sharing() -> None:
             "dog"
         ),
         overlay=sight,
-        frames=130,  # two 200-sheep panels whose fill changes every frame; 200 frames pass 2 MB
+        frames=130,  # keep file under 2 MB
     )
 
 
 def team_rule_at_work() -> None:
-    """The team rule on an outlier-rich start: each dog's target as the rule computes it, the
-    collect distance f(N), and the switch from collecting to driving."""
+    """Outlier-rich N=200, D=4: targets, f(N), and collect-to-drive."""
     animate(
         [Shot("dmin_f99_m6", "strombom_multi", "outlier_rich", 200, 4, 0, "the team rule, 4 dogs")],
         "team_rule.gif",
@@ -616,8 +578,7 @@ def team_rule_at_work() -> None:
 
 
 def lama_herders() -> None:
-    """The Lama herders at 144 targets: each senses within 10, chases the farthest target it
-    senses that no closer herder takes, and walks home when it senses none."""
+    """Lama herders at 144 targets: sense, chase, or walk home."""
     animate(
         [Shot("lama_r50", "lama", "uniform", 144, 11, 0, "11 herders, sensing radius 10")],
         "lama_herders.gif",
@@ -629,13 +590,12 @@ def lama_herders() -> None:
         dot=12,
         capture=chosen_targets,
         overlay=herder_view,
-        frames=140,  # 11 sensing rings move every frame; 200 frames pass 2 MB
+        frames=140,  # keep file under 2 MB
     )
 
 
 def start_layouts() -> None:
-    """The same team on the four start layouts: compact is driven at once, the scattered
-    layouts are collected first, and split takes longest because its clusters lie apart."""
+    """Same team on compact, wide, split, and outlier_rich starts."""
     shots = [
         Shot("dmin_f99_m6", "strombom_multi", layout, 200, 4, 0, layout)
         for layout in ("compact", "wide", "split", "outlier_rich")
@@ -646,8 +606,7 @@ def start_layouts() -> None:
 
 
 def dog_starts() -> None:
-    """Eight dogs released from arcs, a ring and a handler's post onto the same flock: the
-    team rule sorts them onto their targets within the first minutes whatever the start."""
+    """Wide N=200, D=8: arcs vs ring vs handler starts."""
     cell = ("strombom_multi", "wide", 200, 8, 0)
     animate(
         [
@@ -664,8 +623,7 @@ def dog_starts() -> None:
 
 
 def crowding() -> None:
-    """Twelve point dogs against twelve that keep 2 m apart, holding the same outlier-rich
-    flock of 400: the spaced team runs out of time where the point team holds the flock."""
+    """Hold outlier_rich N=400, D=12: point dogs vs 2 m spacing."""
     cell = ("strombom_multi", "outlier_rich", 400, 12, 0)
     animate(
         [

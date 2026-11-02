@@ -1,42 +1,53 @@
-"""The tables of cli/dmin_tables.py whose cells are written for the docs: D_min and D_sat as
-text by layout and N, their growth, the cost beyond D_sat, the upper end of the curves, runs and
-methods side by side, the gather task read two ways, and the failure and spread tables.
-
-Each function takes what analysis/ computed from a finished run and returns a DataFrame;
-text.markdown prints it. The values themselves (brackets, slopes, fits, zones) are
-decided in analysis/, so a change here changes how a table reads, never a result.
-"""
+"""DataFrame layouts for cli/dmin_tables.py and overview tables."""
 
 from __future__ import annotations
 
 import math
 from collections.abc import Callable
-from typing import Any
+from functools import cache
+from pathlib import Path
+from typing import Any, NamedTuple
 
 import pandas as pd
 
-from analysis.curves import bracket, dsat_bracket, effort, growth, one_level, upper_end
+from analysis.curves import (
+    bracket,
+    dsat_bracket,
+    effort,
+    groups_table,
+    growth,
+    one_level,
+    upper_end,
+)
 from analysis.herdability import paper_nstar
-from analysis.keys import join_group
-
-from .text import dmin_text, dsat_text, int_or_dash, numbers_text, slope_text
+from analysis.keys import join_group, split_factors
+from docs.generate_docs.format import (
+    dmin_text,
+    dsat_text,
+    int_or_dash,
+    number_or_text,
+    numbers_text,
+    slope_text,
+    variant_label,
+)
+from services.protocol import load_protocol, results_folder
 
 # ------------------------------------------------------------------------- helpers
 
 
 def _with_text(table: pd.DataFrame, text: Callable[[pd.Series], str]) -> pd.DataFrame:
-    """``table`` with a column ``text`` holding ``text(row)``."""
+    """Add a ``text`` column from ``text(row)``."""
     return table.assign(text=table.apply(text, axis=1))
 
 
 def _by_layout_and_n(
     table: pd.DataFrame, text: Callable[[pd.Series], str], layouts: tuple[str, ...] | None
 ) -> pd.DataFrame:
-    """Layouts as rows, N as columns, ``text(row)`` in each cell."""
+    """Pivot: layouts as rows, N as columns, ``text(row)`` in each cell."""
     shown = _with_text(one_level(table), text)
     wide = shown.pivot_table(index="layout", columns="n", values="text", aggfunc="first")
     kept = [layout for layout in layouts or () if layout in wide.index]
-    if kept:  # a task with its own layouts (the gather task's uniform) keeps them all
+    if kept:  # keep task-specific layouts (e.g. gather task uniform) in protocol order
         wide = wide.reindex(kept)
     return wide.fillna("-")
 
@@ -45,22 +56,17 @@ def _by_layout_and_n(
 
 
 def layout_by_n(table: pd.DataFrame, layouts: tuple[str, ...] | None = None) -> pd.DataFrame:
-    """The D_min table: layouts as rows, N as columns, one text entry per curve."""
+    """D_min table: layout rows, N columns."""
     return _by_layout_and_n(table, dmin_text, layouts)
 
 
 def dsat_by_n(table: pd.DataFrame, layouts: tuple[str, ...] | None = None) -> pd.DataFrame:
-    """D_sat as text, layouts as rows and N as columns, like ``layout_by_n``."""
+    """D_sat table in the same shape as ``layout_by_n``."""
     return _by_layout_and_n(table, dsat_text, layouts)
 
 
 def growth_table(table: pd.DataFrame) -> pd.DataFrame:
-    """Per layout: the slope range, the N values used, and the N values left out and why.
-
-    A flock size is left out when its D_min is not decided. Two cases are told apart: no D
-    on the grid is reliable (D_min is above the grid, so the growth is censored there), or
-    some D is still open on reliability.
-    """
+    """Per layout: slope range, N used, and notes for undecided sizes."""
     rows = []
     for layout, part in one_level(table).groupby("layout", sort=False):
         g = growth(part, bracket)
@@ -92,7 +98,7 @@ def growth_table(table: pd.DataFrame) -> pd.DataFrame:
 
 
 def dsat_growth(table: pd.DataFrame) -> pd.DataFrame:
-    """Per layout: the range of slopes of log2 D_sat against log2 N over the D_sat brackets."""
+    """Per layout: slope range of log2 D_sat vs log2 N over D_sat brackets."""
     rows = []
     for layout, part in one_level(table).groupby("layout", sort=False):
         g = growth(part, dsat_bracket)
@@ -111,8 +117,7 @@ def dsat_growth(table: pd.DataFrame) -> pd.DataFrame:
 
 
 def effort_table(cells: pd.DataFrame, table: pd.DataFrame) -> pd.DataFrame:
-    """What dogs beyond D_sat cost (analysis.curves.effort), per curve with a D_sat below its
-    largest working D: ratios to the D_sat cell at D_double and at the largest working D."""
+    """Cost of dogs beyond D_sat, relative to the D_sat cell (see analysis.curves.effort)."""
     rows = []
     for _, curve in one_level(table).iterrows():
         e = effort(cells, curve)
@@ -135,8 +140,7 @@ def effort_table(cells: pd.DataFrame, table: pd.DataFrame) -> pd.DataFrame:
 
 
 def upper_values(table: pd.DataFrame, cells: pd.DataFrame) -> tuple[dict[str, int], pd.DataFrame]:
-    """The upper end of every curve (analysis.curves.upper_end): its counts, and one row per
-    curve whose D_max lies below the grid top or that has a D_crowd or D_overcrowd."""
+    """Upper-end counts plus rows with D_max below the top, D_crowd, or D_overcrowd."""
     counts, flagged, top = upper_end(table, cells)
     rows = []
     for _, curve in flagged.iterrows():
@@ -161,7 +165,7 @@ def upper_values(table: pd.DataFrame, cells: pd.DataFrame) -> tuple[dict[str, in
 
 
 def frontier_values(table: pd.DataFrame) -> pd.DataFrame:
-    """D_min, D_sat, D_crowd and D_max of every curve as text, for a table across methods."""
+    """D_min, D_sat, D_crowd and D_max of every curve as text."""
     rows = []
     for _, curve in table.iterrows():
         rows.append(
@@ -179,11 +183,7 @@ def frontier_values(table: pd.DataFrame) -> pd.DataFrame:
 
 
 def compare(base: pd.DataFrame, variant: pd.DataFrame) -> pd.DataFrame:
-    """The variant beside the base for the same curve: 'base / variant' per layout and N.
-
-    A variant with a factor (the dog start gap) has one curve per level; the level goes in
-    the row label.
-    """
+    """Side-by-side D_min as 'base / variant' per layout and N."""
     keys = ["layout", "n"]
     b = _with_text(base, dmin_text)[keys + ["text"]]
     v = _with_text(variant, dmin_text)[keys + ["factors", "text"]]
@@ -192,14 +192,15 @@ def compare(base: pd.DataFrame, variant: pd.DataFrame) -> pd.DataFrame:
     merged["row"] = merged["factors"]
     merged["col"] = merged["layout"] + " N=" + merged["n"].astype(str)
     out = merged.pivot_table(index="row", columns="col", values="pair", aggfunc="first")
-    return out.fillna("-")
+    columns = merged.sort_values(keys)["col"].drop_duplicates()  # keep N in numeric order
+    return out[list(columns)].fillna("-")
 
 
 # ---------------------------------------------------------------------- the gather task
 
 
 def side_by_side(trials: pd.DataFrame, groups: pd.DataFrame, level: float = 0.99) -> pd.DataFrame:
-    """Per flock size: the paper's N* at ``level`` and HerdSim's D_min (with its brackets)."""
+    """Paper N* at ``level`` beside HerdSim D_min, one row per flock size."""
     paper = paper_nstar(trials, (level,)).set_index("n")
     out = []
     for _, g in groups.sort_values("n").iterrows():
@@ -220,7 +221,7 @@ def side_by_side(trials: pd.DataFrame, groups: pd.DataFrame, level: float = 0.99
 
 
 def failure_table(failure_df: pd.DataFrame) -> pd.DataFrame:
-    """The failure regimes per run (analysis.dispersion_burden) with readable headers."""
+    """Failure regimes per run with readable headers."""
     if failure_df.empty:
         return pd.DataFrame()
     return pd.DataFrame(
@@ -236,7 +237,7 @@ def failure_table(failure_df: pd.DataFrame) -> pd.DataFrame:
 
 
 def dispersion_table(disp_df: pd.DataFrame) -> pd.DataFrame:
-    """The start spread S0 and the burden S0 x N per layout and N, with readable headers."""
+    """Start spread S0 and burden S0 x N per layout and N."""
     if disp_df.empty:
         return pd.DataFrame()
     return pd.DataFrame(
@@ -248,3 +249,113 @@ def dispersion_table(disp_df: pd.DataFrame) -> pd.DataFrame:
             "Success rate": disp_df["overall_sr"].map(lambda v: f"{v * 100:.1f}%"),
         }
     )
+
+# --------------------------------------------------------------------- overview
+
+# Main grids at 12, 6 and 3 drive times (strict and 99 percent).
+STRICT_MAIN = ("dmin_m12", "dmin_m6", "dmin_m3")
+F99_MAIN = ("dmin_f99_m12", "dmin_f99_m6", "dmin_f99_m3")
+# Flock sizes of the first study; later runs add 71, 141, 283, 566.
+ORIGINAL_NS = (25, 50, 100, 200, 400)
+
+
+class OverviewRun(NamedTuple):
+    """One finished run: folder, success share, and layouts."""
+
+    folder: Path
+    success_fraction: float
+    layouts: tuple[str, ...]
+
+
+@cache
+def overview_run(name: str) -> OverviewRun:
+    """Load protocol ``name`` and return its OverviewRun."""
+    protocol = load_protocol(name, output=results_folder(name))
+    fraction = float(protocol.settings["success_fraction"])
+    return OverviewRun(protocol.output, fraction, protocol.layouts)
+
+
+def overview_cell(row: pd.Series) -> str:
+    """D_min plus optional max / overcrowd notes, e.g. '3', '2-3 (max 6)'."""
+    text = "none" if bool(row.get("d_min_above_grid", False)) else dmin_text(row)
+    notes = []
+    if pd.notna(row["d_max"]) and not bool(row["d_max_at_grid_top"]):
+        notes.append(f"max {int(row['d_max'])}")
+    if pd.notna(row["d_overcrowd"]):
+        notes.append(f"over {int(row['d_overcrowd'])}")
+    return f"{text} ({', '.join(notes)})" if notes else text
+
+
+# Cell formatters keyed by the --value name.
+OVERVIEW_CELLS: dict[str, Callable[[pd.Series], str]] = {
+    "d_min": overview_cell,
+    "d_sat": dsat_text,
+}
+
+
+def _level_order(factors: list[tuple[str, str]]) -> tuple[tuple[str, float | str], ...]:
+    """Sort key for factor levels (numbers by value)."""
+    return tuple((name, number_or_text(value)) for name, value in factors)
+
+
+def n_columns(frame: pd.DataFrame) -> list[str]:
+    """'N=...' columns sorted by N."""
+    return sorted((c for c in frame.columns if c.startswith("N=")), key=lambda c: int(c[2:]))
+
+
+def overview(
+    table: pd.DataFrame,
+    success_fraction: float,
+    layouts: tuple[str, ...],
+    cell: Callable[[pd.Series], str] = overview_cell,
+) -> pd.DataFrame:
+    """One row per layout and factor level; one N= column per flock size."""
+    if table["method"].nunique() > 1:
+        raise ValueError(f"several methods {sorted(table['method'].unique())} in one run")
+    order = {layout: i for i, layout in enumerate(layouts)}
+    rows = []
+    for _, part in table.groupby(["layout", "factors"]):
+        layout, factors = (str(part[c].iloc[0]) for c in ("layout", "factors"))
+        share, kept = success_fraction, []
+        for name, value in split_factors(factors):
+            if name == "success_fraction":
+                share = float(value)
+            else:
+                kept.append((name, value))
+        row = {"share": share, "layout": layout, "variant": variant_label(kept)}
+        row |= {f"N={int(c['n'])}": cell(c) for _, c in part.iterrows()}
+        rows.append(((order.get(layout, len(order)), layout, _level_order(kept)), row))
+    rows.sort(key=lambda pair: pair[0])
+    frame = pd.DataFrame([row for _, row in rows])
+    return frame[["share", "layout", "variant", *n_columns(frame)]].fillna("")
+
+
+def _transposed(rows: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
+    """N as rows, one column per curve (for runs with many flock sizes)."""
+    parts = ["protocol"] + [c for c in ("layout", "variant") if rows[c].nunique() > 1]
+    labels = rows[parts].apply(lambda r: " ".join(v for v in r if v), axis=1)
+    wide = rows[columns].set_axis(labels).T
+    wide.index = [c.removeprefix("N=") for c in wide.index]
+    return wide.rename_axis("N")
+
+
+def overview_tables(
+    runs: dict[str, OverviewRun], value: str = "d_min", transpose: bool = False
+) -> list[tuple[float, pd.DataFrame]]:
+    """Combine runs into one table per success share (highest first)."""
+    cell = OVERVIEW_CELLS[value]
+    curves: list[pd.DataFrame] = []
+    for name, run in runs.items():
+        table = overview(groups_table(run.folder), run.success_fraction, run.layouts, cell)
+        curves.append(table.assign(protocol=name))
+    every = pd.concat(curves, ignore_index=True).fillna("")
+    tables = []
+    for share in sorted({float(s) for s in every["share"]}, reverse=True):
+        rows = every[every["share"] == share]
+        kept = [c for c in n_columns(rows) if (rows[c] != "").any()]
+        if transpose:
+            tables.append((share, _transposed(rows, kept)))
+            continue
+        labels = ["protocol", "layout"] + (["variant"] if (rows["variant"] != "").any() else [])
+        tables.append((share, rows[labels + kept]))
+    return tables

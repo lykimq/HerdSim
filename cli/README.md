@@ -47,7 +47,7 @@ Each round gives one batch of seeds to every cell that still needs them, then th
 
 Every trial is appended to the trial log the moment it finishes. After Ctrl+C, a killed process or a spent budget, run the same command again and it picks up where it left off. A power cut can also lose finished rows the operating system had not yet written to disk; those trials run again. We reasoned this from the code and have not tested it.
 
-A results folder belongs to one protocol and one physics, the settings that change a trial's outcome ([physics hash](../docs/guides/configuration.md#physics-hash)). A protocol grown with more flock sizes, smaller team sizes or more seeds resumes into the same folder. A change that would alter the trials themselves, such as a sheep parameter or the goal size, makes the folder refuse the campaign, so old and new trials are never mixed.
+A results folder belongs to one protocol and one physics, the settings that change a trial's outcome ([physics hash](../docs/guides/configuration.md#physics-hash)), so a change that alters the trials makes the folder refuse the campaign.
 
 ### Checklist for a campaign
 
@@ -130,7 +130,7 @@ uv run cli/diagnostics/split_diagnostic.py --out results/diagnostics/split_diagn
 uv run cli/diagnostics/hold_walk.py --out results/diagnostics/hold_walk.csv
 ```
 
-`gradient_validation.py` replays nothing. It asks how well a sheep could find the flock centre from its nearest neighbours alone, on start flocks ([result in the models doc](../docs/methods/models.md#2-attraction-to-the-flock)):
+`gradient_validation.py` replays nothing. It asks how well a sheep could find the flock centre from its nearest neighbours alone, on start flocks ([result in the Strombom sheep doc](../docs/methods/strombom_sheep.md#attraction-to-the-flock)):
 
 ```bash
 uv run cli/diagnostics/gradient_validation.py --seeds 10

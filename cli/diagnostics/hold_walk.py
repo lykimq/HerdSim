@@ -30,8 +30,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import numpy as np  # noqa: E402
 
-from docs.generate_docs.report.replay_tables import walk_summary  # noqa: E402
-from docs.generate_docs.report.text import markdown  # noqa: E402
+from docs.generate_docs.format import markdown, walk_summary  # noqa: E402
 from services.replay import (  # noqa: E402
     ReplayJob,
     describe_cell_seed,

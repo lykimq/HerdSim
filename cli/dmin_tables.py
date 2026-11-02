@@ -7,7 +7,7 @@
 
 Each verb takes one or more folders (a protocol id under results/, or a path) and prints a table
 ready to paste. Nothing here runs a simulation: the tables are read from the files a run
-wrote, and the calculations live in analysis/ and docs/generate_docs/report/verbs.py.
+wrote, and the calculations live in analysis/ and docs/generate_docs/page.py.
 docs/report/results_tables.md is written from the same verbs by
 docs/generate_docs/make_docs.py.
 
@@ -73,7 +73,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from docs.generate_docs.report.verbs import render, run_command  # noqa: E402
+from docs.generate_docs.page import render, run_command  # noqa: E402
 
 
 def main() -> None:
