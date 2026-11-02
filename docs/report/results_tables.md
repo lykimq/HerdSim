@@ -233,7 +233,7 @@ Spread of D_min in doublings: between layouts at one N 1.13, between N at one la
 
 Trials shared by two runs that differ only in the deadline, matched on cell and seed. `outcome_as_cut_long_trial` is the share of shared trials whose outcome at the shorter deadline equals "the longer trial finished within the shorter limit"; `same_finish_when_both_succeed` is the share of trials that succeed in both and finish at the same second.
 
-`uv run cli/dmin_tables.py nested dmin_f99_m12 dmin_f99_m6`
+`uv run python -m docs.generate_docs.page nested dmin_f99_m12 dmin_f99_m6`
 
 ### dmin_f99_m12 against dmin_f99_m6: the shorter deadline as a cut
 
@@ -241,7 +241,7 @@ Trials shared by two runs that differ only in the deadline, matched on cell and 
 | :---: | :---: | :---: | :---: |
 | 26620 | 1.0 | 25553 | 1.0 |
 
-`uv run cli/dmin_tables.py nested dmin_f99_m6 dmin_f99_m3`
+`uv run python -m docs.generate_docs.page nested dmin_f99_m6 dmin_f99_m3`
 
 ### dmin_f99_m6 against dmin_f99_m3: the shorter deadline as a cut
 
@@ -249,7 +249,7 @@ Trials shared by two runs that differ only in the deadline, matched on cell and 
 | :---: | :---: | :---: | :---: |
 | 10760 | 1.0 | 10236 | 1.0 |
 
-`uv run cli/dmin_tables.py nested dmin_f99_m12 dmin_f99_m3`
+`uv run python -m docs.generate_docs.page nested dmin_f99_m12 dmin_f99_m3`
 
 ### dmin_f99_m12 against dmin_f99_m3: the shorter deadline as a cut
 
@@ -257,7 +257,7 @@ Trials shared by two runs that differ only in the deadline, matched on cell and 
 | :---: | :---: | :---: | :---: |
 | 10360 | 1.0 | 9882 | 1.0 |
 
-`uv run cli/dmin_tables.py nested dmin_m12 dmin_m6`
+`uv run python -m docs.generate_docs.page nested dmin_m12 dmin_m6`
 
 ### dmin_m12 against dmin_m6: the shorter deadline as a cut
 
@@ -265,7 +265,7 @@ Trials shared by two runs that differ only in the deadline, matched on cell and 
 | :---: | :---: | :---: | :---: |
 | 10500 | 1.0 | 9852 | 1.0 |
 
-`uv run cli/dmin_tables.py nested dmin_m6 dmin_m3`
+`uv run python -m docs.generate_docs.page nested dmin_m6 dmin_m3`
 
 ### dmin_m6 against dmin_m3: the shorter deadline as a cut
 
@@ -273,7 +273,7 @@ Trials shared by two runs that differ only in the deadline, matched on cell and 
 | :---: | :---: | :---: | :---: |
 | 8560 | 1.0 | 7906 | 1.0 |
 
-`uv run cli/dmin_tables.py nested dmin_m12 dmin_m3`
+`uv run python -m docs.generate_docs.page nested dmin_m12 dmin_m3`
 
 ### dmin_m12 against dmin_m3: the shorter deadline as a cut
 
@@ -285,7 +285,7 @@ Trials shared by two runs that differ only in the deadline, matched on cell and 
 
 The cells of one curve at the three deadlines, 99 percent rule: successes out of trials, the reliability decision and the median finish in seconds.
 
-`uv run cli/dmin_tables.py curve dmin_f99_m12 dmin_f99_m6 dmin_f99_m3 --layout wide --n 400`
+`uv run python -m docs.generate_docs.page curve dmin_f99_m12 dmin_f99_m6 dmin_f99_m3 --layout wide --n 400`
 
 ### wide, N = 400: cell by cell across folders
 
@@ -322,7 +322,7 @@ The cells of one curve at the three deadlines, 99 percent rule: successes out of
 | dmin_f99_m3 | strombom_multi\|wide\|N=400 | 16 | 60/60 | 1.0 | reliable | 425.0 |
 | dmin_f99_m3 | strombom_multi\|wide\|N=400 | 24 | 60/60 | 1.0 | reliable | 424.0 |
 
-`uv run cli/dmin_tables.py curve dmin_f99_m12 dmin_f99_m6 dmin_f99_m3 --layout outlier_rich --n 400`
+`uv run python -m docs.generate_docs.page curve dmin_f99_m12 dmin_f99_m6 dmin_f99_m3 --layout outlier_rich --n 400`
 
 ### outlier_rich, N = 400: cell by cell across folders
 

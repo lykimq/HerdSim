@@ -1,10 +1,36 @@
-"""CLI verbs and SECTIONS for docs/report/results_tables.md."""
+"""Result tables, one question per verb, and the sections of docs/report/results_tables.md.
+
+    uv run python -m docs.generate_docs.page record
+    uv run python -m docs.generate_docs.page dmin    dmin_f99_m12 dmin_f99_m6
+    uv run python -m docs.generate_docs.page nested  dmin_f99_m12 dmin_f99_m6
+
+Each verb takes one or more folders (a protocol id under results/, or a path) and prints a table
+ready to paste. Nothing here runs a simulation: the tables are read from the files a run
+wrote, and the calculations live in analysis/ and docs/generate_docs/tables.py.
+docs/report/results_tables.md is written from the same verbs by
+docs/generate_docs/make_docs.py.
+
+  record     every run: when it finished, trials, cells, open cells, errors, hours
+             (from results/queue_log.jsonl; takes no folder)
+  dmin       D_min by layout and flock size, one table per folder (--sizes)
+  growth     how fast D_min grows with N (the range of log-log slopes the brackets allow),
+             and whether layout or N moves it more (--sizes)
+  fits       a power law against a curve that levels off, fitted to D_min(N) per layout;
+             split is left out, since its success does not rise with D at N >= 200
+  nested     two runs that differ only in the deadline: is the shorter one a cut of the longer?
+  curve      one curve (--layout, --n) cell by cell across folders: successes, reliability,
+             median finish
+
+An entry such as "2-3" is a bracket (D = 3 is reliable, D = 2 still undecided), "[5]" a lower
+bound with no reliable D yet, and "none on grid" a curve where every D is unreliable.
+"""
 
 from __future__ import annotations
 
 import argparse
 import re
 import shlex
+import sys
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from typing import NamedTuple
@@ -108,7 +134,7 @@ def curve(folders: Sequence[str], layout: str, n: int) -> list[Part]:
 
 
 def build_parser(description: str | None = None) -> argparse.ArgumentParser:
-    """Argument parser for cli/dmin_tables.py; each verb's ``run`` returns its parts."""
+    """Argument parser for the verbs; each verb's ``run`` returns its parts."""
     parser = argparse.ArgumentParser(
         description=description, formatter_class=argparse.RawDescriptionHelpFormatter
     )
@@ -145,16 +171,20 @@ def run_command(argv: Sequence[str], description: str | None = None) -> list[Par
     return args.run(args)
 
 
+def main() -> None:
+    print(render(run_command(sys.argv[1:], __doc__)), end="")
+
+
 # --- results_tables.md page -----------------------------------------------------
 
 QUEUE_LOG = RESULTS_ROOT / "queue_log.jsonl"
 # Shown above a table when show_command is set.
-DMIN_TABLES = "uv run cli/dmin_tables.py"
+DMIN_TABLES = "uv run python -m docs.generate_docs.page"
 
 
 @dataclass(frozen=True)
 class Query:
-    """One cli/dmin_tables.py command and how its tables are headed."""
+    """One verb command and how its tables are headed."""
 
     command: str
     prefix: str = ""
@@ -322,3 +352,7 @@ def runs_block() -> str:
     if grew:
         paragraphs.append(RUNS_GREW.format(count=len(grew), names=names))
     return "\n\n".join(paragraphs)
+
+
+if __name__ == "__main__":
+    main()

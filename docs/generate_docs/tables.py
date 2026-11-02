@@ -1,4 +1,4 @@
-"""DataFrame layouts for cli/dmin_tables.py."""
+"""DataFrame layouts for the tables of docs/generate_docs/page.py."""
 
 from __future__ import annotations
 

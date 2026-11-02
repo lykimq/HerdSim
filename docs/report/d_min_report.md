@@ -220,7 +220,7 @@ A shorter deadline cuts the same trial short. In every pair of runs in Table 7, 
 | Strict | 6 against 3 | [8560](results_tables.md#dmin_m6-against-dmin_m3-the-shorter-deadline-as-a-cut) |
 | Strict | 12 against 3 | [8250](results_tables.md#dmin_m12-against-dmin_m3-the-shorter-deadline-as-a-cut) |
 
-*Data:* `uv run cli/dmin_tables.py nested <longer> <shorter>`, with the longer-deadline folder first.
+*Data:* `uv run python -m docs.generate_docs.page nested <longer> <shorter>`, with the longer-deadline folder first.
 
 ## 4. Limitations
 
@@ -238,7 +238,7 @@ These results rest on HerdSim's choices:
 
 ## 5. Run record
 
-Table 8 gives each run as stored. A run was first made by the queue (`cli/run_queue.py`), which wrote one line per protocol to `results/queue_log.jsonl`; five of the six were later resumed and gained trials.
+Table 8 gives each run as stored. A run was first made by the study queue (`cli/campaign.py run` with no protocol), which wrote one line per protocol to `results/queue_log.jsonl`; five of the six were later resumed and gained trials.
 
 **Table 8: The stored runs. Undecided cells are still undecided on reliability at 200 seeds; open cells would still take seeds, on reliability or on a finish time; hours are the first pass at 20 workers.**
 
@@ -252,7 +252,7 @@ Table 8 gives each run as stored. A run was first made by the queue (`cli/run_qu
 | `dmin_f99_m3` | 11,740 | 185 | 8 | 10 | 0 | 0.27 | 1070 |
 | Total | 115,470 | 1445 | 84 | 151 | 0 | 2.86 | 43,335 |
 
-*Data:* `uv run cli/dmin_tables.py record`; the trials added are the folder's trials now minus those in its queue log line.
+*Data:* `uv run python -m docs.generate_docs.page record`; the trials added are the folder's trials now minus those in its queue log line.
 
 Notes on the record:
 
@@ -263,7 +263,7 @@ Notes on the record:
 
 ## Data and code
 
-Trials and cell decisions are stored under `results/<protocol>/`. The tables behind the numbers are in [results_tables.md](results_tables.md). To rerun a protocol, see [cli/README.md](../../cli/README.md) and the [CLI reference](../guides/cli_reference.md).
+Trials and cell decisions are stored under `results/<protocol>/`. The tables behind the numbers are in [results_tables.md](results_tables.md). To rerun a protocol, see the [CLI reference](../guides/cli_reference.md).
 
 ## References
 

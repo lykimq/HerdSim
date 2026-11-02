@@ -9,7 +9,7 @@ Settings come from two layers under `protocols/configs/`: `canonical.yaml` holds
 ```text
 protocols/configs/
 |-- canonical.yaml             # defaults, each with the source of its value
-|-- study_queue.yaml           # the six protocols in the order cli/run_queue.py runs them
+|-- study_queue.yaml           # the six protocols in the order cli/campaign.py runs them
 `-- protocols/
     |-- dmin_m12.yaml          # strict rule, 12 drive times
     |-- dmin_m6.yaml           # strict rule, 6 drive times

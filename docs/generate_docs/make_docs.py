@@ -300,7 +300,7 @@ def settings_page() -> str:
 
 
 def results_tables_page() -> str:
-    """The tables of cli/dmin_tables.py, section by section."""
+    """The tables of the verbs of docs/generate_docs/page.py, section by section."""
     source = "the stored runs in `results/`"
     return _joined([RESULTS_TABLES_TITLE, notice(source), *page_blocks()])
 

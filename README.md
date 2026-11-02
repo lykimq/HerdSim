@@ -81,21 +81,21 @@ Stored results live in `results/`.
 
 ## Running campaigns
 
-A campaign runs one protocol and puts extra seeds on cells that are still undecided ([`cli/campaign.py`](docs/guides/cli_reference.md#clicampaignpy-one-protocol)). Each trial is written to `results/<protocol_id>/` as it finishes, so the same command resumes a stopped run. A protocol can take minutes to hours.
+A campaign runs one protocol and puts extra seeds on cells that are still undecided ([`cli/campaign.py`](docs/guides/cli_reference.md#clicampaignpy-run-protocols)). Each trial is written to `results/<protocol_id>/` as it finishes, so the same command resumes a stopped run. A protocol can take minutes to hours.
 
 ```bash
-uv run cli/campaign.py plan --protocol dmin_m6               # what a run would do; runs nothing
-uv run cli/campaign.py run --protocol dmin_m6 --workers 16   # run with 16 worker processes
-uv run cli/campaign.py status --protocol dmin_m6             # progress of a run
-uv run cli/run_queue.py --workers 20                         # every protocol, skipping finished ones
+uv run cli/campaign.py plan dmin_m6                          # what a run would do; runs nothing
+uv run cli/campaign.py run dmin_m6 --workers 16              # run with 16 worker processes
+uv run cli/campaign.py status dmin_m6                        # progress of a run
+uv run cli/campaign.py run --workers 20                      # every protocol of the study, skipping finished ones
 
 # Analysis (reads stored results only)
 
-uv run cli/dmin_tables.py record                             # trials, cells, errors and hours per protocol
-uv run cli/dmin_tables.py dmin dmin_m12 dmin_m6 dmin_m3      # smallest reliable team per layout and N
+uv run python -m docs.generate_docs.page record                             # trials, cells, errors and hours per protocol
+uv run python -m docs.generate_docs.page dmin dmin_m12 dmin_m6 dmin_m3      # smallest reliable team per layout and N
 ```
 
-See [`cli/README.md`](cli/README.md) for the usual order of tools.
+See the [CLI reference](docs/guides/cli_reference.md) for every flag and the usual order of tools.
 
 ## Project architecture
 

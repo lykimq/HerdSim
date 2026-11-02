@@ -13,7 +13,7 @@ help:
 	@echo "  test            unit, invariant and reproducibility tests"
 	@echo ""
 	@echo "Campaigns:"
-	@echo "  uv run cli/campaign.py run --protocol dmin_f99_m6 --workers 16"
+	@echo "  uv run cli/campaign.py run dmin_f99_m6 --workers 16"
 	@echo "  Protocol ids: protocols/configs/protocols/"
 
 install:

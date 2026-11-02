@@ -1,4 +1,4 @@
-# The protocols of the study, in the order cli/run_queue.py runs them: the strict rule at
+# The protocols of the study, in the order cli/campaign.py runs them: the strict rule at
 # 12, 6 and 3 drive times, then the 99% rule at 6, 3 and 12 drive times.
 queue:
   - dmin_m12
