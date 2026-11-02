@@ -18,6 +18,7 @@ from typing import Any
 from .generated_notice import with_json_notice
 
 REPO = Path(__file__).resolve().parents[1]
+HASH_CHARS = 16  # hex characters kept of a SHA256, enough to tell two states apart
 # The source that decides a trial's outcome and its row: the engine, the row packaging,
 # the cell config and calibration that size each trial's task, the protocol code that sets
 # its time limit, and the runner that adds the identity columns to the row.
@@ -54,16 +55,11 @@ def stable_hash(payload: Any) -> str:
     """Short SHA256 of a JSON-serialisable value, independent of key order and of whether a
     number was written as an int or a float."""
     text = json.dumps(normalise_numbers(payload), sort_keys=True, default=str)
-    return hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()[:HASH_CHARS]
 
 
-def code_identity() -> dict[str, Any]:
-    """The code a run sitting used. The physics hash covers configuration only, so without
-    this a change to a dog or sheep rule would resume into an old folder unseen.
-
-    ``code_hash`` hashes the trial code itself, so it also catches uncommitted edits; the
-    commit, the dirty flag and the library versions are for a person tracing a result.
-    """
+def _trial_code_hash() -> str:
+    """Hash of the path and bytes of every file in ``TRIAL_CODE``."""
     files = sorted(
         p
         for part in TRIAL_CODE
@@ -73,25 +69,36 @@ def code_identity() -> dict[str, Any]:
     for path in files:
         digest.update(str(path.relative_to(REPO)).encode())
         digest.update(path.read_bytes())
+    return digest.hexdigest()[:HASH_CHARS]
 
-    def git(*args: str) -> str | None:
-        done = subprocess.run(["git", *args], cwd=REPO, capture_output=True, text=True, check=False)
-        return done.stdout.strip() if done.returncode == 0 else None
 
-    def installed(name: str) -> str | None:
-        try:
-            return version(name)
-        except PackageNotFoundError:
-            return None
+def _git(*args: str) -> str | None:
+    """Output of a git command in the repository, or None when it fails (no git, no repo)."""
+    done = subprocess.run(["git", *args], cwd=REPO, capture_output=True, text=True, check=False)
+    return done.stdout.strip() if done.returncode == 0 else None
 
-    commit = git("rev-parse", "HEAD")
-    changes = git("status", "--porcelain", "--", *TRIAL_CODE)
+
+def _installed(name: str) -> str | None:
+    try:
+        return version(name)
+    except PackageNotFoundError:
+        return None
+
+
+def code_identity() -> dict[str, Any]:
+    """The code a run sitting used. The physics hash covers configuration only, so without
+    this a change to a dog or sheep rule would resume into an old folder unseen.
+
+    ``code_hash`` hashes the trial code itself, so it also catches uncommitted edits; the
+    commit, the dirty flag and the library versions are for a person tracing a result.
+    """
+    changes = _git("status", "--porcelain", "--", *TRIAL_CODE)
     return {
-        "code_hash": digest.hexdigest()[:16],
-        "commit": commit,
+        "code_hash": _trial_code_hash(),
+        "commit": _git("rev-parse", "HEAD"),
         "code_dirty": None if changes is None else bool(changes),
         "python": platform.python_version(),
-        **{name: installed(name) for name in LIBRARIES},
+        **{name: _installed(name) for name in LIBRARIES},
     }
 
 

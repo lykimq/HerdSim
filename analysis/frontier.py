@@ -329,14 +329,16 @@ class Frontier:
     groups: pd.DataFrame  # one GroupFrontier per row
 
 
+def cell_ids(cells: pd.DataFrame) -> list[tuple[str, int]]:
+    """(group key, D) of every row of a cells table."""
+    return list(zip(cells["group_key"].astype(str), cells["n_shepherds"].astype(int)))
+
+
 def frontier(trials: pd.DataFrame, rules: Rules, errors: dict[str, int] | None = None) -> Frontier:
     """Build cell and group frontier tables from ``trials`` (and optional per-cell errors)."""
     stats = cell_stats(trials, rules)
     counts = errors or {}
-    stats["n_errors"] = [
-        counts.get(cell_key(key, d), 0)
-        for key, d in zip(stats["group_key"].astype(str), stats["n_shepherds"].astype(int))
-    ]
+    stats["n_errors"] = [counts.get(cell_key(key, d), 0) for key, d in cell_ids(stats)]
     stats.loc[(stats["n_errors"] > 0) & (stats["reliability"] == RELIABLE), "reliability"] = (
         UNDECIDED
     )
@@ -349,9 +351,9 @@ def frontier(trials: pd.DataFrame, rules: Rules, errors: dict[str, int] | None =
         group_rows.append(vars(result))
         zone.update({(str(key), d): z for d, z in zones.items()})
         needs.update((str(key), d) for d in undecided)
-    cell_ids = list(zip(stats["group_key"].astype(str), stats["n_shepherds"].astype(int)))
-    stats["zone"] = [zone[c] for c in cell_ids]
-    stats["needs_seeds"] = [c in needs for c in cell_ids]
+    ids = cell_ids(stats)
+    stats["zone"] = [zone[c] for c in ids]
+    stats["needs_seeds"] = [c in needs for c in ids]
     groups = pd.DataFrame(group_rows)
     groups[list(D_COLUMNS)] = groups[list(D_COLUMNS)].astype("Int64")
     return Frontier(cells=stats, groups=groups)

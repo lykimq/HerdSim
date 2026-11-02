@@ -128,6 +128,8 @@ class CampaignStore:
             if not packed.exists() or packed.stat().st_mtime_ns != plain.stat().st_mtime_ns:
                 _pack(plain, packed)
 
+    # --- lock and folder setup -----------------------------------------------
+
     def open(self, protocol: Protocol, physics_hash: str) -> None:
         """Lock the folder, then create it or check that it ran the same protocol and physics.
 
@@ -165,25 +167,6 @@ class CampaignStore:
         (self.root / "protocol.yaml").write_text(f"{NOTICE_LINE}\n{body}")
         write_provenance(provenance, protocol_id=protocol.protocol_id, physics_hash=physics_hash)
 
-    def record_sitting(self, protocol: Protocol) -> tuple[dict[str, Any] | None, dict[str, Any]]:
-        """Append this sitting to runs.jsonl and return (previous sitting, this one).
-
-        A folder grows across sittings (more flock sizes, a changed strategy, edited code)
-        while protocol.yaml keeps its first form, so each sitting is recorded here. Trials are
-        appended in order, so the log lines a sitting starts after tell which trials ran on
-        its code. Folders from before this log have no previous sitting.
-        """
-        path = self.root / "runs.jsonl"
-        earlier = _read_jsonl(path, repair=True) if path.exists() else []
-        sitting = {
-            "started_at": datetime.now(UTC).isoformat(),
-            "trials_before": len(self.load_rows()),
-            **code_identity(),
-            "protocol": _archive(protocol),
-        }
-        _append_jsonl(path, sitting)
-        return (earlier[-1] if earlier else None), sitting
-
     def is_running(self) -> bool:
         """Whether a campaign process holds the folder's lock right now."""
         path = self.root / ".lock"
@@ -215,6 +198,27 @@ class CampaignStore:
         provenance.unlink()
         (self.root / "calibration.json").unlink(missing_ok=True)
         return True
+
+    # --- run log -------------------------------------------------------------
+
+    def record_sitting(self, protocol: Protocol) -> tuple[dict[str, Any] | None, dict[str, Any]]:
+        """Append this sitting to runs.jsonl and return (previous sitting, this one).
+
+        A folder grows across sittings (more flock sizes, a changed strategy, edited code)
+        while protocol.yaml keeps its first form, so each sitting is recorded here. Trials are
+        appended in order, so the log lines a sitting starts after tell which trials ran on
+        its code. Folders from before this log have no previous sitting.
+        """
+        path = self.root / "runs.jsonl"
+        earlier = _read_jsonl(path, repair=True) if path.exists() else []
+        sitting = {
+            "started_at": datetime.now(UTC).isoformat(),
+            "trials_before": len(self.load_rows()),
+            **code_identity(),
+            "protocol": _archive(protocol),
+        }
+        _append_jsonl(path, sitting)
+        return (earlier[-1] if earlier else None), sitting
 
     # --- trials --------------------------------------------------------------
 

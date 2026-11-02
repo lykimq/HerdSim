@@ -16,7 +16,7 @@ from typing import Any
 import pandas as pd
 
 from analysis import keys
-from analysis.frontier import SATURATED, UNDECIDED, Frontier, Rules, frontier
+from analysis.frontier import SATURATED, UNDECIDED, Frontier, Rules, cell_ids, frontier
 
 from .calibration import CalibrationError, calibrate
 from .cells import Cell, Group, Trial, cell_config, groups, make_trial, trial_key
@@ -176,8 +176,7 @@ def _assess(
     table = pd.DataFrame(ledger.rows)
     front = frontier(table, rules, errors=ledger.error_cells)
     pruned = pruned_cells(front, table, prune_overlap)
-    cell_ids = zip(front.cells["group_key"].astype(str), front.cells["n_shepherds"])
-    front.cells["pruned"] = [(k, int(d)) in pruned for k, d in cell_ids]
+    front.cells["pruned"] = [cell in pruned for cell in cell_ids(front.cells)]
     store.write_tables(ledger.rows, front.cells, front.groups)
     return front, pruned
 
@@ -211,7 +210,7 @@ def _cells_needing_seeds(front: Frontier | None) -> set[CellId]:
     if front is None:
         return set()
     flagged = front.cells.loc[front.cells["needs_seeds"] & ~front.cells["pruned"]]
-    return set(zip(flagged["group_key"].astype(str), flagged["n_shepherds"].astype(int)))
+    return set(cell_ids(flagged))
 
 
 def _plan_round(

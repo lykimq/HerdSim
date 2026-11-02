@@ -169,9 +169,7 @@ def _dmin_cell(ax: Axes, r: Row, x: float, color: str) -> float | None:
     return None
 
 
-def _dmin_layout(
-    ax: Axes, rows: list[Row], color: str, shift: float, marker: str, ls: str
-) -> None:
+def _dmin_layout(ax: Axes, rows: list[Row], color: str, shift: float, marker: str, ls: str) -> None:
     """One layout's D_min against N under one rule; ``shift`` offsets x against overprinting."""
     points = []
     for r in rows:

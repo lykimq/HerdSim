@@ -68,38 +68,6 @@ def check(config: dict[str, Any]) -> None:
         raise ValueError(f"initial_layout {config['initial_layout']!r} not in {LAYOUTS}")
 
 
-def drive_length(setup: Mapping[str, Any]) -> float:
-    """The drive: the distance from the flock's start centre to the goal centre."""
-    return abs(float(setup["goal_center"][0]) - float(setup["flock_center"][0]))
-
-
-def row_columns(config: dict[str, Any], history: pd.DataFrame) -> dict[str, Any]:
-    """The task's columns of a trial row: the geometry it ran in and where it ended."""
-    final = history.iloc[-1]
-    return {
-        **arrival_columns(config, history),
-        "goal_radius": float(config["goal_radius"]),
-        "success_fraction": float(config["success_fraction"]),
-        "drive_distance": drive_length(config),
-        "world_width": float(config["world_width"]),
-        "world_height": float(config["world_height"]),
-        "final_gcm_goal": float(final["gcm_goal"]),
-        "final_sheep_in_goal": float(final["sheep_in_goal"]),
-    }
-
-
-def initial_positions(
-    config: dict[str, Any], rng: np.random.Generator
-) -> tuple[np.ndarray, np.ndarray]:
-    """Flock at its start centre and outside the goal; dogs behind it, away from the goal."""
-    return place_flock(config, rng), place_dogs(config)
-
-
-def is_success(state: SimulationState) -> bool:
-    """The share ``success_fraction`` is inside the goal this tick."""
-    return state.world.goal.reached(state.sheep_positions)
-
-
 def _check_settings(s: Mapping[str, Any]) -> None:
     if not 0.0 < float(s["success_fraction"]) <= 1.0:
         raise ValueError("success_fraction must be in (0, 1]")
@@ -158,4 +126,36 @@ def build_setup(
         "world_height": height,
         "flock_center": [start, height / 2.0],
         "goal_center": [goal, height / 2.0],
+    }
+
+
+def drive_length(setup: Mapping[str, Any]) -> float:
+    """The drive: the distance from the flock's start centre to the goal centre."""
+    return abs(float(setup["goal_center"][0]) - float(setup["flock_center"][0]))
+
+
+def initial_positions(
+    config: dict[str, Any], rng: np.random.Generator
+) -> tuple[np.ndarray, np.ndarray]:
+    """Flock at its start centre and outside the goal; dogs behind it, away from the goal."""
+    return place_flock(config, rng), place_dogs(config)
+
+
+def is_success(state: SimulationState) -> bool:
+    """The share ``success_fraction`` is inside the goal this tick."""
+    return state.world.goal.reached(state.sheep_positions)
+
+
+def row_columns(config: dict[str, Any], history: pd.DataFrame) -> dict[str, Any]:
+    """The task's columns of a trial row: the geometry it ran in and where it ended."""
+    final = history.iloc[-1]
+    return {
+        **arrival_columns(config, history),
+        "goal_radius": float(config["goal_radius"]),
+        "success_fraction": float(config["success_fraction"]),
+        "drive_distance": drive_length(config),
+        "world_width": float(config["world_width"]),
+        "world_height": float(config["world_height"]),
+        "final_gcm_goal": float(final["gcm_goal"]),
+        "final_sheep_in_goal": float(final["sheep_in_goal"]),
     }

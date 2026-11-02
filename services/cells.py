@@ -13,7 +13,6 @@ from pathlib import Path
 from typing import Any
 
 from analysis import keys
-from records.provenance import read_provenance
 from sim.drive_task import task as drive_task
 from sim.trial import build_config
 
@@ -45,6 +44,10 @@ class Cell:
         return keys.cell_key(self.group.key, self.n_shepherds)
 
 
+def trial_key(cell: Cell, seed_index: int) -> str:
+    return keys.trial_key(cell.key, seed_index)
+
+
 @dataclass(frozen=True)
 class Trial:
     """One seed of one cell, with everything a worker needs."""
@@ -60,10 +63,6 @@ class Trial:
         return trial_key(self.cell, self.seed_index)
 
 
-def trial_key(cell: Cell, seed_index: int) -> str:
-    return keys.trial_key(cell.key, seed_index)
-
-
 def groups(protocol: Protocol) -> list[Group]:
     """Every D curve of the protocol."""
     return [
@@ -76,6 +75,20 @@ def groups(protocol: Protocol) -> list[Group]:
 
 def method_spec(protocol: Protocol, name: str) -> MethodSpec:
     return next(m for m in protocol.methods if m.name == name)
+
+
+def _max_ticks(method: MethodSpec, drive: float) -> int:
+    """Time limit of a cell in ticks: the method's fixed limit, or its multiple of the drive
+    time.
+
+    The drive time is the task's length (``drive_length``) over the top sheep
+    speed, so a deadline written as a multiple asks the same of every N: how many dogs
+    finish in m times what the sheep need.
+    """
+    if method.time_limit_ticks is not None:
+        return method.time_limit_ticks
+    assert method.time_limit_drive_multiple is not None
+    return drive_limit_ticks(method.time_limit_drive_multiple, drive, method.params)
 
 
 def setup_for(
@@ -107,20 +120,6 @@ def setup_for(
         "dog_overlap_distance": settings["dog_overlap_distance"],
         **geometry,
     }
-
-
-def _max_ticks(method: MethodSpec, drive: float) -> int:
-    """Time limit of a cell in ticks: the method's fixed limit, or its multiple of the drive
-    time.
-
-    The drive time is the task's length (``drive_length``) over the top sheep
-    speed, so a deadline written as a multiple asks the same of every N: how many dogs
-    finish in m times what the sheep need.
-    """
-    if method.time_limit_ticks is not None:
-        return method.time_limit_ticks
-    assert method.time_limit_drive_multiple is not None
-    return drive_limit_ticks(method.time_limit_drive_multiple, drive, method.params)
 
 
 def cell_config(protocol: Protocol, cell: Cell, flock_radius: float) -> dict[str, Any]:
@@ -161,45 +160,3 @@ def make_trial(
         config=config,
         timeseries_path=timeseries_dir / file_name if keep else None,
     )
-
-
-def _limit_text(m: MethodSpec) -> str:
-    if m.time_limit_ticks is not None:
-        return f"{m.time_limit_ticks} ticks"
-    return f"{m.time_limit_drive_multiple:g} x drive time"
-
-
-def _folder_note(protocol: Protocol) -> str:
-    """Whether the output folder is new, resumes this protocol, or belongs to another."""
-    provenance = protocol.output / "provenance.json"
-    if not provenance.exists():
-        return ""
-    found = read_provenance(provenance)
-    same = found["protocol_id"] == protocol.protocol_id
-    same = same and found["physics_hash"] == protocol.physics_hash()
-    return " (exists: resumes)" if same else " (exists with another protocol or physics: refused)"
-
-
-def describe(protocol: Protocol) -> str:
-    """What a run of ``protocol`` would do, without running anything."""
-    s = protocol.settings
-    curves = groups(protocol)
-    cells = len(curves) * len(protocol.shepherd_counts)
-    batch = s["batch_seeds"]
-    lines = [
-        f"protocol      {protocol.protocol_id}",
-        f"output        {protocol.output}{_folder_note(protocol)}",
-        "methods       " + ", ".join(f"{m.name} ({_limit_text(m)})" for m in protocol.methods),
-        f"layouts       {', '.join(protocol.layouts)}",
-        f"N             {list(protocol.flock_sizes)}",
-        f"D             {list(protocol.shepherd_counts)}",
-        f"D curves      {len(curves)}",
-        f"cells         {cells}  (a midpoint D is added where the zone changes between"
-        + f" neighbours more than {s['refine_min_gap']} dog(s) apart)",
-        f"first round   {cells * batch} trials ({batch} seeds per cell)",
-        f"seeds         up to {s['max_seeds']} per undecided cell",
-        f"reliable      success rate above {s['reliability_theta']}, "
-        + f"{s['confidence']:.0%} intervals",
-        f"budget        {s['budget_hours']} h",
-    ]
-    return "\n".join(lines)

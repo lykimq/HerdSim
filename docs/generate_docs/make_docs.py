@@ -35,49 +35,13 @@ from services.protocol import (  # noqa: E402
 from sim.strombom.params import METHOD  # noqa: E402
 
 COMMAND = "uv run python docs/generate_docs/make_docs.py"
-
-
-# --- Settings: docs/guides/protocols.md --------------------------------------------------------
-
-PROTOCOLS_PAGE = REPO / "docs" / "guides" / "protocols.md"
-# Shown in their own lines, so left out of the list of changed settings.
-OWN_LINE_SETTINGS = ("task", "success_fraction")
-
-# --- Settings: docs/guides/settings.md ---------------------------------------------------------
-
-SETTINGS_PAGE = REPO / "docs" / "guides" / "settings.md"
 # Links from the guides, which sit in docs/guides/, to the method docs.
 METHOD_DOCS = (
     "[Strombom sheep](../methods/strombom_sheep.md) and [team rule](../methods/strombom_multi.md)"
 )
-CANONICAL = REPO / "protocols" / "configs" / "canonical.yaml"
-# canonical.yaml marks its sections with "# --- Name ----" lines and sets one key per line.
-SECTION_LINE = re.compile(r"^# --- (.+?) -+$")
-KEY_LINE = re.compile(r"^([a-z_]+):")
-# Keys set before the first section line.
-FIRST_SECTION = "Task"
-SETTINGS_INTRO = """\
-Every canonical setting, with its default and the note written beside it in \
-`protocols/configs/canonical.yaml`. A protocol changes a setting by naming it \
-([configuration](configuration.md#protocol-overrides)). The model parameters ($r_a$, $c$ and the \
-rest) are not canonical settings: they live with the method and are listed in the method docs: \
-{method_docs}.
 
-The kind of a setting says where it may change. A per-trial setting changes what a trial \
-does. A whole-protocol setting is fixed for the protocol, because calibration or the seeds \
-depend on it. A sampling setting only steers the adaptive run, \
-so it stays out of the physics hash and a folder can resume after it changes.
 
-Settings that share a note are one row, with their defaults in the same order, separated by \
-semicolons. The physics hash that decides whether a folder can resume is in the \
-[configuration guide](configuration.md#physics-hash)."""
-
-# --- Settings: docs/report/results_tables.md ---------------------------------------------------
-
-RESULTS_TABLES_PAGE = REPO / "docs" / "report" / "results_tables.md"
-RESULTS_TABLES_TITLE = "# Result tables"
-
-# --- Helpers -----------------------------------------------------------------------------------
+# --- Shared helpers ----------------------------------------------------------------------------
 
 
 def notice(source: str) -> str:
@@ -101,6 +65,17 @@ def _assignments(settings: Mapping[str, Any]) -> str:
     return ", ".join(f"{k} = {_value(v)}" for k, v in settings.items())
 
 
+def _joined(blocks: Sequence[str]) -> str:
+    return "\n\n".join(blocks) + "\n"
+
+
+# --- Page: docs/guides/protocols.md ------------------------------------------------------------
+
+PROTOCOLS_PAGE = REPO / "docs" / "guides" / "protocols.md"
+# Shown in their own lines, so left out of the list of changed settings.
+OWN_LINE_SETTINGS = ("task", "success_fraction")
+
+
 def time_limit(method: MethodSpec) -> str:
     """'6 drive times', or a fixed limit in seconds."""
     if method.time_limit_drive_multiple is not None:
@@ -115,26 +90,25 @@ def description(protocol: Protocol) -> str:
     return protocol.description.strip()
 
 
-def _joined(blocks: Sequence[str]) -> str:
-    return "\n\n".join(blocks) + "\n"
-
-
-# --- Pages -------------------------------------------------------------------------------------
+def _consecutive_runs(values: Sequence[int]) -> list[list[int]]:
+    """[1, 2, 3, 4, 6] -> [[1, 2, 3, 4], [6]]."""
+    runs: list[list[int]] = []
+    for v in values:
+        if runs and v == runs[-1][-1] + 1:
+            runs[-1].append(v)
+        else:
+            runs.append([v])
+    return runs
 
 
 def _number_list(values: Sequence[Any]) -> str:
     """'1, 2, 3, 4, 6' -> '1-4, 6': runs of three or more consecutive integers become ranges."""
     if not all(isinstance(v, int) and not isinstance(v, bool) for v in values):
         return _values(values)
-    parts: list[str] = []
-    run: list[int] = []
-    for v in [*values, None]:
-        if run and (v is None or v != run[-1] + 1):
-            parts.append(f"{run[0]}-{run[-1]}" if len(run) >= 3 else _values(run))
-            run = []
-        if v is not None:
-            run.append(v)
-    return ", ".join(parts)
+    return ", ".join(
+        f"{run[0]}-{run[-1]}" if len(run) >= 3 else _values(run)
+        for run in _consecutive_runs(values)
+    )
 
 
 def _changed_settings(protocol: Protocol) -> str:
@@ -193,12 +167,16 @@ def _task_sentence(protocols: Sequence[Protocol]) -> str:
     return f"all protocols run the `{main}` task{exceptions}"
 
 
-def protocols_page() -> str:
-    """Every protocol of the study queue: what it tests, its grid and its changed settings."""
-    protocols = [load_protocol(p) for p in study_queue()]
+def _check_output_folders(protocols: Sequence[Protocol]) -> None:
     for p in protocols:
         if p.output != REPO / "results" / p.protocol_id:
             raise ValueError(f"{p.protocol_id}: results folder is {p.output}, not results/<id>")
+
+
+def protocols_page() -> str:
+    """Every protocol of the study queue: what it tests, its grid and its changed settings."""
+    protocols = [load_protocol(p) for p in study_queue()]
+    _check_output_folders(protocols)
     methods = f"`{METHOD}` drives the Strombom sheep with the multi-dog collect and drive rule."
     intro = (
         f"The {len(protocols)} protocols of the study, in queue order: what each tests, its "
@@ -228,6 +206,32 @@ def protocols_page() -> str:
             methods,
         ]
     )
+
+
+# --- Page: docs/guides/settings.md -------------------------------------------------------------
+
+SETTINGS_PAGE = REPO / "docs" / "guides" / "settings.md"
+CANONICAL = REPO / "protocols" / "configs" / "canonical.yaml"
+# canonical.yaml marks its sections with "# --- Name ----" lines and sets one key per line.
+SECTION_LINE = re.compile(r"^# --- (.+?) -+$")
+KEY_LINE = re.compile(r"^([a-z_]+):")
+# Keys set before the first section line.
+FIRST_SECTION = "Task"
+SETTINGS_INTRO = """\
+Every canonical setting, with its default and the note written beside it in \
+`protocols/configs/canonical.yaml`. A protocol changes a setting by naming it \
+([configuration](configuration.md#protocol-overrides)). The model parameters ($r_a$, $c$ and the \
+rest) are not canonical settings: they live with the method and are listed in the method docs: \
+{method_docs}.
+
+The kind of a setting says where it may change. A per-trial setting changes what a trial \
+does. A whole-protocol setting is fixed for the protocol, because calibration or the seeds \
+depend on it. A sampling setting only steers the adaptive run, \
+so it stays out of the physics hash and a folder can resume after it changes.
+
+Settings that share a note are one row, with their defaults in the same order, separated by \
+semicolons. The physics hash that decides whether a folder can resume is in the \
+[configuration guide](configuration.md#physics-hash)."""
 
 
 def canonical_sections() -> list[tuple[str, list[tuple[str, str]]]]:
@@ -291,6 +295,12 @@ def settings_page() -> str:
         header = "| Setting | Default | Kind | Note |\n| :--- | :--- | :--- | :--- |"
         blocks += [f"## {name}", "\n".join([header, *entries])]
     return _joined(blocks)
+
+
+# --- Page: docs/report/results_tables.md -------------------------------------------------------
+
+RESULTS_TABLES_PAGE = REPO / "docs" / "report" / "results_tables.md"
+RESULTS_TABLES_TITLE = "# Result tables"
 
 
 def results_tables_page() -> str:
