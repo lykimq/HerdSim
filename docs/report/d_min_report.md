@@ -2,13 +2,26 @@
 
 This report answers one question with HerdSim: how does the smallest reliable team of dogs, $D_{\min}$, grow with the number of sheep $N$, and how do the start layout and the deadline change it? The sheep follow the model of Strombom et al. (2014) and the dogs follow HerdSim's team rule, `strombom_multi`. The [README](../../README.md#task-and-methods) sets out the task, the layouts and the two success rules, so this report keeps to the decision rule, the results and their limits.
 
-The answer, from 115,470 stored trials in six runs:
+The answer, from 115,470 stored trials in six runs.
 
-1) A flock that starts together (`compact`) needs one dog at every size, deadline and rule we tested: up to $N = 400$, and up to 566 under the 99% rule at 12 and 6 drive times.
-2) A scattered flock needs a few more dogs at the loose deadline, 2 or 3 at $N = 400$ and 12 drive times. Over nine sizes up to 566 under the 99% rule at 12 drive times, $D_{\min}$ grows with a log-log slope of 0.27 to 0.38 on `wide` and 0.28 to 0.38 on `outlier_rich`, below the 0.5 of a square-root law.
-3) Among curves that have a reliable team, flock size moves $D_{\min}$ at least as much as the start layout does at every rule and deadline, though in two of the six pairs the two are within 0.03 doublings.
-4) Deadline and flock size act together. On `wide` under the 99% rule, $D_{\min}$ is 1 at $N = 100$ and 12 drive times, 2 when either the deadline drops to 3 drive times or the flock grows to 400, and 5-6 when both change.
-5) A shorter deadline only cuts trials short. A trial shared by two runs succeeds at the shorter deadline exactly when it had finished inside that limit at the longer one.
+**Strict rule**
+
+Flock sizes $N = 25$, 50, 100, 200 and 400.
+
+- **12 drive times.** On `compact`, one dog is enough at every size. On `wide` and `outlier_rich`, a flock of 400 needs 3 dogs; across $N = 25$, 50, 100, 200 and 400 the log-log slope of $D_{\min}$ is 0.42 on both (0.32 to 0.42 on `split`).
+- **6 drive times.** On `compact`, one dog is enough at every size. On the scattered layouts $D_{\min}$ rises faster: `wide` needs 3 dogs at $N = 200$ and only a lower bound [9] at $N = 400$; `split` and `outlier_rich` have no reliable team up to 24 dogs at $N = 400$.
+- **3 drive times.** On `compact`, one dog is enough at every size. From $N = 200$, no team up to 24 dogs is reliable on `wide`, `split` or `outlier_rich`.
+
+**99% rule**
+
+Flock sizes $N = 25$, 50, 71, 100, 141, 200, 283, 400 and 566 at 12 and 6 drive times; $N = 25$, 50, 100, 200 and 400 at 3 drive times.
+
+- **12 drive times.** On `compact`, one dog is enough through $N = 566$. On `wide` and `outlier_rich`, a flock of 400 needs 2 dogs; across $N = 25$, 50, 71, 100, 141, 200, 283, 400 and 566 the log-log slope of $D_{\min}$ is 0.27 to 0.38 on `wide` and 0.28 to 0.38 on `outlier_rich`.
+- **6 drive times.** On `compact`, one dog is enough through $N = 566$. At $N = 400$, `wide` needs 2-3 dogs and `outlier_rich` needs 3; across $N = 25$, 50, 71, 100, 141, 200, 283, 400 and 566 the log-log slope is 0.38 to 0.61 on `wide` and 0.40 to 0.58 on `outlier_rich`.
+- **3 drive times.** On `compact`, one dog is enough at every size ($N = 25$, 50, 100, 200 and 400). On `wide`, $D_{\min}$ is 2 at $N = 100$, 3 at 200 and 5-6 at 400; on `outlier_rich` at $N = 400$ only a lower bound [6]; on `split` from $N = 200$, no team up to 24 is reliable.
+- A shorter deadline only cuts trials short. A trial shared by two runs succeeds at the shorter deadline exactly when it had finished inside that limit at the longer one.
+
+Among curves that have a reliable team, flock size moves $D_{\min}$ at least as much as the start layout does at every rule and deadline, though in two of the six pairs the two are within 0.03 doublings.
 
 ## Contents
 
@@ -20,13 +33,13 @@ The answer, from 115,470 stored trials in six runs:
 
 ## 1. The question
 
-Strombom et al. (2014) gave a rule for one dog and a flock that stays together. Later work puts several herders on the job (Pierson and Schwager 2015; Auletta et al. 2022; Kubo et al. 2022; Li et al. 2025; Brown et al. 2025), and Ranganathan et al. (2022) find that the regimes of one shepherd depend on a herd size scaled with $\sqrt{N}$. Only Lama and di Bernardo (2024), restated by di Bernardo (2026), say how the team must grow with the flock: for targets that do not flock, it grows as $\sqrt{N}$. For a flock that stays together, earlier work is about one dog. Table 1 lists the three research questions (RQ) of this study.
+Strombom et al. (2014) gave a rule for one dog and a flock that stays together. This study keeps that sheep model and asks how the smallest reliable team grows with flock size under HerdSim's team rule, `strombom_multi`. Table 1 lists the three research questions (RQ).
 
 **Table 1: Research questions and where they are answered.**
 
 | RQ | Question | Answered in |
 | :--- | :--- | :--- |
-| RQ1 | How does $D_{\min}$ grow with $N$ from 25 to 566, and is the growth slower than $\sqrt{N}$? | [3.1](#31-rq1-how-does-d_min-grow-with-n) |
+| RQ1 | How does $D_{\min}$ grow with $N$ from 25 to 566? | [3.1](#31-rq1-how-does-d_min-grow-with-n) |
 | RQ2 | At a given deadline, which moves $D_{\min}$ more, the start layout or $N$? | [3.2](#32-rq2-layout-or-flock-size-which-moves-d_min-more) |
 | RQ3 | How does $D_{\min}$ change from 12 to 6 to 3 drive times? | [3.3](#33-rq3-how-does-the-deadline-change-d_min) |
 
@@ -46,7 +59,7 @@ A trial succeeds under the strict rule when every sheep is in the goal at the sa
 
 ### 2.3 When a team is reliable
 
-A cell is one layout, flock size $N$ and team size $D$ within one run, and a trial is one run of a cell with one seed ([glossary](../glossary.md#trials-and-experiments)). After $n$ trials with $k$ successes, $[L, U]$ is the exact two-sided 99% Clopper-Pearson interval of the success rate. The cell is reliable if $L \ge 0.90$ and unreliable if $U < 0.90$. Otherwise it gets 10 more seeds, up to 200, and a cell still in between at 200 stays open ([stopping early](../experiments/task_design.md#stopping-early-with-the-99-clopper-pearson-interval)).
+A cell is one layout, flock size $N$ and team size $D$ within one run, and a trial is one run of a cell with one seed ([glossary](../glossary.md#trials-and-experiments)). After $n$ trials with $k$ successes, $[L, U]$ is the exact two-sided 99% [Clopper-Pearson](https://doi.org/10.1093/biomet/26.4.404) interval of the success rate. The cell is reliable if $L \ge 0.90$ and unreliable if $U < 0.90$. Otherwise it gets 10 more seeds, up to 200, and a cell still in between at 200 stays open ([stopping early](../experiments/task_design.md#stopping-early-with-the-99-clopper-pearson-interval)).
 
 ```mermaid
 %%{init: {"theme": "base", "themeVariables": {"primaryColor": "#1f5f99", "primaryTextColor": "#ffffff", "primaryBorderColor": "#4a90d9", "lineColor": "#75808f", "tertiaryTextColor": "#75808f", "titleColor": "#75808f", "clusterBkg": "transparent", "clusterBorder": "#75808f", "edgeLabelBackground": "transparent"}}}%%
@@ -112,7 +125,7 @@ When there is time, a larger flock needs few more dogs. A `compact` flock needs 
 
 Up to $N = 50$ one dog is enough on every layout and deadline. At $N = 50$ the drive point is 14 m behind the flock centre and the farthest sheep starts at most 43 m from it (on `outlier_rich`), so a dog at the drive point is at most about 57 m from any sheep, inside $r_s = 65$ m. One dog may therefore reach almost every sheep at once; we have not tested this.
 
-From $N = 100$ on, $D_{\min}$ on the scattered layouts grows with $N$. Table 4 gives the slope of $\log_2 D_{\min}$ against $\log_2 N$; a slope of 0.5 means a flock four times larger needs twice the dogs. Lama and di Bernardo (2024) find $D \propto \sqrt{N}$ for targets with no cohesion and a finite sensing radius, above a critical number of targets (main text, p. 3). At 12 drive times every slope here is below 0.5 under both rules. At 6 and 3 drive times some reach or pass it.
+From $N = 100$ on, $D_{\min}$ on the scattered layouts grows with $N$. Table 4 gives the slope of $\log_2 D_{\min}$ against $\log_2 N$; a slope of 0.5 means a flock four times larger needs twice the dogs. At 12 drive times the slopes are at most 0.42 under the strict rule and 0.30 under the 99% rule. At 6 and 3 drive times some slopes are steeper.
 
 **Table 4: Slope of $\log_2 D_{\min}$ against $\log_2 N$, five sizes ($N = 25$-400).**
 
@@ -131,7 +144,7 @@ A range is the set of slopes the brackets allow, and "$N \le 100$" means the lar
 
 Under the 99% rule the slope on `wide` and `outlier_rich` is steeper at 3 drive times than at 12 or 6, and on `outlier_rich` steeper at 6 than at 12; on `wide` the 12 and 6 ranges meet at 0.30. On `split` it does not rise, because at 6 and 3 drive times only $N \le 100$ has a decided $D_{\min}$, and there the curve is flat.
 
-The nine sizes of the 99% runs at 12 and 6 drive times give the same picture with more points (Table 5). At 12 drive times the slopes the brackets allow are 0.27 to 0.38 on `wide` and 0.28 to 0.38 on `outlier_rich`, below 0.5. At 6 drive times they are 0.38 to 0.61 on `wide` and 0.40 to 0.58 on `outlier_rich`.
+The nine sizes of the 99% runs at 12 and 6 drive times give the same picture with more points (Table 5). At 12 drive times the slopes the brackets allow are 0.27 to 0.38 on `wide` and 0.28 to 0.38 on `outlier_rich`. At 6 drive times they are 0.38 to 0.61 on `wide` and 0.40 to 0.58 on `outlier_rich`.
 
 **Table 5: $D_{\min}$ on nine flock sizes, 99% rule, 12 and 6 drive times.**
 
@@ -253,12 +266,4 @@ Trials and cell decisions are stored under `results/<protocol>/`. The tables beh
 
 ## References
 
-1) Auletta F, Fiore D, Richardson MJ, di Bernardo M (2022). Herding stochastic autonomous agents via local control rules and online target selection strategies. *Autonomous Robots* 46: 469-481.
-2) Brown D, Garrity T, Perkins D, Hunter D, Pochman W (2025). Optimal control strategies for multi-agent sheep herding. *arXiv:2510.25115*.
-3) di Bernardo M (2026). Multi-scale control of large agent populations: from density dynamics to individual actuation. *arXiv:2603.15160*.
-4) Kubo M, Tashiro M, Sato H, Yamaguchi A (2022). Herd guidance by multiple sheepdog agents with repulsive force. *Artificial Life and Robotics* 27: 416-427.
-5) Lama A, di Bernardo M (2024). Shepherding and herdability in complex multiagent systems. *Physical Review Research* 6: L032012.
-6) Li A, Ogura M, Wakamiya N (2025). Swarm shepherding using bearing-only measurements. *Philosophical Transactions of the Royal Society A* 383: 20240145.
-7) Pierson A, Schwager M (2015). Bio-inspired non-cooperative multi-robot herding. *IEEE International Conference on Robotics and Automation (ICRA)*.
-8) Ranganathan A, et al. (2022). Emergent strategies for shepherding a flock. *arXiv:2211.04352*.
-9) Strombom D, Mann RP, Wilson AM, Hailes S, Morton AJ, Sumpter DJT, King AJ (2014). Solving the shepherding problem: heuristics for herding autonomous, interacting agents. *Journal of the Royal Society Interface* 11(100): 20140719.
+1) Strombom D, Mann RP, Wilson AM, Hailes S, Morton AJ, Sumpter DJT, King AJ (2014). Solving the shepherding problem: heuristics for herding autonomous, interacting agents. *Journal of the Royal Society Interface* 11(100): 20140719.

@@ -35,7 +35,7 @@ The papers fall into three groups:
 Table 1 lists what each paper varies and whether it says anything about team size. To start on a question:
 
 - The sheep model HerdSim runs: Strömbom et al.
-- A scaling law to compare with: Lama and di Bernardo.
+- A published scaling law for non-cohesive targets (not run in the current study): Lama and di Bernardo.
 - Why coordination between herders matters: Kubo et al., Auletta et al., Li et al.
 - Harm from too many dogs: the unpublished draft, Kubo et al.
 - Real animals: Jadhav et al., and the field section of Strömbom et al.
@@ -64,7 +64,7 @@ Table 2 sorts the papers from those HerdSim runs to those it does not use, with 
 | Paper | In HerdSim | What it takes | Where | Why not more |
 | :--- | :--- | :--- | :--- | :--- |
 | Strömbom et al. 2014 | used in full | the sheep model, the one-dog rule, the field-matched parameter set | methods `strombom`, `independent`, base of `strombom_multi`; `dmin_s_matched` | the local shepherd and the sweep of neighbours below $N - 1$ are not run |
-| Lama and di Bernardo 2024 | used in full | targets, herders, gather task, the Table I threshold to check against | method `lama`; `lama_r50`, `lama_r50_inf` | one row of Table I is reproduced; the other radii, the noise sweep and periodic boundaries are not run |
+| Lama and di Bernardo 2024 | not in the current study | — | code under `sim/methods/lama/` is not registered in `METHODS` | the D_min report runs only `strombom_multi` |
 | Kubo et al. 2022 | used for one comparison and one baseline | the sheep model and force-based dogs; the farthest-sheep target choice | method `kubo`, `dmin_kubo`; the FAT baseline | HerdSim's own task replaces the paper's layouts and success test, so its percentages do not carry over |
 | Jadhav et al. 2024 | used for one setting | the dog-to-sheep speed ratio 1.15 | `dmin_s_dogspeed` | one dog and 14 sheep give no team-size result; the random-neighbour model is not run |
 | Pierson and Schwager 2015 | not run; shaped a design choice | success counts sheep, not the flock centre | the success rules | no controller gains given; sheep without noise or cohesion |
@@ -123,7 +123,7 @@ $M$ targets and $N$ herders start spread over a disc of radius $R$; the goal is 
 
 ### For HerdSim
 
-In HerdSim: used in full. The targets and herders run as method `lama` on the gather task, in protocols `lama_r50` (sensing radius 10) and `lama_r50_inf` (unlimited sensing), at $R = 50$ and the paper's run limit. HerdSim reproduces the threshold of Supplementary Table I for that row and compares its maps with the paper's Fig. 2 by eye; numbers are compared only with Table I.
+In HerdSim: not in the current study. Dynamics code exists under `sim/methods/lama/`, but `lama` is not registered in `sim/core/methods.py`; the D_min report and README use only `strombom_multi`.
 
 Two differences matter for reading HerdSim against it. Their success is a mean fraction over runs, while HerdSim asks for a team whose per-run success rate is above a target at a stated confidence (see the [report](../report/d_min_report.md)), a stricter test that parts from theirs near the threshold. And their targets have no cohesion, a possible reason the Strömbom flock grows more slowly. Not taken: the other disc and sensing radii of Table I, the noise sweep and the periodic boundaries, because one row is enough to check the reproduction and each further row is a new grid of runs.
 
@@ -241,7 +241,7 @@ The goal has radius 1; targets start at radius 2; each run lasts 100 time units.
 
 In HerdSim: not run; it informs how results are read. Its Table 2 shows that at a fixed team size the target-selection rule alone moves success from 8 to 49 of 50 runs, so a minimum team measured in HerdSim holds only for the controller it was measured with. This fits how HerdSim reports its results: three controllers of the same family side by side, and the minimum team stated as a property of the controller as well as the flock.
 
-Not implemented, because the later Lama and di Bernardo model from the same group, which HerdSim does run, keeps the same kind of targets with simpler first-order herders, and this paper never varies the team beyond 2 and 3.
+Not implemented. The later Lama and di Bernardo model from the same group is also not in the current study, and this paper never varies the team beyond 2 and 3.
 
 ### Where to read more
 
@@ -312,7 +312,7 @@ No new team-size numbers. It restates Lama and di Bernardo as "$M^* \sim N_T^\al
 
 ### For HerdSim
 
-In HerdSim: not used. The review only restates the square-root law, so HerdSim cites Lama and di Bernardo for it. Its continuum controllers work on densities, outside an agent-based simulator. The soft selection parameter $\gamma$, from the targets' centre of mass to the farthest target, is a ready way to compare target-selection rules if HerdSim adds that axis; the minimum-leader-mass conditions it cites (Maffettone et al. 2025) are the continuum version of a minimum team and are not in this folder.
+In HerdSim: not used. The review restates a square-root team-size law for non-cohesive targets; the current study does not run that model or cite that law. Its continuum controllers work on densities, outside an agent-based simulator.
 
 ### Where to read more
 
