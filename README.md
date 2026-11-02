@@ -46,7 +46,7 @@ A sheep farther from the flock centre than the collect distance, $2 N^{2/3}$ m, 
 3) `split`: three compact clusters.
 4) `outlier_rich`: a compact flock with 20% of the sheep on a ring beyond the collect distance.
 
-The method `strombom_multi` pairs Strombom's sheep with the team rule `collect_drive_multi`. While there are outliers, the Hungarian algorithm assigns dogs to the $D$ farthest outliers at the least total distance, and spare dogs drive the sheep that are already within the collect distance. Once there are no outliers, the dogs stand on an arc behind the flock and drive it to the goal.
+The method `strombom_multi` pairs Strombom's sheep with the team rule. While there are outliers, the Hungarian algorithm assigns dogs to the $D$ farthest outliers at the least total distance, and spare dogs drive the sheep that are already within the collect distance. Once there are no outliers, the dogs stand on an arc behind the flock and drive it to the goal.
 
 A protocol is a YAML recipe for one experiment: which flock sizes, team sizes, layouts, success rule and deadline to try. The id encodes the settings; in `dmin_f99_m6`, `f99` is the 99% rule and `m6` is 6 drive times. Ids without `f99` use the strict rule.
 

@@ -16,7 +16,7 @@ import yaml
 from services.cells import Cell, Group, Trial, make_trial
 from services.runner import execute, identity, run_batch
 from services.store import CampaignStore, FolderBusy, PhysicsMismatch, progress
-from sim.core.methods import METHODS
+from sim.strombom.params import DEFAULTS
 from tests.helpers import config_for, protocol_with
 
 PHYSICS = "abc"
@@ -40,8 +40,8 @@ def open_store(tmp_path: Path, physics: str = PHYSICS) -> CampaignStore:
     return store
 
 
-def compact_cell(factors: tuple[tuple[str, Any], ...] = ()) -> Cell:
-    return Cell(Group("strombom_multi", "compact", factors, N_SHEEP), N_DOGS)
+def compact_cell() -> Cell:
+    return Cell(Group("strombom_multi", "compact", N_SHEEP), N_DOGS)
 
 
 def make_trials(tmp_path: Path, seeds: int = BATCH_SEEDS) -> list[Trial]:
@@ -126,7 +126,7 @@ def test_cut_last_error_line_is_repaired_before_the_next_error(tmp_path: Path) -
 def test_archived_protocol_records_every_method_parameter(tmp_path: Path) -> None:
     store = open_store(tmp_path)
     archive = yaml.safe_load((store.root / "protocol.yaml").read_text())
-    assert archive["method_config"]["strombom_multi"] == dict(METHODS["strombom_multi"].defaults)
+    assert archive["method_config"]["strombom_multi"] == dict(DEFAULTS)
 
 
 def test_error_counts_are_per_cell(tmp_path: Path) -> None:
@@ -209,15 +209,15 @@ def test_calibration_round_trips(tmp_path: Path) -> None:
 # --- batch runner ------------------------------------------------------------
 
 
-def test_row_records_factor_levels_and_geometry(tmp_path: Path) -> None:
-    """A swept setting that reaches the config only through its products is still a column."""
-    factors = (("drive_distance_multiple", 20.0),)  # 140 u, above drive_distance_min
+def test_row_records_identity_and_geometry(tmp_path: Path) -> None:
     protocol = protocol_with(ticks=TICKS)
-    config = config_for(n=N_SHEEP, d=N_DOGS, ticks=TICKS, factors=dict(factors))
-    trial = make_trial(protocol, compact_cell(factors), 0, config, tmp_path)
+    # 140 u, above drive_distance_min
+    config = config_for(
+        n=N_SHEEP, d=N_DOGS, ticks=TICKS, settings={"drive_distance_multiple": 20.0}
+    )
+    trial = make_trial(protocol, compact_cell(), 0, config, tmp_path)
 
     columns = identity(trial)
-    assert columns["drive_distance_multiple"] == 20.0
     assert columns["time_limit_seconds"] == float(TICKS)
     assert columns["task"] == "drive_to_goal"
 
@@ -238,13 +238,13 @@ def test_row_records_factor_levels_and_geometry(tmp_path: Path) -> None:
 def test_worker_error_is_logged_and_the_batch_continues(tmp_path: Path) -> None:
     store = open_store(tmp_path)
     good = make_trials(tmp_path)
-    bad = replace(good[0], config={**good[0].config, "sheep_model": "nope"}, seed_index=99)
+    bad = replace(good[0], config={**good[0].config, "initial_layout": "nope"}, seed_index=99)
 
     rows = collect_batch([bad, *good], store, workers=2)
     assert len(rows) == BATCH_SEEDS
     assert store.error_keys() == {bad.key}
     first_error = json.loads(store.errors_jsonl.read_text().splitlines()[1])
-    assert "KeyError" in first_error["error"]
+    assert "ValueError" in first_error["error"]
 
 
 def test_rows_do_not_depend_on_the_number_of_workers(tmp_path: Path) -> None:

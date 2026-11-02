@@ -19,6 +19,8 @@ from tests.analysis.test_frontier import FAIL, Cell, curve, ok
 from tests.helpers import BASE_PROTOCOL
 
 WORKERS = 2
+NO_PRUNING: frozenset[tuple[str, int]] = frozenset()
+CAP = 10_000  # a seed cap no test cell reaches
 # Short stand-in for a real group key like "strombom_multi|wide|N=200".
 GROUP = "group"
 
@@ -60,7 +62,10 @@ def run_tiny(
 
 def frontier_from_zones(zones: dict[tuple[str, int], str]) -> Frontier:
     cells = pd.DataFrame(
-        [{"group_key": g, "n_shepherds": d, "zone": z} for (g, d), z in zones.items()]
+        [
+            {"group_key": g, "n_shepherds": d, "zone": z, "n_seeds": 10}
+            for (g, d), z in zones.items()
+        ]
     )
     return Frontier(cells=cells, groups=pd.DataFrame())
 
@@ -228,11 +233,15 @@ def test_refine_bisects_only_known_groups_and_gaps_above_the_minimum() -> None:
         ("orphan", 9): COLLAPSE,
     }
     grid = {GROUP: {1, 9, 11, 12}}
-    assert refine(grid, frontier_from_zones(zones), min_gap=1) == 2  # 1-9 -> 5, 9-11 -> 10
+    assert (
+        refine(grid, frontier_from_zones(zones), 1, NO_PRUNING, "zone", CAP) == 2
+    )  # 1-9 -> 5, 9-11 -> 10
     assert grid == {GROUP: {1, 5, 9, 10, 11, 12}}
 
     grid = {GROUP: {1, 9, 11, 12}}
-    assert refine(grid, frontier_from_zones(zones), min_gap=4) == 1  # only the gap of 8
+    assert (
+        refine(grid, frontier_from_zones(zones), 4, NO_PRUNING, "zone", CAP) == 1
+    )  # only the gap of 8
     assert grid[GROUP] == {1, 5, 9, 11, 12}
 
 
@@ -241,16 +250,42 @@ def test_refine_by_reliability_adds_a_midpoint_across_the_d_min_boundary_only() 
     boundary is read from reliability: unreliable below, reliable above."""
     cells = pd.DataFrame(
         [
-            {"group_key": GROUP, "n_shepherds": 1, "zone": "too_few", "reliability": "unreliable"},
-            {"group_key": GROUP, "n_shepherds": 4, "zone": "too_few", "reliability": "unreliable"},
-            {"group_key": GROUP, "n_shepherds": 8, "zone": UNDECIDED, "reliability": "reliable"},
-            {"group_key": GROUP, "n_shepherds": 16, "zone": UNDECIDED, "reliability": "reliable"},
+            {
+                "group_key": GROUP,
+                "n_shepherds": 1,
+                "zone": "too_few",
+                "reliability": "unreliable",
+                "n_seeds": 10,
+            },
+            {
+                "group_key": GROUP,
+                "n_shepherds": 4,
+                "zone": "too_few",
+                "reliability": "unreliable",
+                "n_seeds": 10,
+            },
+            {
+                "group_key": GROUP,
+                "n_shepherds": 8,
+                "zone": UNDECIDED,
+                "reliability": "reliable",
+                "n_seeds": 10,
+            },
+            {
+                "group_key": GROUP,
+                "n_shepherds": 16,
+                "zone": UNDECIDED,
+                "reliability": "reliable",
+                "n_seeds": 10,
+            },
         ]
     )
     front = Frontier(cells=cells, groups=pd.DataFrame())
     grid = {GROUP: {1, 4, 8, 16}}
-    assert refine(grid, front, min_gap=1) == 0  # by zone: the reliable cells are undecided
-    assert refine(grid, front, min_gap=1, column="reliability") == 1
+    assert (
+        refine(grid, front, 1, NO_PRUNING, "zone", CAP) == 0
+    )  # by zone: the reliable cells are undecided
+    assert refine(grid, front, 1, NO_PRUNING, "reliability", CAP) == 1
     assert grid[GROUP] == {1, 4, 6, 8, 16}  # 6 between unreliable 4 and reliable 8
 
 
@@ -281,7 +316,7 @@ def test_refine_fills_the_bracket_below_d_min_once_the_open_cell_is_at_the_cap()
         return Frontier(cells=cells, groups=pd.DataFrame())
 
     grid = {GROUP: {4, 6, 8, 12}}
-    assert refine(grid, front_at(120), 1, column="reliability", max_seeds=200) == 0
-    assert refine(grid, front_at(200), 1, column="reliability") == 0  # no cap: waits
-    assert refine(grid, front_at(200), 1, column="reliability", max_seeds=200) == 2  # 5 and 7
+    assert refine(grid, front_at(120), 1, NO_PRUNING, "reliability", 200) == 0
+    assert refine(grid, front_at(200), 1, NO_PRUNING, "reliability", CAP) == 0  # no cap: waits
+    assert refine(grid, front_at(200), 1, NO_PRUNING, "reliability", 200) == 2  # 5 and 7
     assert grid[GROUP] == {4, 5, 6, 7, 8, 12}

@@ -10,11 +10,11 @@ import pytest
 
 from services.cells import Cell, Group, cell_config
 from services.protocol import Protocol
-from sim.core.simulation_runner import run_trial
-from sim.core.world.arena import GoalZone
-from sim.core.world.layouts import goal_half_angle, layout_extent, place_dogs, place_flock
-from sim.plugins.metrics.flock import fragmentation
-from sim.plugins.metrics.view import TickView
+from sim.drive_task.layouts import goal_half_angle, layout_extent, place_dogs, place_flock
+from sim.drive_task.world import GoalZone
+from sim.metrics.flock import fragmentation
+from sim.metrics.view import TickView
+from sim.trial import run_trial
 from tests.helpers import config_for, make_state, protocol_with
 
 METHOD = "strombom_multi"
@@ -181,7 +181,7 @@ def field_keys(protocol: Protocol, n: int, radius: float) -> set[tuple[float, fl
         (cfg["world_width"], cfg["world_height"], cfg["flock_center"][0])
         for layout in protocol.layouts
         for d in protocol.shepherd_counts
-        for cfg in [cell_config(protocol, Cell(Group(METHOD, layout, (), n), d), radius)]
+        for cfg in [cell_config(protocol, Cell(Group(METHOD, layout, n), d), radius)]
     }
 
 

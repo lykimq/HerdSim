@@ -7,8 +7,9 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from sim.core.simulation_runner import RunResult
-from sim.plugins.scenarios import SCENARIOS
+from sim.drive_task import task as drive_task
+from sim.drive_task.failures import classify_failure
+from sim.trial import RunResult
 
 
 def _stats(values: np.ndarray) -> tuple[float, float, float]:
@@ -47,11 +48,10 @@ def build_row(
     identity: dict[str, Any], result: RunResult, config: dict[str, Any]
 ) -> dict[str, Any]:
     """Identity columns, the task's columns, outcome, metric summaries and failure label."""
-    scenario = SCENARIOS[config["scenario_id"]]
-    failure = scenario.classify_failure(result.history, success=result.success, config=config)
+    failure = classify_failure(result.history, success=result.success, config=config)
     return {
         **identity,
-        **scenario.row_columns(config, result.history),
+        **drive_task.row_columns(config, result.history),
         **outcome_fields(result, int(config["n_shepherds"]), float(config["dt"])),
         **metric_fields(result.history),
         "failure_mode": failure.mode,

@@ -10,10 +10,10 @@ from typing import Any, TypeAlias
 import pytest
 import yaml
 
-from records.provenance import read_provenance, stable_hash
+from records.provenance import read_provenance
 from services.cells import Cell, Group, cell_config, groups
 from services.protocol import PROTOCOLS_DIR, Protocol, load_protocol, results_folder, study_queue
-from sim.core.simulation_runner import run_trial
+from sim.trial import run_trial
 from tests.helpers import BASE_PROTOCOL, config_for, protocol_with
 
 FlockSize: TypeAlias = int  # N sheep
@@ -74,7 +74,7 @@ def load_draft(tmp_path: Path, **changes: Any) -> Protocol:
 
 
 def physics_hash(protocol: Protocol) -> str:
-    return stable_hash(protocol.physics())
+    return protocol.physics_hash()
 
 
 def ticks_for_drive_multiple(tmp_path: Path, multiple: float, n_sheep: FlockSize) -> int:
@@ -84,7 +84,7 @@ def ticks_for_drive_multiple(tmp_path: Path, multiple: float, n_sheep: FlockSize
         methods={METHOD: {"time_limit_drive_multiple": multiple}},
         flock_sizes=[n_sheep],
     )
-    group = Group(METHOD, "compact", (), n_sheep)
+    group = Group(METHOD, "compact", n_sheep)
     return int(cell_config(protocol, Cell(group, N_DOGS), radius_for(n_sheep))["max_ticks"])
 
 

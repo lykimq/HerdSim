@@ -64,7 +64,7 @@ Table 2 sorts the papers from those HerdSim runs to those it does not use, with 
 | Paper | In HerdSim | What it takes | Where | Why not more |
 | :--- | :--- | :--- | :--- | :--- |
 | Strömbom et al. 2014 | used in full | the sheep model, the one-dog rule, the field-matched parameter set | methods `strombom`, `independent`, base of `strombom_multi`; `dmin_s_matched` | the local shepherd and the sweep of neighbours below $N - 1$ are not run |
-| Lama and di Bernardo 2024 | not in the current study | — | code under `sim/methods/lama/` is not registered in `METHODS` | the D_min report runs only `strombom_multi` |
+| Lama and di Bernardo 2024 | not in the current study | — | no code in the repository | the D_min report runs only `strombom_multi` |
 | Kubo et al. 2022 | used for one comparison and one baseline | the sheep model and force-based dogs; the farthest-sheep target choice | method `kubo`, `dmin_kubo`; the FAT baseline | HerdSim's own task replaces the paper's layouts and success test, so its percentages do not carry over |
 | Jadhav et al. 2024 | used for one setting | the dog-to-sheep speed ratio 1.15 | `dmin_s_dogspeed` | one dog and 14 sheep give no team-size result; the random-neighbour model is not run |
 | Pierson and Schwager 2015 | not run; shaped a design choice | success counts sheep, not the flock centre | the success rules | no controller gains given; sheep without noise or cohesion |
@@ -123,7 +123,7 @@ $M$ targets and $N$ herders start spread over a disc of radius $R$; the goal is 
 
 ### For HerdSim
 
-In HerdSim: not in the current study. Dynamics code exists under `sim/methods/lama/`, but `lama` is not registered in `sim/core/methods.py`; the D_min report and README use only `strombom_multi`.
+In HerdSim: not in the current study. The repository has no code for it; the D_min report and README use only `strombom_multi`.
 
 Two differences matter for reading HerdSim against it. Their success is a mean fraction over runs, while HerdSim asks for a team whose per-run success rate is above a target at a stated confidence (see the [report](../report/d_min_report.md)), a stricter test that parts from theirs near the threshold. And their targets have no cohesion, a possible reason the Strömbom flock grows more slowly. Not taken: the other disc and sensing radii of Table I, the noise sweep and the periodic boundaries, because one row is enough to check the reproduction and each further row is a new grid of runs.
 

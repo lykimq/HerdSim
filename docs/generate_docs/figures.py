@@ -6,7 +6,7 @@ Scene helpers first, then figures by topic (models, team rule, task). Style in f
 from __future__ import annotations
 
 from collections.abc import Sequence
-from pathlib import Path
+from dataclasses import replace
 from typing import Any
 
 import numpy as np
@@ -32,17 +32,16 @@ from docs.generate_docs.figstyle import (
 )
 from services.cells import Cell, Group, cell_config
 from services.protocol import load_protocol
-from sim.core.simulation_runner import initial_state, run_trial
-from sim.core.simulation_state import SimulationState
-from sim.core.vectors import unit
-from sim.core.world.layouts import layout_extent, place_dogs, place_flock
-from sim.methods.strombom.config import PAPER
-from sim.methods.strombom.heuristics import collect_threshold, drive_point, radius_of
-from sim.plugins.dogs.collect_drive_multi import team_targets
-from tests.helpers import config_for
+from sim.drive_task.layouts import layout_extent, place_dogs, place_flock
+from sim.state import SimulationState
+from sim.strombom.params import METHOD, PAPER
+from sim.strombom.shepherd import collect_threshold, drive_point, radius_of
+from sim.strombom.team import team_targets
+from sim.trial import initial_state, run_trial
+from sim.vectors import unit
 
 # ----- settings -----
-Config = dict[str, Any]  # a run config, as cell_config and config_for build it
+Config = dict[str, Any]  # a run config, as cell_config builds it
 Point = Sequence[float] | np.ndarray
 
 R_S = PAPER["r_s"]
@@ -57,11 +56,24 @@ def calibrated(protocol: str) -> dict[int, float]:
 
 
 # Calibrated flock radii of the Strombom sheep, from the main run.
-RF = calibrated("dmin_m12")
+MAIN_RUN = "dmin_m12"
+RF = calibrated(MAIN_RUN)
 
 
-def cfg(layout: str, n: int, d: int, **kw: Any) -> Config:
-    return config_for("strombom_multi", n=n, d=d, layout=layout, flock_radius=RF[n], **kw)
+def cfg(
+    layout: str, n: int, d: int, *, ticks: int = 300, settings: dict[str, Any] | None = None
+) -> Config:
+    """Run config of one cell of the main run, with the field sized for this cell alone."""
+    protocol = load_protocol(MAIN_RUN)
+    method = replace(protocol.methods[0], time_limit_ticks=ticks, time_limit_drive_multiple=None)
+    protocol = replace(
+        protocol,
+        settings={**protocol.settings, **(settings or {})},
+        methods=(method,),
+        layouts=(layout,),
+        shepherd_counts=(d,),
+    )
+    return cell_config(protocol, Cell(Group(METHOD, layout, n), d), RF[n])
 
 
 def start(c: Config) -> tuple[np.ndarray, np.ndarray]:
@@ -71,11 +83,8 @@ def start(c: Config) -> tuple[np.ndarray, np.ndarray]:
 
 def field_config(n: int, max_dogs: int) -> Config:
     """dmin cell config whose field fits all four layouts and ``max_dogs`` dogs."""
-    from dataclasses import replace
-
-    protocol = load_protocol("dmin_m12", output=Path("/tmp/herdsim-figures"))
-    protocol = replace(protocol, shepherd_counts=(1, max_dogs))
-    return cell_config(protocol, Cell(Group("strombom_multi", "wide", (), n), max_dogs), RF[n])
+    protocol = replace(load_protocol(MAIN_RUN), shepherd_counts=(1, max_dogs))
+    return cell_config(protocol, Cell(Group(METHOD, "wide", n), max_dogs), RF[n])
 
 
 # ----- drawing helpers -----

@@ -11,7 +11,7 @@ from typing import Any
 
 import numpy as np
 
-from sim.core.vectors import FLOCK_RADIUS_FACTOR, angle_vectors, behind, unit
+from sim.vectors import FLOCK_RADIUS_FACTOR, angle_vectors, behind, unit
 
 COLLECT = "collect"
 DRIVE = "drive"

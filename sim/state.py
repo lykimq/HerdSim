@@ -1,4 +1,4 @@
-"""State of one trial at one tick, passed between the engine, plugins and metrics."""
+"""State of one trial at one tick, passed between the engine, team rule, task and metrics."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from typing import Any
 
 import numpy as np
 
-from sim.core.world.arena import World
+from sim.drive_task.world import World
 
 
 @dataclass

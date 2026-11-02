@@ -6,8 +6,8 @@ a goal it cannot reach, for ``calibration_seconds``; R_f = sqrt(2) x RMS radius 
 of a uniform disc with that RMS), averaged over the last window, median over seeds and
 start sizes.
 
-Calibration always uses a single dog and no factor, whatever the protocol sweeps, so every
-factor level of a method is compared on a task sized to that one reference flock.
+Calibration always uses a single dog, so every team size of a method is compared on a task
+sized to that one reference flock.
 
 R_f is only a property of the model where the flock settles to one size whatever size it
 starts from. ``calibrate`` checks both and raises where they fail; for Strombom sheep they
@@ -21,15 +21,12 @@ from typing import Any
 
 import numpy as np
 
-from sim.core.config.experiment import build_config
-from sim.core.simulation_runner import run_trial
-from sim.core.vectors import FLOCK_RADIUS_FACTOR
+from sim.trial import build_config, run_trial
+from sim.vectors import FLOCK_RADIUS_FACTOR
 
 from .cells import method_spec, setup_for
 from .pool import worker_pool
 from .protocol import Protocol, method_dt, sheep_speed_per_second
-
-CALIBRATION_TASK = "drive_to_goal"
 
 # The calibration goal lies this many times farther than the sheep could travel at their
 # top speed during the whole run, so no flock reaches it: a flock that reaches the goal is
@@ -53,7 +50,7 @@ def calibration_drive(protocol: Protocol, method: str) -> float:
     """Length of the calibration drive: DRIVE_SPEED_MARGIN x top sheep speed x seconds."""
     params = method_spec(protocol, method).params
     seconds = protocol.settings["calibration_seconds"]
-    return DRIVE_SPEED_MARGIN * sheep_speed_per_second(method, params) * seconds
+    return DRIVE_SPEED_MARGIN * sheep_speed_per_second(params) * seconds
 
 
 def calibration_config(
@@ -61,8 +58,8 @@ def calibration_config(
 ) -> dict[str, Any]:
     """One dog, a compact start of ``spacing``, a goal of radius 0 too far to reach.
 
-    The protocol's factors are not applied; the drive is set through both drive terms so
-    the task's max() rule returns exactly ``calibration_drive``.
+    The drive is set through both drive terms so the task's max() rule returns exactly
+    ``calibration_drive``.
     """
     spec = method_spec(protocol, method)
     s = protocol.settings
@@ -70,7 +67,6 @@ def calibration_config(
     drive = calibration_drive(protocol, method)
     far = {
         **s,
-        "task": CALIBRATION_TASK,
         "drive_distance_multiple": drive / radius,
         "drive_distance_min": drive,
     }
@@ -83,9 +79,8 @@ def calibration_config(
         max_dogs=1,
     )
     setup["goal_radius"] = 0.0
-    setup["max_ticks"] = math.ceil(s["calibration_seconds"] / method_dt(method, spec.params))
+    setup["max_ticks"] = math.ceil(s["calibration_seconds"] / method_dt(spec.params))
     return build_config(
-        task=CALIBRATION_TASK,
         method=method,
         params=dict(spec.params),
         setup=setup,
@@ -159,7 +154,7 @@ def calibrate(
         jobs = []
         owners: list[tuple[str, int, float]] = []
         for method, n in keys:
-            dt = method_dt(method, method_spec(protocol, method).params)
+            dt = method_dt(method_spec(protocol, method).params)
             window = round(s["calibration_window_seconds"] / dt)
             for spacing in s["calibration_starts"]:
                 config = calibration_config(protocol, method, n, spacing)

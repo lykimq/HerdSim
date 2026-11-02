@@ -16,7 +16,8 @@ from concurrent.futures.process import BrokenProcessPool
 from typing import Any
 
 from records.trial_row import build_row
-from sim.core.simulation_runner import run_trial
+from sim.drive_task.task import TASK
+from sim.trial import run_trial
 
 from .cells import Trial
 from .pool import worker_pool
@@ -28,7 +29,7 @@ QUEUE_PER_WORKER = 4
 
 def identity(trial: Trial) -> dict[str, Any]:
     """Columns that say which trial a row is and what it ran with; the task adds the
-    geometry it ran in (``Scenario.row_columns``).
+    geometry it ran in (``sim.drive_task.task.row_columns``).
 
     Factor values come from the group itself (the protocol's levels), not from the run
     config: a swept setting such as drive_distance_multiple reaches the config only
@@ -40,7 +41,7 @@ def identity(trial: Trial) -> dict[str, Any]:
         "trial_key": trial.key,
         "cell_key": cell.key,
         "group_key": group.key,
-        "task": config["scenario_id"],
+        "task": TASK,
         "method": group.method,
         "initial_layout": group.layout,
         "n_sheep": group.n_sheep,
@@ -52,8 +53,6 @@ def identity(trial: Trial) -> dict[str, Any]:
         "time_limit_seconds": config["max_ticks"] * dt,
         "dt": dt,
     }
-    for name, value in group.factors:
-        columns[name] = value
     return columns
 
 

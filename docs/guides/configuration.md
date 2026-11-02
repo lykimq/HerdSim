@@ -25,11 +25,11 @@ Every protocol names `canonical.yaml`, directly or through the file it `extends`
 
 ### Model parameters
 
-Model parameters are not canonical settings. The method keeps its paper's values in its code (`sim/methods/strombom/config.py`), and a protocol overrides them under `params`.
+Model parameters are not canonical settings. The method keeps its paper's values in its code (`sim/strombom/params.py`), and a protocol overrides them under `params`.
 
 ### Protocol overrides
 
-A protocol names its id and output folder (`protocol_id`, `output`), the canonical file's path from the repository root (`canonical`), each method with exactly one time limit (`time_limit_drive_multiple`, `time_limit_ticks` or `time_limit_seconds`), and the grid: `layouts`, `flock_sizes` and `shepherd_counts`, the team sizes $D$ (the code says shepherd for dog).
+A protocol names its id and output folder (`protocol_id`, `output`), the canonical file's path from the repository root (`canonical`), each method with exactly one time limit (`time_limit_drive_multiple` or `time_limit_ticks`), and the grid: `layouts`, `flock_sizes` and `shepherd_counts`, the team sizes $D$ (the code says shepherd for dog).
 
 A protocol with `extends` names a parent file, by a path relative to itself, and gives only what differs:
 
@@ -50,7 +50,7 @@ canonical: protocols/configs/canonical.yaml
 
 methods:
   strombom_multi:
-    time_limit_drive_multiple: 12.0   # or time_limit_ticks / time_limit_seconds
+    time_limit_drive_multiple: 12.0   # or time_limit_ticks
 
 layouts: [compact, wide, split, outlier_rich]
 flock_sizes: [25, 50, 100, 200, 400]
@@ -71,19 +71,13 @@ flock_sizes: [25, 50, 71, 100, 141, 200, 283, 400, 566]
 
 With `decide_finish_times` at its default, false, seeds only decide reliability.
 
-### Factors
-
-A factor is a canonical setting that a protocol sweeps over several values, its levels, under the key `factors`. Each level, or each pair of levels when two settings are crossed, gets its own curves. None of the six protocols uses one.
-
-Calibration runs once per $N$, whatever the factors, so every level runs on the same $R_f$. A setting that holds for the whole protocol (the task, the master seed and the calibration settings) cannot be swept, nor can a sampling setting such as `max_seeds` or `decide_finish_times`, which changes no trial. A per-trial setting such as `goal_radius_multiple` or `success_fraction` can.
-
 ### Physics hash
 
 The physics hash is a digest of everything that changes a trial's outcome, stored with each results folder. It covers the task, the canonical settings, the method's parameters and time limit, the set of layouts and the largest team size, because every cell at one $N$ shares a field sized for the largest team's start circles.
 
-It leaves out the sampling settings (threshold $\theta$, confidence, batch size, seed cap, `decide_finish_times` and the other campaign controls), `success_fraction` while at its default 1.0, and the flock sizes, smaller team sizes and factor levels, so a protocol can grow and still resume into its folder.
+It leaves out the sampling settings (threshold $\theta$, confidence, batch size, seed cap, `decide_finish_times` and the other campaign controls), `success_fraction` while at its default 1.0, and the flock sizes and smaller team sizes, so a protocol can grow and still resume into its folder.
 
-The hash ties a folder to one physics. A run whose hash or protocol id differs from the folder's is refused, so changed physics needs a new folder: a new protocol with its own `protocol_id` and `output`, or `--output <folder>`. When calibration fails before any trial, the run removes `provenance.json` and `calibration.json`, so a corrected protocol can reopen the folder.
+The hash ties a folder to one physics. A run whose hash or protocol id differs from the folder's is refused, so changed physics needs a new folder: a new protocol with its own `protocol_id` and `output`. When calibration fails before any trial, the run removes `provenance.json` and `calibration.json`, so a corrected protocol can reopen the folder.
 
 The code is not hashed. `runs.jsonl` records the code identity for each sitting, one run of a campaign command on the folder. A resume after a trial-code change warns and goes on, because a refactor changes the code hash but not the physics.
 

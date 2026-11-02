@@ -1,6 +1,6 @@
 """Generic per-tick metrics (TickView -> float), keyed by column name.
 
-Every trial records these plus the task's own ``Scenario.metrics``.
+Every trial records these plus the task's own metrics.
 """
 
 from __future__ import annotations

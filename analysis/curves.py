@@ -18,11 +18,15 @@ from .results import read_groups
 
 Bracket = tuple[float, float]
 
+# Layouts the shape comparison covers; `split` is left out, since its success does not rise
+# with D at N >= 200, and `compact` stays at D = 1.
+SHAPE_LAYOUTS = ("wide", "outlier_rich")
+
 # ----- reading a finished run -----
 
 
 def split_group_key(frame: pd.DataFrame) -> pd.DataFrame:
-    """Replace ``group_key`` with method, layout, factors and n columns."""
+    """Replace ``group_key`` with method, layout and n columns."""
     keys = pd.DataFrame([split_group(k) for k in frame["group_key"]], index=frame.index)
     return pd.concat([keys, frame.drop(columns=["group_key"])], axis=1)
 
@@ -30,14 +34,6 @@ def split_group_key(frame: pd.DataFrame) -> pd.DataFrame:
 def groups_table(folder: Path) -> pd.DataFrame:
     """One row per D curve from a results folder."""
     return split_group_key(read_groups(folder))
-
-
-def one_level(table: pd.DataFrame) -> pd.DataFrame:
-    """Return ``table``, or raise if it mixes several factor levels."""
-    if "factors" in table and table["factors"].nunique() > 1:
-        levels = sorted(table["factors"].unique())
-        raise ValueError(f"several factor levels {levels} in one table")
-    return table
 
 
 # ----- brackets -----
@@ -113,43 +109,31 @@ def growth(part: pd.DataFrame, bracket_of: Callable[[pd.Series], Bracket | None]
     )
 
 
+def _mean_spread(groups: dict[object, list[float]]) -> float:
+    """Mean log2 of max / min over the groups that hold at least two midpoints."""
+    spreads = [math.log2(max(v) / min(v)) for _, v in sorted(groups.items()) if len(v) >= 2]
+    return float(np.mean(spreads)) if spreads else float("nan")
+
+
 def layout_against_n(table: pd.DataFrame) -> dict[str, float]:
     """Mean log2 spread of midpoints: across layouts at fixed N, and across N at fixed layout."""
-    mid: dict[tuple[str, int], float] = {}
-    for _, r in one_level(table).iterrows():
+    by_n: dict[object, list[float]] = {}
+    by_layout: dict[object, list[float]] = {}
+    for _, r in table.iterrows():
         value = midpoint(r)
         if value is not None:
-            mid[(str(r["layout"]), int(r["n"]))] = value
-
-    def spread(values: list[float]) -> float | None:
-        if len(values) < 2:
-            return None
-        return math.log2(max(values) / min(values))
-
-    by_n: list[float] = []
-    for n in sorted({n for _, n in mid}):
-        value = spread([v for (_, n2), v in mid.items() if n2 == n])
-        if value is not None:
-            by_n.append(value)
-
-    by_layout: list[float] = []
-    for lay in sorted({lay for lay, _ in mid}):
-        value = spread([v for (lay2, _), v in mid.items() if lay2 == lay])
-        if value is not None:
-            by_layout.append(value)
-
+            by_n.setdefault(int(r["n"]), []).append(value)
+            by_layout.setdefault(str(r["layout"]), []).append(value)
     return {
-        "layout_spread_at_fixed_n": float(np.mean(by_n)) if by_n else float("nan"),
-        "n_spread_at_fixed_layout": float(np.mean(by_layout)) if by_layout else float("nan"),
+        "layout_spread_at_fixed_n": _mean_spread(by_n),
+        "n_spread_at_fixed_layout": _mean_spread(by_layout),
     }
 
 
-def shape_table(
-    table: pd.DataFrame, layouts: tuple[str, ...] = ("wide", "outlier_rich")
-) -> pd.DataFrame:
-    """Compare power-law vs saturating fits of D_min(N) per layout."""
+def shape_table(table: pd.DataFrame) -> pd.DataFrame:
+    """Compare power-law vs saturating fits of D_min(N) on the two layouts that keep rising."""
     rows = []
-    for layout in layouts:
+    for layout in SHAPE_LAYOUTS:
         points = []
         for _, r in table[table["layout"] == layout].sort_values("n").iterrows():
             found = interval_of(float(r["d_min"]), float(r["d_min_low"]))

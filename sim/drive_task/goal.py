@@ -7,8 +7,9 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from sim.core.world.arena import GoalZone, World
-from sim.plugins.metrics.view import TickView
+from sim.metrics.view import TickView
+
+from .world import GoalZone, World
 
 # Fractions of the flock whose first arrival is recorded in every trial row, so a weaker
 # success rule than the task's own can be read afterwards from the stored rows.

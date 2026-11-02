@@ -13,8 +13,10 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from sim.core.simulation_state import SimulationState
-from sim.core.world.layouts import (
+from sim.state import SimulationState
+
+from .goal import arrival_columns, dogs_goal_side, gcm_goal, gcm_in_goal, sheep_in_goal
+from .layouts import (
     DOG_STARTS,
     LAYOUTS,
     field_size,
@@ -23,7 +25,15 @@ from sim.core.world.layouts import (
     place_flock,
 )
 
-from .goal import arrival_columns
+TASK = "drive_to_goal"
+
+# The task's per-tick metrics, recorded ahead of the generic ones.
+METRICS = {
+    "gcm_goal": gcm_goal,
+    "gcm_in_goal": gcm_in_goal,
+    "sheep_in_goal": sheep_in_goal,
+    "dogs_goal_side": dogs_goal_side,
+}
 
 # Setup keys this task reads from the run config (agent counts and the layout name are set
 # by build_config itself).

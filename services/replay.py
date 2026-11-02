@@ -14,9 +14,9 @@ from typing import Any
 import pandas as pd
 
 from analysis.results import flock_radii, read_trials
-from records.provenance import read_provenance, stable_hash
-from sim.core.simulation_runner import RunResult, run_trial
-from sim.core.simulation_state import SimulationState
+from records.provenance import read_provenance
+from sim.state import SimulationState
+from sim.trial import RunResult, run_trial
 
 from .cells import Cell, Group, cell_config
 from .protocol import Protocol, load_protocol, results_folder
@@ -34,7 +34,7 @@ class ReplayJob:
     config: dict[str, Any]
     seed: int
     stored: Outcome
-    label: dict[str, Any]  # names the trial in a mismatch message
+    label: str  # names the trial in a mismatch message
 
 
 def replay_trial(
@@ -64,32 +64,25 @@ class StoredRun:
 
     def config(self, method: str, layout: str, n: int, d: int) -> dict[str, Any]:
         """Run config of a cell, as the campaign built it."""
-        cell = Cell(Group(method, layout, (), n), d)
+        cell = Cell(Group(method, layout, n), d)
         return cell_config(self.protocol, cell, self.radii[method][str(n)])
 
     def outcomes(self, method: str, layout: str, n: int, d: int) -> dict[int, Outcome]:
         """Stored (success, ticks) per seed index of a cell."""
-        rows = self.trials[self.trials["group_key"] == Group(method, layout, (), n).key]
+        rows = self.trials[self.trials["group_key"] == Group(method, layout, n).key]
         mine = rows[rows["n_shepherds"] == d]
         return {
             int(t["seed_index"]): (bool(t["success"]), int(t["total_ticks"]))
             for _, t in mine.iterrows()
         }
 
-    def jobs(self, method: str, layout: str, n: int, d: int, seeds: int) -> list[ReplayJob]:
-        """Replays of the first ``seeds`` stored seeds of a cell."""
-        config = self.config(method, layout, n, d)
-        stored = self.outcomes(method, layout, n, d)
-        return [
-            ReplayJob(
-                config,
-                self.master_seed + i,
-                stored[i],
-                {"layout": layout, "n": n, "d": d, "seed_index": i},
-            )
-            for i in range(seeds)
-            if i in stored
-        ]
+    def job(self, method: str, layout: str, n: int, d: int, seed_index: int) -> ReplayJob:
+        """The replay of one stored seed of a cell."""
+        stored = self.outcomes(method, layout, n, d)[seed_index]
+        label = f"{layout} N={n} D={d} seed {seed_index}"
+        return ReplayJob(
+            self.config(method, layout, n, d), self.master_seed + seed_index, stored, label
+        )
 
 
 def open_run(name: str) -> StoredRun:
@@ -101,7 +94,7 @@ def open_run(name: str) -> StoredRun:
     folder = results_folder(name)
     protocol = load_protocol(name, output=folder)
     ran = read_provenance(folder / "provenance.json")["physics_hash"]
-    now = stable_hash(protocol.physics())
+    now = protocol.physics_hash()
     if ran != now:
         raise ReplayMismatch(f"{folder} ran with physics {ran}, the protocol now gives {now}")
     return StoredRun(protocol, flock_radii(folder), read_trials(folder))

@@ -6,12 +6,21 @@ are hints. Lengths scale with goal/flock radius; windows use model seconds.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
 import pandas as pd
 
-from .failures import NONE, TIMEOUT, Failure
+NONE = "none"  # the trial succeeded
+TIMEOUT = "timeout"  # none of the rules matched
+
+
+@dataclass(frozen=True)
+class Failure:
+    mode: str
+    hints: tuple[str, ...]  # every rule that matched, the first in PRIORITY is the mode
+
 
 DOGS_OUT_OF_RANGE = "dogs_out_of_range"  # dogs too far for the sheep to react
 FLOCK_ESCAPED = "flock_escaped"  # flock ended farther from the goal than it started

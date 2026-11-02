@@ -2,8 +2,7 @@
 
 A protocol is one experiment written as data, in protocols/configs/protocols/. It names its
 output folder, the methods with their time limits and parameter overrides, the grid
-(layouts, flock sizes, dog counts), optional factors (a sweepable canonical setting; each
-value is its own D curve), and any canonical value it changes. Everything else comes from
+(layouts, flock sizes, dog counts) and any canonical value it changes. Everything else comes from
 protocols/configs/canonical.yaml. A protocol can ``extends`` another and change only what
 differs, which is how a variant of a finished run gets its own id and folder:
 
@@ -25,9 +24,11 @@ from typing import Any
 
 import yaml
 
-from sim.core.methods import METHODS
-from sim.plugins.scenarios import SCENARIOS
-from sim.plugins.sheep import SHEEP_MODELS
+from records.provenance import stable_hash
+from sim.drive_task import task as drive_task
+from sim.drive_task.layouts import LAYOUTS
+from sim.strombom import sheep
+from sim.strombom.params import DEFAULTS, METHOD
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 RESULTS_ROOT = REPO_ROOT / "results"
@@ -45,13 +46,12 @@ REQUIRED_KEYS = (
     "flock_sizes",
     "shepherd_counts",
 )
-PROTOCOL_KEYS = (*REQUIRED_KEYS, "factors", "description")
-TIME_LIMIT_KEYS = ("time_limit_ticks", "time_limit_seconds", "time_limit_drive_multiple")
+PROTOCOL_KEYS = (*REQUIRED_KEYS, "description")
+TIME_LIMIT_KEYS = ("time_limit_ticks", "time_limit_drive_multiple")
 METHOD_KEYS = (*TIME_LIMIT_KEYS, "params")
 
-# Canonical values that hold for the whole protocol, so they cannot be swept as factors:
-# the task, the seed list, and the calibration of R_f, which runs once per method and
-# flock size whatever the factors.
+# Canonical values that hold for the whole protocol: the task, the seed list, and the
+# calibration of R_f, which runs once per method and flock size.
 WHOLE_PROTOCOL_KEYS = (
     "task",
     "master_seed",
@@ -64,7 +64,7 @@ WHOLE_PROTOCOL_KEYS = (
 )
 
 # Canonical values that only steer the adaptive run; they do not change any trial, so they
-# stay out of the physics hash and cannot be swept either.
+# stay out of the physics hash.
 STRATEGY_KEYS = (
     "reliability_theta",
     "confidence",
@@ -80,9 +80,8 @@ STRATEGY_KEYS = (
     "decide_finish_times",
 )
 
-# Settings added after the first runs. At their neutral value they do not change any
-# trial, so they stay out of the physics hash and the folders written before them remain
-# resumable.
+# A setting at its neutral value changes no trial, so it stays out of the physics hash; a
+# folder written before the setting existed keeps its hash.
 NEUTRAL_SETTINGS = {"success_fraction": 1.0}
 
 
@@ -105,14 +104,16 @@ class Protocol:
     layouts: tuple[str, ...]
     flock_sizes: tuple[int, ...]
     shepherd_counts: tuple[int, ...]
-    factors: dict[str, list[Any]]
     resolved: dict[str, Any]  # the merged file contents, archived in the results folder
     # One line on what the protocol tests, for the protocol catalogue; never physics.
     description: str | None = None
 
     def method_config(self) -> dict[str, dict[str, Any]]:
         """Every parameter each method runs with: code defaults under the protocol's overrides."""
-        return {m.name: {**METHODS[m.name].defaults, **m.params} for m in self.methods}
+        return {m.name: {**DEFAULTS, **m.params} for m in self.methods}
+
+    def physics_hash(self) -> str:
+        return stable_hash(self.physics())
 
     def physics(self) -> dict[str, Any]:
         """Everything that changes a trial's outcome; input of the physics hash.
@@ -122,6 +123,7 @@ class Protocol:
         the strategy keys are not, so a campaign can add flock sizes, intermediate D or
         seeds and still resume.
         """
+        methods = self.method_config()
         return {
             "task": self.settings["task"],
             "layouts": sorted(set(self.layouts)),
@@ -135,33 +137,11 @@ class Protocol:
                 m.name: {
                     "time_limit_ticks": m.time_limit_ticks,
                     "time_limit_drive_multiple": m.time_limit_drive_multiple,
-                    "config": config,
+                    "config": methods[m.name],
                 }
-                for m, config in zip(self.methods, self.method_config().values())
+                for m in self.methods
             },
         }
-
-
-def sweepable(settings: Mapping[str, Any]) -> list[str]:
-    """Canonical settings a protocol may sweep as factors: every one that changes a trial
-    and is set per D curve (so not a whole-protocol or strategy key)."""
-    fixed = set(WHOLE_PROTOCOL_KEYS) | set(STRATEGY_KEYS)
-    return sorted(k for k in settings if k not in fixed)
-
-
-def factor_settings(factors: Mapping[str, Any], settings: Mapping[str, Any]) -> dict[str, Any]:
-    """The canonical settings a factor assignment sets.
-
-    A factor is a sweepable canonical setting. A method parameter is refused: R_f is
-    calibrated once per method without factors, so a sheep-side parameter would run every
-    level on the radius of the default flock. Run each level of a method parameter as its
-    own protocol, which calibrates on its own.
-    """
-    swept = sweepable(settings)
-    unknown = sorted(set(factors) - set(swept))
-    if unknown:
-        raise ValueError(f"factors {unknown} are not sweepable canonical settings ({swept})")
-    return dict(factors)
 
 
 def find_protocol(name_or_path: str) -> Path:
@@ -201,26 +181,24 @@ def _read_chain(path: Path, seen: tuple[Path, ...] = ()) -> dict[str, Any]:
     return {**inherited, **spec}
 
 
-def method_dt(name: str, params: Mapping[str, Any]) -> float:
-    """Time step of a method: its default, or the protocol's override."""
-    return float(params.get("dt", METHODS[name].defaults["dt"]))
+def method_dt(params: Mapping[str, Any]) -> float:
+    """Time step of the method: its default, or the protocol's override."""
+    return float(params.get("dt", DEFAULTS["dt"]))
 
 
-def sheep_speed_per_second(method: str, params: Mapping[str, Any]) -> float:
-    """Fastest a sheep of ``method`` can move, in units per model second: the sheep model's
-    ``top_speed`` on the method's parameters under the protocol's overrides."""
-    bundle = METHODS[method]
-    return SHEEP_MODELS[bundle.sheep_model].top_speed({**bundle.defaults, **params})
+def sheep_speed_per_second(params: Mapping[str, Any]) -> float:
+    """Fastest a sheep can move, in units per model second, under the protocol's overrides."""
+    return sheep.top_speed({**DEFAULTS, **params})
 
 
-def drive_limit_ticks(multiple: float, drive: float, method: str, params: Mapping[str, Any]) -> int:
+def drive_limit_ticks(multiple: float, drive: float, params: Mapping[str, Any]) -> int:
     """Ticks in ``multiple`` x the drive time: the drive length at the top sheep speed."""
-    seconds = multiple * drive / sheep_speed_per_second(method, params)
-    return max(1, math.ceil(seconds / method_dt(method, params)))
+    seconds = multiple * drive / sheep_speed_per_second(params)
+    return max(1, math.ceil(seconds / method_dt(params)))
 
 
 def _time_limit(name: str, spec: dict[str, Any]) -> tuple[int | None, float | None]:
-    """(ticks, drive multiple): exactly one of the three time-limit keys, the other None."""
+    """(ticks, drive multiple): exactly one of the two time-limit keys, the other None."""
     given = [k for k in TIME_LIMIT_KEYS if k in spec]
     if len(given) != 1:
         raise ValueError(f"Method {name!r}: give exactly one of {', '.join(TIME_LIMIT_KEYS)}")
@@ -229,10 +207,7 @@ def _time_limit(name: str, spec: dict[str, Any]) -> tuple[int | None, float | No
         if not multiple > 0.0:
             raise ValueError(f"Method {name!r}: time_limit_drive_multiple must be positive")
         return None, multiple
-    if given[0] == "time_limit_ticks":
-        ticks = spec["time_limit_ticks"]
-    else:
-        ticks = spec["time_limit_seconds"] / method_dt(name, spec.get("params", {}))
+    ticks = spec["time_limit_ticks"]
     if not math.isclose(ticks, round(ticks)) or round(ticks) < 1:
         raise ValueError(f"Method {name!r}: the time limit must be a whole number of ticks >= 1")
     return round(ticks), None
@@ -241,14 +216,14 @@ def _time_limit(name: str, spec: dict[str, Any]) -> tuple[int | None, float | No
 def _methods(raw: dict[str, Any]) -> tuple[MethodSpec, ...]:
     specs = []
     for name, spec in raw.items():
-        if name not in METHODS:
-            raise ValueError(f"Unknown method {name!r}; available: {sorted(METHODS)}")
+        if name != METHOD:
+            raise ValueError(f"Unknown method {name!r}; available: {[METHOD]}")
         spec = spec or {}
         unknown = sorted(set(spec) - set(METHOD_KEYS))
         if unknown:
             raise ValueError(f"Method {name!r}: unknown keys {unknown}")
         params = dict(spec.get("params", {}))
-        bad = sorted(set(params) - set(METHODS[name].defaults))
+        bad = sorted(set(params) - set(DEFAULTS))
         if bad:
             raise ValueError(f"Method {name!r} has no parameters {bad}")
         ticks, multiple = _time_limit(name, spec)
@@ -261,48 +236,26 @@ def _check_shape(name: str, spec: Mapping[str, Any], settings: Mapping[str, Any]
     missing = [k for k in REQUIRED_KEYS if k not in spec]
     if missing:
         raise ValueError(f"{name}: missing keys {missing}")
-    factors = spec.get("factors") or {}
-    _check_lists(name, spec, factors)
-    _check_layouts(name, spec["layouts"], settings["task"])
-    for key in ("flock_sizes", "shepherd_counts"):
-        if any(not isinstance(v, int) or v < 1 for v in spec[key]):
-            raise ValueError(f"{name}: {key} must be positive integers")
-    for factor_name, values in factors.items():
-        for label, text in [(f"factor name {factor_name!r}", factor_name)] + [
-            (f"factor {factor_name} value {v!r}", v) for v in values
-        ]:
-            _check_no_delimiters(name, label, text)
-    _check_decisions(name, settings)
-
-
-def _check_lists(name: str, spec: Mapping[str, Any], factors: Mapping[str, Any]) -> None:
-    lists = {k: spec[k] for k in ("layouts", "flock_sizes", "shepherd_counts")}
-    lists.update({f"factor {k}": v for k, v in factors.items()})
-    for key, value in lists.items():
+    for key in ("layouts", "flock_sizes", "shepherd_counts"):
+        value = spec[key]
         if not isinstance(value, list) or not value:
             raise ValueError(f"{name}: {key} must be a non-empty list")
         if len({str(v) for v in value}) != len(value):
             raise ValueError(f"{name}: {key} has repeated values")
     if not isinstance(spec["methods"], dict) or not spec["methods"]:
         raise ValueError(f"{name}: methods must name at least one method")
-
-
-def _check_layouts(name: str, chosen: list[Any], task: str) -> None:
-    if task not in SCENARIOS:
-        raise ValueError(f"{name}: unknown task {task!r}; available: {sorted(SCENARIOS)}")
-    for layout in chosen:
-        _check_no_delimiters(name, f"layout {layout!r}", layout)
-    layouts = SCENARIOS[task].layouts
-    unknown = sorted(set(chosen) - set(layouts))
+    task = settings["task"]
+    if task != drive_task.TASK:
+        raise ValueError(f"{name}: unknown task {task!r}; available: {[drive_task.TASK]}")
+    layouts = LAYOUTS
+    unknown = sorted(set(spec["layouts"]) - set(layouts))
     if unknown:
         known = f"its layouts are {layouts}"
         raise ValueError(f"{name}: unknown layouts {unknown} for task {task!r}; {known}")
-
-
-def _check_no_delimiters(name: str, label: str, value: Any) -> None:
-    """Layouts and factors are joined into group keys with these characters."""
-    if any(c in str(value) for c in ("|", "=", "\n")):
-        raise ValueError(f"{name}: {label} cannot contain key delimiters ('|', '=', newline)")
+    for key in ("flock_sizes", "shepherd_counts"):
+        if any(not isinstance(v, int) or v < 1 for v in spec[key]):
+            raise ValueError(f"{name}: {key} must be positive integers")
+    _check_decisions(name, settings)
 
 
 def _check_decisions(name: str, settings: Mapping[str, Any]) -> None:
@@ -325,7 +278,7 @@ def _check_layout_scale(
     meaning "beyond the distance where the dogs collect".
     """
     for m in methods:
-        r_a = m.params.get("r_a", METHODS[m.name].defaults.get("r_a"))
+        r_a = m.params.get("r_a", DEFAULTS.get("r_a"))
         if r_a is not None and abs(settings["separation_scale"] - r_a) > 1e-9:
             scale = settings["separation_scale"]
             raise ValueError(
@@ -378,12 +331,7 @@ def load_protocol(name_or_path: str, output: Path | None = None) -> Protocol:
     if description is not None and not (isinstance(description, str) and description.strip()):
         raise ValueError(f"{path.name}: description must be non-empty text, got {description!r}")
 
-    factors = dict(spec.get("factors") or {})
     methods = _methods(spec["methods"])
-    try:
-        factor_settings(factors, settings)
-    except ValueError as error:
-        raise ValueError(f"{path.name}: {error}") from error
     _check_calibration_windows(path.name, settings)
     _check_layout_scale(path.name, methods, settings)
 
@@ -395,7 +343,6 @@ def load_protocol(name_or_path: str, output: Path | None = None) -> Protocol:
         layouts=tuple(spec["layouts"]),
         flock_sizes=tuple(spec["flock_sizes"]),
         shepherd_counts=tuple(sorted(spec["shepherd_counts"])),
-        factors=factors,
         resolved={**spec, "canonical_values": canonical},
         description=description,
     )

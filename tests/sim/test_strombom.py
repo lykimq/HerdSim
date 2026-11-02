@@ -7,10 +7,9 @@ from typing import Any
 import numpy as np
 import pytest
 
-from sim.core.vectors import behind, unit
-from sim.methods.strombom import sheep
-from sim.methods.strombom.config import resolve_n_neighbors
-from sim.methods.strombom.heuristics import (
+from sim.strombom import sheep
+from sim.strombom.params import resolve_n_neighbors
+from sim.strombom.shepherd import (
     COLLECT,
     DRIVE,
     decide,
@@ -18,7 +17,8 @@ from sim.methods.strombom.heuristics import (
     radius_of,
     step_toward,
 )
-from sim.plugins.dogs.collect_drive_multi import drive_front, team_targets
+from sim.strombom.team import drive_front, team_targets
+from sim.vectors import behind, unit
 from tests.helpers import config_for
 
 BASE = config_for("strombom_multi", n=10, d=1)

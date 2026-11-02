@@ -9,7 +9,7 @@ import numpy as np
 from scipy.spatial import ConvexHull, QhullError, cKDTree
 from scipy.spatial.distance import pdist
 
-from sim.core.simulation_state import SimulationState
+from sim.state import SimulationState
 
 
 class TickView:

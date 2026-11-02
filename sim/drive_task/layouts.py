@@ -12,7 +12,7 @@ from typing import Any
 
 import numpy as np
 
-from sim.core.vectors import angle_vectors, rotate, unit
+from sim.vectors import angle_vectors, rotate, unit
 
 LAYOUTS = ("compact", "wide", "split", "outlier_rich")
 DOG_STARTS = ("arcs", "ring", "handler")

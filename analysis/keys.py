@@ -2,24 +2,14 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
 from typing import Any
 
 SEP = "|"
 
 
-def value_text(value: Any) -> str:
-    """A factor value as written in keys: numbers as floats, so 1 and 1.0 name one cell, as
-    they run one physics (provenance.normalise_numbers)."""
-    if isinstance(value, (int, float)) and not isinstance(value, bool):
-        return repr(float(value))
-    return str(value)
-
-
-def group_key(method: str, layout: str, factors: Iterable[tuple[str, Any]], n: int) -> str:
-    """The key of one D curve; ``factors`` are sorted (name, value) pairs."""
-    parts = [method, layout, *(f"{k}={value_text(v)}" for k, v in factors)]
-    return SEP.join([*parts, f"N={n}"])
+def group_key(method: str, layout: str, n: int) -> str:
+    """The key of one D curve."""
+    return SEP.join([method, layout, f"N={n}"])
 
 
 def cell_key(group: str, d: int) -> str:
@@ -39,17 +29,6 @@ def cell_of_trial(trial: str) -> str:
 
 
 def split_group(key: str) -> dict[str, Any]:
-    """'strombom_multi|wide|dog_start_gap=15.0|N=200' -> method, layout, factors, n, with the
-    factor parts kept as one text ('dog_start_gap=15.0'), as the tables show them."""
-    parts = key.split(SEP)
-    return {
-        "method": parts[0],
-        "layout": parts[1],
-        "factors": SEP.join(parts[2:-1]),
-        "n": int(parts[-1].removeprefix("N=")),
-    }
-
-
-def join_group(method: str, layout: str, factors: str, n: int) -> str:
-    """The inverse of ``split_group``: a group key from its parts, factors as one text."""
-    return SEP.join([method, layout, *([factors] if factors else []), f"N={n}"])
+    """'strombom_multi|wide|N=200' -> method, layout, n."""
+    method, layout, n = key.split(SEP)
+    return {"method": method, "layout": layout, "n": int(n.removeprefix("N="))}

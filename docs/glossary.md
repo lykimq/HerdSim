@@ -32,7 +32,7 @@ A definition for each term HerdSim's docs use, with a link to the section that e
 
 **Sitting**: one run of the campaign command on a results folder; a folder can grow over several.
 
-**Round**: one pass of a sitting that plans and runs the seeds each undecided cell still needs ([sampling loop](experiments/task_design.md#the-adaptive-sampling-loop)).
+**Round**: one pass of a sitting that plans and runs the seeds each undecided cell still needs ([campaign](codes/architecture.md#how-a-campaign-runs)).
 
 **Batch**: the 10 seeds a cell gets at a time (`batch_seeds`).
 
@@ -120,7 +120,7 @@ A definition for each term HerdSim's docs use, with a link to the section that e
 
 **Collect point $P_c$ and drive point $P_d$**: where a dog aims to collect an outlier or to drive. $P_d$ lies $r_a \sqrt{N}$ behind the flock centre ([team rule](methods/strombom_multi.md)).
 
-**Team rule**: HerdSim's multi-dog controller `collect_drive_multi`, run with Strombom sheep as `strombom_multi`. While collecting, the $D$ farthest outliers each get one dog (Hungarian algorithm, least total walk) and spare dogs drive the core from behind; while driving, the dogs spread over an arc through $P_d$ ([driving](methods/strombom_multi.md#driving-and-its-limit-for-large-flocks)).
+**Team rule**: HerdSim's multi-dog collect and drive rule, run with Strombom sheep as `strombom_multi`. While collecting, the $D$ farthest outliers each get one dog (Hungarian algorithm, least total walk) and spare dogs drive the core from behind; while driving, the dogs spread over an arc through $P_d$ ([driving](methods/strombom_multi.md#driving-and-its-limit-for-large-flocks)).
 
 **Point dogs**: dogs with no size, so two can stand at one point.
 

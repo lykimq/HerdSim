@@ -29,6 +29,10 @@ PAPER: dict[str, Any] = {
 # One tick is one time step of the paper.
 SHEPHERD_EXTENSIONS: dict[str, Any] = {"dt": 1.0}
 
+# The one method: Strombom sheep driven by a team of collect/drive dogs.
+METHOD = "strombom_multi"
+DEFAULTS: dict[str, Any] = {**PAPER, **SHEPHERD_EXTENSIONS}
+
 
 def resolve_n_neighbors(value: int | str, n_sheep: int) -> int:
     """Resolve n_neighbors: -1 -> N-1, "fN" -> ceil(f N); values above N-1 raise."""

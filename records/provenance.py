@@ -1,28 +1,7 @@
 """Physics hash and provenance.json of a campaign folder.
 
-The physics hash covers everything that changes a trial's outcome:
-
-- the task and every canonical setting except the sampling strategy;
-- each method's full parameter set (code defaults under the protocol's overrides) and its
-  time limit;
-- the set of layouts and the largest dog count, because they size the field and place the
-  goal of every cell.
-
-It leaves out what a campaign may add or change without changing a trial:
-
-- the flock sizes, the smaller dog counts and the factor levels;
-- the sampling strategy (theta, seed batches, budget);
-- settings still at their neutral value, so folders written before a setting existed keep
-  their hash.
-
-What follows from that:
-
-- more flock sizes, intermediate dog counts or seeds resume into the same folder;
-- a new layout or a dog count above the old maximum changes the hash and needs a new folder;
-- a folder whose hash differs from the protocol is refused.
-
-The hash says nothing about the code: ``code_identity`` records the code of each run
-sitting, so a resume after a change to the trial code is logged and can be traced.
+What the hash covers and leaves out: docs/guides/configuration.md. It says nothing about the
+code: ``code_identity`` records that per run sitting.
 """
 
 from __future__ import annotations

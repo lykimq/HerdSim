@@ -8,8 +8,8 @@ from typing import Any
 import numpy as np
 import pytest
 
-from sim.core.simulation_runner import run_trial
-from sim.core.simulation_state import SimulationState
+from sim.state import SimulationState
+from sim.trial import run_trial
 from tests.helpers import config_for
 
 METHOD = "strombom_multi"

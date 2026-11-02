@@ -81,4 +81,4 @@ D_min against N on four start layouts, 99 percent rule, 12 drive times, nine siz
 
 A method is a sheep model paired with a dog controller ([Strombom sheep](../methods/strombom_sheep.md) and [team rule](../methods/strombom_multi.md)).
 
-`strombom_multi` pairs the sheep model `strombom` with the dog controller `collect_drive_multi`.
+`strombom_multi` drives the Strombom sheep with the multi-dog collect and drive rule.

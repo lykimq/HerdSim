@@ -14,6 +14,7 @@ import sys
 import textwrap
 from collections.abc import Callable
 from dataclasses import dataclass
+from functools import cache
 from pathlib import Path
 from typing import Any
 
@@ -36,10 +37,10 @@ from docs.generate_docs.figstyle import (  # noqa: E402
     ORANGE,
     SURFACE,
 )
-from services.replay import open_run, replay_trial  # noqa: E402
-from sim.core.simulation_state import SimulationState  # noqa: E402
-from sim.methods.strombom.heuristics import COLLECT, collect_threshold, decide  # noqa: E402
-from sim.plugins.dogs.collect_drive_multi import team_targets  # noqa: E402
+from services.replay import StoredRun, open_run, replay_trial  # noqa: E402
+from sim.state import SimulationState  # noqa: E402
+from sim.strombom.shepherd import COLLECT, collect_threshold, decide  # noqa: E402
+from sim.strombom.team import team_targets  # noqa: E402
 
 # ----- settings -----
 FPS = 12
@@ -97,9 +98,15 @@ class Replayed:
         return int((d > self.goal_radius).sum())
 
 
+@cache
+def _run() -> StoredRun:
+    """The stored run the animations replay, opened once."""
+    return open_run(RUN)
+
+
 def shown_ticks(shot: Shot) -> int:
     """Stored trial length, or ``until`` if shorter."""
-    outcome = open_run(RUN).outcomes(METHOD, shot.layout, shot.n, shot.d)
+    outcome = _run().outcomes(METHOD, shot.layout, shot.n, shot.d)
     stored = outcome[shot.seed_index][1]
     return stored if shot.until is None else min(stored, shot.until)
 
@@ -110,8 +117,7 @@ def replay(shot: Shot, every: int) -> Replayed:
     The full trial is always replayed (and checked against the stored outcome) even when
     ``until`` cuts what is shown.
     """
-    jobs = open_run(RUN).jobs(METHOD, shot.layout, shot.n, shot.d, shot.seed_index + 1)
-    job = next(j for j in jobs if j.label["seed_index"] == shot.seed_index)
+    job = _run().job(METHOD, shot.layout, shot.n, shot.d, shot.seed_index)
     end = shot.until if shot.until is not None else math.inf
     kept: list[tuple[int, np.ndarray, np.ndarray]] = []
     last: list[tuple[int, np.ndarray, np.ndarray]] = []

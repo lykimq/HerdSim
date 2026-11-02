@@ -43,11 +43,20 @@ def last_queue_entries(queue_log: Path) -> dict[str, dict[str, Any]]:
     return {entry["protocol"]: entry for entry in entries}
 
 
+def _folder_status(results_root: Path, protocol: str) -> dict[str, Any] | None:
+    """The folder's status.json, or None when it has none."""
+    path = results_root / protocol / "status.json"
+    return json.loads(path.read_text()) if path.exists() else None
+
+
 def resumed_protocols(queue_log: Path, results_root: Path) -> list[str]:
     """Protocols whose folder holds more trials than their queue line recorded."""
-    last = last_queue_entries(queue_log)
-    status = {p: json.loads((results_root / p / "status.json").read_text()) for p in last}
-    return [p for p, e in last.items() if status[p]["trials_done"] > e["trials"]]
+    resumed = []
+    for protocol, entry in last_queue_entries(queue_log).items():
+        status = _folder_status(results_root, protocol)
+        if status is not None and status["trials_done"] > entry["trials"]:
+            resumed.append(protocol)
+    return resumed
 
 
 def run_record(queue_log: Path, results_root: Path | None = None) -> pd.DataFrame:
@@ -68,9 +77,8 @@ def run_record(queue_log: Path, results_root: Path | None = None) -> pd.DataFram
         "trial_errors": "trial_errors",
     }
     for protocol, entry in last.items():
-        status = results_root / protocol / "status.json" if results_root else None
-        if status is not None and status.exists():
-            found = json.loads(status.read_text())
+        found = _folder_status(results_root, protocol) if results_root else None
+        if found is not None:
             last[protocol] = {**entry, **{k: found[v] for k, v in current.items() if v in found}}
     cols = [
         "protocol",

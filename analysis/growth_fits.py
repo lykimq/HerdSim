@@ -33,6 +33,7 @@ def saturating(n: np.ndarray, p: np.ndarray) -> np.ndarray:
 
 
 SHAPES = {"power law": power_law, "saturating": saturating}
+AHEAD = (1600, 3200)  # flock sizes beyond the data at which the two shapes are compared
 STARTS = {
     "power law": [np.array([math.log(0.2), 0.4]), np.array([math.log(0.02), 0.8])],
     "saturating": [np.array([math.log(3.0), math.log(200.0)]), np.array([0.0, math.log(30.0)])],
@@ -105,11 +106,9 @@ def consistent_range(
     return float(ahead.min()), float(ahead.max())
 
 
-def compare(
-    points: list[tuple[int, Interval]], ahead: tuple[int, ...] = (1600, 3200)
-) -> dict[str, object]:
+def compare(points: list[tuple[int, Interval]]) -> dict[str, object]:
     """Both fits, the odds of the power law against the saturating curve, and the range each
-    shape allows at the sizes ``ahead``. Where both shapes pass through every interval the
+    shape allows at the sizes ``AHEAD``. Where both shapes pass through every interval the
     data cannot tell them apart (odds 1); the ranges then say at which N a run could, which
     is where they no longer overlap."""
     fits = {shape: fit(points, shape) for shape in SHAPES}
@@ -121,7 +120,7 @@ def compare(
         "d_inf": round(1.0 + math.exp(sat[0]), 1),
         "log_odds_power_vs_saturating": round(ratio, 2),
     }
-    for n in ahead:
+    for n in AHEAD:
         g = consistent_range(points, "power law", n)
         v = consistent_range(points, "saturating", n)
         out[f"N={n}: power / saturating"] = f"{g[0]:.1f}-{g[1]:.1f} / {v[0]:.1f}-{v[1]:.1f}"

@@ -120,12 +120,12 @@ def cell_stats(trials: pd.DataFrame, rules: Rules) -> pd.DataFrame:
                 "rate_low": low,
                 "rate_high": high,
                 "reliability": reliability_status(low, high, rules.theta),
-                "median_finish": float(done["finish_ticks"].median()) if k else float("nan"),
-                "p90_finish": float(done["finish_ticks"].quantile(0.9)) if k else float("nan"),
-                "median_finish_seconds": float(seconds.median()) if k else float("nan"),
-                "p90_finish_seconds": float(seconds.quantile(0.9)) if k else float("nan"),
-                "median_dog_ticks": float(done["dog_ticks"].median()) if k else float("nan"),
-                "median_path_per_dog": float(done["path_per_dog"].median()) if k else float("nan"),
+                "median_finish": float(done["finish_ticks"].median()),
+                "p90_finish": float(done["finish_ticks"].quantile(0.9)),
+                "median_finish_seconds": float(seconds.median()),
+                "p90_finish_seconds": float(seconds.quantile(0.9)),
+                "median_dog_ticks": float(done["dog_ticks"].median()),
+                "median_path_per_dog": float(done["path_per_dog"].median()),
             }
         )
     return pd.DataFrame(rows)

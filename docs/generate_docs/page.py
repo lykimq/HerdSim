@@ -1,28 +1,10 @@
-"""Result tables, one question per verb, and the sections of docs/report/results_tables.md.
+"""Result tables, one question per verb, read from stored runs; nothing is simulated.
 
     uv run python -m docs.generate_docs.page record
-    uv run python -m docs.generate_docs.page dmin    dmin_f99_m12 dmin_f99_m6
-    uv run python -m docs.generate_docs.page nested  dmin_f99_m12 dmin_f99_m6
+    uv run python -m docs.generate_docs.page dmin dmin_f99_m12 dmin_f99_m6
 
-Each verb takes one or more folders (a protocol id under results/, or a path) and prints a table
-ready to paste. Nothing here runs a simulation: the tables are read from the files a run
-wrote, and the calculations live in analysis/ and docs/generate_docs/tables.py.
-docs/report/results_tables.md is written from the same verbs by
-docs/generate_docs/make_docs.py.
-
-  record     every run: when it finished, trials, cells, open cells, errors, hours
-             (from results/queue_log.jsonl; takes no folder)
-  dmin       D_min by layout and flock size, one table per folder (--sizes)
-  growth     how fast D_min grows with N (the range of log-log slopes the brackets allow),
-             and whether layout or N moves it more (--sizes)
-  fits       a power law against a curve that levels off, fitted to D_min(N) per layout;
-             split is left out, since its success does not rise with D at N >= 200
-  nested     two runs that differ only in the deadline: is the shorter one a cut of the longer?
-  curve      one curve (--layout, --n) cell by cell across folders: successes, reliability,
-             median finish
-
-An entry such as "2-3" is a bracket (D = 3 is reliable, D = 2 still undecided), "[5]" a lower
-bound with no reliable D yet, and "none on grid" a curve where every D is unreliable.
+Verbs and how to read a table: docs/guides/cli_reference.md. make_docs.py writes
+docs/report/results_tables.md from the same verbs.
 """
 
 from __future__ import annotations
@@ -45,10 +27,7 @@ from docs.generate_docs.tables import F99_MAIN as F99_MAIN_FOLDERS
 from docs.generate_docs.tables import ORIGINAL_NS, growth_table, layout_by_n
 from docs.generate_docs.tables import STRICT_MAIN as STRICT_MAIN_FOLDERS
 from services.protocol import RESULTS_ROOT, results_folder
-from sim.plugins.scenarios import SCENARIOS
-
-# Drive-task layout order for table rows.
-LAYOUTS = tuple(SCENARIOS["drive_to_goal"].layouts)
+from sim.drive_task.layouts import LAYOUTS
 
 SIZES_HELP = "only these flock sizes (a folder resumed with more sizes, shown at its first ones)"
 
@@ -258,7 +237,7 @@ CURVE_INTRO = (
 # --- Commands ----------------------------------------------------------------------------------
 
 STRICT_MAIN_ARGS = " ".join(STRICT_MAIN_FOLDERS)
-F99_MAIN = " ".join(F99_MAIN_FOLDERS)
+F99_MAIN_ARGS = " ".join(F99_MAIN_FOLDERS)
 ORIGINAL_SIZES = " ".join(map(str, ORIGINAL_NS))
 NESTED_PAIRS = (
     ("dmin_f99_m12", "dmin_f99_m6"),
@@ -285,12 +264,12 @@ SECTIONS: tuple[Block, ...] = (
     Query(f"dmin {STRICT_MAIN_ARGS}"),
     "## D_min by layout and N, success at 99 percent",
     ORIGINAL_SIZES_NOTE,
-    Query(f"dmin {F99_MAIN} --sizes {ORIGINAL_SIZES}"),
+    Query(f"dmin {F99_MAIN_ARGS} --sizes {ORIGINAL_SIZES}"),
     "## Growth with N, strict",
     Query(f"growth {STRICT_MAIN_ARGS}"),
     "## Growth with N, 99 percent",
     ORIGINAL_SIZES_NOTE,
-    Query(f"growth {F99_MAIN} --sizes {ORIGINAL_SIZES}"),
+    Query(f"growth {F99_MAIN_ARGS} --sizes {ORIGINAL_SIZES}"),
     "## Nine flock sizes, 99 percent",
     NINE_SIZES_INTRO,
     Query("dmin dmin_f99_m12 dmin_f99_m6", prefix="D_min, "),
@@ -301,8 +280,8 @@ SECTIONS: tuple[Block, ...] = (
     *(_single(f"nested {longer} {shorter}") for longer, shorter in NESTED_PAIRS),
     "## N = 400 at three deadlines, 99 percent",
     CURVE_INTRO,
-    _single(f"curve {F99_MAIN} --layout wide --n 400"),
-    _single(f"curve {F99_MAIN} --layout outlier_rich --n 400"),
+    _single(f"curve {F99_MAIN_ARGS} --layout wide --n 400"),
+    _single(f"curve {F99_MAIN_ARGS} --layout outlier_rich --n 400"),
 )
 
 # --- Helpers -----------------------------------------------------------------------------------

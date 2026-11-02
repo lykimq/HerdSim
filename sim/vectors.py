@@ -1,4 +1,4 @@
-"""Small vector helpers shared by the sheep models, dog controllers and metrics."""
+"""Small vector helpers shared by the sheep, the dog team and the metrics."""
 
 from __future__ import annotations
 

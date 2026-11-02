@@ -1,24 +1,7 @@
 """Adaptive campaign: seeds and dog counts go only where the answer is still open.
 
-One run, one output folder. Each round:
-
-1. every new or partial cell (cut short by a kill or the budget stop) is filled up to a
-   whole batch;
-2. the frontier rules (analysis.frontier) mark the cells whose reliability or finish-time
-   comparison is still undecided; those get their next batch, up to ``max_seeds``;
-3. wherever the zone changes between two neighbouring D on a curve more than
-   ``refine_min_gap`` dogs apart, the D halfway between is added.
-
-Above a confirmed saturation, a cell whose dogs were copies of each other gets no more
-seeds and no midpoints (``pruned_cells``); such cells are marked ``pruned`` in
-frontier_cells.csv. A cell with an errored trial gets no further seeds and is never
-reliable: an exception in a deterministic simulation is a bug to fix, not noise to average;
-status.json names those cells.
-
-The run stops when no cell needs seeds, or when ``budget_hours`` is spent; the budget
-counts from the start of this run (after calibration), so a resumed run gets a new one.
-Resuming continues from the trials already in the folder; rows of groups the protocol no
-longer lists are ignored.
+The rounds, pruning and stop rules are in docs/guides/cli_reference.md. A resume continues
+from the stored trials and ignores groups the protocol no longer lists.
 """
 
 from __future__ import annotations
@@ -34,7 +17,6 @@ import pandas as pd
 
 from analysis import keys
 from analysis.frontier import SATURATED, UNDECIDED, Frontier, Rules, frontier
-from records.provenance import stable_hash
 
 from .calibration import CalibrationError, calibrate
 from .cells import Cell, Group, Trial, cell_config, groups, make_trial, trial_key
@@ -79,15 +61,9 @@ def _flock_radii(
     return table
 
 
-def _next_seeds(
-    cell: Cell, done: set[str], errored: set[str], batch: int, max_seeds: int
-) -> list[int]:
-    """The next ``batch`` seed indices of ``cell`` that have not run or failed."""
-    todo = [
-        i
-        for i in range(max_seeds)
-        if trial_key(cell, i) not in done and trial_key(cell, i) not in errored
-    ]
+def _next_seeds(cell: Cell, done: set[str], batch: int, max_seeds: int) -> list[int]:
+    """The next ``batch`` seed indices of ``cell`` that have not run."""
+    todo = [i for i in range(max_seeds) if trial_key(cell, i) not in done]
     return todo[:batch]
 
 
@@ -122,30 +98,25 @@ def refine(
     grid: dict[str, set[int]],
     front: Frontier,
     min_gap: int,
-    pruned: frozenset[CellId] | None = None,
-    column: str = "zone",
-    max_seeds: int | None = None,
+    pruned: frozenset[CellId],
+    column: str,
+    max_seeds: int,
 ) -> int:
     """Add the midpoint D wherever ``column`` (the zone, or the reliability when finish times
     are not decided) changes between neighbouring D more than ``min_gap`` apart, unless
-    either is ``pruned``. Groups the grid does not list are
-    skipped. Returns how many.
+    either is ``pruned``. Groups the grid does not list are skipped. Returns how many.
 
     An undecided neighbour below ``max_seeds`` may yet decide, so it waits. One at the cap
     stays undecided: the D between it and a decided neighbour is then added, or a D_min
-    could sit above an untested D inside its own bracket. Without ``max_seeds`` every
-    undecided cell waits.
+    could sit above an untested D inside its own bracket.
     """
-    pruned = pruned or frozenset()
     added = 0
     for key, cells in front.cells.groupby("group_key"):
         group_key = str(key)
         if group_key not in grid:
             continue
         zones = dict(zip(cells["n_shepherds"].astype(int), cells[column]))
-        d_all = cells["n_shepherds"].astype(int)
-        capped = cells["n_seeds"] >= max_seeds if max_seeds is not None else None
-        waiting = set(d_all if capped is None else d_all[~capped])
+        waiting = set(cells["n_shepherds"].astype(int)[cells["n_seeds"] < max_seeds])
         ds = sorted(zones)
         for a, b in zip(ds, ds[1:]):
             if (group_key, a) in pruned or (group_key, b) in pruned:
@@ -170,7 +141,6 @@ class _Ledger:
     rows_ignored: int  # rows of groups the protocol no longer lists
     done: set[str] = field(default_factory=set)
     seeds_run: Counter[str] = field(default_factory=Counter)
-    errored: set[str] = field(default_factory=set)
     error_cells: dict[str, int] = field(default_factory=dict)
 
     @classmethod
@@ -196,13 +166,10 @@ class _Ledger:
         self._index(row)
 
     def refresh_errors(self, store: CampaignStore) -> None:
-        """Errored trial keys and counts per cell, of the groups the protocol lists."""
-
-        def listed(key: str) -> bool:
-            return keys.group_of_cell(key) in self.grid
-
-        self.errored = {k for k in store.error_keys() if listed(k)}
-        self.error_cells = {k: n for k, n in store.error_cells().items() if listed(k)}
+        """Errored trials per cell, of the groups the protocol lists."""
+        self.error_cells = {
+            k: n for k, n in store.error_cells().items() if keys.group_of_cell(k) in self.grid
+        }
 
 
 def _assess(
@@ -249,7 +216,7 @@ def _plan_round(
             count = seeds_wanted(ledger.seeds_run[cell.key], batch, (key, d) in needs)
             if count == 0:
                 continue
-            for i in _next_seeds(cell, ledger.done, ledger.errored, count, max_seeds):
+            for i in _next_seeds(cell, ledger.done, count, max_seeds):
                 plan.append(make_trial(protocol, cell, i, config_of(cell), timeseries_dir))
     plan.sort(key=lambda t: (-t.cell.group.n_sheep, -t.cell.n_shepherds, t.seed_index))
     return plan
@@ -300,7 +267,7 @@ def _status(
 def run_campaign(
     protocol: Protocol, workers: int, log: Callable[[str], None] = print
 ) -> CampaignStore:
-    physics_hash = stable_hash(protocol.physics())
+    physics_hash = protocol.physics_hash()
     store = CampaignStore(protocol.output)
     store.open(protocol, physics_hash)
     try:

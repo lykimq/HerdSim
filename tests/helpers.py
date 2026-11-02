@@ -12,8 +12,8 @@ import numpy.typing as npt
 
 from services.cells import Cell, Group, cell_config
 from services.protocol import Protocol, load_protocol
-from sim.core.simulation_state import SimulationState
-from sim.core.world.arena import GoalZone, World
+from sim.drive_task.world import GoalZone, World
+from sim.state import SimulationState
 
 PROTOCOLS = Path(__file__).parent / "protocols"
 TEST_OUTPUT = Path(tempfile.gettempdir()) / "herdsim-tests"
@@ -50,7 +50,6 @@ def config_for(
     flock_radius: float = 7.0,
     settings: dict[str, Any] | None = None,
     params: dict[str, Any] | None = None,
-    factors: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Run config of one cell, built the way a campaign builds it (fixed R_f, no calibration).
 
@@ -62,7 +61,7 @@ def config_for(
         layouts=(layout,),
         shepherd_counts=(d,),
     )
-    group = Group(method, layout, tuple(sorted((factors or {}).items())), n)
+    group = Group(method, layout, n)
     return cell_config(protocol, Cell(group, d), flock_radius)
 
 

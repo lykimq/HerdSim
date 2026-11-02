@@ -8,13 +8,16 @@ after a still tick).
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any
 
 import numpy as np
 from scipy.spatial import cKDTree
 
-from sim.core.vectors import EPS, angle_vectors, unit_rows
+from sim.state import SimulationState
+from sim.vectors import EPS, angle_vectors, unit_rows
+
+from .params import resolve_n_neighbors
 
 
 @dataclass(frozen=True)
@@ -109,3 +112,30 @@ def velocities(
     # speed, so more dogs cannot drive a flock faster than one sheep walks.
     out[idx] = unit_rows(heading) * speed
     return out
+
+
+def prepare(config: dict[str, Any]) -> dict[str, Any]:
+    """The keys the sheep derive from the config: the neighbour count k."""
+    return {"k_neighbors": resolve_n_neighbors(config["n_neighbors"], int(config["n_sheep"]))}
+
+
+def top_speed(config: dict[str, Any]) -> float:
+    """Units per second: one heading of length ``sheep_speed`` is walked per tick at dt = 1."""
+    return float(config["sheep_speed"])
+
+
+def step(state: SimulationState, config: dict[str, Any]) -> SimulationState:
+    """Advance every sheep by ``dt * velocity`` (dt = 1 is the paper's one step per tick)."""
+    moved = velocities(
+        state.sheep_positions,
+        state.sheep_velocities,
+        state.shepherd_positions,
+        draw(state.rng, state.n_sheep),
+        config,
+        int(config["k_neighbors"]),
+    )
+    return replace(
+        state,
+        sheep_positions=state.sheep_positions + float(config["dt"]) * moved,
+        sheep_velocities=moved,
+    )

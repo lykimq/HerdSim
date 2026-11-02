@@ -1,30 +1,8 @@
-"""Results folder of one campaign.
+"""Results folder of one campaign; the files are listed in docs/guides/configuration.md.
 
-    <output>/
-      protocol.yaml           merged protocol and canonical values, as run, plus
-                              method_config: every parameter each method ran with
-      provenance.json         protocol id and physics hash
-      runs.jsonl              one line per run sitting: when, the code it ran (hash, commit,
-                              library versions) and the merged protocol of that sitting, since
-                              protocol.yaml stays as the folder was created
-      calibration.json        R_f(N) per method, with the physics hash it belongs to
-      trials.jsonl            one JSON line per finished trial, appended as trials finish
-      trials.jsonl.gz         the committed copy of trials.jsonl, which can pass GitHub's
-                              100 MB file limit; packed when a campaign closes the folder
-                              and unpacked when a clone has only the .gz
-      errors.jsonl            one line per trial that raised
-      trials.csv              table form of trials.jsonl, rewritten after each round
-      frontier_cells.csv      per (group, D): reliability, finish times, zone, errored trials
-      frontier_groups.csv     per group: D_min, D_min_low, D_best, D_sat, D_crowd,
-                              D_overcrowd, D_max, flags
-      status.json             progress of the adaptive run
-      timeseries/             per-tick Parquet for the first seeds of every cell
-
-Only the campaign process writes here, except the per-trial Parquet files, which each worker
-writes under its trial's own name; workers return their rows to it. ``open`` takes an
-advisory lock on .lock for the whole run, so a second campaign on the folder is refused. A
-kill in the middle of a write leaves at worst a cut last line, which is dropped on the next
-load.
+Only the campaign process writes here, except the Parquet files, which workers write under
+their trial's name. ``open`` locks .lock for the whole run, so a second campaign on the folder
+is refused. A kill mid-write leaves at worst a cut last line, dropped on the next load.
 """
 
 from __future__ import annotations

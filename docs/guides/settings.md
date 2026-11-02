@@ -4,7 +4,7 @@
 
 Every canonical setting, with its default and the note written beside it in `protocols/configs/canonical.yaml`. A protocol changes a setting by naming it ([configuration](configuration.md#protocol-overrides)). The model parameters ($r_a$, $c$ and the rest) are not canonical settings: they live with the method and are listed in the method docs: [Strombom sheep](../methods/strombom_sheep.md) and [team rule](../methods/strombom_multi.md).
 
-The kind of a setting says where it may change. A per-trial setting can differ between curves of one protocol, as a factor. A whole-protocol setting is fixed for every curve of a protocol, because calibration or the seeds depend on it. A sampling setting only steers the adaptive run, so it stays out of the physics hash and a folder can resume after it changes.
+The kind of a setting says where it may change. A per-trial setting changes what a trial does. A whole-protocol setting is fixed for the protocol, because calibration or the seeds depend on it. A sampling setting only steers the adaptive run, so it stays out of the physics hash and a folder can resume after it changes.
 
 Settings that share a note are one row, with their defaults in the same order, separated by semicolons. The physics hash that decides whether a folder can resume is in the [configuration guide](configuration.md#physics-hash).
 

@@ -32,7 +32,7 @@ from services.protocol import (  # noqa: E402
     method_dt,
     study_queue,
 )
-from sim.core.methods import METHODS  # noqa: E402
+from sim.strombom.params import METHOD  # noqa: E402
 
 COMMAND = "uv run python docs/generate_docs/make_docs.py"
 
@@ -63,9 +63,9 @@ Every canonical setting, with its default and the note written beside it in \
 rest) are not canonical settings: they live with the method and are listed in the method docs: \
 {method_docs}.
 
-The kind of a setting says where it may change. A per-trial setting can differ between curves \
-of one protocol, as a factor. A whole-protocol setting is fixed for every curve of a protocol, \
-because calibration or the seeds depend on it. A sampling setting only steers the adaptive run, \
+The kind of a setting says where it may change. A per-trial setting changes what a trial \
+does. A whole-protocol setting is fixed for the protocol, because calibration or the seeds \
+depend on it. A sampling setting only steers the adaptive run, \
 so it stays out of the physics hash and a folder can resume after it changes.
 
 Settings that share a note are one row, with their defaults in the same order, separated by \
@@ -106,7 +106,7 @@ def time_limit(method: MethodSpec) -> str:
     if method.time_limit_drive_multiple is not None:
         return f"{method.time_limit_drive_multiple:g} drive times"
     assert method.time_limit_ticks is not None
-    return f"{method.time_limit_ticks * method_dt(method.name, method.params):.0f} s"
+    return f"{method.time_limit_ticks * method_dt(method.params):.0f} s"
 
 
 def description(protocol: Protocol) -> str:
@@ -164,7 +164,6 @@ def _protocol_entry(p: Protocol) -> str:
         "Layouts": _values(p.layouts),
         "Flock sizes N": _number_list(p.flock_sizes),
         "Team sizes D": _number_list(p.shepherd_counts),
-        "Factors": "; ".join(f"{k}: {_number_list(v)}" for k, v in p.factors.items()),
         "Changed from canonical": _changed_settings(p),
     }
     rows = "\n".join(f"| {name} | {value} |" for name, value in fields.items() if value)
@@ -200,12 +199,7 @@ def protocols_page() -> str:
     for p in protocols:
         if p.output != REPO / "results" / p.protocol_id:
             raise ValueError(f"{p.protocol_id}: results folder is {p.output}, not results/<id>")
-    used = sorted({m.name for p in protocols for m in p.methods})
-    methods = " ".join(
-        f"`{name}` pairs the sheep model `{m.sheep_model}` with the dog controller "
-        + f"`{m.dog_controller}`."
-        for name, m in ((name, METHODS[name]) for name in used)
-    )
+    methods = f"`{METHOD}` drives the Strombom sheep with the multi-dog collect and drive rule."
     intro = (
         f"The {len(protocols)} protocols of the study, in queue order: what each tests, its "
         "grid, and the settings it changes from `protocols/configs/canonical.yaml`. The results "

@@ -1,1 +1,0 @@
-"""Arena and start layouts."""
