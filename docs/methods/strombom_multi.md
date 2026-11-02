@@ -35,8 +35,8 @@ The $D$ farthest outliers get one dog each. Dogs are matched to their collect po
 **Figure 2: Collecting.** Each outlier gets a collect point, and the Hungarian algorithm pairs dogs with collect points so that no two paths cross.
 
 - Marks: light blue dots are sheep within $f(N)$, dark-outlined dots outliers, the plus sign the GCM, crosses collect points, orange triangles dogs.
-- Left: the shaded disc is $f(N)$; each outlier's collect point lies on the ray from the GCM, drawn at $4 r_a$ behind the outlier.
-- Right: the assignment with the least total distance; the dashed lines are a constructed assignment that crosses.
+- Left: the shaded disc is $f(N)$; the $D$ farthest outliers each have a collect point on the ray from the GCM, drawn at $4 r_a$ behind the outlier.
+- Right: the assignment from `linear_sum_assignment` in `collect_drive_multi` (least total walk; numbers on the arrows are distances); the dashed lines are a constructed assignment that crosses.
 
 ![Animation of the team rule with each dog's target](../gifs/team_rule.gif)
 

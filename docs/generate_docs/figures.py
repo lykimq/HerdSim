@@ -14,6 +14,8 @@ from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.lines import Line2D
 from matplotlib.patches import Circle, Rectangle
+from scipy.optimize import linear_sum_assignment
+from scipy.spatial.distance import cdist
 
 from analysis.results import flock_radii
 from docs.generate_docs.figstyle import (
@@ -700,18 +702,28 @@ def fig_independent() -> None:
 
 
 def fig_hungarian_matching() -> None:
-    """Outliers and Pc (left); Hungarian matching vs a crossing assignment (right)."""
+    """How collect_drive_multi assigns dogs: D farthest outliers and Pc (left); least-total
+    walk matching from linear_sum_assignment (right), against a crossing assignment."""
     n, d = 100, 4
     c = cfg("wide", n, d)
     sheep, dogs = start(c)
     goal = np.asarray(c["goal_center"])
-    centroid = sheep.mean(axis=0)
+    decision = decide(sheep, goal, c)
+    centroid = decision.centroid
     thresh = collect_threshold(n, c["r_a"])
-    dists = np.linalg.norm(sheep - centroid, axis=1)
-    far = dists > thresh
-    stray = sheep[np.argsort(dists)[::-1][0]]
-    # drawn four times farther out than the real r_a, or the cross would sit on the sheep
-    pc_pos = stray + float(c["r_a"]) * 4.0 * unit(stray - centroid)
+    far = np.linalg.norm(sheep - centroid, axis=1) > thresh
+    # Same steps as team_targets in collect mode: D farthest outliers, Pc, then assignment.
+    jobs = decision.outliers[:d]
+    points = np.array([behind(sheep[o], centroid, float(c["r_a"])) for o in jobs])
+    # Drawn 4x farther than r_a so the cross is readable next to the sheep.
+    points_drawn = np.array(
+        [sheep[o] + 4.0 * float(c["r_a"]) * unit(sheep[o] - centroid) for o in jobs]
+    )
+    costs = cdist(dogs, points)
+    rows, cols = linear_sum_assignment(costs)
+    assert np.allclose(team_targets(sheep, goal, dogs, c)[rows], points[cols]), (
+        "figure disagrees with collect_drive_multi.team_targets"
+    )
     fig, axes = plt.subplots(1, 2, figsize=(14, 5.8))
 
     ax0 = axes[0]
@@ -747,42 +759,71 @@ def fig_hungarian_matching() -> None:
         fontsize=9,
         fontweight="bold",
     )
-    arrow(ax0, pc_pos, centroid, MUTED, 1.0, ls=":")
-    ax0.scatter(*stray, s=95, facecolors="none", ec=ORANGE, lw=1.8, zorder=4)
+    for k, (o, pc) in enumerate(zip(jobs, points_drawn)):
+        ax0.scatter(*sheep[o], s=95, facecolors="none", ec=ORANGE, lw=1.8, zorder=4)
+        ax0.scatter(*pc, s=90, marker="x", color=INK, lw=2.2, zorder=5)
+        arrow(ax0, pc, centroid, MUTED, 0.8, ls=":")
+        ax0.text(
+            pc[0] + 2,
+            pc[1] + 2,
+            f"$P_{{c,{k + 1}}}$",
+            color=INK,
+            fontsize=9,
+            fontweight="bold",
+        )
     ax0.text(
-        stray[0] + 3, stray[1] - 2, r"outlier $o$", color=ORANGE, fontsize=9.5, fontweight="bold"
-    )
-    ax0.scatter(*pc_pos, s=90, marker="x", color=INK, lw=2.2, zorder=5)
-    ax0.text(
-        pc_pos[0] + 3,
-        pc_pos[1] + 3,
-        r"collect point $P_c$" + "\n" + r"($r_a = 2$ m behind, drawn 4x)",
+        points_drawn[0, 0] + 2,
+        points_drawn[0, 1] - 8,
+        r"$r_a$ behind outlier (drawn 4x)",
         color=INK,
-        fontsize=9,
-        fontweight="bold",
-    )
-    ax0.text(
-        centroid[0] - thresh * 0.72,
-        centroid[1] + thresh * 0.72,
-        r"flock region: $f(N) = r_a N^{2/3}$",
-        color=MUTED,
-        fontsize=8.5,
+        fontsize=8,
     )
     ax0.legend(loc="lower left", frameon=False, fontsize=8.5)
     window(ax0, centroid, 130, 90, 110, 110)
-    style_map(ax0, "A. outliers and the collect point Pc")
+    style_map(ax0, "A. the $D$ farthest outliers and their collect points")
 
     ax1 = axes[1]
-    targets = team_targets(sheep, goal, dogs, c)
     flock_split(ax1, sheep, far, s_in=15, s_out=28, lw_out=0.6, alpha_in=0.5)
     gcm(ax1, centroid, label=None, s=50, lw=1.5, color=MUTED, zorder=3)
     dogs_at(ax1, dogs, s=70, lw=1.0, zorder=5, label="dogs ($D = 4$)")
-    targets_at(ax1, targets, s=65, lw=1.8, zorder=5, label="collect points $P_{c,1..4}$")
-    for dog, tgt in zip(dogs, targets):
-        arrow(ax1, tgt, dog, ORANGE, 1.8)
+    targets_at(ax1, points_drawn, s=65, lw=1.8, zorder=5, label="collect points $P_{c,1..4}$")
+    total = 0.0
+    for dog_i, pc_i in zip(rows, cols):
+        dog, pc = dogs[dog_i], points_drawn[pc_i]
+        dist = float(costs[dog_i, pc_i])
+        total += dist
+        arrow(ax1, pc, dog, ORANGE, 1.8)
+        mid = (dog + pc) / 2
+        ax1.text(
+            mid[0],
+            mid[1],
+            f"{dist:.0f}",
+            color=ORANGE,
+            fontsize=8,
+            ha="center",
+            va="center",
+            bbox=dict(boxstyle="round,pad=0.15", fc=SURFACE, ec="none", alpha=0.85),
+        )
+        ax1.text(
+            dog[0] - 16,
+            dog[1] - 2,
+            f"dog {dog_i + 1}",
+            color=ORANGE,
+            fontsize=8.5,
+            fontweight="bold",
+        )
+        ax1.text(
+            pc[0] + 3,
+            pc[1] - 2,
+            f"$P_{{c,{pc_i + 1}}}$",
+            color=INK,
+            fontsize=8.5,
+            fontweight="bold",
+        )
+    # A hand-drawn crossing pair, to show what the least-total walk avoids.
     ax1.plot(
-        [dogs[0, 0], targets[2, 0]],
-        [dogs[0, 1], targets[2, 1]],
+        [dogs[rows[0], 0], points_drawn[cols[1], 0]],
+        [dogs[rows[0], 1], points_drawn[cols[1], 1]],
         color=RED,
         ls="--",
         lw=1.0,
@@ -790,20 +831,25 @@ def fig_hungarian_matching() -> None:
         label="a crossing assignment (drawn by hand)",
     )
     ax1.plot(
-        [dogs[2, 0], targets[0, 0]],
-        [dogs[2, 1], targets[0, 1]],
+        [dogs[rows[1], 0], points_drawn[cols[0], 0]],
+        [dogs[rows[1], 1], points_drawn[cols[0], 1]],
         color=RED,
         ls="--",
         lw=1.0,
         alpha=0.45,
     )
-    for i, dog in enumerate(dogs):
-        ax1.text(
-            dog[0] - 16, dog[1] - 2, f"dog {i + 1}", color=ORANGE, fontsize=8.5, fontweight="bold"
-        )
-    ax1.legend(loc="lower left", frameon=False, fontsize=8.5)
+    ax1.text(
+        0.02,
+        0.02,
+        f"least total walk = {total:.0f}",
+        transform=ax1.transAxes,
+        color=ORANGE,
+        fontsize=9,
+        fontweight="bold",
+    )
+    ax1.legend(loc="lower right", frameon=False, fontsize=8.5)
     window(ax1, centroid, 130, 90, 110, 110)
-    style_map(ax1, "B. Hungarian assignment: no two paths cross")
+    style_map(ax1, "B. Hungarian assignment: least total walk, no crossing")
     save(fig, "fig_hungarian_matching.png", rect=(0, 0, 1, 0.98))
 
 
