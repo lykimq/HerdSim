@@ -34,17 +34,13 @@ from services.cells import Cell, Group, cell_config
 from services.protocol import load_protocol
 from sim.core.simulation_runner import initial_state, run_trial
 from sim.core.simulation_state import SimulationState
-from sim.core.vectors import behind, farthest_from, unit
+from sim.core.vectors import unit
 from sim.core.world.layouts import layout_extent, place_dogs, place_flock
-from sim.methods.kubo.forces import clamp_speed, dog_velocity, sheep_velocities
-from sim.methods.lama.dynamics import herder_velocities
-from sim.methods.strombom.heuristics import collect_threshold, decide, drive_point, radius_of
+from sim.methods.strombom.heuristics import collect_threshold, drive_point, radius_of
 from sim.plugins.dogs.collect_drive_multi import team_targets
 from tests.helpers import config_for
 
-# ------------------------------------------------------------------------------------ settings
-
-
+# ----- settings -----
 Config = dict[str, Any]  # a run config, as cell_config and config_for build it
 Point = Sequence[float] | np.ndarray
 
@@ -83,9 +79,7 @@ def field_config(n: int, max_dogs: int) -> Config:
     return cell_config(protocol, Cell(Group("strombom_multi", "wide", (), n), max_dogs), RF[n])
 
 
-# ------------------------------------------------------------------------------ drawing helpers
-
-
+# ----- drawing helpers -----
 def xy(point: Point) -> tuple[float, float]:
     """Point as an (x, y) tuple for matplotlib patches."""
     return float(point[0]), float(point[1])
@@ -180,21 +174,7 @@ def draw_scene(
         arrow(ax, goal - [c["goal_radius"] + 4, 0], center + [14, 0], MUTED, 0.9)
 
 
-def force_arrows(
-    ax: Axes, origin: Point, forces: dict[str, np.ndarray], colors: Sequence[str]
-) -> list[Line2D]:
-    """Draw force arrows from ``origin``; return legend handles with magnitudes."""
-    handles = []
-    for (label, v), color in zip(forces.items(), colors):
-        mag = float(np.linalg.norm(v))
-        arrow(ax, unit(v) * max(np.sqrt(mag) * 3.2, 3.5), origin, color, 1.6)
-        handles.append(Line2D([0], [0], color=color, lw=2, label=f"{label}  {mag:.1f}"))
-    return handles
-
-
-# -------------------------------------------------------------------------------------- models
-
-
+# ----- models -----
 def fig_sheep_forces() -> None:
     """Strombom (2014) sheep forces: interaction geometry (left) and weighted sum (right)."""
     focal = np.array([0.0, 0.0])
@@ -356,261 +336,7 @@ def fig_sheep_forces() -> None:
     save(fig, "fig_sheep_forces.png", rect=(0, 0, 1, 0.98))
 
 
-def fig_fat() -> None:
-    """Wide N=100: Strombom vs FAT (one dog and four dogs, same target)."""
-    c1 = cfg("wide", 100, 1)
-    sheep = place_flock(c1, np.random.default_rng(SEED))
-    goal = np.asarray(c1["goal_center"])
-    centroid = sheep.mean(axis=0)
-    fig, axes = plt.subplots(1, 3, figsize=(13, 4.8))
-    for k, ax in enumerate(axes):
-        d = 4 if k == 2 else 1
-        dogs = place_dogs(cfg("wide", 100, d))
-        ax.scatter(*sheep.T, s=9, color=BLUE, alpha=0.75, lw=0)
-        dogs_at(ax, dogs, s=40, zorder=4)
-        arrow(ax, centroid + [80, 0], centroid + [55, 0], AQUA, 1.4)
-        ax.text(centroid[0] + 82, centroid[1], "goal", color=AQUA, va="center", fontsize=9)
-        if k == 0:
-            dd = decide(sheep, goal, c1)
-            tgt = dd.target[None, :]
-            pick = sheep[dd.outliers[0]]
-            gcm(ax, centroid, text_at=(2, 3))
-            title = "Strombom, one dog: farthest from the GCM"
-        else:
-            pick = farthest_from(sheep, goal)
-            tgt = np.tile(behind(pick, goal, c1["r_a"]), (len(dogs), 1))
-            title = "FAT, one dog: farthest from the goal" if k == 1 else "FAT, 4 dogs: one target"
-        ax.scatter(*pick, s=80, facecolors="none", ec=ORANGE, lw=1.4)
-        targets_at(ax, tgt, s=60, lw=1.6)
-        for dog, t in zip(dogs, tgt):
-            arrow(ax, t, dog, ORANGE, 1.2)
-        window(ax, centroid, 130, 100, 125, 125)
-        style_map(ax, title)
-    save(fig, "fig4_fat.png", rect=(0, 0, 1, 0.98))
-
-
-def kubo_sheep_panel(ax: Axes, c: Config) -> None:
-    """Kubo sheep forces on a hand-placed scene (checked against the code)."""
-    focal = np.zeros(2)
-    nbr = np.array([[5.0, 3.0], [-4.0, 6.0], [8.0, -5.0], [-7.0, -4.0], [2.0, -9.0]])
-    heading = np.array([[1.0, 0.2], [0.8, 0.5], [0.0, 0.0], [1.0, -0.3], [0.9, 0.1]])
-    heading = heading / np.maximum(np.linalg.norm(heading, axis=1, keepdims=True), 1e-9)
-    dog = np.array([[-12.0, 9.0]])
-    pos = np.vstack([focal, nbr])
-    vel = np.vstack([[0.8, 0.2], heading * 1.0])
-    diff = focal - nbr
-    dist = np.linalg.norm(diff, axis=1)
-    moving = np.linalg.norm(vel[1:], axis=1) > 0
-    a = (diff / dist[:, None] ** 2).mean(axis=0)
-    cc = -(diff / dist[:, None]).mean(axis=0)
-    b = (vel[1:][moving] / np.linalg.norm(vel[1:][moving], axis=1, keepdims=True)).mean(axis=0)
-    dd_ = focal - dog
-    dflee = (dd_ / np.linalg.norm(dd_, axis=1, keepdims=True) ** 3).mean(axis=0)
-    terms = {
-        "K_s1 repulsion": c["K_s1"] * a,
-        "K_s2 alignment": c["K_s2"] * b,
-        "K_s3 attraction": c["K_s3"] * cc,
-        "K_s4 flight from the dog": c["K_s4"] * dflee,
-    }
-    code = sheep_velocities(pos, vel, dog, c)[0]
-    total = np.sum(list(terms.values()), axis=0)
-    assert np.allclose(code, clamp_speed(total[None, :], c["sheep_speed_max"])[0]), (
-        "figure disagrees with the Kubo sheep code"
-    )
-    ax.add_patch(Circle(xy(focal), c["sheep_radius"], fc="none", ec=MUTED, lw=0.8, ls="--"))
-    ax.scatter(*nbr.T, s=24, color="#a8a7a0", lw=0)
-    ax.scatter(*dog.T, s=50, marker="^", color=ORANGE, zorder=4)
-    ax.scatter(*focal, s=50, color=INK, zorder=4)
-    handles = force_arrows(ax, focal, terms, [MUTED, BLUE, AQUA, ORANGE])
-    ax.legend(handles=handles, loc="lower left", frameon=False, fontsize=8)
-    ax.set_xlim(-22, 22)
-    ax.set_ylim(-34, 20)
-    style_map(ax, "sheep: four forces, field of view 20 (dashed)")
-
-
-def kubo_dog_panel(ax: Axes, c: Config) -> None:
-    """Kubo dog forces on a hand-placed scene (checked against the code)."""
-    X = np.zeros(2)
-    T = np.array([30.0, 9.0])
-    G = np.array([95.0, -30.0])
-    other = np.array([[-6.0, -24.0]])
-    away = (X - other) / np.linalg.norm(X - other, axis=1, keepdims=True) ** 3
-    parts = {
-        "K_f1 toward the target": c["K_f1"] * unit(T - X),
-        "K_f2 keep off the target": c["K_f2"] * (X - T) / np.linalg.norm(X - T) ** 3,
-        "K_f3 away from the goal": c["K_f3"] * unit(X - G),
-        "K_f4 away from the other dog": c["K_f4"] * away.mean(axis=0),
-    }
-    full = dog_velocity(X, T, G, other, c)
-    assert np.allclose(full, sum(parts.values())), "figure disagrees with the Kubo dog code"
-    ax.scatter(*X, s=60, marker="^", color=ORANGE, zorder=4)
-    ax.scatter(*T, s=50, color=BLUE, zorder=4)
-    ax.scatter(*other.T, s=50, marker="^", color="#e8b9a4", zorder=4)
-    ax.text(T[0], T[1] + 3.5, "target sheep", color=BLUE, fontsize=8, ha="center")
-    ax.text(other[0, 0], other[0, 1] - 4, "other dog", color=MUTED, fontsize=8, ha="center")
-    arrow(ax, (48, -10), (30, -3), AQUA, 1.0)
-    ax.text(49, -11.5, "goal, far to the right", color=AQUA, fontsize=8)
-    handles = force_arrows(ax, X, parts, [BLUE, MUTED, AQUA, "#e87ba4"])
-    arrow(ax, unit(full) * np.sqrt(np.linalg.norm(full)) * 3.2, X, INK, 2.4, style="-|>")
-    handles.append(
-        Line2D(
-            [0],
-            [0],
-            color=INK,
-            lw=3,
-            label=f"sum, capped at {c['dog_speed_max']:.0f}  {np.linalg.norm(full):.1f}",
-        )
-    )
-    ax.legend(handles=handles, loc="lower right", frameon=False, fontsize=8)
-    ax.set_xlim(-25, 62)
-    ax.set_ylim(-34, 22)
-    style_map(ax, "dog: four forces (the target, the goal and one other dog)")
-
-
-def fig_kubo() -> None:
-    """Kubo forces on a sheep and a dog, plus a real-trial ring snapshot."""
-    c = config_for("kubo", n=20, d=2)
-    ck = config_for("kubo", n=50, d=4, flock_radius=5.9, ticks=3000)
-    tick = 450  # the snapshot of the real trial
-    fig, axes = plt.subplots(1, 3, figsize=(14, 5.0))
-    kubo_sheep_panel(axes[0], c)
-    kubo_dog_panel(axes[1], c)
-    snap = {}
-
-    def keep(state: SimulationState) -> None:
-        if state.tick == tick:
-            snap["s"] = (state.sheep_positions.copy(), state.shepherd_positions.copy())
-
-    run_trial(ck, SEED, on_tick=keep)
-    sh, dg = snap["s"]
-    ax = axes[2]
-    ax.add_patch(Circle(xy(ck["goal_center"]), ck["goal_radius"], fc="none", ec=AQUA, lw=1.4))
-    ax.scatter(*sh.T, s=10, color=BLUE, lw=0)
-    dogs_at(ax, dg, s=44, zorder=4)
-    allp = np.vstack([sh, dg, np.asarray(ck["goal_center"])[None, :]])
-    lo, hi = allp.min(axis=0) - 12, allp.max(axis=0) + 12
-    ax.set_xlim(lo[0], hi[0])
-    ax.set_ylim(lo[1], hi[1])
-    style_map(ax, f"a real Kubo trial, N = 50, 4 dogs, tick {tick}")
-    save(fig, "fig5_kubo.png", rect=(0, 0, 1, 0.98))
-
-
-def lama_rule_panel(ax: Axes, c: Config) -> None:
-    """Lama herder rule on a hand-placed scene (checked against the code)."""
-    herders = np.array([[24.0, 2.0], [29.0, -6.0], [-20.0, 15.0]])
-    targets = np.array(
-        [
-            [27.0, 9.0],
-            [31.0, -3.0],
-            [20.0, 0.0],
-            [38.0, 14.0],
-            [3.0, 2.0],
-            [-4.0, -1.0],
-            [1.0, -5.0],
-        ]
-    )
-    goal_r = float(c["goal_radius"])
-    velocity, choice = herder_velocities(targets, herders, goal_r, c)
-    assert list(choice.target) == [0, 1, -1], "figure disagrees with the Lama herder code"
-    xi, lam, delta = c["sensing_radius"], c["repulsion_radius"], c["chase_offset"]
-    ax.add_patch(Circle((0, 0), goal_r, fc="none", ec=AQUA, lw=1.5))
-    ax.text(0, -goal_r - 2.5, "goal", color=AQUA, fontsize=8, ha="center")
-    ax.add_patch(Circle(xy(herders[0]), xi, fc="none", ec=MUTED, lw=0.9, ls="--"))
-    ax.text(
-        herders[0][0],
-        herders[0][1] - xi - 2.5,
-        "H1 senses within xi",
-        color=MUTED,
-        fontsize=8,
-        ha="center",
-    )
-    for h in herders:
-        ax.add_patch(Circle(xy(h), lam, fc=ORANGE, ec="none", alpha=0.12))
-    ax.scatter(*targets.T, s=26, color=BLUE, lw=0, zorder=3)
-    dogs_at(ax, herders, s=60, zorder=4)
-    for name, h in zip(("H1", "H2", "H3"), herders):
-        ax.text(h[0] - 1.0, h[1] - 3.2, name, color=ORANGE, fontsize=9, ha="right")
-    # the chase point, delta beyond the target on the ray from the goal centre
-    aim = targets[0]
-    point = aim + delta * unit(aim)
-    ray = aim * (1 + 4 / np.linalg.norm(aim))
-    ax.plot([0, ray[0]], [0, ray[1]], color=MUTED, lw=0.7, ls=":")
-    ax.scatter(*point, s=22, marker="x", color=INK, zorder=4)
-    for i in range(3):
-        arrow(ax, xy(herders[i] + velocity[i] * 0.9), xy(herders[i]), ORANGE, 1.6)
-    ax.text(aim[0] - 1, aim[1] + 2.5, "chased by H1", color=BLUE, fontsize=8, ha="right")
-    ax.text(point[0] + 1.2, point[1] + 0.3, "where H1 stands", color=INK, fontsize=8)
-    ax.text(
-        targets[1][0] + 4.0,
-        targets[1][1] - 0.5,
-        "farther, but closer\nto H2: left to H2",
-        color=BLUE,
-        fontsize=8,
-        va="center",
-    )
-    ax.text(targets[3][0], targets[3][1] + 2.0, "not sensed", color=BLUE, fontsize=8, ha="center")
-    ax.text(
-        herders[2][0],
-        herders[2][1] + 3.0,
-        "senses nothing: walks home",
-        color=ORANGE,
-        fontsize=8,
-        ha="center",
-    )
-    ax.set_xlim(-32, 52)
-    ax.set_ylim(-17, 21)
-    style_map(ax, "the herder rule")
-
-
-def fig_lama() -> None:
-    """Lama gather: herder rule (top) and a real trial at N=196, D=20 (bottom)."""
-    protocol = load_protocol("lama_r50")
-    n, d = 196, 20
-    c = cell_config(protocol, Cell(Group("lama", "uniform", (), n), d), float("nan"))
-    goal = np.asarray(c["goal_center"])
-    snaps: dict[int, tuple[np.ndarray, np.ndarray, np.ndarray]] = {}
-    first = initial_state(c, SEED)
-    snaps[0] = (first.sheep_positions.copy(), first.shepherd_positions.copy(), np.full(d, -1))
-
-    def keep(state: SimulationState) -> None:
-        snaps[state.tick] = (
-            state.sheep_positions.copy(),
-            state.shepherd_positions.copy(),
-            np.asarray(state.metadata["herder_target"]).copy(),
-        )
-
-    result = run_trial(c, SEED, on_tick=keep)
-    assert result.success, "the example trial should gather the targets"
-    last = result.total_ticks
-    fig = plt.figure(figsize=(13, 10))
-    gs = fig.add_gridspec(2, 3, height_ratios=(1.15, 1))
-    lama_rule_panel(fig.add_subplot(gs[0, :]), c)
-    shots = [fig.add_subplot(gs[1, k]) for k in range(3)]
-    span = c["start_radius"] + 6
-    for ax, tick in zip(shots, (0, last // 3, last)):
-        targets, herders, chosen = snaps[tick]
-        ax.add_patch(Circle(xy(goal), c["start_radius"], fc="none", ec=GRID, lw=1.0, ls="--"))
-        ax.add_patch(Circle(xy(goal), c["goal_radius"], fc="none", ec=AQUA, lw=1.5))
-        if 0 < tick < last:
-            for h in herders:
-                ax.add_patch(
-                    Circle(
-                        xy(h), c["sensing_radius"], fc="none", ec=MUTED, lw=0.5, ls="--", alpha=0.6
-                    )
-                )
-            for h, t in zip(herders, chosen):
-                if t >= 0:
-                    ax.plot(*np.array([h, targets[t]]).T, color=ORANGE, lw=0.8)
-        ax.scatter(*targets.T, s=7, color=BLUE, alpha=0.85, lw=0)
-        dogs_at(ax, herders)
-        window(ax, goal, span, span, span, span)
-        style_map(ax, f"t = {tick * c['dt']:.0f} s (tick {tick})")
-    save(fig, "fig_lama.png")
-
-
-# ----------------------------------------------------------------------------------- team rule
-
-
+# ----- team rule -----
 def fig_team_rule() -> None:
     """Team rule from D=1 to 8: collect (wide) and drive (compact)."""
     counts = (1, 2, 4, 8)
@@ -639,64 +365,6 @@ def fig_team_rule() -> None:
                 window(ax, centroid, 80, 35, 70, 70)
             style_map(ax, f"{job}, D = {d}" + ("  (the paper)" if d == 1 else ""))
     save(fig, "fig3_team_rule.png", rect=(0, 0, 1, 0.98))
-
-
-def fig_independent() -> None:
-    """strombom_multi vs independent at D=4: collect matching and drive arc vs single Pd."""
-    n, d = 100, 4
-    c_wide = cfg("wide", n, d)
-    sheep_w, dogs_w = start(c_wide)
-    goal_w = np.asarray(c_wide["goal_center"])
-    centroid_w = sheep_w.mean(axis=0)
-    far_w = np.linalg.norm(sheep_w - centroid_w, axis=1) > collect_threshold(n, c_wide["r_a"])
-    fig, axes = plt.subplots(1, 3, figsize=(15, 5.0))
-
-    ax0 = axes[0]
-    targets_multi = team_targets(sheep_w, goal_w, dogs_w, c_wide)
-    flock_split(ax0, sheep_w, far_w, s_in=9, s_out=16, lw_out=0.6)
-    gcm(ax0, centroid_w)
-    dogs_at(ax0, dogs_w, s=42, zorder=4)
-    targets_at(ax0, targets_multi, s=36, lw=1.4)
-    for dog, tgt in zip(dogs_w, targets_multi):
-        arrow(ax0, tgt, dog, ORANGE, 1.2)
-    window(ax0, centroid_w, 130, 80, 110, 110)
-    style_map(ax0, "strombom_multi: Hungarian Matching (Parallel)")
-
-    ax1 = axes[1]
-    flock_split(ax1, sheep_w, far_w, s_in=9, s_out=16, lw_out=0.6)
-    gcm(ax1, centroid_w)
-    dogs_at(ax1, dogs_w, s=42, zorder=4)
-    dec = decide(sheep_w, goal_w, c_wide)
-    ax1.scatter(*sheep_w[dec.outliers[0]], s=90, facecolors="none", ec=ORANGE, lw=1.5, zorder=3)
-    ax1.scatter(*dec.target, s=70, marker="x", color=INK, lw=1.8, zorder=4)
-    for dog in dogs_w:
-        arrow(ax1, dec.target, dog, ORANGE, 1.2, ls="--")
-    window(ax1, centroid_w, 130, 80, 110, 110)
-    style_map(ax1, "independent: Collect (All 4 dogs chase 1 stray)")
-
-    c_comp = cfg("compact", n, d)
-    sheep_c, dogs_c = start(c_comp)
-    goal_c = np.asarray(c_comp["goal_center"])
-    centroid_c = sheep_c.mean(axis=0)
-    targets_arc = team_targets(sheep_c, goal_c, dogs_c, c_comp)
-    pd_single = drive_point(sheep_c, goal_c, c_comp)
-    ax2 = axes[2]
-    ax2.scatter(*sheep_c.T, s=9, color=BLUE, alpha=0.7, lw=0)
-    gcm(ax2, centroid_c, text_at=(2, 2))
-    dogs_at(ax2, dogs_c, s=42, zorder=4)
-    ordered_arc = targets_arc[np.argsort(targets_arc[:, 1])]
-    ax2.plot(*ordered_arc.T, color=AQUA, lw=1.2, ls=":", label="strombom_multi arc")
-    ax2.scatter(
-        *pd_single, s=80, marker="x", color=INK, lw=2.0, zorder=4, label="independent Pd (single)"
-    )
-    for dog in dogs_c:
-        arrow(ax2, pd_single, dog, ORANGE, 1.2, ls="--")
-    arrow(ax2, goal_c - [c_comp["goal_radius"] + 5, 0], centroid_c + [20, 0], AQUA, 1.2)
-    ax2.text(centroid_c[0] + 25, centroid_c[1] + 3, "to goal", color=AQUA, fontsize=8)
-    window(ax2, centroid_c, 50, 40, 45, 45)
-    ax2.legend(loc="upper left", frameon=False, fontsize=8)
-    style_map(ax2, "independent: Drive (Crowding single point Pd)")
-    save(fig, "fig_independent.png", rect=(0, 0, 1, 0.98))
 
 
 def fig_hungarian_matching() -> None:
@@ -909,9 +577,7 @@ def fig_driving_arc() -> None:
     save(fig, "fig_driving_arc.png", rect=(0, 0, 1, 0.98))
 
 
-# ---------------------------------------------------------------------------------------- task
-
-
+# ----- task -----
 def fig_layouts() -> None:
     """Four start layouts at N=200, same scale; dashed circle is f(N)."""
     n, d = 200, 4

@@ -109,14 +109,9 @@ def setup_for(
         layouts=layouts,
         max_dogs=max_dogs,
     )
-    hold = settings["hold_drive_multiple"]
-    if hold < 0.0:
-        raise ValueError("hold_drive_multiple must not be negative")
     drive = task.drive_length(geometry)
     return {
         "max_ticks": _max_ticks(method, drive),
-        "hold_ticks": drive_limit_ticks(hold, drive, method.name, method.params) if hold else 0,
-        "metrics_stride": settings["metrics_stride"],
         "measurement_radius": settings["measurement_radius"],
         "dog_overlap_distance": settings["dog_overlap_distance"],
         **geometry,

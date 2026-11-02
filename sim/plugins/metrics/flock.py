@@ -20,11 +20,7 @@ def extent(view: TickView) -> float:
 
 
 def aspect_ratio(view: TickView) -> float:
-    """Long / short principal axis of the flock (1 = round).
-
-    NaN with fewer than 3 sheep or when the short axis is zero (all sheep on
-    one line or one point): zero means below float64 rounding of the long axis.
-    """
+    """Long/short principal axis (1 = round). NaN if fewer than 3 sheep or flat."""
     pts = view.state.sheep_positions
     if pts.shape[0] < 3:
         return float("nan")

@@ -1,8 +1,7 @@
-# dmin_m12 at 6 drive times; only the deadline differs. A failed trial stops at its deadline,
-# so this run costs less than the looser one.
+# dmin_m12 at 6 drive times; only the deadline differs.
 
 protocol_id: dmin_m6
-description: "Main grid at 6 drive times, strict rule, on the layouts, flock sizes and teams of dmin_m12 (RQ1 to RQ3)."
+description: "D_min against N on four start layouts, strict rule, 6 drive times."
 output: results/dmin_m6
 extends: dmin_m12.yaml
 

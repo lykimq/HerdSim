@@ -38,19 +38,14 @@ def dog_overlap(view: TickView) -> float:
 
 def dogs_stopped(view: TickView) -> float:
     """Fraction of dogs whose commanded velocity is zero this tick, e.g. under the stop
-    rule (NaN without dogs). A dog held by the stop rule but moved apart by ``dog_spacing``
-    counts as moving."""
+    rule (NaN without dogs)."""
     if view.state.n_shepherds == 0:
         return float("nan")
     return float(np.mean(view.dog_speeds < STOPPED_SPEED))
 
 
 def i_dir(view: TickView) -> float:
-    """Directional conflict among moving dogs: 1 - |sum of unit headings| / moving dogs.
-
-    Headings are the commanded velocities. 0 when no dog moves. Clamped to [0, 1]: parallel
-    headings can sum to a length one rounding error above the count.
-    """
+    """Dog heading conflict: 1 - |sum unit headings| / movers (0 if none; clamped to [0, 1])."""
     speeds = view.dog_speeds
     moving = speeds > STOPPED_SPEED
     if not moving.any():
@@ -60,11 +55,7 @@ def i_dir(view: TickView) -> float:
 
 
 def coverage(view: TickView) -> float:
-    """Fraction of outer sheep (beyond the median centroid distance) within a dog's reach.
-
-    Reach is the sheep model's reaction radius: a sheep closer than it to a dog
-    responds (strictly closer, as in the sheep models). NaN without dogs.
-    """
+    """Share of outer sheep within reaction radius of a dog (NaN if no dogs)."""
     state = view.state
     if state.n_shepherds == 0:
         return float("nan")

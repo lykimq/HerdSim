@@ -1,9 +1,6 @@
-"""Build the flat run config of one trial and check it before anything runs.
+"""Build and check the flat run config of one trial.
 
-The checks here are the engine's own. Each plugin checks its own settings: the task its
-layouts and start geometry, the sheep model its parameters (and it derives keys such as
-Strombom's neighbour count), so a new plugin brings its checks along instead of editing
-this file.
+Engine checks live here; each plugin checks its own settings when it prepares.
 """
 
 from __future__ import annotations
@@ -18,14 +15,13 @@ from sim.plugins.sheep import SHEEP_MODELS
 # constants the generic metrics read every tick.
 ENGINE_KEYS = (
     "max_ticks",
-    "metrics_stride",
     "measurement_radius",
     "lost_radius",
     "dog_overlap_distance",
 )
 
-# Speeds a method may define; none may be negative.
-SPEED_KEYS = ("sheep_speed", "shepherd_speed", "sheep_speed_max", "dog_speed_max", "herder_speed")
+# Speeds of the method; none may be negative.
+SPEED_KEYS = ("sheep_speed", "shepherd_speed")
 
 
 def build_config(
@@ -38,12 +34,7 @@ def build_config(
     n_shepherds: int,
     initial_layout: str,
 ) -> dict[str, Any]:
-    """Method defaults, overridden by ``params``, plus the task ``setup`` and agent counts.
-
-    ``setup`` must hold every key the task and the engine read; there are no defaults
-    for them here. The sheep model adds the keys it derives, and ``reaction_radius`` (how
-    close a dog must be for a sheep to react) is added for the coverage metric.
-    """
+    """Flat run config from method defaults, ``params``, task ``setup``, and counts."""
     bundle = METHODS[method]
     unknown = sorted(set(params) - set(bundle.defaults))
     if unknown:
@@ -73,13 +64,11 @@ def build_config(
 
 
 def _check(config: dict[str, Any]) -> None:
-    """The engine's own bounds: counts, time limit, stride, time step and speeds."""
+    """The engine's own bounds: counts, time limit, time step and speeds."""
     if int(config["n_sheep"]) < 1:
         raise ValueError("n_sheep must be at least 1")
     if int(config["max_ticks"]) < 1:
         raise ValueError("max_ticks must be at least 1")
-    if int(config["metrics_stride"]) < 1:
-        raise ValueError("metrics_stride must be at least 1")
     if float(config["dt"]) <= 0.0:
         raise ValueError("dt must be positive")
     for key in SPEED_KEYS:

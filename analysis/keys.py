@@ -1,18 +1,4 @@
-"""The text keys that name groups, cells and trials in rows, logs and tables.
-
-    uv run pytest tests/analysis/test_keys.py         # the format, pinned by a test
-
-Every results folder stores these keys, so the format is fixed. This module is its one
-definition: the campaign builds keys here and the analysis splits them here. It sits in the
-analysis layer, which imports nothing else of the project, so both sides can use it.
-
-The three keys:
-
-- group: ``method|layout|name=value|...|N=n``, with factor values written by ``value_text``,
-  numbers as floats so that 1 and 1.0 name one cell
-- cell: ``<group>|D=d``
-- trial: ``<cell>|seed=i``
-"""
+"""Build and split the text keys for groups, cells and trials."""
 
 from __future__ import annotations
 

@@ -1,1 +1,1 @@
-"""HerdSim simulation framework: core engine, numerical methods, and plugins."""
+"""Simulation package: engine, methods, and plugins."""

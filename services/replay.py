@@ -1,12 +1,11 @@
-"""Replaying stored trials of a finished run, for diagnostics that need more than the rows.
+"""Replaying stored trials of a finished run.
 
     run = open_run("dmin_f99_m6")
     job = ReplayJob(run.config(method, layout, n, d), run.master_seed + i, stored, label)
     rows = run_replays(worker, jobs, workers, describe)
 
-The tools in cli/diagnostics/ are built this way: ``open_run`` gives the protocol, radii
-and trial rows of a folder, each job is one seed of one cell, and ``run_replays`` runs a
-module-level worker over the jobs in a pool.
+``open_run`` gives the protocol, radii and trial rows of a folder, each job is one seed of
+one cell, and ``run_replays`` runs a module-level worker over the jobs in a pool.
 
 A trial is deterministic in its config and seed, so running it again gives the same trial.
 A diagnostic either replays it unchanged with extra measures, or changes one setting and
@@ -83,9 +82,7 @@ class StoredRun:
         """Run config of a cell, as the campaign built it. ``factors`` are the sorted
         (name, value) pairs of a factor protocol, empty otherwise."""
         cell = Cell(Group(method, layout, factors, n), d)
-        # A task that sizes itself (the gather task) has no calibrated radius, as in the run.
-        radius = self.radii.get(method, {}).get(str(n), float("nan"))
-        return cell_config(self.protocol, cell, radius)
+        return cell_config(self.protocol, cell, self.radii[method][str(n)])
 
     def curve(self, method: str, layout: str, n: int, factors: Factors = ()) -> pd.DataFrame:
         """Trial rows of a D curve."""
@@ -155,8 +152,7 @@ def open_run(name: str) -> StoredRun:
     now = stable_hash(protocol.physics())
     if ran != now:
         raise ReplayMismatch(f"{folder} ran with physics {ran}, the protocol now gives {now}")
-    radii = flock_radii(folder) if (folder / "calibration.json").exists() else {}
-    return StoredRun(protocol, radii, read_trials(folder))
+    return StoredRun(protocol, flock_radii(folder), read_trials(folder))
 
 
 def run_replays(

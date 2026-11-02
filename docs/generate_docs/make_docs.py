@@ -20,7 +20,7 @@ sys.path.insert(0, str(REPO))
 
 import yaml  # noqa: E402
 
-from docs.generate_docs.format import as_entries, rule_text  # noqa: E402
+from docs.generate_docs.format import rule_text  # noqa: E402
 from docs.generate_docs.page import page_blocks  # noqa: E402
 from records.generated_notice import AUTO_GENERATED_NOTICE  # noqa: E402
 from services.protocol import (  # noqa: E402
@@ -48,9 +48,7 @@ OWN_LINE_SETTINGS = ("task", "success_fraction")
 SETTINGS_PAGE = REPO / "docs" / "guides" / "settings.md"
 # Links from the guides, which sit in docs/guides/, to the method docs.
 METHOD_DOCS = (
-    "[Strömbom sheep](../methods/strombom_sheep.md), [team rule](../methods/strombom_multi.md), "
-    "[FAT](../methods/fat.md), [independent](../methods/independent.md), "
-    "[Kubo](../methods/kubo.md) and [Lama](../methods/lama.md)"
+    "[Strombom sheep](../methods/strombom_sheep.md) and [team rule](../methods/strombom_multi.md)"
 )
 CANONICAL = REPO / "protocols" / "configs" / "canonical.yaml"
 # canonical.yaml marks its sections with "# --- Name ----" lines and sets one key per line.
@@ -61,19 +59,16 @@ FIRST_SECTION = "Task"
 SETTINGS_INTRO = """\
 Every canonical setting, with its default and the note written beside it in \
 `protocols/configs/canonical.yaml`. A protocol changes a setting by naming it \
-([configuration](configuration.md#protocol-overrides)). The model parameters ($r_a$, $c$, the \
-Kubo and Lama constants) are not canonical settings: they live with each method and are listed in \
-the method docs: {method_docs}.
+([configuration](configuration.md#protocol-overrides)). The model parameters ($r_a$, $c$ and the \
+rest) are not canonical settings: they live with the method and are listed in the method docs: \
+{method_docs}.
 
-The kind of a setting says where it may change:
+The kind of a setting says where it may change. A per-trial setting can differ between curves \
+of one protocol, as a factor. A whole-protocol setting is fixed for every curve of a protocol, \
+because calibration or the seeds depend on it. A sampling setting only steers the adaptive run, \
+so it stays out of the physics hash and a folder can resume after it changes.
 
-- per trial: it can differ between curves of one protocol, as a factor;
-- whole protocol: it is fixed for every curve of a protocol, because calibration or the seeds \
-depend on it;
-- sampling: it only steers the adaptive run, so it stays out of the physics hash and a folder \
-can resume after it changes.
-
-Settings that share a note are one entry, with their defaults in the same order, separated by \
+Settings that share a note are one row, with their defaults in the same order, separated by \
 semicolons. The physics hash that decides whether a folder can resume is in the \
 [configuration guide](configuration.md#physics-hash)."""
 
@@ -157,8 +152,6 @@ def _changed_settings(protocol: Protocol) -> str:
     for method in protocol.methods:
         if method.params:
             changes.append(_assignments(method.params))
-        if method.calibrate_as:
-            changes.append(f"R_f calibrated as `{method.calibrate_as}`")
     return ", ".join(c for c in changes if c)
 
 
@@ -174,8 +167,10 @@ def _protocol_entry(p: Protocol) -> str:
         "Factors": "; ".join(f"{k}: {_number_list(v)}" for k, v in p.factors.items()),
         "Changed from canonical": _changed_settings(p),
     }
-    lines = "\n".join(f"- {name}: {value}" for name, value in fields.items() if value)
-    return f"### `{p.protocol_id}`\n\n{description(p)}\n\n{lines}"
+    rows = "\n".join(f"| {name} | {value} |" for name, value in fields.items() if value)
+    return (
+        f"### `{p.protocol_id}`\n\n{description(p)}\n\n| Field | Value |\n| :--- | :--- |\n{rows}"
+    )
 
 
 def _id_list(ids: Sequence[str]) -> str:
@@ -206,8 +201,9 @@ def protocols_page() -> str:
         if p.output != REPO / "results" / p.protocol_id:
             raise ValueError(f"{p.protocol_id}: results folder is {p.output}, not results/<id>")
     used = sorted({m.name for p in protocols for m in p.methods})
-    methods = "\n".join(
-        f"- `{name}`: sheep model `{m.sheep_model}`, dog controller `{m.dog_controller}`."
+    methods = " ".join(
+        f"`{name}` pairs the sheep model `{m.sheep_model}` with the dog controller "
+        + f"`{m.dog_controller}`."
         for name, m in ((name, METHODS[name]) for name in used)
     )
     intro = (
@@ -215,18 +211,15 @@ def protocols_page() -> str:
         "grid, and the settings it changes from `protocols/configs/canonical.yaml`. The results "
         "of protocol `<id>` are in `results/<id>`; its numbers are in the "
         "[result tables](../report/results_tables.md), its trials and hours in the "
-        "[run record](../report/appendix_run_record.md#appendix-a-protocol-run-record). Terms "
+        "[run record](../report/d_min_report.md#5-run-record). Terms "
         f"are in the [glossary](../glossary.md), the methods in {METHOD_DOCS} "
         "and each setting in [settings](settings.md)."
     )
     conventions = (
-        "- Rule: the share of the flock that must be in the goal (strict: every sheep).\n"
-        "- Deadline: a multiple of the drive time, or a fixed limit in s for the Kubo and Lama "
-        "protocols.\n"
-        "- RQ1 to RQ14: the report's [research questions]"
-        "(../report/d_min_report.md#1-research-questions).\n"
-        "- Factors: settings swept over several values, each giving its own curves.\n"
-        f"- Task: {_task_sentence(protocols)}."
+        "The rule is the share of the flock that must be in the goal (strict: every sheep). The "
+        "deadline is a multiple of the drive time. The research questions RQ1 to RQ3 are in the "
+        "[report](../report/d_min_report.md#1-the-question). As for the task, "
+        f"{_task_sentence(protocols)}."
     )
     return _joined(
         [
@@ -300,15 +293,16 @@ def settings_page() -> str:
             names = ", ".join(f"`{k}`" for k, _ in group)
             defaults = "; ".join(default(k) for k, _ in group)
             kinds = ", ".join(dict.fromkeys(setting_kind(k) for k, _ in group))
-            entries.append(f"- {names} (default {defaults}; {kinds}): {group[0][1]}")
-        blocks += [f"## {name}", "\n".join(entries)]
+            entries.append(f"| {names} | {defaults} | {kinds} | {group[0][1]} |")
+        header = "| Setting | Default | Kind | Note |\n| :--- | :--- | :--- | :--- |"
+        blocks += [f"## {name}", "\n".join([header, *entries])]
     return _joined(blocks)
 
 
 def results_tables_page() -> str:
-    """The tables of cli/dmin_tables.py and the replay summaries, section by section."""
-    source = "the stored runs in `results/` and the replay CSVs in `results/diagnostics/`"
-    return as_entries(_joined([RESULTS_TABLES_TITLE, notice(source), *page_blocks()]))
+    """The tables of cli/dmin_tables.py, section by section."""
+    source = "the stored runs in `results/`"
+    return _joined([RESULTS_TABLES_TITLE, notice(source), *page_blocks()])
 
 
 # --- Main --------------------------------------------------------------------------------------

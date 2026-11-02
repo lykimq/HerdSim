@@ -20,8 +20,7 @@ def _stats(values: np.ndarray) -> tuple[float, float, float]:
 
 
 def outcome_fields(result: RunResult, n_shepherds: int, dt: float) -> dict[str, Any]:
-    """Outcome columns. Ticks are the method's steps; seconds multiply by dt (Strombom 1 s,
-    Kubo 0.05 s), so times are comparable across methods only in seconds."""
+    """Outcome columns. Ticks are the method's steps; seconds multiply by dt (1 s)."""
     path = float(result.history.iloc[-1]["shepherd_path"])
     return {
         "success": result.success,

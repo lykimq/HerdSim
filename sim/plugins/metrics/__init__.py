@@ -1,10 +1,6 @@
-"""Per-tick metrics that apply to every task. Every trial records all of them, plus
-its task's own metrics (``Scenario.metrics``); the key is the column name.
+"""Generic per-tick metrics (TickView -> float), keyed by column name.
 
-A metric is a function of a TickView, which carries the state and the run
-config, returning one float. A new metric is one function and one entry here
-(or in the task's table when it needs the task's geometry); the engine, the
-trial row and the tables pick it up by name.
+Every trial records these plus the task's own ``Scenario.metrics``.
 """
 
 from __future__ import annotations

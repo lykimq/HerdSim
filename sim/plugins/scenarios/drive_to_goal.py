@@ -1,11 +1,7 @@
 """Drive task: herd the flock into a circular goal.
 
-Success (``is_success``): every sheep is inside the goal disc (or the share
-``success_fraction``), and with a hold time it has stayed inside without a break for
-``hold_ticks``. This is a HerdSim rule and differs from both papers. Strombom 2014 ends the
-task when the flock's centre of mass is within an unstated distance of the target; Kubo
-2022 asks for the flock centre inside the target and the whole flock within a circle of
-radius 10. Strombom's rule can be read afterwards from the per-tick ``gcm_in_goal``.
+Success: all sheep in the goal (or share ``success_fraction``). Strombom's GCM rule
+is available afterwards as ``gcm_in_goal``.
 """
 
 from __future__ import annotations
@@ -21,10 +17,7 @@ from sim.core.simulation_state import SimulationState
 from sim.core.world import layouts
 from sim.core.world.layouts import DOG_STARTS, field_size, layout_extent, place_dogs, place_flock
 
-from .goal import arrival_columns, held_for
-from .team_settings import KEYS as TEAM_KEYS
-from .team_settings import check as check_team
-from .team_settings import setup as team_setup
+from .goal import arrival_columns
 
 # The start layouts of this task: the flock shapes sized by R_f and the separation distance.
 LAYOUTS = layouts.LAYOUTS
@@ -51,8 +44,6 @@ REQUIRED_KEYS = (
     "dog_start_spacing",
     # Read only at setup time (field_size), but part of the setup record.
     "field_clearance",
-    "hold_ticks",
-    *TEAM_KEYS,
 )
 
 
@@ -62,9 +53,6 @@ def check(config: dict[str, Any]) -> None:
         raise ValueError(f"dog_start {config['dog_start']!r} not in {DOG_STARTS}")
     if config["initial_layout"] not in LAYOUTS:
         raise ValueError(f"initial_layout {config['initial_layout']!r} not in {LAYOUTS}")
-    if int(config["hold_ticks"]) < 0:
-        raise ValueError("hold_ticks must not be negative")
-    check_team(config)
 
 
 def drive_length(setup: Mapping[str, Any]) -> float:
@@ -95,13 +83,8 @@ def initial_positions(
 
 
 def is_success(state: SimulationState) -> bool:
-    """The share ``success_fraction`` is inside the goal and has been for ``hold_ticks``.
-
-    The tick at which the goal was last reached is kept in ``state.metadata``; leaving the
-    goal clears it, so the hold has to start again.
-    """
-    goal = state.world.goal
-    return held_for(state, goal.reached(state.sheep_positions), goal.hold_ticks)
+    """The share ``success_fraction`` is inside the goal this tick."""
+    return state.world.goal.reached(state.sheep_positions)
 
 
 def _check_settings(s: Mapping[str, Any]) -> None:
@@ -131,7 +114,6 @@ def _typed_setup(s: Mapping[str, Any], flock_radius: float, n_sheep: int) -> dic
         "dog_start_gap": float(s["dog_start_gap"]),
         "dog_start_spacing": float(s["dog_start_spacing"]),
         "field_clearance": float(s["field_clearance"]),
-        **team_setup(s),
     }
 
 
@@ -143,19 +125,7 @@ def build_setup(
     layouts: tuple[str, ...],
     max_dogs: int,
 ) -> dict[str, Any]:
-    """Setup keys of one flock size, from the protocol settings and the flock radius R_f.
-
-    The drive is max(``drive_distance_multiple`` x R_f, ``drive_distance_min``, reach +
-    goal radius + R_f), where reach is the farthest start sheep of every layout in
-    ``layouts``, so the goal never overlaps a start. The third term grows like the
-    separation distance N^(2/3) while R_f grows more slowly, so with scattered layouts in
-    the protocol the drive is longer than the multiple from about N = 200 on, for the
-    compact cells too. The drive length is recorded per trial.
-
-    The field is sized for ``layouts`` and ``max_dogs``, so all cells of a protocol at one
-    N and one method share one field and one goal; the drive axis runs along x, mirrored
-    for a negative ``drive_distance_multiple``.
-    """
+    """Setup for one N: drive clears every layout; field shared across layouts and max D."""
     _check_settings(settings)
     setup = _typed_setup(settings, flock_radius, n_sheep)
     multiple = float(settings["drive_distance_multiple"])

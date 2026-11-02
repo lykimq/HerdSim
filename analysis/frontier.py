@@ -1,62 +1,4 @@
-"""The decision rules: which team sizes work, which are faster, and where the zones lie.
-
-    uv run cli/dmin_tables.py dmin dmin_f99_m6       # the tables read what it decides
-    uv run cli/campaign.py run --protocol <id>       # the adaptive run calls it every round
-
-This is the one place that turns trial outcomes into answers. The adaptive run calls it after
-every round to see which cells still need seeds, and every table and figure reads its output
-(frontier_cells.csv, frontier_groups.csv). Changing a rule here and rereading the trials redoes
-every answer without running a simulation.
-
-A D curve is every cell of one group (method, layout, factors, N), ordered by dog count D. Each
-cell gets two decisions:
-
-- reliability: ``reliable`` when the Clopper-Pearson interval of its success rate lies at or
-  above theta, ``unreliable`` when it lies below, else ``undecided``; a cell with an errored
-  trial is never reliable, because the error is a bug and the seeds it lost may be the hard ones
-- finish time against another cell: ``faster``, ``slower``, ``same`` or ``undecided``, from the
-  bootstrap interval of the paired difference in finish time, relative to the slower median and
-  the equivalence ``time_margin``; seeds are shared, so seed i of two cells starts from the same
-  flock
-
-Each group gets three values over every tested D:
-
-- D_min: the smallest reliable D, with D_min_low the smallest D whose upper bound reaches theta
-- D_overcrowd: the smallest D above D_min where it and the next tested D are both unreliable;
-  "next" is next in the grid as it stands, so an undecided cell between two unreliable ones
-  holds the value back. A curve with no reliable D yet looks above D_min_low instead, so
-  teams that fail above an undecided one count as too many dogs, not too few
-- D_max: the largest reliable D below D_overcrowd, or the largest reliable D
-
-and three over the working range only, the reliable D from D_min to D_max (a reliable D above
-D_overcrowd is reported but not used):
-
-- D_best: the smallest reliable D that is not slower than the fastest reliable D
-- D_sat: the smallest reliable D that no larger reliable D is faster than; the rule is global,
-  not a step rule, so a dip followed by a drop (3: 300, 4: 299, 6: 200) does not stop at 3, and
-  since the largest reliable D always qualifies, D_sat exists whenever D_min does
-- D_crowd: the smallest reliable D above D_best that is slower than D_best
-
-Each cell then gets a zone:
-
-- too_few: unreliable, below D_min (below D_min_low on a curve with no reliable D)
-- improving: reliable, below D_sat
-- saturated: reliable, from D_sat up, not slower than D_best
-- crowded: reliable, slower than D_best
-- unreliable_dip: unreliable between D_min (or D_min_low) and D_overcrowd
-- collapse: unreliable from D_overcrowd up
-- recovered: reliable above D_overcrowd
-- undecided: its reliability, or its comparison with D_best, is still open
-
-Two kinds of flag say what is still open:
-
-- ``still_improving_at_top``: D_sat is the top of the grid and faster than the reliable D below
-  it, so the true D_sat may lie above the grid
-- ``d_best_undecided``, ``d_sat_undecided``, ``d_crowd_undecided``: a comparison that could
-  still move that value is undecided; only the cells of such comparisons, and cells of undecided
-  reliability, are marked as needing seeds, so the adaptive run never spends seeds on a
-  comparison that cannot change a value or a zone
-"""
+"""Decide which team sizes are reliable, which are faster, and which zone each cell is in."""
 
 from __future__ import annotations
 
@@ -85,35 +27,21 @@ COLLAPSE = "collapse"
 UNRELIABLE_DIP = "unreliable_dip"
 RECOVERED = "recovered"
 
-# Group columns that hold a dog count, or nothing when the value does not exist.
+# Group columns that hold a dog count (nullable when the value does not exist).
 D_COLUMNS = ("d_min", "d_min_low", "d_best", "d_sat", "d_crowd", "d_overcrowd", "d_max")
 
 
 @dataclass(frozen=True)
 class Rules:
-    """Decision settings, read from the protocol's "Seeds and decisions" block.
-
-    ``min_pairs`` is the fewest shared finished seeds ``compare_times`` accepts. It cannot
-    bind between two reliable cells under theta 0.9, confidence 0.99 and max_seeds 200 (a
-    reliable cell has at least 51 seeds, and two reliable cells share at least 42 finished
-    ones); it only guards ad-hoc comparisons with few seeds.
-
-    ``bootstrap_resamples`` sets the Monte Carlo error of the interval ends; at 1000 the
-    99% ends have a spread up to 6% of the 5% margin, which is why the canonical value is
-    4000.
-    """
+    """Decision settings from the protocol's Seeds and decisions block."""
 
     theta: float
     confidence: float
     time_margin: float
-    min_pairs: int
+    min_pairs: int  # fewest shared finished seeds for a finish-time comparison
     bootstrap_resamples: int
     seed: int
-    # Whether open finish-time comparisons may ask for seeds (canonical: false).
-    # true:  a cell gets more seeds while its reliability or one of its finish-time
-    #        comparisons is open, so D_best, D_sat and D_crowd get decided.
-    # false: only an open reliability asks for seeds, which is all D_min needs. Open
-    #        comparisons stay open and the three values are flagged undecided.
+    # If true, open finish-time comparisons also request seeds (canonical: false).
     decide_finish_times: bool
 
     @classmethod
@@ -130,12 +58,7 @@ class Rules:
 
 
 def clopper_pearson(successes: int, trials: int, confidence: float) -> tuple[float, float]:
-    """Two-sided exact binomial confidence interval for the success rate.
-
-    Exact rather than normal: the normal interval has zero width at 0 or n successes and
-    undercovers near theta = 0.9 at these sample sizes. The exact one is conservative, so
-    reading it after every batch of seeds does not inflate false decisions.
-    """
+    """Two-sided exact binomial confidence interval for the success rate."""
     alpha = 1.0 - confidence
     low = 0.0 if successes == 0 else float(beta.ppf(alpha / 2, successes, trials - successes + 1))
     high = (
@@ -155,14 +78,7 @@ def reliability_status(low: float, high: float, theta: float) -> str:
 
 
 def compare_times(a: pd.DataFrame, b: pd.DataFrame, rules: Rules) -> str:
-    """Whether cell ``a`` is FASTER, SLOWER, SAME or UNDECIDED against cell ``b``.
-
-    Trials are paired on seed_index, so both cells met the same start flock and the same
-    sheep noise, and the difference isolates the effect of the team. Seeds failed by
-    either cell drop out, because their finish time is undefined. The paired difference
-    of medians is bootstrapped and read relative to the slower median, so the
-    dimensionless ``time_margin`` means the same at every method and N.
-    """
+    """Whether cell ``a`` is FASTER, SLOWER, SAME or UNDECIDED against cell ``b``."""
     ta = a.loc[a["success"], ["seed_index", "finish_ticks"]].set_index("seed_index")
     tb = b.loc[b["success"], ["seed_index", "finish_ticks"]].set_index("seed_index")
     paired = ta.join(tb, how="inner", lsuffix="_a", rsuffix="_b")
@@ -187,9 +103,7 @@ def compare_times(a: pd.DataFrame, b: pd.DataFrame, rules: Rules) -> str:
 
 
 def cell_stats(trials: pd.DataFrame, rules: Rules) -> pd.DataFrame:
-    """One row per cell: counts, success interval, reliability, time and cost medians.
-    Finish times are given in ticks and in model seconds; only the seconds compare across
-    methods (a Kubo tick is 0.05 s, a Strombom tick 1 s)."""
+    """One row per cell: counts, success interval, reliability, and finish medians."""
     rows = []
     for (group_key, d), g in trials.groupby(["group_key", "n_shepherds"], sort=True):
         k, n = int(g["success"].sum()), len(g)
@@ -219,9 +133,7 @@ def cell_stats(trials: pd.DataFrame, rules: Rules) -> pd.DataFrame:
 
 @dataclass
 class GroupFrontier:
-    """One group's frontier. The ``_undecided`` flags say a value rests on an undecided
-    comparison and may still move once those cells get more seeds; ``group_undecided``
-    says some cell of the group still needs seeds."""
+    """Frontier values for one group (one D curve)."""
 
     group_key: str
     d_min: int | None = None
@@ -235,20 +147,14 @@ class GroupFrontier:
     d_max_at_grid_top: bool = False
     still_improving_at_top: bool = False
     onset_at_last_step: bool = False
-    d_best_undecided: bool = False  # a reliable D below D_best is open against the fastest
-    d_sat_undecided: bool = False  # a reliable D above D_sat is open against D_sat
-    d_crowd_undecided: bool = False  # a reliable D above D_best, below D_crowd, is open
+    d_best_undecided: bool = False
+    d_sat_undecided: bool = False
+    d_crowd_undecided: bool = False
     group_undecided: bool = False
 
 
 class _Comparisons:
-    """Finish-time verdicts within one group, and the cells they leave needing seeds.
-
-    Each ordered pair is bootstrapped once. ``still_open`` both answers whether a verdict is
-    undecided and records its cells in ``needs``, because an open comparison that could
-    move a value is exactly what more seeds should settle. With ``decide_finish_times`` off
-    the comparison stays open but asks for no seeds.
-    """
+    """Cached finish-time verdicts for one group; open pairs may add cells to ``needs``."""
 
     def __init__(self, by_d: dict[int, pd.DataFrame], rules: Rules, needs: set[int]) -> None:
         self.by_d = by_d
@@ -257,7 +163,7 @@ class _Comparisons:
         self._verdicts: dict[tuple[int, int], str] = {}
 
     def verdict(self, a: int, b: int) -> str:
-        """Verdict of ``a`` against ``b``."""
+        """Finish-time verdict of ``a`` against ``b``."""
         if a == b:
             return SAME
         if (a, b) not in self._verdicts:
@@ -271,12 +177,7 @@ class _Comparisons:
 
 
 def _overcrowding_onset(ds: list[int], status: dict[int, str], start: int) -> int | None:
-    """The first of two consecutive unreliable tested D above ``start`` (D_min, or D_min_low
-    on a curve with no reliable D), or None.
-
-    One unreliable cell can be a sampling dip near the boundary; two in a row say the
-    team has really stopped working.
-    """
+    """First of two consecutive unreliable D above ``start``, or None."""
     above = [d for d in ds if d > start]
     for a, b in zip(above, above[1:]):
         if status[a] == UNRELIABLE and status[b] == UNRELIABLE:
@@ -285,8 +186,7 @@ def _overcrowding_onset(ds: list[int], status: dict[int, str], start: int) -> in
 
 
 def _unreliable_zone(d: int, start: int | None, d_overcrowd: int | None) -> str:
-    """Zone of an unreliable D: too few below ``start`` (D_min, or D_min_low when no D is
-    reliable), collapse from D_overcrowd up, a dip in between."""
+    """Zone for an unreliable D: too_few, collapse, or unreliable_dip."""
     if start is None or d < start:
         return TOO_FEW
     if d_overcrowd is not None and d >= d_overcrowd:
@@ -295,8 +195,7 @@ def _unreliable_zone(d: int, start: int | None, d_overcrowd: int | None) -> str:
 
 
 def _d_best(working: list[int], finish: dict[int, float], cmp: _Comparisons) -> tuple[int, bool]:
-    """The smallest working D not slower than the fastest, and whether a smaller D with an
-    open comparison against the fastest could still take it."""
+    """Smallest working D not slower than the fastest, plus an undecided flag."""
     fastest = min(working, key=lambda d: finish[d])
     undecided = False
     for d in working:
@@ -308,8 +207,7 @@ def _d_best(working: list[int], finish: dict[int, float], cmp: _Comparisons) -> 
 
 
 def _d_crowd(working: list[int], d_best: int, cmp: _Comparisons) -> tuple[int | None, bool]:
-    """The smallest working D above D_best that is slower than D_best, and whether an open
-    comparison below it could still be slower."""
+    """Smallest working D above D_best that is slower than it, plus an undecided flag."""
     undecided = False
     for d in (d for d in working if d > d_best):
         verdict = cmp.verdict(d, d_best)
@@ -320,8 +218,7 @@ def _d_crowd(working: list[int], d_best: int, cmp: _Comparisons) -> tuple[int | 
 
 
 def _d_sat(working: list[int], cmp: _Comparisons) -> tuple[int, bool]:
-    """The smallest working D that no larger working D is faster than, and whether a larger
-    D is still open against it."""
+    """Smallest working D that no larger working D beats, plus an undecided flag."""
     for d in working:
         above_d = {e: cmp.verdict(e, d) for e in working if e > d}
         if FASTER not in above_d.values():
@@ -339,7 +236,7 @@ def _zones(
     out: GroupFrontier,
     cmp: _Comparisons,
 ) -> dict[int, str]:
-    """The zone of every tested D (module docstring), once the group's D values are known."""
+    """Zone of every tested D once the group's frontier values are known."""
     assert out.d_min is not None and out.d_best is not None and out.d_sat is not None
     zones: dict[int, str] = {}
     for d in working:
@@ -365,10 +262,7 @@ def _zones(
 def _group(
     cells: pd.DataFrame, trials: pd.DataFrame, rules: Rules
 ) -> tuple[GroupFrontier, dict[int, str], set[int]]:
-    """Frontier, zone per D and the D values that need more seeds, for one group.
-
-    ``cells`` arrive sorted by D (cell_stats groups with sort=True).
-    """
+    """Frontier, zones and seed-needing D values for one group (cells sorted by D)."""
     ds = [int(d) for d in cells["n_shepherds"]]
     status = dict(zip(ds, cells["reliability"]))
     upper = dict(zip(ds, cells["rate_high"]))
@@ -417,13 +311,7 @@ class Frontier:
 
 
 def frontier(trials: pd.DataFrame, rules: Rules, errors: dict[str, int] | None = None) -> Frontier:
-    """Cells and groups of every D curve in ``trials``.
-
-    ``errors`` counts the trials that raised per cell key (``<group_key>|D=<d>``, as the
-    store names them); it becomes the n_errors column, 0 for cells it does not list, and a
-    reliable cell with errors is set to undecided. A cell with only errored trials has no
-    rows and so no cell row at all.
-    """
+    """Build cell and group frontier tables from ``trials`` (and optional per-cell errors)."""
     stats = cell_stats(trials, rules)
     counts = errors or {}
     stats["n_errors"] = [

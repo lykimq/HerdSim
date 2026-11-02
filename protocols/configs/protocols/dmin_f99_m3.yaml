@@ -1,11 +1,11 @@
-# dmin_f99_m12 at 3 drive times (extends dmin_m3); only the deadline differs.
+# dmin_m3 under the 99 percent rule.
 
 protocol_id: dmin_f99_m3
-description: "dmin_m3 under the 99 percent rule, with finish times decided (RQ4, RQ7)."
+description: "D_min against N on four start layouts, 99 percent rule, 3 drive times."
 output: results/dmin_f99_m3
 extends: dmin_m3.yaml
 
 success_fraction: 0.99
 
-# Finish-time seeds on, so D_sat, D_best and D_crowd get decided as well as D_min.
+# Finish-time seeds on, as in the resumes of this folder (its first pass ran without them).
 decide_finish_times: true

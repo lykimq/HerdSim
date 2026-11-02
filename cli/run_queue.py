@@ -5,7 +5,7 @@
     uv run cli/run_queue.py --only dmin_m12 dmin_m6   just these, in this order
 
 The queue lists the protocols in the order it runs them. A fresh pass would not reproduce the
-stored seed allocation (see appendix A of the run record). Each protocol runs as
+stored seed allocation (see the run record in the report). Each protocol runs as
 `cli/campaign.py run` would, into its own folder results/<protocol_id>. A folder where every
 cell is decided is skipped, one that stopped for any other reason is resumed, and a protocol
 that raises is logged while the queue moves on. After each protocol one line goes to

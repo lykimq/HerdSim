@@ -34,7 +34,6 @@ import pandas as pd
 from analysis import keys
 from analysis.frontier import SATURATED, UNDECIDED, Frontier, Rules, frontier
 from records.provenance import stable_hash
-from sim.plugins.scenarios import SCENARIOS
 
 from .calibration import CalibrationError, calibrate
 from .cells import Cell, Group, Trial, cell_config, groups, make_trial, trial_key
@@ -65,12 +64,7 @@ def seeds_wanted(seeds_run: int, batch: int, flagged: bool) -> int:
 def _flock_radii(
     protocol: Protocol, store: CampaignStore, physics_hash: str, workers: int
 ) -> dict[str, dict[int, float]]:
-    """R_f per method and flock size, calibrated once and kept in the folder. A task that
-    sizes itself (``Scenario.calibrates`` false) has none: every cell gets NaN, and its
-    setup ignores it."""
-    if not SCENARIOS[protocol.settings["task"]].calibrates:
-        nan = float("nan")
-        return {m.name: {n: nan for n in protocol.flock_sizes} for m in protocol.methods}
+    """R_f per method and flock size, calibrated once and kept in the folder."""
     table = store.load_calibration()
     needed = {(m.name, n) for m in protocol.methods for n in protocol.flock_sizes}
     if table is None or any(n not in table.get(m, {}) for m, n in needed):
@@ -127,7 +121,7 @@ def pruned_cells(front: Frontier, trials: pd.DataFrame, overlap: float) -> set[C
     return out
 
 
-def _refine(
+def refine(
     grid: dict[str, set[int]],
     front: Frontier,
     min_gap: int,
@@ -369,7 +363,7 @@ def _decide(
     front, pruned = _assess(ledger, rules, settings["prune_overlap"], store)
     if front is not None:
         column = "zone" if rules.decide_finish_times else "reliability"
-        added = _refine(
+        added = refine(
             ledger.grid,
             front,
             settings["refine_min_gap"],

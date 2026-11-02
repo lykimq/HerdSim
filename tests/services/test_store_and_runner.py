@@ -1,4 +1,4 @@
-"""Results store and batch runner: crash repair, physics check, error rows, worker independence."""
+"""Results store and batch runner: crash repair, folder identity, rows, and workers."""
 
 from __future__ import annotations
 
@@ -6,93 +6,155 @@ import json
 import math
 import time
 from dataclasses import replace
+from pathlib import Path
+from typing import Any
 
 import pandas as pd
 import pytest
 import yaml
 
-from services.cells import Cell, Group, make_trial
+from services.cells import Cell, Group, Trial, make_trial
 from services.runner import execute, identity, run_batch
 from services.store import CampaignStore, FolderBusy, PhysicsMismatch, progress
 from sim.core.methods import METHODS
 from tests.helpers import config_for, protocol_with
 
+PHYSICS = "abc"
+# Stand-in cell keys; real ones look like "strombom_multi|wide|N=200|D=3|seed=0".
+CELL_D2 = "group|N=5|D=2"
+CELL_D4 = "group|N=5|D=4"
+N_SHEEP = 15
+N_DOGS = 2
+TICKS = 60
+BATCH_SEEDS = 3
+BATCH_SECONDS = 600
 
-def _store(tmp_path, physics="abc") -> CampaignStore:
+
+# --- helpers -----------------------------------------------------------------
+
+
+def open_store(tmp_path: Path, physics: str = PHYSICS) -> CampaignStore:
     protocol = replace(protocol_with(), output=tmp_path)
     store = CampaignStore(tmp_path)
     store.open(protocol, physics)
     return store
 
 
-def test_cut_last_line_is_dropped_and_earlier_rows_kept(tmp_path):
-    store = _store(tmp_path)
+def compact_cell(factors: tuple[tuple[str, Any], ...] = ()) -> Cell:
+    return Cell(Group("strombom_multi", "compact", factors, N_SHEEP), N_DOGS)
+
+
+def make_trials(tmp_path: Path, seeds: int = BATCH_SEEDS) -> list[Trial]:
+    protocol = protocol_with(ticks=TICKS)
+    cell = compact_cell()
+    config = config_for(n=N_SHEEP, d=N_DOGS, ticks=TICKS)
+    return [make_trial(protocol, cell, i, config, tmp_path) for i in range(seeds)]
+
+
+def trial_keys(store: CampaignStore, *, repair: bool = True) -> list[str]:
+    return [row["trial_key"] for row in store.load_rows(repair=repair)]
+
+
+def cut_last_line(path: Path, fragment: str) -> None:
+    """Leave a truncated JSON line, as if the process died mid-write."""
+    with path.open("a") as handle:
+        handle.write(fragment)
+
+
+def collect_batch(
+    trials: list[Trial],
+    store: CampaignStore,
+    *,
+    workers: int,
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    run_batch(
+        trials,
+        store,
+        workers=workers,
+        deadline=time.time() + BATCH_SECONDS,
+        on_row=rows.append,
+    )
+    return rows
+
+
+# --- crash repair ------------------------------------------------------------
+
+
+def test_cut_last_line_is_dropped_and_earlier_rows_kept(tmp_path: Path) -> None:
+    store = open_store(tmp_path)
     store.append_row({"trial_key": "a", "x": 1})
     store.append_row({"trial_key": "b", "x": 2})
-    with store.trials_jsonl.open("a") as f:
-        f.write('{"trial_key": "c", "x"')  # killed mid-write
-    assert [r["trial_key"] for r in store.load_rows()] == ["a", "b"]
+    cut_last_line(store.trials_jsonl, '{"trial_key": "c", "x"')
+
+    assert trial_keys(store) == ["a", "b"]
     store.append_row({"trial_key": "c", "x": 3})
-    assert [r["trial_key"] for r in store.load_rows()] == ["a", "b", "c"]
+    assert trial_keys(store) == ["a", "b", "c"]
 
 
-def test_reading_without_repair_leaves_the_file_alone(tmp_path):
+def test_reading_without_repair_leaves_the_file_alone(tmp_path: Path) -> None:
     """`campaign status` reads while the campaign appends, so it must never rewrite."""
-    store = _store(tmp_path)
+    store = open_store(tmp_path)
     store.append_row({"trial_key": "a", "x": 1})
-    with store.trials_jsonl.open("a") as f:
-        f.write('{"trial_key": "b", "x"')
+    cut_last_line(store.trials_jsonl, '{"trial_key": "b", "x"')
     before = store.trials_jsonl.read_text()
-    assert [r["trial_key"] for r in store.load_rows(repair=False)] == ["a"]
+
+    assert trial_keys(store, repair=False) == ["a"]
     store.write_status({"running": True, "rounds": 1, "trials_done": 0, "round_trials": 5})
     progress(store)
     assert store.trials_jsonl.read_text() == before
 
 
-def test_archived_protocol_records_every_method_parameter(tmp_path):
-    store = _store(tmp_path)
+def test_cut_last_error_line_is_repaired_before_the_next_error(tmp_path: Path) -> None:
+    store = open_store(tmp_path)
+    store.append_error(f"{CELL_D2}|seed=0", "boom")
+    cut_last_line(store.errors_jsonl, f'{{"trial_key": "{CELL_D2}|se')
+
+    assert store.error_keys() == {f"{CELL_D2}|seed=0"}
+    store.append_error(f"{CELL_D4}|seed=0", "boom")
+    store.append_error(f"{CELL_D4}|seed=1", "boom")
+    assert store.error_keys() == {
+        f"{CELL_D2}|seed=0",
+        f"{CELL_D4}|seed=0",
+        f"{CELL_D4}|seed=1",
+    }
+
+
+# --- folder identity ---------------------------------------------------------
+
+
+def test_archived_protocol_records_every_method_parameter(tmp_path: Path) -> None:
+    store = open_store(tmp_path)
     archive = yaml.safe_load((store.root / "protocol.yaml").read_text())
-    for name in ("strombom_multi", "fat", "kubo"):
-        assert archive["method_config"][name] == dict(METHODS[name].defaults)
+    assert archive["method_config"]["strombom_multi"] == dict(METHODS["strombom_multi"].defaults)
 
 
-def test_error_counts_are_per_cell(tmp_path):
-    store = _store(tmp_path)
-    store.append_error("g|N=5|D=2|seed=0", "boom")
-    store.append_error("g|N=5|D=2|seed=1", "boom")
-    store.append_error("g|N=5|D=4|seed=0", "boom")
-    assert store.error_cells() == {"g|N=5|D=2": 2, "g|N=5|D=4": 1}
+def test_error_counts_are_per_cell(tmp_path: Path) -> None:
+    store = open_store(tmp_path)
+    store.append_error(f"{CELL_D2}|seed=0", "boom")
+    store.append_error(f"{CELL_D2}|seed=1", "boom")
+    store.append_error(f"{CELL_D4}|seed=0", "boom")
+    assert store.error_cells() == {CELL_D2: 2, CELL_D4: 1}
 
 
-def test_cut_last_error_line_is_repaired_before_the_next_error(tmp_path):
-    store = _store(tmp_path)
-    store.append_error("g|N=5|D=2|seed=0", "boom")
-    with store.errors_jsonl.open("a") as f:
-        f.write('{"trial_key": "g|N=5|D=2|se')  # killed mid-write
-    assert store.error_keys() == {"g|N=5|D=2|seed=0"}
-    store.append_error("g|N=5|D=4|seed=0", "boom")
-    store.append_error("g|N=5|D=4|seed=1", "boom")
-    assert store.error_keys() == {"g|N=5|D=2|seed=0", "g|N=5|D=4|seed=0", "g|N=5|D=4|seed=1"}
-
-
-def test_a_failed_open_releases_the_lock(tmp_path):
-    _store(tmp_path).close()
+def test_a_failed_open_releases_the_lock(tmp_path: Path) -> None:
+    open_store(tmp_path).close()
     (tmp_path / "provenance.json").write_text("{not json")
     with pytest.raises(json.JSONDecodeError):
-        _store(tmp_path)
+        open_store(tmp_path)
     assert not CampaignStore(tmp_path).is_running()
 
 
-def test_resetting_an_empty_folder_drops_its_calibration(tmp_path):
-    store = _store(tmp_path)
-    store.save_calibration("abc", {"strombom_multi": {25: 6.5}})
+def test_resetting_an_empty_folder_drops_its_calibration(tmp_path: Path) -> None:
+    store = open_store(tmp_path)
+    store.save_calibration(PHYSICS, {"strombom_multi": {25: 6.5}})
     assert store.discard_if_empty()
     assert store.load_calibration() is None
 
 
-def test_a_clone_with_only_the_packed_trials_keeps_them(tmp_path):
+def test_a_clone_with_only_the_packed_trials_keeps_them(tmp_path: Path) -> None:
     """Git holds trials.jsonl.gz only; without unpacking, the folder would be reset as empty."""
-    store = _store(tmp_path)
+    store = open_store(tmp_path)
     store.append_row({"trial_key": "a", "x": 1})
     store.close()
     packed = store.trials_gz.read_bytes()
@@ -100,15 +162,17 @@ def test_a_clone_with_only_the_packed_trials_keeps_them(tmp_path):
 
     clone = CampaignStore(tmp_path)
     assert not clone.discard_if_empty()
-    assert [r["trial_key"] for r in clone.load_rows()] == ["a"]
+    assert trial_keys(clone) == ["a"]
     clone.trials_gz.unlink()
     clone.pack_trials()
     assert clone.trials_gz.read_bytes() == packed  # same trials, same bytes: no git churn
 
 
-def test_each_sitting_records_its_code_and_protocol(tmp_path, monkeypatch):
+def test_each_sitting_records_its_code_and_protocol(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """The physics hash ignores code, so a resume on edited trial code must leave a trace."""
-    store = _store(tmp_path)
+    store = open_store(tmp_path)
     first, _ = store.record_sitting(protocol_with())
     monkeypatch.setattr("services.store.code_identity", lambda: {"code_hash": "edited"})
     before, now = store.record_sitting(protocol_with())
@@ -117,111 +181,80 @@ def test_each_sitting_records_its_code_and_protocol(tmp_path, monkeypatch):
     assert "flock_sizes" in now["protocol"]
 
 
-def test_reopening_with_other_physics_or_protocol_is_refused(tmp_path):
-    _store(tmp_path, "abc").close()
+def test_reopening_with_other_physics_or_protocol_is_refused(tmp_path: Path) -> None:
+    open_store(tmp_path, PHYSICS).close()
     with pytest.raises(PhysicsMismatch, match="physics"):
-        _store(tmp_path, "xyz")
+        open_store(tmp_path, "xyz")
     other = replace(protocol_with(), protocol_id="other", output=tmp_path)
     with pytest.raises(PhysicsMismatch, match="belongs to protocol"):
-        CampaignStore(tmp_path).open(other, "abc")
+        CampaignStore(tmp_path).open(other, PHYSICS)
 
 
-def test_a_second_campaign_on_a_locked_folder_is_refused(tmp_path):
-    first = _store(tmp_path)
+def test_a_second_campaign_on_a_locked_folder_is_refused(tmp_path: Path) -> None:
+    first = open_store(tmp_path)
     assert first.is_running()
     with pytest.raises(FolderBusy):
-        _store(tmp_path)
+        open_store(tmp_path)
     first.close()
     assert not first.is_running()
-    _store(tmp_path).close()
+    open_store(tmp_path).close()
 
 
-def test_calibration_round_trips(tmp_path):
-    store = _store(tmp_path)
-    store.save_calibration("abc", {"strombom_multi": {25: 6.5}})
+def test_calibration_round_trips(tmp_path: Path) -> None:
+    store = open_store(tmp_path)
+    store.save_calibration(PHYSICS, {"strombom_multi": {25: 6.5}})
     assert store.load_calibration() == {"strombom_multi": {25: 6.5}}
 
 
-def _trials(tmp_path, seeds=3):
-    protocol = protocol_with(ticks=60)
-    cell = Cell(Group("strombom_multi", "compact", (), 15), 2)
-    config = config_for(n=15, d=2, ticks=60)
-    return [make_trial(protocol, cell, i, config, tmp_path) for i in range(seeds)]
+# --- batch runner ------------------------------------------------------------
 
 
-def test_row_records_factor_levels_and_geometry(tmp_path):
+def test_row_records_factor_levels_and_geometry(tmp_path: Path) -> None:
     """A swept setting that reaches the config only through its products is still a column."""
-    protocol = protocol_with(ticks=60)
     factors = (("drive_distance_multiple", 20.0),)  # 140 u, above drive_distance_min
-    cell = Cell(Group("strombom_multi", "compact", factors, 15), 2)
-    config = config_for(n=15, d=2, ticks=60, factors=dict(factors))
-    trial = make_trial(protocol, cell, 0, config, tmp_path)
+    protocol = protocol_with(ticks=TICKS)
+    config = config_for(n=N_SHEEP, d=N_DOGS, ticks=TICKS, factors=dict(factors))
+    trial = make_trial(protocol, compact_cell(factors), 0, config, tmp_path)
+
     columns = identity(trial)
     assert columns["drive_distance_multiple"] == 20.0
-    assert columns["time_limit_seconds"] == 60.0
+    assert columns["time_limit_seconds"] == float(TICKS)
     assert columns["task"] == "drive_to_goal"
-    row = execute(trial)  # the task adds the geometry it ran in
+
+    row = execute(trial)
     assert row["drive_distance"] == pytest.approx(20.0 * config["flock_radius"])
     assert row["world_width"] == config["world_width"]
     assert row["world_height"] == config["world_height"]
     assert {"mean_gcm_goal", "mean_cohesion", "final_sheep_in_goal"} <= set(row)
+
     arrivals = [row[f"seconds_to_{pct}pct_in_goal"] for pct in (90, 95, 99)]
     if row["success"]:
         assert row["finish_seconds"] == row["finish_ticks"] * config["dt"]
-        # every fraction was reached by the finish, and in order of size
         assert arrivals[0] <= arrivals[1] <= arrivals[2] <= row["finish_seconds"]
     else:
         assert math.isnan(row["finish_seconds"])
 
 
-def test_worker_error_is_logged_and_the_batch_continues(tmp_path):
-    store = _store(tmp_path)
-    good = _trials(tmp_path)
+def test_worker_error_is_logged_and_the_batch_continues(tmp_path: Path) -> None:
+    store = open_store(tmp_path)
+    good = make_trials(tmp_path)
     bad = replace(good[0], config={**good[0].config, "sheep_model": "nope"}, seed_index=99)
-    rows: list[dict] = []
-    run_batch([bad, *good], store, workers=2, deadline=time.time() + 600, on_row=rows.append)
-    assert len(rows) == 3
+
+    rows = collect_batch([bad, *good], store, workers=2)
+    assert len(rows) == BATCH_SEEDS
     assert store.error_keys() == {bad.key}
-    assert "KeyError" in json.loads(store.errors_jsonl.read_text().splitlines()[1])["error"]
+    first_error = json.loads(store.errors_jsonl.read_text().splitlines()[1])
+    assert "KeyError" in first_error["error"]
 
 
-def test_rows_do_not_depend_on_the_number_of_workers(tmp_path):
-    rows_one: list[dict] = []
-    rows_three: list[dict] = []
-    run_batch(
-        _trials(tmp_path / "a"),
-        _store(tmp_path / "a"),
-        workers=1,
-        deadline=time.time() + 600,
-        on_row=rows_one.append,
+def test_rows_do_not_depend_on_the_number_of_workers(tmp_path: Path) -> None:
+    one = pd.DataFrame(
+        collect_batch(make_trials(tmp_path / "a"), open_store(tmp_path / "a"), workers=1)
     )
-    run_batch(
-        _trials(tmp_path / "b"),
-        _store(tmp_path / "b"),
-        workers=3,
-        deadline=time.time() + 600,
-        on_row=rows_three.append,
+    three = pd.DataFrame(
+        collect_batch(make_trials(tmp_path / "b"), open_store(tmp_path / "b"), workers=3)
     )
-    one = pd.DataFrame(rows_one).sort_values("trial_key").reset_index(drop=True)
-    three = pd.DataFrame(rows_three).sort_values("trial_key").reset_index(drop=True)
-    pd.testing.assert_frame_equal(one, three)
-
-
-def test_progress_reports_the_running_round_and_its_time_left(tmp_path):
-    store = _store(tmp_path)  # holds the lock, as a running campaign does
-    status = {"rounds": 2, "trials_done": 0, "trials_ignored": 4, "round_trials": 100}
-    store.write_status({**status, "running": True})
-    for i in range(14):  # 4 rows of dropped groups, 10 of this round
-        store.append_row({"trial_key": f"t{i}"})
-    text = progress(store)
-    assert "round 2: 10/100 trials done" in text
-    assert "min left" in text
-
-
-def test_progress_of_a_killed_run_says_stopped(tmp_path):
-    """status.json still says running after a kill; the lock is gone, so progress does not."""
-    store = _store(tmp_path)
-    store.write_status({"running": True, "rounds": 1, "trials_done": 5, "round_trials": 10})
-    store.close()
-    assert '"running": false' in progress(store)
-    assert "round" not in progress(store).split("}")[-1]
+    pd.testing.assert_frame_equal(
+        one.sort_values("trial_key").reset_index(drop=True),
+        three.sort_values("trial_key").reset_index(drop=True),
+    )

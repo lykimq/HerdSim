@@ -17,10 +17,9 @@ from sim.core.world.arena import GoalZone, World
 
 PROTOCOLS = Path(__file__).parent / "protocols"
 TEST_OUTPUT = Path(tempfile.gettempdir()) / "herdsim-tests"
-# Canonical setup and every drive-task method.
+
+# Loaded once from tests/protocols/unit.yaml; campaigns never write here.
 BASE_PROTOCOL = load_protocol(str(PROTOCOLS / "unit.yaml"), output=TEST_OUTPUT)
-# The gather task with the lama method.
-GATHER_PROTOCOL = load_protocol(str(PROTOCOLS / "gather.yaml"), output=TEST_OUTPUT)
 
 
 def protocol_with(
@@ -31,7 +30,7 @@ def protocol_with(
     params: dict[str, Any] | None = None,
     base: Protocol = BASE_PROTOCOL,
 ) -> Protocol:
-    """``base`` with one method's time limit and parameters, and settings, replaced."""
+    """Copy of ``base`` with one method's time limit and parameters, and settings, replaced."""
     methods = tuple(
         replace(m, time_limit_ticks=ticks, params={**m.params, **(params or {})})
         if m.name == method
@@ -55,9 +54,8 @@ def config_for(
 ) -> dict[str, Any]:
     """Run config of one cell, built the way a campaign builds it (fixed R_f, no calibration).
 
-    The field is sized for this single cell (layouts=(layout,), shepherd_counts=(d,)), not for a
-    whole protocol, so finish times measured with it are shorter than a campaign's for protocols
-    with scattered layouts or many dogs.
+    The field is sized for this single cell only, so finish times can be shorter than in a
+    full protocol that also sizes for scattered layouts or larger teams.
     """
     protocol = replace(
         protocol_with(method=method, ticks=ticks, settings=settings, params=params),
@@ -68,25 +66,6 @@ def config_for(
     return cell_config(protocol, Cell(group, d), flock_radius)
 
 
-def gather_config(
-    *,
-    n: int = 20,
-    d: int = 2,
-    ticks: int = 2000,
-    settings: dict[str, Any] | None = None,
-    params: dict[str, Any] | None = None,
-) -> dict[str, Any]:
-    """Run config of one gather cell with the lama method (no calibration: the task sizes
-    itself from ``gather_start_radius``, 20 in the test protocol)."""
-    protocol = replace(
-        protocol_with(
-            method="lama", ticks=ticks, settings=settings, params=params, base=GATHER_PROTOCOL
-        ),
-        shepherd_counts=(d,),
-    )
-    return cell_config(protocol, Cell(Group("lama", "uniform", (), n), d), float("nan"))
-
-
 def make_world(
     *,
     width: float = 150.0,
@@ -94,6 +73,7 @@ def make_world(
     goal_center: tuple[float, float] = (15.0, 15.0),
     goal_radius: float = 15.0,
 ) -> World:
+    """Small fixed arena for hand-placed agents. Not the campaign field sizing."""
     return World(width, height, GoalZone(np.array(goal_center, dtype=float), goal_radius))
 
 

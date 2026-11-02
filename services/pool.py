@@ -19,9 +19,11 @@ THREAD_LIMIT_VARS = (
     "VECLIB_MAXIMUM_THREADS",
 )
 
+
 def _init_worker() -> None:
     for var in THREAD_LIMIT_VARS:
         os.environ[var] = "1"
+
 
 # Ensure environment is set in the parent process before starting any forkserver or workers
 for _var in THREAD_LIMIT_VARS:

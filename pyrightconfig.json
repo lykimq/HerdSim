@@ -5,7 +5,6 @@
   "extraPaths": ["."],
   "failOnWarnings": false,
   "exclude": [
-    "**/node_modules",
     "**/__pycache__",
     ".venv",
     "results",

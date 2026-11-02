@@ -1,9 +1,4 @@
-"""The failure label of a trial, shared by every task's rules.
-
-A task reads a finished trial's metric history and names why it failed
-(``Scenario.classify_failure``). ``NONE`` is the label of a success and ``TIMEOUT`` the label of
-a failure no rule explains; each task adds its own labels in its rules module.
-"""
+"""Shared failure labels: ``NONE`` (success), ``TIMEOUT``, plus each task's own."""
 
 from __future__ import annotations
 

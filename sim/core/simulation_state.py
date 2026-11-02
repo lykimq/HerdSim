@@ -12,16 +12,7 @@ from sim.core.world.arena import World
 
 @dataclass
 class SimulationState:
-    """Positions and velocities of every agent, plus the world and the trial RNGs.
-
-    Sheep models and dog controllers return an updated copy each tick.
-    ``rng`` is the sheep's random stream and ``dog_rng`` the dogs', kept
-    apart so the sheep draw the same numbers whatever the dog count.
-    ``metadata`` holds per-trial constants the metrics need (radii), the
-    running dog path length, and what the controllers remember between
-    ticks (the dogs' last known flock centroid), so a seed replays exactly
-    from the state alone.
-    """
+    """Positions, velocities, world, RNGs; sheep/dog streams kept apart for paired D."""
 
     tick: int
     sheep_positions: np.ndarray  # (N, 2)

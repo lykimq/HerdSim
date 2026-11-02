@@ -1,12 +1,7 @@
-"""Why a failed drive trial failed, read from its metric history after the run.
+"""Drive-task failure labels from a finished trial's metric history.
 
-These are the drive task's rules (``Scenario.classify_failure``): progress is the flock
-centre's distance to the goal (``gcm_goal``). Most rules look at the second half of the
-trial (the late window); FLOCK_ESCAPED compares that window with the start, OSCILLATION and
-STUCK compare the two halves. Lengths are relative to the trial's own goal radius and flock
-radius, and time windows are in model seconds (converted with the method's dt), so the
-labels mean the same thing at every N, D and method. When several rules match, the first
-in ``PRIORITY`` is the label; all matches are kept as hints.
+Progress is ``gcm_goal``. First match in ``PRIORITY`` is the label; all matches
+are hints. Lengths scale with goal/flock radius; windows use model seconds.
 """
 
 from __future__ import annotations
@@ -34,10 +29,8 @@ PRIORITY = (
     STUCK,
 )
 
-# Coverage below this means the dogs are out of the sheep's reach. 0.1 suits Strombom,
-# where a working drive has coverage 1.0. A working Kubo drive sits at 0.1 to 0.2 (the
-# sheep hold the dogs at the edge of their view), so Kubo sets its own value with the
-# config key low_coverage, and for it the label is a weak hint.
+# Coverage below this means the dogs are out of the sheep's reach; a working drive has
+# coverage 1.0.
 LOW_COVERAGE = 0.1
 SPLIT_FRACTION = 0.55
 SCATTER_FLOCK_RADII = 2.0
@@ -45,10 +38,9 @@ SMOOTH_SECONDS = 200.0  # smoothing window of the oscillation rule, in model sec
 MIN_SWINGS = 3
 
 
-def smooth_window(dt: float, stride: int = 1) -> int:
-    """Rows in the smoothing window: SMOOTH_SECONDS of model time, one row per ``stride``
-    ticks of ``dt``."""
-    return max(1, round(SMOOTH_SECONDS / (dt * stride)))
+def smooth_window(dt: float) -> int:
+    """Rows in the smoothing window: SMOOTH_SECONDS of model time, one row per tick of ``dt``."""
+    return max(1, round(SMOOTH_SECONDS / dt))
 
 
 def swings(series: np.ndarray, amplitude: float) -> int:
@@ -71,7 +63,7 @@ def swings(series: np.ndarray, amplitude: float) -> int:
 
 def _oscillates(gcm: np.ndarray, goal_radius: float, config: dict[str, Any]) -> bool:
     """At least MIN_SWINGS swings of a goal radius in the smoothed distance to the goal."""
-    window = smooth_window(float(config["dt"]), int(config["metrics_stride"]))
+    window = smooth_window(float(config["dt"]))
     smooth = pd.Series(gcm).rolling(window, min_periods=1).mean().to_numpy()
     return swings(smooth, goal_radius) >= MIN_SWINGS
 
@@ -84,10 +76,9 @@ def classify_failure(history: pd.DataFrame, *, success: bool, config: dict[str, 
     early, late = history.iloc[:half], history.iloc[half:]
     gcm = history["gcm_goal"].to_numpy(dtype=float)
     progress = float(early["gcm_goal"].mean() - late["gcm_goal"].mean())
-    low_coverage = float(config.get("low_coverage", LOW_COVERAGE))
 
     matched: list[str] = []
-    if late["coverage"].mean() < low_coverage and late["lost_sheep"].mean() < 1.0:
+    if late["coverage"].mean() < LOW_COVERAGE and late["lost_sheep"].mean() < 1.0:
         matched.append(DOGS_OUT_OF_RANGE)
     if late["gcm_goal"].mean() > gcm[0]:
         matched.append(FLOCK_ESCAPED)

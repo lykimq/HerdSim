@@ -1,6 +1,6 @@
-# HerdSim: install, tests, benchmarks, lint. Campaigns: cli/campaign.py
+# HerdSim: install, tests, lint. Campaigns: cli/campaign.py
 
-.PHONY: help install test bench lint format typecheck check clean
+.PHONY: help install test lint format typecheck check clean
 
 UV ?= uv
 export PYTHONPATH := $(CURDIR)$(if $(PYTHONPATH),:$(PYTHONPATH),)
@@ -8,13 +8,12 @@ export PYTHONPATH := $(CURDIR)$(if $(PYTHONPATH),:$(PYTHONPATH),)
 help:
 	@echo "HerdSim"
 	@echo ""
-	@echo "  make install | test | bench | lint | format | typecheck | check | clean"
+	@echo "  make install | test | lint | format | typecheck | check | clean"
 	@echo ""
 	@echo "  test            unit, invariant and reproducibility tests"
-	@echo "  bench           miniature real campaigns read for sense; run before a campaign session"
 	@echo ""
 	@echo "Campaigns:"
-	@echo "  uv run cli/campaign.py run --protocol dmin_pilot --workers 16"
+	@echo "  uv run cli/campaign.py run --protocol dmin_f99_m6 --workers 16"
 	@echo "  Protocol ids: protocols/configs/protocols/"
 
 install:
@@ -22,10 +21,6 @@ install:
 
 test:
 	$(UV) run pytest
-
-bench:
-	$(UV) run pytest -m bench -rP
-
 
 lint:
 	$(UV) run ruff check .
@@ -39,6 +34,4 @@ typecheck:
 check: lint typecheck test
 
 clean:
-	find . -type d -name __pycache__ -prune -exec rm -rf {} +
-	find . -type d -name .pytest_cache -prune -exec rm -rf {} +
-	find . -type d -name .ruff_cache -prune -exec rm -rf {} +
+	find . -path ./.venv -prune -o -type d \( -name __pycache__ -o -name .pytest_cache -o -name .ruff_cache \) -prune -exec rm -rf {} +

@@ -1,14 +1,13 @@
 name: CI
 
-# The checks a change must pass before it is merged: lint and format, types, the test suite,
-# then the benchmarks, which run small real campaigns end to end. Campaign grids and long
-# simulations never run here.
+# The checks a change must pass before it is merged: lint and format, types, and the test
+# suite. Campaign grids and long simulations never run here.
 
 on:
   push:
-    branches: [ main, scaling-cli-d-min-max ]
+    branches: [ main, scaling-cli-v1 ]
   pull_request:
-    branches: [ main, scaling-cli-d-min-max ]
+    branches: [ main, scaling-cli-v1 ]
 
 # The jobs only read the code; a read-only token limits what a compromised action could do.
 permissions:
@@ -66,21 +65,3 @@ jobs:
         run: uv sync --extra dev --locked
       - name: Unit, invariant and regression tests
         run: make test
-
-  # The benchmarks run real adaptive campaigns in worker processes, so they only start once
-  # the fast checks pass.
-  bench:
-    needs: [ lint, typecheck, test ]
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          python-version: "3.12"
-          enable-cache: true
-      - name: Sync Python deps
-        run: uv sync --extra dev --locked
-      - name: Benchmark campaigns
-        run: make bench

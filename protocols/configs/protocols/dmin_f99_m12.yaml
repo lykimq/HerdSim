@@ -1,20 +1,15 @@
-# dmin_m12 with success at 99 percent of the flock in the goal.
-#
-# The strict rule decided many cells on the last one or two sheep (a flock can reach the
-# goal with 99 percent inside and be driven past it). Seed i is the same flock as in
-# dmin_m12, so the two runs compare cell by cell. dmin_f99_m6 and dmin_f99_m3 differ from
-# this file only in the deadline.
+# dmin_m12 with success at 99 percent of the flock in the goal. Seed i is the same flock as
+# in dmin_m12, so the two runs compare cell by cell.
 
 protocol_id: dmin_f99_m12
-description: "dmin_m12 under the 99 percent rule, with N 71, 141, 283 and 566 added and finish times decided (RQ4, RQ7, RQ8)."
+description: "D_min against N on four start layouts, 99 percent rule, 12 drive times, nine sizes."
 output: results/dmin_f99_m12
 extends: dmin_m12.yaml
 
 success_fraction: 0.99
 
-# Finish-time seeds on, so D_sat, D_best and D_crowd get decided as well as D_min.
+# Finish-time seeds on, as in the resumes of this folder (its first pass ran without them).
 decide_finish_times: true
-# The log midpoints 71, 141, 283 and 566 = 400 sqrt(2) give D_min(N) enough points to fit
-# its growth. All calibrate cleanly; the flock has no settled size above about 600, so no
-# larger N.
+# The log midpoints 71, 141, 283 and 566 = 400 sqrt(2) give D_min(N) more points to fit.
+# The flock has no settled size above about 600, so no larger N.
 flock_sizes: [25, 50, 71, 100, 141, 200, 283, 400, 566]

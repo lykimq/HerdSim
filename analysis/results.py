@@ -1,16 +1,4 @@
-"""Reading a finished results folder and the run log.
-
-    uv run cli/dmin_tables.py record                  # the run log, read here
-
-Every reader of a results folder goes through these functions, so the file names and the notice
-line are known in one place. They read:
-
-- the tables a run writes as CSV (trials.csv, frontier_cells.csv, frontier_groups.csv), skipping
-  the AUTO-GENERATED notice on their first line
-- the calibrated flock radii in calibration.json
-- the queue log results/queue_log.jsonl, one entry per finished protocol, with each folder's
-  status.json for the current counts
-"""
+"""Read a finished results folder and the run log."""
 
 from __future__ import annotations
 

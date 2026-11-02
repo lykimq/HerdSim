@@ -1,13 +1,7 @@
-"""Strombom et al. 2014 shepherd rule.
+"""Strombom et al. 2014 shepherd rule: collect (Pc) or drive (Pd).
 
-The shepherd collects when any sheep is farther than f(N) = r_a N^(2/3) from the flock
-centre: it aims r_a behind the farthest such sheep, seen from the centre (Pc). Otherwise it
-drives: it aims r_a sqrt(N) behind the flock, seen from the goal (Pd). It walks straight at
-its target with the same angular noise as the sheep, and stops while within 3 r_a of any
-sheep. N is the flock size being herded (``config["n_sheep"]``).
-
-``decide`` is the single source of this rule; the multi-dog controller calls it and only
-then adds its team layer.
+Collect when any sheep is beyond f(N) = r_a N^(2/3); else drive. ``decide`` is the
+single source; the multi-dog layer builds on it.
 """
 
 from __future__ import annotations
@@ -44,16 +38,8 @@ def radius_of(flock: np.ndarray, centroid: np.ndarray) -> float:
 
 
 def drive_point(flock: np.ndarray, goal: np.ndarray, config: dict[str, Any]) -> np.ndarray:
-    """Pd: r_a sqrt(N) behind the flock centre, seen from the goal.
-
-    The paper's offset passes the reaction distance r_s at N = (r_s / r_a)^2 = 1056, where
-    the dog stands where no sheep feels it. ``drive_offset_cap`` (0 is off) caps it so the
-    drive point stays within reach; it is a labelled variant, not the paper rule.
-    """
+    """Pd: r_a sqrt(N) behind the flock centre, seen from the goal."""
     offset = float(config["r_a"]) * np.sqrt(int(config["n_sheep"]))
-    cap = float(config.get("drive_offset_cap", 0.0))
-    if cap > 0.0:
-        offset = min(offset, cap)
     return behind(flock.mean(axis=0), goal, offset)
 
 

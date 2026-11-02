@@ -18,7 +18,7 @@ status     how far a run has got, whether it is running now, and why it stopped.
 refresh    decide every cell again from the stored trials and rewrite the folder's tables,
            after a change to the decision rules. Runs no trial and adds no dog count.
 
-Run `make test` and `make bench` before a long session. cli/README.md has the full routine.
+Run `make test` before a long session. cli/README.md has the full routine.
 """
 
 from __future__ import annotations
@@ -41,7 +41,6 @@ from services.calibration import calibrate  # noqa: E402
 from services.cells import describe  # noqa: E402
 from services.protocol import load_protocol  # noqa: E402
 from services.store import CampaignStore, progress  # noqa: E402
-from sim.plugins.scenarios import SCENARIOS  # noqa: E402
 
 
 def main() -> None:
@@ -64,9 +63,6 @@ def main() -> None:
     elif args.verb == "plan":
         print(describe(protocol))
     elif args.verb == "calibrate":
-        task = str(protocol.settings["task"])
-        if not SCENARIOS[task].calibrates:
-            raise SystemExit(f"task {task!r} sizes itself from its settings; nothing to calibrate")
         for method, table in calibrate(protocol, args.workers).items():
             for n, radius in sorted(table.items()):
                 print(f"{method:16s} N={n:5d}  R_f={radius:7.2f}")

@@ -1,8 +1,7 @@
-"""Arena: a rectangle that places the start, and a circular goal.
+"""Arena: start rectangle and circular goal.
 
-There is no boundary. Agents may leave the rectangle, as in Strombom 2014 ("the square is
-not enclosed", p.6) and Kubo 2022. The rectangle only holds the start: the layouts, the goal
-and the dog arcs are sized to fit it (``field_size`` in layouts.py).
+No walls (Strombom 2014): agents may leave. The rectangle only sizes the start,
+goal and dog arcs (see ``field_size`` in layouts.py).
 """
 
 from __future__ import annotations
@@ -21,8 +20,6 @@ class GoalZone:
     radius: float
     # Share of the sheep that must be inside for the goal to count as reached; 1 is every sheep.
     required_fraction: float = 1.0
-    # Ticks the share must stay inside without a break before the task succeeds; 0 is at once.
-    hold_ticks: int = 0
 
     def contains(self, positions: np.ndarray) -> np.ndarray:
         """Which positions are inside the goal, shape (n,)."""

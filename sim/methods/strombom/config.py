@@ -1,8 +1,4 @@
-"""Strombom et al. 2014 parameters (J. R. Soc. Interface 11: 20140719, Table 1).
-
-``PAPER`` holds the Table 1 values. ``SHEPHERD_EXTENSIONS`` holds the one HerdSim setting
-the paper does not have.
-"""
+"""Strombom et al. 2014 parameters (Table 1) plus HerdSim shepherd extensions."""
 
 from __future__ import annotations
 
@@ -35,11 +31,7 @@ SHEPHERD_EXTENSIONS: dict[str, Any] = {"dt": 1.0}
 
 
 def resolve_n_neighbors(value: int | str, n_sheep: int) -> int:
-    """Neighbour count for a flock of ``n_sheep``: -1 -> N - 1, "fN" -> ceil(f N).
-
-    A count above N - 1 is an error, not clipped: n is a parameter of the rule, and a
-    cell whose N cannot supply it is a different cell.
-    """
+    """Resolve n_neighbors: -1 -> N-1, "fN" -> ceil(f N); values above N-1 raise."""
     if isinstance(value, str):
         if not value.endswith("N"):
             raise ValueError(f"n_neighbors {value!r}: use an int, -1, or a fraction like '0.25N'")

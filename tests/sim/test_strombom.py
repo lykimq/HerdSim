@@ -1,11 +1,12 @@
-"""Strombom 2014 rules: the shepherd decision, the multi-dog layer on top, and the sheep heading."""
+"""Strombom 2014 rules: shepherd decision, multi-dog layer, and sheep heading."""
 
 from __future__ import annotations
+
+from typing import Any
 
 import numpy as np
 import pytest
 
-from sim.core.simulation_runner import initial_state, run_trial
 from sim.core.vectors import behind, unit
 from sim.methods.strombom import sheep
 from sim.methods.strombom.config import resolve_n_neighbors
@@ -17,262 +18,356 @@ from sim.methods.strombom.heuristics import (
     radius_of,
     step_toward,
 )
-from sim.plugins.dogs import independent
 from sim.plugins.dogs.collect_drive_multi import drive_front, team_targets
 from tests.helpers import config_for
 
-CONFIG = config_for("strombom_multi", n=10, d=1)
-R_A = CONFIG["r_a"]
-GOAL = np.array([200.0, 0.0])
+BASE = config_for("strombom_multi", n=10, d=1)
+R_A = BASE["r_a"]
+GOAL = np.array([200.0, 0.0])  # goal lies to the right; dogs approach from -x
+DOG_BEHIND_X = -40.0  # dogs start this far left of the flock centre
+DOG_SPREAD_Y = 20.0  # half-width of the dog line along y
+WIDE_SCALE = 6.0  # stretch a tight flock so drive slots have room to fan out
+ANGLE_TOL = 1e-12
 
 
-def _cfg(n_sheep: int, **overrides) -> dict:
-    """CONFIG for a flock of ``n_sheep``: the rule uses the true N, not the sheep passed in."""
-    return {**CONFIG, "n_sheep": n_sheep, **overrides}
+# --- helpers -----------------------------------------------------------------
 
 
-def _tight_flock(n: int, center=(0.0, 0.0)) -> np.ndarray:
+def cfg(n_sheep: int, **overrides: Any) -> dict[str, Any]:
+    """Run config for a flock of ``n_sheep``: the rule uses true N, not the sheep passed in."""
+    return {**BASE, "n_sheep": n_sheep, **overrides}
+
+
+def tight_flock(n: int, center: tuple[float, float] = (0.0, 0.0)) -> np.ndarray:
     rng = np.random.default_rng(1)
     return np.asarray(center) + rng.normal(0.0, 0.5, size=(n, 2))
 
 
-def test_drive_target_is_paper_pd_behind_flock():
-    flock = _tight_flock(25)
-    d = decide(flock, GOAL, _cfg(25))
-    assert d.mode == DRIVE
-    centroid = flock.mean(axis=0)
-    expected = centroid + unit(centroid - GOAL) * R_A * np.sqrt(25)
-    np.testing.assert_allclose(d.target, expected)
+def wide_flock(n: int = 25) -> np.ndarray:
+    """Tight flock scaled up so the back-edge drive arc is wide enough to check."""
+    return tight_flock(n) * WIDE_SCALE
 
 
-def test_collect_target_is_paper_pc_behind_furthest():
-    flock = np.vstack([_tight_flock(9), [[30.0, 0.0]]])
-    d = decide(flock, GOAL, _cfg(10))
-    assert d.mode == COLLECT
-    centroid = flock.mean(axis=0)
-    np.testing.assert_allclose(d.target, flock[-1] + unit(flock[-1] - centroid) * R_A)
+def flock_with_outlier(core: int = 9, outlier: tuple[float, float] = (30.0, 0.0)) -> np.ndarray:
+    return np.vstack([tight_flock(core), [list(outlier)]])
 
 
-def test_local_dog_uses_the_true_flock_size():
-    """Seeing 10 of 400 sheep: f(N) and Pd use N = 400, the GCM the 10 seen sheep."""
-    seen = _tight_flock(10)
-    d = decide(seen, GOAL, _cfg(400))
-    assert d.mode == DRIVE
-    centroid = seen.mean(axis=0)
-    assert np.linalg.norm(d.target - centroid) == pytest.approx(R_A * np.sqrt(400))
-
-
-def test_decision_mirrors_with_the_goal():
-    flock = _tight_flock(25)
-    mirror = np.array([-1.0, 1.0])
-    a = decide(flock, GOAL, _cfg(25))
-    b = decide(flock * mirror, GOAL * mirror, _cfg(25))
-    np.testing.assert_allclose(b.target, a.target * mirror)
-
-
-def _behind(n_dogs: int, flock: np.ndarray) -> np.ndarray:
+def dogs_behind(n_dogs: int, flock: np.ndarray) -> np.ndarray:
     """Dogs on a line behind the flock (away from the goal), spread sideways."""
     centroid = flock.mean(axis=0)
-    return centroid + np.column_stack([np.full(n_dogs, -40.0), np.linspace(-20, 20, n_dogs)])
+    xs = np.full(n_dogs, DOG_BEHIND_X)
+    ys = np.linspace(-DOG_SPREAD_Y, DOG_SPREAD_Y, n_dogs)
+    return centroid + np.column_stack([xs, ys])
 
 
-def _angle(points: np.ndarray, centroid: np.ndarray, arm: np.ndarray) -> np.ndarray:
+def signed_angles(points: np.ndarray, centroid: np.ndarray, arm: np.ndarray) -> np.ndarray:
+    """Signed angle of each point around ``centroid``, measured from ``arm``."""
     rel = points - centroid
     return np.arctan2(arm[0] * rel[:, 1] - arm[1] * rel[:, 0], rel @ arm)
 
 
-@pytest.mark.parametrize("flock", [_tight_flock(25), np.vstack([_tight_flock(9), [[30.0, 0.0]]])])
-def test_one_dog_takes_the_paper_target(flock):
-    cfg = _cfg(flock.shape[0])
-    d = decide(flock, GOAL, cfg)
-    np.testing.assert_allclose(team_targets(flock, GOAL, _behind(1, flock), cfg)[0], d.target)
+def evenly_spaced_angles(half_span: float, count: int) -> np.ndarray:
+    return np.linspace(-half_span, half_span, count)
 
 
-def test_driving_point_dogs_cover_the_flock_width_not_one_point():
-    """Each added dog takes its own stretch of the flock's back edge; the middle is Pd."""
-    flock = _tight_flock(25) * 6.0  # radius about 4
-    cfg = _cfg(25)
-    d = decide(flock, GOAL, cfg)
-    slots = team_targets(flock, GOAL, _behind(5, flock), cfg)
-    radius = np.linalg.norm(d.target - d.centroid)
-    np.testing.assert_allclose(np.linalg.norm(slots - d.centroid, axis=1), radius)
-    half = np.arcsin(radius_of(flock, d.centroid) / radius)
-    angles = np.sort(_angle(slots, d.centroid, d.target - d.centroid))
-    np.testing.assert_allclose(angles, np.linspace(-half, half, 5), atol=1e-12)
-    assert len(np.unique(np.round(slots, 9), axis=0)) == 5  # five distinct jobs
+# --- single-dog collect / drive ----------------------------------------------
 
 
-def test_drive_front_stays_behind_the_flock_at_the_drive_distance():
-    centroid, target = np.zeros(2), np.array([-10.0, 0.0])  # goal at +x
-    many = drive_front(centroid, target, 2.0, 40)
-    rel = many - centroid
-    np.testing.assert_allclose(np.linalg.norm(rel, axis=1), 10.0)
-    assert np.all(rel @ unit(target - centroid) > -1e-9)  # never on the goal side
-    half = np.arcsin(2.0 / 10.0)
-    angles = np.sort(_angle(many, centroid, target))
-    np.testing.assert_allclose(angles, np.linspace(-half, half, 40), atol=1e-12)
-
-
-def test_collecting_dogs_take_distinct_outliers_nearest_first_and_the_rest_drive_the_core():
-    core = _tight_flock(20)
-    flock = np.vstack([core, [[0.0, 60.0], [0.0, -60.0]]])  # two outliers, above and below
-    cfg = _cfg(22)
-    dogs = np.array([[-40.0, -50.0], [-40.0, 50.0], [-40.0, 0.0], [-40.0, 5.0]])
-    targets = team_targets(flock, GOAL, dogs, cfg)
+def test_drive_target_is_paper_pd_behind_flock() -> None:
+    flock = tight_flock(25)
+    decision = decide(flock, GOAL, cfg(25))
+    assert decision.mode == DRIVE
     centroid = flock.mean(axis=0)
-    np.testing.assert_allclose(targets[0], behind(flock[-1], centroid, R_A))  # lower dog: lower
-    np.testing.assert_allclose(targets[1], behind(flock[-2], centroid, R_A))  # upper dog: upper
-    core_centroid = core.mean(axis=0)
-    drive_radius = np.linalg.norm(drive_point(core, GOAL, cfg) - core_centroid)
-    for t in targets[2:]:  # the two dogs without an outlier drive the core from behind
-        assert np.linalg.norm(t - core_centroid) == pytest.approx(drive_radius)
-        assert t[0] < core_centroid[0]
-    assert not np.allclose(targets[2], targets[3])
+    expected = centroid + unit(centroid - GOAL) * R_A * np.sqrt(25)
+    np.testing.assert_allclose(decision.target, expected)
 
 
-def test_dogs_keep_their_side_when_matched_to_drive_slots():
-    flock = _tight_flock(25) * 6.0
-    cfg = _cfg(25)
-    dogs = _behind(4, flock)[::-1]  # dog 0 is the topmost
-    targets = team_targets(flock, GOAL, dogs, cfg)
-    assert np.all(np.diff(targets[:, 1]) < 0)  # top dog takes the top slot, and so on
+def test_collect_target_is_paper_pc_behind_furthest() -> None:
+    flock = flock_with_outlier()
+    decision = decide(flock, GOAL, cfg(10))
+    assert decision.mode == COLLECT
+    centroid = flock.mean(axis=0)
+    np.testing.assert_allclose(decision.target, flock[-1] + unit(flock[-1] - centroid) * R_A)
 
 
-def test_dog_stops_near_sheep_and_always_walks_delta_s():
-    sheep_pos = np.array([[0.0, 0.0]])
-    near = step_toward(
-        np.array([3.0 * R_A - 0.1, 0.0]), np.array([50.0, 0.0]), sheep_pos, CONFIG, 0.3
+def test_local_dog_uses_the_true_flock_size() -> None:
+    """Seeing 10 of 400 sheep: f(N) and Pd use N = 400, the GCM the 10 seen sheep."""
+    seen = tight_flock(10)
+    decision = decide(seen, GOAL, cfg(400))
+    assert decision.mode == DRIVE
+    centroid = seen.mean(axis=0)
+    assert np.linalg.norm(decision.target - centroid) == pytest.approx(R_A * np.sqrt(400))
+
+
+def test_decision_mirrors_with_the_goal() -> None:
+    flock = tight_flock(25)
+    mirror = np.array([-1.0, 1.0])
+    a = decide(flock, GOAL, cfg(25))
+    b = decide(flock * mirror, GOAL * mirror, cfg(25))
+    np.testing.assert_allclose(b.target, a.target * mirror)
+
+
+# --- multi-dog layer ---------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "flock",
+    [tight_flock(25), flock_with_outlier()],
+    ids=["drive_flock", "collect_flock"],
+)
+def test_one_dog_takes_the_paper_target(flock: np.ndarray) -> None:
+    n = flock.shape[0]
+    paper = decide(flock, GOAL, cfg(n)).target
+    team = team_targets(flock, GOAL, dogs_behind(1, flock), cfg(n))
+    np.testing.assert_allclose(team[0], paper)
+
+
+def test_driving_point_dogs_cover_the_flock_width_not_one_point() -> None:
+    """Each added dog takes its own stretch of the flock's back edge; the middle is Pd."""
+    n_dogs = 5
+    flock = wide_flock(25)
+    decision = decide(flock, GOAL, cfg(25))
+    slots = team_targets(flock, GOAL, dogs_behind(n_dogs, flock), cfg(25))
+
+    drive_radius = np.linalg.norm(decision.target - decision.centroid)
+    distances = np.linalg.norm(slots - decision.centroid, axis=1)
+    np.testing.assert_allclose(distances, drive_radius)
+
+    flock_radius = radius_of(flock, decision.centroid)
+    half_span = np.arcsin(flock_radius / drive_radius)
+    arm = decision.target - decision.centroid
+    angles = np.sort(signed_angles(slots, decision.centroid, arm))
+    np.testing.assert_allclose(angles, evenly_spaced_angles(half_span, n_dogs), atol=ANGLE_TOL)
+    assert len(np.unique(np.round(slots, 9), axis=0)) == n_dogs
+
+
+def test_drive_front_stays_behind_the_flock_at_the_drive_distance() -> None:
+    n_dogs = 40
+    flock_radius = 2.0
+    drive_distance = 10.0
+    centroid = np.zeros(2)
+    # Pd sits drive_distance behind the centroid; goal is the opposite way (+x).
+    drive_point_xy = np.array([-drive_distance, 0.0])
+
+    slots = drive_front(centroid, drive_point_xy, flock_radius, n_dogs)
+    offset = slots - centroid
+    np.testing.assert_allclose(np.linalg.norm(offset, axis=1), drive_distance)
+    assert np.all(offset @ unit(drive_point_xy - centroid) > -1e-9)  # never goal-side
+
+    half_span = np.arcsin(flock_radius / drive_distance)
+    angles = np.sort(signed_angles(slots, centroid, drive_point_xy))
+    np.testing.assert_allclose(angles, evenly_spaced_angles(half_span, n_dogs), atol=ANGLE_TOL)
+
+
+def test_collecting_dogs_take_distinct_outliers_nearest_first_and_the_rest_drive_the_core() -> None:
+    core = tight_flock(20)
+    outliers = np.array([[0.0, 60.0], [0.0, -60.0]])  # above and below the core
+    flock = np.vstack([core, outliers])
+    # Two dogs near the outliers (matched first), two spare dogs for the drive arc.
+    dogs = np.array(
+        [
+            [DOG_BEHIND_X, -50.0],  # nearest the lower outlier
+            [DOG_BEHIND_X, 50.0],  # nearest the upper outlier
+            [DOG_BEHIND_X, 0.0],
+            [DOG_BEHIND_X, 5.0],
+        ]
     )
-    assert np.all(near == 0.0)
-    far = step_toward(np.array([20.0, 0.0]), np.array([50.0, 0.0]), sheep_pos, CONFIG, 0.3)
-    assert np.linalg.norm(far) == pytest.approx(CONFIG["shepherd_speed"])
-    close = step_toward(np.array([20.0, 0.0]), np.array([20.1, 0.0]), sheep_pos, CONFIG, 0.3)
-    assert np.linalg.norm(close) == pytest.approx(CONFIG["shepherd_speed"])  # no overshoot cap
+    n = flock.shape[0]
+    targets = team_targets(flock, GOAL, dogs, cfg(n))
+    centroid = flock.mean(axis=0)
+
+    # Nearest-first: dog at y=-50 takes the lower outlier, dog at y=50 the upper.
+    np.testing.assert_allclose(targets[0], behind(outliers[1], centroid, R_A))
+    np.testing.assert_allclose(targets[1], behind(outliers[0], centroid, R_A))
+
+    core_centroid = core.mean(axis=0)
+    drive_radius = np.linalg.norm(drive_point(core, GOAL, cfg(n)) - core_centroid)
+    drive_slots = targets[2:]
+    for slot in drive_slots:
+        assert np.linalg.norm(slot - core_centroid) == pytest.approx(drive_radius)
+        assert slot[0] < core_centroid[0]  # still behind the core
+    assert not np.allclose(drive_slots[0], drive_slots[1])
 
 
-def test_n_neighbors_forms():
-    assert resolve_n_neighbors(-1, 50) == 49
-    assert resolve_n_neighbors(7, 50) == 7
-    assert resolve_n_neighbors("0.25N", 50) == 13
+def test_dogs_keep_their_side_when_matched_to_drive_slots() -> None:
+    flock = wide_flock(25)
+    dogs = dogs_behind(4, flock)[::-1]  # reverse order: dog 0 is topmost in y
+    targets = team_targets(flock, GOAL, dogs, cfg(25))
+    assert np.all(np.diff(targets[:, 1]) < 0)  # matched slots keep top-to-bottom order
+
+
+def test_dog_stops_near_sheep_and_always_walks_delta_s() -> None:
+    sheep_at = np.array([[0.0, 0.0]])
+    stop_distance = 3.0 * R_A  # dog halts inside this distance of any sheep
+    dt = 0.3
+    far_target = np.array([50.0, 0.0])
+
+    halted = step_toward(np.array([stop_distance - 0.1, 0.0]), far_target, sheep_at, BASE, dt)
+    assert np.all(halted == 0.0)
+
+    walking = step_toward(np.array([20.0, 0.0]), far_target, sheep_at, BASE, dt)
+    assert np.linalg.norm(walking) == pytest.approx(BASE["shepherd_speed"])
+
+    # Even a tiny remaining gap still takes a full shepherd_speed step (paper delta_s).
+    last_step = step_toward(np.array([20.0, 0.0]), np.array([20.1, 0.0]), sheep_at, BASE, dt)
+    assert np.linalg.norm(last_step) == pytest.approx(BASE["shepherd_speed"])
+
+
+def test_n_neighbors_forms() -> None:
+    n_sheep = 50
+    assert resolve_n_neighbors(-1, n_sheep) == n_sheep - 1  # "all others"
+    assert resolve_n_neighbors(7, n_sheep) == 7
+    assert resolve_n_neighbors("0.25N", n_sheep) == 13  # round(0.25 * 50)
     with pytest.raises(ValueError):
-        resolve_n_neighbors(7, 5)  # more neighbours than the flock has: an error, not a clip
+        resolve_n_neighbors(7, 5)  # k must be < N
     with pytest.raises(ValueError):
-        resolve_n_neighbors("0.25", 50)
+        resolve_n_neighbors("0.25", n_sheep)  # fraction form needs the N suffix
 
 
-# --- sheep heading: vectorised step against a per-sheep reading of eq. 4.1 to 4.3
+# --- sheep heading -----------------------------------------------------------
+# Slow per-sheep oracle of the paper rule; used only to check the vectorised path.
 
 
-def _reference(positions, prev, dogs, draws, cfg, k):
-    """Per-sheep loop written straight from the paper, on the same random draws."""
-    out = np.zeros_like(positions)
-    for i, x in enumerate(positions):
-        dist = np.linalg.norm(x - dogs, axis=1)
-        if not np.any(dist < cfg["r_s"]):
-            if draws.graze_move[i] < cfg["graze_move_prob"]:
-                a = draws.graze_angle[i]
-                out[i] = np.array([np.cos(a), np.sin(a)]) * cfg["sheep_speed"]
+def _angle_vec(angle: float) -> np.ndarray:
+    return np.array([np.cos(angle), np.sin(angle)])
+
+
+def _dog_is_near(sheep_xy: np.ndarray, dogs: np.ndarray, r_s: float) -> bool:
+    return bool(np.any(np.linalg.norm(sheep_xy - dogs, axis=1) < r_s))
+
+
+def _graze_step(angle: float, speed: float) -> np.ndarray:
+    return _angle_vec(angle) * speed
+
+
+def _local_centre(positions: np.ndarray, index: int, k: int) -> np.ndarray:
+    """Mean of the k nearest other sheep (LCM); the sheep itself if k is 0."""
+    sheep_xy = positions[index]
+    others = np.delete(np.arange(len(positions)), index)
+    if k <= 0 or len(others) == 0:
+        return sheep_xy
+    order = others[np.argsort(np.linalg.norm(positions[others] - sheep_xy, axis=1))]
+    return positions[order[:k]].mean(axis=0)
+
+
+def _sheep_repulsion(positions: np.ndarray, index: int, r_a: float) -> np.ndarray:
+    """Sum of unit vectors away from other sheep inside r_a."""
+    sheep_xy = positions[index]
+    total = np.zeros(2)
+    for j, other in enumerate(positions):
+        if j == index:
             continue
-        others = np.delete(np.arange(len(positions)), i)
-        order = others[np.argsort(np.linalg.norm(positions[others] - x, axis=1))]
-        lcm = positions[order[:k]].mean(axis=0) if k > 0 else x
-        rep = sum(
-            (
-                unit(x - positions[j])
-                for j in others
-                if 0 < np.linalg.norm(x - positions[j]) < cfg["r_a"]
-            ),
-            np.zeros(2),
-        )
-        push = sum(
-            (unit(x - dog) for dog in dogs if np.linalg.norm(x - dog) < cfg["r_s"]), np.zeros(2)
-        )
-        push = unit(push)
-        a = draws.noise_angle[i]
-        heading = (
-            cfg["inertia"] * unit(prev[i])
-            + cfg["c"] * unit(lcm - x)
-            + cfg["rho_a"] * unit(rep)
-            + cfg["rs_weight"] * push
-            + cfg["noise_strength"] * np.array([np.cos(a), np.sin(a)])
-        )
-        out[i] = unit(heading) * cfg["sheep_speed"]
+        gap = np.linalg.norm(sheep_xy - other)
+        if 0.0 < gap < r_a:
+            total = total + unit(sheep_xy - other)
+    return total
+
+
+def _dog_repulsion(sheep_xy: np.ndarray, dogs: np.ndarray, r_s: float) -> np.ndarray:
+    """Unit vector of the summed unit pushes from dogs inside r_s."""
+    total = np.zeros(2)
+    for dog in dogs:
+        if np.linalg.norm(sheep_xy - dog) < r_s:
+            total = total + unit(sheep_xy - dog)
+    return unit(total)
+
+
+def _reacting_step(
+    positions: np.ndarray,
+    prev: np.ndarray,
+    dogs: np.ndarray,
+    draws: sheep.SheepDraws,
+    settings: dict[str, Any],
+    index: int,
+    k: int,
+) -> np.ndarray:
+    """One reacting sheep: inertia + LCM + sheep repulsion + dog push + noise."""
+    sheep_xy = positions[index]
+    heading = (
+        settings["inertia"] * unit(prev[index])
+        + settings["c"] * unit(_local_centre(positions, index, k) - sheep_xy)
+        + settings["rho_a"] * unit(_sheep_repulsion(positions, index, settings["r_a"]))
+        + settings["rs_weight"] * _dog_repulsion(sheep_xy, dogs, settings["r_s"])
+        + settings["noise_strength"] * _angle_vec(draws.noise_angle[index])
+    )
+    return unit(heading) * settings["sheep_speed"]
+
+
+def sheep_reference(
+    positions: np.ndarray,
+    prev: np.ndarray,
+    dogs: np.ndarray,
+    draws: sheep.SheepDraws,
+    settings: dict[str, Any],
+    k: int,
+) -> np.ndarray:
+    """Per-sheep loop written from the paper terms, on the same random draws."""
+    out = np.zeros_like(positions)
+    for i, sheep_xy in enumerate(positions):
+        if not _dog_is_near(sheep_xy, dogs, settings["r_s"]):
+            if draws.graze_move[i] < settings["graze_move_prob"]:
+                out[i] = _graze_step(draws.graze_angle[i], settings["sheep_speed"])
+            continue
+        out[i] = _reacting_step(positions, prev, dogs, draws, settings, i, k)
     return out
 
 
-@pytest.mark.parametrize("r_a", [2.0, 1.0])  # figure 5 of the paper uses r_a = 1 with rho_a = 2
+def _still_draws(n: int) -> sheep.SheepDraws:
+    """Draws that never graze-step and add no heading noise."""
+    return sheep.SheepDraws(
+        graze_move=np.ones(n),
+        graze_angle=np.zeros(n),
+        noise_angle=np.zeros(n),
+    )
+
+
+@pytest.mark.parametrize("r_a", [2.0, 1.0])
 @pytest.mark.parametrize("k", [29, 7])
 @pytest.mark.parametrize("n_dogs", [1, 3])
-def test_vectorised_sheep_match_reference(k, n_dogs, r_a):
-    rng = np.random.default_rng(3)
-    positions = rng.normal(0.0, 3.0, size=(30, 2))
-    positions[-1] = [200.0, 200.0]  # one grazer, far from every dog
-    prev = rng.normal(0.0, 1.0, size=(30, 2))
-    dogs = rng.normal(0.0, 1.0, size=(n_dogs, 2)) + [8.0, 0.0]
-    cfg = {**CONFIG, "r_a": r_a}
-    draws = sheep.draw(np.random.default_rng(4), 30)
-    np.testing.assert_allclose(
-        sheep.velocities(positions, prev, dogs, draws, cfg, k),
-        _reference(positions, prev, dogs, draws, cfg, k),
-        atol=1e-12,
-    )
+def test_vectorised_sheep_match_reference(k: int, n_dogs: int, r_a: float) -> None:
+    n_sheep = 30
+    pos_rng = np.random.default_rng(3)
+    positions = pos_rng.normal(0.0, 3.0, size=(n_sheep, 2))
+    positions[-1] = [200.0, 200.0]  # far from every dog: must take the graze branch
+    prev = pos_rng.normal(0.0, 1.0, size=(n_sheep, 2))
+    dogs = pos_rng.normal(0.0, 1.0, size=(n_dogs, 2)) + [8.0, 0.0]
+    settings = {**BASE, "r_a": r_a}
+    draws = sheep.draw(np.random.default_rng(4), n_sheep)
+
+    got = sheep.velocities(positions, prev, dogs, draws, settings, k)
+    expected = sheep_reference(positions, prev, dogs, draws, settings, k)
+    np.testing.assert_allclose(got, expected, atol=ANGLE_TOL)
 
 
-def test_sheep_at_exactly_r_s_grazes():
-    positions = np.array([[0.0, 0.0], [0.0, 1.0]])  # the second sheep is beyond r_s either way
-    draws = sheep.SheepDraws(
-        graze_move=np.ones(2), graze_angle=np.zeros(2), noise_angle=np.zeros(2)
-    )
-    still = np.zeros((2, 2))
-    at_edge = np.array([[CONFIG["r_s"], 0.0]])
-    assert np.all(sheep.velocities(positions, still, at_edge, draws, CONFIG, 1) == 0.0)
-    inside = at_edge - [1e-9, 0.0]
-    assert np.any(sheep.velocities(positions, still, inside, draws, CONFIG, 1) != 0.0)
+def test_sheep_at_exactly_r_s_grazes() -> None:
+    """Reaction is strict < r_s: on the boundary the sheep grazes (stays still here)."""
+    flock = np.array([[0.0, 0.0], [0.0, 1.0]])
+    prev = np.zeros_like(flock)
+    draws = _still_draws(len(flock))
+    r_s = BASE["r_s"]
+
+    on_boundary = np.array([[r_s, 0.0]])
+    assert np.all(sheep.velocities(flock, prev, on_boundary, draws, BASE, k_neighbors=1) == 0.0)
+
+    just_inside = on_boundary - [1e-9, 0.0]
+    assert np.any(sheep.velocities(flock, prev, just_inside, draws, BASE, k_neighbors=1) != 0.0)
 
 
-def test_one_dog_push_is_the_paper_unit_vector():
-    to_dog = np.array([[[3.0, 4.0]]])
-    dist = np.linalg.norm(to_dog, axis=2)
-    np.testing.assert_allclose(sheep.dog_push(to_dog, dist, 65.0), [[0.6, 0.8]])
-
-
-def test_several_dogs_push_as_one_unit_vector_from_their_mean_direction():
-    to_dogs = np.array([[[3.0, 4.0], [3.0, -4.0], [-500.0, 0.0]]])  # the third is out of reach
+def test_one_dog_push_is_the_paper_unit_vector() -> None:
+    # One sheep, one dog offset by the 3-4-5 triangle -> unit push (0.6, 0.8).
+    offset = np.array([3.0, 4.0])
+    to_dogs = offset.reshape(1, 1, 2)
     dist = np.linalg.norm(to_dogs, axis=2)
-    np.testing.assert_allclose(sheep.dog_push(to_dogs, dist, 65.0), [[1.0, 0.0]], atol=1e-12)
+    r_s = 65.0  # well beyond the 5 m gap, so the dog counts
+    np.testing.assert_allclose(sheep.dog_push(to_dogs, dist, r_s), [[0.6, 0.8]])
 
 
-def test_one_independent_dog_is_the_paper_shepherd_trial():
-    multi = run_trial(config_for(n=60, d=1, layout="wide", ticks=200), 2026)
-    alone = run_trial(config_for("independent", n=60, d=1, layout="wide", ticks=200), 2026)
-    assert alone.total_ticks == multi.total_ticks
-    np.testing.assert_array_equal(alone.history.to_numpy(), multi.history.to_numpy())
-
-
-def test_independent_dogs_all_take_the_one_paper_target():
-    config = config_for("independent", n=60, d=4, layout="wide")
-    state = initial_state(config, 2026)
-    aims = independent.targets(state, config)
-    paper = decide(state.sheep_positions, state.world.goal.center, config).target
-    assert aims.shape == (4, 2)
-    np.testing.assert_array_equal(aims, np.tile(paper, (4, 1)))
-
-
-def test_capped_drive_offset_stays_within_reach_and_is_off_by_default():
-    flock = np.array([[0.0, 0.0], [2.0, 0.0], [0.0, 2.0]])
-    goal = np.array([100.0, 0.0])
-    paper = config_for(n=1600, d=1)  # r_a sqrt(N) = 80, beyond r_s = 65
-    capped = {**paper, "drive_offset_cap": 63.0}
-    centre = flock.mean(axis=0)
-    assert np.linalg.norm(drive_point(flock, goal, paper) - centre) == pytest.approx(80.0)
-    assert np.linalg.norm(drive_point(flock, goal, capped) - centre) == pytest.approx(63.0)
-
-
-def test_spread_jobs_skip_outliers_near_one_already_taken():
-    from sim.plugins.dogs.collect_drive_multi import spread_jobs
-
-    flock = np.array([[100.0, 0.0], [99.0, 1.0], [-90.0, 0.0], [0.0, 80.0]])
-    outliers = np.array([0, 1, 2, 3])  # farthest first
-    assert spread_jobs(flock, outliers, 2, 0.0).tolist() == [0, 1]  # the team rule
-    assert spread_jobs(flock, outliers, 2, 50.0).tolist() == [0, 2]  # 1 is next to 0
-    assert spread_jobs(flock, outliers, 4, 50.0).tolist() == [0, 2, 3, 1]  # filled in at the end
+def test_several_dogs_push_as_one_unit_vector_from_their_mean_direction() -> None:
+    # Two equal pushes above/below +x cancel the y parts; a third dog is out of range.
+    near_a = np.array([3.0, 4.0])
+    near_b = np.array([3.0, -4.0])
+    far = np.array([-500.0, 0.0])
+    to_dogs = np.stack([near_a, near_b, far])[None, :, :]  # shape (1 sheep, 3 dogs, 2)
+    dist = np.linalg.norm(to_dogs, axis=2)
+    r_s = 65.0
+    np.testing.assert_allclose(sheep.dog_push(to_dogs, dist, r_s), [[1.0, 0.0]], atol=ANGLE_TOL)

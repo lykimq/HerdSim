@@ -7,10 +7,10 @@ value is its own D curve), and any canonical value it changes. Everything else c
 protocols/configs/canonical.yaml. A protocol can ``extends`` another and change only what
 differs, which is how a variant of a finished run gets its own id and folder:
 
-    protocol_id: dmin_f99_hold_spacing
-    output: results/dmin_f99_hold_spacing
-    extends: dmin_f99_hold.yaml
-    dog_spacing: 2.0
+    protocol_id: dmin_f99_m6
+    output: results/dmin_f99_m6
+    extends: dmin_m6.yaml
+    success_fraction: 0.99
 
 Unknown keys are errors, so a typo stops the run instead of being ignored.
 """
@@ -27,7 +27,6 @@ import yaml
 
 from sim.core.methods import METHODS
 from sim.plugins.scenarios import SCENARIOS
-from sim.plugins.scenarios.team_settings import OFF as TEAM_OFF
 from sim.plugins.sheep import SHEEP_MODELS
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -48,7 +47,7 @@ REQUIRED_KEYS = (
 )
 PROTOCOL_KEYS = (*REQUIRED_KEYS, "factors", "description")
 TIME_LIMIT_KEYS = ("time_limit_ticks", "time_limit_seconds", "time_limit_drive_multiple")
-METHOD_KEYS = (*TIME_LIMIT_KEYS, "params", "calibrate_as")
+METHOD_KEYS = (*TIME_LIMIT_KEYS, "params")
 
 # Canonical values that hold for the whole protocol, so they cannot be swept as factors:
 # the task, the seed list, and the calibration of R_f, which runs once per method and
@@ -62,8 +61,6 @@ WHOLE_PROTOCOL_KEYS = (
     "calibration_starts",
     "settled_tolerance",
     "start_agreement",
-    "impose_radius_above",
-    "imposed_radius_scale",
 )
 
 # Canonical values that only steer the adaptive run; they do not change any trial, so they
@@ -86,16 +83,7 @@ STRATEGY_KEYS = (
 # Settings added after the first runs. At their neutral value they do not change any
 # trial, so they stay out of the physics hash and the folders written before them remain
 # resumable.
-NEUTRAL_SETTINGS = {
-    **TEAM_OFF,  # the dog team settings, off
-    "success_fraction": 1.0,
-    "hold_drive_multiple": 0.0,
-    "impose_radius_above": 0,
-    "imposed_radius_scale": 1.0,
-    # Hashed when not 1: it leaves the outcome of a trial as it is but changes the rows
-    # (the arrival columns, the metric summaries), which must agree within a folder.
-    "metrics_stride": 1,
-}
+NEUTRAL_SETTINGS = {"success_fraction": 1.0}
 
 
 @dataclass(frozen=True)
@@ -106,10 +94,6 @@ class MethodSpec:
     time_limit_ticks: int | None
     params: dict[str, Any] = field(default_factory=dict)
     time_limit_drive_multiple: float | None = None
-    # Method whose single dog drives the calibration flock, when not this one. R_f then
-    # comes from the same reference drive as that method's, so both run the same task.
-    # Only between methods with the same sheep model and parameter names.
-    calibrate_as: str | None = None
 
 
 @dataclass(frozen=True)
@@ -136,26 +120,22 @@ class Protocol:
         The layout set and the largest D size the field and place the goal of every cell
         (the task's build_setup), so both are physics. The flock sizes, the smaller D and
         the strategy keys are not, so a campaign can add flock sizes, intermediate D or
-        seeds and still resume. Settings owned by another task are left out.
+        seeds and still resume.
         """
-        task = self.settings["task"]
-        others = {k for name, t in SCENARIOS.items() if name != task for k in t.own_settings}
         return {
-            "task": task,
+            "task": self.settings["task"],
             "layouts": sorted(set(self.layouts)),
             "max_dogs": max(self.shepherd_counts),
             "settings": {
                 k: v
                 for k, v in self.settings.items()
-                if k not in STRATEGY_KEYS and k not in others and NEUTRAL_SETTINGS.get(k) != v
+                if k not in STRATEGY_KEYS and NEUTRAL_SETTINGS.get(k) != v
             },
             "methods": {
                 m.name: {
                     "time_limit_ticks": m.time_limit_ticks,
                     "time_limit_drive_multiple": m.time_limit_drive_multiple,
                     "config": config,
-                    # Left out when unset, so folders written before it keep their hash.
-                    **({"calibrate_as": m.calibrate_as} if m.calibrate_as else {}),
                 }
                 for m, config in zip(self.methods, self.method_config().values())
             },
@@ -258,19 +238,6 @@ def _time_limit(name: str, spec: dict[str, Any]) -> tuple[int | None, float | No
     return round(ticks), None
 
 
-def _calibrate_as(name: str, source: str | None) -> str | None:
-    """The reference method of ``calibrate_as``, checked; None when it is the method itself."""
-    if source is None or source == name:
-        return None
-    if source not in METHODS:
-        raise ValueError(f"Method {name!r}: calibrate_as {source!r} is not a method")
-    if METHODS[source].sheep_model != METHODS[name].sheep_model:
-        raise ValueError(f"Method {name!r}: calibrate_as {source!r} has another sheep model")
-    if set(METHODS[source].defaults) != set(METHODS[name].defaults):
-        raise ValueError(f"Method {name!r}: calibrate_as {source!r} has other parameters")
-    return source
-
-
 def _methods(raw: dict[str, Any]) -> tuple[MethodSpec, ...]:
     specs = []
     for name, spec in raw.items():
@@ -285,8 +252,7 @@ def _methods(raw: dict[str, Any]) -> tuple[MethodSpec, ...]:
         if bad:
             raise ValueError(f"Method {name!r} has no parameters {bad}")
         ticks, multiple = _time_limit(name, spec)
-        source = _calibrate_as(name, spec.get("calibrate_as"))
-        specs.append(MethodSpec(name, ticks, params, multiple, source))
+        specs.append(MethodSpec(name, ticks, params, multiple))
     return tuple(specs)
 
 

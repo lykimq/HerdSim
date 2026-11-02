@@ -1,9 +1,4 @@
-"""Per-tick view of a state with shared, lazily computed geometry.
-
-Several metrics need the same distances; the view computes each once per tick.
-``config`` is the trial's run config, where metrics read their constants
-(measurement radius, lost radius, ...).
-"""
+"""Per-tick state view with lazily shared geometry for metrics."""
 
 from __future__ import annotations
 
@@ -36,11 +31,7 @@ class TickView:
 
     @cached_property
     def hull(self) -> tuple[float, float]:
-        """(perimeter, area) of the sheep convex hull.
-
-        Fewer than 3 sheep, or all on one line: area 0 and perimeter twice the
-        longest sheep-sheep distance.
-        """
+        """(perimeter, area) of the sheep hull; flat or <3 sheep -> area 0."""
         pts = self.state.sheep_positions
         if pts.shape[0] >= 3:
             try:

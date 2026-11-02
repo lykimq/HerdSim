@@ -1,16 +1,11 @@
-# D_min at 12 drive times, the loosest of the three main deadlines (dmin_m6 and dmin_m3
-# differ only in the deadline). A drive time is the drive length over the sheep speed.
+# D_min at 12 drive times, the loosest of the three deadlines. A drive time is the drive
+# length over the sheep speed. Strombom sheep, the team rule, four layouts, N 25 to 400,
+# D 1 to 24 (a midpoint D is added where the zone changes).
 #
-# Strombom sheep and the multi-dog rule, point dogs, global view, four layouts, N 25 to 400
-# (dmin_f99_m12 adds more sizes), D 1 to 24 (the hardest cells may need more than the
-# pilot's 16; a midpoint D is added where the zone changes), theta 0.90 at 99 percent
-# confidence.
-#
-# This run was made with decide_finish_times true; the canonical default is false. Add
-# decide_finish_times: true to reproduce its seed allocation exactly.
+# This run was made with decide_finish_times true; add it to reproduce its seed allocation.
 
 protocol_id: dmin_m12
-description: "Main grid at 12 drive times, strict rule: D_min against N on four start layouts (RQ1 to RQ3)."
+description: "D_min against N on four start layouts, strict rule, 12 drive times."
 output: results/dmin_m12
 canonical: protocols/configs/canonical.yaml
 
