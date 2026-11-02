@@ -7,7 +7,7 @@
 
 One sheepdog can bring a flock that stays together into a pen. When the sheep start scattered and the job has a deadline, one dog may not reach every stray sheep in time. HerdSim is a simulator, and a study run with it, that asks how many dogs such a task needs. It runs the sheep model of Strombom et al. (2014) with a team rule for several dogs, and counts how often a team of $D$ dogs brings a flock of $N$ sheep into a goal before a deadline.
 
-The question is how $D_{\min}$, the smallest team that is reliable, grows with $N$, and how the start layout and the deadline change it. The results are in the [report](docs/report/d_min_report.md) and the terms in the [glossary](docs/glossary.md).
+The question is how $D_{\min}$, the smallest team that is reliable, grows with $N$, and how the start layout and the deadline change it. The results are in the report and the terms in the glossary.
 
 ## Results in short
 
@@ -20,32 +20,32 @@ From 115,470 trials in six runs (12, 6 and 3 drive times, each under the strict 
 
 ## Task and methods
 
-HerdSim moves sheep and dogs over an open field one time step, a [tick](docs/glossary.md#trials-and-experiments), at a time. The dogs bring the flock into a circular goal. The deadline is counted in drive times: one drive time is what a sheep walking straight at 1 m/s needs to cover the drive distance, from the flock's start centre to the goal centre. The study uses 12, 6 and 3 drive times.
+HerdSim moves sheep and dogs over an open field one time step, a tick, at a time. The dogs bring the flock into a circular goal. The deadline is counted in drive times: one drive time is what a sheep walking straight at 1 m/s needs to cover the drive distance, from the flock's start centre to the goal centre. The study uses 12, 6 and 3 drive times.
 
 A trial succeeds under the strict rule when every sheep is in the goal at the same tick, and under the 99% rule when 99% of them are.
 
-A sheep farther from the flock centre than the collect distance, $2 N^{2/3}$ m, is an outlier. The flock starts in one of four [layouts](docs/experiments/task_design.md#flock-start-layouts):
+A sheep farther from the flock centre than the collect distance, $2 N^{2/3}$ m, is an outlier. The flock starts in one of four layouts:
 
 1) `compact`: a tight flock.
 2) `wide`: a loose flock in which about 13% of the sheep start beyond the collect distance.
 3) `split`: three compact clusters.
 4) `outlier_rich`: a compact flock with 20% of the sheep on a ring beyond the collect distance.
 
-The one method, `strombom_multi`, pairs Strombom's sheep with the team rule `collect_drive_multi` ([team rule](docs/methods/strombom_multi.md)). While there are outliers, the Hungarian algorithm (an optimal one-to-one assignment) pairs the dogs with the $D$ farthest outliers at the least total distance, and spare dogs drive the sheep within the collect distance. With no outliers left, the dogs stand on an arc behind the flock and drive it to the goal.
+The one method, `strombom_multi`, pairs Strombom's sheep with the team rule `collect_drive_multi` (team rule). While there are outliers, the Hungarian algorithm (an optimal one-to-one assignment) pairs the dogs with the $D$ farthest outliers at the least total distance, and spare dogs drive the sheep within the collect distance. With no outliers left, the dogs stand on an arc behind the flock and drive it to the goal.
 
-A protocol is the recipe of one experiment, a YAML file listing the flock sizes, team sizes, layouts, success rule and deadline to try ([protocol catalogue](docs/guides/protocols.md)). Its id names its settings: in `dmin_f99_m6`, `f99` means the 99% rule and `m6` a deadline of 6 drive times, and ids without `f99` use the strict rule.
+A protocol is the recipe of one experiment, a YAML file listing the flock sizes, team sizes, layouts, success rule and deadline to try (protocol catalogue). Its id names its settings: in `dmin_f99_m6`, `f99` means the 99% rule and `m6` a deadline of 6 drive times, and ids without `f99` use the strict rule.
 
 ![One simulation trial](docs/figures/fig17_trial.png)
 
-**Figure 1: One trial in HerdSim ($N = 200$ sheep, $D = 4$ dogs, `wide` start, seed 2026, strict rule, 1500-tick limit), at ticks 0, 55, 139 and 279.** The dogs start on an arc behind the flock, gather it from several sides, then drive it from behind into the goal. The green circle is the goal, of radius 1.9 times the flock radius [$R_f$](docs/glossary.md#the-drive-task); orange triangles are dogs, with their tracks, and blue dots are sheep.
+**Figure 1: One trial in HerdSim ($N = 200$ sheep, $D = 4$ dogs, `wide` start, seed 2026, strict rule, 1500-tick limit), at ticks 0, 55, 139 and 279.** The dogs start on an arc behind the flock, gather it from several sides, then drive it from behind into the goal. The green circle is the goal, of radius 1.9 times the flock radius $R_{f}$; orange triangles are dogs, with their tracks, and blue dots are sheep.
 
 ## How the study is organised
 
 Inside a protocol the data has three levels. A curve is one setup, such as `wide` starts of 200 sheep, tried at each team size. A cell is one team size on a curve and asks a question such as "can 3 dogs herd 200 sheep in this setup?". A trial is one run of that cell with one random seed.
 
-A cell is reliable when the lower end of the 99% Clopper-Pearson interval of its success rate is at least theta = 0.90, that is, its success rate is at least 0.90 at 99% confidence. It stays undecided while the interval straddles theta ([reliable cell](docs/glossary.md#success-and-reliability)). $D_{\min}$ is the smallest reliable team on a curve.
+A cell is reliable when the lower end of the 99% Clopper-Pearson interval of its success rate is at least theta = 0.90, that is, its success rate is at least 0.90 at 99% confidence. It stays undecided while the interval straddles theta (reliable cell). $D_{\min}$ is the smallest reliable team on a curve.
 
-The six protocols are `dmin_m12`, `dmin_m6` and `dmin_m3` under the strict rule on $N$ = 25 to 400, and `dmin_f99_m12`, `dmin_f99_m6` and `dmin_f99_m3` under the 99% rule; the 99% runs at 12 and 6 drive times add $N$ = 71, 141, 283 and 566. No trial ended in an error ([run record](docs/report/d_min_report.md#5-run-record)).
+The six protocols are `dmin_m12`, `dmin_m6` and `dmin_m3` under the strict rule on $N$ = 25 to 400, and `dmin_f99_m12`, `dmin_f99_m6` and `dmin_f99_m3` under the 99% rule; the 99% runs at 12 and 6 drive times add $N$ = 71, 141, 283 and 566. No trial ended in an error.
 
 ## Setup and tests
 
@@ -77,7 +77,7 @@ The last two commands read stored files and run no simulation. [`cli/README.md`]
 
 ## Project architecture
 
-The tree lists the code's six [layers](docs/codes/architecture.md#layers), top to bottom. Each imports only layers below it, and the engine and the analysis import no other layer. The engine runs one trial and knows nothing of campaigns; the analysis reads stored files and never runs the model.
+The tree lists the code's six layers, top to bottom. Each imports only layers below it, and the engine and the analysis import no other layer. The engine runs one trial and knows nothing of campaigns; the analysis reads stored files and never runs the model.
 
 ```text
 HerdSim/
@@ -92,7 +92,7 @@ HerdSim/
 `-- tests/                  # unit, invariant and regression tests
 ```
 
-[Configuration](docs/guides/configuration.md) describes the canonical defaults, which a protocol keeps unless it names them, and the [physics hash](docs/guides/configuration.md#physics-hash) that ties a results folder to one physics.
+[Configuration](docs/guides/configuration.md) describes the canonical defaults, which a protocol keeps unless it names them, and the physics hash that ties a results folder to one physics.
 
 ## Documentation
 
