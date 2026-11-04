@@ -98,9 +98,11 @@ A definition for each term HerdSim's docs use, with a link to the section that e
 
 **Lower bound**, written `[5]`: no team is reliable yet, and $D_{\min}$ is at least 5, its $D_{\min,\mathrm{low}}$.
 
+**$D_{\min,\mathrm{stable}}$**: on a curve where a team above $D_{\min,\mathrm{low}}$ is unreliable, the smallest reliable team above the last such team ([report, section 2.3](report/d_min_report.md#23-when-a-team-is-reliable)).
+
 **`none`**: every tested team up to the top of the grid is unreliable; the generated tables write `none on grid`.
 
-**$D_{\mathrm{sat}}$**: the smallest reliable team that no larger reliable team beats on finish time ([frontier values](experiments/task_design.md#frontier-values)). One team beats another when, on the seeds both finished, the bootstrap 99% interval of the paired median difference lies more than 5% of the slower median below zero. The campaign uses it to skip cells far above it; the report does not use it.
+**$D_{\mathrm{sat}}$**: the smallest reliable team that no larger reliable team beats on finish time ([frontier values](experiments/task_design.md#frontier-values)). One team beats another when, on the seeds both finished, the bootstrap 99% interval of the paired median difference lies more than 5% of the slower median below zero. The campaign uses it to stop seeding copies above it ([pruning](experiments/task_design.md#pruning-above-saturation)); the report does not use it.
 
 **Other frontier values**: the frontier rules also store $D_{\max}$, $D_{\mathrm{overcrowd}}$, $D_{\mathrm{best}}$ and $D_{\mathrm{crowd}}$ in `frontier_groups.csv` ([frontier values](experiments/task_design.md#frontier-values)).
 
@@ -113,6 +115,10 @@ A definition for each term HerdSim's docs use, with a link to the section that e
 **$r_a$**: 2 m, the distance below which sheep push each other apart.
 
 **$r_s$**: 65 m, the distance within which a sheep reacts to a dog; with no dog that close it grazes.
+
+**Grazing repulsion** (`graze_repulsion`): grazing sheep also push apart when closer than $r_a$, as in the paper. Off in the six study runs, on in the check against the paper and the grazing pilots ([grazing](methods/strombom_sheep.md#grazing)).
+
+**Neighbour count $n$**: how many nearest neighbours attract a sheep; all $N - 1$ in the study. The check against the paper varies it, and there a trial finishes when the flock centre is within 10 m of the goal ([terms](methods/strombom_check.md#terms)).
 
 **GCM and $\mathrm{LCM}_i$**: the global centre of mass (mean position of the flock) and the local centre of mass of sheep $i$ (mean position of its nearest neighbours, all other sheep by default).
 

@@ -66,7 +66,7 @@ Each trial runs through HerdSim's own trial code, with the paper's values. Table
 | Length of a grazing step | $\delta$, in a random direction | HerdSim's reading; the paper gives only the probability $p$ |
 | Grazing repulsion | applied | the paper repels sheep from each other "regardless of distance to the shepherd" (section 2); how a repelled grazing sheep moves is not stated, so HerdSim's reading: it steps $\delta$ along its previous heading, the push from its neighbours and noise |
 | Trials per point | 50 | the paper's text on its Figure 3: "over 50 simulations" |
-| Seed of trial $i$ at size $N$ | $1000 N + i$, the same for every $n$ at that $N$ | HerdSim's choice; a trial can be replayed from its seed |
+| Seed of trial $i$ at size $N$ | $1000 N + i$, the same for every $n$ at that $N$; in the distance study $1{,}000{,}000 + 1000\,l + i$ | HerdSim's choice; a trial can be replayed from its seed |
 
 The paper's Figure 3 covers $N$ from 2 to 150 and $n$ from 1 to $N - 1$. HerdSim runs 80 grid points: ten sizes (10, 20, 30, 40, 50, 60, 80, 100, 125 and 150) and, at each, the global case and $n = \lceil s N \rceil$ (at least 1) for the shares $s$ = 0.1, 0.2, 0.3, 0.4, 0.5, 0.6 and 0.8. How to run it and its cost are in the [command-line reference](../guides/cli_reference.md#clipaper_checkpy-check-against-the-paper).
 
@@ -74,31 +74,22 @@ The paper's Figure 3 covers $N$ from 2 to 150 and $n$ from 1 to $N - 1$. HerdSim
 
 The paper's Figure 3 shows, for flock sizes $N$ up to 150 and every neighbour count $n$, the share of 50 runs in which one dog brings the flock to the corner within 8000 time steps. HerdSim ran the same task; Figure 2 sets the two side by side.
 
-The comparison, point by point:
+Table 3 compares them point by point. HerdSim's grid has no point between $n = 0.5 N$ and $0.6 N$, so the paper's line at $0.53 N$ falls between two tested columns, and 50 of 50 bounds the finish rate at 0.899 or more (99% confidence), not at exactly 1.
 
-- All trials finish above the line $n = 0.53 N$.
-  - Paper: every trial finishes from the global case down to about $n = 0.53 N$.
-  - HerdSim: 50 of 50 finish at all 30 grid points with $n \ge 0.6 N$.
-  - Result: same.
-- Success falls below that line.
-  - Paper: for $N > 30$, success falls from 1 to rare below the line.
-  - HerdSim: at $N = 100$, 49, 34 and 9 of 50 finish at $n$ = 50, 40 and 30.
-  - Result: same.
-- Rare success under a lower curve.
-  - Paper: success is rare under a curve $n \approx 3 \log N$.
-  - HerdSim: not checked, because the paper does not state the base of the logarithm.
-  - Result: cannot tell.
-- The figure.
-  - Paper and HerdSim: the same shape by eye (Figure 2).
-  - Result: same.
+**Table 3: The paper's Figure 3 against HerdSim.**
 
-Why they match: the check uses the paper's parameters and rules (Tables 1 and 2). We found no difference.
+| Claim | Paper | HerdSim | Result |
+| :--- | :--- | :--- | :--- |
+| All finish above $n = 0.53 N$ | every trial finishes from the global case down to about $n = 0.53 N$ | 50 of 50 at all 30 grid points with $n \ge 0.6 N$ | same |
+| Success falls below that line | for $N > 30$, from 1 to rare | at $N = 100$, 49, 34 and 9 of 50 at $n$ = 50, 40 and 30 | same |
+| Rare success under a lower curve | rare under $n \approx 3 \log N$ | not checked: the paper does not state the base of the logarithm | cannot tell |
+| The figure | - | the same shape by eye (Figure 2) | same |
 
 ![The paper's Figure 3 beside HerdSim's run of the same task](../figures/fig_paper_check.png)
 
-**Figure 2: Share of trials that finish against $N$ and $n$ in the paper (left) and in HerdSim (right), one dog, 8000 time steps, $r_s = 45$ m.** The two have the same shape, with the change near the line $n = 0.53 N$.
+**Figure 2: Share of trials that finish against $N$ and $n$ in the paper (left) and in HerdSim (right), one dog, 8000 time steps, $r_s = 45$ m.** By eye the two have the same shape, with the change near the line $n = 0.53 N$.
 
-- Marks: blue is no trial finishing and white is every trial; the black line is $n = 0.53 N$.
+- Marks: blue is no trial finishing and white is every trial; the black line is $n = 0.53 N$, and the paper's panel also draws its curve $n \approx 3 \log N$.
 - Left: the paper's Figure 3, cropped from its PDF (licence CC BY 4.0), with its own colour scale; it is also blue above $n = N - 1$, where no trial exists.
 - Right: HerdSim, one square per grid point, on a similar blue-to-white scale.
 
@@ -106,22 +97,15 @@ Why they match: the check uses the paper's parameters and rules (Tables 1 and 2)
 
 ## Time against distance to the goal
 
-The paper's text (p. 4) describes a second study: 46 sheep start in a 50 x 50 square centred at $(l + 25\sqrt{2}, l + 25\sqrt{2})$, with $l$ "increasing from 10 to 500" and 100 runs per $l$. It gives no other setting, so HerdSim uses the paper's Table 1 values ($r_s = 65$ m), the global case, the 10 m end rule and 8000 time steps of its Figure 3, $l$ = 10 and 50 to 500 in steps of 50, and the dog in a 50 m square next to the sheep's on the goal side. The paper's result is in its supplementary Figure S2, which we do not have, so HerdSim is compared with its text.
+The paper's text (p. 4) describes a second study: 46 sheep start in a 50 x 50 square centred at $(l + 25\sqrt{2}, l + 25\sqrt{2})$, with $l$ "increasing from 10 to 500" and 100 runs per $l$. It gives no other setting, so HerdSim uses the paper's Table 1 values ($r_s = 65$ m), the global case, HerdSim's 10 m end rule (Table 2), the 8000 time steps of the paper's Figure 3, $l$ = 10 and 50 to 500 in steps of 50, and the dog in a 50 m square next to the sheep's on the goal side. The paper's result is in its supplementary Figure S2, which we do not have, so HerdSim is compared with its text.
 
-The comparison, point by point:
+**Table 4: The paper's distance study against HerdSim.**
 
-- Success against distance.
-  - Paper: "the success rate is unaffected".
-  - HerdSim: 100 of 100 finish at all 11 distances.
-  - Result: same.
-- Time against distance.
-  - Paper: "the average time to completion increases linearly with distance to target".
-  - HerdSim: mean steps = 314 + 2.30 $l$, $R^2$ = 0.9995 over the 11 means (Figure 3).
-  - Result: same.
-- The time itself.
-  - Paper: no number given (its Figure S2 is not available to us).
-  - HerdSim: 345 steps at $l = 10$ to 1472 at $l = 500$.
-  - Result: cannot tell.
+| Claim | Paper | HerdSim | Result |
+| :--- | :--- | :--- | :--- |
+| Success against distance | "the success rate is unaffected" | 100 of 100 at all 11 distances | same |
+| Time against distance | "the average time to completion increases linearly with distance to target" | a line through the 11 mean times: 314 + 2.30 $l$ steps, $R^2$ = 0.9995 (Figure 3) | same |
+| The time itself | no number (its Figure S2 is not available to us) | 345 steps at $l = 10$ to 1472 at $l = 500$ | cannot tell |
 
 ![Time to finish against distance to the goal](../figures/fig_paper_distance.png)
 
@@ -144,7 +128,7 @@ The comparison, point by point:
 
 ## Reproducing the check
 
-The trials are run with `cli/paper_check.py` ([command-line reference](../guides/cli_reference.md#clipaper_checkpy-check-against-the-paper)), which stores one row per trial with its seed in `results/paper_check/`; `paper_check/trials.py` runs any trial again. Rerun through the trial code, every Figure 3 trial gave the same result and step count as an earlier version of the check that used a loop of its own. The tables and figures come from:
+The trials are run with `cli/paper_check.py` ([command-line reference](../guides/cli_reference.md#clipaper_checkpy-check-against-the-paper)), which stores one row per trial with its seed in `results/paper_check/`; `paper_check/trials.py` runs any trial again from its seed. The tables and figures come from:
 
 ```bash
 uv run python -m docs.generate_docs.page paper

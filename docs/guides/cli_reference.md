@@ -45,6 +45,19 @@ Before a long run, run `make test` and `plan` (the folder should be new or say `
 
 Calibration measures $R_f$, which sizes the field, the goal and the drive; the procedure and its limits are in [task design](../experiments/task_design.md#sizing-by-the-calibrated-flock-radius). `run` stops with a `CalibrationError` naming $N$ when the radius is not settled. The folder is then cleared for a corrected protocol.
 
+## `cli/calibration_check.py`: calibration with its drift and spread
+
+Runs the calibration of a protocol and reports, per flock size, $R_f$ with its drift (change between the last two windows) and spread (difference between the two start spacings) instead of stopping on them, so `settled_tolerance` and `start_agreement` can be judged.
+
+```text
+uv run cli/calibration_check.py <protocol> [--sizes <N> ...] [--seeds <n>] [--workers <n>]
+```
+
+- `--sizes`: flock sizes to measure (default: the protocol's).
+- `--seeds`: seeds per start (default: the protocol's `calibration_seeds`).
+- `--workers`: the number of processes (default 1).
+- Output: `results/diagnostics/calibration_<protocol>[_<n>seeds].csv`.
+
 ## `cli/paper_check.py`: check against the paper
 
 Runs results of [Strombom et al. (2014)](https://doi.org/10.1098/rsif.2014.0719) through HerdSim's engine and stores every trial. It is not run through `campaign.py`: there is no protocol, round or decision. What it checks and how to read it is in [checking HerdSim against Strombom et al. (2014)](../methods/strombom_check.md).

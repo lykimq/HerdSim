@@ -16,6 +16,8 @@ from typing import Any
 
 import pandas as pd
 
+from .frontier import UNDECIDED
+
 
 def read_table(path: Path) -> pd.DataFrame:
     """A generated CSV: the first line is the AUTO-GENERATED notice."""
@@ -85,9 +87,17 @@ def run_record(queue_log: Path, results_root: Path | None = None) -> pd.DataFram
         "trial_errors": "trial_errors",
     }
     for protocol, entry in last.items():
-        found = _folder_status(results_root, protocol) if results_root else None
+        if results_root is None:
+            continue
+        found = _folder_status(results_root, protocol)
         if found is not None:
             last[protocol] = {**entry, **{k: found[v] for k, v in current.items() if v in found}}
+        folder = results_root / protocol
+        if (folder / "frontier_cells.csv").exists():
+            # Open on reliability itself, unlike the open cells above, which may only wait
+            # on a finish-time comparison.
+            reliability = read_cells(folder)["reliability"]
+            last[protocol]["cells_reliability_undecided"] = int((reliability == UNDECIDED).sum())
     cols = [
         "protocol",
         "finished",
@@ -95,6 +105,7 @@ def run_record(queue_log: Path, results_root: Path | None = None) -> pd.DataFram
         "cells",
         "cells_needing_seeds",
         "cells_at_max_seeds_undecided",
+        "cells_reliability_undecided",
         "trial_errors",
         "hours",
         "workers",

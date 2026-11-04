@@ -42,7 +42,7 @@ def replay_trial(
 ) -> RunResult:
     """Run the trial of ``job`` again; raises ReplayMismatch when it does not reproduce the
     stored outcome."""
-    result = run_trial(job.config, job.seed, on_tick=on_tick)
+    result = run_trial(job.config, job.seed, on_tick=on_tick, history=False)
     if (result.success, result.total_ticks) != job.stored:
         got = f"success={result.success} ticks={result.total_ticks}"
         want = f"success={job.stored[0]} ticks={job.stored[1]}"

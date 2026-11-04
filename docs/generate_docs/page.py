@@ -88,14 +88,17 @@ def growth(folders: Sequence[str], sizes: Sequence[int] | None) -> list[Part]:
     for name in folders:
         table = _groups(name, sizes)
         effect = layout_against_n(table)
-        by_layout = effect["layout_spread_at_fixed_n"]
-        by_n = effect["n_spread_at_fixed_layout"]
+        # Without the curves that have only a lower bound, which enter at their low end.
+        decided = layout_against_n(table[table["d_min"].notna()])
         parts += [
             _part(name, growth_table(table)),
             Part(
                 None,
-                f"Spread of D_min in doublings: between layouts at one N {by_layout:.2f}, "
-                + f"between N at one layout {by_n:.2f}.",
+                "Spread of D_min in doublings: between layouts at one N "
+                + f"{effect['layout_spread_at_fixed_n']:.2f}, between N at one layout "
+                + f"{effect['n_spread_at_fixed_layout']:.2f}; on curves with a reliable team "
+                + f"{decided['layout_spread_at_fixed_n']:.2f} and "
+                + f"{decided['n_spread_at_fixed_layout']:.2f}.",
             ),
         ]
     return parts

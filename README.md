@@ -3,41 +3,19 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Tests](https://img.shields.io/badge/tests-make%20check-brightgreen.svg)](tests/)
-[![Trials](https://img.shields.io/badge/simulated%20trials-115%2C470-success.svg)](results/)
+[![Study trials](https://img.shields.io/badge/study%20trials-115%2C470-success.svg)](docs/report/d_min_report.md#24-the-six-runs)
 
 One sheepdog can bring a flock that stays together into a pen. When the sheep start scattered and the job has a deadline, one dog may not reach every stray in time. HerdSim is a simulator, and a study run with it, that asks how many dogs that task needs. It uses the sheep model of Strombom et al. (2014) with a team rule for several dogs, and counts how often a team of $D$ dogs gets a flock of $N$ sheep into a goal before the deadline.
 
 The question is how $D_{\min}$, the smallest reliable team, grows with $N$, and how the start layout and the deadline change that answer. Results are in the [report](docs/report/d_min_report.md); terms are in the [glossary](docs/glossary.md).
 
-## Results in short
-
-From 115,470 trials in six runs (12, 6 and 3 drive times, each under the strict and the 99% rule).
-
-### Strict rule
-
-Flock sizes $N = 25$, 50, 100, 200 and 400.
-
-**12 drive times.** On `compact`, one dog is enough at every size. On `wide` and `outlier_rich`, a flock of 400 needs 3 dogs; across $N = 25$, 50, 100, 200 and 400 the log-log slope of $D_{\min}$ is 0.42 on both (0.32 to 0.42 on `split`).
-
-**6 drive times.** On `compact`, one dog is enough at every size. On the scattered layouts $D_{\min}$ rises faster: `wide` needs 3 dogs at $N = 200$ and only a lower bound [9] at $N = 400$; `split` and `outlier_rich` have no reliable team up to 24 dogs at $N = 400$.
-
-**3 drive times.** On `compact`, one dog is enough at every size. From $N = 200$, no team up to 24 dogs is reliable on `wide`, `split` or `outlier_rich`.
-
-### 99% rule
-
-Flock sizes $N = 25$, 50, 71, 100, 141, 200, 283, 400 and 566 at 12 and 6 drive times; $N = 25$, 50, 100, 200 and 400 at 3 drive times.
-
-**12 drive times.** On `compact`, one dog is enough through $N = 566$. On `wide` and `outlier_rich`, a flock of 400 needs 2 dogs; across $N = 25$, 50, 71, 100, 141, 200, 283, 400 and 566 the log-log slope of $D_{\min}$ is 0.27 to 0.38 on `wide` and 0.28 to 0.38 on `outlier_rich`.
-
-**6 drive times.** On `compact`, one dog is enough through $N = 566$. At $N = 400$, `wide` needs 2-3 dogs and `outlier_rich` needs 3; across $N = 25$, 50, 71, 100, 141, 200, 283, 400 and 566 the log-log slope is 0.38 to 0.61 on `wide` and 0.40 to 0.58 on `outlier_rich`.
-
-**3 drive times.** On `compact`, one dog is enough at every size ($N = 25$, 50, 100, 200 and 400). On `wide`, $D_{\min}$ is 2 at $N = 100$, 3 at 200 and 5-6 at 400; on `outlier_rich` at $N = 400$ only a lower bound [6]; on `split` from $N = 200$, no team up to 24 is reliable.
+Every team result rests on Strombom's sheep and dog, so HerdSim also reruns the paper's one-dog task through the same trial code ([check against the paper](#check-against-strombom-et-al-2014)).
 
 ## Task and methods
 
 HerdSim moves sheep and dogs on an open field one tick at a time. The dogs bring the flock into a circular goal. The deadline is counted in drive times: one drive time is how long a sheep walking straight at 1 m/s needs to cover the drive distance (flock start centre to goal centre). The study uses 12, 6 and 3 drive times.
 
-A trial succeeds under the strict rule when every sheep is in the goal at the same tick, and under the 99% rule when 99% of them are.
+A trial succeeds under the strict rule when every sheep is in the goal at the same tick, and under the 99% rule when at least $\lceil 0.99 N \rceil$ are, which is every sheep below $N = 100$.
 
 A sheep farther from the flock centre than the collect distance, $2 N^{2/3}$ m, is an outlier. The flock starts in one of four layouts:
 
@@ -52,19 +30,62 @@ A protocol is a YAML recipe for one experiment: which flock sizes, team sizes, l
 
 ![One simulation trial](docs/figures/fig17_trial.png)
 
-**Figure 1: One trial in HerdSim ($N = 200$ sheep, $D = 4$ dogs, `wide` start, seed 2026, strict rule, 1500-tick limit), at ticks 0, 55, 139 and 279.** The dogs start on an arc behind the flock, gather it from several sides, then drive it from behind into the goal. The green circle is the goal (radius 1.9 times the flock radius $R_{f}$); orange triangles are dogs with their tracks; blue dots are sheep.
+**Figure 1: One trial ($N = 200$, $D = 4$, `wide` start, seed 2026, strict rule, 1500-tick limit) at ticks 0, 55, 139 and 279.** The dogs start on an arc behind the flock, gather it from several sides, then drive it into the goal.
+
+- Marks: blue dots are sheep, orange triangles dogs with their tracks, and the green circle the goal (radius 1.9 times the flock radius $R_f$).
+
+![Animation of the same trial](docs/gifs/one_trial.gif)
+
+**Animation 1: The stored trial with the same start flock and dogs (99% rule, 6 drive times).** At 278 s 199 of the 200 sheep are in the goal, which the 99% rule counts as success. Figure 1 sizes the field for this one layout; the stored run fits all four, so its goal is 3.7 m farther.
+
+- Marks: as in Figure 1; the bottom-left text gives the time and the sheep outside the goal.
 
 ## How the study is organised
 
 Each protocol stores data in three levels:
 
-- A **curve** is one setup, for example `wide` starts with 200 sheep, tried at each team size.
-- A **cell** is one team size on that curve: "can 3 dogs herd 200 sheep in this setup?"
-- A **trial** is one run of a cell with one random seed.
+- Curve: one setup, for example `wide` starts with 200 sheep, tried at each team size.
+- Cell: one team size on that curve, "can 3 dogs herd 200 sheep in this setup?"
+- Trial: one run of a cell with one random seed.
 
-A cell is reliable when the lower end of its 99% [Clopper-Pearson](https://doi.org/10.1093/biomet/26.4.404) interval for the success rate is at least $\theta = 0.90$ (so the success rate is at least 0.90 at 99% confidence). It stays undecided while the interval still straddles $\theta$. $D_{\min}$ is the smallest reliable team on a curve.
+A cell gets trials in batches of 10 seeds, up to 200. It is reliable when the lower end of its 99% [Clopper-Pearson](https://doi.org/10.1093/biomet/26.4.404) interval for the success rate is at least $\theta = 0.90$ (the success rate is at least 0.90 at 99% confidence), unreliable when the upper end is below 0.90, and open while the interval still straddles $\theta$. $D_{\min}$ is the smallest reliable team on a curve.
 
 The six protocols are `dmin_m12`, `dmin_m6` and `dmin_m3` (strict rule, $N = 25$ to 400) and `dmin_f99_m12`, `dmin_f99_m6` and `dmin_f99_m3` (99% rule). The 99% runs at 12 and 6 drive times also use $N = 71$, 141, 283 and 566. No trial ended in an error.
+
+## Results in short
+
+$D_{\min}$ at $N = 400$, from 115,470 trials in the six runs (Table 1). `2-3` means 3 dogs are reliable and 2 still open at 200 seeds, `[9]` that no team is reliable yet and at least 9 are needed, and `none` that every team tested, up to 24 dogs, is unreliable ([notation](docs/report/d_min_report.md#23-when-a-team-is-reliable)).
+
+**Table 1: $D_{\min}$ at $N = 400$, strict rule / 99% rule.**
+
+| Deadline | `compact` | `wide` | `split` | `outlier_rich` |
+| :---: | :---: | :---: | :---: | :---: |
+| 12 drive times | 1 / 1 | 3 / 2 | 3 / 2 | 3 / 2 |
+| 6 drive times | 1 / 1 | [9] / 2-3 | none / [5] | none / 3 |
+| 3 drive times | 1 / 1 | none / 5-6 | none / none | none / [6] |
+
+- `compact` needs one dog at every size, rule and deadline, through $N = 566$ where tested.
+- Up to $N = 50$ one dog is enough on every layout; from $N = 100$ some scattered curves need more.
+- At 12 drive times the log-log slope of $D_{\min}$ against $N$ is 0.42 on `wide` and `outlier_rich` and 0.32 to 0.42 on `split` (strict, $N = 25$-400), and 0.27 to 0.38 on `wide` and 0.28 to 0.38 on `outlier_rich` (99%, nine sizes to 566). At 6 drive times under the 99% rule, on the nine sizes, it is 0.38 to 0.61 on `wide` and 0.40 to 0.58 on `outlier_rich`.
+
+The [report](docs/report/d_min_report.md) has every size, the brackets and the limits.
+
+## Check against Strombom et al. (2014)
+
+HerdSim reruns two one-dog studies of the paper with its own trial code, the paper's settings where it gives them and HerdSim's reading where it does not, 5100 trials in all ([check doc](docs/methods/strombom_check.md)):
+
+- The paper's Figure 3 task, each sheep attracted by its $n$ nearest neighbours: the paper says every trial finishes down to about $n = 0.53 N$. In HerdSim 50 of 50 finish at all 30 grid points with $n \ge 0.6 N$ ($N$ = 10 to 150); the grid has no point between $0.5 N$ and $0.6 N$.
+- The paper's distance study: the paper says success is unaffected and the mean time grows linearly with distance. In HerdSim all 1100 trials finish, and a line fits the 11 mean times with $R^2$ = 0.9995.
+
+![The paper's Figure 3 beside HerdSim's run of the same task](docs/figures/fig_paper_check.png)
+
+**Figure 2: Share of the 50 trials that finish at each $N$ and $n$, the paper's Figure 3 and HerdSim (one dog, 8000 time steps, $r_s = 45$ m as in the paper's Figure 3).** By eye the two have the same shape, with the change near the line $n = 0.53 N$.
+
+- Marks: blue is no trial finishing and white is every trial; the black line is $n = 0.53 N$, and the paper's panel also draws its curve $n \approx 3 \log N$.
+- Left: the paper's Figure 3.
+- Right: HerdSim, one square per grid point.
+
+The check applies the paper's grazing repulsion (sheep push apart with no dog near), which the six study runs leave off; what turning it on changes in two of them is in the [report, limitations](docs/report/d_min_report.md#4-limitations).
 
 ## Setup and tests
 
@@ -88,11 +109,13 @@ uv run cli/campaign.py plan dmin_m6                          # what a run would 
 uv run cli/campaign.py run dmin_m6 --workers 16              # run with 16 worker processes
 uv run cli/campaign.py status dmin_m6                        # progress of a run
 uv run cli/campaign.py run --workers 20                      # every protocol of the study, skipping finished ones
+uv run cli/paper_check.py fig3 --workers 20                  # the check against the paper (also: distance)
 
 # Analysis (reads stored results only)
 
 uv run python -m docs.generate_docs.page record                             # trials, cells, errors and hours per protocol
 uv run python -m docs.generate_docs.page dmin dmin_m12 dmin_m6 dmin_m3      # smallest reliable team per layout and N
+uv run python -m docs.generate_docs.page paper                              # counts and times of the check against the paper
 ```
 
 See the [CLI reference](docs/guides/cli_reference.md) for every flag and the usual order of tools.
@@ -106,7 +129,8 @@ HerdSim/
 |-- analysis/               # cell decisions and values read from results
 |-- cli/                    # command-line tools
 |-- docs/                   # docs; generate_docs/ writes the generated pages and figures
-|-- protocols/configs/      # canonical defaults and the six protocol files
+|-- paper_check/            # the paper's one-dog task run through the engine
+|-- protocols/configs/      # canonical defaults, the six study protocols and three grazing pilots
 |-- records/                # trial row, physics hash, code identity
 |-- results/                # one folder per protocol
 |-- services/               # campaign: protocols, campaigns, calibration, replays

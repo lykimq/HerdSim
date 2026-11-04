@@ -15,6 +15,7 @@ from matplotlib.axes import Axes
 from matplotlib.lines import Line2D
 from matplotlib.patches import Circle, Rectangle
 
+from analysis.frontier import COLLAPSE, CROWDED, IMPROVING, SATURATED, TOO_FEW
 from analysis.results import flock_radii
 from docs.generate_docs.figstyle import (
     AQUA,
@@ -24,8 +25,10 @@ from docs.generate_docs.figstyle import (
     MUTED,
     NS,
     ORANGE,
+    RED,
     REPO,
     SURFACE,
+    ZONE_COLOR,
     grid,
     n_axis,
     save,
@@ -46,7 +49,6 @@ Point = Sequence[float] | np.ndarray
 
 R_S = PAPER["r_s"]
 SEED = 2026  # every scene starts from the same flock
-RED = "#d9534f"  # the one extra colour: personal space and the crossing assignment
 START_LAYOUTS = ("compact", "wide", "split", "outlier_rich")
 DRIVE_MULTIPLE, DRIVE_FLOOR = 13.0, 80.0  # the drive length's first two terms
 GOAL_MULTIPLE = 1.9  # goal radius in flock radii
@@ -235,7 +237,7 @@ def force_arrows(lcm: np.ndarray) -> list[ForceArrow]:
     # (label, weight, unit vector the weight multiplies, colour, weight note, tip label, offset)
     terms = (
         (
-            r"1. Momentum $h\,\mathbf{H}_i$",
+            r"1. Previous heading $h\,\mathbf{H}_i$",
             h,
             unit(np.array([0.5, 0.85])),
             BLUE,
@@ -244,7 +246,7 @@ def force_arrows(lcm: np.ndarray) -> list[ForceArrow]:
             (0.5, 1.0),
         ),
         (
-            r"2. Social Cohesion $c\,\mathbf{C}_i$",
+            r"2. Attraction to the flock $c\,\mathbf{C}_i$",
             c,
             unit(lcm - FOCAL),
             AQUA,
@@ -253,7 +255,7 @@ def force_arrows(lcm: np.ndarray) -> list[ForceArrow]:
             (1.0, 0),
         ),
         (
-            r"3. Avoidance $\rho_a\,\mathbf{R}_{a,i}$",
+            r"3. Keeping space $\rho_a\,\mathbf{R}_{a,i}$",
             rho_a,
             unit(FOCAL - CLOSE_NEIGHBOR),
             RED,
@@ -262,7 +264,7 @@ def force_arrows(lcm: np.ndarray) -> list[ForceArrow]:
             (-2.0, -2.0),
         ),
         (
-            r"4. Predator Escape $\rho_s\,\mathbf{R}_{s,i}$",
+            r"4. Running from the dog $\rho_s\,\mathbf{R}_{s,i}$",
             rho_s,
             unit(FOCAL - FORCE_DOG),
             ORANGE,
@@ -297,13 +299,13 @@ def forces_geometry_panel(ax: Axes, lcm: np.ndarray) -> None:
             ec=ORANGE,
             lw=1.0,
             ls="--",
-            label=f"Threat detection $r_s = {R_S:g}$ m",
+            label=f"dog reaction distance $r_s = {R_S:g}$ m",
         )
     )
     ax.add_patch(
-        Circle((0, 0), 2.0, fc=RED, alpha=0.25, ec=RED, lw=1.2, label="Personal space $r_a = 2$ m")
+        Circle((0, 0), 2.0, fc=RED, alpha=0.25, ec=RED, lw=1.2, label="personal space $r_a = 2$ m")
     )
-    ax.scatter(*FLOCK_NEIGHBORS.T, s=35, color=BLUE, alpha=0.75, lw=0, label="Flock-mates")
+    ax.scatter(*FLOCK_NEIGHBORS.T, s=35, color=BLUE, alpha=0.75, lw=0, label="flock-mates")
     ax.scatter(
         *CLOSE_NEIGHBOR,
         s=50,
@@ -311,20 +313,20 @@ def forces_geometry_panel(ax: Axes, lcm: np.ndarray) -> None:
         ec=INK,
         lw=0.9,
         zorder=4,
-        label=r"Intruding neighbor ($< r_a$)",
+        label=r"neighbour closer than $r_a$",
     )
-    ax.scatter(*FOCAL, s=85, color=INK, zorder=5, label="Focal sheep $i$")
+    ax.scatter(*FOCAL, s=85, color=INK, zorder=5, label="sheep $i$")
     bold_text(ax, FOCAL[0] + 1.5, FOCAL[1] - 3.2, "Sheep $i$", INK)
     ax.scatter(
-        *lcm, s=75, marker="+", color=AQUA, lw=2.2, zorder=4, label="Local Center of Mass (LCM)"
+        *lcm, s=75, marker="+", color=AQUA, lw=2.2, zorder=4, label="local centre of mass (LCM)"
     )
     bold_text(ax, lcm[0] + 2.0, lcm[1] - 1.0, r"$\mathrm{LCM}_i$", AQUA)
-    dogs_at(ax, FORCE_DOG, s=95, lw=1.0, zorder=5, label=r"Shepherd dog ($< r_s$)")
-    bold_text(ax, FORCE_DOG[0] - 2.0, FORCE_DOG[1] - 4.5, r"Dog ($< r_s$)", ORANGE)
+    dogs_at(ax, FORCE_DOG, s=95, lw=1.0, zorder=5, label=r"dog, within $r_s$")
+    bold_text(ax, FORCE_DOG[0] - 2.0, FORCE_DOG[1] - 4.5, "dog", ORANGE)
     ax.set_xlim(-40, 45)
     ax.set_ylim(-35, 45)
     ax.legend(loc="upper left", frameon=False, fontsize=8)
-    style_map(ax, "A. Biological interaction geometry on open pasture")
+    style_map(ax, "A. What sheep $i$ responds to")
 
 
 def forces_sum_panel(ax: Axes, arrows: Sequence[ForceArrow]) -> None:
@@ -343,7 +345,7 @@ def forces_sum_panel(ax: Axes, arrows: Sequence[ForceArrow]) -> None:
             color=INK,
             lw=3.2,
             label=(
-                r"Resultant Heading $\mathbf{H}_i'$ "
+                r"new heading $\mathbf{H}_i'$ "
                 r"($\mathbf{x}_i^{t+1} = \mathbf{x}_i^t + \delta\,\mathbf{H}_i' / "
                 r"\|\mathbf{H}_i'\|$)"
             ),
@@ -354,11 +356,11 @@ def forces_sum_panel(ax: Axes, arrows: Sequence[ForceArrow]) -> None:
     for a in arrows:
         dx, dy = a.tip_offset
         bold_text(ax, a.vec[0] * scale + dx, a.vec[1] * scale + dy, a.tip_label, a.color)
-    bold_text(ax, resultant[0] + 1.2, resultant[1] - 1.2, r"$\mathbf{H}_i'$ (Resultant)", INK, 9.5)
+    bold_text(ax, resultant[0] + 1.5, resultant[1] + 1.0, r"$\mathbf{H}_i'$", INK, 9.5)
     ax.legend(handles=handles, loc="lower left", frameon=False, fontsize=8)
     ax.set_xlim(-30, 25)
     ax.set_ylim(-30, 20)
-    style_map(ax, r"B. 5 competing instinct forces and Resultant heading $\mathbf{H}_i'$")
+    style_map(ax, r"B. The five weighted terms and the new heading $\mathbf{H}_i'$")
 
 
 def fig_sheep_forces() -> None:
@@ -679,7 +681,7 @@ def record_trial(c: Config) -> tuple[dict[int, tuple[np.ndarray, np.ndarray]], n
         path.append(state.shepherd_positions.copy())
         states[state.tick] = (state.sheep_positions.copy(), state.shepherd_positions.copy())
 
-    result = run_trial(c, SEED, on_tick=keep)
+    result = run_trial(c, SEED, on_tick=keep, history=False)
     return states, np.array(path), result.total_ticks  # trail is (ticks + 1, D, 2)
 
 
@@ -786,7 +788,7 @@ def drive_length_panel(ax: Axes, configs: Sequence[Config]) -> None:
         NS, from_reach, color=ORANGE, lw=1.6, marker="o", ms=3, label="reach + goal radius + R_f"
     )
     n_axis(ax)
-    ax.set_ylabel("length (units)")
+    ax.set_ylabel("length (m)")
     ax.set_title("drive length: the largest of three terms")
     grid(ax, axis="y")
     ax.legend(frameon=False, fontsize=8, loc="upper left")
@@ -806,7 +808,7 @@ def radii_panel(ax: Axes, configs: Sequence[Config]) -> None:
     )
     ax.plot(NS, radii, color=BLUE, lw=1.6, marker="o", ms=3, label="flock radius R_f")
     n_axis(ax)
-    ax.set_ylabel("length (units)")
+    ax.set_ylabel("length (m)")
     ax.set_title("flock radius and goal radius")
     ax.set_ylim(0, GOAL_MULTIPLE * max(radii) * 1.1)
     grid(ax, axis="y")
@@ -823,3 +825,60 @@ def fig_task_geometry() -> None:
     drive_length_panel(fig.add_subplot(gs[0, 1]), configs)
     radii_panel(fig.add_subplot(gs[0, 2]), configs)
     save(fig, "fig6_task_geometry.png", rect=(0, 0, 1, 0.98))
+
+
+# ----- frontier values -----
+# An invented curve: D -> (reliable, median finish s, zone).
+EXAMPLE_CURVE = {
+    1: (False, None, TOO_FEW),
+    2: (True, 400, IMPROVING),
+    3: (True, 300, IMPROVING),
+    4: (True, 250, SATURATED),
+    5: (True, 245, SATURATED),
+    6: (True, 290, CROWDED),
+    7: (False, None, COLLAPSE),
+    8: (False, None, COLLAPSE),
+}
+# Its frontier values. D_best, D_sat and D_crowd rest on paired finish-time verdicts, which an
+# invented curve has no trials for, so the values are stated with the curve, not derived.
+EXAMPLE_VALUES = {"D_min": 2, "D_best = D_sat": 4, "D_crowd = D_max": 6, "D_overcrowd": 7}
+
+
+def fig_zones() -> None:
+    """An invented curve: zones and frontier values along D."""
+    ds = list(EXAMPLE_CURVE)
+    fig, (top, bottom) = plt.subplots(2, 1, figsize=(7.5, 4.2), sharex=True)
+    for d, (reliable, _, zone) in EXAMPLE_CURVE.items():
+        top.bar(d, 1, color=ZONE_COLOR[zone], alpha=0.85, width=0.8)
+        top.text(
+            d,
+            0.5,
+            zone.replace("_", " "),
+            ha="center",
+            va="center",
+            fontsize=7.5,
+            color=SURFACE,
+            rotation=90,
+        )
+        top.text(
+            d,
+            1.08,
+            "reliable" if reliable else "not",
+            ha="center",
+            fontsize=7.5,
+            color=INK if reliable else RED,
+        )
+    top.set_ylim(0, 1.25)
+    top.set_yticks([])
+    top.spines["left"].set_visible(False)
+    times = [(d, t) for d, (_, t, _) in EXAMPLE_CURVE.items() if t is not None]
+    bottom.plot(*zip(*times), color=INK, marker="o", ms=4)
+    bottom.set_ylabel("median finish (s)")
+    bottom.set_ylim(200, 430)
+    for label, d in EXAMPLE_VALUES.items():
+        bottom.axvline(d, color=MUTED, lw=0.8, ls=":")
+        bottom.text(d + 0.06, 205, label, fontsize=7.5, color=MUTED, rotation=90, va="bottom")
+    bottom.set_xticks(ds)
+    bottom.set_xlabel("dogs D")
+    grid(bottom, "y")
+    save(fig, "def_D_zones.png")

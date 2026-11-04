@@ -20,6 +20,7 @@ from docs.generate_docs.figures import (  # noqa: E402
     fig_task_geometry,
     fig_team_rule,
     fig_trial,
+    fig_zones,
 )
 from docs.generate_docs.paper_check import fig_paper_layout  # noqa: E402
 
@@ -32,6 +33,7 @@ FIGURES = (
     fig_layouts,
     fig_dog_starts,
     fig_trial,
+    fig_zones,
     fig_paper_layout,
 )
 

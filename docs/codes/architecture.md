@@ -9,7 +9,7 @@ HerdSim moves sheep and dogs tick by tick on a 2D field and runs thousands of tr
 ## Goals and constraints
 
 1) Paired comparisons: the cells of one curve share the field, goal and task, and seed $i$ of every cell starts from the same flock. This lowers the part luck plays in a comparison but does not remove it.
-2) Replayable trials: a trial is fixed by its configuration and seed. The same seed on the same machine, Python and library versions gives the same trial bit for bit. Across CPUs and NumPy builds the last bits differ and trials can drift apart within a few hundred ticks; we have not measured why, so the regression tests compare whole-trial summaries with small tolerances.
+2) Replayable trials: a trial is fixed by its configuration and seed. The same seed on the same machine, Python and library versions gives the same trial bit for bit. Across CPUs and NumPy builds the last bits differ and trials can drift apart within a few hundred ticks; we have not measured why. The regression tests replay three stored study trials and require the same success and tick count, so they catch a setup that drifts on those trials.
 3) Resuming: a protocol can run tens of thousands of trials, and the same command resumes an interrupted run.
 4) Analysis without rerunning: stored rows can be reread under a changed threshold, rule or fit, though some cells may then need more seeds. By default only the first 3 seeds of each cell keep their per-tick history, so failure labels cannot be recomputed for the rest.
 5) One machine, many cores: workers are separate processes, by default one per core, each with one numeric-library thread.

@@ -93,7 +93,7 @@ def run_fig3_trial(
     config = paper_config(n_sheep, n_neighbors)
     if on_step is not None:
         on_step(initial_state(config, seed))
-    result = run_trial(config, seed, on_tick=on_step)
+    result = run_trial(config, seed, on_tick=on_step, history=False)
     return Fig3Trial(n_sheep, n_neighbors, seed, result.success, result.total_ticks)
 
 
@@ -102,5 +102,5 @@ def run_distance_trial(distance: int, seed: int) -> DistanceTrial:
     n = paper.DISTANCE_FLOCK
     box = distance_box(distance)
     config = paper_config(n, n - 1, r_s=paper.TABLE1_DETECTION, sheep_box=box)
-    result = run_trial(config, seed)
+    result = run_trial(config, seed, history=False)
     return DistanceTrial(distance, seed, result.success, result.total_ticks)

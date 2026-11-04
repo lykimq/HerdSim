@@ -112,19 +112,25 @@ def run_trial(
     config: dict[str, Any],
     seed: int,
     on_tick: Callable[[SimulationState], None] | None = None,
+    history: bool = True,
 ) -> RunResult:
     """Run until success or the time limit: sheep, then dogs, then metrics each tick.
 
     ``shepherd_path`` sums |v| dt. ``on_tick`` sees the post-tick state (for tests).
+    ``history=False`` skips the metrics, which only read the state, so the trial is the
+    same and ``RunResult.history`` is empty; a caller that needs only the outcome saves
+    most of the run time.
     """
     max_ticks = int(config["max_ticks"])
     dt = float(config["dt"])
+    rows: list[dict[str, float]] = []
 
-    def metrics(state: SimulationState) -> dict[str, float]:
-        return {"tick": state.tick, **record(TickView(state, config), task.METRICS)}
+    def metrics(state: SimulationState) -> None:
+        if history:
+            rows.append({"tick": state.tick, **record(TickView(state, config), task.METRICS)})
 
     state = initial_state(config, seed)
-    history = [metrics(state)]
+    metrics(state)
     while True:
         state = sheep.step(state, config)
         state = team.step(state, config)
@@ -132,11 +138,11 @@ def run_trial(
             np.linalg.norm(state.shepherd_velocities, axis=1).sum()
         )
         state.tick += 1
-        history.append(metrics(state))
+        metrics(state)
         if on_tick is not None:
             on_tick(state)
 
         if task.is_success(state):
-            return RunResult(True, state.tick, STOP_SUCCESS, pd.DataFrame(history))
+            return RunResult(True, state.tick, STOP_SUCCESS, pd.DataFrame(rows))
         if state.tick >= max_ticks:
-            return RunResult(False, state.tick, STOP_TIMEOUT, pd.DataFrame(history))
+            return RunResult(False, state.tick, STOP_TIMEOUT, pd.DataFrame(rows))

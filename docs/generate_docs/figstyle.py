@@ -13,7 +13,17 @@ import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.axes import Axes  # noqa: E402
 from matplotlib.figure import Figure  # noqa: E402
 
-from docs.generate_docs.tables import ORIGINAL_NS
+from analysis.frontier import (  # noqa: E402
+    COLLAPSE,
+    CROWDED,
+    IMPROVING,
+    RECOVERED,
+    SATURATED,
+    TOO_FEW,
+    UNDECIDED,
+    UNRELIABLE_DIP,
+)
+from docs.generate_docs.tables import ORIGINAL_NS  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[2]
 OUT = REPO / "docs" / "figures"
@@ -22,7 +32,18 @@ DPI = 150
 
 SURFACE, INK, MUTED, GRID = "#fcfcfb", "#0b0b0b", "#52514e", "#e4e3df"
 BLUE, ORANGE, AQUA = "#2a78d6", "#eb6834", "#1baf7a"  # categorical slots 1 to 3
+RED = "#d9534f"  # the one extra colour: failure, personal space, a crossing assignment
 NS = ORIGINAL_NS  # flock sizes every N-axis figure labels
+ZONE_COLOR = {
+    TOO_FEW: RED,
+    UNRELIABLE_DIP: RED,
+    COLLAPSE: INK,
+    UNDECIDED: MUTED,
+    IMPROVING: AQUA,
+    SATURATED: BLUE,
+    CROWDED: ORANGE,
+    RECOVERED: AQUA,
+}
 
 plt.rcParams.update(
     {

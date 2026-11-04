@@ -17,13 +17,16 @@ from sim.strombom.params import DEFAULTS
 FIELD_SIDE = 150.0  # m, L (Table 1)
 SHEEP_BOX = (FIELD_SIDE / 2, FIELD_SIDE)  # the upper right quarter (section 4.1)
 MAX_STEPS = 8000  # time steps allowed (Fig. 3 caption)
-DONE_DISTANCE = 10.0  # m, flock centre to the origin (Fig. 2 caption)
 FIG3_DETECTION = 45.0  # m, r_s (Fig. 3 caption)
 TABLE1_DETECTION = float(DEFAULTS["r_s"])  # 65 m, Table 1, used by the distance study
 FIG3_TRIALS = 50  # "over 50 simulations" (text on Fig. 3)
 RUNS = 100  # "100 simulations" per distance of the distance study
 DISTANCE_FLOCK = 46  # agents of the distance study
 DISTANCE_BOX_SIDE = 50.0  # m, their start square, centred at (l + 25 sqrt 2, l + 25 sqrt 2)
+
+# HerdSim's reading: the paper ends at "a certain distance" (section 4.1) and gives 10 units
+# for one example (Fig. 2 caption).
+DONE_DISTANCE = 10.0  # m, flock centre to the origin
 
 # HerdSim's grids over the paper's. Fig. 3: sizes N and neighbour counts n as shares of N, plus
 # the global case n = N - 1, chosen to cover the paper's three regions (always, transition,

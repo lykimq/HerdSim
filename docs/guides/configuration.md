@@ -16,7 +16,8 @@ protocols/configs/
     |-- dmin_m3.yaml           # strict rule, 3 drive times
     |-- dmin_f99_m12.yaml      # 99% rule, 12 drive times, nine flock sizes
     |-- dmin_f99_m6.yaml       # 99% rule, 6 drive times, nine flock sizes
-    `-- dmin_f99_m3.yaml       # 99% rule, 3 drive times
+    |-- dmin_f99_m3.yaml       # 99% rule, 3 drive times
+    `-- pilot_graze_on*.yaml   # the 99% runs at 6 (two files, split by N) and 3 drive times, grazing repulsion on
 ```
 
 ### Canonical defaults (`canonical.yaml`)
@@ -25,7 +26,7 @@ Every protocol names `canonical.yaml`, directly or through the file it `extends`
 
 ### Model parameters
 
-Model parameters are not canonical settings. The method keeps the values of the paper it implements in its code (`sim/strombom/params.py`), and a protocol overrides them under `params`. A parameter added with a neutral value, one that changes nothing, stays out of the [physics hash](#physics-hash) at that value, so a folder written before the parameter existed keeps its hash. The only such parameter is `graze_repulsion`, neutral at `false` ([grazing](../methods/strombom_sheep.md#grazing)).
+Model parameters are not canonical settings. The method keeps the values of the paper it implements in its code (`sim/strombom/params.py`), and a protocol overrides them under `params` in its method's entry of `methods:`, for example `methods: {strombom_multi: {params: {graze_repulsion: true}}}` in the grazing pilots. A parameter added with a neutral value, one that changes nothing, stays out of the [physics hash](#physics-hash) at that value, so a folder written before the parameter existed keeps its hash. The only such parameter is `graze_repulsion`, neutral at `false` ([grazing](../methods/strombom_sheep.md#grazing)).
 
 ### Protocol overrides
 
@@ -96,4 +97,4 @@ A run writes everything to `results/<protocol_id>/`:
 | `status.json` | Progress and why the run stopped |
 | `errors.jsonl`, `.lock`, `timeseries/` | Trials that raised, the lock held during a run, and per-tick histories of seeds 0-2 of every cell |
 
-The stored folders in git keep only the packed `trials.jsonl.gz`, `trials.csv`, the frontier files, `protocol.yaml`, `provenance.json`, `calibration.json` and `status.json`. When a clone has only the packed files, `campaign.py run` and `status` unpack them.
+The stored folders in git keep only the packed `trials.jsonl.gz`, `trials.csv` (the grazing pilots also `trials.csv.gz`), the frontier files, `protocol.yaml`, `provenance.json`, `calibration.json`, `status.json` and, in the grazing pilots, `runs.jsonl`; the six study folders were written before `runs.jsonl` existed. When a clone has only the packed files, `campaign.py run` and `status` unpack them.

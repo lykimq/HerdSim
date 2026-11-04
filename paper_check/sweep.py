@@ -107,8 +107,11 @@ def sweep(workers: int, name: str) -> pd.DataFrame:
     table = read(name)
     pending = _pending(experiment, table)
     with worker_pool(workers) as pool:
+        # One map over every pending trial, so no worker waits for a point's slowest trial;
+        # results come back in order and are stored point by point.
+        results = pool.map(experiment.run, [key for _, keys in pending for key in keys])
         for i, (label, keys) in enumerate(pending, 1):
-            new = pd.DataFrame(list(pool.map(experiment.run, keys)))
+            new = pd.DataFrame([next(results) for _ in keys])
             table = new if table.empty else pd.concat([table, new], ignore_index=True)
             write_csv(table, experiment.path)
             print(f"{name} {i}/{len(pending)} {label}: {int(new['success'].sum())}/{len(keys)}")

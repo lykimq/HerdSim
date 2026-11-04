@@ -2,23 +2,15 @@
 
 What the sheep-herding task looks like, how HerdSim samples it, and how a curve of results is turned into answers. Terms such as cell, curve and campaign are in the [glossary](../glossary.md), and the code layers are in the [architecture](../codes/architecture.md).
 
-## Contents
-
-1) [Task geometry and scale](#1-task-geometry-and-scale)
-2) [Start layouts and dog starts](#2-start-layouts-and-dog-starts)
-3) [Adaptive sampling](#3-adaptive-sampling)
-4) [Flock and team sizes tested](#4-flock-and-team-sizes-tested)
-5) [Frontier rules and zones](#5-frontier-rules-and-zones)
-
 ## 1. Task geometry and scale
 
 ### Why the field grows with the flock
 
-A goal of fixed radius holds a flock of 25 with room to spare and a flock of 400 not at all. HerdSim has no walls, as the source model has none, and a wall would stop sheep that the dogs failed to stop. So it sizes the task by the calibrated flock radius $R_f(N)$, the radius a flock of $N$ sheep settles to while one dog drives it. The drive distance, from the start centre to the goal centre, and the goal radius are multiples of $R_f(N)$, so the task has the same shape at every $N$ (Figure 1).
+A goal of fixed radius holds a flock of 25 with room to spare and a flock of 400 not at all. HerdSim has no walls, as the source model has none, and a wall would stop sheep that the dogs failed to stop. So it sizes the task by the calibrated flock radius $R_f(N)$, the radius a flock of $N$ sheep settles to while one dog drives it. The drive distance, from the start centre to the goal centre, and the goal radius are multiples of $R_f(N)$, so the task has the same shape at every $N$ up to 141; from $N = 200$ the widest start sets a longer drive (Table 1, Figure 1).
 
 ![Task geometry and physical scaling](../figures/fig6_task_geometry.png)
 
-**Figure 1: Task geometry drawn to scale.** The flock and goal radii grow slowly with $N$, and the drive distance is the largest of three terms. Lengths are in m, although the axes say "units".
+**Figure 1: Task geometry drawn to scale.** The flock and goal radii grow slowly with $N$, and the drive distance is the largest of three terms.
 
 - Left: the field at $N = 200$, with $R_f$, the goal of $1.9 R_f$, the farthest start sheep of the widest [start layout](#flock-start-layouts) and the drive distance.
 - Middle: the drive distance $l$ against $N$ with its three terms (Table 1); the largest, in grey, is used.
@@ -44,13 +36,13 @@ On the study's grids the 80 m floor never sets the drive, as $13\,R_f$ is alread
 
 ### Success rules
 
-A trial succeeds when enough sheep are in the goal at the same tick. Under the strict rule that is every sheep. Under the 99% rule it is at least $\lceil 0.99\,N \rceil$ sheep; below $N = 100$ that is every sheep, so the rules are the same there, and one straggler is allowed from $N = 100$ and four at $N = 400$.
+A trial succeeds when enough sheep are in the goal at the same tick. Under the strict rule that is every sheep. Under the 99% rule it is at least $\lceil 0.99\,N \rceil$ sheep; below $N = 100$ that is every sheep, so the rules are the same there, and one straggler is allowed from $N = 100$ and four at $N = 400$. The engine has a second rule, the flock centre inside the goal, used only with the paper's box start in the [check against the paper](../methods/strombom_check.md).
 
 ### Deadlines in drive times
 
 A fixed 5-minute limit would be unfair to large flocks, driven over 200 m against 80 m for small ones. Deadlines are therefore given in drive times $T_{\mathrm{drive}} = l / v_{\mathrm{sheep,max}}$, the time a sheep walking straight at top speed needs for the drive. A Strombom sheep has one speed, 1.0 m/s, so $T_{\mathrm{drive}}$ in s equals $l$ in m.
 
-The study uses 3, 6 and 12 drive times, each double the one before. At 12 drive times one dog has time to collect outliers one after another, and at 3 the team needed grows ([report, section 3.3](../report/d_min_report.md#33-rq3-how-does-the-deadline-change-d_min)). Each deadline is rounded up to whole 1 s ticks from the unrounded drive distance, so it can be 1 s above the multiple shown ($3 \times 98.8 = 296.4$ s gives 297 s at $N = 50$).
+The study uses 3, 6 and 12 drive times, each double the one before. The tighter the deadline, the larger the team needed ([report, section 3.3](../report/d_min_report.md#33-rq3-how-does-the-deadline-change-d_min)). Each deadline is rounded up to whole 1 s ticks from the unrounded drive distance, so it can be 1 s above the multiple shown ($3 \times 98.8 = 296.4$ s gives 297 s at $N = 50$).
 
 **Table 2: Deadlines at the five main flock sizes.**
 
@@ -75,7 +67,10 @@ How spread out the flock starts decides how much the dogs must collect before th
 
 ![The four starting flock layouts at N = 200](../figures/fig7_layouts.png)
 
-**Figure 2: The four start layouts ($N = 200$, $D = 4$, same scale).** A sheep that starts outside the collect distance, the dashed circle, has to be collected before the flock can be driven. Each panel is one layout, named above it.
+**Figure 2: The four start layouts ($N = 200$, $D = 4$, same scale).** A sheep that starts outside the collect distance has to be collected before the flock can be driven.
+
+- Marks: blue dots are sheep, orange triangles dogs, the green circle the goal and the dashed circle the collect distance.
+- Panels: one layout each, named above it.
 
 ![Animation of one team on the four start layouts](../gifs/layouts.gif)
 
@@ -92,11 +87,15 @@ The study uses `arcs`: half circles on the side away from the goal, with the dog
 
 ![Dog start patterns](../figures/fig8_dog_starts.png)
 
-**Figure 3: Dog starts.** The top row shows the default arcs for $D = 1$ to 64 behind an $N = 100$ flock; the bottom row shows arcs, ring and handler at $N = 200$ with $D = 8$. Marks are as in Animation 1.
+**Figure 3: Dog starts.** Dogs start on half circles behind the flock, on a second circle once the first is full.
+
+- Marks: as in Animation 1.
+- Top: the default arcs for $D = 1$ to 64 behind an $N = 100$ flock.
+- Bottom: arcs, ring and handler at $N = 200$ with $D = 8$.
 
 ## 3. Adaptive sampling
 
-Most [cells](../glossary.md#trials-and-experiments) need far fewer than the cap of 200 seeds (one dog against 400 scattered sheep at a tight deadline, or twelve dogs on 25 compact sheep), so HerdSim adds trials only to the open cells, those whose answer is still undecided. In the end each cell gets a zone, which says what its place on the curve means ([section 5](#5-frontier-rules-and-zones)). How the rounds, the time budget and resuming work is in the [architecture](../codes/architecture.md#how-a-campaign-runs). Figures 4 to 7 are illustrations, not stored runs.
+Most [cells](../glossary.md#trials-and-experiments) need far fewer than the cap of 200 seeds (one dog against 400 scattered sheep at a tight deadline, or twelve dogs on 25 compact sheep), so HerdSim adds trials only to the open cells, those whose answer is still undecided. In the end each cell gets a zone, which says what its place on the curve means ([section 5](#5-frontier-rules-and-zones)). How the rounds, the time budget and resuming work is in the [architecture](../codes/architecture.md#how-a-campaign-runs). Figures 4 to 7 show stored cells of `dmin_f99_m6` (99% rule, 6 drive times); Figure 4 also draws the interval bounds for all failures and all successes.
 
 ### Stopping early with the 99% Clopper-Pearson interval
 
@@ -110,7 +109,9 @@ The exact interval is conservative for one look. Repeated looks are not correcte
 
 ![Sequential refinement and early stopping](../figures/fig_adaptive_1_refinement.png)
 
-**Figure 4: Stopping early.** Clear failures stop after 10 to 20 trials, clear successes at 60 trials, and only cells near the threshold go on toward 200. Red is the interval's upper bound when no trial succeeds, green its lower bound when all succeed and blue an undecided cell after each batch of 10; the dashed line is $\theta = 0.90$.
+**Figure 4: Stopping early, 99% interval after each batch of 10.** A cell with no success stops after 10 trials and one with every success after 60; `wide`, $N = 400$, $D = 2$ stays near 0.93 and is still undecided at 200 (187 of 200).
+
+- Marks: red is the upper bound when no trial succeeds, green the lower bound when every trial succeeds, blue the stored cell's rate with its interval; the dashed line is $\theta = 0.90$.
 
 ### Midpoint densification
 
@@ -122,7 +123,9 @@ The protocol lists a coarse set of team sizes, and HerdSim fills in counts where
 
 ![Adaptive grid densification](../figures/fig_adaptive_2_densification.png)
 
-**Figure 5: Midpoint densification.** A change of zone between $D = 2$ and $D = 4$ adds $D = 3$ to the next round. Dots are tested $D$, coloured by zone; the top row is the first round and the bottom row the next, with the added $D = 3$ as a star.
+**Figure 5: Midpoint densification, `wide`, $N = 400$.** The zone changes between $D = 4$ (`improving`) and $D = 6$ (`saturated`), so the campaign added $D = 5$.
+
+- Marks: a dot is a team size of the protocol and the star one the campaign added, coloured by the zone stored at the end of the run.
 
 ### Pruning above saturation
 
@@ -148,7 +151,10 @@ To compare 2 dogs with 4 fairly, both teams should face the same flock. Seed $i$
 
 ![Deterministic paired comparisons](../figures/fig_adaptive_4_paired_seeds.png)
 
-**Figure 7: Paired seeds.** Seed 2026 gives the same start flock at every team size $D$. Columns are seeds 2026 to 2028 and rows team sizes 2 to 4.
+**Figure 7: Paired seeds, `wide`, $N = 400$, seeds 2026 to 2028, $D$ = 2 to 4.** Each seed starts the same flock at every $D$; only the dogs and the outcome differ (seed 2028 fails with 2 dogs and succeeds with 3 and 4).
+
+- Marks: blue dots are sheep and orange triangles dogs at tick 0; a green frame is a success and a red one a failure, all on one scale.
+- Panels: columns are seeds, rows team sizes.
 
 ## 4. Flock and team sizes tested
 
@@ -162,14 +168,14 @@ The grids test 1, 2, 3, 4, 6, 8, 12, 16 and 24 dogs: from 2 on, steps of 1.33x a
 
 ## 5. Frontier rules and zones
 
-The frontier rules turn a curve's cells into answers: the smallest team that works, the fastest, and where more dogs stop helping or start to hurt. The report uses only $D_{\min}$ and its bracket; the other values steer the campaign (midpoints and pruning) and are stored in `frontier_groups.csv`. Figure 8 shows the zones along $D$, and Table 3 defines the team sizes marked on it.
+The frontier rules turn a curve's cells into answers: the smallest team that works, the fastest, and where more dogs stop helping or start to hurt. The report uses only $D_{\min}$, its bracket or lower bound, and $D_{\min,\mathrm{stable}}$; the other values steer the campaign (midpoints and pruning) and are stored in `frontier_groups.csv`. Figure 8 shows the zones along $D$, and Table 3 defines the team sizes marked on it.
 
 ![Behavioral zones and frontier classification](../figures/def_D_zones.png)
 
-**Figure 8: Zones along the team size $D$.** The zones follow from each cell's reliability and the paired finish-time comparisons. The curves are illustrative. Coloured bands are the five main [zones](#zones), from `too_few` to `collapse`, and the team sizes of Table 3 are marked below.
+**Figure 8: Zones and frontier values of the invented curve of Table 4.** Reliability and finish time together set each cell's [zone](#zones).
 
-- Top: success rate against $D$, with $\theta = 0.90$ dashed.
-- Bottom: median finish time against $D$, with the margin around $D_{\mathrm{best}}$ shaded.
+- Top: one bar per $D$, coloured and labelled by zone, with its reliability above.
+- Bottom: median finish time of the reliable teams; dotted lines mark the frontier values of Table 3.
 
 ### Frontier values
 

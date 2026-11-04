@@ -48,7 +48,7 @@ from sim.strombom.team import team_targets  # noqa: E402
 FPS = 12
 FRAMES = 200  # about 17 s of animation, whatever the trial's length
 HOLD_SECONDS = 2.0  # the last frame stays on screen this long before the loop restarts
-DPI = 80
+DPI = 100  # readable text; every GIF stays under 1.5 MB, within the 2 MB page budget
 MARGIN = 12.0  # length units around everything that moves, so no agent touches the frame
 NOTE_CHARS = 72  # note characters per panel width before it wraps
 NOTE_LINE = 0.16  # inches per extra note line
@@ -193,7 +193,17 @@ def draw_panel(ax: Axes, trial: Replayed, title: str, view: View, dot: float) ->
     herders = ax.scatter(
         *trial.herders[0].T, s=60, marker="^", color=ORANGE, ec=SURFACE, lw=0.8, zorder=3
     )
-    status = ax.text(0.02, 0.03, "", transform=ax.transAxes, fontsize=9, color=INK)
+    # A light backing keeps the status readable when a dog walks under it.
+    status = ax.text(
+        0.02,
+        0.03,
+        "",
+        transform=ax.transAxes,
+        fontsize=9,
+        color=INK,
+        zorder=4,
+        bbox={"fc": SURFACE, "ec": "none", "alpha": 0.8, "pad": 1.5},
+    )
     return Panel(trial, herd, herders, status)
 
 

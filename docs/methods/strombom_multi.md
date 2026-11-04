@@ -2,11 +2,15 @@
 
 The team rule is Strombom's single-dog decision plus a team layer that gives each dog its own job (Figure 1). The dogs either collect, fetching outliers back, or drive the whole flock toward the goal from behind. Three terms set the jobs. An outlier is a sheep farther than the [collect distance](#when-to-collect) $f(N)$ from the flock centre. The collect point $P_c$ is where a dog stands to fetch an outlier, just behind it as seen from the flock centre. The drive point $P_d$ is where a dog stands to push the whole flock, behind the flock on the side away from the goal.
 
-While there are outliers each dog gets its own outlier to fetch; otherwise each gets its own slot, a standing point on an arc through $P_d$ ([driving](#driving-and-its-limit-for-large-flocks)). With one dog this is the paper's rule.
+While there are outliers, each of the $D$ farthest outliers gets its own dog and any spare dog drives the rest of the flock; with no outliers each dog gets its own slot, a standing point on an arc through $P_d$ ([driving](#driving-and-its-limit-for-large-flocks)). With one dog this is the paper's rule.
 
 ![Collect and drive targets of the team rule with 1, 2, 4 and 8 dogs](../figures/fig3_team_rule.png)
 
-**Figure 1: The team rule `strombom_multi` with $D = 1, 2, 4, 8$ dogs ($N = 200$).** More dogs collect more outliers at once, and spread over a wider arc when they drive. Blue dots are sheep, dark-outlined dots outliers and orange triangles dogs; each arrow joins a dog to its target, a cross. The columns have $D = 1$ (the paper's rule), 2, 4 and 8. The top row collects a `wide` start: the $D$ farthest outliers get one dog each ([assigning outliers](#assigning-outliers-hungarian-algorithm)), at their collect points $P_c$. The bottom row drives a `compact` start: the dogs spread over an arc round the flock centre, through the drive point $P_d$ at its middle, and keep their angular order.
+**Figure 1: The team rule `strombom_multi` with $D = 1, 2, 4, 8$ dogs ($N = 200$).** More dogs collect more outliers at once, and spread over a wider arc when they drive.
+
+- Marks: blue dots are sheep, dark-outlined dots outliers and orange triangles dogs; each arrow joins a dog to its target, a cross. Columns have $D = 1$ (the paper's rule), 2, 4 and 8.
+- Top: collecting a `wide` start; the $D$ farthest outliers get one dog each ([assigning outliers](#assigning-outliers-hungarian-algorithm)), at their collect points $P_c$.
+- Bottom: driving a `compact` start; the dogs spread over an arc round the flock centre, through the drive point $P_d$ at its middle, and keep their angular order.
 
 ## When to collect
 
@@ -24,11 +28,17 @@ The $D$ farthest outliers get one dog each. Dogs are matched to their collect po
 
 ![Outliers, the collect point and the dog-to-collect-point assignment](../figures/fig_hungarian_matching.png)
 
-**Figure 2: Collecting.** Each outlier gets a collect point, and the Hungarian algorithm pairs dogs with collect points so that no two paths cross. Light blue dots are sheep within $f(N)$, dark-outlined dots outliers, the plus sign the GCM, crosses collect points and orange triangles dogs. On the left the shaded disc is $f(N)$, and each outlier's collect point lies on the ray from the GCM, drawn at $4 r_a$ behind the outlier. On the right is the assignment with the least total distance; the dashed lines are a constructed assignment that crosses.
+**Figure 2: Collecting.** Each outlier gets a collect point, and the Hungarian algorithm pairs dogs with collect points so that no two paths cross.
+
+- Marks: light blue dots are sheep within $f(N)$, dark-outlined dots outliers, the plus sign the GCM, crosses collect points and orange triangles dogs.
+- Left: the shaded disc is $f(N)$; each outlier's collect point lies on the ray from the GCM, drawn at $4 r_a$ behind the outlier.
+- Right: the assignment with the least total distance; the dashed lines are a constructed assignment that crosses.
 
 ![Animation of the team rule with each dog's target](../gifs/team_rule.gif)
 
-**Animation 1: The team rule in a 4-dog trial (`outlier_rich`, $N = 200$, $D = 4$, seed 0, 99% rule, 6 drive times).** While sheep are outside $f(N)$ the dogs go to the collect points of four different outliers, and once every sheep is inside they drive from an arc behind the flock. The trial succeeds at 277 s with 1 sheep outside (`dmin_f99_m6`). Crosses are targets, at the true $r_a = 2$ m, and the top-right label is the mode; lines join dogs to their targets, and the dashed circle is $f(N)$.
+**Animation 1: The team rule in a 4-dog trial (`outlier_rich`, $N = 200$, $D = 4$, seed 0, 99% rule, 6 drive times).** While sheep are outside $f(N)$ each outlier, up to four, gets its own dog and spare dogs drive the rest, and once every sheep is inside they drive from an arc behind the flock. The trial succeeds at 277 s with 1 sheep outside (`dmin_f99_m6`).
+
+- Marks: crosses are targets, at the true $r_a = 2$ m, and lines join dogs to them; the dashed circle is $f(N)$ and the top-right label the mode.
 
 ## Driving and its limit for large flocks
 
@@ -46,11 +56,15 @@ The rule has a limit. Above $N \approx 1056$, where $2\sqrt{N} > r_s = 65$ m, a 
 
 ![The drive point behind the flock and the arc of drive slots](../figures/fig_driving_arc.png)
 
-**Figure 3: Driving.** One dog drives from a point behind the flock; several dogs spread over an arc that also covers its sides. Blue dots are sheep, the plus sign the GCM, crosses the drive point or arc slots, orange triangles dogs and the green line the arc. On the left one dog stands at $P_d$, $r_a\sqrt{N} = 20$ m behind the flock centre at $N = 100$; on the right several dogs stand on the arc.
+**Figure 3: Driving.** One dog drives from a point behind the flock; several dogs spread over an arc that also covers its sides.
+
+- Marks: blue dots are sheep, the plus sign the GCM, crosses the drive point or arc slots, orange triangles dogs and the green line the arc.
+- Left: one dog at $P_d$, $r_a\sqrt{N} = 20$ m behind the flock centre at $N = 100$.
+- Right: several dogs on the arc.
 
 ## Dog speed, step and stop rule
 
-A dog walks at $v_{\mathrm{dog}} = 1.5$ m/s, Strombom's value, 1.5 times the sheep's 1 m/s. Each step adds a random unit vector of weight 0.3 to the unit direction toward the point the dog aims at, as for the sheep noise, and the dog moves 1.5 m along the result. A dog closer than $3 r_a = 6$ m to any sheep stands still that tick (Strombom's stop rule). Every dog knows where every sheep is.
+A dog walks at $v_{\mathrm{dog}} = 1.5$ m/s, Strombom's 1.5 m per time step read as 1 s per step, 1.5 times the sheep's 1 m/s. Each step adds a random unit vector of weight 0.3 to the unit direction toward the point the dog aims at, as for the sheep noise, and the dog moves 1.5 m along the result. A dog closer than $3 r_a = 6$ m to any sheep stands still that tick (Strombom's stop rule). Every dog knows where every sheep is.
 
 ## References
 

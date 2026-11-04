@@ -32,14 +32,14 @@ dmin_f99_m12 and dmin_f99_m6 were resumed with four more flock sizes (71, 141, 2
 
 Each row is the line of `results/queue_log.jsonl` for a protocol. `finished`, `hours` and `workers` come from that line; the counts come from the folder's `status.json` now. `cells` is the number of cells, `cells_needing_seeds` the open cells that still ask for seeds, `cells_at_max_seeds_undecided` the open cells that already have the limit of 200 seeds, and `trial_errors` the trials that raised an error.
 
-| protocol | finished | trials | cells | cells_needing_seeds | cells_at_max_seeds_undecided | trial_errors | hours | workers | outcome |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| dmin_m12 | 2026-10-20 18:07:47 | 17220 | 183 | 4 | 4 | 0 | 1.24 | 20 | ran |
-| dmin_m6 | 2026-10-20 18:32:06 | 13470 | 191 | 21 | 21 | 0 | 0.284 | 20 | ran |
-| dmin_m3 | 2026-10-20 18:42:19 | 9530 | 183 | 5 | 5 | 0 | 0.17 | 20 | ran |
-| dmin_f99_m6 | 2026-10-20 20:40:21 | 31920 | 354 | 58 | 58 | 0 | 0.492 | 20 | ran |
-| dmin_f99_m3 | 2026-10-20 20:56:31 | 11740 | 185 | 10 | 10 | 0 | 0.269 | 20 | ran |
-| dmin_f99_m12 | 2026-10-20 21:20:51 | 31590 | 349 | 53 | 53 | 0 | 0.405 | 20 | ran |
+| protocol | finished | trials | cells | cells_needing_seeds | cells_at_max_seeds_undecided | cells_reliability_undecided | trial_errors | hours | workers | outcome |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| dmin_m12 | 2026-10-20 18:07:47 | 17220 | 183 | 4 | 4 | 4 | 0 | 1.24 | 20 | ran |
+| dmin_m6 | 2026-10-20 18:32:06 | 13470 | 191 | 21 | 21 | 21 | 0 | 0.284 | 20 | ran |
+| dmin_m3 | 2026-10-20 18:42:19 | 9530 | 183 | 5 | 5 | 5 | 0 | 0.17 | 20 | ran |
+| dmin_f99_m6 | 2026-10-20 20:40:21 | 31920 | 354 | 58 | 58 | 42 | 0 | 0.492 | 20 | ran |
+| dmin_f99_m3 | 2026-10-20 20:56:31 | 11740 | 185 | 10 | 10 | 8 | 0 | 0.269 | 20 | ran |
+| dmin_f99_m12 | 2026-10-20 21:20:51 | 31590 | 349 | 53 | 53 | 4 | 0 | 0.405 | 20 | ran |
 
 5 folders hold more trials than their log line records, because trials were added when they were resumed later: `dmin_m6`, `dmin_m3`, `dmin_f99_m6`, `dmin_f99_m3`, `dmin_f99_m12`. For these, `finished` and `hours` belong to the first pass only. The [run record](d_min_report.md#5-run-record) gives the trials each resume added.
 
@@ -114,7 +114,7 @@ Shown at the five original flock sizes (25, 50, 100, 200, 400) of dmin_f99_m12 a
 | split | 0.32 to 0.42 | 25 50 100 200 400 |  |
 | wide | 0.42 to 0.42 | 25 50 100 200 400 |  |
 
-Spread of D_min in doublings: between layouts at one N 0.68, between N at one layout 1.19.
+Spread of D_min in doublings: between layouts at one N 0.68, between N at one layout 1.19; on curves with a reliable team 0.68 and 1.19.
 
 ### dmin_m6
 
@@ -125,7 +125,7 @@ Spread of D_min in doublings: between layouts at one N 0.68, between N at one la
 | split | 0 (flat, decided sizes only) | 25 50 100 | D_min = 1 where decided; no reliable D on the grid at N = 200 400 |
 | wide | 0.48 to 0.48 | 25 50 100 200 | still open on reliability at N = 400 |
 
-Spread of D_min in doublings: between layouts at one N 1.67, between N at one layout 1.69.
+Spread of D_min in doublings: between layouts at one N 1.67, between N at one layout 1.69; on curves with a reliable team 0.79 and 0.79.
 
 ### dmin_m3
 
@@ -136,7 +136,7 @@ Spread of D_min in doublings: between layouts at one N 1.67, between N at one la
 | split | 0 (flat, decided sizes only) | 25 50 100 | D_min = 1 where decided; no reliable D on the grid at N = 200 400 |
 | wide | 0.79 to 0.79 | 25 50 100 | no reliable D on the grid at N = 200 400 |
 
-Spread of D_min in doublings: between layouts at one N 0.76, between N at one layout 0.97.
+Spread of D_min in doublings: between layouts at one N 0.76, between N at one layout 0.97; on curves with a reliable team 0.76 and 0.97.
 
 ## Growth with N, 99 percent
 
@@ -151,7 +151,7 @@ Shown at the five original flock sizes (25, 50, 100, 200, 400) of dmin_f99_m12 a
 | split | 0.20 to 0.20 | 25 50 100 200 400 |  |
 | wide | 0.20 to 0.30 | 25 50 100 200 400 |  |
 
-Spread of D_min in doublings: between layouts at one N 0.50, between N at one layout 0.75.
+Spread of D_min in doublings: between layouts at one N 0.50, between N at one layout 0.75; on curves with a reliable team 0.50 and 0.75.
 
 ### dmin_f99_m6
 
@@ -162,7 +162,7 @@ Spread of D_min in doublings: between layouts at one N 0.50, between N at one la
 | split | 0 (flat, decided sizes only) | 25 50 100 | D_min = 1 where decided; still open on reliability at N = 200 400 |
 | wide | 0.30 to 0.42 | 25 50 100 200 400 |  |
 
-Spread of D_min in doublings: between layouts at one N 0.92, between N at one layout 1.30.
+Spread of D_min in doublings: between layouts at one N 0.92, between N at one layout 1.30; on curves with a reliable team 0.78 and 0.72.
 
 ### dmin_f99_m3
 
@@ -173,7 +173,7 @@ Spread of D_min in doublings: between layouts at one N 0.92, between N at one la
 | split | 0 (flat, decided sizes only) | 25 50 100 | D_min = 1 where decided; no reliable D on the grid at N = 200 400 |
 | wide | 0.62 to 0.68 | 25 50 100 200 400 |  |
 
-Spread of D_min in doublings: between layouts at one N 1.25, between N at one layout 1.28.
+Spread of D_min in doublings: between layouts at one N 1.25, between N at one layout 1.28; on curves with a reliable team 1.22 and 1.28.
 
 ## Reach of one dog, 99 percent
 
@@ -237,7 +237,7 @@ dmin_f99_m12 and dmin_f99_m6 on all nine flock sizes (N above 50 spaced by sqrt 
 | split | 0.34 to 0.34 | 25 50 71 100 141 200 283 400 566 |  |
 | wide | 0.27 to 0.38 | 25 50 71 100 141 200 283 400 566 |  |
 
-Spread of D_min in doublings: between layouts at one N 0.68, between N at one layout 1.04.
+Spread of D_min in doublings: between layouts at one N 0.68, between N at one layout 1.04; on curves with a reliable team 0.68 and 1.04.
 
 ### Growth, dmin_f99_m6
 
@@ -248,7 +248,7 @@ Spread of D_min in doublings: between layouts at one N 0.68, between N at one la
 | split | 0 (flat, decided sizes only) | 25 50 71 100 141 | D_min = 1 where decided; no reliable D on the grid at N = 566; still open on reliability at N = 200 283 400 |
 | wide | 0.38 to 0.61 | 25 50 71 100 141 200 283 400 566 |  |
 
-Spread of D_min in doublings: between layouts at one N 1.13, between N at one layout 1.65.
+Spread of D_min in doublings: between layouts at one N 1.13, between N at one layout 1.65; on curves with a reliable team 0.93 and 1.07.
 
 ### Fits, dmin_f99_m12: D_min(N), power law against saturating curve
 
