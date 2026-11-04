@@ -16,7 +16,7 @@ RUN = "dmin_f99_m6"
 
 @pytest.mark.parametrize(
     ("layout", "n", "d", "seed_index"),
-    [("compact", 100, 1, 0), ("compact", 200, 6, 0), ("wide", 50, 3, 0)],
+    [("compact", 100, 1, 0), ("compact", 200, 6, 0), ("wide", 50, 3, 2)],
 )
 def test_a_stored_study_trial_replays_exactly(layout: str, n: int, d: int, seed_index: int) -> None:
     job = open_run(RUN).job("strombom_multi", layout, n, d, seed_index)

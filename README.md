@@ -48,13 +48,13 @@ Each protocol stores data in three levels:
 - Cell: one team size on that curve, "can 3 dogs herd 200 sheep in this setup?"
 - Trial: one run of a cell with one random seed.
 
-A cell gets trials in batches of 10 seeds, up to 200. It is reliable when the lower end of its 99% [Clopper-Pearson](https://doi.org/10.1093/biomet/26.4.404) interval for the success rate is at least $\theta = 0.90$ (the success rate is at least 0.90 at 99% confidence), unreliable when the upper end is below 0.90, and open while the interval still straddles $\theta$. $D_{\min}$ is the smallest reliable team on a curve.
+A cell gets trials in batches of 10 seeds, up to 200. It is reliable when the lower end of its 99% [Clopper-Pearson](https://doi.org/10.1093/biomet/26.4.404) interval for the success rate is at least $\theta = 0.90$ (the success rate is at least 0.90 at 99% confidence), unreliable when the upper end is below 0.90, and undecided while the interval still straddles $\theta$. $D_{\min}$ is the smallest reliable team on a curve.
 
 The six protocols are `dmin_m12`, `dmin_m6` and `dmin_m3` (strict rule, $N = 25$ to 400) and `dmin_f99_m12`, `dmin_f99_m6` and `dmin_f99_m3` (99% rule). The 99% runs at 12 and 6 drive times also use $N = 71$, 141, 283 and 566. No trial ended in an error.
 
 ## Results in short
 
-$D_{\min}$ at $N = 400$, from 115,470 trials in the six runs (Table 1). `2-3` means 3 dogs are reliable and 2 still open at 200 seeds, `[9]` that no team is reliable yet and at least 9 are needed, and `none` that every team tested, up to 24 dogs, is unreliable ([notation](docs/report/d_min_report.md#23-when-a-team-is-reliable)).
+$D_{\min}$ at $N = 400$, from 115,470 trials in the six runs (Table 1). `2-3` means 3 dogs are reliable and 2 still undecided at 200 seeds, `[9]` that no team is reliable yet and at least 9 are needed, and `none` that every team tested, up to 24 dogs, is unreliable ([notation](docs/report/d_min_report.md#23-when-a-team-is-reliable)).
 
 **Table 1: $D_{\min}$ at $N = 400$, strict rule / 99% rule.**
 

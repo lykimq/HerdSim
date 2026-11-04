@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+from scipy.spatial.distance import cdist
 
 from sim.strombom import sheep
 from sim.strombom.params import resolve_n_neighbors
@@ -26,6 +27,7 @@ from tests.helpers import (
 R_A = BASE["r_a"]
 DOG_BEHIND_X = -40.0  # dogs start this far left of the flock centre
 DOG_SPREAD_Y = 20.0  # half-width of the dog line along y
+SPARE_DOG_X = -400.0  # a dog this far behind is never the cheapest match for an outlier
 WIDE_SCALE = 6.0  # stretch a tight flock so drive slots have room to fan out
 
 
@@ -134,22 +136,29 @@ def test_collecting_dogs_take_distinct_outliers_by_least_walk_and_the_rest_drive
     core = tight_flock(20)
     outliers = np.array([[0.0, 60.0], [0.0, -60.0]])  # above and below the core
     flock = np.vstack([core, outliers])
-    # Two dogs near the outliers (matched first), two spare dogs for the drive arc.
+    # Dog 0 is close to the upper outlier and dog 1 far above both; two spare dogs are too far
+    # from the outliers to be matched and drive the core.
     dogs = np.array(
         [
-            [DOG_BEHIND_X, -50.0],  # nearest the lower outlier
-            [DOG_BEHIND_X, 50.0],  # nearest the upper outlier
-            [DOG_BEHIND_X, 0.0],
-            [DOG_BEHIND_X, 5.0],
+            [DOG_BEHIND_X, 55.0],
+            [DOG_BEHIND_X, 200.0],
+            [SPARE_DOG_X, 0.0],
+            [SPARE_DOG_X, 5.0],
         ]
     )
     n = flock.shape[0]
     targets = team_targets(flock, GOAL, dogs, cfg(n))
     centroid = flock.mean(axis=0)
+    upper = behind(outliers[0], centroid, R_A)
+    lower = behind(outliers[1], centroid, R_A)
 
-    # Least total walk: dog at y=-50 takes the lower outlier, dog at y=50 the upper.
-    np.testing.assert_allclose(targets[0], behind(outliers[1], centroid, R_A))
-    np.testing.assert_allclose(targets[1], behind(outliers[0], centroid, R_A))
+    # Premise: pairing the closest dog and point first (dog 0 with the upper point) would walk
+    # further in total than the swapped pairing, so only the least-total-walk rule swaps them.
+    walk = cdist(dogs[:2], [upper, lower])
+    assert walk.argmin() == 0
+    assert walk[0, 0] + walk[1, 1] > walk[0, 1] + walk[1, 0]
+    np.testing.assert_allclose(targets[0], lower)
+    np.testing.assert_allclose(targets[1], upper)
 
     core_centroid = core.mean(axis=0)
     drive_radius = np.linalg.norm(drive_point(core, GOAL, cfg(n)) - core_centroid)

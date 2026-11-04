@@ -95,7 +95,7 @@ The study uses `arcs`: half circles on the side away from the goal, with the dog
 
 ## 3. Adaptive sampling
 
-Most [cells](../glossary.md#trials-and-experiments) need far fewer than the cap of 200 seeds (one dog against 400 scattered sheep at a tight deadline, or twelve dogs on 25 compact sheep), so HerdSim adds trials only to the open cells, those whose answer is still undecided. In the end each cell gets a zone, which says what its place on the curve means ([section 5](#5-frontier-rules-and-zones)). How the rounds, the time budget and resuming work is in the [architecture](../codes/architecture.md#how-a-campaign-runs). Figures 4 to 7 show stored cells of `dmin_f99_m6` (99% rule, 6 drive times); Figure 4 also draws the interval bounds for all failures and all successes.
+Most [cells](../glossary.md#trials-and-experiments) need far fewer than the cap of 200 seeds (one dog against 400 scattered sheep at a tight deadline, or twelve dogs on 25 compact sheep), so HerdSim adds trials only to the open cells, those that still ask for seeds because their reliability, or a finish-time comparison, is undecided. In the end each cell gets a zone, which says what its place on the curve means ([section 5](#5-frontier-rules-and-zones)). How the rounds, the time budget and resuming work is in the [architecture](../codes/architecture.md#how-a-campaign-runs). Figures 4 to 7 show stored cells of `dmin_f99_m6` (99% rule, 6 drive times); Figure 4 also draws the interval bounds for all failures and all successes.
 
 ### Stopping early with the 99% Clopper-Pearson interval
 
@@ -133,7 +133,7 @@ Above a confirmed [$D_{\mathrm{sat}}$](#frontier-values), the team from which mo
 
 1) When it starts: $D_{\mathrm{sat}}$ is decided, a larger tested team is also classed as saturated (reliable and not slower than $D_{\mathrm{best}}$), and the curve is not still improving at the top of its grid.
 2) What it prunes: above that confirming team, a saturated cell, or a reliable cell whose speed against $D_{\mathrm{best}}$ is still open, in which, averaged over ticks and trials, at least 90% of the dogs had another dog within 2 m.
-3) What it never prunes: unreliable cells, cells whose reliability is still open, and cells slower than $D_{\mathrm{best}}$, since they are the answers being measured.
+3) What it never prunes: unreliable cells, cells whose reliability is undecided, and cells slower than $D_{\mathrm{best}}$, since they are the answers being measured.
 
 A pruned cell is filled to a whole batch, then gets no more seeds and adds no midpoints. The rule assumes that a dog standing on another acts as its copy and cannot change the answer; we have not tested that.
 
@@ -160,7 +160,7 @@ To compare 2 dogs with 4 fairly, both teams should face the same flock. Seed $i$
 
 ### Flock size
 
-All six runs test $N$ = 25, 50, 100, 200 and 400, doublings. The 99% runs at 12 and 6 drive times add 71, 141, 283 and 566, steps of $\sqrt{2}$ that are even in $\log N$, so small sizes do not dominate a log-log fit. Above about $N = 600$ a driven flock no longer settles to one radius, so calibration cannot size the task there. 566 = $400\sqrt{2}$ is the last added size below it, and the strict-rule grids stop at 400.
+All six runs test $N$ = 25, 50, 100, 200 and 400, doublings. The 99% runs at 12 and 6 drive times add 71, 141, 283 and 566, steps of $\sqrt{2}$ that are even in $\log N$, so small sizes do not dominate a log-log fit. Above about $N = 600$ the radius of a driven flock is still changing when calibration measures it: it moves by more than 5% between the last two windows from $N = 630$ (3 seeds). The calibration check of the six runs accepts a change of up to 15%, so it would still pass there; the study stops at 566 = $400\sqrt{2}$, the last added size below the edge, and the strict-rule grids stop at 400.
 
 ### Team size
 

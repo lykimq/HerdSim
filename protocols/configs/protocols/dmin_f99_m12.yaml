@@ -11,5 +11,5 @@ success_fraction: 0.99
 # Gives seeds to cells whose finish time is still being compared with a neighbour.
 decide_finish_times: true
 # The log midpoints 71, 141, 283 and 566 = 400 sqrt(2) give D_min(N) more points to fit.
-# The flock has no settled size above about 600, so no larger N.
+# The flock radius is still changing above about 600, so no larger N.
 flock_sizes: [25, 50, 71, 100, 141, 200, 283, 400, 566]

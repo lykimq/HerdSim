@@ -140,4 +140,7 @@ uv run python docs/generate_docs/make_docs.py --check    # write nothing; list s
 uv run python docs/generate_docs/make_figures.py         # figures of the models and the task
 uv run python docs/generate_docs/make_result_figures.py  # figures of the results
 uv run python docs/generate_docs/make_gifs.py            # every animation, from stored trials
+uv run python docs/generate_docs/make_gifs.py paper_task # only the named animations
 ```
+
+`make_gifs.py` takes any of the animation names `one_trial`, `sheep_reaction`, `push_blending`, `team_rule_at_work`, `start_layouts` and `paper_task`, and writes each to `docs/gifs/`.

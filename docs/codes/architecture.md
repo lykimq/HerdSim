@@ -40,7 +40,7 @@ flowchart TB
     records --> engine
 ```
 
-1) Command-line tool: plans, starts and checks protocols, and prints progress as plain lines.
+1) Command-line tool: plans, starts and checks protocols, and prints progress as plain lines. The [check against the paper](../methods/strombom_check.md) is a tool of this layer too: it runs the engine on the paper's own grid through the worker pool, reads stored rows through analysis, and keeps its trials apart from the campaign's.
 2) Report: writes analysis values as Markdown tables, and produces the generated pages, figures and GIFs. Figures and GIFs may replay trials, but no stored result comes from them.
 3) Campaign: the manager that spends extra seeds on undecided cells. It calibrates, runs the rounds, sends trials to the worker pool, appends the rows and hands them to analysis after each round. No sheep or dog rule lives here.
 4) Analysis: reads stored files and never runs the model. It works out success rates, reliable teams, $D_{\min}$ (the smallest reliable team), the other team sizes and curve fits.

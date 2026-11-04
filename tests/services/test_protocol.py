@@ -149,6 +149,17 @@ def test_physics_hash_matches_only_when_trial_outcomes_match() -> None:
     as_float = protocol_with(ticks=3000, settings={"drive_distance_multiple": 13.0})
     assert physics_hash(as_int) == physics_hash(as_float)
 
+    # A graze-off protocol must resume into folders written before the switch existed.
+    assert physics_hash(protocol_with(ticks=3000, params={"graze_repulsion": False})) == base
+    assert physics_hash(protocol_with(ticks=3000, params={"graze_repulsion": True})) != base
+
+
+@pytest.mark.parametrize("bad", ["false", 0])
+def test_a_model_switch_must_be_a_real_boolean(tmp_path: Path, bad: object) -> None:
+    """ "false" or 0 would read as on and escape the neutral filter of the hash."""
+    with pytest.raises(ValueError, match="graze_repulsion"):
+        load_draft(tmp_path, methods={METHOD: {"params": {"graze_repulsion": bad}}})
+
 
 # --- drive-time deadlines ----------------------------------------------------
 

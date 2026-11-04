@@ -41,7 +41,7 @@ The [README](../../README.md#task-and-methods) defines the goal, drive times, th
 
 ### 2.3 When a team is reliable
 
-A cell is one layout, flock size $N$ and team size $D$ within one run, and a trial is one run of a cell with one seed ([glossary](../glossary.md#trials-and-experiments)). After $n$ trials with $k$ successes, $[L, U]$ is the exact two-sided 99% [Clopper-Pearson](https://doi.org/10.1093/biomet/26.4.404) interval of the success rate. The cell is reliable if $L \ge 0.90$ and unreliable if $U < 0.90$. Otherwise it gets 10 more seeds, up to 200, and a cell still in between at 200 stays open ([stopping early](../experiments/task_design.md#stopping-early-with-the-99-clopper-pearson-interval)).
+A cell is one layout, flock size $N$ and team size $D$ within one run, and a trial is one run of a cell with one seed ([glossary](../glossary.md#trials-and-experiments)). After $n$ trials with $k$ successes, $[L, U]$ is the exact two-sided 99% [Clopper-Pearson](https://doi.org/10.1093/biomet/26.4.404) interval of the success rate. The cell is reliable if $L \ge 0.90$ and unreliable if $U < 0.90$. Otherwise it gets 10 more seeds, up to 200, and a cell still in between at 200 stays undecided ([stopping early](../experiments/task_design.md#stopping-early-with-the-99-clopper-pearson-interval)).
 
 ```mermaid
 %%{init: {"theme": "base", "themeVariables": {"primaryColor": "#1f5f99", "primaryTextColor": "#ffffff", "primaryBorderColor": "#4a90d9", "lineColor": "#75808f", "tertiaryTextColor": "#75808f", "titleColor": "#75808f", "clusterBkg": "transparent", "clusterBorder": "#75808f", "edgeLabelBackground": "transparent"}}}%%
@@ -58,7 +58,7 @@ flowchart LR
 On one curve of team sizes (one layout and $N$ under one rule), $D_{\min}$ is the smallest reliable $D$. The tables write it in four ways:
 
 1) `3`: 3 dogs are reliable and every smaller team is unreliable.
-2) `3-8`: 8 dogs are reliable, every team below 3 is unreliable, and 3 dogs are still open at 200 seeds. We call the lower end $D_{\min,\mathrm{low}}$.
+2) `3-8`: 8 dogs are reliable, every team below 3 is unreliable, and 3 dogs are still undecided at 200 seeds. We call the lower end $D_{\min,\mathrm{low}}$.
 3) `[5]`: no team is reliable yet, and $D_{\min}$ is at least 5.
 4) `none`: every team tested, up to 24 dogs, is unreliable.
 
@@ -79,7 +79,7 @@ Each run is one protocol, the recipe of one experiment ([protocol catalogue](../
 | `dmin_f99_m6` | 99% | 6 | 25, 50, 71, 100, 141, 200, 283, 400, 566 | 31,920 |
 | `dmin_f99_m3` | 99% | 3 | 25, 50, 100, 200, 400 | 11,740 |
 
-The 99% runs at 12 and 6 drive times have four more sizes, 71, 141, 283 and 566, so that the sizes step by $\sqrt{2}$ and count equally in a log-log fit. They stop below about 600 sheep, the calibration edge, above which a driven flock started loose no longer settles to one radius ([flock size](../experiments/task_design.md#flock-size)).
+The 99% runs at 12 and 6 drive times have four more sizes, 71, 141, 283 and 566, so that the sizes step by $\sqrt{2}$ and count equally in a log-log fit. They stop below about 600 sheep, the calibration edge, above which the radius of a driven flock started loose is still changing when it is measured ([flock size](../experiments/task_design.md#flock-size)).
 
 ## 3. Results
 
@@ -107,7 +107,7 @@ When there is time, a larger flock needs few more dogs. A `compact` flock needs 
 
 **Figure 1: $D_{\min}$ against flock size $N$ on the three scattered layouts, both rules, at 12, 6 and 3 drive times ($N = 25$-400, and up to 566 under the 99% rule at 12 and 6 drive times; `compact` is 1 everywhere).** Scattered flocks grow slowly at the loose deadline, and much faster under the strict rule from $N = 100$.
 
-- Marks: blue circles with solid lines are the strict rule and orange squares with dashed lines the 99% rule, shifted sideways so they do not overlap. Shaded bars are brackets still open at 200 seeds, hollow triangles lower bounds, and crosses curves where every team tested, up to 24, is unreliable. Axes are log-log.
+- Marks: blue circles with solid lines are the strict rule and orange squares with dashed lines the 99% rule, shifted sideways so they do not overlap. Shaded bars are brackets still undecided at 200 seeds, hollow triangles lower bounds, and crosses curves where every team tested, up to 24, is unreliable. Axes are log-log.
 - Panels: rows are `wide`, `split` and `outlier_rich`; columns 12, 6 and 3 drive times.
 
 Up to $N = 50$ one dog is enough on every layout and deadline. At $N = 50$ the drive point is 14 m behind the flock centre and the farthest sheep starts at most 43.4 m from it (on `outlier_rich`), so a dog at the drive point is at most about 58 m from any sheep, inside $r_s = 65$ m. One dog may therefore reach almost every sheep at once. Reach measures this in the stored one-dog trials: the share of the outer half of the flock (the sheep farther than the median distance from its centre) within $r_s$ of the dog, averaged over the ticks of a trial (Figure 2). Its median is 0.93 to 1.00 at $N \le 50$ on every layout and deadline (99% rule, at least 60 trials per entry) and 1.00 on `compact` at every size. On the scattered layouts it falls with $N$: at 6 drive times 0.84 on `wide`, 0.80 on `split` and 0.86 on `outlier_rich` at $N = 100$, and 0.14, 0.41 and 0.06 at $N = 400$, where each entry is 10 failed trials that run to the deadline. Reach does not order $D_{\min}$ by itself: at $N = 100$ and 6 drive times `outlier_rich` has the highest reach of the three and needs two dogs, while `wide` and `split` need one. We have not tested whether low reach causes the growth of $D_{\min}$.
@@ -159,7 +159,7 @@ The data cannot yet tell whether the team keeps growing or levels off. We fit tw
 
 **Figure 3: $D_{\min}$ on nine flock sizes ($N = 25$-566, 99% rule), and where each curve shape could go.** Power laws and saturating curves both fit the data up to $N = 566$; beyond it the shaded regions are extrapolation.
 
-- Marks: `wide` is drawn with circles and `outlier_rich` with squares, on log-log axes. A marker is $D_{\min}$ and a bar runs down to $D_{\min,\mathrm{low}}$ where a smaller team is still open. The vertical line marks the calibration edge; to its right, the shaded regions show where power laws (dashed upper edge) and saturating curves (dotted upper edge) that fit the data could lie.
+- Marks: `wide` is drawn with circles and `outlier_rich` with squares, on log-log axes. A marker is $D_{\min}$ and a bar runs down to $D_{\min,\mathrm{low}}$ where a smaller team is still undecided. The vertical line marks the calibration edge; to its right, the shaded regions show where power laws (dashed upper edge) and saturating curves (dotted upper edge) that fit the data could lie.
 - Left: 12 drive times.
 - Right: 6 drive times.
 
@@ -233,7 +233,7 @@ These results rest on HerdSim's choices:
 1) Sheep and dogs are points that turn at once and never tire, on a field with no fences. In real fields, fences help dogs hold outliers.
 2) Dogs know where every sheep is.
 3) A reacting sheep always walks at 1 m/s, however many dogs push it. HerdSim scales the summed push of all dogs within 65 m down to one dog's push ([push blending](../methods/strombom_sheep.md#multi-dog-push-blending-herdsim-extension)); a plain sum was never run.
-4) Grazing sheep, with no dog within 65 m, do not push each other apart, while the paper's sheep do at any distance from the dog ([grazing](../methods/strombom_sheep.md#grazing)). With that push on, the 99% runs at 6 and 3 drive times were run again on the same seeds at all their flock sizes. Each run calibrates its own $R_f$, which with the push on differs by -1.1% to +0.4% (9.68 against 9.79 m at $N = 141$), and the goal radius, the drive, the deadline and every start sized by $R_f$ (the `compact` flock, the `split` clusters, the `outlier_rich` core and the dog arcs around them) change with it ([calibration](../experiments/task_design.md#sizing-by-the-calibrated-flock-radius)). None of the 526 shared cells is reliable in one run and unreliable in the other. 14 of the 56 $D_{\min}$ entries change, each through a cell still open at 200 seeds in one of the two runs; no entry decided in both runs differs. The largest gap in trials is `split` at $N = 566$ and 6 drive times: 88 seeds succeed only with the push on and 49 only without, of 510 (sign test $p = 0.0011$, above the 0.0009 that a Bonferroni correction for 56 layout and size groups needs) ([grazing repulsion on](results_tables.md#grazing-repulsion-on-same-seeds)).
+4) Grazing sheep, with no dog within 65 m, do not push each other apart, while the paper's sheep do at any distance from the dog ([grazing](../methods/strombom_sheep.md#grazing)). With that push on, the 99% runs at 6 and 3 drive times were run again on the same seeds at all their flock sizes. Each run calibrates its own $R_f$, which with the push on differs by -1.1% to +0.4% (9.68 against 9.79 m at $N = 141$), and the goal radius, the drive, the deadline and every start sized by $R_f$ (the `compact` flock, the `split` clusters, the `outlier_rich` core and the dog arcs around them) change with it ([calibration](../experiments/task_design.md#sizing-by-the-calibrated-flock-radius)). None of the 526 shared cells is reliable in one run and unreliable in the other. 14 of the 56 $D_{\min}$ entries change, each through a cell still undecided at 200 seeds in one of the two runs; no entry decided in both runs differs. The largest gap in trials is `split` at $N = 566$ and 6 drive times: 88 seeds succeed only with the push on and 49 only without, of 510 (sign test $p = 0.0011$, above the 0.0009 that a Bonferroni correction for 56 layout and size groups needs) ([grazing repulsion on](results_tables.md#grazing-repulsion-on-same-seeds)).
 5) Reliability is checked after every batch of 10 seeds, up to 20 looks per cell, with no correction for the repeated looks. Computed exactly for this rule alone, a cell with true success rate 0.90 ends reliable with chance 1.27%, unreliable with 1.86% and open with 96.86%, so cells near 0.90 give brackets ([decision rates](results_tables.md#decision-rates-of-the-per-cell-rule)).
 6) From $N = 200$ the drive distance is set by the farthest start, not by $13 R_f$: 13.4 $R_f$ at $N = 200$ and 18 $R_f$ at 400 ([sizing](../experiments/task_design.md#sizing-by-the-calibrated-flock-radius)). A drive time therefore stands for a relatively longer drive from $N = 200$ on, and the growth slopes that span $N = 200$ include this change; we have not tested how much it moves them.
 7) The flock sizes stop at 566, below the calibration edge, so the shape of the curve beyond it is open.

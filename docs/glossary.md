@@ -48,7 +48,7 @@ A definition for each term HerdSim's docs use, with a link to the section that e
 
 **$R_f$**: the calibrated flock radius, the size a compact flock of $N$ sheep settles to while one dog drives it ($\sqrt{2}$ times its RMS distance to the centre). It sizes the field, the goal and the drive ([sizing](experiments/task_design.md#sizing-by-the-calibrated-flock-radius)).
 
-**Calibration edge**: about $N = 600$, above which a driven flock no longer settles to one radius. The study stops at 566.
+**Calibration edge**: about $N = 600$, above which the radius of a driven flock changes by more than 5% between calibration windows (from $N = 630$ in a 3-seed check). The study stops at 566.
 
 **Goal**: a circle of radius $1.9 R_f$.
 
