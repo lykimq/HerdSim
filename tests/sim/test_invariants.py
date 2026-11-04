@@ -26,6 +26,8 @@ CASES: list[dict[str, Any]] = [
     {"layout": "wide"},
     {"layout": "split", "n": 60},
     {"layout": "outlier_rich", "n": 60},
+    {"method": "fat", "layout": "wide"},
+    {"method": "independent", "layout": "wide"},
 ]
 
 
@@ -71,8 +73,8 @@ def case_id(options: dict[str, Any]) -> str:
 
 @pytest.mark.parametrize("options", CASES, ids=case_id)
 def test_every_tick_respects_the_invariants(options: dict[str, Any]) -> None:
-    cell: dict[str, Any] = {"n": 30, "d": 3, **options}
-    config = config_for(METHOD, ticks=TICKS, flock_radius=FLOCK_RADIUS, **cell)
+    cell: dict[str, Any] = {"method": METHOD, "n": 30, "d": 3, **options}
+    config = config_for(ticks=TICKS, flock_radius=FLOCK_RADIUS, **cell)
     history = run_trial(config, SEED, on_tick=tick_checker(config)).history
 
     for column in ("fragmentation", "coverage", "dogs_stopped", "dogs_goal_side"):

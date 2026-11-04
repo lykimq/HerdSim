@@ -1,5 +1,6 @@
 # The protocols of the study, in the order cli/campaign.py runs them: the strict rule at
-# 12, 6 and 3 drive times, then the 99% rule at 6, 3 and 12 drive times.
+# 12, 6 and 3 drive times, the 99% rule at 6, 3 and 12 drive times, the uncoordinated
+# FAT baseline at 6 drive times under both rules, and the independent shepherds baseline.
 queue:
   - dmin_m12
   - dmin_m6
@@ -7,3 +8,6 @@ queue:
   - dmin_f99_m6
   - dmin_f99_m3
   - dmin_f99_m12
+  - dmin_fat
+  - dmin_f99_fat
+  - dmin_f99_indep

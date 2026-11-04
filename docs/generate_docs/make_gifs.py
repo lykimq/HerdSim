@@ -38,13 +38,13 @@ from docs.generate_docs.figstyle import (  # noqa: E402
     SURFACE,
     style_map,
 )
-from docs.generate_docs.runs import F99_RUNS  # noqa: E402
+from docs.generate_docs.runs import F99_RUNS, FAT_RUNS  # noqa: E402
 from paper_check.settings import DONE_DISTANCE, FIELD_SIDE  # noqa: E402
 from paper_check.sweep import fig3_replay_job  # noqa: E402
 from paper_check.trials import seed_of  # noqa: E402
 from services.replay import ReplayJob, StoredRun, open_run, replay_trial  # noqa: E402
 from sim.state import SimulationState  # noqa: E402
-from sim.strombom.params import METHOD  # noqa: E402
+from sim.strombom.params import FAT, INDEPENDENT, METHOD  # noqa: E402
 from sim.strombom.shepherd import COLLECT, collect_threshold, decide  # noqa: E402
 from sim.strombom.team import team_targets  # noqa: E402
 from sim.trial import RunResult, initial_state  # noqa: E402
@@ -75,6 +75,8 @@ class Shot:
     seed_index: int
     title: str
     until: int | None = None  # first ticks only (trial start)
+    run: str = RUN
+    method: str = METHOD
 
 
 @dataclass
@@ -108,14 +110,14 @@ class Replayed:
 
 
 @cache
-def _run() -> StoredRun:
-    """The stored run the animations replay, opened once."""
-    return open_run(RUN)
+def _run(name: str = RUN) -> StoredRun:
+    """A stored run the animations replay, opened once."""
+    return open_run(name)
 
 
 def shown_ticks(shot: Shot) -> int:
     """Stored trial length, or ``until`` if shorter."""
-    stored = _run().job(METHOD, shot.layout, shot.n, shot.d, shot.seed_index).stored[1]
+    stored = _run(shot.run).job(shot.method, shot.layout, shot.n, shot.d, shot.seed_index).stored[1]
     return stored if shot.until is None else min(stored, shot.until)
 
 
@@ -150,7 +152,7 @@ def replay(shot: Shot, every: int) -> Replayed:
     The full trial is always replayed (and checked against the stored outcome) even when
     ``until`` cuts what is shown.
     """
-    job = _run().job(METHOD, shot.layout, shot.n, shot.d, shot.seed_index)
+    job = _run(shot.run).job(shot.method, shot.layout, shot.n, shot.d, shot.seed_index)
     end = shot.until if shot.until is not None else math.inf
     (ticks, herd, herders), result = _record(job, every, end)
     return Replayed(
@@ -434,6 +436,26 @@ def start_layouts() -> None:
     animate(shots, "layouts.gif", f"N = 200, D = 4, seed 0, 99 percent rule, 6 drive times ({RUN})")
 
 
+def controllers() -> None:
+    """Same start flock: team rule vs independent shepherds vs uncoordinated FAT."""
+    shots = [
+        Shot("wide", 400, 4, 0, "the team rule (strombom_multi)"),
+        Shot(
+            "wide",
+            400,
+            4,
+            0,
+            "independent shepherds (independent)",
+            run="dmin_f99_indep",
+            method=INDEPENDENT,
+        ),
+        Shot("wide", 400, 4, 0, "FAT baseline (fat)", run=FAT_RUNS[1], method=FAT),
+    ]
+    animate(
+        shots, "controllers.gif", "wide, N = 400, D = 4, seed 0, 99 percent rule, 6 drive times"
+    )
+
+
 def paper_task() -> None:
     """One trial of the paper's task: N = 100, the global case."""
     n_sheep = 100
@@ -467,6 +489,7 @@ GIFS = {
         push_blending,
         team_rule_at_work,
         start_layouts,
+        controllers,
         paper_task,
     )
 }

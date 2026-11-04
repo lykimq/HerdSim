@@ -19,6 +19,8 @@ The tables behind the [report](d_min_report.md), for readers who want the values
 11) [Grazing repulsion on, same seeds](#grazing-repulsion-on-same-seeds)
 12) [Teams that fail above D_min](#teams-that-fail-above-d_min)
 13) [N = 400 at three deadlines, 99 percent](#n--400-at-three-deadlines-99-percent)
+14) [Uncoordinated FAT baseline, 6 drive times](#uncoordinated-fat-baseline-6-drive-times)
+15) [Independent paper shepherds baseline, 6 drive times](#independent-paper-shepherds-baseline-6-drive-times)
 
 ## How to read the tables
 
@@ -40,8 +42,11 @@ Each row is the line of `results/queue_log.jsonl` for a protocol. `finished`, `h
 | dmin_f99_m6 | 2026-10-20 20:40:21 | 31920 | 354 | 58 | 58 | 42 | 0 | 0.492 | 20 | ran |
 | dmin_f99_m3 | 2026-10-20 20:56:31 | 11740 | 185 | 10 | 10 | 8 | 0 | 0.269 | 20 | ran |
 | dmin_f99_m12 | 2026-10-20 21:20:51 | 31590 | 349 | 53 | 53 | 4 | 0 | 0.405 | 20 | ran |
+| dmin_fat | 2026-10-22 13:36:46 | 8660 | 181 | 2 | 2 | 4 | 0 | 0.217 | 20 | ran |
+| dmin_f99_fat | 2026-10-22 13:50:43 | 8670 | 184 | 1 | 1 | 1 | 0 | 0.232 | 20 | ran |
+| dmin_f99_indep | 2026-10-23 14:28:19 | 12990 | 181 | 18 | 18 | 3 | 0 | 0.298 | 20 | ran |
 
-5 folders hold more trials than their log line records, because trials were added when they were resumed later: `dmin_m6`, `dmin_m3`, `dmin_f99_m6`, `dmin_f99_m3`, `dmin_f99_m12`. For these, `finished` and `hours` belong to the first pass only. The [run record](d_min_report.md#4-run-record) gives the trials each resume added.
+7 folders hold more trials than their log line records, because trials were added when they were resumed later: `dmin_m6`, `dmin_m3`, `dmin_f99_m6`, `dmin_f99_m3`, `dmin_f99_m12`, `dmin_fat`, `dmin_f99_fat`. For these, `finished` and `hours` belong to the first pass only. The [run record](d_min_report.md#4-run-record) gives the trials each resume added.
 
 ## D_min by layout and N, strict success
 
@@ -318,7 +323,7 @@ Trials shared by two runs that differ only in the deadline, matched on cell and 
 
 ## Decision rates of the per-cell rule
 
-The six runs share one per-cell rule, so one table covers them: a cell is reliable when the 99 percent Clopper-Pearson interval of its success rate lies at or above 0.90 and unreliable when it lies below; otherwise it gets 10 more seeds, up to 200, and a cell still in between at 200 stays undecided. Each check after a batch is a look. For a cell whose true success rate is p, the table gives the chance in percent that it ends reliable, unreliable or undecided, computed exactly over every look (no simulation).
+The nine study runs share one per-cell rule, so one table covers them: a cell is reliable when the 99 percent Clopper-Pearson interval of its success rate lies at or above 0.90 and unreliable when it lies below; otherwise it gets 10 more seeds, up to 200, and a cell still in between at 200 stays undecided. Each check after a batch is a look. For a cell whose true success rate is p, the table gives the chance in percent that it ends reliable, unreliable or undecided, computed exactly over every look (no simulation).
 
 `uv run python -m docs.generate_docs.page sequential dmin_f99_m6`
 
@@ -513,6 +518,16 @@ None.
 | :--- | :---: | :---: | :---: | :---: |
 | outlier_rich | 400 | [6] | 7 8 12 16 24 | - |
 
+### dmin_fat
+
+None.
+
+### dmin_f99_fat
+
+| layout | N | D_min | unreliable above | D_min_stable |
+| :--- | :---: | :---: | :---: | :---: |
+| compact | 400 | [12] | 13 14 16 24 | - |
+
 ## N = 400 at three deadlines, 99 percent
 
 The cells of one curve at the three deadlines, 99 percent rule: successes out of trials, the reliability decision and the median finish in seconds.
@@ -591,3 +606,197 @@ The cells of one curve at the three deadlines, 99 percent rule: successes out of
 | dmin_f99_m3 | strombom_multi\|outlier_rich\|N=400 | 12 | 12/20 | 0.6 | unreliable | 448.5 |
 | dmin_f99_m3 | strombom_multi\|outlier_rich\|N=400 | 16 | 37/50 | 0.74 | unreliable | 444.0 |
 | dmin_f99_m3 | strombom_multi\|outlier_rich\|N=400 | 24 | 46/60 | 0.77 | unreliable | 444.0 |
+
+## Uncoordinated FAT baseline, 6 drive times
+
+The uncoordinated `fat` baseline ([fat.md](../methods/fat.md)) at 6 drive times under strict (dmin_fat) and 99 percent (dmin_f99_fat) rules, calibrated with `strombom_multi` so both controllers share the same $R_f$, start flocks, goal and deadline, followed by cell-by-cell curves comparing `dmin_f99_m6` (`strombom_multi`) and `dmin_f99_fat` (`fat`) on `compact` ($N = 400$) and `wide` ($N = 200$).
+
+### D_min, dmin_fat
+
+| layout | 25 | 50 | 100 | 200 | 400 |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| compact | 1 | 1 | 1 | 1 | none on grid |
+| wide | 1 | 1 | 1 | none on grid | none on grid |
+| split | 1 | 1 | 1 | none on grid | none on grid |
+| outlier_rich | 1 | 1 | 2 | none on grid | none on grid |
+
+### D_min, dmin_f99_fat
+
+| layout | 25 | 50 | 100 | 200 | 400 |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| compact | 1 | 1 | 1 | 1 | [12] |
+| wide | 1 | 1 | 1 | none on grid | none on grid |
+| split | 1 | 1 | 1 | none on grid | none on grid |
+| outlier_rich | 1 | 1 | 2 | none on grid | none on grid |
+
+### Growth, dmin_fat
+
+| layout | slope_range | n_used | note |
+| :--- | :--- | :---: | :--- |
+| compact | 0 (flat, decided sizes only) | 25 50 100 200 | D_min = 1 where decided; no reliable D on the grid at N = 400 |
+| outlier_rich | 0.50 to 0.50 | 25 50 100 | no reliable D on the grid at N = 200 400 |
+| split | 0 (flat, decided sizes only) | 25 50 100 | D_min = 1 where decided; no reliable D on the grid at N = 200 400 |
+| wide | 0 (flat, decided sizes only) | 25 50 100 | D_min = 1 where decided; no reliable D on the grid at N = 200 400 |
+
+Spread of D_min in doublings: between layouts at one N 0.33, between N at one layout 0.25; on curves with a reliable team 0.33 and 0.25.
+
+### Growth, dmin_f99_fat
+
+| layout | slope_range | n_used | note |
+| :--- | :--- | :---: | :--- |
+| compact | 0 (flat, decided sizes only) | 25 50 100 200 | D_min = 1 where decided; still undecided on reliability at N = 400 |
+| outlier_rich | 0.50 to 0.50 | 25 50 100 | no reliable D on the grid at N = 200 400 |
+| split | 0 (flat, decided sizes only) | 25 50 100 | D_min = 1 where decided; no reliable D on the grid at N = 200 400 |
+| wide | 0 (flat, decided sizes only) | 25 50 100 | D_min = 1 where decided; no reliable D on the grid at N = 200 400 |
+
+Spread of D_min in doublings: between layouts at one N 0.33, between N at one layout 1.15; on curves with a reliable team 0.33 and 0.25.
+
+`uv run python -m docs.generate_docs.page curve dmin_f99_m6 dmin_f99_fat --layout compact --n 400`
+
+### compact, N = 400: cell by cell across folders
+
+| folder | group | d | successes | rate | reliability | median_finish_s |
+| :--- | :--- | :---: | :--- | :---: | :--- | :---: |
+| dmin_f99_m6 | strombom_multi\|compact\|N=400 | 1 | 60/60 | 1.0 | reliable | 356.0 |
+| dmin_f99_m6 | strombom_multi\|compact\|N=400 | 2 | 60/60 | 1.0 | reliable | 354.0 |
+| dmin_f99_m6 | strombom_multi\|compact\|N=400 | 3 | 60/60 | 1.0 | reliable | 355.0 |
+| dmin_f99_m6 | strombom_multi\|compact\|N=400 | 4 | 60/60 | 1.0 | reliable | 355.0 |
+| dmin_f99_m6 | strombom_multi\|compact\|N=400 | 6 | 60/60 | 1.0 | reliable | 355.0 |
+| dmin_f99_m6 | strombom_multi\|compact\|N=400 | 8 | 60/60 | 1.0 | reliable | 356.0 |
+| dmin_f99_m6 | strombom_multi\|compact\|N=400 | 12 | 60/60 | 1.0 | reliable | 355.0 |
+| dmin_f99_m6 | strombom_multi\|compact\|N=400 | 16 | 60/60 | 1.0 | reliable | 355.5 |
+| dmin_f99_m6 | strombom_multi\|compact\|N=400 | 24 | 60/60 | 1.0 | reliable | 355.5 |
+| dmin_f99_fat | fat\|compact\|N=400 | 1 | 38/50 | 0.76 | unreliable | 440.0 |
+| dmin_f99_fat | fat\|compact\|N=400 | 2 | 38/50 | 0.76 | unreliable | 441.5 |
+| dmin_f99_fat | fat\|compact\|N=400 | 3 | 13/20 | 0.65 | unreliable | 438.0 |
+| dmin_f99_fat | fat\|compact\|N=400 | 4 | 72/90 | 0.8 | unreliable | 436.0 |
+| dmin_f99_fat | fat\|compact\|N=400 | 6 | 5/10 | 0.5 | unreliable | 441.0 |
+| dmin_f99_fat | fat\|compact\|N=400 | 8 | 88/110 | 0.8 | unreliable | 436.0 |
+| dmin_f99_fat | fat\|compact\|N=400 | 10 | 38/50 | 0.76 | unreliable | 437.0 |
+| dmin_f99_fat | fat\|compact\|N=400 | 11 | 20/30 | 0.67 | unreliable | 437.0 |
+| dmin_f99_fat | fat\|compact\|N=400 | 12 | 174/200 | 0.87 | undecided | 438.0 |
+| dmin_f99_fat | fat\|compact\|N=400 | 13 | 62/80 | 0.78 | unreliable | 437.0 |
+| dmin_f99_fat | fat\|compact\|N=400 | 14 | 45/60 | 0.75 | unreliable | 439.0 |
+| dmin_f99_fat | fat\|compact\|N=400 | 16 | 38/50 | 0.76 | unreliable | 439.0 |
+| dmin_f99_fat | fat\|compact\|N=400 | 24 | 45/60 | 0.75 | unreliable | 441.0 |
+
+`uv run python -m docs.generate_docs.page curve dmin_f99_m6 dmin_f99_fat --layout wide --n 200`
+
+### wide, N = 200: cell by cell across folders
+
+| folder | group | d | successes | rate | reliability | median_finish_s |
+| :--- | :--- | :---: | :--- | :---: | :--- | :---: |
+| dmin_f99_m6 | strombom_multi\|wide\|N=200 | 1 | 4/10 | 0.4 | unreliable | 733.0 |
+| dmin_f99_m6 | strombom_multi\|wide\|N=200 | 2 | 60/60 | 1.0 | reliable | 401.0 |
+| dmin_f99_m6 | strombom_multi\|wide\|N=200 | 3 | 100/100 | 1.0 | reliable | 277.0 |
+| dmin_f99_m6 | strombom_multi\|wide\|N=200 | 4 | 60/60 | 1.0 | reliable | 271.0 |
+| dmin_f99_m6 | strombom_multi\|wide\|N=200 | 6 | 60/60 | 1.0 | reliable | 269.0 |
+| dmin_f99_m6 | strombom_multi\|wide\|N=200 | 8 | 60/60 | 1.0 | reliable | 269.0 |
+| dmin_f99_m6 | strombom_multi\|wide\|N=200 | 12 | 70/70 | 1.0 | reliable | 268.0 |
+| dmin_f99_m6 | strombom_multi\|wide\|N=200 | 16 | 90/90 | 1.0 | reliable | 267.0 |
+| dmin_f99_m6 | strombom_multi\|wide\|N=200 | 24 | 100/100 | 1.0 | reliable | 266.5 |
+| dmin_f99_fat | fat\|wide\|N=200 | 1 | 0/10 | 0.0 | unreliable |  |
+| dmin_f99_fat | fat\|wide\|N=200 | 2 | 4/10 | 0.4 | unreliable | 517.0 |
+| dmin_f99_fat | fat\|wide\|N=200 | 3 | 9/20 | 0.45 | unreliable | 311.0 |
+| dmin_f99_fat | fat\|wide\|N=200 | 4 | 11/20 | 0.55 | unreliable | 314.0 |
+| dmin_f99_fat | fat\|wide\|N=200 | 6 | 9/20 | 0.45 | unreliable | 307.0 |
+| dmin_f99_fat | fat\|wide\|N=200 | 8 | 4/10 | 0.4 | unreliable | 308.5 |
+| dmin_f99_fat | fat\|wide\|N=200 | 12 | 10/20 | 0.5 | unreliable | 323.5 |
+| dmin_f99_fat | fat\|wide\|N=200 | 16 | 5/10 | 0.5 | unreliable | 293.0 |
+| dmin_f99_fat | fat\|wide\|N=200 | 24 | 11/20 | 0.55 | unreliable | 310.0 |
+
+## Independent paper shepherds baseline, 6 drive times
+
+The independent paper shepherds baseline ([independent.md](../methods/independent.md)) at 6 drive times under the 99 percent rule (`dmin_f99_indep`), calibrated with `strombom_multi` so both controllers share the same $R_f$, start flocks, goal and deadline, followed by cell-by-cell curves comparing `dmin_f99_m6` (`strombom_multi`), `dmin_f99_indep` (`independent`) and `dmin_f99_fat` (`fat`) on `split` ($N = 200$) and `wide` ($N = 200$).
+
+### D_min, dmin_f99_indep
+
+| layout | 25 | 50 | 100 | 200 | 400 |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| compact | 1 | 1 | 1 | 1 | 1 |
+| wide | 1 | 1 | 1 | 2-3 | none on grid |
+| split | 1 | 1 | 1 | 1-3 | none on grid |
+| outlier_rich | 1 | 1 | 2 | 3 | none on grid |
+
+### Growth, dmin_f99_indep
+
+| layout | slope_range | n_used | note |
+| :--- | :--- | :---: | :--- |
+| compact | 0 (flat) | 25 50 100 200 400 | D_min = 1 throughout |
+| outlier_rich | 0.58 to 0.58 | 25 50 100 200 | no reliable D on the grid at N = 400 |
+| split | 0.00 to 0.48 | 25 50 100 200 | no reliable D on the grid at N = 400 |
+| wide | 0.30 to 0.48 | 25 50 100 200 | no reliable D on the grid at N = 400 |
+
+Spread of D_min in doublings: between layouts at one N 0.65, between N at one layout 0.92; on curves with a reliable team 0.65 and 0.92.
+
+`uv run python -m docs.generate_docs.page curve dmin_f99_m6 dmin_f99_indep dmin_f99_fat --layout split --n 200`
+
+### split, N = 200: cell by cell across folders
+
+| folder | group | d | successes | rate | reliability | median_finish_s |
+| :--- | :--- | :---: | :--- | :---: | :--- | :---: |
+| dmin_f99_m6 | strombom_multi\|split\|N=200 | 1 | 183/200 | 0.92 | undecided | 425.0 |
+| dmin_f99_m6 | strombom_multi\|split\|N=200 | 2 | 190/200 | 0.95 | undecided | 365.5 |
+| dmin_f99_m6 | strombom_multi\|split\|N=200 | 3 | 184/200 | 0.92 | undecided | 578.5 |
+| dmin_f99_m6 | strombom_multi\|split\|N=200 | 4 | 38/50 | 0.76 | unreliable | 341.0 |
+| dmin_f99_m6 | strombom_multi\|split\|N=200 | 6 | 13/20 | 0.65 | unreliable | 652.0 |
+| dmin_f99_m6 | strombom_multi\|split\|N=200 | 7 | 178/200 | 0.89 | undecided | 657.5 |
+| dmin_f99_m6 | strombom_multi\|split\|N=200 | 8 | 180/200 | 0.9 | undecided | 677.0 |
+| dmin_f99_m6 | strombom_multi\|split\|N=200 | 10 | 176/200 | 0.88 | undecided | 676.0 |
+| dmin_f99_m6 | strombom_multi\|split\|N=200 | 11 | 176/200 | 0.88 | undecided | 703.0 |
+| dmin_f99_m6 | strombom_multi\|split\|N=200 | 12 | 38/50 | 0.76 | unreliable | 699.0 |
+| dmin_f99_m6 | strombom_multi\|split\|N=200 | 16 | 55/70 | 0.79 | unreliable | 703.0 |
+| dmin_f99_m6 | strombom_multi\|split\|N=200 | 24 | 12/20 | 0.6 | unreliable | 676.5 |
+| dmin_f99_indep | independent\|split\|N=200 | 1 | 183/200 | 0.92 | undecided | 425.0 |
+| dmin_f99_indep | independent\|split\|N=200 | 2 | 188/200 | 0.94 | undecided | 423.0 |
+| dmin_f99_indep | independent\|split\|N=200 | 3 | 182/190 | 0.96 | reliable | 295.0 |
+| dmin_f99_indep | independent\|split\|N=200 | 4 | 79/80 | 0.99 | reliable | 299.0 |
+| dmin_f99_indep | independent\|split\|N=200 | 5 | 196/200 | 0.98 | reliable | 278.0 |
+| dmin_f99_indep | independent\|split\|N=200 | 6 | 194/200 | 0.97 | reliable | 286.0 |
+| dmin_f99_indep | independent\|split\|N=200 | 8 | 199/200 | 0.99 | reliable | 276.0 |
+| dmin_f99_indep | independent\|split\|N=200 | 12 | 200/200 | 1.0 | reliable | 266.0 |
+| dmin_f99_indep | independent\|split\|N=200 | 16 | 198/200 | 0.99 | reliable | 265.0 |
+| dmin_f99_indep | independent\|split\|N=200 | 24 | 200/200 | 1.0 | reliable | 265.0 |
+| dmin_f99_fat | fat\|split\|N=200 | 1 | 12/20 | 0.6 | unreliable | 742.5 |
+| dmin_f99_fat | fat\|split\|N=200 | 2 | 11/20 | 0.55 | unreliable | 716.0 |
+| dmin_f99_fat | fat\|split\|N=200 | 3 | 21/30 | 0.7 | unreliable | 692.0 |
+| dmin_f99_fat | fat\|split\|N=200 | 4 | 5/10 | 0.5 | unreliable | 610.0 |
+| dmin_f99_fat | fat\|split\|N=200 | 6 | 26/40 | 0.65 | unreliable | 691.5 |
+| dmin_f99_fat | fat\|split\|N=200 | 8 | 5/10 | 0.5 | unreliable | 655.0 |
+| dmin_f99_fat | fat\|split\|N=200 | 12 | 13/20 | 0.65 | unreliable | 635.0 |
+| dmin_f99_fat | fat\|split\|N=200 | 16 | 4/10 | 0.4 | unreliable | 507.0 |
+| dmin_f99_fat | fat\|split\|N=200 | 24 | 88/110 | 0.8 | unreliable | 305.5 |
+
+`uv run python -m docs.generate_docs.page curve dmin_f99_m6 dmin_f99_indep dmin_f99_fat --layout wide --n 200`
+
+### wide, N = 200: cell by cell across folders
+
+| folder | group | d | successes | rate | reliability | median_finish_s |
+| :--- | :--- | :---: | :--- | :---: | :--- | :---: |
+| dmin_f99_m6 | strombom_multi\|wide\|N=200 | 1 | 4/10 | 0.4 | unreliable | 733.0 |
+| dmin_f99_m6 | strombom_multi\|wide\|N=200 | 2 | 60/60 | 1.0 | reliable | 401.0 |
+| dmin_f99_m6 | strombom_multi\|wide\|N=200 | 3 | 100/100 | 1.0 | reliable | 277.0 |
+| dmin_f99_m6 | strombom_multi\|wide\|N=200 | 4 | 60/60 | 1.0 | reliable | 271.0 |
+| dmin_f99_m6 | strombom_multi\|wide\|N=200 | 6 | 60/60 | 1.0 | reliable | 269.0 |
+| dmin_f99_m6 | strombom_multi\|wide\|N=200 | 8 | 60/60 | 1.0 | reliable | 269.0 |
+| dmin_f99_m6 | strombom_multi\|wide\|N=200 | 12 | 70/70 | 1.0 | reliable | 268.0 |
+| dmin_f99_m6 | strombom_multi\|wide\|N=200 | 16 | 90/90 | 1.0 | reliable | 267.0 |
+| dmin_f99_m6 | strombom_multi\|wide\|N=200 | 24 | 100/100 | 1.0 | reliable | 266.5 |
+| dmin_f99_indep | independent\|wide\|N=200 | 1 | 4/10 | 0.4 | unreliable | 733.0 |
+| dmin_f99_indep | independent\|wide\|N=200 | 2 | 177/200 | 0.89 | undecided | 425.0 |
+| dmin_f99_indep | independent\|wide\|N=200 | 3 | 60/60 | 1.0 | reliable | 273.0 |
+| dmin_f99_indep | independent\|wide\|N=200 | 4 | 60/60 | 1.0 | reliable | 273.5 |
+| dmin_f99_indep | independent\|wide\|N=200 | 6 | 60/60 | 1.0 | reliable | 272.0 |
+| dmin_f99_indep | independent\|wide\|N=200 | 8 | 60/60 | 1.0 | reliable | 272.0 |
+| dmin_f99_indep | independent\|wide\|N=200 | 12 | 60/60 | 1.0 | reliable | 272.0 |
+| dmin_f99_indep | independent\|wide\|N=200 | 16 | 60/60 | 1.0 | reliable | 271.0 |
+| dmin_f99_indep | independent\|wide\|N=200 | 24 | 79/80 | 0.99 | reliable | 272.0 |
+| dmin_f99_fat | fat\|wide\|N=200 | 1 | 0/10 | 0.0 | unreliable |  |
+| dmin_f99_fat | fat\|wide\|N=200 | 2 | 4/10 | 0.4 | unreliable | 517.0 |
+| dmin_f99_fat | fat\|wide\|N=200 | 3 | 9/20 | 0.45 | unreliable | 311.0 |
+| dmin_f99_fat | fat\|wide\|N=200 | 4 | 11/20 | 0.55 | unreliable | 314.0 |
+| dmin_f99_fat | fat\|wide\|N=200 | 6 | 9/20 | 0.45 | unreliable | 307.0 |
+| dmin_f99_fat | fat\|wide\|N=200 | 8 | 4/10 | 0.4 | unreliable | 308.5 |
+| dmin_f99_fat | fat\|wide\|N=200 | 12 | 10/20 | 0.5 | unreliable | 323.5 |
+| dmin_f99_fat | fat\|wide\|N=200 | 16 | 5/10 | 0.5 | unreliable | 293.0 |
+| dmin_f99_fat | fat\|wide\|N=200 | 24 | 11/20 | 0.55 | unreliable | 310.0 |

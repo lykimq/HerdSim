@@ -55,9 +55,10 @@ def calibration_config(
     """One dog, a compact start of ``spacing``, a goal of radius 0 too far to reach.
 
     The drive is set through both drive terms so the task's max() rule returns exactly
-    ``calibration_drive``.
+    ``calibration_drive``. With ``calibrate_as`` the single dog of that method drives.
     """
     spec = method_spec(protocol, method)
+    driver = spec.calibrate_as or method
     s = protocol.settings
     radius = start_radius(spacing, n_sheep)
     drive = calibration_drive(protocol, method)
@@ -77,7 +78,7 @@ def calibration_config(
     setup["goal_radius"] = 0.0
     setup["max_ticks"] = math.ceil(s["calibration_seconds"] / method_dt(spec.params))
     return build_config(
-        method=method,
+        method=driver,
         params=dict(spec.params),
         setup=setup,
         n_sheep=n_sheep,

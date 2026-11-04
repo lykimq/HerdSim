@@ -9,7 +9,7 @@ Configuration lives in two layers under `protocols/configs/`: `canonical.yaml` d
 ```text
 protocols/configs/
 |-- canonical.yaml             # default settings with source comments
-|-- study_queue.yaml           # the six study protocols in execution order
+|-- study_queue.yaml           # the nine study protocols in execution order
 `-- protocols/
     |-- dmin_m12.yaml          # strict rule, 12 drive times
     |-- dmin_m6.yaml           # strict rule, 6 drive times
@@ -17,6 +17,8 @@ protocols/configs/
     |-- dmin_f99_m12.yaml      # 99% rule, 12 drive times, nine flock sizes
     |-- dmin_f99_m6.yaml       # 99% rule, 6 drive times, nine flock sizes
     |-- dmin_f99_m3.yaml       # 99% rule, 3 drive times
+    |-- dmin_fat.yaml          # strict rule, 6 drive times, uncoordinated FAT baseline
+    |-- dmin_f99_fat.yaml      # 99% rule, 6 drive times, uncoordinated FAT baseline
     `-- pilot_graze_on*.yaml   # 99% rule at 6 and 3 drive times with grazing repulsion on
 ```
 
@@ -26,18 +28,15 @@ Every protocol points to `canonical.yaml` directly or through its `extends` chai
 
 ### Model parameters
 
-Model parameters ($r_a$, $c$, $r_s$, `n_neighbors`, `graze_repulsion`, etc.) live with the method in `sim/strombom/params.py` rather than in `canonical.yaml`:
-
-- Overriding in a protocol: set under `methods.<method>.params`, for example `methods: {strombom_multi: {params: {graze_repulsion: true}}}`.
-- Neutral defaults: a parameter added with a no-op default stays out of the [physics hash](#physics-hash) at that default so existing results folders keep their hash (`graze_repulsion: false` is the only such parameter; see [grazing](../methods/strombom_sheep.md#grazing)).
+Model parameters ($r_a$, $c$, $r_s$, `n_neighbors`, `graze_repulsion`, etc.) live with the method in `sim/strombom/params.py` rather than in `canonical.yaml`, and are overridden in a protocol under `methods.<method>.params`. A parameter added with a no-op default stays out of the [physics hash](#physics-hash) at that default so existing results folders keep their hash (`graze_repulsion` at `false` is the only such parameter; see [grazing](../methods/strombom_sheep.md#grazing)).
 
 ### Protocol overrides
 
-A root protocol specifies `protocol_id`, `output`, `canonical`, `methods` (each with either `time_limit_drive_multiple` or `time_limit_ticks`), and the experiment grid (`layouts`, `flock_sizes`, and `shepherd_counts` for $D$). A child protocol uses `extends: <parent.yaml>` (relative to its own directory) and follows three inheritance rules:
+A root protocol specifies `protocol_id`, `output`, `canonical`, `methods` (each with either `time_limit_drive_multiple` or `time_limit_ticks`), and the experiment grid (`layouts`, `flock_sizes`, and `shepherd_counts` for $D$). A child protocol uses `extends` to point to a parent YAML file (relative to its own directory) and follows three inheritance rules:
 
 - Inherited keys: the child inherits all parent keys including `canonical`, `protocol_id` and `output`, so a child must set its own `protocol_id` and `output` to avoid writing into the parent's folder. The one-line `description` is never inherited and is excluded from the physics hash.
 - Whole-value replacement: any key set by the child replaces the parent's entire value, including lists and mappings.
-- Method replacement: if the child sets `methods:`, it keeps only the methods it lists and must state each method's time limit; omitting `methods:` inherits the parent's methods unchanged.
+- Method replacement: if the child sets `methods`, it keeps only the methods it lists and must state each method's time limit (plus optional `calibrate_as` to calibrate $R_f(N)$ with another controller); omitting `methods` inherits the parent's methods unchanged.
 
 ### Example protocols
 
@@ -71,11 +70,7 @@ flock_sizes: [25, 50, 71, 100, 141, 200, 283, 400, 566]
 
 ### Physics hash
 
-Each results folder stores a physics hash in `provenance.json` that locks the simulation physics for that folder:
-
-- Included in the hash: the task, per-trial and whole-protocol canonical settings, method parameters and time limit, the set of layouts, and `max(shepherd_counts)` (which sizes the shared arena margin at each $N$).
-- Excluded from the hash: adaptive-sampling controls ($\theta$, confidence, batch size, seed cap, `decide_finish_times`, `budget_hours`), calibration tolerances (`settled_tolerance`, `start_agreement`), `success_fraction` when at its default `1.0`, `flock_sizes`, and team sizes below `max(shepherd_counts)`. Adding new flock sizes or intermediate team sizes therefore resumes cleanly into the same folder.
-- Code identity: source code is not part of the physics hash; instead, each sitting logs the git commit and code digest to `runs.jsonl` and prints a warning if trial code changed between sittings.
+Each results folder stores a physics hash in `provenance.json` that locks the simulation physics for that folder. The hash covers the task, per-trial and whole-protocol canonical settings, method parameters, time limit and `calibrate_as` (when set), the set of layouts, and `max(shepherd_counts)` (which sizes the shared arena margin at each $N$). It excludes adaptive-sampling controls ($\theta$, confidence, batch size, seed cap, `decide_finish_times`, `budget_hours`), calibration tolerances (`settled_tolerance`, `start_agreement`), `success_fraction` when at its default `1.0`, `flock_sizes`, and team sizes below `max(shepherd_counts)`, so adding new flock sizes or intermediate team sizes resumes cleanly into the same folder. Source code is not part of the physics hash; instead, each sitting logs the git commit and code digest to `runs.jsonl` and warns if trial code changed between sittings.
 
 ## What a simulation run writes
 

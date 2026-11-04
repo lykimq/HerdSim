@@ -38,8 +38,12 @@ SHEEP_OPTIONS: dict[str, Any] = {"graze_repulsion": False}
 # the behaviour the study ran with, so its default is its neutral value.
 NEUTRAL_PARAMS: dict[str, Any] = dict(SHEEP_OPTIONS)
 
-# The one method: Strombom sheep driven by a team of collect/drive dogs.
+# Methods: Strombom sheep driven by the multi-dog collect/drive team rule, or by the
+# uncoordinated farthest-agent targeting (FAT) baseline.
 METHOD = "strombom_multi"
+FAT = "fat"
+INDEPENDENT = "independent"
+METHODS = (METHOD, FAT, INDEPENDENT)
 DEFAULTS: dict[str, Any] = {**PAPER, **SHEPHERD_EXTENSIONS, **SHEEP_OPTIONS}
 
 

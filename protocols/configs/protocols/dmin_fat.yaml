@@ -1,0 +1,14 @@
+# Uncoordinated FAT baseline (every dog aims behind the sheep farthest from the goal) on the
+# dmin_m6 grid. Calibrated with the paper shepherd of strombom_multi so both methods run the
+# exact same arena, goal and drive distance.
+
+protocol_id: dmin_fat
+description: "D_min for uncoordinated FAT dogs on four start layouts, strict rule, 6 drive times."
+output: results/dmin_fat
+extends: dmin_m6.yaml
+
+methods:
+  fat:
+    time_limit_drive_multiple: 6.0
+    calibrate_as: strombom_multi
+

@@ -46,14 +46,14 @@ Table 1 lists what each paper varies and whether it says anything about team siz
 | :--- | :--- | :--- | :--- | :--- |
 | Strömbom et al. 2014 | cohesive, Strömbom model | 1 dog, collect or drive | 1 | one dog always succeeds when each sheep follows at least about half the flock (tested up to 150 sheep) |
 | Lama and di Bernardo 2024 | non-cohesive, Brownian | farthest target within a sensing radius | sweep | herders needed grow as the square root of targets, above a density threshold |
-| Kubo et al. 2022 | Boids-like | farthest-sheep dogs with mutual repulsion | 1–20 | one dog fails in every hard layout; success rises with dogs once they repel each other |
+| Kubo et al. 2022 | Boids-like | farthest-sheep dogs with mutual repulsion | 1-20 | one dog fails in every hard layout; success rises with dogs once they repel each other |
 | Jadhav et al. 2024 | 14 real sheep, plus a model | 1 border collie | 1 | nothing; field values for a driven flock |
-| Pierson and Schwager 2015 | repelled by dogs, no noise | dogs on an arc behind the herd | 3–12 (2 in the proof) | 2 dogs are enough to steer one sheep (proof) |
+| Pierson and Schwager 2015 | repelled by dogs, no noise | dogs on an arc behind the herd | 3-12 (2 in the proof) | 2 dogs are enough to steer one sheep (proof) |
 | Auletta et al. 2022 | non-cohesive, Brownian | second-order, four target-selection rules | 2, 3 | team size fixed; at 3 herders and 60 targets the selection rule alone moves success from 8 to 49 of 50 runs |
-| Li et al. 2025 | Boids-like, 1–3 swarms | bearing-only, one shared direction | 1–10 | success rises with team size to 100 % of 20 runs |
+| Li et al. 2025 | Boids-like, 1-3 swarms | bearing-only, one shared direction | 1-10 | success rises with team size to 100 % of 20 runs |
 | Brown et al. 2025 | non-cohesive, undamped | optimal control, centralised | 2, 4 | asks the question, gives no answer |
 | di Bernardo 2026 | non-cohesive (densities) | continuum controllers | none | restates Lama and di Bernardo |
-| Unpublished draft | cohesive, each sheep follows its 7 nearest, NetLogo | dogs that collect, hold, then drive through a gate | 1–35 | dogs for 90 % success range from 1 (up to 100 sheep) to 35 (400 sheep), see Table 3; too many dogs lower success in small flocks |
+| Unpublished draft | cohesive, each sheep follows its 7 nearest, NetLogo | dogs that collect, hold, then drive through a gate | 1-35 | dogs for 90 % success range from 1 (up to 100 sheep) to 35 (400 sheep), see Table 3; too many dogs lower success in small flocks |
 
 ## How HerdSim uses each paper
 
@@ -64,14 +64,14 @@ Table 2 sorts the papers from those HerdSim runs to those it does not use, with 
 | Paper | In HerdSim | What it takes | Where | Why not more |
 | :--- | :--- | :--- | :--- | :--- |
 | Strömbom et al. 2014 | used in full | the sheep model, the one-dog rule, the field-matched parameter set | methods `strombom`, `independent`, base of `strombom_multi`; `dmin_s_matched` | the local shepherd and the sweep of neighbours below $N - 1$ are not run |
-| Lama and di Bernardo 2024 | not in the current study | — | no code in the repository | the D_min report runs only `strombom_multi` |
+| Lama and di Bernardo 2024 | not in the current study | - | no code in the repository | the D_min report runs only `strombom_multi` |
 | Kubo et al. 2022 | used for one comparison and one baseline | the sheep model and force-based dogs; the farthest-sheep target choice | method `kubo`, `dmin_kubo`; the FAT baseline | HerdSim's own task replaces the paper's layouts and success test, so its percentages do not carry over |
 | Jadhav et al. 2024 | used for one setting | the dog-to-sheep speed ratio 1.15 | `dmin_s_dogspeed` | one dog and 14 sheep give no team-size result; the random-neighbour model is not run |
 | Pierson and Schwager 2015 | not run; shaped a design choice | success counts sheep, not the flock centre | the success rules | no controller gains given; sheep without noise or cohesion |
 | Auletta et al. 2022 | not run; informs the reading | a minimum team holds only for its controller | three controllers reported side by side | its targets are run through the later Lama model instead |
-| Li, Ogura and Wakamiya 2025 | not used | — | — | bearing-only controller and Boids sheep would be a new method and model |
-| Brown et al. 2025 | not used | — | — | no number to compare; solvers stop at a few agents |
-| di Bernardo 2026 | not used | — | — | a review of the square-root law; continuum controllers |
+| Li, Ogura and Wakamiya 2025 | not used | - | - | bearing-only controller and Boids sheep would be a new method and model |
+| Brown et al. 2025 | not used | - | - | no number to compare; solvers stop at a few agents |
+| di Bernardo 2026 | not used | - | - | a review of the square-root law; continuum controllers |
 | Unpublished draft | discussed here only | the framing of the question (minimum and maximum team, harm from too many dogs) | this summary | unpublished; HerdSim's results, report and paper draft do not use or cite it |
 
 ## Strömbom et al. 2014
@@ -129,7 +129,7 @@ Two differences matter for reading HerdSim against it. Their success is a mean f
 
 ### Where to read more
 
-Equations 1–4 and the selection paragraph on page 2; Fig. 2 and the two conditions on page 3; Supplementary Section II, Fig. S6 and Table I for the threshold.
+Equations 1-4 and the selection paragraph on page 2; Fig. 2 and the two conditions on page 3; Supplementary Section II, Fig. S6 and Table I for the threshold.
 
 ## Kubo et al. 2022
 
@@ -139,7 +139,7 @@ How should several robot sheepdogs share out the space around a flock so that ad
 
 ### How
 
-Sheep follow a Boids-like rule: separation, alignment, attraction, and a strong push away from dogs within 20 units. Every dog chases the sheep farthest from the goal, which on its own makes all dogs chase the same sheep. The paper adds a repulsion between dogs with weight $K_{f4}$, which spreads them around the flock. A short analysis of one sheep and two or three dogs shows the dogs settle in a stable ring. Success means the flock centre is inside the goal and the flock fits in a circle of radius 10 within 500 s. Simulations used 400 or 1000 sheep (plus one example with 100), 1–20 dogs, and three hard starting layouts.
+Sheep follow a Boids-like rule: separation, alignment, attraction, and a strong push away from dogs within 20 units. Every dog chases the sheep farthest from the goal, which on its own makes all dogs chase the same sheep. The paper adds a repulsion between dogs with weight $K_{f4}$, which spreads them around the flock. A short analysis of one sheep and two or three dogs shows the dogs settle in a stable ring. Success means the flock centre is inside the goal and the flock fits in a circle of radius 10 within 500 s. Simulations used 400 or 1000 sheep (plus one example with 100), 1-20 dogs, and three hard starting layouts.
 
 ### What it finds
 
@@ -156,7 +156,7 @@ The lesson HerdSim keeps is the paper's own: without a rule that spreads the dog
 
 ### Where to read more
 
-Sections 3.2–3.3 and Figs. 3–4 for the dog rule; Section 4.1 and Figs. 10–11 for the repulsion sweep; Section 4.2 and Figs. 13–15 for the hard layouts.
+Sections 3.2-3.3 and Figs. 3-4 for the dog rule; Section 4.1 and Figs. 10-11 for the repulsion sweep; Section 4.2 and Figs. 13-15 for the hard layouts.
 
 ## Jadhav et al. 2024
 
@@ -172,7 +172,7 @@ A professional handler and an 8-year-old border collie drove 14 merino ewes 26 t
 
 - Mean cohesion was 1.21 ± 0.34 m, about one body length; polarisation 0.85 ± 0.17; flock speed 1.3 m/s against the dog's 1.5 m/s.
 - The flock was wider than long, perpendicular to the direction of motion.
-- The dog stayed 1–4 m behind the rear sheep and zigzagged sideways with an amplitude often over 2 m.
+- The dog stayed 1-4 m behind the rear sheep and zigzagged sideways with an amplitude often over 2 m.
 - Sheep at the front led the others (Pearson $r = 0.85$ between front position and number of followers). The dog drives the flock but sits at the bottom of the leadership hierarchy.
 - The modified model matched the measured distributions qualitatively.
 
@@ -211,7 +211,7 @@ Not implemented, because the paper gives no controller gains, so its runs cannot
 
 ### Where to read more
 
-Section III-B and equations 8–11 for the arc geometry; Section V-B and Figs. 7–8 for cohesive and dispersive herds.
+Section III-B and equations 8-11 for the arc geometry; Section V-B and Figs. 7-8 for cohesive and dispersive herds.
 
 ## Auletta et al. 2022
 
@@ -245,7 +245,7 @@ Not implemented. The later Lama and di Bernardo model from the same group is als
 
 ### Where to read more
 
-Sections 4.1–4.2 and Fig. 2 for the controller and the four rules; the paper's Tables 1 and 2; Appendix B for all parameters.
+Sections 4.1-4.2 and Fig. 2 for the controller and the four rules; the paper's Tables 1 and 2; Appendix B for all parameters.
 
 ## Li, Ogura and Wakamiya 2025
 
@@ -259,7 +259,7 @@ Sheep follow a Boids-type rule with separation, cohesion, alignment and a push f
 
 ### What it finds
 
-- With three swarms and 1–10 herders, success is poor for small teams and rises with team size to "a 100 % success rate", while time falls. The paper does not say at which team size 100 % is reached.
+- With three swarms and 1-10 herders, success is poor for small teams and rises with team size to "a 100 % success rate", while time falls. The paper does not say at which team size 100 % is reached.
 - Flocks that split easily are harder to herd; the results are otherwise stable across the three sheep parameter sets.
 - Small angle errors do no harm and even reduce jitter; large ones cause failures and can scatter the flock.
 - Without the shared direction, "the effectiveness does not improve with an increasing number of shepherds", and herding "is more likely to fail when multiple swarms exist" (example runs only, no rates).
@@ -272,7 +272,7 @@ The team-size sweep is the closest result here to a minimum team, but success is
 
 ### Where to read more
 
-Section 3b and Algorithm 1 for how herders avoid each other; Section 4d and Fig. 8 for team size; Figs. 9–10 for angle errors.
+Section 3b and Algorithm 1 for how herders avoid each other; Section 4d and Fig. 8 for team size; Figs. 9-10 for angle errors.
 
 ## Brown et al. 2025
 
@@ -294,7 +294,7 @@ In HerdSim: not used. It frames the number of dogs in optimal-control terms but 
 
 ### Where to read more
 
-Sections 3.1–3.2 for the model and cost; Section 4.2.2 and Fig. 5 for sheep outnumbering dogs.
+Sections 3.1-3.2 for the model and cost; Section 4.2.2 and Fig. 5 for sheep outnumbering dogs.
 
 ## di Bernardo 2026
 
@@ -316,7 +316,7 @@ In HerdSim: not used. The review restates a square-root team-size law for non-co
 
 ### Where to read more
 
-Section 4.3 and equations 7–10 for the herding model; Section 4.1 for minimum leader mass; Section 5 for open problems.
+Section 4.3 and equations 7-10 for the herding model; Section 4.1 for minimum leader mass; Section 5 for open problems.
 
 ## Unpublished draft on dogs per flock size
 
@@ -328,9 +328,9 @@ How does the range of dog numbers that complete a herding task, from a minimum $
 
 ### How
 
-The model runs in NetLogo, an agent-based simulation tool where space is a grid of cells (patches) and time advances in steps (ticks). The field is 101 by 71 patches, with walls, a central holding zone and a gate in the right wall. Sheep graze slowly and loosely until a dog comes within 14 patches (or 25.2 patches when at least 30 % of their neighbours already flee). Then they run faster and pack tighter. Each sheep responds to its 7 nearest neighbours. In place of a global flock centre, it moves toward the densest of 8 sectors around it, a local stand-in for the centre. Dogs have three modes: chase lost sheep, drive in a 90° arc behind the flock, or patrol their own sector of the holding zone. The task has three phases: gather all sheep into the zone, hold them there for 800 ticks, then drive them out through the gate, all within 10,000 ticks.
+The model runs in NetLogo, an agent-based simulation tool where space is a grid of cells (patches) and time advances in steps (ticks). The field is 101 by 71 patches, with walls, a central holding zone and a gate in the right wall. Sheep graze slowly and loosely until a dog comes within 14 patches (or 25.2 patches when at least 30 % of their neighbours already flee). Then they run faster and pack tighter. Each sheep responds to its 7 nearest neighbours. In place of a global flock centre, it moves toward the densest of 8 sectors around it, a local stand-in for the centre. Dogs have three modes: chase lost sheep, drive in a 90 deg arc behind the flock, or patrol their own sector of the holding zone. The task has three phases: gather all sheep into the zone, hold them there for 800 ticks, then drive them out through the gate, all within 10,000 ticks.
 
-The design crosses 10 dog counts (1–35) with 11 flock sizes (5–400), with 100 runs each, 11,000 runs in total. Spread $\bar S$ is defined in equation 1 as the variance of sheep distances to the flock centre, averaged over the run; the draft's Section V-B describes it as the average distance, so the two definitions disagree.
+The design crosses 10 dog counts (1-35) with 11 flock sizes (5-400), with 100 runs each, 11,000 runs in total. Spread $\bar S$ is defined in equation 1 as the variance of sheep distances to the flock centre, averaged over the run; the draft's Section V-B describes it as the average distance, so the two definitions disagree.
 
 ### What it finds
 
@@ -340,7 +340,7 @@ Table 3 gives the smallest number of dogs that reached at least 90 % success, re
 
 | Flock size (sheep) | Dogs | Success at that size (%) |
 | :---: | :---: | :---: |
-| 5–100 | 1 | 99–100 |
+| 5-100 | 1 | 99-100 |
 | 150 | 3 | 99 |
 | 200 | 20 | 93 |
 | 250 | 25 | 93 |
@@ -349,12 +349,12 @@ Table 3 gives the smallest number of dogs that reached at least 90 % success, re
 | 400 | 35 | 91 |
 
 - One dog goes from near-certain success at 100 sheep to 1 % at 150. The draft calls 100 sheep the breakpoint for one dog.
-- The dogs needed grow non-linearly with flock size: one dog per 100 sheep, then per 50, then per 10–15. Each value in Table 3 is one of the tested counts (1, 2, 3, 4, 6, 10, 15, 20, 25, 35).
-- Too many dogs hurt small flocks: at 10 sheep, success drops from 99 % with 6 dogs to 70 % with 35. At 100 sheep, 35 dogs ran 33× as far as one dog and reached 95 % instead of 100 %.
+- The dogs needed grow non-linearly with flock size: one dog per 100 sheep, then per 50, then per 10-15. Each value in Table 3 is one of the tested counts (1, 2, 3, 4, 6, 10, 15, 20, 25, 35).
+- Too many dogs hurt small flocks: at 10 sheep, success drops from 99 % with 6 dogs to 70 % with 35. At 100 sheep, 35 dogs ran 33x as far as one dog and reached 95 % instead of 100 %.
 - Spread predicts success fairly well across the 110 cells (Spearman $\rho = -0.701$); spread times $\sqrt{N}$ does better ($\rho = -0.828$). Compactness is necessary but not sufficient: 10 dogs kept 400 sheep compact ($\bar S = 22$) yet succeeded in 6 % of runs.
 - 90 % of the 3089 failed runs stopped in the gathering phase.
 - Lowering the sheep repulsion radius from 3 to 2.5 patches changed outcomes sharply, for example from 0 % to 92 % with 6 dogs and 400 sheep. The results depend on flock parameters.
-- The density-sector rule picked the right sector in 64.7–76.7 % of cases for flocks of 100 or more sheep.
+- The density-sector rule picked the right sector in 64.7-76.7 % of cases for flocks of 100 or more sheep.
 
 ### For HerdSim
 
@@ -402,9 +402,9 @@ Three points from these sources matter for reading HerdSim:
 
 - Strömbom, D., Mann, R. P., Wilson, A. M., Hailes, S., Morton, A. J., Sumpter, D. J. T. and King, A. J. (2014). Solving the shepherding problem: heuristics for herding autonomous, interacting agents. J. R. Soc. Interface 11, 20140719. [doi:10.1098/rsif.2014.0719](https://doi.org/10.1098/rsif.2014.0719). File: [Strombom_et_al.pdf](Strombom_et_al.pdf).
 - Jadhav, V., Pasqua, R., Zanon, C., Roy, M., Tredan, G., Bon, R., Guttal, V. and Theraulaz, G. (2024). Collective responses of flocking sheep (Ovis aries) to a herding dog (border collie). Commun. Biol. 7, 1543. [doi:10.1038/s42003-024-07245-8](https://doi.org/10.1038/s42003-024-07245-8). File: [Jadhav_et_al.pdf](Jadhav_et_al.pdf).
-- Pierson, A. and Schwager, M. (2015). Bio-inspired non-cooperative multi-robot herding. Proc. IEEE ICRA 2015, 1843–1849. The file is the authors' version, which prints no venue: [pierson2015icraHerd.pdf](pierson2015icraHerd.pdf).
-- Auletta, F., Fiore, D., Richardson, M. J. and di Bernardo, M. (2022). Herding stochastic autonomous agents via local control rules and online target selection strategies. Auton. Robots 46, 469–481. [doi:10.1007/s10514-021-10033-6](https://doi.org/10.1007/s10514-021-10033-6). The file is the arXiv 2010.00386v3 preprint, whose title reads "online global target selection strategies": [Herding_stochastic_ autonomous_agents_via_local_control_rules_and_online_global_target_selection_strategies.pdf](<Herding_stochastic_ autonomous_agents_via_local_control_rules_and_online_global_target_selection_strategies.pdf>).
-- Kubo, M., Tashiro, M., Sato, H. and Yamaguchi, A. (2022). Herd guidance by multiple sheepdog agents with repulsive force. Artif. Life Robot. 27, 416–427. [doi:10.1007/s10015-021-00726-7](https://doi.org/10.1007/s10015-021-00726-7). File: [kubo_22.pdf](kubo_22.pdf).
+- Pierson, A. and Schwager, M. (2015). Bio-inspired non-cooperative multi-robot herding. Proc. IEEE ICRA 2015, 1843-1849. The file is the authors' version, which prints no venue: [pierson2015icraHerd.pdf](pierson2015icraHerd.pdf).
+- Auletta, F., Fiore, D., Richardson, M. J. and di Bernardo, M. (2022). Herding stochastic autonomous agents via local control rules and online target selection strategies. Auton. Robots 46, 469-481. [doi:10.1007/s10514-021-10033-6](https://doi.org/10.1007/s10514-021-10033-6). The file is the arXiv 2010.00386v3 preprint, whose title reads "online global target selection strategies": [Herding_stochastic_ autonomous_agents_via_local_control_rules_and_online_global_target_selection_strategies.pdf](<Herding_stochastic_ autonomous_agents_via_local_control_rules_and_online_global_target_selection_strategies.pdf>).
+- Kubo, M., Tashiro, M., Sato, H. and Yamaguchi, A. (2022). Herd guidance by multiple sheepdog agents with repulsive force. Artif. Life Robot. 27, 416-427. [doi:10.1007/s10015-021-00726-7](https://doi.org/10.1007/s10015-021-00726-7). File: [kubo_22.pdf](kubo_22.pdf).
 - Lama, A. and di Bernardo, M. (2024). Shepherding and herdability in complex multiagent systems. Phys. Rev. Research 6, L032012. [doi:10.1103/PhysRevResearch.6.L032012](https://doi.org/10.1103/PhysRevResearch.6.L032012). The file is the arXiv 2307.16797v2 preprint with its Supplementary Material: [Shepherding control and herdability in complex multiagent systems.pdf](<Shepherding control and herdability in complex multiagent systems.pdf>).
 - Li, A., Ogura, M. and Wakamiya, N. (2025). Swarm shepherding using bearing-only measurements. Phil. Trans. R. Soc. A 383, 20240145. [doi:10.1098/rsta.2024.0145](https://doi.org/10.1098/rsta.2024.0145). File: [Swarm shepherding using bearing-only measurements.pdf](<Swarm shepherding using bearing-only measurements.pdf>).
 - Brown, D., Garrity, T., Perkins, D., Hunter, D. and Pochman, W. (2025). Optimal control strategies for multi-agent sheep herding. arXiv 2510.25115. File: [Optimal_control_for_m_dogs_and_n_sheep.pdf](Optimal_control_for_m_dogs_and_n_sheep.pdf).
@@ -422,4 +422,4 @@ Other work, not in this folder:
 - Green, T. et al. (2022). A minimalist solution to the multi-robot barrier coverage problem. TAROS 2021, LNCS 13054.
 - Yaxley, K. J., Joiner, K. F. and Abbass, H. (2021). Drone approach parameters leading to lower stress sheep flocking and movement: sky shepherding. Sci. Rep. 11, 7803.
 - Chaplain, L. (2025). Livestock mustering with drones and pathways to adoption. MLA report P.PSH.1491.
-- Long, N. K., Sammut, K., Sgarioto, D., Garratt, M. and Abbass, H. A. (2020). A comprehensive review of shepherding as a bio-inspired swarm-robotics guidance approach. IEEE Trans. Emerg. Top. Comput. Intell. 4, 523–537. [doi:10.1109/TETCI.2020.2992778](https://doi.org/10.1109/TETCI.2020.2992778).
+- Long, N. K., Sammut, K., Sgarioto, D., Garratt, M. and Abbass, H. A. (2020). A comprehensive review of shepherding as a bio-inspired swarm-robotics guidance approach. IEEE Trans. Emerg. Top. Comput. Intell. 4, 523-537. [doi:10.1109/TETCI.2020.2992778](https://doi.org/10.1109/TETCI.2020.2992778).

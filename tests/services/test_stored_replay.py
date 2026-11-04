@@ -15,10 +15,18 @@ RUN = "dmin_f99_m6"
 
 
 @pytest.mark.parametrize(
-    ("layout", "n", "d", "seed_index"),
-    [("compact", 100, 1, 0), ("compact", 200, 6, 0), ("wide", 50, 3, 2)],
+    ("run", "method", "layout", "n", "d", "seed_index"),
+    [
+        (RUN, "strombom_multi", "compact", 100, 1, 0),
+        (RUN, "strombom_multi", "compact", 200, 6, 0),
+        (RUN, "strombom_multi", "wide", 50, 3, 2),
+        ("dmin_f99_fat", "fat", "wide", 50, 2, 0),
+        ("dmin_f99_indep", "independent", "wide", 50, 2, 0),
+    ],
 )
-def test_a_stored_study_trial_replays_exactly(layout: str, n: int, d: int, seed_index: int) -> None:
-    job = open_run(RUN).job("strombom_multi", layout, n, d, seed_index)
+def test_a_stored_study_trial_replays_exactly(
+    run: str, method: str, layout: str, n: int, d: int, seed_index: int
+) -> None:
+    job = open_run(run).job(method, layout, n, d, seed_index)
     result = replay_trial(job)
     assert (result.success, result.total_ticks) == job.stored

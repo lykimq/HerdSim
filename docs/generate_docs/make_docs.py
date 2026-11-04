@@ -34,12 +34,14 @@ from services.protocol import (  # noqa: E402
     method_dt,
     study_queue,
 )
-from sim.strombom.params import METHOD  # noqa: E402
+from sim.strombom.params import FAT, INDEPENDENT, METHOD  # noqa: E402
 
 COMMAND = "uv run python docs/generate_docs/make_docs.py"
 # Links from the guides, which sit in docs/guides/, to the method docs.
 METHOD_DOCS = (
-    "[Strombom sheep](../methods/strombom_sheep.md) and [team rule](../methods/strombom_multi.md)"
+    "[Strombom sheep](../methods/strombom_sheep.md), "
+    "[team rule](../methods/strombom_multi.md), [FAT baseline](../methods/fat.md) "
+    "and [independent baseline](../methods/independent.md)"
 )
 
 
@@ -126,6 +128,8 @@ def _changed_settings(protocol: Protocol) -> str:
         )
     ]
     for method in protocol.methods:
+        if method.calibrate_as is not None:
+            changes.append(f"calibrate_as = {method.calibrate_as}")
         if method.params:
             changes.append(_assignments(method.params))
     return ", ".join(c for c in changes if c)
@@ -164,7 +168,14 @@ def protocols_page() -> str:
     """Every protocol of the study queue: what it tests, its grid and its changed settings."""
     protocols = [load_protocol(p) for p in study_queue()]
     _check_output_folders(protocols)
-    methods = f"`{METHOD}` drives the Strombom sheep with the multi-dog collect and drive rule."
+    methods = (
+        f"- `{METHOD}`: drives the Strombom sheep with the multi-dog collect and drive rule "
+        "([strombom_multi.md](../methods/strombom_multi.md)).\n"
+        f"- `{FAT}`: drives the same sheep with the uncoordinated farthest-agent targeting "
+        "baseline ([fat.md](../methods/fat.md)).\n"
+        f"- `{INDEPENDENT}`: drives the same sheep with independent paper shepherds "
+        "([independent.md](../methods/independent.md))."
+    )
     intro = (
         f"The {len(protocols)} protocols of the study, in queue order: what each tests, its "
         "grid, and the settings it changes from `protocols/configs/canonical.yaml`. The results "
@@ -176,7 +187,7 @@ def protocols_page() -> str:
     )
     conventions = (
         "The rule is the share of the flock that must be in the goal (strict: every sheep). The "
-        "deadline is a multiple of the drive time. The research questions RQ1 to RQ3 are in the "
+        "deadline is a multiple of the drive time. The research questions RQ1 to RQ4 are in the "
         "[report](../report/d_min_report.md#1-the-question). As for the task, "
         f"{_task_sentence(protocols)}."
     )

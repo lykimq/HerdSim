@@ -31,13 +31,14 @@ def protocol_with(
     base: Protocol = BASE_PROTOCOL,
 ) -> Protocol:
     """Copy of ``base`` with one method's time limit and parameters, and settings, replaced."""
-    methods = tuple(
-        replace(m, time_limit_ticks=ticks, params={**m.params, **(params or {})})
-        if m.name == method
-        else m
-        for m in base.methods
+    first = base.methods[0]
+    chosen = replace(
+        first,
+        name=method,
+        time_limit_ticks=ticks,
+        params={**first.params, **(params or {})},
     )
-    return replace(base, settings={**base.settings, **(settings or {})}, methods=methods)
+    return replace(base, settings={**base.settings, **(settings or {})}, methods=(chosen,))
 
 
 def config_for(

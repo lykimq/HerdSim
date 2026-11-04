@@ -14,7 +14,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from docs.generate_docs.figures import (  # noqa: E402
     fig_dog_starts,
     fig_driving_arc,
+    fig_fat,
     fig_hungarian_matching,
+    fig_independent,
     fig_layouts,
     fig_sheep_forces,
     fig_task_geometry,
@@ -26,6 +28,8 @@ from docs.generate_docs.paper_figures import fig_paper_layout  # noqa: E402
 
 FIGURES = (
     fig_sheep_forces,
+    fig_fat,
+    fig_independent,
     fig_team_rule,
     fig_hungarian_matching,
     fig_driving_arc,

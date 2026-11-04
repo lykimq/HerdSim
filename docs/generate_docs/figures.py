@@ -43,10 +43,10 @@ from services.protocol import RESULTS_ROOT, load_protocol
 from sim.drive_task.layouts import LAYOUTS, layout_extent, place_dogs, place_flock
 from sim.state import SimulationState
 from sim.strombom.params import METHOD, PAPER
-from sim.strombom.shepherd import collect_threshold, drive_point, radius_of
+from sim.strombom.shepherd import collect_threshold, decide, drive_point, radius_of
 from sim.strombom.team import team_targets
 from sim.trial import initial_state, run_trial
-from sim.vectors import unit
+from sim.vectors import behind, farthest_from, unit
 
 # ----- settings -----
 Config = dict[str, Any]  # a run config, as cell_config builds it
@@ -349,6 +349,98 @@ def fig_sheep_forces() -> None:
     forces_geometry_panel(axes[0], lcm)
     forces_sum_panel(axes[1], force_arrows(lcm))
     save(fig, "fig_sheep_forces.png", rect=(0, 0, 1, 0.98))
+
+
+# ----- models: FAT -----
+def fig_fat() -> None:
+    """Wide N=100: Strombom vs FAT (one dog and four dogs, same target)."""
+    c1 = cfg("wide", 100, 1)
+    sheep = place_flock(c1, np.random.default_rng(SEED))
+    goal = np.asarray(c1["goal_center"])
+    centroid = sheep.mean(axis=0)
+    fig, axes = plt.subplots(1, 3, figsize=(13, 4.8))
+    for k, ax in enumerate(axes):
+        d = 4 if k == 2 else 1
+        dogs = place_dogs(cfg("wide", 100, d))
+        ax.scatter(*sheep.T, s=9, color=BLUE, alpha=0.75, lw=0)
+        dogs_at(ax, dogs, s=40, zorder=4)
+        arrow(ax, centroid + [80, 0], centroid + [55, 0], AQUA, 1.4)
+        ax.text(centroid[0] + 82, centroid[1], "goal", color=AQUA, va="center", fontsize=9)
+        if k == 0:
+            dd = decide(sheep, goal, c1)
+            tgt = dd.target[None, :]
+            pick = sheep[dd.outliers[0]]
+            gcm(ax, centroid, text_at=(2, 3))
+            title = "Strombom, one dog: farthest from the GCM"
+        else:
+            pick = farthest_from(sheep, goal)
+            tgt = np.tile(behind(pick, goal, c1["r_a"]), (len(dogs), 1))
+            title = "FAT, one dog: farthest from the goal" if k == 1 else "FAT, 4 dogs: one target"
+        ax.scatter(*pick, s=80, facecolors="none", ec=ORANGE, lw=1.4)
+        targets_at(ax, tgt, s=60, lw=1.6)
+        for dog, t in zip(dogs, tgt, strict=True):
+            arrow(ax, t, dog, ORANGE, 1.2)
+        window(ax, centroid, 130, 100, 125, 125)
+        style_map(ax, title)
+    save(fig, "fig4_fat.png", rect=(0, 0, 1, 0.98))
+
+
+def fig_independent() -> None:
+    """strombom_multi vs independent at D=4: collect matching and drive arc vs single Pd."""
+    n, d = 100, 4
+    c_wide = cfg("wide", n, d)
+    sheep_w, dogs_w = start(c_wide)
+    goal_w = np.asarray(c_wide["goal_center"])
+    centroid_w = sheep_w.mean(axis=0)
+    far_w = np.linalg.norm(sheep_w - centroid_w, axis=1) > collect_threshold(n, c_wide["r_a"])
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5.0))
+
+    ax0 = axes[0]
+    targets_multi = team_targets(sheep_w, goal_w, dogs_w, c_wide)
+    flock_split(ax0, sheep_w, far_w, s_in=9, s_out=16, lw_out=0.6)
+    gcm(ax0, centroid_w)
+    dogs_at(ax0, dogs_w, s=42, zorder=4)
+    targets_at(ax0, targets_multi, s=36, lw=1.4)
+    for dog, tgt in zip(dogs_w, targets_multi, strict=True):
+        arrow(ax0, tgt, dog, ORANGE, 1.2)
+    window(ax0, centroid_w, 130, 80, 110, 110)
+    style_map(ax0, "strombom_multi: Hungarian Matching (Parallel)")
+
+    ax1 = axes[1]
+    flock_split(ax1, sheep_w, far_w, s_in=9, s_out=16, lw_out=0.6)
+    gcm(ax1, centroid_w)
+    dogs_at(ax1, dogs_w, s=42, zorder=4)
+    dec = decide(sheep_w, goal_w, c_wide)
+    ax1.scatter(*sheep_w[dec.outliers[0]], s=90, facecolors="none", ec=ORANGE, lw=1.5, zorder=3)
+    ax1.scatter(*dec.target, s=70, marker="x", color=INK, lw=1.8, zorder=4)
+    for dog in dogs_w:
+        arrow(ax1, dec.target, dog, ORANGE, 1.2, ls="--")
+    window(ax1, centroid_w, 130, 80, 110, 110)
+    style_map(ax1, "independent: Collect (All 4 dogs chase 1 stray)")
+
+    c_comp = cfg("compact", n, d)
+    sheep_c, dogs_c = start(c_comp)
+    goal_c = np.asarray(c_comp["goal_center"])
+    centroid_c = sheep_c.mean(axis=0)
+    targets_arc = team_targets(sheep_c, goal_c, dogs_c, c_comp)
+    pd_single = drive_point(sheep_c, goal_c, c_comp)
+    ax2 = axes[2]
+    ax2.scatter(*sheep_c.T, s=9, color=BLUE, alpha=0.7, lw=0)
+    gcm(ax2, centroid_c, text_at=(2, 2))
+    dogs_at(ax2, dogs_c, s=42, zorder=4)
+    ordered_arc = targets_arc[np.argsort(targets_arc[:, 1])]
+    ax2.plot(*ordered_arc.T, color=AQUA, lw=1.2, ls=":", label="strombom_multi arc")
+    ax2.scatter(
+        *pd_single, s=80, marker="x", color=INK, lw=2.0, zorder=4, label="independent Pd (single)"
+    )
+    for dog in dogs_c:
+        arrow(ax2, pd_single, dog, ORANGE, 1.2, ls="--")
+    arrow(ax2, goal_c - [c_comp["goal_radius"] + 5, 0], centroid_c + [20, 0], AQUA, 1.2)
+    ax2.text(centroid_c[0] + 25, centroid_c[1] + 3, "to goal", color=AQUA, fontsize=8)
+    window(ax2, centroid_c, 50, 40, 45, 45)
+    ax2.legend(loc="upper left", frameon=False, fontsize=8)
+    style_map(ax2, "independent: Drive (Crowding single point Pd)")
+    save(fig, "fig_independent.png", rect=(0, 0, 1, 0.98))
 
 
 # ----- team rule -----

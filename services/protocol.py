@@ -28,7 +28,7 @@ from records.provenance import stable_hash
 from sim.drive_task import task as drive_task
 from sim.drive_task.layouts import LAYOUTS
 from sim.strombom import sheep
-from sim.strombom.params import DEFAULTS, METHOD, NEUTRAL_PARAMS
+from sim.strombom.params import DEFAULTS, METHODS, NEUTRAL_PARAMS
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 RESULTS_ROOT = REPO_ROOT / "results"
@@ -50,7 +50,7 @@ REQUIRED_KEYS = (
 )
 PROTOCOL_KEYS = (*REQUIRED_KEYS, "description")
 TIME_LIMIT_KEYS = ("time_limit_ticks", "time_limit_drive_multiple")
-METHOD_KEYS = (*TIME_LIMIT_KEYS, "params")
+METHOD_KEYS = (*TIME_LIMIT_KEYS, "params", "calibrate_as")
 
 # Canonical values that hold for the whole protocol: the task, the seed list, and the
 # calibration of R_f, which runs once per method and flock size.
@@ -140,6 +140,9 @@ class MethodSpec:
     time_limit_ticks: int | None
     params: dict[str, Any] = field(default_factory=dict)
     time_limit_drive_multiple: float | None = None
+    # Method whose single dog drives the calibration flock, when not this one (e.g. FAT
+    # calibrated with the paper shepherd of strombom_multi so both run the same arena).
+    calibrate_as: str | None = None
 
 
 @dataclass(frozen=True)
@@ -187,6 +190,8 @@ class Protocol:
                     "config": {
                         k: v for k, v in methods[m.name].items() if NEUTRAL_PARAMS.get(k) != v
                     },
+                    # Left out when unset, so folders without it keep their hash.
+                    **({"calibrate_as": m.calibrate_as} if m.calibrate_as else {}),
                 }
                 for m in self.methods
             },
@@ -266,11 +271,20 @@ def _time_limit(name: str, spec: dict[str, Any]) -> tuple[int | None, float | No
     return round(ticks), None
 
 
+def _calibrate_as(name: str, source: str | None) -> str | None:
+    """The reference method of ``calibrate_as``, checked; None when it is the method itself."""
+    if source is None or source == name:
+        return None
+    if source not in METHODS:
+        raise ValueError(f"Method {name!r}: calibrate_as {source!r} is not a method")
+    return source
+
+
 def _methods(raw: dict[str, Any]) -> tuple[MethodSpec, ...]:
     specs = []
     for name, spec in raw.items():
-        if name != METHOD:
-            raise ValueError(f"Unknown method {name!r}; available: {[METHOD]}")
+        if name not in METHODS:
+            raise ValueError(f"Unknown method {name!r}; available: {list(METHODS)}")
         spec = spec or {}
         unknown = sorted(set(spec) - set(METHOD_KEYS))
         if unknown:
@@ -285,7 +299,8 @@ def _methods(raw: dict[str, Any]) -> tuple[MethodSpec, ...]:
             if isinstance(DEFAULTS[key], bool) and not isinstance(value, bool):
                 raise ValueError(f"Method {name!r}: {key} must be true or false, not {value!r}")
         ticks, multiple = _time_limit(name, spec)
-        specs.append(MethodSpec(name, ticks, params, multiple))
+        source = _calibrate_as(name, spec.get("calibrate_as"))
+        specs.append(MethodSpec(name, ticks, params, multiple, source))
     return tuple(specs)
 
 

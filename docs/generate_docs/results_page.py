@@ -21,13 +21,14 @@ from docs.generate_docs.page import Part, render, run_command
 from docs.generate_docs.runs import (
     F99_MAIN,
     F99_RUNS,
+    FAT_RUNS,
     NINE_SIZE_RUNS,
     ORIGINAL_NS,
     STRICT_MAIN,
     STRICT_RUNS,
 )
 from services.protocol import QUEUE_LOG, RESULTS_ROOT, load_protocol
-from sim.strombom.params import METHOD
+from sim.strombom.params import FAT, METHOD
 
 # Shown above a table when show_command is set.
 PAGE_COMMAND = "uv run python -m docs.generate_docs.page"
@@ -47,7 +48,7 @@ def _listed(values: Sequence[object]) -> str:
 @cache
 def _rule() -> dict[str, Any]:
     """The per-cell rule of the main runs; the page says they share it, so it checks."""
-    settings = {name: load_protocol(name).settings for name in (*STRICT_MAIN, *F99_MAIN)}
+    settings = {name: load_protocol(name).settings for name in (*STRICT_MAIN, *F99_MAIN, *FAT_RUNS)}
     rules = {name: tuple(s[k] for k in RULE_KEYS) for name, s in settings.items()}
     if len(set(rules.values())) != 1:
         raise ValueError(f"the main runs no longer share one rule {RULE_KEYS}: {rules}")
@@ -168,13 +169,13 @@ MONOTONE_INTRO = (
 def sequential_intro() -> str:
     batch, cap = _rule()["batch_seeds"], _rule()["max_seeds"]
     return (
-        "The six runs share one per-cell rule, so one table covers them: a cell is reliable when "
-        f"the {_confidence_percent()} percent Clopper-Pearson interval of its success rate lies "
-        f"at or above {_theta()} and unreliable when it lies below; otherwise it gets {batch} "
-        f"more seeds, up to {cap}, and a cell still in between at {cap} stays undecided. Each "
-        "check after a batch is a look. For a cell whose true success rate is p, the table gives "
-        "the chance in percent that it ends reliable, unreliable or undecided, computed exactly "
-        "over every look (no simulation)."
+        "The nine study runs share one per-cell rule, so one table covers them: a cell is "
+        f"reliable when the {_confidence_percent()} percent Clopper-Pearson interval of its "
+        f"success rate lies at or above {_theta()} and unreliable when it lies below; otherwise "
+        f"it gets {batch} more seeds, up to {cap}, and a cell still in between at {cap} stays "
+        "undecided. Each check after a batch is a look. For a cell whose true success rate is p, "
+        "the table gives the chance in percent that it ends reliable, unreliable or undecided, "
+        "computed exactly over every look (no simulation)."
     )
 
 
@@ -196,6 +197,22 @@ CURVE_INTRO = (
     "the reliability decision and the median finish in seconds."
 )
 
+FAT_INTRO = (
+    f"The uncoordinated `{FAT}` baseline ([fat.md](../methods/fat.md)) at 6 drive times under "
+    f"strict ({FAT_RUNS[0]}) and 99 percent ({FAT_RUNS[1]}) rules, calibrated with `{METHOD}` so "
+    "both controllers share the same $R_f$, start flocks, goal and deadline, followed by "
+    f"cell-by-cell curves comparing `{F99_RUNS[6]}` (`{METHOD}`) and `{FAT_RUNS[1]}` (`{FAT}`) "
+    "on `compact` ($N = 400$) and `wide` ($N = 200$)."
+)
+INDEP_RUN = "dmin_f99_indep"
+INDEP_INTRO = (
+    "The independent paper shepherds baseline ([independent.md](../methods/independent.md)) at 6 "
+    "drive times under the 99 percent rule (`dmin_f99_indep`), calibrated with `strombom_multi` so "
+    "both controllers share the same $R_f$, start flocks, goal and deadline, followed by "
+    "cell-by-cell curves comparing `dmin_f99_m6` (`strombom_multi`), `dmin_f99_indep` "
+    "(`independent`) and `dmin_f99_fat` (`fat`) on `split` ($N = 200$) and `wide` ($N = 200$)."
+)
+
 
 # --- Commands ----------------------------------------------------------------------------------
 
@@ -213,6 +230,7 @@ Block = str | Query | Callable[[], str]
 
 STRICT_MAIN_ARGS = " ".join(STRICT_MAIN)
 F99_MAIN_ARGS = " ".join(F99_MAIN)
+FAT_ARGS = " ".join(FAT_RUNS)
 ORIGINAL_SIZES = " ".join(map(str, ORIGINAL_NS))
 NESTED_PAIRS = tuple(
     (runs[longer], runs[shorter])
@@ -307,11 +325,23 @@ SECTIONS: tuple[Block, ...] = (
     _single(f"dmin {' '.join(GRAZE_ON)}"),
     "## Teams that fail above D_min",
     MONOTONE_INTRO,
-    Query(f"monotone {STRICT_MAIN_ARGS} {F99_MAIN_ARGS}"),
+    Query(f"monotone {STRICT_MAIN_ARGS} {F99_MAIN_ARGS} {FAT_ARGS}"),
     "## N = 400 at three deadlines, 99 percent",
     CURVE_INTRO,
     _single(f"curve {F99_MAIN_ARGS} --layout wide --n 400"),
     _single(f"curve {F99_MAIN_ARGS} --layout outlier_rich --n 400"),
+    "## Uncoordinated FAT baseline, 6 drive times",
+    FAT_INTRO,
+    Query(f"dmin {FAT_ARGS}", prefix="D_min, "),
+    Query(f"growth {FAT_ARGS}", prefix="Growth, "),
+    _single(f"curve {F99_RUNS[6]} {FAT_RUNS[1]} --layout compact --n 400"),
+    _single(f"curve {F99_RUNS[6]} {FAT_RUNS[1]} --layout wide --n 200"),
+    "## Independent paper shepherds baseline, 6 drive times",
+    INDEP_INTRO,
+    Query(f"dmin {INDEP_RUN}", prefix="D_min, "),
+    Query(f"growth {INDEP_RUN}", prefix="Growth, "),
+    _single(f"curve {F99_RUNS[6]} {INDEP_RUN} {FAT_RUNS[1]} --layout split --n 200"),
+    _single(f"curve {F99_RUNS[6]} {INDEP_RUN} {FAT_RUNS[1]} --layout wide --n 200"),
 )
 
 

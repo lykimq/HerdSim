@@ -12,8 +12,8 @@ Plans, runs and inspects protocol campaigns:
 uv run cli/campaign.py <verb> [<protocol> ...] [--workers <n>]
 ```
 
-- `<protocol>`: one or more protocol ids or paths to YAML files; if omitted, runs all six protocols in `protocols/configs/study_queue.yaml` in queue order.
-- `--workers <n>`: worker processes (default: CPU core count).
+- `<protocol>`: one or more protocol ids or paths to YAML files; if omitted, runs all nine protocols in `protocols/configs/study_queue.yaml` in queue order.
+- `--workers <n>`: worker processes (defaults to the CPU core count).
 
 ### `plan`
 
@@ -32,9 +32,7 @@ uv run cli/campaign.py run dmin_f99_m6 --workers 20   # single protocol
 uv run cli/campaign.py run --workers 20               # full study queue
 ```
 
-- Resume safety: trials are flushed to `results/<protocol_id>/` as they finish, so rerunning the same command resumes after Ctrl+C, a crash or an expired time budget.
-- Queue vs named protocol: running the full queue skips folders where every cell is already decided, whereas naming a protocol on the command line always opens it (so new grid points are added if the grid grew).
-- Error handling: a trial that raises an exception is logged in `errors.jsonl` and its cell receives no further seeds; if a protocol in the queue raises, the queue logs it to `results/queue_log.jsonl`, continues to the next protocol and exits with status 1 at the end.
+Trials are flushed to `results/<protocol_id>/` as they finish, so rerunning the same command resumes after an interrupt, a crash or an expired time budget. Running the full queue skips folders where every cell is already decided, whereas naming a protocol on the command line always opens it (so new grid points are added if the grid grew). A trial that raises an exception is logged in `errors.jsonl` and its cell receives no more seeds; if a protocol in the queue raises, the queue logs it to `results/queue_log.jsonl`, continues to the next protocol and exits with status 1 at the end.
 
 ### `status`
 
@@ -44,10 +42,7 @@ For a completed run with no bugs, `status` reports stop reason `"every cell deci
 
 ### Calibration
 
-Before a folder's first trial, `run` calibrates $R_f(N)$ for any uncalibrated flock size ([procedure and limits](../experiments/task_design.md#sizing-by-the-calibrated-flock-radius)):
-
-- Failure check: `run` stops with `CalibrationError` naming $N$ if window drift exceeds `settled_tolerance`, start-spacing spread exceeds `start_agreement`, or the flock centre enters within $2\,R_f$ of the goal.
-- Cleanup: if the folder has no trials yet, `run` removes `provenance.json` and `calibration.json` so a corrected protocol can reuse the folder; existing trials and `runs.jsonl` entries are never deleted.
+Before a folder's first trial, `run` calibrates $R_f(N)$ for any uncalibrated flock size ([procedure and limits](../experiments/task_design.md#sizing-by-the-calibrated-flock-radius)). It stops with `CalibrationError` naming $N$ if window drift exceeds `settled_tolerance`, start-spacing spread exceeds `start_agreement`, or the flock centre enters within $2\,R_f$ of the goal. If the folder has no trials yet, `run` removes `provenance.json` and `calibration.json` so a corrected protocol can reuse the folder; existing trials and `runs.jsonl` entries are never deleted.
 
 ## `cli/calibration_check.py`: calibration with its drift and spread
 
@@ -57,10 +52,10 @@ Runs a protocol's calibration across flock sizes and records $R_f$, window drift
 uv run cli/calibration_check.py <protocol> [--sizes <N> ...] [--seeds <n>] [--workers <n>]
 ```
 
-- `--sizes`: flock sizes to measure (default: the protocol's `flock_sizes`).
-- `--seeds`: seeds per start spacing (default: the protocol's `calibration_seeds`).
-- `--workers`: worker processes (default: 1).
-- Output: `results/diagnostics/calibration_<protocol>[_<n>seeds].csv`.
+- `--sizes`: flock sizes to measure (defaults to the protocol's `flock_sizes`).
+- `--seeds`: seeds per start spacing (defaults to the protocol's `calibration_seeds`).
+- `--workers`: worker processes (defaults to 1).
+- Output file: `results/diagnostics/calibration_<protocol>[_<n>seeds].csv`.
 
 ## `cli/paper_check.py`: check against the paper
 
@@ -71,8 +66,8 @@ uv run cli/paper_check.py <experiment> [--workers <n>]
 ```
 
 - `<experiment>`: `fig3` (80 $(N, n)$ grid points x 50 trials = 4000 trials) or `distance` (1100 drive-distance trials), both with grazing sheep repulsion enabled.
-- `--workers`: worker processes (default: 1).
-- Output: `results/paper_check/<experiment>.csv` (rewritten after each point so interrupted runs resume automatically).
+- `--workers`: worker processes (defaults to 1).
+- Output file: `results/paper_check/<experiment>.csv` (rewritten after each point so interrupted runs resume automatically).
 
 ## `docs/generate_docs/page.py`: tables from finished runs
 
@@ -118,4 +113,4 @@ uv run python docs/generate_docs/make_result_figures.py  # result and diagnostic
 uv run python docs/generate_docs/make_gifs.py [name ...] # all GIFs, or only named animations
 ```
 
-Valid animation names for `make_gifs.py` are `one_trial`, `sheep_reaction`, `push_blending`, `team_rule_at_work`, `start_layouts` and `paper_task`.
+Valid animation names for `make_gifs.py` are `one_trial`, `sheep_reaction`, `push_blending`, `team_rule_at_work`, `start_layouts`, `controllers` and `paper_task`.

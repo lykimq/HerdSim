@@ -16,6 +16,7 @@ from scipy.optimize import linear_sum_assignment
 from scipy.spatial.distance import cdist
 
 from sim.state import SimulationState
+from sim.strombom.params import FAT, INDEPENDENT
 from sim.strombom.shepherd import (
     COLLECT,
     collect_threshold,
@@ -24,7 +25,7 @@ from sim.strombom.shepherd import (
     radius_of,
     step_toward,
 )
-from sim.vectors import behind, rotate
+from sim.vectors import behind, farthest_from, rotate
 
 
 def _angles(points: np.ndarray, centroid: np.ndarray, arm: np.ndarray) -> np.ndarray:
@@ -93,6 +94,11 @@ def team_targets(
     return targets
 
 
+def fat_target(flock: np.ndarray, goal: np.ndarray, r_a: float) -> np.ndarray:
+    """FAT target: ``r_a`` behind the sheep farthest from ``goal``, seen from ``goal``."""
+    return behind(farthest_from(flock, goal), goal, r_a)
+
+
 def step(state: SimulationState, config: dict[str, Any]) -> SimulationState:
     """Advance every dog by ``dt * velocity`` toward its target and store the velocities."""
     dogs = state.shepherd_positions
@@ -100,7 +106,15 @@ def step(state: SimulationState, config: dict[str, Any]) -> SimulationState:
     # One heading-noise angle per dog, drawn every tick in dog order from the dogs' stream.
     angles = state.dog_rng.uniform(0.0, 2.0 * np.pi, state.n_shepherds)
     if state.n_shepherds:
-        targets = team_targets(state.sheep_positions, state.world.goal.center, dogs, config)
+        goal = state.world.goal.center
+        if config["method"] == FAT:
+            target = fat_target(state.sheep_positions, goal, float(config["r_a"]))
+            targets = np.tile(target, (state.n_shepherds, 1))
+        elif config["method"] == INDEPENDENT:
+            target = decide(state.sheep_positions, goal, config).target
+            targets = np.tile(target, (state.n_shepherds, 1))
+        else:
+            targets = team_targets(state.sheep_positions, goal, dogs, config)
         for i in range(state.n_shepherds):
             velocities[i] = step_toward(
                 dogs[i], targets[i], state.sheep_positions, config, angles[i]

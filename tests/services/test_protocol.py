@@ -11,6 +11,7 @@ import pytest
 import yaml
 
 from records.provenance import read_provenance
+from services.calibration import calibration_config
 from services.cells import Cell, Group, cell_config, groups
 from services.protocol import PROTOCOLS_DIR, Protocol, load_protocol, results_folder, study_queue
 from sim.trial import run_trial
@@ -155,6 +156,19 @@ def test_physics_hash_matches_only_when_trial_outcomes_match() -> None:
     # A graze-off protocol must resume into folders written before the switch existed.
     assert physics_hash(protocol_with(ticks=3000, params={"graze_repulsion": False})) == base
     assert physics_hash(protocol_with(ticks=3000, params={"graze_repulsion": True})) != base
+
+
+def test_calibrate_as_drives_calibration_with_the_named_method_and_enters_the_hash(
+    tmp_path: Path,
+) -> None:
+    plain = load_draft(tmp_path, methods={"fat": {"time_limit_ticks": 100}})
+    paired = load_draft(
+        tmp_path,
+        methods={"fat": {"time_limit_ticks": 100, "calibrate_as": METHOD}},
+    )
+    assert calibration_config(plain, "fat", 25, 2.0)["method"] == "fat"
+    assert calibration_config(paired, "fat", 25, 2.0)["method"] == METHOD
+    assert physics_hash(plain) != physics_hash(paired)
 
 
 @pytest.mark.parametrize("bad", ["false", 0])

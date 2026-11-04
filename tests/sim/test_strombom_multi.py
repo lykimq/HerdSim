@@ -7,14 +7,16 @@ import pytest
 from scipy.spatial.distance import cdist
 
 from sim.strombom import sheep
-from sim.strombom.params import resolve_n_neighbors
+from sim.strombom.params import FAT, INDEPENDENT, resolve_n_neighbors
 from sim.strombom.shepherd import DRIVE, decide, drive_point, radius_of
-from sim.strombom.team import drive_front, team_targets
+from sim.strombom.team import drive_front, fat_target, step, team_targets
 from sim.vectors import behind, unit
 from tests.helpers import (
     ANGLE_TOL,
     GOAL,
     flock_with_outlier,
+    make_state,
+    make_world,
     signed_angles,
     tight_flock,
 )
@@ -180,3 +182,29 @@ def test_several_dogs_push_as_one_unit_vector_from_their_mean_direction() -> Non
     dist = np.linalg.norm(to_dogs, axis=2)
     r_s = 65.0
     np.testing.assert_allclose(sheep.dog_push(to_dogs, dist, r_s), [[1.0, 0.0]], atol=ANGLE_TOL)
+
+
+def test_fat_sends_every_dog_behind_the_sheep_farthest_from_the_goal() -> None:
+    """Every FAT dog aims r_a behind the single sheep farthest from the goal."""
+    flock = np.array([[10.0, 0.0], [-50.0, 20.0], [30.0, -10.0]])
+    expected = behind(flock[1], GOAL, R_A)
+    np.testing.assert_allclose(fat_target(flock, GOAL, R_A), expected)
+
+    dogs = np.array([[-100.0, 0.0], [-100.0, 40.0], [-80.0, -30.0]])
+    state = make_state(flock, dogs, world=make_world(goal_center=(float(GOAL[0]), float(GOAL[1]))))
+    config = cfg(len(flock), method=FAT, noise_strength=0.0)
+    state = step(state, config)
+    expected_vel = np.array([unit(expected - d) * config["shepherd_speed"] for d in dogs])
+    np.testing.assert_allclose(state.shepherd_velocities, expected_vel)
+
+
+def test_independent_sends_every_dog_to_single_strombom_target() -> None:
+    """Every independent dog aims at the single Strombom target with no team assignment."""
+    flock = np.array([[10.0, 0.0], [-50.0, 20.0], [30.0, -10.0]])
+    expected = decide(flock, GOAL, cfg(len(flock))).target
+    dogs = np.array([[-100.0, 0.0], [-100.0, 40.0], [-80.0, -30.0]])
+    state = make_state(flock, dogs, world=make_world(goal_center=(float(GOAL[0]), float(GOAL[1]))))
+    config = cfg(len(flock), method=INDEPENDENT, noise_strength=0.0)
+    state = step(state, config)
+    expected_vel = np.array([unit(expected - d) * config["shepherd_speed"] for d in dogs])
+    np.testing.assert_allclose(state.shepherd_velocities, expected_vel)

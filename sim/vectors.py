@@ -39,6 +39,11 @@ def behind(point: np.ndarray, reference: np.ndarray, distance: float) -> np.ndar
     return point + unit(point - reference) * distance
 
 
+def farthest_from(points: np.ndarray, reference: np.ndarray) -> np.ndarray:
+    """The row of ``points`` farthest from ``reference``."""
+    return points[int(np.argmax(np.linalg.norm(points - reference, axis=1)))]
+
+
 def rotate(vec: np.ndarray, angle: float) -> np.ndarray:
     """Rotate a 2-vector counter-clockwise by ``angle`` radians."""
     c, s = np.cos(angle), np.sin(angle)

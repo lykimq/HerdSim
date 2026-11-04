@@ -35,10 +35,10 @@ from docs.generate_docs.figstyle import (
     n_axis,
     save,
 )
-from docs.generate_docs.runs import F99_RUNS, NINE_SIZE_RUNS, STRICT_RUNS
+from docs.generate_docs.runs import F99_RUNS, FAT_RUNS, NINE_SIZE_RUNS, STRICT_RUNS
 from services.protocol import RESULTS_ROOT, load_protocol
 from services.replay import open_run
-from sim.strombom.params import METHOD
+from sim.strombom.params import FAT, METHOD
 from sim.trial import initial_state
 
 Row = dict[Hashable, Any]  # one row of a groups table, from DataFrame.to_dict("records")
@@ -83,6 +83,21 @@ FIT_SHAPES = (("power law", "--"), ("saturating", ":"))
 # Smallest tested N whose calibration fails its 5% limits with 3 seeds per start
 # (results/diagnostics/calibration_dmin_f99_m6.csv).
 CALIBRATION_EDGE = 630
+
+# FAT baseline comparison at 6 drive times, strict and 99 percent rules.
+FAT_PANELS = (
+    ("compact", 400),
+    ("wide", 200),
+    ("wide", 400),
+    ("outlier_rich", 200),
+    ("split", 200),
+)
+FAT_SERIES = (
+    (STRICT_RUNS[6], METHOD, f"{METHOD}, strict", BLUE, "o-", -1.5),
+    (F99_RUNS[6], METHOD, f"{METHOD}, 99 percent", BLUE, "s--", -0.5),
+    (FAT_RUNS[0], FAT, f"{FAT}, strict", ORANGE, "o-", 0.5),
+    (FAT_RUNS[1], FAT, f"{FAT}, 99 percent", ORANGE, "s--", 1.5),
+)
 
 
 # ----- data access -----
@@ -576,3 +591,40 @@ def fig_growth_fits() -> None:
             "range of D allowed by every curve of each shape that passes through all the brackets."
         ),
     )
+
+
+# ----- FAT baseline -----
+def _fat_panel(ax: Axes, data: dict[str, pd.DataFrame], layout: str, n: int) -> None:
+    """Success rate against D for strombom_multi and fat at 6 drive times."""
+    for name, method, label, color, fmt, step in FAT_SERIES:
+        part = curve(data[name], layout, n)
+        part = part[part["method"] == method]
+        rate_errorbars(
+            ax,
+            part,
+            part["d"] * (1 + 0.025 * step),
+            color,
+            fmt,
+            label,
+            ms=4,
+            lw=1.3,
+            elinewidth=0.75,
+            capsize=1.6,
+        )
+    theta_line(ax)
+    d_axis(ax)
+    ax.set_ylim(-0.04, 1.05)
+    ax.set_title(f"{layout}, N = {n}", fontsize=10)
+    grid(ax)
+
+
+def fig_fat() -> None:
+    """Success rate vs D for strombom_multi and fat at 6 drive times (strict and 99 percent)."""
+    data = {name: cells(name) for name, *_ in FAT_SERIES}
+    fig, axes = plt.subplots(1, len(FAT_PANELS), figsize=(16.5, 3.8), sharey=True)
+    for ax, (layout, n) in zip(axes, FAT_PANELS, strict=True):
+        _fat_panel(ax, data, layout, n)
+    axes[0].set_ylabel("success rate (6 drive times)")
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, loc="lower center", ncol=4, frameon=False, fontsize=8.5)
+    save(fig, "fig26_fat.png", rect=(0, 0.08, 1, 1))

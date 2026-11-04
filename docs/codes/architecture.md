@@ -6,7 +6,7 @@ How HerdSim is put together: the design rules, the code layers, how a campaign r
 
 Six rules shape the code:
 
-- Paired seeds: every [cell](../glossary.md#trials-and-experiments) on a curve uses the same arena, and seed $i$ starts from the same flock at every team size and in all six study protocols.
+- Paired seeds: every [cell](../glossary.md#trials-and-experiments) on a curve uses the same arena, and seed $i$ starts from the same flock at every team size and in all nine study protocols.
 - Exact replay: a trial is fixed by its settings and seed. Replaying a stored trial on the same machine and library build gives the exact same outcome and tick count.
 - Safe resume: a protocol takes thousands of trials, so each trial is saved as soon as it finishes and the same command resumes a stopped run.
 - Offline analysis: analysis reads stored files and never runs the simulator, so tables and fits can be rebuilt without rerunning trials.
@@ -74,11 +74,7 @@ Each round decides which cells are reliable, adds midpoint team sizes where reli
 
 ### Stopping, resuming and replaying
 
-Only the parent campaign process appends rows to the trial log, one line per finished trial:
-
-- Stopping with `Ctrl+C` or a kill leaves at worst a cut last line. On restart, that line is dropped, finished seeds are skipped, and cut cells are topped back up to a full batch of 10 seeds.
-- If a worker process is killed by the OS, the batch stops without logging a trial error and a restart reruns the trials that were in flight. If a trial raises a Python exception, the error is logged and that cell gets no more seeds, because an exception in a deterministic model is a bug.
-- Replaying a trial rebuilds its settings from the protocol and checks its physics hash. If the replay does not match the stored success and tick count, it raises an error so figures and animations never show a drifted run.
+Only the parent campaign process appends rows to the trial log, one line per finished trial. Stopping the process with an interrupt or a kill leaves at worst a cut last line; on restart, that line is dropped, finished seeds are skipped, and cut cells are topped back up to a full batch of 10 seeds. If a worker process is killed by the OS, the batch stops without logging a trial error and a restart reruns the trials that were in flight. If a trial raises a Python exception, the error is logged and that cell gets no more seeds, because an exception in a deterministic model is a bug. Replaying a trial rebuilds its settings from the protocol and checks its physics hash; if the replay does not match the stored success and tick count, it raises an error so figures and animations never show a drifted run.
 
 ## Where to look in the code
 
@@ -89,7 +85,7 @@ Table 1 maps each part of the design to its folder or file:
 | Part | Path | What it does |
 | :--- | :--- | :--- |
 | Simulation engine | `sim/trial.py`, `sim/state.py` | Single-trial tick loop, random streams and stop checks |
-| Sheep and dog rules | `sim/strombom/` | Strombom sheep model, one-dog decision rule and `strombom_multi` team rule |
+| Sheep and dog rules | `sim/strombom/` | Strombom sheep model, one-dog decision rule, `strombom_multi` team rule, `fat` baseline and `independent` baseline |
 | Arena task and layouts | `sim/drive_task/`, `sim/metrics/` | Arena sizing from $R_f(N)$, start layouts, goal check, failure labels and metrics |
 | Records | `records/` | Trial row, physics hash, code identity and generated-file notice |
 | Campaign services | `services/` | Protocol loader, $R_f(N)$ calibration, adaptive rounds, worker pool, folder store and replay |
