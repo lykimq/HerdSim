@@ -95,6 +95,7 @@ def describe(protocol: Protocol) -> str:
     curves = groups(protocol)
     cells = len(curves) * len(protocol.shepherd_counts)
     batch = s["batch_seeds"]
+    column = "zone" if s["decide_finish_times"] else "reliability"
     lines = [
         f"protocol      {protocol.protocol_id}",
         f"output        {protocol.output}{_folder_note(protocol)}",
@@ -103,7 +104,7 @@ def describe(protocol: Protocol) -> str:
         f"N             {list(protocol.flock_sizes)}",
         f"D             {list(protocol.shepherd_counts)}",
         f"D curves      {len(curves)}",
-        f"cells         {cells}  (a midpoint D is added where the zone changes between"
+        f"cells         {cells}  (a midpoint D is added where {column} changes between"
         + f" neighbours more than {s['refine_min_gap']} dog(s) apart)",
         f"first round   {cells * batch} trials ({batch} seeds per cell)",
         f"seeds         up to {s['max_seeds']} per undecided cell",

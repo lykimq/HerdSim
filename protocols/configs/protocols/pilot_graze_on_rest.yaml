@@ -1,7 +1,6 @@
-# dmin_f99_m6 with grazing repulsion on, on the six flock sizes pilot_graze_on left out, so the
-# two pilots together cover all nine sizes of dmin_f99_m6. Seed i draws the same flock as in
-# dmin_f99_m6, scaled by this run's own R_f, and the four layouts and the dog grid are kept because they size the field and
-# the drive, so each cell compares with the stored cell of dmin_f99_m6.
+# dmin_f99_m6 with grazing repulsion on across the six flock sizes left out of pilot_graze_on.
+# Layouts, dog grid, and master_seed match dmin_f99_m6 so the two pilots together cover all
+# nine sizes of dmin_f99_m6.
 
 protocol_id: pilot_graze_on_rest
 description: "Pilot: dmin_f99_m6 with grazing repulsion on, N 25, 71, 141, 283, 400 and 566."
@@ -15,4 +14,5 @@ methods:
     params:
       graze_repulsion: true
 
+# The six sizes of dmin_f99_m6 not run in pilot_graze_on.
 flock_sizes: [25, 71, 141, 283, 400, 566]

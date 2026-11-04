@@ -57,17 +57,21 @@ def test_decision_mirrors_with_the_goal() -> None:
 def test_dog_stops_near_sheep_and_always_walks_delta_s() -> None:
     sheep_at = np.array([[0.0, 0.0]])
     stop_distance = 3.0 * R_A  # dog halts inside this distance of any sheep
-    dt = 0.3
+    noise_angle = 0.3
     far_target = np.array([50.0, 0.0])
 
-    halted = step_toward(np.array([stop_distance - 0.1, 0.0]), far_target, sheep_at, BASE, dt)
+    halted = step_toward(
+        np.array([stop_distance - 0.1, 0.0]), far_target, sheep_at, BASE, noise_angle
+    )
     assert np.all(halted == 0.0)
 
-    walking = step_toward(np.array([20.0, 0.0]), far_target, sheep_at, BASE, dt)
+    walking = step_toward(np.array([20.0, 0.0]), far_target, sheep_at, BASE, noise_angle)
     assert np.linalg.norm(walking) == pytest.approx(BASE["shepherd_speed"])
 
     # Even a tiny remaining gap still takes a full shepherd_speed step (paper delta_s).
-    last_step = step_toward(np.array([20.0, 0.0]), np.array([20.1, 0.0]), sheep_at, BASE, dt)
+    last_step = step_toward(
+        np.array([20.0, 0.0]), np.array([20.1, 0.0]), sheep_at, BASE, noise_angle
+    )
     assert np.linalg.norm(last_step) == pytest.approx(BASE["shepherd_speed"])
 
 

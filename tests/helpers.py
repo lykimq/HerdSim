@@ -75,6 +75,12 @@ def strombom_cfg(n_sheep: int, **overrides: Any) -> dict[str, Any]:
     return {**STROMBOM_BASE, "n_sheep": n_sheep, **overrides}
 
 
+def signed_angles(points: np.ndarray, centroid: np.ndarray, arm: np.ndarray) -> np.ndarray:
+    """Signed angle of each point around ``centroid``, measured from ``arm``."""
+    rel = points - centroid
+    return np.arctan2(arm[0] * rel[:, 1] - arm[1] * rel[:, 0], rel @ arm)
+
+
 def tight_flock(n: int, center: tuple[float, float] = (0.0, 0.0)) -> np.ndarray:
     rng = np.random.default_rng(1)
     return np.asarray(center) + rng.normal(0.0, 0.5, size=(n, 2))

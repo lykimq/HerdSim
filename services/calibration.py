@@ -116,7 +116,9 @@ def settle(runs: list[tuple[float, tuple[float, float]]]) -> tuple[float, float,
     late = float(np.median([v[0] for _, v in runs]))
     early = float(np.median([v[1] for _, v in runs]))
     by_start = [float(np.median([v[0] for sp, v in runs if sp == x])) for x in starts]
-    return late, abs(late - early) / early, (max(by_start) - min(by_start)) / late
+    drift = abs(late - early) / early if early > 0.0 else 0.0
+    spread = (max(by_start) - min(by_start)) / late if late > 0.0 else 0.0
+    return late, drift, spread
 
 
 def summarise(

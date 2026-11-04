@@ -1,6 +1,6 @@
 # D_min at 12 drive times, the loosest of the three deadlines. A drive time is the drive
 # length over the sheep speed. Strombom sheep, the team rule, four layouts, N 25 to 400,
-# D 1 to 24 (a midpoint D is added where the zone changes).
+# D 1 to 24 (a midpoint D is added where reliability changes).
 
 protocol_id: dmin_m12
 description: "D_min against N on four start layouts, strict rule, 12 drive times."

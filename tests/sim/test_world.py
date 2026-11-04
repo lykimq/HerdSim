@@ -21,14 +21,14 @@ from sim.drive_task.world import GoalZone
 from sim.metrics.flock import fragmentation
 from sim.metrics.view import TickView
 from sim.trial import run_trial
-from tests.helpers import config_for, make_state, protocol_with
+from tests.helpers import config_for, make_state, protocol_with, signed_angles
 
 METHOD = "strombom_multi"
 LAYOUTS = ("compact", "wide", "split", "outlier_rich")
 SCATTERED = ("wide", "split", "outlier_rich")
 
 # Calibrated R_f used in a few placement checks (same values as the study table).
-RF = {100: 9.0, 200: 10.47, 400: 11.4}
+RF = {100: 9.08, 200: 10.47, 400: 11.4}
 
 DRIVE_MULTIPLE = 13.0
 GOAL_RADIUS_MULTIPLE = 1.9
@@ -61,10 +61,7 @@ def goal_centre(cfg: dict[str, Any]) -> np.ndarray:
 
 
 def signed_angles_from_behind(cfg: dict[str, Any], points: np.ndarray) -> np.ndarray:
-    centre = flock_centre(cfg)
-    back = behind_unit(cfg)
-    rel = points - centre
-    return np.arctan2(back[0] * rel[:, 1] - back[1] * rel[:, 0], rel @ back)
+    return signed_angles(points, flock_centre(cfg), behind_unit(cfg))
 
 
 def sheep_at(cfg: dict[str, Any], seed: int) -> np.ndarray:

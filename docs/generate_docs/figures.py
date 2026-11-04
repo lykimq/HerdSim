@@ -12,6 +12,7 @@ from typing import Any, NamedTuple
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
+from matplotlib.colors import to_rgb
 from matplotlib.lines import Line2D
 from matplotlib.patches import Circle, Rectangle
 
@@ -715,7 +716,6 @@ def field_panel(ax: Axes, c: Config, n: int) -> None:
     rf = c["flock_radius"]
     r_goal = c["goal_radius"]
     reach = start_reach(c)
-    from matplotlib.colors import to_rgb
 
     ax.add_patch(Rectangle((0, 0), c["world_width"], c["world_height"], fc="none", ec=GRID, lw=1.0))
     ax.add_patch(

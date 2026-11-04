@@ -21,7 +21,7 @@ DRIVE = "drive"
 class Decision:
     mode: str  # COLLECT or DRIVE
     target: np.ndarray  # Pc or Pd
-    centroid: np.ndarray  # centre of the flock the dog knows of
+    centroid: np.ndarray  # centre of the passed flock
     # Indices (into the flock passed in) of the sheep beyond f(N), farthest first; empty
     # when driving. outliers[0] is the sheep Pc stands behind.
     outliers: np.ndarray
@@ -49,7 +49,7 @@ def drive_point(flock: np.ndarray, goal: np.ndarray, config: dict[str, Any]) -> 
 
 
 def decide(flock: np.ndarray, goal: np.ndarray, config: dict[str, Any]) -> Decision:
-    """Collect or drive, and where to stand, for one dog knowing of ``flock``."""
+    """Collect or drive, and where to stand, for one dog on ``flock``."""
     r_a = float(config["r_a"])
     n = int(config["n_sheep"])
     centroid = flock.mean(axis=0)

@@ -5,9 +5,9 @@ from __future__ import annotations
 
 import itertools
 import math
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from pathlib import Path
-from typing import NamedTuple
+from typing import Any, NamedTuple
 
 import numpy as np
 import pandas as pd
@@ -109,7 +109,7 @@ def growth(part: pd.DataFrame, bracket_of: Callable[[pd.Series], Bracket | None]
     )
 
 
-def _mean_spread(groups: dict[object, list[float]]) -> float:
+def _mean_spread(groups: Mapping[Any, list[float]]) -> float:
     """Mean log2 of max / min over the groups that hold at least two midpoints."""
     spreads = [math.log2(max(v) / min(v)) for _, v in sorted(groups.items()) if len(v) >= 2]
     return float(np.mean(spreads)) if spreads else float("nan")
@@ -117,8 +117,8 @@ def _mean_spread(groups: dict[object, list[float]]) -> float:
 
 def layout_against_n(table: pd.DataFrame) -> dict[str, float]:
     """Mean log2 spread of midpoints: across layouts at fixed N, and across N at fixed layout."""
-    by_n: dict[object, list[float]] = {}
-    by_layout: dict[object, list[float]] = {}
+    by_n: dict[int, list[float]] = {}
+    by_layout: dict[str, list[float]] = {}
     for _, r in table.iterrows():
         value = midpoint(r)
         if value is not None:

@@ -37,32 +37,32 @@ Settings that share a note are one row, with their defaults in the same order, s
 
 | Setting | Default | Kind | Note |
 | :--- | :--- | :--- | :--- |
-| `dog_start`, `dog_start_gap`, `dog_start_spacing` | arcs; 30; 5 | per trial | Where the dogs stand at tick 0, a convention with no real-world rule behind it. arcs: half circles behind the flock, spread evenly (the base). ring: circles round the flock, leaving out the cone that holds the goal. handler: every dog at one point straight behind the flock. The first circle is dog_start_gap beyond the farthest sheep that can start. A circle holds as many dogs as fit dog_start_spacing apart; more dogs go on the next one, dog_start_spacing farther out. |
-| `dog_overlap_distance` | 2 | per trial | A dog with another dog closer than this has a twin (dog_overlap metric). The adaptive run uses it to stop spending seeds on copies of a dog. 2 is the Strombom distance r_a. |
+| `dog_start`, `dog_start_gap`, `dog_start_spacing` | arcs; 30; 5 | per trial | Tick-0 dog placement (arcs: even half-circles behind the flock; ring: full circles minus the goal cone; handler: all dogs at one point behind the flock). The inner arc lies dog_start_gap beyond the farthest starting sheep; dogs keep dog_start_spacing apart along an arc and between successive arcs. |
+| `dog_overlap_distance` | 2 | per trial | Distance (m) within which two dogs count as overlapping (dog_overlap metric); 2.0 is r_a. |
 
 ## Metrics
 
 | Setting | Default | Kind | Note |
 | :--- | :--- | :--- | :--- |
-| `measurement_radius`, `lost_radius_multiple` | 5; 2.5 | per trial | Sheep closer than measurement_radius are in the same group (fragmentation). Sheep farther than lost_radius_multiple x R_f from the centroid count as lost. |
+| `measurement_radius`, `lost_radius_multiple` | 5; 2.5 | per trial | Connected-component link distance (m) for fragmentation, and centroid distance (in R_f) beyond which a sheep counts as lost. |
 
 ## Calibration of R_f
 
 | Setting | Default | Kind | Note |
 | :--- | :--- | :--- | :--- |
-| `calibration_seeds`, `calibration_seconds`, `calibration_window_seconds`, `calibration_starts` | 3; 300; 90; 1, 3 | whole protocol | One dog drives a compact flock toward a goal it cannot reach for calibration_seconds. R_f is sqrt(2) x the RMS radius over the last calibration_window_seconds, median over seeds and over the start sizes in calibration_starts (a start of s has radius s x sqrt(N / pi) m). |
-| `settled_tolerance`, `start_agreement` | 0.05; 0.05 | calibration check | Calibration raises when R_f changed by more than settled_tolerance between the last two windows, or differs by more than start_agreement between the start sizes. Measured with cli/calibration_check.py (results/diagnostics/, with and without graze_repulsion). With 3 seeds per start, N = 25 to 566 change by at most 1.9% and differ by at most 2.3%, 600 changes by 2.7-2.8% and 630 by 5.7-5.9%. With 20 seeds, 25 to 400 change by at most 0.52%, 566 by 1.4-1.7%, 600 by 2.2%, 630 by 3.4% and 660 by 4.1-5.6%, where the starts differ by 11-13%. So 0.05 for both passes every flock size studied and stops at N = 630 with 3 seeds (660 with 20), the smallest tested sizes that fail: the calibration edge. A tolerance never changes R_f, only whether calibration stops, so it is not part of the physics hash. |
+| `calibration_seeds`, `calibration_seconds`, `calibration_window_seconds`, `calibration_starts` | 3; 300; 90; 1, 3 | whole protocol | One dog drives a compact flock toward an unreachable goal for calibration_seconds. R_f is sqrt(2) x the RMS radius over the last calibration_window_seconds, taking the median across seeds and across start densities in calibration_starts (radius s x sqrt(N / pi) m). |
+| `settled_tolerance`, `start_agreement` | 0.05; 0.05 | calibration check | Max relative drift between the last two windows and max relative spread across start sizes. At 0.05 every study size (N <= 566) passes at 3 and 20 seeds per start, while larger flocks fail from N = 630 (3 seeds) or N = 660 (20 seeds) once the flock outgrows the settle window. Excluded from the physics hash because tolerances only gate whether calibration stops. |
 
 ## Seeds and decisions
 
 | Setting | Default | Kind | Note |
 | :--- | :--- | :--- | :--- |
-| `master_seed` | 2026 | whole protocol | Seed i of every cell is master_seed + i, so cells share start flocks. |
-| `reliability_theta`, `confidence` | 0.9; 0.99 | sampling | A cell is reliable when the confidence interval of its success rate lies at or above theta, unreliable when it lies below, undecided otherwise. At theta 0.90 and 99% confidence a cell needs 51 successes in a row to be reliable. |
-| `batch_seeds`, `max_seeds` | 10; 200 | sampling | Seeds are added in batches until every open cell has max_seeds or budget_hours is spent. |
-| `time_margin`, `min_pairs`, `bootstrap_resamples` | 0.05; 5; 4000 | sampling | Two finish times are the same when their paired median difference is within time_margin of the slower median (paired bootstrap, bootstrap_resamples draws). min_pairs is the fewest shared finished seeds a comparison accepts. |
-| `refine_min_gap` | 1 | sampling | A dog count is added halfway between two neighbours more than refine_min_gap apart whose zones differ (whose reliability differs, when decide_finish_times is false). |
-| `decide_finish_times` | false | sampling | Off: seeds only decide reliability (D_min). On: seeds also decide the finish-time values D_best, D_sat and D_crowd, which costs more trials. |
-| `prune_overlap` | 0.9 | sampling | Above the team that confirms saturation, a reliable, not slower cell whose dogs were copies (mean dog_overlap at least this) gets no more seeds. Above 1 turns it off. |
-| `timeseries_seeds` | 3 | sampling | The first timeseries_seeds seeds of every cell keep their per-tick history as Parquet. |
-| `budget_hours` | 72 | sampling | A run starts no new batch after this many hours (calibration not counted). Trials are saved as they finish and a rerun continues where it stopped. |
+| `master_seed` | 2026 | whole protocol | Seed i of every cell is master_seed + i, so cells share starting flocks. |
+| `reliability_theta`, `confidence` | 0.9; 0.99 | sampling | A cell is reliable when its success-rate confidence interval lies at or above reliability_theta (51/51 successes at theta = 0.90, confidence = 0.99), unreliable when below, undecided otherwise. |
+| `batch_seeds`, `max_seeds` | 10; 200 | sampling | Seeds are added in batches of batch_seeds up to max_seeds per undecided cell. |
+| `time_margin`, `min_pairs`, `bootstrap_resamples` | 0.05; 5; 4000 | sampling | Paired-bootstrap finish-time equivalence margin (fraction of the slower median), minimum shared finished seeds required to compare two cells, and bootstrap resample count. |
+| `refine_min_gap` | 1 | sampling | Insert a midpoint D between neighbouring dog counts more than refine_min_gap apart when their zones differ (or when their reliability differs if decide_finish_times is false). |
+| `decide_finish_times` | false | sampling | False: allocate seeds only for reliability (D_min). True: also resolve finish-time regimes (D_best, D_sat, D_crowd). |
+| `prune_overlap` | 0.9 | sampling | Stop adding seeds to a reliable, non-slowed cell above the saturation team once its mean dog_overlap reaches this threshold (> 1 disables pruning). |
+| `timeseries_seeds` | 3 | sampling | Number of initial seeds per cell whose per-tick history is saved as Parquet. |
+| `budget_hours` | 72 | sampling | Wall-clock limit (hours, excluding calibration) after which no new batch is started. |

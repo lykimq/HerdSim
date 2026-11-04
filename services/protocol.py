@@ -303,9 +303,10 @@ def _check_shape(name: str, spec: Mapping[str, Any], settings: Mapping[str, Any]
     if not isinstance(spec["methods"], dict) or not spec["methods"]:
         raise ValueError(f"{name}: methods must name at least one method")
     _check_task_and_layouts(name, spec["layouts"], settings["task"])
-    for key in ("flock_sizes", "shepherd_counts"):
-        if any(not (_is_number(v) and isinstance(v, int) and v >= 1) for v in spec[key]):
-            raise ValueError(f"{name}: {key} must be positive integers")
+    if any(not (_is_number(v) and isinstance(v, int) and v >= 2) for v in spec["flock_sizes"]):
+        raise ValueError(f"{name}: flock_sizes must be integers >= 2")
+    if any(not (_is_number(v) and isinstance(v, int) and v >= 1) for v in spec["shepherd_counts"]):
+        raise ValueError(f"{name}: shepherd_counts must be positive integers")
 
 
 def _check_task_and_layouts(name: str, layouts: list[str], task: str) -> None:

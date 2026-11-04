@@ -12,6 +12,7 @@ from collections import Counter
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from itertools import pairwise
+from pathlib import Path
 from typing import Any
 
 import pandas as pd
@@ -231,7 +232,7 @@ def _plan_round(
     ledger: _Ledger,
     needs: set[CellId],
     config_of: Callable[[Cell], dict[str, Any]],
-    timeseries_dir: Any,
+    timeseries_dir: Path,
 ) -> list[Trial]:
     """The trials of the next round: every cell's missing seeds (``seeds_wanted``), skipping
     cells that errored. Longest trials first, so the big flocks and many-dog cells go to

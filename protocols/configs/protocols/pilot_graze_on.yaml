@@ -1,7 +1,6 @@
-# dmin_f99_m6 with grazing repulsion on, on three of its flock sizes: a pilot of whether the
-# paper's repulsion between grazing sheep changes D_min. Seed i draws the same flock as in
-# dmin_f99_m6, scaled by this run's own R_f, and the four layouts and the dog grid are kept because they size the field and
-# the drive, so each cell compares with the stored cell of dmin_f99_m6.
+# dmin_f99_m6 with grazing repulsion on, testing whether repulsion between grazing sheep
+# changes D_min. Layouts, dog grid, and master_seed match dmin_f99_m6 so cells compare
+# directly after scaling by this run's calibrated R_f.
 
 protocol_id: pilot_graze_on
 description: "Pilot: dmin_f99_m6 with grazing repulsion on, N 50, 100 and 200."
@@ -15,4 +14,5 @@ methods:
     params:
       graze_repulsion: true
 
+# Three mid-range anchor sizes from dmin_f99_m6; pilot_graze_on_rest covers the remaining six.
 flock_sizes: [50, 100, 200]

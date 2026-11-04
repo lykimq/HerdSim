@@ -13,7 +13,7 @@ from analysis import frontier as fr
 from tests.helpers import BASE_PROTOCOL
 
 # Success threshold 0.90 at 99% confidence, finish-time margin 5%. Finish-time seeds are on
-# here so those comparisons can be tested; the stored D_min protocols leave them off.
+# here so those comparisons can be tested (canonical default is false).
 RULES = replace(fr.Rules.from_settings(BASE_PROTOCOL.settings), decide_finish_times=True)
 SEEDS = 60
 NOISE = 2.0  # standard deviation of per-trial finish-time noise, in ticks

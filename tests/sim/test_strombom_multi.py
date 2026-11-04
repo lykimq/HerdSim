@@ -15,6 +15,7 @@ from tests.helpers import (
     ANGLE_TOL,
     GOAL,
     flock_with_outlier,
+    signed_angles,
     tight_flock,
 )
 from tests.helpers import (
@@ -47,25 +48,19 @@ def dogs_behind(n_dogs: int, flock: np.ndarray) -> np.ndarray:
     return centroid + np.column_stack([xs, ys])
 
 
-def signed_angles(points: np.ndarray, centroid: np.ndarray, arm: np.ndarray) -> np.ndarray:
-    """Signed angle of each point around ``centroid``, measured from ``arm``."""
-    rel = points - centroid
-    return np.arctan2(arm[0] * rel[:, 1] - arm[1] * rel[:, 0], rel @ arm)
-
-
 def evenly_spaced_angles(half_span: float, count: int) -> np.ndarray:
     return np.linspace(-half_span, half_span, count)
 
 
-# --- local view and settings -------------------------------------------------
+# --- core sub-flock and settings ---------------------------------------------
 
 
-def test_local_dog_uses_the_true_flock_size() -> None:
-    """Seeing 10 of 400 sheep: f(N) and Pd use N = 400, the GCM the 10 seen sheep."""
-    seen = tight_flock(10)
-    decision = decide(seen, GOAL, cfg(400))
+def test_subflock_decision_uses_the_true_flock_size() -> None:
+    """Passing a 10-sheep core of N = 400: f(N) and Pd use N = 400, the GCM uses the 10 sheep."""
+    core = tight_flock(10)
+    decision = decide(core, GOAL, cfg(400))
     assert decision.mode == DRIVE
-    centroid = seen.mean(axis=0)
+    centroid = core.mean(axis=0)
     assert np.linalg.norm(decision.target - centroid) == pytest.approx(R_A * np.sqrt(400))
 
 
@@ -73,7 +68,7 @@ def test_n_neighbors_forms() -> None:
     n_sheep = 50
     assert resolve_n_neighbors(-1, n_sheep) == n_sheep - 1  # "all others"
     assert resolve_n_neighbors(7, n_sheep) == 7
-    assert resolve_n_neighbors("0.25N", n_sheep) == 13  # round(0.25 * 50)
+    assert resolve_n_neighbors("0.25N", n_sheep) == 13  # ceil(0.25 * 50)
     with pytest.raises(ValueError):
         resolve_n_neighbors(7, 5)  # k must be < N
     with pytest.raises(ValueError):
