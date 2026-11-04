@@ -1,141 +1,88 @@
 # Glossary
 
-A definition for each term HerdSim's docs use, with a link to the section that explains it in full. Other docs, including [architecture](codes/architecture.md), link here at a term's first use. The [README](../README.md) gives an overview of the study.
+Definitions for the terms and symbols used across HerdSim's documentation, with links to the sections that explain them in full.
 
 ## Trials and experiments
 
-**$N$ and $D$**: the number of sheep (flock size) and of dogs (team size). The code and protocol files call a dog a shepherd (`shepherd_counts` lists the team sizes).
+These terms describe how HerdSim organises experiments, trials and adaptive sampling:
 
-**Protocol**: the recipe of one experiment, a YAML file in `protocols/configs/protocols/` that fixes the method, layouts, flock sizes, team sizes, [success rule](#success-and-reliability) and [deadline](#the-drive-task). How a protocol inherits from a parent and from the canonical defaults is in the [configuration guide](guides/configuration.md#protocol-overrides).
-
-**Protocol id**: the protocol's name, built from parts: `dmin` for the [$D_{\min}$](#team-sizes) study, `f99` for the [99% rule](#success-and-reliability) (absent for the strict rule), and `m12`, `m6` or `m3` for the deadline in [drive times](#the-drive-task).
-
-**Method**: a sheep model paired with a dog controller. HerdSim has one, `strombom_multi`, Strombom sheep with the team rule ([sheep model and dog rule](#sheep-model-and-dog-rule)).
-
-**Cell**: the question "can 3 dogs herd 200 sheep in this setup?" for one layout, $N$ and $D$ within one protocol. It gets trials in batches of 10, up to 200; a cell with an errored trial stops earlier.
-
-**Group**: one setup, meaning one layout and flock size $N$, in which the team sizes are compared.
-
-**Curve**: the cells of one group, one per tested team size.
-
-**Grid**: the layouts, flock sizes and team sizes a protocol tests. The top of the grid is its largest team size.
-
-**Trial**: one run of one cell with one seed, until it succeeds, ends early or reaches its time limit.
-
-**Tick**: one time step, 1 s. The Strombom paper gives no time unit, and HerdSim reads it as 1 s.
-
-**Seed**: the number that fixes a trial's random streams. Seed $i$ of a cell is `master_seed` (2026 by default) plus $i$, so it starts from the same flock at every team size and in every protocol ([paired random streams](experiments/task_design.md#paired-random-streams)).
-
-**Replay**: running a stored trial again from its configuration and seed. A replay that does not give the stored success and tick count raises an error.
-
-**Campaign**: the manager that runs a protocol into `results/<protocol id>/` and spends extra seeds on [open](#success-and-reliability) cells, in rounds ([adaptive sampling](experiments/task_design.md#3-adaptive-sampling)).
-
-**Sitting**: one run of the campaign command on a results folder; a folder can grow over several.
-
-**Round**: one pass of a sitting that plans and runs the seeds each open cell still needs ([campaign](codes/architecture.md#how-a-campaign-runs)).
-
-**Batch**: the 10 seeds a cell gets at a time (`batch_seeds`).
-
-**Seed cap**: the most seeds a cell can get, 200 (`max_seeds`).
-
-**Calibration**: the short run at the start of a campaign that measures $R_f$ ([drive task](#the-drive-task)) for each flock size, with one dog driving for 300 s ([sizing](experiments/task_design.md#sizing-by-the-calibrated-flock-radius)).
-
-**Main runs**: the six protocols of the study, three strict and three 99%, at 12, 6 and 3 [drive times](#the-drive-task), on $N = 25$-400 and $D = 1$-24. The 99% grids at 12 and 6 drive times add 71, 141, 283 and 566, for nine flock sizes ([flock size](experiments/task_design.md#flock-size)).
+- $N$ and $D$: the number of sheep (flock size) and dogs (team size). Code and protocol files call a dog a shepherd (`shepherd_counts`).
+- Protocol: the YAML recipe for one experiment in `protocols/configs/protocols/`, fixing the method, layouts, flock sizes, team sizes, [success rule](#success-and-reliability) and [deadline](#the-drive-task) ([configuration guide](guides/configuration.md#protocol-overrides)).
+- Protocol id: the protocol's name, built from `dmin` for the [$D_{\min}$](#team-sizes) study, `f99` for the [99% rule](#success-and-reliability) (omitted for the strict rule), and `m12`, `m6` or `m3` for the deadline in [drive times](#the-drive-task).
+- Main runs: the six study protocols (`dmin_m12`, `dmin_m6`, `dmin_m3` under the strict rule and `dmin_f99_m12`, `dmin_f99_m6`, `dmin_f99_m3` under the 99% rule) tested on $N = 25$-400 and $D = 1$-24, plus $N = 71, 141, 283, 566$ in the 99% runs at 12 and 6 drive times ([flock size](experiments/task_design.md#flock-size)).
+- Method: a sheep model paired with a dog controller; HerdSim uses `strombom_multi`, combining Strombom sheep with the team rule ([sheep model and dog rule](#sheep-model-and-dog-rule)).
+- Grid: the full set of layouts, flock sizes and team sizes a protocol tests; the top of the grid is its largest team size ($D = 24$ in the study).
+- Group and curve: one setup (a single layout and flock size $N$) is a group, and the sequence of cells across tested team sizes $D$ for that group is its curve.
+- Cell: a single $(layout, N, D)$ point on a curve, answering "can $D$ dogs herd $N$ sheep in this layout?" A cell receives trials in batches of 10 seeds (`batch_seeds`) up to the seed cap of 200 (`max_seeds`), stopping early once decided or if a trial errors.
+- Trial and tick: one simulation run of a cell with one random seed is a trial, stepped one tick (1 s) at a time until it succeeds, ends early or reaches the deadline.
+- Seed: the integer that fixes a trial's random streams (`master_seed + i`, with `master_seed = 2026` by default), so trial $i$ starts from the same flock at every team size and across the six study protocols ([paired random streams](experiments/task_design.md#paired-random-streams)).
+- Replay: re-running a stored trial from its configuration and seed; any mismatch in outcome or tick count raises an error.
+- Campaign, sitting and round: the campaign is the manager that runs a protocol into `results/<protocol_id>/` ([adaptive sampling](experiments/task_design.md#3-adaptive-sampling)); each invocation of the CLI is a sitting, and each pass within a sitting that allocates another seed batch to [open cells](#success-and-reliability) is a round ([architecture](codes/architecture.md#how-a-campaign-runs)).
+- Calibration: the initial pass of a campaign that drives a compact flock with one dog for 300 s at each flock size to measure $R_f$ ([sizing](experiments/task_design.md#sizing-by-the-calibrated-flock-radius)).
 
 ## The drive task
 
-**Drive task**: the dogs gather the flock if needed and drive it into a circular goal.
+These terms define the arena geometry and time limits:
 
-**$R_f$**: the calibrated flock radius, the size a compact flock of $N$ sheep settles to while one dog drives it ($\sqrt{2}$ times its RMS distance to the centre). It sizes the field, the goal and the drive ([sizing](experiments/task_design.md#sizing-by-the-calibrated-flock-radius)).
-
-**Calibration edge**: the smallest tested flock size whose calibration fails its 5% limits, meaning the radius of the driven flock changes by more than 5% between the last two 90 s windows or differs by more than 5% between the two start sizes. It is $N = 630$ with the 3 seeds per start the runs use (600 passes), and 660 with 20 seeds (630 passes) ([flock size](experiments/task_design.md#flock-size)). The study stops at 566, the last $\sqrt{2}$ step below it.
-
-**Goal**: a circle of radius $1.9 R_f$.
-
-**Drive distance $l$**: from the flock's start centre to the goal centre, $13 R_f$, but at least 80 m and at least the farthest any sheep can start (over the protocol's layouts) plus the goal radius plus $R_f$.
-
-**Drive time $T_{\mathrm{drive}}$**: the time a sheep walking straight at 1 m/s needs to cover the drive distance ([deadlines](experiments/task_design.md#deadlines-in-drive-times)).
-
-**Deadline**: a trial's time limit, 12, 6 or 3 drive times.
-
-**Finish time**: the time a successful trial takes.
+- Drive task: the task in which dogs gather a flock if scattered and drive it into a circular goal.
+- Calibrated flock radius $R_f$: the radius a compact flock of $N$ sheep settles to when driven by one dog ($\sqrt{2}$ times its root-mean-square distance to the flock centre), used to scale the arena, goal and drive distance ([sizing](experiments/task_design.md#sizing-by-the-calibrated-flock-radius)).
+- Calibration edge: the smallest tested flock size where calibration exceeds its 5% drift or start-agreement limits ($N = 630$ at 3 seeds per start where 600 passes, and $N = 660$ at 20 seeds where 630 passes); the study stops at $N = 566$, the last $\sqrt{2}$ step below it ([flock size](experiments/task_design.md#flock-size)).
+- Goal: a circle of radius $1.9 R_f$.
+- Drive distance $l$: the distance from the flock's initial centre to the goal centre, set to $13 R_f$ (at least 80 m, and at least the farthest possible initial sheep distance across the protocol's layouts plus the goal radius plus $R_f$).
+- Drive time $T_{\mathrm{drive}}$ and deadline: one drive time is the duration a sheep walking straight at 1 m/s takes to cover the drive distance $l$, and a trial's deadline is 12, 6 or 3 drive times ([deadlines](experiments/task_design.md#deadlines-in-drive-times)).
+- Finish time: the number of ticks (seconds) a successful trial takes to reach the goal condition.
 
 ## Start layouts and dog starts
 
-**Layout**: how the sheep are placed at the start ([layouts](experiments/task_design.md#flock-start-layouts)). A Gaussian layout's spread is a standard deviation, cut at three spreads. The scattered layouts are sized by the [collect distance](#sheep-model-and-dog-rule), beyond which a sheep is an outlier.
+These terms describe the initial placement of sheep and dogs at tick 0:
 
-**`compact`**: a Gaussian with spread $0.5 R_f$, so every sheep starts within $1.5 R_f$ and within the collect distance, and the dogs start by driving.
-
-**`wide`**: a Gaussian whose spread is half the collect distance, so about 13% of the sheep start beyond it at every $N$.
-
-**`split`**: three compact clusters (two below $N = 12$) on a circle of radius the collect distance round the flock centre.
-
-**`outlier_rich`**: 80% of the sheep in a compact core and 20% on a ring 1.1-1.6 collect distances from it.
-
-**Scattered layouts**: `wide`, `split` and `outlier_rich`, where the dogs must collect before they drive.
-
-**Dog start**: where the dogs stand at tick 0 ([dog starts](experiments/task_design.md#dog-starts)). The study uses `arcs`, half circles behind the flock, the first 30 m beyond the farthest possible start sheep (`dog_start_gap`), with dogs at least 5 m apart (`dog_start_spacing`) and the rest on a circle 5 m farther out.
+- Layout: the initial spatial distribution of the sheep ([layouts](experiments/task_design.md#flock-start-layouts)), where Gaussian layouts are truncated at three standard deviations and scattered layouts are scaled by the [collect distance](#sheep-model-and-dog-rule).
+- `compact`: a tight Gaussian cluster with standard deviation $0.5 R_f$ (truncated at $1.5 R_f$), keeping all sheep within the collect distance so dogs begin driving immediately.
+- `wide`: a loose Gaussian cluster with standard deviation equal to half the collect distance, placing about 13% of the sheep beyond the collect distance at every $N$.
+- `split`: three compact clusters (two when $N < 12$) placed on a circle of radius equal to the collect distance around the flock centre.
+- `outlier_rich`: a compact core containing 80% of the sheep surrounded by the remaining 20% on a ring at 1.1-1.6 collect distances.
+- Scattered layouts: the three layouts (`wide`, `split` and `outlier_rich`) in which sheep start beyond the collect distance, requiring collection before driving.
+- Dog start (`arcs`): the initial placement of dogs on semicircular arcs behind the flock, with the inner arc 30 m behind the farthest possible initial sheep (`dog_start_gap`), at least 5 m between dogs (`dog_start_spacing`), and any overflow placed on a second arc 5 m farther out ([dog starts](experiments/task_design.md#dog-starts)).
 
 ## Success and reliability
 
-**Strict rule**: a trial succeeds when every sheep is inside the goal at one tick.
+These terms define trial success and cell-level statistical decisions:
 
-**99% rule**: a trial succeeds when at least $\lceil 0.99 N \rceil$ sheep are inside at one tick. Below $N = 100$ that is $N$, so the two rules agree there.
-
-**$\theta$**: the reliability threshold, 0.90.
-
-**Reliable cell**: a cell whose 99% Clopper-Pearson interval of the success rate lies at or above $\theta$, which takes at least 51 successes without a failure (60 of 60 gives a lower bound of 0.915). An unreliable cell's interval lies below $\theta$ and an undecided cell's straddles it; the first two are decided ([stopping early](experiments/task_design.md#stopping-early-with-the-99-clopper-pearson-interval)).
-
-**Open cell**: a cell that still asks for seeds, because its reliability is undecided or, with `decide_finish_times` true, a finish-time comparison is. Cells with an errored trial and cells [pruned above saturation](experiments/task_design.md#pruning-above-saturation) get no seeds and are not counted. An open cell gets another batch until it has `max_seeds` (200); a cell at 200 stays open but gets no more seeds.
-
-**Undecided**: a cell is undecided when its reliability interval straddles $\theta$ (see Reliable cell), or when its interval is at or above $\theta$ but one of its trials raised an error. A finish-time comparison is undecided when the two cells share fewer than 5 finished seeds or the bootstrap interval of their median difference is neither beyond nor within 5% of the slower median. The zone `undecided` holds the cells undecided on reliability and the reliable cells above $D_{best}$ whose comparison with $D_{best}$ is undecided ([zones](experiments/task_design.md#zones)).
-
-**Frontier rules**: the rules that turn a curve's stored trials into each cell's decision and the team sizes below ([frontier rules](experiments/task_design.md#5-frontier-rules-and-zones)).
+- Strict rule: a trial succeeds when all $N$ sheep are inside the goal at the same tick before the deadline.
+- 99% rule: a trial succeeds when at least $\lceil 0.99 N \rceil$ sheep are inside the goal at the same tick before the deadline, which equals the strict rule for $N < 100$.
+- Reliability threshold $\theta$: the target success rate $\theta = 0.90$.
+- Reliable, unreliable and undecided cells: using the exact two-sided 99% Clopper-Pearson confidence interval $[L, U]$ for a cell's success rate, a cell is reliable when $L \ge \theta$ (requiring at least 51/51 successes) with no trial errors, unreliable when $U < \theta$, and undecided on reliability when $L < \theta \le U$ or when $L \ge \theta$ with a trial error ([stopping early](experiments/task_design.md#stopping-early-with-the-99-clopper-pearson-interval)).
+- Open cell: a cell that still needs seeds under the protocol's stopping rule (either undecided on reliability, or undecided on finish-time comparison when `decide_finish_times` is enabled), excluding errored cells and cells [pruned above saturation](experiments/task_design.md#pruning-above-saturation); at `max_seeds` (200) an open cell remains listed in `status.json` (`cells_needing_seeds`) but receives no further seeds.
+- Frontier rules and zones: the rules that evaluate a curve's cells to assign each cell a zone label (such as `too_few`, `improving`, `saturated` or `undecided`) and extract critical team sizes ([frontier rules](experiments/task_design.md#5-frontier-rules-and-zones)).
 
 ## Team sizes
 
-**$D_{\min}$**: the smallest reliable team on a curve ([report, section 2.3](report/d_min_report.md#23-when-a-team-is-reliable)).
+These terms describe the critical team sizes reported for a curve:
 
-**Bracket**, written `3-8`, and **$D_{\min,\mathrm{low}}$**: 8 dogs are reliable and 3 are undecided, so $D_{\min}$ lies between 3 and 8. $D_{\min,\mathrm{low}}$, the lower end, is the smallest team whose interval still reaches $\theta$.
-
-**Lower bound**, written `[5]`: no team is reliable yet, and $D_{\min}$ is at least 5, its $D_{\min,\mathrm{low}}$.
-
-**$D_{\min,\mathrm{stable}}$**: on a curve where a team above $D_{\min,\mathrm{low}}$ is unreliable, the smallest reliable team above the last such team ([report, section 2.3](report/d_min_report.md#23-when-a-team-is-reliable)).
-
-**`none`**: every tested team up to the top of the grid is unreliable; the generated tables write `none on grid`.
-
-**$D_{\mathrm{sat}}$**: the smallest reliable team that no larger reliable team beats on finish time ([frontier values](experiments/task_design.md#frontier-values)). One team beats another when, on the seeds both finished, the bootstrap 99% interval of the paired median difference lies more than 5% of the slower median below zero. The campaign uses it to stop seeding copies above it ([pruning](experiments/task_design.md#pruning-above-saturation)); the report does not use it.
-
-**Other frontier values**: the frontier rules also store $D_{\max}$, $D_{\mathrm{overcrowd}}$, $D_{\mathrm{best}}$ and $D_{\mathrm{crowd}}$ in `frontier_groups.csv` ([frontier values](experiments/task_design.md#frontier-values)).
-
-**Zone**: a cell's label along its curve, such as `too_few`, `improving` or `saturated` ([zones](experiments/task_design.md#zones)).
+- $D_{\min}$: the smallest reliable team size on a curve ([report, section 2.3](report/d_min_report.md#23-when-a-team-is-reliable)).
+- Bracket (`3-8`) and $D_{\min,\mathrm{low}}$: notation indicating that 8 dogs are reliable while a smaller team (down to $D_{\min,\mathrm{low}} = 3$, the smallest team whose interval still reaches $\theta$) remains undecided at 200 seeds.
+- Lower bound (`[5]`): notation indicating that no tested team on the curve is reliable yet, and the smallest team not yet ruled out is $D_{\min,\mathrm{low}} = 5$.
+- `none` (`none on grid`): notation indicating that every tested team size up to the top of the grid is unreliable.
+- $D_{\min,\mathrm{stable}}$: on a curve where a team size above $D_{\min,\mathrm{low}}$ is unreliable, the smallest reliable team size above the last unreliable team ([report, section 2.3](report/d_min_report.md#23-when-a-team-is-reliable)).
+- Saturation team size $D_{\mathrm{sat}}$ and other frontier values: $D_{\mathrm{sat}}$ is the smallest reliable team that no larger reliable team beats on paired finish time (used by the campaign to [prune seeds above saturation](experiments/task_design.md#pruning-above-saturation)), stored alongside $D_{\max}$, $D_{\mathrm{overcrowd}}$, $D_{\mathrm{best}}$ and $D_{\mathrm{crowd}}$ in `frontier_groups.csv` ([frontier values](experiments/task_design.md#frontier-values)).
 
 ## Sheep model and dog rule
 
-**Strombom model**: the sheep model of Strombom et al. (2014) ([Strombom sheep](methods/strombom_sheep.md)).
+These terms define the agent physics in `sim/`:
 
-**$r_a$**: 2 m, the distance below which sheep push each other apart.
-
-**$r_s$**: 65 m, the distance within which a sheep reacts to a dog; with no dog that close it grazes.
-
-**Grazing repulsion** (`graze_repulsion`): grazing sheep also push apart when closer than $r_a$, as in the paper. Off in the six study runs, on in the check against the paper and the grazing pilots ([grazing](methods/strombom_sheep.md#grazing)).
-
-**Neighbour count $n$**: how many nearest neighbours attract a sheep; all $N - 1$ in the study. The check against the paper varies it, and there a trial finishes when the flock centre is within 10 m of the goal ([terms](methods/strombom_check.md#terms)).
-
-**GCM and $\mathrm{LCM}_i$**: the global centre of mass (mean position of the flock) and the local centre of mass of sheep $i$ (mean position of its nearest neighbours, all other sheep by default).
-
-**Collect distance $f(N) = r_a N^{2/3}$**: a sheep farther than this from the GCM is an outlier. The dogs collect while any sheep is that far out, and drive otherwise.
-
-**Collect point $P_c$ and drive point $P_d$**: where a dog aims to collect an outlier or to drive. $P_d$ lies $r_a \sqrt{N}$ behind the flock centre ([team rule](methods/strombom_multi.md)).
-
-**Team rule**: HerdSim's multi-dog collect and drive rule, run with Strombom sheep as `strombom_multi`. While collecting, the $D$ farthest outliers each get one dog (Hungarian algorithm, least total walk) and spare dogs drive the core from behind; while driving, the dogs spread over an arc through $P_d$ ([driving](methods/strombom_multi.md#driving-and-its-limit-for-large-flocks)).
-
-**Point dogs**: dogs with no size, so two can stand at one point.
-
-**Stop rule**: a dog stands still while any sheep is within $3 r_a = 6$ m.
+- Strombom model: the sheep and single-dog interaction rules of Strombom et al. (2014) ([Strombom sheep](methods/strombom_sheep.md)).
+- Interaction distances $r_a$ and $r_s$: sheep repel one another within $r_a = 2$ m and react to any dog within $r_s = 65$ m (grazing when no dog is within $r_s$).
+- Grazing repulsion (`graze_repulsion`): sheep-to-sheep repulsion within $r_a$ applied even when no dog is within $r_s$; disabled in the six main multi-dog study runs and enabled in the paper check and grazing pilots ([grazing](methods/strombom_sheep.md#grazing)).
+- Neighbour count $n$: the number of nearest neighbours that attract each sheep ($n = N - 1$, the global case, in the multi-dog study; varied in the [paper check](methods/strombom_check.md#terms)).
+- $\mathrm{GCM}$ and $\mathrm{LCM}_i$: the global centre of mass of all $N$ sheep and the local centre of mass of sheep $i$'s $n$ nearest neighbours.
+- Collect distance $f(N) = r_a N^{2/3}$: the radius around the $\mathrm{GCM}$ beyond which a sheep is classified as an outlier, triggering collection rather than driving.
+- Collect point $P_c$ and drive point $P_d$: the target point $r_a$ behind an outlier for collection ($P_c$) and $r_a \sqrt{N}$ behind the $\mathrm{GCM}$ for driving ($P_d$) ([team rule](methods/strombom_multi.md)).
+- Team rule (`strombom_multi`): HerdSim's multi-dog controller, which matches dogs to the $D$ farthest outliers via the Hungarian algorithm (minimum total distance) while spare dogs drive the core, and spreads all $D$ dogs on an arc through $P_d$ once all sheep are within $f(N)$ ([driving](methods/strombom_multi.md#driving-and-its-limit-for-large-flocks)).
+- Stop rule: a dog pauses for the current tick whenever any sheep is within $3 r_a = 6$ m.
 
 ## Records
 
-**Physics hash**: a digest of every setting that changes a trial; a folder whose hash differs from its protocol is refused (the [configuration guide](guides/configuration.md#physics-hash) says what it covers and leaves out).
+These terms describe provenance and reproducibility checks on stored results:
 
-**Code identity**: the trial-code hash, git commit, uncommitted-edit flag and Python and library versions, recorded for each sitting. A changed code hash between sittings gives a warning, and the run goes on.
+- Physics hash: a digest of all protocol settings that affect trial trajectories; a results folder refuses a run if its stored physics hash differs from the protocol's ([configuration guide](guides/configuration.md#physics-hash)).
+- Code identity: the trial-code hash, git commit, dirty-worktree flag and Python/package versions logged in `runs.jsonl` for each sitting, emitting a warning if the trial-code hash changes between sittings.

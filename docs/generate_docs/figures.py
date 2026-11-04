@@ -702,47 +702,61 @@ def field_panel(ax: Axes, c: Config, n: int) -> None:
     centre = np.asarray(c["flock_center"])
     goal = np.asarray(c["goal_center"])
     rf = c["flock_radius"]
+    r_goal = c["goal_radius"]
     reach = start_reach(c)
+    from matplotlib.colors import to_rgb
+
     ax.add_patch(Rectangle((0, 0), c["world_width"], c["world_height"], fc="none", ec=GRID, lw=1.0))
-    ax.add_patch(Circle(xy(centre), reach, fc=BLUE, ec="none", alpha=0.10))
-    ax.add_patch(Circle(xy(centre), rf, fc="none", ec=BLUE, lw=1.0, ls=":"))
+    ax.add_patch(
+        Circle(xy(centre), reach, fc=(*to_rgb(BLUE), 0.08), ec=BLUE, lw=1.0, ls="--", zorder=1)
+    )
     sheep = place_flock({**c, "initial_layout": "compact"}, np.random.default_rng(SEED))
-    ax.scatter(*sheep.T, s=7, color=BLUE, lw=0)
-    ax.add_patch(Circle(xy(goal), c["goal_radius"], fc="none", ec=AQUA, lw=1.6))
-    below = centre[1] - reach
-    arrow(ax, (goal[0], below - 28), (centre[0], below - 28), INK, 1.0, style="<->")
+    ax.scatter(*sheep.T, s=5, color=BLUE, alpha=0.45, lw=0, zorder=2)
+    ax.add_patch(Circle(xy(centre), rf, fc="none", ec=INK, lw=1.4, zorder=4))
+    ax.scatter(*centre, s=35, marker="+", color=INK, lw=1.2, zorder=5)
+    ax.add_patch(Circle(xy(goal), r_goal, fc="none", ec=AQUA, lw=1.6, zorder=4))
+    ax.scatter(*goal, s=35, marker="+", color=AQUA, lw=1.2, zorder=5)
+    below = centre[1] - reach - 28
+    ax.plot([centre[0], centre[0]], [centre[1], below], color=MUTED, lw=0.7, ls=":")
+    ax.plot([goal[0], goal[0]], [goal[1], below], color=MUTED, lw=0.7, ls=":")
+    arrow(ax, (goal[0], below), (centre[0], below), INK, 1.0, style="<->")
     ax.text(
         (centre[0] + goal[0]) / 2,
-        below - 46,
-        f"drive length {goal[0] - centre[0]:.0f}",
+        below - 18,
+        f"drive distance l = {goal[0] - centre[0]:.1f} m",
         ha="center",
         color=INK,
     )
+    angle_rf = -np.pi / 4
     ax.annotate(
-        f"R_f = {rf:.1f}",
-        xy=(centre[0] + rf * 0.71, centre[1] - rf * 0.71),
-        xytext=(centre[0] + 25, centre[1] - 60),
-        color=BLUE,
-        arrowprops=dict(arrowstyle="-", color=BLUE, lw=0.7),
+        f"R_f = {rf:.1f} m\n(settled flock radius)",
+        xy=(centre[0] + rf * np.cos(angle_rf), centre[1] + rf * np.sin(angle_rf)),
+        xytext=(centre[0] + 22, centre[1] - 68),
+        color=INK,
+        fontsize=8.5,
+        arrowprops=dict(arrowstyle="->", color=INK, lw=0.9),
     )
+    angle_reach = 2.35
     ax.annotate(
-        f"farthest start sheep, {reach:.0f}\n(widest layout)",
-        xy=(centre[0] - reach * 0.71, centre[1] + reach * 0.71),
-        xytext=(centre[0] - reach - 10, centre[1] + reach + 22),
+        f"l_reach = {reach:.1f} m\nmax start radius (outlier_rich)",
+        xy=(centre[0] + reach * np.cos(angle_reach), centre[1] + reach * np.sin(angle_reach)),
+        xytext=(centre[0] - reach - 15, centre[1] + reach + 18),
         color=BLUE,
-        arrowprops=dict(arrowstyle="-", color=BLUE, lw=0.7),
+        fontsize=8.5,
+        arrowprops=dict(arrowstyle="->", color=BLUE, lw=0.9),
     )
     ax.text(
         goal[0],
-        goal[1] + c["goal_radius"] + 8,
-        f"goal {c['goal_radius']:.1f} = {GOAL_MULTIPLE} R_f",
+        goal[1] + r_goal + 10,
+        f"R_goal = {r_goal:.1f} m\n({GOAL_MULTIPLE} R_f)",
         ha="center",
         color=AQUA,
+        fontsize=8.5,
     )
     ax.text(
         c["world_width"],
         c["world_height"] + 6,
-        f"field {c['world_width']:.0f} x {c['world_height']:.0f}, places the start, no boundary",
+        f"field {c['world_width']:.0f} x {c['world_height']:.0f} m (open, no boundary)",
         ha="right",
         color=MUTED,
         fontsize=8,
@@ -769,9 +783,7 @@ def drive_length_panel(ax: Axes, configs: Sequence[Config]) -> None:
         ls="--",
         label=f"minimum {DRIVE_FLOOR:g}",
     )
-    ax.plot(
-        NS, from_reach, color=ORANGE, lw=1.6, marker="o", ms=3, label="reach + goal radius + R_f"
-    )
+    ax.plot(NS, from_reach, color=ORANGE, lw=1.6, marker="o", ms=3, label="l_reach + R_goal + R_f")
     n_axis(ax)
     ax.set_ylabel("length (m)")
     ax.set_title("drive length: the largest of three terms")

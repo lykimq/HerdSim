@@ -79,7 +79,11 @@ def _fig3_panel(ax: Axes, trials: pd.DataFrame, title: str) -> Any:
     )  # fmt: skip
     sizes = np.linspace(2, 150, 100)
     ax.plot(sizes, SHARE_LINE * sizes, color=INK, lw=0.9)
-    ax.set(xlim=(0, 156), ylim=(0, 156), xlabel="no. agents (N)", ylabel="no. neighbours (n)")
+    ticks = range(20, 141, 20)
+    ax.set(
+        xlim=(0, 156), ylim=(0, 156), xticks=ticks, yticks=ticks,
+        xlabel="no. agents (N)", ylabel="no. neighbours (n)",
+    )  # fmt: skip
     ax.set_title(title)
     return points
 

@@ -2,7 +2,7 @@
 
 This doc summarises the ten papers kept in this folder: what each one asks, how it answers, what it finds, and what part of it matters for counting herders. A last section lists, more briefly, other work found while reading whose files are not here.
 
-Numbers below are the ones the papers state in their text or tables. Where a result is only shown in a figure, the summary describes its shape and gives no value. Notes marked "for HerdSim" are our reading, not the authors' claims. HerdSim's own terms in those notes (the team rule, FAT, layouts such as `wide`, point dogs, the holding and gather tasks, protocol ids) are defined in the [glossary](../glossary.md).
+Numbers below are the ones the papers state in their text or tables. Where a result is only shown in a figure, the summary describes its shape and gives no value. Notes marked "for HerdSim" are our reading, not the authors' claims. HerdSim's current terms in those notes (the team rule, layouts such as `wide`, protocol ids) are defined in the [glossary](../glossary.md).
 
 ## Contents
 
@@ -385,7 +385,7 @@ These papers were read while surveying the field but are not kept here as files.
 
 Three points from these sources matter for reading HerdSim:
 
-- Harm from extra herders has been reported with a mechanism only in containment (Green et al.) and with centralised control (Li et al. 2023); open gathering and caging show saturation without harm (Lee and Kim, Van Havermaet et al. 2023). HerdSim's own results fit this: point dogs never made the drive fail on `wide` or `outlier_rich`, while dogs that take up room fail in the holding task.
+- Harm from extra herders has been reported with a mechanism only in containment (Green et al.) and with centralised control (Li et al. 2023); open gathering and caging show saturation without harm (Lee and Kim, Van Havermaet et al. 2023).
 - The size of the start area, more than the number of animals, sets the effort in Li et al. 2022 and Van Havermaet et al. 2023, which agrees with HerdSim's sizing of its tasks by the flock's own scale.
 - No study relates stress to the number of dogs or drones, and no published GPS study with two or more sheepdogs was found.
 
