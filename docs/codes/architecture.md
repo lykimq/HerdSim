@@ -1,6 +1,6 @@
 # HerdSim architecture
 
-How HerdSim is put together: the design rules, the code layers, how a campaign runs and resumes, and where to find each part in the codebase. Terms are in the [glossary](../glossary.md), statistical rules in [task design](../experiments/task_design.md), and result files in the [configuration guide](../guides/configuration.md).
+How HerdSim is put together: the design rules, the code layers, how a campaign runs and resumes, and where to find each part in the codebase.
 
 ## Design rules
 

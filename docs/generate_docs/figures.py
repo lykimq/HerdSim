@@ -190,8 +190,8 @@ FLOCK_NEIGHBORS = np.array(
         [23.0, -17.0],
     ]
 )
-CLOSE_NEIGHBOR = np.array([1.2, 0.9])
-FORCE_DOG = np.array([-25.0, -20.0])
+CLOSE_NEIGHBOR = np.array([-3.2, 2.8])
+FORCE_DOG = np.array([-32.0, -26.0])
 FORCE_ARROW_SCALE = 12.0  # arrow length per unit of weighted force
 
 
@@ -238,7 +238,7 @@ def force_arrows(lcm: np.ndarray) -> list[ForceArrow]:
             RED,
             f"weight $\\rho_a$ = {rho_a} (highest)",
             r"$\rho_a\,\mathbf{R}_{a,i}$",
-            (-2.0, -2.0),
+            (1.0, -2.2),
         ),
         (
             r"4. Running from the dog $\rho_s\,\mathbf{R}_{s,i}$",
@@ -267,27 +267,19 @@ def force_arrows(lcm: np.ndarray) -> list[ForceArrow]:
 
 def forces_geometry_panel(ax: Axes, lcm: np.ndarray) -> None:
     """Who the focal sheep reacts to: neighbours, a too-close neighbour, the local centre, a dog."""
+    r_a_drawn = R_A * 3.0  # drawn 3x so the close neighbour and circle are legible at r_s scale
+    ax.add_patch(Circle((0, 0), R_S, fc=ORANGE, alpha=0.04, ec="none"))
+    ax.add_patch(Circle((0, 0), R_S, fc="none", ec=ORANGE, lw=1.1, ls="--", alpha=0.75))
+    ax.plot([], [], color=ORANGE, lw=1.1, ls="--", label=f"dog detection radius $r_s = {R_S:g}$ m")
     ax.add_patch(
         Circle(
             (0, 0),
-            R_S,
-            fc=ORANGE,
-            alpha=0.04,
-            ec=ORANGE,
-            lw=1.0,
-            ls="--",
-            label=f"dog reaction distance $r_s = {R_S:g}$ m",
-        )
-    )
-    ax.add_patch(
-        Circle(
-            (0, 0),
-            R_A,
+            r_a_drawn,
             fc=RED,
-            alpha=0.25,
+            alpha=0.18,
             ec=RED,
             lw=1.2,
-            label=f"personal space $r_a = {R_A:g}$ m",
+            label=f"repulsion zone $r_a = {R_A:g}$ m (drawn 3x)",
         )
     )
     ax.scatter(*FLOCK_NEIGHBORS.T, s=35, color=BLUE, alpha=0.75, lw=0, label="flock-mates")
@@ -301,15 +293,16 @@ def forces_geometry_panel(ax: Axes, lcm: np.ndarray) -> None:
         label=r"neighbour closer than $r_a$",
     )
     ax.scatter(*FOCAL, s=85, color=INK, zorder=5, label="sheep $i$")
-    bold_text(ax, FOCAL[0] + 1.5, FOCAL[1] - 3.2, "Sheep $i$", INK)
+    bold_text(ax, FOCAL[0] + 2.5, FOCAL[1] - 5.5, "Sheep $i$", INK)
     ax.scatter(
         *lcm, s=75, marker="+", color=AQUA, lw=2.2, zorder=4, label="local centre of mass (LCM)"
     )
-    bold_text(ax, lcm[0] + 2.0, lcm[1] - 1.0, r"$\mathrm{LCM}_i$", AQUA)
-    dogs_at(ax, FORCE_DOG, s=95, lw=1.0, zorder=5, label=r"dog, within $r_s$")
-    bold_text(ax, FORCE_DOG[0] - 2.0, FORCE_DOG[1] - 4.5, "dog", ORANGE)
-    ax.set_xlim(-40, 45)
-    ax.set_ylim(-35, 45)
+    bold_text(ax, lcm[0] + 2.5, lcm[1] - 1.5, r"$\mathrm{LCM}_i$", AQUA)
+    dogs_at(ax, FORCE_DOG, s=95, lw=1.0, zorder=5, label=r"dog (within $r_s$)")
+    bold_text(ax, FORCE_DOG[0] - 2.0, FORCE_DOG[1] - 6.5, "dog", ORANGE)
+    ax.text(46, -54, f"$r_s = {R_S:g}$ m", color=ORANGE, fontsize=8.5)
+    ax.set_xlim(-72, 72)
+    ax.set_ylim(-72, 72)
     ax.legend(loc="upper left", frameon=False, fontsize=8)
     style_map(ax, "A. What sheep $i$ responds to")
 
@@ -317,7 +310,7 @@ def forces_geometry_panel(ax: Axes, lcm: np.ndarray) -> None:
 def forces_sum_panel(ax: Axes, arrows: Sequence[ForceArrow]) -> None:
     """The five weighted terms from the sheep, and their sum as the resultant heading."""
     scale = FORCE_ARROW_SCALE
-    resultant = sum((a.vec for a in arrows), start=np.zeros(2)) * (scale * 0.42)
+    resultant = sum((a.vec for a in arrows), start=np.zeros(2)) * (scale * 0.55)
     handles = []
     for a in arrows:
         arrow(ax, a.vec * scale, (0, 0), a.color, 2.2)
@@ -337,14 +330,14 @@ def forces_sum_panel(ax: Axes, arrows: Sequence[ForceArrow]) -> None:
         )
     )
     ax.scatter(0, 0, s=70, color=INK, zorder=5)
-    bold_text(ax, 0, -2.5, "Sheep $i$", INK, ha="center")
+    bold_text(ax, -1.5, -3.2, "Sheep $i$", INK, ha="right")
     for a in arrows:
         dx, dy = a.tip_offset
         bold_text(ax, a.vec[0] * scale + dx, a.vec[1] * scale + dy, a.tip_label, a.color)
-    bold_text(ax, resultant[0] + 1.5, resultant[1] + 1.0, r"$\mathbf{H}_i'$", INK, 9.5)
+    bold_text(ax, resultant[0] + 1.2, resultant[1] + 0.5, r"$\mathbf{H}_i'$", INK, 9.5)
     ax.legend(handles=handles, loc="lower left", frameon=False, fontsize=8)
-    ax.set_xlim(-30, 25)
-    ax.set_ylim(-30, 20)
+    ax.set_xlim(-18, 32)
+    ax.set_ylim(-28, 22)
     style_map(ax, r"B. The five weighted terms and the new heading $\mathbf{H}_i'$")
 
 
@@ -364,7 +357,10 @@ def team_rule_panel(ax: Axes, layout: str, n: int, d: int, collecting: bool) -> 
     sheep, dogs = start(c)
     targets = team_targets(sheep, np.asarray(c["goal_center"]), dogs, c)
     centroid = sheep.mean(axis=0)
-    far = np.linalg.norm(sheep - centroid, axis=1) > collect_threshold(n, c["r_a"])
+    f_n = collect_threshold(n, c["r_a"])
+    far = np.linalg.norm(sheep - centroid, axis=1) > f_n
+    if collecting:
+        ax.add_patch(Circle(xy(centroid), f_n, fc="none", ec=MUTED, lw=0.9, ls="--"))
     flock_split(ax, sheep, far, s_in=7, s_out=14, lw_out=0.5)
     dogs_at(ax, dogs)
     targets_at(ax, targets, s=22, lw=1.1, zorder=3)
@@ -382,11 +378,23 @@ def fig_team_rule() -> None:
     """Team rule from D=1 to 8: collect (wide) and drive (compact)."""
     counts = (1, 2, 4, 8)
     rows = (("wide", 200), ("compact", 200))
-    fig, axes = plt.subplots(2, 4, figsize=(13, 7.0))
+    fig, axes = plt.subplots(2, 4, figsize=(13, 7.2))
     for col, d in enumerate(counts):
         for row, (layout, n) in enumerate(rows):
             team_rule_panel(axes[row, col], layout, n, d, collecting=row == 0)
-    save(fig, "fig3_team_rule.png", rect=(0, 0, 1, 0.98))
+    fig.text(0.01, 0.015, "light blue: sheep inside f(N)", color=BLUE, fontsize=8.5)
+    fig.text(0.19, 0.015, "dark-outlined: outliers (> f(N))", color=INK, fontsize=8.5)
+    fig.text(
+        0.39, 0.015, "orange triangles + arrows: dogs -> targets (x)", color=ORANGE, fontsize=8.5
+    )
+    fig.text(
+        0.69,
+        0.015,
+        "dashed circle: collect threshold f(N) = r_a N^(2/3)",
+        color=MUTED,
+        fontsize=8.5,
+    )
+    save(fig, "fig3_team_rule.png", rect=(0, 0.04, 1, 0.98))
 
 
 # ----- team rule: collect point and Hungarian matching -----
@@ -397,18 +405,9 @@ def outlier_panel(
     stray = sheep[np.argmax(np.linalg.norm(sheep - centroid, axis=1))]
     # drawn four times farther out than the real r_a, or the cross would sit on the sheep
     pc_pos = stray + float(c["r_a"]) * 4.0 * unit(stray - centroid)
-    ax.add_patch(
-        Circle(
-            xy(centroid),
-            thresh,
-            fc=BLUE,
-            alpha=0.04,
-            ec=MUTED,
-            lw=1.2,
-            ls="--",
-            label=r"threshold $f(N) = r_a N^{2/3}$",
-        )
-    )
+    ax.add_patch(Circle(xy(centroid), thresh, fc=BLUE, alpha=0.04, ec="none"))
+    ax.add_patch(Circle(xy(centroid), thresh, fc="none", ec=MUTED, lw=1.1, ls="--", alpha=0.7))
+    ax.plot([], [], color=MUTED, lw=1.1, ls="--", label=r"collect threshold $f(N) = r_a N^{2/3}$")
     flock_split(
         ax,
         sheep,
@@ -416,7 +415,7 @@ def outlier_panel(
         s_in=18,
         s_out=30,
         lw_out=0.8,
-        labels=("sheep inside the flock", r"outliers ($> f(N)$)"),
+        labels=("sheep inside $f(N)$", r"outliers ($> f(N)$)"),
     )
     gcm(
         ax,
@@ -441,15 +440,15 @@ def outlier_panel(
         INK,
     )
     ax.text(
-        centroid[0] - thresh * 0.72,
-        centroid[1] + thresh * 0.72,
-        r"flock region: $f(N) = r_a N^{2/3}$",
+        centroid[0] + thresh + 3,
+        centroid[1] - 12,
+        r"$f(N) = r_a N^{2/3}$",
         color=MUTED,
         fontsize=8.5,
     )
     ax.legend(loc="lower left", frameon=False, fontsize=8.5)
     window(ax, centroid, 130, 90, 110, 110)
-    style_map(ax, "A. outliers and the collect point Pc")
+    style_map(ax, "A. Outliers and the collect point Pc")
 
 
 def matching_panel(
@@ -462,10 +461,13 @@ def matching_panel(
 ) -> None:
     """The assignment of dogs to collect points, against a hand-drawn crossing one."""
     targets = team_targets(sheep, np.asarray(c["goal_center"]), dogs, c)
+    thresh = collect_threshold(int(c["n_sheep"]), c["r_a"])
+    ax.add_patch(Circle(xy(centroid), thresh, fc="none", ec=MUTED, lw=0.9, ls="--", alpha=0.6))
     flock_split(ax, sheep, far, s_in=15, s_out=28, lw_out=0.6, alpha_in=0.5)
     gcm(ax, centroid, label=None, s=50, lw=1.5, color=MUTED, zorder=3)
     dogs_at(ax, dogs, s=70, lw=1.0, zorder=5, label="dogs ($D = 4$)")
     targets_at(ax, targets, s=65, lw=1.8, zorder=5, label="collect points $P_{c,1..4}$")
+    ax.plot([], [], color=ORANGE, lw=1.8, label="Hungarian assignment (min total walk)")
     for dog, tgt in zip(dogs, targets, strict=True):
         arrow(ax, tgt, dog, ORANGE, 1.8)
     for k, (i, j) in enumerate(((0, 2), (2, 0))):  # dog i to the target of dog j
@@ -476,11 +478,11 @@ def matching_panel(
             ls="--",
             lw=1.0,
             alpha=0.45,
-            label="a crossing assignment (drawn by hand)" if k == 0 else None,
+            label="crossing assignment (longer total walk)" if k == 0 else None,
         )
     for i, dog in enumerate(dogs):
         dog_label(ax, dog, i)
-    ax.legend(loc="lower left", frameon=False, fontsize=8.5)
+    ax.legend(loc="lower right", frameon=False, fontsize=8.5)
     window(ax, centroid, 130, 90, 110, 110)
     style_map(ax, "B. Hungarian assignment: no two paths cross")
 
@@ -514,7 +516,7 @@ def drive_point_panel(
             alpha=0.15,
             ec=BLUE,
             lw=1.2,
-            label=r"the flock ($R_{\mathrm{flock}} \propto r_a\sqrt{N}$)",
+            label=r"flock radius $R_{\mathrm{flock}}$ ($\sqrt{2}\times\mathrm{RMS}$)",
         )
     )
     ax.scatter(*sheep.T, s=14, color=BLUE, alpha=0.7, lw=0)
@@ -532,7 +534,7 @@ def drive_point_panel(
     bold_text(ax, pd[0] - 2, pd[1] - 4.5, r"$P_d$ ($r_a\sqrt{N}$ behind the GCM)", INK, ha="center")
     mid = (centroid + pd) / 2.0
     ax.text(
-        mid[0] - 1.5,
+        mid[0] - 3.5,
         mid[1] + 2.5,
         r"offset $r_a\sqrt{N} = 20$ m",
         color=MUTED,
@@ -541,7 +543,7 @@ def drive_point_panel(
     )
     ax.legend(loc="upper left", frameon=False, fontsize=8.5)
     window(ax, centroid, 35, 38, 28, 28)
-    style_map(ax, "A. the drive point Pd")
+    style_map(ax, "A. The drive point Pd (N = 100)")
 
 
 def flank_label(ax: Axes, x: float, y: float, text: str) -> None:
@@ -559,23 +561,32 @@ def arc_panel(
     """The team's targets on an arc round the flock's sides, one dog to each slot."""
     goal = np.asarray(c["goal_center"])
     targets = team_targets(sheep, goal, dogs, c)
+    ax.add_patch(Circle(xy(centroid), r_flock, fc=BLUE, alpha=0.10, ec=BLUE, lw=0.9, ls="--"))
     ax.scatter(*sheep.T, s=14, color=BLUE, alpha=0.6, lw=0)
-    gcm(ax, centroid, label=None, s=50, lw=1.5, color=MUTED, zorder=3)
+    gcm(ax, centroid, label="GCM", s=50, lw=1.5, color=INK, zorder=3, text_at=(2, -3.5))
     ordered = targets[np.argsort(targets[:, 1])]
-    ax.plot(*ordered.T, color=AQUA, lw=2.0, ls="-", label="driving arc")
-    targets_at(ax, targets, s=65, lw=1.8, label="arc slots")
+    for end in (ordered[0], ordered[-1]):
+        ax.plot([centroid[0], end[0]], [centroid[1], end[1]], color=MUTED, ls=":", lw=0.9)
+    ax.plot(
+        *ordered.T,
+        color=AQUA,
+        lw=2.0,
+        ls="-",
+        label=r"driving arc (span $\pm\arcsin(R_{\mathrm{flock}}/R_{\mathrm{arc}})$)",
+    )
+    targets_at(ax, targets, s=65, lw=1.8, label="arc slots (angular order)")
     dogs_at(ax, dogs, s=70, lw=1.0, zorder=5, label="dogs ($D = 4$)")
     for i, (dog, tgt) in enumerate(zip(dogs, targets, strict=True)):
         arrow(ax, tgt, dog, ORANGE, 1.6)
         arrow(ax, tgt + unit(centroid - tgt) * 6, tgt, AQUA, 1.2, ls="--")
         dog_label(ax, dog, i)
-    flank_label(ax, centroid[0] + 2, centroid[1] + r_flock + 2, "upper flank covered")
-    flank_label(ax, centroid[0] + 2, centroid[1] - r_flock - 4, "lower flank covered")
+    flank_label(ax, centroid[0] - 2, centroid[1] + r_flock + 5, "upper flank covered")
+    flank_label(ax, centroid[0] - 2, centroid[1] - r_flock - 6, "lower flank covered")
     arrow(ax, goal - [c["goal_radius"] + 5, 0], centroid + [25, 0], AQUA, 1.5)
     bold_text(ax, centroid[0] + 27, centroid[1] + 2, "toward the goal", AQUA, 8.5)
     ax.legend(loc="upper left", frameon=False, fontsize=8.5)
     window(ax, centroid, 65, 55, 55, 55)
-    style_map(ax, "B. the driving arc round the flock's sides")
+    style_map(ax, "B. Driving arc slots matched by angle")
 
 
 def fig_driving_arc() -> None:

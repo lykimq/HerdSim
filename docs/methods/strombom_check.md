@@ -1,134 +1,126 @@
 # Checking HerdSim against Strombom et al. (2014)
 
-Does HerdSim run the sheep and the dog of [Strombom et al. (2014)](https://doi.org/10.1098/rsif.2014.0719), or something of its own? This doc reruns two of the paper's one-dog results with HerdSim's own trial code and compares them with what the paper states. HerdSim's model is described in [Strombom sheep](strombom_sheep.md).
+Verification of HerdSim's simulation engine against two single-dog experiments from [Strombom et al. (2014)](https://doi.org/10.1098/rsif.2014.0719): the $(N, n)$ success-rate sweep (the paper's Figure 3) and the completion-time distance sweep (p. 4).
 
 ## Terms
 
-- Flock size $N$: the number of sheep.
-- Neighbour count $n$: how many nearest neighbours attract a sheep, out of the other $N - 1$. The paper calls $n = N - 1$ the global case.
-- Time step: one tick of HerdSim, one step of the paper.
-- Finish: a trial finishes when the flock centre (the mean position of the sheep) is within 10 m of the goal before the time limit.
-- Grid point: one pair of $N$ and $n$.
-- Grazing repulsion: sheep that no dog is within $r_s$ of also push apart when closer than $r_a$ (both in Table 1), as the paper says (section 2). Every trial of the check applies it; in HerdSim it is the model parameter `graze_repulsion` ([grazing](strombom_sheep.md#grazing)).
+- Flock size $N$: number of sheep in the flock.
+- Neighbour count $n$: number of nearest neighbours that attract each sheep out of the remaining $N - 1$ ($n = N - 1$ is the global case).
+- Time step: one simulation tick (1 s in HerdSim, one step in the paper).
+- Finish rule: a trial succeeds when the flock centre (mean sheep position) reaches within 10 m of the goal at $(0, 0)$ before the time limit.
+- Grid point: one tested pair $(N, n)$ in the Figure 3 sweep.
+- Grazing repulsion: sheep outside the dog detection radius $r_s$ still repel neighbours closer than $r_a$ (`graze_repulsion: true`; see [grazing](strombom_sheep.md#grazing)), enabled in all 5100 paper-check trials to match Section 2 of the paper.
 
 ## Setup and result in short
 
-The check uses the paper's setup wherever the paper gives one: the square field, the start squares of the sheep and the dog, the goal in the corner, the time limit and the sheep parameters. Where the paper is silent, [Table 2](#how-the-papers-figure-3-is-set-up) says so and HerdSim's reading is used. Figure 1 shows the paper's start as the check runs it, and Animation 1 one trial.
+All trials run directly through HerdSim's trial engine (`sim/trial.py`) using the paper's arena, start boxes, parameters and deadlines (Figure 1, Animation 1); wherever the paper leaves a detail unspecified, Table 2 records HerdSim's choice:
 
-Every trial finishes at the 30 grid points where the paper's text says all should ($n \ge 0.6 N$, sizes 10 to 150), and the counts have the shape of the paper's Figure 3. The paper's distance study also matches: every trial finishes at all 11 distances run, and the time grows linearly with the distance.
+- Figure 3 check (4000 trials): 50 of 50 trials finish at all 30 grid points with $n \ge 0.6\,N$ across $N = 10$ to $150$, and the transition across $n = 0.53\,N$ matches the paper's Figure 3 (Table 3, Figure 2).
+- Distance check (1100 trials): 100 of 100 trials finish at all 11 distances ($l = 10$ to $500$ m), and mean completion time grows linearly with distance ($314 + 2.30\,l$ steps, $R^2 = 0.9995$; Table 4, Figure 3).
 
-![The paper's start as the check runs it](../figures/fig_paper_layout.png)
+![Paper task start at N = 100](../figures/fig_paper_layout.png)
 
-**Figure 1: The start of the paper's task as the check runs it, $N = 100$.** Every trial of the check of the paper's Figure 3 starts this way: the sheep in the upper right quarter of the 150 m field, the dog in the lower left quarter, next to the goal at the corner. The distance study moves the two squares (its own section).
+**Figure 1: Start geometry for the Figure 3 check ($N = 100$).** Sheep start in the upper-right quadrant $[75, 150]^2$ m and the dog in the lower-left quadrant $[0, 75]^2$ m of an open $150 \times 150$ m field, driving toward the goal at $(0, 0)$.
 
-- Marks: blue dots are sheep, the orange triangle is the dog, the green circle is the goal; the shaded squares are where the sheep (blue) and the dog (orange) start. It is the start of the trial in Animation 1.
+- Legend: blue dots are sheep, the orange triangle is the dog, the green circle is the 10 m goal around $(0, 0)$, and the shaded squares are the sheep (blue) and dog (orange) start boxes.
 
-*Data:* `uv run python docs/generate_docs/make_figures.py`.
+![Animation of one trial of the paper's task](../gifs/paper_task.gif)
 
-![Animation of one trial of the paper's task run by HerdSim](../gifs/paper_task.gif)
+**Animation 1: One trial of the paper's task ($N = 100$, $n = 99$, seed 100000).** The dog circles behind the flock and drives it into the goal at time step 434.
 
-**Animation 1: One trial of the paper's task run by HerdSim ($N = 100$, $n = 99$, seed 100000).** The dog goes round to the far side of the flock, and the flock moves to the goal circle, finishing at time step 434.
-
-- Marks: as in Figure 1; the label gives the time step and the distance from the flock centre to the goal.
-
-*Data:* `uv run python docs/generate_docs/make_gifs.py paper_task`.
+- Legend: symbols as in Figure 1; the bottom label shows the current time step and the flock-centre distance to $(0, 0)$.
 
 ## How the paper's Figure 3 is set up
 
-Each trial runs through HerdSim's own trial code, with the paper's values. Table 1 lists the model parameters, all the paper's (its Table 1) except $r_s$, which its Figure 3 sets to 45 m. Table 2 lists the rest of the setup and, for each setting the paper leaves open, HerdSim's reading.
+Table 1 lists the model parameters (from the paper's Table 1, with $r_s = 45$ m from its Figure 3 caption), and Table 2 lists the arena and simulation rules:
 
-**Table 1: Model parameters used, from the paper's Table 1 and Figure 3 caption.**
+**Table 1: Model parameters from Strombom et al. (2014), Table 1 and Figure 3.**
 
 | Symbol | Meaning | Value |
 | :--- | :--- | :---: |
-| $r_a$ | sheep-to-sheep interaction distance (m) | 2 |
-| $\rho_a$ | weight of repulsion from other sheep | 2 |
-| $c$ | weight of attraction to the $n$ nearest neighbours | 1.05 |
-| $\rho_s$ | weight of repulsion from the dog | 1 |
-| $h$ | weight of the previous heading | 0.5 |
-| $e$ | weight of the angular noise | 0.3 |
-| $\delta$ | sheep step per time step (m) | 1 |
-| $p$ | probability that a grazing sheep moves in a time step | 0.05 |
-| $r_s$ | distance within which a sheep reacts to the dog (m) | 45 (the paper's Table 1: 65) |
-| $\delta_s$ | dog step per time step (m) | 1.5 |
+| $r_a$ | Sheep-to-sheep repulsion distance (m) | 2 |
+| $\rho_a$ | Weight of sheep-to-sheep repulsion | 2 |
+| $c$ | Weight of attraction to the $n$ nearest neighbours | 1.05 |
+| $\rho_s$ | Weight of repulsion from the dog | 1 |
+| $h$ | Weight of previous heading (inertia) | 0.5 |
+| $e$ | Weight of angular noise | 0.3 |
+| $\delta$ | Sheep step length per time step (m) | 1 |
+| $p$ | Probability that a grazing sheep moves in a time step | 0.05 |
+| $r_s$ | Dog detection distance (m) | 45 (Table 1 default: 65) |
+| $\delta_s$ | Dog step length per time step (m) | 1.5 |
 
-**Table 2: The rest of the setup of the paper's Figure 3.**
+**Table 2: Arena and trial setup for the Figure 3 check.**
 
-| Setting | Value | Where it comes from |
+| Setting | Value | Source |
 | :--- | :--- | :--- |
-| Field | open square, side $L = 150$ m | the paper's Table 1; section 4.1 says it is not enclosed |
-| Sheep start | uniform in the upper right quarter, 75 to 150 m on both axes | section 4.1, "randomly positioned"; uniform is HerdSim's reading |
-| Dog start | one dog, uniform in the lower left quarter, 0 to 75 m on both axes | section 4.1, "released in the lower left quarter" (section 2 says "outside" the sheep's quarter; the example of the paper's Figure 2 starts at (15, 170)); uniform is HerdSim's reading |
-| Goal | the origin; the trial ends when the flock centre is within 10 m | the paper's Figure 2 caption gives 10 units for one example and section 4.1 "a certain distance"; 10 m is HerdSim's reading |
-| Time limit | 8000 time steps | the paper's Figure 3 caption |
-| Order within a time step | every sheep moves, then the dog | HerdSim's reading; the paper does not say |
-| Previous heading after a step without moving | zero | HerdSim's reading; the paper does not say |
-| Length of a grazing step | $\delta$, in a random direction | HerdSim's reading; the paper gives only the probability $p$ |
-| Grazing repulsion | applied | the paper repels sheep from each other "regardless of distance to the shepherd" (section 2); how a repelled grazing sheep moves is not stated, so HerdSim's reading: it steps $\delta$ along its previous heading, the push from its neighbours and noise |
-| Trials per point | 50 | the paper's text on its Figure 3: "over 50 simulations" |
-| Seed of trial $i$ at size $N$ | $1000 N + i$, the same for every $n$ at that $N$; in the distance study $1{,}000{,}000 + 1000\,l + i$ | HerdSim's choice; a trial can be replayed from its seed |
+| Field | Open $150 \times 150$ m square (no walls) | Paper Table 1 ($L = 150$) and Section 4.1 ("not enclosed") |
+| Sheep start | Uniform in $[75, 150] \times [75, 150]$ m | Section 4.1 ("upper right quarter"); uniform distribution is HerdSim's reading |
+| Dog start | One dog, uniform in $[0, 75] \times [0, 75]$ m | Section 4.1 ("lower left quarter"); uniform distribution is HerdSim's reading |
+| Goal and finish | Origin $(0, 0)$; flock centre within 10 m | Figure 2 caption gives 10 units and Section 4.1 "a certain distance"; 10 m is HerdSim's reading |
+| Time limit | 8000 time steps | Figure 3 caption |
+| Step order | All sheep update, then the dog | HerdSim's reading (unstated in paper) |
+| Idle inertia | Previous heading resets to zero after an idle grazing step | HerdSim's reading (unstated in paper) |
+| Grazing step | Step of length $\delta$ in a random direction with probability $p$, or along inertia + neighbour repulsion + noise when another sheep is within $r_a$ | Section 2 states sheep repel "regardless of distance to the shepherd"; step kinematics are HerdSim's reading |
+| Trials and seeds | 50 trials per point; seed $1000\,N + i$ (paired across $n$ at each $N$) | Figure 3 text ("over 50 simulations"); deterministic seeds are HerdSim's choice |
 
-The paper's Figure 3 covers $N$ from 2 to 150 and $n$ from 1 to $N - 1$. HerdSim runs 80 grid points: ten sizes (10, 20, 30, 40, 50, 60, 80, 100, 125 and 150) and, at each, the global case and $n = \lceil s N \rceil$ (at least 1) for the shares $s$ = 0.1, 0.2, 0.3, 0.4, 0.5, 0.6 and 0.8. How to run it and its cost are in the [command-line reference](../guides/cli_reference.md#clipaper_checkpy-check-against-the-paper).
+Instead of running every integer pair $(N, n)$ for $N \in [2, 150]$, HerdSim samples an 80-point grid that spans all three regions of Figure 3:
+
+- Flock sizes (10 values): $N \in \{10, 20, 30, 40, 50, 60, 80, 100, 125, 150\}$.
+- Neighbour counts (8 values per $N$): $n = \lceil s\,N \rceil$ for $s \in \{0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.8\}$, plus the global case $n = N - 1$.
 
 ## Results for the paper's Figure 3
 
-The paper's Figure 3 shows, for flock sizes $N$ up to 150 and every neighbour count $n$, the share of 50 runs in which one dog brings the flock to the corner within 8000 time steps. HerdSim ran the same task; Figure 2 sets the two side by side.
+Figure 2 and Table 3 compare the paper's Figure 3 against HerdSim's 80-point sweep. Because HerdSim steps from $s = 0.5$ to $s = 0.6$, the paper's boundary $n = 0.53\,N$ lies between those two columns; 50/50 successes bounds the true finish rate at $\ge 0.899$ (99% Clopper-Pearson lower bound):
 
-Table 3 compares them point by point. HerdSim's grid has no point between $n = 0.5 N$ and $0.6 N$, so the paper's line at $0.53 N$ falls between two tested columns, and 50 of 50 bounds the finish rate at 0.899 or more (99% confidence), not at exactly 1.
+**Table 3: Comparison on Figure 3 of Strombom et al. (2014).**
 
-**Table 3: The paper's Figure 3 against HerdSim.**
-
-| Claim | Paper | HerdSim | Result |
+| Claim | Paper | HerdSim | Verdict |
 | :--- | :--- | :--- | :--- |
-| All finish above $n = 0.53 N$ | every trial finishes from the global case down to about $n = 0.53 N$ | 50 of 50 at all 30 grid points with $n \ge 0.6 N$ | same |
-| Success falls below that line | for $N > 30$, from 1 to rare | at $N = 100$, 49, 34 and 9 of 50 at $n$ = 50, 40 and 30 | same |
-| Rare success under a lower curve | rare under $n \approx 3 \log N$ | not checked: the paper does not state the base of the logarithm | cannot tell |
-| The figure | - | the same shape by eye (Figure 2) | same |
+| Complete success above $n = 0.53\,N$ | 100% finish rate from $n = N - 1$ down to $n \approx 0.53\,N$ | 50/50 at all 30 grid points with $n \ge 0.6\,N$ | Matches |
+| Sharp drop below $n = 0.53\,N$ | Success falls from 1 to rare for $N > 30$ | At $N = 100$: 49/50 ($n = 50$), 34/50 ($n = 40$), 9/50 ($n = 30$) | Matches |
+| Lower boundary $n \approx 3\log N$ | Rare success below $n \approx 3\log N$ | Not plotted (paper does not specify the logarithm base) | Unchecked |
+| Overall phase diagram | Figure 3 left panel | Same transition boundary and gradient (Figure 2 right panel) | Matches |
 
-![The paper's Figure 3 beside HerdSim's run of the same task](../figures/fig_paper_check.png)
+![Strombom Figure 3 beside HerdSim](../figures/fig_paper_check.png)
 
-**Figure 2: Share of trials that finish against $N$ and $n$ in the paper (left) and in HerdSim (right), one dog, 8000 time steps, $r_s = 45$ m.** By eye the two have the same shape, with the change near the line $n = 0.53 N$.
+**Figure 2: Share of trials that finish across $(N, n)$ in Strombom et al. (2014) (left) and HerdSim (right), with 1 dog, 8000 steps and $r_s = 45$ m.** Both panels show universal success above $n = 0.53\,N$ and a transition band below it.
 
-- Marks: blue is no trial finishing and white is every trial; the black line is $n = 0.53 N$, and the paper's panel also draws its curve $n \approx 3 \log N$.
-- Left: the paper's Figure 3, cropped from its PDF (licence CC BY 4.0), with its own colour scale; it is also blue above $n = N - 1$, where no trial exists.
-- Right: HerdSim, one square per grid point, on a similar blue-to-white scale.
-
-*Data:* `uv run python -m docs.generate_docs.page paper` prints the counts; the figure comes from `uv run python docs/generate_docs/make_result_figures.py`.
+- Legend: dark blue is 0% success, white is 100% success, and the solid black line is $n = 0.53\,N$ (the paper's panel also draws $n \approx 3\log N$).
+- Left: Figure 3 cropped from Strombom et al. (2014) (CC BY 4.0); the upper-left triangle $n \ge N$ has no trials and is shaded dark blue in the original figure.
+- Right: HerdSim's 80 tested grid points (50 trials per square).
 
 ## Time against distance to the goal
 
-The paper's text (p. 4) describes a second study: 46 sheep start in a 50 x 50 square centred at $(l + 25\sqrt{2}, l + 25\sqrt{2})$, with $l$ "increasing from 10 to 500" and 100 runs per $l$. It gives no other setting, so HerdSim uses the paper's Table 1 values ($r_s = 65$ m), the global case, HerdSim's 10 m end rule (Table 2), the 8000 time steps of the paper's Figure 3, $l$ = 10 and 50 to 500 in steps of 50, and the dog in a 50 m square next to the sheep's on the goal side. The paper's result is in its supplementary Figure S2, which we do not have, so HerdSim is compared with its text.
+The paper (p. 4) also tests drive distance $l$ from 10 to 500 m with 100 trials per distance:
 
-**Table 4: The paper's distance study against HerdSim.**
+- Setup from the paper: $N = 46$ sheep start in a $50 \times 50$ m square centred at $(l + 25\sqrt{2},\, l + 25\sqrt{2})$ m, with 100 runs per distance $l$.
+- HerdSim settings for unspecified details: Table 1 detection distance ($r_s = 65$ m), global attraction ($n = 45$), 10 m goal radius, 8000-step limit, 11 distances ($l = 10$ and $50, 100, \dots, 500$ m), dog starting in the adjacent $50 \times 50$ m square one step closer to the origin, and seed $1{,}000{,}000 + 1000\,l + i$.
 
-| Claim | Paper | HerdSim | Result |
+Table 4 and Figure 3 compare HerdSim with the paper's text (its supplementary Figure S2 is not publicly available):
+
+**Table 4: Comparison on the distance study of Strombom et al. (2014).**
+
+| Claim | Paper | HerdSim | Verdict |
 | :--- | :--- | :--- | :--- |
-| Success against distance | "the success rate is unaffected" | 100 of 100 at all 11 distances | same |
-| Time against distance | "the average time to completion increases linearly with distance to target" | a line through the 11 mean times: 314 + 2.30 $l$ steps, $R^2$ = 0.9995 (Figure 3) | same |
-| The time itself | no number (its Figure S2 is not available to us) | 345 steps at $l = 10$ to 1472 at $l = 500$ | cannot tell |
+| Success rate vs distance | "the success rate is unaffected" | 100/100 at all 11 distances ($l = 10$ to $500$ m) | Matches |
+| Completion time vs distance | "increases linearly with distance to target" | Linear fit across the 11 means: $314 + 2.30\,l$ steps, $R^2 = 0.9995$ (Figure 3) | Matches |
+| Absolute step counts | Not stated in text (Figure S2 unavailable) | Mean rises from 345 steps ($l = 10$ m) to 1472 steps ($l = 500$ m) | Unchecked |
 
-![Time to finish against distance to the goal](../figures/fig_paper_distance.png)
+![Completion time against distance to the goal](../figures/fig_paper_distance.png)
 
-**Figure 3: Time steps to finish against distance $l$ in the paper's distance study, HerdSim only.** Every trial finishes, and the mean time lies on a straight line. The paper's figure for this study (its Figure S2) is not available, so there is no paper panel.
+**Figure 3: Completion time (steps) against distance $l$ in HerdSim's distance sweep ($N = 46$, $n = 45$, $r_s = 65$ m).** All 1100 trials succeed, and mean completion time scales linearly with $l$.
 
-- Marks: dots are the mean over 100 runs, the band runs from the fastest to the slowest run, and the line is the least-squares fit of the means.
-
-*Data:* `uv run python -m docs.generate_docs.page paper` prints the counts and times; the figure comes from `uv run python docs/generate_docs/make_result_figures.py`.
+- Legend: blue dots are 100-trial means, the shaded band spans the minimum to maximum steps at each $l$, and the black line is the least-squares fit $314 + 2.30\,l$ ($R^2 = 0.9995$).
 
 ## What this does not show
 
-- The paper gives its results as pictures with no tables, so the comparison uses only the numbers its text, captions and its Table 1 state; the pictures are compared by eye.
-- The check covers one dog and up to 150 sheep, the range of the paper's Figure 3, and counts whether and when a trial finishes. It says nothing about more dogs or larger flocks.
-- We have not varied the settings the paper leaves open (Table 2 and the distance study), and HerdSim's grid of the paper's Figure 3 has 80 points, not every $(N, n)$.
-- The paper's other simulations are not reproduced:
-  - Figure 2 is one example run.
-  - Figure 4 (time spent driving and collecting) names and draws its vectors but does not define them.
-  - Figure 5 sets $n = 46$ for 46 sheep, which exceeds $N - 1$, and its field data are not given.
-  - Figure 6 uses another dog rule (a dog that acts on its 20 nearest sheep), which HerdSim does not implement.
+- Visual vs numerical comparison: because the paper reports Figure 3 as a heatmap without raw data tables, quantitative checks are limited to the thresholds stated in the text and captions.
+- Single-dog scope: these checks cover $D = 1$ and $N \le 150$; multi-dog coordination (`strombom_multi`) and larger flocks are specific to HerdSim's study.
+- Other figures in the paper: Figure 2 is a single trajectory; Figure 4 does not define its mode-classification vectors; Figure 5 relies on unreleased GPS trajectories (and states $n = 46$ for $N = 46$); and Figure 6 uses a local 20-nearest-sheep dog controller not studied here.
 
 ## Reproducing the check
 
-The trials are run with `cli/paper_check.py` ([command-line reference](../guides/cli_reference.md#clipaper_checkpy-check-against-the-paper)), which stores one row per trial with its seed in `results/paper_check/`; `paper_check/trials.py` runs any trial again from its seed. The tables and figures come from:
+Run the trials via [`cli/paper_check.py`](../guides/cli_reference.md#clipaper_checkpy-check-against-the-paper) (stored in `results/paper_check/`), then rebuild the tables, figures and GIF:
 
 ```bash
 uv run python -m docs.generate_docs.page paper
@@ -136,5 +128,3 @@ uv run python docs/generate_docs/make_result_figures.py
 uv run python docs/generate_docs/make_figures.py
 uv run python docs/generate_docs/make_gifs.py paper_task
 ```
-
-The figure scripts need `pdftoppm` (poppler-utils) to crop the paper's figure, and stop with its name if it is missing.

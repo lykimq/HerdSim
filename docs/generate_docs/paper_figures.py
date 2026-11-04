@@ -78,7 +78,8 @@ def _fig3_panel(ax: Axes, trials: pd.DataFrame, title: str) -> Any:
         marker="s", s=40, edgecolor=MUTED, linewidth=0.4,
     )  # fmt: skip
     sizes = np.linspace(2, 150, 100)
-    ax.plot(sizes, SHARE_LINE * sizes, color=INK, lw=0.9)
+    ax.plot(sizes, SHARE_LINE * sizes, color=INK, lw=0.9, label="n = 0.53 N")
+    ax.legend(frameon=False, fontsize=8, loc="upper left")
     ticks = range(20, 141, 20)
     ax.set(
         xlim=(0, 156), ylim=(0, 156), xticks=ticks, yticks=ticks,
@@ -103,9 +104,18 @@ def fig_paper_distance() -> None:
     stats = finished_steps(trials).agg(["mean", "min", "max"])
     intercept, slope, _ = distance_fit(trials)
     fig, ax = plt.subplots(figsize=(6, 4.0))
-    ax.fill_between(stats.index, stats["min"], stats["max"], color=BLUE, alpha=0.15, lw=0)
-    ax.plot(stats.index, stats["mean"], color=BLUE, marker="o", ms=4, lw=0, label="mean")
-    ax.plot(stats.index, intercept + slope * stats.index, color=INK, lw=0.9, label="fitted line")
+    ax.fill_between(
+        stats.index,
+        stats["min"],
+        stats["max"],
+        color=BLUE,
+        alpha=0.15,
+        lw=0,
+        label="min-max range (100 runs)",
+    )
+    ax.plot(stats.index, stats["mean"], color=BLUE, marker="o", ms=4, lw=0, label="mean (100 runs)")
+    fit_label = f"fit: {intercept:.0f} + {slope:.2f} l"
+    ax.plot(stats.index, intercept + slope * stats.index, color=INK, lw=0.9, label=fit_label)
     ax.set(xlabel="distance to target l", ylabel="time steps to finish")
     ax.set_title("HerdSim, the paper's distance study")
     ax.legend(frameon=False, fontsize=8)
@@ -121,14 +131,17 @@ def _paper_layout_panel(ax: Axes) -> None:
         ax.add_patch(Rectangle((low, low), high - low, high - low, fc=color, ec="none", alpha=0.1))
     ax.add_patch(Rectangle((0, 0), side, side, fc="none", ec=GRID, lw=1.0))
     ax.add_patch(Circle((0, 0), paper.DONE_DISTANCE, fc="none", ec=AQUA, lw=1.5))
+    ax.plot(0, 0, marker="+", color=AQUA, ms=6, mew=1.2)
     ax.scatter(*state.sheep_positions.T, s=7, color=BLUE, alpha=0.85, lw=0)
     dogs_at(ax, state.shepherd_positions)
-    ax.text(side - 3, side + 5, "sheep start here", ha="right", color=BLUE)
-    ax.text(side / 2 - 3, side / 2 + 5, "dog starts here", ha="right", color=ORANGE)
-    ax.text(paper.DONE_DISTANCE + 4, -14, f"goal, {paper.DONE_DISTANCE:.0f} m", color=AQUA)
-    ax.text(side, -14, f"field {side:.0f} m", ha="right", color=MUTED)
+    ax.text(side - 3, side + 5, "sheep start [75, 150] m", ha="right", color=BLUE)
+    ax.text(side / 2 - 3, side / 2 + 5, "dog start [0, 75] m", ha="right", color=ORANGE)
+    ax.text(
+        paper.DONE_DISTANCE + 4, -14, f"goal (0, 0), radius {paper.DONE_DISTANCE:.0f} m", color=AQUA
+    )
+    ax.text(side, -14, f"{side:.0f} x {side:.0f} m field", ha="right", color=MUTED)
     window(ax, (side / 2, side / 2), 130, 130, 100, 100)
-    style_map(ax, f"the paper's start as the check runs it, N = {n}")
+    style_map(ax, f"Paper task start (N = {n})")
 
 
 def fig_paper_layout() -> None:

@@ -1,24 +1,23 @@
 # Command-line reference
 
-Every command of HerdSim's tools with its arguments, defaults and output, for a developer who runs experiments or checks results.
+Commands, arguments and outputs for running HerdSim protocols, checking calibration, reproducing the Strombom (2014) checks, and building documentation tables and figures.
 
-Run each tool from the repository root with `uv run`. The first argument of `campaign.py` is the verb, such as `run` in `campaign.py run`.
+Run all commands from the repository root with `uv run`.
 
 ## `cli/campaign.py`: run protocols
 
-Runs protocols into their results folders and checks on them.
+Plans, runs and inspects protocol campaigns:
 
 ```text
 uv run cli/campaign.py <verb> [<protocol> ...] [--workers <n>]
 ```
 
-A `<protocol>` is a protocol id or a path to a YAML file. Without one, the verb takes the six protocols of `protocols/configs/study_queue.yaml`, in that order. `--workers` (default: CPU count) is the number of worker processes.
-
-Each round gives every [open cell](../glossary.md#success-and-reliability) 10 more seeds, up to 200. A trial that raises is listed in `errors.jsonl`, and its cell gets no more seeds. `status.json` counts open cells as `cells_needing_seeds`.
+- `<protocol>`: one or more protocol ids or paths to YAML files; if omitted, runs all six protocols in `protocols/configs/study_queue.yaml` in queue order.
+- `--workers <n>`: worker processes (default: CPU core count).
 
 ### `plan`
 
-Prints the grid, the cell count, the first round's cost, and whether the folder is new, resumed or refused (its physics hash differs from the protocol's). Writes nothing.
+Prints the grid, cell count, first-round trial cost, and whether the output folder is `new`, `resumes` or `refused` (on a [physics-hash](configuration.md#physics-hash) mismatch), without writing files:
 
 ```bash
 uv run cli/campaign.py plan dmin_f99_m6
@@ -26,121 +25,97 @@ uv run cli/campaign.py plan dmin_f99_m6
 
 ### `run`
 
-Calibrates, or reuses saved radii (see [Calibration](#calibration)), then adds seeds round by round until every cell is decided, the seed cap is reached or the time budget is spent. Trials are written as they finish, so `run` resumes after Ctrl+C, a crash or the end of the budget. Writes `results/<protocol_id>/`. A results folder belongs to one protocol and one physics ([physics hash](configuration.md#physics-hash)); if the physics changed the folder refuses `run`.
+Runs calibration (or loads saved radii) and adds 10-seed batches to [open cells](../glossary.md#success-and-reliability) until every cell is decided, reaches `max_seeds` (200), or `budget_hours` expires ([adaptive sampling](../experiments/task_design.md#3-adaptive-sampling)):
 
 ```bash
-uv run cli/campaign.py run dmin_f99_m6 --workers 20   # one protocol
-uv run cli/campaign.py run --workers 20               # the whole study, which takes hours
+uv run cli/campaign.py run dmin_f99_m6 --workers 20   # single protocol
+uv run cli/campaign.py run --workers 20               # full study queue
 ```
 
-Protocols run one after another. The whole study skips a folder with every cell decided; a protocol named on the command line always runs, so one whose grid was edited adds the new cells. A protocol that raises is reported and the next one goes on, and the command exits with 1 at the end. Each protocol of the study adds a line to `results/queue_log.jsonl`.
+- Resume safety: trials are flushed to `results/<protocol_id>/` as they finish, so rerunning the same command resumes after Ctrl+C, a crash or an expired time budget.
+- Queue vs named protocol: running the full queue skips folders where every cell is already decided, whereas naming a protocol on the command line always opens it (so new grid points are added if the grid grew).
+- Error handling: a trial that raises an exception is logged in `errors.jsonl` and its cell receives no further seeds; if a protocol in the queue raises, the queue logs it to `results/queue_log.jsonl`, continues to the next protocol and exits with status 1 at the end.
 
 ### `status`
 
-Prints how far a run has got, whether it is running and why it stopped. Without a protocol it lists `done`, `partial` or `new` for each folder of the study. Writes nothing.
+Prints progress, active lock state and stop reason for one or more protocols (or lists `done`, `partial` or `new` across the study queue when no protocol is named), without writing files.
 
-Before a long run, run `make test` and `plan` (the folder should be new or say `resumes`). Start `run` in the background with its output going to a log file, with no more workers than cores. At the end `status` should give the stop reason "every cell decided, at max_seeds or errored" and `trial_errors` 0; the simulation is deterministic, so an error is a bug, and a cell with an error is never counted as reliable.
+For a completed run with no bugs, `status` reports stop reason `"every cell decided, at max_seeds or errored"` and `trial_errors: 0`.
 
 ### Calibration
 
-Calibration measures $R_f$, which sizes the field, the goal and the drive; the procedure and its limits are in [task design](../experiments/task_design.md#sizing-by-the-calibrated-flock-radius). `run` stops with a `CalibrationError` naming $N$ when the radius changes by more than `settled_tolerance` between the last two windows, differs by more than `start_agreement` between the two start spacings, or the flock centre comes within twice the flock's measured radius of the goal. If the folder holds no trial yet, `run` then deletes its `provenance.json` and `calibration.json`, so a corrected protocol can start it afresh; a folder with trials keeps them. Either way `runs.jsonl` keeps a line for the failed sitting.
+Before a folder's first trial, `run` calibrates $R_f(N)$ for any uncalibrated flock size ([procedure and limits](../experiments/task_design.md#sizing-by-the-calibrated-flock-radius)):
+
+- Failure check: `run` stops with `CalibrationError` naming $N$ if window drift exceeds `settled_tolerance`, start-spacing spread exceeds `start_agreement`, or the flock centre enters within $2\,R_f$ of the goal.
+- Cleanup: if the folder has no trials yet, `run` removes `provenance.json` and `calibration.json` so a corrected protocol can reuse the folder; existing trials and `runs.jsonl` entries are never deleted.
 
 ## `cli/calibration_check.py`: calibration with its drift and spread
 
-Runs the calibration of a protocol and reports, per flock size, $R_f$ with its drift (change between the last two windows) and spread (difference between the two start spacings) instead of stopping on them, so `settled_tolerance` and `start_agreement` can be judged.
+Runs a protocol's calibration across flock sizes and records $R_f$, window drift and start-spacing spread without stopping on tolerance failures:
 
 ```text
 uv run cli/calibration_check.py <protocol> [--sizes <N> ...] [--seeds <n>] [--workers <n>]
 ```
 
-- `--sizes`: flock sizes to measure (default: the protocol's).
-- `--seeds`: seeds per start (default: the protocol's `calibration_seeds`).
-- `--workers`: the number of processes (default 1).
+- `--sizes`: flock sizes to measure (default: the protocol's `flock_sizes`).
+- `--seeds`: seeds per start spacing (default: the protocol's `calibration_seeds`).
+- `--workers`: worker processes (default: 1).
 - Output: `results/diagnostics/calibration_<protocol>[_<n>seeds].csv`.
 
 ## `cli/paper_check.py`: check against the paper
 
-Runs results of [Strombom et al. (2014)](https://doi.org/10.1098/rsif.2014.0719) through HerdSim's engine and stores every trial. It is not run through `campaign.py`: there is no protocol, round or decision. What it checks and how to read it is in [checking HerdSim against Strombom et al. (2014)](../methods/strombom_check.md).
+Reproduces the single-dog experiments of [Strombom et al. (2014)](https://doi.org/10.1098/rsif.2014.0719) directly on the simulation engine, outside `campaign.py` ([method and results](../methods/strombom_check.md)):
 
 ```text
 uv run cli/paper_check.py <experiment> [--workers <n>]
 ```
 
-- `<experiment>`: `fig3`, the paper's Figure 3 (80 grid points of 50 trials: 4000 trials), or `distance`, the paper's distance study (1100 trials). A grid point is one pair of flock size $N$ and neighbour count $n$ ([terms](../methods/strombom_check.md#terms)); every trial applies the paper's repulsion between grazing sheep.
-- `--workers`: the number of processes (default 1).
-- Output: one CSV per experiment under `results/paper_check/`, one row per trial with its seed, rewritten after each point, so a rerun continues from the trials already stored.
+- `<experiment>`: `fig3` (80 $(N, n)$ grid points x 50 trials = 4000 trials) or `distance` (1100 drive-distance trials), both with grazing sheep repulsion enabled.
+- `--workers`: worker processes (default: 1).
+- Output: `results/paper_check/<experiment>.csv` (rewritten after each point so interrupted runs resume automatically).
 
 ## `docs/generate_docs/page.py`: tables from finished runs
 
-Prints Markdown tables from stored files, one question per verb. It never runs the model.
+Prints Markdown result tables from stored files without running simulations:
 
 ```text
-uv run python -m docs.generate_docs.page <verb> <folder> [<folder> ...] [flags]
+uv run python -m docs.generate_docs.page <verb> [<folder> ...] [flags]
 ```
 
-A `<folder>` is a protocol id under `results/` or a path, and a verb takes one or more folders unless noted. `--sizes <N> ...` keeps only these flock sizes, for the verbs that show it below.
+A `<folder>` is a protocol id under `results/` or a folder path. In $D_{\min}$ tables, cells that are not yet decided to a single integer are formatted in one of three ways:
 
-A value that is not yet decided is printed in one of three ways:
+- `3-8` (bracket): $D = 8$ is reliable, and $D = 3$ is the smallest team not yet ruled unreliable ($D_{\min,\mathrm{low}}$).
+- `[5]` (lower bound): no team is reliable yet, and $D = 5$ is the smallest team not yet ruled unreliable.
+- `none on grid`: every tested team size up to the top of the grid is unreliable.
 
-1) `3-8`: a bracket; 8 dogs are reliable, and 3 is the smallest team not yet ruled out.
-2) `[5]`: a lower bound; no team is reliable yet, so the value is at least 5.
-3) `none on grid`: every team up to the grid top (the largest team size the protocol tests) is unreliable.
+Table 1 lists the verbs of `page.py` and their arguments:
 
-### `record`
+**Table 1: Verbs of `docs/generate_docs/page.py`.**
 
-Takes no folder. Per protocol in `results/queue_log.jsonl`, prints the trials, cells, open cells and errors from `status.json`, and the finish time and hours from its log line.
-
-### `dmin [--sizes <N> ...]`
-
-Prints $D_{\min}$ per layout and $N$.
-
-### `growth [--sizes <N> ...]`
-
-Prints the log-log slopes of $D_{\min}$ against $N$ that the brackets allow, and whether layout or $N$ moves $D_{\min}$ more.
-
-### `reach [--sizes <N> ...]`
-
-Prints how much of the flock one dog reaches per layout and $N$: the median, over the one-dog trials, of the share of the outer half of the flock within $r_s$ of the dog, averaged over the ticks of a trial.
-
-### `fits`
-
-Prints which of two shapes fits $D_{\min}(N)$ on `wide` and `outlier_rich`, and what each allows at $N = 1600$ and 3200. The shapes are a power law $D = \max(1, c N^b)$ and a curve that levels off at $D_\infty$, $D = 1 + (D_\infty - 1) N / (N + K)$. Takes no flags.
-
-### `nested <longer> <shorter>`
-
-For two runs that differ only in deadline, prints whether the shorter is the longer cut off at its deadline.
-
-### `curve --layout <name> --n <N>`
-
-Both flags are required. Prints one curve across folders, a row per folder and team size with successes, rate, reliability and median finish time.
-
-### `pair <a> <b>`
-
-For two folders run with the same seeds, prints per layout and $N$ the trials that succeed in only one of them, with a sign test of the two counts, and a table of shared cells by their decision (reliable, unreliable, undecided) in each.
-
-### `monotone`
-
-Prints the curves on which a team larger than $D_{\min}$, or than the lower end of a bracket or a lower bound, is unreliable, with $D_{\min,\mathrm{stable}}$ ([definition](../report/d_min_report.md#23-when-a-team-is-reliable)).
-
-### `sequential <protocol>`
-
-Takes a protocol, not a folder. For true success rates from 0.80 to 0.97, prints the chance that a cell ends reliable, unreliable or undecided at the seed limit under its seed rule, computed exactly over every look.
-
-### `paper`
-
-Takes no folder: `uv run python -m docs.generate_docs.page paper`. Prints the tables of the [Strombom check](../methods/strombom_check.md) from `results/paper_check/`: trials finished per grid point of the paper's Figure 3, and the distance study with its least-squares line.
+| Verb and arguments | Output table |
+| :--- | :--- |
+| `record` | Per protocol in `results/queue_log.jsonl`: `trials`, `cells`, `cells_needing_seeds`, `cells_at_max_seeds_undecided`, `cells_reliability_undecided`, `trial_errors` (from `status.json` and `frontier_cells.csv`), plus `finished`, `hours`, `workers` and `outcome`. |
+| `dmin <folder> ... [--sizes <N> ...]` | $D_{\min}$ (or bracket/bound) by layout and flock size $N$. |
+| `growth <folder> ... [--sizes <N> ...]` | Log-log slopes of $D_{\min}(N)$ allowed by the brackets, plus $D_{\min}$ spread across layouts vs across $N$. |
+| `reach <folder> ... [--sizes <N> ...]` | Median share of the outer half of the flock within $r_s$ of a single dog ($D = 1$) by layout and $N$. |
+| `fits <folder> ...` | Fit comparison between a power law $D = \max(1, cN^b)$ and a saturating curve $D = 1 + (D_\infty - 1)N/(N + K)$ on `wide` and `outlier_rich`, with extrapolations at $N = 1600, 3200$. |
+| `nested <longer> <shorter>` | Checks whether the shorter-deadline run matches the longer-deadline run truncated at the shorter deadline. |
+| `curve <folder> ... --layout <name> --n <N>` | Cell-by-cell curve across folders (trials, successes, rate, reliability and median finish time per $D$). |
+| `pair <folder_a> <folder_b>` | Seed-by-seed comparison of two runs sharing seeds (discordant trial counts with a sign test, plus a cross-tabulation of cell reliability decisions). |
+| `monotone <folder> ...` | Curves where a team above $D_{\min}$ (or $D_{\min,\mathrm{low}}$) is unreliable, alongside $D_{\min,\mathrm{stable}}$. |
+| `sequential <protocol>` | Exact probabilities of ending reliable, unreliable or undecided at `max_seeds` for true success rates $p \in [0.80, 0.97]$ under `<protocol>`'s stopping rule. |
+| `paper` | Tables for the [Strombom check](../methods/strombom_check.md) from `results/paper_check/` (Fig. 3 grid completion and least-squares line for the distance study). |
 
 ## Generated doc pages and figures
 
-These scripts in `docs/generate_docs/` write files under `docs/` (figures in `docs/figures/`, GIFs in `docs/gifs/`) from the protocol files and stored runs. They start no campaign. The figure scripts need matplotlib (`uv sync --extra dev`).
+Scripts in `docs/generate_docs/` rebuild the auto-generated Markdown pages, PNG figures (`docs/figures/`) and GIF animations (`docs/gifs/`) from stored runs (requires `uv sync --extra dev` for `matplotlib`, plus `pdftoppm` from `poppler-utils` to crop Strombom's figure in `fig_paper_check.png`):
 
 ```bash
-uv run python docs/generate_docs/make_docs.py            # rewrite the generated pages
-uv run python docs/generate_docs/make_docs.py --check    # write nothing; list stale pages, exit 1 if any
-uv run python docs/generate_docs/make_figures.py         # figures of the models and the task
-uv run python docs/generate_docs/make_result_figures.py  # figures of the results
-uv run python docs/generate_docs/make_gifs.py            # every animation, from stored trials
-uv run python docs/generate_docs/make_gifs.py paper_task # only the named animations
+uv run python docs/generate_docs/make_docs.py            # rewrite generated Markdown pages
+uv run python docs/generate_docs/make_docs.py --check    # exit 1 if any generated page is stale
+uv run python docs/generate_docs/make_figures.py         # model and task figures
+uv run python docs/generate_docs/make_result_figures.py  # result and diagnostic figures
+uv run python docs/generate_docs/make_gifs.py [name ...] # all GIFs, or only named animations
 ```
 
-The animation names are `one_trial`, `sheep_reaction`, `push_blending`, `team_rule_at_work`, `start_layouts` and `paper_task`; an unknown name stops the script and lists them. A figure or animation whose run folder or paper-check trials are missing stops with an error naming the file. The figure that sets HerdSim beside the paper's Fig. 3 (`fig_paper_check.png`) also needs `pdftoppm` (poppler-utils) to crop the paper's figure.
+Valid animation names for `make_gifs.py` are `one_trial`, `sheep_reaction`, `push_blending`, `team_rule_at_work`, `start_layouts` and `paper_task`.

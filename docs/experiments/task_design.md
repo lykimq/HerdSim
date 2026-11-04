@@ -1,12 +1,15 @@
 # Task design and experimental method
 
-How HerdSim sizes the herding task, places the flock and dogs, samples cells adaptively, and turns each curve of trials into critical team sizes and zones. Project terms are in the [glossary](../glossary.md) and code layers in the [architecture](../codes/architecture.md).
+How HerdSim sizes the herding task, places the flock and dogs, samples cells adaptively, and turns each curve of trials into critical team sizes and zones.
 
 ## 1. Task geometry and scale
 
 ### Why the field grows with the flock
 
-A fixed goal radius would be oversized for 25 sheep and too small to hold 400, and HerdSim uses an open field with no walls (matching Strombom et al., 2014). To keep the task geometry proportional across flock sizes, HerdSim scales the goal and drive distance by the calibrated flock radius $R_f(N)$, the radius a flock of $N$ sheep settles to when driven by one dog (Figure 1, Table 1).
+To keep the herding task proportional across flock sizes $N$ (Figure 1, Table 1):
+
+- Open field: there are no walls or boundaries (matching Strombom et al., 2014); the field only sets the start and goal coordinates.
+- Proportional scale: a fixed goal radius would be oversized for $N = 25$ and too small to hold $N = 400$, so HerdSim scales the goal and drive distance by the calibrated flock radius $R_f(N)$ (the radius a flock of $N$ sheep settles to when driven by one dog).
 
 ![Task geometry and physical scaling](../figures/fig6_task_geometry.png)
 
@@ -89,9 +92,10 @@ A sheep farther than the [collect distance](../methods/strombom_multi.md#when-to
 
 ### Dog starts
 
-The inner dog arc sits 30 m behind the farthest point any sheep of that layout can start, so dogs never spawn inside the flock. Dogs stand at least 5 m apart along the arc, and any overflow is placed on a concentric arc 5 m farther out.
+Dogs start behind the flock so they never spawn inside the sheep (Figure 3):
 
-The study uses `arcs` (semicircles on the side of the flock away from the goal, evenly spaced). Two alternative patterns are implemented in the engine but unused in the study: `ring` (full circles omitting the goal cone) and `handler` (all dogs at a single point behind the flock), shown in Figure 3:
+- Placement: the inner arc sits 30 m behind the farthest point any sheep of that layout can start, with dogs at least 5 m apart along the arc and any overflow placed on a concentric arc 5 m farther out.
+- Patterns: the study uses `arcs` (semicircles on the side away from the goal); the engine also implements `ring` (full circles omitting the goal cone) and `handler` (all dogs at a single point behind the flock).
 
 ![Dog start patterns](../figures/fig8_dog_starts.png)
 
@@ -151,7 +155,10 @@ When `decide_finish_times` is enabled, cells above a confirmed saturation team s
 
 ### Paired random streams
 
-Seed index $i$ of every cell uses `master_seed + i` ($2026 + i$ by default) and splits into separate random streams for initial placement, sheep noise and dog noise. Every team size therefore faces the exact same initial flock (Figure 7) and the same sheep noise until dog trajectories diverge, isolating the effect of team size $D$.
+Cells at the same $(N, \text{layout})$ share paired seeds so team sizes compare directly (Figure 7):
+
+- Seed assignment: seed index $i$ of every cell uses `master_seed + i` ($2026 + i$ by default).
+- Independent streams: each seed splits into separate random streams for initial placement, sheep noise and dog noise, so every team size $D$ faces the exact same initial flock and the same sheep noise until dog trajectories diverge.
 
 ![Deterministic paired comparisons](../figures/fig_adaptive_4_paired_seeds.png)
 
@@ -191,7 +198,12 @@ The frontier rules summarize each curve of cells into critical team sizes (Table
 
 ### Frontier values
 
-Finish-time comparisons apply only to working teams (reliable cells from $D_{\min}$ to $D_{\max}$) using a paired bootstrap over the seeds where both cells succeeded (requiring at least 5 shared seeds and 4000 resamples): one team is faster or slower when the 99% bootstrap interval of their median finish-time difference lies entirely outside $\pm 5\%$ of the slower median (`time_margin`), the same when it lies entirely within $\pm 5\%$, and undecided otherwise. Table 3 defines the frontier values, and Table 4 illustrates them on an example curve:
+Finish-time comparisons apply only to working teams (reliable cells from $D_{\min}$ to $D_{\max}$):
+
+- Paired bootstrap: two working teams are compared over the shared seeds where both succeeded (at least 5 shared seeds, 4000 bootstrap resamples).
+- Decision margin: one team is faster or slower when the 99% bootstrap interval of their median finish-time difference lies entirely outside $\pm 5\%$ of the slower median (`time_margin`), the same when it lies entirely within $\pm 5\%$, and undecided otherwise.
+
+Table 3 defines the frontier values, and Table 4 illustrates them on an example curve:
 
 **Table 3: Frontier values.**
 

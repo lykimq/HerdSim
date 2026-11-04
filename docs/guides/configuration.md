@@ -1,15 +1,15 @@
 # Configuration and protocol guide
 
-How a protocol file builds on the canonical defaults, what the physics hash covers, and what a run writes to its results folder.
+How protocol YAML files layer on top of canonical defaults, what the physics hash locks, and what files a campaign writes to `results/<protocol_id>/`.
 
 ## Configuration files
 
-Settings come from two layers under `protocols/configs/`: `canonical.yaml` holds the defaults, and each protocol file changes only what its experiment needs.
+Configuration lives in two layers under `protocols/configs/`: `canonical.yaml` defines every default setting, and individual protocol files override only what changes for that experiment.
 
 ```text
 protocols/configs/
-|-- canonical.yaml             # defaults, each with the source of its value
-|-- study_queue.yaml           # the six protocols in the order cli/campaign.py runs them
+|-- canonical.yaml             # default settings with source comments
+|-- study_queue.yaml           # the six study protocols in execution order
 `-- protocols/
     |-- dmin_m12.yaml          # strict rule, 12 drive times
     |-- dmin_m6.yaml           # strict rule, 6 drive times
@@ -17,32 +17,31 @@ protocols/configs/
     |-- dmin_f99_m12.yaml      # 99% rule, 12 drive times, nine flock sizes
     |-- dmin_f99_m6.yaml       # 99% rule, 6 drive times, nine flock sizes
     |-- dmin_f99_m3.yaml       # 99% rule, 3 drive times
-    `-- pilot_graze_on*.yaml   # the 99% runs at 6 (two files, split by N) and 3 drive times, grazing repulsion on
+    `-- pilot_graze_on*.yaml   # 99% rule at 6 and 3 drive times with grazing repulsion on
 ```
 
 ### Canonical defaults (`canonical.yaml`)
 
-Every protocol names `canonical.yaml`, directly or through the file it `extends`. Each setting has a comment giving the source of its value. Two settings govern a campaign run as a whole. Before a folder's first trial the campaign measures the flock radius $R_f$ for each flock size $N$ and stores it in `calibration.json`; a resumed run calibrates only the sizes the folder lacks. After `budget_hours` (default 72) a run starts no new batch of seeds; the clock starts after calibration, and a resumed run gets a fresh budget.
+Every protocol points to `canonical.yaml` directly or through its `extends` chain. The loader rejects unknown keys or out-of-range values before any trial runs.
 
 ### Model parameters
 
-Model parameters are not canonical settings. The method keeps the values of the paper it implements in its code (`sim/strombom/params.py`), and a protocol overrides them under `params` in its method's entry of `methods:`, for example `methods: {strombom_multi: {params: {graze_repulsion: true}}}` in the grazing pilots. A parameter added with a neutral value, one that changes nothing, stays out of the [physics hash](#physics-hash) at that value, so a folder written before the parameter existed keeps its hash. The only such parameter is `graze_repulsion`, neutral at `false` ([grazing](../methods/strombom_sheep.md#grazing)).
+Model parameters ($r_a$, $c$, $r_s$, `n_neighbors`, `graze_repulsion`, etc.) live with the method in `sim/strombom/params.py` rather than in `canonical.yaml`:
+
+- Overriding in a protocol: set under `methods.<method>.params`, for example `methods: {strombom_multi: {params: {graze_repulsion: true}}}`.
+- Neutral defaults: a parameter added with a no-op default stays out of the [physics hash](#physics-hash) at that default so existing results folders keep their hash (`graze_repulsion: false` is the only such parameter; see [grazing](../methods/strombom_sheep.md#grazing)).
 
 ### Protocol overrides
 
-A protocol names its id and output folder (`protocol_id`, `output`), the canonical file's path from the repository root (`canonical`), each method with exactly one time limit (`time_limit_drive_multiple` or `time_limit_ticks`), and the grid: `layouts`, `flock_sizes` and `shepherd_counts`, the team sizes $D$ (the code says shepherd for dog).
+A root protocol specifies `protocol_id`, `output`, `canonical`, `methods` (each with either `time_limit_drive_multiple` or `time_limit_ticks`), and the experiment grid (`layouts`, `flock_sizes`, and `shepherd_counts` for $D$). A child protocol uses `extends: <parent.yaml>` (relative to its own directory) and follows three inheritance rules:
 
-A protocol with `extends` names a parent file, by a path relative to itself, and gives only what differs:
-
-1) The child inherits every parent key, `canonical`, `protocol_id` and `output` included, so a child that does not state its own id and output runs into the parent's folder. The one exception is the one-line `description`, which is neither inherited nor in the physics hash.
-2) A key the child names replaces the parent's whole value, lists and mappings included.
-3) A child that names `methods:` keeps only the methods it lists and must repeat each one's time limit. A child that leaves `methods:` out keeps the parent's.
-
-An unknown key stops the run at load, before any trial, with an error naming the key. A number outside its range does the same and names the setting, and for most settings its value, for example `batch_seeds` below 1 or `compact_spread` below 0.
+- Inherited keys: the child inherits all parent keys including `canonical`, `protocol_id` and `output`, so a child must set its own `protocol_id` and `output` to avoid writing into the parent's folder. The one-line `description` is never inherited and is excluded from the physics hash.
+- Whole-value replacement: any key set by the child replaces the parent's entire value, including lists and mappings.
+- Method replacement: if the child sets `methods:`, it keeps only the methods it lists and must state each method's time limit; omitting `methods:` inherits the parent's methods unchanged.
 
 ### Example protocols
 
-`dmin_m12.yaml` names everything a protocol needs (shortened):
+`dmin_m12.yaml` is the base protocol for the strict rule at 12 drive times:
 
 ```yaml
 protocol_id: dmin_m12
@@ -58,43 +57,41 @@ flock_sizes: [25, 50, 100, 200, 400]
 shepherd_counts: [1, 2, 3, 4, 6, 8, 12, 16, 24]
 ```
 
-`dmin_f99_m6.yaml` leaves `methods:` out, keeps the 6-drive-time deadline of `dmin_m6`, and changes the success rule and the flock sizes:
+`dmin_f99_m6.yaml` extends `dmin_m6.yaml` (keeping its 6-drive-time deadline) and overrides the success rule, finish-time flag and flock sizes:
 
 ```yaml
 protocol_id: dmin_f99_m6
 output: results/dmin_f99_m6
-extends: dmin_m6.yaml           # dmin_m6 extends dmin_m12 and sets the 6x deadline
+extends: dmin_m6.yaml
 
-success_fraction: 0.99          # 99% of the flock inside the goal (1.0: every sheep)
-decide_finish_times: true       # also spend seeds until the finish-time ranking is decided
+success_fraction: 0.99          # 99% rule (1.0 is strict)
+decide_finish_times: true       # also sample until finish-time zones settle
 flock_sizes: [25, 50, 71, 100, 141, 200, 283, 400, 566]
 ```
 
-With `decide_finish_times` at its default, false, seeds only decide reliability.
-
 ### Physics hash
 
-The physics hash is a digest of everything that changes a trial's outcome, stored with each results folder. It covers the task, the canonical settings, the method's parameters and time limit, the set of layouts and the largest team size, because every cell at one $N$ shares a field sized for the largest team's start circles.
+Each results folder stores a physics hash in `provenance.json` that locks the simulation physics for that folder:
 
-It leaves out the sampling settings (threshold $\theta$, confidence, batch size, seed cap, `decide_finish_times` and the other campaign controls), `success_fraction` while at its default 1.0, the calibration tolerances `settled_tolerance` and `start_agreement` (they decide only whether calibration stops, never $R_f$), and the flock sizes and smaller team sizes, so a protocol can grow and still resume into its folder.
-
-The hash ties a folder to one physics. A run whose hash or protocol id differs from the folder's is refused, so changed physics needs a new folder: a new protocol with its own `protocol_id` and `output`. When calibration fails before any trial, the run removes `provenance.json` and `calibration.json`, so a corrected protocol can reopen the folder.
-
-The code is not hashed. `runs.jsonl` records the code identity for each sitting, one run of a campaign command on the folder. A resume after a trial-code change warns and goes on, because a refactor changes the code hash but not the physics.
+- Included in the hash: the task, per-trial and whole-protocol canonical settings, method parameters and time limit, the set of layouts, and `max(shepherd_counts)` (which sizes the shared arena margin at each $N$).
+- Excluded from the hash: adaptive-sampling controls ($\theta$, confidence, batch size, seed cap, `decide_finish_times`, `budget_hours`), calibration tolerances (`settled_tolerance`, `start_agreement`), `success_fraction` when at its default `1.0`, `flock_sizes`, and team sizes below `max(shepherd_counts)`. Adding new flock sizes or intermediate team sizes therefore resumes cleanly into the same folder.
+- Code identity: source code is not part of the physics hash; instead, each sitting logs the git commit and code digest to `runs.jsonl` and prints a warning if trial code changed between sittings.
 
 ## What a simulation run writes
 
-A run writes everything to `results/<protocol_id>/`:
+Table 1 lists the files written to `results/<protocol_id>/`:
 
-| File | What it holds |
+**Table 1: Files in a results folder.**
+
+| File | Contents |
 | :--- | :--- |
-| `protocol.yaml` | The merged protocol as first run |
-| `provenance.json` | Protocol id, physics hash, creation time |
-| `calibration.json` | $R_f(N)$ |
-| `runs.jsonl` | One line per sitting, with start time, trials so far and code identity |
-| `trials.jsonl`, `trials.csv` | One line or row per finished trial; the `.gz` copy is packed for git |
-| `frontier_cells.csv`, `frontier_groups.csv` | The decision per cell and per curve ($D_{\min}$, $D_{\mathrm{sat}}$, $D_{\max}$) |
-| `status.json` | Progress and why the run stopped |
-| `errors.jsonl`, `.lock`, `timeseries/` | Trials that raised, the lock held during a run, and per-tick histories of seeds 0-2 of every cell |
+| `protocol.yaml` | Resolved protocol configuration at folder creation |
+| `provenance.json` | `protocol_id`, `physics_hash` and creation timestamp |
+| `calibration.json` | Calibrated flock radius $R_f(N)$ per method and flock size |
+| `runs.jsonl` | One record per campaign sitting (start time, trial count, git/code digest) |
+| `trials.jsonl`, `trials.csv` | One record per completed trial (with `.gz` archives for git storage) |
+| `frontier_cells.csv`, `frontier_groups.csv` | Per-cell statistics/zones and per-curve frontier values ($D_{\min}$, $D_{\mathrm{sat}}$, $D_{\max}$, etc.) |
+| `status.json` | Current trial/cell counts and stop reason |
+| `errors.jsonl`, `.lock`, `timeseries/` | Trial exceptions, active process lock, and per-tick Parquet histories for seeds 0 to 2 |
 
-The stored folders in git keep only the packed `trials.jsonl.gz` and `trials.csv.gz`, the frontier files, `protocol.yaml`, `provenance.json`, `calibration.json`, `status.json` and, in the grazing pilots, `runs.jsonl`; the six study folders were written before `runs.jsonl` existed. When a clone has only the packed files, `campaign.py run` and `status` unpack them.
+In git, committed folders store the compressed `trials.jsonl.gz` and `trials.csv.gz` rather than the uncompressed trial files; `campaign.py run` and `status` unpack them automatically when needed.
