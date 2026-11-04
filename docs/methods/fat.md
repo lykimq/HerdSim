@@ -41,13 +41,14 @@ Every dog $d \in \{1, \dots, D\}$ receives $\mathbf{T}_d = P_{\mathrm{FAT}}$ at 
 
 In [`dmin_fat.yaml`](../../protocols/configs/protocols/dmin_fat.yaml) and [`dmin_f99_fat.yaml`](../../protocols/configs/protocols/dmin_f99_fat.yaml), the method entry sets `calibrate_as: strombom_multi` (`services/calibration.py`). Calibration therefore measures the settled flock radius $R_f(N)$ with one `strombom_multi` dog rather than one `fat` dog, so `fat` and `strombom_multi` run on the same $R_f(N)$, start flocks, goal radius, drive distance, seeds and 6-drive-time deadline (Animation 1).
 
-![Animation of the team rule and FAT on one start flock](../gifs/controllers.gif)
+![Animation of three dog rules on one start flock](../gifs/controllers.gif)
 
-**Animation 1: `strombom_multi` and `fat` on the same start flock (`wide`, $N = 400$, $D = 4$, seed 0, 99% rule, 6 drive times).** Only the team rule brings the flock in; FAT fails when time is up.
+**Animation 1: Three dog rules on the same start flock (`wide`, $N = 400$, $D = 4$, seed 0, 99% rule, 6 drive times).** Only the team rule brings the flock in; both baselines fail when time is up.
 
 - Marks: blue dots are sheep, orange triangles dogs, the green circle the goal; the bottom-left text gives the time and the sheep outside the goal.
 - Left: the team rule gives each dog its own outlier while collecting, then drives from an arc, and succeeds at 569 s (`dmin_f99_m6`).
-- Right: every FAT dog aims at the sheep farthest from the goal; the bulk of the flock gathers, but 298 sheep stay outside the goal at the 1241 s deadline (`dmin_f99_fat`).
+- Middle: the `independent` dogs all chase the same outlier, crowd together and fail at the 1241 s deadline with 298 sheep outside (`dmin_f99_indep`).
+- Right: every `fat` dog aims behind the sheep farthest from the goal without gathering lateral stragglers and fails at 1241 s (`dmin_f99_fat`).
 
 ## References
 

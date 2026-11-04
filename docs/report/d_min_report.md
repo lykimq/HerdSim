@@ -18,8 +18,10 @@ Across the three other comparisons:
 
 - Shorter deadlines as a cut: a trial shared by two deadlines under the same rule succeeds at the shorter deadline if and only if it had finished within that time limit at the longer one.
 - Layout against flock size: on $N = 25$-400 with lower bounds counted at their low end, $N$ moves $D_{\min}$ at least as much as the start layout in all six `strombom_multi` runs. On curves with a decided reliable team only, $N$ still moves $D_{\min}$ at least as much in five of the six runs (a tie at 0.79 doublings in `dmin_m6`), while layout moves it more on the five sizes of `dmin_f99_m6` (0.78 against 0.72 doublings) and $N$ moves it more across all nine sizes of `dmin_f99_m6` (1.07 against 0.93).
-- Uncoordinated `fat` baseline (`dmin_fat`, `dmin_f99_fat`, 6 drive times): when every dog aims behind the single sheep farthest from the goal without a collect/drive switch or outlier assignment, $D_{\min} = 1$ at $N \le 100$ (`2 / 2` on `outlier_rich` at $N = 100$) and on `compact` up to $N = 200$, but from $N = 200$ no team up to 24 dogs is reliable on any scattered layout under either rule, and at $N = 400$ `compact` is `none / [12]`.
-- Independent paper shepherds (`dmin_f99_indep`, 6 drive times, 99% rule): keeping Strömbom's collect/drive switch without multi-dog assignment restores reliability up to $N = 200$ on all scattered layouts (`wide` needs 2-3 dogs, `outlier_rich` 3, `split` 1-3), but at $N = 400$ no team up to 24 dogs is reliable on any scattered layout.
+- Controller ablation across three coordination levels (6 drive times):
+  - Level 0 (`fat`, uncoordinated baseline): without a collect/drive switch or outlier assignment, dogs bunch on the same sheep; no team up to 24 dogs is reliable from $N = 200$ upward on any scattered layout, and at $N = 400$ even `compact` requires at least 12 dogs (`none / [12]`).
+  - Level 1 (`independent`, mode switching without team assignment): adding Strömbom's collect/drive switch restores reliability up to $N = 200$ across all scattered layouts (`wide` needs 2-3 dogs, `outlier_rich` 3, `split` 1-3), but without Hungarian assignment all dogs chase the same straggler, causing complete collapse at $N = 400$ (`none` on all scattered layouts).
+  - Level 2 (`strombom_multi`, full multi-agent coordination): combining mode switching with Hungarian outlier assignment and the driving arc scales reliably through $N = 400$ and $N = 566$ with small teams ($D_{\min} = 2-3$ at $N = 400$). Mode switching is necessary for scattered flocks, but role assignment is strictly required for large flocks.
 
 ## 1. The question
 
@@ -237,7 +239,7 @@ Five features of the stored runs qualify the curves above:
 
 ## 4. Run record
 
-**Table 8: Stored study runs (`undecided` = undecided on reliability at 200 seeds; `open` = flagged for more seeds on reliability or finish time, all at the 200-seed cap; hours are the first pass at 20 workers).**
+**Table 9: Stored study runs (`undecided` = undecided on reliability at 200 seeds; `open` = flagged for more seeds on reliability or finish time, all at the 200-seed cap; hours are the first pass at 20 workers).**
 
 | Protocol | Trials | Cells | Undecided | Open | Errors | Hours, first pass | Trials added later |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
