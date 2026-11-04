@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from itertools import pairwise
 from typing import Any, cast
 
 import numpy as np
@@ -179,7 +180,7 @@ class _Comparisons:
 def _overcrowding_onset(ds: list[int], status: dict[int, str], start: int) -> int | None:
     """First of two consecutive unreliable D above ``start``, or None."""
     above = [d for d in ds if d > start]
-    for a, b in zip(above, above[1:]):
+    for a, b in pairwise(above):
         if status[a] == UNRELIABLE and status[b] == UNRELIABLE:
             return a
     return None
@@ -260,26 +261,23 @@ def _zones(
 
 
 def _zones_without_reliable(
-    ds: list[int], status: dict[int, str], out: GroupFrontier
+    ds: list[int], status: dict[int, str], start: int | None, d_overcrowd: int | None
 ) -> dict[int, str]:
-    """Zones of a group with no reliable D; sets its D_overcrowd from the first D that could
-    still be reliable."""
-    start = out.d_min_low
-    out.d_overcrowd = None if start is None else _overcrowding_onset(ds, status, start)
+    """Zones of a group with no reliable D, from the first D that could still be reliable."""
     return {
-        d: _unreliable_zone(d, start, out.d_overcrowd) if status[d] == UNRELIABLE else UNDECIDED
+        d: _unreliable_zone(d, start, d_overcrowd) if status[d] == UNRELIABLE else UNDECIDED
         for d in ds
     }
 
 
-def _zones_with_reliable(
+def _set_reliable_frontier(
     ds: list[int],
     status: dict[int, str],
     finish: dict[int, float],
     out: GroupFrontier,
     cmp: _Comparisons,
-) -> dict[int, str]:
-    """Zones of a group with a reliable D; sets all its frontier values on ``out``.
+) -> list[int]:
+    """Set the frontier values of a group with a reliable D on ``out``; return its working D.
 
     The working D are the reliable ones below overcrowding; the finish-time values D_best,
     D_crowd and D_sat are found among them.
@@ -297,7 +295,7 @@ def _zones_with_reliable(
     out.still_improving_at_top = (
         out.d_max_at_grid_top and len(working) > 1 and out.d_sat == working[-1]
     )
-    return _zones(ds, status, working, out, cmp)
+    return working
 
 
 def _group(
@@ -305,9 +303,9 @@ def _group(
 ) -> tuple[GroupFrontier, dict[int, str], set[int]]:
     """Frontier, zones and seed-needing D values for one group (cells sorted by D)."""
     ds = [int(d) for d in cells["n_shepherds"]]
-    status = dict(zip(ds, cells["reliability"]))
-    upper = dict(zip(ds, cells["rate_high"]))
-    finish = dict(zip(ds, cells["median_finish"]))
+    status = dict(zip(ds, cells["reliability"], strict=True))
+    upper = dict(zip(ds, cells["rate_high"], strict=True))
+    finish = dict(zip(ds, cells["median_finish"], strict=True))
     needs = {d for d in ds if status[d] == UNDECIDED}
     by_d = {int(cast(int, d)): g for d, g in trials.groupby("n_shepherds")}
     cmp = _Comparisons(by_d, rules, needs)
@@ -315,10 +313,13 @@ def _group(
     out.d_min_low = next((d for d in ds if upper[d] >= rules.theta), None)
 
     if any(status[d] == RELIABLE for d in ds):
-        zones = _zones_with_reliable(ds, status, finish, out, cmp)
+        working = _set_reliable_frontier(ds, status, finish, out, cmp)
+        zones = _zones(ds, status, working, out, cmp)
     else:
         out.d_min_above_grid = not needs
-        zones = _zones_without_reliable(ds, status, out)
+        start = out.d_min_low
+        out.d_overcrowd = None if start is None else _overcrowding_onset(ds, status, start)
+        zones = _zones_without_reliable(ds, status, start, out.d_overcrowd)
     out.group_undecided = bool(needs)  # after the comparisons, which may add to ``needs``
     return out, zones, needs
 
@@ -337,7 +338,7 @@ def confirming_team(zones: dict[int, str], d_sat: int) -> int | None:
 
 def cell_ids(cells: pd.DataFrame) -> list[tuple[str, int]]:
     """(group key, D) of every row of a cells table."""
-    return list(zip(cells["group_key"].astype(str), cells["n_shepherds"].astype(int)))
+    return list(zip(cells["group_key"].astype(str), cells["n_shepherds"].astype(int), strict=True))
 
 
 def frontier(trials: pd.DataFrame, rules: Rules, errors: dict[str, int] | None = None) -> Frontier:

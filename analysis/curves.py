@@ -12,8 +12,7 @@ from typing import NamedTuple
 import numpy as np
 import pandas as pd
 
-from .growth_fits import compare as compare_shapes
-from .growth_fits import interval_of
+from .growth_fits import compare_shapes, interval_of
 from .keys import split_group
 from .results import read_groups
 

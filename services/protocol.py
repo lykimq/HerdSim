@@ -32,6 +32,8 @@ from sim.strombom.params import DEFAULTS, METHOD, NEUTRAL_PARAMS
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 RESULTS_ROOT = REPO_ROOT / "results"
+QUEUE_LOG = RESULTS_ROOT / "queue_log.jsonl"  # one line per protocol the study queue ran
+CANONICAL = REPO_ROOT / "protocols" / "configs" / "canonical.yaml"  # the study's defaults
 PROTOCOLS_DIR = REPO_ROOT / "protocols" / "configs" / "protocols"
 STUDY_QUEUE = REPO_ROOT / "protocols" / "configs" / "study_queue.yaml"
 
@@ -59,8 +61,6 @@ WHOLE_PROTOCOL_KEYS = (
     "calibration_seconds",
     "calibration_window_seconds",
     "calibration_starts",
-    "settled_tolerance",
-    "start_agreement",
 )
 
 # Canonical values that only steer the adaptive run; they do not change any trial, so they
@@ -80,9 +80,56 @@ STRATEGY_KEYS = (
     "decide_finish_times",
 )
 
+# The tolerances of the calibration only decide whether it stops, never the R_f it measures,
+# so they stay out of the physics hash too: a folder whose calibration passes a tighter
+# tolerance holds the same trials.
+CALIBRATION_CHECKS = ("settled_tolerance", "start_agreement")
+
 # A setting at its neutral value changes no trial, so it stays out of the physics hash; a
 # folder written before the setting existed keeps its hash.
 NEUTRAL_SETTINGS = {"success_fraction": 1.0}
+
+# The range each numeric canonical value must lie in, checked at load: the engine would
+# otherwise meet a bad value only inside the workers, after calibration has run.
+WHOLE_AT_LEAST_ONE = (
+    "calibration_seeds",
+    "batch_seeds",
+    "max_seeds",
+    "min_pairs",
+    "bootstrap_resamples",
+    "refine_min_gap",
+)
+WHOLE_AT_LEAST_ZERO = ("master_seed", "timeseries_seeds")
+POSITIVE = (
+    "goal_radius_multiple",
+    "separation_scale",
+    "measurement_radius",
+    "lost_radius_multiple",
+    "calibration_seconds",
+    "calibration_window_seconds",
+    "settled_tolerance",
+    "start_agreement",
+    "budget_hours",
+)
+AT_LEAST_ZERO = (
+    "drive_distance_min",
+    "field_clearance",
+    "compact_spread",
+    "wide_sigma",
+    "split_ring",
+    "outlier_near",
+    "outlier_far",
+    "dog_start_gap",
+    "dog_overlap_distance",
+    "time_margin",
+    "prune_overlap",
+)
+FRACTIONS = ("outlier_fraction",)
+OPEN_FRACTIONS = ("reliability_theta", "confidence")
+# Checked by the task itself (drive_task.check_settings), which load_protocol also calls.
+TASK_CHECKED = ("success_fraction", "dog_start_spacing", "drive_distance_multiple")
+SWITCHES = ("decide_finish_times",)
+LAYOUT_SCALE_TOLERANCE = 1e-9  # separation_scale and r_a are equal up to float noise
 
 
 @dataclass(frozen=True)
@@ -119,9 +166,9 @@ class Protocol:
         """Everything that changes a trial's outcome; input of the physics hash.
 
         The layout set and the largest D size the field and place the goal of every cell
-        (the task's build_setup), so both are physics. The flock sizes, the smaller D and
-        the strategy keys are not, so a campaign can add flock sizes, intermediate D or
-        seeds and still resume.
+        (the task's build_setup), so both are physics. The flock sizes, the smaller D, the
+        strategy keys and the calibration tolerances are not, so a campaign can add flock
+        sizes, intermediate D or seeds and still resume.
         """
         methods = self.method_config()
         return {
@@ -131,7 +178,7 @@ class Protocol:
             "settings": {
                 k: v
                 for k, v in self.settings.items()
-                if k not in STRATEGY_KEYS and NEUTRAL_SETTINGS.get(k) != v
+                if k not in (*STRATEGY_KEYS, *CALIBRATION_CHECKS) and NEUTRAL_SETTINGS.get(k) != v
             },
             "methods": {
                 m.name: {
@@ -206,12 +253,16 @@ def _time_limit(name: str, spec: dict[str, Any]) -> tuple[int | None, float | No
         raise ValueError(f"Method {name!r}: give exactly one of {', '.join(TIME_LIMIT_KEYS)}")
     if given[0] == "time_limit_drive_multiple":
         multiple = spec["time_limit_drive_multiple"]
-        if not multiple > 0.0:
-            raise ValueError(f"Method {name!r}: time_limit_drive_multiple must be positive")
+        if not (_is_number(multiple) and multiple > 0.0):
+            raise ValueError(
+                f"Method {name!r}: time_limit_drive_multiple must be positive, got {multiple!r}"
+            )
         return None, multiple
     ticks = spec["time_limit_ticks"]
-    if not math.isclose(ticks, round(ticks)) or round(ticks) < 1:
-        raise ValueError(f"Method {name!r}: the time limit must be a whole number of ticks >= 1")
+    whole = _is_number(ticks) and math.isclose(ticks, round(ticks)) and round(ticks) >= 1
+    if not whole:
+        wanted = "a whole number of ticks >= 1"
+        raise ValueError(f"Method {name!r}: time_limit_ticks must be {wanted}, got {ticks!r}")
     return round(ticks), None
 
 
@@ -228,7 +279,8 @@ def _methods(raw: dict[str, Any]) -> tuple[MethodSpec, ...]:
         bad = sorted(set(params) - set(DEFAULTS))
         if bad:
             raise ValueError(f"Method {name!r} has no parameters {bad}")
-        # A switch given as "false" or 0 would read as on and also escape the neutral filter.
+        # A switch must be a YAML bool: "false" would read as on and escape the neutral
+        # filter, and 1 would run as on but hash apart from true.
         for key, value in params.items():
             if isinstance(DEFAULTS[key], bool) and not isinstance(value, bool):
                 raise ValueError(f"Method {name!r}: {key} must be true or false, not {value!r}")
@@ -252,7 +304,7 @@ def _check_shape(name: str, spec: Mapping[str, Any], settings: Mapping[str, Any]
         raise ValueError(f"{name}: methods must name at least one method")
     _check_task_and_layouts(name, spec["layouts"], settings["task"])
     for key in ("flock_sizes", "shepherd_counts"):
-        if any(not isinstance(v, int) or v < 1 for v in spec[key]):
+        if any(not (_is_number(v) and isinstance(v, int) and v >= 1) for v in spec[key]):
             raise ValueError(f"{name}: {key} must be positive integers")
 
 
@@ -265,14 +317,38 @@ def _check_task_and_layouts(name: str, layouts: list[str], task: str) -> None:
         raise ValueError(f"{name}: unknown layouts {unknown} for task {task!r}; {known}")
 
 
-def _check_decisions(name: str, settings: Mapping[str, Any]) -> None:
-    """The reliability rule and the seed batches."""
-    if not 0.0 < settings["reliability_theta"] < 1.0:
-        raise ValueError(f"{name}: reliability_theta must lie between 0 and 1")
-    if not 0.0 < settings["confidence"] < 1.0:
-        raise ValueError(f"{name}: confidence must lie between 0 and 1")
-    if not 1 <= settings["batch_seeds"] <= settings["max_seeds"]:
-        raise ValueError(f"{name}: need 1 <= batch_seeds <= max_seeds")
+def _check_batches(name: str, settings: Mapping[str, Any]) -> None:
+    batch, cap = settings["batch_seeds"], settings["max_seeds"]
+    if batch > cap:
+        raise ValueError(f"{name}: batch_seeds ({batch}) must not exceed max_seeds ({cap})")
+
+
+def _is_number(value: Any) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+def _check_ranges(name: str, settings: Mapping[str, Any]) -> None:
+    """Every numeric canonical value in its range, named with its value when it is not."""
+    rules = (
+        (WHOLE_AT_LEAST_ONE, lambda v: isinstance(v, int) and v >= 1, "a whole number >= 1"),
+        (WHOLE_AT_LEAST_ZERO, lambda v: isinstance(v, int) and v >= 0, "a whole number >= 0"),
+        (POSITIVE, lambda v: v > 0, "positive"),
+        (AT_LEAST_ZERO, lambda v: v >= 0, "at least 0"),
+        (FRACTIONS, lambda v: 0 <= v <= 1, "between 0 and 1"),
+        (OPEN_FRACTIONS, lambda v: 0 < v < 1, "strictly between 0 and 1"),
+    )
+    ranged = {key for keys, _, _ in rules for key in keys} | set(TASK_CHECKED)
+    unranged = sorted(k for k, v in settings.items() if _is_number(v) and k not in ranged)
+    if unranged:  # a new canonical number must be given a range here
+        raise ValueError(f"{name}: no range check for settings {unranged}")
+    for keys, holds, wanted in rules:
+        for key in keys:
+            value = settings[key]
+            if not (_is_number(value) and holds(value)):
+                raise ValueError(f"{name}: {key} must be {wanted}, got {value!r}")
+    for key in SWITCHES:
+        if not isinstance(settings[key], bool):
+            raise ValueError(f"{name}: {key} must be true or false, got {settings[key]!r}")
 
 
 def _check_layout_scale(
@@ -285,8 +361,8 @@ def _check_layout_scale(
     meaning "beyond the distance where the dogs collect".
     """
     for m in methods:
-        r_a = m.params.get("r_a", DEFAULTS.get("r_a"))
-        if r_a is not None and abs(settings["separation_scale"] - r_a) > 1e-9:
+        r_a = m.params.get("r_a", DEFAULTS["r_a"])
+        if abs(settings["separation_scale"] - r_a) > LAYOUT_SCALE_TOLERANCE:
             scale = settings["separation_scale"]
             raise ValueError(
                 f"{name}: separation_scale ({scale}) must equal r_a ({r_a}) of {m.name}; "
@@ -334,7 +410,9 @@ def load_protocol(name_or_path: str, output: Path | None = None) -> Protocol:
         raise ValueError(f"{path.name}: unknown keys {unknown}")
     settings = {**canonical, **{k: v for k, v in spec.items() if k in canonical}}
     _check_shape(path.name, spec, settings)
-    _check_decisions(path.name, settings)
+    _check_ranges(path.name, settings)
+    drive_task.check_settings(settings)
+    _check_batches(path.name, settings)
     description = spec.get("description")
     if description is not None and not (isinstance(description, str) and description.strip()):
         raise ValueError(f"{path.name}: description must be non-empty text, got {description!r}")

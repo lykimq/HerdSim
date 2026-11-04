@@ -109,8 +109,9 @@ def test_physics_hash_matches_only_when_trial_outcomes_match() -> None:
     """Resume gate: same trial physics -> same hash; a real physics change -> new hash.
 
     Strategy and sampling stay out of the hash so a campaign can raise seeds and still
-    resume. Layouts and the largest D size every cell's field, so they are in. Extra flock
-    sizes or intermediate D are not. Neutral success_fraction (strict 1.0) stays out so
+    resume; so do the calibration tolerances, which never change R_f. Layouts and the
+    largest D size every cell's field, so they are in. Extra flock sizes or intermediate D
+    are not. Neutral success_fraction (strict 1.0) stays out so
     folders written before that setting remain resumable; a relaxed fraction is in.
     YAML 13 and 13.0 must hash alike so int/float spelling does not block resume.
     """
@@ -119,6 +120,8 @@ def test_physics_hash_matches_only_when_trial_outcomes_match() -> None:
 
     assert physics_hash(protocol_with(ticks=3000, settings={"max_seeds": 400})) == base
     assert physics_hash(protocol_with(ticks=3000, settings={"refine_min_gap": 4})) == base
+    tolerances = {"settled_tolerance": 0.2, "start_agreement": 0.2}
+    assert physics_hash(protocol_with(ticks=3000, settings=tolerances)) == base
     assert (
         physics_hash(replace(BASE_PROTOCOL, flock_sizes=(*BASE_PROTOCOL.flock_sizes, 50))) == base
     )
@@ -156,7 +159,7 @@ def test_physics_hash_matches_only_when_trial_outcomes_match() -> None:
 
 @pytest.mark.parametrize("bad", ["false", 0])
 def test_a_model_switch_must_be_a_real_boolean(tmp_path: Path, bad: object) -> None:
-    """ "false" or 0 would read as on and escape the neutral filter of the hash."""
+    """ "false" would read as on; a number is refused too, as 1 would hash apart from true."""
     with pytest.raises(ValueError, match="graze_repulsion"):
         load_draft(tmp_path, methods={METHOD: {"params": {"graze_repulsion": bad}}})
 

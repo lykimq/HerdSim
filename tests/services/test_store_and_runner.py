@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import time
 from dataclasses import replace
 from pathlib import Path
@@ -15,7 +16,13 @@ import yaml
 
 from services.cells import Cell, Group, Trial, make_trial
 from services.runner import execute, identity, run_batch
-from services.store import CampaignStore, FolderBusy, PhysicsMismatch, progress
+from services.store import (
+    CampaignStore,
+    FolderBusy,
+    PhysicsMismatch,
+    TrialsConflict,
+    progress,
+)
 from sim.strombom.params import DEFAULTS
 from tests.helpers import config_for, protocol_with
 
@@ -168,6 +175,33 @@ def test_a_clone_with_only_the_packed_trials_keeps_them(tmp_path: Path) -> None:
     assert clone.trials_gz.read_bytes() == packed  # same trials, same bytes: no git churn
 
 
+def _pulled_over(tmp_path: Path, local_keys: list[str], pulled_keys: list[str]) -> Path:
+    """A folder whose trials.jsonl holds ``local_keys`` and whose trials.jsonl.gz, newer as
+    after a pull, holds ``pulled_keys``."""
+    pulled, local = open_store(tmp_path / "pulled"), open_store(tmp_path / "local")
+    for store, keys in ((pulled, pulled_keys), (local, local_keys)):
+        for key in keys:
+            store.append_row({"trial_key": key})
+        store.close()
+    gz = local.trials_gz
+    gz.write_bytes(pulled.trials_gz.read_bytes())
+    later = local.trials_jsonl.stat().st_mtime_ns + 10**9
+    os.utime(gz, ns=(later, later))
+    return local.root
+
+
+def test_a_pulled_packed_copy_replaces_an_older_local_one(tmp_path: Path) -> None:
+    """Resuming on the older trials.jsonl would pack it over the pulled trials."""
+    folder = _pulled_over(tmp_path, ["a"], ["a", "b"])
+    assert trial_keys(CampaignStore(folder)) == ["a", "b"]
+
+
+def test_a_pull_that_lacks_local_trials_is_refused(tmp_path: Path) -> None:
+    folder = _pulled_over(tmp_path, ["a", "c"], ["a", "b"])
+    with pytest.raises(TrialsConflict, match="'c'"):
+        CampaignStore(folder)
+
+
 def test_each_sitting_records_its_code_and_protocol(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -209,16 +243,17 @@ def test_calibration_round_trips(tmp_path: Path) -> None:
 # --- batch runner ------------------------------------------------------------
 
 
-def test_row_records_identity_and_geometry(tmp_path: Path) -> None:
-    protocol = protocol_with(ticks=TICKS)
+@pytest.mark.parametrize(("ticks", "finishes"), [(TICKS, False), (400, True)])
+def test_row_records_identity_and_geometry(tmp_path: Path, ticks: int, finishes: bool) -> None:
+    protocol = protocol_with(ticks=ticks)
     # 140 u, above drive_distance_min
     config = config_for(
-        n=N_SHEEP, d=N_DOGS, ticks=TICKS, settings={"drive_distance_multiple": 20.0}
+        n=N_SHEEP, d=N_DOGS, ticks=ticks, settings={"drive_distance_multiple": 20.0}
     )
     trial = make_trial(protocol, compact_cell(), 0, config, tmp_path)
 
     columns = identity(trial)
-    assert columns["time_limit_seconds"] == float(TICKS)
+    assert columns["time_limit_seconds"] == float(ticks)
     assert columns["task"] == "drive_to_goal"
 
     row = execute(trial)
@@ -227,8 +262,9 @@ def test_row_records_identity_and_geometry(tmp_path: Path) -> None:
     assert row["world_height"] == config["world_height"]
     assert {"mean_gcm_goal", "mean_cohesion", "final_sheep_in_goal"} <= set(row)
 
+    assert row["success"] == finishes
     arrivals = [row[f"seconds_to_{pct}pct_in_goal"] for pct in (90, 95, 99)]
-    if row["success"]:
+    if finishes:
         assert row["finish_seconds"] == row["finish_ticks"] * config["dt"]
         assert arrivals[0] <= arrivals[1] <= arrivals[2] <= row["finish_seconds"]
     else:

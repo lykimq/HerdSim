@@ -38,7 +38,7 @@ A protocol with `extends` names a parent file, by a path relative to itself, and
 2) A key the child names replaces the parent's whole value, lists and mappings included.
 3) A child that names `methods:` keeps only the methods it lists and must repeat each one's time limit. A child that leaves `methods:` out keeps the parent's.
 
-An unknown key stops the run at load, before any trial, with an error naming the key.
+An unknown key stops the run at load, before any trial, with an error naming the key. A number outside its range does the same and names the setting, and for most settings its value, for example `batch_seeds` below 1 or `compact_spread` below 0.
 
 ### Example protocols
 
@@ -76,7 +76,7 @@ With `decide_finish_times` at its default, false, seeds only decide reliability.
 
 The physics hash is a digest of everything that changes a trial's outcome, stored with each results folder. It covers the task, the canonical settings, the method's parameters and time limit, the set of layouts and the largest team size, because every cell at one $N$ shares a field sized for the largest team's start circles.
 
-It leaves out the sampling settings (threshold $\theta$, confidence, batch size, seed cap, `decide_finish_times` and the other campaign controls), `success_fraction` while at its default 1.0, and the flock sizes and smaller team sizes, so a protocol can grow and still resume into its folder.
+It leaves out the sampling settings (threshold $\theta$, confidence, batch size, seed cap, `decide_finish_times` and the other campaign controls), `success_fraction` while at its default 1.0, the calibration tolerances `settled_tolerance` and `start_agreement` (they decide only whether calibration stops, never $R_f$), and the flock sizes and smaller team sizes, so a protocol can grow and still resume into its folder.
 
 The hash ties a folder to one physics. A run whose hash or protocol id differs from the folder's is refused, so changed physics needs a new folder: a new protocol with its own `protocol_id` and `output`. When calibration fails before any trial, the run removes `provenance.json` and `calibration.json`, so a corrected protocol can reopen the folder.
 
@@ -97,4 +97,4 @@ A run writes everything to `results/<protocol_id>/`:
 | `status.json` | Progress and why the run stopped |
 | `errors.jsonl`, `.lock`, `timeseries/` | Trials that raised, the lock held during a run, and per-tick histories of seeds 0-2 of every cell |
 
-The stored folders in git keep only the packed `trials.jsonl.gz`, `trials.csv` (the grazing pilots also `trials.csv.gz`), the frontier files, `protocol.yaml`, `provenance.json`, `calibration.json`, `status.json` and, in the grazing pilots, `runs.jsonl`; the six study folders were written before `runs.jsonl` existed. When a clone has only the packed files, `campaign.py run` and `status` unpack them.
+The stored folders in git keep only the packed `trials.jsonl.gz` and `trials.csv.gz`, the frontier files, `protocol.yaml`, `provenance.json`, `calibration.json`, `status.json` and, in the grazing pilots, `runs.jsonl`; the six study folders were written before `runs.jsonl` existed. When a clone has only the packed files, `campaign.py run` and `status` unpack them.

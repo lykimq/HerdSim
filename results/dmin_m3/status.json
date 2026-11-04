@@ -1,7 +1,7 @@
 {
   "_auto_generated_notice": "AUTO-GENERATED: do not modify. Re-run the producing command to refresh this file.",
   "protocol_id": "dmin_m3",
-  "physics_hash": "862e12aa36d42022",
+  "physics_hash": "060c7c1707561199",
   "running": false,
   "stop_reason": "every cell decided, at max_seeds or errored",
   "rounds": 20,

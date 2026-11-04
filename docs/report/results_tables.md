@@ -2,7 +2,7 @@
 
 > AUTO-GENERATED: do not modify. Re-run the producing command to refresh this file. Command: `uv run python docs/generate_docs/make_docs.py`. Source: the stored runs in `results/`.
 
-The tables behind the [report](d_min_report.md), for readers who want the values of a figure or a sentence of the report. Terms are in the [glossary](../glossary.md). Every table is read from the stored runs when this page is written, so it shows the runs as they are now. A table with no heading of its own has its command printed above it; the others are listed in `docs/generate_docs/page.py`.
+The tables behind the [report](d_min_report.md), for readers who want the values of a figure or a sentence of the report. Terms are in the [glossary](../glossary.md). Every table is read from the stored runs when this page is written, so it shows the runs as they are now. A table with no heading of its own has its command printed above it; the others are listed in `docs/generate_docs/results_page.py`.
 
 ## Contents
 
@@ -26,11 +26,11 @@ An entry of a $D_{\min}$ table is the smallest number of dogs whose success rate
 
 Strict means every sheep inside the goal. 99 percent means ceil(0.99 N) sheep inside, so the two rules are the same below N = 100. A doubling is a factor of 2 in $D$, so going from 1 dog to 2 is one doubling.
 
-dmin_f99_m12 and dmin_f99_m6 were resumed with four more flock sizes (71, 141, 283 and 566). The D_min and growth sections at 99 percent show them at the five original sizes, so the three deadlines can be compared; the section on nine flock sizes uses all of them.
+dmin_f99_m12 and dmin_f99_m6 were resumed with more flock sizes (71, 141, 283 and 566). The D_min and growth sections at 99 percent show them at the original sizes, so the three deadlines can be compared; the section on nine flock sizes uses all of them.
 
 ## Runs
 
-Each row is the line of `results/queue_log.jsonl` for a protocol. `finished`, `hours` and `workers` come from that line; the counts come from the folder's `status.json` now. `cells` is the number of cells, `cells_needing_seeds` the open cells that still ask for seeds, `cells_at_max_seeds_undecided` the open cells that already have the limit of 200 seeds, and `trial_errors` the trials that raised an error.
+Each row is the line of `results/queue_log.jsonl` for a protocol. `finished`, `hours` and `workers` come from that line; the other counts come from the folder's `status.json` now, except `cells_reliability_undecided`, which comes from its `frontier_cells.csv`. `cells` is the number of cells, `cells_needing_seeds` the open cells that still ask for seeds, `cells_at_max_seeds_undecided` the open cells that have reached the limit of 200 seeds (including cells decided on reliability that wait on a finish time), `cells_reliability_undecided` the cells whose reliability is undecided, and `trial_errors` the trials that raised an error.
 
 | protocol | finished | trials | cells | cells_needing_seeds | cells_at_max_seeds_undecided | cells_reliability_undecided | trial_errors | hours | workers | outcome |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
@@ -74,7 +74,7 @@ Each row is the line of `results/queue_log.jsonl` for a protocol. `finished`, `h
 
 ## D_min by layout and N, success at 99 percent
 
-Shown at the five original flock sizes (25, 50, 100, 200, 400) of dmin_f99_m12 and dmin_f99_m6.
+Shown at the original flock sizes (25, 50, 100, 200, 400) of dmin_f99_m12 and dmin_f99_m6.
 
 ### dmin_f99_m12
 
@@ -121,9 +121,9 @@ Spread of D_min in doublings: between layouts at one N 0.68, between N at one la
 | layout | slope_range | n_used | note |
 | :--- | :--- | :---: | :--- |
 | compact | 0 (flat) | 25 50 100 200 400 | D_min = 1 throughout |
-| outlier_rich | 0.79 to 0.79 | 25 50 100 | no reliable D on the grid at N = 400; still open on reliability at N = 200 |
+| outlier_rich | 0.79 to 0.79 | 25 50 100 | no reliable D on the grid at N = 400; still undecided on reliability at N = 200 |
 | split | 0 (flat, decided sizes only) | 25 50 100 | D_min = 1 where decided; no reliable D on the grid at N = 200 400 |
-| wide | 0.48 to 0.48 | 25 50 100 200 | still open on reliability at N = 400 |
+| wide | 0.48 to 0.48 | 25 50 100 200 | still undecided on reliability at N = 400 |
 
 Spread of D_min in doublings: between layouts at one N 1.67, between N at one layout 1.69; on curves with a reliable team 0.79 and 0.79.
 
@@ -140,7 +140,7 @@ Spread of D_min in doublings: between layouts at one N 0.76, between N at one la
 
 ## Growth with N, 99 percent
 
-Shown at the five original flock sizes (25, 50, 100, 200, 400) of dmin_f99_m12 and dmin_f99_m6.
+Shown at the original flock sizes (25, 50, 100, 200, 400) of dmin_f99_m12 and dmin_f99_m6.
 
 ### dmin_f99_m12
 
@@ -159,7 +159,7 @@ Spread of D_min in doublings: between layouts at one N 0.50, between N at one la
 | :--- | :--- | :---: | :--- |
 | compact | 0 (flat) | 25 50 100 200 400 | D_min = 1 throughout |
 | outlier_rich | 0.42 to 0.48 | 25 50 100 200 400 |  |
-| split | 0 (flat, decided sizes only) | 25 50 100 | D_min = 1 where decided; still open on reliability at N = 200 400 |
+| split | 0 (flat, decided sizes only) | 25 50 100 | D_min = 1 where decided; still undecided on reliability at N = 200 400 |
 | wide | 0.30 to 0.42 | 25 50 100 200 400 |  |
 
 Spread of D_min in doublings: between layouts at one N 0.92, between N at one layout 1.30; on curves with a reliable team 0.78 and 0.72.
@@ -169,7 +169,7 @@ Spread of D_min in doublings: between layouts at one N 0.92, between N at one la
 | layout | slope_range | n_used | note |
 | :--- | :--- | :---: | :--- |
 | compact | 0 (flat) | 25 50 100 200 400 | D_min = 1 throughout |
-| outlier_rich | 0.70 to 1.10 | 25 50 100 200 | still open on reliability at N = 400 |
+| outlier_rich | 0.70 to 1.10 | 25 50 100 200 | still undecided on reliability at N = 400 |
 | split | 0 (flat, decided sizes only) | 25 50 100 | D_min = 1 where decided; no reliable D on the grid at N = 200 400 |
 | wide | 0.62 to 0.68 | 25 50 100 200 400 |  |
 
@@ -208,7 +208,7 @@ Reach is the share of the outer half of the flock, the sheep farther than the me
 
 ## Nine flock sizes, 99 percent
 
-dmin_f99_m12 and dmin_f99_m6 on all nine flock sizes (N above 50 spaced by sqrt 2). Fits: interval-censored maximum likelihood of a power law and of a saturating curve to the D_min brackets. The last two columns give the range of D that every curve of each shape passing through all the brackets allows at N = 1600 and 3200.
+dmin_f99_m12 and dmin_f99_m6 on all their flock sizes (N above 50 spaced by sqrt 2). Fits: interval-censored maximum likelihood of a power law and of a saturating curve to the D_min brackets. The last two columns give the range of D that every curve of each shape passing through all the brackets allows at N = 1600 and 3200.
 
 ### D_min, dmin_f99_m12
 
@@ -245,7 +245,7 @@ Spread of D_min in doublings: between layouts at one N 0.68, between N at one la
 | :--- | :--- | :---: | :--- |
 | compact | 0 (flat) | 25 50 71 100 141 200 283 400 566 | D_min = 1 throughout |
 | outlier_rich | 0.40 to 0.58 | 25 50 71 100 141 200 283 400 566 |  |
-| split | 0 (flat, decided sizes only) | 25 50 71 100 141 | D_min = 1 where decided; no reliable D on the grid at N = 566; still open on reliability at N = 200 283 400 |
+| split | 0 (flat, decided sizes only) | 25 50 71 100 141 | D_min = 1 where decided; no reliable D on the grid at N = 566; still undecided on reliability at N = 200 283 400 |
 | wide | 0.38 to 0.61 | 25 50 71 100 141 200 283 400 566 |  |
 
 Spread of D_min in doublings: between layouts at one N 1.13, between N at one layout 1.65; on curves with a reliable team 0.93 and 1.07.
@@ -318,13 +318,13 @@ Trials shared by two runs that differ only in the deadline, matched on cell and 
 
 ## Decision rates of the per-cell rule
 
-The six runs share one per-cell rule, so one table covers them: a cell is reliable when the 99 percent Clopper-Pearson interval of its success rate lies at or above 0.90 and unreliable when it lies below; otherwise it gets 10 more seeds, up to 200, and a cell still in between stays open. Each check after a batch is a look. For a cell whose true success rate is p, the table gives the chance in percent that it ends reliable, unreliable or open, computed exactly over every look (no simulation).
+The six runs share one per-cell rule, so one table covers them: a cell is reliable when the 99 percent Clopper-Pearson interval of its success rate lies at or above 0.90 and unreliable when it lies below; otherwise it gets 10 more seeds, up to 200, and a cell still in between at 200 stays undecided. Each check after a batch is a look. For a cell whose true success rate is p, the table gives the chance in percent that it ends reliable, unreliable or undecided, computed exactly over every look (no simulation).
 
 `uv run python -m docs.generate_docs.page sequential dmin_f99_m6`
 
 ### dmin_f99_m6: decision per true success rate p (percent)
 
-| p | reliable | unreliable | open |
+| p | reliable | unreliable | undecided |
 | :---: | :---: | :---: | :---: |
 | 0.8 | 0.00 | 94.47 | 5.53 |
 | 0.84 | 0.01 | 58.36 | 41.63 |

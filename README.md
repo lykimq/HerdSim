@@ -66,16 +66,12 @@ $D_{\min}$ at $N = 400$, from 115,470 trials in the six runs (Table 1). `2-3` me
 
 - `compact` needs one dog at every size, rule and deadline, through $N = 566$ where tested.
 - Up to $N = 50$ one dog is enough on every layout; from $N = 100$ some scattered curves need more.
-- At 12 drive times the log-log slope of $D_{\min}$ against $N$ is 0.42 on `wide` and `outlier_rich` and 0.32 to 0.42 on `split` (strict, $N = 25$-400), and 0.27 to 0.38 on `wide` and 0.28 to 0.38 on `outlier_rich` (99%, nine sizes to 566). At 6 drive times under the 99% rule, on the nine sizes, it is 0.38 to 0.61 on `wide` and 0.40 to 0.58 on `outlier_rich`.
 
-The [report](docs/report/d_min_report.md) has every size, the brackets and the limits.
+The [report](docs/report/d_min_report.md) has every size, the brackets, the limits and the log-log slope of $D_{\min}$ against $N$ per layout, rule and deadline ([RQ1](docs/report/d_min_report.md#31-rq1-how-does-d_min-grow-with-n)).
 
 ## Check against Strombom et al. (2014)
 
-HerdSim reruns two one-dog studies of the paper with its own trial code, the paper's settings where it gives them and HerdSim's reading where it does not, 5100 trials in all ([check doc](docs/methods/strombom_check.md)):
-
-- The paper's Figure 3 task, each sheep attracted by its $n$ nearest neighbours: the paper says every trial finishes down to about $n = 0.53 N$. In HerdSim 50 of 50 finish at all 30 grid points with $n \ge 0.6 N$ ($N$ = 10 to 150); the grid has no point between $0.5 N$ and $0.6 N$.
-- The paper's distance study: the paper says success is unaffected and the mean time grows linearly with distance. In HerdSim all 1100 trials finish, and a line fits the 11 mean times with $R^2$ = 0.9995.
+HerdSim reruns two one-dog studies of the paper with its own trial code, the paper's settings where it gives them and HerdSim's reading where it does not, 5100 trials in all: the paper's Figure 3 task, where each sheep is attracted by its $n$ nearest neighbours, and its study of the distance to the goal. For each, the [check doc](docs/methods/strombom_check.md) gives what the paper states beside what HerdSim measures, with the trial counts, the fit of time against distance and the grid points HerdSim chose.
 
 ![The paper's Figure 3 beside HerdSim's run of the same task](docs/figures/fig_paper_check.png)
 
@@ -102,7 +98,7 @@ Stored results live in `results/`.
 
 ## Running campaigns
 
-A campaign runs one protocol and puts extra seeds on cells that are still undecided ([`cli/campaign.py`](docs/guides/cli_reference.md#clicampaignpy-run-protocols)). Each trial is written to `results/<protocol_id>/` as it finishes, so the same command resumes a stopped run. A protocol can take minutes to hours.
+A campaign runs one or more protocols and puts extra seeds on [open cells](docs/glossary.md#success-and-reliability), the cells whose answer still needs more trials ([`cli/campaign.py`](docs/guides/cli_reference.md#clicampaignpy-run-protocols)). Each trial is written to `results/<protocol_id>/` as it finishes, so the same command resumes a stopped run. A protocol can take minutes to hours.
 
 ```bash
 uv run cli/campaign.py plan dmin_m6                          # what a run would do; runs nothing

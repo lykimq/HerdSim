@@ -30,6 +30,9 @@ flowchart TB
     engine["6. Engine"]
 
     tools --> campaign
+    tools --> analysis
+    tools --> records
+    tools --> engine
     report --> campaign
     report --> analysis
     report --> records
@@ -40,9 +43,9 @@ flowchart TB
     records --> engine
 ```
 
-1) Command-line tool: plans, starts and checks protocols, and prints progress as plain lines. The [check against the paper](../methods/strombom_check.md) is a tool of this layer too: it runs the engine on the paper's own grid through the worker pool, reads stored rows through analysis, and keeps its trials apart from the campaign's.
+1) Command-line tool: plans, starts and checks protocols, and prints progress as plain lines. The [check against the paper](../methods/strombom_check.md) also lives here; it runs the paper's experiments on the engine and stores its trials apart from the campaign's. Its settings and trial code are the one part of this layer that the report imports, to draw and animate the check from the same settings.
 2) Report: writes analysis values as Markdown tables, and produces the generated pages, figures and GIFs. Figures and GIFs may replay trials, but no stored result comes from them.
-3) Campaign: the manager that spends extra seeds on undecided cells. It calibrates, runs the rounds, sends trials to the worker pool, appends the rows and hands them to analysis after each round. No sheep or dog rule lives here.
+3) Campaign: the manager that spends extra seeds on [open cells](../glossary.md#success-and-reliability). It calibrates, runs the rounds, sends trials to the worker pool, appends the rows and hands them to analysis after each round. No sheep or dog rule lives here.
 4) Analysis: reads stored files and never runs the model. It works out success rates, reliable teams, $D_{\min}$ (the smallest reliable team), the other team sizes and curve fits.
 5) Records: builds the trial row, hashes the physics settings, records the code identity and writes the notice on generated files.
 6) Engine: a sandbox that runs one trial and knows nothing of campaigns. Each tick the sheep model moves the sheep, the dog controller moves the dogs and the task checks for success, its own end rule or the time limit. Apart from third-party libraries it imports only from its own folder.

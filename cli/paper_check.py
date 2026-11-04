@@ -14,7 +14,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from services.pool import limit_threads  # noqa: E402
+from services.pool import limit_threads, worker_count  # noqa: E402
 
 # One BLAS thread per process: the check already runs one trial per core.
 limit_threads()
@@ -25,7 +25,7 @@ from paper_check.sweep import EXPERIMENTS, sweep  # noqa: E402
 def main() -> None:
     parser = argparse.ArgumentParser(description=(__doc__ or "").splitlines()[0])
     parser.add_argument("experiment", choices=sorted(EXPERIMENTS))
-    parser.add_argument("--workers", type=int, default=1)
+    parser.add_argument("--workers", type=worker_count, default=1)
     args = parser.parse_args()
     trials = sweep(args.workers, args.experiment)
     print(f"{len(trials)} trials in {EXPERIMENTS[args.experiment].path}")

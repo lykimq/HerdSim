@@ -9,13 +9,6 @@ import pandas as pd
 from analysis.curves import bracket, growth
 from docs.generate_docs.format import dmin_text, numbers_text, slope_text
 
-# Main grids at 12, 6 and 3 drive times (strict and 99 percent).
-STRICT_MAIN = ("dmin_m12", "dmin_m6", "dmin_m3")
-F99_MAIN = ("dmin_f99_m12", "dmin_f99_m6", "dmin_f99_m3")
-# Flock sizes of every main grid; the 99 percent grids at 12 and 6 drive times add 71, 141,
-# 283 and 566.
-ORIGINAL_NS = (25, 50, 100, 200, 400)
-
 
 def _with_text(table: pd.DataFrame, text: Callable[[pd.Series], str]) -> pd.DataFrame:
     """Add a ``text`` column from ``text(row)``."""
@@ -43,7 +36,7 @@ def growth_table(table: pd.DataFrame) -> pd.DataFrame:
     rows = []
     for layout, part in table.groupby("layout", sort=False):
         g = growth(part, bracket)
-        open_ = [n for n in g.left_out if n not in g.above_grid]
+        undecided = [n for n in g.left_out if n not in g.above_grid]
         notes = []
         if g.flat and not g.left_out:
             notes.append("D_min = 1 throughout")
@@ -51,8 +44,8 @@ def growth_table(table: pd.DataFrame) -> pd.DataFrame:
             notes.append("D_min = 1 where decided")
         if g.above_grid:
             notes.append("no reliable D on the grid at N = " + numbers_text(g.above_grid))
-        if open_:
-            notes.append("still open on reliability at N = " + numbers_text(open_))
+        if undecided:
+            notes.append("still undecided on reliability at N = " + numbers_text(undecided))
         if g.flat:
             slope = "0 (flat, decided sizes only)" if g.left_out else "0 (flat)"
         else:

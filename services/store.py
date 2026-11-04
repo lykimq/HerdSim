@@ -20,6 +20,7 @@ import pandas as pd
 import yaml
 
 from analysis import keys
+from analysis.results import flock_radii, newer, read_status
 from records.generated_notice import NOTICE_LINE, with_json_notice, write_csv
 from records.provenance import code_identity, read_provenance, write_provenance
 
@@ -34,9 +35,14 @@ class FolderBusy(RuntimeError):
     """Another campaign process holds the folder's lock."""
 
 
+class TrialsConflict(RuntimeError):
+    """A newer trials.jsonl.gz (from a pull) lacks trials the local trials.jsonl holds, so
+    taking either copy would lose trials."""
+
+
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
     tmp = path.with_suffix(".json.tmp")
-    tmp.write_text(json.dumps(with_json_notice(payload), indent=2, default=str) + "\n")
+    tmp.write_text(json.dumps(with_json_notice(payload), indent=2) + "\n")
     tmp.replace(path)
 
 
@@ -59,12 +65,30 @@ def _read_jsonl(path: Path, repair: bool) -> list[dict[str, Any]]:
 
 def _append_jsonl(path: Path, record: dict[str, Any]) -> None:
     """Append one JSON line, starting a new file with the generated-file notice. NaN is
-    written as NaN, as Python's json reads it back."""
+    written as NaN, as Python's json reads it back. A value json cannot write (a NumPy
+    scalar, say) raises instead of being stored as text."""
+    line = json.dumps(record, allow_nan=True)
     new = not path.exists()
     with path.open("a") as f:
         if new:
             f.write(NOTICE_LINE + "\n")
-        f.write(json.dumps(record, default=str, allow_nan=True) + "\n")
+        f.write(line + "\n")
+
+
+def resume_refusal(folder: Path, protocol: Protocol, physics_hash: str) -> str | None:
+    """Why ``folder`` may not resume ``protocol``; None when it may or holds no run yet."""
+    provenance = folder / "provenance.json"
+    if not provenance.exists():
+        return None
+    found = read_provenance(provenance)
+    if found["protocol_id"] != protocol.protocol_id:
+        ran = f"{folder} belongs to protocol {found['protocol_id']!r}"
+        return f"{ran}, not {protocol.protocol_id!r}; set its own output"
+    if found["physics_hash"] != physics_hash:
+        ran = f"{folder} was run with physics {found['physics_hash']}"
+        now = f"the protocol now gives {physics_hash}"
+        return f"{ran}, {now}. Use a new output folder for changed physics."
+    return None
 
 
 def _archive(protocol: Protocol) -> dict[str, Any]:
@@ -97,10 +121,14 @@ def _unpack(packed: Path, plain: Path) -> None:
 
 class CampaignStore:
     def __init__(self, output: Path) -> None:
-        """A clone holds only trials.jsonl.gz (and optional trials.csv.gz). Unpacked here,
+        """A clone holds only trials.jsonl.gz and trials.csv.gz. Unpacked here,
         before anything reads the folder, because a folder with provenance.json and no
-        trials.jsonl counts as empty and ``discard_if_empty`` would reset it. An existing
-        trials.jsonl is never overwritten: it may hold trials the .gz does not have yet."""
+        trials.jsonl counts as empty and ``discard_if_empty`` would reset it.
+
+        A packed copy newer than its plain file comes from a pull. trials.csv only tabulates
+        the trials, so it is replaced. trials.jsonl may hold trials of a killed run that were
+        never packed, so it is replaced only when the pulled copy holds all of them; packing
+        the older file instead would overwrite the pulled trials."""
         self.root = output
         self.trials_jsonl = output / "trials.jsonl"
         self.trials_gz = output / "trials.jsonl.gz"
@@ -112,6 +140,23 @@ class CampaignStore:
         for plain, packed in self._packed_pairs():
             if packed.exists() and not plain.exists():
                 _unpack(packed, plain)
+        if newer(self.trials_gz, self.trials_jsonl):
+            self._take_pulled_trials()
+        if newer(self.trials_csv_gz, self.trials_csv):
+            _unpack(self.trials_csv_gz, self.trials_csv)
+
+    def _take_pulled_trials(self) -> None:
+        local = {r["trial_key"] for r in _read_jsonl(self.trials_jsonl, repair=False)}
+        with gzip.open(self.trials_gz, "rt") as packed:
+            pulled = {json.loads(line)["trial_key"] for line in packed.read().splitlines()[1:]}
+        missing = local - pulled
+        if missing:
+            lacks = f"{len(missing)} trials that the newer {self.trials_gz.name} lacks"
+            example = f"for example {sorted(missing)[0]!r}"
+            raise TrialsConflict(
+                f"{self.trials_jsonl} holds {lacks} ({example}); merge them by hand first"
+            )
+        _unpack(self.trials_gz, self.trials_jsonl)
 
     def _packed_pairs(self) -> tuple[tuple[Path, Path], ...]:
         return (
@@ -153,14 +198,9 @@ class CampaignStore:
     def _check_or_create(self, protocol: Protocol, physics_hash: str) -> None:
         provenance = self.root / "provenance.json"
         if provenance.exists():
-            found = read_provenance(provenance)
-            if found["protocol_id"] != protocol.protocol_id:
-                ran = f"{self.root} belongs to protocol {found['protocol_id']!r}"
-                raise PhysicsMismatch(f"{ran}, not {protocol.protocol_id!r}; set its own output")
-            if found["physics_hash"] != physics_hash:
-                ran = f"{self.root} was run with physics {found['physics_hash']}"
-                now = f"the protocol now gives {physics_hash}"
-                raise PhysicsMismatch(f"{ran}, {now}. Use a new output folder for changed physics.")
+            reason = resume_refusal(self.root, protocol, physics_hash)
+            if reason is not None:
+                raise PhysicsMismatch(reason)
             return
         self.timeseries_dir.mkdir(exist_ok=True)
         body = yaml.safe_dump(_archive(protocol), sort_keys=False)
@@ -259,13 +299,9 @@ class CampaignStore:
 
     def load_calibration(self) -> dict[str, dict[int, float]] | None:
         """R_f table of the folder; ``open`` has checked the folder's physics already."""
-        path = self.root / "calibration.json"
-        if not path.exists():
+        if not (self.root / "calibration.json").exists():
             return None
-        data = json.loads(path.read_text())
-        return {
-            m: {int(n): float(r) for n, r in t.items()} for m, t in data["flock_radius"].items()
-        }
+        return flock_radii(self.root)
 
     def save_calibration(self, physics_hash: str, table: dict[str, dict[int, float]]) -> None:
         _write_json(
@@ -286,7 +322,10 @@ class CampaignStore:
         )
 
     def read_status(self) -> dict[str, Any]:
-        return json.loads((self.root / "status.json").read_text())
+        status = read_status(self.root)
+        if status is None:
+            raise FileNotFoundError(f"no status.json in {self.root}")
+        return status
 
 
 def progress(store: CampaignStore) -> str:

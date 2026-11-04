@@ -11,18 +11,6 @@ import pandas as pd
 NUMBER_CELL = re.compile(r"^(-|none( on grid)?|[\[(]?[-+]?\d[\d.,%\- ]*[\])]?)$")
 
 
-# Notation key for the D_min tables on the results page.
-DMIN_KEY = (
-    "An entry of a $D_{\\min}$ table is the smallest number of dogs whose success rate is at "
-    "least 0.90 with 99% confidence "
-    "([decision rules](d_min_report.md#23-when-a-team-is-reliable)). `3` is decided: every "
-    "smaller team is unreliable. `3-8` means 8 dogs are reliable, teams below 3 are "
-    "unreliable and 3 dogs are still undecided at the seed limit of 200 trials per cell; no "
-    "team from 3 to 7 is shown reliable. `[5]` means no team is reliable yet and teams below 5 "
-    "are unreliable. `none` or `none on grid` means every team tested is unreliable."
-)
-
-
 def markdown(frame: pd.DataFrame, index: bool = False) -> str:
     """Render a DataFrame as a Markdown table (escape `|`; centre number-like columns)."""
     if frame.empty:

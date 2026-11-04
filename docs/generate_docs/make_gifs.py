@@ -36,13 +36,18 @@ from docs.generate_docs.figstyle import (  # noqa: E402
     MUTED,
     ORANGE,
     SURFACE,
+    style_map,
 )
+from docs.generate_docs.runs import F99_RUNS  # noqa: E402
 from paper_check.settings import DONE_DISTANCE, FIELD_SIDE  # noqa: E402
-from paper_check.trials import paper_config, run_fig3_trial, seed_of  # noqa: E402
-from services.replay import StoredRun, open_run, replay_trial  # noqa: E402
+from paper_check.sweep import fig3_replay_job  # noqa: E402
+from paper_check.trials import seed_of  # noqa: E402
+from services.replay import ReplayJob, StoredRun, open_run, replay_trial  # noqa: E402
 from sim.state import SimulationState  # noqa: E402
+from sim.strombom.params import METHOD  # noqa: E402
 from sim.strombom.shepherd import COLLECT, collect_threshold, decide  # noqa: E402
 from sim.strombom.team import team_targets  # noqa: E402
+from sim.trial import RunResult, initial_state  # noqa: E402
 
 # ----- settings -----
 FPS = 12
@@ -54,8 +59,7 @@ NOTE_CHARS = 72  # note characters per panel width before it wraps
 NOTE_LINE = 0.16  # inches per extra note line
 PANEL_WIDTH = 4.6  # inches per panel; the height follows the view, so no space is wasted
 # Every GIF replays the 99 percent run at 6 drive times.
-RUN = "dmin_f99_m6"
-METHOD = "strombom_multi"
+RUN = F99_RUNS[6]
 
 View = tuple[tuple[float, float], tuple[float, float]]  # x limits and y limits of a panel
 
@@ -111,21 +115,19 @@ def _run() -> StoredRun:
 
 def shown_ticks(shot: Shot) -> int:
     """Stored trial length, or ``until`` if shorter."""
-    outcome = _run().outcomes(METHOD, shot.layout, shot.n, shot.d)
-    stored = outcome[shot.seed_index][1]
+    stored = _run().job(METHOD, shot.layout, shot.n, shot.d, shot.seed_index).stored[1]
     return stored if shot.until is None else min(stored, shot.until)
 
 
-def replay(shot: Shot, every: int) -> Replayed:
-    """Replay one stored trial, keeping every ``every``-th tick.
-
-    The full trial is always replayed (and checked against the stored outcome) even when
-    ``until`` cuts what is shown.
-    """
-    job = _run().job(METHOD, shot.layout, shot.n, shot.d, shot.seed_index)
-    end = shot.until if shot.until is not None else math.inf
-    kept: list[tuple[int, np.ndarray, np.ndarray]] = []
-    last: list[tuple[int, np.ndarray, np.ndarray]] = []
+def _record(
+    job: ReplayJob, every: int = 1, end: float = math.inf
+) -> tuple[tuple[np.ndarray, np.ndarray, np.ndarray], RunResult]:
+    """Replay ``job`` (checked against its stored outcome) and keep (ticks, sheep, dogs) at
+    tick 0, every ``every``-th tick up to ``end``, and the last tick up to ``end``."""
+    # on_tick sees only the state after each tick, so the start is taken from the seed.
+    start = initial_state(job.config, job.seed)
+    kept = [(0, start.sheep_positions.copy(), start.shepherd_positions.copy())]
+    last = kept[:]
 
     def keep(state: SimulationState) -> None:
         if state.tick > end:
@@ -138,21 +140,33 @@ def replay(shot: Shot, every: int) -> Replayed:
     result = replay_trial(job, on_tick=keep)
     if kept[-1][0] != last[0][0]:
         kept.append(last[0])
-    ticks, herd, herders = zip(*kept)
+    ticks, herd, herders = zip(*kept, strict=True)
+    return (np.array(ticks), np.array(herd), np.array(herders)), result
+
+
+def replay(shot: Shot, every: int) -> Replayed:
+    """Replay one stored trial, keeping every ``every``-th tick.
+
+    The full trial is always replayed (and checked against the stored outcome) even when
+    ``until`` cuts what is shown.
+    """
+    job = _run().job(METHOD, shot.layout, shot.n, shot.d, shot.seed_index)
+    end = shot.until if shot.until is not None else math.inf
+    (ticks, herd, herders), result = _record(job, every, end)
     return Replayed(
-        np.array(ticks),
-        np.array(herd),
-        np.array(herders),
-        np.asarray(job.config["goal_center"], dtype=float),
-        float(job.config["goal_radius"]),
-        float(job.config["dt"]),
-        bool(result.success),
-        job.config,
-        shot.until is not None and shot.until < int(result.total_ticks),
+        ticks=ticks,
+        herd=herd,
+        herders=herders,
+        goal=np.asarray(job.config["goal_center"], dtype=float),
+        goal_radius=float(job.config["goal_radius"]),
+        dt=float(job.config["dt"]),
+        success=bool(result.success),
+        config=job.config,
+        cut=shot.until is not None and shot.until < int(result.total_ticks),
     )
 
 
-def window(trials: list[Replayed]) -> View:
+def shared_view(trials: list[Replayed]) -> View:
     """Shared view covering every trial's agents and goals."""
     points = np.vstack(
         [np.vstack([t.herd.reshape(-1, 2), t.herders.reshape(-1, 2)]) for t in trials]
@@ -179,14 +193,9 @@ class Panel:
 
 
 def draw_panel(ax: Axes, trial: Replayed, title: str, view: View, dot: float) -> Panel:
-    ax.set_aspect("equal")
+    style_map(ax, title)
     ax.set_xlim(*view[0])
     ax.set_ylim(*view[1])
-    ax.set_xticks([])
-    ax.set_yticks([])
-    for side in ("left", "bottom"):
-        ax.spines[side].set_visible(False)
-    ax.set_title(title, fontsize=10)
     centre = (float(trial.goal[0]), float(trial.goal[1]))
     ax.add_patch(Circle(centre, trial.goal_radius, fc="none", ec=AQUA, lw=1.5))
     herd = ax.scatter(*trial.herd[0].T, s=dot, color=BLUE, alpha=0.85, lw=0)
@@ -262,7 +271,7 @@ def render(
     """Draw ``trials`` side by side on one clock, ``clock`` = (last tick, ticks per frame), and
     save a GIF."""
     longest, every = clock
-    view = window(trials)
+    view = shared_view(trials)
     aspect = (view[1][1] - view[1][0]) / (view[0][1] - view[0][0])
     lines = textwrap.wrap(note, NOTE_CHARS * len(trials), break_on_hyphens=False)
     extra_height = NOTE_LINE * (len(lines) - 1)
@@ -270,9 +279,13 @@ def render(
     fig, axes = plt.subplots(1, len(trials), figsize=size)
     panels = [
         draw_panel(ax, t, title, view, dot)
-        for ax, t, title in zip(np.atleast_1d(axes), trials, titles)
+        for ax, t, title in zip(np.atleast_1d(axes), trials, titles, strict=True)
     ]
-    extras = [overlay(ax, p) for ax, p in zip(np.atleast_1d(axes), panels)] if overlay else []
+    extras = (
+        [(p, overlay(ax, p)) for ax, p in zip(np.atleast_1d(axes), panels, strict=True)]
+        if overlay
+        else []
+    )
     fig.text(0.5, 0.02, "\n".join(lines), ha="center", fontsize=8.5, color=MUTED)
     fig.tight_layout(rect=(0, (0.35 + extra_height) / size[1], 1, 1))
     ticks = list(range(0, longest, every)) + [longest] * (1 + round(HOLD_SECONDS * FPS))
@@ -280,7 +293,7 @@ def render(
     def draw(k: int) -> list[Any]:
         for panel in panels:
             update_panel(panel, ticks[k])
-        for panel, update in zip(panels, extras):
+        for panel, update in extras:
             update(panel.trial.at(ticks[k]))
         return []
 
@@ -336,7 +349,7 @@ def team_rule(ax: Axes, panel: Panel) -> Callable[[int], None]:
         mode = decide(sheep, trial.goal, config).mode
         targets = team_targets(sheep, trial.goal, dogs, config)
         ring.set_center(tuple(sheep.mean(axis=0)))
-        lines.set_segments([[tuple(a), tuple(b)] for a, b in zip(dogs, targets)])
+        lines.set_segments([[tuple(a), tuple(b)] for a, b in zip(dogs, targets, strict=True)])
         crosses.set_offsets(targets)
         label.set_text("collecting" if mode == COLLECT else "driving")
 
@@ -353,26 +366,19 @@ def paper_field(ax: Axes, _: Panel) -> Callable[[int], None]:
 
 
 def paper_replay(n_sheep: int, n_neighbors: int, seed: int) -> Replayed:
-    """Run one trial of the paper's task and keep every tick for the animation."""
-    ticks: list[int] = []
-    herd: list[np.ndarray] = []
-    herders: list[np.ndarray] = []
-
-    def keep(state: SimulationState) -> None:
-        ticks.append(state.tick)
-        herd.append(state.sheep_positions.copy())
-        herders.append(state.shepherd_positions.copy())
-
-    trial = run_fig3_trial(n_sheep, n_neighbors, seed, on_step=keep)
+    """Replay one stored trial of the paper's task, checked against its stored outcome, and
+    keep every tick for the animation."""
+    job = fig3_replay_job(n_sheep, n_neighbors, seed)
+    (ticks, herd, herders), result = _record(job)
     return Replayed(
-        np.array(ticks),
-        np.array(herd),
-        np.array(herders),
-        np.zeros(2),
-        DONE_DISTANCE,
-        1.0,
-        trial.success,
-        paper_config(n_sheep, n_neighbors),
+        ticks=ticks,
+        herd=herd,
+        herders=herders,
+        goal=np.zeros(2),
+        goal_radius=DONE_DISTANCE,
+        dt=1.0,
+        success=bool(result.success),
+        config=job.config,
         cut=False,
         paper=True,
     )
@@ -467,7 +473,11 @@ GIFS = {
 
 
 def main() -> None:
-    for name in sys.argv[1:] or list(GIFS):
+    names = sys.argv[1:] or list(GIFS)
+    unknown = [name for name in names if name not in GIFS]
+    if unknown:
+        sys.exit(f"unknown animations {unknown}; choose from {list(GIFS)}")
+    for name in names:
         GIFS[name]()
 
 

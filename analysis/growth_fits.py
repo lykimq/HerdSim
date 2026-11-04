@@ -66,9 +66,7 @@ SHAPES = {"power law": power_law, "saturating": saturating}
 
 @dataclass(frozen=True)
 class Fit:
-    shape: str
     params: tuple[float, ...]
-    sigma: float
     log_likelihood: float
 
 
@@ -99,7 +97,7 @@ def fit(points: Points, shape: str) -> Fit:
             if best is None or result.fun < best.fun:
                 best = result
     assert best is not None
-    return Fit(shape, tuple(float(v) for v in best.x[:2]), math.exp(best.x[2]), -float(best.fun))
+    return Fit(tuple(float(v) for v in best.x[:2]), -float(best.fun))
 
 
 def consistent_range(points: Points, shape: str, size: int) -> tuple[float, float]:
@@ -116,7 +114,7 @@ def consistent_range(points: Points, shape: str, size: int) -> tuple[float, floa
     return float(ahead.min()), float(ahead.max())
 
 
-def compare(points: Points) -> dict[str, object]:
+def compare_shapes(points: Points) -> dict[str, object]:
     """Both fits, the odds of the power law against the saturating curve, and the range each
     shape allows at the sizes ``AHEAD``. Where both shapes pass through every interval the
     data cannot tell them apart (odds 1); the ranges then say at which N a run could, which

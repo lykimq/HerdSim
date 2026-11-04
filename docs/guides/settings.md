@@ -4,7 +4,7 @@
 
 Every canonical setting, with its default and the note written beside it in `protocols/configs/canonical.yaml`. A protocol changes a setting by naming it ([configuration](configuration.md#protocol-overrides)). The model parameters ($r_a$, $c$ and the rest) are not canonical settings: they live with the method and are listed in the method docs: [Strombom sheep](../methods/strombom_sheep.md) and [team rule](../methods/strombom_multi.md).
 
-The kind of a setting says where it may change. A per-trial setting changes what a trial does. A whole-protocol setting is fixed for the protocol, because calibration or the seeds depend on it. A sampling setting only steers the adaptive run, so it stays out of the physics hash and a folder can resume after it changes.
+The kind of a setting says where it may change. A per-trial setting changes what a trial does. A whole-protocol setting is fixed for the protocol, because calibration or the seeds depend on it. A sampling setting only steers the adaptive run, so it stays out of the physics hash and a folder can resume after it changes. A calibration check only decides whether calibration stops, never the flock radius $R_f$ it measures, so it stays out of the physics hash as a sampling setting does.
 
 Settings that share a note are one row, with their defaults in the same order, separated by semicolons. The physics hash that decides whether a folder can resume is in the [configuration guide](configuration.md#physics-hash).
 
@@ -51,7 +51,7 @@ Settings that share a note are one row, with their defaults in the same order, s
 | Setting | Default | Kind | Note |
 | :--- | :--- | :--- | :--- |
 | `calibration_seeds`, `calibration_seconds`, `calibration_window_seconds`, `calibration_starts` | 3; 300; 90; 1, 3 | whole protocol | One dog drives a compact flock toward a goal it cannot reach for calibration_seconds. R_f is sqrt(2) x the RMS radius over the last calibration_window_seconds, median over seeds and over the start sizes in calibration_starts (a start of s has radius s x sqrt(N / pi) m). |
-| `settled_tolerance`, `start_agreement` | 0.15; 0.25 | whole protocol | Calibration raises when R_f changed by more than settled_tolerance between the last two windows, or differs by more than start_agreement between the start sizes. Strombom sheep settle up to N = 600. Measured with cli/calibration_check.py (3 seeds, results/diagnostics/, with and without graze_repulsion): N = 25 to 566 change by at most 1.9 % and differ by at most 2.3 %, so 0.05 for both would pass every flock size studied and stop at N = 630. A new protocol may set 0.05; the six study protocols keep these values, which are part of their physics hash. |
+| `settled_tolerance`, `start_agreement` | 0.05; 0.05 | calibration check | Calibration raises when R_f changed by more than settled_tolerance between the last two windows, or differs by more than start_agreement between the start sizes. Measured with cli/calibration_check.py (results/diagnostics/, with and without graze_repulsion). With 3 seeds per start, N = 25 to 566 change by at most 1.9% and differ by at most 2.3%, 600 changes by 2.7-2.8% and 630 by 5.7-5.9%. With 20 seeds, 25 to 400 change by at most 0.52%, 566 by 1.4-1.7%, 600 by 2.2%, 630 by 3.4% and 660 by 4.1-5.6%, where the starts differ by 11-13%. So 0.05 for both passes every flock size studied and stops at N = 630 with 3 seeds (660 with 20), the smallest tested sizes that fail: the calibration edge. A tolerance never changes R_f, only whether calibration stops, so it is not part of the physics hash. |
 
 ## Seeds and decisions
 
@@ -59,7 +59,7 @@ Settings that share a note are one row, with their defaults in the same order, s
 | :--- | :--- | :--- | :--- |
 | `master_seed` | 2026 | whole protocol | Seed i of every cell is master_seed + i, so cells share start flocks. |
 | `reliability_theta`, `confidence` | 0.9; 0.99 | sampling | A cell is reliable when the confidence interval of its success rate lies at or above theta, unreliable when it lies below, undecided otherwise. At theta 0.90 and 99% confidence a cell needs 51 successes in a row to be reliable. |
-| `batch_seeds`, `max_seeds` | 10; 200 | sampling | Seeds are added in batches until every open cell is decided or has max_seeds. |
+| `batch_seeds`, `max_seeds` | 10; 200 | sampling | Seeds are added in batches until every open cell has max_seeds or budget_hours is spent. |
 | `time_margin`, `min_pairs`, `bootstrap_resamples` | 0.05; 5; 4000 | sampling | Two finish times are the same when their paired median difference is within time_margin of the slower median (paired bootstrap, bootstrap_resamples draws). min_pairs is the fewest shared finished seeds a comparison accepts. |
 | `refine_min_gap` | 1 | sampling | A dog count is added halfway between two neighbours more than refine_min_gap apart whose zones differ (whose reliability differs, when decide_finish_times is false). |
 | `decide_finish_times` | false | sampling | Off: seeds only decide reliability (D_min). On: seeds also decide the finish-time values D_best, D_sat and D_crowd, which costs more trials. |

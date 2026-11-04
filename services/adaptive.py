@@ -11,6 +11,7 @@ import time
 from collections import Counter
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from itertools import pairwise
 from typing import Any
 
 import pandas as pd
@@ -77,8 +78,8 @@ def pruned_cells(front: Frontier, trials: pd.DataFrame, overlap: float) -> set[C
         key, d_sat = str(g["group_key"]), int(g["d_sat"])
         cells = front.cells.loc[front.cells["group_key"] == key]
         ds = cells["n_shepherds"].astype(int)
-        zones = dict(zip(ds, cells["zone"]))
-        reliable = dict(zip(ds, cells["reliability"] == RELIABLE))
+        zones = dict(zip(ds, cells["zone"], strict=True))
+        reliable = dict(zip(ds, cells["reliability"] == RELIABLE, strict=True))
         confirm = confirming_team(zones, d_sat)
         if confirm is None:
             continue
@@ -123,10 +124,10 @@ def refine(
         if group_key not in grid:
             continue
         ds_of_cells = cells["n_shepherds"].astype(int)
-        values = dict(zip(ds_of_cells, cells[column]))
+        values = dict(zip(ds_of_cells, cells[column], strict=True))
         may_still_decide = set(ds_of_cells[cells["n_seeds"] < max_seeds])
         ds = sorted(values)
-        for a, b in zip(ds, ds[1:]):
+        for a, b in pairwise(ds):
             if (group_key, a) in pruned or (group_key, b) in pruned:
                 continue
             mid = _midpoint_to_add(a, b, values, may_still_decide, min_gap)

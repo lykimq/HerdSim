@@ -100,7 +100,7 @@ def run_curve(
 
 
 def zones_of(front: fr.Frontier) -> dict[int, str]:
-    return dict(zip(front.cells.n_shepherds, front.cells.zone))
+    return dict(zip(front.cells.n_shepherds, front.cells.zone, strict=True))
 
 
 def cells_of(rows: pd.DataFrame) -> dict[int, pd.DataFrame]:
@@ -142,6 +142,16 @@ def test_d_sat_is_global_so_a_dip_does_not_hide_a_later_drop():
     assert zones[6] == zones[10] == fr.SATURATED
     assert all(zones[d] == fr.IMPROVING for d in (2, 3, 4))
     assert_decided(g)
+
+
+def test_a_mid_rate_cell_below_a_reliable_one_leaves_a_bracket():
+    """57 of 60 lies inside the 99% interval around 0.90, so D = 2 is open and D_min = 3 is only
+    an upper bound until D = 2 gets more seeds."""
+    front, g = run_curve({1: FAIL, 2: Cell(0.95, 300.0), 3: ok(200.0)})
+    by_d = front.cells.set_index("n_shepherds")
+    assert by_d.reliability.to_dict() == {1: fr.UNRELIABLE, 2: fr.UNDECIDED, 3: fr.RELIABLE}
+    assert (g.d_min, g.d_min_low) == (3, 2)
+    assert by_d.needs_seeds[2]
 
 
 def test_hard_failure_is_censored_above_the_grid():

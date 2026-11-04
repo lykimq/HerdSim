@@ -28,11 +28,11 @@ A definition for each term HerdSim's docs use, with a link to the section that e
 
 **Replay**: running a stored trial again from its configuration and seed. A replay that does not give the stored success and tick count raises an error.
 
-**Campaign**: the manager that runs a protocol into `results/<protocol id>/` and spends extra seeds on [undecided](#success-and-reliability) cells, in rounds ([adaptive sampling](experiments/task_design.md#3-adaptive-sampling)).
+**Campaign**: the manager that runs a protocol into `results/<protocol id>/` and spends extra seeds on [open](#success-and-reliability) cells, in rounds ([adaptive sampling](experiments/task_design.md#3-adaptive-sampling)).
 
 **Sitting**: one run of the campaign command on a results folder; a folder can grow over several.
 
-**Round**: one pass of a sitting that plans and runs the seeds each undecided cell still needs ([campaign](codes/architecture.md#how-a-campaign-runs)).
+**Round**: one pass of a sitting that plans and runs the seeds each open cell still needs ([campaign](codes/architecture.md#how-a-campaign-runs)).
 
 **Batch**: the 10 seeds a cell gets at a time (`batch_seeds`).
 
@@ -48,7 +48,7 @@ A definition for each term HerdSim's docs use, with a link to the section that e
 
 **$R_f$**: the calibrated flock radius, the size a compact flock of $N$ sheep settles to while one dog drives it ($\sqrt{2}$ times its RMS distance to the centre). It sizes the field, the goal and the drive ([sizing](experiments/task_design.md#sizing-by-the-calibrated-flock-radius)).
 
-**Calibration edge**: about $N = 600$, above which the radius of a driven flock changes by more than 5% between calibration windows (from $N = 630$ in a 3-seed check). The study stops at 566.
+**Calibration edge**: the smallest tested flock size whose calibration fails its 5% limits, meaning the radius of the driven flock changes by more than 5% between the last two 90 s windows or differs by more than 5% between the two start sizes. It is $N = 630$ with the 3 seeds per start the runs use (600 passes), and 660 with 20 seeds (630 passes) ([flock size](experiments/task_design.md#flock-size)). The study stops at 566, the last $\sqrt{2}$ step below it.
 
 **Goal**: a circle of radius $1.9 R_f$.
 
@@ -86,7 +86,9 @@ A definition for each term HerdSim's docs use, with a link to the section that e
 
 **Reliable cell**: a cell whose 99% Clopper-Pearson interval of the success rate lies at or above $\theta$, which takes at least 51 successes without a failure (60 of 60 gives a lower bound of 0.915). An unreliable cell's interval lies below $\theta$ and an undecided cell's straddles it; the first two are decided ([stopping early](experiments/task_design.md#stopping-early-with-the-99-clopper-pearson-interval)).
 
-**Open cell**: a cell that still asks for seeds, because its reliability is undecided or, with `decide_finish_times` true, a finish-time comparison is. Cells with an errored trial and cells [pruned above saturation](experiments/task_design.md#pruning-above-saturation) get no seeds and are not counted.
+**Open cell**: a cell that still asks for seeds, because its reliability is undecided or, with `decide_finish_times` true, a finish-time comparison is. Cells with an errored trial and cells [pruned above saturation](experiments/task_design.md#pruning-above-saturation) get no seeds and are not counted. An open cell gets another batch until it has `max_seeds` (200); a cell at 200 stays open but gets no more seeds.
+
+**Undecided**: a cell is undecided when its reliability interval straddles $\theta$ (see Reliable cell), or when its interval is at or above $\theta$ but one of its trials raised an error. A finish-time comparison is undecided when the two cells share fewer than 5 finished seeds or the bootstrap interval of their median difference is neither beyond nor within 5% of the slower median. The zone `undecided` holds the cells undecided on reliability and the reliable cells above $D_{best}$ whose comparison with $D_{best}$ is undecided ([zones](experiments/task_design.md#zones)).
 
 **Frontier rules**: the rules that turn a curve's stored trials into each cell's decision and the team sizes below ([frontier rules](experiments/task_design.md#5-frontier-rules-and-zones)).
 

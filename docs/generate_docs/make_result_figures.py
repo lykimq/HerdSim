@@ -2,7 +2,7 @@
 
     uv run python docs/generate_docs/make_result_figures.py
 
-Writes PNGs via result_figures.py; skips a figure when its run folder is missing.
+Writes PNGs via result_figures.py; stops with an error when a run folder is missing.
 Style and log/N-axis helpers in figstyle.py. Captions live in the report and README.
 """
 
@@ -11,7 +11,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from docs.generate_docs.paper_check import FIGURES as PAPER_FIGURES  # noqa: E402
+from docs.generate_docs.paper_figures import FIGURES as PAPER_FIGURES  # noqa: E402
 from docs.generate_docs.result_figures import (  # noqa: E402
     fig_deadline,
     fig_densification,

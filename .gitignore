@@ -32,6 +32,9 @@ docs/vi
 # The lock a running campaign holds in its folder
 .lock
 
-# trials.jsonl is kept in git as trials.jsonl.gz (GitHub refuses files over 100 MB)
+# Trials are kept in git as trials.jsonl.gz and trials.csv.gz (GitHub refuses files over
+# 100 MB); the store unpacks them on open
 results/*/trials.jsonl
+results/*/trials.csv
+!results/paper_check/trials.csv
 results/*/*.tmp

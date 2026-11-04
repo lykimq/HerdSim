@@ -20,11 +20,13 @@ from .generated_notice import with_json_notice
 REPO = Path(__file__).resolve().parents[1]
 HASH_CHARS = 16  # hex characters kept of a SHA256, enough to tell two states apart
 # The source that decides a trial's outcome and its row: the engine, the row packaging,
-# the cell config and calibration that size each trial's task, the protocol code that sets
-# its time limit, and the runner that adds the identity columns to the row.
+# the key format of the row's trial, cell and group columns, the cell config and calibration
+# that size each trial's task, the protocol code that sets its time limit, and the runner
+# that adds the identity columns to the row.
 TRIAL_CODE = (
     "sim",
     "records",
+    "analysis/keys.py",
     "services/cells.py",
     "services/calibration.py",
     "services/protocol.py",

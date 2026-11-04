@@ -17,7 +17,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from services.pool import limit_threads  # noqa: E402
+from services.pool import limit_threads, worker_count  # noqa: E402
 
 # One BLAS thread per process: the calibration runs one trial per core.
 limit_threads()
@@ -36,7 +36,7 @@ def main() -> None:
     parser.add_argument(
         "--seeds", type=int, default=None, help="seeds per start (default: protocol's)"
     )
-    parser.add_argument("--workers", type=int, default=1)
+    parser.add_argument("--workers", type=worker_count, default=1)
     args = parser.parse_args()
     protocol = load_protocol(args.protocol)
     settings = dict(protocol.settings)
@@ -50,6 +50,7 @@ def main() -> None:
             zip(
                 ("method", "n_sheep", "flock_radius", "drift", "spread"),
                 (m, n, *settle(runs[m, n])),
+                strict=True,
             )
         )
         for m, n in sizes

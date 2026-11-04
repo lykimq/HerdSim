@@ -37,7 +37,7 @@ target-version = "py311"
 # structure does not drift. Gitignored local folders are skipped, as ruff respects .gitignore.
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "W", "UP"]
+select = ["E", "F", "I", "W", "UP", "B"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

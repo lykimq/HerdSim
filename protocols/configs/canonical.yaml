@@ -70,14 +70,17 @@ calibration_seconds: 300.0
 calibration_window_seconds: 90.0
 calibration_starts: [1.0, 3.0]
 # Calibration raises when R_f changed by more than settled_tolerance between the last two
-# windows, or differs by more than start_agreement between the start sizes. Strombom sheep
-# settle up to N = 600. Measured with cli/calibration_check.py (3 seeds, results/diagnostics/,
-# with and without graze_repulsion): N = 25 to 566 change by at most 1.9 % and differ by at
-# most 2.3 %, so 0.05 for both would pass every flock size studied and stop at N = 630. A new
-# protocol may set 0.05; the six study protocols keep these values, which are part of their
+# windows, or differs by more than start_agreement between the start sizes. Measured with
+# cli/calibration_check.py (results/diagnostics/, with and without graze_repulsion). With 3
+# seeds per start, N = 25 to 566 change by at most 1.9% and differ by at most 2.3%, 600
+# changes by 2.7-2.8% and 630 by 5.7-5.9%. With 20 seeds, 25 to 400 change by at most
+# 0.52%, 566 by 1.4-1.7%, 600 by 2.2%, 630 by 3.4% and 660 by 4.1-5.6%, where the starts
+# differ by 11-13%. So 0.05 for both passes every flock size studied and stops at N = 630
+# with 3 seeds (660 with 20), the smallest tested sizes that fail: the calibration edge.
+# A tolerance never changes R_f, only whether calibration stops, so it is not part of the
 # physics hash.
-settled_tolerance: 0.15
-start_agreement: 0.25
+settled_tolerance: 0.05
+start_agreement: 0.05
 
 # --- Seeds and decisions -------------------------------------------------------------------
 # Seed i of every cell is master_seed + i, so cells share start flocks.
@@ -87,7 +90,7 @@ master_seed: 2026
 # needs 51 successes in a row to be reliable.
 reliability_theta: 0.90
 confidence: 0.99
-# Seeds are added in batches until every open cell is decided or has max_seeds.
+# Seeds are added in batches until every open cell has max_seeds or budget_hours is spent.
 batch_seeds: 10
 max_seeds: 200
 # Two finish times are the same when their paired median difference is within time_margin of

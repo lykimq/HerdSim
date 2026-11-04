@@ -26,16 +26,20 @@ from docs.generate_docs.figstyle import (
     NS,
     ORANGE,
     RED,
-    REPO,
     SURFACE,
     ZONE_COLOR,
+    Point,
+    dogs_at,
     grid,
     n_axis,
     save,
+    style_map,
+    window,
 )
+from docs.generate_docs.runs import STRICT_RUNS
 from services.cells import Cell, Group, cell_config
-from services.protocol import load_protocol
-from sim.drive_task.layouts import layout_extent, place_dogs, place_flock
+from services.protocol import RESULTS_ROOT, load_protocol
+from sim.drive_task.layouts import LAYOUTS, layout_extent, place_dogs, place_flock
 from sim.state import SimulationState
 from sim.strombom.params import METHOD, PAPER
 from sim.strombom.shepherd import collect_threshold, drive_point, radius_of
@@ -45,35 +49,30 @@ from sim.vectors import unit
 
 # ----- settings -----
 Config = dict[str, Any]  # a run config, as cell_config builds it
-Point = Sequence[float] | np.ndarray
 
 R_S = PAPER["r_s"]
+R_A = PAPER["r_a"]
 SEED = 2026  # every scene starts from the same flock
-START_LAYOUTS = ("compact", "wide", "split", "outlier_rich")
-DRIVE_MULTIPLE, DRIVE_FLOOR = 13.0, 80.0  # the drive length's first two terms
-GOAL_MULTIPLE = 1.9  # goal radius in flock radii
-
-
-def calibrated(protocol: str) -> dict[int, float]:
-    """Flock radii from results/<protocol>/calibration.json."""
-    radii = flock_radii(REPO / "results" / protocol)["strombom_multi"]
-    return {int(n): float(r) for n, r in radii.items()}
+MAIN_RUN = STRICT_RUNS[12]
+MAIN = load_protocol(MAIN_RUN)  # every scene is a cell of this run
+# The drive length's first two terms and the goal radius in flock radii.
+DRIVE_MULTIPLE = MAIN.settings["drive_distance_multiple"]
+DRIVE_FLOOR = MAIN.settings["drive_distance_min"]
+GOAL_MULTIPLE = MAIN.settings["goal_radius_multiple"]
 
 
 # Calibrated flock radii of the Strombom sheep, from the main run.
-MAIN_RUN = "dmin_m12"
-RF = calibrated(MAIN_RUN)
+RF = flock_radii(RESULTS_ROOT / MAIN_RUN)[METHOD]
 
 
 def cfg(
     layout: str, n: int, d: int, *, ticks: int = 300, settings: dict[str, Any] | None = None
 ) -> Config:
     """Run config of one cell of the main run, with the field sized for this cell alone."""
-    protocol = load_protocol(MAIN_RUN)
-    method = replace(protocol.methods[0], time_limit_ticks=ticks, time_limit_drive_multiple=None)
+    method = replace(MAIN.methods[0], time_limit_ticks=ticks, time_limit_drive_multiple=None)
     protocol = replace(
-        protocol,
-        settings={**protocol.settings, **(settings or {})},
+        MAIN,
+        settings={**MAIN.settings, **(settings or {})},
         methods=(method,),
         layouts=(layout,),
         shepherd_counts=(d,),
@@ -88,7 +87,7 @@ def start(c: Config) -> tuple[np.ndarray, np.ndarray]:
 
 def field_config(n: int, max_dogs: int) -> Config:
     """dmin cell config whose field fits all four layouts and ``max_dogs`` dogs."""
-    protocol = replace(load_protocol(MAIN_RUN), shepherd_counts=(1, max_dogs))
+    protocol = replace(MAIN, shepherd_counts=(1, max_dogs))
     return cell_config(protocol, Cell(Group(METHOD, "wide", n), max_dogs), RF[n])
 
 
@@ -96,22 +95,6 @@ def field_config(n: int, max_dogs: int) -> Config:
 def xy(point: Point) -> tuple[float, float]:
     """Point as an (x, y) tuple for matplotlib patches."""
     return float(point[0]), float(point[1])
-
-
-def style_map(ax: Axes, title: str) -> None:
-    """A map panel: equal axes, no ticks, no frame."""
-    ax.set_aspect("equal")
-    ax.set_title(title)
-    ax.set_xticks([])
-    ax.set_yticks([])
-    for side in ("left", "bottom"):
-        ax.spines[side].set_visible(False)
-
-
-def window(ax: Axes, centre: Point, left: float, right: float, down: float, up: float) -> None:
-    """Set axes limits around ``centre`` by left/right/down/up offsets."""
-    ax.set_xlim(centre[0] - left, centre[0] + right)
-    ax.set_ylim(centre[1] - down, centre[1] + up)
 
 
 def arrow(
@@ -126,12 +109,6 @@ def bold_text(
     ax: Axes, x: float, y: float, text: str, color: str, fontsize: float = 9, **kw: Any
 ) -> None:
     ax.text(x, y, text, color=color, fontsize=fontsize, fontweight="bold", **kw)
-
-
-def dogs_at(
-    ax: Axes, dogs: np.ndarray, s: float = 34, lw: float = 0.8, zorder: int = 3, **kw: Any
-) -> None:
-    ax.scatter(*dogs.T, s=s, marker="^", color=ORANGE, ec=SURFACE, lw=lw, zorder=zorder, **kw)
 
 
 def dog_label(ax: Axes, dog: np.ndarray, i: int) -> None:
@@ -303,7 +280,15 @@ def forces_geometry_panel(ax: Axes, lcm: np.ndarray) -> None:
         )
     )
     ax.add_patch(
-        Circle((0, 0), 2.0, fc=RED, alpha=0.25, ec=RED, lw=1.2, label="personal space $r_a = 2$ m")
+        Circle(
+            (0, 0),
+            R_A,
+            fc=RED,
+            alpha=0.25,
+            ec=RED,
+            lw=1.2,
+            label=f"personal space $r_a = {R_A:g}$ m",
+        )
     )
     ax.scatter(*FLOCK_NEIGHBORS.T, s=35, color=BLUE, alpha=0.75, lw=0, label="flock-mates")
     ax.scatter(
@@ -386,7 +371,7 @@ def team_rule_panel(ax: Axes, layout: str, n: int, d: int, collecting: bool) -> 
     if not collecting and d > 1:  # the drive slots lie on an arc; a thin line makes them readable
         ordered = targets[np.argsort(targets[:, 1])]
         ax.plot(*ordered.T, color=INK, lw=0.5, alpha=0.4, zorder=2)
-    for dog, target in zip(dogs, targets):
+    for dog, target in zip(dogs, targets, strict=True):
         arrow(ax, target, dog, ORANGE, 0.9)
     window(ax, centroid, *((185, 115, 170, 170) if collecting else (80, 35, 70, 70)))
     job = "collect" if collecting else "drive"
@@ -452,7 +437,7 @@ def outlier_panel(
         ax,
         pc_pos[0] + 3,
         pc_pos[1] + 3,
-        r"collect point $P_c$" + "\n" + r"($r_a = 2$ m behind, drawn 4x)",
+        r"collect point $P_c$" + "\n" + f"($r_a = {R_A:g}$ m behind, drawn 4x)",
         INK,
     )
     ax.text(
@@ -481,7 +466,7 @@ def matching_panel(
     gcm(ax, centroid, label=None, s=50, lw=1.5, color=MUTED, zorder=3)
     dogs_at(ax, dogs, s=70, lw=1.0, zorder=5, label="dogs ($D = 4$)")
     targets_at(ax, targets, s=65, lw=1.8, zorder=5, label="collect points $P_{c,1..4}$")
-    for dog, tgt in zip(dogs, targets):
+    for dog, tgt in zip(dogs, targets, strict=True):
         arrow(ax, tgt, dog, ORANGE, 1.8)
     for k, (i, j) in enumerate(((0, 2), (2, 0))):  # dog i to the target of dog j
         ax.plot(
@@ -580,7 +565,7 @@ def arc_panel(
     ax.plot(*ordered.T, color=AQUA, lw=2.0, ls="-", label="driving arc")
     targets_at(ax, targets, s=65, lw=1.8, label="arc slots")
     dogs_at(ax, dogs, s=70, lw=1.0, zorder=5, label="dogs ($D = 4$)")
-    for i, (dog, tgt) in enumerate(zip(dogs, targets)):
+    for i, (dog, tgt) in enumerate(zip(dogs, targets, strict=True)):
         arrow(ax, tgt, dog, ORANGE, 1.6)
         arrow(ax, tgt + unit(centroid - tgt) * 6, tgt, AQUA, 1.2, ls="--")
         dog_label(ax, dog, i)
@@ -610,7 +595,7 @@ def fig_layouts() -> None:
     """Four start layouts at N=200, same scale; dashed circle is f(N)."""
     n, d = 200, 4
     fig, axes = plt.subplots(2, 2, figsize=(10, 6.6))
-    for ax, layout in zip(axes.flat, START_LAYOUTS):
+    for ax, layout in zip(axes.flat, LAYOUTS, strict=True):
         c = cfg(layout, n, d)
         sheep, dogs = start(c)
         draw_scene(ax, c, sheep, dogs)
@@ -651,7 +636,7 @@ def fig_dog_starts() -> None:
     counts = (1, 2, 4, 8, 24, 64)
     modes = ("arcs", "ring", "handler")
     fig, axes = plt.subplots(2, 6, figsize=(13, 6.0))
-    for ax, d in zip(axes[0], counts):
+    for ax, d in zip(axes[0], counts, strict=True):
         c = cfg("compact", 100, d)
         sheep, dogs = start(c)
         center = np.asarray(c["flock_center"])
@@ -659,7 +644,7 @@ def fig_dog_starts() -> None:
         r = np.linalg.norm(dogs - center, axis=1).max() + 8
         window(ax, center, r, 35, r, r)
         style_map(ax, f"arcs, D = {d}")
-    for ax, mode in zip(axes[1][:3], modes):
+    for ax, mode in zip(axes[1][:3], modes, strict=True):
         c = cfg("wide", 200, 8, settings={"dog_start": mode})
         sheep, dogs = start(c)
         draw_scene(ax, c, sheep, dogs, goal_arrow=False)
@@ -693,7 +678,7 @@ def fig_trial() -> None:
     goal = np.asarray(c["goal_center"])
     centre = np.asarray(c["flock_center"])
     fig, axes = plt.subplots(2, 2, figsize=(10, 6.2))
-    for ax, tick in zip(axes.flat, (0, last // 5, last // 2, last)):
+    for ax, tick in zip(axes.flat, (0, last // 5, last // 2, last), strict=True):
         sheep, dogs = states[tick]
         ax.add_patch(Circle(xy(goal), c["goal_radius"], fc="none", ec=AQUA, lw=1.5))
         for j in range(d):
@@ -709,7 +694,7 @@ def fig_trial() -> None:
 # ----- task geometry -----
 def start_reach(c: Config) -> float:
     """The farthest a sheep can start, over every layout of the protocol."""
-    return max(layout_extent({**c, "initial_layout": k}) for k in START_LAYOUTS)
+    return max(layout_extent({**c, "initial_layout": k}) for k in LAYOUTS)
 
 
 def field_panel(ax: Axes, c: Config, n: int) -> None:
@@ -872,7 +857,7 @@ def fig_zones() -> None:
     top.set_yticks([])
     top.spines["left"].set_visible(False)
     times = [(d, t) for d, (_, t, _) in EXAMPLE_CURVE.items() if t is not None]
-    bottom.plot(*zip(*times), color=INK, marker="o", ms=4)
+    bottom.plot(*zip(*times, strict=True), color=INK, marker="o", ms=4)
     bottom.set_ylabel("median finish (s)")
     bottom.set_ylim(200, 430)
     for label, d in EXAMPLE_VALUES.items():

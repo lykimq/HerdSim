@@ -17,29 +17,29 @@ import time
 import traceback
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from services.pool import limit_threads  # noqa: E402
+from services.pool import limit_threads, worker_count  # noqa: E402
 
 # One BLAS thread per process: the campaign already runs one trial per core.
 # Must be set before NumPy is imported, which the services below do.
 limit_threads()
 
-from records.provenance import read_provenance  # noqa: E402
+from analysis.results import read_status  # noqa: E402
 from services.adaptive import STOP_DECIDED, run_campaign  # noqa: E402
 from services.cells import groups  # noqa: E402
 from services.protocol import (  # noqa: E402
-    RESULTS_ROOT,
+    QUEUE_LOG,
     MethodSpec,
     Protocol,
     load_protocol,
     study_queue,
 )
-from services.store import CampaignStore, progress  # noqa: E402
+from services.store import CampaignStore, progress, resume_refusal  # noqa: E402
 
 QUEUE: tuple[str, ...] = study_queue()
-LOG = RESULTS_ROOT / "queue_log.jsonl"
 
 
 def stamp() -> str:
@@ -53,16 +53,14 @@ def say(message: str) -> None:
 
 def folder_state(folder: Path) -> str:
     """done: every cell decided; partial: stopped or killed, resumes; new: nothing yet."""
-    status = folder / "status.json"
-    if not status.exists():
+    info = read_status(folder)
+    if info is None:
         return "new"
-    info = json.loads(status.read_text())
     return "done" if info.get("stop_reason") == STOP_DECIDED else "partial"
 
 
-def summary(folder: Path) -> dict[str, object]:
-    """The numbers worth keeping from a finished or stopped folder."""
-    info = json.loads((folder / "status.json").read_text())
+def summary(info: dict[str, Any], folder: Path) -> dict[str, object]:
+    """The numbers worth keeping from a finished or stopped folder's status."""
     errors = folder / "errors.jsonl"
     return {
         "trials": info.get("trials_done"),
@@ -84,13 +82,11 @@ def _limit_text(m: MethodSpec) -> str:
 
 def _folder_note(protocol: Protocol) -> str:
     """Whether the output folder is new, resumes this protocol, or belongs to another."""
-    provenance = protocol.output / "provenance.json"
-    if not provenance.exists():
+    if not (protocol.output / "provenance.json").exists():
         return ""
-    found = read_provenance(provenance)
-    same = found["protocol_id"] == protocol.protocol_id
-    same = same and found["physics_hash"] == protocol.physics_hash()
-    return " (exists: resumes)" if same else " (exists with another protocol or physics: refused)"
+    if resume_refusal(protocol.output, protocol, protocol.physics_hash()) is not None:
+        return " (exists with another protocol or physics: refused)"
+    return " (exists: resumes)"
 
 
 def describe(protocol: Protocol) -> str:
@@ -134,8 +130,9 @@ def run_one(protocol: Protocol, workers: int) -> dict[str, object]:
         traceback.print_exc()
     entry["hours"] = round((time.time() - started) / 3600.0, 3)
     entry["finished"] = stamp()
-    if (protocol.output / "status.json").exists():
-        entry.update(summary(protocol.output))
+    info = read_status(protocol.output)
+    if info is not None:
+        entry.update(summary(info, protocol.output))
     return entry
 
 
@@ -153,8 +150,8 @@ def run_all(protocols: list[Protocol], workers: int, skip_done: bool) -> bool:
         entry = run_one(protocol, workers)
         failed |= entry["outcome"] != "ran"
         if protocol.protocol_id in QUEUE:
-            RESULTS_ROOT.mkdir(exist_ok=True)
-            with LOG.open("a") as handle:
+            QUEUE_LOG.parent.mkdir(exist_ok=True)
+            with QUEUE_LOG.open("a") as handle:
                 handle.write(json.dumps(entry) + "\n")
         say(f"{protocol.protocol_id}: {json.dumps(entry)}")
     say("finished")
@@ -178,7 +175,7 @@ def main() -> None:
     parser.add_argument(
         "protocols", nargs="*", help="protocol ids or paths (default: the study's protocols)"
     )
-    parser.add_argument("--workers", type=int, default=os.cpu_count() or 1)
+    parser.add_argument("--workers", type=worker_count, default=os.cpu_count() or 1)
     args = parser.parse_args()
 
     # Loaded before anything runs, so a mistyped id stops the command, not hour three of it.

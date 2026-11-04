@@ -10,7 +10,7 @@ import math
 
 import yaml
 
-from services.protocol import REPO_ROOT, RESULTS_ROOT
+from services.protocol import CANONICAL, RESULTS_ROOT
 from sim.strombom.params import DEFAULTS
 
 # Stated by the paper.
@@ -38,7 +38,7 @@ DISTANCES = (10, *range(50, 501, 50))
 
 # The engine records per-tick metrics that change no trial; they take the study's values, and
 # the paper has no lost-sheep rule, so no sheep counts as lost.
-_CANONICAL = yaml.safe_load((REPO_ROOT / "protocols" / "configs" / "canonical.yaml").read_text())
+_CANONICAL = yaml.safe_load(CANONICAL.read_text())
 METRIC_SETUP = {
     "measurement_radius": float(_CANONICAL["measurement_radius"]),
     "dog_overlap_distance": float(_CANONICAL["dog_overlap_distance"]),

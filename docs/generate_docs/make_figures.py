@@ -22,7 +22,7 @@ from docs.generate_docs.figures import (  # noqa: E402
     fig_trial,
     fig_zones,
 )
-from docs.generate_docs.paper_check import fig_paper_layout  # noqa: E402
+from docs.generate_docs.paper_figures import fig_paper_layout  # noqa: E402
 
 FIGURES = (
     fig_sheep_forces,

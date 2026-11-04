@@ -14,7 +14,7 @@ uv run cli/campaign.py <verb> [<protocol> ...] [--workers <n>]
 
 A `<protocol>` is a protocol id or a path to a YAML file. Without one, the verb takes the six protocols of `protocols/configs/study_queue.yaml`, in that order. `--workers` (default: CPU count) is the number of worker processes.
 
-A cell is open while its reliability is undecided or, with `decide_finish_times` true, its finish-time comparison is. Each round gives every open cell 10 more seeds, up to 200. Cells pruned above saturation and cells with an errored trial (listed in `errors.jsonl`) get no seeds. `status.json` counts open cells as `cells_needing_seeds`.
+Each round gives every [open cell](../glossary.md#success-and-reliability) 10 more seeds, up to 200. A trial that raises is listed in `errors.jsonl`, and its cell gets no more seeds. `status.json` counts open cells as `cells_needing_seeds`.
 
 ### `plan`
 
@@ -43,7 +43,7 @@ Before a long run, run `make test` and `plan` (the folder should be new or say `
 
 ### Calibration
 
-Calibration measures $R_f$, which sizes the field, the goal and the drive; the procedure and its limits are in [task design](../experiments/task_design.md#sizing-by-the-calibrated-flock-radius). `run` stops with a `CalibrationError` naming $N$ when the radius is not settled. The folder is then cleared for a corrected protocol.
+Calibration measures $R_f$, which sizes the field, the goal and the drive; the procedure and its limits are in [task design](../experiments/task_design.md#sizing-by-the-calibrated-flock-radius). `run` stops with a `CalibrationError` naming $N$ when the radius changes by more than `settled_tolerance` between the last two windows, differs by more than `start_agreement` between the two start spacings, or the flock centre comes within twice the flock's measured radius of the goal. If the folder holds no trial yet, `run` then deletes its `provenance.json` and `calibration.json`, so a corrected protocol can start it afresh; a folder with trials keeps them. Either way `runs.jsonl` keeps a line for the failed sitting.
 
 ## `cli/calibration_check.py`: calibration with its drift and spread
 
@@ -124,7 +124,7 @@ Prints the curves on which a team larger than $D_{\min}$, or than the lower end 
 
 ### `sequential <protocol>`
 
-Takes a protocol, not a folder. For true success rates from 0.80 to 0.97, prints the chance that a cell ends reliable, unreliable or open (undecided at the seed limit) under its seed rule, computed exactly over every look.
+Takes a protocol, not a folder. For true success rates from 0.80 to 0.97, prints the chance that a cell ends reliable, unreliable or undecided at the seed limit under its seed rule, computed exactly over every look.
 
 ### `paper`
 
@@ -143,4 +143,4 @@ uv run python docs/generate_docs/make_gifs.py            # every animation, from
 uv run python docs/generate_docs/make_gifs.py paper_task # only the named animations
 ```
 
-`make_gifs.py` takes any of the animation names `one_trial`, `sheep_reaction`, `push_blending`, `team_rule_at_work`, `start_layouts` and `paper_task`, and writes each to `docs/gifs/`.
+The animation names are `one_trial`, `sheep_reaction`, `push_blending`, `team_rule_at_work`, `start_layouts` and `paper_task`; an unknown name stops the script and lists them. A figure or animation whose run folder or paper-check trials are missing stops with an error naming the file. The figure that sets HerdSim beside the paper's Fig. 3 (`fig_paper_check.png`) also needs `pdftoppm` (poppler-utils) to crop the paper's figure.

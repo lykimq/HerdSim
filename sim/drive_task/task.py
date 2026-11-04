@@ -94,7 +94,8 @@ def check(config: dict[str, Any]) -> None:
         raise ValueError(f"dog_start {config['dog_start']!r} not in {DOG_STARTS}")
 
 
-def _check_settings(s: Mapping[str, Any]) -> None:
+def check_settings(s: Mapping[str, Any]) -> None:
+    """Task settings of a protocol, before any setup is built from them."""
     if not 0.0 < float(s["success_fraction"]) <= 1.0:
         raise ValueError("success_fraction must be in (0, 1]")
     if float(s["dog_start_spacing"]) <= 0.0:
@@ -134,7 +135,7 @@ def build_setup(
     max_dogs: int,
 ) -> dict[str, Any]:
     """Setup for one N: drive clears every layout; field shared across layouts and max D."""
-    _check_settings(settings)
+    check_settings(settings)
     setup = _typed_setup(settings, flock_radius, n_sheep)
     multiple = float(settings["drive_distance_multiple"])
     sizing = {**setup, "n_sheep": n_sheep, "n_shepherds": max_dogs}

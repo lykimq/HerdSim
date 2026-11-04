@@ -10,15 +10,13 @@ the lower left quarter of section 4.1).
 from __future__ import annotations
 
 import math
-from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
 from sim.drive_task.layouts import BOX_LAYOUT
 from sim.drive_task.task import box_setup
-from sim.state import SimulationState
 from sim.strombom.params import METHOD
-from sim.trial import build_config, initial_state, run_trial
+from sim.trial import build_config, run_trial
 
 from . import settings as paper
 
@@ -83,17 +81,9 @@ def paper_config(
     )
 
 
-def run_fig3_trial(
-    n_sheep: int,
-    n_neighbors: int,
-    seed: int,
-    on_step: Callable[[SimulationState], None] | None = None,
-) -> Fig3Trial:
-    """One Fig. 3 trial. ``on_step`` sees tick 0 and every later tick (for the animation)."""
-    config = paper_config(n_sheep, n_neighbors)
-    if on_step is not None:
-        on_step(initial_state(config, seed))
-    result = run_trial(config, seed, on_tick=on_step, history=False)
+def run_fig3_trial(n_sheep: int, n_neighbors: int, seed: int) -> Fig3Trial:
+    """One Fig. 3 trial."""
+    result = run_trial(paper_config(n_sheep, n_neighbors), seed, history=False)
     return Fig3Trial(n_sheep, n_neighbors, seed, result.success, result.total_ticks)
 
 

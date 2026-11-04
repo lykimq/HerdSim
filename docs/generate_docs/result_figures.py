@@ -1,13 +1,12 @@
 """Result figures for make_result_figures.py.
 
 Data and axis helpers first, then the three figures of D_min against N and the deadline.
-Style in figstyle.py; a figure is skipped when its run folder is missing.
+Style in figstyle.py; a missing run folder stops the figure with an error.
 """
 
 from __future__ import annotations
 
-from collections.abc import Callable, Hashable, Sequence
-from functools import cache, wraps
+from collections.abc import Hashable, Sequence
 from itertools import product
 from typing import Any
 
@@ -20,7 +19,7 @@ from matplotlib.lines import Line2D
 from analysis.curves import groups_table, split_group_key
 from analysis.frontier import clopper_pearson, confirming_team
 from analysis.growth_fits import consistent_range, interval_of
-from analysis.results import read_cells, read_trials
+from analysis.results import read_cells, read_once, read_trials
 from analysis.trial_measures import reach_by_n
 from docs.generate_docs.figstyle import (
     AQUA,
@@ -36,7 +35,7 @@ from docs.generate_docs.figstyle import (
     n_axis,
     save,
 )
-from docs.generate_docs.tables import F99_MAIN, STRICT_MAIN
+from docs.generate_docs.runs import F99_RUNS, NINE_SIZE_RUNS, STRICT_RUNS
 from services.protocol import RESULTS_ROOT, load_protocol
 from services.replay import open_run
 from sim.strombom.params import METHOD
@@ -45,21 +44,22 @@ from sim.trial import initial_state
 Row = dict[Hashable, Any]  # one row of a groups table, from DataFrame.to_dict("records")
 
 # ----- settings -----
-MAIN_RUNS = dict(zip((12, 6, 3), zip(STRICT_MAIN, F99_MAIN, strict=True), strict=True))
-
 LAYOUT_COLOR = {"compact": MUTED, "wide": BLUE, "split": ORANGE, "outlier_rich": AQUA}
 # Light to dark blues for an ordered series (deadlines, flock sizes).
 BLUES = ("#bcd3f0", "#8fb9ec", "#5b95de", "#2a78d6", "#0b2f66")
 
-D_TICKS = (1, 2, 4, 8, 16, 24)
-D_MAX = 24  # largest team size the runs try
-THETA = 0.9
+_STRICT_GRID = load_protocol(STRICT_RUNS[12])
+_F99_GRID = load_protocol(NINE_SIZE_RUNS[0])
+D_MAX = max(_STRICT_GRID.shepherd_counts)  # largest team size the runs try
+N_TOP = max(_F99_GRID.flock_sizes)  # largest flock size the runs try
+THETA = _STRICT_GRID.settings["reliability_theta"]
+D_TICKS = (1, 2, 4, 8, 16, D_MAX)
 
 # D_min against N: marker and line style of the strict rule, then of the 99 percent rule.
 RULE_STYLES = (("o", "-"), ("s", "--"))
 RULE_COLORS = (BLUE, ORANGE)
 RULE_LABELS = ("strict (every sheep)", "99 percent of the sheep")
-DMIN_XTICKS = (25, 50, 100, 200, 400, 566)
+DMIN_XTICKS = (25, 50, 100, 200, 400, N_TOP)
 NONE_Y = 40  # where "no reliable D" is drawn
 DMIN_YTICKS = (1, 2, 3, 4, 6, 8, 12, D_MAX)
 
@@ -75,33 +75,17 @@ DEADLINE_COMBOS = (
 
 # Adaptive-sampling figures: one stored curve where D = 2 stays undecided at 200 seeds and the
 # campaign added D = 5 between an improving and a saturated team.
-ADAPTIVE_CASE = (MAIN_RUNS[6][1], "wide", 400, 2)
+ADAPTIVE_CASE = (F99_RUNS[6], "wide", 400, 2)
 
 # Growth-fit figure: sizes the fits are extended to, and the shapes with their line style.
-FIT_AHEAD = np.array([566, 800, 1131, 1600, 2263, 3200])
+FIT_AHEAD = np.array([N_TOP, 800, 1131, 1600, 2263, 3200])
 FIT_SHAPES = (("power law", "--"), ("saturating", ":"))
-CALIBRATION_EDGE = 600  # largest N with a calibrated flock radius
+# Smallest tested N whose calibration fails its 5% limits with 3 seeds per start
+# (results/diagnostics/calibration_dmin_f99_m6.csv).
+CALIBRATION_EDGE = 630
 
 
 # ----- data access -----
-def have(*names: str) -> bool:
-    missing = [n for n in names if not (RESULTS_ROOT / n / "frontier_cells.csv").exists()]
-    if missing:
-        print("missing", missing, ": figure skipped")
-    return not missing
-
-
-def read_once(load: Callable[[str], pd.DataFrame]) -> Callable[[str], pd.DataFrame]:
-    """Cache a run file once; each call returns a copy."""
-    cached = cache(load)
-
-    @wraps(load)
-    def frame(name: str) -> pd.DataFrame:
-        return cached(name).copy()
-
-    return frame
-
-
 @read_once
 def cells(name: str) -> pd.DataFrame:
     t = split_group_key(read_cells(RESULTS_ROOT / name))
@@ -179,7 +163,7 @@ def _dmin_cell(ax: Axes, r: Row, x: float, color: str) -> float | None:
     """Draw one (layout, N) cell; return its D_min when decided, else None."""
     d_min, low = r["d_min"], r["d_min_low"]
     if not np.isnan(d_min):
-        if low < d_min:  # a smaller D is still open: a bracket
+        if low < d_min:  # a smaller D is still undecided: a bracket
             ax.plot([x, x], [low, d_min], color=color, lw=2.2, alpha=0.45)
             ax.plot(x, low, marker="_", color=color, ms=9, mew=1.6, ls="")
         return d_min
@@ -200,7 +184,7 @@ def _dmin_layout(ax: Axes, rows: list[Row], color: str, shift: float, marker: st
         if d_min is not None:
             points.append((x, d_min))
     if points:
-        xs, ys = zip(*points)
+        xs, ys = zip(*points, strict=True)
         ax.plot(xs, ys, color=color, lw=1.2, alpha=0.85, ls=ls)
         ax.plot(xs, ys, marker=marker, color=color, ms=6, ls="", mec=SURFACE, mew=0.8)
 
@@ -229,7 +213,9 @@ def _dmin_legend_handles() -> list[Line2D]:
     ]
     return [
         *rules,
-        Line2D([], [], color=MUTED, lw=2.2, alpha=0.45, label="bracket: a smaller D still open"),
+        Line2D(
+            [], [], color=MUTED, lw=2.2, alpha=0.45, label="bracket: a smaller D still undecided"
+        ),
         Line2D(
             [],
             [],
@@ -251,18 +237,15 @@ def _dmin_legend_handles() -> list[Line2D]:
 
 
 def fig_dmin_vs_n() -> None:
-    """D_min vs N for the three main runs (strict and 99 percent), with open brackets."""
-    if not have(*[n for pair in MAIN_RUNS.values() for n in pair]):
-        return
+    """D_min vs N for the three main runs (strict and 99 percent), with undecided brackets."""
     layouts = [layout for layout in LAYOUT_COLOR if layout != "compact"]
-    fig, axes = plt.subplots(
-        len(layouts), len(MAIN_RUNS), figsize=(11, 8.6), sharex=True, sharey=True
-    )
-    for (layout, runs), ax in zip(product(layouts, MAIN_RUNS.values()), axes.flat):
+    pairs = {m: (STRICT_RUNS[m], F99_RUNS[m]) for m in STRICT_RUNS}  # strict, then 99 percent
+    fig, axes = plt.subplots(len(layouts), len(pairs), figsize=(11, 8.6), sharex=True, sharey=True)
+    for (layout, runs), ax in zip(product(layouts, pairs.values()), axes.flat, strict=True):
         _dmin_panel(ax, runs, layout)
-    for ax, m in zip(axes[0], MAIN_RUNS):
+    for ax, m in zip(axes[0], pairs, strict=True):
         ax.set_title(f"{m} drive times")
-    for ax, layout in zip(axes[:, 0], layouts):
+    for ax, layout in zip(axes[:, 0], layouts, strict=True):
         ax.set_ylabel(f"{layout}\nD_min (dogs)")
     for ax in axes[-1]:
         ax.set_xlabel("flock size N")
@@ -275,11 +258,8 @@ def fig_dmin_vs_n() -> None:
 # ----- reach -----
 def fig_reach() -> None:
     """Median reach of one dog against N per layout, 99 percent rule, at the three deadlines."""
-    runs = {m: pair[1] for m, pair in MAIN_RUNS.items()}
-    if not have(*runs.values()):
-        return
-    fig, axes = plt.subplots(1, len(runs), figsize=(11, 3.6), sharey=True)
-    for ax, (m, name) in zip(axes, runs.items()):
+    fig, axes = plt.subplots(1, len(F99_RUNS), figsize=(11, 3.6), sharey=True)
+    for ax, (m, name) in zip(axes, F99_RUNS.items(), strict=True):
         table = reach_by_n(trials(name))
         for layout, color in LAYOUT_COLOR.items():
             rows = table[table["layout"] == layout].sort_values("n")
@@ -348,7 +328,9 @@ def _dmin_deadline_panel(ax: Axes, tables: dict[int, pd.DataFrame]) -> None:
             if d_min is not None:
                 points.append((x + off, d_min))
         if len(points) > 1:
-            ax.plot(*zip(*points), color=color, lw=1.0, ls=ls, label=f"{layout}, N = {n}")
+            ax.plot(
+                *zip(*points, strict=True), color=color, lw=1.0, ls=ls, label=f"{layout}, N = {n}"
+            )
     log_ticks(ax, [1, 2, 3, 4, 6, 8, 12], axis="y")
     ax.set_xticks(range(len(tables)))
     ax.set_xticklabels([str(m) for m in tables])
@@ -361,14 +343,11 @@ def _dmin_deadline_panel(ax: Axes, tables: dict[int, pd.DataFrame]) -> None:
 
 def fig_deadline() -> None:
     """How the deadline moves the success curve and D_min (99 percent rule, main runs)."""
-    runs = {m: pair[1] for m, pair in MAIN_RUNS.items()}
-    if not have(*runs.values()):
-        return
-    data = {m: cells(name) for m, name in runs.items()}
-    tables = {m: groups(name) for m, name in runs.items()}
+    data = {m: cells(name) for m, name in F99_RUNS.items()}
+    tables = {m: groups(name) for m, name in F99_RUNS.items()}
 
     fig, axes = plt.subplots(1, 3, figsize=(14, 4.4))
-    for ax, (layout, n) in zip(axes[:2], SUCCESS_CURVES):
+    for ax, (layout, n) in zip(axes[:2], SUCCESS_CURVES, strict=True):
         _success_panel(ax, data, layout, n)
     axes[0].legend(frameon=False, fontsize=8, loc="lower right", title="deadline", title_fontsize=8)
     _dmin_deadline_panel(axes[2], tables)
@@ -391,7 +370,9 @@ def _running_rates(
 ) -> tuple[np.ndarray, np.ndarray]:
     """The rate and its interval after each look, from the successes in seed order."""
     wins = np.cumsum(successes)[looks - 1]
-    bounds = np.array([clopper_pearson(int(k), int(n), confidence) for k, n in zip(wins, looks)])
+    bounds = np.array(
+        [clopper_pearson(int(k), int(n), confidence) for k, n in zip(wins, looks, strict=True)]
+    )
     return wins / looks, bounds
 
 
@@ -399,8 +380,6 @@ def fig_stopping() -> None:
     """Interval bounds after each batch: all failures, all successes, and one stored cell
     that stays undecided at the seed limit."""
     name, layout, n, d = ADAPTIVE_CASE
-    if not have(name):
-        return
     s = load_protocol(name).settings
     batch, cap, conf = s["batch_seeds"], s["max_seeds"], s["confidence"]
     looks = np.arange(batch, cap + 1, batch)
@@ -443,8 +422,6 @@ def fig_stopping() -> None:
 def fig_densification() -> None:
     """One stored curve: the protocol's team sizes and those the campaign added, by zone."""
     name, layout, n, _ = ADAPTIVE_CASE
-    if not have(name):
-        return
     listed = set(load_protocol(name).shepherd_counts)
     c = curve(cells(name), layout, n)
 
@@ -476,14 +453,12 @@ def fig_densification() -> None:
 def fig_paired_seeds() -> None:
     """The start of seeds 0 to 2 at three team sizes of one stored curve, with each outcome."""
     name, layout, n, _ = ADAPTIVE_CASE
-    if not have(name):
-        return
     run = open_run(name)  # refuses a folder whose protocol now gives other physics
     teams, seeds = (2, 3, 4), (0, 1, 2)
 
     # One scale for every panel, so the same seed shows the same flock at every team size.
     fig, axes = plt.subplots(len(teams), len(seeds), figsize=(7.5, 6.6), sharex=True, sharey=True)
-    for (d, i), ax in zip(product(teams, seeds), axes.flat):
+    for (d, i), ax in zip(product(teams, seeds), axes.flat, strict=True):
         job = run.job(METHOD, layout, n, d, i)
         state = initial_state(job.config, job.seed)
         ax.plot(*state.sheep_positions.T, ls="", marker="o", ms=1.2, color=BLUE)
@@ -502,13 +477,11 @@ def fig_paired_seeds() -> None:
 # ----- pruning -----
 def fig_pruning() -> None:
     """Finish time and dog overlap along one stored curve, with the cells pruning skips."""
-    name, layout, n = MAIN_RUNS[6][1], "compact", 200
-    if not have(name):
-        return
+    name, layout, n = F99_RUNS[6], "compact", 200
     c = curve(cells(name), layout, n)
     overlap = curve(trials(name), layout, n).groupby("d")["mean_dog_overlap"].mean()
     d_sat = int(group_row(groups(name), layout, n)["d_sat"])
-    confirm = confirming_team(dict(zip(c["d"], c["zone"])), d_sat)
+    confirm = confirming_team(dict(zip(c["d"], c["zone"], strict=True)), d_sat)
     threshold = load_protocol(name).settings["prune_overlap"]
     pruned = c[c["pruned"]]
     if confirm is None or confirm == c["d"].max():
@@ -564,7 +537,7 @@ def _fit_layout(ax: Axes, g: pd.DataFrame, layout: str, marker: str, shift: floa
         ax.plot([x, x], [found[0] + 0.5, found[1] - 0.5], color=color, lw=3, alpha=0.5)
         ax.plot(x, found[1] - 0.5, marker=marker, color=color, ms=5, ls="")
     for shape, ls in FIT_SHAPES:
-        lo, hi = zip(*[consistent_range(points, shape, int(n)) for n in FIT_AHEAD])
+        lo, hi = zip(*[consistent_range(points, shape, int(n)) for n in FIT_AHEAD], strict=True)
         ax.fill_between(FIT_AHEAD, lo, hi, color=color, alpha=0.08 if ls == ":" else 0.15)
         ax.plot(FIT_AHEAD, hi, color=color, lw=0.9, ls=ls)
     ax.plot([], [], color=color, marker=marker, ls="", label=layout)
@@ -575,7 +548,7 @@ def _fit_panel(ax: Axes, name: str, title: str) -> None:
     for layout, marker, shift in (("wide", "o", 0.96), ("outlier_rich", "s", 1.04)):
         _fit_layout(ax, g, layout, marker, shift)
     ax.axvline(CALIBRATION_EDGE, color=MUTED, lw=0.8)
-    ax.text(CALIBRATION_EDGE + 10, 0.85, "calibration edge", fontsize=8, color=MUTED)
+    ax.text(CALIBRATION_EDGE + 20, 17, "calibration edge", fontsize=8, color=MUTED)
     log_ticks(ax, [25, 50, 100, 200, 400, 800, 1600, 3200])
     log_ticks(ax, [1, 2, 3, 5, 10, 20], axis="y")
     ax.set_xlabel("flock size N")
@@ -585,11 +558,9 @@ def _fit_panel(ax: Axes, name: str, title: str) -> None:
 
 def fig_growth_fits() -> None:
     """D_min against N on the nine sizes (99 percent), with the range each fitted shape allows."""
-    runs = ((MAIN_RUNS[12][1], "12 drive times"), (MAIN_RUNS[6][1], "6 drive times"))
-    if not have(*[r for r, _ in runs]):
-        return
+    runs = [(name, f"{m} drive times") for m, name in F99_RUNS.items() if name in NINE_SIZE_RUNS]
     fig, axes = plt.subplots(1, 2, figsize=(11.5, 4.4), sharey=True)
-    for ax, (name, title) in zip(axes, runs):
+    for ax, (name, title) in zip(axes, runs, strict=True):
         _fit_panel(ax, name, title)
     axes[0].set_ylabel("dogs")
     axes[0].plot([], [], color=INK, ls="--", lw=0.9, label="power law: largest allowed")
@@ -601,7 +572,7 @@ def fig_growth_fits() -> None:
         rect=(0, 0.05, 1, 1),
         note=(
             "Bars: the D_min bracket at each N (marker at the reliable D). "
-            "Shaded beyond N = 566: the "
+            f"Shaded beyond N = {N_TOP}: the "
             "range of D allowed by every curve of each shape that passes through all the brackets."
         ),
     )

@@ -5,8 +5,9 @@ a compact flock toward a goal it cannot reach for ``calibration_seconds``; R_f =
 RMS radius over the last window, median over seeds and start sizes. One dog is used for
 every team size, so all are compared on a task sized to the same reference flock.
 
-``calibrate`` raises where the radius is not settled or depends on the start size; for
-Strombom sheep it holds up to N = 600.
+``calibrate`` raises where the radius is not settled or depends on the start size; with the
+canonical tolerances and 3 seeds per start it holds for Strombom sheep at every tested size up
+to N = 600 and fails at every tested size from 630 (results/diagnostics/).
 """
 
 from __future__ import annotations

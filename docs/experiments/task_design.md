@@ -22,7 +22,7 @@ In the middle and right panels each dot is one of the five main flock sizes.
 
 The radius of a flock is $\sqrt{2}$ times the RMS (root mean square) distance of its sheep from the flock centre, the radius of a uniform disc with that RMS. Calibration measures $R_f(N)$ once per $N$ when a campaign starts. One dog that knows where every sheep is drives the flock for 300 s toward a goal too far away to reach. The flock starts as a Gaussian with $\sigma = 0.5\,s\sqrt{N/\pi}$ cut at $3\sigma$, for a spacing $s$ between sheep of 1 m and of 3 m (each sheep then has about $s^2$ of ground). $R_f$ is the radius averaged over the last 90 s, the median over 3 seeds and both spacings.
 
-If the radius still changes by more than 15% between the last two 90 s windows, differs by more than 25% between the two spacings, or the flock centre comes within $2 R_f$ of the goal during those windows, the campaign stops with an error: the flock has no single size to scale the task by, or it reached the goal instead of being driven ([calibration settings](../guides/settings.md#calibration-of-r_f)).
+If the radius still changes by more than 5% between the last two 90 s windows, differs by more than 5% between the two spacings, or the flock centre comes within twice the flock's measured radius of the goal during those windows, the campaign stops with an error: the flock has no single size to scale the task by, or it reached the goal instead of being driven ([calibration settings](../guides/settings.md#calibration-of-r_f)).
 
 **Table 1: Lengths of the drive task.** $l_{\mathrm{reach}}$ is the farthest any sheep can start from the flock centre, over every [start layout](#flock-start-layouts) of the protocol.
 
@@ -95,7 +95,7 @@ The study uses `arcs`: half circles on the side away from the goal, with the dog
 
 ## 3. Adaptive sampling
 
-Most [cells](../glossary.md#trials-and-experiments) need far fewer than the cap of 200 seeds (one dog against 400 scattered sheep at a tight deadline, or twelve dogs on 25 compact sheep), so HerdSim adds trials only to the open cells, those that still ask for seeds because their reliability, or a finish-time comparison, is undecided. In the end each cell gets a zone, which says what its place on the curve means ([section 5](#5-frontier-rules-and-zones)). How the rounds, the time budget and resuming work is in the [architecture](../codes/architecture.md#how-a-campaign-runs). Figures 4 to 7 show stored cells of `dmin_f99_m6` (99% rule, 6 drive times); Figure 4 also draws the interval bounds for all failures and all successes.
+Most [cells](../glossary.md#trials-and-experiments) need far fewer than the cap of 200 seeds (one dog against 400 scattered sheep at a tight deadline, or twelve dogs on 25 compact sheep), so HerdSim adds trials only to the [open cells](../glossary.md#success-and-reliability), those that still ask for seeds. In the end each cell gets a zone, which says what its place on the curve means ([section 5](#5-frontier-rules-and-zones)). How the rounds, the time budget and resuming work is in the [architecture](../codes/architecture.md#how-a-campaign-runs). Figures 4 to 7 show stored cells of `dmin_f99_m6` (99% rule, 6 drive times); Figure 4 also draws the interval bounds for all failures and all successes.
 
 ### Stopping early with the 99% Clopper-Pearson interval
 
@@ -132,7 +132,7 @@ The protocol lists a coarse set of team sizes, and HerdSim fills in counts where
 Above a confirmed [$D_{\mathrm{sat}}$](#frontier-values), the team from which more dogs stop helping, cells whose dogs mostly stand on top of each other get no more seeds and are marked `pruned` in `frontier_cells.csv` (Figure 6).
 
 1) When it starts: $D_{\mathrm{sat}}$ is decided, a larger tested team is also classed as saturated (reliable and not slower than $D_{\mathrm{best}}$), and the curve is not still improving at the top of its grid.
-2) What it prunes: above that confirming team, a saturated cell, or a reliable cell whose speed against $D_{\mathrm{best}}$ is still open, in which, averaged over ticks and trials, at least 90% of the dogs had another dog within 2 m.
+2) What it prunes: above that confirming team, a saturated cell, or a reliable cell whose speed against $D_{\mathrm{best}}$ is still undecided, in which, averaged over ticks and trials, at least 90% of the dogs had another dog within 2 m.
 3) What it never prunes: unreliable cells, cells whose reliability is undecided, and cells slower than $D_{\mathrm{best}}$, since they are the answers being measured.
 
 A pruned cell is filled to a whole batch, then gets no more seeds and adds no midpoints. The rule assumes that a dog standing on another acts as its copy and cannot change the answer; we have not tested that.
@@ -160,7 +160,7 @@ To compare 2 dogs with 4 fairly, both teams should face the same flock. Seed $i$
 
 ### Flock size
 
-All six runs test $N$ = 25, 50, 100, 200 and 400, doublings. The 99% runs at 12 and 6 drive times add 71, 141, 283 and 566, steps of $\sqrt{2}$ that are even in $\log N$, so small sizes do not dominate a log-log fit. Above about $N = 600$ the radius of a driven flock is still changing when calibration measures it: it moves by more than 5% between the last two windows from $N = 630$ (3 seeds). The calibration check of the six runs accepts a change of up to 15%, so it would still pass there; the study stops at 566 = $400\sqrt{2}$, the last added size below the edge, and the strict-rule grids stop at 400.
+All six runs test $N$ = 25, 50, 100, 200 and 400, doublings. The 99% runs at 12 and 6 drive times add 71, 141, 283 and 566, steps of $\sqrt{2}$ that are even in $\log N$, so small sizes do not dominate a log-log fit. The radius of a driven flock changes between the last two 90 s windows of calibration ([sizing](#sizing-by-the-calibrated-flock-radius)), and with 20 seeds per start that change grows with $N$ above 400. Over both settings of the paper's [repulsion between grazing sheep](../methods/strombom_sheep.md#grazing), it is at most 0.52% up to 400, 1.4-1.7% at 566, 2.2% at 600, 3.4% at 630 and 4.1-5.6% at 660 with 20 seeds, where the two start sizes also differ by 11-13%. With the 3 seeds the runs use, over both settings, it is at most 1.9% up to 566, 2.7-2.8% at 600 and 5.7-5.9% at 630, and it does not grow steadily ([measurement](../guides/settings.md#calibration-of-r_f)). Calibration stops a run when that change, or the difference between the two start sizes, is above 5%. With 3 seeds every tested size up to 600 passes and 630, the next tested size, fails, so 630 is the calibration edge (660 with 20 seeds); sizes between 600 and 630 are untested. The study stops at 566 = $400\sqrt{2}$, the last $\sqrt{2}$ step below the edge, and the strict-rule grids stop at 400.
 
 ### Team size
 
@@ -229,7 +229,7 @@ Each cell gets one zone, set by its reliability and its place among the frontier
 | `unreliable_dip` | Unreliable, between $D_{\min}$ (or $D_{\min,\mathrm{low}}$) and $D_{\mathrm{overcrowd}}$ |
 | `collapse` | Unreliable, from $D_{\mathrm{overcrowd}}$ up |
 | `recovered` | Reliable again above $D_{\mathrm{overcrowd}}$, outside the working teams |
-| `undecided` | Reliability, or the comparison with $D_{\mathrm{best}}$, still open |
+| `undecided` | Reliability, or the comparison with $D_{\mathrm{best}}$, not decided |
 
 ### How failed trials end
 

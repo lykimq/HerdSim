@@ -21,9 +21,11 @@ sys.path.insert(0, str(REPO))
 import yaml  # noqa: E402
 
 from docs.generate_docs.format import rule_text  # noqa: E402
-from docs.generate_docs.page import page_blocks  # noqa: E402
+from docs.generate_docs.results_page import page_blocks  # noqa: E402
 from records.generated_notice import AUTO_GENERATED_NOTICE  # noqa: E402
 from services.protocol import (  # noqa: E402
+    CALIBRATION_CHECKS,
+    CANONICAL,
     STRATEGY_KEYS,
     WHOLE_PROTOCOL_KEYS,
     MethodSpec,
@@ -146,25 +148,10 @@ def _protocol_entry(p: Protocol) -> str:
     )
 
 
-def _id_list(ids: Sequence[str]) -> str:
-    """'`a`', '`a` and `b`', '`a`, `b` and `c`'."""
-    quoted = [f"`{i}`" for i in ids]
-    return quoted[0] if len(quoted) == 1 else f"{', '.join(quoted[:-1])} and {quoted[-1]}"
-
-
 def _task_sentence(protocols: Sequence[Protocol]) -> str:
-    """'all protocols run the `a` task, except `x` and `y`, which run the `b` task'"""
-    by_task: dict[str, list[str]] = {}
-    for p in protocols:
-        by_task.setdefault(p.settings["task"], []).append(p.protocol_id)
-    main = max(by_task, key=lambda task: len(by_task[task]))
-    others = [
-        f"{_id_list(ids)}, which run the `{task}` task"
-        for task, ids in by_task.items()
-        if task != main
-    ]
-    exceptions = f", except {'; '.join(others)}" if others else ""
-    return f"all protocols run the `{main}` task{exceptions}"
+    """'all protocols run the `a` task'; load_protocol admits a single task."""
+    (task,) = {p.settings["task"] for p in protocols}
+    return f"all protocols run the `{task}` task"
 
 
 def _check_output_folders(protocols: Sequence[Protocol]) -> None:
@@ -211,7 +198,6 @@ def protocols_page() -> str:
 # --- Page: docs/guides/settings.md -------------------------------------------------------------
 
 SETTINGS_PAGE = REPO / "docs" / "guides" / "settings.md"
-CANONICAL = REPO / "protocols" / "configs" / "canonical.yaml"
 # canonical.yaml marks its sections with "# --- Name ----" lines and sets one key per line.
 SECTION_LINE = re.compile(r"^# --- (.+?) -+$")
 KEY_LINE = re.compile(r"^([a-z_]+):")
@@ -227,7 +213,9 @@ rest) are not canonical settings: they live with the method and are listed in th
 The kind of a setting says where it may change. A per-trial setting changes what a trial \
 does. A whole-protocol setting is fixed for the protocol, because calibration or the seeds \
 depend on it. A sampling setting only steers the adaptive run, \
-so it stays out of the physics hash and a folder can resume after it changes.
+so it stays out of the physics hash and a folder can resume after it changes. A calibration \
+check only decides whether calibration stops, never the flock radius $R_f$ it measures, so it \
+stays out of the physics hash as a sampling setting does.
 
 Settings that share a note are one row, with their defaults in the same order, separated by \
 semicolons. The physics hash that decides whether a folder can resume is in the \
@@ -259,6 +247,8 @@ def canonical_sections() -> list[tuple[str, list[tuple[str, str]]]]:
 def setting_kind(key: str) -> str:
     if key in STRATEGY_KEYS:
         return "sampling"
+    if key in CALIBRATION_CHECKS:
+        return "calibration check"
     return "whole protocol" if key in WHOLE_PROTOCOL_KEYS else "per trial"
 
 
@@ -304,7 +294,8 @@ RESULTS_TABLES_TITLE = "# Result tables"
 
 
 def results_tables_page() -> str:
-    """The tables of the verbs of docs/generate_docs/page.py, section by section."""
+    """The tables of the verbs of docs/generate_docs/page.py, section by section, with the
+    text of results_page.py."""
     source = "the stored runs in `results/`"
     return _joined([RESULTS_TABLES_TITLE, notice(source), *page_blocks()])
 

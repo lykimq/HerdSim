@@ -17,12 +17,14 @@ import pandas as pd
 from analysis.results import read_table
 from records.generated_notice import write_csv
 from services.pool import worker_pool
+from services.replay import ReplayJob
 
 from . import settings as paper
 from .trials import (
     DistanceTrial,
     Fig3Trial,
     distance_seed,
+    paper_config,
     run_distance_trial,
     run_fig3_trial,
     seed_of,
@@ -93,11 +95,35 @@ def read(name: str) -> pd.DataFrame:
     return read_table(experiment.path)[columns]
 
 
+def read_stored(name: str) -> pd.DataFrame:
+    """The stored trials of ``name``; they are kept in git, so a missing file is a broken
+    clone, not a check still to run."""
+    path = EXPERIMENTS[name].path
+    if not path.exists():
+        raise FileNotFoundError(f"no paper-check trials at {path}")
+    return read(name)
+
+
+def fig3_replay_job(n_sheep: int, n_neighbors: int, seed: int) -> ReplayJob:
+    """The stored Fig. 3 trial with these values, as a replay checked against its outcome."""
+    stored = read_stored("fig3")
+    row = stored[
+        (stored["n_sheep"] == n_sheep)
+        & (stored["n_neighbors"] == n_neighbors)
+        & (stored["seed"] == seed)
+    ]
+    label = f"paper fig3 N={n_sheep} n={n_neighbors} seed={seed}"
+    if len(row) != 1:
+        raise ValueError(f"{label}: {len(row)} stored trials, expected 1")
+    outcome = (bool(row["success"].iloc[0]), int(row["steps"].iloc[0]))
+    return ReplayJob(paper_config(n_sheep, n_neighbors), seed, outcome, label)
+
+
 def _pending(experiment: Experiment, stored: pd.DataFrame) -> list[Point]:
     """The points with trials not stored yet, each with only those trials."""
     points = experiment.points()
     names = [f.name for f in fields(experiment.row)][: len(points[0][1][0])]
-    done = set(zip(*(stored[name] for name in names)))
+    done = set(zip(*(stored[name] for name in names), strict=True))
     return [(label, todo) for label, keys in points if (todo := [k for k in keys if k not in done])]
 
 

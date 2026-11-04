@@ -55,34 +55,28 @@ class StoredRun:
     """A finished run, opened for replay: its protocol, flock radii and trial rows."""
 
     protocol: Protocol
-    radii: dict[str, dict[str, float]]
+    radii: dict[str, dict[int, float]]
     trials: pd.DataFrame
-
-    @property
-    def master_seed(self) -> int:
-        return self.protocol.settings["master_seed"]
 
     def config(self, method: str, layout: str, n: int, d: int) -> dict[str, Any]:
         """Run config of a cell, as the campaign built it."""
         cell = Cell(Group(method, layout, n), d)
-        return cell_config(self.protocol, cell, self.radii[method][str(n)])
-
-    def outcomes(self, method: str, layout: str, n: int, d: int) -> dict[int, Outcome]:
-        """Stored (success, ticks) per seed index of a cell."""
-        rows = self.trials[self.trials["group_key"] == Group(method, layout, n).key]
-        mine = rows[rows["n_shepherds"] == d]
-        return {
-            int(t["seed_index"]): (bool(t["success"]), int(t["total_ticks"]))
-            for _, t in mine.iterrows()
-        }
+        return cell_config(self.protocol, cell, self.radii[method][n])
 
     def job(self, method: str, layout: str, n: int, d: int, seed_index: int) -> ReplayJob:
-        """The replay of one stored seed of a cell."""
-        stored = self.outcomes(method, layout, n, d)[seed_index]
+        """The replay of one stored seed of a cell, with the seed the row records."""
+        t = self.trials
+        row = t[
+            (t["group_key"] == Group(method, layout, n).key)
+            & (t["n_shepherds"] == d)
+            & (t["seed_index"] == seed_index)
+        ]
         label = f"{layout} N={n} D={d} seed {seed_index}"
-        return ReplayJob(
-            self.config(method, layout, n, d), self.master_seed + seed_index, stored, label
-        )
+        if len(row) != 1:
+            raise ValueError(f"{label}: {len(row)} stored trials, expected 1")
+        stored = (bool(row["success"].iloc[0]), int(row["total_ticks"].iloc[0]))
+        seed = int(row["seed"].iloc[0])
+        return ReplayJob(self.config(method, layout, n, d), seed, stored, label)
 
 
 def open_run(name: str) -> StoredRun:

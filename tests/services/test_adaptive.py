@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections import Counter
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -35,6 +36,10 @@ TINY = {
     "batch_seeds": 3,
     "max_seeds": 6,
     "calibration_seeds": 1,
+    # One seed of 10 sheep drifts by more than the study's 0.05; these tests check the
+    # campaign, so the calibration only has to pass.
+    "settled_tolerance": 0.15,
+    "start_agreement": 0.25,
 }
 
 
@@ -79,7 +84,8 @@ def test_campaign_runs_writes_tables_and_resumes(tmp_path: Path) -> None:
     assert status["stop_reason"] == STOP_DECIDED
     assert status["cells_with_errors"] == {"count": 0, "keys": []}
     rows = store.load_rows()
-    assert 12 <= len(rows) <= 6 * 3  # one batch per cell, at most max_seeds, maybe a midpoint D
+    # Both cells run to max_seeds, two batches of 3, and no midpoint D is added.
+    assert Counter(r["n_shepherds"] for r in rows) == {1: 6, 3: 6}
     for name in ("trials.csv", "frontier_cells.csv", "frontier_groups.csv", "calibration.json"):
         assert (store.root / name).exists(), name
     cells = pd.read_csv(store.root / "frontier_cells.csv", skiprows=1)
