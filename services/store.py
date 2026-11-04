@@ -101,9 +101,12 @@ def _pack(plain: Path, packed: Path) -> None:
     and git sees no change when nothing ran. The .gz takes the mtime of its source,
     which is how ``pack_trials`` tells that it is current."""
     tmp = packed.with_suffix(".gz.tmp")
-    with plain.open("rb") as src, tmp.open("wb") as raw:
-        with gzip.GzipFile(fileobj=raw, mode="wb", compresslevel=6, mtime=0, filename="") as dst:
-            shutil.copyfileobj(src, dst)
+    with (
+        plain.open("rb") as src,
+        tmp.open("wb") as raw,
+        gzip.GzipFile(fileobj=raw, mode="wb", compresslevel=6, mtime=0, filename="") as dst,
+    ):
+        shutil.copyfileobj(src, dst)
     tmp.replace(packed)
     stat = plain.stat()
     os.utime(packed, ns=(stat.st_atime_ns, stat.st_mtime_ns))

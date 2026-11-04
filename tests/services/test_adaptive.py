@@ -175,6 +175,7 @@ def test_calibration_failure_leaves_the_folder_reusable(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     def refuse(_protocol: Protocol, _workers: int, existing: object = None) -> None:
+        del existing
         raise CalibrationError("no settled radius")
 
     monkeypatch.setattr("services.adaptive.calibrate", refuse)

@@ -6,7 +6,7 @@ import math
 from typing import Any
 
 PAPER: dict[str, Any] = {
-    # Sheep (agents)
+    # Sheep parameters
     # Agent-agent interaction distance (eq. 4.1 cutoff); the shepherd rule also uses it
     # for f(N) = r_a N^(2/3), the Pc and Pd offsets and the 3 r_a stop distance.
     "r_a": 2.0,

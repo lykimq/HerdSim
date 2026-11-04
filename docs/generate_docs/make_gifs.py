@@ -364,7 +364,7 @@ def paper_field(ax: Axes, _: Panel) -> Callable[[int], None]:
     ax.add_patch(Rectangle((0, 0), FIELD_SIDE, FIELD_SIDE, fc="none", ec=MUTED, lw=0.8))
     ax.add_patch(Rectangle((half, half), half, half, fc=BLUE, ec="none", alpha=0.08, zorder=0))
     ax.add_patch(Rectangle((0, 0), half, half, fc=ORANGE, ec="none", alpha=0.08, zorder=0))
-    return lambda i: None
+    return lambda _: None
 
 
 def paper_replay(n_sheep: int, n_neighbors: int, seed: int) -> Replayed:
