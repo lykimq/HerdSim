@@ -2,7 +2,7 @@
 
 > AUTO-GENERATED: do not modify. Re-run the producing command to refresh this file. Command: `uv run python docs/generate_docs/make_docs.py`. Source: the protocol files in `protocols/configs/` and the study queue.
 
-The 6 protocols of the study, in queue order: what each tests, its grid, and the settings it changes from `protocols/configs/canonical.yaml`. The results of protocol `<id>` are in `results/<id>`; its numbers are in the [result tables](../report/results_tables.md), its trials and hours in the [run record](../report/d_min_report.md#5-run-record). Terms are in the [glossary](../glossary.md), the methods in [Strombom sheep](../methods/strombom_sheep.md) and [team rule](../methods/strombom_multi.md) and each setting in [settings](settings.md).
+The 6 protocols of the study, in queue order: what each tests, its grid, and the settings it changes from `protocols/configs/canonical.yaml`. The results of protocol `<id>` are in `results/<id>`; its numbers are in the [result tables](../report/results_tables.md), its trials and hours in the [run record](../report/d_min_report.md#4-run-record). Terms are in the [glossary](../glossary.md), the methods in [Strombom sheep](../methods/strombom_sheep.md) and [team rule](../methods/strombom_multi.md) and each setting in [settings](settings.md).
 
 The rule is the share of the flock that must be in the goal (strict: every sheep). The deadline is a multiple of the drive time. The research questions RQ1 to RQ3 are in the [report](../report/d_min_report.md#1-the-question). As for the task, all protocols run the `drive_to_goal` task.
 

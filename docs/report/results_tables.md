@@ -22,7 +22,7 @@ The tables behind the [report](d_min_report.md), for readers who want the values
 
 ## How to read the tables
 
-An entry of a $D_{\min}$ table is the smallest number of dogs whose success rate is at least 0.90 with 99% confidence ([decision rules](d_min_report.md#23-when-a-team-is-reliable)). `3` is decided: every smaller team is unreliable. `3-8` means 8 dogs are reliable, teams below 3 are unreliable and 3 dogs are still undecided at the seed limit of 200 trials per cell; no team from 3 to 7 is shown reliable. `[5]` means no team is reliable yet and teams below 5 are unreliable. `none` or `none on grid` means every team tested is unreliable.
+An entry of a $D_{\min}$ table is the smallest number of dogs whose success rate is at least 0.90 with 99% confidence ([decision rules](d_min_report.md#1-the-question)). `3` is decided: every smaller team is unreliable. `3-8` means 8 dogs are reliable, teams below 3 are unreliable and 3 dogs are still undecided at the seed limit of 200 trials per cell; no team from 3 to 7 is shown reliable. `[5]` means no team is reliable yet and teams below 5 are unreliable. `none` or `none on grid` means every team tested is unreliable.
 
 Strict means every sheep inside the goal. 99 percent means ceil(0.99 N) sheep inside, so the two rules are the same below N = 100. A doubling is a factor of 2 in $D$, so going from 1 dog to 2 is one doubling.
 
@@ -41,7 +41,7 @@ Each row is the line of `results/queue_log.jsonl` for a protocol. `finished`, `h
 | dmin_f99_m3 | 2026-10-20 20:56:31 | 11740 | 185 | 10 | 10 | 8 | 0 | 0.269 | 20 | ran |
 | dmin_f99_m12 | 2026-10-20 21:20:51 | 31590 | 349 | 53 | 53 | 4 | 0 | 0.405 | 20 | ran |
 
-5 folders hold more trials than their log line records, because trials were added when they were resumed later: `dmin_m6`, `dmin_m3`, `dmin_f99_m6`, `dmin_f99_m3`, `dmin_f99_m12`. For these, `finished` and `hours` belong to the first pass only. The [run record](d_min_report.md#5-run-record) gives the trials each resume added.
+5 folders hold more trials than their log line records, because trials were added when they were resumed later: `dmin_m6`, `dmin_m3`, `dmin_f99_m6`, `dmin_f99_m3`, `dmin_f99_m12`. For these, `finished` and `hours` belong to the first pass only. The [run record](d_min_report.md#4-run-record) gives the trials each resume added.
 
 ## D_min by layout and N, strict success
 

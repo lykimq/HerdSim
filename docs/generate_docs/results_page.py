@@ -78,7 +78,7 @@ def dmin_key() -> str:
     return (
         "An entry of a $D_{\\min}$ table is the smallest number of dogs whose success rate is at "
         f"least {_theta()} with {_confidence_percent()}% confidence "
-        "([decision rules](d_min_report.md#23-when-a-team-is-reliable)). `3` is decided: every "
+        "([decision rules](d_min_report.md#1-the-question)). `3` is decided: every "
         "smaller team is unreliable. `3-8` means 8 dogs are reliable, teams below 3 are "
         "unreliable and 3 dogs are still undecided at the seed limit of "
         f"{_rule()['max_seeds']} trials per cell; no "
@@ -124,7 +124,7 @@ def runs_head() -> str:
 RUNS_GREW = (
     "{count} folders hold more trials than their log line records, because trials were added "
     "when they were resumed later: {names}. For these, `finished` and `hours` belong to the "
-    "first pass only. The [run record](d_min_report.md#5-run-record) gives the trials each "
+    "first pass only. The [run record](d_min_report.md#4-run-record) gives the trials each "
     "resume added."
 )
 

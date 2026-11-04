@@ -53,7 +53,7 @@ $$
 $$
 
 - Default (`graze_repulsion: false`): used in all six main study protocols; grazing sheep ignore neighbours closer than $r_a$ and only take the $5\%$ random walk above.
-- Grazing repulsion (`graze_repulsion: true`): matches Section 2 of Strombom et al. (2014), where sheep repel each other regardless of dog distance (used in the [paper check](strombom_check.md) and the grazing pilots in the [report](../report/d_min_report.md#4-limitations)). Under this option, any grazing sheep with $\mathcal{N}_a(i) \ne \emptyset$ steps $\delta = 1$ m along the normalized sum $h\,\mathbf{H}_i + \rho_a\,\mathbf{R}_{a,i} + e\,\boldsymbol{\epsilon}_i$.
+- Grazing repulsion (`graze_repulsion: true`): matches Section 2 of Strombom et al. (2014), where sheep repel each other regardless of dog distance (used in the [paper check](strombom_check.md) and the grazing pilots in the [report](../report/d_min_report.md#3-exceptions-and-pilot-checks)). Under this option, any grazing sheep with $\mathcal{N}_a(i) \ne \emptyset$ steps $\delta = 1$ m along the normalized sum $h\,\mathbf{H}_i + \rho_a\,\mathbf{R}_{a,i} + e\,\boldsymbol{\epsilon}_i$.
 
 ![Animation of sheep reacting as the dogs come within r_s](../gifs/sheep_reaction.gif)
 

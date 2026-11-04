@@ -59,11 +59,11 @@ These terms define trial success and cell-level statistical decisions:
 
 These terms describe the critical team sizes reported for a curve:
 
-- $D_{\min}$: the smallest reliable team size on a curve ([report, section 2.3](report/d_min_report.md#23-when-a-team-is-reliable)).
+- $D_{\min}$: the smallest reliable team size on a curve ([report, section 1](report/d_min_report.md#1-the-question)).
 - Bracket (`3-8`) and $D_{\min,\mathrm{low}}$: notation indicating that 8 dogs are reliable while a smaller team (down to $D_{\min,\mathrm{low}} = 3$, the smallest team whose interval still reaches $\theta$) remains undecided at 200 seeds.
 - Lower bound (`[5]`): notation indicating that no tested team on the curve is reliable yet, and the smallest team not yet ruled out is $D_{\min,\mathrm{low}} = 5$.
 - `none` (`none on grid`): notation indicating that every tested team size up to the top of the grid is unreliable.
-- $D_{\min,\mathrm{stable}}$: on a curve where a team size above $D_{\min,\mathrm{low}}$ is unreliable, the smallest reliable team size above the last unreliable team ([report, section 2.3](report/d_min_report.md#23-when-a-team-is-reliable)).
+- $D_{\min,\mathrm{stable}}$: on a curve where a team size above $D_{\min,\mathrm{low}}$ is unreliable, the smallest reliable team size above the last unreliable team ([report, section 3](report/d_min_report.md#3-exceptions-and-pilot-checks)).
 - Saturation team size $D_{\mathrm{sat}}$ and other frontier values: $D_{\mathrm{sat}}$ is the smallest reliable team that no larger reliable team beats on paired finish time (used by the campaign to [prune seeds above saturation](experiments/task_design.md#pruning-above-saturation)), stored alongside $D_{\max}$, $D_{\mathrm{overcrowd}}$, $D_{\mathrm{best}}$ and $D_{\mathrm{crowd}}$ in `frontier_groups.csv` ([frontier values](experiments/task_design.md#frontier-values)).
 
 ## Sheep model and dog rule
