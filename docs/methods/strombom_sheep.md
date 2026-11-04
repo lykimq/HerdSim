@@ -1,6 +1,6 @@
 # Strombom et al. (2014) discrete behavioral model
 
-In the model of [Strombom et al. (2014)](https://doi.org/10.1098/rsif.2014.0719) nobody plans for the flock as a whole. A sheep with a dog within $r_s = 65$ m reacts: it picks its own heading every tick (one time step, 1 s) from five influences (keep going, stay with the flock, keep a little space from any neighbour closer than $r_a = 2$ m, run from the dog, and noise; Figure 1). A sheep with no dog that close grazes, mostly standing still. The authors compared the model with GPS tracks of a real flock and dog.
+In the model of [Strombom et al. (2014)](https://doi.org/10.1098/rsif.2014.0719) nobody plans for the flock as a whole. A sheep with a dog within $r_s = 65$ m reacts: it picks its own heading every tick (one time step, 1 s) from five influences (keep going, stay with the flock, keep a little space from any neighbour closer than $r_a = 2$ m, run from the dog, and noise; Figure 1). A sheep with no dog that close grazes, mostly standing still. The authors compared the model with GPS tracks of a real flock and dog. The check of HerdSim against the paper is in [strombom_check.md](strombom_check.md).
 
 ![Sheep i, its neighbours and a dog, and the five heading vectors](../figures/fig_sheep_forces.png)
 
@@ -70,7 +70,11 @@ $$
 \end{cases}
 $$
 
-In the paper the push from close neighbours is part of the reacting heading only, so HerdSim lets only reacting sheep keep apart. A flock no dog reaches therefore spreads slowly, by grazing steps. Animation 1 shows sheep switching from grazing to reacting as the dogs approach.
+The paper repels sheep from each other at any distance from the dog (its section 2). HerdSim's default applies the push from close neighbours only to sheep that react to a dog, so grazing sheep do not keep apart. Every study protocol runs with this default.
+
+The model parameter `graze_repulsion` (default `false`, [setting it in a protocol](../guides/configuration.md#model-parameters)) turns the paper's repulsion on for grazing sheep. A grazing sheep with a neighbour closer than $r_a$ then steps $\delta$ at every time step, not only with probability 0.05. Its heading combines its previous heading, the push from its neighbours and noise, with the weights $h$, $\rho_a$ and $e$ of the reacting heading. The paper does not say how such a sheep moves, so this step is HerdSim's reading. The [check against the paper](strombom_check.md) runs with it on; in the 99% runs at 6 and 3 drive times, turning it on reverses no cell decision ([report, limitations](../report/d_min_report.md#4-limitations)).
+
+With the default, a flock no dog reaches spreads slowly, by grazing steps. Animation 1 shows sheep switching from grazing to reacting as the dogs approach.
 
 ![Animation of sheep reacting as the dogs come within r_s](../gifs/sheep_reaction.gif)
 

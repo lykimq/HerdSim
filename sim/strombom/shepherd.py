@@ -11,7 +11,7 @@ from typing import Any
 
 import numpy as np
 
-from sim.vectors import FLOCK_RADIUS_FACTOR, angle_vectors, behind, unit
+from sim.vectors import angle_vectors, behind, unit
 
 COLLECT = "collect"
 DRIVE = "drive"
@@ -33,8 +33,13 @@ def collect_threshold(n_sheep: int, r_a: float) -> float:
 
 
 def radius_of(flock: np.ndarray, centroid: np.ndarray) -> float:
-    """Flock radius sqrt(2) x RMS distance to the centroid, the same measure as R_f."""
-    return float(FLOCK_RADIUS_FACTOR * np.sqrt(np.mean(np.sum((flock - centroid) ** 2, axis=1))))
+    """Flock radius sqrt(2) x RMS distance to the centroid, the same measure as R_f.
+
+    Computed as sqrt(2 x mean square), the operation order the study runs used: the
+    algebraically equal FLOCK_RADIUS_FACTOR x sqrt(mean square) rounds differently in the
+    last bit, which moves the drive slots and so the stored multi-dog trials.
+    """
+    return float(np.sqrt(2.0 * np.mean(np.sum((flock - centroid) ** 2, axis=1))))
 
 
 def drive_point(flock: np.ndarray, goal: np.ndarray, config: dict[str, Any]) -> np.ndarray:

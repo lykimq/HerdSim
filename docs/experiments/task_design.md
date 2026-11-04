@@ -86,7 +86,7 @@ How spread out the flock starts decides how much the dogs must collect before th
 
 ### Dog starts
 
-The first dog circle lies 30 m beyond the farthest point any sheep of that layout can start, so no dog starts among the sheep. A sheep [reacts to a dog](../methods/strombom_sheep.md) within $r_s = 65$ m, so the nearest sheep react from the first tick. Dogs on one circle stand at least 5 m apart, and those that do not fit go on a circle 5 m farther out. Both are conventions.
+The first dog circle lies 30 m beyond the farthest point any sheep of that layout can start, so no dog starts among the sheep. A sheep [reacts to a dog](../methods/strombom_sheep.md) within $r_s = 65$ m; on the scattered layouts some starts have every sheep farther than that from the dogs, which then walk in first. Dogs on one circle stand at least 5 m apart along the circle, and those that do not fit go on a circle 5 m farther out. Both are conventions.
 
 The study uses `arcs`: half circles on the side away from the goal, with the dogs evenly spread. With an odd count one dog starts on the drive axis, the line through the flock and goal centres. Two other patterns are implemented but not used: `ring`, full circles that leave out the cone holding the goal, and `handler`, every dog at one point straight behind the flock (Figure 3).
 
@@ -106,7 +106,7 @@ A cell gets its trials in batches of 10 seeds. After each batch (a look) HerdSim
 2) $L \ge 0.90$: the cell is reliable, a success rate of at least 0.90 at 99% confidence. That needs at least 51 straight successes, and looks come every 10 trials, so the earliest decision is 60 of 60.
 3) Otherwise the cell is undecided and gets another batch of 10, up to 200.
 
-The exact interval is conservative for one look. Repeated looks are not corrected for, and the false-decision rate has not been measured ([report, limitations](../report/d_min_report.md#4-limitations)). The cap of 200 seeds is a cost choice: a cell of 200 trials stays undecided with 168 to 190 successes, and at 400 trials the band would be 344 to 375, about a third narrower in rate.
+The exact interval is conservative for one look. Repeated looks are not corrected for; the exact decision rates over all looks are in the [report, limitations](../report/d_min_report.md#4-limitations). The cap of 200 seeds is a cost choice: a cell of 200 trials stays undecided with 168 to 190 successes, and at 400 trials the band would be 344 to 375, about a third narrower in rate.
 
 ![Sequential refinement and early stopping](../figures/fig_adaptive_1_refinement.png)
 
@@ -129,14 +129,18 @@ The protocol lists a coarse set of team sizes, and HerdSim fills in counts where
 Above a confirmed [$D_{\mathrm{sat}}$](#frontier-values), the team from which more dogs stop helping, cells whose dogs mostly stand on top of each other get no more seeds and are marked `pruned` in `frontier_cells.csv` (Figure 6).
 
 1) When it starts: $D_{\mathrm{sat}}$ is decided, a larger tested team is also classed as saturated (reliable and not slower than $D_{\mathrm{best}}$), and the curve is not still improving at the top of its grid.
-2) What it prunes: above that confirming team, a cell that is saturated or undecided and in which, averaged over ticks and trials, at least 90% of the dogs had another dog within 2 m.
-3) What it never prunes: unreliable cells and cells slower than $D_{\mathrm{best}}$, since they are the answers being measured.
+2) What it prunes: above that confirming team, a saturated cell, or a reliable cell whose speed against $D_{\mathrm{best}}$ is still open, in which, averaged over ticks and trials, at least 90% of the dogs had another dog within 2 m.
+3) What it never prunes: unreliable cells, cells whose reliability is still open, and cells slower than $D_{\mathrm{best}}$, since they are the answers being measured.
 
 A pruned cell is filled to a whole batch, then gets no more seeds and adds no midpoints. The rule assumes that a dog standing on another acts as its copy and cannot change the answer; we have not tested that.
 
 ![Saturation and overlap pruning](../figures/fig_adaptive_3_pruning.png)
 
-**Figure 6: Pruning.** Above a confirmed saturation, [saturated](#zones) or undecided cells get no more seeds once their dog overlap is at least 0.90. Blue is the median finish time (left axis) and orange the mean dog overlap (right axis), the share of dogs with another dog within 2 m averaged over ticks and trials; the dotted line is 0.90 overlap and the shaded region is pruned.
+**Figure 6: Pruning, compact, $N = 200$, 99% rule, 6 drive times.** Every team finishes in 232 to 235 s, so $D_{\mathrm{sat}} = 1$ and $D = 2$ confirms it; of the teams above 2, only $D = 24$ reaches 0.90 overlap (0.91) and is pruned.
+
+- Marks: blue is the median finish time (left axis) and orange the mean dog overlap (right axis), the share of dogs with another dog within 2 m averaged over ticks and trials. The dotted line is 0.90 overlap, the shaded region holds the teams above the confirming one, and the hollow square marks the pruned cell.
+
+*Data:* `results/dmin_f99_m6/`, drawn by `docs/generate_docs/make_result_figures.py`.
 
 ### Paired random streams
 

@@ -28,7 +28,7 @@ from records.provenance import stable_hash
 from sim.drive_task import task as drive_task
 from sim.drive_task.layouts import LAYOUTS
 from sim.strombom import sheep
-from sim.strombom.params import DEFAULTS, METHOD
+from sim.strombom.params import DEFAULTS, METHOD, NEUTRAL_PARAMS
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 RESULTS_ROOT = REPO_ROOT / "results"
@@ -137,7 +137,9 @@ class Protocol:
                 m.name: {
                     "time_limit_ticks": m.time_limit_ticks,
                     "time_limit_drive_multiple": m.time_limit_drive_multiple,
-                    "config": methods[m.name],
+                    "config": {
+                        k: v for k, v in methods[m.name].items() if NEUTRAL_PARAMS.get(k) != v
+                    },
                 }
                 for m in self.methods
             },
@@ -226,6 +228,10 @@ def _methods(raw: dict[str, Any]) -> tuple[MethodSpec, ...]:
         bad = sorted(set(params) - set(DEFAULTS))
         if bad:
             raise ValueError(f"Method {name!r} has no parameters {bad}")
+        # A switch given as "false" or 0 would read as on and also escape the neutral filter.
+        for key, value in params.items():
+            if isinstance(DEFAULTS[key], bool) and not isinstance(value, bool):
+                raise ValueError(f"Method {name!r}: {key} must be true or false, not {value!r}")
         ticks, multiple = _time_limit(name, spec)
         specs.append(MethodSpec(name, ticks, params, multiple))
     return tuple(specs)

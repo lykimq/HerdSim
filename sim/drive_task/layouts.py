@@ -16,6 +16,9 @@ from sim.vectors import angle_vectors, rotate, unit
 
 LAYOUTS = ("compact", "wide", "split", "outlier_rich")
 DOG_STARTS = ("arcs", "ring", "handler")
+# Sheep and dogs uniform in two square boxes, as Strombom et al. (2014, section 4.1) start them.
+# Not a study layout above: only the check against that paper (paper_check/) uses it.
+BOX_LAYOUT = "boxes"
 
 # Agents start at least this far inside the field edge.
 EDGE_MARGIN = 1.0
@@ -139,6 +142,16 @@ _PLACERS: dict[str, Callable[[dict[str, Any], np.random.Generator], np.ndarray]]
     "split": _place_split,
     "outlier_rich": _place_outlier_rich,
 }
+
+
+def place_boxes(config: dict[str, Any], rng: np.random.Generator) -> tuple[np.ndarray, np.ndarray]:
+    """Sheep uniform in the square ``sheep_box``, then the dogs uniform in the square
+    ``dog_box``, both from ``rng``; a box is (low, high) on both axes."""
+    sheep_low, sheep_high = config["sheep_box"]
+    dog_low, dog_high = config["dog_box"]
+    sheep = rng.uniform(float(sheep_low), float(sheep_high), (int(config["n_sheep"]), 2))
+    dogs = rng.uniform(float(dog_low), float(dog_high), (int(config["n_shepherds"]), 2))
+    return sheep, dogs
 
 
 def place_flock(config: dict[str, Any], rng: np.random.Generator) -> np.ndarray:

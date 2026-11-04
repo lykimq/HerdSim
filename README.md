@@ -126,6 +126,7 @@ HerdSim/
 
 - [Strombom sheep](docs/methods/strombom_sheep.md) and the [team rule](docs/methods/strombom_multi.md)
 - [Task design](docs/experiments/task_design.md) - field and goal sized by $R_f(N)$, deadlines, sizes and sampling
+- [Check against Strombom et al. (2014)](docs/methods/strombom_check.md) - the paper's parameters, and its task run with HerdSim's sheep and dog
 
 **Running experiments**
 

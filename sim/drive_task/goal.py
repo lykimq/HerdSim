@@ -15,9 +15,14 @@ from .world import GoalZone, World
 # success rule than the task's own can be read afterwards from the stored rows.
 ARRIVAL_FRACTIONS = (0.90, 0.95, 0.99)
 
+# Success rules: the study's share of sheep inside the goal, or the paper's flock centre inside.
+SHEEP_SHARE = "sheep_share"
+CENTROID = "centroid"
+SUCCESS_RULES = (SHEEP_SHARE, CENTROID)
+
 
 def create_world(config: dict[str, Any]) -> World:
-    """The field rectangle and the goal disc, with the task's success share."""
+    """The field rectangle and the goal disc, with the task's success rule."""
     return World(
         width=float(config["world_width"]),
         height=float(config["world_height"]),
@@ -25,6 +30,7 @@ def create_world(config: dict[str, Any]) -> World:
             center=np.asarray(config["goal_center"], dtype=float),
             radius=float(config["goal_radius"]),
             required_fraction=float(config["success_fraction"]),
+            by_centroid=config["success_rule"] == CENTROID,
         ),
     )
 

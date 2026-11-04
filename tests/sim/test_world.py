@@ -10,7 +10,13 @@ import pytest
 
 from services.cells import Cell, Group, cell_config
 from services.protocol import Protocol
-from sim.drive_task.layouts import goal_half_angle, layout_extent, place_dogs, place_flock
+from sim.drive_task.layouts import (
+    goal_half_angle,
+    layout_extent,
+    place_boxes,
+    place_dogs,
+    place_flock,
+)
 from sim.drive_task.world import GoalZone
 from sim.metrics.flock import fragmentation
 from sim.metrics.view import TickView
@@ -328,6 +334,30 @@ def test_success_fraction_counts_the_share_of_sheep_inside() -> None:
     assert relaxed.reached(np.vstack([inside, outside]))  # 99 of 100
     assert not relaxed.reached(np.vstack([inside[:98], outside, outside]))  # 98 of 100
     assert strict.reached(inside)
+
+
+def test_the_centroid_rule_ends_on_the_flock_centre_not_the_sheep_count() -> None:
+    """Strombom et al. (2014): the task ends when the flock centre is in the goal."""
+    goal = GoalZone(np.zeros(2), 10.0, by_centroid=True)
+    straddling = np.array([[-30.0, 0.0], [30.0, 0.0]])  # no sheep inside, centre at the goal
+
+    assert goal.reached(straddling)
+    assert not goal.reached(straddling + [25.0, 0.0])
+
+
+def test_the_box_start_puts_the_sheep_and_the_dog_in_their_boxes() -> None:
+    side = 150.0
+    config = {
+        "sheep_box": (side / 2, side),
+        "dog_box": (0.0, side / 2),
+        "n_sheep": 200,
+        "n_shepherds": 1,
+    }
+    sheep, dogs = place_boxes(config, np.random.default_rng(SEED))
+
+    assert sheep.shape == (200, 2) and dogs.shape == (1, 2)
+    assert np.all((sheep >= side / 2) & (sheep <= side))
+    assert np.all((dogs >= 0.0) & (dogs <= side / 2))
 
 
 def test_a_relaxed_success_rule_never_finishes_later_than_the_strict_one() -> None:

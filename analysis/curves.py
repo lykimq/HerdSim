@@ -1,4 +1,5 @@
-"""D_min brackets from a finished run, and how they grow with N."""
+"""Read a finished run, take a bracket (D_min) for each N,
+and analyze how they grow with N."""
 
 from __future__ import annotations
 

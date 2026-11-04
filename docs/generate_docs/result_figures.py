@@ -17,8 +17,9 @@ from matplotlib.axes import Axes
 from matplotlib.lines import Line2D
 
 from analysis.curves import groups_table, split_group_key
+from analysis.frontier import confirming_team
 from analysis.growth_fits import consistent_range, interval_of
-from analysis.results import read_cells
+from analysis.results import read_cells, read_trials
 from docs.generate_docs.figstyle import (
     AQUA,
     BLUE,
@@ -32,7 +33,7 @@ from docs.generate_docs.figstyle import (
     save,
 )
 from docs.generate_docs.tables import F99_MAIN, STRICT_MAIN
-from services.protocol import RESULTS_ROOT
+from services.protocol import RESULTS_ROOT, load_protocol
 
 Row = dict[Hashable, Any]  # one row of a groups table, from DataFrame.to_dict("records")
 
@@ -90,6 +91,13 @@ def read_once(load: Callable[[str], pd.DataFrame]) -> Callable[[str], pd.DataFra
 @read_once
 def cells(name: str) -> pd.DataFrame:
     t = split_group_key(read_cells(RESULTS_ROOT / name))
+    t["d"] = t["n_shepherds"].astype(int)
+    return t
+
+
+@read_once
+def trials(name: str) -> pd.DataFrame:
+    t = split_group_key(read_trials(RESULTS_ROOT / name))
     t["d"] = t["n_shepherds"].astype(int)
     return t
 
@@ -330,6 +338,56 @@ def fig_deadline() -> None:
             "times)"
         ),
     )
+
+
+# ----- pruning -----
+def fig_pruning() -> None:
+    """Finish time and dog overlap along one stored curve, with the cells pruning skips."""
+    name, layout, n = MAIN_RUNS[6][1], "compact", 200
+    if not have(name):
+        return
+    c = curve(cells(name), layout, n)
+    overlap = curve(trials(name), layout, n).groupby("d")["mean_dog_overlap"].mean()
+    d_sat = int(group_row(groups(name), layout, n)["d_sat"])
+    confirm = confirming_team(dict(zip(c["d"], c["zone"])), d_sat)
+    threshold = load_protocol(name).settings["prune_overlap"]
+    pruned = c[c["pruned"]]
+    if confirm is None or confirm == c["d"].max():
+        raise ValueError(f"{name} {layout} N = {n}: no team above a confirmed saturation")
+    above = c.loc[c["d"] > confirm, "d"].min()  # shade only teams above the confirming one
+
+    fig, ax = plt.subplots(figsize=(7.5, 3.8))
+    marks = ax.get_xaxis_transform()  # x in data, y in axes fraction
+    ax.axvspan(np.sqrt(confirm * above), D_MAX * 1.15, color=ORANGE, alpha=0.07, lw=0)
+    ax.axvline(confirm, color=MUTED, lw=0.8, ls="-.")
+    ax.text(confirm * 1.04, 0.6, "confirming team", color=MUTED, fontsize=8, transform=marks)
+    ax.axvline(d_sat, color=MUTED, lw=0.8, ls="--")
+    ax.text(d_sat * 1.04, 0.6, "D_sat", color=MUTED, fontsize=8, transform=marks)
+    ax.plot(c["d"], c["median_finish_seconds"], color=BLUE, marker="o", ms=4)
+    ax.set_ylim(0, c["median_finish_seconds"].max() * 1.1)  # from 0, so a few seconds look flat
+    ax.set_ylabel("median finish time (s)", color=BLUE)
+    d_axis(ax, ticks=tuple(c["d"]))
+    grid(ax, "x")
+
+    right = ax.twinx()
+    right.spines["right"].set_visible(True)
+    right.plot(overlap.index, overlap.to_numpy(), color=ORANGE, marker="s", ms=4, ls="--")
+    right.plot(
+        pruned["d"],
+        overlap[pruned["d"]],
+        color=ORANGE,
+        marker="s",
+        ms=10,
+        mfc="none",
+        ls="",
+        label="pruned cell",
+    )
+    right.axhline(threshold, color=ORANGE, lw=0.8, ls=":")
+    right.set_ylim(-0.03, 1.03)
+    right.set_ylabel("mean dog overlap", color=ORANGE)
+    right.legend(frameon=False, fontsize=8, loc="lower right", bbox_to_anchor=(1, 0.3))
+    ax.set_title(f"{layout}, N = {n}, 99 percent rule, 6 drive times", fontsize=10)
+    save(fig, "fig_adaptive_3_pruning.png")
 
 
 # ----- growth fits -----

@@ -21,6 +21,7 @@ from docs.generate_docs.figures import (  # noqa: E402
     fig_team_rule,
     fig_trial,
 )
+from docs.generate_docs.paper_check import fig_paper_layout  # noqa: E402
 
 FIGURES = (
     fig_sheep_forces,
@@ -31,6 +32,7 @@ FIGURES = (
     fig_layouts,
     fig_dog_starts,
     fig_trial,
+    fig_paper_layout,
 )
 
 

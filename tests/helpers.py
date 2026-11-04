@@ -65,6 +65,25 @@ def config_for(
     return cell_config(protocol, Cell(group, d), flock_radius)
 
 
+STROMBOM_BASE = config_for("strombom_multi", n=10, d=1)
+GOAL = np.array([200.0, 0.0])  # goal lies to the right; dogs approach from -x
+ANGLE_TOL = 1e-12
+
+
+def strombom_cfg(n_sheep: int, **overrides: Any) -> dict[str, Any]:
+    """Run config for a flock of ``n_sheep``: the rule uses true N, not the sheep passed in."""
+    return {**STROMBOM_BASE, "n_sheep": n_sheep, **overrides}
+
+
+def tight_flock(n: int, center: tuple[float, float] = (0.0, 0.0)) -> np.ndarray:
+    rng = np.random.default_rng(1)
+    return np.asarray(center) + rng.normal(0.0, 0.5, size=(n, 2))
+
+
+def flock_with_outlier(core: int = 9, outlier: tuple[float, float] = (30.0, 0.0)) -> np.ndarray:
+    return np.vstack([tight_flock(core), [list(outlier)]])
+
+
 def make_world(
     *,
     width: float = 150.0,

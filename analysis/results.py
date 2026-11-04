@@ -1,4 +1,12 @@
-"""Read a finished results folder and the run log."""
+"""Read a finished results folder and the run log.
+For example:
+- trials.csv/trials.csv.gz: read_trials
+- frontier_cells.csv: read_cells
+- frontier_groups.csv: read_groups
+- calibration.json: flock_radii
+- status.json: _folder_status
+...
+"""
 
 from __future__ import annotations
 

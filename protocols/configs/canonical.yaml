@@ -71,7 +71,11 @@ calibration_window_seconds: 90.0
 calibration_starts: [1.0, 3.0]
 # Calibration raises when R_f changed by more than settled_tolerance between the last two
 # windows, or differs by more than start_agreement between the start sizes. Strombom sheep
-# settle up to N = 600.
+# settle up to N = 600. Measured with cli/calibration_check.py (3 seeds, results/diagnostics/,
+# with and without graze_repulsion): N = 25 to 566 change by at most 1.9 % and differ by at
+# most 2.3 %, so 0.05 for both would pass every flock size studied and stop at N = 630. A new
+# protocol may set 0.05; the six study protocols keep these values, which are part of their
+# physics hash.
 settled_tolerance: 0.15
 start_agreement: 0.25
 
@@ -98,8 +102,8 @@ refine_min_gap: 1
 # Off: seeds only decide reliability (D_min). On: seeds also decide the finish-time values
 # D_best, D_sat and D_crowd, which costs more trials.
 decide_finish_times: false
-# Above a confirmed saturation, a cell whose dogs were copies (mean dog_overlap at least
-# this) and that is neither slower nor unreliable gets no more seeds. Above 1 turns it off.
+# Above the team that confirms saturation, a reliable, not slower cell whose dogs were copies
+# (mean dog_overlap at least this) gets no more seeds. Above 1 turns it off.
 prune_overlap: 0.9
 # The first timeseries_seeds seeds of every cell keep their per-tick history as Parquet.
 timeseries_seeds: 3

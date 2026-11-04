@@ -15,11 +15,14 @@ The tables behind the [report](d_min_report.md), for readers who want the values
 7) [Reach of one dog, 99 percent](#reach-of-one-dog-99-percent)
 8) [Nine flock sizes, 99 percent](#nine-flock-sizes-99-percent)
 9) [The shorter deadline as a cut](#the-shorter-deadline-as-a-cut)
-10) [N = 400 at three deadlines, 99 percent](#n--400-at-three-deadlines-99-percent)
+10) [Decision rates of the per-cell rule](#decision-rates-of-the-per-cell-rule)
+11) [Grazing repulsion on, same seeds](#grazing-repulsion-on-same-seeds)
+12) [Teams that fail above D_min](#teams-that-fail-above-d_min)
+13) [N = 400 at three deadlines, 99 percent](#n--400-at-three-deadlines-99-percent)
 
 ## How to read the tables
 
-An entry of a $D_{\min}$ table is the smallest number of dogs whose success rate is at least 0.90 with 99% confidence ([decision rules](d_min_report.md#23-when-a-team-is-reliable)). `3` is decided: every smaller team is unreliable. `3-8` means 8 dogs are reliable and teams below 3 are unreliable, while 3 to 7 are not known to be reliable at the seed limit of 200 trials per cell. `[5]` means no team is reliable yet and teams below 5 are unreliable. `none` or `none on grid` means every team tested is unreliable.
+An entry of a $D_{\min}$ table is the smallest number of dogs whose success rate is at least 0.90 with 99% confidence ([decision rules](d_min_report.md#23-when-a-team-is-reliable)). `3` is decided: every smaller team is unreliable. `3-8` means 8 dogs are reliable, teams below 3 are unreliable and 3 dogs are still undecided at the seed limit of 200 trials per cell; no team from 3 to 7 is shown reliable. `[5]` means no team is reliable yet and teams below 5 are unreliable. `none` or `none on grid` means every team tested is unreliable.
 
 Strict means every sheep inside the goal. 99 percent means ceil(0.99 N) sheep inside, so the two rules are the same below N = 100. A doubling is a factor of 2 in $D$, so going from 1 dog to 2 is one doubling.
 
@@ -312,6 +315,203 @@ Trials shared by two runs that differ only in the deadline, matched on cell and 
 | shared_trials | outcome_as_cut_long_trial | both_succeed | same_finish_when_both_succeed |
 | :---: | :---: | :---: | :---: |
 | 8250 | 1.0 | 7629 | 1.0 |
+
+## Decision rates of the per-cell rule
+
+The six runs share one per-cell rule, so one table covers them: a cell is reliable when the 99 percent Clopper-Pearson interval of its success rate lies at or above 0.90 and unreliable when it lies below; otherwise it gets 10 more seeds, up to 200, and a cell still in between stays open. Each check after a batch is a look. For a cell whose true success rate is p, the table gives the chance in percent that it ends reliable, unreliable or open, computed exactly over every look (no simulation).
+
+`uv run python -m docs.generate_docs.page sequential dmin_f99_m6`
+
+### dmin_f99_m6: decision per true success rate p (percent)
+
+| p | reliable | unreliable | open |
+| :---: | :---: | :---: | :---: |
+| 0.8 | 0.00 | 94.47 | 5.53 |
+| 0.84 | 0.01 | 58.36 | 41.63 |
+| 0.85 | 0.01 | 43.85 | 56.14 |
+| 0.88 | 0.21 | 9.66 | 90.13 |
+| 0.9 | 1.27 | 1.86 | 96.86 |
+| 0.92 | 7.26 | 0.25 | 92.49 |
+| 0.95 | 53.22 | 0.01 | 46.77 |
+| 0.955 | 65.52 | 0.01 | 34.47 |
+| 0.97 | 93.77 | 0.00 | 6.23 |
+
+## Grazing repulsion on, same seeds
+
+dmin_f99_m6 and dmin_f99_m3 run again with repulsion between grazing sheep (graze_repulsion: true), on the same seeds but each run with its own calibrated R_f: pilot_graze_on (N = 50, 100, 200) and pilot_graze_on_rest (the other six sizes) against dmin_f99_m6, pilot_graze_on_m3 against dmin_f99_m3. For each pair: per layout and N, the paired trials (same cell and seed) that succeed in only one run, with an exact two-sided sign test; then the shared cells counted by their decision in each run; then the D_min of the runs with repulsion on.
+
+`uv run python -m docs.generate_docs.page pair pilot_graze_on dmin_f99_m6`
+
+### a = pilot_graze_on, b = dmin_f99_m6: same seeds
+
+| layout | N | pairs | finish only in a | finish only in b | p |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| compact | 50 | 540 | 0 | 0 | 1 |
+| compact | 100 | 540 | 0 | 0 | 1 |
+| compact | 200 | 540 | 0 | 0 | 1 |
+| outlier_rich | 50 | 820 | 1 | 0 | 1 |
+| outlier_rich | 100 | 550 | 5 | 3 | 0.73 |
+| outlier_rich | 200 | 840 | 32 | 24 | 0.35 |
+| split | 50 | 590 | 2 | 1 | 1 |
+| split | 100 | 560 | 0 | 1 | 1 |
+| split | 200 | 1280 | 130 | 118 | 0.48 |
+| wide | 50 | 540 | 0 | 0 | 1 |
+| wide | 100 | 540 | 0 | 0 | 1 |
+| wide | 200 | 610 | 0 | 3 | 0.25 |
+| all | all | 7950 | 170 | 150 | 0.29 |
+
+### a = pilot_graze_on, b = dmin_f99_m6: cell decisions
+
+| in a | reliable | undecided | unreliable |
+| :--- | :---: | :---: | :---: |
+| reliable | 93 | 2 | 0 |
+| undecided | 2 | 4 | 3 |
+| unreliable | 0 | 1 | 5 |
+
+`uv run python -m docs.generate_docs.page pair pilot_graze_on_rest dmin_f99_m6`
+
+### a = pilot_graze_on_rest, b = dmin_f99_m6: same seeds
+
+| layout | N | pairs | finish only in a | finish only in b | p |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| compact | 25 | 540 | 0 | 0 | 1 |
+| compact | 71 | 540 | 0 | 0 | 1 |
+| compact | 141 | 540 | 0 | 0 | 1 |
+| compact | 283 | 540 | 0 | 0 | 1 |
+| compact | 400 | 540 | 0 | 0 | 1 |
+| compact | 566 | 540 | 0 | 0 | 1 |
+| outlier_rich | 25 | 540 | 0 | 0 | 1 |
+| outlier_rich | 71 | 1120 | 1 | 4 | 0.38 |
+| outlier_rich | 141 | 770 | 15 | 21 | 0.41 |
+| outlier_rich | 283 | 1720 | 63 | 86 | 0.071 |
+| outlier_rich | 400 | 1190 | 17 | 17 | 1 |
+| outlier_rich | 566 | 1900 | 82 | 70 | 0.37 |
+| split | 25 | 540 | 0 | 0 | 1 |
+| split | 71 | 680 | 10 | 19 | 0.14 |
+| split | 141 | 1220 | 52 | 58 | 0.63 |
+| split | 283 | 1390 | 155 | 168 | 0.5 |
+| split | 400 | 1230 | 173 | 139 | 0.062 |
+| split | 566 | 510 | 88 | 49 | 0.0011 |
+| wide | 25 | 540 | 0 | 0 | 1 |
+| wide | 71 | 560 | 0 | 0 | 1 |
+| wide | 141 | 490 | 1 | 1 | 1 |
+| wide | 283 | 630 | 16 | 13 | 0.71 |
+| wide | 400 | 840 | 11 | 14 | 0.69 |
+| wide | 566 | 1160 | 42 | 36 | 0.57 |
+| all | all | 20270 | 726 | 695 | 0.43 |
+
+### a = pilot_graze_on_rest, b = dmin_f99_m6: cell decisions
+
+| in a | reliable | undecided | unreliable |
+| :--- | :---: | :---: | :---: |
+| reliable | 169 | 3 | 0 |
+| undecided | 2 | 20 | 10 |
+| unreliable | 0 | 4 | 25 |
+
+`uv run python -m docs.generate_docs.page pair pilot_graze_on_m3 dmin_f99_m3`
+
+### a = pilot_graze_on_m3, b = dmin_f99_m3: same seeds
+
+| layout | N | pairs | finish only in a | finish only in b | p |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| compact | 25 | 540 | 0 | 0 | 1 |
+| compact | 50 | 540 | 0 | 0 | 1 |
+| compact | 100 | 540 | 0 | 0 | 1 |
+| compact | 200 | 540 | 0 | 0 | 1 |
+| compact | 400 | 540 | 0 | 0 | 1 |
+| outlier_rich | 25 | 540 | 0 | 0 | 1 |
+| outlier_rich | 50 | 820 | 2 | 1 | 1 |
+| outlier_rich | 100 | 560 | 4 | 3 | 1 |
+| outlier_rich | 200 | 1250 | 40 | 35 | 0.64 |
+| outlier_rich | 400 | 370 | 21 | 36 | 0.063 |
+| split | 25 | 540 | 0 | 0 | 1 |
+| split | 50 | 670 | 9 | 5 | 0.42 |
+| split | 100 | 730 | 13 | 18 | 0.47 |
+| split | 200 | 130 | 19 | 22 | 0.76 |
+| split | 400 | 90 | 5 | 5 | 1 |
+| wide | 25 | 540 | 0 | 0 | 1 |
+| wide | 50 | 540 | 0 | 0 | 1 |
+| wide | 100 | 550 | 5 | 1 | 0.22 |
+| wide | 200 | 550 | 4 | 3 | 1 |
+| wide | 400 | 610 | 13 | 8 | 0.38 |
+| all | all | 11190 | 135 | 137 | 0.95 |
+
+### a = pilot_graze_on_m3, b = dmin_f99_m3: cell decisions
+
+| in a | reliable | undecided | unreliable |
+| :--- | :---: | :---: | :---: |
+| reliable | 137 | 2 | 0 |
+| undecided | 1 | 4 | 1 |
+| unreliable | 0 | 2 | 36 |
+
+`uv run python -m docs.generate_docs.page dmin pilot_graze_on pilot_graze_on_rest pilot_graze_on_m3`
+
+### pilot_graze_on
+
+| layout | 50 | 100 | 200 |
+| :--- | :---: | :---: | :---: |
+| compact | 1 | 1 | 1 |
+| wide | 1 | 1 | 2-3 |
+| split | 1 | 1 | 1-2 |
+| outlier_rich | 1 | 2 | 2-3 |
+
+### pilot_graze_on_rest
+
+| layout | 25 | 71 | 141 | 283 | 400 | 566 |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| compact | 1 | 1 | 1 | 1 | 1 | 1 |
+| wide | 1 | 1 | 2 | 2-3 | 2-3 | 3-5 |
+| split | 1 | 1 | 1 | [4] | [4] | [7] |
+| outlier_rich | 1 | 1 | 2-3 | 3 | 3 | 4-6 |
+
+### pilot_graze_on_m3
+
+| layout | 25 | 50 | 100 | 200 | 400 |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| compact | 1 | 1 | 1 | 1 | 1 |
+| wide | 1 | 1 | 1-2 | 3 | 5 |
+| split | 1 | 1 | 1 | none on grid | none on grid |
+| outlier_rich | 1 | 1 | 2-3 | 5-10 | none on grid |
+
+## Teams that fail above D_min
+
+Curves on which a team larger than the smallest team not ruled out is unreliable: larger than $D_{\min}$, than the lower end of a bracket (`3-8`), or than a lower bound (`[5]`; see How to read the tables). `unreliable above` lists those teams. $D_{\min,\mathrm{stable}}$ (column D_min_stable) is the smallest reliable team above the last of them; `-` means there is none. A run with no such curve shows None.
+
+### dmin_m12
+
+None.
+
+### dmin_m6
+
+| layout | N | D_min | unreliable above | D_min_stable |
+| :--- | :---: | :---: | :---: | :---: |
+| split | 100 | 1 | 3 | 5 |
+
+### dmin_m3
+
+| layout | N | D_min | unreliable above | D_min_stable |
+| :--- | :---: | :---: | :---: | :---: |
+| outlier_rich | 100 | 3-8 | 4 | 8 |
+| split | 100 | 1 | 2 3 4 | 5 |
+
+### dmin_f99_m12
+
+None.
+
+### dmin_f99_m6
+
+| layout | N | D_min | unreliable above | D_min_stable |
+| :--- | :---: | :---: | :---: | :---: |
+| split | 141 | 1 | 4 | 7 |
+| split | 200 | [1] | 4 6 12 16 24 | - |
+| split | 283 | [5] | 15 16 20 22 | - |
+| split | 400 | [5] | 10 12 14 20 24 | - |
+
+### dmin_f99_m3
+
+| layout | N | D_min | unreliable above | D_min_stable |
+| :--- | :---: | :---: | :---: | :---: |
+| outlier_rich | 400 | [6] | 7 8 12 16 24 | - |
 
 ## N = 400 at three deadlines, 99 percent
 

@@ -25,7 +25,7 @@ Every protocol names `canonical.yaml`, directly or through the file it `extends`
 
 ### Model parameters
 
-Model parameters are not canonical settings. The method keeps its paper's values in its code (`sim/strombom/params.py`), and a protocol overrides them under `params`.
+Model parameters are not canonical settings. The method keeps the values of the paper it implements in its code (`sim/strombom/params.py`), and a protocol overrides them under `params`. A parameter added with a neutral value, one that changes nothing, stays out of the [physics hash](#physics-hash) at that value, so a folder written before the parameter existed keeps its hash. The only such parameter is `graze_repulsion`, neutral at `false` ([grazing](../methods/strombom_sheep.md#grazing)).
 
 ### Protocol overrides
 

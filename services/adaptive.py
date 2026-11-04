@@ -16,7 +16,16 @@ from typing import Any
 import pandas as pd
 
 from analysis import keys
-from analysis.frontier import SATURATED, UNDECIDED, Frontier, Rules, cell_ids, frontier
+from analysis.frontier import (
+    RELIABLE,
+    SATURATED,
+    UNDECIDED,
+    Frontier,
+    Rules,
+    cell_ids,
+    confirming_team,
+    frontier,
+)
 
 from .calibration import CalibrationError, calibrate
 from .cells import Cell, Group, Trial, cell_config, groups, make_trial, trial_key
@@ -56,8 +65,9 @@ def pruned_cells(front: Frontier, trials: pd.DataFrame, overlap: float) -> set[C
     the answer, so seeds there are wasted.
 
     Saturation is confirmed when D_sat is decided and a larger D is already zoned
-    saturated. Only cells zoned saturated or undecided are pruned, never a slower or an
-    unreliable one: those are the answers being measured.
+    saturated. Only reliable cells zoned saturated or undecided (a finish-time comparison
+    still open) are pruned, never a slower one or one whose reliability is not decided:
+    those are the answers being measured.
     """
     out: set[CellId] = set()
     mean_overlap = trials.groupby(["group_key", "n_shepherds"])["mean_dog_overlap"].mean()
@@ -66,13 +76,15 @@ def pruned_cells(front: Frontier, trials: pd.DataFrame, overlap: float) -> set[C
             continue
         key, d_sat = str(g["group_key"]), int(g["d_sat"])
         cells = front.cells.loc[front.cells["group_key"] == key]
-        zones = dict(zip(cells["n_shepherds"].astype(int), cells["zone"]))
-        confirm = next((d for d in sorted(zones) if d > d_sat and zones[d] == SATURATED), None)
+        ds = cells["n_shepherds"].astype(int)
+        zones = dict(zip(ds, cells["zone"]))
+        reliable = dict(zip(ds, cells["reliability"] == RELIABLE))
+        confirm = confirming_team(zones, d_sat)
         if confirm is None:
             continue
         for d in (d for d in sorted(zones) if d > confirm):  # only above the confirming D
             copies = float(mean_overlap.get((key, d), 0.0)) >= overlap
-            if copies and zones[d] in (SATURATED, UNDECIDED):
+            if copies and reliable[d] and zones[d] in (SATURATED, UNDECIDED):
                 out.add((key, d))
     return out
 

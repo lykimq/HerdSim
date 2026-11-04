@@ -45,6 +45,18 @@ Before a long run, run `make test` and `plan` (the folder should be new or say `
 
 Calibration measures $R_f$, which sizes the field, the goal and the drive; the procedure and its limits are in [task design](../experiments/task_design.md#sizing-by-the-calibrated-flock-radius). `run` stops with a `CalibrationError` naming $N$ when the radius is not settled. The folder is then cleared for a corrected protocol.
 
+## `cli/paper_check.py`: check against the paper
+
+Runs results of [Strombom et al. (2014)](https://doi.org/10.1098/rsif.2014.0719) through HerdSim's engine and stores every trial. It is not run through `campaign.py`: there is no protocol, round or decision. What it checks and how to read it is in [checking HerdSim against Strombom et al. (2014)](../methods/strombom_check.md).
+
+```text
+uv run cli/paper_check.py <experiment> [--workers <n>]
+```
+
+- `<experiment>`: `fig3`, the paper's Figure 3 (80 grid points of 50 trials: 4000 trials), or `distance`, the paper's distance study (1100 trials). A grid point is one pair of flock size $N$ and neighbour count $n$ ([terms](../methods/strombom_check.md#terms)); every trial applies the paper's repulsion between grazing sheep.
+- `--workers`: the number of processes (default 1).
+- Output: one CSV per experiment under `results/paper_check/`, one row per trial with its seed, rewritten after each point, so a rerun continues from the trials already stored.
+
 ## `docs/generate_docs/page.py`: tables from finished runs
 
 Prints Markdown tables from stored files, one question per verb. It never runs the model.
@@ -88,6 +100,22 @@ For two runs that differ only in deadline, prints whether the shorter is the lon
 ### `curve --layout <name> --n <N>`
 
 Both flags are required. Prints one curve across folders, a row per folder and team size with successes, rate, reliability and median finish time.
+
+### `pair <a> <b>`
+
+For two folders run with the same seeds, prints per layout and $N$ the trials that succeed in only one of them, with a sign test of the two counts, and a table of shared cells by their decision (reliable, unreliable, undecided) in each.
+
+### `monotone`
+
+Prints the curves on which a team larger than $D_{\min}$, or than the lower end of a bracket or a lower bound, is unreliable, with $D_{\min,\mathrm{stable}}$ ([definition](../report/d_min_report.md#23-when-a-team-is-reliable)).
+
+### `sequential <protocol>`
+
+Takes a protocol, not a folder. For true success rates from 0.80 to 0.97, prints the chance that a cell ends reliable, unreliable or open (undecided at the seed limit) under its seed rule, computed exactly over every look.
+
+### `paper`
+
+Takes no folder: `uv run python -m docs.generate_docs.page paper`. Prints the tables of the [Strombom check](../methods/strombom_check.md) from `results/paper_check/`: trials finished per grid point of the paper's Figure 3, and the distance study with its least-squares line.
 
 ## Generated doc pages and figures
 

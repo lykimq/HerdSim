@@ -23,7 +23,7 @@ from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation, PillowWriter
 from matplotlib.axes import Axes
 from matplotlib.collections import LineCollection
-from matplotlib.patches import Circle
+from matplotlib.patches import Circle, Rectangle
 from scipy.spatial.distance import cdist
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -37,6 +37,8 @@ from docs.generate_docs.figstyle import (  # noqa: E402
     ORANGE,
     SURFACE,
 )
+from paper_check.settings import DONE_DISTANCE, FIELD_SIDE  # noqa: E402
+from paper_check.trials import paper_config, run_fig3_trial, seed_of  # noqa: E402
 from services.replay import StoredRun, open_run, replay_trial  # noqa: E402
 from sim.state import SimulationState  # noqa: E402
 from sim.strombom.shepherd import COLLECT, collect_threshold, decide  # noqa: E402
@@ -84,9 +86,12 @@ class Replayed:
     success: bool
     config: dict[str, Any]
     cut: bool  # True when shown only up to Shot.until
+    paper: bool = False  # the paper's task: time steps, and the flock centre ends the trial
 
     @property
     def ending(self) -> str:
+        if self.paper:
+            return "finished" if self.success else "not finished, time is up"
         return "succeeded" if self.success else "failed, time is up"
 
     def at(self, tick: int) -> int:
@@ -198,14 +203,20 @@ def update_panel(panel: Panel, tick: int) -> None:
     i = trial.at(tick)
     panel.herd.set_offsets(trial.herd[i])
     panel.herders.set_offsets(trial.herders[i])
-    seconds = trial.ticks[i] * trial.dt
-    outside = trial.outside(i)
-    if i == len(trial.ticks) - 1 and not trial.cut:
-        panel.status.set_text(f"t = {seconds:.0f} s, {outside} outside: {trial.ending}")
-        panel.status.set_color(INK if trial.success else ORANGE)
+    last = i == len(trial.ticks) - 1 and not trial.cut
+    if trial.paper:
+        gcm = float(np.linalg.norm(trial.herd[i].mean(axis=0) - trial.goal))
+        text = f"step {trial.ticks[i]}, flock centre {gcm:.0f} m from the goal"
+        text += f": {trial.ending}" if last else ""
     else:
-        panel.status.set_text(f"t = {seconds:.0f} s, {outside} sheep outside the goal")
-        panel.status.set_color(INK)
+        seconds = trial.ticks[i] * trial.dt
+        outside = trial.outside(i)
+        if last:
+            text = f"t = {seconds:.0f} s, {outside} outside: {trial.ending}"
+        else:
+            text = f"t = {seconds:.0f} s, {outside} sheep outside the goal"
+    panel.status.set_text(text)
+    panel.status.set_color(ORANGE if last and not trial.success else INK)
 
 
 Overlay = Callable[[Any, Panel], Callable[[int], None]]
@@ -226,15 +237,30 @@ def animate(
     longest = max(shown_ticks(s) for s in shots)
     every = max(1, math.ceil(longest / frames))
     trials = [replay(s, every) for s in shots]
+    render(trials, [s.title for s in shots], (longest, every), file, note, dot, overlay)
+
+
+def render(
+    trials: list[Replayed],
+    titles: list[str],
+    clock: tuple[int, int],
+    file: str,
+    note: str,
+    dot: float,
+    overlay: Overlay | None,
+) -> None:
+    """Draw ``trials`` side by side on one clock, ``clock`` = (last tick, ticks per frame), and
+    save a GIF."""
+    longest, every = clock
     view = window(trials)
     aspect = (view[1][1] - view[1][0]) / (view[0][1] - view[0][0])
-    lines = textwrap.wrap(note, NOTE_CHARS * len(shots), break_on_hyphens=False)
+    lines = textwrap.wrap(note, NOTE_CHARS * len(trials), break_on_hyphens=False)
     extra_height = NOTE_LINE * (len(lines) - 1)
-    size = (PANEL_WIDTH * len(shots), PANEL_WIDTH * aspect + 0.9 + extra_height)
-    fig, axes = plt.subplots(1, len(shots), figsize=size)
+    size = (PANEL_WIDTH * len(trials), PANEL_WIDTH * aspect + 0.9 + extra_height)
+    fig, axes = plt.subplots(1, len(trials), figsize=size)
     panels = [
-        draw_panel(ax, t, s.title, view, dot)
-        for ax, t, s in zip(np.atleast_1d(axes), trials, shots)
+        draw_panel(ax, t, title, view, dot)
+        for ax, t, title in zip(np.atleast_1d(axes), trials, titles)
     ]
     extras = [overlay(ax, p) for ax, p in zip(np.atleast_1d(axes), panels)] if overlay else []
     fig.text(0.5, 0.02, "\n".join(lines), ha="center", fontsize=8.5, color=MUTED)
@@ -307,6 +333,41 @@ def team_rule(ax: Axes, panel: Panel) -> Callable[[int], None]:
     return update
 
 
+def paper_field(ax: Axes, _: Panel) -> Callable[[int], None]:
+    """The paper's field and its two start quarters, behind the agents."""
+    half = FIELD_SIDE / 2
+    ax.add_patch(Rectangle((0, 0), FIELD_SIDE, FIELD_SIDE, fc="none", ec=MUTED, lw=0.8))
+    ax.add_patch(Rectangle((half, half), half, half, fc=BLUE, ec="none", alpha=0.08, zorder=0))
+    ax.add_patch(Rectangle((0, 0), half, half, fc=ORANGE, ec="none", alpha=0.08, zorder=0))
+    return lambda i: None
+
+
+def paper_replay(n_sheep: int, n_neighbors: int, seed: int) -> Replayed:
+    """Run one trial of the paper's task and keep every tick for the animation."""
+    ticks: list[int] = []
+    herd: list[np.ndarray] = []
+    herders: list[np.ndarray] = []
+
+    def keep(state: SimulationState) -> None:
+        ticks.append(state.tick)
+        herd.append(state.sheep_positions.copy())
+        herders.append(state.shepherd_positions.copy())
+
+    trial = run_fig3_trial(n_sheep, n_neighbors, seed, on_step=keep)
+    return Replayed(
+        np.array(ticks),
+        np.array(herd),
+        np.array(herders),
+        np.zeros(2),
+        DONE_DISTANCE,
+        1.0,
+        trial.success,
+        paper_config(n_sheep, n_neighbors),
+        cut=False,
+        paper=True,
+    )
+
+
 # ----- GIFs -----
 def one_trial() -> None:
     """One wide trial: collect outliers, then drive to the goal."""
@@ -357,9 +418,41 @@ def start_layouts() -> None:
     animate(shots, "layouts.gif", f"N = 200, D = 4, seed 0, 99 percent rule, 6 drive times ({RUN})")
 
 
+def paper_task() -> None:
+    """One trial of the paper's task: N = 100, the global case."""
+    n_sheep = 100
+    trial = paper_replay(n_sheep, n_sheep - 1, seed_of(n_sheep, 0))
+    every = max(1, math.ceil(int(trial.ticks[-1]) / FRAMES))
+    keep = np.flatnonzero((trial.ticks % every == 0) | (trial.ticks == trial.ticks[-1]))
+    trial.ticks, trial.herd, trial.herders = (
+        trial.ticks[keep],
+        trial.herd[keep],
+        trial.herders[keep],
+    )
+    render(
+        [trial],
+        ["HerdSim on the paper's task"],
+        (int(trial.ticks[-1]), every),
+        "paper_task.gif",
+        (
+            f"N = {n_sheep}, n = {n_sheep - 1}, seed {seed_of(n_sheep, 0)}; "
+            "blue: sheep, orange: the dog, green: the 10 m goal circle at the origin"
+        ),
+        dot=9,
+        overlay=paper_field,
+    )
+
+
 GIFS = {
     g.__name__: g
-    for g in (one_trial, sheep_reaction, push_blending, team_rule_at_work, start_layouts)
+    for g in (
+        one_trial,
+        sheep_reaction,
+        push_blending,
+        team_rule_at_work,
+        start_layouts,
+        paper_task,
+    )
 }
 
 

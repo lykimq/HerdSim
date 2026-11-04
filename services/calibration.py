@@ -1,17 +1,12 @@
 """Flock radius R_f(N) per method: the size of a flock while one dog drives it.
 
-The goal radius, the compact spread and the lost-sheep radius are multiples of R_f, so they
-follow the real flock instead of an assumed packing. One dog drives a compact flock toward
-a goal it cannot reach, for ``calibration_seconds``; R_f = sqrt(2) x RMS radius (the radius
-of a uniform disc with that RMS), averaged over the last window, median over seeds and
-start sizes.
+The goal radius, compact spread and lost-sheep radius are multiples of R_f. One dog drives
+a compact flock toward a goal it cannot reach for ``calibration_seconds``; R_f = sqrt(2) x
+RMS radius over the last window, median over seeds and start sizes. One dog is used for
+every team size, so all are compared on a task sized to the same reference flock.
 
-Calibration always uses a single dog, so every team size of a method is compared on a task
-sized to that one reference flock.
-
-R_f is only a property of the model where the flock settles to one size whatever size it
-starts from. ``calibrate`` checks both and raises where they fail; for Strombom sheep they
-hold up to N = 600.
+``calibrate`` raises where the radius is not settled or depends on the start size; for
+Strombom sheep it holds up to N = 600.
 """
 
 from __future__ import annotations
@@ -110,21 +105,27 @@ def measure(job: tuple[dict[str, Any], int, int]) -> tuple[float, float]:
     return float(late), float(early)
 
 
-def summarise(
-    label: str, runs: list[tuple[float, tuple[float, float]]], settings: dict[str, Any]
-) -> tuple[float, list[str]]:
-    """(R_f, problems) from the runs of one flock size: (start spacing, (late, early)) each.
+def settle(runs: list[tuple[float, tuple[float, float]]]) -> tuple[float, float, float]:
+    """(R_f, drift, spread) from the runs of one flock size: (start spacing, (late, early)).
 
-    R_f is the median of the late windows. A problem is a drift between the two windows
-    above ``settled_tolerance``, or a spread between the start sizes above
-    ``start_agreement``.
+    R_f is the median of the late windows; drift the change between the two windows' medians;
+    spread the range of the per-start medians, both relative.
     """
     starts = sorted({spacing for spacing, _ in runs})
     late = float(np.median([v[0] for _, v in runs]))
     early = float(np.median([v[1] for _, v in runs]))
     by_start = [float(np.median([v[0] for sp, v in runs if sp == x])) for x in starts]
-    drift = abs(late - early) / early
-    spread = (max(by_start) - min(by_start)) / late
+    return late, abs(late - early) / early, (max(by_start) - min(by_start)) / late
+
+
+def summarise(
+    label: str, runs: list[tuple[float, tuple[float, float]]], settings: dict[str, Any]
+) -> tuple[float, list[str]]:
+    """(R_f, problems) from the runs of one flock size: (start spacing, (late, early)) each.
+
+    A problem is a drift above ``settled_tolerance`` or a spread above ``start_agreement``.
+    """
+    late, drift, spread = settle(runs)
     problems = []
     if drift > settings["settled_tolerance"]:
         problems.append(f"{label}: radius still changing ({drift:.0%} between windows)")

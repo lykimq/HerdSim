@@ -208,6 +208,7 @@ def test_calibration_refuses_a_flock_that_has_no_settled_size(tmp_path: Path) ->
         (ok(200.0), 0.20, False),  # as fast, but the dogs did different work: keep
         (ok(260.0), 0.95, False),  # slower: a measured harm is never pruned
         (FAIL, 0.95, False),  # unreliable: harm, never pruned
+        (Cell(0.9, 200.0), 0.95, False),  # reliability open: may be harm, never pruned
     ],
 )
 def test_pruning_spares_only_copies_above_a_confirmed_saturation(

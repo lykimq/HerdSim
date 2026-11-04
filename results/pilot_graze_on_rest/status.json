@@ -1,0 +1,24 @@
+{
+  "_auto_generated_notice": "AUTO-GENERATED: do not modify. Re-run the producing command to refresh this file.",
+  "protocol_id": "pilot_graze_on_rest",
+  "physics_hash": "e2e7d2e306043abf",
+  "running": false,
+  "stop_reason": "every cell decided, at max_seeds or errored",
+  "rounds": 76,
+  "trials_done": 23370,
+  "trials_ignored": 0,
+  "trials_this_run": 15046,
+  "round_trials": 0,
+  "trial_errors": 0,
+  "cells_with_errors": {
+    "count": 0,
+    "keys": []
+  },
+  "hours_this_run": 1.883,
+  "trials_per_hour": 7990.3,
+  "cells": 242,
+  "cells_pruned": 5,
+  "cells_needing_seeds": 48,
+  "cells_at_max_seeds_undecided": 48,
+  "updated_at": "2026-11-03T20:01:04.971175+00:00"
+}

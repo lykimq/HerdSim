@@ -1,7 +1,8 @@
 """Drive task: herd the flock into a circular goal.
 
-Success: all sheep in the goal (or share ``success_fraction``). Strombom's GCM rule
-is available afterwards as ``gcm_in_goal``.
+Success in the study: all sheep in the goal (or share ``success_fraction``); Strombom's GCM
+rule is recorded every tick as ``gcm_in_goal``. The check against Strombom et al. (2014) starts
+from two square boxes (layout ``boxes``) and ends on that GCM rule (``success_rule``).
 """
 
 from __future__ import annotations
@@ -15,12 +16,23 @@ import pandas as pd
 
 from sim.state import SimulationState
 
-from .goal import arrival_columns, dogs_goal_side, gcm_goal, gcm_in_goal, sheep_in_goal
+from .goal import (
+    CENTROID,
+    SHEEP_SHARE,
+    SUCCESS_RULES,
+    arrival_columns,
+    dogs_goal_side,
+    gcm_goal,
+    gcm_in_goal,
+    sheep_in_goal,
+)
 from .layouts import (
+    BOX_LAYOUT,
     DOG_STARTS,
     LAYOUTS,
     field_size,
     layout_extent,
+    place_boxes,
     place_dogs,
     place_flock,
 )
@@ -36,14 +48,18 @@ METRICS = {
 }
 
 # Setup keys this task reads from the run config (agent counts and the layout name are set
-# by build_config itself).
-REQUIRED_KEYS = (
+# by build_config itself): the world and goal for every start, then the keys of the study
+# layouts, which are sized from R_f, or of the box start.
+WORLD_KEYS = (
     "world_width",
     "world_height",
-    "flock_center",
     "goal_center",
     "goal_radius",
     "success_fraction",
+    "success_rule",
+)
+STUDY_KEYS = (
+    "flock_center",
     "flock_radius",
     "compact_spread",
     "wide_sigma",
@@ -58,14 +74,24 @@ REQUIRED_KEYS = (
     # Read only at setup time (field_size), but part of the setup record.
     "field_clearance",
 )
+BOX_KEYS = ("sheep_box", "dog_box")
+
+
+def required_keys(layout: str) -> tuple[str, ...]:
+    """The setup keys a run config with start ``layout`` needs."""
+    if layout == BOX_LAYOUT:
+        return WORLD_KEYS + BOX_KEYS
+    if layout in LAYOUTS:
+        return WORLD_KEYS + STUDY_KEYS
+    raise ValueError(f"initial_layout {layout!r} not in {LAYOUTS + (BOX_LAYOUT,)}")
 
 
 def check(config: dict[str, Any]) -> None:
     """Task settings of a built run config."""
-    if config["dog_start"] not in DOG_STARTS:
+    if config["success_rule"] not in SUCCESS_RULES:
+        raise ValueError(f"success_rule {config['success_rule']!r} not in {SUCCESS_RULES}")
+    if config["initial_layout"] != BOX_LAYOUT and config["dog_start"] not in DOG_STARTS:
         raise ValueError(f"dog_start {config['dog_start']!r} not in {DOG_STARTS}")
-    if config["initial_layout"] not in LAYOUTS:
-        raise ValueError(f"initial_layout {config['initial_layout']!r} not in {LAYOUTS}")
 
 
 def _check_settings(s: Mapping[str, Any]) -> None:
@@ -82,6 +108,7 @@ def _typed_setup(s: Mapping[str, Any], flock_radius: float, n_sheep: int) -> dic
     return {
         "goal_radius": float(s["goal_radius_multiple"]) * flock_radius,
         "success_fraction": float(s["success_fraction"]),
+        "success_rule": SHEEP_SHARE,
         "flock_radius": flock_radius,
         "compact_spread": float(s["compact_spread"]),
         "wide_sigma": float(s["wide_sigma"]),
@@ -129,6 +156,25 @@ def build_setup(
     }
 
 
+def box_setup(
+    sheep_box: tuple[float, float], dog_box: tuple[float, float], goal_radius: float
+) -> dict[str, Any]:
+    """Setup of a box start: sheep and dogs start in their square boxes ((low, high) on both
+    axes) of an open field, the goal is at the origin, and the trial is over when the flock
+    centre is within ``goal_radius`` of it."""
+    side = max(float(sheep_box[1]), float(dog_box[1]))  # the field only records the extent
+    return {
+        "world_width": side,
+        "world_height": side,
+        "goal_center": [0.0, 0.0],
+        "goal_radius": goal_radius,
+        "success_fraction": 1.0,  # unused: the centroid rule counts no sheep
+        "success_rule": CENTROID,
+        "sheep_box": list(sheep_box),
+        "dog_box": list(dog_box),
+    }
+
+
 def drive_length(setup: Mapping[str, Any]) -> float:
     """The drive: the distance from the flock's start centre to the goal centre."""
     return abs(float(setup["goal_center"][0]) - float(setup["flock_center"][0]))
@@ -137,12 +183,15 @@ def drive_length(setup: Mapping[str, Any]) -> float:
 def initial_positions(
     config: dict[str, Any], rng: np.random.Generator
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Flock at its start centre and outside the goal; dogs behind it, away from the goal."""
+    """Flock at its start centre and outside the goal; dogs behind it, away from the goal.
+    The box start draws the sheep and then the dogs from ``rng``."""
+    if config["initial_layout"] == BOX_LAYOUT:
+        return place_boxes(config, rng)
     return place_flock(config, rng), place_dogs(config)
 
 
 def is_success(state: SimulationState) -> bool:
-    """The share ``success_fraction`` is inside the goal this tick."""
+    """The goal's success rule holds this tick (share of sheep, or the flock centre)."""
     return state.world.goal.reached(state.sheep_positions)
 
 

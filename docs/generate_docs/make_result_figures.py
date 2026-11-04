@@ -11,13 +11,21 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from docs.generate_docs.paper_check import FIGURES as PAPER_FIGURES  # noqa: E402
 from docs.generate_docs.result_figures import (  # noqa: E402
     fig_deadline,
     fig_dmin_vs_n,
     fig_growth_fits,
+    fig_pruning,
 )
 
-FIGURES = (fig_dmin_vs_n, fig_deadline, fig_growth_fits)
+FIGURES = (
+    fig_dmin_vs_n,
+    fig_deadline,
+    fig_growth_fits,
+    fig_pruning,
+    *PAPER_FIGURES,
+)
 
 
 def main() -> None:

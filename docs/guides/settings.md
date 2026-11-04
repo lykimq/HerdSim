@@ -51,7 +51,7 @@ Settings that share a note are one row, with their defaults in the same order, s
 | Setting | Default | Kind | Note |
 | :--- | :--- | :--- | :--- |
 | `calibration_seeds`, `calibration_seconds`, `calibration_window_seconds`, `calibration_starts` | 3; 300; 90; 1, 3 | whole protocol | One dog drives a compact flock toward a goal it cannot reach for calibration_seconds. R_f is sqrt(2) x the RMS radius over the last calibration_window_seconds, median over seeds and over the start sizes in calibration_starts (a start of s has radius s x sqrt(N / pi) m). |
-| `settled_tolerance`, `start_agreement` | 0.15; 0.25 | whole protocol | Calibration raises when R_f changed by more than settled_tolerance between the last two windows, or differs by more than start_agreement between the start sizes. Strombom sheep settle up to N = 600. |
+| `settled_tolerance`, `start_agreement` | 0.15; 0.25 | whole protocol | Calibration raises when R_f changed by more than settled_tolerance between the last two windows, or differs by more than start_agreement between the start sizes. Strombom sheep settle up to N = 600. Measured with cli/calibration_check.py (3 seeds, results/diagnostics/, with and without graze_repulsion): N = 25 to 566 change by at most 1.9 % and differ by at most 2.3 %, so 0.05 for both would pass every flock size studied and stop at N = 630. A new protocol may set 0.05; the six study protocols keep these values, which are part of their physics hash. |
 
 ## Seeds and decisions
 
@@ -63,6 +63,6 @@ Settings that share a note are one row, with their defaults in the same order, s
 | `time_margin`, `min_pairs`, `bootstrap_resamples` | 0.05; 5; 4000 | sampling | Two finish times are the same when their paired median difference is within time_margin of the slower median (paired bootstrap, bootstrap_resamples draws). min_pairs is the fewest shared finished seeds a comparison accepts. |
 | `refine_min_gap` | 1 | sampling | A dog count is added halfway between two neighbours more than refine_min_gap apart whose zones differ (whose reliability differs, when decide_finish_times is false). |
 | `decide_finish_times` | false | sampling | Off: seeds only decide reliability (D_min). On: seeds also decide the finish-time values D_best, D_sat and D_crowd, which costs more trials. |
-| `prune_overlap` | 0.9 | sampling | Above a confirmed saturation, a cell whose dogs were copies (mean dog_overlap at least this) and that is neither slower nor unreliable gets no more seeds. Above 1 turns it off. |
+| `prune_overlap` | 0.9 | sampling | Above the team that confirms saturation, a reliable, not slower cell whose dogs were copies (mean dog_overlap at least this) gets no more seeds. Above 1 turns it off. |
 | `timeseries_seeds` | 3 | sampling | The first timeseries_seeds seeds of every cell keep their per-tick history as Parquet. |
 | `budget_hours` | 72 | sampling | A run starts no new batch after this many hours (calibration not counted). Trials are saved as they finish and a rerun continues where it stopped. |

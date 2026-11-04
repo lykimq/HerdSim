@@ -1,0 +1,17 @@
+# dmin_f99_m3 with grazing repulsion on, on all its flock sizes: the pilot of grazing repulsion
+# at the tightest deadline. Seed i draws the same flock as in dmin_f99_m3, scaled by
+# this run's own R_f, and the layouts and the
+# dog grid are kept because they size the field and the drive, so each cell compares with the
+# stored cell of dmin_f99_m3.
+
+protocol_id: pilot_graze_on_m3
+description: "Pilot: dmin_f99_m3 with grazing repulsion on, N 25 to 400."
+output: results/pilot_graze_on_m3
+extends: dmin_f99_m3.yaml
+
+# Strombom et al. (2014) repel sheep from each other at any distance from the dog (section 2).
+methods:
+  strombom_multi:
+    time_limit_drive_multiple: 3.0
+    params:
+      graze_repulsion: true

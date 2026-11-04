@@ -55,7 +55,7 @@ def build_config(
     initial_layout: str,
 ) -> dict[str, Any]:
     """Flat run config from the method defaults, ``params``, task ``setup``, and counts."""
-    missing = sorted(set(task.REQUIRED_KEYS + ENGINE_KEYS) - set(setup))
+    missing = sorted(set(task.required_keys(initial_layout) + ENGINE_KEYS) - set(setup))
     if missing:
         raise KeyError(f"Task {task.TASK!r} needs setup keys {missing}")
     config: dict[str, Any] = {
@@ -86,11 +86,14 @@ def _check(config: dict[str, Any]) -> None:
             raise ValueError(f"{key} must not be negative")
 
 
+def seed_streams(seed: int) -> list[np.random.Generator]:
+    """The layout, sheep and dog random streams of one seed, kept apart so D can be paired."""
+    return [np.random.default_rng(child) for child in np.random.SeedSequence(seed).spawn(3)]
+
+
 def initial_state(config: dict[str, Any], seed: int) -> SimulationState:
-    """Tick 0: place agents; seed splits into layout, sheep, and dog RNGs (paired D)."""
-    layout_rng, sheep_rng, dog_rng = (
-        np.random.default_rng(child) for child in np.random.SeedSequence(seed).spawn(3)
-    )
+    """Tick 0: place agents with the seed's layout stream."""
+    layout_rng, sheep_rng, dog_rng = seed_streams(seed)
     sheep_positions, dogs = task.initial_positions(config, layout_rng)
     return SimulationState(
         tick=0,

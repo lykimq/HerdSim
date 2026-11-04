@@ -1,9 +1,11 @@
 """Strombom et al. 2014 sheep heading (vectorised).
 
 Beyond r_s: graze (stay or one random step of length delta). Inside r_s: eq. 4.2
-heading, then move at sheep_speed. Multi-dog R_s is ``dog_push``. Readings where the
-paper is silent: no neighbour repulsion while grazing; H is the last velocity (zero
-after a still tick).
+heading, then move at sheep_speed. Multi-dog R_s is ``dog_push``. Where the paper is
+silent: H is the last velocity (zero after a still tick). The paper repels sheep from each
+other at any distance from the dog (section 2); with ``graze_repulsion`` a grazing sheep
+closer than r_a to another takes a step along the inertia, repulsion and noise terms of
+eq. 4.2. Off by default, which is how every study protocol ran.
 """
 
 from __future__ import annotations
@@ -95,11 +97,22 @@ def velocities(
     out[grazing_step] = angle_vectors(draws.graze_angle[grazing_step]) * speed
 
     idx = np.flatnonzero(active)
+    if idx.size == 0 and not config["graze_repulsion"]:
+        return out  # no sheep reacts or steps apart: skip the neighbour search
+    push_apart = sheep_repulsion(positions, np.arange(n), r_a)
+    if config["graze_repulsion"]:
+        crowded = np.flatnonzero(~active & (np.linalg.norm(push_apart, axis=1) > 0.0))
+        heading = (
+            float(config["inertia"]) * unit_rows(prev_velocities[crowded])
+            + float(config["rho_a"]) * unit_rows(push_apart[crowded])
+            + float(config["noise_strength"]) * angle_vectors(draws.noise_angle[crowded])
+        )
+        out[crowded] = unit_rows(heading) * speed
     if idx.size == 0:
         return out
     pos = positions[idx]
     attraction = unit_rows(neighbour_centres(positions, idx, k_neighbors) - pos)
-    repulsion = unit_rows(sheep_repulsion(positions, idx, r_a))
+    repulsion = unit_rows(push_apart[idx])
     push = dog_push(to_dogs[idx], dist[idx], r_s)
     heading = (
         float(config["inertia"]) * unit_rows(prev_velocities[idx])

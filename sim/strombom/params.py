@@ -29,9 +29,18 @@ PAPER: dict[str, Any] = {
 # One tick is one time step of the paper.
 SHEPHERD_EXTENSIONS: dict[str, Any] = {"dt": 1.0}
 
+# Whether sheep out of the dogs' reach also push apart when closer than r_a, as the paper
+# states (section 2). Off in every study protocol, which ran before the option existed.
+SHEEP_OPTIONS: dict[str, Any] = {"graze_repulsion": False}
+
+# A parameter at its neutral value changes no trial, so it stays out of the physics hash and
+# a folder written before the parameter existed keeps its hash. Each sheep option defaults to
+# the behaviour the study ran with, so its default is its neutral value.
+NEUTRAL_PARAMS: dict[str, Any] = dict(SHEEP_OPTIONS)
+
 # The one method: Strombom sheep driven by a team of collect/drive dogs.
 METHOD = "strombom_multi"
-DEFAULTS: dict[str, Any] = {**PAPER, **SHEPHERD_EXTENSIONS}
+DEFAULTS: dict[str, Any] = {**PAPER, **SHEPHERD_EXTENSIONS, **SHEEP_OPTIONS}
 
 
 def resolve_n_neighbors(value: int | str, n_sheep: int) -> int:

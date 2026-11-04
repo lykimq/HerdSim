@@ -329,6 +329,12 @@ class Frontier:
     groups: pd.DataFrame  # one GroupFrontier per row
 
 
+def confirming_team(zones: dict[int, str], d_sat: int) -> int | None:
+    """The smallest D above ``d_sat`` zoned saturated: it confirms saturation, and only
+    cells above it may be pruned."""
+    return next((d for d in sorted(zones) if d > d_sat and zones[d] == SATURATED), None)
+
+
 def cell_ids(cells: pd.DataFrame) -> list[tuple[str, int]]:
     """(group key, D) of every row of a cells table."""
     return list(zip(cells["group_key"].astype(str), cells["n_shepherds"].astype(int)))

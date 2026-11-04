@@ -19,18 +19,28 @@ from typing import NamedTuple
 
 import pandas as pd
 
+from analysis.compare_runs import nonmonotone_curves, paired_decisions, paired_outcomes
 from analysis.curves import groups_table, layout_against_n, shape_table
-from analysis.results import read_cells, read_trials, resumed_protocols, run_record
+from analysis.results import read_cells, read_groups, read_trials, resumed_protocols, run_record
+from analysis.sequential import decision_rates
 from analysis.trial_measures import curve_across, nested_deadlines, reach_by_n
-from docs.generate_docs.format import DMIN_KEY, markdown
+from docs.generate_docs import paper_check
+from docs.generate_docs.format import DMIN_KEY, dmin_text, markdown
 from docs.generate_docs.tables import F99_MAIN as F99_MAIN_FOLDERS
-from docs.generate_docs.tables import ORIGINAL_NS, growth_table, layout_by_n, reach_table
+from docs.generate_docs.tables import (
+    ORIGINAL_NS,
+    growth_table,
+    layout_by_n,
+    reach_table,
+)
 from docs.generate_docs.tables import STRICT_MAIN as STRICT_MAIN_FOLDERS
-from services.protocol import RESULTS_ROOT, results_folder
+from services.protocol import RESULTS_ROOT, load_protocol, results_folder
 from sim.drive_task.layouts import LAYOUTS
 
 QUEUE_LOG = RESULTS_ROOT / "queue_log.jsonl"
 SIZES_HELP = "only these flock sizes (a folder resumed with more sizes, shown at its first ones)"
+# True success rates at which the sequential verb gives the rule's decision rates.
+SEQUENTIAL_RATES = (0.80, 0.84, 0.85, 0.88, 0.90, 0.92, 0.95, 0.955, 0.97)
 # Shown above a table when show_command is set.
 DMIN_TABLES = "uv run python -m docs.generate_docs.page"
 
@@ -111,6 +121,38 @@ def fits(folders: Sequence[str]) -> list[Part]:
     ]
 
 
+def paper() -> list[Part]:
+    """Results of the Strombom (2014) check in results/paper_check."""
+    return [
+        _part(title, body) if isinstance(body, pd.DataFrame) else Part(title, body)
+        for title, body in paper_check.tables()
+    ]
+
+
+def pair(folder_a: str, folder_b: str) -> list[Part]:
+    """Trials of two folders run with the same seeds, compared seed by seed."""
+    a, b = (results_folder(name) for name in (folder_a, folder_b))
+    title = f"a = {folder_a}, b = {folder_b}"
+    return [
+        _part(f"{title}: same seeds", paired_outcomes(read_trials(a), read_trials(b))),
+        _part(f"{title}: cell decisions", paired_decisions(read_cells(a), read_cells(b))),
+    ]
+
+
+def monotone(folders: Sequence[str]) -> list[Part]:
+    """Curves with an unreliable D above D_min, with D_min in the notation of the D_min tables."""
+    parts = []
+    for name in folders:
+        folder = results_folder(name)
+        groups = read_groups(folder)
+        table = nonmonotone_curves(read_cells(folder), groups)
+        if not table.empty:
+            bracket = {row["group_key"]: dmin_text(row) for _, row in groups.iterrows()}
+            table.insert(2, "D_min", table.pop("group_key").map(bracket))
+        parts.append(_part(name, table))
+    return parts
+
+
 def nested(longer: str, shorter: str) -> list[Part]:
     long_trials, short_trials = (read_trials(results_folder(name)) for name in (longer, shorter))
     return [
@@ -119,6 +161,18 @@ def nested(longer: str, shorter: str) -> list[Part]:
             pd.DataFrame([nested_deadlines(long_trials, short_trials)]),
         )
     ]
+
+
+def sequential(protocol: str) -> list[Part]:
+    """Chance, in percent, that a cell ends reliable, unreliable or open under the protocol's
+    rule, for true success rates around its threshold."""
+    s = load_protocol(protocol).settings
+    rule = (s["reliability_theta"], s["confidence"], s["batch_seeds"], s["max_seeds"])
+    rows = [
+        {"p": p, **{k: f"{100 * v:.2f}" for k, v in decision_rates(p, *rule).items()}}
+        for p in SEQUENTIAL_RATES
+    ]
+    return [_part(f"{protocol}: decision per true success rate p (percent)", pd.DataFrame(rows))]
 
 
 def curve(folders: Sequence[str], layout: str, n: int) -> list[Part]:
@@ -148,11 +202,20 @@ def build_parser(description: str | None = None) -> argparse.ArgumentParser:
         return p
 
     sub.add_parser("record").set_defaults(run=lambda _: record())
+    sub.add_parser("paper").set_defaults(run=lambda _: paper())
     on_folders("fits", lambda args: fits(args.folders))
     for verb, run in (("dmin", dmin), ("growth", growth), ("reach", reach)):
         on_folders(verb, lambda args, run=run: run(args.folders, args.sizes)).add_argument(
             "--sizes", nargs="+", type=int, default=None, help=SIZES_HELP
         )
+    on_folders("monotone", lambda args: monotone(args.folders))
+    p = sub.add_parser("sequential")
+    p.add_argument("protocol")
+    p.set_defaults(run=lambda args: sequential(args.protocol))
+    p = sub.add_parser("pair")
+    p.add_argument("folder_a")
+    p.add_argument("folder_b")
+    p.set_defaults(run=lambda args: pair(args.folder_a, args.folder_b))
     p = sub.add_parser("nested")
     p.add_argument("longer")
     p.add_argument("shorter")
@@ -237,6 +300,33 @@ REACH_INTRO = (
     "Each entry is the median of that average over the trials of one dog, 99 percent rule, for "
     "a layout and a flock size, rounded to two decimals (so 1.00 can be slightly below 1). A "
     "failed trial runs to the deadline, so its average covers the whole run."
+)
+
+MONOTONE_INTRO = (
+    "Curves on which a team larger than the smallest team not ruled out is unreliable: larger "
+    "than $D_{\\min}$, than the lower end of a bracket (`3-8`), or than a lower bound (`[5]`; see "
+    "How to read the tables). `unreliable above` lists those teams. $D_{\\min,\\mathrm{stable}}$ "
+    "(column D_min_stable) is the smallest reliable team above the last of them; `-` means "
+    "there is none. A run with no such curve shows None."
+)
+
+SEQUENTIAL_INTRO = (
+    "The six runs share one per-cell rule, so one table covers them: a cell is reliable when the "
+    "99 percent Clopper-Pearson interval of its success rate lies at or above 0.90 and "
+    "unreliable when it lies below; otherwise it gets 10 more seeds, up to 200, and a cell "
+    "still in between stays open. Each check after a batch is a look. For a cell whose true "
+    "success rate is p, the table gives the chance in percent that it ends reliable, unreliable "
+    "or open, computed exactly over every look (no simulation)."
+)
+
+GRAZE_INTRO = (
+    "dmin_f99_m6 and dmin_f99_m3 run again with repulsion between grazing sheep "
+    "(graze_repulsion: true), on the same seeds but each run with its own calibrated R_f: "
+    "pilot_graze_on (N = 50, 100, 200) and "
+    "pilot_graze_on_rest (the other six sizes) against dmin_f99_m6, pilot_graze_on_m3 against "
+    "dmin_f99_m3. For each pair: per layout and N, the paired trials (same cell and seed) that "
+    "succeed in only one run, with an exact two-sided sign test; then the shared cells counted by "
+    "their decision in each run; then the D_min of the runs with repulsion on."
 )
 
 CURVE_INTRO = (
@@ -347,6 +437,18 @@ SECTIONS: tuple[Block, ...] = (
     "## The shorter deadline as a cut",
     NESTED_INTRO,
     *(_single(f"nested {longer} {shorter}") for longer, shorter in NESTED_PAIRS),
+    "## Decision rates of the per-cell rule",
+    SEQUENTIAL_INTRO,
+    _single("sequential dmin_f99_m6"),
+    "## Grazing repulsion on, same seeds",
+    GRAZE_INTRO,
+    _single("pair pilot_graze_on dmin_f99_m6"),
+    _single("pair pilot_graze_on_rest dmin_f99_m6"),
+    _single("pair pilot_graze_on_m3 dmin_f99_m3"),
+    _single("dmin pilot_graze_on pilot_graze_on_rest pilot_graze_on_m3"),
+    "## Teams that fail above D_min",
+    MONOTONE_INTRO,
+    Query(f"monotone {STRICT_MAIN_ARGS} {F99_MAIN_ARGS}"),
     "## N = 400 at three deadlines, 99 percent",
     CURVE_INTRO,
     _single(f"curve {F99_MAIN_ARGS} --layout wide --n 400"),
