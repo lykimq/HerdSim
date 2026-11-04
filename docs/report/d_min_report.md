@@ -174,7 +174,7 @@ Because the deadline only changes `max_ticks` and seed $i$ initializes the same 
 
 ### 2.4 RQ4: Do uncoordinated FAT dogs reach a finite D_min?
 
-[`fat`](../methods/fat.md) (farthest-agent targeting) dogs do not coordinate: every dog goes behind the sheep farthest from the goal, without Strömbom's collect/drive switch and without `strombom_multi`'s outlier assignment or driving arc. In [`dmin_fat`](../guides/protocols.md#dmin_fat) (strict) and [`dmin_f99_fat`](../guides/protocols.md#dmin_f99_fat) (99% rule) at 6 drive times, `fat` is calibrated with `strombom_multi` so both controllers share the same $R_f(N)$, start flocks, goal radius, drive distance and deadline. From $N = 200$ on, `fat` has no reliable team up to 24 dogs on any scattered layout under either rule (Table 7, Figure 5).
+[`fat`](../methods/fat.md) (farthest-agent targeting) dogs do not coordinate: every dog goes behind the sheep farthest from the goal, without Strömbom's collect/drive switch and without `strombom_multi`'s outlier assignment or driving arc. In [`dmin_fat`](../guides/protocols.md#dmin_fat) (strict) and [`dmin_f99_fat`](../guides/protocols.md#dmin_f99_fat) (99% rule) at 6 drive times (the study's intermediate reference deadline that balances sufficient time against tight speed constraints), `fat` is calibrated with `strombom_multi` so both controllers share the same $R_f(N)$, start flocks, goal radius, drive distance and deadline. From $N = 200$ on, `fat` has no reliable team up to 24 dogs on any scattered layout under either rule (Table 7, Figure 5).
 
 **Table 7: $D_{\min}$ at 6 drive times for `fat` (`dmin_fat` / `dmin_f99_fat`) and `strombom_multi` (`dmin_m6` / `dmin_f99_m6`), strict rule / 99% rule.**
 
@@ -204,7 +204,7 @@ Up to $N = 100$, one dog (or 2 dogs on `outlier_rich` at $N = 100$, where `fat` 
 
 ### 2.5 RQ5: What does the team layer add over independent shepherds?
 
-The run [`dmin_f99_indep`](../guides/protocols.md#dmin_f99_indep) (99% rule, 6 drive times) runs [independent paper shepherds](../methods/independent.md): each dog runs Strömbom's single-dog rule on the whole flock, so it keeps the collect/drive mode switch but lacks multi-dog outlier assignment and the driving arc. Table 8 compares $D_{\min}$ across all three controllers at 6 drive times.
+The run [`dmin_f99_indep`](../guides/protocols.md#dmin_f99_indep) evaluates [independent paper shepherds](../methods/independent.md) under the same 6-drive-time reference deadline (99% rule): each dog runs Strömbom's single-dog rule on the whole flock, so it keeps the collect/drive mode switch but lacks multi-dog outlier assignment and the driving arc. Table 8 compares $D_{\min}$ across all three controllers at 6 drive times.
 
 **Table 8: $D_{\min}$ of `fat`, `independent` and `strombom_multi` at 6 drive times (99% rule).**
 
