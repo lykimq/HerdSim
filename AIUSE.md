@@ -7,7 +7,7 @@ Last updated: 2026-11-11
 | Tool | Model | Used for |
 | :--- | :--- | :--- |
 | Claude Code (Anthropic) | Claude Opus, Claude Sonnet | code, tests, docs, review |
-| Cursor | model chosen per session | code, docs |
+| Cursor | mostly Auto mode (Cursor picks the model) | code, docs |
 
 ## What AI was used for
 
