@@ -1,16 +1,7 @@
 # Contributing
 
-Use this page when changing HerdSim. Setup is in
-[Setup and tests](README.md#setup-and-tests) of the README. For a large
-change, open an [issue](https://github.com/lykimq/HerdSim/issues) first.
-
-## Checks
-
-Run this before opening a PR; CI runs the same checks.
-
-```bash
-make check   # ruff (lint and format), basedpyright and pytest
-```
+Setup and tests are in the [README](README.md#setup-and-tests). This page sets
+the rules for using AI tools in a contribution.
 
 ## Using AI tools
 
@@ -20,8 +11,9 @@ responsible for every line of it.
 - Read, run and test everything the tool wrote before you ask for a review.
   You must be able to explain the change and why it is correct in your own
   words.
-- Keep each PR small and on one topic, with no unrelated reformatting. A PR
-  should be worth more to the project than the time it takes to review.
+- Keep each PR small and on one topic, with no unrelated reformatting; for a
+  large change, open an issue first. A PR should be worth more to the project
+  than the time it takes to review.
 - Do not change, skip or delete tests to make them pass.
 - Every number in the docs comes from running the code; never type or edit a
   result by hand.
@@ -41,9 +33,3 @@ are adapted from the AI policies of
 [SciPy](https://docs.scipy.org/doc/scipy/dev/conduct/ai_policy.html) and
 [CPython](https://devguide.python.org/getting-started/ai-tools/index.html).
 How the maintainer uses AI is in [AIUSE.md](AIUSE.md).
-
-## PR checklist
-
-- [ ] Tests cover the changed behavior, and `make check` passes.
-- [ ] Docs are updated when behavior, settings or results changed.
-- [ ] AI use, if any, is stated in the PR description.

@@ -161,7 +161,7 @@ HerdSim/
 - Results: [Report](docs/report/d_min_report.md), [Result tables](docs/report/results_tables.md), [Glossary](docs/glossary.md).
 - Methods: [Strombom sheep](docs/methods/strombom_sheep.md), [Team rule (`strombom_multi`)](docs/methods/strombom_multi.md), [Independent baseline (`independent`)](docs/methods/independent.md), [FAT baseline (`fat`)](docs/methods/fat.md), [Task design](docs/experiments/task_design.md), [Paper check](docs/methods/strombom_check.md).
 - Guides and code: [CLI reference](docs/guides/cli_reference.md), [Configuration](docs/guides/configuration.md), [Architecture](docs/codes/architecture.md).
-- Contributing: [CONTRIBUTING.md](CONTRIBUTING.md) covers checks, PRs and the rules for using AI tools; [AIUSE.md](AIUSE.md) lists the AI tools the maintainer used and who reviewed the work.
+- Contributing: [CONTRIBUTING.md](CONTRIBUTING.md) sets the rules for using AI tools in a contribution; [AIUSE.md](AIUSE.md) lists the AI tools the maintainer used and who reviewed the work.
 
 ## References
 
