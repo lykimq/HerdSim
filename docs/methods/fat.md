@@ -1,6 +1,6 @@
 # Uncoordinated greedy baseline: `fat`
 
-Farthest-agent targeting, or FAT, tests whether coordination is needed at all ([report, section 2.4](../report/d_min_report.md#24-rq4-do-uncoordinated-fat-dogs-reach-a-finite-d_min)). Every dog aims at the point $r_a = 2$ m behind the sheep farthest from the goal, on its far side from the goal (`sim/strombom/team.py`: `fat_target`, `step`), and moves with [Strömbom's step, noise and stop rule](strombom_multi.md#dog-speed-step-and-stop-rule). Strömbom's rule takes the sheep farthest from the flock centre instead. FAT has no assignment, no drive arc, no communication and no collect/drive switch. Its dogs bunch on one sheep because nothing keeps them apart (Figure 1, Animation 1).
+Farthest-agent targeting, or FAT, tests whether coordination is needed at all ([report, section 2.4](../report/d_min_report.md#24-rq4-do-uncoordinated-fat-dogs-reach-a-finite-d_min)). Every dog aims at the point $r_a = 2$ m behind the sheep farthest from the goal, on its far side from the goal (`sim/strombom/team.py`: `fat_target`, `step`), and moves with [Strömbom's step, noise and stop rule](strombom_multi.md#dog-speed-step-and-stop-rule). Strömbom's rule takes the sheep farthest from the flock centre instead. FAT has no assignment, no drive arc, no communication and no collect/drive switch. Its dogs bunch on one sheep because nothing keeps them apart (Figure 1).
 
 ![Strömbom and FAT targets, and four FAT dogs bunching](../figures/fig4_fat.png)
 
