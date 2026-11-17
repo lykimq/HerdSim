@@ -18,6 +18,8 @@ $$
 \mathbf{H}_i' = h\,\mathbf{H}_i + c\,\mathbf{C}_i + \rho_a\,\mathbf{R}_{a,i} + \rho_s\,\mathbf{R}_{s,i} + e\,\boldsymbol{\epsilon}_i, \qquad \mathbf{x}_i^{t+1} = \mathbf{x}_i^t + \delta\,\frac{\mathbf{H}_i'}{\lVert \mathbf{H}_i' \rVert}
 $$
 
+*Intuition:* The heading balances five competing drives: forward momentum ($h$), flock cohesion ($c$), personal space ($\rho_a$, highest priority to prevent overlap), dog evasion ($\rho_s$), and random wander ($e$). Normalizing $\mathbf{H}_i'$ ensures reacting sheep always advance at exactly $\delta = 1$ m/s; dogs steer the sheep's direction rather than accelerating its speed.
+
 Besides flock attraction $\mathbf{C}_i$ (below), the four other unit vectors are:
 
 - Previous heading $\mathbf{H}_i$ (inertia weight $h = 0.5$): unit direction of the sheep's previous step $(\mathbf{x}_i^t - \mathbf{x}_i^{t-1}) / \lVert \mathbf{x}_i^t - \mathbf{x}_i^{t-1} \rVert$, or $\mathbf{0}$ if the sheep stood still on the previous tick.
@@ -67,7 +69,9 @@ $$
 \mathbf{R}_{s,i} = \frac{\sum_{j \in \mathrm{threat}_i} \widehat{\mathbf{x}_i - \mathbf{y}_j}}{\left\lVert \sum_{j \in \mathrm{threat}_i} \widehat{\mathbf{x}_i - \mathbf{y}_j} \right\rVert}
 $$
 
-Without normalization, two dogs separated by an angle $\phi < 116.7$ deg would exert a combined push of $2\cos(\phi/2) > c = 1.05$, overpowering flock cohesion and splitting the flock. Normalizing keeps the dog repulsion weight at $\rho_s = 1.0$ for any $D$ while blending the push directions, and because every reacting step has length $\delta = 1$ m, adding dogs changes the sheep's heading and the share of the flock inside $r_s$, never a reacting sheep's walking speed.
+Without normalization, two dogs separated by an angle $\phi < 116.7^\circ$[^1] would exert a combined push of $2\cos(\phi/2) > c = 1.05$, overpowering flock cohesion and splitting the flock. Normalizing keeps the dog repulsion weight at $\rho_s = 1.0$ for any $D$ while blending the push directions, and because every reacting step has length $\delta = 1$ m, adding dogs changes the sheep's heading and the share of the flock inside $r_s$, never a reacting sheep's walking speed.
+
+[^1]: The resultant length of two unit vectors separated by angle $\phi$ is $\lVert \mathbf{u}_1 + \mathbf{u}_2 \rVert = \sqrt{2(1+\cos\phi)} = 2\cos(\phi/2)$. The combined push exceeds flock cohesion $c = 1.05$ when $2\cos(\phi/2) > 1.05 \iff \phi < 2\arccos(1.05/2) \approx 116.7^\circ$.
 
 ![Animation of one dog and eight dogs driving the same flock](../gifs/push_blending.gif)
 

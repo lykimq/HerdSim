@@ -28,6 +28,8 @@ $$
 P_c = \mathbf{x}_o + r_a \frac{\mathbf{x}_o - \mathrm{GCM}}{\lVert \mathbf{x}_o - \mathrm{GCM} \rVert}
 $$
 
+*Intuition:* $P_c$ sits directly behind outlier $o$ relative to the flock center $\mathrm{GCM}$. When a dog occupies $P_c$, its repulsive force steers the outlier straight back toward the flock.
+
 Dogs are paired with collect points at every tick by the Hungarian algorithm (`scipy.optimize.linear_sum_assignment` on the Euclidean distance matrix), which minimizes total travel distance and guarantees non-crossing paths in the plane. When $D > n_{\mathrm{outliers}}$, the unassigned dogs drive the core flock (the sheep currently inside $f(N)$) along its driving arc.
 
 ![Outliers, the collect point and the dog-to-collect-point assignment](../figures/fig_hungarian_matching.png)
@@ -46,11 +48,15 @@ Dogs are paired with collect points at every tick by the Hungarian algorithm (`s
 
 ## Driving and its limit for large flocks
 
-When all sheep lie within $f(N)$, the team drives the flock toward $\mathbf{x}_{\mathrm{goal}}$ around Strombom's drive point $P_d$, located $R_{\mathrm{arc}} = r_a\sqrt{N}$ behind $\mathrm{GCM}$ (Figure 3):
+When all sheep lie within $f(N)$, the team drives the flock toward $\mathbf{x}_{\mathrm{goal}}$ around Strombom's drive point $P_d$, located $R_{\mathrm{arc}} = r_a\sqrt{N}$ behind $\mathrm{GCM}$[^1] (Figure 3):
 
 $$
 P_d = \mathrm{GCM} + r_a \sqrt{N} \frac{\mathrm{GCM} - \mathbf{x}_{\mathrm{goal}}}{\lVert \mathrm{GCM} - \mathbf{x}_{\mathrm{goal}} \rVert}
 $$
+
+*Intuition:* $P_d$ sits behind the flock opposing the goal. Spreading multiple dogs across the driving arc provides flank containment, pushing the flock forward while preventing sheep from spilling out laterally.
+
+[^1]: Because a compact flock of $N$ sheep packed at distance $r_a$ has a geometric radius scaling as $r_a\sqrt{N}$, placing $P_d$ at this distance positions the dogs immediately behind the flock's rear edge.
 
 For $D > 1$, $D$ evenly spaced slots are placed on a circular arc of radius $R_{\mathrm{arc}} = r_a\sqrt{N}$ centred at $\mathrm{GCM}$ with $P_d$ at its midpoint. The arc spans $\pm \arcsin(\min(1,\, R_{\mathrm{flock}} / R_{\mathrm{arc}}))$ around $P_d$, where $R_{\mathrm{flock}} = \sqrt{2}\,\mathrm{RMS}(\mathbf{x}_k - \mathrm{GCM})$ is the flock's instantaneous radius at that tick, so the outer slots cover the left and right flanks of the flock. Dogs and arc slots are sorted by signed angle around $\mathrm{GCM}$ and paired in order, preventing paths from crossing.
 

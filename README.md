@@ -8,6 +8,7 @@
 
 HerdSim is a Python simulator and experimental framework for multi-dog sheepherding. When a flock starts compact, one sheepdog can gather and drive it into a goal, but when sheep start scattered and the task has a deadline, a single dog cannot collect every stray in time. HerdSim investigates how team size $D_{\min}$, the smallest reliable number of dogs, scales with flock size $N$ (from 25 to 566 sheep), initial layout, and deadline across 145,790 deterministic simulation trials.
 
+
 Full findings are in the [report](docs/report/d_min_report.md), detailed tables in [result tables](docs/report/results_tables.md), and project terms in the [glossary](docs/glossary.md).
 
 ## Three levels of shepherd coordination
@@ -29,6 +30,14 @@ To evaluate what coordination mechanisms allow multi-dog herding to scale, HerdS
 ## Task and physical scaling
 
 HerdSim steps $N$ sheep and $D$ dogs on an open 2D field one tick (1 s) at a time. The field, goal and drive distance (flock start centre to goal centre) are sized by the calibrated flock radius $R_f(N)$, the radius a driven flock of $N$ sheep settles to. Deadlines are expressed in drive times: one drive time is the duration a sheep walking straight at 1 m/s needs to cover the drive distance. The study tests deadlines of 12, 6 and 3 drive times.
+
+### Flock calibration and why flock size stops at $N = 566$
+
+Before running trials, HerdSim **calibrates** the resting radius $R_f(N)$ (the natural equilibrium radius a flock of $N$ sheep settles into under mutual attraction and personal repulsion). This radius sets the scale for the arena, the goal circle ($1.9\,R_f$), and the drive distance ($13\,R_f$).
+
+- **Flock size scaling:** Flock sizes scale by factors of $\sqrt{2} \approx 1.414$ ($25, 50, 71, 100, 141, 200, 283, 400, 566 \approx 400\sqrt{2}$) to ensure evenly spaced steps on log-log axes.
+- **Window drift:** To verify that a flock has truly reached a stable shape, HerdSim measures its median radius across two consecutive observation windows ($R_{\text{early}}$ and $R_{\text{late}}$). The relative change, $\text{drift} = |R_{\text{late}} - R_{\text{early}}| / R_{\text{early}}$, must stay within the 5% tolerance (`settled_tolerance = 0.05`).
+- **Why $N = 566$ is the upper limit:** Up to $N = 566$, window drift remains low ($0.5\% - 1.9\%$). Above $N = 600$ (specifically at $N = 630$), the flock is too massive to equilibrate within the calibration window, and drift jumps to $5.7\% - 5.9\%$ (exceeding 5%). Therefore, $N = 566$ is the largest scientifically valid $\sqrt{2}$ step where flocks settle stably.
 
 A trial succeeds when the goal condition holds at a single tick before the deadline under one of two rules:
 
