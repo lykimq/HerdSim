@@ -22,7 +22,7 @@ $$
 and puts the shared target point $`r_a`$ behind $`\mathbf{x}_{i^*}`$ on the ray from $`\mathbf{g}`$ through $`\mathbf{x}_{i^*}`$:
 
 $$
-P_{\mathrm{FAT}} = \mathbf{x}_{i^*} + r_a \frac{\mathbf{x}_{i^*} - \mathbf{g}}{\lVert \mathbf{x}_{i^*} - \mathbf{g} \rVert}.
+P_{\mathrm{FAT}} = \mathbf{x}_{i^\ast} + r_a \frac{\mathbf{x}_{i^\ast} - \mathbf{g}}{\lVert \mathbf{x}_{i^\ast} - \mathbf{g} \rVert}.
 $$
 
 Every dog $d \in \{1, \dots, D\}$ receives $\mathbf{T}_d = P_{\mathrm{FAT}}$ at that tick. All sheep equations, force weights and dog kinematic parameters ($\Delta t, v_{\mathrm{dog}}, r_s, r_a, \rho_a, c, h, e, p$ and the stop distance $3r_a = 6$ m) are identical to [`strombom_sheep.md`](strombom_sheep.md) and [`strombom_multi.md`](strombom_multi.md) (Table 1).
