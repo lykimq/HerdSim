@@ -19,7 +19,7 @@ $$
 i^* = \arg\max_{i \in \{1, \dots, N\}} \lVert \mathbf{x}_i - \mathbf{g} \rVert,
 $$
 
-and puts the shared target point $r_a$ behind $\mathbf{x}_{i^*}$ on the ray from $\mathbf{g}$ through $\mathbf{x}_{i^*}$:
+and puts the shared target point $r_a$ behind $\mathbf{x}_{i^{\ast}}$ on the ray from $\mathbf{g}$ through $\mathbf{x}_{i^{\ast}}$:
 
 $$
 P_{\mathrm{FAT}} = \mathbf{x}_{i^*} + r_a \frac{\mathbf{x}_{i^*} - \mathbf{g}}{\lVert \mathbf{x}_{i^*} - \mathbf{g} \rVert}.
