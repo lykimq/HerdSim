@@ -21,8 +21,7 @@ by the maintainer. Every number in the results comes from running the code.
 
 ## Responsibility
 
-Kim Quyen LY reviewed every AI-assisted change, made every commit, and is
-fully responsible for the code, tests, docs and results produced with AI help.
+Kim Quyen LY reviewed every AI-assisted change, and is fully responsible for the code, tests, docs and results produced with AI help.
 
 ## Updating this file
 
