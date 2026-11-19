@@ -139,9 +139,9 @@ $$P(r \le k\sigma) = \int_0^{k\sigma} \frac{r}{\sigma^2} e^{-\frac{r^2}{2\sigma^
 
 ### Dog starts
 
-Dogs start behind the flock so they never spawn inside the sheep (Figure 3). The inner arc sits a safety buffer `dog_start_gap = 30` m behind the farthest point any sheep of that layout can start:
-$$R_{\mathrm{arc}} = l_{\mathrm{reach}} + \text{dog\_start\_gap}$$
-*(For example, at $N = 200$ on the widest layout `outlier_rich`, the inner arc has radius $R_{\mathrm{arc}} = 109.4 + 30.0 = 139.4$ m from the flock centre).*
+Dogs start behind the flock so they never spawn inside the sheep (Figure 3). The inner arc sits a safety buffer $d_{\mathrm{gap}} = 30\text{ m}$ (`dog_start_gap = 30`) behind the farthest point any sheep of that layout can start:
+$$R_{\mathrm{arc}} = l_{\mathrm{reach}} + d_{\mathrm{gap}}$$
+*(For example, at $N = 200$ on the widest layout `outlier_rich`, the inner arc has radius $R_{\mathrm{arc}} = 109.4 + 30.0 = 139.4\text{ m}$ from the flock centre).*
 
 Dogs are spaced at least `dog_start_spacing = 5` m apart along the semicircle arc ($\pi \approx 180^\circ$ span, facing away from the goal). The capacity of the first arc is $\lfloor \pi R_{\mathrm{arc}} / 5 \rfloor$ (up to 87 dogs at $N = 200$); any overflow is placed on a concentric arc 5 m farther out. 
 
