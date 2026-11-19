@@ -1,6 +1,6 @@
 # HerdSim architecture
 
-How HerdSim is put together: the design rules, the code layers, how a campaign runs and resumes, and where to find each part in the codebase.
+How HerdSim is put together: the design rules, the code layers, how a campaign runs and resumes, and where to find each part in the codebase. The commands are in the [CLI reference](../guides/cli_reference.md) and the settings in the [configuration guide](../guides/configuration.md).
 
 ## Design rules
 
@@ -36,21 +36,27 @@ flowchart TB
 
     cli --> campaign
     cli --> paper
+    cli --> analysis
+    cli --> records
+    docs --> records
     docs --> analysis
     docs --> campaign
     docs --> paper
+    docs --> engine
     campaign --> analysis
     campaign --> records
     campaign --> engine
+    paper --> campaign
+    paper --> analysis
     paper --> records
     paper --> engine
     records --> engine
 ```
 
 - Command-line tools: start campaigns, calibration checks and paper checks, and print progress.
-- Doc and figure generators: read stored runs through analysis to write Markdown tables, figures and animations.
+- Doc and figure generators: read stored runs through analysis to write Markdown tables, figures and animations; many figures and all animations also call the engine to rebuild trial states.
 - Campaign services: load protocols, calibrate the flock radius $R_f(N)$ ([the drive task](../glossary.md#the-drive-task)), lock the results folder, send batches to workers and run the adaptive loop.
-- Paper check: runs the one-dog experiments of Strombom et al. (2014) directly on the engine over fixed grids ([paper check](../methods/strombom_check.md)).
+- Paper check: runs the one-dog experiments of Strombom et al. (2014) over fixed grids, reusing the worker pool and replay jobs of the campaign services and the canonical settings file ([paper check](../methods/strombom_check.md)).
 - Analysis: reads stored files to compute confidence intervals, cell decisions, $D_{\min}$ (the smallest reliable team size) and curve fits.
 - Records: builds the trial row, hashes the physics settings, logs code identity and stamps generated files.
 - Simulation engine: a sandbox that steps sheep and dogs through one trial and checks when it ends. It knows nothing about campaigns or storage.
@@ -70,11 +76,17 @@ flowchart TB
     check -->|no| done["Pack logs and<br/>write tables"]
 ```
 
-Each round decides which cells are reliable, adds midpoint team sizes where reliability changes across a gap, and gives every remaining [open cell](../glossary.md#success-and-reliability) below 200 seeds its next batch of 10 seeds.
+Each round decides which cells are reliable, adds midpoint team sizes where neighbouring teams differ across a gap, in zone or, when finish times are not compared, in reliability ([midpoint densification](../experiments/task_design.md#midpoint-densification)), and gives every remaining [open cell](../glossary.md#success-and-reliability) below 200 seeds its next batch of 10 seeds.
 
 ### Stopping, resuming and replaying
 
-Only the parent campaign process appends rows to the trial log, one line per finished trial. Stopping the process with an interrupt or a kill leaves at worst a cut last line; on restart, that line is dropped, finished seeds are skipped, and cut cells are topped back up to a full batch of 10 seeds. If a worker process is killed by the OS, the batch stops without logging a trial error and a restart reruns the trials that were in flight. If a trial raises a Python exception, the error is logged and that cell gets no more seeds, because an exception in a deterministic model is a bug. Replaying a trial rebuilds its settings from the protocol and checks its physics hash; if the replay does not match the stored success and tick count, it raises an error so figures and animations never show a drifted run.
+Only the parent campaign process appends rows to the trial log, one line per finished trial. What happens when something stops a run:
+
+- Interrupt or kill of the campaign: at worst the last line is cut. On restart that line is dropped, finished seeds are skipped, and cut cells are topped back up to a full batch of 10 seeds.
+- A worker process killed by the OS: the batch stops without logging a trial error, and a restart reruns the trials that were in flight.
+- A Python exception in a trial: the error is logged and that cell gets no more seeds, because an exception in a deterministic model is a bug.
+
+Replaying a trial rebuilds its settings from the protocol and checks its physics hash. If the replay does not match the stored success and tick count, it raises an error, so figures and animations never show a drifted run.
 
 ## Where to look in the code
 

@@ -125,8 +125,8 @@ def runs_head() -> str:
 RUNS_GREW = (
     "{count} folders hold more trials than their log line records, because trials were added "
     "when they were resumed later: {names}. For these, `finished` and `hours` belong to the "
-    "first pass only. The [run record](d_min_report.md#4-run-record) gives the trials each "
-    "resume added."
+    "first pass only. The [run record](d_min_report.md#31-study-runs) gives the trials added "
+    "by resumes."
 )
 
 NINE_SIZES_INTRO = (

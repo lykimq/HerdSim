@@ -46,7 +46,7 @@ Each row is the line of `results/queue_log.jsonl` for a protocol. `finished`, `h
 | dmin_f99_fat | 2026-10-22 13:50:43 | 8670 | 184 | 1 | 1 | 1 | 0 | 0.232 | 20 | ran |
 | dmin_f99_indep | 2026-10-23 14:28:19 | 12990 | 181 | 18 | 18 | 3 | 0 | 0.298 | 20 | ran |
 
-7 folders hold more trials than their log line records, because trials were added when they were resumed later: `dmin_m6`, `dmin_m3`, `dmin_f99_m6`, `dmin_f99_m3`, `dmin_f99_m12`, `dmin_fat`, `dmin_f99_fat`. For these, `finished` and `hours` belong to the first pass only. The [run record](d_min_report.md#4-run-record) gives the trials each resume added.
+7 folders hold more trials than their log line records, because trials were added when they were resumed later: `dmin_m6`, `dmin_m3`, `dmin_f99_m6`, `dmin_f99_m3`, `dmin_f99_m12`, `dmin_fat`, `dmin_f99_fat`. For these, `finished` and `hours` belong to the first pass only. The [run record](d_min_report.md#31-study-runs) gives the trials added by resumes.
 
 ## D_min by layout and N, strict success
 

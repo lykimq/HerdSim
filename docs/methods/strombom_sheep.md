@@ -66,7 +66,7 @@ $$
 \end{cases}
 $$
 
-By default (`graze_repulsion: false`, used in all nine study protocols), a grazing sheep ignores neighbours closer than $r_a$ and only takes this random step. Setting `graze_repulsion: true` follows Section 2 of Strombom et al. (2014), which states that sheep keep their distance from each other even with no dog nearby; the step rule below is HerdSim's reading of it. It is used in the [paper check](strombom_check.md) and in the grazing pilots of the [report](../report/d_min_report.md#3-exceptions-and-pilot-checks). With it, a grazing sheep with at least one neighbour closer than $r_a$ steps $\delta = 1$ m along the normalized sum $h\,\mathbf{H}_i + \rho_a\,\mathbf{R}_{a,i} + e\,\boldsymbol{\epsilon}_i$: the reacting heading without the flock and dog terms.
+By default (`graze_repulsion: false`, used in all nine study protocols), a grazing sheep ignores neighbours closer than $r_a$ and only takes this random step. Setting `graze_repulsion: true` follows Section 2 of Strombom et al. (2014), which states that sheep keep their distance from each other even with no dog nearby; the step rule below is HerdSim's reading of it. It is used in the [paper check](strombom_check.md) and in the grazing pilots of the [report](../report/d_min_report.md#32-grazing-repulsion-pilots). With it, a grazing sheep with at least one neighbour closer than $r_a$ steps $\delta = 1$ m along the normalized sum $h\,\mathbf{H}_i + \rho_a\,\mathbf{R}_{a,i} + e\,\boldsymbol{\epsilon}_i$: the reacting heading without the flock and dog terms.
 
 ![Animation of sheep reacting as the dogs come within r_s](../gifs/sheep_reaction.gif)
 

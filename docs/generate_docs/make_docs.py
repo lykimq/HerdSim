@@ -181,7 +181,7 @@ def protocols_page() -> str:
         "grid, and the settings it changes from `protocols/configs/canonical.yaml`. The results "
         "of protocol `<id>` are in `results/<id>`; its numbers are in the "
         "[result tables](../report/results_tables.md), its trials and hours in the "
-        "[run record](../report/d_min_report.md#4-run-record). Terms "
+        "[run record](../report/d_min_report.md#31-study-runs). Terms "
         f"are in the [glossary](../glossary.md), the methods in {METHOD_DOCS} "
         "and each setting in [settings](settings.md)."
     )

@@ -9,6 +9,13 @@ This report gives the results of 145,790 stored trials from nine study runs in H
 
 The task, start layouts (`compact`, `wide`, `split`, `outlier_rich`), success rules (strict and 99%) and deadlines in drive times are explained in the [README](../../README.md#how-a-trial-works), the [task design](../experiments/task_design.md), the [protocol catalogue](../guides/protocols.md) and the [glossary](../glossary.md). The ways $D_{\min}$ is written (`3`, `2-3`, `[9]`, `none`) are defined in [section 1](#1-the-question); in tables, `a / b` gives the strict rule, then the 99% rule.
 
+## Contents
+
+- [Summary](#summary)
+- [1. The question](#1-the-question)
+- [2. Results](#2-results)
+- [3. Run record and checks](#3-run-record-and-checks)
+
 ## Summary
 
 Under the strict rule (all sheep in the goal), at $N = 25$, 50, 100, 200 and 400:
@@ -83,7 +90,7 @@ On `compact`, $D_{\min} = 1$ at every flock size, rule and deadline. Up to $N = 
 
 ![D_min against flock size N](../figures/fig20_dmin_vs_n.png)
 
-**Figure 1: $D_{\min}$ against flock size $N$ on the three scattered layouts, both rules, at 12, 6 and 3 drive times ($N = 25$-400, and up to 566 under the 99% rule at 12 and 6 drive times; `compact` is 1 everywhere).** $D_{\min}$ stays small at 12 drive times and rises fastest at 3 drive times.
+**Figure 1: $D_{\min}$ against flock size $N$ on the three scattered layouts, both rules, at 12, 6 and 3 drive times ($N = 25$-400, and up to 566 under the 99% rule at 12 and 6 drive times; `compact` is 1 everywhere).** $D_{\min}$ stays small at 12 drive times and rises as the deadline gets shorter.
 
 - Marks: blue circles with solid lines are the strict rule and orange squares with dashed lines the 99% rule. Shaded bars are undecided brackets at 200 seeds, hollow triangles are lower bounds, and crosses are curves where every tested team up to 24 is unreliable. Axes are log-log.
 - Panels: rows are `wide`, `split` and `outlier_rich`; columns are 12, 6 and 3 drive times.
@@ -143,6 +150,16 @@ Two curve shapes were fitted by maximum likelihood to the nine sizes of `dmin_f9
 
 *Data:* [results_tables.md: fits, dmin_f99_m12](results_tables.md#fits-dmin_f99_m12-d_minn-power-law-against-saturating-curve) and [results_tables.md: fits, dmin_f99_m6](results_tables.md#fits-dmin_f99_m6-d_minn-power-law-against-saturating-curve).
 
+#### Teams that fail above D_min
+
+A team larger than $D_{\min}$ is not always reliable. On three curves, all on `split` with $D_{\min} = 1$, a larger team is unreliable; $D_{\min,\mathrm{stable}}$ is the smallest reliable team above the last unreliable one:
+
+- `dmin_m6`, $N = 100$: $D = 3$ is unreliable; $D_{\min,\mathrm{stable}} = 5$.
+- `dmin_m3`, $N = 100$: $D = 2$, 3 and 4 are unreliable; $D_{\min,\mathrm{stable}} = 5$.
+- `dmin_f99_m6`, $N = 141$: $D = 4$ is unreliable; $D_{\min,\mathrm{stable}} = 7$.
+
+One more curve shows this inside an undecided bracket: `dmin_m3`, `outlier_rich`, $N = 100$ (`3-8`) has $D = 4$ unreliable ([full list](results_tables.md#teams-that-fail-above-d_min)).
+
 ### 2.2 RQ2: Layout or flock size, which moves D_min more?
 
 In most runs flock size moves $D_{\min}$ at least as much as the start layout; the one exception is the five sizes of `dmin_f99_m6` when only curves with a decided reliable team are counted.
@@ -166,7 +183,7 @@ With lower bounds included, the spread across $N$ is at least the spread across 
 
 ### 2.3 RQ3: How does the deadline change D_min?
 
-A shorter deadline raises $D_{\min}$ on large scattered flocks, mostly between 6 and 3 drive times (Table 2, Figure 4). Under the 99% rule:
+A shorter deadline raises $D_{\min}$ on large scattered flocks (Table 2, Figure 4). Under the strict rule much of the rise is already between 12 and 6 drive times. Under the 99% rule it is mostly between 6 and 3:
 
 - `wide` at $N = 400$: up by at most 1 dog from 12x to 6x (`2` to `2-3`), and by 2 to 4 dogs from 6x to 3x (`2-3` to `5-6`). At 3x, success is 2/10 at $D = 3$, 45/60 at $D = 4$, 189/200 at $D = 5$ and 79/80 at $D = 6$.
 - `outlier_rich` at $N = 400$: up by 1 dog from 12x to 6x (`2` to `3`), and by at least 3 dogs from 6x to 3x (`3` to `[6]`). At 3x, success stays between 12/20 at $D = 12$ and 172/200 at $D = 6$ for all $D \ge 5$.
@@ -258,55 +275,13 @@ At $N = 400$, independent shepherds have `none` on all three scattered layouts, 
 
 On `split` at $N = 200$, independent shepherds have $D_{\min} = 1$-3 (every team from 3 to 24 dogs is reliable), while `strombom_multi` has only the lower bound `[1]`. This may be because the Hungarian assignment spreads the dogs over the three clusters and so delays driving; we have not tested it.
 
-## 3. Exceptions and pilot checks
+## 3. Run record and checks
 
-This section lists what limits the curves of section 2: curves that are not monotone, curves with no decided reliable team, and three checks on the method.
+### 3.1 Study runs
 
-### 3.1 Curves that dip above D_min
+Table 9 lists the stored study runs. `Undecided` counts cells undecided on reliability, at 200 seeds or pruned (two `dmin_fat` cells, at 140 and 110 seeds); `Open` counts cells flagged for more seeds on reliability or finish time, all at the 200-seed cap. The first pass is the first full run of a protocol, timed at 20 workers; trials added later come from later sittings of the same protocol.
 
-On some curves a team larger than $D_{\min}$ is unreliable, and reliability returns only at a larger team, $D_{\min,\mathrm{stable}}$. This happens on three curves, all on `split` with $D_{\min} = 1$ (Table 9):
-
-**Table 9: Curves with an unreliable team above $D_{\min}$.**
-
-| Run | Layout, $N$ | $D_{\min}$ | Unreliable above it | $D_{\min,\mathrm{stable}}$ |
-| :--- | :--- | :---: | :---: | :---: |
-| `dmin_m6` | `split`, 100 | 1 | 3 | 5 |
-| `dmin_m3` | `split`, 100 | 1 | 2, 3, 4 | 5 |
-| `dmin_f99_m6` | `split`, 141 | 1 | 4 | 7 |
-
-Inside an undecided bracket it happens once more: on `dmin_m3` `outlier_rich` $N = 100$ (`3-8`), $D = 4$ is unreliable ([full list](results_tables.md#teams-that-fail-above-d_min)).
-
-### 3.2 Curves with no decided reliable team
-
-A lower bound `[D]` or `none` in Table 2 means no team up to 24 dogs was decided reliable. The 12-drive-time runs have none. The others have:
-
-- `dmin_m6` (strict, 6x): `split` at $N = 200$ and 400 (`none`), `wide` at $N = 400$ (`[9]`), `outlier_rich` at $N = 200$ (`[12]`) and 400 (`none`).
-- `dmin_m3` (strict, 3x): `wide`, `split` and `outlier_rich` at $N = 200$ and 400 (`none`).
-- `dmin_f99_m6` (99%, 6x): `split` at $N = 200$ (`[1]`) and 400 (`[5]`).
-- `dmin_f99_m3` (99%, 3x): `split` at $N = 200$ and 400 (`none`), `outlier_rich` at $N = 400$ (`[6]`).
-
-### 3.3 Grazing-repulsion pilots
-
-The pilots `pilot_graze_on`, `pilot_graze_on_rest` and `pilot_graze_on_m3` rerun `dmin_f99_m6` (all 9 sizes) and `dmin_f99_m3` (all 5 sizes) on the same seeds with [grazing repulsion](../methods/strombom_sheep.md#grazing) on. Each pilot calibrates its own $R_f$, so its field sizes differ slightly from the run it repeats. Turning grazing repulsion on changes little:
-
-- Calibrated $R_f$ moves by $-1.1\%$ to $+0.4\%$ (9.68 m against 9.79 m at $N = 141$).
-- Of 526 shared cells, 0 flip between reliable and unreliable.
-- Of the $D_{\min}$ entries decided in both runs, 0 change. 14 of 56 entries move through a cell that is undecided at 200 seeds in one of the two runs.
-- The largest trial-level difference is `split` at $N = 566$, 6x: of 510 paired trials (same cell and seed), 88 succeed only with grazing repulsion on and 49 only without. The sign test gives $p = 0.0011$, above the Bonferroni threshold 0.0009 for 56 groups, so the difference is not significant ([pilot table](results_tables.md#grazing-repulsion-on-same-seeds)).
-
-### 3.4 Error rates of the stopping rule
-
-The 99% Clopper-Pearson interval is checked every 10 seeds up to 200, so a cell gets up to 20 looks, with no correction for repeated testing. A cell whose true success rate is exactly 0.90 ends reliable with probability 1.27%, unreliable with 1.86% and undecided with 96.86% ([decision rates](results_tables.md#decision-rates-of-the-per-cell-rule)).
-
-### 3.5 Limits of the task size
-
-From $N = 200$ the drive distance is set by the widest start layout, not by $13 R_f$ ([sizing](../experiments/task_design.md#sizing-by-the-calibrated-flock-radius)). Flock sizes stop at $N = 566$, the last $\sqrt{2}$ step below $N = 630$, where calibration with 3 seeds per start fails its 5% limits ([flock size](../experiments/task_design.md#flock-size)).
-
-## 4. Run record
-
-Table 10 lists the stored study runs, with their trial counts and first-pass compute time:
-
-**Table 10: Stored study runs (`undecided` = undecided on reliability at 200 seeds; `open` = flagged for more seeds on reliability or finish time, all at the 200-seed cap; hours are the first pass at 20 workers).**
+**Table 9: Stored study runs.**
 
 | Protocol | Trials | Cells | Undecided | Open | Errors | Hours, first pass | Trials added later |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -326,5 +301,21 @@ Table 10 lists the stored study runs, with their trial counts and first-pass com
 Notes on the record:
 
 - Replay and errors: all 145,790 study trials finished without a simulation error, and the deterministic replay checks pass on the stored rows.
-- Archived calibration tolerances: the archived `protocol.yaml` in the nine study folders and three pilot folders lists `settled_tolerance` as `0.15` and `start_agreement` as `0.25`. The stored calibrated $R_f$ values match `results/diagnostics/calibration_dmin_f99_m6.csv` and `calibration_pilot_graze_on_rest.csv`, which meet the 5% (`0.05`) limits at every stored size $N \le 566$ ([settings](../guides/settings.md#calibration-of-r_f)).
-- Resumes, pruning and finish-time seeds: `dmin_f99_m12` and `dmin_f99_m6` were resumed with the four $\sqrt{2}$ sizes in between ($N = 71$, 141, 283, 566). `dmin_f99_m12`, `dmin_f99_m6` and `dmin_f99_m3` had `decide_finish_times` off on their first pass and on during their resumes. `dmin_f99_indep` had it on from the start; it pruned 11 cells above saturation and has 18 open cells, of which 3 are undecided on reliability and 15 wait only on a finish-time comparison. In `dmin_fat`, two undecided cells on `compact` $N = 200$ ($D = 12, 24$) were pruned above the confirmed saturation at $D_{\min} = 1$ (`open = 2`, `undecided = 4`). `dmin_m12` was run with `decide_finish_times` on, although neither its protocol file nor its archived `protocol.yaml` sets that key; reproducing its exact seed counts requires turning `decide_finish_times` on.
+- Calibration limits: the archived `protocol.yaml` in the nine study folders and three pilot folders lists the calibration limits `settled_tolerance` as `0.15` and `start_agreement` as `0.25` ([calibration](../guides/cli_reference.md#calibration)). The stored $R_f$ values also meet the 5% (`0.05`) limits of the current settings at every stored size $N \le 566$: they match `results/diagnostics/calibration_dmin_f99_m6.csv` and `calibration_pilot_graze_on_rest.csv` ([settings](../guides/settings.md#calibration-of-r_f)).
+- Resumes: `dmin_f99_m12` and `dmin_f99_m6` were resumed with the four $\sqrt{2}$ sizes in between ($N = 71$, 141, 283, 566). `dmin_f99_m12`, `dmin_f99_m6` and `dmin_f99_m3` had `decide_finish_times` off on their first pass and on during their resumes.
+- `dmin_f99_indep`: `decide_finish_times` was on from the start. The run pruned 11 cells above saturation and has 18 open cells, of which 3 are undecided on reliability and 15 wait only on a finish-time comparison.
+- `dmin_fat`: two undecided cells on `compact` $N = 200$ ($D = 12, 24$) were pruned above the confirmed saturation at $D_{\min} = 1$ (`open = 2`, `undecided = 4`).
+- `dmin_m12`: reproducing its seed counts needs `decide_finish_times: true`, which its protocol file does not set.
+
+### 3.2 Grazing-repulsion pilots
+
+The pilots `pilot_graze_on`, `pilot_graze_on_rest` and `pilot_graze_on_m3` rerun `dmin_f99_m6` (all 9 sizes) and `dmin_f99_m3` (all 5 sizes) on the same seeds with [grazing repulsion](../methods/strombom_sheep.md#grazing) on. Each pilot calibrates its own $R_f$, so its field sizes differ slightly from the run it repeats. Turning grazing repulsion on changes little:
+
+- Calibrated $R_f$ moves by $-1.1\%$ to $+0.4\%$ (9.68 m against 9.79 m at $N = 141$).
+- Of 526 shared cells, 0 flip between reliable and unreliable.
+- Of the $D_{\min}$ entries decided in both runs, 0 change. 14 of the 56 entries depend on a cell that is undecided at 200 seeds in one of the two runs.
+- The largest trial-level difference is `split` at $N = 566$, 6x: of 510 paired trials (same cell and seed), 88 succeed only with grazing repulsion on and 49 only without. A sign test on these pairs gives $p = 0.0011$, above the Bonferroni threshold 0.0009 (0.05 divided by 56 groups), so the difference is not significant ([pilot table](results_tables.md#grazing-repulsion-on-same-seeds)).
+
+### 3.3 Error rates of the stopping rule
+
+The 99% Clopper-Pearson interval is checked every 10 seeds up to 200, so a cell gets up to 20 looks, with no correction for repeated testing. A cell whose true success rate is exactly 0.90 ends reliable with probability 1.27%, unreliable with 1.86% and undecided with 96.86% ([decision rates](results_tables.md#decision-rates-of-the-per-cell-rule)).
