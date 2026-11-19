@@ -62,7 +62,7 @@ On `compact`, $D_{\min} = 1$ at every flock size, rule and deadline. Up to $N = 
 | 3x | `split` | 1 / 1 | 1 / 1 | 1 / 1 | none / none | none / none |
 | 3x | `outlier_rich` | 1 / 1 | 1 / 1 | 3-8 / 2 | none / 4-10 | none / [6] |
 
-*Data:* [results_tables.md: strict success](results_tables.md#d_min-by-layout-and-n-strict-success) and [results_tables.md: success at 99 percent](results_tables.md#d_min-by-layout-and-n-success-at-99-percent).
+*Data:* Stored runs `results/dmin_m12`, `results/dmin_m6`, `results/dmin_m3`, `results/dmin_f99_m12`, `results/dmin_f99_m6`, `results/dmin_f99_m3` (`frontier_groups.csv` and `trials.csv`); see also [results_tables.md: strict success](results_tables.md#d_min-by-layout-and-n-strict-success) and [results_tables.md: success at 99 percent](results_tables.md#d_min-by-layout-and-n-success-at-99-percent).
 
 ![D_min against flock size N](../figures/fig20_dmin_vs_n.png)
 
@@ -80,7 +80,7 @@ In the stored one-dog trials (`D = 1`), reach (the share of the outer half of th
 - Marks: one line per layout; median over the stored `D = 1` trials of the per-trial mean outer-half reach.
 - Panels: 12, 6 and 3 drive times, left to right.
 
-*Data:* [reach table](results_tables.md#reach-of-one-dog-99-percent).
+*Data:* One-dog trials ($D=1$) in `results/dmin_f99_m12`, `results/dmin_f99_m6`, `results/dmin_f99_m3` (`trials.csv`, column `mean_outer_reach`); see [reach table](results_tables.md#reach-of-one-dog-99-percent).
 
 Table 3 gives the log-log slopes of $\log_2 D_{\min}$ against $\log_2 N$ across the five main sizes ($N = 25$-400), and Table 4 gives the nine-size $D_{\min}$ brackets for `dmin_f99_m12` and `dmin_f99_m6` ($N = 25$-566, stepped by $\sqrt{2}$). Across all nine sizes under the 99% rule, the allowed slopes are 0.27 to 0.38 (`wide`) and 0.28 to 0.38 (`outlier_rich`) at 12 drive times, and 0.38 to 0.61 (`wide`) and 0.40 to 0.58 (`outlier_rich`) at 6 drive times.
 
@@ -95,7 +95,7 @@ Table 3 gives the log-log slopes of $\log_2 D_{\min}$ against $\log_2 N$ across 
 | 99% | 6x | 0.30 to 0.42 | flat ($N \le 100$) | 0.42 to 0.48 |
 | 99% | 3x | 0.62 to 0.68 | flat ($N \le 100$) | 0.70 to 1.10 ($N \le 200$) |
 
-*Data:* [results_tables.md: growth with N, strict](results_tables.md#growth-with-n-strict) and [results_tables.md: growth with N, 99 percent](results_tables.md#growth-with-n-99-percent).
+*Data:* `results/dmin_m12`, `results/dmin_m6`, `results/dmin_m3`, `results/dmin_f99_m12`, `results/dmin_f99_m6`, `results/dmin_f99_m3` (`frontier_groups.csv`); see [results_tables.md: growth with N, strict](results_tables.md#growth-with-n-strict) and [results_tables.md: growth with N, 99 percent](results_tables.md#growth-with-n-99-percent).
 
 **Table 4: $D_{\min}$ on nine flock sizes, 99% rule, 12 and 6 drive times.**
 
@@ -106,7 +106,7 @@ Table 3 gives the log-log slopes of $\log_2 D_{\min}$ against $\log_2 N$ across 
 | `wide`, 6x | 1 | 1 | 1 | 1 | 2 | 2 | 2-3 | 2-3 | 3-7 |
 | `outlier_rich`, 6x | 1 | 1 | 1 | 2 | 2 | 2-3 | 2-3 | 3 | 3-6 |
 
-*Data:* [results_tables.md: nine flock sizes, 99 percent](results_tables.md#nine-flock-sizes-99-percent).
+*Data:* `results/dmin_f99_m12` and `results/dmin_f99_m6` (`frontier_groups.csv`); see [results_tables.md: nine flock sizes, 99 percent](results_tables.md#nine-flock-sizes-99-percent).
 
 Maximum-likelihood fits of a power law $D = a N^b$ against a saturating curve $D = 1 + (D_\infty - 1) N / (N + K)$ on the nine sizes of `dmin_f99_m12` and `dmin_f99_m6` give a log-likelihood difference (`log_odds`) of 0.0 on both `wide` and `outlier_rich` at both deadlines, so up to $N = 566$ the brackets fit both shapes equally well (Figure 3).
 
@@ -118,7 +118,7 @@ Maximum-likelihood fits of a power law $D = a N^b$ against a saturating curve $D
 - Left: 12 drive times (`dmin_f99_m12`).
 - Right: 6 drive times (`dmin_f99_m6`).
 
-*Data:* [results_tables.md: fits, dmin_f99_m12](results_tables.md#fits-dmin_f99_m12-d_minn-power-law-against-saturating-curve) and [results_tables.md: fits, dmin_f99_m6](results_tables.md#fits-dmin_f99_m6-d_minn-power-law-against-saturating-curve).
+*Data:* Fits on `results/dmin_f99_m12/frontier_groups.csv` and `results/dmin_f99_m6/frontier_groups.csv`; see [results_tables.md: fits, dmin_f99_m12](results_tables.md#fits-dmin_f99_m12-d_minn-power-law-against-saturating-curve) and [results_tables.md: fits, dmin_f99_m6](results_tables.md#fits-dmin_f99_m6-d_minn-power-law-against-saturating-curve).
 
 ### 2.2 RQ2: Layout or flock size, which moves D_min more?
 
@@ -135,7 +135,7 @@ Table 5 compares the mean spread of $D_{\min}$ in doublings ($\log_2(\max D_{\mi
 | 99% | 6x | 0.92 | 1.30 | 0.78 | 0.72 |
 | 99% | 3x | 1.25 | 1.28 | 1.22 | 1.28 |
 
-*Data:* [growth with N, strict](results_tables.md#growth-with-n-strict) and [growth with N, 99 percent](results_tables.md#growth-with-n-99-percent).
+*Data:* `frontier_groups.csv` across all six `strombom_multi` runs in `results/dmin_*`; see [growth with N, strict](results_tables.md#growth-with-n-strict) and [growth with N, 99 percent](results_tables.md#growth-with-n-99-percent).
 
 With lower bounds included, the spread across $N$ is at least the spread across layouts in every run (within 0.03 at strict 6x and 99% 3x). Restricting to curves with a decided reliable team only, strict 6x ties (0.79 vs 0.79) and 99% 6x reverses on the five sizes (0.78 across layouts vs 0.72 across $N$), though across all nine sizes of `dmin_f99_m6` $N$ is larger again (0.93 across layouts vs 1.07 across $N$). Under the 99% rule at 12 drive times, `wide` and `outlier_rich` differ by at most 1 dog at every size; under the strict rule at 6 drive times, they diverge at $N = 200$ (`3` vs `[12]`).
 
@@ -157,7 +157,7 @@ Shortening the deadline increases $D_{\min}$ on large scattered flocks, mainly b
 - Left and middle: success rate with 99% Clopper-Pearson intervals against $D$ for `wide` $N = 400$ and `outlier_rich` $N = 200$.
 - Right: $D_{\min}$ against deadline for `wide` and `outlier_rich` at $N = 200$ (solid, circles) and $N = 400$ (dashed, squares).
 
-*Data:* [results_tables.md: success at 99 percent](results_tables.md#d_min-by-layout-and-n-success-at-99-percent) and [results_tables.md: N = 400 at three deadlines](results_tables.md#n--400-at-three-deadlines-99-percent).
+*Data:* `results/dmin_f99_m12`, `results/dmin_f99_m6`, `results/dmin_f99_m3` (`frontier_cells.csv` and `frontier_groups.csv`); see [results_tables.md: success at 99 percent](results_tables.md#d_min-by-layout-and-n-success-at-99-percent) and [results_tables.md: N = 400 at three deadlines](results_tables.md#n--400-at-three-deadlines-99-percent).
 
 Because the deadline only changes `max_ticks` and seed $i$ initializes the same trial across deadlines, every shared trial between two deadlines under the same rule succeeds at the shorter deadline if and only if its finish time at the longer deadline was within the shorter limit, with identical finish ticks (Table 6).
 
@@ -189,7 +189,7 @@ Because the deadline only changes `max_ticks` and seed $i$ initializes the same 
 | `strombom_multi` | `split` | 1 / 1 | 1 / 1 | 1 / 1 | none / [1] | none / [5] |
 | `strombom_multi` | `outlier_rich` | 1 / 1 | 1 / 1 | 3 / 2 | [12] / 2-3 | none / 3 |
 
-*Data:* [results_tables.md: uncoordinated FAT baseline, 6 drive times](results_tables.md#uncoordinated-fat-baseline-6-drive-times).
+*Data:* `results/dmin_fat`, `results/dmin_f99_fat`, `results/dmin_m6`, `results/dmin_f99_m6`; see [results_tables.md: uncoordinated FAT baseline, 6 drive times](results_tables.md#uncoordinated-fat-baseline-6-drive-times).
 
 ![Success against team size for strombom_multi and fat at 6 drive times](../figures/fig26_fat.png)
 
@@ -223,7 +223,7 @@ The run [`dmin_f99_indep`](../guides/protocols.md#dmin_f99_indep) evaluates [ind
 | `strombom_multi` | `split` | 1 | 1 | 1 | [1] | [5] |
 | `strombom_multi` | `outlier_rich` | 1 | 1 | 2 | 2-3 | 3 |
 
-*Data:* [results_tables.md: independent paper shepherds](results_tables.md#independent-paper-shepherds-baseline-6-drive-times).
+*Data:* `results/dmin_f99_indep`, `results/dmin_f99_fat`, `results/dmin_f99_m6` (`frontier_groups.csv` and `trials.csv`); see [results_tables.md: independent paper shepherds](results_tables.md#independent-paper-shepherds-baseline-6-drive-times).
 
 Independent shepherds succeed up to $N = 200$ on every scattered layout (`wide` needs 2-3 dogs, `outlier_rich` 3, and `split` 1-3), proving that Strömbom's collect/drive switch alone prevents the immediate failure seen in `fat`. At $N = 400$, however, independent shepherds fail on all three scattered layouts: without Hungarian assignment, all dogs chase the same outlier while other stragglers drift away, so the team layer of `strombom_multi` is strictly necessary to herd large scattered flocks. On `split` at $N = 200$, independent shepherds achieve $D_{\min} = 1-3$ (every team from 3 to 24 dogs is reliable), outperforming `strombom_multi` (which has only lower bound `[1]` because its Hungarian assignment splits dogs across clusters and delays cohesive driving).
 

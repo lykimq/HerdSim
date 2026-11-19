@@ -86,6 +86,8 @@ Because larger flocks are driven farther (206.8 m at $N = 400$ versus 80.6 m at 
 | 200 | 10.47 | 139.8 | 1678 | 839 | 420 |
 | 400 | 11.40 | 206.8 | 2482 | 1241 | 621 |
 
+*Data:* `results/diagnostics/calibration_dmin_f99_m6.csv` and `results/dmin_m6/calibration.json`.
+
 ## 2. Start layouts and dog starts
 
 ### Flock start layouts
