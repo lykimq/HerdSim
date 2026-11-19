@@ -45,6 +45,7 @@ The task geometry, start layouts, success rules and models are detailed in the [
 
 ---
 
+<a id="1-the-question"></a>
 ## 1. The Question and Experimental Framework
 
 Each trial cell `(layout, N, D)` is tested in sequential batches of 10 seeds (up to 200 seeds maximum) using the exact two-sided 99% Clopper-Pearson confidence interval $[L, U]$ against threshold $\theta = 0.90$ ([stopping rule](../experiments/task_design.md#stopping-early-with-the-99-clopper-pearson-interval)):

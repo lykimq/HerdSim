@@ -49,7 +49,7 @@ flowchart TB
 
 - Command-line tools: start campaigns, calibration checks and paper checks, and print progress.
 - Doc and figure generators: read stored runs through analysis to write Markdown tables, figures and animations.
-- Campaign services: load protocols, calibrate the [flock radius $R_f(N)$](../glossary.md#the-drive-task), lock the results folder, send batches to workers and run the adaptive loop.
+- Campaign services: load protocols, calibrate the flock radius $R_f(N)$ ([the drive task](../glossary.md#the-drive-task)), lock the results folder, send batches to workers and run the adaptive loop.
 - Paper check: runs the one-dog experiments of Strombom et al. (2014) directly on the engine over fixed grids ([paper check](../methods/strombom_check.md)).
 - Analysis: reads stored files to compute confidence intervals, cell decisions, $D_{\min}$ (the smallest reliable team size) and curve fits.
 - Records: builds the trial row, hashes the physics settings, logs code identity and stamps generated files.

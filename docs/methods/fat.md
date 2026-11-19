@@ -1,59 +1,87 @@
-# Uncoordinated greedy baseline: `fat`
+# Uncoordinated Greedy Baseline: `fat`
 
-Farthest-agent targeting, or FAT, tests whether coordination is needed at all ([report, section 2.4](../report/d_min_report.md#24-rq4-do-uncoordinated-fat-dogs-reach-a-finite-d_min)). Every dog aims at the point $r_a = 2$ m behind the sheep farthest from the goal, on its far side from the goal (`sim/strombom/team.py`: `fat_target`, `step`), and moves with [Strömbom's step, noise and stop rule](strombom_multi.md#dog-speed-step-and-stop-rule). Strömbom's rule takes the sheep farthest from the flock centre instead. FAT has no assignment, no drive arc, no communication and no collect/drive switch. Its dogs bunch on one sheep because nothing keeps them apart (Figure 1).
+This document specifies the **Farthest-Agent Targeting (`fat`)** baseline controller (Level 0 in HerdSim's controller hierarchy), designed to evaluate whether multi-agent coordination is strictly required to herd a flock or if simple uncoordinated greed suffices.
+
+---
+
+### Executive Overview
+
+`fat` represents a completely uncoordinated baseline where every shepherd acts greedily and independently without communication, role assignment, or behavioral mode switching:
+
+1. **Greedy Single-Target Heuristic:** At every tick, all $D$ dogs target the exact same spatial waypoint $P_ {\mathrm{FAT}}$ stationed behind the single sheep farthest from the goal.
+2. **Identical Kinematics:** Sheep motion, force parameters, and dog kinematics ($\Delta t = 1$ s, $v_ {\mathrm{dog}} = 1.5$ m/s, stop rule within $3\,r_a = 6$ m) are identical to [`strombom_sheep.md`](strombom_sheep.md) and [`strombom_multi.md`](strombom_multi.md).
+3. **Severe Multi-Agent Bunching:** Because nothing keeps dogs apart or assigns them to separate sheep, multiple dogs collapse into an overlapping cluster, causing complete operational failure on large or scattered flocks (Figure 1).
 
 ![Strömbom and FAT targets, and four FAT dogs bunching](../figures/fig4_fat.png)
 
-**Figure 1: Bunching in FAT (`wide`, $N = 100$).** Every FAT dog picks the same sheep, so a team works like a single dog.
+**Figure 1: Geometric comparison of target selection and physical bunching in FAT (`wide`, $N = 100$).**
 
-- Marks: blue dots are sheep, orange triangles dogs; the orange circle marks the chosen sheep, the cross the dog's target, the green arrow the direction to the goal.
-- Left: Strömbom's single-dog rule, behind the sheep farthest from the GCM.
-- Middle: FAT with one dog, behind the sheep farthest from the goal.
-- Right: FAT with 4 dogs, bunched on the same sheep.
+* **Left panel (Strömbom single-dog rule):** The dog positions itself behind the sheep farthest from the flock centre ($\mathrm{GCM}$), gathering stragglers inward.
+* **Middle panel (FAT with 1 dog):** The dog targets the sheep farthest from the goal $\mathbf{g}$, driving it forward but ignoring lateral spread.
+* **Right panel (FAT with 4 dogs):** All four dogs pick the exact same trailing sheep and bunch together, behaving essentially like an oversized single dog.
+* **Visual Symbols:** Blue dots = sheep; Orange triangles = dogs; Orange circle = targeted sheep; Cross `x` = dog target waypoint; Green arrow = direction toward the goal.
 
-## Target equation
+---
 
-At each tick, with sheep positions $\{\mathbf{x}_1, \dots, \mathbf{x}_N\}$ and goal centre $\mathbf{g}$, `fat_target` picks the sheep $i^*$ farthest from $\mathbf{g}$,
+## 1. Target Formulation and Mathematical Mechanics
 
-$$
-i^* = \arg\max_{i \in \{1, \dots, N\}} \lVert \mathbf{x}_i - \mathbf{g} \rVert,
-$$
-
-and puts the shared target point $`r_a`$ behind $`\mathbf{x}_{i^*}`$ on the ray from $`\mathbf{g}`$ through $`\mathbf{x}_{i^*}`$:
+At each tick, given sheep coordinates $\{\mathbf{x}_1, \dots, \mathbf{x}_N\}$ and goal center $\mathbf{g}$, the algorithm identifies the single sheep $i^*$ that maximizes Euclidean distance to the goal:
 
 $$
-P_{\mathrm{FAT}} = \mathbf{x}_{i^\ast} + r_a \frac{\mathbf{x}_{i^\ast} - \mathbf{g}}{\lVert \mathbf{x}_{i^\ast} - \mathbf{g} \rVert}.
+i^* = \arg\max_{i \in \{1, \dots, N\}} \lVert \mathbf{x}_i - \mathbf{g} \rVert
 $$
 
-*Intuition:* Every dog targets the point behind the single sheep furthest from the goal. Without role assignment or flank containment, all dogs crowd around the same sheep (bunching), leaving stragglers on the flanks uncollected.
+The shared target waypoint $P_ {\mathrm{FAT}}$ is positioned at distance $r_a = 2.0\text{ m}$ behind sheep $i^*$ along the ray extending from $\mathbf{g}$:
 
-Every dog $d \in \{1, \dots, D\}$ receives $\mathbf{T}_d = P_{\mathrm{FAT}}$ at that tick. All sheep equations, force weights and dog kinematic parameters ($\Delta t, v_{\mathrm{dog}}, r_s, r_a, \rho_a, c, h, e, p$ and the stop distance $3r_a = 6$ m) are identical to [`strombom_sheep.md`](strombom_sheep.md) and [`strombom_multi.md`](strombom_multi.md) (Table 1).
+$$
+P_{\mathrm{FAT}} = \mathbf{x}_{i^*} + r_a \frac{\mathbf{x}_{i^*} - \mathbf{g}}{\lVert \mathbf{x}_{i^*} - \mathbf{g} \rVert}
+$$
 
-**Table 1: `strombom_multi` and `fat`.**
+Every dog $d \in \{1, \dots, D\}$ receives the identical waypoint $\mathbf{T}_ {d} = P_ {\mathrm{FAT}}$.
 
-| Part | `strombom_multi` ([strombom_multi.md](strombom_multi.md)) | `fat` (`sim/strombom/team.py`) |
-| :--- | :--- | :--- |
-| Mode switch | Collects when $\max_i \lVert \mathbf{x}_i - \mathrm{GCM} \rVert > f(N) = r_a N^{2/3}$; drives otherwise | None; always pushes the farthest sheep toward $\mathbf{g}$ |
-| Target reference | Collect: $\mathrm{GCM}$; drive: goal $\mathbf{g}$ | Always goal $\mathbf{g}$ |
-| Multi-dog collect | Hungarian assignment of the $D$ dogs to the $D$ farthest outliers from $\mathrm{GCM}$ | Every dog aims at the single sheep farthest from $\mathbf{g}$ |
-| Multi-dog drive | $D$ slots along a circular arc of radius $r_a\sqrt{N}$ behind $\mathrm{GCM}$ | Every dog aims at $P_{\mathrm{FAT}}$ |
-| Sheep and dog step | [`strombom_sheep.md`](strombom_sheep.md), `PAPER` parameters | Identical |
+> [!NOTE]
+> **Key Differences from Strömbom's Rule:**  
+> While Strömbom's heuristic targets the sheep farthest from the flock center ($\mathrm{GCM}$) to restore herd cohesion, FAT targets the sheep farthest from the **goal** ($\mathbf{g}$). FAT never checks whether the herd is cohesive and never gathers lateral stragglers.
 
-## Shared calibration (`calibrate_as: strombom_multi`)
+---
 
-In [`dmin_fat.yaml`](../../protocols/configs/protocols/dmin_fat.yaml) and [`dmin_f99_fat.yaml`](../../protocols/configs/protocols/dmin_f99_fat.yaml), the method entry sets `calibrate_as: strombom_multi` (`services/calibration.py`). Calibration therefore measures the settled flock radius $R_f(N)$ with one `strombom_multi` dog rather than one `fat` dog, so `fat` and `strombom_multi` run on the same $R_f(N)$, start flocks, goal radius, drive distance, seeds and 6-drive-time deadline (Animation 1).
+## 2. Why Uncoordinated Greed Fails at Scale
+
+In experimental trials ([report, Section 2.4](../report/d_min_report.md#24-rq4-do-uncoordinated-fat-dogs-reach-a-finite-d_min)), `fat` collapses completely for $N \ge 200$ across all scattered layouts. Three physical mechanisms explain this failure:
+
+1. **Pathological Agent Bunching:**  
+   Because all dogs chase the identical waypoint, shepherds crowd within 2 m of each other. In multi-dog trials ($D > 1$), median dog overlap (`mean_dog_overlap`, fraction of dogs within 2 m of another dog) surges to **0.73** in `dmin_f99_fat` (compared to only **0.15** in `strombom_multi`). At $N = 200$, overlap reaches $0.58$ at $D = 2$, $0.70$ at $D = 3$, and $0.80$ at $D = 4$.
+2. **Absence of Flank Containment:**  
+   When sheep are pushed toward the goal, repulsive interactions between sheep cause the flock to spread laterally. Because FAT provides no driving arc to contain the flanks, sheep escape to the sides and are permanently abandoned.
+3. **Flock Neglect and Flat Success Curves:**  
+   Adding more dogs ($D = 4, 8, 16, 24$) provides no benefit: success rates stay flat between $0.40$ and $0.55$. More dogs simply crowd onto the same rear sheep without expanding spatial coverage.
+
+---
+
+## 3. Shared Calibration Protocol (`calibrate_as: strombom_multi`)
+
+To ensure rigorous scientific comparison, all FAT campaigns ([`dmin_fat.yaml`](../../protocols/configs/protocols/dmin_fat.yaml) and [`dmin_f99_fat.yaml`](../../protocols/configs/protocols/dmin_f99_fat.yaml)) specify:
+
+```yaml
+calibrate_as: strombom_multi
+```
+
+* **Methodological Purpose:** Sizing the arena, flock radius $R_f(N)$, goal radius $R_{\mathrm{goal}}$, drive distance $l$, and deadlines based on FAT would introduce circular bias, because FAT cannot settle a natural flock.
+* **Controlled Conditions:** Calibrating under `strombom_multi` guarantees that FAT is tested on the **exact same physical task geometry**, starting layouts, paired random seeds, and 6-drive-time deadlines as the coordinated team rule (Animation 1).
 
 ![Animation of three dog rules on one start flock](../gifs/controllers.gif)
 
-**Animation 1: Three dog rules on the same start flock (`wide`, $N = 400$, $D = 4$, seed 0, 99% rule, 6 drive times).** Only the team rule brings the flock in; both baselines fail when time is up.
+**Animation 1: Three-controller ablation on the identical starting flock (`wide`, $N = 400$, $D = 4$, seed 0, 99% rule, 6 drive times).**
 
-- Marks: blue dots are sheep, orange triangles dogs, the green circle the goal; the bottom-left text gives the time and the sheep outside the goal.
-- Left: the team rule gives each dog its own outlier while collecting, then drives from an arc, and succeeds at 569 s (`dmin_f99_m6`).
-- Middle: the `independent` dogs all chase the same outlier, crowd together and fail at the 1241 s deadline with 298 sheep outside (`dmin_f99_indep`).
-- Right: every `fat` dog aims behind the sheep farthest from the goal without gathering lateral stragglers and fails at 1241 s (`dmin_f99_fat`).
+* **Performance Breakdown:**
+  * **Left (`strombom_multi`, Level 2):** Shepherds gather 4 outliers in parallel via Hungarian matching, then form a driving arc, successfully penning the herd at 569 s (`dmin_f99_m6`).
+  * **Middle (`independent`, Level 1):** Shepherds switch between collect and drive, but all chase the identical outlier, failing at the 1241 s deadline with 298 sheep outside (`dmin_f99_indep`).
+  * **Right (`fat`, Level 0):** All 4 dogs crowd onto the single trailing sheep, completely neglecting lateral stragglers and failing at 1241 s with the herd dispersed (`dmin_f99_fat`).
+
+---
 
 ## References
 
 1. Strömbom, D., et al. (2014). *Solving the shepherding problem: heuristics for herding autonomous, interacting agents*. Journal of the Royal Society Interface, 11(100), 20140719. [doi:10.1098/rsif.2014.0719](https://doi.org/10.1098/rsif.2014.0719)
-2. Nalepka, P., Kallen, R. W., Chemero, A., Saltzman, E., & Richardson, M. J. (2017). *Herd those sheep: Emergent multiagent coordination and behavioral-mode switching*. Psychological Science, 28(5), 630-650. [doi:10.1177/0956797617692107](https://doi.org/10.1177/0956797617692107)
-3. Auletta, F., Fiore, D., Richardson, M. J., & di Bernardo, M. (2022). *Herding stochastic autonomous agents via local control rules and online target selection strategies*. Autonomous Robots, 46, 469-481. [doi:10.1007/s10514-021-10033-6](https://doi.org/10.1007/s10514-021-10033-6)
+2. Nalepka, P., et al. (2017). *Herd those sheep: Emergent multiagent coordination and behavioral-mode switching*. Psychological Science, 28(5), 630-650. [doi:10.1177/0956797617692107](https://doi.org/10.1177/0956797617692107)
+3. Auletta, F., et al. (2022). *Herding stochastic autonomous agents via local control rules and online target selection strategies*. Autonomous Robots, 46, 469-481. [doi:10.1007/s10514-021-10033-6](https://doi.org/10.1007/s10514-021-10033-6)
