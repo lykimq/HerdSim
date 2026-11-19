@@ -33,6 +33,37 @@ Table 1 gives the arena lengths computed from $R_f(N)$ and $l_{\mathrm{reach}}$ 
 
 Up to $N = 141$ (blue curve in Figure 1, middle), $13\,R_f(N)$ is the largest term ($80.6$ m at $N = 25$, so the 80 m floor never binds), giving $l = 13\,R_f(N)$. From $N = 200$ on (orange curve), the widest start layout (`outlier_rich`, $l_{\mathrm{reach}} = 1.6\,f(N) \propto N^{2/3}$) grows faster than $R_f(N)$, so the clearance term $l_{\mathrm{reach}} + R_{\mathrm{goal}} + R_f$ takes over and reaches $18\,R_f$ at $N = 400$.
 
+#### Step-by-step numerical breakdown at $N = 200$ (as annotated in Figure 1):
+
+To clarify how the numbers in Figure 1 are derived ($R_f = 10.5$ m, $R_{\mathrm{goal}} = 19.9$ m, $l_{\mathrm{reach}} = 109.4$ m, and $l = 139.8$ m):
+
+1. **Calibrated resting flock radius $R_f(200) = 10.47$ m (rounded to $10.5$ m):**
+   Measured empirically from a 300 s drive calibration of an unforced $N=200$ flock under mutual attraction and repulsion (Table 2).
+
+2. **Goal radius $R_{\mathrm{goal}} = 19.9$ m:**
+   Calculated as $R_{\mathrm{goal}} = 1.9\,R_f$:
+   $$R_{\mathrm{goal}} = 1.9 \times 10.4725\text{ m} = 19.898\text{ m} \approx 19.9\text{ m}$$
+   The multiplier $1.9$ provides an area $(1.9)^2 \approx 3.61$ times that of the natural resting flock, preventing driven sheep from jostling against the goal boundary.
+
+3. **Maximum start reach $l_{\mathrm{reach}} = 109.4$ m:**
+   The Strömbom collect distance at $N=200$ is $f(200) = 2 \cdot (200)^{2/3} \approx 68.40$ m. Comparing the maximum sheep spawn radius across all 4 layouts:
+   - `compact`: Truncated at $3\sigma = 3 \times (0.5\,R_f) = 1.5 \times 10.47 = 15.7$ m.
+   - `wide`: Truncated at $3\sigma = 3 \times (0.5\,f(N)) = 1.5 \times 68.40 = 102.6$ m.
+   - `split`: 3 cluster centres at $f(N)$ with radius $3\sigma = 3 \times (0.5\,R_f / \sqrt{3}) \approx 9.1$ m $\rightarrow \max = 68.40 + 9.1 = 77.5$ m.
+   - `outlier_rich`: 20% of sheep placed on an outer ring between $1.1\,f(N)$ and $1.6\,f(N)$:
+     $$l_{\mathrm{reach}} = 1.6 \times f(200) = 1.6 \times 68.3995\text{ m} = 109.439\text{ m} \approx 109.4\text{ m}$$
+   `outlier_rich` determines the maximum extent across all layouts, giving $l_{\mathrm{reach}} = 109.4$ m.
+
+4. **Drive distance $l = 139.8$ m:**
+   Following Table 1, $l$ is the maximum of three candidate terms:
+   - Term 1 (flock scale): $13\,R_f = 13 \times 10.4725 = 136.14$ m.
+   - Term 2 (minimum floor): $80.0$ m.
+   - Term 3 (clearance constraint): $l_{\mathrm{reach}} + R_{\mathrm{goal}} + R_f = 109.44 + 19.90 + 10.47 = 139.81\text{ m} \approx 139.8\text{ m}$.
+   
+   Because $139.81 > 136.14 > 80.0$, the clearance term governs:
+   $$l = \max(136.14,\ 80.0,\ 139.81) = 139.81\text{ m} \approx 139.8\text{ m}$$
+   *Physical rationale:* If $l \le l_{\mathrm{reach}} + R_{\mathrm{goal}}$, the goal circle would overlap with initial sheep spawn locations (sheep starting already inside the goal). The additional $+ R_f$ guarantees that the settled herd at the goal is fully detached from any start positions.
+
 ### Success rules
 
 A trial succeeds at the first tick before the deadline where enough sheep are inside the goal:
@@ -66,6 +97,30 @@ A sheep farther than the [collect distance](../methods/strombom_multi.md#when-to
 - `split`: $k = 3$ compact clusters ($k = 2$ when $N < 12$) centred on a circle of radius $f(N)$, each a Gaussian with $\sigma = 0.5\,R_f / \sqrt{k}$ so each cluster has the density of `compact`.
 - `outlier_rich`: 80% of the sheep in a `compact` core and 20% on a ring between $1.1\,f(N)$ and $1.6\,f(N)$ from the centre.
 
+#### Why Gaussian layouts are truncated at $3\sigma$
+
+Start layouts based on Gaussians are truncated at a hard outer radius $r_{\max} = 3\sigma$. The mathematical and experimental rationale is as follows:
+
+**1. Cumulative probability in 2D isotropic space:**
+In a 2D plane with independent coordinate distributions $(x, y) \sim \mathcal{N}(0, \sigma^2)$, the radial distance $r = \sqrt{x^2 + y^2}$ follows a [Rayleigh distribution](https://mathworld.wolfram.com/RayleighDistribution.html) (see also [NIST e-Handbook: Rayleigh Distribution](https://www.itl.nist.gov/div898/handbook/eda/section3/eda366h.htm)). The cumulative probability of finding a sheep within radius $r \le k\sigma$ is:
+$$P(r \le k\sigma) = \int_0^{k\sigma} \frac{r}{\sigma^2} e^{-\frac{r^2}{2\sigma^2}} dr = 1 - e^{-\frac{k^2}{2}}$$
+
+**2. Comparing $1\sigma, 2\sigma, 3\sigma, 4\sigma$ truncation thresholds:**
+
+| Threshold ($k\sigma$) | Probability formula $P(r \le k\sigma)$ | Sheep fraction retained | Sheep fraction discarded (tail) | Evaluation |
+| :---: | :---: | :---: | :---: | :--- |
+| **$1\sigma$** | $1 - e^{-0.5}$ | **$39.35\%$** | $60.65\%$ | Far too narrow; discards most of the flock and flattens the density profile. |
+| **$2\sigma$** | $1 - e^{-2.0}$ | **$86.47\%$** | $13.53\%$ | Leaves over $13\%$ of sheep beyond the boundary; insufficient as a clean spatial cutoff. |
+| **$3\sigma$** | $1 - e^{-4.5}$ | **$98.89\% \approx 98.9\%$** | **$1.11\%$** | **Optimal:** Preserves nearly $99\%$ of the natural flock mass while cutting off extreme stragglers. |
+| **$4\sigma$** | $1 - e^{-8.0}$ | **$99.97\%$** | $0.03\%$ | Unnecessarily large boundary ($r_{\max}$ expands too far), pushing arena size and dog spawn points excessively outward. |
+
+**3. Three scientific reasons for selecting $3\sigma$:**
+- **Preserving the natural bell shape:** By retaining $98.89\%$ of the distribution, the spatial density faithfully mimics natural clustering without distorting the underlying Gaussian physics.
+- **Eliminating infinite-tail artifacts:** Theoretical Gaussians extend infinitely ($r \to \infty$). Without a cutoff, across hundreds of thousands of simulation trials, rare seeds would inevitably spawn stray sheep hundreds of metres away, heavily distorting task completion times and reliability metrics.
+- **Establishing a hard boundary ($l_{\mathrm{reach}}$):** Truncating at $3\sigma$ sets a definite maximum radius $r_{\max} = 3\sigma$. This enables:
+  - Sizing the drive distance $l$ so the goal never overlaps initial sheep positions ($l \ge l_{\mathrm{reach}} + R_{\mathrm{goal}} + R_f$).
+  - Stationing the dog team safely behind the flock at $R_{\mathrm{arc}} = l_{\mathrm{reach}} + 30$ m, ensuring dogs never spawn inside the flock.
+
 ![The four starting flock layouts at N = 200](../figures/fig7_layouts.png)
 
 **Figure 2: The four start layouts ($N = 200$, $D = 4$, same scale).** Sheep outside the dashed collect circle are outliers that must be gathered first.
@@ -82,7 +137,13 @@ A sheep farther than the [collect distance](../methods/strombom_multi.md#when-to
 
 ### Dog starts
 
-Dogs start behind the flock so they never spawn inside the sheep (Figure 3). The inner arc sits 30 m behind the farthest point any sheep of that layout can start, with dogs at least 5 m apart along the arc and any overflow placed on a concentric arc 5 m farther out. All study protocols use `arcs` (semicircles on the side away from the goal); the engine also implements `ring` (full circles omitting the goal cone) and `handler` (all dogs at a single point behind the flock).
+Dogs start behind the flock so they never spawn inside the sheep (Figure 3). The inner arc sits a safety buffer `dog_start_gap = 30` m behind the farthest point any sheep of that layout can start:
+$$R_{\mathrm{arc}} = l_{\mathrm{reach}} + \text{dog\_start\_gap}$$
+*(For example, at $N = 200$ on the widest layout `outlier_rich`, the inner arc has radius $R_{\mathrm{arc}} = 109.4 + 30.0 = 139.4$ m from the flock centre).*
+
+Dogs are spaced at least `dog_start_spacing = 5` m apart along the semicircle arc ($\pi \approx 180^\circ$ span, facing away from the goal). The capacity of the first arc is $\lfloor \pi R_{\mathrm{arc}} / 5 \rfloor$ (up to 87 dogs at $N = 200$); any overflow is placed on a concentric arc 5 m farther out. 
+
+All study protocols use `arcs` (semicircles on the side away from the goal); the engine also implements `ring` (full circles omitting the goal cone) and `handler` (all dogs at a single point behind the flock).
 
 ![Dog start patterns](../figures/fig8_dog_starts.png)
 
@@ -158,7 +219,28 @@ The study therefore stops at $N = 566 = 400\sqrt{2}$, the last $\sqrt{2}$ step b
 
 ### Team size
 
-All nine study protocols start with the grid $D \in \{1, 2, 3, 4, 6, 8, 12, 16, 24\}$ (two steps per doubling above $D = 2$, alternating $1.5\times$ and $1.33\times$), and [midpoint densification](#midpoint-densification) fills in intermediate team sizes wherever needed.
+All nine study protocols start with the grid $D \in \{1, 2, 3, 4, 6, 8, 12, 16, 24\}$ (two steps per doubling above $D = 2$, alternating the fractions $\frac{3}{2} = 1.5\times$ and $\frac{4}{3} \approx 1.33\times$: $2 \xrightarrow{\times 1.5} 3 \xrightarrow{\times 1.33} 4 \xrightarrow{\times 1.5} 6 \xrightarrow{\times 1.33} 8 \xrightarrow{\times 1.5} 12 \xrightarrow{\times 1.33} 16 \xrightarrow{\times 1.5} 24$). 
+
+This alternation splits each doubling ($2\times$) on logarithmic axes into two integer steps, since $\frac{3}{2} \times \frac{4}{3} = 2$. Because the number of dogs $D$ must be an integer, these two rational fractions bracket the ideal geometric midpoint ratio $\sqrt{2} \approx 1.414$, providing evenly spaced integer steps on log-log plots without skipping intermediate optimal team sizes. Wherever finer resolution is required, [midpoint densification](#midpoint-densification) automatically inserts intermediate team sizes.
+
+#### Why the grid stops at $D = 24$ rather than larger teams
+
+Capping the upper grid at $D = 24$ rather than expanding to larger teams ($D = 32, 48$) rests on three sound scientific and geometric grounds:
+
+1. **Early saturation of task completion speed ($D_{\mathrm{sat}}$):**
+   Across all study protocols, $D_{\min}$ requires only **1 to 3 dogs** on most layouts (reaching 5–7 dogs only under the harshest combination of $N = 566$ at 3 drive times). Concurrently, saturation team size $D_{\mathrm{sat}}$ (the team beyond which additional dogs yield no statistically significant finish-time reduction) is achieved between **2 and 8 dogs** (reaching 12 dogs on isolated curves). Beyond $D_{\mathrm{sat}}$, completion times plateau within $0.96 - 1.01\times$ of the saturated team because sheep walking speed is capped at $1.0$ m/s. Testing beyond $D = 24$ incurs $\mathcal{O}(D)$ computational cost with zero speed benefit.
+
+2. **Geometric capacity of the driving arc ($D_{\mathrm{cap}}$) and physical crowding:**
+   During the driving phase, dogs distribute along an arc behind the flock at distance $R = r_a\sqrt{N}$ with half-angle $\arcsin(R_f / R)$. The arc length is:
+   $$L(N) = 2R \arcsin(R_f / R)$$
+   $L(N)$ ranges from $13.4$ m at $N=25$ to $23.1$ m at $N=400$. Defining a realistic minimum separation $s = 2$ m between dogs (`dog_overlap_distance = 2` m, below which dogs perform redundant pushes), the physical arc capacity is:
+   $$D_{\mathrm{cap}}(N) = \left\lfloor \frac{L(N)}{s} \right\rfloor + 1$$
+   Specifically: $D_{\mathrm{cap}} = 7$ (at $N=25$), $9$ (at $N=50$), $10$ (at $N=100$), $11$ (at $N=200$), and $12$ (at $N=400$).
+   
+   At $D = 24$, team size already **doubles the physical arc capacity** ($24 \ge 2\,D_{\mathrm{cap}}$). The spacing between assigned dog slots drops to $0.58 - 1.01$ m, causing dog overlap (`dog_overlap`) to exceed $90\%$. Adding $D = 32$ or $48$ would force dogs to superimpose as overlapping point masses, violating physical realism.
+
+3. **Flat or declining success rates of failing controllers:**
+   On curves without a reliable team (such as uncoordinated `fat` at $N \ge 200$, or `split` at 3 drive times), success rates plateau or decline between 8, 16, and 24 dogs. These failures arise from structural coordination defects (contention over single stragglers or cluster neglect), not insufficient agent numbers. Increasing team size beyond 24 cannot salvage these algorithmic deficiencies.
 
 ## 5. Frontier rules and zones
 
